@@ -1,0 +1,85 @@
+{
+  "name": "Arch-Systems Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts",
+      "nodeGypDependencies": true,
+      "nvmInstallPath": "/usr/local/share/nvm"
+    },
+    "ghcr.io/devcontainers/features/pnpm:1": {
+      "version": "9.15.9"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "dockerBuildx": true,
+      "dockerCompose": "v2"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-vscode.live-server",
+        "eamodio.gitlens",
+        "pkief.material-icon-theme",
+        "ms-azuretools.vscode-docker",
+        "editorconfig.editorconfig"
+      ]
+    }
+  },
+
+  "postCreateCommand": "pnpm install && pnpm --filter @repo/database supabase:gen",
+
+  "remoteUser": "vscode",
+  
+  "forwardPorts": [3000, 3001, 3002, 54321, 54322, 54323, 6379, 9093],
+  
+  "portsAttributes": {
+    "3000": {
+      "label": "Portal",
+      "onAutoForward": "openBrowser"
+    },
+    "3001": {
+      "label": "CMS"
+    },
+    "3002": {
+      "label": "Overview"
+    },
+    "54321": {
+      "label": "Supabase API"
+    },
+    "54323": {
+      "label": "Supabase Studio"
+    }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/node_modules,target=${containerWorkspaceFolder}/node_modules,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.nx,target=${containerWorkspaceFolder}/.nx,type=bind,consistency=cached"
+  ],
+
+  "workspaceFolder": "/workspace",
+  
+  "shutdownAction": "stopCompose"
+}

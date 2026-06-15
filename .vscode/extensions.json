@@ -1,0 +1,27 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "github.copilot",
+    "github.copilot-chat",
+    "ms-vscode.live-server",
+    "eamodio.gitlens",
+    "pkief.material-icon-theme",
+    "ms-azuretools.vscode-docker",
+    "editorconfig.editorconfig",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "github.vscode-pull-request-gardener",
+    "visualstudioexptteam.vscodeintellicode",
+    "firsttris.vscode-jest-runner",
+    "wix.vscode-import-cost",
+    "yoavbls.pretty-ts-errors"
+  ],
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "dbaeumer.jshint",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
