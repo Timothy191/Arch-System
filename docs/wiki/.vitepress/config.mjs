@@ -146,7 +146,7 @@ export default defineConfig({
     
     // Edit link
     editLink: {
-      pattern: 'https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/edit/main/wiki/:path',
+      pattern: 'https://github.com/DRACOSFN/Turborepo-Fullstack-Starter-Template/edit/main/docs/wiki/:path',
       text: 'Edit this page on GitHub',
     },
     
