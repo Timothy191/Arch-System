@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const STATE_FILE = path.join(__dirname, 'state.json');
+const fs = require("fs");
+const path = require("path");
+const STATE_FILE = path.join(__dirname, "state.json");
 
 const STATES = Object.freeze({
-  IDLE: 'idle',
-  ANALYZE: 'analyze',
-  PLAN: 'plan',
-  EXECUTE: 'execute',
-  VERIFY: 'verify',
-  REPORT: 'report',
-  BLOCKED: 'blocked'
+  IDLE: "idle",
+  ANALYZE: "analyze",
+  PLAN: "plan",
+  EXECUTE: "execute",
+  VERIFY: "verify",
+  REPORT: "report",
+  BLOCKED: "blocked",
 });
 
 const TRANSITIONS = {
@@ -20,12 +20,12 @@ const TRANSITIONS = {
   [STATES.EXECUTE]: [STATES.VERIFY, STATES.PLAN, STATES.BLOCKED],
   [STATES.VERIFY]: [STATES.REPORT, STATES.EXECUTE, STATES.BLOCKED],
   [STATES.REPORT]: [STATES.IDLE],
-  [STATES.BLOCKED]: [STATES.ANALYZE, STATES.IDLE]
+  [STATES.BLOCKED]: [STATES.ANALYZE, STATES.IDLE],
 };
 
 function createInitialState() {
   return {
-    session_id: 'ses_default',
+    session_id: "ses_default",
     state: STATES.IDLE,
     current_task: null,
     queue: [],
@@ -36,15 +36,15 @@ function createInitialState() {
       tokens_used: 0,
       subagents_dispatched: 0,
       errors: 0,
-      session_start: new Date().toISOString()
-    }
+      session_start: new Date().toISOString(),
+    },
   };
 }
 
 function loadState() {
   try {
     if (fs.existsSync(STATE_FILE)) {
-      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
     }
   } catch {}
   return createInitialState();
@@ -61,20 +61,26 @@ function saveState(state) {
 }
 
 function getSessionId() {
-  const raw = process.env.CLAUDE_SESSION_ID || String(process.ppid) || 'default';
-  return raw.replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
+  const raw =
+    process.env.CLAUDE_SESSION_ID || String(process.ppid) || "default";
+  return raw.replace(/[^a-zA-Z0-9_-]/g, "") || "default";
 }
 
 function checkInput() {
-  return new Promise(resolve => {
-    let data = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', c => { data += c; });
-    process.stdin.on('end', () => {
-      try { resolve(JSON.parse(data || '{}')); }
-      catch { resolve({}); }
+  return new Promise((resolve) => {
+    let data = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (c) => {
+      data += c;
     });
-    process.stdin.on('error', () => resolve({}));
+    process.stdin.on("end", () => {
+      try {
+        resolve(JSON.parse(data || "{}"));
+      } catch {
+        resolve({});
+      }
+    });
+    process.stdin.on("error", () => resolve({}));
   });
 }
 
@@ -86,62 +92,77 @@ function validTransition(from, to) {
 async function main() {
   const state = loadState();
   const input = await checkInput();
-  const hookType = process.env.HOOK_TYPE || 'postToolUse';
+  const hookType = process.env.HOOK_TYPE || "postToolUse";
   const sessionId = getSessionId();
 
   state.session_id = sessionId;
 
   state.metrics.tool_calls_total++;
 
-  if (hookType === 'subagentStop' && input.agent_name) {
-    const idx = state.subagents.findIndex(s => s.agent === input.agent_name && s.status === 'running');
+  if (hookType === "subagentStop" && input.agent_name) {
+    const idx = state.subagents.findIndex(
+      (s) => s.agent === input.agent_name && s.status === "running",
+    );
     if (idx !== -1) {
-      state.subagents[idx].status = 'complete';
+      state.subagents[idx].status = "complete";
       state.subagents[idx].completed_at = new Date().toISOString();
-      state.subagents[idx].result = input.result_summary || '';
+      state.subagents[idx].result = input.result_summary || "";
 
-      const allDone = state.subagents.every(s => s.status === 'complete' || s.status === 'failed');
+      const allDone = state.subagents.every(
+        (s) => s.status === "complete" || s.status === "failed",
+      );
       if (allDone && state.state === STATES.EXECUTE) {
         state.state = STATES.VERIFY;
       }
     }
   }
 
-  if (hookType === 'subagentStart' && input.agent_name) {
+  if (hookType === "subagentStart" && input.agent_name) {
     state.subagents.push({
       agent: input.agent_name,
-      task: input.task_description || '',
-      status: 'running',
-      started_at: new Date().toISOString()
+      task: input.task_description || "",
+      status: "running",
+      started_at: new Date().toISOString(),
     });
     state.metrics.subagents_dispatched++;
   }
 
-  if (hookType === 'sessionStart') {
-    const elapsed = Date.now() - new Date(state.metrics.session_start).getTime();
+  if (hookType === "sessionStart") {
+    const elapsed =
+      Date.now() - new Date(state.metrics.session_start).getTime();
     if (elapsed > 3600000) {
-      state.history.push({ state: state.state, action: 'timeout_reset', at: new Date().toISOString() });
+      state.history.push({
+        state: state.state,
+        action: "timeout_reset",
+        at: new Date().toISOString(),
+      });
       Object.assign(state, createInitialState());
       state.session_id = sessionId;
     }
   }
 
-  if (process.env.LOOP_DEBUG === '1') {
-    console.error(`[loop] State: ${state.state} | Tool: ${input.tool || 'none'} | Queue: ${state.queue.length} | Subagents: ${state.subagents.filter(s => s.status === 'running').length} running`);
+  if (process.env.LOOP_DEBUG === "1") {
+    console.error(
+      `[loop] State: ${state.state} | Tool: ${input.tool || "none"} | Queue: ${state.queue.length} | Subagents: ${state.subagents.filter((s) => s.status === "running").length} running`,
+    );
     if (state.current_task) {
-      console.error(`[loop] Current task: ${state.current_task.description?.slice(0, 60)}`);
+      console.error(
+        `[loop] Current task: ${state.current_task.description?.slice(0, 60)}`,
+      );
     }
   }
 
   saveState(state);
 
   const nextState = state.state;
-  console.error(`[loop] state=${nextState} queue=${state.queue.length} subagents_running=${state.subagents.filter(s => s.status === 'running').length}`);
+  console.error(
+    `[loop] state=${nextState} queue=${state.queue.length} subagents_running=${state.subagents.filter((s) => s.status === "running").length}`,
+  );
 
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(`[loop] Fatal error: ${err.message}`);
   process.exit(1);
 });

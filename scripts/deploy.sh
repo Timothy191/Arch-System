@@ -667,8 +667,8 @@ phase_stop_services() {
   
   # Clean mode stops everything
   if [ "$CLEAN_ONLY" = true ] || [ "$DEPLOY_MODE" = "local" ]; then
-    local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
-    local monitor_compose="$REPO_ROOT/docker/docker-compose.monitoring.yml"
+    local tools_compose="$REPO_ROOT/infra/docker/compose.tools.yml"
+    local monitor_compose="$REPO_ROOT/infra/monitoring/docker-compose.yml"
     
     if [ -f "$tools_compose" ]; then
       log "Stopping Docker tools..."
@@ -727,7 +727,7 @@ phase_start_infrastructure() {
       
       # Docker tools (skipped in lightweight mode)
       if [ "${LIGHTWEIGHT:-false}" != "true" ]; then
-        local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
+        local tools_compose="$REPO_ROOT/infra/docker/compose.tools.yml"
         if [ -f "$tools_compose" ]; then
           if $COMPOSE_CMD -f "$tools_compose" ps --format '{{.Status}}' 2>/dev/null | grep -q 'Up'; then
             success "Docker tools already running - connecting"
@@ -761,7 +761,7 @@ phase_start_infrastructure() {
         fi
 
         # Monitoring
-        local monitor_compose="$REPO_ROOT/docker/docker-compose.monitoring.yml"
+        local monitor_compose="$REPO_ROOT/infra/monitoring/docker-compose.yml"
         if [ -f "$monitor_compose" ]; then
           if $COMPOSE_CMD -f "$monitor_compose" ps --format '{{.Status}}' 2>/dev/null | grep -q 'Up'; then
             success "Monitoring already running - connecting"
@@ -778,8 +778,8 @@ phase_start_infrastructure() {
       ;;
       
     production|staging)
-      local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
-      local prod_compose="$REPO_ROOT/docker/docker-compose.production.yml"
+      local tools_compose="$REPO_ROOT/infra/docker/compose.tools.yml"
+      local prod_compose="$REPO_ROOT/infra/docker/compose.production.yml"
       
       if [ -f "$tools_compose" ]; then
         log "Starting production Docker services..."

@@ -1,6 +1,6 @@
 # LLM Wiki Viewer (Standalone)
 
-Self-contained HTML viewer for the Arch-Systems LLM Wiki at `../../wiki/`.
+Self-contained HTML viewer for the Arch-Systems LLM Wiki at `../../docs/wiki/`.
 
 ## Usage
 
@@ -29,7 +29,7 @@ node generate.js
 
 ## How it works
 
-1. `generate.js` recursively reads all `.md` files from `../../wiki/`
+1. `generate.js` recursively reads all `.md` files from `../../docs/wiki/`
 2. Parses YAML frontmatter and converts Markdown to HTML
 3. Resolves wikilinks against the page index
 4. Embeds everything (pages, links, CSS, JS) into a single `viewer.html`

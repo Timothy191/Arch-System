@@ -10,7 +10,7 @@ Build, query, and maintain long-lived knowledge bases. Each wiki = markdown fold
 | `/wiki list [--scope global\|project]`                                                    | List registered wikis                                                                         |
 | `/wiki info <slug>`                                                                       | Show wiki metadata + page count                                                               |
 | `/wiki page <slug> <rel-path> [--title "X"] [--type concept\|paper\|...]`                 | Upsert a markdown page into the FTS index                                                     |
-| `/wiki reindex <slug>`                                                                    | Walk `wiki/` and re-index all `*.md`                                                          |
+| `/wiki reindex <slug>`                                                                    | Walk `docs/wiki/` and re-index all `*.md`                                                     |
 | `/wiki ask "<query>" [--wiki <slug>] [--limit N]`                                         | BM25 search over wiki pages                                                                   |
 | `/wiki related <slug> <rel-path>`                                                         | Find adjacent pages by reusing title+summary as query                                         |
 | `/wiki show <slug> <rel-path>`                                                            | Print a page from the index                                                                   |
@@ -50,9 +50,9 @@ Both indexed in `~/.pro-workflow/data.db`.
 
 ```
 /wiki init agent-memory --title "Agent Memory" --flavor research
-/wiki page agent-memory wiki/concepts/episodic-memory.md --type concept
+/wiki page agent-memory docs/wiki/concepts/episodic-memory.md --type concept
 /wiki ask "what is episodic memory" --wiki agent-memory
-/wiki related agent-memory wiki/concepts/episodic-memory.md
+/wiki related agent-memory docs/wiki/concepts/episodic-memory.md
 ```
 
 ## Auto-research (Phase 3.3.1+)

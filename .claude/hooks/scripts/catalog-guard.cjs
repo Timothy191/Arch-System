@@ -15,17 +15,17 @@
  * Pairs with .claude/rules/architecture.md "Dependency Versioning".
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 function readStdin() {
   return new Promise((resolve) => {
-    let data = '';
-    process.stdin.on('data', (c) => {
+    let data = "";
+    process.stdin.on("data", (c) => {
       data += c;
     });
-    process.stdin.on('end', () => resolve(data));
-    process.stdin.on('error', () => resolve(''));
+    process.stdin.on("end", () => resolve(data));
+    process.stdin.on("error", () => resolve(""));
   });
 }
 
@@ -41,12 +41,14 @@ function readStdin() {
 function parseCatalogs(yamlText) {
   const result = { flat: new Set(), byCatalog: new Map() };
   if (!yamlText) return result;
-  const lines = yamlText.split('\n');
+  const lines = yamlText.split("\n");
   let currentCatalog = null;
   for (const line of lines) {
-    const stripped = line.replace(/#.*$/, '').replace(/\s+$/, '');
+    const stripped = line.replace(/#.*$/, "").replace(/\s+$/, "");
     if (!stripped.trim()) continue;
-    const catalogMatch = stripped.match(/^((?:catalog(?::[\w-]+)?)|(?:[a-z0-9][\w-]*)):\s*$/i);
+    const catalogMatch = stripped.match(
+      /^((?:catalog(?::[\w-]+)?)|(?:[a-z0-9][\w-]*)):\s*$/i,
+    );
     if (catalogMatch) {
       currentCatalog = catalogMatch[1];
       if (!result.byCatalog.has(currentCatalog)) {
@@ -54,11 +56,13 @@ function parseCatalogs(yamlText) {
       }
       continue;
     }
-    if (currentCatalog && !line.startsWith(' ') && !line.startsWith('\t')) {
+    if (currentCatalog && !line.startsWith(" ") && !line.startsWith("\t")) {
       currentCatalog = null;
     }
     if (currentCatalog) {
-      const entry = stripped.match(/^\s+([A-Za-z0-9_@/.-]+):\s*['"]?([^'"]+)['"]?\s*$/);
+      const entry = stripped.match(
+        /^\s+([A-Za-z0-9_@/.-]+):\s*['"]?([^'"]+)['"]?\s*$/,
+      );
       if (entry) {
         const [, name, version] = entry;
         result.flat.add(name);
@@ -78,7 +82,12 @@ function extractAddedDeps(content) {
     return { deps: new Set() };
   }
   const all = new Set();
-  for (const k of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+  for (const k of [
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ]) {
     for (const name of Object.keys(json[k] || {})) {
       all.add(name);
     }
@@ -94,17 +103,19 @@ function extractAddedDeps(content) {
   } catch {
     process.exit(0);
   }
-  const filePath = input?.tool_input?.file_path || input?.tool_input?.TargetFile || '';
+  const filePath =
+    input?.tool_input?.file_path || input?.tool_input?.TargetFile || "";
   if (!filePath) process.exit(0);
   if (!/package\.json$|pnpm-workspace\.yaml$/.test(filePath)) process.exit(0);
 
-  const content = input?.tool_input?.content || input?.tool_input?.new_string || '';
+  const content =
+    input?.tool_input?.content || input?.tool_input?.new_string || "";
   if (!content) process.exit(0);
 
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-  const workspaceYaml = path.join(projectDir, 'pnpm-workspace.yaml');
+  const workspaceYaml = path.join(projectDir, "pnpm-workspace.yaml");
   if (!fs.existsSync(workspaceYaml)) process.exit(0);
-  const catalogs = parseCatalogs(fs.readFileSync(workspaceYaml, 'utf8'));
+  const catalogs = parseCatalogs(fs.readFileSync(workspaceYaml, "utf8"));
   if (catalogs.flat.size === 0) process.exit(0);
 
   const added = extractAddedDeps(content);
@@ -112,9 +123,9 @@ function extractAddedDeps(content) {
   if (collisions.length === 0) process.exit(0);
 
   console.error(
-    `[catalog-guard] ${filePath} adds package(s) that already exist in pnpm-workspace.yaml catalog: ${collisions.join(', ')}.\n` +
-      'Use `pnpm add` (or `pnpm --filter <pkg> add`) so the catalog stays the single source of truth.\n' +
-      'See .claude/rules/architecture.md "Dependency Versioning" for the policy.'
+    `[catalog-guard] ${filePath} adds package(s) that already exist in pnpm-workspace.yaml catalog: ${collisions.join(", ")}.\n` +
+      "Use `pnpm add` (or `pnpm --filter <pkg> add`) so the catalog stays the single source of truth.\n" +
+      'See .claude/rules/architecture.md "Dependency Versioning" for the policy.',
   );
   process.exit(2);
 })();

@@ -21,51 +21,51 @@
 // analysis using regex over the migration files. Same code style as
 // tools/circular-dep-detect.cjs.
 
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require("node:fs");
+const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, '..');
-const MIGRATIONS_DIR = path.join(ROOT, 'packages', 'database', 'migrations');
-const REPORT_DIR = path.join(ROOT, '.audit');
-const REPORT_PATH = path.join(REPORT_DIR, 'rls-report.md');
+const ROOT = path.resolve(__dirname, "..");
+const MIGRATIONS_DIR = path.join(ROOT, "packages", "database", "migrations");
+const REPORT_DIR = path.join(ROOT, ".audit");
+const REPORT_PATH = path.join(REPORT_DIR, "rls-report.md");
 
 // Tables that legitimately do not need department-scoped SELECT policies.
 // These are reference / config tables or system-internal tables where
 // USING (true) for SELECT is the intentional design. Add to this list
 // sparingly — every entry should be reviewed.
 const REFERENCE_TABLES = new Set([
-  'departments',
-  'operators',
-  'sites',
-  'safety_severities',
-  'safety_incident_categories',
-  'delay_categories',
-  'report_templates',
-  'mine_blocks',
-  'materialized_view_refresh_log',
+  "departments",
+  "operators",
+  "sites",
+  "safety_severities",
+  "safety_incident_categories",
+  "delay_categories",
+  "report_templates",
+  "mine_blocks",
+  "materialized_view_refresh_log",
 ]);
 
 function listMigrations() {
   if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error('Migration directory not found: ' + MIGRATIONS_DIR);
+    console.error("Migration directory not found: " + MIGRATIONS_DIR);
     process.exit(2);
   }
   return fs
     .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith('.sql'))
+    .filter((f) => f.endsWith(".sql"))
     .sort(); // zero-padded NNN_... sort gives migration order
 }
 
 function readMigration(file) {
-  return fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf-8');
+  return fs.readFileSync(path.join(MIGRATIONS_DIR, file), "utf-8");
 }
 
 // Strip SQL comments so regex matches inside a comment don't trip the parser.
 function stripComments(sql) {
   // Block comments.
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
+  let out = sql.replace(/\/\*[\s\S]*?\*\//g, "");
   // Line comments (only when not inside a string — we approximate).
-  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
+  out = out.replace(/(^|\s)--[^\n]*/g, "$1");
   return out;
 }
 
@@ -74,11 +74,13 @@ function stripComments(sql) {
 //   CREATE TABLE IF NOT EXISTS foo (
 //   CREATE TABLE public.foo (
 //   CREATE TABLE foo PARTITION OF ...   (child partitions — skipped)
-const RE_CREATE_TABLE = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\b[^;]*?\(/gi;
+const RE_CREATE_TABLE =
+  /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\b[^;]*?\(/gi;
 const PARTITION_HINT = /PARTITION\s+OF/i;
 
 // Match ALTER TABLE ... ENABLE ROW LEVEL SECURITY for a specific table.
-const RE_ENABLE_RLS = /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
+const RE_ENABLE_RLS =
+  /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/gi;
 
 // Match a CREATE POLICY ... statement. Captures:
 //   1: policy name (quoted or unquoted)
@@ -93,7 +95,8 @@ const RE_POLICY =
 const BODY_HAS_USING_TRUE = /USING\s*\(\s*true\s*\)/i;
 const BODY_HAS_WITH_CHECK_TRUE = /WITH\s+CHECK\s*\(\s*true\s*\)/i;
 const BODY_HAS_AUTH_UID = /auth\.uid\(\)/i;
-const BODY_HAS_EMPLOYEES_REF = /\bFROM\s+employees\b|\bJOIN\s+employees\b|\bis_admin\s*\(\s*\)|has_department_access\s*\(/i;
+const BODY_HAS_EMPLOYEES_REF =
+  /\bFROM\s+employees\b|\bJOIN\s+employees\b|\bis_admin\s*\(\s*\)|has_department_access\s*\(/i;
 
 // Check if a CREATE TABLE block defines a department_id column.
 const RE_DEPT_ID_COLUMN = /department_id\s+UUID/i;
@@ -143,8 +146,9 @@ function scanMigrations(files) {
     while ((m = RE_POLICY.exec(sql)) !== null) {
       const name = m[1];
       const table = m[2];
-      const command = (m[3] || '').toUpperCase().replace(/^FOR\s+/, '') || 'ALL';
-      const body = m[4] || '';
+      const command =
+        (m[3] || "").toUpperCase().replace(/^FOR\s+/, "") || "ALL";
+      const body = m[4] || "";
       policies.push({
         table,
         command,
@@ -193,27 +197,29 @@ function findSuspiciousPolicies(policies, tablesWithDeptColumn) {
     // USING (true) on a SELECT or FOR ALL policy is almost always too
     // permissive UNLESS the table is on the allowlist. INSERT with
     // WITH CHECK (true) is similarly suspect.
-    if (p.hasUsingTrue && (p.command === 'SELECT' || p.command === 'ALL')) {
+    if (p.hasUsingTrue && (p.command === "SELECT" || p.command === "ALL")) {
       if (!REFERENCE_TABLES.has(p.table)) {
-        issues.push('USING (true) on SELECT/ALL — unrestricted read');
+        issues.push("USING (true) on SELECT/ALL — unrestricted read");
       }
     }
-    if (p.hasWithCheckTrue && (p.command === 'INSERT' || p.command === 'ALL')) {
+    if (p.hasWithCheckTrue && (p.command === "INSERT" || p.command === "ALL")) {
       if (!REFERENCE_TABLES.has(p.table)) {
-        issues.push('WITH CHECK (true) on INSERT/ALL — unrestricted write');
+        issues.push("WITH CHECK (true) on INSERT/ALL — unrestricted write");
       }
     }
     // SELECT policy on a table with department_id that never references
     // auth.uid() OR employees isolation. This catches policies that look
     // "fine" syntactically but leak across departments.
     if (
-      p.command === 'SELECT' &&
+      p.command === "SELECT" &&
       !p.hasUsingTrue &&
       tablesWithDeptColumn.has(p.table) &&
       !p.hasAuthUid &&
       !p.hasEmployeesRef
     ) {
-      issues.push('SELECT policy with no auth.uid() or employees isolation on a department-scoped table');
+      issues.push(
+        "SELECT policy with no auth.uid() or employees isolation on a department-scoped table",
+      );
     }
     if (issues.length) {
       warnings.push({
@@ -228,70 +234,100 @@ function findSuspiciousPolicies(policies, tablesWithDeptColumn) {
   return warnings;
 }
 
-function renderReport({ files, critical, warnings, allTables, enabledTables, policyCount, suspiciousTableSet }) {
+function renderReport({
+  files,
+  critical,
+  warnings,
+  allTables,
+  enabledTables,
+  policyCount,
+  suspiciousTableSet,
+}) {
   const lines = [];
-  lines.push('# RLS Policy Audit');
-  lines.push('');
-  lines.push('Generated by `tools/audit-rls.cjs` from `' + path.relative(ROOT, MIGRATIONS_DIR) + '`.');
-  lines.push('');
-  lines.push('## Summary');
-  lines.push('');
-  lines.push('| Metric | Count |');
-  lines.push('| --- | --- |');
-  lines.push('| Migrations scanned | ' + files.length + ' |');
-  lines.push('| Tables declared | ' + allTables.length + ' |');
-  lines.push('| Tables with RLS enabled | ' + enabledTables.length + ' |');
-  lines.push('| Tables missing RLS (CRITICAL) | ' + critical.length + ' |');
-  lines.push('| Tables with suspicious policies (WARNING) | ' + suspiciousTableSet.size + ' |');
-  lines.push('| Total CREATE POLICY statements | ' + policyCount + ' |');
-  lines.push('');
+  lines.push("# RLS Policy Audit");
+  lines.push("");
+  lines.push(
+    "Generated by `tools/audit-rls.cjs` from `" +
+      path.relative(ROOT, MIGRATIONS_DIR) +
+      "`.",
+  );
+  lines.push("");
+  lines.push("## Summary");
+  lines.push("");
+  lines.push("| Metric | Count |");
+  lines.push("| --- | --- |");
+  lines.push("| Migrations scanned | " + files.length + " |");
+  lines.push("| Tables declared | " + allTables.length + " |");
+  lines.push("| Tables with RLS enabled | " + enabledTables.length + " |");
+  lines.push("| Tables missing RLS (CRITICAL) | " + critical.length + " |");
+  lines.push(
+    "| Tables with suspicious policies (WARNING) | " +
+      suspiciousTableSet.size +
+      " |",
+  );
+  lines.push("| Total CREATE POLICY statements | " + policyCount + " |");
+  lines.push("");
 
-  lines.push('## CRITICAL — Tables Missing Row Level Security');
-  lines.push('');
+  lines.push("## CRITICAL — Tables Missing Row Level Security");
+  lines.push("");
   if (critical.length === 0) {
-    lines.push('_None. Every CREATE TABLE has a matching ALTER TABLE … ENABLE ROW LEVEL SECURITY somewhere in the migration sequence._');
-    lines.push('');
+    lines.push(
+      "_None. Every CREATE TABLE has a matching ALTER TABLE … ENABLE ROW LEVEL SECURITY somewhere in the migration sequence._",
+    );
+    lines.push("");
   } else {
-    lines.push('These tables have no `ENABLE ROW LEVEL SECURITY` statement in any migration. RLS must be enabled before data is exposed via Supabase.');
-    lines.push('');
-    lines.push('| Table | First declared in |');
-    lines.push('| --- | --- |');
+    lines.push(
+      "These tables have no `ENABLE ROW LEVEL SECURITY` statement in any migration. RLS must be enabled before data is exposed via Supabase.",
+    );
+    lines.push("");
+    lines.push("| Table | First declared in |");
+    lines.push("| --- | --- |");
     for (const c of critical) {
-      lines.push('| `' + c.table + '` | `' + c.firstFile + '` |');
+      lines.push("| `" + c.table + "` | `" + c.firstFile + "` |");
     }
-    lines.push('');
+    lines.push("");
   }
 
-  lines.push('## WARNING — Suspicious Policies');
-  lines.push('');
+  lines.push("## WARNING — Suspicious Policies");
+  lines.push("");
   if (warnings.length === 0) {
-    lines.push('_None._');
-    lines.push('');
+    lines.push("_None._");
+    lines.push("");
   } else {
-    lines.push('These policies are syntactically valid but look overly permissive or missing department isolation. Review each entry.');
-    lines.push('');
-    lines.push('| Table | Policy | Command | File | Issue |');
-    lines.push('| --- | --- | --- | --- | --- |');
+    lines.push(
+      "These policies are syntactically valid but look overly permissive or missing department isolation. Review each entry.",
+    );
+    lines.push("");
+    lines.push("| Table | Policy | Command | File | Issue |");
+    lines.push("| --- | --- | --- | --- | --- |");
     for (const w of warnings) {
       lines.push(
-        '| `' + w.table + '` | `' + w.policy + '` | ' +
-          w.command + ' | `' + w.file + '` | ' +
-          w.issues.join('<br>') + ' |'
+        "| `" +
+          w.table +
+          "` | `" +
+          w.policy +
+          "` | " +
+          w.command +
+          " | `" +
+          w.file +
+          "` | " +
+          w.issues.join("<br>") +
+          " |",
       );
     }
-    lines.push('');
+    lines.push("");
   }
 
-  lines.push('## Tables With RLS Enabled');
-  lines.push('');
-  lines.push('| Table | RLS enabled in |');
-  lines.push('| --- | --- |');
+  lines.push("## Tables With RLS Enabled");
+  lines.push("");
+  lines.push("| Table | RLS enabled in |");
+  lines.push("| --- | --- |");
   for (const t of enabledTables) {
-    lines.push('| `' + t.name + '` | ' + (t.files.join(', ') || '—') + ' |');
+    lines.push("| `" + t.name + "` | " + (t.files.join(", ") || "—") + " |");
   }
-  lines.push('');
+  lines.push("");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function main() {
@@ -325,22 +361,30 @@ function main() {
   fs.writeFileSync(REPORT_PATH, report);
 
   if (critical.length > 0) {
-    console.error('FAIL ' + critical.length + ' table(s) missing RLS:');
+    console.error("FAIL " + critical.length + " table(s) missing RLS:");
     for (const c of critical) {
-      console.error('  - ' + c.table + ' (declared in ' + c.firstFile + ')');
+      console.error("  - " + c.table + " (declared in " + c.firstFile + ")");
     }
-    console.error('Report: ' + path.relative(ROOT, REPORT_PATH));
+    console.error("Report: " + path.relative(ROOT, REPORT_PATH));
     process.exit(1);
   }
 
   console.log(
-    'OK Scanned ' + files.length + ' migrations: ' +
-      allTableNames.length + ' tables, ' +
-      enabledTableNames.length + ' with RLS, ' +
-      critical.length + ' critical, ' +
-      warnings.length + ' warnings (' + suspiciousTableSet.size + ' tables).'
+    "OK Scanned " +
+      files.length +
+      " migrations: " +
+      allTableNames.length +
+      " tables, " +
+      enabledTableNames.length +
+      " with RLS, " +
+      critical.length +
+      " critical, " +
+      warnings.length +
+      " warnings (" +
+      suspiciousTableSet.size +
+      " tables).",
   );
-  console.log('Report: ' + path.relative(ROOT, REPORT_PATH));
+  console.log("Report: " + path.relative(ROOT, REPORT_PATH));
   process.exit(0);
 }
 

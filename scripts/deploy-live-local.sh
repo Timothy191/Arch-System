@@ -159,12 +159,12 @@ pnpm --filter portal build
 
 # ── Step 6: Start Secondary Tools ────────────────────────────
 info "Starting secondary tools..."
-if [ -f "$REPO_ROOT/docker/docker-compose.tools.yml" ]; then
-  $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.tools.yml" up -d
+if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
+  $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d
 fi
 
-if [ -f "$REPO_ROOT/docker/docker-compose.monitoring.yml" ]; then
-  $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.monitoring.yml" up -d
+if [ -f "$REPO_ROOT/infra/monitoring/docker-compose.yml" ]; then
+  $COMPOSE_CMD -f "$REPO_ROOT/infra/monitoring/docker-compose.yml" up -d
 fi
 
 # ── Step 7: Launch Server ────────────────────────────────────

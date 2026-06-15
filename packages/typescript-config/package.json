@@ -1,6 +1,7 @@
 {
   "name": "@repo/typescript-config",
+  "description": "Shared TypeScript configuration for consistent type checking across the monorepo",
   "version": "1.0.0",
-  "private": true,
-  "license": "MIT"
+  "license": "MIT",
+  "private": true
 }

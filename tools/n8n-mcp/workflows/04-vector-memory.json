@@ -47,7 +47,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.LTM_SEARCH_API || 'http://localhost:3000/api/ltm/search' }}",
+        "url": "={{ $env.LTM_SEARCH_API || 'http://localhost:3000/api/.memory/data/ltm/search' }}",
         "sendQuery": true,
         "queryParameters": {
           "query": "={{ $json.query }}",
@@ -67,7 +67,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.LTM_STORE_API || 'http://localhost:3000/api/ltm/store' }}",
+        "url": "={{ $env.LTM_STORE_API || 'http://localhost:3000/api/.memory/data/ltm/store' }}",
         "sendBody": true,
         "body": "={{ JSON.stringify({ content: $json.content, namespace: $json.namespace }) }}",
         "options": {

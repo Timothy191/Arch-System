@@ -31,15 +31,19 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 ### Setup
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
+
 2. **Environment Variables**:
    Copy `apps/portal/.env.example` to `apps/portal/.env` and fill in your Supabase credentials.
 3. **Start Local Database** (requires Docker):
+
    ```bash
    cd packages/database && pnpm supabase:dev
    ```
+
 4. **Development Mode**:
 
    ```bash

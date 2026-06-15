@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: "ltm/**/*"
+fileMatchPattern: ".memory/data/ltm/**/*"
 ---
 
 ## LTM record formats

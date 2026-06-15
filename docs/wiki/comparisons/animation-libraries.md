@@ -4,7 +4,8 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [animation, ui, decision]
-sources: [apps/portal/package.json, docs/wiki/concepts/design-system.md, CLAUDE.md]
+sources:
+  [apps/portal/package.json, docs/wiki/concepts/design-system.md, CLAUDE.md]
 confidence: medium
 ---
 

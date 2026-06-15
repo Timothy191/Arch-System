@@ -1,7 +1,26 @@
+import { DepartmentLayout } from "@repo/ui/DepartmentLayout";
+import { DEPARTMENTS, getDepartmentTabs } from "~/lib/departments";
+import { notFound } from "next/navigation";
+import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
+import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
+
 export default function TireManagementLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const dept = DEPARTMENTS.find((d) => d.name === "engineering");
+  if (!dept) notFound();
+
+  const tabs = getDepartmentTabs("engineering");
+
+  return (
+    <>
+      <ActiveDepartmentSetter department="engineering" />
+      <DepartmentLayout department={dept} tabs={tabs}>
+        {children}
+        <AIAssistantWrapper context="Engineering Department" />
+      </DepartmentLayout>
+    </>
+  );
 }

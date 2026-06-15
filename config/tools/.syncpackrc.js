@@ -26,6 +26,23 @@ export default {
   versionGroups: [
     {
       packages: ["**"],
+      dependencies: ["react", "react-dom", "@types/react", "@types/react-dom"],
+      isIgnored: true,
+      label: "Ignore React 19 dependencies to allow peerDependencies to be ^19 while others are catalog:react19",
+    },
+    {
+      packages: ["**"],
+      dependencies: [
+        "next",
+        "@next/bundle-analyzer",
+        "@next/eslint-plugin-next",
+        "next-themes",
+        "@ai-sdk/react",
+      ],
+      label: "Next.js ecosystem packages should stay in lockstep",
+    },
+    {
+      packages: ["**"],
       specifierTypes: ["unsupported"],
       isIgnored: true,
       label:

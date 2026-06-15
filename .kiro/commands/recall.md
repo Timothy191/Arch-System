@@ -23,11 +23,11 @@ Semantic memory search across LTM events and checkpoints.
 
 ## Implementation
 
-Calls `python3 ltm/bin/vector.py search <query>` using TF-IDF vector similarity.
+Calls `python3 .memory/data/ltm/bin/vector.py search <query>` using TF-IDF vector similarity.
 Results show matching memory entries with relevance scores (0-1).
 
 For re-indexing after adding memory:
 
 ```bash
-python3 ltm/bin/vector.py index
+python3 .memory/data/ltm/bin/vector.py index
 ```

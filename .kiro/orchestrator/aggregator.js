@@ -1,61 +1,69 @@
 #!/usr/bin/env node
 
 module.exports = {
-  merge(results, strategy = 'merge') {
+  merge(results, strategy = "merge") {
     if (results.length === 0) {
-      return { summary: 'No results to aggregate', merged: false };
+      return { summary: "No results to aggregate", merged: false };
     }
 
-    const succeeded = results.filter(r => r.status === 'ok');
-    const failed = results.filter(r => r.status !== 'ok');
+    const succeeded = results.filter((r) => r.status === "ok");
+    const failed = results.filter((r) => r.status !== "ok");
 
     switch (strategy) {
-      case 'first': {
+      case "first": {
         const first = succeeded[0] || results[0];
         return {
-          strategy: 'first',
+          strategy: "first",
           summary: `Used first result: ${first.unit}`,
           merged: true,
-          primary: first
+          primary: first,
         };
       }
 
-      case 'concatenate': {
-        const text = succeeded.map(r => r.stdout || '').join('\n\n---\n\n');
+      case "concatenate": {
+        const text = succeeded.map((r) => r.stdout || "").join("\n\n---\n\n");
         return {
-          strategy: 'concatenate',
+          strategy: "concatenate",
           summary: `Concatenated ${succeeded.length} results`,
           merged: true,
           output: text,
-          length: text.length
+          length: text.length,
         };
       }
 
-      case 'merge':
+      case "merge":
       default: {
         const combined = {
           changes: [],
           findings: [],
-          errors: []
+          errors: [],
         };
 
         for (const r of results) {
-          const output = r.stdout || r.result || '';
-          if (r.status === 'ok') {
-            combined.findings.push({ unit: r.unit, text: output.slice(0, 2000) });
+          const output = r.stdout || r.result || "";
+          if (r.status === "ok") {
+            combined.findings.push({
+              unit: r.unit,
+              text: output.slice(0, 2000),
+            });
             // Extract changed file patterns
             const files = output.match(/^[+\-]{3}\s+\S+/gm) || [];
-            combined.changes.push(...files.map(f => f.replace(/^[+\-]{3}\s+/, '')));
+            combined.changes.push(
+              ...files.map((f) => f.replace(/^[+\-]{3}\s+/, "")),
+            );
           } else {
-            combined.errors.push({ unit: r.unit, error: r.error || r.stderr || 'Unknown error' });
+            combined.errors.push({
+              unit: r.unit,
+              error: r.error || r.stderr || "Unknown error",
+            });
           }
         }
 
         return {
-          strategy: 'merge',
+          strategy: "merge",
           summary: `Merged ${results.length} results (${succeeded.length} ok, ${failed.length} failed)`,
           merged: failed.length === 0,
-          combined
+          combined,
         };
       }
     }
@@ -65,14 +73,14 @@ module.exports = {
     const conflicts = [];
     const merged = [];
 
-    results.forEach(r => {
+    results.forEach((r) => {
       if (leadResult && r.unit !== leadResult.unit) {
-        const leadOutput = leadResult.stdout || '';
-        const thisOutput = r.stdout || '';
+        const leadOutput = leadResult.stdout || "";
+        const thisOutput = r.stdout || "";
         if (leadOutput && thisOutput && leadOutput !== thisOutput) {
           conflicts.push({
             unit: r.unit,
-            difference: 'Outputs differ from lead result'
+            difference: "Outputs differ from lead result",
           });
         }
       }
@@ -80,5 +88,5 @@ module.exports = {
     });
 
     return { conflicts, merged, conflict_count: conflicts.length };
-  }
+  },
 };

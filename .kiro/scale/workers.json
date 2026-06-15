@@ -2,10 +2,7 @@
   "workers": [
     {
       "name": "worker-1",
-      "capabilities": [
-        "code-review",
-        "testing"
-      ],
+      "capabilities": ["code-review", "testing"],
       "registered_at": 1779116881821,
       "last_heartbeat": 1779116881821,
       "status": "active",
@@ -14,9 +11,7 @@
     },
     {
       "name": "test-worker",
-      "capabilities": [
-        "code"
-      ],
+      "capabilities": ["code"],
       "registered_at": 1779117053805,
       "last_heartbeat": 1779117053805,
       "status": "active",

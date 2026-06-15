@@ -8,11 +8,11 @@ Quick navigation guide for Arch-Systems documentation.
 
 - **[README.md](./README.md)** - Project overview and quick start (5 min read)
 - **[CLAUDE.md](./CLAUDE.md)** - Complete technical guide (30 min read)
-- **[wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
+- **[docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference
 
-- **[wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
+- **[docs/wiki/index.md](./docs/wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
 - **[AGENTS.md](./AGENTS.md)** - Workflow rules, quality gates, and quick commands
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for all environments
 
@@ -65,7 +65,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### UI Implementation
 
-- **[LIQUID_GLASS_CHECKLIST.md](./LIQUID_GLASS_CHECKLIST.md)** - UI implementation checklist
+- **[LIQUID_GLASS_CHECKLIST.md](./archive/LIQUID_GLASS_CHECKLIST.md)** - UI implementation checklist
   - Phased implementation guide for liquid glass interface
   - WebGL refraction and shader requirements
   - Accessibility and responsiveness requirements
@@ -105,13 +105,25 @@ Arch-Mk2/
 ├── DESIGN.md                          # Design system reference
 ├── PRODUCT.md                         # Product strategy
 ├── GEMINI.md                          # AI conventions
-├── LIQUID_GLASS_CHECKLIST.md          # UI implementation guide
 ├── SECURITY.md                        # Security policy
 ├── DOCUMENTATION_INDEX.md             # This file
-├── wiki/                              # Detailed technical wiki and domain concept docs
-│   ├── index.md                       # Wiki Index page (63 pages total)
-│   └── concepts/
-│       └── project-overview.md        # Comprehensive system architecture & stack guide
+├── docs/
+│   ├── archive/                       # Historical checklists, phase plans, and reports
+│   │   ├── LIQUID_GLASS_CHECKLIST.md
+│   │   ├── PHASE3_MUI_BASE_MIGRATION.md
+│   │   └── SECURITY_USABILITY_REPORT.md
+│   ├── operations/                    # Control room procedures, FUXA integrations, and runbooks
+│   │   ├── alert-response-procedures.md
+│   │   ├── caching-strategy.md
+│   │   ├── fuxa-integration-plan.md
+│   │   └── runbooks/
+│   │       ├── AMCA-RUNBOOK.md
+│   │       └── auth-unavailable.md
+│   └── wiki/                          # Detailed technical wiki and domain concept docs
+│       ├── index.md                   # Wiki Index page
+│       └── concepts/
+│           ├── project-overview.md    # Comprehensive system architecture & stack guide
+│           └── overview.md            # Wiki system introduction
 └── scripts/
     └── ROCKY_LINUX_COMPATIBILITY.md   # Rocky Linux/RHEL compatibility guide
 ```
@@ -120,17 +132,19 @@ Arch-Mk2/
 
 ### I need to
 
-- **Understand the system architecture & stack**: Read [wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)
-- **Browse the complete developer wiki**: Check [wiki/index.md](./wiki/index.md)
-- **Set up the project**: Start with [README.md](./README.md), then [CLAUDE.md](./CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](./CLAUDE.md) Architecture section
-- **Run development commands**: Check [AGENTS.md](./AGENTS.md) Commands section
-- **Deploy the application**: Follow [DEPLOYMENT.md](./DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
-- **Deploy on Rocky Linux/RHEL**: Read [scripts/ROCKY_LINUX_COMPATIBILITY.md](./scripts/ROCKY_LINUX_COMPATIBILITY.md)
-- **Design a new component**: Reference [DESIGN.md](./DESIGN.md) and [PRODUCT.md](./PRODUCT.md)
-- **Implement AI features**: Read [GEMINI.md](./GEMINI.md)
-- **Report a security issue**: Follow [SECURITY.md](./SECURITY.md)
-- **Understand quality gates**: Review [AGENTS.md](./AGENTS.md) Quality Gates section
+- **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
+- **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
+- **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](../CLAUDE.md)
+- **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section
+- **Run development commands**: Check [AGENTS.md](../AGENTS.md) Commands section
+- **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
+- **Deploy on Rocky Linux/RHEL**: Read [scripts/ROCKY_LINUX_COMPATIBILITY.md](../scripts/ROCKY_LINUX_COMPATIBILITY.md)
+- **Design a new component**: Reference [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md)
+- **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
+- **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)
+- **Understand quality gates**: Review [AGENTS.md](../AGENTS.md) Quality Gates section
+- **Review historical plans / checklist**: Check [docs/archive/LIQUID_GLASS_CHECKLIST.md](./docs/archive/LIQUID_GLASS_CHECKLIST.md)
+- **Find operational runbooks**: Check [docs/operations/runbooks/](./docs/operations/runbooks/)
 
 ## 📝 Documentation Maintenance
 

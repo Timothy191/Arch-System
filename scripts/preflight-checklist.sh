@@ -273,7 +273,7 @@ done
 # ═══════════════════════════════════════════════════════════
 header "9. Systemd Service"
 
-SERVICE_FILE="$HOME/.config/systemd/user/arch-systems.service"
+SERVICE_FILE="$HOME/.config/infra/systemd/user/arch-systems.service"
 if [ -f "$SERVICE_FILE" ]; then
   check_pass "Service file exists"
   if grep -q "standalone/apps/portal/server.js" "$SERVICE_FILE"; then

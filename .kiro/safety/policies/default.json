@@ -16,23 +16,65 @@
   },
   "permission": {
     "deny_by_default": false,
-    "require_approval_for": ["Bash(rm *)", "Bash(sudo *)", "Bash(docker *)", "Bash(chmod *)", "Bash(curl *)"]
+    "require_approval_for": [
+      "Bash(rm *)",
+      "Bash(sudo *)",
+      "Bash(docker *)",
+      "Bash(chmod *)",
+      "Bash(curl *)"
+    ]
   },
   "isolation": {
     "dangerous_commands": [
-      "rm -rf /", "rm -rf /*", "sudo rm", "mkfs", "dd if=",
-      "chmod 777", "chmod -R 777",
-      "curl * | bash", "curl * | sh", "wget * | bash",
-      "> /dev/", "> /dev/sda",
-      "docker system prune", "docker rm -f",
-      "git push --force", "git push -f", "git reset --hard HEAD"
+      "rm -rf /",
+      "rm -rf /*",
+      "sudo rm",
+      "mkfs",
+      "dd if=",
+      "chmod 777",
+      "chmod -R 777",
+      "curl * | bash",
+      "curl * | sh",
+      "wget * | bash",
+      "> /dev/",
+      "> /dev/sda",
+      "docker system prune",
+      "docker rm -f",
+      "git push --force",
+      "git push -f",
+      "git reset --hard HEAD"
     ],
     "allowed_shell_prefixes": [
-      "git", "npm", "pnpm", "node", "python", "ls", "cat", "echo",
-      "mkdir", "cp", "mv", "rmdir", "touch", "chmod +x",
-      "curl", "wget", "docker", "psql", "sqlite3",
-      "pnpx", "npx", "tsc", "eslint", "prettier",
-      "jq", "grep", "rg", "find", "sleep", "cd"
+      "git",
+      "npm",
+      "pnpm",
+      "node",
+      "python",
+      "ls",
+      "cat",
+      "echo",
+      "mkdir",
+      "cp",
+      "mv",
+      "rmdir",
+      "touch",
+      "chmod +x",
+      "curl",
+      "wget",
+      "docker",
+      "psql",
+      "sqlite3",
+      "pnpx",
+      "npx",
+      "tsc",
+      "eslint",
+      "prettier",
+      "jq",
+      "grep",
+      "rg",
+      "find",
+      "sleep",
+      "cd"
     ],
     "max_output_bytes": 102400,
     "max_execution_seconds": 30
@@ -57,7 +99,7 @@
   },
   "audit": {
     "enabled": true,
-    "log_path": "ltm/store/audit.jsonl",
+    "log_path": ".memory/data/ltm/store/audit.jsonl",
     "log_all": false,
     "log_blocks": true,
     "log_warns": true

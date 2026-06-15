@@ -25,7 +25,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.LTM_HYBRID_SEARCH_API || 'http://localhost:3000/api/ltm/hybrid-search' }}",
+        "url": "={{ $env.LTM_HYBRID_SEARCH_API || 'http://localhost:3000/api/.memory/data/ltm/hybrid-search' }}",
         "sendBody": true,
         "body": "={{ JSON.stringify({ query: $json.query, limit: $json.limit, recent_only: true }) }}",
         "options": {
@@ -62,7 +62,12 @@
       "main": [[{ "node": "Parse Hybrid Request", "type": "main", "index": 0 }]]
     },
     "Parse Hybrid Request": {
-      "main": [[{ "node": "Stream LTM Search", "type": "main", "index": 0 }, { "node": "Short-Term Window", "type": "main", "index": 1 }]]
+      "main": [
+        [
+          { "node": "Stream LTM Search", "type": "main", "index": 0 },
+          { "node": "Short-Term Window", "type": "main", "index": 1 }
+        ]
+      ]
     },
     "Stream LTM Search": {
       "main": [[{ "node": "Merge Contexts", "type": "main", "index": 0 }]]

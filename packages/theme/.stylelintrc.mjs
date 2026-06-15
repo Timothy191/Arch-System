@@ -14,11 +14,7 @@
 /** @type {import('stylelint').Config} */
 export default {
   extends: ["stylelint-config-standard"],
-  ignoreFiles: [
-    "node_modules/**",
-    "dist/**",
-    "coverage/**",
-  ],
+  ignoreFiles: ["node_modules/**", "dist/**", "coverage/**"],
   overrides: [
     {
       // ── Source-of-truth files: no component-level rules apply ──────────────
@@ -30,7 +26,12 @@ export default {
     },
     {
       // ── Component CSS files: enforce token usage ────────────────────────────
-      files: ["src/css/glass.css", "src/css/animations.css", "src/css/focus.css", "src/css/transitions.css"],
+      files: [
+        "src/css/glass.css",
+        "src/css/animations.css",
+        "src/css/focus.css",
+        "src/css/transitions.css",
+      ],
       rules: {
         // Disallow raw box-shadow values — must use var(--shadow-*)
         "declaration-property-value-disallowed-list": [

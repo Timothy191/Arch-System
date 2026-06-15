@@ -9,11 +9,16 @@ import {
 const N8N_URL = process.env.N8N_URL || "http://localhost:5678";
 const N8N_EMAIL = process.env.N8N_EMAIL;
 const N8N_PASSWORD = process.env.N8N_PASSWORD;
-const N8N_FETCH_TIMEOUT = parseInt(process.env.N8N_FETCH_TIMEOUT || "30000", 10);
+const N8N_FETCH_TIMEOUT = parseInt(
+  process.env.N8N_FETCH_TIMEOUT || "30000",
+  10,
+);
 const COOKIE_MARGIN_MS = 5 * 60 * 1000;
 
 if (!N8N_EMAIL || !N8N_PASSWORD) {
-  console.error("Fatal: N8N_EMAIL and N8N_PASSWORD environment variables are required");
+  console.error(
+    "Fatal: N8N_EMAIL and N8N_PASSWORD environment variables are required",
+  );
   process.exit(1);
 }
 
@@ -22,16 +27,28 @@ let cookieExpiry = 0;
 
 function sanitizePathSegment(segment) {
   if (typeof segment !== "string" || !segment) return "";
-  if (segment.includes("..") || segment.includes("/") || segment.includes("\\")) {
-    throw new Error("Invalid path segment: must not contain '..', '/', or '\\'");
+  if (
+    segment.includes("..") ||
+    segment.includes("/") ||
+    segment.includes("\\")
+  ) {
+    throw new Error(
+      "Invalid path segment: must not contain '..', '/', or '\\'",
+    );
   }
   if (/[^a-zA-Z0-9_.-]/.test(segment)) {
-    throw new Error("Invalid path segment: only alphanumeric, _, ., and - allowed");
+    throw new Error(
+      "Invalid path segment: only alphanumeric, _, ., and - allowed",
+    );
   }
   return segment;
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = N8N_FETCH_TIMEOUT) {
+async function fetchWithTimeout(
+  url,
+  options = {},
+  timeoutMs = N8N_FETCH_TIMEOUT,
+) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -47,7 +64,10 @@ async function ensureLogin() {
   const res = await fetchWithTimeout(`${N8N_URL}/rest/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ emailOrLdapLoginId: N8N_EMAIL, password: N8N_PASSWORD }),
+    body: JSON.stringify({
+      emailOrLdapLoginId: N8N_EMAIL,
+      password: N8N_PASSWORD,
+    }),
     redirect: "manual",
   });
   if (!res.ok) {
@@ -55,7 +75,8 @@ async function ensureLogin() {
     throw new Error(`n8n login failed (${res.status}): ${text}`);
   }
   const setCookie = res.headers.get("set-cookie");
-  if (!setCookie) throw new Error("n8n login failed: no session cookie returned");
+  if (!setCookie)
+    throw new Error("n8n login failed: no session cookie returned");
   n8nCookie = setCookie.split(";")[0];
   cookieExpiry = Date.now() + 50 * 60 * 1000 - COOKIE_MARGIN_MS;
 }
@@ -87,19 +108,23 @@ async function n8nFetch(path, options = {}, retries = 1) {
 
 const server = new Server(
   { name: "n8n-mcp-server", version: "1.0.0" },
-  { capabilities: { tools: {} } }
+  { capabilities: { tools: {} } },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: "n8n_list_workflows",
-      description: "List all workflows with IDs, names, active status, and tags.",
+      description:
+        "List all workflows with IDs, names, active status, and tags.",
       inputSchema: {
         type: "object",
         properties: {
           search: { type: "string", description: "Optional name filter" },
-          tag: { type: "string", description: "Filter by tag name (server-side)" },
+          tag: {
+            type: "string",
+            description: "Filter by tag name (server-side)",
+          },
         },
       },
     },
@@ -116,7 +141,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "n8n_execute_workflow",
-      description: "Execute a workflow via its webhook trigger. Returns the workflow response.",
+      description:
+        "Execute a workflow via its webhook trigger. Returns the workflow response.",
       inputSchema: {
         type: "object",
         properties: {
@@ -138,7 +164,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: "object",
         properties: {
-          execution_id: { type: "string", description: "Execution ID to check" },
+          execution_id: {
+            type: "string",
+            description: "Execution ID to check",
+          },
         },
         required: ["execution_id"],
       },
@@ -224,7 +253,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 active: w.active,
                 tags: w.tags?.map((t) => t.name) || [],
               })),
-              null, 2
+              null,
+              2,
             ),
           },
         ],
@@ -253,7 +283,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
       let parsed = body;
-      try { parsed = JSON.parse(body); } catch {}
+      try {
+        parsed = JSON.parse(body);
+      } catch {}
       return {
         content: [{ type: "text", text: JSON.stringify(parsed, null, 2) }],
       };
@@ -284,8 +316,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(
-                { id: data.data.id, name: data.data.name, active: actData.data?.active ?? true },
-                null, 2
+                {
+                  id: data.data.id,
+                  name: data.data.name,
+                  active: actData.data?.active ?? true,
+                },
+                null,
+                2,
               ),
             },
           ],
@@ -296,8 +333,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text",
             text: JSON.stringify(
-              { id: data.data?.id, name: data.data?.name, active: data.data?.active ?? false },
-              null, 2
+              {
+                id: data.data?.id,
+                name: data.data?.name,
+                active: data.data?.active ?? false,
+              },
+              null,
+              2,
             ),
           },
         ],
@@ -306,20 +348,38 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     case "n8n_activate_workflow": {
       const safeId = sanitizePathSegment(args.id);
-      const data = await n8nFetch(`/workflows/${safeId}/activate`, { method: "POST" });
+      const data = await n8nFetch(`/workflows/${safeId}/activate`, {
+        method: "POST",
+      });
       return {
         content: [
-          { type: "text", text: JSON.stringify({ id: safeId, active: data.data?.active ?? true }, null, 2) },
+          {
+            type: "text",
+            text: JSON.stringify(
+              { id: safeId, active: data.data?.active ?? true },
+              null,
+              2,
+            ),
+          },
         ],
       };
     }
 
     case "n8n_deactivate_workflow": {
       const safeId = sanitizePathSegment(args.id);
-      const data = await n8nFetch(`/workflows/${safeId}/deactivate`, { method: "POST" });
+      const data = await n8nFetch(`/workflows/${safeId}/deactivate`, {
+        method: "POST",
+      });
       return {
         content: [
-          { type: "text", text: JSON.stringify({ id: safeId, active: data.data?.active ?? false }, null, 2) },
+          {
+            type: "text",
+            text: JSON.stringify(
+              { id: safeId, active: data.data?.active ?? false },
+              null,
+              2,
+            ),
+          },
         ],
       };
     }

@@ -12,19 +12,19 @@ Goal: Add embedding-based semantic search to existing LTM JSONL stores.
 ### Architecture
 
 ```
-ltm/bin/
+.memory/data/ltm/bin/
 ├── ltm.py              → existing (957 lines, stdlib JSONL management)
 └── vector.py            → NEW: embeddings + semantic search (sentence-transformers)
 ```
 
-File: `ltm/bin/vector.py`
+File: `.memory/data/ltm/bin/vector.py`
 
 Features:
 
-- Embed events from `ltm/store/events.jsonl` using `sentence-transformers/all-MiniLM-L6-v2`
-- Store embeddings in `ltm/store/vectors.jsonl` (JSONL with id + embedding + text + metadata)
+- Embed events from `.memory/data/ltm/store/events.jsonl` using `sentence-transformers/all-MiniLM-L6-v2`
+- Store embeddings in `.memory/data/ltm/store/vectors.jsonl` (JSONL with id + embedding + text + metadata)
 - Search: cosine similarity against query embedding, return top-k
-- CLI: `python3 ltm/bin/vector.py index` (re-index), `search "query"`, `status`
+- CLI: `python3 .memory/data/ltm/bin/vector.py index` (re-index), `search "query"`, `status`
 - Integration: n8n Pattern 4 (Vector Memory) and Pattern 5 (Hybrid Memory) webhooks call this script
 
 ### Dependencies
@@ -35,7 +35,7 @@ Features:
 ### Integration with n8n
 
 - Pattern 4 webhook (`/webhook/vector-memory`) already exists
-- Update its Code node to call `python3 ltm/bin/vector.py search "..."` instead of grep-based search
+- Update its Code node to call `python3 .memory/data/ltm/bin/vector.py search "..."` instead of grep-based search
 - Pattern 5 webhook (`/webhook/hybrid-memory`) combines vector search + recent events
 
 ---
@@ -153,7 +153,7 @@ node .kiro/evaluator-optimizer/index.js --issue "$ISSUE_URL" --workdir /tmp/eval
 
 ## Implementation Order
 
-1. **Vector memory** — `ltm/bin/vector.py` + n8n webhook updates
+1. **Vector memory** — `.memory/data/ltm/bin/vector.py` + n8n webhook updates
 2. **Multi-agent orchestrator** — `.kiro/orchestrator/` with spawner + worktree
 3. **MCP expansion** — GitHub MCP + unified registry
 4. **Evaluator-optimizer** — Full PR generation workflow
@@ -163,7 +163,7 @@ node .kiro/evaluator-optimizer/index.js --issue "$ISSUE_URL" --workdir /tmp/eval
 ### Create
 
 ```
-ltm/bin/vector.py
+.memory/data/ltm/bin/vector.py
 .kiro/orchestrator/index.js
 .kiro/orchestrator/spawner.js
 .kiro/orchestrator/worktree.js

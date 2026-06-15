@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock, AlertCircle } from "lucide-react";

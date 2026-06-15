@@ -5,7 +5,8 @@ updated: 2026-06-03
 type: decision
 status: superseded
 tags: [adr, ai, architecture, decision]
-sources: [docs/wiki/comparisons/ai-providers.md, docs/wiki/concepts/ai-service.md]
+sources:
+  [docs/wiki/comparisons/ai-providers.md, docs/wiki/concepts/ai-service.md]
 confidence: high
 ---
 

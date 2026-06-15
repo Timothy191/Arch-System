@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-process.stdin.setEncoding('utf8');
-let data = '';
-process.stdin.on('data', chunk => { data += chunk; });
-process.stdin.on('end', () => {
+process.stdin.setEncoding("utf8");
+let data = "";
+process.stdin.on("data", (chunk) => {
+  data += chunk;
+});
+process.stdin.on("end", () => {
   try {
     const input = JSON.parse(data);
-    const filePath = input.file_path || input.path || '';
+    const filePath = input.file_path || input.path || "";
 
     const importantPatterns = [
       /package\.json$/,
@@ -19,19 +21,20 @@ process.stdin.on('end', () => {
       /Cargo\.toml$/,
       /pyproject\.toml$/,
       /go\.mod$/,
-      /Makefile$/
+      /Makefile$/,
     ];
 
-    const isImportant = importantPatterns.some(p => p.test(filePath));
+    const isImportant = importantPatterns.some((p) => p.test(filePath));
 
-    // Reactive wiki seed enqueue: edits inside a wiki/ tree spawn a verify seed.
-    const wikiMatch = filePath.match(/(?:^|\/)\.claude\/wikis\/([^/]+)\/wiki\/.+\.md$/) ||
-                      filePath.match(/(?:^|\/)\.pro-workflow\/wikis\/([^/]+)\/wiki\/.+\.md$/);
+    // Reactive wiki seed enqueue: edits inside a docs/wiki/ tree spawn a verify seed.
+    const wikiMatch =
+      filePath.match(/(?:^|\/)\.claude\/wikis\/([^/]+)\/wiki\/.+\.md$/) ||
+      filePath.match(/(?:^|\/)\.pro-workflow\/wikis\/([^/]+)\/wiki\/.+\.md$/);
     if (wikiMatch) {
       try {
-        const path2 = require('path');
-        const fs2 = require('fs');
-        const distPath = path2.join(__dirname, '..', 'dist', 'db', 'store.js');
+        const path2 = require("path");
+        const fs2 = require("fs");
+        const distPath = path2.join(__dirname, "..", "dist", "db", "store.js");
         if (fs2.existsSync(distPath)) {
           const { createStore } = require(distPath);
           const store = createStore();
@@ -40,45 +43,73 @@ process.stdin.on('end', () => {
             const w = store.getWiki(slug);
             if (w) {
               const rel = path2.relative(w.root_path, filePath);
-              store.enqueueSeed({ wiki_slug: slug, query: `verify edits in ${rel}`, depth: 0 });
-              console.error(`[ProWorkflow] enqueued verify seed for ${slug}/${rel}`);
+              store.enqueueSeed({
+                wiki_slug: slug,
+                query: `verify edits in ${rel}`,
+                depth: 0,
+              });
+              console.error(
+                `[ProWorkflow] enqueued verify seed for ${slug}/${rel}`,
+              );
             }
-          } finally { store.close(); }
+          } finally {
+            store.close();
+          }
         }
-      } catch (e) { /* never break the hook */ }
+      } catch (e) {
+        /* never break the hook */
+      }
     }
 
     if (isImportant) {
-      console.error('[ProWorkflow] Important config file changed: ' + filePath);
+      console.error("[ProWorkflow] Important config file changed: " + filePath);
 
       if (/package\.json$/.test(filePath)) {
-        console.error('[ProWorkflow]   Run: npm install to sync dependencies');
+        console.error("[ProWorkflow]   Run: npm install to sync dependencies");
       } else if (/\/\.env$|^\.env$/.test(filePath)) {
-        console.error('[ProWorkflow]   CAUTION: .env changed — verify no secrets are committed');
+        console.error(
+          "[ProWorkflow]   CAUTION: .env changed — verify no secrets are committed",
+        );
       } else if (/tsconfig.*\.json$/.test(filePath)) {
-        console.error('[ProWorkflow]   Run: tsc --noEmit to verify TypeScript config');
+        console.error(
+          "[ProWorkflow]   Run: tsc --noEmit to verify TypeScript config",
+        );
       } else if (/Dockerfile|docker-compose/.test(filePath)) {
-        console.error('[ProWorkflow]   Rebuild containers: docker compose up --build');
+        console.error(
+          "[ProWorkflow]   Rebuild containers: docker compose up --build",
+        );
       } else if (/\.github\/workflows\//.test(filePath)) {
-        console.error('[ProWorkflow]   CI workflow changed — verify pipeline still passes');
+        console.error(
+          "[ProWorkflow]   CI workflow changed — verify pipeline still passes",
+        );
       } else if (/CLAUDE\.md$/.test(filePath)) {
-        console.error('[ProWorkflow]   CLAUDE.md changed — context instructions updated');
+        console.error(
+          "[ProWorkflow]   CLAUDE.md changed — context instructions updated",
+        );
       } else if (/Cargo\.toml$/.test(filePath)) {
-        console.error('[ProWorkflow]   Run: cargo check to verify dependencies');
+        console.error(
+          "[ProWorkflow]   Run: cargo check to verify dependencies",
+        );
       } else if (/pyproject\.toml$/.test(filePath)) {
-        console.error('[ProWorkflow]   Run: pip install -e . to sync dependencies');
+        console.error(
+          "[ProWorkflow]   Run: pip install -e . to sync dependencies",
+        );
       } else if (/go\.mod$/.test(filePath)) {
-        console.error('[ProWorkflow]   Run: go mod tidy to sync dependencies');
+        console.error("[ProWorkflow]   Run: go mod tidy to sync dependencies");
       } else if (/\.claude\//.test(filePath)) {
-        console.error('[ProWorkflow]   .claude/ config changed — context or rules may be affected');
+        console.error(
+          "[ProWorkflow]   .claude/ config changed — context or rules may be affected",
+        );
       } else if (/Makefile$/.test(filePath)) {
-        console.error('[ProWorkflow]   Makefile changed — verify build targets still work');
+        console.error(
+          "[ProWorkflow]   Makefile changed — verify build targets still work",
+        );
       }
     }
 
     console.log(data);
   } catch (err) {
-    console.error('[ProWorkflow] JSON parse error:', err.message);
-    console.log(data || '{}');
+    console.error("[ProWorkflow] JSON parse error:", err.message);
+    console.log(data || "{}");
   }
 });

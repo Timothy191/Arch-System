@@ -10,20 +10,20 @@
 //        pnpm nx run graph:no-cycles (after wiring in tools/nx-plugins/)
 //
 
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require("node:fs");
+const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, "..");
 
 function readDeps(projectPath) {
-  const pkgPath = path.join(ROOT, projectPath, 'package.json');
+  const pkgPath = path.join(ROOT, projectPath, "package.json");
   if (!fs.existsSync(pkgPath)) return [];
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
   const deps = pkg.dependencies || {};
   const result = [];
   for (const [name, version] of Object.entries(deps)) {
-    if (typeof version !== 'string') continue;
-    if (!version.startsWith('workspace:')) continue;
+    if (typeof version !== "string") continue;
+    if (!version.startsWith("workspace:")) continue;
     result.push(name);
   }
   return result;
@@ -31,15 +31,15 @@ function readDeps(projectPath) {
 
 function buildGraph() {
   const graph = new Map();
-  const dirs = ['apps', 'packages'];
+  const dirs = ["apps", "packages"];
   for (const dir of dirs) {
     const abs = path.join(ROOT, dir);
     if (!fs.existsSync(abs)) continue;
     for (const n of fs.readdirSync(abs)) {
       const projectPath = path.join(dir, n);
-      const pkgPath = path.join(ROOT, projectPath, 'package.json');
+      const pkgPath = path.join(ROOT, projectPath, "package.json");
       if (!fs.existsSync(pkgPath)) continue;
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
       const name = pkg.name;
       const deps = readDeps(projectPath);
       graph.set(name, deps);
@@ -49,7 +49,9 @@ function buildGraph() {
 }
 
 function findCycles(graph) {
-  const WHITE = 0, GRAY = 1, BLACK = 2;
+  const WHITE = 0,
+    GRAY = 1,
+    BLACK = 2;
   const color = new Map();
   for (const k of graph.keys()) color.set(k, WHITE);
   const cycles = [];
@@ -82,12 +84,16 @@ const graph = buildGraph();
 const cycles = findCycles(graph);
 
 if (cycles.length === 0) {
-  console.log('OK No circular dependencies found across ' + graph.size + ' projects.');
+  console.log(
+    "OK No circular dependencies found across " + graph.size + " projects.",
+  );
   process.exit(0);
 }
 
-console.error('FAIL ' + cycles.length + ' circular dependency cycle(s) detected:\n');
+console.error(
+  "FAIL " + cycles.length + " circular dependency cycle(s) detected:\n",
+);
 for (const cycle of cycles) {
-  console.error('  ' + cycle.join(' -> '));
+  console.error("  " + cycle.join(" -> "));
 }
 process.exit(1);

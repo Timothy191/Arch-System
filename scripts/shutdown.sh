@@ -9,8 +9,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORTAL_PID_FILE="$REPO_ROOT/run/.portal.pid"
-TOOLS_COMPOSE="$REPO_ROOT/docker/docker-compose.tools.yml"
-MONITOR_COMPOSE="$REPO_ROOT/docker/docker-compose.monitoring.yml"
+TOOLS_COMPOSE="$REPO_ROOT/infra/docker/compose.tools.yml"
+MONITOR_COMPOSE="$REPO_ROOT/infra/monitoring/docker-compose.yml"
 DATABASE_DIR="$REPO_ROOT/packages/database"
 
 # Colors

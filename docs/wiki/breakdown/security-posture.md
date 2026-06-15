@@ -181,26 +181,26 @@ is_active(record) → boolean
 
 ## Action Plan
 
-| Priority | Action                                                               | Status      | Impact                    |
-| -------- | -------------------------------------------------------------------- | ----------- | ------------------------- |
-| 🟡 P1    | Enable MFA enrollment in `/admin` user settings                      | ⬜ Pending  | Closes 50% MFA gap        |
-| 🟡 P1    | Add `pnpm audit --audit-level=moderate` to CI                        | ⬜ Pending  | Automated CVE detection   |
+| Priority | Action                                                                     | Status      | Impact                    |
+| -------- | -------------------------------------------------------------------------- | ----------- | ------------------------- |
+| 🟡 P1    | Enable MFA enrollment in `/admin` user settings                            | ⬜ Pending  | Closes 50% MFA gap        |
+| 🟡 P1    | Add `pnpm audit --audit-level=moderate` to CI                              | ⬜ Pending  | Automated CVE detection   |
 | 🟡 P1    | Add `scripts/backup.sh` + `infra/systemd/backup.timer` for on-prem pg_dump | ⬜ Pending  | Backup coverage           |
-| 🟡 P1    | Execute OWASP ZAP baseline scan                                      | ⬜ Pending  | Find real vulnerabilities |
-| 🟢 P2    | Add Renovate/Dependabot for automated dep updates                    | ⬜ Pending  | Proactive CVE fixes       |
-| 🟢 P2    | Add CSRF token middleware for `app/api/` non-action routes           | ⬜ Pending  | Closes 25% CSRF gap       |
-| 🟢 P2    | Document secret rotation policy in wiki                              | ⬜ Pending  | Ops security              |
-| 🟢 P3    | Add Content-Security-Policy headers via `next.config.js`             | ⬜ Pending  | Defense-in-depth          |
-| ✅ Done  | RLS on all 37 tables (118 policies)                                  | ✅ Complete | Full data isolation       |
-| ✅ Done  | Auth middleware on all protected routes                              | ✅ Complete | No bypass possible        |
-| ✅ Done  | 5-level role hierarchy (superadmin→viewer)                           | ✅ Complete | Least-privilege access    |
-| ✅ Done  | 4 RLS helper functions                                               | ✅ Complete | Consistent policy logic   |
-| ✅ Done  | Full audit log trail with DB triggers                                | ✅ Complete | Complete change history   |
-| ✅ Done  | Minimal CI GitHub token permissions                                  | ✅ Complete | Least-privilege CI        |
-| ✅ Done  | Secrets never in CI / never committed                                | ✅ Complete | No secret leakage         |
-| ✅ Done  | OWASP ZAP pentest scripted                                           | ✅ Complete | Ready to execute          |
-| ✅ Done  | SQL injection prevented via parameterized queries                    | ✅ Complete | No injection surface      |
-| ✅ Done  | XSS prevented via React JSX escaping                                 | ✅ Complete | No XSS surface            |
+| 🟡 P1    | Execute OWASP ZAP baseline scan                                            | ⬜ Pending  | Find real vulnerabilities |
+| 🟢 P2    | Add Renovate/Dependabot for automated dep updates                          | ⬜ Pending  | Proactive CVE fixes       |
+| 🟢 P2    | Add CSRF token middleware for `app/api/` non-action routes                 | ⬜ Pending  | Closes 25% CSRF gap       |
+| 🟢 P2    | Document secret rotation policy in wiki                                    | ⬜ Pending  | Ops security              |
+| 🟢 P3    | Add Content-Security-Policy headers via `next.config.js`                   | ⬜ Pending  | Defense-in-depth          |
+| ✅ Done  | RLS on all 37 tables (118 policies)                                        | ✅ Complete | Full data isolation       |
+| ✅ Done  | Auth middleware on all protected routes                                    | ✅ Complete | No bypass possible        |
+| ✅ Done  | 5-level role hierarchy (superadmin→viewer)                                 | ✅ Complete | Least-privilege access    |
+| ✅ Done  | 4 RLS helper functions                                                     | ✅ Complete | Consistent policy logic   |
+| ✅ Done  | Full audit log trail with DB triggers                                      | ✅ Complete | Complete change history   |
+| ✅ Done  | Minimal CI GitHub token permissions                                        | ✅ Complete | Least-privilege CI        |
+| ✅ Done  | Secrets never in CI / never committed                                      | ✅ Complete | No secret leakage         |
+| ✅ Done  | OWASP ZAP pentest scripted                                                 | ✅ Complete | Ready to execute          |
+| ✅ Done  | SQL injection prevented via parameterized queries                          | ✅ Complete | No injection surface      |
+| ✅ Done  | XSS prevented via React JSX escaping                                       | ✅ Complete | No XSS surface            |
 
 ---
 

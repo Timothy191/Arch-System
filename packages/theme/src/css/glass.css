@@ -1033,7 +1033,13 @@
   position: fixed;
   inset: 0;
   z-index: -9;
-  background: rgba(255, 255, 255, 0.15); /* Reduced from 0.55 to make videos visible */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.15
+  ); /* Reduced from 0.55 to make videos visible */
+
   pointer-events: none;
 }
 

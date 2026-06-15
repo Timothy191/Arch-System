@@ -15,7 +15,7 @@
     },
     "jsonl": {
       "enabled": true,
-      "path": "ltm/store/traces.jsonl",
+      "path": ".memory/data/ltm/store/traces.jsonl",
       "max_file_size_mb": 100
     },
     "prometheus": {

@@ -421,7 +421,7 @@ setup_systemd() {
 
   phase "3. SYSTEMD SERVICE SETUP"
 
-  local service_file="/etc/systemd/system/arch-systems.service"
+  local service_file="/etc/infra/systemd/system/arch-systems.service"
   local user="$(whoami)"
 
   log "Creating systemd service file..."
@@ -558,7 +558,7 @@ setup_docker_tools() {
   phase "5. DOCKER TOOLS STACK SETUP"
 
   log "Checking Docker Compose configuration..."
-  local compose_file="$REPO_ROOT/docker/docker-compose.tools.yml"
+  local compose_file="$REPO_ROOT/infra/docker/compose.tools.yml"
   if [ ! -f "$compose_file" ]; then
     warn "Docker Compose file not found: $compose_file"
     warn "Docker tools stack will be skipped"
@@ -598,7 +598,7 @@ setup_monitoring() {
   phase "6. MONITORING STACK SETUP"
 
   log "Checking monitoring configuration..."
-  local monitoring_file="$REPO_ROOT/docker/docker-compose.monitoring.yml"
+  local monitoring_file="$REPO_ROOT/infra/monitoring/docker-compose.yml"
   if [ ! -f "$monitoring_file" ]; then
     warn "Monitoring Docker Compose file not found"
     info "Monitoring stack will be skipped"

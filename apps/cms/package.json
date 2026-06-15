@@ -1,15 +1,6 @@
 {
   "name": "cms",
   "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "type-check": "tsc --noEmit",
-    "payload": "payload"
-  },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",
     "@payloadcms/next": "^3.84.1",
@@ -20,12 +11,21 @@
     "react-dom": "catalog:react19"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@repo/typescript-config": "workspace:*",
+    "@repo/typescript-config": "1.0.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
     "@typescript-eslint/parser": "^8.59.4",
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  },
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "payload": "payload",
+    "start": "next start",
+    "type-check": "tsc --noEmit"
   }
 }

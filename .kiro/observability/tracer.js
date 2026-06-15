@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const PROJ = '/home/timothy/Project/Arch-Mk2';
-const TRACE_LOG = path.join(PROJ, 'ltm', 'store', 'traces.jsonl');
-const LANGEFUSE_URL = process.env.LANGFUSE_URL || 'http://localhost:3000';
-const LANGEFUSE_PK = process.env.LANGFUSE_PUBLIC_KEY || '';
-const LANGEFUSE_SK = process.env.LANGFUSE_SECRET_KEY || '';
-const OTEL_SERVICE_NAME = process.env.OTEL_SERVICE_NAME || 'kiro-agent';
+const PROJ = "/home/timothy/Project/Arch-Mk2";
+const TRACE_LOG = path.join(PROJ, "ltm", "store", "traces.jsonl");
+const LANGEFUSE_URL = process.env.LANGFUSE_URL || "http://localhost:3000";
+const LANGEFUSE_PK = process.env.LANGFUSE_PUBLIC_KEY || "";
+const LANGEFUSE_SK = process.env.LANGFUSE_SECRET_KEY || "";
+const OTEL_SERVICE_NAME = process.env.OTEL_SERVICE_NAME || "kiro-agent";
 
 class Tracer {
   constructor() {
@@ -46,7 +46,7 @@ class Tracer {
       service: OTEL_SERVICE_NAME,
       started_at: this._now(),
       attributes,
-      spans: []
+      spans: [],
     };
     return traceId;
   }
@@ -62,7 +62,7 @@ class Tracer {
       started_ms: this._timestampMs(),
       attributes: { ...attributes },
       events: [],
-      status: 'ok'
+      status: "ok",
     };
     this.activeSpans[spanId] = span;
     return spanId;
@@ -74,11 +74,11 @@ class Tracer {
     span.events.push({
       name: eventName,
       at: this._now(),
-      attributes
+      attributes,
     });
   }
 
-  endSpan(spanId, status = 'ok', attributes = {}) {
+  endSpan(spanId, status = "ok", attributes = {}) {
     const span = this.activeSpans[spanId];
     if (!span) return null;
     span.ended_at = this._now();
@@ -93,7 +93,7 @@ class Tracer {
     return span;
   }
 
-  endTrace(traceId, status = 'ok', attributes = {}) {
+  endTrace(traceId, status = "ok", attributes = {}) {
     const trace = this.traces[traceId];
     if (!trace) return null;
     trace.ended_at = this._now();
@@ -109,7 +109,7 @@ class Tracer {
     try {
       this._ensureDir();
       const line = JSON.stringify(trace);
-      fs.appendFileSync(TRACE_LOG, line + '\n');
+      fs.appendFileSync(TRACE_LOG, line + "\n");
     } catch (err) {
       console.error(`[tracer] Persist failed: ${err.message}`);
     }
@@ -124,7 +124,7 @@ class Tracer {
         timestamp: trace.started_at,
         tags: [trace.service, trace.status],
         metadata: trace.attributes,
-        spans: trace.spans.map(s => ({
+        spans: trace.spans.map((s) => ({
           spanId: s.span_id,
           parentSpanId: s.parent_span_id,
           name: s.name,
@@ -133,18 +133,20 @@ class Tracer {
           duration: s.duration_ms,
           status: s.status,
           metadata: s.attributes,
-          events: s.events
-        }))
+          events: s.events,
+        })),
       };
-      const auth = Buffer.from(`${LANGEFUSE_PK}:${LANGEFUSE_SK}`).toString('base64');
+      const auth = Buffer.from(`${LANGEFUSE_PK}:${LANGEFUSE_SK}`).toString(
+        "base64",
+      );
       const res = await fetch(`${LANGEFUSE_URL}/api/public/traces`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${auth}`
+          "Content-Type": "application/json",
+          Authorization: `Basic ${auth}`,
         },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(5000),
       });
       if (!res.ok) {
         console.error(`[tracer] Langfuse push failed: ${res.status}`);
@@ -158,9 +160,9 @@ class Tracer {
     try {
       this._ensureDir();
       if (!fs.existsSync(TRACE_LOG)) return [];
-      const raw = fs.readFileSync(TRACE_LOG, 'utf8').trim();
+      const raw = fs.readFileSync(TRACE_LOG, "utf8").trim();
       if (!raw) return [];
-      const lines = raw.split('\n').filter(Boolean);
+      const lines = raw.split("\n").filter(Boolean);
       const results = [];
       for (let i = lines.length - 1; i >= 0 && results.length < limit; i--) {
         try {
@@ -179,10 +181,11 @@ class Tracer {
   getStats() {
     try {
       this._ensureDir();
-      if (!fs.existsSync(TRACE_LOG)) return { total_traces: 0, total_spans: 0, by_status: {} };
-      const raw = fs.readFileSync(TRACE_LOG, 'utf8').trim();
+      if (!fs.existsSync(TRACE_LOG))
+        return { total_traces: 0, total_spans: 0, by_status: {} };
+      const raw = fs.readFileSync(TRACE_LOG, "utf8").trim();
       if (!raw) return { total_traces: 0, total_spans: 0, by_status: {} };
-      const lines = raw.split('\n').filter(Boolean);
+      const lines = raw.split("\n").filter(Boolean);
       const byStatus = {};
       let totalSpans = 0;
       for (const line of lines) {
@@ -192,7 +195,11 @@ class Tracer {
           totalSpans += (t.spans || []).length;
         } catch {}
       }
-      return { total_traces: lines.length, total_spans: totalSpans, by_status: byStatus };
+      return {
+        total_traces: lines.length,
+        total_spans: totalSpans,
+        by_status: byStatus,
+      };
     } catch {
       return { total_traces: 0, total_spans: 0, by_status: {} };
     }

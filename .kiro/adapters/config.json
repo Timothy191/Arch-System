@@ -4,7 +4,7 @@
   "providers": {
     "jsonl": {
       "type": "jsonl",
-      "path": "ltm/store/vectors.jsonl"
+      "path": ".memory/data/ltm/store/vectors.jsonl"
     },
     "qdrant": {
       "type": "qdrant",

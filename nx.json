@@ -15,9 +15,6 @@
         "env": "CI"
       },
       {
-        "env": "TURBO_TELEMETRY_DISABLED"
-      },
-      {
         "env": "OTEL_EXPORTER_OTLP_ENDPOINT"
       },
       {
@@ -42,7 +39,15 @@
         "env": "DISABLE_RATE_LIMIT"
       }
     ],
-    "default": ["{projectRoot}/**/*", "sharedGlobals"]
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.test.[jt]s?(x)",
+      "!{projectRoot}/**/*.spec.[jt]s?(x)",
+      "!{projectRoot}/**/__tests__/**/*",
+      "!{projectRoot}/**/*.stories.[jt]s?(x)",
+      "!{projectRoot}/**/*.md"
+    ]
   },
   "targetDefaults": {
     "codegen": {
@@ -66,16 +71,8 @@
       "cache": true
     },
     "build": {
-      "dependsOn": ["^build", "^codegen"],
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/!**/*.test.ts",
-        "{projectRoot}/!**/*.test.tsx",
-        "{projectRoot}/!**/*.spec.ts",
-        "{projectRoot}/!**/*.spec.tsx",
-        "{projectRoot}/!**/__tests__/**",
-        "{projectRoot}/!**/*.stories.tsx"
-      ],
+      "dependsOn": ["^build", "^codegen", "sync-assets"],
+      "inputs": ["production", "^production"],
       "outputs": [
         "{projectRoot}/.next/**",
         "!{projectRoot}/.next/cache/**",
@@ -89,27 +86,17 @@
     },
     "type-check": {
       "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/**/tsconfig.json",
-        "{projectRoot}/!**/*.test.ts",
-        "{projectRoot}/!**/*.test.tsx",
-        "{projectRoot}/!**/*.md",
-        "{projectRoot}/!**/*.stories.*"
+        "production",
+        "{projectRoot}/**/tsconfig.json"
       ],
       "outputs": ["{projectRoot}/**/*.tsbuildinfo"],
       "cache": true
     },
     "lint": {
       "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/**/tsconfig.json",
+        "default",
         "{projectRoot}/.eslintrc.*",
-        "{projectRoot}/!pnpm-lock.yaml",
-        "{projectRoot}/!**/*.test.ts",
-        "{projectRoot}/!**/*.test.tsx",
-        "{projectRoot}/!**/*.md",
-        "{projectRoot}/!**/*.stories.*",
-        "{projectRoot}/!**/__fixtures__/**"
+        "!{projectRoot}/pnpm-lock.yaml"
       ],
       "outputs": ["{projectRoot}/node_modules/.cache/.eslintcache"],
       "cache": true
@@ -119,18 +106,31 @@
     },
     "test": {
       "inputs": [
-        "{projectRoot}/**/*",
+        "default",
         "{projectRoot}/jest.config.*",
         "{projectRoot}/vitest.config.*",
-        "{projectRoot}/playwright.config.*",
-        "{projectRoot}/!**/*.md",
-        "{projectRoot}/!**/*.stories.*"
+        "{projectRoot}/playwright.config.*"
       ],
       "outputs": ["{projectRoot}/coverage/**/*"],
       "cache": true
     },
     "clean": {
       "cache": false
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-remotecache-s3",
+      "options": {
+        "bucket": "{env.NXCACHE_S3_BUCKET}",
+        "accessKeyId": "{env.NXCACHE_S3_ACCESS_KEY_ID}",
+        "secretAccessKey": "{env.NXCACHE_S3_SECRET_ACCESS_KEY}",
+        "endpoint": "{env.NXCACHE_S3_ENDPOINT}",
+        "region": "{env.NXCACHE_S3_REGION}",
+        "forcePathStyle": true,
+        "read": true,
+        "write": true
+      }
     }
   },
   "defaultBase": "master",

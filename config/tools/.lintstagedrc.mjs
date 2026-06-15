@@ -11,6 +11,8 @@ const PRETTIER_GLOBS = ["*.json", "*.md", "*.css", "*.mjs", "*.yaml", "*.yml"];
 
 const ESLINT_GLOBS = ["*.js", "*.ts", "*.tsx"];
 
+const PACKAGE_JSON_GLOB = "package.json";
+
 function matchesAny(filename, patterns) {
   return patterns.some((p) => filename.endsWith(p.slice(1)));
 }
@@ -24,6 +26,20 @@ function chunk(arr, size) {
 }
 
 export default {
+  // package.json → syncpack fix then prettier
+  [PACKAGE_JSON_GLOB]: (files) => {
+    const filtered = files.filter((f) => f.endsWith(PACKAGE_JSON_GLOB));
+    if (filtered.length === 0) return [];
+    const commands = [];
+    // Run syncpack fix-mismatches for all package.json files at once
+    commands.push("pnpm syncpack fix-mismatches --config config/tools/.syncpackrc.js");
+    // Then prettier each file
+    for (const file of filtered) {
+      commands.push(`prettier --write ${file}`);
+    }
+    return commands;
+  },
+
   // JS/TS → eslint then prettier
   "*.{js,ts,tsx}": (files) => {
     const filtered = files.filter((f) => matchesAny(f, ESLINT_GLOBS));
@@ -37,9 +53,9 @@ export default {
     return commands;
   },
 
-  // JSON / MD / CSS / YAML → prettier only
+  // JSON / MD / CSS / YAML → prettier only (excluding package.json which has syncpack)
   "*.{json,md,css,mjs,yaml,yml}": (files) => {
-    const filtered = files.filter((f) => matchesAny(f, PRETTIER_GLOBS));
+    const filtered = files.filter((f) => matchesAny(f, PRETTIER_GLOBS) && !f.endsWith("package.json"));
     if (filtered.length === 0) return [];
     const commands = [];
     for (const batch of chunk(filtered, 30)) {

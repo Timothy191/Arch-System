@@ -11,6 +11,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Check the result of the last tool call. If it returned an error containing \"rate limit\", \"too many requests\", \"429\", or \"timeout\", and this specific tool call has been retried fewer than 3 times, apply exponential backoff (wait 5s on retry 1, 15s on retry 2, 30s on retry 3) then retry the exact same tool call with the same parameters. If available, before retrying run 'python3 ltm/bin/ltm.py capture-turn' to save progress so nothing is lost if the session fails. Track retries by incrementing a counter per tool call. If it has already been retried 3 times, stop retrying and report the error to the user. If the tool call succeeded, do nothing."
+    "prompt": "Check the result of the last tool call. If it returned an error containing \"rate limit\", \"too many requests\", \"429\", or \"timeout\", and this specific tool call has been retried fewer than 3 times, apply exponential backoff (wait 5s on retry 1, 15s on retry 2, 30s on retry 3) then retry the exact same tool call with the same parameters. If available, before retrying run 'python3 .memory/data/ltm/bin/ltm.py capture-turn' to save progress so nothing is lost if the session fails. Track retries by incrementing a counter per tool call. If it has already been retried 3 times, stop retrying and report the error to the user. If the tool call succeeded, do nothing."
   }
 }

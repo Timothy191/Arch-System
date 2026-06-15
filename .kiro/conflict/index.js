@@ -1,33 +1,40 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+const crypto = require("crypto");
 
-const PROJ = '/home/timothy/Project/Arch-Mk2';
-const CONFLICT_DIR = path.join(PROJ, '.kiro', 'conflict');
+const PROJ = "/home/timothy/Project/Arch-Mk2";
+const CONFLICT_DIR = path.join(PROJ, ".kiro", "conflict");
 
 function hash(content) {
-  return crypto.createHash('sha256').update(content).digest('hex').slice(0, 12);
+  return crypto.createHash("sha256").update(content).digest("hex").slice(0, 12);
 }
 
 function loadState() {
-  const file = path.join(CONFLICT_DIR, 'conflicts.json');
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return { conflicts: [], resolutions: [] }; }
+  const file = path.join(CONFLICT_DIR, "conflicts.json");
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return { conflicts: [], resolutions: [] };
+  }
 }
 
 function saveState(state) {
   try {
-    if (!fs.existsSync(CONFLICT_DIR)) fs.mkdirSync(CONFLICT_DIR, { recursive: true });
-    fs.writeFileSync(path.join(CONFLICT_DIR, 'conflicts.json'), JSON.stringify(state, null, 2));
+    if (!fs.existsSync(CONFLICT_DIR))
+      fs.mkdirSync(CONFLICT_DIR, { recursive: true });
+    fs.writeFileSync(
+      path.join(CONFLICT_DIR, "conflicts.json"),
+      JSON.stringify(state, null, 2),
+    );
   } catch {}
 }
 
 function detectConflicts(changes) {
   const fileChanges = {};
   for (const change of changes) {
-    const file = change.file || change.file_path || '';
+    const file = change.file || change.file_path || "";
     if (!fileChanges[file]) fileChanges[file] = [];
     fileChanges[file].push(change);
   }
@@ -35,7 +42,7 @@ function detectConflicts(changes) {
   const conflicts = [];
   for (const [file, edits] of Object.entries(fileChanges)) {
     if (edits.length > 1) {
-      const overlapping = edits.filter(e => {
+      const overlapping = edits.filter((e) => {
         const range = e.range || e.lines || null;
         if (!range) return true;
         return true;
@@ -46,7 +53,7 @@ function detectConflicts(changes) {
           id: `conflict_${Date.now()}_${hash(file)}`,
           changes: overlapping,
           detected_at: new Date().toISOString(),
-          status: 'pending'
+          status: "pending",
         });
       }
     }
@@ -55,13 +62,15 @@ function detectConflicts(changes) {
 }
 
 function threeWayMerge(original, changeA, changeB) {
-  const linesA = changeA.split('\n');
-  const linesB = changeB.split('\n');
-  const originalLines = original.split('\n');
+  const linesA = changeA.split("\n");
+  const linesB = changeB.split("\n");
+  const originalLines = original.split("\n");
 
   let result = [];
   let conflicts = [];
-  let i = 0, j = 0, k = 0;
+  let i = 0,
+    j = 0,
+    k = 0;
 
   while (i < originalLines.length || j < linesA.length || k < linesB.length) {
     const origLine = i < originalLines.length ? originalLines[i] : null;
@@ -94,13 +103,13 @@ function threeWayMerge(original, changeA, changeB) {
     } else {
       conflicts.push({
         position: result.length,
-        original: origLine || '',
-        changeA: lineA || '',
-        changeB: lineB || ''
+        original: origLine || "",
+        changeA: lineA || "",
+        changeB: lineB || "",
       });
       result.push(`<<<<<<< change-a`);
       if (lineA !== null) result.push(lineA);
-      result.push('=======');
+      result.push("=======");
       if (lineB !== null) result.push(lineB);
       result.push(`>>>>>>> change-b`);
       if (origLine !== null) i++;
@@ -109,7 +118,7 @@ function threeWayMerge(original, changeA, changeB) {
     }
   }
 
-  return { merged: result.join('\n'), conflicts };
+  return { merged: result.join("\n"), conflicts };
 }
 
 async function arbitrate(conflict, context = {}) {
@@ -117,46 +126,58 @@ async function arbitrate(conflict, context = {}) {
     conflict_id: conflict.id,
     file: conflict.file,
     resolved_at: new Date().toISOString(),
-    strategy: 'auto_merge',
-    status: 'resolved',
+    strategy: "auto_merge",
+    status: "resolved",
     confidence: 1.0,
-    merged_content: null
+    merged_content: null,
   };
 
-  let original = '';
+  let original = "";
   try {
     const fullPath = path.isAbsolute(conflict.file)
       ? conflict.file
       : path.join(PROJ, conflict.file);
     if (fs.existsSync(fullPath)) {
-      original = fs.readFileSync(fullPath, 'utf8');
+      original = fs.readFileSync(fullPath, "utf8");
     }
   } catch {}
 
-  const changeA = conflict.changes[0]?.content || '';
-  const changeB = conflict.changes[1]?.content || '';
+  const changeA = conflict.changes[0]?.content || "";
+  const changeB = conflict.changes[1]?.content || "";
 
   if (original && changeA && changeB) {
     const merge = threeWayMerge(original, changeA, changeB);
     resolution.merged_content = merge.merged;
     resolution.confidence = merge.conflicts.length === 0 ? 1.0 : 0.5;
     resolution.conflict_count = merge.conflicts.length;
-    resolution.strategy = merge.conflicts.length === 0 ? 'auto_merge' : 'marked_conflicts';
+    resolution.strategy =
+      merge.conflicts.length === 0 ? "auto_merge" : "marked_conflicts";
 
     if (resolution.confidence < 0.7) {
-      resolution.status = 'needs_review';
-      resolution.review_branch = `conflict/${conflict.file.replace(/[^a-zA-Z0-9]/g, '-')}-${hash(original)}`;
+      resolution.status = "needs_review";
+      resolution.review_branch = `conflict/${conflict.file.replace(/[^a-zA-Z0-9]/g, "-")}-${hash(original)}`;
       try {
-        execSync(`cd "${PROJ}" && git checkout -b "${resolution.review_branch}" 2>/dev/null`, { stdio: 'ignore' });
-        fs.writeFileSync(path.join(PROJ, conflict.file), resolution.merged_content);
-        execSync(`cd "${PROJ}" && git add "${conflict.file}" && git commit -m "conflict: ${conflict.file} needs review" 2>/dev/null`, { stdio: 'ignore' });
-        execSync(`cd "${PROJ}" && git checkout - 2>/dev/null`, { stdio: 'ignore' });
+        execSync(
+          `cd "${PROJ}" && git checkout -b "${resolution.review_branch}" 2>/dev/null`,
+          { stdio: "ignore" },
+        );
+        fs.writeFileSync(
+          path.join(PROJ, conflict.file),
+          resolution.merged_content,
+        );
+        execSync(
+          `cd "${PROJ}" && git add "${conflict.file}" && git commit -m "conflict: ${conflict.file} needs review" 2>/dev/null`,
+          { stdio: "ignore" },
+        );
+        execSync(`cd "${PROJ}" && git checkout - 2>/dev/null`, {
+          stdio: "ignore",
+        });
       } catch {}
     }
   } else {
-    resolution.strategy = 'first_wins';
+    resolution.strategy = "first_wins";
     resolution.merged_content = changeA || changeB;
-    resolution.status = 'resolved';
+    resolution.status = "resolved";
   }
 
   const state = loadState();
@@ -168,18 +189,22 @@ async function arbitrate(conflict, context = {}) {
 }
 
 async function main() {
-  const cmd = process.argv[2] || 'detect';
+  const cmd = process.argv[2] || "detect";
 
   switch (cmd) {
-    case 'detect': {
-      let raw = '';
-      process.stdin.setEncoding('utf8');
-      process.stdin.on('data', d => { raw += d; });
-      process.stdin.on('end', async () => {
+    case "detect": {
+      let raw = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (d) => {
+        raw += d;
+      });
+      process.stdin.on("end", async () => {
         try {
           const input = JSON.parse(raw || '{"changes":[]}');
           const conflicts = detectConflicts(input.changes || []);
-          console.log(JSON.stringify({ conflicts, count: conflicts.length }, null, 2));
+          console.log(
+            JSON.stringify({ conflicts, count: conflicts.length }, null, 2),
+          );
         } catch (err) {
           console.error(JSON.stringify({ error: err.message }));
           process.exit(1);
@@ -188,14 +213,19 @@ async function main() {
       break;
     }
 
-    case 'arbitrate': {
-      let raw = '';
-      process.stdin.setEncoding('utf8');
-      process.stdin.on('data', d => { raw += d; });
-      process.stdin.on('end', async () => {
+    case "arbitrate": {
+      let raw = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", (d) => {
+        raw += d;
+      });
+      process.stdin.on("end", async () => {
         try {
-          const input = JSON.parse(raw || '{}');
-          const resolution = await arbitrate(input.conflict || input, input.context || {});
+          const input = JSON.parse(raw || "{}");
+          const resolution = await arbitrate(
+            input.conflict || input,
+            input.context || {},
+          );
           console.log(JSON.stringify(resolution, null, 2));
         } catch (err) {
           console.error(JSON.stringify({ error: err.message }));
@@ -205,31 +235,37 @@ async function main() {
       break;
     }
 
-    case 'status': {
+    case "status": {
       const state = loadState();
-      const pending = state.conflicts.filter(c => c.status === 'pending');
+      const pending = state.conflicts.filter((c) => c.status === "pending");
       const resolved = state.resolutions;
-      console.log(JSON.stringify({
-        pending_conflicts: pending.length,
-        total_resolved: resolved.length,
-        recent: resolved.slice(-5).map(r => ({
-          file: r.file,
-          strategy: r.strategy,
-          status: r.status,
-          confidence: r.confidence,
-          resolved_at: r.resolved_at
-        }))
-      }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            pending_conflicts: pending.length,
+            total_resolved: resolved.length,
+            recent: resolved.slice(-5).map((r) => ({
+              file: r.file,
+              strategy: r.strategy,
+              status: r.status,
+              confidence: r.confidence,
+              resolved_at: r.resolved_at,
+            })),
+          },
+          null,
+          2,
+        ),
+      );
       break;
     }
 
     default:
-      console.log('Commands: detect | arbitrate | status');
+      console.log("Commands: detect | arbitrate | status");
   }
 }
 
 if (require.main === module) {
-  main().catch(err => {
+  main().catch((err) => {
     console.error(JSON.stringify({ error: err.message }));
     process.exit(1);
   });

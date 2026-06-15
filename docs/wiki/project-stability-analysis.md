@@ -212,7 +212,7 @@
 
 | Location       | Content            | Status    |
 | -------------- | ------------------ | --------- |
-| `docs/wiki/`        | Architecture, ADRs | ✅ Good   |
+| `docs/wiki/`   | Architecture, ADRs | ✅ Good   |
 | `DESIGN.md`    | Design system      | ✅ Good   |
 | `AGENTS.md`    | Dev quickstart     | ✅ Good   |
 | `README.md`    | Project overview   | ✅ Good   |

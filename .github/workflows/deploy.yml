@@ -196,7 +196,7 @@ jobs:
             --build-arg SENTRY_PROJECT="${{ vars.SENTRY_PROJECT }}" \
             --build-arg SENTRY_AUTH_TOKEN="${{ secrets.SENTRY_AUTH_TOKEN }}" \
             -t ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }} \
-            -f apps/portal/Dockerfile .
+            -f apps/portal/docker/Dockerfile .
           docker push ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }}
           docker tag ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/arch-systems:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/arch-systems:latest

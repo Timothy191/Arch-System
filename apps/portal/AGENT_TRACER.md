@@ -1,5 +1,23 @@
 # Portal Agent Tracer
 
+## 2026-06-15: S3 Remote Cache Integration
+
+### Purpose
+
+Enable self-hosted shared caching via `nx-remotecache-s3` targeting MinIO/S3-compatible storage.
+
+### Changes Made
+
+1. **Nx Task Runner Migration**:
+   - Swapped the default Nx runner for `nx-remotecache-s3` under `tasksRunnerOptions.default` in [nx.json](file:///home/timothy/Documents/Arch-System/nx.json).
+   - Configured S3 adapter properties to map to `NXCACHE_S3_*` environment variables (`bucket`, `accessKeyId`, `secretAccessKey`, `endpoint`, `region`, `forcePathStyle`, `read`, `write`).
+2. **Dependency Management**:
+   - Added `nx-remotecache-s3` to root `devDependencies` in [package.json](file:///home/timothy/Documents/Arch-System/package.json) and formatted `package.json` files with `syncpack format`.
+
+### What the Next Agent Should Know
+
+- Local or CI environments need S3/MinIO credentials mapped to `NXCACHE_S3_*` environment variables to leverage the remote cache.
+
 ## 2026-06-15: Nx Caching & Task Graph Optimizations
 
 ### Purpose

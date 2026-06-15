@@ -24,7 +24,15 @@ const css = readFileSync(CSS_SRC, "utf8");
 /** Extract all --token: value; pairs from the :root block */
 function extractTokens(cssText) {
   const tokens = {
-    color: { bg: {}, border: {}, text: {}, accent: {}, mac: {}, glass: {}, vibrancy: {} },
+    color: {
+      bg: {},
+      border: {},
+      text: {},
+      accent: {},
+      mac: {},
+      glass: {},
+      vibrancy: {},
+    },
     shadow: {},
     radius: {},
     wave: {},
@@ -42,34 +50,54 @@ function extractTokens(cssText) {
 
     // Categorise by name prefix
     if (name.startsWith("--bg-")) {
-      const key = name.replace("--bg-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--bg-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.bg[key] = `var(${name})`;
     } else if (name.startsWith("--border-")) {
-      const key = name.replace("--border-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--border-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.border[key] = `var(${name})`;
     } else if (name.startsWith("--text-")) {
-      const key = name.replace("--text-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--text-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.text[key] = `var(${name})`;
     } else if (name.startsWith("--accent-")) {
-      const key = name.replace("--accent-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--accent-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.accent[key] = `var(${name})`;
     } else if (name.startsWith("--mac-")) {
-      const key = name.replace("--mac-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--mac-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.mac[key] = `var(${name})`;
     } else if (name.startsWith("--glass-")) {
-      const key = name.replace("--glass-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--glass-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.glass[key] = `var(${name})`;
     } else if (name === "--vibrancy-surface" || name === "--vibrancy-border") {
-      const key = name.replace("--vibrancy-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--vibrancy-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.vibrancy[key] = `var(${name})`;
     } else if (name.startsWith("--shadow-")) {
-      const key = name.replace("--shadow-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--shadow-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.shadow[key] = `var(${name})`;
     } else if (name.startsWith("--radius-")) {
-      const key = name.replace("--radius-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--radius-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.radius[key] = `var(${name})`;
     } else if (name.startsWith("--wave-")) {
-      const key = name.replace("--wave-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      const key = name
+        .replace("--wave-", "")
+        .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.wave[key] = value; // wave tokens are numbers, keep raw value
     }
   }

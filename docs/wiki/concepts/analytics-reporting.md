@@ -125,11 +125,13 @@ Use historical machine breakdown data to predict failure probability.
   ```
 
 - [ ] Expose predictions via Python FastAPI microservice or Edge Function:
+
   ```
   POST /api/ml/maintenance-risk
   Body: { machine_id, hours_since_service, recent_fuel_avg }
   Response: { risk_score: 0.73, recommendation: "Schedule service within 48h" }
   ```
+
 - [ ] Display risk badges on machine list in Engineering department:
   - 🟢 Low risk (< 0.3)
   - 🟡 Medium risk (0.3–0.7)

@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const state = $json;\nif (state.files_changed > 20) {\n  state.warnings.push({ severity: 'warn', pattern: 'large_change_set', files: state.files_changed, tip: 'Break into smaller batches of 5-10 files' });\n}\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store/events.jsonl';\nconst fs = require('fs');\nconst path = require('path');\nif (fs.existsSync(ltmPath)) {\n  const recentEvents = fs.readFileSync(ltmPath, 'utf8').split('\\n').filter(Boolean).slice(-10);\n  state.recent_sessions = recentEvents.map(e => { try { return JSON.parse(e); } catch (x) { return null; } }).filter(Boolean);\n  // Check if similar dangerous action was attempted recently\n  for (const event of state.recent_sessions) {\n    if (event.type === 'guardrail_block' && event.action === state.action) {\n      state.warnings.push({ severity: 'warn', pattern: 'repeat_violation', previous: event.ts, tip: 'This action was previously blocked. Consider an alternative approach.' });\n    }\n  }\n}\nreturn state;"
+        "jsCode": "const state = $json;\nif (state.files_changed > 20) {\n  state.warnings.push({ severity: 'warn', pattern: 'large_change_set', files: state.files_changed, tip: 'Break into smaller batches of 5-10 files' });\n}\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/.memory/data/ltm/store/events.jsonl';\nconst fs = require('fs');\nconst path = require('path');\nif (fs.existsSync(ltmPath)) {\n  const recentEvents = fs.readFileSync(ltmPath, 'utf8').split('\\n').filter(Boolean).slice(-10);\n  state.recent_sessions = recentEvents.map(e => { try { return JSON.parse(e); } catch (x) { return null; } }).filter(Boolean);\n  // Check if similar dangerous action was attempted recently\n  for (const event of state.recent_sessions) {\n    if (event.type === 'guardrail_block' && event.action === state.action) {\n      state.warnings.push({ severity: 'warn', pattern: 'repeat_violation', previous: event.ts, tip: 'This action was previously blocked. Consider an alternative approach.' });\n    }\n  }\n}\nreturn state;"
       },
       "name": "Check Context Limits",
       "type": "n8n-nodes-base.code",
@@ -59,7 +59,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const state = $json;\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst event = {\n  id: `guard_${Date.now()}`,\n  ts: new Date().toISOString(),\n  type: 'guardrail_block',\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings\n};\nfs.appendFileSync(path.join(ltmPath, 'events.jsonl'), JSON.stringify(event) + '\\n');\nreturn {\n  allowed: false,\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings,\n  message: `Action blocked by ${state.violations.length} guardrail violation(s)`,\n  suggestion: 'Review the violations above and adjust your approach.'\n};"
+        "jsCode": "const state = $json;\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/.memory/data/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst event = {\n  id: `guard_${Date.now()}`,\n  ts: new Date().toISOString(),\n  type: 'guardrail_block',\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings\n};\nfs.appendFileSync(path.join(ltmPath, 'events.jsonl'), JSON.stringify(event) + '\\n');\nreturn {\n  allowed: false,\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings,\n  message: `Action blocked by ${state.violations.length} guardrail violation(s)`,\n  suggestion: 'Review the violations above and adjust your approach.'\n};"
       },
       "name": "Block Action",
       "type": "n8n-nodes-base.code",
@@ -78,7 +78,9 @@
   ],
   "connections": {
     "Webhook Trigger": {
-      "main": [[{ "node": "Initialize Guardrails", "type": "main", "index": 0 }]]
+      "main": [
+        [{ "node": "Initialize Guardrails", "type": "main", "index": 0 }]
+      ]
     },
     "Initialize Guardrails": {
       "main": [[{ "node": "Check Safety Rules", "type": "main", "index": 0 }]]

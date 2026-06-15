@@ -83,6 +83,6 @@ Execute the plan step by step.
 ## Rate Limit Awareness
 
 - Batch work into chunks of 3-5 file edits to avoid excessive API calls per turn.
-- After each milestone (every 3-5 edits), save a checkpoint: `python3 ltm/bin/ltm.py checkpoint --summary "..."`.
+- After each milestone (every 3-5 edits), save a checkpoint: `python3 .memory/data/ltm/bin/ltm.py checkpoint --summary "..."`.
 - If hitting rate limits, reduce batch size and wait between phases.
 - On resume after rate limit, pick up from the checkpoint — do not re-do completed work.

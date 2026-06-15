@@ -538,9 +538,9 @@ else
 
   # 2b. Optional Tools
   if [ "$START_TOOLS" = "true" ]; then
-    if [ -f "$REPO_ROOT/docker/docker-compose.tools.yml" ]; then
+    if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
       echo -e "  ${INFO} Starting Docker Tools..."
-      $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.tools.yml" up -d > /dev/null 2>&1
+      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d > /dev/null 2>&1
 
       local services=("plantcor-redis" "plantcor-n8n" "plantcor-flowise" "plantcor-langfuse-db" "plantcor-langfuse" "plantcor-qdrant")
       for service in "${services[@]}"; do
@@ -578,7 +578,7 @@ else
       check "Redis" "pass" "Docker container already running"
     else
       echo -e "  ${INFO} Starting Redis (Docker)..."
-      $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.redis.yml" up -d > /dev/null 2>&1
+      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.redis.yml" up -d > /dev/null 2>&1
       REDIS_HEALTHY=false
       for i in $(seq 1 15); do
         if docker inspect --format='{{.State.Health.Status}}' arch-redis 2>/dev/null | grep -q "healthy"; then

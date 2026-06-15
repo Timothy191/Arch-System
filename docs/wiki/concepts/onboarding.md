@@ -127,7 +127,7 @@ Choose one based on your interests:
 | Backend    | Add machine hours API | `apps/portal/lib/`               |
 | Full-stack | Add a department tab  | `apps/portal/app/(departments)/` |
 | DevOps     | Add a CI check        | `.github/workflows/`             |
-| Docs       | Improve wiki          | `docs/wiki/concepts/`                 |
+| Docs       | Improve wiki          | `docs/wiki/concepts/`            |
 
 ### Development Workflow
 

@@ -53,10 +53,16 @@ export const PrecisionInput = React.forwardRef<
     }
   };
 
+  const defaultId = React.useId();
+  const inputId = props.id || defaultId;
+
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+        <label
+          htmlFor={inputId}
+          className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider"
+        >
           {label}
         </label>
       )}
@@ -68,6 +74,7 @@ export const PrecisionInput = React.forwardRef<
           )}
         >
           <input
+            id={inputId}
             ref={(node) => {
               internalRef.current = node as HTMLInputElement;
               if (typeof ref === "function") ref(node);

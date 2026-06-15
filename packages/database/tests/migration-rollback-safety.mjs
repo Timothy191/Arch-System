@@ -29,8 +29,6 @@ const MIGRATIONS_DIR = join(__dirname, "..", "migrations");
 
 const SEQUENTIAL_FILE_REGEX = /^(\d{3})_(.+)\.sql$/;
 
-
-
 // ── Results tracking ─────────────────────────────────────────────────────────
 
 const errors = [];
@@ -83,20 +81,28 @@ function checkFilenames(files) {
 
 const DROP_TABLE_RE = /^\s*DROP\s+TABLE\s+(IF EXISTS\s+)?([^\s;]+)/gim;
 const DROP_INDEX_RE = /^\s*DROP\s+INDEX\s+(IF EXISTS\s+)?([^\s;]+)/gim;
-const DROP_VIEW_RE = /^\s*DROP\s+(MATERIALIZED\s+)?VIEW\s+(IF EXISTS\s+)?([^\s;]+)/gim;
+const DROP_VIEW_RE =
+  /^\s*DROP\s+(MATERIALIZED\s+)?VIEW\s+(IF EXISTS\s+)?([^\s;]+)/gim;
 const DROP_TYPE_RE = /^\s*DROP\s+TYPE\s+(IF EXISTS\s+)?([^\s;]+)/gim;
-const DROP_COLUMN_NO_IF_RE = /^\s*ALTER\s+TABLE\s+[^\s;]+\s+DROP\s+COLUMN\s+(?!IF EXISTS)([^\s;]+)/gim;
+const DROP_COLUMN_NO_IF_RE =
+  /^\s*ALTER\s+TABLE\s+[^\s;]+\s+DROP\s+COLUMN\s+(?!IF EXISTS)([^\s;]+)/gim;
 
-const ADD_COLUMN_NO_IF_RE = /^\s*ALTER\s+TABLE\s+[^\s;]+\s+ADD\s+COLUMN\s+(?!IF NOT EXISTS)([^\s;]+\s+)/gim;
+const ADD_COLUMN_NO_IF_RE =
+  /^\s*ALTER\s+TABLE\s+[^\s;]+\s+ADD\s+COLUMN\s+(?!IF NOT EXISTS)([^\s;]+\s+)/gim;
 
 const CREATE_TABLE_IF_RE = /^\s*CREATE\s+TABLE\s+IF NOT EXISTS\s+[^\s;(]+/gim;
-const CREATE_TABLE_NO_IF_RE = /^\s*CREATE\s+TABLE\s+(?!IF NOT EXISTS)([^\s;(]+)/gim;
+const CREATE_TABLE_NO_IF_RE =
+  /^\s*CREATE\s+TABLE\s+(?!IF NOT EXISTS)([^\s;(]+)/gim;
 
-const CREATE_INDEX_IF_RE = /^\s*CREATE\s+(UNIQUE\s+)?INDEX\s+(CONCURRENTLY\s+)?IF NOT EXISTS\s+/gim;
-const CREATE_INDEX_NO_IF_RE = /^\s*CREATE\s+(UNIQUE\s+)?INDEX\s+(CONCURRENTLY\s+)?(?!IF NOT EXISTS)([^\s;(]+)/gim;
+const CREATE_INDEX_IF_RE =
+  /^\s*CREATE\s+(UNIQUE\s+)?INDEX\s+(CONCURRENTLY\s+)?IF NOT EXISTS\s+/gim;
+const CREATE_INDEX_NO_IF_RE =
+  /^\s*CREATE\s+(UNIQUE\s+)?INDEX\s+(CONCURRENTLY\s+)?(?!IF NOT EXISTS)([^\s;(]+)/gim;
 
-const UPDATE_WITHOUT_WHERE_RE = /^\s*UPDATE\s+[^\s;]+\s+SET\b(?![\s\S]*?\bWHERE\b)/gim;
-const DELETE_WITHOUT_WHERE_RE = /^\s*DELETE\s+FROM\s+[^\s;]+(?![\s\S]*?\bWHERE\b)/gim;
+const UPDATE_WITHOUT_WHERE_RE =
+  /^\s*UPDATE\s+[^\s;]+\s+SET\b(?![\s\S]*?\bWHERE\b)/gim;
+const DELETE_WITHOUT_WHERE_RE =
+  /^\s*DELETE\s+FROM\s+[^\s;]+(?![\s\S]*?\bWHERE\b)/gim;
 
 const ALTER_TYPE_RENAME_RE = /^\s*ALTER\s+TYPE\s+[^\s;]+\s+RENAME\s+TO\s+/gim;
 
@@ -159,7 +165,10 @@ function analyzeMigration(file, content) {
   // ── Check ADD COLUMN with IF NOT EXISTS ──
   const addColNoIf = [...sql.matchAll(ADD_COLUMN_NO_IF_RE)];
   for (const m of addColNoIf) {
-    warn(`ALTER TABLE ADD COLUMN without IF NOT EXISTS: "${m[0].trim()}"`, file);
+    warn(
+      `ALTER TABLE ADD COLUMN without IF NOT EXISTS: "${m[0].trim()}"`,
+      file,
+    );
   }
 
   // ── Check CREATE TABLE with IF NOT EXISTS ──
@@ -216,7 +225,9 @@ function main() {
   const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
   const total = files.length;
 
-  console.log(`\n🔍 Checking ${total} migration files for rollback safety...\n`);
+  console.log(
+    `\n🔍 Checking ${total} migration files for rollback safety...\n`,
+  );
 
   const matched = checkFilenames(files);
 

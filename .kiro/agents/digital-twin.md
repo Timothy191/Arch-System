@@ -229,7 +229,7 @@ Every tool call passes through the 7-layer safety gate (`.kiro/safety/index.js`)
 3. **Isolation** — dangerous command patterns blocked
 4. **Content Filter** — secret/PII scanning in tool inputs
 5. **Rate Limiter** — sliding window (60s) per-tool counters
-6. **Audit Log** — structured events written to `ltm/store/audit.jsonl`
+6. **Audit Log** — structured events written to `.memory/data/ltm/store/audit.jsonl`
 7. **User Control** — trusted operations bypass, persistent exceptions
 
 Policies: `default` (warn→block), `strict` (deny-by-default), `permissive` (auto-approve).
@@ -249,9 +249,9 @@ The loop state machine (`.kiro/loop/index.js`) tracks: `idle → analyze → pla
 
 The LTM now supports semantic search via TF-IDF vector similarity:
 
-- `python3 ltm/bin/vector.py index` — index all events and checkpoints
-- `python3 ltm/bin/vector.py search <query>` — find relevant memories by meaning
-- `python3 ltm/bin/vector.py status` — view index stats
+- `python3 .memory/data/ltm/bin/vector.py index` — index all events and checkpoints
+- `python3 .memory/data/ltm/bin/vector.py search <query>` — find relevant memories by meaning
+- `python3 .memory/data/ltm/bin/vector.py status` — view index stats
 - Uses sklearn TF-IDF by default; auto-detects sentence-transformers if installed
 - Upgrade: `pip install sentence-transformers` for deep semantic embeddings
 

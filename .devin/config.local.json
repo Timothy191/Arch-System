@@ -1,16 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Exec(git clone)",
-      "Exec(rm)",
-      "Exec(git status)",
-      "Exec(git)",
-      "Exec(cp)",
-      "Exec(rmdir)",
-      "Exec(pnpm)",
-      "Exec(npx eslint)",
-      "Exec(sed)",
-      "Exec(docker compose)"
+      "Exec(mkdir)",
+      "Exec(mv)",
+      "Exec(find packages)",
+      "Exec(rg)"
     ]
   }
 }

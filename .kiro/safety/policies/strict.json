@@ -20,15 +20,34 @@
   },
   "isolation": {
     "dangerous_commands": [
-      "rm", "sudo", "mkfs", "dd", "chmod", "chown",
-      "curl * | bash", "wget * | sh",
-      "> /dev/", "docker", "git push --force",
-      "npm publish", "pnpm publish"
+      "rm",
+      "sudo",
+      "mkfs",
+      "dd",
+      "chmod",
+      "chown",
+      "curl * | bash",
+      "wget * | sh",
+      "> /dev/",
+      "docker",
+      "git push --force",
+      "npm publish",
+      "pnpm publish"
     ],
     "allowed_shell_prefixes": [
-      "git status", "git diff", "git log", "ls", "cat", "echo",
-      "pnpm lint", "pnpm test", "pnpm build", "pnpm typecheck",
-      "node", "python3", "tsc --noEmit"
+      "git status",
+      "git diff",
+      "git log",
+      "ls",
+      "cat",
+      "echo",
+      "pnpm lint",
+      "pnpm test",
+      "pnpm build",
+      "pnpm typecheck",
+      "node",
+      "python3",
+      "tsc --noEmit"
     ],
     "max_output_bytes": 51200,
     "max_execution_seconds": 15
@@ -48,7 +67,7 @@
   },
   "audit": {
     "enabled": true,
-    "log_path": "ltm/store/audit.jsonl",
+    "log_path": ".memory/data/ltm/store/audit.jsonl",
     "log_all": true,
     "log_blocks": true,
     "log_warns": true

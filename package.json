@@ -1,63 +1,10 @@
 {
   "name": "arch-systems",
   "version": "1.5.1",
-  "private": true,
-  "type": "module",
-  "license": "MIT",
-  "scripts": {
-    "build": "bash scripts/sync-assets.sh && nx run-many -t build",
-    "dev": "bash scripts/sync-assets.sh && bash scripts/dev.sh",
-    "sync-assets": "bash scripts/sync-assets.sh",
-    "ensure-reachability": "python3 scripts/ensure_reachability.py",
-    "lint": "nx run-many -t lint",
-    "lint:root": "eslint . --max-warnings 0 --ignore-pattern apps --ignore-pattern packages --no-error-on-unmatched-pattern",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
-    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm format:check && pnpm deps:lint && pnpm knip",
-    "ui": "pnpm --filter @repo/ui ui",
-    "test:e2e": "playwright test",
-    "policy:gen": "node tools/policy-compiler.cjs",
-    "policy:check": "node tools/policy-compiler.cjs --check",
-    "audit:rls": "node tools/audit-rls.cjs",
-    "test": "nx run-many -t test",
-    "type-check": "nx run-many -t type-check",
-    "deps:check": "syncpack list-mismatches",
-    "deps:fix": "syncpack fix-mismatches",
-    "deps:lint": "syncpack lint",
-    "knip": "knip --no-config-hints",
-    "knip:fix": "knip --fix --no-config-hints",
-    "analyze": "ANALYZE=true pnpm --filter portal build",
-    "md:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
-    "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
-    "commitlint": "commitlint --edit",
-    "deploy": "bash scripts/deploy.sh",
-    "deploy:local": "bash scripts/deploy.sh local",
-    "deploy:staging": "bash scripts/deploy.sh staging",
-    "deploy:production": "bash scripts/deploy.sh production",
-    "deploy:rollback": "bash scripts/deploy.sh production --rollback",
-    "fresh-start": "bash scripts/deploy.sh local --clean",
-    "deploy:dev": "bash scripts/deploy-dev.sh",
-    "monitor": "bash scripts/monitor-hud.sh",
-    "monitor:grafana": "docker compose -f docker/docker-compose.monitoring.yml up -d",
-    "monitor:grafana-stop": "docker compose -f docker/docker-compose.monitoring.yml down",
-    "shutdown": "bash scripts/shutdown.sh",
-    "db:docs": "bash scripts/generate-db-docs.sh",
-    "prepare": "husky"
-  },
-  "syncpack": {
-    "config": "config/.syncpackrc.js"
-  },
   "commitlint": {
-    "extends": ["./config/commitlint.config.mjs"]
-  },
-  "knip": {
-    "config": "config/knip.json"
-  },
-  "markdownlint": {
-    "config": "config/.markdownlint.json"
-  },
-  "lint-staged": {
-    "config": "config/.lintstagedrc.mjs"
+    "extends": [
+      "./config/commitlint.config.mjs"
+    ]
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
@@ -76,6 +23,7 @@
     "lint-staged": "^17.0.7",
     "markdownlint-cli": "^0.41.0",
     "nx": "22.7.5",
+    "nx-remotecache-s3": "^1.2.2",
     "preflight": "0.2.0",
     "prettier": "catalog:",
     "secretlint": "^13.0.2",
@@ -83,13 +31,18 @@
     "syncpack": "^13.0.4",
     "typescript-eslint": "^8.60.1"
   },
-  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=22"
   },
-  "volta": {
-    "node": "24.15.0",
-    "pnpm": "9.15.9"
+  "knip": {
+    "config": "config/knip.json"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "config": "config/.lintstagedrc.mjs"
+  },
+  "markdownlint": {
+    "config": "config/.markdownlint.json"
   },
   "overrides": {
     "handlebars": ">=4.7.9",
@@ -106,5 +59,55 @@
     "@babel/runtime": ">=7.26.10",
     "js-yaml@^3.0.0": ">=3.14.2",
     "js-yaml@^4.0.0": ">=4.1.1"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "private": true,
+  "scripts": {
+    "analyze": "ANALYZE=true pnpm --filter portal build",
+    "audit:rls": "node tools/audit-rls.cjs",
+    "build": "bash scripts/sync-assets.sh && nx run-many -t build",
+    "commitlint": "commitlint --edit",
+    "db:docs": "bash scripts/generate-db-docs.sh",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:dev": "bash scripts/deploy-dev.sh",
+    "deploy:local": "bash scripts/deploy.sh local",
+    "deploy:production": "bash scripts/deploy.sh production",
+    "deploy:rollback": "bash scripts/deploy.sh production --rollback",
+    "deploy:staging": "bash scripts/deploy.sh staging",
+    "deps:check": "syncpack list-mismatches",
+    "deps:fix": "syncpack fix-mismatches",
+    "deps:lint": "syncpack lint",
+    "dev": "bash scripts/sync-assets.sh && bash scripts/dev.sh",
+    "ensure-reachability": "python3 scripts/ensure_reachability.py",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "fresh-start": "bash scripts/deploy.sh local --clean",
+    "knip": "knip --no-config-hints",
+    "knip:fix": "knip --fix --no-config-hints",
+    "lint": "nx run-many -t lint",
+    "lint:root": "eslint . --max-warnings 0 --ignore-pattern apps --ignore-pattern packages --no-error-on-unmatched-pattern",
+    "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
+    "md:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
+    "monitor": "bash scripts/monitor-hud.sh",
+    "monitor:grafana": "docker compose -f docker/docker-compose.monitoring.yml up -d",
+    "monitor:grafana-stop": "docker compose -f docker/docker-compose.monitoring.yml down",
+    "policy:check": "node tools/policy-compiler.cjs --check",
+    "policy:gen": "node tools/policy-compiler.cjs",
+    "prepare": "husky",
+    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm format:check && pnpm deps:lint && pnpm knip",
+    "shutdown": "bash scripts/shutdown.sh",
+    "sync-assets": "bash scripts/sync-assets.sh",
+    "test": "nx run-many -t test",
+    "test:e2e": "playwright test",
+    "type-check": "nx run-many -t type-check",
+    "ui": "pnpm --filter @repo/ui ui"
+  },
+  "syncpack": {
+    "config": "config/.syncpackrc.js"
+  },
+  "type": "module",
+  "volta": {
+    "node": "24.15.0",
+    "pnpm": "9.15.9"
   }
 }

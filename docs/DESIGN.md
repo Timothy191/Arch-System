@@ -7,7 +7,7 @@ This document serves as the single source of truth for the visual style, design 
 - **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
 - **[PRODUCT.md](PRODUCT.md)** — Product strategy, user personas, and design direction
 - **[CLAUDE.md](CLAUDE.md)** — Technical implementation guide
-- **[LIQUID_GLASS_CHECKLIST.md](LIQUID_GLASS_CHECKLIST.md)** — UI implementation checklist
+- **[LIQUID_GLASS_CHECKLIST.md](archive/LIQUID_GLASS_CHECKLIST.md)** — UI implementation checklist
 - **[AGENTS.md](AGENTS.md)** — Development workflow and quality gates
 
 ---
@@ -338,9 +338,11 @@ Animations must feel light, natural, and immediate. Never block user interaction
 
 - **Animate Transforms and Opacity Only**: Never animate layout-forcing parameters (`width`, `height`, `margin`, `padding`, `top`, `left`).
 - **Tactile Click Feedback**: All interactive buttons, cards, and list actions must use:
+
   ```css
   active: scale-[0.97] transition-transform duration-150 ease-out-expo;
   ```
+
 - **Motion reduction**: Respect `prefers-reduced-motion`. Disable non-essential animations.
 
 ---

@@ -193,7 +193,7 @@ Required variables:
 2. **Systemd Service** (optional but recommended):
 
 ```bash
-sudo cp scripts/arch-systems.service /etc/systemd/system/
+sudo cp scripts/arch-systems.service /etc/infra/systemd/system/
 sudo systemctl enable arch-systems
 ```
 
@@ -253,7 +253,7 @@ pnpm supabase db push           # Apply to remote
 ### Build Production Image
 
 ```bash
-docker build -t arch-systems:latest -f apps/portal/Dockerfile .
+docker build -t arch-systems:latest -f apps/portal/docker/Dockerfile .
 ```
 
 ### Docker Compose (Production)

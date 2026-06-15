@@ -1,3 +1,0 @@
-# Add patterns to exclude from memory indexing
-# Uses same syntax as .gitignore
-.audit/

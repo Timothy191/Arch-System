@@ -116,7 +116,7 @@ CMD ["pnpm", "--filter", "portal", "start"]
 Build and deploy:
 
 ```bash
-docker build -t arch-systems-portal -f apps/portal/Dockerfile .
+docker build -t arch-systems-portal -f apps/portal/docker/Dockerfile .
 docker run -p 3000:3000 --env-file apps/portal/.env arch-systems-portal
 ```
 

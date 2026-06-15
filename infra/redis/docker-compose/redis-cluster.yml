@@ -1,21 +1,60 @@
-version: '3.8'
+version: "3.8"
 
 services:
   redis-node-1:
     image: redis:7-alpine
-    command: ["redis-server", "--port", "6379", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--appendonly", "yes"]
+    command:
+      [
+        "redis-server",
+        "--port",
+        "6379",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
     ports:
       - "6371:6379"
 
   redis-node-2:
     image: redis:7-alpine
-    command: ["redis-server", "--port", "6379", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--appendonly", "yes"]
+    command:
+      [
+        "redis-server",
+        "--port",
+        "6379",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
     ports:
       - "6372:6379"
 
   redis-node-3:
     image: redis:7-alpine
-    command: ["redis-server", "--port", "6379", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--appendonly", "yes"]
+    command:
+      [
+        "redis-server",
+        "--port",
+        "6379",
+        "--cluster-enabled",
+        "yes",
+        "--cluster-config-file",
+        "nodes.conf",
+        "--cluster-node-timeout",
+        "5000",
+        "--appendonly",
+        "yes",
+      ]
     ports:
       - "6373:6379"
 

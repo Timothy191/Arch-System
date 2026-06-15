@@ -4,7 +4,8 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [state, react, architecture, decision]
-sources: [apps/portal/package.json, docs/wiki/concepts/portal-app-architecture.md]
+sources:
+  [apps/portal/package.json, docs/wiki/concepts/portal-app-architecture.md]
 confidence: high
 ---
 

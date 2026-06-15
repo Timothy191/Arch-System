@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 5s       # High-fidelity scraping for active dev feedback
+  scrape_interval: 5s # High-fidelity scraping for active dev feedback
   evaluation_interval: 5s
 
 scrape_configs:
@@ -7,7 +7,7 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: "cadvisor"     # Scrapes real-time container resource usages (CPU, Memory, IO)
+  - job_name: "cadvisor" # Scrapes real-time container resource usages (CPU, Memory, IO)
     static_configs:
       - targets: ["cadvisor:8080"]
 

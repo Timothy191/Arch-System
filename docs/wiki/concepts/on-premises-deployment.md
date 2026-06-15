@@ -116,9 +116,11 @@ cp apps/portal/.env.production.example apps/portal/.env
 
 - [ ] Pre-pull all Docker images: `docker compose pull`
 - [ ] Export images as tarballs for air-gapped updates:
+
   ```bash
   docker save <image> | gzip > <image>.tar.gz
   ```
+
 - [ ] Test full stack bring-up with network disconnected
 - [ ] Document image update procedure
 

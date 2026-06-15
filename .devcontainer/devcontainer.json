@@ -1,7 +1,7 @@
 {
   "name": "Arch-Systems Development Environment",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
-  
+
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts",
@@ -52,9 +52,9 @@
   "postCreateCommand": "pnpm install && pnpm --filter @repo/database supabase:gen",
 
   "remoteUser": "vscode",
-  
+
   "forwardPorts": [3000, 3001, 3002, 54321, 54322, 54323, 6379, 9093],
-  
+
   "portsAttributes": {
     "3000": {
       "label": "Portal",
@@ -80,6 +80,6 @@
   ],
 
   "workspaceFolder": "/workspace",
-  
+
   "shutdownAction": "stopCompose"
 }

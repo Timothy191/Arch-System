@@ -128,7 +128,7 @@ CI/services use env vars prefixed with `SUPABASE_` (not `NEXT_PUBLIC_SUPABASE_`)
 
 ## Supabase Auth & Middleware
 
-- Proxy at `apps/portal/proxy.ts` (renamed from `middleware.ts` in Next.js 16): handles session refresh, department-slug → UUID resolution (Redis-cached), and role-based route gating.
+- Proxy at `apps/portal/server/proxy.ts` (renamed from `middleware.ts` in Next.js 16): handles session refresh, department-slug → UUID resolution (Redis-cached), and role-based route gating.
 - The **`employees` table** is the authorization source of truth: role = `employees.role`, department = `employees.department_id`, not Supabase Auth metadata.
 - `/api/c66` is **exempt from auth** — keep this when touching proxy.
 - Server Actions: `createServerSupabaseClient()` from `@repo/supabase/server`. **Always validate the user at the top.**

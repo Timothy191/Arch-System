@@ -15,18 +15,18 @@
  * Pairs with the test-writer and integration-tester agents.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
 function readStdin() {
   return new Promise((resolve) => {
-    let data = '';
-    process.stdin.on('data', (c) => {
+    let data = "";
+    process.stdin.on("data", (c) => {
       data += c;
     });
-    process.stdin.on('end', () => resolve(data));
-    process.stdin.on('error', () => resolve(''));
+    process.stdin.on("end", () => resolve(data));
+    process.stdin.on("error", () => resolve(""));
   });
 }
 
@@ -45,7 +45,11 @@ function findCoLocatedTest(sourcePath) {
   const candidates = [
     `${base}.test${ext}`,
     `${base}.spec${ext}`,
-    path.join(path.dirname(sourcePath), '__tests__', `${path.basename(base)}.test${ext}`),
+    path.join(
+      path.dirname(sourcePath),
+      "__tests__",
+      `${path.basename(base)}.test${ext}`,
+    ),
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
@@ -62,7 +66,10 @@ function findCoLocatedTest(sourcePath) {
     process.exit(0);
   }
   const filePath =
-    input?.tool_response?.filePath || input?.tool_input?.file_path || input?.tool_input?.TargetFile || '';
+    input?.tool_response?.filePath ||
+    input?.tool_input?.file_path ||
+    input?.tool_input?.TargetFile ||
+    "";
   if (!filePath || !isInScope(filePath)) process.exit(0);
 
   const testFile = findCoLocatedTest(filePath);
@@ -71,19 +78,29 @@ function findCoLocatedTest(sourcePath) {
   try {
     const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
     const relTest = path.relative(projectDir, testFile);
-    const out = execSync(`pnpm --filter portal exec jest "${relTest}" --silent --maxWorkers=1 2>&1 | tail -40`, {
-      timeout: 60000,
-      stdio: 'pipe',
-    });
-    if (out.toString().includes('Tests:') && !out.toString().includes('failed')) {
+    const out = execSync(
+      `pnpm --filter portal exec jest "${relTest}" --silent --maxWorkers=1 2>&1 | tail -40`,
+      {
+        timeout: 60000,
+        stdio: "pipe",
+      },
+    );
+    if (
+      out.toString().includes("Tests:") &&
+      !out.toString().includes("failed")
+    ) {
       console.error(`[portal-test-on-edit] ${relTest} passed.`);
     } else {
-      console.error(`[portal-test-on-edit] ${relTest} output:\n${out.toString()}`);
+      console.error(
+        `[portal-test-on-edit] ${relTest} output:\n${out.toString()}`,
+      );
     }
   } catch (err) {
-    const stdout = (err.stdout || '').toString();
-    const stderr = (err.stderr || '').toString();
-    console.error(`[portal-test-on-edit] ${testFile} failed:\n${stdout}\n${stderr}`);
+    const stdout = (err.stdout || "").toString();
+    const stderr = (err.stderr || "").toString();
+    console.error(
+      `[portal-test-on-edit] ${testFile} failed:\n${stdout}\n${stderr}`,
+    );
   }
   process.exit(0);
 })();

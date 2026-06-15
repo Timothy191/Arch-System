@@ -41,7 +41,7 @@ Location: `.kiro/safety/`
 | `.kiro/safety/layers/03-isolation.js`      | Command allowlist, path restrictions, dangerous pattern blocking             |
 | `.kiro/safety/layers/04-content-filter.js` | PII/secret regex scan + output content safety check                          |
 | `.kiro/safety/layers/05-rate-limiter.js`   | Sliding window (60s), per-tool type counters, auto-cooldown                  |
-| `.kiro/safety/layers/06-audit-log.js`      | Write structured audit event to `ltm/store/audit.jsonl`                      |
+| `.kiro/safety/layers/06-audit-log.js`      | Write structured audit event to `.memory/data/ltm/store/audit.jsonl`         |
 | `.kiro/safety/layers/07-user-control.js`   | Persistent exception store, auto-approve patterns, trust levels              |
 | `.kiro/safety/policies/default.json`       | Default policy: warn on suspicious, block on dangerous                       |
 | `.kiro/safety/policies/strict.json`        | Strict: deny-by-default, only explicitly allowed operations                  |

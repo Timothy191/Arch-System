@@ -9,12 +9,12 @@
  * Output (stdout): Same JSON
  */
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
 
 function getTempDir() {
-  return path.join(os.tmpdir(), 'pro-workflow');
+  return path.join(os.tmpdir(), "pro-workflow");
 }
 
 function ensureDir(dir) {
@@ -28,61 +28,72 @@ function log(msg) {
 }
 
 function getDateString() {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function getTimeString() {
-  return new Date().toLocaleTimeString('en-US', { hour12: false });
+  return new Date().toLocaleTimeString("en-US", { hour12: false });
 }
 
 async function main() {
-  let data = '';
+  let data = "";
 
-  process.stdin.on('data', chunk => {
+  process.stdin.on("data", (chunk) => {
     data += chunk;
   });
 
-  process.stdin.on('end', () => {
+  process.stdin.on("end", () => {
     try {
       const input = JSON.parse(data);
-      const sessionId = input.session_id || 'default';
+      const sessionId = input.session_id || "default";
 
       // Save pre-compact state
       const tempDir = getTempDir();
-      const compactDir = path.join(tempDir, 'compacts');
+      const compactDir = path.join(tempDir, "compacts");
       ensureDir(compactDir);
 
-      const compactFile = path.join(compactDir, `${getDateString()}-${sessionId.slice(-6)}.json`);
+      const compactFile = path.join(
+        compactDir,
+        `${getDateString()}-${sessionId.slice(-6)}.json`,
+      );
 
       const state = {
         timestamp: new Date().toISOString(),
         session_id: sessionId,
-        summary: input.summary || 'No summary provided'
+        summary: input.summary || "No summary provided",
       };
 
       // Read edit count if exists
       const editCountFile = path.join(tempDir, `edit-count-${sessionId}`);
       if (fs.existsSync(editCountFile)) {
-        state.edits_before_compact = parseInt(fs.readFileSync(editCountFile, 'utf8').trim(), 10);
+        state.edits_before_compact = parseInt(
+          fs.readFileSync(editCountFile, "utf8").trim(),
+          10,
+        );
       }
 
       // Read prompt count if exists
       const promptCountFile = path.join(tempDir, `prompt-count-${sessionId}`);
       if (fs.existsSync(promptCountFile)) {
-        state.prompts_before_compact = parseInt(fs.readFileSync(promptCountFile, 'utf8').trim(), 10);
+        state.prompts_before_compact = parseInt(
+          fs.readFileSync(promptCountFile, "utf8").trim(),
+          10,
+        );
       }
 
       fs.writeFileSync(compactFile, JSON.stringify(state, null, 2));
 
-      log('[ProWorkflow] Context compacting - state saved');
-      log(`[ProWorkflow] Edits: ${state.edits_before_compact || 0}, Prompts: ${state.prompts_before_compact || 0}`);
+      log("[ProWorkflow] Context compacting - state saved");
+      log(
+        `[ProWorkflow] Edits: ${state.edits_before_compact || 0}, Prompts: ${state.prompts_before_compact || 0}`,
+      );
 
       // Reset counters after compact
       if (fs.existsSync(editCountFile)) {
-        fs.writeFileSync(editCountFile, '0');
+        fs.writeFileSync(editCountFile, "0");
       }
       if (fs.existsSync(promptCountFile)) {
-        fs.writeFileSync(promptCountFile, '0');
+        fs.writeFileSync(promptCountFile, "0");
       }
 
       console.log(data);
@@ -92,7 +103,7 @@ async function main() {
   });
 }
 
-main().catch(err => {
-  console.error('[ProWorkflow] Error:', err.message);
+main().catch((err) => {
+  console.error("[ProWorkflow] Error:", err.message);
   process.exit(0);
 });

@@ -501,6 +501,17 @@ When modifying scripts:
 5. Test with clean environment (no existing Docker containers)
 6. **Note**: Project uses Nx (`.nx/cache`), not Turborepo (`.turbo`)
 
+## 🗄️ Archived Scripts
+
+The `archive/` directory contains deprecated or one-off scripts that are no longer actively used but preserved for historical reference:
+
+- **`reorganize.mjs`** - One-off directory restructuring utility (already executed)
+- **`deploy-overview.sh`** - Vague deployment script superseded by docs-generators
+
+These scripts are kept in archive rather than deleted to preserve git history and enable restoration if needed.
+
+**Note**: `ROCKY_LINUX_COMPATIBILITY.md` was moved to `docs/ROCKY_LINUX_COMPATIBILITY.md` as it is documentation, not an executable script.
+
 ## 🔄 Version Requirements
 
 Current project requirements (from CLAUDE.md):
@@ -567,4 +578,4 @@ See `DELAY_TRACKING_TEST_PLAN.md` for full test coverage including:
 **Last Updated**: January 27, 2026
 **Script Count**: 14 active scripts
 **Build System**: Nx 22.7.5 (not Turborepo)
-**Removed Scripts**: 5 redundant/stale scripts removed in cleanup
+**Removed Scripts**: 7 redundant/stale scripts removed in cleanup (2 archived, 5 previously removed)

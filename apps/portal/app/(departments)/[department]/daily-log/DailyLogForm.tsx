@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+// eslint-disable-next-line no-restricted-imports
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";

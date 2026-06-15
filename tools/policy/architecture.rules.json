@@ -4,29 +4,17 @@
   "checks": [
     {
       "projectType": "app",
-      "targets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ],
+      "targets": ["build", "lint", "typecheck", "test"],
       "blocking": true
     },
     {
       "projectType": "package",
-      "targets": [
-        "build",
-        "lint",
-        "typecheck"
-      ],
+      "targets": ["build", "lint", "typecheck"],
       "blocking": true
     },
     {
       "projectType": "tool",
-      "targets": [
-        "lint",
-        "typecheck"
-      ],
+      "targets": ["lint", "typecheck"],
       "blocking": false
     }
   ]

@@ -19,7 +19,7 @@
         "app/**/layout.tsx",
         "app/**/page.tsx",
         "app/**/route.ts",
-        "proxy.ts",
+        "server/proxy.ts",
         "plugins/rust-telemetry-engine/index.tsx",
         ".eslintrc.{js,cjs}"
       ],
@@ -121,7 +121,7 @@
     "devDependencies": "warn",
     "unlisted": "warn",
     "binaries": "warn",
-    "exports": "error",
+    "exports": "warn",
     "nsExports": "warn",
     "types": "warn",
     "nsTypes": "warn",

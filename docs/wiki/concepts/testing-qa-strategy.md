@@ -37,9 +37,11 @@ E2E runner: `pnpm test:e2e` (requires app on `:3000`)
 ### Unit Test Coverage (72% → 90%+)
 
 - [ ] Identify untested modules via coverage report:
+
   ```bash
   pnpm --filter portal test -- --coverage
   ```
+
 - [ ] Priority coverage targets:
   - Server Actions (all mutations in `app/` actions)
   - Auth helpers (`createServerSupabaseClient`, middleware logic)
@@ -75,22 +77,28 @@ Run with: `pnpm test:e2e`
 ### Visual Regression Testing
 
 - [ ] Install Storybook for `@repo/ui` package:
+
   ```bash
   pnpm --filter @repo/ui add -D @storybook/react @storybook/nextjs
   ```
+
 - [ ] Add stories for design system components (Button, Card, Table, Form)
 - [ ] Integrate Chromatic for visual diffs:
+
   ```bash
   npx chromatic --project-token=<token>
   ```
+
 - [ ] Add to CI pipeline (`.github/workflows/ci.yml`)
 
 ### Load Testing
 
 - [ ] Install k6:
+
   ```bash
   sudo apt install k6
   ```
+
 - [ ] Write load test scenarios:
   - Dashboard page: 50 concurrent users for 5 min
   - Data entry form: 20 concurrent submissions

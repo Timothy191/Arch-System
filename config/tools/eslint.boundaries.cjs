@@ -13,12 +13,11 @@
  * Reference: https://nx.dev/features/enforce-module-boundaries
  */
 
-const generated = require('../../tools/policy/eslint-boundaries.generated.cjs');
+const generated = require("../../tools/policy/eslint-boundaries.generated.cjs");
 
 const resolved = {
   ...generated,
-  plugins: ['@nx/eslint-plugin'],
+  plugins: ["@nx/eslint-plugin"],
 };
 
 module.exports = resolved;
-

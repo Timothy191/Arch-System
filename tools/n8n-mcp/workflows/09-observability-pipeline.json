@@ -54,7 +54,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst perfFile = path.join(ltmPath, 'performance.jsonl');\nconst record = {\n  id: `perf_${Date.now()}`,\n  ts: new Date().toISOString(),\n  session_id: $json.session_id,\n  tool_calls: $json.tool_calls,\n  tokens_used: $json.tokens_used,\n  estimated_cost: $json.estimated_cost,\n  bottlenecks: $json.bottlenecks,\n  health: $json.health\n};\nfs.appendFileSync(perfFile, JSON.stringify(record) + '\\n');\nreturn record;"
+        "jsCode": "const ltmPath = '/home/timothy/Project/Arch-Mk2/.memory/data/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst perfFile = path.join(ltmPath, 'performance.jsonl');\nconst record = {\n  id: `perf_${Date.now()}`,\n  ts: new Date().toISOString(),\n  session_id: $json.session_id,\n  tool_calls: $json.tool_calls,\n  tokens_used: $json.tokens_used,\n  estimated_cost: $json.estimated_cost,\n  bottlenecks: $json.bottlenecks,\n  health: $json.health\n};\nfs.appendFileSync(perfFile, JSON.stringify(record) + '\\n');\nreturn record;"
       },
       "name": "Persist to LTM",
       "type": "n8n-nodes-base.code",

@@ -22,6 +22,7 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/$1",
     "^~/(.*)$": "<rootDir>/$1",
     "^@repo/contract$": "<rootDir>/../../packages/contract/src/index.ts",
@@ -69,7 +70,7 @@ module.exports = {
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
     "hooks/**/*.{ts,tsx}",
-    "proxy.ts",
+    "server/proxy.ts",
     "!**/*.test.{ts,tsx}",
     "!**/*.d.ts",
     "!**/node_modules/**",
