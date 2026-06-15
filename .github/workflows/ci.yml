@@ -20,9 +20,7 @@ jobs:
       pull-requests: write
 
     env:
-      TURBO_TELEMETRY_DISABLED: 1
       NEXT_TELEMETRY_DISABLED: 1
-      TURBO_SUMMARIZE: 1
       # Dummy values required for Next.js builds
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
@@ -38,6 +36,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -49,6 +49,9 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
 
       - name: Next.js Cache
         uses: actions/cache@v4
@@ -86,13 +89,13 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Lint & Type Check
-        run: pnpm nx run-many -t lint type-check
+        run: pnpm nx affected -t lint type-check
 
       - name: Token & CSS Lint
-        run: pnpm nx run-many -t lint:tokens lint:css
+        run: pnpm nx affected -t lint:tokens lint:css
 
       - name: Test with Coverage
-        run: pnpm nx run-many -t test -- --coverage --passWithNoTests
+        run: pnpm nx affected -t test -- --coverage --passWithNoTests
         env:
           CI: true
 
@@ -105,7 +108,7 @@ jobs:
           retention-days: 14
 
       - name: Build
-        run: pnpm nx run-many -t build
+        run: pnpm nx affected -t build
 
       - name: Bundle Size Check
         run: pnpm bundlesize
