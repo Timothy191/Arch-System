@@ -2,6 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+// TODO: Align with @repo/ui design tokens (see packages/ui/src/components/ui/card.tsx)
+// Current colors are intentionally hardcoded for the overview app's dark theme
+// Consider using design system tokens with theme variants for consistency across the monorepo
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

@@ -3,6 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// TODO: Align with @repo/ui design tokens (see packages/ui/src/components/ui/badge.tsx)
+// Current colors are intentionally hardcoded for the overview app's dark theme
+// Consider using design system tokens with theme variants for consistency across the monorepo
+
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border border-[#363636] px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#3ecf8e] focus:ring-offset-2",
   {

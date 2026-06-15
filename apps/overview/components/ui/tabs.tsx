@@ -5,6 +5,10 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
 
+// TODO: Align with @repo/ui design tokens (see packages/ui/src/components/ui/tabs.tsx)
+// Current colors are intentionally hardcoded for the overview app's dark theme
+// Consider using design system tokens with theme variants for consistency across the monorepo
+
 const Tabs = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
