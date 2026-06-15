@@ -81,7 +81,7 @@ export default {
     const commands = [];
     for (const batch of chunk(filtered, 30)) {
       commands.push(
-        `secretlint --secretlintrc .secretlintrc.json --secretlintignore .secretlintignore ${batch.join(" ")}`,
+        `secretlint --secretlintrc config/.secretlintrc.json --secretlintignore config/.secretlintignore ${batch.join(" ")}`,
       );
     }
     return commands;

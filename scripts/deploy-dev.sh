@@ -9,7 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORT=3000
 LOGIN_URL="http://localhost:$PORT/login"
-PORTAL_LOG="$REPO_ROOT/portal.log"
+PORTAL_LOG="$REPO_ROOT/run/portal.log"
 
 # Colors
 GREEN='\033[0;32m'
@@ -145,8 +145,8 @@ if [ "$COMPILED" = "true" ]; then
   # Save the background PID of the listening process
   PORTAL_PID=$(sudo ss -tulpn | grep -E "\b:$PORT\b" | grep -oE "pid=[0-9]+" | cut -d= -f2 | head -n1 || true)
   if [ -n "$PORTAL_PID" ]; then
-    echo "$PORTAL_PID" > "$REPO_ROOT/.portal.pid"
-    log "Saved portal PID $PORTAL_PID to .portal.pid"
+    echo "$PORTAL_PID" > "$REPO_ROOT/run/.portal.pid"
+    log "Saved portal PID $PORTAL_PID to run/.portal.pid"
   fi
 else
   error "Timed out waiting for compilation. Check portal.log:"

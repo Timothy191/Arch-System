@@ -25,8 +25,8 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 ### Prerequisites
 
-- **Node.js**: `>=20.17.0`
-- **pnpm**: `9.12.0`
+- **Node.js**: `>=22`
+- **pnpm**: `9.15.9`
 
 ### Setup
 
@@ -43,11 +43,11 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 4. **Development Mode**:
 
    ```bash
-   # Optional: clear port 3000 if it might be occupied
-   ./scripts/clear-port.sh
+   # Start the monorepo dev server (auto-resolves port conflicts and starts dependencies)
+   pnpm dev
    ```
 
-   **Note**: The script will free port 3000 before launching the dev server. If you prefer to run the server directly, ensure no other process is listening on that port.
+   **Note**: The development server automatically checks for port conflicts, starts the Supabase local stack, and launches the portal.
 
 ## 🛠️ Key Commands
 

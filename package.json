@@ -14,7 +14,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm format:check && pnpm deps:lint && pnpm knip",
-    "syncpack": "syncpack lint",
     "ui": "pnpm --filter @repo/ui ui",
     "test:e2e": "playwright test",
     "policy:gen": "node tools/policy-compiler.cjs",
@@ -39,11 +38,26 @@
     "fresh-start": "bash scripts/deploy.sh local --clean",
     "deploy:dev": "bash scripts/deploy-dev.sh",
     "monitor": "bash scripts/monitor-hud.sh",
-    "monitor:grafana": "docker compose -f docker-compose.monitoring.yml up -d",
-    "monitor:grafana-stop": "docker compose -f docker-compose.monitoring.yml down",
+    "monitor:grafana": "docker compose -f docker/docker-compose.monitoring.yml up -d",
+    "monitor:grafana-stop": "docker compose -f docker/docker-compose.monitoring.yml down",
     "shutdown": "bash scripts/shutdown.sh",
     "db:docs": "bash scripts/generate-db-docs.sh",
     "prepare": "husky"
+  },
+  "syncpack": {
+    "config": "config/.syncpackrc.js"
+  },
+  "commitlint": {
+    "extends": ["./config/commitlint.config.mjs"]
+  },
+  "knip": {
+    "config": "config/knip.json"
+  },
+  "markdownlint": {
+    "config": "config/.markdownlint.json"
+  },
+  "lint-staged": {
+    "config": "config/.lintstagedrc.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",

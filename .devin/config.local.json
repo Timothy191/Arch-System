@@ -8,7 +8,9 @@
       "Exec(cp)",
       "Exec(rmdir)",
       "Exec(pnpm)",
-      "Exec(npx eslint)"
+      "Exec(npx eslint)",
+      "Exec(sed)",
+      "Exec(docker compose)"
     ]
   }
 }

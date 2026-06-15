@@ -54,9 +54,7 @@ yarn-error.log*
 
 # Runtime artifacts
 .frontend.pid
-.portal.pid
-.portal.start
-portal.log
+run/
 portal-error.log
 dev.log
 deploy.log

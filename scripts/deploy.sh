@@ -219,7 +219,7 @@ error_trap() {
     echo -e "${RED}║${NC} ${YELLOW}→ Check: pnpm lint${NC}"
   elif [[ "$last_command" == *"healthcheck"* ]]; then
     echo -e "${RED}║${NC} ${YELLOW}→ Check logs: tail -50 $DEPLOY_LOG${NC}"
-    [ -f "$REPO_ROOT/portal.log" ] && echo -e "${RED}║${NC} ${YELLOW}→ Portal: tail -50 $REPO_ROOT/portal.log${NC}"
+    [ -f "$REPO_ROOT/run/portal.log" ] && echo -e "${RED}║${NC} ${YELLOW}→ Portal: tail -50 $REPO_ROOT/run/portal.log${NC}"
   fi
   
   echo -e "${RED}╚════════════════════════════════════════════════════════════════╝${NC}"
@@ -622,7 +622,7 @@ phase_backup() {
   log "Creating backup: $backup_name"
   
   run_if_not_dry mkdir -p "$backup_path"
-  [ -f "$REPO_ROOT/.portal.pid" ] && run_if_not_dry cp "$REPO_ROOT/.portal.pid" "$backup_path/"
+  [ -f "$REPO_ROOT/run/.portal.pid" ] && run_if_not_dry cp "$REPO_ROOT/run/.portal.pid" "$backup_path/"
   
   if [ -d "$PORTAL_DIR/.next" ]; then
     run_if_not_dry tar -czf "$backup_path/build.tar.gz" -C "$PORTAL_DIR" .next 2>/dev/null || true
@@ -637,16 +637,16 @@ phase_stop_services() {
   phase "4. STOPPING EXISTING SERVICES"
   
   # Stop portal
-  if [ -f "$REPO_ROOT/.portal.pid" ]; then
+  if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
     local pid
-    pid=$(cat "$REPO_ROOT/.portal.pid" 2>/dev/null || true)
+    pid=$(cat "$REPO_ROOT/run/.portal.pid" 2>/dev/null || true)
     if [ -n "$pid" ] && ps -p "$pid" > /dev/null 2>&1; then
       log "Stopping portal (PID: $pid)..."
       run_if_not_dry kill -SIGTERM "$pid" 2>/dev/null || true
       sleep 3
       run_if_not_dry kill -9 "$pid" 2>/dev/null || true
     fi
-    run_if_not_dry rm -f "$REPO_ROOT/.portal.pid"
+    run_if_not_dry rm -f "$REPO_ROOT/run/.portal.pid"
   fi
   
   # Check if portal still running on port
@@ -667,8 +667,8 @@ phase_stop_services() {
   
   # Clean mode stops everything
   if [ "$CLEAN_ONLY" = true ] || [ "$DEPLOY_MODE" = "local" ]; then
-    local tools_compose="$REPO_ROOT/docker-compose.tools.yml"
-    local monitor_compose="$REPO_ROOT/docker-compose.monitoring.yml"
+    local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
+    local monitor_compose="$REPO_ROOT/docker/docker-compose.monitoring.yml"
     
     if [ -f "$tools_compose" ]; then
       log "Stopping Docker tools..."
@@ -727,7 +727,7 @@ phase_start_infrastructure() {
       
       # Docker tools (skipped in lightweight mode)
       if [ "${LIGHTWEIGHT:-false}" != "true" ]; then
-        local tools_compose="$REPO_ROOT/docker-compose.tools.yml"
+        local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
         if [ -f "$tools_compose" ]; then
           if $COMPOSE_CMD -f "$tools_compose" ps --format '{{.Status}}' 2>/dev/null | grep -q 'Up'; then
             success "Docker tools already running - connecting"
@@ -761,7 +761,7 @@ phase_start_infrastructure() {
         fi
 
         # Monitoring
-        local monitor_compose="$REPO_ROOT/docker-compose.monitoring.yml"
+        local monitor_compose="$REPO_ROOT/docker/docker-compose.monitoring.yml"
         if [ -f "$monitor_compose" ]; then
           if $COMPOSE_CMD -f "$monitor_compose" ps --format '{{.Status}}' 2>/dev/null | grep -q 'Up'; then
             success "Monitoring already running - connecting"
@@ -778,8 +778,8 @@ phase_start_infrastructure() {
       ;;
       
     production|staging)
-      local tools_compose="$REPO_ROOT/docker-compose.tools.yml"
-      local prod_compose="$REPO_ROOT/docker-compose.production.yml"
+      local tools_compose="$REPO_ROOT/docker/docker-compose.tools.yml"
+      local prod_compose="$REPO_ROOT/docker/docker-compose.production.yml"
       
       if [ -f "$tools_compose" ]; then
         log "Starting production Docker services..."
@@ -820,8 +820,8 @@ phase_deploy_portal() {
       run_if_not_dry cd "$PORTAL_DIR"
       
       if [ "$DRY_RUN" = false ]; then
-        HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/portal.log" 2>&1 &
-        echo $! > "$REPO_ROOT/.portal.pid"
+        HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/run/portal.log" 2>&1 &
+        echo $! > "$REPO_ROOT/run/.portal.pid"
       fi
       
       healthcheck "http://localhost:$PORT" 60 "Portal"
@@ -842,8 +842,8 @@ phase_deploy_portal() {
         run_if_not_dry cd "$PORTAL_DIR"
         
         if [ "$DRY_RUN" = false ]; then
-          NODE_ENV=production PORT=$PORT pnpm start >> "$REPO_ROOT/portal.log" 2>&1 &
-          echo $! > "$REPO_ROOT/.portal.pid"
+          NODE_ENV=production PORT=$PORT pnpm start >> "$REPO_ROOT/run/portal.log" 2>&1 &
+          echo $! > "$REPO_ROOT/run/.portal.pid"
         fi
         
         healthcheck "http://localhost:$PORT" 60 "Portal"

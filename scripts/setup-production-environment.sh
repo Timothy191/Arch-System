@@ -439,7 +439,7 @@ Environment="PORT=3000"
 ExecStart=$(which pnpm) --filter portal start
 Restart=always
 RestartSec=10
-StandardOutput=append:$REPO_ROOT/portal.log
+StandardOutput=append:$REPO_ROOT/run/portal.log
 StandardError=append:$REPO_ROOT/portal-error.log
 
 [Install]
@@ -558,7 +558,7 @@ setup_docker_tools() {
   phase "5. DOCKER TOOLS STACK SETUP"
 
   log "Checking Docker Compose configuration..."
-  local compose_file="$REPO_ROOT/docker-compose.tools.yml"
+  local compose_file="$REPO_ROOT/docker/docker-compose.tools.yml"
   if [ ! -f "$compose_file" ]; then
     warn "Docker Compose file not found: $compose_file"
     warn "Docker tools stack will be skipped"
@@ -598,7 +598,7 @@ setup_monitoring() {
   phase "6. MONITORING STACK SETUP"
 
   log "Checking monitoring configuration..."
-  local monitoring_file="$REPO_ROOT/docker-compose.monitoring.yml"
+  local monitoring_file="$REPO_ROOT/docker/docker-compose.monitoring.yml"
   if [ ! -f "$monitoring_file" ]; then
     warn "Monitoring Docker Compose file not found"
     info "Monitoring stack will be skipped"
@@ -637,15 +637,15 @@ build_and_start_portal() {
   if [ "$SKIP_SYSTEMD" = true ]; then
     log "Starting portal in background..."
     # Start portal from its directory so pnpm start runs the portal package's "start" script
-    run_if_not_dry bash -lc "cd '$PORTAL_DIR' && \"$(which pnpm)\" start > '$REPO_ROOT/portal.log' 2>&1 & echo \$! > '$REPO_ROOT/.portal.pid'"
-    if [ -f "$REPO_ROOT/.portal.pid" ]; then
+    run_if_not_dry bash -lc "cd '$PORTAL_DIR' && \"$(which pnpm)\" start > '$REPO_ROOT/run/portal.log' 2>&1 & echo \$! > '$REPO_ROOT/run/.portal.pid'"
+    if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
       local portal_pid
-      portal_pid=$(cat "$REPO_ROOT/.portal.pid")
+      portal_pid=$(cat "$REPO_ROOT/run/.portal.pid")
       success "Portal started in background (PID: $portal_pid)"
-      info "Logs: tail -f $REPO_ROOT/portal.log"
+      info "Logs: tail -f $REPO_ROOT/run/portal.log"
       info "To stop: kill $portal_pid"
     else
-      warn "Failed to capture portal PID. Check $REPO_ROOT/portal.log for details."
+      warn "Failed to capture portal PID. Check $REPO_ROOT/run/portal.log for details."
     fi
   else
     info "Portal will be managed by systemd service"
@@ -675,7 +675,7 @@ health_check() {
   done
 
   warn "Portal health check failed after ${max_attempts} attempts"
-  info "Check logs: tail -50 $REPO_ROOT/portal.log"
+  info "Check logs: tail -50 $REPO_ROOT/run/portal.log"
   info "If using systemd: sudo journalctl -u arch-systems -n 50"
 }
 
@@ -733,9 +733,9 @@ print_summary() {
     echo
   else
     echo -e "${BOLD}Background Process Management:${NC}"
-    echo -e "  • PID file: $REPO_ROOT/.portal.pid"
-    echo -e "  • Logs: tail -f $REPO_ROOT/portal.log"
-    echo -e "  • Stop: kill \$(cat $REPO_ROOT/.portal.pid)"
+    echo -e "  • PID file: $REPO_ROOT/run/.portal.pid"
+    echo -e "  • Logs: tail -f $REPO_ROOT/run/portal.log"
+    echo -e "  • Stop: kill \$(cat $REPO_ROOT/run/.portal.pid)"
     echo
   fi
 

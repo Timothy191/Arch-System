@@ -155,16 +155,16 @@ info "Cleaning cache and compiling production bundle (this takes ~1-2 min)..."
 rm -rf "$PORTAL_DIR/.next"
 
 pnpm install --frozen-lockfile
-pnpm turbo build --filter=portal...
+pnpm --filter portal build
 
 # ── Step 6: Start Secondary Tools ────────────────────────────
 info "Starting secondary tools..."
-if [ -f "$REPO_ROOT/docker-compose.tools.yml" ]; then
-  $COMPOSE_CMD -f "$REPO_ROOT/docker-compose.tools.yml" up -d
+if [ -f "$REPO_ROOT/docker/docker-compose.tools.yml" ]; then
+  $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.tools.yml" up -d
 fi
 
-if [ -f "$REPO_ROOT/docker-compose.monitoring.yml" ]; then
-  $COMPOSE_CMD -f "$REPO_ROOT/docker-compose.monitoring.yml" up -d
+if [ -f "$REPO_ROOT/docker/docker-compose.monitoring.yml" ]; then
+  $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.monitoring.yml" up -d
 fi
 
 # ── Step 7: Launch Server ────────────────────────────────────
@@ -178,8 +178,8 @@ if [ -n "$stray_pids" ]; then
 fi
 
 cd "$PORTAL_DIR"
-HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/portal.log" 2>&1 &
-echo $! > "$REPO_ROOT/.portal.pid"
+HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/run/portal.log" 2>&1 &
+echo $! > "$REPO_ROOT/run/.portal.pid"
 
 # Wait for server to become healthy
 info "Running health checks..."

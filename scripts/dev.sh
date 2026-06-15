@@ -169,7 +169,7 @@ echo -e "\033[0;35m────────────────────�
 echo -e "\033[0;36mPress Enter to close this window...\033[0m"
 read
 STATUSEOF
-  sed -i "s|PORT_PLACEHOLDER|$PORT|g; s|LOG_PLACEHOLDER|$REPO_ROOT/portal.log|g" "$script"
+  sed -i "s|PORT_PLACEHOLDER|$PORT|g; s|LOG_PLACEHOLDER|$REPO_ROOT/run/portal.log|g" "$script"
   chmod +x "$script"
 
   local term
@@ -213,8 +213,8 @@ cleanup() {
   echo
   echo -e "  ${YELLOW}Shutting down...${NC}"
   for pidfile in .portal.pid .cms.pid .overview.pid; do
-    [ -f "$REPO_ROOT/$pidfile" ] && kill "$(cat "$REPO_ROOT/$pidfile")" 2>/dev/null || true
-    rm -f "$REPO_ROOT/$pidfile"
+    [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
+    rm -f "$REPO_ROOT/run/$pidfile"
   done
 }
 trap cleanup EXIT INT TERM
@@ -281,7 +281,7 @@ portal_healthy() {
 
 # Check if any source file changed since portal last started
 source_files_stale() {
-  local marker="$REPO_ROOT/.portal.start"
+  local marker="$REPO_ROOT/run/.portal.start"
   [ ! -f "$marker" ] && return 0
   find "$REPO_ROOT/apps/portal" \
     \( -path "*/node_modules" -o -path "*/.next" -o -path "*/public" -o -path "*/.nx" \) -prune -o \
@@ -306,10 +306,10 @@ fi
 if [ "$FORCE_RESTART" = "true" ]; then
   check "Restart" "pass" "preparing fresh start"
 
-  if [ -f "$REPO_ROOT/.portal.pid" ]; then
-    old_pid=$(cat "$REPO_ROOT/.portal.pid")
+  if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
+    old_pid=$(cat "$REPO_ROOT/run/.portal.pid")
     kill "$old_pid" 2>/dev/null || true
-    rm -f "$REPO_ROOT/.portal.pid" "$REPO_ROOT/.portal.start"
+    rm -f "$REPO_ROOT/run/.portal.pid" "$REPO_ROOT/run/.portal.start"
     check "Stale portal process" "pass" "PID $old_pid cleaned"
   else
     check "Stale portal process" "skip" "no pid file"
@@ -345,9 +345,9 @@ if [ "$FORCE_RESTART" = "true" ]; then
   find "$REPO_ROOT" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
   check "Python pycaches" "pass" "removed"
 
-  if [ -f "$REPO_ROOT/portal.log" ]; then
-    logsize=$(du -sh "$REPO_ROOT/portal.log" 2>/dev/null | awk '{print $1}')
-    : > "$REPO_ROOT/portal.log"
+  if [ -f "$REPO_ROOT/run/portal.log" ]; then
+    logsize=$(du -sh "$REPO_ROOT/run/portal.log" 2>/dev/null | awk '{print $1}')
+    : > "$REPO_ROOT/run/portal.log"
     check "Portal log" "pass" "cleared ${logsize:-old log}"
   else
     check "Portal log" "skip" "not present"
@@ -538,9 +538,9 @@ else
 
   # 2b. Optional Tools
   if [ "$START_TOOLS" = "true" ]; then
-    if [ -f "$REPO_ROOT/docker-compose.tools.yml" ]; then
+    if [ -f "$REPO_ROOT/docker/docker-compose.tools.yml" ]; then
       echo -e "  ${INFO} Starting Docker Tools..."
-      $COMPOSE_CMD -f "$REPO_ROOT/docker-compose.tools.yml" up -d > /dev/null 2>&1
+      $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.tools.yml" up -d > /dev/null 2>&1
 
       local services=("plantcor-redis" "plantcor-n8n" "plantcor-flowise" "plantcor-langfuse-db" "plantcor-langfuse" "plantcor-qdrant")
       for service in "${services[@]}"; do
@@ -578,7 +578,7 @@ else
       check "Redis" "pass" "Docker container already running"
     else
       echo -e "  ${INFO} Starting Redis (Docker)..."
-      $COMPOSE_CMD -f "$REPO_ROOT/docker-compose.redis.yml" up -d > /dev/null 2>&1
+      $COMPOSE_CMD -f "$REPO_ROOT/docker/docker-compose.redis.yml" up -d > /dev/null 2>&1
       REDIS_HEALTHY=false
       for i in $(seq 1 15); do
         if docker inspect --format='{{.State.Health.Status}}' arch-redis 2>/dev/null | grep -q "healthy"; then
@@ -623,8 +623,8 @@ if [ "${SKIP_RESTART:-false}" = "true" ]; then
   check "Dev server" "pass" "http://localhost:$PORT (already up)"
 else
   cd "$REPO_ROOT/apps/portal"
-  PORT=$PORT pnpm dev > "$REPO_ROOT/portal.log" 2>&1 &
-  echo $! > "$REPO_ROOT/.portal.pid"
+  PORT=$PORT pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
+  echo $! > "$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
   echo -e "  ${INFO} Starting Next.js dev server..."
 
@@ -634,19 +634,19 @@ else
       compiled=true
       break
     fi
-    if grep -qiE "Failed to compile|Module not found|Cannot find module" "$REPO_ROOT/portal.log" 2>/dev/null; then
+    if grep -qiE "Failed to compile|Module not found|Cannot find module" "$REPO_ROOT/run/portal.log" 2>/dev/null; then
       break
     fi
     sleep 2
   done
 
   if [ "$compiled" = "true" ]; then
-    date +%s > "$REPO_ROOT/.portal.start"
+    date +%s > "$REPO_ROOT/run/.portal.start"
     check "Dev server" "pass" "http://localhost:$PORT (compiled)"
   else
     check "Dev server" "fail"
     echo -e "\n  ${RED}Last 20 lines of portal.log:${NC}"
-    tail -20 "$REPO_ROOT/portal.log" 2>/dev/null | sed 's/^/  /'
+    tail -20 "$REPO_ROOT/run/portal.log" 2>/dev/null | sed 's/^/  /'
     exit 1
   fi
 fi
@@ -682,13 +682,13 @@ start_extra_app() {
 if [ "$START_CMS" = "true" ]; then
   start_extra_app \
     "cms" "$REPO_ROOT/apps/cms" "3001" \
-    "$REPO_ROOT/cms.log" "$REPO_ROOT/.cms.pid" "CMS"
+    "$REPO_ROOT/run/cms.log" "$REPO_ROOT/run/.cms.pid" "CMS"
 fi
 
 if [ "$START_OVERVIEW" = "true" ]; then
   start_extra_app \
     "overview" "$REPO_ROOT/apps/overview" "3002" \
-    "$REPO_ROOT/overview.log" "$REPO_ROOT/.overview.pid" "Overview"
+    "$REPO_ROOT/run/overview.log" "$REPO_ROOT/run/.overview.pid" "Overview"
 fi
 
 if [ "$START_CMS" != "true" ] && [ "$START_OVERVIEW" != "true" ]; then

@@ -246,7 +246,7 @@ fi
 header "8. Log Cleanup"
 
 LOG_FILES=(
-  "$REPO_ROOT/portal.log"
+  "$REPO_ROOT/run/portal.log"
   "$REPO_ROOT/portal-error.log"
   "$REPO_ROOT/deploy-*.log"
 )

@@ -10,9 +10,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PORTAL_LOG="$REPO_ROOT/portal.log"
+PORTAL_LOG="$REPO_ROOT/run/portal.log"
 DEPLOY_LOG="$REPO_ROOT/deploy.log"
-PORTAL_PID_FILE="$REPO_ROOT/.portal.pid"
+PORTAL_PID_FILE="$REPO_ROOT/run/.portal.pid"
 
 # Colors
 CLR_RESET="\033[0m"
@@ -166,7 +166,7 @@ while true; do
       echo -e "${CLR_MAGENTA}│${CLR_RESET}  Server state: ${CLR_RED}NOT RUNNING${CLR_RESET} (Process ID not found in ps)"
     fi
   else
-    echo -e "${CLR_MAGENTA}│${CLR_RESET}  Server state: ${CLR_RED}NOT RUNNING${CLR_RESET} (.portal.pid missing)"
+    echo -e "${CLR_MAGENTA}│${CLR_RESET}  Server state: ${CLR_RED}NOT RUNNING${CLR_RESET} (run/.portal.pid missing)"
   fi
   tput el; move_cursor 11 79; echo -e "${CLR_MAGENTA}│${CLR_RESET}"
 
