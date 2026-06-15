@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    env:
+      TURBO_TELEMETRY_DISABLED: 1
+      NEXT_TELEMETRY_DISABLED: 1
+      TURBO_SUMMARIZE: 1
+      # Dummy values required for Next.js builds
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
+      PORT: 3000
+      N8N_URL: http://localhost:5678
+      FLOWISE_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres # secretlint-disable-line
+      PAYLOAD_SECRET: dummy-payload-secret-for-ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Next.js Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/apps/portal/.next/cache
+            ${{ github.workspace }}/apps/overview/.next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check dependency versions
+        run: pnpm deps:lint
+
+      - name: Audit dependencies (high/critical vulnerabilities)
+        run: pnpm audit --audit-level=high --prod
+        continue-on-error: false
+
+      - name: Check for dead code
+        run: pnpm knip
+
+      - name: Verify policy SSoT (drift detection)
+        run: pnpm policy:check
+
+      - name: Markdown Lint
+        run: pnpm md:lint
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+      - name: Lint & Type Check
+        run: pnpm nx run-many -t lint type-check
+
+      - name: Token & CSS Lint
+        run: pnpm nx run-many -t lint:tokens lint:css
+
+      - name: Test with Coverage
+        run: pnpm nx run-many -t test -- --coverage --passWithNoTests
+        env:
+          CI: true
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/portal/coverage/
+          retention-days: 14
+
+      - name: Build
+        run: pnpm nx run-many -t build
+
+      - name: Bundle Size Check
+        run: pnpm bundlesize
+
+      - name: Start portal for Lighthouse
+        run: pnpm --filter portal start &
+        env:
+          PORT: 3000
+
+      - name: Wait for portal
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Lighthouse CI
+        run: npx @lhci/cli@0.14.x autorun
+
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 14
+
+      - name: Run Self-Healing CI
+        run: pnpm exec nx fix-ci
+        if: always()

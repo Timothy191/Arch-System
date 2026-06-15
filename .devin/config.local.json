@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(git clone)",
+      "Exec(rm)",
+      "Exec(git status)",
+      "Exec(git)",
+      "Exec(cp)",
+      "Exec(rmdir)",
+      "Exec(pnpm)",
+      "Exec(npx eslint)"
+    ]
+  }
+}

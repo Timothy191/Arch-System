@@ -1,0 +1,68 @@
+{
+  "version": 2,
+  "servers": {
+    "codebase-memory-mcp": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "github": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "playwright": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "devdocs": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "context7": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "magicui": {
+      "status": "registered",
+      "tool_count": 0
+    },
+    "n8n": {
+      "status": "registered",
+      "tool_count": 8
+    }
+  },
+  "tools": {
+    "n8n_list_workflows": {
+      "server": "n8n",
+      "description": "List all n8n workflows"
+    },
+    "n8n_get_workflow": {
+      "server": "n8n",
+      "description": "Get n8n workflow by ID"
+    },
+    "n8n_execute_workflow": {
+      "server": "n8n",
+      "description": "Execute n8n workflow via webhook"
+    },
+    "n8n_check_execution": {
+      "server": "n8n",
+      "description": "Check n8n execution result"
+    },
+    "n8n_import_workflow": {
+      "server": "n8n",
+      "description": "Import n8n workflow JSON"
+    },
+    "n8n_activate_workflow": {
+      "server": "n8n",
+      "description": "Activate n8n workflow"
+    },
+    "n8n_deactivate_workflow": {
+      "server": "n8n",
+      "description": "Deactivate n8n workflow"
+    },
+    "n8n_search_workflows_by_tag": {
+      "server": "n8n",
+      "description": "Search n8n workflows by tag"
+    }
+  },
+  "updated_at": null
+}

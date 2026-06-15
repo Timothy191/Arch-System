@@ -1,0 +1,41 @@
+{
+  "predictiveMaintenance": [
+    {
+      "input": "Machine CAT-320 excavator, 4500 operating hours, hydraulic pressure dropping from 3500 PSI to 2800 PSI over last shift. Engine temperature normal at 92C. No unusual vibrations reported.",
+      "output": "{\"risk\": \"high\", \"actions\": [\"Schedule hydraulic system inspection immediately\", \"Check hydraulic pump seals and filter condition\", \"Monitor hydraulic pressure trend over next 24 hours\"], \"timeEstimate\": \"8-24 hours\"}",
+      "expected_risk": "high",
+      "expected_actions_count": 3
+    },
+    {
+      "input": "Sandvik DD422 drill rig, 12000 hours, drill penetration rate decreased 25% from baseline. Rod handling system intermittent delays. Coolant level stable.",
+      "output": "{\"risk\": \"medium\", \"actions\": [\"Inspect drill bit condition and replace if worn\", \"Check hydraulic valve system for rod handling delays\", \"Schedule sensor calibration for rod handling system\"], \"timeEstimate\": \"2-4 days\"}",
+      "expected_risk": "medium",
+      "expected_actions_count": 3
+    }
+  ],
+  "shiftHandoff": [
+    {
+      "input": "Day shift summary: 3 loads completed on excavator EX-01, 2 operational delays (weather 45min, equipment changeover 20min). Night shift should prioritize backlog clearing on Load 4.",
+      "output": "SHIFT HANDOVER REPORT\n\nAccomplishments:\n- 3 loads completed on EX-01\n- Equipment changeover completed (20min delay)\n\nOngoing Issues:\n- Weather delay of 45min may recur tonight\n- Backlog on Load 4 pending\n\nCritical Alerts:\n- Monitor weather conditions for continued delays\n\nPriorities for Next Shift:\n- Clear Load 4 backlog\n- Resume normal operations if weather permits"
+    }
+  ],
+  "safetyCompliance": [
+    {
+      "input": "Shift log: Worker observed standing on excavator tracks without fall protection at 14:30. Near-miss: drill rod dropped from 0.5m during rod change at 16:00, no injuries. PPE compliance: 98% hard hat, 95% safety glasses.",
+      "output": "{\"violations\": [\"Worker on excavator tracks without fall protection at height >1.2m (MP-003 violation)\"], \"concerns\": [\"PPE compliance gap: 5% not wearing safety glasses\", \"Near-miss with dropped drill rod requires incident report within 24 hours (IR-001)\"], \"score\": 6}",
+      "expected_score_range": [4, 8]
+    }
+  ],
+  "equipmentManual": [
+    {
+      "input": "What is the recommended hydraulic oil filter change interval for a CAT-320 excavator operating in dusty conditions?",
+      "output": "For a CAT-320 excavator operating in dusty/high-debris conditions, the recommended hydraulic oil filter change interval is **500 hours** (reduced from the standard 1000-hour interval). Always use Cat HYDO Advanced 10 hydraulic oil."
+    }
+  ],
+  "translate": [
+    {
+      "input": "Translate to Afrikaans: 'All operators must complete the daily pre-shift inspection checklist before starting equipment.'",
+      "output": "Alle operateurs moet die daaglikse voorskof-inspeksie kontrolelys voltooi voordat hulle toerusting begin."
+    }
+  ]
+}

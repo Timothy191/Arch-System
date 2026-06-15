@@ -1,0 +1,26 @@
+# Root JS config files without a tsconfig project
+commitlint.config.mjs
+
+# Directories containing plain JS without a tsconfig project
+load-tests/
+scripts/
+tools/
+template/
+scratch/
+
+# Generated artifacts
+apps/portal/public/sw.js
+apps/portal/public/swe-worker-*.js
+apps/portal/public/workbox-*.js
+
+# Test artifacts
+test-results/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+build/
+report/

@@ -1,0 +1,59 @@
+{
+  "name": "Arch Mesh — Ops Events Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mesh/ops-events",
+        "options": {}
+      },
+      "name": "Ops Events Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "mesh-ops-events"
+    },
+    {
+      "parameters": {
+        "jsCode": "const event = $json.body || $json;\nconst validTypes = [\n  'daily_log.created','daily_log.updated',\n  'breakdown.created','breakdown.updated','breakdown.completed',\n  'safety_incident.created','safety_incident.updated','safety_incident.resolved',\n  'production_log.created','production_log.updated',\n  'operational_delay.created','operational_delay.updated'\n];\nif (!validTypes.includes(event.type)) {\n  return { error: 'Invalid event type', received: event.type };\n}\nreturn { event, routedAt: new Date().toISOString() };"
+      },
+      "name": "Validate & Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { event } = $json;\nconst actions = [];\nif (event.type.startsWith('breakdown.')) {\n  actions.push('notify_engineering', 'update_machine_status');\n}\nif (event.type.startsWith('safety_incident.')) {\n  actions.push('notify_safety', 'update_compliance_log');\n}\nif (event.type.startsWith('production_log.')) {\n  actions.push('update_dashboard', 'sync_to_erp');\n}\nif (event.type.startsWith('operational_delay.')) {\n  actions.push('notify_control_room', 'update_shift_report');\n}\nreturn { ...$json, actions, dispatched: actions.length };"
+      },
+      "name": "Dispatch Actions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { event, actions, routedAt } = $json;\nreturn {\n  status: 'routed',\n  eventType: event.type,\n  department: event.department || 'unknown',\n  actions,\n  routedAt,\n  processedAt: new Date().toISOString()\n};"
+      },
+      "name": "Acknowledge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Ops Events Webhook": {
+      "main": [[{ "node": "Validate & Route", "type": "main", "index": 0 }]]
+    },
+    "Validate & Route": {
+      "main": [[{ "node": "Dispatch Actions", "type": "main", "index": 0 }]]
+    },
+    "Dispatch Actions": {
+      "main": [[{ "node": "Acknowledge", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["automation-mesh", "ops-events", "real-time"],
+  "id": "mesh-ops-events"
+}

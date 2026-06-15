@@ -1,0 +1,274 @@
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n:1.45.0
+    container_name: plantcor-n8n
+    restart: unless-stopped
+    env_file: .env.tools
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${TOOL_ADMIN_EMAIL}
+      - N8N_BASIC_AUTH_PASSWORD=${TOOL_ADMIN_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_CONCURRENCY_PRODUCTION_LIMIT=16
+      - N8N_LOG_LEVEL=warn
+    volumes:
+      - /home/timothy/.n8n:/home/node/.n8n
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - plantcor-tools
+
+  flowise:
+    image: flowiseai/flowise:2.1.2
+    container_name: plantcor-flowise
+    restart: unless-stopped
+    env_file: .env.tools
+    ports:
+      - "3001:3000"
+    environment:
+      - FLOWISE_USERNAME=${TOOL_ADMIN_EMAIL}
+      - FLOWISE_PASSWORD=${TOOL_ADMIN_PASSWORD}
+      - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE}
+    volumes:
+      - flowise_data:/root/.flowise
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:3000/ > /dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  redis:
+    image: redis:7
+    container_name: plantcor-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  langfuse:
+    image: langfuse/langfuse:3
+    container_name: plantcor-langfuse
+    restart: unless-stopped
+    env_file: .env.tools
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true
+      - OTEL_EXPORTER_OTLP_ENABLED=true
+      - LANGFUSE_INIT_ORG_ID=plantcor
+      - LANGFUSE_INIT_ORG_NAME=PlantCor
+      - LANGFUSE_INIT_PROJECT_ID=kiro-agent
+      - LANGFUSE_INIT_PROJECT_NAME=Kiro Agent
+      - LANGFUSE_INIT_USER_EMAIL=${TOOL_ADMIN_EMAIL}
+      - LANGFUSE_INIT_USER_PASSWORD=${TOOL_ADMIN_PASSWORD}
+      - LANGFUSE_INIT_USER_NAME=Admin
+      - LANGFUSE_INIT_PUBLIC_KEY=pk-lf-plantcor
+      - LANGFUSE_INIT_SECRET_KEY=sk-lf-plantcor
+      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER}:${LANGFUSE_DB_PASSWORD}@plantcor-langfuse-db:5432/${LANGFUSE_DB_NAME}
+      - CLICKHOUSE_URL=http://plantcor-clickhouse:8123/default
+      - CLICKHOUSE_MIGRATION_URL=clickhouse://plantcor-clickhouse:9000/default
+      - CLICKHOUSE_CLUSTER_ENABLED=false
+      - LANGFUSE_S3_EVENT_UPLOAD_BUCKET=dummy
+      - LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-1
+      - LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://localhost:9000
+      - LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=dummy
+      - LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=dummy
+      - NEXTAUTH_URL=http://localhost:3003
+      - NEXTAUTH_SECRET=${TOOL_NEXTAUTH_SECRET}
+      - SALT=${TOOL_SALT}
+      - ENCRYPTION_KEY=${TOOL_ENCRYPTION_KEY}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000/api/public/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+      langfuse-redis:
+        condition: service_healthy
+    networks:
+      - plantcor-tools
+
+  langfuse-db:
+    image: postgres:16-alpine
+    container_name: plantcor-langfuse-db
+    restart: unless-stopped
+    env_file: .env.tools
+    environment:
+      - POSTGRES_USER=${LANGFUSE_DB_USER}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD}
+      - POSTGRES_DB=${LANGFUSE_DB_NAME}
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${LANGFUSE_DB_USER} -d ${LANGFUSE_DB_NAME}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - plantcor-tools
+
+  langfuse-redis:
+    image: redis:7
+    container_name: plantcor-langfuse-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.0
+    container_name: plantcor-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/6333"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.12-alpine
+    container_name: plantcor-clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:8123/ping",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: plantcor-prometheus
+    restart: unless-stopped
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:9090/-/healthy",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  fuxa:
+    image: frangoteam/fuxa:latest
+    container_name: plantcor-fuxa
+    restart: unless-stopped
+    ports:
+      - "1881:1881"
+    volumes:
+      - fuxa_data:/root/.fuxa
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - plantcor-tools
+
+volumes:
+  flowise_data:
+  redis_data:
+  langfuse_db_data:
+  qdrant_data:
+  prometheus_data:
+  fuxa_data:
+  clickhouse_data:
+
+networks:
+  plantcor-tools:
+    driver: bridge

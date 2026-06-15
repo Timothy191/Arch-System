@@ -1,0 +1,145 @@
+{
+  "runs": [
+    {
+      "id": "run_1_1779117032007",
+      "goal": "Update JWT logic",
+      "started_at": "2026-05-18T15:10:32.008Z",
+      "status": "completed",
+      "tasks": [
+        {
+          "id": "task_1779117032008_0",
+          "description": "Update JWT logic",
+          "files": [],
+          "dependencies": [],
+          "priority": 5,
+          "status": "ok",
+          "worker_id": "worker_1779117032009_4sq6"
+        }
+      ],
+      "workers": [
+        {
+          "id": "worker_1779117032009_4sq6",
+          "task_id": "task_1779117032008_0",
+          "status": "ok",
+          "duration_ms": 194,
+          "started_at": "2026-05-18T15:10:32.009Z"
+        }
+      ],
+      "results": [
+        {
+          "worker_id": "worker_1779117032009_4sq6",
+          "task_id": "task_1779117032008_0",
+          "run_id": "run_1_1779117032007",
+          "description": "Update JWT logic",
+          "files_affected": [],
+          "status": "ok",
+          "summary": "Worker worker_1779117032009_4sq6 completed: Update JWT logic",
+          "started_at": "2026-05-18T15:10:32.195Z",
+          "completed_at": "2026-05-18T15:10:32.196Z",
+          "metadata": {
+            "has_context": false,
+            "file_count": 0,
+            "dependency_count": 0
+          }
+        }
+      ],
+      "ended_at": "2026-05-18T15:10:32.203Z",
+      "duration_ms": 197
+    },
+    {
+      "id": "run_2_1779117050975",
+      "goal": "test",
+      "started_at": "2026-05-18T15:10:50.976Z",
+      "status": "completed",
+      "tasks": [
+        {
+          "id": "task_1779117050976_0",
+          "description": "test",
+          "files": [],
+          "dependencies": [],
+          "priority": 5,
+          "status": "ok",
+          "worker_id": "worker_1779117050977_n9cz"
+        }
+      ],
+      "workers": [
+        {
+          "id": "worker_1779117050977_n9cz",
+          "task_id": "task_1779117050976_0",
+          "status": "ok",
+          "duration_ms": 222,
+          "started_at": "2026-05-18T15:10:50.977Z"
+        }
+      ],
+      "results": [
+        {
+          "worker_id": "worker_1779117050977_n9cz",
+          "task_id": "task_1779117050976_0",
+          "run_id": "run_2_1779117050975",
+          "description": "test",
+          "files_affected": [],
+          "status": "ok",
+          "summary": "Worker worker_1779117050977_n9cz completed: test",
+          "started_at": "2026-05-18T15:10:51.184Z",
+          "completed_at": "2026-05-18T15:10:51.184Z",
+          "metadata": {
+            "has_context": false,
+            "file_count": 0,
+            "dependency_count": 0
+          }
+        }
+      ],
+      "ended_at": "2026-05-18T15:10:51.201Z",
+      "duration_ms": 226
+    },
+    {
+      "id": "run_3_1779117089978",
+      "goal": "refactor auth",
+      "started_at": "2026-05-18T15:11:29.979Z",
+      "status": "completed",
+      "tasks": [
+        {
+          "id": "task_1779117089979_0",
+          "description": "refactor auth",
+          "files": [],
+          "dependencies": [],
+          "priority": 5,
+          "status": "ok",
+          "worker_id": "worker_1779117089980_zyum"
+        }
+      ],
+      "workers": [
+        {
+          "id": "worker_1779117089980_zyum",
+          "task_id": "task_1779117089979_0",
+          "status": "ok",
+          "duration_ms": 152,
+          "started_at": "2026-05-18T15:11:29.980Z"
+        }
+      ],
+      "results": [
+        {
+          "worker_id": "worker_1779117089980_zyum",
+          "task_id": "task_1779117089979_0",
+          "run_id": "run_3_1779117089978",
+          "description": "refactor auth",
+          "files_affected": [],
+          "status": "ok",
+          "summary": "Worker worker_1779117089980_zyum completed: refactor auth",
+          "started_at": "2026-05-18T15:11:30.126Z",
+          "completed_at": "2026-05-18T15:11:30.127Z",
+          "metadata": {
+            "has_context": false,
+            "file_count": 0,
+            "dependency_count": 0
+          }
+        }
+      ],
+      "ended_at": "2026-05-18T15:11:30.133Z",
+      "duration_ms": 155
+    }
+  ],
+  "workers": [],
+  "next_id": 4,
+  "started_at": null
+}

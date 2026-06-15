@@ -1,0 +1,160 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Local env files (.env & .env.local)
+.env
+.env.local
+
+# Testing
+coverage
+
+# Vercel
+.vercel
+
+# Build Outputs
+.next/
+out/
+build
+dist
+apps/*/dist/
+apps/*/.next/
+
+# Agent runtime / personal skills (not project source)
+.claude/skills/
+.claude/hooks/scripts/db/
+.claude/hooks/scripts/search/
+.agents/
+# .kiro/ agent config — tracked except local overrides and runtime data
+.kiro/settings.local.json
+.kiro/worktrees/
+!.kiro/worktrees/.gitkeep
+.kiro/deploy/
+.kiro/guardrails/
+.kiro/skills/
+
+# IDE
+.vscode/
+
+# Tooling
+.mcp.json
+skills-lock.json
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store
+*.pem
+
+# Runtime artifacts
+.frontend.pid
+.portal.pid
+.portal.start
+portal.log
+portal-error.log
+dev.log
+deploy.log
+.benchmark-results.json
+dev_run.log
+.eslintcache
+
+# Supabase local state (synced from packages/database/migrations/ by deploy-local.sh)
+packages/supabase/supabase/
+
+# Archive / backup files
+*.zip
+*-old.*
+
+# --- ltm-power ---
+ltm/store/*.jsonl
+ltm/runtime/*
+ltm/reports/*
+ltm/snapshots/*
+# --- /ltm-power ---
+
+# Typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Python virtual env
+ltm/.venv/
+
+# IDE tools
+.windsurf/
+.kilo/
+
+# Generated service workers
+apps/portal/public/sw.js
+apps/portal/public/sw.js.map
+apps/portal/public/swe-worker-*.js
+apps/portal/public/swe-worker-*.js.map
+apps/portal/public/workbox-*.js
+apps/portal/public/workbox-*.js.map
+
+# Test artifacts
+test-results/
+.bundlesize.json
+
+# Scratch / temporary workflow exports
+scratch/
+template/
+
+# Deploy artifacts
+.deploy.lock
+.deploy-monitor.pid
+.deploy-results-*.sh
+.monitor-*.sh
+.tbls.yml
+deploy-*.log
+.aider*
+*.desktop
+
+# Local env files
+.env
+.env.local
+.env.bak
+.env.tools
+
+# Backup files
+*.backup
+*.bak
+.eslintcache
+dev_run.log
+
+# Noise / runtime
+.antigravitycli/
+populating-data/
+
+
+
+.nx/cache
+.nx/workspace-data
+
+# Fallow dead-code analyzer output
+fallow_json.txt
+fallow_output.txt
+
+# Agent / IDE runtime artifacts
+.codebuddy/
+.poolside/
+.project/
+.memory/
+
+# Nx cache (per-package)
+**/.nx/
+
+# One-off generated reports / backups
+audit_report.md
+cleanup-backup/
+metadata.json
+.audit/
+
+# Submodules (tools/devdocs not properly configured)
+tools/devdocs
+.codebuddy

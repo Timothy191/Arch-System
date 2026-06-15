@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 5s       # High-fidelity scraping for active dev feedback
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "cadvisor"     # Scrapes real-time container resource usages (CPU, Memory, IO)
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  - job_name: "supabase-gateway"
+    static_configs:
+      - targets: ["host.docker.internal:54321"] # Connects to local Supabase endpoints outside monitoring network
+
+  - job_name: "plantcor-portal"
+    metrics_path: "/api/metrics"
+    static_configs:
+      - targets: ["host.docker.internal:3000"] # Next.js portal running locally

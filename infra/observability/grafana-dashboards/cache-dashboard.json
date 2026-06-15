@@ -1,0 +1,21 @@
+{
+  "title": "AMCA Cache Telemetry",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Cache Hits vs Misses",
+      "targets": [
+        { "expr": "rate(amca_cache_hits_total[5m])", "legendFormat": "Hits ({{tier}})" },
+        { "expr": "rate(amca_cache_misses_total[5m])", "legendFormat": "Misses" }
+      ]
+    },
+    {
+      "type": "heatmap",
+      "title": "Request Latency",
+      "targets": [
+        { "expr": "rate(amca_cache_latency_seconds_bucket[5m])", "format": "heatmap" }
+      ]
+    }
+  ],
+  "schemaVersion": 30
+}

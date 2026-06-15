@@ -1,0 +1,17 @@
+[Unit]
+Description=n8n workflow engine (AI Agentic patterns)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/timothy/.npm-global/bin/n8n start
+Restart=on-failure
+RestartSec=10
+Environment=N8N_PORT=5678
+Environment=N8N_CONCURRENCY_PRODUCTION_LIMIT=16
+Environment=N8N_LOG_LEVEL=warn
+Environment=WEBHOOK_URL=http://localhost:5678/
+# N8N_ENCRYPTION_KEY must be set externally (e.g. in ~/.n8n/config)
+
+[Install]
+WantedBy=default.target

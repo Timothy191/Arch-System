@@ -1,0 +1,47 @@
+{
+  "name": "Single-Shot Tool Batcher [Pattern 1]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tool-batcher",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "tool-batcher"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { calls, context } = $json;\nif (!Array.isArray(calls)) {\n  return { error: 'calls must be an array of { tool, args }' };\n}\nconst results = [];\nfor (const call of calls) {\n  try {\n    let result;\n    switch (call.tool) {\n      case 'read_file':\n        result = require('fs').readFileSync(call.args.path, 'utf8');\n        break;\n      case 'list_dir':\n        result = require('fs').readdirSync(call.args.path);\n        break;\n      case 'stat':\n        result = require('fs').statSync(call.args.path);\n        break;\n      default:\n        result = { error: `Unknown tool: ${call.tool}` };\n    }\n    results.push({ tool: call.tool, status: 'ok', result });\n  } catch (e) {\n    results.push({ tool: call.tool, status: 'error', error: e.message });\n  }\n}\nreturn { batch_results: results, total: results.length, errors: results.filter(r => r.status === 'error').length };"
+      },
+      "name": "Batch Executor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $json;\nreturn { result: output, summary: `Executed ${output.total} tools (${output.errors} errors) in a single round-trip` };"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Batch Executor", "type": "main", "index": 0 }]]
+    },
+    "Batch Executor": {
+      "main": [[{ "node": "Format Response", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "performance", "tool-use"],
+  "id": "pattern-01-tool-batcher"
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Arch Mesh — AI Agents Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mesh/ai-agents",
+        "options": {}
+      },
+      "name": "AI Agent Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "mesh-ai-agents"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst agents = [\n  'shift-handoff-generator',\n  'predictive-maintenance',\n  'safety-compliance-auditor',\n  'telemetry-analyzer'\n];\nif (!payload.agent || !agents.includes(payload.agent)) {\n  return { error: 'Unknown or missing agent', available: agents };\n}\nreturn { agent: payload.agent, context: payload.context || {}, dispatchedAt: new Date().toISOString() };"
+      },
+      "name": "Route Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { agent, context } = $json;\nconst config = {\n  'shift-handoff-generator': { model: 'claude-sonnet', maxTokens: 2048 },\n  'predictive-maintenance': { model: 'claude-haiku', maxTokens: 1024 },\n  'safety-compliance-auditor': { model: 'claude-sonnet', maxTokens: 4096 },\n  'telemetry-analyzer': { model: 'claude-haiku', maxTokens: 1024 }\n};\nreturn { agent, context, config: config[agent], status: 'executing' };"
+      },
+      "name": "Load Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { agent, context, config } = $json;\nreturn {\n  status: 'completed',\n  agent,\n  config,\n  contextKeys: Object.keys(context),\n  result: `Agent ${agent} executed with ${config.model}`,\n  completedAt: new Date().toISOString()\n};"
+      },
+      "name": "Return Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "AI Agent Webhook": {
+      "main": [[{ "node": "Route Agent", "type": "main", "index": 0 }]]
+    },
+    "Route Agent": {
+      "main": [[{ "node": "Load Config", "type": "main", "index": 0 }]]
+    },
+    "Load Config": {
+      "main": [[{ "node": "Return Result", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["automation-mesh", "ai-agents", "llm"],
+  "id": "mesh-ai-agents"
+}

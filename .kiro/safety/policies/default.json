@@ -1,0 +1,79 @@
+{
+  "name": "default",
+  "description": "Default safety policy: warn on suspicious, block on dangerous",
+  "budget": {
+    "warn_at": 40,
+    "block_at": 80,
+    "per_tool_limits": {
+      "Bash": 30,
+      "Edit": 50,
+      "Write": 30,
+      "Agent": 20,
+      "Read": 100,
+      "Glob": 50,
+      "Grep": 50
+    }
+  },
+  "permission": {
+    "deny_by_default": false,
+    "require_approval_for": ["Bash(rm *)", "Bash(sudo *)", "Bash(docker *)", "Bash(chmod *)", "Bash(curl *)"]
+  },
+  "isolation": {
+    "dangerous_commands": [
+      "rm -rf /", "rm -rf /*", "sudo rm", "mkfs", "dd if=",
+      "chmod 777", "chmod -R 777",
+      "curl * | bash", "curl * | sh", "wget * | bash",
+      "> /dev/", "> /dev/sda",
+      "docker system prune", "docker rm -f",
+      "git push --force", "git push -f", "git reset --hard HEAD"
+    ],
+    "allowed_shell_prefixes": [
+      "git", "npm", "pnpm", "node", "python", "ls", "cat", "echo",
+      "mkdir", "cp", "mv", "rmdir", "touch", "chmod +x",
+      "curl", "wget", "docker", "psql", "sqlite3",
+      "pnpx", "npx", "tsc", "eslint", "prettier",
+      "jq", "grep", "rg", "find", "sleep", "cd"
+    ],
+    "max_output_bytes": 102400,
+    "max_execution_seconds": 30
+  },
+  "rate_limit": {
+    "max_calls_per_minute": 60,
+    "per_tool_max_per_minute": {
+      "Bash": 15,
+      "Edit": 20,
+      "Agent": 10
+    },
+    "cooldown_seconds": 30
+  },
+  "content_filter": {
+    "block_secrets": true,
+    "block_patterns": [
+      "AKIA[0-9A-Z]{16}",
+      "sk-[A-Za-z0-9_\\-]{20,}",
+      "gh[pousr]_[A-Za-z0-9]{36,}",
+      "-----BEGIN.*PRIVATE KEY-----"
+    ]
+  },
+  "audit": {
+    "enabled": true,
+    "log_path": "ltm/store/audit.jsonl",
+    "log_all": false,
+    "log_blocks": true,
+    "log_warns": true
+  },
+  "user_control": {
+    "trusted_operations": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "max_exceptions_per_session": 10
+  }
+}

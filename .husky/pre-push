@@ -1,0 +1,2 @@
+export PATH="$HOME/.volta/bin:$PATH"
+pnpm nx run-many -t lint type-check 2>&1

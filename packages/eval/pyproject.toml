@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "arch-eval"
+version = "0.1.0"
+description = "LLM evaluation suite for Arch-Systems portal — AI service quality and code generation compliance"
+authors = ["Arch-Systems"]
+readme = "README.md"
+packages = [{include = "tests"}, {include = "metrics"}, {include = "datasets"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+deepeval = "^2.0"
+pytest = "^8.0"
+pytest-asyncio = "^0.24"
+httpx = "^0.27"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "ai_service: tests that call the portal AI service (require running portal)",
+    "code_gen: tests that evaluate code generation compliance",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

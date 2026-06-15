@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Auto Retry on Failure",
+  "description": "When a task fails or errors (including rate limit / too many requests), automatically retry with exponential backoff up to 3 times. Saves LTM checkpoint before each retry.",
+  "version": "2",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if the last task or operation failed due to an error (including rate limit, timeout, or \"too many requests\"). If it did, and the retry count for this task is less than 3, first save progress by running 'python3 ltm/bin/ltm.py capture-turn' if available, then apply exponential backoff (wait 5s on retry 1, 15s on retry 2, 30s on retry 3) before retrying the same task automatically. Track retries by incrementing a counter per task. On each retry attempt, report which retry number it is. If the task has already been retried 3 times, stop and report the failure to the user with a clear summary of what failed, what was completed, and what was left undone. If the last task succeeded, do nothing."
+  }
+}

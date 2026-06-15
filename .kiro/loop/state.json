@@ -1,0 +1,28 @@
+{
+  "session_id": "96123",
+  "state": "idle",
+  "current_task": null,
+  "queue": [
+    {
+      "id": "t-mp8skqeh-1",
+      "description": "test",
+      "priority": 1,
+      "dependencies": [],
+      "status": "complete",
+      "created_at": "2026-05-16T20:21:34.505Z",
+      "agent_type": "scout",
+      "files": [],
+      "instructions": "test",
+      "result_summary": "done"
+    }
+  ],
+  "subagents": [],
+  "history": [],
+  "metrics": {
+    "tool_calls_total": 5,
+    "tokens_used": 0,
+    "subagents_dispatched": 0,
+    "errors": 0,
+    "session_start": null
+  }
+}

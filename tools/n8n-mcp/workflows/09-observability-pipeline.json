@@ -1,0 +1,142 @@
+{
+  "name": "Observability & Performance Pipeline [Pattern 9]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "observability",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "observability"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { session_id, tool_calls, tokens_used, errors, duration_ms } = $json;\nreturn {\n  session_id: session_id || 'unknown',\n  tool_calls: tool_calls || 0,\n  tokens_used: tokens_used || 0,\n  errors: errors || 0,\n  duration_ms: duration_ms || 0,\n  recorded_at: new Date().toISOString()\n};"
+      },
+      "name": "Parse Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = $json;\nconst costPerToken = 0.000003;\nconst estimatedCost = metrics.tokens_used * costPerToken;\nconst tokenPerSecond = metrics.duration_ms > 0 ? (metrics.tokens_used / (metrics.duration_ms / 1000)).toFixed(1) : 0;\nconst errorRate = metrics.tool_calls > 0 ? ((metrics.errors / metrics.tool_calls) * 100).toFixed(1) : 0;\nconst bottlenecks = [];\nif (metrics.tool_calls > 50) bottlenecks.push('High tool call count - consider batching');\nif (metrics.tokens_used > 50000) bottlenecks.push('High token usage - consider context optimization');\nif (metrics.errors > 5) bottlenecks.push('Elevated error rate - check rate limits');\nif (Number(tokenPerSecond) < 10) bottlenecks.push('Low throughput - consider parallel execution');\nreturn {\n  ...metrics,\n  estimated_cost: estimatedCost.toFixed(4),\n  token_throughput: tokenPerSecond,\n  error_rate: `${errorRate}%`,\n  bottlenecks,\n  health: bottlenecks.length === 0 ? 'good' : bottlenecks.length <= 2 ? 'fair' : 'poor'\n};"
+      },
+      "name": "Analyze Performance",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "cached_at",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "cache_source",
+              "value": "observability-pipeline"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Add Cache Metadata",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst perfFile = path.join(ltmPath, 'performance.jsonl');\nconst record = {\n  id: `perf_${Date.now()}`,\n  ts: new Date().toISOString(),\n  session_id: $json.session_id,\n  tool_calls: $json.tool_calls,\n  tokens_used: $json.tokens_used,\n  estimated_cost: $json.estimated_cost,\n  bottlenecks: $json.bottlenecks,\n  health: $json.health\n};\nfs.appendFileSync(perfFile, JSON.stringify(record) + '\\n');\nreturn record;"
+      },
+      "name": "Persist to LTM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.health }}",
+              "value2": "poor",
+              "options": { "caseSensitive": false }
+            }
+          ]
+        }
+      },
+      "name": "Health Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  alert: true,\n  severity: 'warning',\n  message: `Performance degradation detected: ${$json.bottlenecks.join('; ')}`,\n  recommended_action: '/compact to reduce context, or switch to batching pattern'\n};"
+      },
+      "name": "Alert Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "return { alert: false, message: 'Performance within acceptable range' };"
+      },
+      "name": "All Good",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 450]
+    },
+    {
+      "parameters": {
+        "jsCode": "const alerts = $input.all();\nreturn { observability: true, metrics: $json, alert: alerts[0] };"
+      },
+      "name": "Format Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Parse Metrics", "type": "main", "index": 0 }]]
+    },
+    "Parse Metrics": {
+      "main": [[{ "node": "Analyze Performance", "type": "main", "index": 0 }]]
+    },
+    "Analyze Performance": {
+      "main": [[{ "node": "Add Cache Metadata", "type": "main", "index": 0 }]]
+    },
+    "Add Cache Metadata": {
+      "main": [[{ "node": "Persist to LTM", "type": "main", "index": 0 }]]
+    },
+    "Persist to LTM": {
+      "main": [[{ "node": "Health Check", "type": "main", "index": 0 }]]
+    },
+    "Health Check": {
+      "main": [
+        [{ "node": "Alert Handler", "type": "main", "index": 0 }],
+        [{ "node": "All Good", "type": "main", "index": 0 }]
+      ]
+    },
+    "Alert Handler": {
+      "main": [[{ "node": "Format Report", "type": "main", "index": 0 }]]
+    },
+    "All Good": {
+      "main": [[{ "node": "Format Report", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "observability", "performance"],
+  "id": "pattern-09-observability"
+}

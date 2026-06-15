@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "exceptions": [],
+  "trusted_sessions": [],
+  "_note": "User-approved persistent exceptions. Each entry: { pattern, tool, approved_at, expires_at, reason }"
+}

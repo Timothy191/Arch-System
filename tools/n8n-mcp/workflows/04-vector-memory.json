@@ -1,0 +1,131 @@
+{
+  "name": "LTM Vector Memory [Pattern 4]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vector-memory",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "vector-memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { mode, query, content, namespace = 'default' } = $json;\nif (!mode) return { error: 'mode required: search | store | delete' };\nreturn { mode, query, content, namespace };"
+      },
+      "name": "Parse Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.mode }}",
+              "value2": "search",
+              "options": { "caseSensitive": false }
+            },
+            {
+              "value1": "={{ $json.mode }}",
+              "value2": "store",
+              "options": { "caseSensitive": false }
+            }
+          ]
+        }
+      },
+      "name": "Mode Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LTM_SEARCH_API || 'http://localhost:3000/api/ltm/search' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "query": "={{ $json.query }}",
+          "namespace": "={{ $json.namespace }}",
+          "limit": "={{ $json.limit }}"
+        },
+        "options": {
+          "timeout": 30000,
+          "batch": { "size": 100 }
+        }
+      },
+      "name": "Search LTM Store",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [750, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LTM_STORE_API || 'http://localhost:3000/api/ltm/store' }}",
+        "sendBody": true,
+        "body": "={{ JSON.stringify({ content: $json.content, namespace: $json.namespace }) }}",
+        "options": {
+          "timeout": 30000,
+          "maxRetries": 3,
+          "retryOn": ["5XX", "timeout"]
+        }
+      },
+      "name": "Store in LTM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [750, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "return { error: `Unknown mode: ${$json.mode}`, supported: ['search', 'store'] };"
+      },
+      "name": "Unknown Mode",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\nreturn { mode: $json.mode, result: results[0], vector_memory: true };"
+      },
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Parse Request", "type": "main", "index": 0 }]]
+    },
+    "Parse Request": {
+      "main": [[{ "node": "Mode Router", "type": "main", "index": 0 }]]
+    },
+    "Mode Router": {
+      "main": [
+        [{ "node": "Search LTM Store", "type": "main", "index": 0 }],
+        [{ "node": "Store in LTM", "type": "main", "index": 1 }],
+        [{ "node": "Unknown Mode", "type": "main", "index": 2 }]
+      ]
+    },
+    "Search LTM Store": {
+      "main": [[{ "node": "Format Output", "type": "main", "index": 0 }]]
+    },
+    "Store in LTM": {
+      "main": [[{ "node": "Format Output", "type": "main", "index": 0 }]]
+    },
+    "Unknown Mode": {
+      "main": [[{ "node": "Format Output", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "memory", "ltm"],
+  "id": "pattern-04-vector-memory"
+}

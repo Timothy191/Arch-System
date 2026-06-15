@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.kiro/safety/index.js\""
+          },
+          {
+            "type": "command",
+            "command": "GUARD_TYPE=input node \"/home/timothy/Project/Arch-Mk2/.kiro/guardrails/index.js\""
+          },
+          {
+            "type": "command",
+            "command": "HOOK_TYPE=preToolUse node \"/home/timothy/Project/Arch-Mk2/.kiro/observability/index.js\" trace"
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/tool-call-budget.js\""
+          }
+        ],
+        "description": "Safety gate + guardrails + OTEL trace + budget tracking"
+      },
+      {
+        "matcher": "tool == \"Edit\" || tool == \"Write\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/secret-scan.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/read-before-write.js\""
+          }
+        ],
+        "description": "Secret detection + stale-read prevention on file writes"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/pre-push-check.js\""
+          },
+          {
+            "type": "command",
+            "command": "GUARD_TYPE=tool-use node \"/home/timothy/Project/Arch-Mk2/.kiro/guardrails/index.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/git-blast-radius.js\""
+          }
+        ],
+        "description": "Pre-push quality gate + tool-use guardrails + dangerous git detection"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_TYPE=postToolUse node \"/home/timothy/Project/Arch-Mk2/.kiro/loop/index.js\""
+          }
+        ],
+        "description": "Persist agentic loop state after each tool call"
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path // .tool_input.TargetFile' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && [ -f \"$f\" ] && pnpm exec prettier --write \"$f\"; }",
+            "statusMessage": "Formatting..."
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path // .tool_input.TargetFile' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && [ -f \"$f\" ] && [[ \"$f\" == */apps/portal/* ]] && [[ \"$f\" =~ \\.(ts|tsx|js|jsx)$ ]] && pnpm --filter portal exec eslint \"$f\" --max-warnings 0; }",
+            "statusMessage": "Linting...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/post-edit-check.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/quality-gate.js\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/learn-capture.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/stop-failure.js\""
+          }
+        ],
+        "description": "Auto-capture [LEARN] blocks + failure logging"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/session-start.js\""
+          },
+          {
+            "type": "command",
+            "command": "HOOK_TYPE=sessionStart node \"/home/timothy/Project/Arch-Mk2/.kiro/loop/index.js\""
+          }
+        ],
+        "description": "Load LEARNED patterns, previous session context, restore loop state"
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/pre-compact.js\""
+          }
+        ],
+        "description": "Save context state before compaction"
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/post-compact.js\""
+          }
+        ],
+        "description": "Re-inject critical context after compaction"
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/subagent-start.js\""
+          },
+          {
+            "type": "command",
+            "command": "HOOK_TYPE=subagentStart node \"/home/timothy/Project/Arch-Mk2/.kiro/loop/index.js\""
+          }
+        ],
+        "description": "Log subagent dispatch + update loop state"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/subagent-stop.js\""
+          },
+          {
+            "type": "command",
+            "command": "HOOK_TYPE=subagentStop node \"/home/timothy/Project/Arch-Mk2/.kiro/loop/index.js\""
+          }
+        ],
+        "description": "Log subagent completion + update loop state"
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/notification-handler.js\""
+          }
+        ],
+        "description": "Desktop notification when agent needs attention"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/prompt-submit.js\""
+          }
+        ],
+        "description": "Validate prompt before submission"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/session-end.js\""
+          }
+        ],
+        "description": "Save final session summary on end"
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": ".env|.envrc|package.json|tsconfig.json|pyproject.toml",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Project/Arch-Mk2/.claude/hooks/scripts/file-changed.js\""
+          }
+        ],
+        "description": "Watch for important config and dependency file changes"
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "claude-md-management@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "linear@claude-plugins-official": true
+  },
+  "theme": "dark"
+}

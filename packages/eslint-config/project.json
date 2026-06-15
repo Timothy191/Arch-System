@@ -1,0 +1,4 @@
+{
+  "name": "@repo/eslint-config",
+  "tags": ["scope:package", "scope:package:eslint-config"]
+}

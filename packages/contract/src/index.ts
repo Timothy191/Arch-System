@@ -1,0 +1,107 @@
+/**
+ * @repo/contract — Canonical Zod schemas and derived types for the Arch-System monorepo.
+ *
+ * This package is the single source of truth for all cross-boundary data contracts.
+ * No other workspace should define Zod schemas for shared entities; import from here.
+ */
+
+// ---------------------------------------------------------------------------
+// Re-exported Zod types (so consumers don't import "zod" directly)
+// ---------------------------------------------------------------------------
+
+export type { ZodSchema, ZodError } from "zod";
+
+// ---------------------------------------------------------------------------
+// Schemas
+// ---------------------------------------------------------------------------
+
+export {
+  uuidSchema,
+  dateSchema,
+  dateMonthSchema,
+  nonEmptyString,
+} from "./schemas/common.schema.js";
+
+export {
+  createWebhookSchema,
+  updateWebhookSchema,
+} from "./schemas/webhook.schema.js";
+
+export {
+  exportQuerySchema,
+  safetyExportQuerySchema,
+} from "./schemas/export.schema.js";
+
+export { scannerBadgeSchema } from "./schemas/scanner.schema.js";
+
+export { telemetryPushSchema } from "./schemas/telemetry.schema.js";
+
+export { syncPlaybackSchema } from "./schemas/sync.schema.js";
+
+export { shiftCompletenessSchema } from "./schemas/control-room.schema.js";
+
+export {
+  aiChatSchema,
+  aiSafetySchema,
+  aiPredictSchema,
+  aiHandoffSchema,
+  riskAssessmentSchema,
+  complianceResultSchema,
+} from "./schemas/ai.schema.js";
+
+export {
+  adminDataQuerySchema,
+  adminDataUpdateSchema,
+  adminDataDeleteSchema,
+} from "./schemas/admin.schema.js";
+
+export { dailyLogSchema, dozerRollSchema } from "./schemas/form.schema.js";
+
+// ---------------------------------------------------------------------------
+// Derived types (inferred from schemas)
+// ---------------------------------------------------------------------------
+
+export type {
+  Uuid,
+  DateString,
+  DateMonthString,
+  NonEmptyString,
+} from "./types/common.types.js";
+
+export type {
+  CreateWebhookInput,
+  UpdateWebhookInput,
+} from "./types/webhook.types.js";
+
+export type {
+  ExportQueryInput,
+  SafetyExportQueryInput,
+} from "./types/export.types.js";
+
+export type { ScannerBadgeInput } from "./types/scanner.types.js";
+
+export type { TelemetryPushInput } from "./types/telemetry.types.js";
+
+export type { SyncPlaybackInput } from "./types/sync.types.js";
+
+export type { ShiftCompletenessInput } from "./types/control-room.types.js";
+
+export type {
+  AiChatInput,
+  AiSafetyInput,
+  AiPredictInput,
+  AiHandoffInput,
+  RiskAssessment,
+  ComplianceResult,
+} from "./types/ai.types.js";
+
+export type {
+  AdminDataQueryInput,
+  AdminDataUpdateInput,
+  AdminDataDeleteInput,
+} from "./types/admin.types.js";
+
+export type {
+  DailyLogFormValues,
+  DozerRollFormValues,
+} from "./types/form.types.js";

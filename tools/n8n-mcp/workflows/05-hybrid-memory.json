@@ -1,0 +1,78 @@
+{
+  "name": "Hybrid Semantic + Short-Term Window [Pattern 5]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hybrid-memory",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "hybrid-memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { query, short_term, limit = 3 } = $json;\nconst shortTermContext = Array.isArray(short_term) ? short_term.slice(-10) : [];\nreturn { query, short_term: shortTermContext, limit };"
+      },
+      "name": "Parse Hybrid Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LTM_HYBRID_SEARCH_API || 'http://localhost:3000/api/ltm/hybrid-search' }}",
+        "sendBody": true,
+        "body": "={{ JSON.stringify({ query: $json.query, limit: $json.limit, recent_only: true }) }}",
+        "options": {
+          "timeout": 30000,
+          "batch": { "size": 50 }
+        }
+      },
+      "name": "Stream LTM Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [550, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { short_term, query } = $json;\nconst recentSummary = short_term.map((msg, i) => `[${i}] ${typeof msg === 'string' ? msg.slice(0, 200) : JSON.stringify(msg).slice(0, 200)}`);\nreturn { short_term_summary: recentSummary, window_size: short_term.length, mode: 'short_term_window' };"
+      },
+      "name": "Short-Term Window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [550, 450]
+    },
+    {
+      "parameters": {
+        "jsCode": "const longTerm = $node['Stream LTM Search'].json;\nconst shortTerm = $node['Short-Term Window'].json;\nreturn {\n  query: $json.query,\n  long_term_memories: longTerm.results || [],\n  short_term_window: shortTerm.short_term_summary || [],\n  total_long_term: longTerm.total || 0,\n  recent_turns: shortTerm.window_size || 0,\n  hybrid: true,\n  recommendation: longTerm.total > 0\n    ? 'Found relevant long-term context. Use LTM results for cross-session awareness.'\n    : 'No LTM matches. Rely on short-term window + fresh exploration.'\n};"
+      },
+      "name": "Merge Contexts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Parse Hybrid Request", "type": "main", "index": 0 }]]
+    },
+    "Parse Hybrid Request": {
+      "main": [[{ "node": "Stream LTM Search", "type": "main", "index": 0 }, { "node": "Short-Term Window", "type": "main", "index": 1 }]]
+    },
+    "Stream LTM Search": {
+      "main": [[{ "node": "Merge Contexts", "type": "main", "index": 0 }]]
+    },
+    "Short-Term Window": {
+      "main": [[{ "node": "Merge Contexts", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "memory", "context", "hybrid"],
+  "id": "pattern-05-hybrid-memory"
+}

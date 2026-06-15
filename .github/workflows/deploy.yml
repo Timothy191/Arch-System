@@ -1,0 +1,238 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: "Skip test execution"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  # ── Quality Gates ───────────────────────────────────────
+  quality-check:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    env:
+      TURBO_TELEMETRY_DISABLED: 1
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
+      PORT: 3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm nx run-many -t lint
+
+      - name: Type Check
+        run: pnpm nx run-many -t type-check
+
+      - name: Test
+        if: ${{ !inputs.skip_tests }}
+        run: pnpm test -- --passWithNoTests
+
+      - name: Build
+        run: pnpm nx run-many -t build --filter=portal
+
+  # ── Deploy to Staging ───────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    needs: quality-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || inputs.environment == 'staging'
+
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Option 1: Vercel Deployment
+      - name: Deploy to Vercel (Staging)
+        if: vars.DEPLOY_TARGET == 'vercel'
+        run: |
+          pnpm dlx vercel --token=${{ secrets.VERCEL_TOKEN }} --target=staging
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Option 2: Docker/Server Deployment
+      - name: Deploy via SSH
+        if: vars.DEPLOY_TARGET == 'ssh'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /opt/arch-systems
+            git pull origin main
+            ./scripts/deploy.sh staging --force
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f ${{ vars.STAGING_URL }}/api/health || exit 1
+
+      - name: Output URL
+        id: deploy
+        run: echo "url=${{ vars.STAGING_URL }}" >> $GITHUB_OUTPUT
+
+  # ── Deploy to Production ──────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: [quality-check, deploy-staging]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.environment == 'production'
+
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build for production
+      - name: Build
+        run: pnpm nx run-many -t build --filter=portal
+
+      # Option 1: Vercel Production
+      - name: Deploy to Vercel (Production)
+        if: vars.DEPLOY_TARGET == 'vercel'
+        run: |
+          pnpm dlx vercel --token=${{ secrets.VERCEL_TOKEN }} --prod
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Option 2: On-Premises Server
+      - name: Deploy to Production Server
+        if: vars.DEPLOY_TARGET == 'ssh'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /opt/arch-systems
+            git fetch origin
+            git checkout ${{ github.sha }}
+            ./scripts/deploy.sh production --force
+
+      # Option 3: Docker Hub + Server Pull
+      - name: Build and Push Docker Image
+        if: vars.DEPLOY_TARGET == 'docker'
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker build \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ vars.NEXT_PUBLIC_SUPABASE_URL }}" \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            --build-arg NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID="${{ vars.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID }}" \
+            --build-arg NEXT_PUBLIC_FUXA_URL="${{ vars.NEXT_PUBLIC_FUXA_URL }}" \
+            --build-arg NEXT_PUBLIC_SENTRY_DSN="${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}" \
+            --build-arg NEXT_PUBLIC_VERCEL_ENV="production" \
+            --build-arg SENTRY_ORG="${{ vars.SENTRY_ORG }}" \
+            --build-arg SENTRY_PROJECT="${{ vars.SENTRY_PROJECT }}" \
+            --build-arg SENTRY_AUTH_TOKEN="${{ secrets.SENTRY_AUTH_TOKEN }}" \
+            -t ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }} \
+            -f apps/portal/Dockerfile .
+          docker push ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/arch-systems:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/arch-systems:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/arch-systems:latest
+
+      - name: Deploy Docker Image
+        if: vars.DEPLOY_TARGET == 'docker'
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /opt/arch-systems
+            docker pull ${{ secrets.DOCKER_USERNAME }}/arch-systems:latest
+            docker compose up -d --no-deps --build portal
+
+      - name: Production Health Check
+        run: |
+          sleep 15
+          curl -f ${{ vars.PRODUCTION_URL }}/api/health || exit 1
+          curl -f ${{ vars.PRODUCTION_URL }}/login || exit 1
+
+      - name: Notify Deployment
+        if: always()
+        run: |
+          curl -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"event\": \"deploy\",
+              \"environment\": \"production\",
+              \"status\": \"${{ job.status }}\",
+              \"version\": \"${{ github.ref_name }}\",
+              \"commit\": \"${{ github.sha }}\",
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }" || true
+
+      - name: Output URL
+        id: deploy
+        run: echo "url=${{ vars.PRODUCTION_URL }}" >> $GITHUB_OUTPUT

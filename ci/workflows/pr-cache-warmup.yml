@@ -1,0 +1,31 @@
+name: Predictive Cache Warmup
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  warmup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Run Turbo Dry Run
+        run: pnpm turbo run build --dry-run=json > turbo-dry-run.json
+        
+      - name: Run Predictive Warmup Generator
+        run: pnpm exec ts-node packages/predictive-warmup/src/cli.ts --base origin/main --head HEAD --dry-run turbo-dry-run.json > targets.txt
+        
+      - name: Pre-fetch Cache Targets
+        run: |
+          cat targets.txt | xargs -I {} curl -X POST -d '{"target": "{}"}' http://cache-agent.internal/api/warmup

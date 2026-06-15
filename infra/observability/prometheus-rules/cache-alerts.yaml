@@ -1,0 +1,20 @@
+groups:
+- name: AMCA.Rules
+  rules:
+  - alert: CacheMissRateTooHigh
+    expr: rate(amca_cache_misses_total[5m]) / (rate(amca_cache_hits_total[5m]) + rate(amca_cache_misses_total[5m])) > 0.4
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Cache Miss Rate exceeds 40%"
+      description: "Cache miss rate for Tier L1 is too high. Policy engine may not be keeping up."
+  
+  - alert: RedisShardDown
+    expr: up{job="redis-cluster"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Redis Shard Down"
+      description: "A node in the L2 cache cluster has failed."

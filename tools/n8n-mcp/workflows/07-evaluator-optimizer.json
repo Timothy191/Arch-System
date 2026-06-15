@@ -1,0 +1,131 @@
+{
+  "name": "Self-Refining Evaluator-Optimizer Loop [Pattern 7]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eval-optimizer",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "eval-optimizer"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { input, criteria = ['correctness', 'completeness', 'conciseness'], max_iterations = 3 } = $json;\nreturn {\n  input,\n  criteria,\n  max_iterations,\n  max_safe_iterations: Math.min(max_iterations, 10),\n  iteration: 0,\n  history: [],\n  best_output: null,\n  best_score: 0\n};"
+      },
+      "name": "Initialize Loop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nstate.iteration++;\nstate.history.push({\n  iteration: state.iteration,\n  output: state.current_output || state.input,\n  timestamp: new Date().toISOString()\n});\nreturn state;"
+      },
+      "name": "Generate Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nconst current = state.history[state.history.length - 1];\nconst evaluations = {};\nlet totalScore = 0;\nstate.criteria.forEach(c => {\n  const score = Math.min(10, Math.max(1, Math.round(Math.random() * 6 + 4)));\n  evaluations[c] = { score, max: 10 };\n  totalScore += score;\n});\nconst avgScore = totalScore / state.criteria.length;\nstate.evaluations = evaluations;\nstate.avg_score = avgScore;\nif (avgScore > state.best_score) {\n  state.best_score = avgScore;\n  state.best_output = current.output;\n}\nreturn state;"
+      },
+      "name": "Evaluate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.iteration }}",
+              "operation": "smaller",
+              "value2": "={{ $json.max_safe_iterations }}",
+              "options": {}
+            }
+          ]
+        }
+      },
+      "name": "Should Continue?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.avg_score }}",
+              "operation": "smaller",
+              "value2": 8,
+              "options": {}
+            }
+          ]
+        }
+      },
+      "name": "Needs Improvement?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1150, 150]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nconst lastEval = state.evaluations || {};\nconst weakAreas = Object.entries(lastEval)\n  .filter(([k, v]) => v.score < 7)\n  .map(([k]) => k);\nstate.improvement_focus = weakAreas.length > 0\n  ? `Improve: ${weakAreas.join(', ')}`\n  : 'Polish and refine';\nreturn state;"
+      },
+      "name": "Improve",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 150]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nreturn {\n  input: state.input,\n  best_output: state.best_output || state.history[state.history.length - 1]?.output,\n  best_score: state.best_score,\n  iterations_run: state.iteration,\n  max_safe_iterations: state.max_safe_iterations,\n  evaluation_history: state.history.map(h => ({\n    iteration: h.iteration,\n    score: state.avg_score\n  })),\n  converged: state.best_score >= 8,\n  circuit_breaker: state.iteration >= state.max_safe_iterations,\n  summary: `Completed ${state.iteration}/${state.max_safe_iterations} iterations. Best score: ${state.best_score.toFixed(1)}/10. ${state.best_score >= 8 ? 'Converged.' : state.iteration >= state.max_safe_iterations ? 'Circuit breaker triggered.' : 'Manual review recommended.'}`\n};"
+      },
+      "name": "Finalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 450]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Initialize Loop", "type": "main", "index": 0 }]]
+    },
+    "Initialize Loop": {
+      "main": [[{ "node": "Generate Output", "type": "main", "index": 0 }]]
+    },
+    "Generate Output": {
+      "main": [[{ "node": "Evaluate", "type": "main", "index": 0 }]]
+    },
+    "Evaluate": {
+      "main": [[{ "node": "Should Continue?", "type": "main", "index": 0 }]]
+    },
+    "Should Continue?": {
+      "main": [
+        [{ "node": "Needs Improvement?", "type": "main", "index": 0 }],
+        [{ "node": "Finalize", "type": "main", "index": 0 }]
+      ]
+    },
+    "Needs Improvement?": {
+      "main": [
+        [{ "node": "Improve", "type": "main", "index": 0 }],
+        [{ "node": "Finalize", "type": "main", "index": 0 }]
+      ]
+    },
+    "Improve": {
+      "main": [[{ "node": "Generate Output", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "evaluation", "quality", "circuit-breaker"],
+  "id": "pattern-07-evaluator-optimizer"
+}

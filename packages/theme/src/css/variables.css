@@ -1,0 +1,385 @@
+/**
+ * Arch System — Theme Variables v4.0
+ * =====================================================
+ * macOS Ventura/Sonoma light palette — white vibrancy + glassmorphism.
+ * Light-only. No dark mode.
+ *
+ * Architecture:
+ * - :root defines the single source of truth (light mode)
+ * - shadcn/ui HSL variables for component compatibility
+ * - Tremor brand tokens for chart compatibility
+ * - Glass tokens always active (light frosted glass)
+ */
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+       TIER 1 — PRIMITIVES
+       Raw palette values. Never reference these directly in components
+       or utilities — use the Semantic aliases below.
+       ═══════════════════════════════════════════════════════════════ */
+
+  /* Background range — macOS system grays */
+  /* ARCH PALETTE — macOS Ventura/Sonoma Light */
+  --arch0: #f5f5f7; /* macOS base background */
+  --arch1: #ffffff; /* elevated surface / card */
+  --arch2: #e8e8ed; /* sunken / input bg */
+  --arch3: #d2d2d7; /* pressed / deeply sunken */
+
+  /* Border range — hairline to emphasis */
+  --arch4: rgba(0, 0, 0, 0.06); /* border subtle */
+  --arch5: rgba(0, 0, 0, 0.12); /* border default */
+  --arch6: rgba(0, 0, 0, 0.2); /* border emphasis */
+  --arch7: rgba(0, 0, 0, 0.3); /* border strong */
+
+  /* Text range — macOS type hierarchy */
+  --arch8: #a1a1a6; /* muted / placeholder */
+  --arch9: #6e6e73; /* secondary / caption */
+  --arch10: #3a3a3c; /* body */
+  --arch11: #1d1d1f; /* heading / primary */
+
+  /* Aurora Accents — status colors (unchanged) */
+  --arch12: #ff3b30; /* red — error / danger */
+  --arch13: #1c1c1e; /* deep charcoal — warning */
+  --arch14: #34c759; /* green — success */
+  --arch15: #1c1c1e; /* deep charcoal — macOS system blue / info */
+
+  /* ═══════════════════════════════════════════════════════════════
+       TIER 2 — SEMANTIC ALIASES
+       These are the only tokens components and utilities should reference.
+       They map to primitives above and will be redefined in dark mode.
+       ═══════════════════════════════════════════════════════════════ */
+  --bg-primary: var(--arch0);
+  --bg-secondary: var(--arch1);
+  --bg-tertiary: var(--arch2);
+
+  --border-subtle: var(--arch4);
+  --border-default: var(--arch5);
+  --border-emphasis: var(--arch6);
+
+  --text-muted: var(--arch8);
+  --text-secondary: var(--arch9);
+  --text-body: var(--arch10);
+  --text-primary: var(--arch10);
+  --text-heading: var(--arch11);
+
+  --accent-red: var(--arch12);
+  --accent-blue: var(--arch13);
+  --accent-green: var(--arch14);
+
+  /* Corporate Brand Colors */
+  --arch-brand-blue: #1c1c1e;
+  --arch-brand-blue-hover: #2c2c2e;
+
+  /* ─── Extended Action & Status Palette ────────────────────────────────────
+     These complement the macOS system blue with vivid action tokens that
+     align with the premium glassmorphism spec. Components must use semantic
+     aliases (--color-action-*, --color-status-*) rather than these directly.
+     ─────────────────────────────────────────────────────────────────────── */
+
+  /* Vivid Electric Blue — primary CTA, interactive highlights */
+  --accent-electric-blue: #1c1c1e;
+  --accent-electric-blue-hover: #2c2c2e;
+  --accent-electric-blue-subtle: rgba(28, 28, 30, 0.08);
+  --accent-electric-blue-border: rgba(28, 28, 30, 0.28);
+
+  /* Mint Green — status: optimal / active / healthy */
+  --accent-mint: #10b981;
+  --accent-mint-hover: #059669;
+  --accent-mint-subtle: rgba(16, 185, 129, 0.1);
+  --accent-mint-border: rgba(16, 185, 129, 0.28);
+
+  /* Amber — status: warning / pending / degraded */
+  --accent-amber: #f59e0b;
+  --accent-amber-hover: #d97706;
+  --accent-amber-subtle: rgba(245, 158, 11, 0.1);
+  --accent-amber-border: rgba(245, 158, 11, 0.28);
+
+  /* Semantic action aliases — use these in components */
+  --color-action-primary: var(--accent-electric-blue);
+  --color-action-primary-hover: var(--accent-electric-blue-hover);
+  --color-status-positive: var(--accent-mint);
+  --color-status-warning: var(--accent-amber);
+  --color-status-danger: var(--accent-red);
+
+  /* Glow shadows for the extended palette */
+  --shadow-glow-electric-blue:
+    0 0 20px rgba(28, 28, 30, 0.22), 0 0 60px rgba(28, 28, 30, 0.08);
+  --shadow-glow-mint:
+    0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
+  --shadow-glow-amber:
+    0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
+
+  /* Semantic status colors — used by QR access control and similar modules */
+  --success: #34c759;
+  --success-foreground: 0 0% 100%;
+  --warning: #1c1c1e;
+  --warning-foreground: 0 0% 100%;
+  --danger: #ff3b30;
+  --danger-foreground: 0 0% 100%;
+  --info: #1c1c1e;
+  --info-foreground: 0 0% 100%;
+
+  /* ═══════════════════════════════════════════════════════════════
+       TIER 3 — DEPRECATED ALIASES
+       These map to their canonical Tier 2 equivalents.
+       @deprecated Use the canonical --accent-* tokens instead.
+       Migration tracked in packages/theme/DECISIONS.md.
+       ═══════════════════════════════════════════════════════════════ */
+  --accent-cyan: var(--accent-blue); /* @deprecated → use --accent-blue */
+  --accent-indigo: var(--accent-blue); /* @deprecated → use --accent-blue */
+  --accent-violet: var(--accent-blue); /* @deprecated → use --accent-blue */
+  --accent-alert: var(--accent-red); /* @deprecated → use --accent-red */
+  --accent-emerald: var(--accent-green); /* @deprecated → use --accent-green */
+
+  /* macOS traffic light colors */
+  --mac-red: #ff5f56;
+  --mac-yellow: #ffbd2e;
+  --mac-green: #27c93f;
+
+  /* ═══════════════════════════════════════════════════════════════
+       SHADCN/UI HSL VARIABLES — macOS Light
+       ═══════════════════════════════════════════════════════════════ */
+  --background: 240 5% 96%; /* #f5f5f7 */
+  --foreground: 240 6% 10%; /* #1d1d1f */
+  --card: 0 0% 100%; /* white */
+  --card-foreground: 240 6% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 10%;
+  --primary: 240 6% 10%; /* #18181b Slate / Pitch Black */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 91%; /* #e8e8ed */
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 91%;
+  --muted-foreground: 240 3% 44%; /* #6e6e73 */
+  --accent: 240 5% 91%;
+  --accent-foreground: 240 6% 10%;
+  --destructive: 4 86% 58%; /* #ff3b30 */
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 6% 87%; /* rgba-ish light border */
+  --input: 240 5% 91%;
+  --ring: 240 6% 10%;
+  --radius: 0.75rem;
+
+  /* Charts — macOS system colors */
+  --chart-1: 240 6% 10%; /* Slate / Pitch Black */
+  --chart-2: 142 71% 45%; /* green */
+  --chart-3: 240 5% 45%; /* slate gray */
+  --chart-4: 4 86% 58%; /* red */
+  --chart-5: 270 60% 55%; /* purple */
+
+  /* ═══════════════════════════════════════════════════════════════
+       TREMOR BRAND — macOS Light
+       ═══════════════════════════════════════════════════════════════ */
+  --tremor-brand-faint: 240 5% 96%;
+  --tremor-brand-muted: 240 5% 90%;
+  --tremor-brand-subtle: 240 5% 65%;
+  --tremor-brand-default: 240 6% 10%;
+  --tremor-brand-emphasis: 0 0% 0%;
+  --tremor-brand-inverted: 0 0% 100%;
+  --tremor-background-muted: 240 5% 96%;
+  --tremor-background-subtle: 240 5% 92%;
+  --tremor-background-default: 0 0% 100%;
+  --tremor-background-emphasis: 240 6% 10%;
+  --tremor-border-default: 240 6% 87%;
+  --tremor-ring-default: 240 6% 10%;
+  --tremor-content-subtle: 240 3% 63%;
+  --tremor-content-default: 240 3% 44%;
+  --tremor-content-emphasis: 240 6% 23%;
+  --tremor-content-strong: 240 6% 10%;
+  --tremor-content-inverted: 0 0% 100%;
+
+  /* ═══════════════════════════════════════════════════════════════
+       GLASS TOKENS — macOS Frosted Glass (always active)
+       ═══════════════════════════════════════════════════════════════ */
+  --glass-surface: rgba(255, 255, 255, 0.7);
+  --glass-surface-hover: rgba(255, 255, 255, 0.85);
+  --glass-surface-strong: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-top: rgba(255, 255, 255, 0.25);
+  --glass-border-gradient: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.05)
+  );
+  --text-on-glass: rgba(10, 10, 20, 0.92);
+  --text-on-glass-muted: rgba(10, 10, 20, 0.55);
+
+  /* ── Glass-on-Video (translucent light glass over dark media) ──────────
+     These tokens produce a light-blurred-glass effect when layered over
+     the dark video scrim. The white surface at ~70 % opacity over a
+     dark background reads as a muted light gray — similar to macOS
+     vibrancy panels over a dark wallpaper.
+     Use these in place of inline dark-glass classes for maintainability. */
+  --glass-video-surface: rgba(255, 255, 255, 0.7);
+  --glass-video-surface-hover: rgba(255, 255, 255, 0.82);
+  --glass-video-surface-strong: rgba(255, 255, 255, 0.9);
+  --glass-video-backdrop: blur(16px) saturate(160%);
+  --glass-video-border: rgba(255, 255, 255, 0.15);
+  --glass-video-border-bottom: rgba(0, 0, 0, 0.06);
+  --glass-video-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  --glass-video-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
+  --text-on-glass-video: rgba(10, 10, 20, 0.92);
+  --text-on-glass-video-muted: rgba(10, 10, 20, 0.55);
+  --glass-video-radius: 20px;
+
+  /* Dark glass surface — opaque dark card for high-contrast sections
+     like data-heavy dashboards, chart containers, or alert panels. */
+  --dark-glass-surface: rgba(15, 23, 42, 0.75);
+  --dark-glass-surface-hover: rgba(15, 23, 42, 0.85);
+  --dark-glass-border: rgba(255, 255, 255, 0.12);
+  --dark-glass-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  --text-on-dark-glass: rgba(248, 250, 252, 0.95);
+  --text-on-dark-glass-muted: rgba(203, 213, 225, 0.6);
+
+  /* Premium Glass Stack — exact spec for the highest-tier surfaces
+     (hero panels, drawer headers, command bar backdrop).
+     These tokens are intentionally more translucent and vivid
+     than the standard --glass-* set to create visual hierarchy. */
+  --glass-premium-bg: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  --glass-premium-backdrop: blur(16px) saturate(160%);
+  --glass-premium-border: rgba(255, 255, 255, 0.6);
+  --glass-premium-radius: 20px;
+  --glass-premium-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 24px 35px -5px rgba(15, 23, 42, 0.06);
+
+  /* Vibrancy — macOS sidebar/toolbar tint */
+  --vibrancy-surface: rgba(246, 246, 250, 0.82);
+  --vibrancy-border: rgba(0, 0, 0, 0.06);
+
+  /* ═══════════════════════════════════════════════════════════════
+       Z-INDEX MATRIX — Single Source of Truth
+       ═══════════════════════════════════════════════════════════════ */
+  --z-background: 10;
+  --z-telemetry: 20;
+  --z-primary-card: 30;
+  --z-navigation: 40;
+  --z-overlay: 50;
+
+  /* ─── Canvas / Background Wave Tokens ──────────────────────────────────
+     Used by RouteBackground for the animated wave canvas fallback.
+     The gradient moves from soft gray to ice-blue to give depth
+     while keeping the surface light enough for glass to read cleanly.
+     ─────────────────────────────────────────────────────────────────── */
+  --canvas-bg-from: #f4f4f7;
+  --canvas-bg-to: #e4e4e7;
+  --canvas-gradient: linear-gradient(
+    135deg,
+    var(--canvas-bg-from) 0%,
+    var(--canvas-bg-to) 100%
+  );
+  /* Wave layer tint — subtle charcoal/slate radial used by the animated orbs */
+  --canvas-wave-tint-a: rgba(28, 28, 30, 0.06);
+  --canvas-wave-tint-b: rgba(16, 185, 129, 0.04);
+  --canvas-wave-tint-c: rgba(228, 228, 231, 0.8);
+
+  /* ═══════════════════════════════════════════════════════════════
+       DIFFUSION SHADOW SYSTEM — Light mode (softer)
+       ═══════════════════════════════════════════════════════════════ */
+  --shadow-diffusion-sm:
+    0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-md:
+    0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-lg:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-xl:
+    0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03),
+    0 12px 32px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.04),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-card-hover:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04),
+    0 16px 40px rgba(0, 0, 0, 0.04), 0 28px 64px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-elevated:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03),
+    0 20px 48px rgba(0, 0, 0, 0.03), 0 32px 72px rgba(0, 0, 0, 0.04),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-glow-blue:
+    0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-primary:
+    0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-electric:
+    0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
+  --shadow-window:
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03),
+    0 24px 56px rgba(0, 0, 0, 0.04), 0 40px 96px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+
+  /* ═══════════════════════════════════════════════════════════════
+       REFRACTION SYSTEM
+       ═══════════════════════════════════════════════════════════════ */
+  --refraction-inner-border: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --refraction-inner-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02);
+  --refraction-edge-light: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+
+  /* ═══════════════════════════════════════════════════════════════
+       WAVE TOKENS — Light mode (subtle)
+       ═══════════════════════════════════════════════════════════════ */
+  --wave-intensity: 0.2;
+  --wave-speed-mult: 0.5;
+  --wave-ampl-scale: 0.4;
+  --wave-opacity: 0.25;
+
+  /* ═══════════════════════════════════════════════════════════════
+       RADIUS SCALE
+       ═══════════════════════════════════════════════════════════════ */
+  /* radius-sm/md/lg/xl/card/button/full are generated from tokens.json */
+  /* and imported via variables-generated.css. Do not define duplicates here. */
+
+  /* Liquid Glass Radius Refinements */
+  --liquid-glass-radius-card: 16px;
+  --liquid-glass-radius-card-hover: 16px;
+  --liquid-glass-radius-input: var(--radius-md);
+  --liquid-glass-radius-input-focus: var(--radius-md);
+  --liquid-glass-radius-button: var(--radius-md);
+  --liquid-glass-radius-button-hover: var(--radius-md);
+
+  /* ===== Design System Tokens ===== */
+  /* ---- Colors (HUD & Overlays) ---- */
+  --color-bg-hud: oklch(0% 0 0deg / 60%);
+  --color-border-hud: oklch(100% 0 0deg / 10%);
+  --color-text-hud-primary: oklch(100% 0 0deg);
+  --color-text-hud-secondary: oklch(100% 0 0deg / 70%);
+  --color-text-hud-tertiary: oklch(100% 0 0deg / 40%);
+
+  /* ---- Opacity Tokens ---- */
+  --opacity-focus-dim: 0.4;
+  --opacity-disabled: 0.38;
+  --opacity-hover: 0.08;
+
+  /* ---- Blur Tokens ---- */
+  --blur-focus-dim: 4px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 3px oklch(0% 0 0deg / 0.08);
+  --shadow-md: 0 4px 12px oklch(0% 0 0deg / 0.1);
+  --shadow-lg:
+    0 8px 24px oklch(0% 0 0deg / 0.12), 0 0 0 1px oklch(0% 0 0deg / 0.04);
+
+  /* macOS menu bar height */
+  --mac-menu-bar-height: 28px;
+
+  /* ═══════════════════════════════════════════════════════════════
+       THEME TRANSITION
+       ═══════════════════════════════════════════════════════════════ */
+  --theme-transition-duration: 0ms;
+
+  /* Font variables used in Tailwind config preset */
+  --font-sans:
+    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+    sans-serif;
+  --font-inter:
+    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+    sans-serif;
+  --font-outfit:
+    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  color-scheme: light;
+}

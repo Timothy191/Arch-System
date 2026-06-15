@@ -1,0 +1,60 @@
+{
+  "name": "strict",
+  "description": "Strict safety policy: deny-by-default, only explicitly allowed operations",
+  "budget": {
+    "warn_at": 20,
+    "block_at": 40,
+    "per_tool_limits": {
+      "Bash": 10,
+      "Edit": 20,
+      "Write": 15,
+      "Agent": 10,
+      "Read": 50,
+      "Glob": 30,
+      "Grep": 30
+    }
+  },
+  "permission": {
+    "deny_by_default": true,
+    "require_approval_for": ["*"]
+  },
+  "isolation": {
+    "dangerous_commands": [
+      "rm", "sudo", "mkfs", "dd", "chmod", "chown",
+      "curl * | bash", "wget * | sh",
+      "> /dev/", "docker", "git push --force",
+      "npm publish", "pnpm publish"
+    ],
+    "allowed_shell_prefixes": [
+      "git status", "git diff", "git log", "ls", "cat", "echo",
+      "pnpm lint", "pnpm test", "pnpm build", "pnpm typecheck",
+      "node", "python3", "tsc --noEmit"
+    ],
+    "max_output_bytes": 51200,
+    "max_execution_seconds": 15
+  },
+  "rate_limit": {
+    "max_calls_per_minute": 30,
+    "per_tool_max_per_minute": {
+      "Bash": 5,
+      "Edit": 10,
+      "Agent": 5
+    },
+    "cooldown_seconds": 60
+  },
+  "content_filter": {
+    "block_secrets": true,
+    "block_patterns": ["*"]
+  },
+  "audit": {
+    "enabled": true,
+    "log_path": "ltm/store/audit.jsonl",
+    "log_all": true,
+    "log_blocks": true,
+    "log_warns": true
+  },
+  "user_control": {
+    "trusted_operations": ["Read(*)", "Glob(*)", "Grep(*)"],
+    "max_exceptions_per_session": 3
+  }
+}

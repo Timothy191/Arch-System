@@ -1,0 +1,138 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/pnpm-workspace.yaml",
+      "{workspaceRoot}/.npmrc",
+      {
+        "env": "NODE_ENV"
+      },
+      {
+        "env": "VERCEL_ENV"
+      },
+      {
+        "env": "CI"
+      },
+      {
+        "env": "TURBO_TELEMETRY_DISABLED"
+      },
+      {
+        "env": "OTEL_EXPORTER_OTLP_ENDPOINT"
+      },
+      {
+        "env": "INNGEST_EVENT_KEY"
+      },
+      {
+        "env": "NOVU_API_KEY"
+      },
+      {
+        "env": "OTEL_SERVICE_NAME"
+      },
+      {
+        "env": "PORTAL_VERSION"
+      },
+      {
+        "env": "RATE_LIMIT_IP_WHITELIST"
+      },
+      {
+        "env": "ENABLE_LOAD_ADAPTIVE_TEST"
+      },
+      {
+        "env": "DISABLE_RATE_LIMIT"
+      }
+    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"]
+  },
+  "targetDefaults": {
+    "codegen": {
+      "inputs": [
+        "{projectRoot}/src/css/variables.css",
+        "{projectRoot}/scripts/generate-tokens.mjs"
+      ],
+      "outputs": ["{projectRoot}/src/tokens/generated.ts"],
+      "cache": true
+    },
+    "lint:tokens": {
+      "inputs": [
+        "{projectRoot}/src/css/variables.css",
+        "{projectRoot}/src/tailwind/preset.ts",
+        "{projectRoot}/scripts/validate-tokens.mjs"
+      ],
+      "cache": true
+    },
+    "lint:css": {
+      "inputs": ["{projectRoot}/src/**/*.css", "{projectRoot}/.stylelintrc.*"],
+      "cache": true
+    },
+    "build": {
+      "dependsOn": ["^build", "^codegen"],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{projectRoot}/!**/*.test.ts",
+        "{projectRoot}/!**/*.test.tsx",
+        "{projectRoot}/!**/*.spec.ts",
+        "{projectRoot}/!**/*.spec.tsx",
+        "{projectRoot}/!**/__tests__/**",
+        "{projectRoot}/!**/*.stories.tsx"
+      ],
+      "outputs": [
+        "{projectRoot}/.next/**",
+        "!{projectRoot}/.next/cache/**",
+        "{projectRoot}/dist/**"
+      ],
+      "cache": true
+    },
+    "db:pull": {
+      "outputs": ["{projectRoot}/packages/supabase/migrations/**"],
+      "cache": false
+    },
+    "type-check": {
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{projectRoot}/**/tsconfig.json",
+        "{projectRoot}/!**/*.test.ts",
+        "{projectRoot}/!**/*.test.tsx",
+        "{projectRoot}/!**/*.md",
+        "{projectRoot}/!**/*.stories.*"
+      ],
+      "outputs": ["{projectRoot}/**/*.tsbuildinfo"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{projectRoot}/**/tsconfig.json",
+        "{projectRoot}/.eslintrc.*",
+        "{projectRoot}/!pnpm-lock.yaml",
+        "{projectRoot}/!**/*.test.ts",
+        "{projectRoot}/!**/*.test.tsx",
+        "{projectRoot}/!**/*.md",
+        "{projectRoot}/!**/*.stories.*",
+        "{projectRoot}/!**/__fixtures__/**"
+      ],
+      "outputs": ["{projectRoot}/node_modules/.cache/.eslintcache"],
+      "cache": true
+    },
+    "dev": {
+      "cache": false
+    },
+    "test": {
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{projectRoot}/jest.config.*",
+        "{projectRoot}/vitest.config.*",
+        "{projectRoot}/playwright.config.*",
+        "{projectRoot}/!**/*.md",
+        "{projectRoot}/!**/*.stories.*"
+      ],
+      "outputs": ["{projectRoot}/coverage/**/*"],
+      "cache": true
+    },
+    "clean": {
+      "cache": false
+    }
+  },
+  "defaultBase": "master",
+  "analytics": true
+}

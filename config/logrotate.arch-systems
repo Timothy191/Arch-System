@@ -1,0 +1,16 @@
+/home/timothy/Project/Arch-Mk2/*.log /home/timothy/Project/Arch-Mk2/apps/portal/*.log {
+  daily
+  rotate 14
+  compress
+  delaycompress
+  missingok
+  notifempty
+  create 0644 timothy timothy
+  sharedscripts
+  postrotate
+    # Reload portal if running so it reopens log file handles
+    if systemctl is-active --quiet arch-systems-local 2>/dev/null; then
+      systemctl kill -s USR1 arch-systems-local
+    fi
+  endscript
+}

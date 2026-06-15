@@ -1,0 +1,64 @@
+{
+  "name": "permissive",
+  "description": "Permissive safety policy: auto-approve known patterns, block only critical",
+  "budget": {
+    "warn_at": 80,
+    "block_at": 120,
+    "per_tool_limits": {
+      "Bash": 60,
+      "Edit": 100,
+      "Write": 60,
+      "Agent": 40,
+      "Read": 200,
+      "Glob": 100,
+      "Grep": 100
+    }
+  },
+  "permission": {
+    "deny_by_default": false,
+    "require_approval_for": ["Bash(sudo *)", "Bash(rm -rf /)"]
+  },
+  "isolation": {
+    "dangerous_commands": [
+      "rm -rf /", "sudo rm -rf", "mkfs", "dd if=/dev",
+      "> /dev/sda"
+    ],
+    "allowed_shell_prefixes": [],
+    "max_output_bytes": 204800,
+    "max_execution_seconds": 60
+  },
+  "rate_limit": {
+    "max_calls_per_minute": 120,
+    "per_tool_max_per_minute": {
+      "Bash": 30,
+      "Edit": 40,
+      "Agent": 20
+    },
+    "cooldown_seconds": 10
+  },
+  "content_filter": {
+    "block_secrets": true,
+    "block_patterns": [
+      "-----BEGIN.*PRIVATE KEY-----"
+    ]
+  },
+  "audit": {
+    "enabled": true,
+    "log_path": "ltm/store/audit.jsonl",
+    "log_all": false,
+    "log_blocks": true,
+    "log_warns": false
+  },
+  "user_control": {
+    "trusted_operations": [
+      "Bash(*)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Agent(*)"
+    ],
+    "max_exceptions_per_session": 50
+  }
+}

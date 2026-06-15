@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "skillListingMaxDescChars": 2048,
+  "skillListingBudgetFraction": 0.05,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Edit\" || tool == \"Write\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/secret-scan.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/catalog-guard.cjs\""
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_input.TargetFile // .tool_input.target_file' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && case \"$f\" in */packages/supabase/supabase/migrations/*) echo \"BLOCKED: Edit packages/supabase/supabase/migrations/* directly. Edit packages/database/migrations/* instead — supabase/migrations is a deploy-time copy (see CLAUDE.md 'Database' section).\" >&2; exit 2 ;; esac; }"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_input.TargetFile // .tool_input.target_file' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && case \"$f\" in */apps/portal/.env*) case \"$f\" in *.example) ;; *) echo \"BLOCKED: direct edits to apps/portal/.env* are not allowed. Update apps/portal/.env.example instead and document in CLAUDE.md if new vars are required.\" >&2; exit 2; ;; esac ;; esac; }"
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/rls-prompt.cjs\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path // .tool_input.TargetFile' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && [ -f \"$f\" ] && pnpm exec prettier --write \"$f\"; }",
+            "statusMessage": "Formatting..."
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path // .tool_input.TargetFile' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && [ -f \"$f\" ] && case \"$f\" in */apps/portal/*.ts|*/apps/portal/*.tsx|*/apps/portal/*.js|*/apps/portal/*.jsx) pnpm --filter portal exec eslint \"$f\" --max-warnings 0 ;; esac; }",
+            "statusMessage": "Linting...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path // .tool_input.TargetFile' | { read -r f; [ -n \"$f\" ] && [ \"$f\" != \"null\" ] && [ -f \"$f\" ] && case \"$f\" in */apps/portal/*.ts|*/apps/portal/*.tsx) pnpm --filter portal exec tsc --noEmit -p apps/portal/tsconfig.json --pretty false 2>&1 | tail -40 ;; esac; }",
+            "statusMessage": "Type-checking...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/tracing-check-reminder.cjs\"",
+            "statusMessage": "Tracing reminder...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/portal-test-on-edit.cjs\"",
+            "statusMessage": "Running portal test...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/track-package-edits.cjs\"",
+            "statusMessage": "Tracking package edits...",
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/suggest-skills-on-edit.cjs\"",
+            "statusMessage": "Checking skill triggers...",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/learn-capture.cjs\""
+          },
+          {
+            "type": "command",
+            "command": "DRIFT=$(diff -rq packages/database/migrations/ packages/supabase/supabase/migrations/ 2>/dev/null | wc -l); [ \"$DRIFT\" -gt 0 ] && echo \"[migration-drift] $DRIFT divergence(s) between packages/database/migrations/ and packages/supabase/supabase/migrations/. Sync with cp or run the deploy step.\" >&2; true"
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/agent-tracer-enforce.cjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/knip-on-stop.cjs\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/tracing-reminder.cjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/session-start.cjs\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PROJECT_DIR=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; TOKEN=$(cat \"$PROJECT_DIR/.memory/daemon.token\" 2>/dev/null || echo \"\"); curl -s -X POST   -H \"Authorization: Bearer $TOKEN\"   -H \"Content-Type: application/json\"   --data-binary @-   \"http://127.0.0.1:37222/hooks/session-start\"   2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/pre-compact.cjs\""
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/post-compact.cjs\""
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": ".env|.envrc|package.json|tsconfig.json|pyproject.toml|pnpm-workspace.yaml|turbo.json|.syncpackrc.js|knip.json",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/file-changed.cjs\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PROJECT_DIR=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; TOKEN=$(cat \"$PROJECT_DIR/.memory/daemon.token\" 2>/dev/null || echo \"\"); curl -s -X POST   -H \"Authorization: Bearer $TOKEN\"   -H \"Content-Type: application/json\"   --data-binary @-   \"http://127.0.0.1:37222/hooks/prompt-context\"   2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "claude-md-management@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "linear@claude-plugins-official": false,
+    "remember@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "qodo-skills@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
+  "companyAnnouncements": [
+    "features: /spec | bugfixes: /fix | requirements: /prd"
+  ],
+  "prefersReducedMotion": true,
+  "showThinkingSummaries": true,
+  "theme": "dark",
+  "autoCompactEnabled": true,
+  "showTurnDuration": true,
+  "terminalProgressBarEnabled": true,
+  "todoFeatureEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch)",
+      "Bash(git remote)",
+      "Bash(ls *)",
+      "Bash(pnpm quality)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm type-check)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm format:check)",
+      "Bash(pnpm format)",
+      "Bash(pnpm build)",
+      "Bash(pnpm --filter *)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm knip)",
+      "Bash(pnpm knip:fix)",
+      "Bash(pnpm deps:check)",
+      "Bash(pnpm deps:fix)",
+      "Bash(pnpm deps:lint)",
+      "Bash(pnpm md:lint)",
+      "Bash(pnpm md:fix)",
+      "Bash(pnpm db:docs)",
+      "Bash(pnpm --filter @repo/database *)",
+      "Bash(pnpm deploy:local)",
+      "Bash(pnpm deploy:staging)",
+      "Bash(pnpm deploy:production)",
+      "Bash(pnpm deploy:rollback)",
+      "Bash(pnpm fresh-start)",
+      "Bash(pnpm shutdown)",
+      "Bash(pnpm monitor*)",
+      "Bash(./scripts/*)"
+    ],
+    "deny": [
+      "Bash(git push --force)",
+      "Bash(git reset --hard *)",
+      "Bash(git checkout .)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "mcpServers": {
+    "reporecall": {
+      "command": "npx",
+      "args": ["-y", "@proofofwork-agency/reporecall", "mcp"]
+    }
+  }
+}

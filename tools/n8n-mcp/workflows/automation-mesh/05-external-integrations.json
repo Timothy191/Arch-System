@@ -1,0 +1,67 @@
+{
+  "name": "Arch Mesh — External Integrations Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mesh/external-integrations",
+        "options": {}
+      },
+      "name": "External Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "mesh-external-integrations"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body || $json;\nconst integrations = [\n  'slack-notification',\n  'email-alert',\n  'sms-gateway',\n  'erp-webhook',\n  'weather-api',\n  'satellite-feed'\n];\nif (!payload.integration || !integrations.includes(payload.integration)) {\n  return { error: 'Unknown integration', available: integrations };\n}\nreturn { integration: payload.integration, payload: payload.data || {}, requestedAt: new Date().toISOString() };"
+      },
+      "name": "Route Integration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ (() => { const urls = { 'slack-notification': $env.SLACK_WEBHOOK_URL, 'email-alert': $env.EMAIL_API_URL, 'sms-gateway': $env.SMS_API_URL, 'erp-webhook': $env.ERP_WEBHOOK_URL, 'weather-api': $env.WEATHER_API_URL, 'satellite-feed': $env.SATELLITE_API_URL }; return urls[$json.integration]; })() }}",
+        "sendBody": true,
+        "body": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "timeout": 30000,
+          "maxRetries": 3,
+          "retryOn": ["5XX", "timeout"]
+        }
+      },
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json;\nreturn {\n  status: 'delivered',\n  integration: $json.integration,\n  respondedAt: new Date().toISOString(),\n  httpStatus: response.statusCode || 'unknown'\n};"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "External Webhook": {
+      "main": [[{ "node": "Route Integration", "type": "main", "index": 0 }]]
+    },
+    "Route Integration": {
+      "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request": {
+      "main": [[{ "node": "Format Response", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": ["automation-mesh", "external-integrations", "api"],
+  "id": "mesh-external-integrations"
+}

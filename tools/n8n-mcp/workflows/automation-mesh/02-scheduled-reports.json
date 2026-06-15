@@ -1,0 +1,64 @@
+{
+  "name": "Arch Mesh — Scheduled Reports Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 0,
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const reportDate = new Date().toISOString().split('T')[0];\nconst reports = [\n  { id: 'daily-production', name: 'Daily Production Report', department: 'production' },\n  { id: 'daily-safety', name: 'Daily Safety Summary', department: 'safety' },\n  { id: 'daily-breakdowns', name: 'Breakdown Status Report', department: 'engineering' },\n  { id: 'daily-shifts', name: 'Shift Coverage Summary', department: 'control-room' }\n];\nreturn { reportDate, reports, scheduledAt: new Date().toISOString() };"
+      },
+      "name": "Prepare Reports",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { reports, reportDate } = $json;\nconst results = reports.map(r => ({\n  ...r,\n  status: 'queued',\n  generatedAt: new Date().toISOString()\n}));\nreturn { reportDate, results, total: results.length };"
+      },
+      "name": "Queue Generation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { results, reportDate } = $json;\nreturn {\n  status: 'scheduled',\n  reportDate,\n  queuedReports: results.length,\n  reports: results.map(r => r.name),\n  nextRun: 'Tomorrow 06:00 UTC'\n};"
+      },
+      "name": "Confirm Schedule",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Daily Schedule": {
+      "main": [[{ "node": "Prepare Reports", "type": "main", "index": 0 }]]
+    },
+    "Prepare Reports": {
+      "main": [[{ "node": "Queue Generation", "type": "main", "index": 0 }]]
+    },
+    "Queue Generation": {
+      "main": [[{ "node": "Confirm Schedule", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["automation-mesh", "scheduled-reports", "batch"],
+  "id": "mesh-scheduled-reports"
+}

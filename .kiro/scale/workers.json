@@ -1,0 +1,27 @@
+{
+  "workers": [
+    {
+      "name": "worker-1",
+      "capabilities": [
+        "code-review",
+        "testing"
+      ],
+      "registered_at": 1779116881821,
+      "last_heartbeat": 1779116881821,
+      "status": "active",
+      "current_load": 0,
+      "max_load": 3
+    },
+    {
+      "name": "test-worker",
+      "capabilities": [
+        "code"
+      ],
+      "registered_at": 1779117053805,
+      "last_heartbeat": 1779117053805,
+      "status": "active",
+      "current_load": 0,
+      "max_load": 3
+    }
+  ]
+}

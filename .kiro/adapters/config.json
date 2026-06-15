@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "active_provider": "jsonl",
+  "providers": {
+    "jsonl": {
+      "type": "jsonl",
+      "path": "ltm/store/vectors.jsonl"
+    },
+    "qdrant": {
+      "type": "qdrant",
+      "url": "http://localhost:6333",
+      "collection": "kiro_vectors",
+      "vector_size": 384
+    },
+    "chroma": {
+      "type": "chroma",
+      "url": "http://localhost:8000",
+      "collection": "kiro_vectors"
+    }
+  },
+  "embedding": {
+    "provider": "tfidf",
+    "model": null,
+    "batch_size": 32
+  },
+  "retrieval": {
+    "top_k": 5,
+    "score_threshold": 0.3
+  }
+}

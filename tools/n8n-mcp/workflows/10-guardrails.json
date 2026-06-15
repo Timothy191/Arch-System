@@ -1,0 +1,103 @@
+{
+  "name": "Guardrailed Agent with Hard Limits [Pattern 10]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "guardrails",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "guardrails"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { action, tool_calls_so_far = 0, max_tool_calls = 100, command, files_changed = 0 } = $json;\nreturn {\n  action,\n  tool_calls_so_far,\n  max_tool_calls,\n  command,\n  files_changed,\n  violations: [],\n  warnings: []\n};"
+      },
+      "name": "Initialize Guardrails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nconst DANGEROUS_PATTERNS = [\n  { re: /rm\\s+(-[rRf]+\\s+)*-?[rRf]/, desc: 'recursive force delete' },\n  { re: /sudo\\s+rm/, desc: 'sudo delete' },\n  { re: /\\|\\s*(ba)?sh/, desc: 'pipe to shell' },\n  { re: /git\\s+push\\s+.*--force/, desc: 'force push' },\n  { re: /git\\s+reset\\s+--hard/, desc: 'hard reset' },\n  { re: /chmod\\s+777/, desc: 'world-writable permissions' },\n  { re: /drop\\s+table/i, desc: 'DROP TABLE' },\n  { re: /truncate\\s+table/i, desc: 'TRUNCATE TABLE' },\n  { re: /delete\\s+from\\s+\\w+\\s*(;|$)/i, desc: 'unconditional DELETE' },\n  { re: /format\\s+(drive|disk|C:)/i, desc: 'drive format' },\n  { re: /dd\\s+if=/, desc: 'dd disk write' },\n  { re: /mkfs\\./, desc: 'filesystem creation' },\n  { re: />/\\s*\\/dev\\//, desc: 'direct device write' },\n];\nif (state.command) {\n  for (const p of DANGEROUS_PATTERNS) {\n    if (p.re.test(state.command)) {\n      state.violations.push({ severity: 'block', pattern: p.desc, command: state.command });\n    }\n  }\n}\nif (state.tool_calls_so_far > state.max_tool_calls) {\n  state.violations.push({ severity: 'block', pattern: 'max_tool_calls_exceeded', current: state.tool_calls_so_far, limit: state.max_tool_calls });\n}\nreturn state;"
+      },
+      "name": "Check Safety Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nif (state.files_changed > 20) {\n  state.warnings.push({ severity: 'warn', pattern: 'large_change_set', files: state.files_changed, tip: 'Break into smaller batches of 5-10 files' });\n}\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store/events.jsonl';\nconst fs = require('fs');\nconst path = require('path');\nif (fs.existsSync(ltmPath)) {\n  const recentEvents = fs.readFileSync(ltmPath, 'utf8').split('\\n').filter(Boolean).slice(-10);\n  state.recent_sessions = recentEvents.map(e => { try { return JSON.parse(e); } catch (x) { return null; } }).filter(Boolean);\n  // Check if similar dangerous action was attempted recently\n  for (const event of state.recent_sessions) {\n    if (event.type === 'guardrail_block' && event.action === state.action) {\n      state.warnings.push({ severity: 'warn', pattern: 'repeat_violation', previous: event.ts, tip: 'This action was previously blocked. Consider an alternative approach.' });\n    }\n  }\n}\nreturn state;"
+      },
+      "name": "Check Context Limits",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.violations.length }}",
+              "value2": 0,
+              "options": {}
+            }
+          ]
+        }
+      },
+      "name": "Violations?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nconst ltmPath = '/home/timothy/Project/Arch-Mk2/ltm/store';\nconst fs = require('fs');\nconst path = require('path');\nif (!fs.existsSync(ltmPath)) fs.mkdirSync(ltmPath, { recursive: true });\nconst event = {\n  id: `guard_${Date.now()}`,\n  ts: new Date().toISOString(),\n  type: 'guardrail_block',\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings\n};\nfs.appendFileSync(path.join(ltmPath, 'events.jsonl'), JSON.stringify(event) + '\\n');\nreturn {\n  allowed: false,\n  action: state.action,\n  violations: state.violations,\n  warnings: state.warnings,\n  message: `Action blocked by ${state.violations.length} guardrail violation(s)`,\n  suggestion: 'Review the violations above and adjust your approach.'\n};"
+      },
+      "name": "Block Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $json;\nreturn {\n  allowed: true,\n  action: state.action,\n  warnings: state.warnings,\n  message: state.warnings.length > 0\n    ? `Action allowed with ${state.warnings.length} warning(s)`\n    : 'Action allowed'\n};"
+      },
+      "name": "Allow Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1150, 450]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Initialize Guardrails", "type": "main", "index": 0 }]]
+    },
+    "Initialize Guardrails": {
+      "main": [[{ "node": "Check Safety Rules", "type": "main", "index": 0 }]]
+    },
+    "Check Safety Rules": {
+      "main": [[{ "node": "Check Context Limits", "type": "main", "index": 0 }]]
+    },
+    "Check Context Limits": {
+      "main": [[{ "node": "Violations?", "type": "main", "index": 0 }]]
+    },
+    "Violations?": {
+      "main": [
+        [{ "node": "Block Action", "type": "main", "index": 0 }],
+        [{ "node": "Allow Action", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "tags": ["agentic-ai", "safety", "guardrails"],
+  "id": "pattern-10-guardrails"
+}

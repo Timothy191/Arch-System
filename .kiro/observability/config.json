@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "service_name": "kiro-agent",
+  "exporters": {
+    "langfuse": {
+      "enabled": false,
+      "url": "http://localhost:3000",
+      "public_key": "",
+      "secret_key": ""
+    },
+    "otel": {
+      "enabled": false,
+      "endpoint": "http://localhost:4318",
+      "headers": {}
+    },
+    "jsonl": {
+      "enabled": true,
+      "path": "ltm/store/traces.jsonl",
+      "max_file_size_mb": 100
+    },
+    "prometheus": {
+      "enabled": false,
+      "port": 9464
+    }
+  },
+  "sampling": {
+    "rate": 1.0,
+    "always_sample_errors": true,
+    "always_sample_safety_blocks": true
+  },
+  "capture": {
+    "llm_calls": true,
+    "tool_invocations": true,
+    "retrieval_ops": true,
+    "agent_decisions": true,
+    "app_metadata": true
+  },
+  "redact": {
+    "enabled": true,
+    "patterns": ["password", "secret", "token", "key", "auth", "credential"]
+  }
+}
