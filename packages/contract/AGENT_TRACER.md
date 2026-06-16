@@ -27,11 +27,23 @@ Resolve the authentication challenge for contract validation by implementing off
    - Added detailed output showing all found endpoints
    - Validation now successfully finds all 35 endpoint operations
 
-4. **Offline Validation Workflow**:
-   - No longer requires running dev server
+4. **Zod Schema Generation**:
+   - Installed `openapi-zod-client` and `zod` packages
+   - Added `generate-zod` script to generate Zod schemas from OpenAPI spec
+   - Generated `src/generated/schemas.ts` with Zod schemas for all endpoints
+   - Added `@zodios/core` dependency for schema generation
+
+5. **Deep Contract Validation Test**:
+   - Created `src/generated/health-response-schema.ts` with extracted Zod schema for `/api/health`
+   - Created `scripts/test-contract-health.js` for runtime contract validation
+   - Test calls live `/api/health` endpoint and validates response against Zod schema
+   - Added `test:contract:health` script to package.json
+
+6. **Offline Validation Workflow**:
+   - No longer requires running dev server for spec generation
    - No longer requires authentication
-   - Fully offline and CI-friendly
-   - Works with committed spec file
+   - Fully offline and CI-friendly for spec generation
+   - Runtime tests require running dev server (expected for contract validation)
 
 ### Updated Workflow
 
@@ -39,20 +51,24 @@ The new contract validation workflow:
 
 1. **Portal generates spec**: `pnpm --filter portal generate-openapi-spec` (or automatically via build)
 2. **Contract generates types**: `pnpm --filter @repo/contract openapi:generate` (reads from local spec)
-3. **Contract validates**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
+3. **Contract generates Zod schemas**: `pnpm --filter @repo/contract generate-zod`
+4. **Contract validates**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
+5. **Runtime contract test**: `pnpm --filter @repo/contract test:contract:health` (requires running dev server)
 
-This workflow is fully offline and can run in CI without any external dependencies.
+Steps 1-4 are fully offline. Step 5 requires a running dev server for deep validation.
 
 ### What the Next Agent Should Know
 
 - **Spec File**: `packages/contract/openapi.generated.json` is the source of truth (committed)
 - **Generated Types**: `src/generated/openapi.types.ts` is generated and in .gitignore
-- **No Auth Required**: Validation now works offline without authentication
+- **Zod Schemas**: `src/generated/schemas.ts` is generated and in .gitignore
+- **No Auth Required**: Spec generation and validation work offline without authentication
 - **Build Integration**: Portal build script automatically regenerates spec
 - **CI Integration**: Can now add spec drift check and contract validation to CI
 - **Status**: All 28 API routes have JSDoc annotations (100% coverage), 35 endpoint operations found
 - **Schema Coverage Warnings**: Expected - the matching logic is simplistic. Zod schemas in @repo/contract don't necessarily map 1:1 to API endpoints. This can be improved later.
-- **Next Steps**: Add CI integration for spec drift check and contract validation
+- **Deep Validation**: Runtime test validates actual API responses against Zod schemas derived from spec
+- **Next Steps**: Add CI integration for spec drift check, contract validation, and runtime tests
 
 ### CI Integration Example
 
@@ -69,6 +85,12 @@ This workflow is fully offline and can run in CI without any external dependenci
 
 - name: Validate contracts
   run: pnpm --filter @repo/contract openapi:generate && pnpm --filter @repo/contract openapi:validate
+
+- name: Generate Zod schemas
+  run: pnpm --filter @repo/contract generate-zod
+
+- name: Runtime contract tests
+  run: pnpm --filter portal dev & sleep 10 && pnpm --filter @repo/contract test:contract:health
 ```
 
 ### See Also

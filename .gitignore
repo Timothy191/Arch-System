@@ -147,6 +147,9 @@ fallow_output.txt
 # Nx cache (per-package)
 **/.nx/
 
+# Generated OpenAPI types from contract validation
+packages/contract/src/generated/
+
 # One-off generated reports / backups
 audit_report.md
 cleanup-backup/
@@ -156,3 +159,6 @@ metadata.json
 # Submodules (tools/devdocs not properly configured)
 tools/devdocs
 .codebuddy
+
+
+storybook-static
