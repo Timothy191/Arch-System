@@ -15,7 +15,7 @@
   --arch9: #6e6e73;
   --arch10: #3a3a3c;
   --arch11: #1d1d1f;
-  --arch12: #ff3b30;
+  --arch12: #d22118;
   --arch13: #1c1c1e;
   --arch14: #34c759;
   --arch15: #1c1c1e;
@@ -24,6 +24,8 @@
   --mac-green: #27c93f;
   --mac-menu-bar-height: 28px;
   --border: 240 6% 87%;
+  --accent-red: #d22118;
+  --accent-alert: #d22118;
   --success: #34c759;
   --success-foreground: 0 0% 100%;
   --warning: #1c1c1e;
@@ -135,10 +137,8 @@
   --text-body: var(--arch10);
   --text-primary: var(--arch10);
   --text-heading: var(--arch11);
-  --accent-red: var(--arch12);
   --accent-blue: var(--arch15);
   --accent-green: var(--arch14);
-  --accent-alert: var(--arch12);
   --accent-cyan: var(--arch15);
   --accent-emerald: var(--arch14);
   --accent-indigo: var(--arch15);
