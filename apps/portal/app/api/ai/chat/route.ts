@@ -1,3 +1,70 @@
+/**
+ * @swagger
+ * /api/ai/chat:
+ *   post:
+ *     summary: Chat with AI assistant
+ *     description: Interact with the AI assistant using a multi-turn conversation interface. Supports context passing and session management for coherent conversations.
+ *     tags:
+ *       - AI
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - messages
+ *             properties:
+ *               messages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - role
+ *                     - content
+ *                   properties:
+ *                     role:
+ *                       type: string
+ *                       enum: [user, assistant, system]
+ *                     content:
+ *                       type: string
+ *                     parts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                       description: Optional multipart content (images, files)
+ *               context:
+ *                 type: string
+ *                 description: Additional context for the conversation
+ *               sessionId:
+ *                 type: string
+ *                 description: "Session ID for conversation continuity (auto-generated if not provided)"
+ *               model:
+ *                 type: string
+ *                 description: "AI model to use (default: provider default)"
+ *     responses:
+ *       200:
+ *         description: AI response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 content:
+ *                   type: string
+ *                 sessionId:
+ *                   type: string
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { inngest } from "@repo/utils/inngest";
 import { logError } from "@/lib/errors/error-logger";

@@ -1,3 +1,96 @@
+/**
+ * @swagger
+ * /api/export/fuel-logs:
+ *   get:
+ *     summary: Export fuel logs
+ *     description: Export fuel consumption logs with date range filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).
+ *     tags:
+ *       - Export
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: "Start date (YYYY-MM-DD, default: 30 days ago)"
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: "End date (YYYY-MM-DD, default: today)"
+ *       - in: query
+ *         name: dept
+ *         schema:
+ *           type: string
+ *         description: Department name filter
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Maximum number of records
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Pagination offset
+ *     responses:
+ *       200:
+ *         description: Export data (JSON or CSV)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       log_date:
+ *                         type: string
+ *                         format: date
+ *                       shift:
+ *                         type: string
+ *                       department_id:
+ *                         type: string
+ *                       machine_id:
+ *                         type: string
+ *                       machine_name:
+ *                         type: string
+ *                       machine_type:
+ *                         type: string
+ *                       diesel_litres:
+ *                         type: string
+ *                 from:
+ *                   type: string
+ *                 to:
+ *                   type: string
+ *                 count:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 offset:
+ *                   type: integer
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               description: CSV file with fuel log data
+ *       400:
+ *         description: Invalid query parameters
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";

@@ -1,3 +1,88 @@
+/**
+ * @swagger
+ * /api/export/safety-incidents:
+ *   get:
+ *     summary: Export safety incidents
+ *     description: Export safety incident records with month-based filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).
+ *     tags:
+ *       - Export
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: "Month filter (YYYY-MM, default: last 30 days)"
+ *       - in: query
+ *         name: dept
+ *         schema:
+ *           type: string
+ *         description: Department name filter
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Maximum number of records
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Pagination offset
+ *     responses:
+ *       200:
+ *         description: Export data (JSON or CSV)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       incident_date:
+ *                         type: string
+ *                         format: date
+ *                       incident_type:
+ *                         type: string
+ *                       severity:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       department_id:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                 from:
+ *                   type: string
+ *                 to:
+ *                   type: string
+ *                 count:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 offset:
+ *                   type: integer
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               description: CSV file with safety incident data
+ *       400:
+ *         description: Invalid query parameters
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
