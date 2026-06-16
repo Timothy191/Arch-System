@@ -9,6 +9,7 @@ import { PerformanceListener } from "@/components/PerformanceListener";
 import { CommandBar } from "@/components/CommandBar";
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
+import { PWAInstallButton } from "@/components/PWAInstallButton";
 import dynamic from "next/dynamic";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
@@ -23,9 +24,9 @@ const HeaderWidgets = dynamic(
   {
     loading: () => (
       <div className="flex items-center gap-3" aria-hidden="true">
-        <div className="w-7 h-7 rounded-full bg-black/[0.03] border border-black/[0.05] animate-pulse" />
-        <div className="w-20 h-7 rounded-full bg-black/[0.03] border border-black/[0.05] animate-pulse" />
-        <div className="w-7 h-7 rounded-full bg-black/[0.03] border border-black/[0.05] animate-pulse" />
+        <div className="w-7 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
+        <div className="w-20 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
+        <div className="w-7 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
       </div>
     ),
   },
@@ -145,6 +146,7 @@ export default function RootLayout({
               <PerformanceListener />
               <WebVitalsReporter />
               <OfflineBanner />
+              <PWAInstallButton />
               <AIAssistantWrapper />
 
               {/* Global Navigation Header with proper landmark */}
