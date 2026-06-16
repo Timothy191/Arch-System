@@ -45,15 +45,23 @@ Implement automated OpenAPI spec generation from JSDoc annotations to enable off
    - Now properly extracts all endpoints from `spec.paths` object
    - Successfully validates all 35 endpoint operations
 
+7. **Zod Schema Generation**:
+   - Contract package added `openapi-zod-client` and `zod` for schema generation
+   - Added `generate-zod` script to generate Zod schemas from OpenAPI spec
+   - Generated Zod schemas for all 35 endpoint operations
+   - Enables deep contract validation against runtime API responses
+
 ### Validation Workflow
 
 The new workflow for contract validation:
 
 1. **Generate Spec**: `pnpm --filter portal generate-openapi-spec`
 2. **Generate Types**: `pnpm --filter @repo/contract openapi:generate` (uses local spec)
-3. **Validate Contracts**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
+3. **Generate Zod Schemas**: `pnpm --filter @repo/contract generate-zod`
+4. **Validate Contracts**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
+5. **Runtime Tests**: `pnpm --filter @repo/contract test:contract:health` (requires dev server)
 
-This workflow is fully offline and requires no authentication or running dev server.
+Steps 1-4 are fully offline. Step 5 requires a running dev server for deep validation.
 
 ### What the Next Agent Should Know
 
@@ -62,8 +70,10 @@ This workflow is fully offline and requires no authentication or running dev ser
 - **CI Integration**: Add spec drift check to CI (see next steps)
 - **Spec Location**: `packages/contract/openapi.generated.json` - committed as source of truth
 - **Generated Types**: `packages/contract/src/generated/openapi.types.ts` - in .gitignore
+- **Zod Schemas**: `packages/contract/src/generated/schemas.ts` - in .gitignore
 - **Authentication No Longer Required**: Contract validation now works offline without auth
 - **Validation Status**: Successfully validates all 35 endpoint operations across 30 paths
+- **Deep Validation**: Runtime tests validate actual API responses against Zod schemas
 - **Schema Coverage Warnings**: Expected - simplistic matching logic. Zod schemas don't map 1:1 to endpoints.
 
 ### Next Steps for CI Integration
@@ -83,6 +93,12 @@ Add to GitHub Actions workflow:
 
 - name: Validate contracts
   run: pnpm --filter @repo/contract openapi:generate && pnpm --filter @repo/contract openapi:validate
+
+- name: Generate Zod schemas
+  run: pnpm --filter @repo/contract generate-zod
+
+- name: Runtime contract tests
+  run: pnpm --filter portal dev & sleep 10 && pnpm --filter @repo/contract test:contract:health
 ```
 
 ### See Also
@@ -288,6 +304,7 @@ Add comprehensive JSDoc annotations to API routes to enable automatic OpenAPI sp
 - **Role-Based Access**: Document admin-only or department-scoped access in descriptions
 
 ### Next Steps
+
 - **Next Steps**:
   - Test the generated OpenAPI spec at `/api/doc`
   - Validate generated types against @repo/contract schemas
@@ -302,7 +319,6 @@ Add comprehensive JSDoc annotations to API routes to enable automatic OpenAPI sp
   - Uses `animate-pulse` and `blur-[60px]` for a subtle, high-quality depth effect.
 - **Status**: Visual fidelity improved; no impact on form accessibility.
 - **Next Steps**: None.
-
 
 ## 2026-06-15: DozerRollForm Test Fixes — Isolation & Zod Coverage
 
@@ -452,7 +468,7 @@ Implement Progressive Web App (PWA) functionality for offline capability and ins
 
 2. **Manual Service Worker**:
    - Created `public/sw.js` with custom caching strategies
-   - Implemented CacheFirst for static assets (_next/static/)
+   - Implemented CacheFirst for static assets (\_next/static/)
    - Implemented NetworkFirst for API routes (excluding /api/auth)
    - Implemented CacheFirst for Supabase images
    - Added install, activate, and fetch event handlers
@@ -716,7 +732,7 @@ Implement Playwright E2E test suite for the Control Room department (4 spec file
 - **Critical — scada.spec.ts**: Replaced `.or(iframe, degradedHeading)` with status text labels ("Connected" / "Degraded" / "Offline") to fix false-positive from always-visible iframe DOM element.
 - **Critical — alerts.spec.ts**: Replaced brittle empty-state assertion with `.or()` for either empty state text or alert card content matching "/ is offline/".
 - **Critical — shift-closeout.spec.ts**: Replaced single Close Shift button assertion with `.or(closeButton, closedBadge)` to handle both open and closed shift DB states.
-- **Major — both specs**: Added `requireDepartment` rejection tests (navigate to /drilling/* expecting 404) for machine-operations and shift-coverage routes.
+- **Major — both specs**: Added `requireDepartment` rejection tests (navigate to /drilling/\* expecting 404) for machine-operations and shift-coverage routes.
 - **Major — shift-closeout.spec.ts**: Added Machine Coverage section test.
 - **Major — machine-operations.spec.ts**: Added shift coverage compliance widget test.
 - **Minor — machine-operations.spec.ts**: Removed unused `loginWithTestUser` import.
