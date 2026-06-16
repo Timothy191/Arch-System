@@ -18,9 +18,16 @@ Resolve the authentication challenge for contract validation by implementing off
    - Portal generates spec at `packages/contract/openapi.generated.json`
    - Generated using swagger-jsdoc from JSDoc annotations
    - Committed to repository as source of truth
-   - 30 paths generated successfully with no YAML errors
+   - 35 endpoint operations across 30 paths generated successfully
 
-3. **Offline Validation Workflow**:
+3. **Fixed validate-contract.js**:
+   - Updated to read OpenAPI spec JSON directly instead of parsing TypeScript
+   - Now reads from `openapi.generated.json` instead of generated types
+   - Properly extracts all endpoints from `spec.paths` object
+   - Added detailed output showing all found endpoints
+   - Validation now successfully finds all 35 endpoint operations
+
+4. **Offline Validation Workflow**:
    - No longer requires running dev server
    - No longer requires authentication
    - Fully offline and CI-friendly
@@ -32,7 +39,7 @@ The new contract validation workflow:
 
 1. **Portal generates spec**: `pnpm --filter portal generate-openapi-spec` (or automatically via build)
 2. **Contract generates types**: `pnpm --filter @repo/contract openapi:generate` (reads from local spec)
-3. **Contract validates**: `pnpm --filter @repo/contract openapi:validate`
+3. **Contract validates**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
 
 This workflow is fully offline and can run in CI without any external dependencies.
 
@@ -43,7 +50,8 @@ This workflow is fully offline and can run in CI without any external dependenci
 - **No Auth Required**: Validation now works offline without authentication
 - **Build Integration**: Portal build script automatically regenerates spec
 - **CI Integration**: Can now add spec drift check and contract validation to CI
-- **Status**: All 28 API routes have JSDoc annotations (100% coverage)
+- **Status**: All 28 API routes have JSDoc annotations (100% coverage), 35 endpoint operations found
+- **Schema Coverage Warnings**: Expected - the matching logic is simplistic. Zod schemas in @repo/contract don't necessarily map 1:1 to API endpoints. This can be improved later.
 - **Next Steps**: Add CI integration for spec drift check and contract validation
 
 ### CI Integration Example

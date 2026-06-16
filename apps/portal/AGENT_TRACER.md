@@ -35,10 +35,15 @@ Implement automated OpenAPI spec generation from JSDoc annotations to enable off
    - Now reads from local `openapi.generated.json` instead of fetching from `/api/doc`
 
 5. **Generated Initial Spec**:
-   - Successfully generated spec with 30 paths
+   - Successfully generated spec with 35 endpoint operations across 30 paths
    - No YAML parsing errors
    - Spec includes all public API endpoints with proper schemas
    - Added generated spec to git (committed as source of truth)
+
+6. **Fixed validate-contract.js**:
+   - Updated to read OpenAPI spec JSON directly instead of parsing generated TypeScript
+   - Now properly extracts all endpoints from `spec.paths` object
+   - Successfully validates all 35 endpoint operations
 
 ### Validation Workflow
 
@@ -46,7 +51,7 @@ The new workflow for contract validation:
 
 1. **Generate Spec**: `pnpm --filter portal generate-openapi-spec`
 2. **Generate Types**: `pnpm --filter @repo/contract openapi:generate` (uses local spec)
-3. **Validate Contracts**: `pnpm --filter @repo/contract openapi:validate`
+3. **Validate Contracts**: `pnpm --filter @repo/contract openapi:validate` (reads spec directly)
 
 This workflow is fully offline and requires no authentication or running dev server.
 
@@ -58,6 +63,8 @@ This workflow is fully offline and requires no authentication or running dev ser
 - **Spec Location**: `packages/contract/openapi.generated.json` - committed as source of truth
 - **Generated Types**: `packages/contract/src/generated/openapi.types.ts` - in .gitignore
 - **Authentication No Longer Required**: Contract validation now works offline without auth
+- **Validation Status**: Successfully validates all 35 endpoint operations across 30 paths
+- **Schema Coverage Warnings**: Expected - simplistic matching logic. Zod schemas don't map 1:1 to endpoints.
 
 ### Next Steps for CI Integration
 
@@ -281,11 +288,21 @@ Add comprehensive JSDoc annotations to API routes to enable automatic OpenAPI sp
 - **Role-Based Access**: Document admin-only or department-scoped access in descriptions
 
 ### Next Steps
+- **Next Steps**:
+  - Test the generated OpenAPI spec at `/api/doc`
+  - Validate generated types against @repo/contract schemas
+  - Integrate contract validation into CI pipeline
+  - Review and refine JSDoc annotations based on actual API usage patterns
 
-- Test the generated OpenAPI spec at `/api/doc`
-- Validate generated types against @repo/contract schemas
-- Integrate contract validation into CI pipeline
-- Review and refine JSDoc annotations based on actual API usage patterns
+## 2026-06-16: Login Surface Visual Refinement
+
+- **Purpose**: Enhance "Liquid Glass" depth and macOS Sonoma aesthetic.
+- **Changes**:
+  - Added an animated radial refraction glow behind the login card in `app/(auth)/login/page.tsx`.
+  - Uses `animate-pulse` and `blur-[60px]` for a subtle, high-quality depth effect.
+- **Status**: Visual fidelity improved; no impact on form accessibility.
+- **Next Steps**: None.
+
 
 ## 2026-06-15: DozerRollForm Test Fixes — Isolation & Zod Coverage
 
