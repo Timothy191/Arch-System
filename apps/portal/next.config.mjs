@@ -166,6 +166,15 @@ const nextConfig = {
               source: "/api/ai/:path*",
               headers: [{ key: "Cache-Control", value: "private, no-store" }],
             },
+            {
+              source: "/error-pages/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
           ]
         : []),
     ];

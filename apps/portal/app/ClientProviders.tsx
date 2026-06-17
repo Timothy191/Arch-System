@@ -41,13 +41,12 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
-          .then((registration) => {
-            // eslint-disable-next-line no-console
-            console.log("SW registered: ", registration);
+          .then((_registration) => {
+            // Service worker registered silently
           })
           .catch((registrationError) => {
             // eslint-disable-next-line no-console
-            console.log("SW registration failed: ", registrationError);
+            console.error("SW registration failed: ", registrationError);
           });
       });
     }

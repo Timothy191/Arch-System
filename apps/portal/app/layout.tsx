@@ -2,19 +2,19 @@ import "@repo/ui/globals.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import dynamic from "next/dynamic";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FocusModeProvider } from "@/components/FocusModeProvider";
 import { PerformanceListener } from "@/components/PerformanceListener";
-import { CommandBar } from "@/components/CommandBar";
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 import { PWAInstallButton } from "@/components/PWAInstallButton";
-import dynamic from "next/dynamic";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
+import { Toaster } from "@repo/ui/Toaster";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -31,6 +31,12 @@ const HeaderWidgets = dynamic(
     ),
   },
 );
+
+const CommandBar = dynamic(
+  () =>
+    import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
+  { ssr: false },
+);
 import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
 import { RouteBackground } from "@/components/RouteBackground";
 import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
@@ -38,14 +44,17 @@ import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600"],
   display: "swap",
+  adjustFontFallback: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  weight: ["400", "500"],
   display: "swap",
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -85,6 +94,12 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
@@ -175,6 +190,7 @@ export default function RootLayout({
 
               <CommandBar />
               <ViewportBoundaries />
+              <Toaster />
 
               {/* Footer landmark - if exists, otherwise contentinfo on body or create footer */}
               {/* We'll add a proper footer or ensure contentinfo is on appropriate element */}

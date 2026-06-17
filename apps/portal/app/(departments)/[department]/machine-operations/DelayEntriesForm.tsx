@@ -10,10 +10,10 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  XCircle,
   Info,
   HelpCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // AGENT-TRACE: Delay entry form with granular tracking, auto-calculation, and manual override
 // Supports draft/committed workflow with role-based access control
@@ -80,10 +80,6 @@ export function DelayEntriesForm({
     "commit" | "remove" | null
   >(null);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
-  const [toast, setToast] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
   const isDirty =
@@ -238,7 +234,7 @@ export function DelayEntriesForm({
         delete newErrors[index];
         return newErrors;
       });
-      setToast({ type: "success", message: "Delay entry removed" });
+      toast.success("Delay entry removed");
     },
     [delayEntries],
   );
@@ -347,10 +343,7 @@ export function DelayEntriesForm({
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to save delay entries:", err);
-      setToast({
-        type: "error",
-        message: "Failed to save delay entries. Please try again.",
-      });
+      toast.error("Failed to save delay entries. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -361,7 +354,7 @@ export function DelayEntriesForm({
   const handleCommitClick = useCallback(() => {
     const draftDelays = delayEntries.filter((d) => d.status === "draft");
     if (draftDelays.length === 0) {
-      setToast({ type: "error", message: "No draft delays to commit" });
+      toast.error("No draft delays to commit");
       return;
     }
     setConfirmAction("commit");
@@ -378,10 +371,7 @@ export function DelayEntriesForm({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setToast({
-          type: "error",
-          message: "You must be logged in to commit delays",
-        });
+        toast.error("You must be logged in to commit delays");
         return;
       }
 
@@ -393,16 +383,13 @@ export function DelayEntriesForm({
         .single();
 
       if (!employee) {
-        setToast({ type: "error", message: "Employee record not found" });
+        toast.error("Employee record not found");
         return;
       }
 
       // Check if user has permission to commit (supervisor or admin)
       if (employee.role !== "supervisor" && employee.role !== "admin") {
-        setToast({
-          type: "error",
-          message: "Only supervisors can commit delay entries",
-        });
+        toast.error("Only supervisors can commit delay entries");
         return;
       }
 
@@ -445,17 +432,13 @@ export function DelayEntriesForm({
         setInitialDelays(formatted);
       }
 
-      setToast({
-        type: "success",
-        message: `${draftDelays.length} delay entry(ies) committed successfully`,
-      });
+      toast.success(
+        `${draftDelays.length} delay entry(ies) committed successfully`,
+      );
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to commit delays:", err);
-      setToast({
-        type: "error",
-        message: "Failed to commit delays. Please try again.",
-      });
+      toast.error("Failed to commit delays. Please try again.");
     } finally {
       setIsCommitting(false);
     }
@@ -914,33 +897,6 @@ export function DelayEntriesForm({
                 </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Toast Notification */}
-        {toast && (
-          <div
-            className={`fixed bottom-4 right-4 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg z-50 ${
-              toast.type === "success"
-                ? "bg-[var(--accent-green)] text-white"
-                : "bg-accent-red text-white"
-            }`}
-          >
-            {toast.type === "success" ? (
-              <CheckCircle size={20} />
-            ) : (
-              <XCircle size={20} />
-            )}
-            <span className="text-sm font-medium">{toast.message}</span>
-            <button
-              type="button"
-              title="Dismiss notification"
-              aria-label="Dismiss notification"
-              onClick={() => setToast(null)}
-              className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
-            >
-              <XCircle size={16} />
-            </button>
           </div>
         )}
       </div>

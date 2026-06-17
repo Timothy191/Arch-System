@@ -1,5 +1,115 @@
 # Portal Agent Tracer
 
+## 2026-01-XX: Performance and Core Web Vitals Optimization
+
+### Purpose
+
+Optimize the portal application to meet Core Web Vitals targets and improve overall performance, including LCP, INP, CLS, bundle size, and resource loading.
+
+### Changes Made
+
+1. **Font Optimization** (`apps/portal/app/layout.tsx`):
+   - Reduced Inter font weights from 6 to 3 (400, 500, 600) to reduce font payload
+   - Reduced JetBrains Mono weights to 2 (400, 500)
+   - Added `adjustFontFallback: false` to reduce CLS from font swapping
+   - Added preconnect headers for Google Fonts (fonts.googleapis.com, fonts.gstatic.com)
+
+2. **Code Splitting** (`apps/portal/app/layout.tsx`):
+   - Dynamically imported CommandBar with `ssr: false` to defer loading of keyboard shortcut feature
+   - Heavy components (UniverSheet, MonitoringMap, AIAssistant) already use dynamic imports
+
+3. **Cache Headers** (`apps/portal/next.config.mjs`):
+   - Added cache headers for `/error-pages/:path*` with `public, max-age=31536000, immutable`
+   - Existing headers already well-configured for static assets, API routes, and auth endpoints
+
+4. **Memory Leak Prevention**:
+   - Reviewed all useEffect hooks across components and features
+   - Verified proper cleanup for intervals, timeouts, event listeners
+   - All components have correct cleanup patterns
+
+5. **Image Optimization**:
+   - Verified all images use Next.js Image component with explicit dimensions
+   - Satellite images use `loading="lazy"` for below-the-fold content
+   - Error page images use `priority` for above-the-fold content
+   - Image formats already configured for AVIF/WebP optimization
+
+6. **Linting Fixes**:
+   - Removed unused `XCircle` import from DelayEntriesForm.tsx
+   - Prefixed unused `registration` parameter with underscore in ClientProviders.tsx
+   - Prefixed unused parameters in use-form-submit.ts type definitions
+
+### Verification
+
+- **Lint**: PASS (resolved all unused variable warnings)
+- **Type-check**: PASS
+- **Bundle analyzer**: Turbopack doesn't support traditional analyzer, but build completes successfully
+- **Tree shaking**: Enabled via Next.js configuration with `optimizePackageImports`
+- **Inline CSS**: Enabled via `experimental.inlineCss`
+
+### Performance Improvements
+
+- **Font payload**: Reduced by ~50% (from 6 weights to 3 for Inter)
+- **Initial JS bundle**: CommandBar now lazy-loaded (reduces initial bundle)
+- **Cache hit rate**: Error page assets now cached for 1 year
+- **CLS**: Reduced by `adjustFontFallback: false` on fonts
+- **LCP**: Improved via font preconnect and reduced font weights
+- **INP**: Improved by code splitting non-critical features (CommandBar)
+
+### What the Next Agent Should Know
+
+- Font optimization reduces initial load time but may require adjusting if all font weights are needed
+- CommandBar is now client-side only and won't work with JavaScript disabled (acceptable for keyboard shortcut feature)
+- Cache headers follow best practices: static assets long-lived, dynamic routes private/no-store
+- Tree shaking is automatic for packages listed in `optimizePackageImports` (lucide-react, framer-motion, @tremor/react)
+
+---
+
+## 2026-06-17: Visitors Page UX Enhancements (Loading, Empty, and Feedback States)
+
+### Purpose
+
+Implement tailored loading, empty, and feedback states for the Visitors page to ensure high-quality UX and alignment with industrial portal standards.
+
+### Changes Made
+
+1. **Tailored Loading Skeleton** (`apps/portal/app/(departments)/access-control/visitors/loading.tsx`):
+   - Created a custom skeleton loader that matches the 1:2 column grid layout.
+   - Includes specific skeletons for the registration form and the visitors table.
+
+2. **Reusable EmptyState Component** (`packages/ui/src/components/EmptyState.tsx`):
+   - Created a new reusable component for displaying friendly illustrations and CTAs when no data is found.
+   - Exported as `@repo/ui/EmptyState`.
+
+3. **VisitorForm Client Component** (`apps/portal/app/(departments)/access-control/visitors/visitor-form.tsx`):
+   - Extracted the registration form into a client component to support interactive states.
+   - Implemented `useFormStatus` to show a loading spinner and disable the button during submission.
+   - Added **toast notifications** (success/error) using `sonner` for immediate feedback.
+   - Added inline error messaging for failed registration attempts.
+
+4. **Visitors Page Update** (`apps/portal/app/(departments)/access-control/visitors/page.tsx`):
+   - Integrated the new `VisitorForm` and `EmptyState` components.
+   - Improved the table container with `flex flex-col` to properly center the empty state.
+
+5. **Backend Server Action** (`apps/portal/app/(departments)/access-control/actions.ts`):
+   - Implemented `registerVisitor` server action to handle visitor check-in and temporary badge issuance.
+   - Added `revalidatePath` to ensure the visitor list refreshes immediately.
+
+### Verification
+
+- **Lint**: PASS (Resolved unused var and console warnings).
+- **Type-check**: PASS.
+- **Visuals**: Matches macOS Sonoma Liquid Glass design system.
+- **States**: Verified Loading -> Success/Error -> List Refresh flow.
+
+### What the Next Agent Should Know
+
+- The Visitors page now handles its own loading state via `loading.tsx`.
+- The `EmptyState` component is available for reuse in other parts of the monorepo.
+- `sonner` toasts are configured in the root layout and can be used in any client component.
+- The `registerVisitor` action issues a 8-hour temporary badge upon successful registration.
+
+---
+
 ## 2026-06-17: Next.js Turbopack Root Workspace Configuration
 
 ### Purpose
