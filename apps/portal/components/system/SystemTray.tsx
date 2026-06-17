@@ -264,10 +264,9 @@ export function useNotificationCount() {
 /* ------------------------------------------------------------------ */
 interface HealthState {
   status: "healthy" | "error" | "degraded";
-  db: "ok" | "unavailable";
-  pooler: "ok" | "unavailable" | "disabled";
-  redis: "ok" | "unavailable";
-  aiRouter: "ok" | "unavailable" | "disabled";
+  db: "ok" | "degraded" | "unavailable" | "disabled";
+  redis: "ok" | "degraded" | "unavailable" | "disabled";
+  fuxa: "ok" | "degraded" | "unavailable" | "disabled";
   responseTime: number;
   timestamp: string;
   loading: boolean;
@@ -278,9 +277,8 @@ function useServerHealth() {
   const [health, setHealth] = useState<HealthState>({
     status: "healthy",
     db: "ok",
-    pooler: "ok",
     redis: "ok",
-    aiRouter: "ok",
+    fuxa: "ok",
     responseTime: 0,
     timestamp: "",
     loading: true,
@@ -299,14 +297,30 @@ function useServerHealth() {
         });
         const data = await res.json();
         if (!cancelled) {
+          const statusMap = {
+            healthy: "healthy",
+            degraded: "degraded",
+            down: "error",
+          } as const;
+
+          const mapServiceStatus = (
+            s: { status: "healthy" | "degraded" | "down" } | null | undefined,
+          ): "ok" | "degraded" | "unavailable" => {
+            if (!s) return "unavailable";
+            if (s.status === "healthy") return "ok";
+            if (s.status === "degraded") return "degraded";
+            return "unavailable";
+          };
+
           setHealth({
-            status: data.status ?? "error",
-            db: data.db ?? "unavailable",
-            pooler: data.pooler ?? "disabled",
-            redis: data.redis ?? "unavailable",
-            aiRouter: data.aiRouter ?? "unavailable",
-            responseTime: data.responseTime ?? 0,
-            timestamp: data.timestamp ?? "",
+            status: data.status
+              ? (statusMap[data.status as keyof typeof statusMap] ?? "error")
+              : "error",
+            db: mapServiceStatus(data.services?.supabase_realtime),
+            redis: mapServiceStatus(data.services?.redis),
+            fuxa: mapServiceStatus(data.services?.fuxa),
+            responseTime: data.latency_ms ?? 0,
+            timestamp: data.last_check ?? "",
             loading: false,
             lastFetched: Date.now(),
           });
@@ -577,11 +591,12 @@ function HealthSubRow({
   icon: Icon,
 }: {
   label: string;
-  status: "ok" | "unavailable" | "disabled";
+  status: "ok" | "degraded" | "unavailable" | "disabled";
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const config = {
     ok: { color: "text-[var(--accent-green)]", label: "OK" },
+    degraded: { color: "text-[var(--accent-blue)]", label: "Degraded" },
     unavailable: { color: "text-[var(--accent-red)]", label: "Unavailable" },
     disabled: { color: "text-[var(--text-muted)]", label: "Disabled" },
   };
@@ -602,10 +617,10 @@ export function ServerHealthRow({
   status,
   db,
   redis,
-  aiRouter,
+  fuxa,
   responseTime,
   loading,
-}: Omit<HealthState, "timestamp" | "pooler" | "lastFetched">) {
+}: Omit<HealthState, "timestamp" | "lastFetched">) {
   const statusConfig = {
     healthy: {
       icon: CheckCircle2,
@@ -641,7 +656,7 @@ export function ServerHealthRow({
       <div className="space-y-1">
         <HealthSubRow label="Database" status={db} icon={Database} />
         <HealthSubRow label="Redis" status={redis} icon={HardDrive} />
-        <HealthSubRow label="AI Router" status={aiRouter} icon={Zap} />
+        <HealthSubRow label="SCADA (FUXA)" status={fuxa} icon={Zap} />
       </div>
 
       <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
@@ -780,7 +795,7 @@ export function SystemTrayPill() {
                 status={health.status}
                 db={health.db}
                 redis={health.redis}
-                aiRouter={health.aiRouter}
+                fuxa={health.fuxa}
                 responseTime={health.responseTime}
                 loading={health.loading}
               />

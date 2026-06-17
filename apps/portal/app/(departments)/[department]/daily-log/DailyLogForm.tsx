@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { logError } from "@/lib/errors/error-logger";
 import { speculativeEmbedShiftLog, revalidateRSC } from "@/app/actions";
 import { dailyLogSchema, type DailyLogFormValues } from "@repo/contract";
+import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
 interface Machine {
   id: string;
@@ -29,7 +30,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     reset,
     watch,
     setValue,
@@ -40,6 +41,8 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       notes: "",
     },
   });
+
+  useUnsavedChangesWarning(isDirty);
 
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"

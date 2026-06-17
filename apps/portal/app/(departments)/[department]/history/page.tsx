@@ -124,7 +124,7 @@ export default async function HistoryPage({
           </h2>
           <Link
             href={`/${deptSlug}/reports?from=${from}&to=${to}`}
-            className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-cyan)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
           >
             Export CSV
           </Link>
@@ -198,7 +198,7 @@ export default async function HistoryPage({
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
                         {(hoursMap.get(k) || 0).toFixed(1)}
                       </td>
-                      <td className="px-6 py-4 text-[var(--accent-cyan)] text-sm text-right">
+                      <td className="px-6 py-4 text-[var(--accent-blue)] text-sm text-right">
                         {(loadsMap.get(k) || 0).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-accent-blue text-sm text-right">
@@ -259,7 +259,7 @@ export default async function HistoryPage({
         </h2>
         <Link
           href={`/${deptSlug}/reports?from=${from}&to=${to}`}
-          className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-cyan)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
+          className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
         >
           Export CSV
         </Link>

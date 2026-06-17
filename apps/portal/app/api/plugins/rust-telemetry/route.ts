@@ -7,6 +7,70 @@ import { logError } from "@/lib/errors/error-logger";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
+/**
+ * @swagger
+ * /api/plugins/rust-telemetry:
+ *   post:
+ *     summary: Rust telemetry engine for predictive maintenance
+ *     description: Calculates wear index and remaining useful life (RUL) for drilling equipment using either native Rust engine or JavaScript fallback. Requires authentication and rate limiting.
+ *     tags:
+ *       - Plugins
+ *       - Telemetry
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               hours:
+ *                 type: number
+ *                 default: 150.0
+ *                 description: Operating hours
+ *               temp:
+ *                 type: number
+ *                 default: 55.0
+ *                 description: Operating temperature in Celsius
+ *               rpm:
+ *                 type: number
+ *                 default: 1000.0
+ *                 description: Rotational speed
+ *     responses:
+ *       200:
+ *         description: Telemetry analysis results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 wearIndex:
+ *                   type: number
+ *                 probability:
+ *                   type: number
+ *                   description: Failure probability percentage
+ *                 rulHours:
+ *                   type: number
+ *                   description: Remaining useful life in hours
+ *                 status:
+ *                   type: string
+ *                   enum: [critical, warning, optimal]
+ *                 isNative:
+ *                   type: boolean
+ *                   description: Whether results came from native Rust engine
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       429:
+ *         description: Rate limit exceeded
+ */
+
 const execFileAsync = promisify(execFile);
 
 async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {

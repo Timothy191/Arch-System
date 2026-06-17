@@ -3,16 +3,13 @@
   "version": "1.5.1",
   "commitlint": {
     "extends": [
-      "./config/commitlint.config.mjs"
+      "./config/tools/commitlint.config.mjs"
     ]
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^21.0.1",
-    "@eslint/js": "^10.0.1",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "@nx/eslint-plugin": "^22.7.5",
-    "@nx/js": "22.7.5",
     "@nx/storybook": "^22.7.5",
     "@nx/vite": "22.7.5",
     "@nx/web": "22.7.5",
@@ -23,37 +20,31 @@
     "@storybook/addon-a11y": "8.6.14",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
-    "@storybook/addon-links": "8.6.14",
-    "@storybook/addon-onboarding": "8.6.14",
-    "@storybook/blocks": "8.6.14",
     "@storybook/react": "^8.6.14",
     "@storybook/react-vite": "^8.6.14",
     "@storybook/test": "8.6.14",
     "@storybook/test-runner": "^0.24.4",
     "@swc-node/register": "~1.11.1",
-    "@swc/core": "~1.15.5",
-    "@swc/helpers": "~0.5.18",
+    "@swc/core": "^1.15.40",
     "@vitejs/plugin-react": "^6.0.2",
     "axe-playwright": "^2.2.2",
     "eslint": "catalog:",
-    "globals": "^17.6.0",
     "husky": "^9.1.7",
     "knip": "^5.45.0",
     "lint-staged": "^17.0.7",
     "markdownlint-cli": "^0.41.0",
     "nx": "22.7.5",
-    "nx-remotecache-s3": "^1.2.2",
     "preflight": "0.2.0",
     "prettier": "catalog:",
     "secretlint": "^13.0.2",
     "storybook": "^8.6.14",
+    "stylelint": "^17.11.1",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-declaration-strict-value": "^1.11.1",
     "supabase": "catalog:",
     "swagger-jsdoc": "^6.3.0",
     "syncpack": "^13.0.4",
-    "ts-node": "10.9.1",
-    "tslib": "^2.3.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.60.1",
     "vite": "^8.0.16"
   },
   "engines": {
@@ -61,7 +52,16 @@
   },
   "license": "MIT",
   "lint-staged": {
-    "config": "config/.lintstagedrc.mjs"
+    "*.{css,scss}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,ts,tsx,md,json}": [
+      "prettier --write"
+    ],
+    "packages/theme/**/*": [
+      "pnpm --filter @repo/theme lint:tokens"
+    ]
   },
   "markdownlint": {
     "config": "config/.markdownlint.json"
@@ -86,6 +86,7 @@
   "private": true,
   "scripts": {
     "analyze": "ANALYZE=true pnpm --filter portal build",
+    "audit:design": "node tools/design-audit.cjs",
     "audit:rls": "node tools/audit-rls.cjs",
     "build": "bash scripts/sync-assets.sh && nx run-many -t build",
     "commitlint": "commitlint --edit",
@@ -108,6 +109,7 @@
     "knip:fix": "knip --config config/tools/knip.json --fix --no-config-hints",
     "lint": "nx run-many -t lint",
     "lint:root": "eslint . --max-warnings 0 --ignore-pattern apps --ignore-pattern packages --no-error-on-unmatched-pattern",
+    "lint:styles": "stylelint '**/*.{css,scss}' --ignore-path .gitignore",
     "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "md:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "monitor": "bash scripts/monitor-hud.sh",
@@ -116,12 +118,13 @@
     "policy:check": "node tools/policy-compiler.cjs --check",
     "policy:gen": "node tools/policy-compiler.cjs",
     "prepare": "husky",
-    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm format:check && pnpm deps:lint && pnpm knip",
+    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm lint:styles && pnpm format:check && pnpm deps:lint && pnpm knip",
     "shutdown": "bash scripts/shutdown.sh",
     "sync-assets": "bash scripts/sync-assets.sh",
     "test": "nx run-many -t test",
     "test:a11y": "pnpm --filter @repo/ui test-storybook:a11y",
     "test:e2e": "playwright test",
+    "test:e2e:visual": "playwright test --grep 'theme.smoke'",
     "type-check": "nx run-many -t type-check",
     "ui": "pnpm --filter @repo/ui ui"
   },

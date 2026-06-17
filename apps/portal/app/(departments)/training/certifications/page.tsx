@@ -212,12 +212,12 @@ export default async function CertificationsPage({
                 <th className="pb-2 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[0.02]">
+            <tbody className="divide-y divide-[var(--overlay-dim)]">
               {filteredCerts.length > 0 ? (
                 filteredCerts.map((cert) => (
                   <tr
                     key={cert.id}
-                    className="hover:bg-black/[0.01] transition-colors"
+                    className="hover:bg-[var(--overlay-dim)] transition-colors"
                   >
                     <td className="py-3 font-medium text-[var(--text-heading)]">
                       {cert.employee}

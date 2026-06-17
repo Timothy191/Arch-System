@@ -80,7 +80,7 @@ export default async function HourlyLoadsPage({
 
       <div className="flex items-center gap-6 text-xs text-[var(--text-muted)]">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded bg-[var(--accent-cyan)]/20 border border-[var(--accent-cyan)]"></span>
+          <span className="w-3 h-3 rounded bg-[var(--accent-blue)]/20 border border-[var(--accent-blue)]"></span>
           <span>Active hour with loads</span>
         </div>
         <div className="flex items-center gap-2">

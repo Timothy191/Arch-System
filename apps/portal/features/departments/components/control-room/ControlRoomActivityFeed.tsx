@@ -78,11 +78,17 @@ export function ControlRoomActivityFeed({
         <h2 className="text-xl font-medium text-[var(--text-heading)]">
           Activity Feed
         </h2>
-        <div className="flex items-center gap-2">
+        {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for filter toggle buttons */}
+        <div
+          className="flex items-center gap-2"
+          role="group"
+          aria-label="Activity filter"
+        >
           {(["all", "insert", "update", "delete"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 filter === f
                   ? "bg-[var(--bg-tertiary)] text-[var(--text-heading)] border border-arch-accent-green"

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { useAutoSave } from "@repo/ui/hooks/useAutoSave";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { speculativeEmbedShiftLog } from "@/app/actions";
+import { BreakdownControlRoomView } from "@/features/departments/components/engineering/breakdowns/types";
 
 interface Machine {
   id: string;
@@ -13,22 +15,10 @@ interface Machine {
   machine_type: string;
 }
 
-interface BreakdownDraft {
-  id: string;
-  fleet_id: string;
-  machine_name: string | null;
-  machine_type: string;
-  reason: string;
-  date_in: string;
-  time_in: string;
-  date_out: string | null;
-  status: "active" | "completed";
-}
-
 interface EngineeringNotesFormProps {
   departmentId: string;
   machines: Machine[];
-  breakdownDrafts?: BreakdownDraft[];
+  breakdownDrafts?: BreakdownControlRoomView[];
 }
 
 const ISSUE_TYPES = [
@@ -101,7 +91,12 @@ export function EngineeringNotesForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const prefillFromBreakdown = (bd: BreakdownDraft) => {
+  const { clear: clearDraft } = useAutoSave(formData, {
+    key: `eng-note-draft-${departmentId}`,
+    onLoad: (savedData) => setFormData(savedData),
+  });
+
+  const prefillFromBreakdown = (bd: BreakdownControlRoomView) => {
     setFormData({
       issueType: inferIssueType(bd.machine_type),
       severity: bd.status === "active" ? "high" : "medium",
@@ -160,6 +155,8 @@ export function EngineeringNotesForm({
       });
 
       if (error) throw error;
+
+      clearDraft();
 
       // Speculatively generate embeddings in background
       if (formData.description && formData.description.trim() !== "") {
@@ -253,7 +250,7 @@ export function EngineeringNotesForm({
                   <button
                     type="button"
                     onClick={() => prefillFromBreakdown(bd)}
-                    className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/20 hover:bg-[var(--accent-cyan)]/20 transition-colors"
+                    className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 transition-colors"
                   >
                     Log Note →
                   </button>
@@ -393,7 +390,7 @@ export function EngineeringNotesForm({
                   }
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     formData.shiftType === shift
-                      ? "bg-[var(--accent-cyan)] text-[var(--bg-secondary)]"
+                      ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
                       : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                   }`}
                 >
@@ -463,7 +460,7 @@ export function EngineeringNotesForm({
                   requiresFollowUp: e.target.checked,
                 }))
               }
-              className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-cyan)] focus:ring-[var(--accent-cyan)]"
+              className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
             />
             <span className="text-[var(--text-secondary)] text-sm">
               Requires follow-up
@@ -475,7 +472,7 @@ export function EngineeringNotesForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
+              className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
             >
               {isSubmitting ? "Saving..." : "Log Issue"}
             </button>

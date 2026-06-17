@@ -3,6 +3,57 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { EXTERNAL_TOOLS } from "~/lib/tools";
 import { cacheWrap } from "@repo/redis";
 
+/**
+ * @swagger
+ * /api/tools/status:
+ *   get:
+ *     summary: External tools health status
+ *     description: Returns the health status and response times of all configured external tools. Results are cached for 60 seconds. Requires authentication.
+ *     tags:
+ *       - Tools
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of tool status objects
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tools:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       displayName:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       icon:
+ *                         type: string
+ *                       color:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                         enum: [online, offline, unknown]
+ *                       responseTime:
+ *                         type: number
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
 export const dynamic = "force-dynamic";
 
 interface ToolStatus {

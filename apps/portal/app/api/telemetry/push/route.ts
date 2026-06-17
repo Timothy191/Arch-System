@@ -1,9 +1,100 @@
+/**
+ * @swagger
+ * /api/telemetry/push:
+ *   post:
+ *     summary: Push telemetry data to SCADA
+ *     description: Forward machine telemetry to FUXA SCADA server with two-level caching (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates. Deduplicates unchanged values.
+ *     tags:
+ *       - Telemetry
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 description: Supabase webhook payload (auto-detected)
+ *                 required:
+ *                   - table
+ *                   - record
+ *                 properties:
+ *                   table:
+ *                     type: string
+ *                     enum: [machine_telemetry]
+ *                   record:
+ *                     type: object
+ *                     properties:
+ *                       machine_id:
+ *                         type: string
+ *                       engine_rpm:
+ *                         type: number
+ *                       engine_temp:
+ *                         type: number
+ *                       hydraulic_pressure:
+ *                         type: number
+ *                       vibration_level:
+ *                         type: number
+ *                       fuel_level:
+ *                         type: number
+ *                       bit_depth:
+ *                         type: number
+ *               - type: object
+ *                 description: Direct tag update
+ *                 required:
+ *                   - name
+ *                   - value
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     description: Tag name (e.g., machine_123_engine_rpm)
+ *                   value:
+ *                     type: number
+ *                     description: Tag value
+ *     responses:
+ *       200:
+ *         description: Telemetry processed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 synced:
+ *                   type: boolean
+ *                 cached:
+ *                   type: boolean
+ *                   description: True if value unchanged (deduplicated)
+ *                 webhook:
+ *                   type: boolean
+ *                   description: True for webhook payload format
+ *                 processed:
+ *                   type: integer
+ *                   description: Number of tags processed (webhook mode)
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       tag:
+ *                         type: string
+ *                       success:
+ *                         type: boolean
+ *                       cached:
+ *                         type: boolean
+ *                       error:
+ *                         type: string
+ *       400:
+ *         description: Invalid request body
+ *       500:
+ *         description: Internal server error or SCADA unreachable
+ */
 import { NextResponse } from "next/server";
 import { getRedisClient } from "@repo/redis";
-import { validateBody } from "@/lib/api/response";
+import { withValidation } from "@repo/contract/validation";
+import { telemetryPushSchema } from "@repo/contract";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
-import { telemetryPushSchema } from "@repo/contract";
 
 // L1 cache (in-memory)
 let localLastValues = new Map<string, number>();
@@ -31,12 +122,76 @@ async function setRedisLastValue(key: string, value: number): Promise<void> {
   }
 }
 
+// AGENT-TRACE: The webhook path (body.table === "machine_telemetry") does not
+// use telemetryPushSchema — Supabase webhook payloads have a different shape
+// ({ table, record }). Only the direct single-tag update path is wrapped with
+// withValidation. handlePost parses the body once and routes accordingly.
+const handleDirectTag = withValidation(
+  telemetryPushSchema,
+  async (_req, data) => {
+    const { name, value } = data;
+    const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
+    const endpoint = `${fuxaUrl}/api/tag`;
+    const numValue = Number(value);
+
+    // L1 Check
+    if (localLastValues.has(name) && localLastValues.get(name) === numValue) {
+      return NextResponse.json({ success: true, synced: true, cached: true });
+    }
+
+    // L2 Check (Redis)
+    const lastVal = await getRedisLastValue(name);
+    if (lastVal !== null && lastVal === numValue) {
+      localLastValues.set(name, numValue);
+      return NextResponse.json({ success: true, synced: true, cached: true });
+    }
+
+    try {
+      const fuxaRes = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(process.env.FUXA_API_KEY
+            ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
+            : {}),
+        },
+        body: JSON.stringify({ name, value: numValue }),
+      });
+
+      if (!fuxaRes.ok) {
+        return NextResponse.json(
+          {
+            warning: `FUXA SCADA server returned status ${fuxaRes.status}`,
+            synced: false,
+          },
+          { status: 200 },
+        );
+      }
+
+      localLastValues.set(name, numValue);
+      await setRedisLastValue(name, numValue);
+
+      return NextResponse.json({ success: true, synced: true });
+    } catch {
+      return NextResponse.json(
+        {
+          warning: "FUXA SCADA server is unreachable",
+          synced: false,
+        },
+        { status: 200 },
+      );
+    }
+  },
+);
+
 export async function POST(req: Request) {
   return withBodyLimit(
     req,
     async () => {
       const response = await handlePost(req);
-      return applyCors(req, response);
+      // withValidation returns Response (standard Web API) while applyCors expects
+      // NextResponse. At runtime NextResponse extends Response so the cast is safe.
+      return applyCors(req, response as NextResponse);
     },
     { maxSize: 10485760 },
   );
@@ -44,8 +199,7 @@ export async function POST(req: Request) {
 
 async function handlePost(req: Request) {
   try {
-    const webhookCheck = req.clone();
-    const body = await webhookCheck.json();
+    const body = await req.clone().json();
     const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
     const endpoint = `${fuxaUrl}/api/tag`;
 
@@ -130,69 +284,15 @@ async function handlePost(req: Request) {
       });
     }
 
-    // 2. Otherwise, treat as a direct single tag value update
-    const webhookCheck2 = req.clone();
-    const body2 = await webhookCheck2.json().catch(() => ({}));
-    if (!body2.name || body2.value === undefined || body2.value === null) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, value" },
-        { status: 400 },
-      );
-    }
-
-    const parsed = await validateBody(req, telemetryPushSchema);
-    if (parsed instanceof NextResponse) return parsed;
-
-    const { name, value } = parsed.data;
-    const numValue = Number(value);
-
-    // L1 Check
-    if (localLastValues.has(name) && localLastValues.get(name) === numValue) {
-      return NextResponse.json({ success: true, synced: true, cached: true });
-    }
-
-    // L2 Check (Redis)
-    const lastVal = await getRedisLastValue(name);
-    if (lastVal !== null && lastVal === numValue) {
-      localLastValues.set(name, numValue);
-      return NextResponse.json({ success: true, synced: true, cached: true });
-    }
-
-    try {
-      const fuxaRes = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(process.env.FUXA_API_KEY
-            ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
-            : {}),
-        },
-        body: JSON.stringify({ name, value: numValue }),
-      });
-
-      if (!fuxaRes.ok) {
-        return NextResponse.json(
-          {
-            warning: `FUXA SCADA server returned status ${fuxaRes.status}`,
-            synced: false,
-          },
-          { status: 200 },
-        );
-      }
-
-      localLastValues.set(name, numValue);
-      await setRedisLastValue(name, numValue);
-
-      return NextResponse.json({ success: true, synced: true });
-    } catch {
-      return NextResponse.json(
-        {
-          warning: "FUXA SCADA server is unreachable",
-          synced: false,
-        },
-        { status: 200 },
-      );
-    }
+    // 2. Direct single tag value update — delegate to validated handler
+    return handleDirectTag(
+      new Request(req.url, {
+        method: req.method,
+        headers: req.headers,
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({}) },
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to forward telemetry" },

@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HTML="${SCRIPT_DIR}/viewer.html"
 
 echo "Generating wiki viewer..."
-node "${SCRIPT_DIR}/generate.js"
+node "${SCRIPT_DIR}/generate.cjs"
 
 echo "Opening ${HTML} ..."
 

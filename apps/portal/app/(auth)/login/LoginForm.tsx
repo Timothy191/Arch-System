@@ -370,7 +370,7 @@ export function LoginForm() {
               );
             }
           }}
-          className="w-full h-12 border border-black/[0.06] bg-black/[0.02] hover:bg-black/[0.04] text-[var(--text-secondary)] font-medium text-xs rounded-md liquid-glass-button flex items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 focus-visible:ring-offset-1"
+          className="w-full h-12 border border-[var(--border-default)] bg-[var(--overlay-dim)] hover:bg-[var(--overlay-subtle)] text-[var(--text-secondary)] font-medium text-xs rounded-md liquid-glass-button flex items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 focus-visible:ring-offset-1"
           hoverScale={1}
           tapScale={0.97}
         >

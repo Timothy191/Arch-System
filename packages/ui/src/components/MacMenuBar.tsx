@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
+import { getServiceUrls } from "../lib/urls";
 import { useFocusMode } from "../lib/useFocusMode";
+import { Logo } from "./Logo";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,6 +19,7 @@ import {
   Pickaxe,
   TrendingUp,
   ScanFace,
+  CreditCard,
   Wrench,
   TowerControl,
   HardHat,
@@ -61,64 +65,73 @@ const DEPARTMENTS_LIST = [
     name: "drilling",
     displayName: "Drilling Operations",
     icon: Pickaxe,
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-50 hover:bg-blue-100",
+    iconColor: "text-dept-drilling",
+    bgColor: "bg-dept-drilling/10 hover:bg-dept-drilling/15",
     description: "Rig operations & depth telemetry",
   },
   {
     name: "production",
     displayName: "Production Tracking",
     icon: TrendingUp,
-    iconColor: "text-accent-green",
-    bgColor: "bg-emerald-50 hover:bg-emerald-100",
+    iconColor: "text-dept-production",
+    bgColor: "bg-dept-production/10 hover:bg-dept-production/15",
     description: "Yield & tonnage monitoring",
   },
   {
     name: "access-control",
     displayName: "Access Control",
     icon: ScanFace,
-    iconColor: "text-sky-600",
-    bgColor: "bg-sky-50 hover:bg-sky-100",
+    iconColor: "text-dept-access-control",
+    bgColor: "bg-dept-access-control/10 hover:bg-dept-access-control/15",
     description: "Personnel badging & visitor logs",
+  },
+  {
+    name: "access-card-actions",
+    displayName: "Access Card Actions",
+    icon: CreditCard,
+    iconColor: "text-dept-access-card-actions",
+    bgColor:
+      "bg-dept-access-card-actions/10 hover:bg-dept-access-card-actions/15",
+    description: "Badge printing & QR generation",
   },
   {
     name: "engineering",
     displayName: "Engineering",
     icon: Wrench,
-    iconColor: "text-violet-600",
-    bgColor: "bg-violet-50 hover:bg-violet-100",
+    iconColor: "text-dept-engineering",
+    bgColor: "bg-dept-engineering/10 hover:bg-dept-engineering/15",
     description: "CAD, equipment specs & breakdowns",
   },
   {
     name: "control-room",
     displayName: "SCADA Control Room",
     icon: TowerControl,
-    iconColor: "text-red-600",
-    bgColor: "bg-red-50 hover:bg-red-100",
+    iconColor: "text-dept-control-room",
+    bgColor: "bg-dept-control-room/10 hover:bg-dept-control-room/15",
     description: "Real-time operations monitor",
   },
   {
     name: "safety",
     displayName: "Safety Compliance",
     icon: HardHat,
-    iconColor: "text-amber-600",
-    bgColor: "bg-amber-50 hover:bg-amber-100",
+    iconColor: "text-dept-safety",
+    bgColor: "bg-dept-safety/10 hover:bg-dept-safety/15",
     description: "Incident reporting & inspections",
   },
   {
     name: "training",
     displayName: "Training & LMS",
     icon: GraduationCap,
-    iconColor: "text-cyan-600",
-    bgColor: "bg-cyan-50 hover:bg-cyan-100",
+    iconColor: "text-dept-training",
+    bgColor: "bg-dept-training/10 hover:bg-dept-training/15",
     description: "LMS, certificates & site rules",
   },
   {
     name: "satellite-monitoring",
     displayName: "Satellite Monitoring",
     icon: Orbit,
-    iconColor: "text-indigo-600",
-    bgColor: "bg-indigo-50 hover:bg-indigo-100",
+    iconColor: "text-dept-satellite",
+    bgColor: "bg-dept-satellite/10 hover:bg-dept-satellite/15",
     description: "SAR, High-Res & Hyperspectral",
   },
 ] as const;
@@ -128,47 +141,48 @@ const PRODUCTIVITY_LIST = [
     name: "tasks",
     displayName: "Tasks",
     icon: CheckSquare,
-    colorClass: "text-accent-green",
+    colorClass: "text-dept-production",
   },
   {
     name: "documents",
     displayName: "Documents",
     icon: FileText,
-    colorClass: "text-blue-500",
+    colorClass: "text-dept-drilling",
   },
   {
     name: "schedule",
     displayName: "Schedule",
     icon: CalendarDays,
-    colorClass: "text-rose-500",
+    colorClass: "text-dept-control-room",
   },
   {
     name: "calculations",
     displayName: "Calculations",
     icon: Calculator,
-    colorClass: "text-violet-500",
+    colorClass: "text-dept-engineering",
   },
   {
     name: "notes",
     displayName: "Notes",
     icon: StickyNote,
-    colorClass: "text-amber-500",
+    colorClass: "text-dept-safety",
   },
 ] as const;
 
+const urls = getServiceUrls();
 const EXTERNAL_LIST = [
   {
     name: "n8n",
     displayName: "n8n Workflows",
     icon: Workflow,
-    url: "http://localhost:5678",
+    url: urls.api,
     colorClass: "text-[#ea4b2a]",
   },
   {
     name: "flowise",
     displayName: "Flowise AI",
     icon: Bot,
-    url: "http://localhost:3001",
+    url: urls.portal,
     colorClass: "text-[#3ecf8e]",
   },
 ] as const;
@@ -202,7 +216,14 @@ export function MacMenuBar({
   }
 
   return (
-    <div
+    <motion.div
+      initial={false}
+      animate={{
+        opacity: isFocusMode ? 0.85 : 1,
+        scale: isFocusMode ? 0.99 : 1,
+        y: isFocusMode ? -2 : 0,
+      }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
         "liquid-glass-light rounded-full shadow-window",
@@ -223,20 +244,9 @@ export function MacMenuBar({
                 aria-haspopup="true"
                 className="relative w-11 h-11 -ml-1 rounded-full bg-white border border-black/10 shadow-window flex items-center justify-center hover:bg-gray-50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
               >
-                <img
-                  src={isFocusMode ? "/logo-focused.jpeg" : "/logo.png"}
-                  alt="Arch Logo"
-                  className="w-6 h-6 object-contain"
-                />
+                <Logo className="w-7 h-7 text-[var(--accent-blue)]" />
               </button>
             </DropdownMenuTrigger>
-
-            {/* Company branding added globally — keep website logo intact */}
-            <img
-              src="/company-branding.jpeg"
-              alt="Company Logo"
-              className="hidden md:block h-7 w-auto object-contain opacity-90"
-            />
           </div>
           <DropdownMenuContent
             align="start"
@@ -329,6 +339,43 @@ export function MacMenuBar({
 
               <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
 
+              {/* Split View */}
+              <div className="px-2.5 pb-1 space-y-0.5">
+                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
+                  Split View
+                </p>
+                <DropdownMenuItem asChild>
+                  <button
+                    onClick={() => {
+                      window.open(
+                        "https://web.whatsapp.com",
+                        "whatsapp-web",
+                        `width=400,height=${window.innerHeight},left=${window.screen.width - 400},top=0`,
+                      );
+                    }}
+                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5 shrink-0 text-dept-engineering"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <line x1="12" y1="3" x2="12" y2="21" />
+                    </svg>
+                    <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                      New Split Tab
+                    </span>
+                  </button>
+                </DropdownMenuItem>
+              </div>
+
+              <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
+
               {/* Automation */}
               <div className="px-2.5 pb-1 space-y-0.5">
                 <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
@@ -365,10 +412,10 @@ export function MacMenuBar({
               <div className="mt-auto px-2.5 py-2.5 border-t border-black/[0.06]">
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-violet-50 active:bg-violet-100 transition-all group"
+                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-dept-admin/10 active:bg-dept-admin/15 transition-all group"
                 >
-                  <Shield className="w-3.5 h-3.5 text-violet-500 shrink-0" />
-                  <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-violet-700">
+                  <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
+                  <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
                     Admin Panel
                   </span>
                 </Link>
@@ -377,18 +424,18 @@ export function MacMenuBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* WhatsApp split window trigger (GitHub trigger moved to Tools menu) */}
+        {/* WhatsApp Web Window trigger */}
         <button
           type="button"
           onClick={() => {
-            window.dispatchEvent(
-              new CustomEvent("open-split-view", {
-                detail: { service: "whatsapp" },
-              }),
+            window.open(
+              "https://web.whatsapp.com",
+              "whatsapp-web",
+              `width=400,height=${window.innerHeight},left=${window.screen.width - 400},top=0`,
             );
           }}
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
-          title="WhatsApp Operations Split"
+          title="WhatsApp Web"
         >
           <img
             src="/whatsapp-logo.jpeg"
@@ -487,7 +534,7 @@ export function MacMenuBar({
                   >
                     <div className="w-full flex items-center px-2 py-1.5 gap-2.5">
                       <svg
-                        className="w-4 h-4 shrink-0 text-black fill-current"
+                        className="w-4 h-4 shrink-0 text-dept-drilling fill-current"
                         viewBox="0 0 24 24"
                       >
                         <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
@@ -650,7 +697,7 @@ export function MacMenuBar({
           }
 
           return (
-            <button key={item} className={NAV_BTN}>
+            <button key={item} type="button" className={NAV_BTN}>
               {item}
             </button>
           );
@@ -681,6 +728,6 @@ export function MacMenuBar({
       <div className="flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
         {rightSlot}
       </div>
-    </div>
+    </motion.div>
   );
 }

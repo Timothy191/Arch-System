@@ -5,15 +5,15 @@
 module.exports = {
   arch0: {
     key: "{arch0}",
-    value: "#f5f5f7",
+    value: "#ffffff",
     type: "color",
-    description: "macOS base background",
+    description: "macOS pure white background",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#f5f5f7",
+      value: "#ffffff",
       type: "color",
-      description: "macOS base background",
+      description: "macOS pure white background",
       key: "{arch0}",
     },
     name: "Arch0",
@@ -233,13 +233,13 @@ module.exports = {
   },
   arch12: {
     key: "{arch12}",
-    value: "#ff3b30",
+    value: "#d22118",
     type: "color",
     description: "red — error / danger",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#ff3b30",
+      value: "#d22118",
       type: "color",
       description: "red — error / danger",
       key: "{arch12}",
@@ -378,7 +378,7 @@ module.exports = {
   bg: {
     primary: {
       key: "{bg.primary}",
-      value: "#f5f5f7",
+      value: "#ffffff",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
@@ -593,12 +593,12 @@ module.exports = {
   },
   "accent-red": {
     key: "{accent-red}",
-    value: "#ff3b30",
+    value: "#d22118",
     type: "color",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "{arch12}",
+      value: "#d22118",
       type: "color",
       key: "{accent-red}",
     },
@@ -644,12 +644,12 @@ module.exports = {
   },
   "accent-alert": {
     key: "{accent-alert}",
-    value: "#ff3b30",
+    value: "#d22118",
     type: "color",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "{arch12}",
+      value: "#d22118",
       type: "color",
       key: "{accent-alert}",
     },
@@ -957,13 +957,13 @@ module.exports = {
     "border-gradient": {
       key: "{glass.border-gradient}",
       value:
-        "linear-gradient(to bottom, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05))",
+        "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
         value:
-          "linear-gradient(to bottom, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05))",
+          "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
         type: "color",
         key: "{glass.border-gradient}",
       },
@@ -1120,6 +1120,57 @@ module.exports = {
       },
       path: ["vibrancy", "border"],
     },
+  },
+  "overlay-dim": {
+    key: "{overlay-dim}",
+    value: "#00000005",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(0, 0, 0, 0.02)",
+      type: "color",
+      key: "{overlay-dim}",
+    },
+    name: "OverlayDim",
+    attributes: {
+      category: "overlay-dim",
+    },
+    path: ["overlay-dim"],
+  },
+  "overlay-subtle": {
+    key: "{overlay-subtle}",
+    value: "#0000000a",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(0, 0, 0, 0.04)",
+      type: "color",
+      key: "{overlay-subtle}",
+    },
+    name: "OverlaySubtle",
+    attributes: {
+      category: "overlay-subtle",
+    },
+    path: ["overlay-subtle"],
+  },
+  "overlay-medium": {
+    key: "{overlay-medium}",
+    value: "#0000000f",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(0, 0, 0, 0.06)",
+      type: "color",
+      key: "{overlay-medium}",
+    },
+    name: "OverlayMedium",
+    attributes: {
+      category: "overlay-medium",
+    },
+    path: ["overlay-medium"],
   },
   background: {
     key: "{background}",

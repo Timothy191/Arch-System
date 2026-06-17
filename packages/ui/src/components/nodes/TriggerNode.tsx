@@ -24,6 +24,7 @@ export const TriggerNode = memo(function TriggerNode({
 
   return (
     <div
+      aria-roledescription="workflow-node"
       className={`
         relative min-w-[140px] rounded-xl border border-[#007aff]/30
         bg-gradient-to-br from-[#007aff]/10 to-[#007aff]/5
@@ -51,5 +52,3 @@ export const TriggerNode = memo(function TriggerNode({
     </div>
   );
 });
-
-export default TriggerNode;

@@ -53,6 +53,7 @@ export {
   SLIDE_UP_VARIANTS,
 } from "./motion";
 export { tokens } from "./generated";
+export * from "./glass";
 export type {
   Tokens,
   ColorTokens,

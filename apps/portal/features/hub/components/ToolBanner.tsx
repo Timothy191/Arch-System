@@ -98,7 +98,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative overflow-hidden rounded-2xl min-h-[200px]">
+      <div className="relative overflow-hidden rounded-xl min-h-[200px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={tool.id}
@@ -126,7 +126,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
                 >
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-semibold text-arch-text-primary mb-2 group-hover:text-arch-accent-blue transition-colors duration-300">
+                <h3 className="text-xl font-medium text-arch-text-primary mb-2 group-hover:text-arch-accent-blue transition-colors duration-300">
                   {tool.displayName}
                 </h3>
                 <p className="text-sm text-arch-text-secondary max-w-md leading-relaxed">

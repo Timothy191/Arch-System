@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/bin:$PATH"
+
 # ──────────────────────────────────────────────────────────
 # Arch-Systems — Lightning Dev Script v3
 # Starts Supabase + Next.js HMR, runs 4-phase health check,
@@ -241,6 +243,7 @@ START_TOOLS=false
 QUICK_MODE=false
 START_CMS=false
 START_OVERVIEW=false
+RUN_E2E=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --force|-f) FORCE_KILL=true; shift ;;
@@ -248,6 +251,7 @@ while [ $# -gt 0 ]; do
     --quick|-q) QUICK_MODE=true; shift ;;
     --cms)      START_CMS=true; shift ;;
     --overview) START_OVERVIEW=true; shift ;;
+    --e2e)      RUN_E2E=true; shift ;;
     --all)      START_CMS=true; START_OVERVIEW=true; shift ;;
     *) shift ;;
   esac
@@ -477,7 +481,14 @@ fi
 
 # 1c. Check & Fix Environment files
 if [ ! -f "$REPO_ROOT/apps/portal/.env" ] && [ ! -f "$REPO_ROOT/apps/portal/.env.local" ]; then
-  if [ -f "$REPO_ROOT/apps/portal/.env.example" ]; then
+  if [ -f "$REPO_ROOT/apps/portal/env/.env.example" ]; then
+    echo -e "  ${INFO} Apps portal .env missing. Copying from env/.env.example..."
+    cp "$REPO_ROOT/apps/portal/env/.env.example" "$REPO_ROOT/apps/portal/.env"
+    check "Environment file" "pass" "copied from template"
+    if grep -q -E "your-|TODO|CHANGEME" "$REPO_ROOT/apps/portal/.env" 2>/dev/null; then
+      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
+    fi
+  elif [ -f "$REPO_ROOT/apps/portal/.env.example" ]; then
     echo -e "  ${INFO} Apps portal .env missing. Copying from .env.example..."
     cp "$REPO_ROOT/apps/portal/.env.example" "$REPO_ROOT/apps/portal/.env"
     check "Environment file" "pass" "copied from template"
@@ -614,6 +625,23 @@ else
       check "Ollama" "warn" "not running — AI features unavailable (install: https://ollama.com)"
     fi
   fi
+
+  # 2d. Open WebUI — launch if tools compose configuration has it
+  # if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
+  #   if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "plantcor-open-webui"; then
+  #     check "Open WebUI" "pass" "http://localhost:3005"
+  #   elif grep -q "open-webui:" "$REPO_ROOT/infra/docker/compose.tools.yml" 2>/dev/null; then
+  #     echo -e "  ${INFO} Starting Open WebUI (Docker Tools)..."
+  #     $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d open-webui > /dev/null 2>&1
+  #     for i in $(seq 1 15); do
+  #       if docker inspect --format='{{.State.Health.Status}}' plantcor-open-webui 2>/dev/null | grep -q "healthy"; then
+  #         break
+  #       fi
+  #       sleep 1
+  #     done
+  #     check "Open WebUI" "pass" "http://localhost:3005"
+  #   fi
+  # fi
 fi
 
 # ── Phase 3: Portal (Start + Wait) ────────────────────────
@@ -735,8 +763,37 @@ else
   check "Static assets" "skip"
 fi
 
+# 4f. FUXA SCADA health check
+FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+if curl -fs "$FUXA_URL" > /dev/null 2>&1; then
+  check "FUXA SCADA" "pass" "$FUXA_URL"
+else
+  check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
+fi
+
 # ── Done ─────────────────────────────────────────────────
 show_results
+
+# ── E2E Test Runner ─────────────────────────
+if [ "$RUN_E2E" = "true" ]; then
+  phase "E2E" "Playwright Tests"
+  echo -e "  ${INFO} Seeding E2E test data..."
+  bash "$REPO_ROOT/scripts/seed-e2e.sh"
+  echo -e "  ${INFO} Running Playwright E2E tests..."
+  cd "$REPO_ROOT"
+  if [ -f "e2e/.auth/user.json" ]; then
+    rm -f "e2e/.auth/user.json"
+    check "Auth cache" "pass" "cleared for fresh session"
+  fi
+  pnpm test:e2e
+  E2E_EXIT=$?
+  if [ $E2E_EXIT -eq 0 ]; then
+    check "E2E tests" "pass" "all passed"
+  else
+    check "E2E tests" "fail" "exit code $E2E_EXIT — check above for failures"
+  fi
+fi
+
 open_browser
 launch_status_terminal
 wait

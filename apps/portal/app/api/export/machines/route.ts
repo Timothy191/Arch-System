@@ -1,3 +1,82 @@
+/**
+ * @swagger
+ * /api/export/machines:
+ *   get:
+ *     summary: Export machines
+ *     description: Export machine registry data with optional department filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).
+ *     tags:
+ *       - Export
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: dept
+ *         schema:
+ *           type: string
+ *         description: Department name filter
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *         description: Maximum number of records
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Pagination offset
+ *     responses:
+ *       200:
+ *         description: Export data (JSON or CSV)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       machine_type:
+ *                         type: string
+ *                       serial_number:
+ *                         type: string
+ *                       bin_factor:
+ *                         type: number
+ *                       active:
+ *                         type: boolean
+ *                       department_id:
+ *                         type: string
+ *                       site_id:
+ *                         type: string
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                 count:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 offset:
+ *                   type: integer
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               description: CSV file with machine data
+ *       400:
+ *         description: Invalid query parameters
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";

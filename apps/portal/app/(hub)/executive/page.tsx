@@ -9,10 +9,16 @@ import {
   ShieldAlert,
   Truck,
   Activity,
+  AlertCircle,
+  Scale,
 } from "lucide-react";
 import { ExportButton } from "@/features/analytics/components/ExportButton";
 import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
 import { ProductionTrendChart } from "@/features/analytics/components/ProductionTrendChartWrapper";
+import {
+  classifyReconciliationDrift,
+  RECONCILIATION_UI,
+} from "@/lib/production-reconciliation";
 
 export const dynamic = "force-dynamic";
 
@@ -41,35 +47,23 @@ export default async function ExecutiveDashboardPage() {
     .toISOString()
     .split("T")[0]!;
 
-  // Step 1: get daily_log IDs for MTD and 30-day window
-  const [{ data: mtdLogs }, { data: trendLogs }] = await Promise.all([
-    db
-      .from("daily_logs")
-      .select("id")
-      .gte("log_date", monthStart)
-      .lte("log_date", today),
-    db
-      .from("daily_logs")
-      .select("id, log_date")
-      .gte("log_date", thirtyDaysAgo)
-      .lte("log_date", today)
-      .order("log_date", { ascending: true }),
-  ]);
+  // Step 1: Fetch Unified Production Summary (RPC)
+  // This single call replaces multiple production_logs, machine_hours, and fuel_logs fetches.
+  const { data: summaryData } = await db.rpc("get_production_summary", {
+    p_start_date: thirtyDaysAgo,
+    p_end_date: today,
+  });
 
-  const mtdLogIds = mtdLogs?.map((l) => l.id) ?? [];
-  const trendLogIds = trendLogs?.map((l) => l.id) ?? [];
+  const mtdSummary =
+    summaryData?.filter((s: any) => s.log_date >= monthStart) ?? [];
 
-  // Step 2: parallel fetch of all KPI data
+  // Step 2: parallel fetch of remaining KPI data
   const [
     { count: activeMachines },
     { count: totalMachines },
     { count: openIncidents },
     { count: activeEmployees },
-    { data: productionMtd },
-    { data: fuelMtd },
-    { data: machineHoursMtd },
     { data: breakdownsMtd },
-    { data: trendProduction },
   ] = await Promise.all([
     db
       .from("machines")
@@ -88,63 +82,45 @@ export default async function ExecutiveDashboardPage() {
       .from("employees")
       .select("id", { count: "exact", head: true })
       .is("deleted_at", null),
-    mtdLogIds.length > 0
-      ? db
-          .from("production_logs")
-          .select("coal_tonnes, waste_tonnes")
-          .in("daily_log_id", mtdLogIds)
-      : Promise.resolve({
-          data: [] as { coal_tonnes: number; waste_tonnes: number }[],
-          error: null,
-        }),
-    mtdLogIds.length > 0
-      ? db
-          .from("fuel_logs")
-          .select("diesel_litres")
-          .in("daily_log_id", mtdLogIds)
-      : Promise.resolve({
-          data: [] as { diesel_litres: number }[],
-          error: null,
-        }),
-    mtdLogIds.length > 0
-      ? db
-          .from("machine_hours")
-          .select("hours_worked")
-          .in("daily_log_id", mtdLogIds)
-      : Promise.resolve({
-          data: [] as { hours_worked: number }[],
-          error: null,
-        }),
     db
       .from("breakdowns")
       .select("id, status")
       .gte("date_in", monthStart)
       .is("deleted_at", null),
-    trendLogIds.length > 0
-      ? db
-          .from("production_logs")
-          .select("daily_log_id, coal_tonnes, waste_tonnes")
-          .in("daily_log_id", trendLogIds)
-      : Promise.resolve({
-          data: [] as {
-            daily_log_id: string;
-            coal_tonnes: number;
-            waste_tonnes: number;
-          }[],
-          error: null,
-        }),
   ]);
 
-  // Compute MTD aggregates
-  const totalCoalMtd =
-    productionMtd?.reduce((s, r) => s + (r.coal_tonnes ?? 0), 0) ?? 0;
-  const totalWasteMtd =
-    productionMtd?.reduce((s, r) => s + (r.waste_tonnes ?? 0), 0) ?? 0;
+  // Compute MTD aggregates from server-side summary
+  const totalCoalMtd = mtdSummary.reduce(
+    (s: number, r: any) => s + Number(r.actual_coal_tonnes),
+    0,
+  );
+  const totalWasteMtd = mtdSummary.reduce(
+    (s: number, r: any) => s + Number(r.actual_waste_tonnes),
+    0,
+  );
   const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
-  const totalFuelMtd =
-    fuelMtd?.reduce((s, r) => s + (r.diesel_litres ?? 0), 0) ?? 0;
-  const totalHoursMtd =
-    machineHoursMtd?.reduce((s, r) => s + (r.hours_worked ?? 0), 0) ?? 0;
+  const totalFuelMtd = mtdSummary.reduce(
+    (s: number, r: any) => s + Number(r.total_fuel_litres),
+    0,
+  );
+  const totalHoursMtd = mtdSummary.reduce(
+    (s: number, r: any) => s + Number(r.total_hours_worked),
+    0,
+  );
+
+  // reconciliation calculation
+  const avgDriftPct =
+    mtdSummary.length > 0
+      ? mtdSummary.reduce(
+          (s: number, r: any) =>
+            s + Math.abs(Number(r.reconciliation_drift_pct)),
+          0,
+        ) / mtdSummary.length
+      : 0;
+
+  const driftLevel = classifyReconciliationDrift(avgDriftPct);
+  const driftUi = RECONCILIATION_UI[driftLevel];
+
   const fleetPct =
     totalMachines && totalMachines > 0
       ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
@@ -154,27 +130,21 @@ export default async function ExecutiveDashboardPage() {
   const openBreakdowns =
     breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
 
-  // Build 30-day chart data — aggregate production per log_date
-  const prodByLogId = new Map<string, { coal: number; waste: number }>();
-  trendProduction?.forEach((p) => {
-    const cur = prodByLogId.get(p.daily_log_id) ?? { coal: 0, waste: 0 };
-    prodByLogId.set(p.daily_log_id, {
-      coal: cur.coal + (p.coal_tonnes ?? 0),
-      waste: cur.waste + (p.waste_tonnes ?? 0),
-    });
-  });
-
-  const chartData = (trendLogs ?? []).map((log) => {
-    const prod = prodByLogId.get(log.id) ?? { coal: 0, waste: 0 };
-    return { date: log.log_date, coal: prod.coal, waste: prod.waste };
-  });
+  // Build 30-day chart data from summary
+  const chartData = (summaryData ?? []).map((s: any) => ({
+    date: s.log_date,
+    coal: Number(s.actual_coal_tonnes),
+    waste: Number(s.actual_waste_tonnes),
+    drift: Number(s.reconciliation_drift_pct),
+  }));
 
   // CSV export payload
-  const exportRows = chartData.map((r) => ({
+  const exportRows = chartData.map((r: any) => ({
     Date: r.date,
     "Coal (t)": r.coal.toFixed(2),
     "Waste (t)": r.waste.toFixed(2),
     "Total (t)": (r.coal + r.waste).toFixed(2),
+    "Reconciliation Drift (%)": r.drift.toFixed(1),
   }));
 
   const pdfReportData = {
@@ -188,12 +158,19 @@ export default async function ExecutiveDashboardPage() {
       { label: "Fleet Availability", value: `${fleetPct}%` },
       { label: "Active Breakdowns", value: `${openBreakdowns}` },
     ],
-    tableHeaders: ["Date", "Coal (t)", "Waste (t)", "Total Tonnage (t)"],
-    tableRows: chartData.map((r) => [
+    tableHeaders: [
+      "Date",
+      "Coal (t)",
+      "Waste (t)",
+      "Total Tonnage (t)",
+      "Drift %",
+    ],
+    tableRows: chartData.map((r: any) => [
       r.date,
       r.coal.toFixed(2),
       r.waste.toFixed(2),
       (r.coal + r.waste).toFixed(2),
+      `${r.drift.toFixed(1)}%`,
     ]),
   };
 
@@ -202,7 +179,7 @@ export default async function ExecutiveDashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--text-heading)] flex items-center gap-2">
+          <h1 className="text-2xl font-medium text-[var(--text-heading)] flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-[var(--accent-blue)]" />
             Executive Dashboard
           </h1>
@@ -219,10 +196,11 @@ export default async function ExecutiveDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Row 1 — Production */}
+      {/* KPI Row 1 — Production & Reconciliation */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <TrendingUp className="w-3.5 h-3.5" /> Production (MTD)
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5" /> Production & Reconciliation
+          (MTD)
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -236,21 +214,39 @@ export default async function ExecutiveDashboardPage() {
             color="green"
           />
           <KPICard
-            label="Waste Removed"
-            value={`${totalWasteMtd.toFixed(0)} t`}
-            color="blue"
+            label="Reconciliation Drift"
+            value={`${avgDriftPct.toFixed(1)}%`}
+            color={driftUi.color as any}
+            sub={driftUi.label}
+            icon={<Scale className="w-4 h-4" />}
           />
           <KPICard
             label="Fuel Efficiency"
             value={`${fuelPerTonne} L/t`}
             color="blue"
+            icon={<Activity className="w-4 h-4" />}
           />
         </KPIGrid>
+
+        {/* Drift Alert (only if not stable) */}
+        {driftLevel !== "stable" && (
+          <div
+            className={`p-3 rounded-lg border flex items-start gap-3 bg-${driftUi.color}/10 border-${driftUi.color}/30 text-sm`}
+          >
+            <AlertCircle
+              className={`w-5 h-5 text-${driftUi.color} mt-0.5 shrink-0`}
+            />
+            <div>
+              <p className="font-medium">Operational Drift Warning</p>
+              <p className="text-[var(--text-muted)]">{driftUi.description}</p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* KPI Row 2 — Fleet & Personnel */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
           <Truck className="w-3.5 h-3.5" /> Fleet & Personnel
         </h2>
         <KPIGrid cols={4}>
@@ -280,10 +276,10 @@ export default async function ExecutiveDashboardPage() {
         </KPIGrid>
       </section>
 
-      {/* KPI Row 3 — Safety */}
+      {/* KPI Row 3 — Safety & Environment */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <ShieldAlert className="w-3.5 h-3.5" /> Safety
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+          <ShieldAlert className="w-3.5 h-3.5" /> Safety & Resource Usage
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -297,8 +293,8 @@ export default async function ExecutiveDashboardPage() {
             color="blue"
           />
           <KPICard
-            label="Breakdowns (MTD)"
-            value={breakdownsMtd?.length ?? 0}
+            label="Waste Removed"
+            value={`${totalWasteMtd.toFixed(0)} t`}
             color="default"
           />
           <KPICard label="Reporting Date" value={today} color="default" />
@@ -307,7 +303,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* 30-Day Production Trend Chart */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
           <Activity className="w-3.5 h-3.5" /> 30-Day Production Trend
         </h2>
         <GlassCard>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
+  CreditCard,
   Factory,
   FileText,
   HardHat,
@@ -29,48 +30,41 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   HardHat,
   GraduationCap,
   Satellite,
+  CreditCard,
 };
 
-const COLOR_MAP: Record<string, { bg: string; glow: string; text: string }> = {
+const COLOR_MAP: Record<string, { bg: string; text: string }> = {
   amber: {
-    bg: "border-[var(--mac-yellow)]/20 text-[var(--mac-yellow)] bg-[var(--mac-yellow)]/5",
-    glow: "rgba(255, 189, 46, 0.15)",
-    text: "text-[var(--mac-yellow)]",
+    bg: "border-accent-amber/20 text-accent-amber bg-accent-amber/5",
+    text: "text-accent-amber",
   },
   emerald: {
-    bg: "border-[var(--accent-green)]/20 text-[var(--accent-green)] bg-[var(--accent-green)]/5",
-    glow: "rgba(52, 199, 89, 0.15)",
-    text: "text-[var(--accent-green)]",
+    bg: "border-accent-green/20 text-accent-green bg-accent-green/5",
+    text: "text-accent-green",
   },
   blue: {
-    bg: "border-[var(--accent-blue)]/20 text-[var(--accent-blue)] bg-[var(--accent-blue)]/5",
-    glow: "rgba(0, 122, 255, 0.15)",
-    text: "text-[var(--accent-blue)]",
+    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
+    text: "text-accent-blue",
   },
   violet: {
-    bg: "border-[var(--accent-blue)]/20 text-[var(--accent-blue)] bg-[var(--accent-blue)]/5",
-    glow: "rgba(0, 122, 255, 0.15)",
-    text: "text-[var(--accent-blue)]",
+    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
+    text: "text-accent-blue",
   },
   red: {
-    bg: "border-[var(--accent-red)]/20 text-[var(--accent-red)] bg-[var(--accent-red)]/5",
-    glow: "rgba(255, 59, 48, 0.15)",
-    text: "text-[var(--accent-red)]",
+    bg: "border-accent-red/20 text-accent-red bg-accent-red/5",
+    text: "text-accent-red",
   },
   orange: {
-    bg: "border-[var(--mac-yellow)]/20 text-[var(--mac-yellow)] bg-[var(--mac-yellow)]/5",
-    glow: "rgba(255, 189, 46, 0.15)",
-    text: "text-[var(--mac-yellow)]",
+    bg: "border-accent-amber/20 text-accent-amber bg-accent-amber/5",
+    text: "text-accent-amber",
   },
   cyan: {
-    bg: "border-[var(--accent-blue)]/20 text-[var(--accent-blue)] bg-[var(--accent-blue)]/5",
-    glow: "rgba(0, 122, 255, 0.15)",
-    text: "text-[var(--accent-blue)]",
+    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
+    text: "text-accent-blue",
   },
   indigo: {
-    bg: "border-[var(--accent-blue)]/20 text-[var(--accent-blue)] bg-[var(--accent-blue)]/5",
-    glow: "rgba(0, 122, 255, 0.15)",
-    text: "text-[var(--accent-blue)]",
+    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
+    text: "text-accent-blue",
   },
 };
 
@@ -83,9 +77,9 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
   const router = useRouter();
   const Icon = ICON_MAP[department.icon] || Factory;
   const config = COLOR_MAP[department.color] || {
-    bg: "border-[var(--border-default)] text-[var(--text-heading)]",
+    bg: "border-arch-border-subtle text-arch-text-primary",
     glow: "rgba(0,0,0,0.04)",
-    text: "text-[var(--text-heading)]",
+    text: "text-arch-text-primary",
   };
   const cardContent = (
     <>
@@ -103,23 +97,22 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
             <Badge
               variant="outline"
               className={cn(
-                "text-[9px] font-bold uppercase tracking-[0.05em] px-2 py-0.5 rounded-full border",
-                department.status === "active" && "active-badge-liquid",
+                "text-[9px] font-medium uppercase tracking-[0.05em] px-2 py-0.5 rounded-full border",
+                department.status === "active" &&
+                  "bg-accent-green/10 border-accent-green/20 text-accent-green",
                 department.status === "maintenance" &&
-                  "bg-amber-50/70 border-amber-200/50 text-amber-700",
+                  "bg-accent-amber/10 border-accent-amber/20 text-accent-amber",
                 department.status === "alert" &&
-                  "bg-red-50/70 border-red-200/50 text-red-700",
+                  "bg-accent-red/10 border-accent-red/20 text-accent-red",
               )}
             >
               <span className="flex items-center gap-1.5">
                 <span
                   className={cn(
-                    department.status === "active" &&
-                      "badge-pulse-dot bg-emerald-500",
-                    department.status === "maintenance" &&
-                      "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse",
-                    department.status === "alert" &&
-                      "w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse",
+                    "w-1.5 h-1.5 rounded-full animate-pulse",
+                    department.status === "active" && "bg-accent-green",
+                    department.status === "maintenance" && "bg-accent-amber",
+                    department.status === "alert" && "bg-accent-red",
                   )}
                 />
                 {department.status}
@@ -130,7 +123,7 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
       </div>
 
       <div className="flex-1 liquid-shift-y">
-        <h3 className="text-arch-text-primary font-bold text-xl tracking-tighter group-hover:text-arch-accent-blue transition-colors duration-300">
+        <h3 className="text-arch-text-primary font-medium text-xl tracking-tighter group-hover:text-arch-accent-blue transition-colors duration-300">
           {department.displayName}
         </h3>
         <p className="text-arch-text-secondary antialiased text-sm mt-2 line-clamp-2 leading-relaxed">
@@ -152,7 +145,7 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           </div>
           <span
             className={cn(
-              "text-lg font-mono tabular-nums font-bold transition-all duration-300 group-hover:scale-110 liquid-shift-y",
+              "text-lg font-mono tabular-nums font-medium transition-all duration-300 group-hover:scale-110 liquid-shift-y",
               config.text,
             )}
           >
@@ -168,7 +161,7 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
               key={action.label}
               href={action.href}
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[11px] font-semibold transition-all interactive-element"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[11px] font-medium transition-all interactive-element"
             >
               <FileText className="w-3 h-3 shrink-0" />
               <span>{action.label}</span>
@@ -207,6 +200,12 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           padding={false}
           className="h-full aurora-shadow"
         >
+          {/* Inner glass highlight ring for edge definition */}
+          <div
+            className="absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-arch-border-emphasis/30 pointer-events-none"
+            aria-hidden="true"
+          />
+
           <div className="p-5 flex flex-col h-full">{cardContent}</div>
         </GlassCard>
       </div>

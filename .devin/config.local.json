@@ -1,10 +1,39 @@
 {
   "permissions": {
     "allow": [
+      "Exec(pnpm install)",
+      "Exec(pnpm build)",
+      "Exec(cat)",
+      "Exec(pnpm)",
+      "Exec(find)",
+      "Exec(lsof)",
+      "Exec(curl)",
+      "Exec(grep)",
+      "Exec(node)",
       "Exec(mkdir)",
+      "Exec(git add)",
+      "Exec(git status)",
+      "Exec(git commit)",
+      "Exec(npx tsc)",
+      "Exec(pkill)",
+      "Exec(sudo pacman)",
+      "Exec(convert)",
+      "Exec(cp)",
+      "Exec(/plugin marketplace)",
+      "Exec(claude)",
+      "Exec(netstat)",
+      "Exec(kill)",
+      "Exec(xargs kill)",
+      "Exec(sleep)",
       "Exec(mv)",
-      "Exec(find packages)",
-      "Exec(rg)"
+      "Exec(psql)",
+      "Exec(pnpx supabase)",
+      "Exec(docker exec)",
+      "Exec(env)",
+      "Exec(npx eslint)",
+      "Exec(git log)",
+      "Exec(git diff)",
+      "Exec(git rm)"
     ]
   }
 }

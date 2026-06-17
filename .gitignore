@@ -42,6 +42,8 @@ apps/*/.next/
 # Tooling
 .mcp.json
 skills-lock.json
+MCP/
+.playwright-mcp/
 
 # Debug
 npm-debug.log*
@@ -161,4 +163,9 @@ tools/devdocs
 .codebuddy
 
 
-storybook-static
+# Storybook build output
+**/storybook-static/
+packages/ui/storybook-static/
+**/storybook-static
+.claude/worktrees
+.claude/settings.local.json

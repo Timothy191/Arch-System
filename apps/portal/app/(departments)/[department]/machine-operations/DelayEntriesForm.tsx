@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 import {
   Plus,
   Trash2,
@@ -69,6 +70,7 @@ export function DelayEntriesForm({
 
   const [categories, setCategories] = useState<DelayCategory[]>([]);
   const [delayEntries, setDelayEntries] = useState<DelayEntry[]>([]);
+  const [initialDelays, setInitialDelays] = useState<DelayEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
@@ -83,6 +85,10 @@ export function DelayEntriesForm({
     message: string;
   } | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+
+  const isDirty =
+    JSON.stringify(delayEntries) !== JSON.stringify(initialDelays);
+  useUnsavedChangesWarning(isDirty);
 
   // Load delay categories
   useEffect(() => {
@@ -109,19 +115,19 @@ export function DelayEntriesForm({
         .order("delay_start_time");
 
       if (data) {
-        setDelayEntries(
-          data.map((d) => ({
-            id: d.id,
-            delay_category_id: d.delay_category_id,
-            // AGENT-TRACE: Convert UTC from database to local time for UI display
-            delay_start_time: toLocalTime(d.delay_start_time),
-            delay_end_time: toLocalTime(d.delay_end_time),
-            is_manual_override: d.is_manual_override,
-            manual_duration_hours: d.manual_duration_hours,
-            description: d.description,
-            status: d.status as "draft" | "committed",
-          })),
-        );
+        const formatted = data.map((d) => ({
+          id: d.id,
+          delay_category_id: d.delay_category_id,
+          // AGENT-TRACE: Convert UTC from database to local time for UI display
+          delay_start_time: toLocalTime(d.delay_start_time),
+          delay_end_time: toLocalTime(d.delay_end_time),
+          is_manual_override: d.is_manual_override,
+          manual_duration_hours: d.manual_duration_hours,
+          description: d.description,
+          status: d.status as "draft" | "committed",
+        }));
+        setDelayEntries(formatted);
+        setInitialDelays(formatted);
       }
       setIsLoading(false);
     };
@@ -324,19 +330,19 @@ export function DelayEntriesForm({
         .order("delay_start_time");
 
       if (data) {
-        setDelayEntries(
-          data.map((d) => ({
-            id: d.id,
-            delay_category_id: d.delay_category_id,
-            // AGENT-TRACE: Convert UTC from database to local time for UI display
-            delay_start_time: toLocalTime(d.delay_start_time),
-            delay_end_time: toLocalTime(d.delay_end_time),
-            is_manual_override: d.is_manual_override,
-            manual_duration_hours: d.manual_duration_hours,
-            description: d.description,
-            status: d.status as "draft" | "committed",
-          })),
-        );
+        const formatted = data.map((d) => ({
+          id: d.id,
+          delay_category_id: d.delay_category_id,
+          // AGENT-TRACE: Convert UTC from database to local time for UI display
+          delay_start_time: toLocalTime(d.delay_start_time),
+          delay_end_time: toLocalTime(d.delay_end_time),
+          is_manual_override: d.is_manual_override,
+          manual_duration_hours: d.manual_duration_hours,
+          description: d.description,
+          status: d.status as "draft" | "committed",
+        }));
+        setDelayEntries(formatted);
+        setInitialDelays(formatted);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -424,19 +430,19 @@ export function DelayEntriesForm({
         .order("delay_start_time");
 
       if (data) {
-        setDelayEntries(
-          data.map((d) => ({
-            id: d.id,
-            delay_category_id: d.delay_category_id,
-            // AGENT-TRACE: Convert UTC from database to local time for UI display
-            delay_start_time: toLocalTime(d.delay_start_time),
-            delay_end_time: toLocalTime(d.delay_end_time),
-            is_manual_override: d.is_manual_override,
-            manual_duration_hours: d.manual_duration_hours,
-            description: d.description,
-            status: d.status as "draft" | "committed",
-          })),
-        );
+        const formatted = data.map((d) => ({
+          id: d.id,
+          delay_category_id: d.delay_category_id,
+          // AGENT-TRACE: Convert UTC from database to local time for UI display
+          delay_start_time: toLocalTime(d.delay_start_time),
+          delay_end_time: toLocalTime(d.delay_end_time),
+          is_manual_override: d.is_manual_override,
+          manual_duration_hours: d.manual_duration_hours,
+          description: d.description,
+          status: d.status as "draft" | "committed",
+        }));
+        setDelayEntries(formatted);
+        setInitialDelays(formatted);
       }
 
       setToast({
@@ -606,6 +612,8 @@ export function DelayEntriesForm({
                           </span>
                         </label>
                         <select
+                          id={`delay-category-${index}`}
+                          title="Category"
                           value={entry.delay_category_id}
                           onChange={(e) =>
                             updateDelayEntry(
@@ -638,6 +646,8 @@ export function DelayEntriesForm({
                           </span>
                         </label>
                         <input
+                          id={`delay-start-time-${index}`}
+                          title="Start Time"
                           type="datetime-local"
                           value={entry.delay_start_time.slice(0, 16)}
                           onChange={(e) =>
@@ -668,6 +678,8 @@ export function DelayEntriesForm({
                           </span>
                         </label>
                         <input
+                          id={`delay-end-time-${index}`}
+                          title="End Time"
                           type="datetime-local"
                           value={entry.delay_end_time.slice(0, 16)}
                           onChange={(e) =>
@@ -748,6 +760,8 @@ export function DelayEntriesForm({
                           <span className="text-accent-red">*</span>
                         </label>
                         <input
+                          id={`delay-manual-duration-${index}`}
+                          title="Manual Duration"
                           type="number"
                           step="0.01"
                           min="0"
@@ -815,7 +829,7 @@ export function DelayEntriesForm({
                 type="button"
                 onClick={saveDelayEntries}
                 disabled={isSubmitting}
-                className="bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
+                className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
               >
                 {isSubmitting ? "Saving..." : "Save Delays"}
               </button>
@@ -840,7 +854,7 @@ export function DelayEntriesForm({
         {/* Confirmation Dialog */}
         {showConfirmDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
               <div className="flex items-start gap-3 mb-4">
                 {confirmAction === "commit" ? (
                   <CheckCircle
@@ -920,6 +934,8 @@ export function DelayEntriesForm({
             <span className="text-sm font-medium">{toast.message}</span>
             <button
               type="button"
+              title="Dismiss notification"
+              aria-label="Dismiss notification"
               onClick={() => setToast(null)}
               className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
             >

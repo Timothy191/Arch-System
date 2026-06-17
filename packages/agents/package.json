@@ -1,0 +1,24 @@
+{
+  "name": "@repo/agents",
+  "description": "Shared Agent Coordination engine and specialists using MCP and OpenAI/Together APIs",
+  "version": "1.0.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
+    "openai": "^4.82.0",
+    "p-limit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .nx",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  }
+}

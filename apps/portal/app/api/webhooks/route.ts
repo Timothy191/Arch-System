@@ -1,3 +1,107 @@
+/**
+ * @swagger
+ * /api/webhooks:
+ *   get:
+ *     summary: List webhook endpoints
+ *     description: Retrieve all webhook endpoints. Admins can see all webhooks, supervisors only see webhooks for their department.
+ *     tags:
+ *       - Webhooks
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of webhook endpoints
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 webhooks:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: Webhook endpoint ID
+ *                       url:
+ *                         type: string
+ *                         description: Webhook URL
+ *                       description:
+ *                         type: string
+ *                         nullable: true
+ *                         description: Webhook description
+ *                       event_types:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, safety_incident.created, safety_incident.updated, safety_incident.resolved, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
+ *                       department_id:
+ *                         type: string
+ *                         nullable: true
+ *                       active:
+ *                         type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       429:
+ *         description: Rate limit exceeded
+ *   post:
+ *     summary: Create webhook endpoint
+ *     description: Create a new webhook endpoint for receiving event notifications. Non-admins can only create webhooks for their department.
+ *     tags:
+ *       - Webhooks
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *               - event_types
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 format: uri
+ *                 description: Webhook endpoint URL
+ *               description:
+ *                 type: string
+ *                 description: Webhook description
+ *               event_types:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, safety_incident.created, safety_incident.updated, safety_incident.resolved, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
+ *                 description: Event types to subscribe to
+ *               department_id:
+ *                 type: string
+ *                 description: Department ID (defaults to user's department if not provided)
+ *     responses:
+ *       201:
+ *         description: Webhook created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 webhook:
+ *                   type: object
+ *                   description: Created webhook endpoint
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";

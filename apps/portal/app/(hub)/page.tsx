@@ -104,79 +104,59 @@ async function getProductionTrendData(
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
-          const { data: rows, error } = await db
-            .from("daily_logs")
-            .select(
-              `
-                created_at,
-                department:department_id(name),
-                production_logs(coal_tonnes, waste_tonnes)
-              `,
-            )
-            .gte(
-              "created_at",
-              new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            )
-            .order("created_at", { ascending: true });
+          const { data: trendData, error } = await db.rpc(
+            "get_production_trend",
+            {
+              p_hours_back: 24,
+            },
+          );
 
-          if (error || !rows || rows.length === 0) {
+          if (error || !trendData || trendData.length === 0) {
             return FALLBACK_TREND_DATA;
           }
 
-          const hourlyMap = new Map<string, Record<string, number>>();
+          // Format RPC response into TrendDataPoint[]
+          const hourlyMap = new Map<string, TrendDataPoint>();
 
-          for (const row of rows) {
-            const hour = new Date(row.created_at).toLocaleTimeString("en-GB", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            const deptName =
-              (row.department as unknown as { name: string } | null)?.name ??
-              "Unknown";
-
+          for (const row of trendData) {
+            const hour = row.hour_label;
             if (!hourlyMap.has(hour)) {
               hourlyMap.set(hour, {
+                date: hour,
                 Drilling: 0,
                 Production: 0,
                 Engineering: 0,
               });
             }
-
-            const logs = row.production_logs as
-              | { coal_tonnes: number; waste_tonnes: number }[]
-              | null;
-            if (logs) {
-              const total = logs.reduce(
-                (sum, l) =>
-                  sum + Number(l.coal_tonnes) + Number(l.waste_tonnes),
-                0,
-              );
-              hourlyMap.get(hour)![deptName] =
-                (hourlyMap.get(hour)![deptName] ?? 0) + total;
+            const point = hourlyMap.get(hour)!;
+            // Map department name to the specific key in TrendDataPoint
+            // If department name is not one of the keys, we skip or handle accordingly
+            const deptKey = row.department_name as keyof Omit<
+              TrendDataPoint,
+              "date"
+            >;
+            if (
+              deptKey === "Drilling" ||
+              deptKey === "Production" ||
+              deptKey === "Engineering"
+            ) {
+              point[deptKey] = Number(row.tonnes);
             }
           }
 
-          const formatted: TrendDataPoint[] = Array.from(
-            hourlyMap.entries(),
-          ).map(([date, depts]) => ({
-            date,
-            Drilling: depts.Drilling || 0,
-            Production: depts.Production || 0,
-            Engineering: depts.Engineering || 0,
-          }));
-
+          const formatted = Array.from(hourlyMap.values());
           return formatted.length > 0 ? formatted : FALLBACK_TREND_DATA;
         },
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "production-trend"],
-          tags: ["table:daily_logs", "table:production_logs"],
+          tags: ["table:hourly_loads", "table:machines"],
         },
       );
     },
     {
       revalidate: 300,
-      tags: ["table:daily_logs", "table:production_logs"],
+      tags: ["table:hourly_loads", "table:machines"],
     },
   );
 }
@@ -374,7 +354,7 @@ export default async function HubPage() {
       {/* Light-theme glass hero section */}
       {/* Light-theme glass hero section */}
       <section
-        className="relative overflow-hidden rounded-3xl pt-1 pb-0 sm:pt-2 sm:pb-0 md:pt-3 md:pb-0 lg:pt-4 lg:pb-0 px-4 sm:px-6 md:px-10 motion-reduce:animate-none animate-fade-up"
+        className="relative overflow-hidden rounded-xl pt-1 pb-0 sm:pt-2 sm:pb-0 md:pt-3 md:pb-0 lg:pt-4 lg:pb-0 px-4 sm:px-6 md:px-10 motion-reduce:animate-none animate-fade-up"
         style={{
           animationDelay: "0s",
           animationFillMode: "both",
@@ -386,20 +366,20 @@ export default async function HubPage() {
           variant="liquid"
           hover={false}
           padding={false}
-          className="relative z-10 rounded-3xl shadow-card overflow-hidden"
+          className="relative z-10 rounded-xl shadow-card overflow-hidden"
         >
           {/* Inner glass highlight ring */}
           <div
-            className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-arch-border-emphasis/40 pointer-events-none"
+            className="absolute inset-0 rounded-xl ring-1 ring-inset ring-arch-border-emphasis/40 pointer-events-none"
             aria-hidden="true"
           />
 
           <div className="px-6 py-6 sm:px-10 sm:py-8 md:px-14 md:py-10 max-w-xl space-y-5 relative">
             {/* Eyebrow badge row */}
             <div className="flex items-center gap-3 flex-wrap liquid-shift-y">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-semibold tracking-wide text-arch-text-secondary">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-medium tracking-wide text-arch-text-secondary">
                 <span
-                  className="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                  className="w-1.5 h-1.5 rounded-full bg-accent-green"
                   aria-hidden="true"
                 />
                 Sector-01 Active
@@ -410,7 +390,7 @@ export default async function HubPage() {
               <FocusModeToggle />
               {incidentCount > 0 && (
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-semibold tracking-wide"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red text-[10px] font-medium tracking-wide"
                   title={`${incidentCount} open safety incidents`}
                 >
                   <AlertTriangle className="w-3 h-3" aria-hidden="true" />
@@ -419,7 +399,7 @@ export default async function HubPage() {
               )}
               {breakdownCount > 0 && (
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-semibold tracking-wide"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber text-[10px] font-medium tracking-wide"
                   title={`${breakdownCount} active breakdowns`}
                 >
                   <Wrench className="w-3 h-3" aria-hidden="true" />
@@ -428,7 +408,7 @@ export default async function HubPage() {
               )}
               {offlineMachineCount > 0 && (
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold tracking-wide"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-arch-surface-tertiary text-arch-text-secondary text-[10px] font-medium tracking-wide"
                   title={`${offlineMachineCount} machines offline`}
                 >
                   <Power className="w-3 h-3" aria-hidden="true" />
@@ -476,7 +456,7 @@ export default async function HubPage() {
         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
       >
         <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-bold text-arch-text-primary flex items-center gap-2">
+          <h2 className="text-[17px] font-medium text-arch-text-primary flex items-center gap-2">
             <Shield className="w-4 h-4 text-arch-accent-red" />
             Live System Urgency & Incident Controls
           </h2>
@@ -486,11 +466,11 @@ export default async function HubPage() {
 
       {/* Core Operational Modules - Responsive Grid */}
       <section
-        className="space-y-4 animate-fade-up group/row relative aurora-shadow rounded-2xl"
+        className="space-y-4 animate-fade-up group/row relative aurora-shadow rounded-lg"
         style={{ animationDelay: "0.2s", animationFillMode: "both" }}
       >
         <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-bold text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
+          <h2 className="text-[17px] font-medium text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
             <Boxes className="w-4 h-4 text-arch-accent-blue opacity-70" />
             Core Operational Modules
             <span className="ml-1 px-1.5 py-0.5 rounded-md bg-arch-surface-tertiary text-arch-text-tertiary text-[11px] font-mono">
@@ -500,7 +480,7 @@ export default async function HubPage() {
         </div>
 
         {departments.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-arch-surface-tertiary/40 border border-arch-border-primary">
+          <div className="p-8 text-center rounded-lg bg-arch-surface-tertiary/40 border border-arch-border-primary">
             <p className="text-sm text-arch-text-tertiary">
               No departments available for your account.
             </p>
@@ -527,7 +507,7 @@ export default async function HubPage() {
           style={{ animationDelay: "0.3s", animationFillMode: "both" }}
         >
           <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-            <h2 className="text-[17px] font-bold text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
+            <h2 className="text-[17px] font-medium text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
               <WrenchIcon className="w-4 h-4 text-arch-accent-blue opacity-70" />
               Daily Workflow & Efficiency Tools
             </h2>
@@ -549,7 +529,7 @@ export default async function HubPage() {
         style={{ animationDelay: "0.4s", animationFillMode: "both" }}
       >
         <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-bold text-arch-text-primary flex items-center gap-2">
+          <h2 className="text-[17px] font-medium text-arch-text-primary flex items-center gap-2">
             <Activity className="w-4 h-4 text-arch-accent-green" />
             Operational Ingestion Telemetry
           </h2>

@@ -132,7 +132,7 @@ export default function ReportsPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="w-full bg-black/[0.03] h-2 rounded-full overflow-hidden flex">
+                  <div className="w-full bg-[var(--overlay-dim)] h-2 rounded-full overflow-hidden flex">
                     <div
                       className={`h-full rounded-full ${
                         dept.rate >= 95
@@ -204,11 +204,11 @@ export default function ReportsPage() {
 
       {/* Reports history */}
       <GlassCard>
-        <div className="pb-3 border-b border-black/[0.06] flex items-center justify-between">
+        <div className="pb-3 border-b border-[var(--border-default)] flex items-center justify-between">
           <h3 className="font-semibold text-sm text-[var(--text-heading)]">
             Generated Audits & Exports
           </h3>
-          <button className="text-xs px-2.5 py-1 bg-black/[0.02] border border-black/[0.08] hover:bg-black/[0.05] rounded-md font-semibold transition-colors">
+          <button className="text-xs px-2.5 py-1 bg-[var(--overlay-dim)] border border-[var(--border-default)] hover:bg-[var(--overlay-subtle)] rounded-md font-semibold transition-colors">
             Generate Custom Report
           </button>
         </div>
@@ -216,7 +216,7 @@ export default function ReportsPage() {
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-black/[0.06] text-[var(--text-muted)] font-semibold">
+              <tr className="border-b border-[var(--border-default)] text-[var(--text-muted)] font-semibold">
                 <th className="pb-2">ID</th>
                 <th className="pb-2">Report Name</th>
                 <th className="pb-2">Format</th>
@@ -225,9 +225,9 @@ export default function ReportsPage() {
                 <th className="pb-2 text-right">Download</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[0.02]">
+            <tbody className="divide-y divide-[var(--overlay-dim)]">
               {initialReports.map((report) => (
-                <tr key={report.id} className="hover:bg-black/[0.01]">
+                <tr key={report.id} className="hover:bg-[var(--overlay-dim)]">
                   <td className="py-3 font-semibold text-[var(--text-muted)]">
                     {report.id}
                   </td>
@@ -236,7 +236,7 @@ export default function ReportsPage() {
                     <span>{report.name}</span>
                   </td>
                   <td className="py-3">
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-black/[0.04] font-medium text-[var(--text-secondary)]">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--overlay-subtle)] font-medium text-[var(--text-secondary)]">
                       {report.type}
                     </span>
                   </td>

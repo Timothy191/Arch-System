@@ -281,7 +281,8 @@ if [ -f "$SERVICE_FILE" ]; then
   else
     check_fail "ExecStart does NOT use standalone server.js — fix required"
     if [ "$FIX_MODE" = true ]; then
-      sed -i 's|ExecStart=.*|ExecStart=/home/timothy/.config/nvm/versions/node/v24.16.0/bin/node /home/timothy/Project/Arch-Mk2/apps/portal/.next/standalone/apps/portal/server.js|' "$SERVICE_FILE"
+      NODE_BIN=$(command -v node)
+      sed -i "s|ExecStart=.*|ExecStart=$NODE_BIN $REPO_ROOT/apps/portal/.next/standalone/apps/portal/server.js|" "$SERVICE_FILE"
       systemctl --user daemon-reload 2>/dev/null || true
       echo -e "    ${GREEN}→ Fixed ExecStart to use standalone server.js${NC}"
     fi

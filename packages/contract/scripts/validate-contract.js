@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Validate contract schemas against OpenAPI specification
  *

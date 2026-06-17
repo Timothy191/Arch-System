@@ -7,6 +7,8 @@ import { Search, Download } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Pagination } from "@repo/ui/Pagination";
+import { logError } from "@/lib/errors/error-logger";
 
 interface AuditLog {
   id: string;
@@ -25,41 +27,89 @@ export function AuditLogsTab() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
   const [tableFilter, setTableFilter] = useState("all");
+  const [tables, setTables] = useState<string[]>([]);
+  const [actions, setActions] = useState<string[]>([]);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+
   const supabase = createBrowserSupabaseClient();
 
+  // Load available table names and actions for select filters once on mount
   useEffect(() => {
-    loadLogs();
-  }, []);
+    const loadFilters = async () => {
+      const { data } = await supabase
+        .from("audit_logs")
+        .select("table_name, action");
+      if (data) {
+        const uniqueTables = Array.from(new Set(data.map((d) => d.table_name)));
+        const uniqueActions = Array.from(new Set(data.map((d) => d.action)));
+        setTables(uniqueTables.sort());
+        setActions(uniqueActions.sort());
+      }
+    };
+    loadFilters();
+  }, [supabase]);
 
-  const loadLogs = async () => {
-    const { data } = await supabase
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1); // Reset to page 1 on search change
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const loadLogs = async (
+    page: number,
+    size: number,
+    search: string,
+    action: string,
+    table: string,
+  ) => {
+    setLoading(true);
+
+    let query = supabase
       .from("audit_logs")
-      .select("*, employees(full_name)")
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .select("*, employees(full_name)", { count: "exact" });
 
-    if (data) setLogs(data);
+    if (action !== "all") {
+      query = query.eq("action", action);
+    }
+    if (table !== "all") {
+      query = query.eq("table_name", table);
+    }
+    if (search !== "") {
+      query = query.or(`action.ilike.%${search}%,table_name.ilike.%${search}%`);
+    }
+
+    query = query.order("created_at", { ascending: false });
+
+    const from = (page - 1) * size;
+    const to = from + size - 1;
+    query = query.range(from, to);
+
+    const { data, count, error } = await query;
+
+    if (error) {
+      logError(new Error(error.message), { context: "AuditLogsTab.loadLogs" });
+    } else {
+      if (data) setLogs(data);
+      if (count !== null) setTotalCount(count);
+    }
     setLoading(false);
   };
 
-  const filteredLogs = logs.filter((log) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      log.table_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.employees?.full_name.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    loadLogs(currentPage, pageSize, debouncedSearch, actionFilter, tableFilter);
+  }, [currentPage, pageSize, debouncedSearch, actionFilter, tableFilter]);
 
-    const matchesAction = actionFilter === "all" || log.action === actionFilter;
-    const matchesTable =
-      tableFilter === "all" || log.table_name === tableFilter;
-
-    return matchesSearch && matchesAction && matchesTable;
-  });
-
-  const tables = Array.from(new Set(logs.map((l) => l.table_name)));
-  const actions = Array.from(new Set(logs.map((l) => l.action)));
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6">
@@ -77,7 +127,10 @@ export function AuditLogsTab() {
           <select
             id="actionFilter"
             value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
+            onChange={(e) => {
+              setActionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
             aria-label="Filter by action"
           >
@@ -91,7 +144,10 @@ export function AuditLogsTab() {
           <select
             id="tableFilter"
             value={tableFilter}
-            onChange={(e) => setTableFilter(e.target.value)}
+            onChange={(e) => {
+              setTableFilter(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-3 py-2 bg-[var(--bg-secondary)] border-[var(--border-default)] rounded text-[var(--text-heading)]"
             aria-label="Filter by table"
           >
@@ -156,7 +212,7 @@ export function AuditLogsTab() {
                     Loading...
                   </td>
                 </tr>
-              ) : filteredLogs.length === 0 ? (
+              ) : logs.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -166,7 +222,7 @@ export function AuditLogsTab() {
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => (
+                logs.map((log) => (
                   <tr
                     key={log.id}
                     className="hover:bg-[var(--bg-tertiary)] transition-colors"
@@ -206,6 +262,20 @@ export function AuditLogsTab() {
           </table>
         </div>
       </GlassCard>
+
+      {!loading && totalCount > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
+          totalCount={totalCount}
+        />
+      )}
     </div>
   );
 }

@@ -83,7 +83,7 @@ export const colors = {
 } as const;
 
 /** @deprecated light-only — kept for backward compatibility */
-export const colorsDark = colors;
+export const colorsDark = { ...colors } as const;
 
 // ═══════════════════════════════════════════════════════════════
 // TIER 3 — DEPRECATED ALIASES
@@ -91,17 +91,17 @@ export const colorsDark = colors;
 // Stylelint will emit warnings on var(--accent-cyan/indigo/violet) usage.
 // ═══════════════════════════════════════════════════════════════
 /** @deprecated → use colors.accent.blue */
-export const accentCyan = arch15;
+export const accentCyan = "#007aff";
 /** @deprecated → use colors.accent.blue */
-export const accentIndigo = arch15;
+export const accentIndigo = "#007aff";
 /** @deprecated → use colors.accent.blue */
-export const accentViolet = arch15;
+export const accentViolet = "#007aff";
 /** @deprecated → use colors.accent.red */
-export const accentAlert = arch12;
+export const accentAlert = "#ff3b30";
 /** @deprecated → use colors.accent.blue */
-export const accentBlue = arch13;
+export const accentBlue = "#007aff";
 /** @deprecated → use colors.accent.green */
-export const accentEmerald = arch14;
+export const accentEmerald = "#34c759";
 
 // ═══════════════════════════════════════════════════════════════
 // GLASSMORPHISM TOKENS (RGBA for runtime use)
@@ -159,7 +159,7 @@ export const hsl = {
 } as const;
 
 /** @deprecated light-only — kept for backward compatibility */
-export const hslDark = hsl;
+export const hslDark = { ...hsl } as const;
 
 /** Generate a themer-compatible ColorSet for external tool export */
 export function generateThemerColorSet() {

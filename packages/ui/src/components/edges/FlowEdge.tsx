@@ -69,5 +69,3 @@ export const FlowEdge = memo(function FlowEdge({
     </>
   );
 });
-
-export default FlowEdge;

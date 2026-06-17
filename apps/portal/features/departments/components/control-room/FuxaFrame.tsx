@@ -301,7 +301,7 @@ export function FuxaFrame({
                 </p>
                 <p className="text-xs text-[var(--text-secondary)]">
                   Set{" "}
-                  <span className="font-mono text-[var(--accent-cyan)]">
+                  <span className="font-mono text-[var(--accent-blue)]">
                     NEXT_PUBLIC_FUXA_URL
                   </span>{" "}
                   in{" "}

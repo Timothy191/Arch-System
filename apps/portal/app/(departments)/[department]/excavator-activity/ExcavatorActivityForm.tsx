@@ -302,7 +302,7 @@ export function ExcavatorActivityForm({
             <button
               type="button"
               onClick={handleAddAnother}
-              className="w-14 h-14 rounded-full bg-[var(--accent-cyan)] text-[var(--bg-secondary)] text-2xl font-medium hover:bg-[var(--accent-cyan)]/90 transition-colors flex items-center justify-center"
+              className="w-14 h-14 rounded-full bg-[var(--accent-blue)] text-[var(--bg-secondary)] text-2xl font-medium hover:bg-[var(--accent-blue)]/90 transition-colors flex items-center justify-center"
             >
               +
             </button>
@@ -417,7 +417,7 @@ export function ExcavatorActivityForm({
                       }
                       className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                         formData.shiftType === shift
-                          ? "bg-[var(--accent-cyan)] text-[var(--bg-secondary)]"
+                          ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
                           : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                       }`}
                     >
@@ -472,7 +472,7 @@ export function ExcavatorActivityForm({
                     <p className="text-[var(--text-muted)] text-xs">
                       Total Hauled
                     </p>
-                    <p className="text-lg font-medium text-[var(--accent-cyan)]">
+                    <p className="text-lg font-medium text-[var(--accent-blue)]">
                       {totalBcm.toFixed(1)} BCM
                     </p>
                   </div>
@@ -524,7 +524,7 @@ export function ExcavatorActivityForm({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
+                className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
               >
                 {isSubmitting ? "Saving..." : "Log Activity"}
               </button>
@@ -534,7 +534,7 @@ export function ExcavatorActivityForm({
             </div>
 
             <p className="text-[var(--text-muted)] text-xs">
-              <span className="text-[var(--accent-cyan)]">Tip:</span> BCM is
+              <span className="text-[var(--accent-blue)]">Tip:</span> BCM is
               auto-calculated from hourly loads data. Select a site to see
               available dumpers.
             </p>

@@ -1,3 +1,57 @@
+/**
+ * @swagger
+ * /api/ai/predict:
+ *   post:
+ *     summary: Predictive maintenance analysis
+ *     description: AI-powered predictive maintenance that analyzes machine data to assess risk levels, recommend actions, and estimate time to maintenance. Considers hours worked, time since last maintenance, and recent issues.
+ *     tags:
+ *       - AI
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - machineData
+ *             properties:
+ *               machineData:
+ *                 type: string
+ *                 description: Machine operational data for predictive analysis
+ *     responses:
+ *       200:
+ *         description: Risk assessment result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 risk:
+ *                   type: string
+ *                   enum: [low, medium, high]
+ *                   description: Risk level assessment
+ *                 actions:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: Recommended maintenance actions
+ *                 timeEstimate:
+ *                   type: string
+ *                   description: Estimated time until maintenance is needed
+ *                 summary:
+ *                   type: string
+ *                   description: Narrative summary of risk assessment
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { logError } from "@/lib/errors/error-logger";
 import {

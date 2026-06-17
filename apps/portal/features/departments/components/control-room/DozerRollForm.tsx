@@ -7,6 +7,7 @@ import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Plus, X, Equal, Calculator } from "lucide-react";
 import { dozerRollSchema } from "@repo/contract";
+import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
 interface DozerWithSite {
   id: string;
@@ -42,6 +43,19 @@ export function DozerRollForm({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isDirty =
+    isOpen &&
+    !!(
+      machineId ||
+      lengthM ||
+      widthM ||
+      bladePasses ||
+      pushCount ||
+      hoursOperated
+    );
+
+  useUnsavedChangesWarning(isDirty);
 
   if (!today || !/^\d{4}-\d{2}-\d{2}$/.test(today)) {
     return (
@@ -144,7 +158,7 @@ export function DozerRollForm({
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2 bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/90 text-[var(--bg-secondary)] font-medium py-2.5 px-5 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-[var(--bg-secondary)] font-medium py-2.5 px-5 rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Roll
@@ -157,7 +171,7 @@ export function DozerRollForm({
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-[var(--accent-cyan)]" />
+                <Calculator className="w-5 h-5 text-[var(--accent-blue)]" />
                 <h3 className="text-lg font-medium text-[var(--text-heading)]">
                   Record Dozer Roll
                 </h3>
@@ -176,7 +190,7 @@ export function DozerRollForm({
               <span className="text-[var(--text-secondary)] font-medium">
                 Operational Date:
               </span>
-              <span className="font-mono font-semibold text-[var(--accent-cyan)]">
+              <span className="font-mono font-semibold text-[var(--accent-blue)]">
                 {today} (Africa/Johannesburg)
               </span>
             </div>
@@ -313,7 +327,7 @@ export function DozerRollForm({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
+                className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
               >
                 {isSubmitting ? "Saving..." : "Save Roll"}
               </button>

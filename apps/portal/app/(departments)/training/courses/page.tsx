@@ -202,7 +202,7 @@ export default async function CoursesPage({
                       {course.completionRate}%
                     </span>
                   </div>
-                  <div className="w-full bg-black/[0.04] h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[var(--overlay-subtle)] h-1.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${
                         course.completionRate > 85
@@ -216,7 +216,7 @@ export default async function CoursesPage({
                   </div>
                 </div>
 
-                <button className="w-full h-8 flex items-center justify-center gap-1.5 bg-black/[0.02] border border-black/[0.06] rounded-lg text-xs font-semibold text-[var(--text-heading)] hover:bg-black/[0.05] transition-colors">
+                <button className="w-full h-8 flex items-center justify-center gap-1.5 bg-[var(--overlay-dim)] border border-[var(--border-default)] rounded-lg text-xs font-semibold text-[var(--text-heading)] hover:bg-[var(--overlay-subtle)] transition-colors">
                   <PlayCircle className="w-4 h-4 text-[var(--text-muted)]" />
                   <span>Configure Modules</span>
                 </button>

@@ -20,7 +20,7 @@ import { logError } from "@/lib/errors/error-logger";
 // Types
 // ────────────────────────────────────────────────────────────────────────────
 
-export interface ToolDispatchResult {
+interface ToolDispatchResult {
   /** The tool name to call, or null if no tool should fire */
   tool: string | null;
   /** Arguments for the tool */

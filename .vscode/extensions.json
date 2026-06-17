@@ -1,13 +1,15 @@
 {
   "recommendations": [
+    "sst-dev.opencode",
     "dbaeumer.vscode-eslint",
+    "nrwl.angular-console",
+    "eamodio.gitlens",
+    "vscodevim.vim",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next",
     "github.copilot",
     "github.copilot-chat",
     "ms-vscode.live-server",
-    "eamodio.gitlens",
     "pkief.material-icon-theme",
     "ms-azuretools.vscode-docker",
     "editorconfig.editorconfig",

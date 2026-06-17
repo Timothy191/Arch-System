@@ -16,6 +16,8 @@
  *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
  */
 
+import { Logo } from "@repo/ui/Logo";
+
 interface TrustLogo {
   src: string;
   alt: string;
@@ -58,8 +60,11 @@ export function TrustLogos({ logos }: TrustLogosProps) {
           {PLACEHOLDERS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-7 px-3 text-xs font-semibold text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
+              className="inline-flex items-center justify-center h-7 px-3 text-xs font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
             >
+              {p.label === "Arch Mining" && (
+                <Logo className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+              )}
               {p.label}
             </span>
           ))}

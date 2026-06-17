@@ -19,7 +19,7 @@
 
   /* Background range — macOS system grays */
   /* ARCH PALETTE — macOS Ventura/Sonoma Light */
-  --arch0: #f5f5f7; /* macOS base background */
+  --arch0: #ffffff; /* macOS pure white background */
   --arch1: #ffffff; /* elevated surface / card */
   --arch2: #e8e8ed; /* sunken / input bg */
   --arch3: #d2d2d7; /* pressed / deeply sunken */
@@ -37,7 +37,7 @@
   --arch11: #1d1d1f; /* heading / primary */
 
   /* Aurora Accents — status colors (unchanged) */
-  --arch12: #ff3b30; /* red — error / danger */
+  --arch12: #d22118; /* red — error / danger (adjusted for 4.5:1 contrast) */
   --arch13: #1c1c1e; /* deep charcoal — warning */
   --arch14: #34c759; /* green — success */
   --arch15: #1c1c1e; /* deep charcoal — macOS system blue / info */
@@ -102,7 +102,7 @@
 
   /* Glow shadows for the extended palette */
   --shadow-glow-electric-blue:
-    0 0 20px rgba(28, 28, 30, 0.22), 0 0 60px rgba(28, 28, 30, 0.08);
+    0 0 20px rgba(220, 38, 38, 0.22), 0 0 60px rgba(220, 38, 38, 0.08);
   --shadow-glow-mint:
     0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
   --shadow-glow-amber:
@@ -123,12 +123,34 @@
        These map to their canonical Tier 2 equivalents.
        @deprecated Use the canonical --accent-* tokens instead.
        Migration tracked in packages/theme/DECISIONS.md.
+       
+       DEPRECATION NOTICE (2026-06-20):
+       All deprecated accent tokens have been migrated to their canonical equivalents:
+       - --accent-cyan → --accent-blue
+       - --accent-indigo → --accent-blue  
+       - --accent-violet → --accent-blue
+       - --accent-alert → --accent-red
+       - --accent-emerald → --accent-green
+       
+       These deprecated definitions are being removed as part of the style cleanup.
        ═══════════════════════════════════════════════════════════════ */
-  --accent-cyan: var(--accent-blue); /* @deprecated → use --accent-blue */
-  --accent-indigo: var(--accent-blue); /* @deprecated → use --accent-blue */
-  --accent-violet: var(--accent-blue); /* @deprecated → use --accent-blue */
-  --accent-alert: var(--accent-red); /* @deprecated → use --accent-red */
-  --accent-emerald: var(--accent-green); /* @deprecated → use --accent-green */
+
+  /* ═══════════════════════════════════════════════════════════════
+       DEPARTMENT COLOR TOKENS
+       Single source of truth for department-specific icon/badge colors.
+       Used by MacMenuBar, DepartmentLayout, KPI, and any component
+       that renders per-department color accents.
+       ═══════════════════════════════════════════════════════════════ */
+  --dept-drilling: #2563eb;         /* blue-600 */
+  --dept-production: #34c759;       /* green / accent-green */
+  --dept-access-control: #0284c7;   /* sky-600 */
+  --dept-access-card-actions: #3b82f6; /* blue-500 */
+  --dept-engineering: #7c3aed;      /* violet-600 */
+  --dept-control-room: #dc2626;     /* red-600 */
+  --dept-safety: #d97706;           /* amber-600 */
+  --dept-training: #0891b2;         /* cyan-600 */
+  --dept-satellite: #4f46e5;        /* indigo-600 */
+  --dept-admin: #7c3aed;            /* violet-600 */
 
   /* macOS traffic light colors */
   --mac-red: #ff5f56;
@@ -197,8 +219,8 @@
   --glass-border-top: rgba(255, 255, 255, 0.25);
   --glass-border-gradient: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.25),
-    rgba(255, 255, 255, 0.05)
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.3)
   );
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
@@ -340,6 +362,17 @@
   --liquid-glass-radius-button-hover: var(--radius-md);
 
   /* ===== Design System Tokens ===== */
+  /* ---- Colors (Base Palette - DESIGN.md lines 20-39) ---- */
+  --color-bg-base: var(--arch0);
+  --color-bg-elevated: var(--arch1);
+  --color-bg-sunken: var(--arch2);
+  --color-border-subtle: var(--arch4);
+  --color-border-focus: var(--arch13);
+  --color-text-primary: var(--arch11);
+  --color-text-secondary: var(--arch10);
+  --color-text-tertiary: var(--arch9);
+  --color-accent-subtle: var(--accent-electric-blue-subtle);
+
   /* ---- Colors (HUD & Overlays) ---- */
   --color-bg-hud: oklch(0% 0 0deg / 60%);
   --color-border-hud: oklch(100% 0 0deg / 10%);
@@ -352,14 +385,26 @@
   --opacity-disabled: 0.38;
   --opacity-hover: 0.08;
 
+  /* ---- Overlay/Backdrop Tokens ---- */
+  --backdrop-dim: oklch(0% 0 0deg / 40%);
+
   /* ---- Blur Tokens ---- */
   --blur-focus-dim: 4px;
 
-  /* ---- Shadows ---- */
-  --shadow-sm: 0 1px 3px oklch(0% 0 0deg / 0.08);
-  --shadow-md: 0 4px 12px oklch(0% 0 0deg / 0.1);
-  --shadow-lg:
-    0 8px 24px oklch(0% 0 0deg / 0.12), 0 0 0 1px oklch(0% 0 0deg / 0.04);
+  /* ---- Shadows (DESIGN.md Shadow Scale) ---- */
+  --shadow-sm: 0 1px 2px oklch(0% 0 0deg / 0.05);
+  --shadow-md: 0 4px 6px -1px oklch(0% 0 0deg / 0.08), 0 2px 4px -1px oklch(0% 0 0deg / 0.04);
+  --shadow-lg: 0 10px 15px -3px oklch(0% 0 0deg / 0.1), 0 4px 6px -2px oklch(0% 0 0deg / 0.05);
+
+  /* ---- Z-Index Layers (DESIGN.md lines 117-123) ---- */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-dropdown: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+
+  /* ---- Focus Mode Tokens (DESIGN.md lines 203-205) ---- */
+  --transition-focus: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* macOS menu bar height */
   --mac-menu-bar-height: 28px;

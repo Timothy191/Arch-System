@@ -22,7 +22,7 @@ class AppError extends Error {
       statusCode?: number;
       context?: Record<string, unknown>;
       cause?: unknown;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   );
   constructor(
@@ -34,7 +34,7 @@ class AppError extends Error {
           statusCode?: number;
           context?: Record<string, unknown>;
           cause?: unknown;
-          [key: string]: any;
+          [key: string]: unknown;
         },
     statusCode?: number,
   ) {
@@ -50,16 +50,34 @@ class AppError extends Error {
       this.statusCode = codeOrOptions.statusCode ?? 500;
       this.context = codeOrOptions.context;
       this.cause = codeOrOptions.cause;
-      // Capture extra parameters in context
-      const { code, statusCode: _, context, cause, ...extra } = codeOrOptions;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
     }
   }
+}
+
+type AppErrorMeta = {
+  statusCode?: number;
+  context?: Record<string, unknown>;
+  cause?: unknown;
+  [key: string]: unknown;
+};
+
+function mergeExtra(
+  base: Record<string, unknown> | undefined,
+  extra: Record<string, unknown>,
+): Record<string, unknown> {
+  const next = { ...base, ...extra };
+  for (const key of Object.keys(next)) {
+    if (key === "context" || key === "cause") {
+      delete (extra as Record<string, unknown>)[key];
+      delete next[key];
+    }
+  }
+  for (const key of Object.keys(extra)) {
+    (next as Record<string, unknown>)[key] = (extra as Record<string, unknown>)[
+      key
+    ];
+  }
+  return next;
 }
 
 export class APIError extends AppError {
@@ -72,20 +90,10 @@ export class APIError extends AppError {
       statusCode?: number;
       context?: Record<string, unknown>;
       cause?: unknown;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   );
-  constructor(
-    message: string,
-    responseOrOptions?:
-      | Response
-      | {
-          statusCode?: number;
-          context?: Record<string, unknown>;
-          cause?: unknown;
-          [key: string]: any;
-        },
-  ) {
+  constructor(message: string, responseOrOptions?: Response | AppErrorMeta) {
     let statusCode: number | undefined;
     let response: Response | undefined;
     let context: Record<string, unknown> | undefined;
@@ -94,33 +102,27 @@ export class APIError extends AppError {
 
     if (responseOrOptions) {
       if (
-        "status" in responseOrOptions &&
-        typeof (responseOrOptions as any).status === "number"
+        responseOrOptions instanceof Response &&
+        typeof (responseOrOptions as Response).status === "number"
       ) {
         response = responseOrOptions as Response;
-        statusCode = (responseOrOptions as any).status;
+        statusCode = (responseOrOptions as unknown as Response).status;
       } else {
-        statusCode = (responseOrOptions as any).statusCode;
-        context = (responseOrOptions as any).context;
-        cause = (responseOrOptions as any).cause;
-        const {
-          statusCode: _,
-          context: __,
-          cause: ___,
-          ...rest
-        } = responseOrOptions as any;
-        extra = rest;
+        const meta = responseOrOptions as AppErrorMeta;
+        statusCode = meta.statusCode;
+        context = meta.context;
+        cause = meta.cause;
+        const { statusCode: _, context: __, cause: ___, ...rest } = meta;
+        extra = (rest ?? {}) as Record<string, unknown>;
       }
     }
     super(message, "API_ERROR", statusCode ?? 500);
     this.response = response;
     if (context) this.context = context;
     if (cause) this.cause = cause;
-    if (Object.keys(extra).length > 0) {
-      this.context = {
-        ...this.context,
-        ...extra,
-      };
+    const resolvedContext = mergeExtra(this.context, extra);
+    if (Object.keys(resolvedContext).length > 0) {
+      this.context = resolvedContext;
     }
   }
 }
@@ -133,27 +135,26 @@ export class ValidationError extends AppError {
       value?: unknown;
       context?: Record<string, unknown>;
       cause?: unknown;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
+    const extra = {
+      ...(options?.field && { field: options.field }),
+      ...(options?.value !== undefined && { value: options.value }),
+    };
     super(message, {
       code: "VALIDATION_ERROR",
       statusCode: 400,
       cause: options?.cause,
-      context: {
-        ...options?.context,
-        ...(options?.field && { field: options.field }),
-        ...(options?.value !== undefined && { value: options.value }),
-      },
+      context: { ...options?.context, ...extra },
     });
-    if (options) {
-      const { field, value, context, cause, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { field: _field, value: _value, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }
@@ -164,7 +165,7 @@ export class AuthError extends AppError {
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
     super(message, {
@@ -173,14 +174,13 @@ export class AuthError extends AppError {
       cause: options?.cause,
       context: options?.context,
     });
-    if (options) {
-      const { cause, context, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { cause: _cause, context: _context, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }
@@ -191,7 +191,7 @@ export class DatabaseError extends AppError {
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
     super(message, {
@@ -200,14 +200,13 @@ export class DatabaseError extends AppError {
       cause: options?.cause,
       context: options?.context,
     });
-    if (options) {
-      const { cause, context, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { cause: _cause, context: _context, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }
@@ -218,7 +217,7 @@ export class NotFoundError extends AppError {
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
     super(message, {
@@ -227,14 +226,13 @@ export class NotFoundError extends AppError {
       cause: options?.cause,
       context: options?.context,
     });
-    if (options) {
-      const { cause, context, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { cause: _cause, context: _context, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }
@@ -245,7 +243,7 @@ export class ConflictError extends AppError {
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
     super(message, {
@@ -254,14 +252,13 @@ export class ConflictError extends AppError {
       cause: options?.cause,
       context: options?.context,
     });
-    if (options) {
-      const { cause, context, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { cause: _cause, context: _context, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }
@@ -272,7 +269,7 @@ export class ForbiddenError extends AppError {
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
-      [key: string]: any;
+      [key: string]: unknown;
     },
   ) {
     super(message, {
@@ -281,14 +278,13 @@ export class ForbiddenError extends AppError {
       cause: options?.cause,
       context: options?.context,
     });
-    if (options) {
-      const { cause, context, ...extra } = options;
-      if (Object.keys(extra).length > 0) {
-        this.context = {
-          ...this.context,
-          ...extra,
-        };
-      }
+    const { cause: _cause, context: _context, ...rest } = options ?? {};
+    const merged = mergeExtra(
+      this.context,
+      (rest as Record<string, unknown>) ?? {},
+    );
+    if (Object.keys(merged).length > 0) {
+      this.context = merged;
     }
   }
 }

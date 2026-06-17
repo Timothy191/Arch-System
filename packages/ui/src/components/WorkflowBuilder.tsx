@@ -149,6 +149,8 @@ export function WorkflowBuilder({
 
   return (
     <div
+      role="application"
+      aria-label="Industrial Workflow Builder: Drag and connect nodes to define automation logic."
       className={`w-full h-[600px] rounded-lg border border-black/[0.08] border-t-white/90 bg-white/70 backdrop-blur-xl overflow-hidden ${className}`}
     >
       <ReactFlow
@@ -178,6 +180,7 @@ export function WorkflowBuilder({
         <Panel position="top-left" className="m-4">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-white/80 backdrop-blur-xl border border-black/[0.08] shadow-card">
             <button
+              type="button"
               onClick={addPluginNode}
               disabled={readOnly}
               className="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-black/[0.08] text-[#1d1d1f] hover:bg-[#f5f5f7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -188,6 +191,7 @@ export function WorkflowBuilder({
             <div className="w-px h-4 bg-black/[0.08]" />
 
             <button
+              type="button"
               onClick={handleSave}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-black/[0.08] text-[#1d1d1f] hover:bg-[#f5f5f7] transition-colors"
             >
@@ -197,6 +201,7 @@ export function WorkflowBuilder({
 
             {onExecute && (
               <button
+                type="button"
                 onClick={handleExecute}
                 disabled={isExecuting}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-[#007aff] text-white hover:bg-[#0071e3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -225,5 +230,3 @@ export function WorkflowBuilder({
     </div>
   );
 }
-
-export default WorkflowBuilder;

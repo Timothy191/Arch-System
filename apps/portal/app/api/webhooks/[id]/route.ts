@@ -1,3 +1,101 @@
+/**
+ * @swagger
+ * /api/webhooks/{id}:
+ *   put:
+ *     summary: Update webhook endpoint
+ *     description: Update an existing webhook endpoint. All fields are optional - only provided fields will be updated. Non-admins can only update webhooks for their department.
+ *     tags:
+ *       - Webhooks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Webhook endpoint ID
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 format: uri
+ *                 description: New webhook URL
+ *               description:
+ *                 type: string
+ *                 description: New webhook description
+ *               event_types:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, safety_incident.created, safety_incident.updated, safety_incident.resolved, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
+ *                 description: Event types to subscribe to
+ *               active:
+ *                 type: boolean
+ *                 description: Whether the webhook is active
+ *     responses:
+ *       200:
+ *         description: Webhook updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 webhook:
+ *                   type: object
+ *                   description: Updated webhook endpoint
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Webhook not found
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ *   delete:
+ *     summary: Delete webhook endpoint
+ *     description: Soft delete a webhook endpoint (sets deleted_at timestamp). Non-admins can only delete webhooks for their department.
+ *     tags:
+ *       - Webhooks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Webhook endpoint ID
+ *     responses:
+ *       200:
+ *         description: Webhook deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Webhook not found
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";

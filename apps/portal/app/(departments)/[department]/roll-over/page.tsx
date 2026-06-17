@@ -57,13 +57,13 @@ export default async function RollOverPage({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Blade Passes</p>
-          <p className="text-2xl font-medium text-[var(--accent-cyan)] mt-1">
+          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
             {totalPasses.toLocaleString()}
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Push Count</p>
-          <p className="text-2xl font-medium text-[var(--accent-cyan)] mt-1">
+          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
             {totalPushes.toLocaleString()}
           </p>
         </GlassCard>
@@ -150,12 +150,12 @@ export default async function RollOverPage({
                     {/* Site header */}
                     <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
                       <h4 className="text-base font-medium text-[var(--text-heading)] flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-cyan)]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-blue)]" />
                         {siteName}
                       </h4>
                       <div className="flex items-center gap-4 text-xs">
                         {sitePasses > 0 && (
-                          <span className="text-[var(--accent-cyan)] font-medium">
+                          <span className="text-[var(--accent-blue)] font-medium">
                             {sitePasses.toLocaleString()} passes
                           </span>
                         )}
@@ -187,7 +187,7 @@ export default async function RollOverPage({
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-[var(--accent-cyan)] font-medium">
+                                <p className="text-[var(--accent-blue)] font-medium">
                                   {roll.blade_passes} passes
                                 </p>
                                 {roll.area_covered_sqm > 0 && (
@@ -229,7 +229,7 @@ export default async function RollOverPage({
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-[var(--accent-cyan)] font-medium">
+                                <p className="text-[var(--accent-blue)] font-medium">
                                   {roll.blade_passes} passes
                                 </p>
                                 {roll.area_covered_sqm > 0 && (

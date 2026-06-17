@@ -6,14 +6,15 @@ import {
   SATELLITE_MONITORING_TABS,
   DRILLING_TABS,
   ACCESS_CONTROL_TABS,
+  ACCESS_CARD_ACTIONS_TABS,
   TRAINING_TABS,
   PRODUCTIVITY_TOOLS,
   getDepartmentTabs,
 } from "./departments";
 
 describe("DEPARTMENTS", () => {
-  it("contains exactly 9 departments", () => {
-    expect(DEPARTMENTS).toHaveLength(9);
+  it("contains exactly 10 departments", () => {
+    expect(DEPARTMENTS).toHaveLength(10);
   });
 
   it("every department has required fields", () => {
@@ -36,6 +37,11 @@ describe("DEPARTMENTS", () => {
     const names = DEPARTMENTS.map((d) => d.name);
     expect(names).toContain("control-room");
     expect(names).toContain("satellite-monitoring");
+  });
+
+  it("includes access-card-actions", () => {
+    const names = DEPARTMENTS.map((d) => d.name);
+    expect(names).toContain("access-card-actions");
   });
 
   it("all status values are valid when present", () => {
@@ -94,6 +100,12 @@ describe("getDepartmentTabs", () => {
 
   it("returns DRILLING_TABS for drilling", () => {
     expect(getDepartmentTabs("drilling")).toBe(DRILLING_TABS);
+  });
+
+  it("returns ACCESS_CARD_ACTIONS_TABS for access-card-actions", () => {
+    expect(getDepartmentTabs("access-card-actions")).toBe(
+      ACCESS_CARD_ACTIONS_TABS,
+    );
   });
 
   it("returns standard DEPARTMENT_TABS for unknown slugs", () => {

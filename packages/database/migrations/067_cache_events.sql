@@ -30,5 +30,50 @@ CREATE INDEX IF NOT EXISTS idx_cache_anomalies_timestamp ON cache_anomalies(time
 ALTER TABLE cache_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cache_anomalies ENABLE ROW LEVEL SECURITY;
 
+-- RLS Policies: admin-only access for internal observability tables
+CREATE POLICY "cache_events_select_admin"
+  ON cache_events
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM employees e
+      WHERE e.auth_id = auth.uid() AND e.role = 'admin'
+    )
+  );
+
+CREATE POLICY "cache_events_modify_admin"
+  ON cache_events
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM employees e
+      WHERE e.auth_id = auth.uid() AND e.role = 'admin'
+    )
+  );
+
+CREATE POLICY "cache_anomalies_select_admin"
+  ON cache_anomalies
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM employees e
+      WHERE e.auth_id = auth.uid() AND e.role = 'admin'
+    )
+  );
+
+CREATE POLICY "cache_anomalies_modify_admin"
+  ON cache_anomalies
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM employees e
+      WHERE e.auth_id = auth.uid() AND e.role = 'admin'
+    )
+  );
+
 COMMENT ON TABLE cache_events IS 'Raw observability data from the distributed cache mesh.';
 COMMENT ON TABLE cache_anomalies IS 'Anomalies detected by the CI Observer brain.';

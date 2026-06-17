@@ -56,8 +56,8 @@ export default async function VisitorsPage() {
         <div className="lg:col-span-1 space-y-4">
           <GlassCard>
             <div className="flex items-center space-x-2 mb-6">
-              <div className="p-2 bg-[var(--accent-cyan)]/10 rounded-lg">
-                <Users className="w-5 h-5 text-[var(--accent-cyan)]" />
+              <div className="p-2 bg-[var(--accent-blue)]/10 rounded-lg">
+                <Users className="w-5 h-5 text-[var(--accent-blue)]" />
               </div>
               <h3 className="font-semibold text-[var(--text-heading)]">
                 New Registration

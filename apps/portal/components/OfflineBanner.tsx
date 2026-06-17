@@ -75,8 +75,8 @@ export function OfflineBanner() {
       className={cn(
         "fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-300",
         state === "offline" && "bg-arch-accent-blue/95 text-white",
-        state === "syncing" && "bg-accent-blue/95 text-white",
-        state === "back-online" && "bg-accent-green/95 text-white",
+        state === "syncing" && "bg-arch-accent-blue/95 text-white",
+        state === "back-online" && "bg-arch-accent-green/95 text-white",
       )}
     >
       {state === "offline" && (

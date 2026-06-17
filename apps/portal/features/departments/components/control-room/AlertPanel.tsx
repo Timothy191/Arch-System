@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { AcknowledgeButton } from "@repo/ui/AcknowledgeButton";
 import { useThrottledState } from "@/hooks/useThrottledState";
 import { trackClientMetric } from "@/lib/observability/client-telemetry";
 
@@ -161,12 +162,11 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               </div>
               <div className="flex items-center gap-2">
                 {!alert.acknowledged && (
-                  <button
-                    onClick={() => acknowledge(alert.id)}
-                    className="px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
-                    Acknowledge
-                  </button>
+                  <AcknowledgeButton
+                    onAcknowledge={() => acknowledge(alert.id)}
+                    confirmTitle={`Acknowledge ${alert.machineId} Alert`}
+                    confirmDescription={`Are you sure you want to acknowledge that ${alert.message}?`}
+                  />
                 )}
                 <button
                   onClick={() => dismiss(alert.id)}

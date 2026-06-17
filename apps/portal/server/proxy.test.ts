@@ -155,7 +155,7 @@ describe("proxy", () => {
 
   it("passes through static file requests", async () => {
     buildProxyMock();
-    const req = makeRequest("/logo.png");
+    const req = makeRequest("/logo.svg");
     const res = await proxy(req);
     expect(res).toBeDefined();
     // Should return the raw response (not a redirect)

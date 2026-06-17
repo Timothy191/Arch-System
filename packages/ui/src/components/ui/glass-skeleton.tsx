@@ -26,9 +26,9 @@ export function GlassSkeleton({
         "relative overflow-hidden rounded-card",
         "border border-[var(--glass-border)] border-t-white/95",
         "bg-white/40 backdrop-blur-xl saturate-[160%]",
-        "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6)]",
         className,
       )}
+      style={{ boxShadow: "var(--refraction-edge-light)" }}
     >
       {/* Ambient shimmer sweep — silver core, 12s diagonal */}
       <div

@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export interface PrecisionInputProps
+interface PrecisionInputProps
   extends Omit<
     React.InputHTMLAttributes<HTMLInputElement>,
     "onChange" | "value"
@@ -93,6 +93,7 @@ export const PrecisionInput = React.forwardRef<
             <button
               type="button"
               onClick={handleIncrement}
+              aria-label="Increment"
               className="flex items-center justify-center p-1 hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors"
             >
               <ChevronUp className="w-3 h-3" />
@@ -100,6 +101,7 @@ export const PrecisionInput = React.forwardRef<
             <button
               type="button"
               onClick={handleDecrement}
+              aria-label="Decrement"
               className="flex items-center justify-center p-1 hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border-t border-[var(--border-emphasis)] transition-colors"
             >
               <ChevronDown className="w-3 h-3" />

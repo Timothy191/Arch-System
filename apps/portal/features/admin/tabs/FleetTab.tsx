@@ -359,7 +359,7 @@ export function FleetTab() {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {m.site ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/20">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
                             {m.site.site_code}
                             <span className="text-[var(--text-muted)]">
                               {m.site.name}

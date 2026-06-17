@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
+    "./Logo": "./src/components/Logo.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",
     "./SecondaryButton": "./src/components/SecondaryButton.tsx",
@@ -70,6 +72,12 @@
     "./MacMenuBar": "./src/components/MacMenuBar.tsx",
     "./MacTitleBar": "./src/components/MacTitleBar.tsx",
     "./WorkflowBuilder": "./src/components/WorkflowBuilder.tsx",
+    "./AcknowledgeButton": "./src/components/AcknowledgeButton.tsx",
+    "./ActionConfirmDialog": "./src/components/ui/action-confirm-dialog.tsx",
+    "./TelemetryChart": "./src/components/ui/telemetry-chart.tsx",
+    "./FreezeToggle": "./src/components/ui/freeze-toggle.tsx",
+    "./Pagination": "./src/components/ui/pagination.tsx",
+    "./hooks/useAutoSave": "./src/hooks/useAutoSave.ts",
     "./nodes/PluginNode": "./src/components/nodes/PluginNode.tsx",
     "./nodes/TriggerNode": "./src/components/nodes/TriggerNode.tsx",
     "./edges/FlowEdge": "./src/components/edges/FlowEdge.tsx"
@@ -82,6 +90,8 @@
     "clean": "rm -rf .nx",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:css": "stylelint 'src/**/*.css'",
+    "test-storybook": "test-storybook",
+    "test-storybook:a11y": "test-storybook --a11y",
     "type-check": "tsc --noEmit",
     "ui": "pnpm dlx shadcn@latest"
   },

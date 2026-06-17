@@ -26,7 +26,7 @@
 
   /* Liquid Glass variables */
   --liquid-glass-blur: 20px;
-  --liquid-glass-saturate: 140%;
+  --liquid-glass-saturate: 160%;
   --liquid-glass-bg: rgba(255, 255, 255, 0.15);
   --liquid-glass-border-color: rgba(255, 255, 255, 0.3);
 }
@@ -76,8 +76,8 @@
 /* ── Glass Components ── */
 
 .glass-card {
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-surface-hover: rgba(255, 255, 255, 0.85);
+  --glass-surface: rgba(255, 255, 255, 0.08);
+  --glass-surface-hover: rgba(255, 255, 255, 0.15);
   --glass-border-top-opacity: 0.25;
   --glass-border-gradient: linear-gradient(
     to bottom,
@@ -85,11 +85,13 @@
     rgba(255, 255, 255, 0.05)
   );
 
+  position: relative;
+  z-index: 10;
   background:
     linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
     var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
   border: 1px solid transparent;
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card);
@@ -137,6 +139,9 @@
 }
 
 .glass-input {
+  position: relative;
+  z-index: 20;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   background:
     linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
     var(--glass-border-gradient) border-box;
@@ -730,6 +735,11 @@
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;
   background-image:
+    radial-gradient(
+      circle at 0% 0%,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 50%
+    ),
     linear-gradient(
       135deg,
       var(--liquid-glass-bg) 0%,
@@ -893,7 +903,7 @@
 
 /* ── Specular SVG Film Grain overlay ── */
 .liquid-grain-overlay {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
   background-size: 150px 150px;
   animation: grain-dance 8s steps(10) infinite;
 }
@@ -1007,22 +1017,35 @@
   background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
 }
 
-/* Video base layer — sits at z-index -10 behind all overlays.
-   will-change: transform promotes the element to its own GPU compositor
-   layer immediately so no re-paint occurs on the first frame transition. */
-.route-bg-video,
-.route-bg-focus-video {
+/* Video container — provides viewport-relative sizing that works reliably
+   across all browsers during window resizes. The container is fixed to the
+   viewport using inset: 0, which accounts for scrollbar width and prevents gaps.
+   The video inside uses percentage sizing relative to this container with
+   object-fit: cover to maintain aspect ratio. */
+.route-bg-video-container,
+.route-bg-focus-video-container {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   z-index: -10;
+  overflow: hidden;
   background-color: #f5f5f7;
+}
+
+/* Video element — fills the container and maintains aspect ratio with object-fit */
+.route-bg-video,
+.route-bg-focus-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   will-change: transform;
   transform: translate3d(0, 0, 0);
   image-rendering: high-quality;
   image-rendering: -webkit-optimize-contrast;
+  opacity: 0.6;
+  filter: brightness(0.7);
 }
 
 /* Tint overlay — always visible (including prefers-reduced-motion).
@@ -1032,15 +1055,21 @@
 .route-bg-tint {
   position: fixed;
   inset: 0;
-  z-index: -9;
-  background: rgba(
-    255,
-    255,
-    255,
-    0.15
-  ); /* Reduced from 0.55 to make videos visible */
-
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: rgba(255, 255, 255, 0.5);
   pointer-events: none;
+}
+
+@media (width <= 768px) {
+  .route-bg-video,
+  .route-bg-focus-video {
+    opacity: 0.4;
+  }
+  .route-bg-tint {
+    background: rgba(255, 255, 255, 0.7);
+  }
 }
 
 /* Ambient Film Grain overlay to eliminate H.264 banding and add crisp texture */
@@ -1048,7 +1077,7 @@
   position: fixed;
   inset: 0;
   z-index: -8;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
   background-size: 140px 140px;
   opacity: 0.024; /* extremely subtle but prevents gradient banding and feels sharp */
   animation: grain-dance 8s steps(10) infinite;
@@ -1065,7 +1094,7 @@ body.focus-mode .route-bg-grain {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background-image: url("/focused-bg.jpeg");
+  background-image: url("/auth-bg-poster.jpg");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -1336,7 +1365,7 @@ body.focus-mode .route-bg-grain {
   transform: none !important;
 }
 
-.low-perf-fallback .route-bg-video {
+.low-perf-fallback .route-bg-video-container {
   display: none !important;
 }
 
@@ -1441,21 +1470,21 @@ body.focus-mode .liquid-glass-button {
    time the user leaves focus mode. Placed at end of file so the
    base class declarations above come first, satisfying
    `no-descending-specificity` for stylelint. */
-body:not(.focus-mode) .route-bg-video {
+body:not(.focus-mode) .route-bg-video-container {
   opacity: 1;
 }
 
-body:not(.focus-mode) .route-bg-focus-video {
+body:not(.focus-mode) .route-bg-focus-video-container {
   opacity: 0;
   pointer-events: none;
 }
 
-body.focus-mode .route-bg-video {
+body.focus-mode .route-bg-video-container {
   opacity: 0;
   pointer-events: none;
 }
 
-body.focus-mode .route-bg-focus-video {
+body.focus-mode .route-bg-focus-video-container {
   opacity: 1;
   pointer-events: auto;
 }

@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export interface ReportData {
+interface ReportData {
   title: string;
   subtitle: string;
   kpis: { label: string; value: string }[];

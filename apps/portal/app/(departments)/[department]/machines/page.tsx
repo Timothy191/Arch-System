@@ -35,7 +35,7 @@ export default async function MachinesPage({
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--accent-cyan)]/5 border border-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] text-sm">
+      <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--accent-blue)]/5 border border-[var(--accent-blue)]/20 text-[var(--accent-blue)] text-sm">
         <svg
           className="w-4 h-4 shrink-0"
           fill="none"
@@ -122,7 +122,7 @@ export default async function MachinesPage({
                     {/* Site heading */}
                     <div className="flex items-center gap-3 border-b border-[var(--border-default)] pb-2">
                       {siteCode ? (
-                        <span className="inline-flex px-2 py-0.5 rounded font-mono text-xs bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/20">
+                        <span className="inline-flex px-2 py-0.5 rounded font-mono text-xs bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
                           {siteCode}
                         </span>
                       ) : null}

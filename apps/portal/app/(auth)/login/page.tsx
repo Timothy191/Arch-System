@@ -4,7 +4,9 @@ import {
   getUserSafely,
 } from "@repo/supabase/server";
 import { LoginForm } from "./LoginForm";
+import { RefractionGlow } from "./RefractionGlow";
 import { AlertTriangle, Lock } from "lucide-react";
+import { Logo } from "@repo/ui/Logo";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
@@ -46,9 +48,11 @@ export default async function LoginPage() {
     <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-start justify-start py-8 pl-6 pr-8 md:pl-12 md:pr-16 lg:pl-20 lg:pr-32 overflow-y-auto">
       {/* Login Card wrapper */}
       <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up -top-16 flex flex-col justify-center">
+        {/* Liquid Refraction Glow (Behind Card) */}
+        <RefractionGlow />
         {systemUnavailable ? (
-          <div className="bg-white/70 backdrop-blur-lg border border-white/40 rounded-2xl overflow-hidden w-full shadow-window">
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-black/[0.02]">
+          <div className="glass-card rounded-2xl overflow-hidden w-full">
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-[var(--overlay-dim)]">
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="w-3 h-3 rounded-full bg-mac-red border border-arch-border-subtle" />
                 <span className="w-3 h-3 rounded-full bg-mac-yellow border border-arch-border-subtle" />
@@ -84,7 +88,7 @@ export default async function LoginPage() {
             className="w-full flex flex-col min-h-[660px] overflow-hidden login-card-container layer-signin-card liquid-glass-light border border-white/40 shadow-window rounded-xl"
           >
             {/* Title bar */}
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-black/[0.02]">
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-[var(--overlay-dim)]">
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="w-3 h-3 rounded-full bg-mac-red border border-arch-border-subtle" />
                 <span className="w-3 h-3 rounded-full bg-mac-yellow border border-arch-border-subtle" />
@@ -103,29 +107,15 @@ export default async function LoginPage() {
                     Welcome Back
                   </span>
                 </div>
-                <div className="flex flex-col items-start gap-2">
-                  <div className="flex items-center gap-1.5 text-[10px] text-arch-accent-green">
-                    <Lock className="w-3 h-3" strokeWidth={1.5} />
-                    <span>Secure</span>
-                  </div>
-                  {/* Company Branding (do not remove) */}
-                  <img
-                    src="/assets/large/company-branding.jpeg"
-                    alt="Company Logo"
-                    className="h-8 w-auto object-contain opacity-95"
-                  />
+                <div className="flex items-center gap-1.5 text-[10px] text-arch-accent-green">
+                  <Lock className="w-3 h-3" strokeWidth={1.5} />
+                  <span>Secure</span>
                 </div>
               </div>
 
               {/* Title */}
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-4">
-                  <img
-                    src="/logo-large.png"
-                    alt="Arch Logo"
-                    className="w-16 h-16 object-contain shrink-0"
-                  />
-                </div>
+                <Logo className="w-14 h-14 shrink-0 text-[var(--accent-blue)]" />
                 <div className="space-y-1">
                   <h1 className="text-2xl font-medium tracking-tight text-[var(--text-heading)]">
                     Arch
@@ -139,7 +129,7 @@ export default async function LoginPage() {
               <LoginForm />
 
               {/* Contextual System Notice */}
-              <div className="px-3.5 py-2.5 rounded-lg border border-black/[0.04] bg-black/[0.02] text-[11px] text-[var(--text-secondary)] leading-relaxed flex items-start gap-2.5 select-none">
+              <div className="px-3.5 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--overlay-dim)] text-[11px] text-[var(--text-secondary)] leading-relaxed flex items-start gap-2.5 select-none">
                 <svg
                   className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 mt-0.5"
                   viewBox="0 0 24 24"
@@ -161,7 +151,7 @@ export default async function LoginPage() {
             </div>
 
             {/* Enterprise Footer */}
-            <div className="px-4 py-3 flex items-center justify-between text-[10px] text-[var(--text-muted)] bg-black/[0.02] border-t border-arch-border-subtle select-none">
+            <div className="px-4 py-3 flex items-center justify-between text-[10px] text-[var(--text-muted)] bg-[var(--overlay-dim)] border-t border-arch-border-subtle select-none">
               <button
                 type="button"
                 className="flex items-center gap-1 cursor-pointer hover:text-[var(--text-secondary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1.5 py-0.5 -mx-1.5"

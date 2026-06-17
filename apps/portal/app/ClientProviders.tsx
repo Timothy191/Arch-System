@@ -17,6 +17,7 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
       process.env.NODE_ENV === "development" &&
       "serviceWorker" in navigator
     ) {
+      // Unregister service workers in development to avoid cache conflicts
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         if (registrations.length > 0) {
           Promise.all(registrations.map((r) => r.unregister())).then(
@@ -31,6 +32,23 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
             },
           );
         }
+      });
+    } else if (
+      process.env.NODE_ENV === "production" &&
+      "serviceWorker" in navigator
+    ) {
+      // Register service worker in production
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            // eslint-disable-next-line no-console
+            console.log("SW registered: ", registration);
+          })
+          .catch((registrationError) => {
+            // eslint-disable-next-line no-console
+            console.log("SW registration failed: ", registrationError);
+          });
       });
     }
   }, []);

@@ -73,7 +73,7 @@ const BentoCard = ({
           variant="link"
           asChild
           size="sm"
-          className="pointer-events-auto p-0 text-[var(--accent-cyan)]"
+          className="pointer-events-auto p-0 text-[var(--accent-blue)]"
         >
           <a href={href}>
             {cta}
@@ -92,7 +92,7 @@ const BentoCard = ({
         variant="link"
         asChild
         size="sm"
-        className="pointer-events-auto p-0 text-[var(--accent-cyan)]"
+        className="pointer-events-auto p-0 text-[var(--accent-blue)]"
       >
         <a href={href}>
           {cta}

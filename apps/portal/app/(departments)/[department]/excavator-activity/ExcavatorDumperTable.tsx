@@ -146,7 +146,7 @@ export function ExcavatorDumperTable({
         <button
           type="button"
           onClick={handleAddRow}
-          className="flex items-center gap-1.5 text-[var(--accent-cyan)] hover:text-[var(--accent-cyan)]/80 text-sm font-medium transition-colors"
+          className="flex items-center gap-1.5 text-[var(--accent-blue)] hover:text-[var(--accent-blue)]/80 text-sm font-medium transition-colors"
         >
           <span className="text-lg leading-none">+</span> Add Dumper
         </button>
@@ -256,7 +256,7 @@ export function ExcavatorDumperTable({
                     </td>
                     <td className="py-2 px-2 text-right">
                       {assignment.totalBcm > 0 ? (
-                        <span className="text-[var(--accent-cyan)] font-medium">
+                        <span className="text-[var(--accent-blue)] font-medium">
                           {assignment.totalBcm.toFixed(1)}
                         </span>
                       ) : (
@@ -269,7 +269,7 @@ export function ExcavatorDumperTable({
                           type="button"
                           onClick={() => handleDuplicateRow(index)}
                           title="Duplicate for different material"
-                          className="p-1 text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors text-xs"
+                          className="p-1 text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors text-xs"
                         >
                           ⧉
                         </button>
@@ -298,7 +298,7 @@ export function ExcavatorDumperTable({
                 <td className="py-2 px-2 text-right text-[var(--text-heading)] font-medium">
                   {runningTotalLoads}
                 </td>
-                <td className="py-2 px-2 text-right text-[var(--accent-cyan)] font-medium">
+                <td className="py-2 px-2 text-right text-[var(--accent-blue)] font-medium">
                   {runningTotalBcm.toFixed(1)}
                 </td>
                 <td />

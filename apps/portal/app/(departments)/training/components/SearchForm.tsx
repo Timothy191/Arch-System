@@ -21,7 +21,7 @@ export function SearchForm({
         name="q"
         placeholder={placeholder}
         defaultValue={value}
-        className="pl-9 w-full h-9 bg-black/[0.02] border border-black/[0.08] rounded-lg text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--accent-blue)]"
+        className="pl-9 w-full h-9 bg-[var(--overlay-dim)] border border-[var(--border-default)] rounded-lg text-sm text-[var(--text-heading)] focus:outline-none focus:border-[var(--accent-blue)]"
       />
       {Object.entries(hiddenParams).map(([key, val]) => (
         <input key={key} type="hidden" name={key} value={val} />

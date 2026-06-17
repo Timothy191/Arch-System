@@ -16,14 +16,12 @@ export default async function EngineeringNotesPage({
     department,
   });
 
-  // Resolve the Engineering department ID for cross-dept breakdown query
-  const { data: engDept } = await supabase
-    .from("departments")
-    .select("id")
-    .eq("name", "engineering")
-    .single();
-
-  // Parallel fetches — machines, today's notes, and Engineering breakdowns
+  // AGENT-TRACE: Use the secure view breakdowns_control_room_view instead of querying
+  // the base breakdowns table directly. This view filters to only show breakdowns that:
+  // 1. Are shared with Control Room (via shared_with_departments)
+  // 2. Are either active or completed today
+  // 3. Only exposes required fields (no repair_notes, created_by, etc.)
+  // The view is read-only and enforced by RLS policies on the base table.
   const [{ data: machines }, { data: todayNotes }, { data: engBreakdowns }] =
     await Promise.all([
       supabase
@@ -37,19 +35,10 @@ export default async function EngineeringNotesPage({
         .eq("department_id", deptId)
         .eq("note_date", today)
         .order("created_at", { ascending: false }),
-      engDept
-        ? supabase
-            .from("breakdowns")
-            .select(
-              "id, fleet_id, machine_name, machine_type, reason, date_in, time_in, date_out, status",
-            )
-            .eq("department_id", engDept.id)
-            .is("deleted_at", null)
-            .or(
-              `status.eq.active,and(status.eq.completed,date_out.eq.${today})`,
-            )
-            .order("created_at", { ascending: false })
-        : Promise.resolve({ data: [] }),
+      supabase
+        .from("breakdowns_control_room_view")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
 
   // Calculate statistics

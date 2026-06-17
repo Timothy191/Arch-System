@@ -129,6 +129,7 @@ export function ShiftCoverageWidget({
     );
   }
 
+  // AGENT-TRACE: UX improvement - Error handling with actionable guidance
   if (error) {
     return (
       <GlassCard>
@@ -138,7 +139,18 @@ export function ShiftCoverageWidget({
           </h3>
           <Clock className="w-5 h-5 text-[var(--text-muted)]" />
         </div>
-        <p className="text-accent-red text-sm">{error}</p>
+        <div className="space-y-2">
+          <p className="text-accent-red text-sm font-medium">
+            Unable to load shift coverage data
+          </p>
+          <p className="text-[var(--text-muted)] text-xs">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-[var(--accent-blue)] text-xs hover:underline"
+          >
+            Try refreshing the page
+          </button>
+        </div>
       </GlassCard>
     );
   }
@@ -232,7 +244,7 @@ export function ShiftCoverageWidget({
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
-                className="mt-4 w-full flex items-center justify-center gap-2 bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/90 text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors text-sm"
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors text-sm"
               >
                 <Clock className="w-4 h-4" />
                 Close Shift

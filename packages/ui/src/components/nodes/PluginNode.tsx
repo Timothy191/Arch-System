@@ -25,6 +25,7 @@ export const PluginNode = memo(function PluginNode({
   const data = rawData as PluginNodeData;
   return (
     <div
+      aria-roledescription="workflow-node"
       className={`
         relative min-w-[180px] rounded-xl border border-[#34c759]/30
         bg-gradient-to-br from-[#f5f5f7] to-white
@@ -42,6 +43,7 @@ export const PluginNode = memo(function PluginNode({
           {data.label || "Plugin Step"}
         </span>
         <button
+          type="button"
           className="ml-auto p-1 rounded hover:bg-black/[0.04] transition-colors"
           aria-label="Configure plugin"
         >
@@ -84,5 +86,3 @@ export const PluginNode = memo(function PluginNode({
     </div>
   );
 });
-
-export default PluginNode;

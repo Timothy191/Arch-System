@@ -7,20 +7,21 @@ Quick navigation guide for Arch-Systems documentation.
 ### New to the Project?
 
 - **[README.md](./README.md)** - Project overview and quick start (5 min read)
-- **[CLAUDE.md](./CLAUDE.md)** - Complete technical guide (30 min read)
-- **[docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
+- **[CLAUDE.md](CLAUDE.md)** - Complete technical guide (30 min read)
+- **[docs/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference
 
-- **[docs/wiki/index.md](./docs/wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
-- **[AGENTS.md](./AGENTS.md)** - Workflow rules, quality gates, and quick commands
+- **[docs/reports/PROJECT_AUDIT_UPGRADE_PLAN.md](./reports/PROJECT_AUDIT_UPGRADE_PLAN.md)** - Full-stack project audit, remote caching optimizations, and upgrade roadmap
+- **[docs/wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
+- **[AGENTS.md](AGENTS.md)** - Workflow rules, quality gates, and quick commands
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for all environments
 
 ## 🛠️ Development
 
 ### Core Development
 
-- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive technical guide covering:
+- **[CLAUDE.md](CLAUDE.md)** - Comprehensive technical guide covering:
   - Runtime requirements (Node.js ≥22, pnpm 9.15.9)
   - All development commands
   - Architecture (apps, packages, dependency versioning)
@@ -29,7 +30,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Workflow & Quality
 
-- **[AGENTS.md](./AGENTS.md)** - Development workflow and agent contracts
+- **[AGENTS.md](AGENTS.md)** - Development workflow and agent contracts
   - Phase boundaries (Discuss, Plan, Execute, Verify, Ship)
   - Quality gates and verification steps
   - Subagent discipline
@@ -96,7 +97,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ## 📊 Documentation Structure
 
-```
+```text
 Arch-Mk2/
 ├── README.md                          # Project overview
 ├── CLAUDE.md                          # Technical guide (authoritative)
@@ -119,6 +120,9 @@ Arch-Mk2/
 │   │   └── runbooks/
 │   │       ├── AMCA-RUNBOOK.md
 │   │       └── auth-unavailable.md
+│   ├── reports/                       # Project audits and upgrade plans
+│   │   ├── PROJECT_AUDIT_UPGRADE_PLAN.md
+│   │   └── architecture_walkthrough.md
 │   └── wiki/                          # Detailed technical wiki and domain concept docs
 │       ├── index.md                   # Wiki Index page
 │       └── concepts/
@@ -134,15 +138,15 @@ Arch-Mk2/
 
 - **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
 - **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
-- **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](../CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section
-- **Run development commands**: Check [AGENTS.md](../AGENTS.md) Commands section
+- **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](CLAUDE.md)
+- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section
+- **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [scripts/ROCKY_LINUX_COMPATIBILITY.md](../scripts/ROCKY_LINUX_COMPATIBILITY.md)
 - **Design a new component**: Reference [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md)
 - **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
 - **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)
-- **Understand quality gates**: Review [AGENTS.md](../AGENTS.md) Quality Gates section
+- **Understand quality gates**: Review [AGENTS.md](AGENTS.md) Quality Gates section
 - **Review historical plans / checklist**: Check [docs/archive/LIQUID_GLASS_CHECKLIST.md](./docs/archive/LIQUID_GLASS_CHECKLIST.md)
 - **Find operational runbooks**: Check [docs/operations/runbooks/](./docs/operations/runbooks/)
 

@@ -176,7 +176,7 @@ export function SitesTab() {
                       {s.name}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex px-2 py-0.5 rounded font-mono text-xs bg-[var(--bg-secondary)] text-[var(--accent-cyan)] border border-[var(--border-default)]">
+                      <span className="inline-flex px-2 py-0.5 rounded font-mono text-xs bg-[var(--bg-secondary)] text-[var(--accent-blue)] border border-[var(--border-default)]">
                         {s.site_code}
                       </span>
                     </td>

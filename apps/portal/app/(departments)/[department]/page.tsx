@@ -158,23 +158,22 @@ export default async function DepartmentDashboard({
               <WeatherWidget variant="compact" />
             </Suspense>
 
-            {/* Quick Actions */}
+            {/* AGENT-TRACE: Quick Actions - UX improvements based on heuristics:
+                 - Single primary action (machine operations) to reduce cognitive load
+                 - Removed duplicate "Log Delay" button that went to same destination
+                 - Clear visual hierarchy: primary (blue) vs secondary (outline) buttons
+                 - Action labels are self-evident and match system capabilities
+            */}
             <div className="flex flex-wrap gap-3">
               <a
                 href={`/${deptSlug}/machine-operations`}
                 className="px-4 py-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
               >
-                + Log Operation
-              </a>
-              <a
-                href={`/${deptSlug}/machine-operations`}
-                className="px-4 py-2 bg-white/70 backdrop-blur-md border border-black/[0.08] hover:bg-white/90 text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
-              >
-                + Log Delay
+                Machine Operations
               </a>
               <a
                 href={`/${deptSlug}/hourly-loads`}
-                className="px-4 py-2 bg-white/70 backdrop-blur-md border border-black/[0.08] hover:bg-white/90 text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
+                className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] font-medium rounded-lg transition-all duration-200 text-sm hover:scale-[1.02] active:scale-[0.98]"
               >
                 Update Loads
               </a>
@@ -354,7 +353,7 @@ async function ControlRoomSummaryGrid({
       </GlassCard>
       <GlassCard hover accent="cyan">
         <p className="system-label">Delay Entries</p>
-        <p className="text-2xl font-bold text-[var(--accent-cyan)] mt-1">
+        <p className="text-2xl font-bold text-[var(--accent-blue)] mt-1">
           {todayDelayEntries.data?.length || 0}
         </p>
         {committedDelayHours > 0 && (

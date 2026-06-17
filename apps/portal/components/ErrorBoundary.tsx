@@ -173,18 +173,3 @@ export class ErrorBoundary extends Component<
     return this.props.children;
   }
 }
-
-// Functional wrapper for easier usage in modern React
-export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  context?: string,
-  fallback?: ReactNode,
-) {
-  return function WrappedComponent(props: P) {
-    return (
-      <ErrorBoundary context={context} fallback={fallback}>
-        <Component {...props} />
-      </ErrorBoundary>
-    );
-  };
-}

@@ -163,7 +163,7 @@ export default async function SchedulesPage({
                     {session.type}
                   </span>
                   <span
-                    className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium bg-black/[0.03] text-[var(--text-muted)]`}
+                    className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium bg-[var(--overlay-dim)] text-[var(--text-muted)]`}
                   >
                     {session.status}
                   </span>
@@ -208,7 +208,7 @@ export default async function SchedulesPage({
                     {session.filled} / {session.capacity} Slots
                   </p>
                 </div>
-                <div className="w-24 bg-black/[0.04] h-1.5 rounded-full overflow-hidden hidden sm:block">
+                <div className="w-24 bg-[var(--overlay-subtle)] h-1.5 rounded-full overflow-hidden hidden sm:block">
                   <div
                     className="h-full bg-[var(--accent-blue)] rounded-full"
                     style={{
@@ -216,7 +216,7 @@ export default async function SchedulesPage({
                     }}
                   />
                 </div>
-                <button className="h-8 px-3 text-xs bg-black/[0.02] border border-black/[0.08] hover:bg-black/[0.05] font-semibold text-[var(--text-heading)] rounded-lg transition-colors">
+                <button className="h-8 px-3 text-xs bg-[var(--overlay-dim)] border border-[var(--border-default)] hover:bg-[var(--overlay-subtle)] font-semibold text-[var(--text-heading)] rounded-lg transition-colors">
                   Manage Roster
                 </button>
               </div>

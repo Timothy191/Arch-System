@@ -490,6 +490,92 @@ cd packages/database && pnpx supabase status
 pnpm --filter @repo/database supabase:gen
 ```
 
+## 💾 Database Backup & Restore
+
+Automated PostgreSQL/Supabase backup and restore scripts.
+
+### `backup-db.sh` 🗄️ **Database Backup**
+
+**Purpose**: Dump the database schema and data into compressed SQL files.
+
+**Features**:
+
+- Schema-only and data-only dumps (separate files)
+- Data dump excludes migration tracking tables (`schema_migrations`, `supabase_migrations`)
+- Automatic compression with gzip
+- Metadata manifest file with backup info, sizes, and `pg_dump` version
+- Automatic `DATABASE_URL` resolution from env vars or `.env` files
+- Fallback construction from `SUPABASE_URL` + `SUPABASE_SERVICE_KEY`
+
+**Usage**:
+
+```bash
+./scripts/backup-db.sh                                # Run a backup now
+DATABASE_URL=postgresql://user:pass@host:5432/db ./scripts/backup-db.sh  # Override connection
+```
+
+**Output in `scripts/backups/`**:
+
+```
+backup-schema-2026-06-16_143022.sql.gz     # Schema only (no data)
+backup-data-2026-06-16_143022.sql.gz       # Data only (no migrations)
+backup-2026-06-16_143022.manifest.txt      # Metadata manifest
+```
+
+**Daily cron example** (add to crontab):
+
+```bash
+# Daily at 3 AM — keep 7 days of backups
+0 3 * * * cd /path/to/arch-system && ./scripts/backup-db.sh
+```
+
+---
+
+### `restore-db.sh` ⚠️ **Database Restore**
+
+**Purpose**: Restore the database from a previous backup.
+
+**⚠️ DESTRUCTIVE** — drops all existing tables before restoring.
+
+**Features**:
+
+- Accepts a backup timestamp (full or partial prefix)
+- Lists available backups on no argument
+- Validates database connectivity before confirmation
+- Drops all public schema objects cleanly before restore
+- Restores schema first, then data
+- Refuses to run non-interactively unless `FORCE_RESTORE=true`
+
+**Usage**:
+
+```bash
+# List available backups
+./scripts/restore-db.sh
+
+# Restore a specific backup
+./scripts/restore-db.sh 2026-06-16_143022
+
+# Non-interactive restore (CI/automation — use with extreme caution)
+FORCE_RESTORE=true ./scripts/restore-db.sh 2026-06-16_143022
+```
+
+**Restore workflow**:
+
+1. The script lists the backup files it found and shows the manifest
+2. It verifies database connectivity
+3. **You must type `yes` to confirm** the destructive operation
+4. Schema (tables, types, functions) is restored first
+5. Data is restored second
+
+**Safety notes**:
+
+- Always verify the manifest before confirming
+- Test restores on a staging/development DB first
+- The script does **not** create a pre-restore backup — run `backup-db.sh` before restoring if you need a rollback point
+- For production, consider taking a Supabase native backup before restoring
+
+---
+
 ## 📝 Script Maintenance
 
 When modifying scripts:

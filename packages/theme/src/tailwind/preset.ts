@@ -62,6 +62,10 @@ const archTheme: Config = {
         "bg-secondary": "var(--bg-secondary)",
         "bg-tertiary": "var(--bg-tertiary)",
 
+        "overlay-dim": "var(--overlay-dim)",
+        "overlay-subtle": "var(--overlay-subtle)",
+        "overlay-medium": "var(--overlay-medium)",
+
         "border-subtle": "var(--border-subtle)",
         "border-default": "var(--border-default)",
         "border-emphasis": "var(--border-emphasis)",
@@ -72,11 +76,9 @@ const archTheme: Config = {
         "text-primary": "var(--text-primary)",
         "text-heading": "var(--text-heading)",
 
-        // @deprecated Tier 3 aliases — kept for backward compat; migrate to canonical accent-*
-        "accent-cyan": "var(--accent-blue)", // @deprecated → use accent-blue
-        "accent-indigo": "var(--accent-blue)", // @deprecated → use accent-blue
-        "accent-violet": "var(--accent-blue)", // @deprecated → use accent-blue
-        "accent-alert": "var(--accent-red)", // @deprecated → use accent-red
+        // @deprecated Tier 3 aliases — removed after migration to accent-blue
+        // accent-cyan, accent-indigo, accent-violet → use accent-blue
+        // accent-alert → use accent-red
 
         // Corporate Brand Colors
         "brand-blue": "var(--arch-brand-blue)",
@@ -134,6 +136,25 @@ const archTheme: Config = {
             green: "var(--accent-green)", // --arch14 #34c759
           },
         },
+
+        // DESIGN.md Color System Tokens (Phase I Promotion)
+        "color-bg-base": "var(--color-bg-base)",
+        "color-bg-elevated": "var(--color-bg-elevated)",
+        "color-bg-sunken": "var(--color-bg-sunken)",
+        "color-border-subtle": "var(--color-border-subtle)",
+        "color-border-focus": "var(--color-border-focus)",
+        "color-text-primary": "var(--color-text-primary)",
+        "color-text-secondary": "var(--color-text-secondary)",
+        "color-text-tertiary": "var(--color-text-tertiary)",
+        "color-action-primary": "var(--color-action-primary)",
+        "color-action-primary-hover": "var(--color-action-primary-hover)",
+        "color-status-positive": "var(--color-status-positive)",
+        "color-status-warning": "var(--color-status-warning)",
+        "color-status-danger": "var(--color-status-danger)",
+        "color-accent-subtle": "var(--color-accent-subtle)",
+
+        // Backdrop token
+        "backdrop-dim": "var(--backdrop-dim)",
 
         // shadcn/ui HSL variable colors
         border: "hsl(var(--border))",
@@ -223,6 +244,20 @@ const archTheme: Config = {
           "text-secondary": "var(--color-text-hud-secondary)",
           "text-tertiary": "var(--color-text-hud-tertiary)",
         },
+
+        // Department-specific accent colors
+        dept: {
+          drilling: "var(--dept-drilling)",
+          production: "var(--dept-production)",
+          "access-control": "var(--dept-access-control)",
+          "access-card-actions": "var(--dept-access-card-actions)",
+          engineering: "var(--dept-engineering)",
+          "control-room": "var(--dept-control-room)",
+          safety: "var(--dept-safety)",
+          training: "var(--dept-training)",
+          satellite: "var(--dept-satellite)",
+          admin: "var(--dept-admin)",
+        },
       },
       opacity: {
         "focus-dim": "var(--opacity-focus-dim)",
@@ -253,6 +288,7 @@ const archTheme: Config = {
         elevated: "var(--shadow-elevated)",
         "glow-primary": "var(--shadow-glow-primary)",
         "glow-electric": "var(--shadow-glow-electric)",
+        "glow-mint": "var(--shadow-glow-mint)",
         // Tremor-compatible shadows
         "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "tremor-card":

@@ -1,3 +1,45 @@
+/**
+ * @swagger
+ * /api/ai/handoff:
+ *   post:
+ *     summary: Generate shift handoff report
+ *     description: AI-powered shift handoff report generation that summarizes shift accomplishments, ongoing issues, critical alerts, and recommends priorities for the next shift.
+ *     tags:
+ *       - AI
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - shiftData
+ *             properties:
+ *               shiftData:
+ *                 type: string
+ *                 description: Shift data to summarize into a handoff report
+ *     responses:
+ *       200:
+ *         description: Generated handoff report
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 content:
+ *                   type: string
+ *                   description: Generated shift handoff report text
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { logError } from "@/lib/errors/error-logger";
 import { chat, DEFAULT_MODEL } from "@/lib/ai/providers";

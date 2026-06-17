@@ -130,7 +130,7 @@ export default async function MachineOperationsPage({
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Material Moved</p>
-          <p className="text-2xl font-medium text-[var(--accent-cyan)] mt-1">
+          <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
             {totalMaterialBCM.toFixed(1)} BCM
           </p>
         </GlassCard>

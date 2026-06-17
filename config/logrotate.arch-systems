@@ -1,4 +1,4 @@
-/home/timothy/Project/Arch-Mk2/*.log /home/timothy/Project/Arch-Mk2/apps/portal/*.log {
+/home/timothy/Documents/Arch-System/*.log /home/timothy/Documents/Arch-System/apps/portal/*.log {
   daily
   rotate 14
   compress

@@ -60,7 +60,7 @@ const FORM_META: Record<RequiredForm, { label: string; path: string }> = {
 };
 
 // AGENT-TRACE: Server-side validation utilities for shift data integrity
-export interface ValidationError {
+interface ValidationError {
   field: string;
   message: string;
   severity: "error" | "warning";

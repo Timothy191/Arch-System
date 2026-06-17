@@ -7,10 +7,10 @@ Wants=docker.service
 [Service]
 Type=simple
 User=%I
-WorkingDirectory=/home/timothy/Project/Arch-Mk2/apps/portal
+WorkingDirectory=/home/timothy/Documents/Arch-System/apps/portal
 
 # Load local environment
-EnvironmentFile=/home/timothy/Project/Arch-Mk2/apps/portal/.env
+EnvironmentFile=/home/timothy/Documents/Arch-System/apps/portal/.env
 Environment=NODE_ENV=production
 Environment=HOSTNAME=0.0.0.0
 Environment=PORT=3000
@@ -33,7 +33,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=/home/timothy/Project/Arch-Mk2
+ReadWritePaths=/home/timothy/Documents/Arch-System
 
 # Logging — readable via: journalctl -u arch-systems-local -f
 StandardOutput=journal

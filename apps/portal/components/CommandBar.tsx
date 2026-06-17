@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "~/app/actions";
 import { cn } from "@repo/ui/lib/utils";
+import { getServiceUrls } from "@repo/ui/lib/urls";
+
+const urls = getServiceUrls();
 import {
   Search,
   X,
@@ -130,14 +133,14 @@ const TOOLS_COMMANDS: CommandItem[] = [
   {
     id: "tool-n8n",
     label: "n8n",
-    href: "http://localhost:5678",
+    href: `${urls.api}`,
     category: "Tools",
     icon: <Workflow className="w-4 h-4" />,
   },
   {
     id: "tool-flowise",
     label: "Flowise",
-    href: "http://localhost:3001",
+    href: `${urls.portal}`,
     category: "Tools",
     icon: <Bot className="w-4 h-4" />,
   },

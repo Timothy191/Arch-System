@@ -43,6 +43,7 @@ const REFERENCE_TABLES = new Set([
   "report_templates",
   "mine_blocks",
   "materialized_view_refresh_log",
+  "material_density",
 ]);
 
 function listMigrations() {

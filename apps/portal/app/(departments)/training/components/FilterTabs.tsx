@@ -38,8 +38,8 @@ export function FilterTabs({
             href={href}
             className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 ${
               isActive
-                ? "bg-black text-white border-transparent"
-                : "bg-black/[0.01] hover:bg-black/[0.04] text-[var(--text-secondary)] border-black/[0.08]"
+                ? "bg-[var(--text-heading)] text-white border-transparent"
+                : "bg-[var(--overlay-dim)] hover:bg-[var(--overlay-subtle)] text-[var(--text-secondary)] border-[var(--border-default)]"
             }`}
           >
             {option}

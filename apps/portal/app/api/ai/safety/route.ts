@@ -1,3 +1,60 @@
+/**
+ * @swagger
+ * /api/ai/safety:
+ *   post:
+ *     summary: Analyze safety compliance
+ *     description: AI-powered safety compliance analysis that reviews shift logs for violations, near-misses, and concerns. Assigns a safety score from 1-10.
+ *     tags:
+ *       - AI
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - logData
+ *             properties:
+ *               logData:
+ *                 type: string
+ *                 description: Shift log data to analyze for safety compliance
+ *     responses:
+ *       200:
+ *         description: Safety compliance analysis result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 violations:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of safety violations detected
+ *                 concerns:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of safety concerns identified
+ *                 score:
+ *                   type: number
+ *                   minimum: 1
+ *                   maximum: 10
+ *                   description: Overall safety score (1=poor, 10=excellent)
+ *                 summary:
+ *                   type: string
+ *                   description: Narrative summary of safety analysis
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { logError } from "@/lib/errors/error-logger";
 import {

@@ -1,5 +1,50 @@
 # Agent Tracer - @repo/theme
 
+## 2026-06-17 - Root Stylelint and Token Guard Implementation
+
+- **Purpose**: Implement strict Stylelint rules at the workspace root to prevent raw color bypasses of the theme tokens.
+- **Changes**:
+  - Installed `stylelint-declaration-strict-value` and `stylelint-config-standard` at root.
+  - Created root `stylelint.config.mjs` config to block hardcoded colors (hex, rgb, hsl) while permitting CSS custom properties (`var(--color-*)`) and common keywords.
+  - Linked stylelint to the quality checking scripts.
+- **Status**: Completed root-level Stylelint guarding.
+
+## 2026-06-20 - Deprecated Accent Token Cleanup
+
+- **Purpose**: Remove deprecated accent color tokens that were replaced by canonical equivalents as part of the style cleanup initiative. This eliminates technical debt and ensures all components use the standardized color palette.
+- **Changes**:
+  - Removed deprecated token definitions from `variables.css`: `--accent-cyan`, `--accent-indigo`, `--accent-violet`, `--accent-alert`, `--accent-emerald`
+  - These were mapped to canonical tokens: `--accent-blue` and `--accent-green`
+  - Updated deprecation notice to document the migration completion
+  - Cleaned up `variables-generated.css` to remove deprecated token definitions
+  - Migrated component usage across the codebase (portal apps, UI package, overview app)
+  - Updated `GlassCard.tsx` custom color palette to use canonical tokens
+- **Token Migration Summary**:
+  - `--accent-cyan` → `--accent-blue`
+  - `--accent-indigo` → `--accent-blue`
+  - `--accent-violet` → `--accent-blue`
+  - `--accent-alert` → `--accent-red`
+  - `--accent-emerald` → `--accent-green`
+- **Status**: Cleanup complete, all deprecated tokens removed and migrated
+- **Next Steps**: Next theme build will regenerate variables-generated.css from tokens.json
+
+## 2026-06-16 - macOS-Inspired Light Mode Implementation
+
+- **Purpose**: Implement a macOS-inspired light mode with white branding and liquid glass effects.
+- **Changes**:
+  - `packages/theme/tokens.json`: Updated `arch0` to `#ffffff` (pure white) and modified `glass.border-gradient` for a brighter, more distinct reflection.
+  - `packages/theme/src/css/glass.css`: Changed `.route-bg-tint` background to a bright, semi-transparent white wash (`rgba(255, 255, 255, 0.5)`) to ensure the ambient background video retains dynamic motion while the canvas feels white and airy.
+  - Ran `pnpm --filter @repo/theme build` to regenerate theme variables.
+- **Status**: Completed visual update to pure white light mode.
+- **Next Steps**: None.
+
+## 2026-06-16 - Asset Audit and Missing Asset Resolution
+
+- **Purpose**: Fix a missing asset reference found during the cross-app asset audit.
+- **Changes**:
+  - `packages/theme/src/css/glass.css`: Replaced missing `/focused-bg.jpeg` fallback image reference with `/auth-bg-poster.jpg`.
+- **Status**: Audit completed and missing asset reference resolved.
+
 ## 2026-06-16 - Commit generated token files
 
 - **Purpose**: Regenerate and commit design tokens, CSS variables, and TS maps to synchronize theme changes across the workspace.
@@ -120,3 +165,11 @@
 - **Changes**:
   - Replaced direct assignments in `colors.ts` and `motion.ts` with shallow destructuring/clones or literal values to avoid AST conflicts.
 - **Status**: Completed theme token duplicate export resolutions.
+
+## 2026-06-16 — Register shadow-glow-mint Tailwind utility
+
+- **Purpose**: Register `shadow-glow-mint` Tailwind utility so the `@repo/ui` `cyber-button.tsx` component can use it.
+- **Changes**:
+  - Added `"glow-mint": "var(--shadow-glow-mint)"` to the `boxShadow` section of `preset.ts`.
+  - The CSS variable `--shadow-glow-mint` was already defined in `variables.css` (line 106-107) but lacked a Tailwind utility mapping.
+- **Status**: Completed, type-check passes.

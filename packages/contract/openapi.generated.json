@@ -1052,6 +1052,9 @@
                     "last_check": {
                       "type": "string",
                       "format": "date-time"
+                    },
+                    "latency_ms": {
+                      "type": "integer"
                     }
                   }
                 }
@@ -1064,153 +1067,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/health/supabase-realtime": {
-      "get": {
-        "summary": "Supabase Realtime health check",
-        "description": "Monitors Supabase realtime subscription connection status and query latency. Critical for Control Room real-time features (AlertPanel, ActivityFeed).",
-        "tags": [
-          "Health"
-        ],
-        "responses": {
-          "200": {
-            "description": "Supabase Realtime health status",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "healthy",
-                        "degraded",
-                        "down"
-                      ]
-                    },
-                    "latency_ms": {
-                      "type": "integer",
-                      "description": "Query latency in milliseconds"
-                    },
-                    "last_check": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "details": {
-                      "type": "object",
-                      "properties": {
-                        "connection_status": {
-                          "type": "string"
-                        },
-                        "subscriptions": {
-                          "type": "integer"
-                        },
-                        "error": {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Supabase Realtime is down or unreachable"
-          }
-        }
-      }
-    },
-    "/api/health/redis": {
-      "get": {
-        "summary": "Redis health check",
-        "description": "Monitors Redis connection status, performs get/set operations to verify connectivity, and reports cache performance metrics. Critical for Control Room caching.",
-        "tags": [
-          "Health"
-        ],
-        "responses": {
-          "200": {
-            "description": "Redis health status",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "healthy",
-                        "degraded",
-                        "down"
-                      ]
-                    },
-                    "latency_ms": {
-                      "type": "integer",
-                      "description": "Response latency in milliseconds"
-                    },
-                    "last_check": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "details": {
-                      "type": "object",
-                      "properties": {
-                        "connection_status": {
-                          "type": "string"
-                        },
-                        "hit_rate": {
-                          "type": "number"
-                        },
-                        "memory_mb": {
-                          "type": "number",
-                          "nullable": true
-                        },
-                        "error": {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Redis is down or unreachable"
-          }
-        }
-      }
-    },
-    "/api/health/live": {
-      "get": {
-        "summary": "Liveness probe",
-        "description": "Simple liveness check for Kubernetes or load balancer health probes. Returns minimal response to indicate the service is running.",
-        "tags": [
-          "Health"
-        ],
-        "responses": {
-          "200": {
-            "description": "Service is alive",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "ok"
-                      ]
-                    }
-                  }
                 }
               }
             }

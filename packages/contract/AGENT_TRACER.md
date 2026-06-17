@@ -98,6 +98,39 @@ Steps 1-4 are fully offline. Step 5 requires a running dev server for deep valid
 - `apps/portal/AGENT_TRACER.md` for spec generation implementation details
 - Previous authentication challenge fully resolved
 
+## 2026-06-16: Runtime API Contract Validation Middleware
+
+### Purpose
+
+Add runtime API request validation middleware (`withValidation`, `withQueryValidation`, `validateBody`) to `@repo/contract`, enabling Zod-schema-based validation for Next.js App Router API routes. Follows the same HOF pattern as `@repo/logger`'s `withLogging`.
+
+### Changes Made
+
+1. **Created `src/validation.ts`**:
+   - `ValidationError` class with `statusCode` (400) and structured `z.ZodIssue[]`
+   - `validateBody<T>(schema, request)` — parses request body JSON, validates against Zod schema, returns typed data or throws `ValidationError`
+   - `withValidation<T>(schema, handler)` — HOF wrapping route handlers with body validation. Returns 400 `Response` with `{ error, issues }` on failure
+   - `withQueryValidation<T>(schema, handler)` — HOF for URL search parameter validation (same pattern)
+   - Uses `safeParse` for boundary-safe parsing with structured error output
+   - Added `AGENT-TRACE` breadcrumb explaining the parse boundary design
+
+2. **Updated `package.json`**:
+   - Added `./validation` export entry pointing to `dist/validation.{js,d.ts}`
+
+3. **Updated `src/index.ts`**:
+   - Re-exported `ValidationError` from `./validation.js` for shared use
+
+### What the Next Agent Should Know
+
+- Import path: `@repo/contract/validation` (separate sub-path export from the barrel)
+- Core exports: `validateBody`, `withValidation`, `withQueryValidation`, `ValidationError`
+- The validation module uses standard Web API `Response.json()` (no Next.js dependency) since `@repo/contract` is a shared package
+- The `withValidation` HOF catches `ValidationError` and returns JSON error responses; non-validation errors are re-thrown to the framework error boundary
+- `withQueryValidation` parses URL params via `Object.fromEntries(url.searchParams.entries())` — flat key-value only, no nested query params
+- A route handler that does both webhook detection and direct tag updates (like telemetry/push) should parse the body once in the orchestrator and only delegate the validated path to `withValidation`
+
+---
+
 ## 2026-01-XX: OpenAPI Contract Validation Setup
 
 ### Purpose

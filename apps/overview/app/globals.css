@@ -7,10 +7,10 @@
 /* XYFlow custom styles — using theme CSS variables */
 .react-flow {
   --xy-edge-stroke: var(--border-default);
-  --xy-edge-stroke-selected: var(--accent-cyan);
+  --xy-edge-stroke-selected: var(--accent-blue);
   --xy-edge-stroke-width: 2;
   --xy-node-border-radius: 12px;
-  --xy-handle-background: var(--accent-cyan);
+  --xy-handle-background: var(--accent-blue);
   --xy-handle-border-color: var(--bg-primary);
   --xy-handle-border-width: 2px;
 }
@@ -26,8 +26,8 @@
 }
 
 .react-flow__node.selected {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2);
 }
 
 .react-flow__edge-path {
@@ -36,13 +36,13 @@
 }
 
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: var(--accent-cyan);
+  stroke: var(--accent-blue);
 }
 
 .react-flow__handle {
   width: 8px;
   height: 8px;
-  background: var(--accent-cyan);
+  background: var(--accent-blue);
   border: 2px solid var(--bg-primary);
 }
 
@@ -77,5 +77,5 @@
 
 /* Tab active state */
 [data-state="active"] {
-  color: var(--accent-cyan);
+  color: var(--accent-blue);
 }

@@ -78,7 +78,7 @@ export default async function BadgesPage() {
             Issue, print, and revoke physical QR access credentials.
           </p>
         </div>
-        <Button className="bg-accent-cyan text-bg-secondary hover:bg-accent-cyan/90 shadow-diffusion-cyan">
+        <Button className="bg-accent-blue text-bg-secondary hover:bg-accent-blue/90 shadow-diffusion-cyan">
           <Plus className="w-4 h-4 mr-2" />
           Issue New Badge
         </Button>
@@ -159,11 +159,11 @@ export default async function BadgesPage() {
         <div className="lg:col-span-1">
           <GlassCard className="relative overflow-hidden group">
             {/* Background Glow */}
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-[var(--accent-cyan)]/10 blur-3xl" />
+            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-[var(--accent-blue)]/10 blur-3xl" />
 
             <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-[var(--accent-cyan)]/10 flex items-center justify-center border border-[var(--accent-cyan)]/20 mb-2">
-                <QrCode className="w-6 h-6 text-[var(--accent-cyan)]" />
+              <div className="w-12 h-12 rounded-full bg-[var(--accent-blue)]/10 flex items-center justify-center border border-[var(--accent-blue)]/20 mb-2">
+                <QrCode className="w-6 h-6 text-[var(--accent-blue)]" />
               </div>
 
               <h3 className="text-lg font-semibold text-[var(--text-heading)]">
@@ -176,9 +176,9 @@ export default async function BadgesPage() {
               </p>
 
               {/* Placeholder for actual QR code rendering */}
-              <div className="w-48 h-48 bg-white rounded-xl p-2 flex items-center justify-center mt-4 shadow-card group-hover:shadow-[var(--accent-cyan)]/10 transition-[box-shadow] duration-500">
-                <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                  <span className="text-xs text-gray-400 font-medium">
+              <div className="w-48 h-48 bg-[var(--bg-secondary)] rounded-xl p-2 flex items-center justify-center mt-4 shadow-card group-hover:shadow-[var(--accent-blue)]/10 transition-[box-shadow] duration-500">
+                <div className="w-full h-full border-2 border-dashed border-[var(--border-subtle)] rounded-lg flex items-center justify-center bg-[var(--bg-tertiary)]">
+                  <span className="text-xs text-[var(--text-muted)] font-medium">
                     Select Badge
                   </span>
                 </div>

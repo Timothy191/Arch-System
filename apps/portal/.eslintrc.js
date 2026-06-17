@@ -9,6 +9,16 @@ module.exports = {
   },
   overrides: [
     {
+      files: ["scripts/*.js"],
+      env: { node: true },
+      parserOptions: {
+        project: null,
+      },
+      rules: {
+        "no-console": "off",
+      },
+    },
+    {
       files: [
         "**/*.test.ts",
         "**/*.test.tsx",

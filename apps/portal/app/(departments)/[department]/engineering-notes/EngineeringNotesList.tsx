@@ -155,7 +155,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
                   {siteName && (
                     <>
                       <span className="text-[var(--border-emphasis)]">·</span>
-                      <span className="text-[var(--accent-cyan)]">
+                      <span className="text-[var(--accent-blue)]">
                         {siteName}
                       </span>
                     </>
@@ -176,7 +176,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
         {/* Action Taken */}
         {note.action_taken && (
           <div className="text-sm">
-            <span className="text-[var(--accent-cyan)]">Action:</span>{" "}
+            <span className="text-[var(--accent-blue)]">Action:</span>{" "}
             <span className="text-[var(--text-secondary)]">
               {note.action_taken}
             </span>

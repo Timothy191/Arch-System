@@ -111,10 +111,16 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for toggle buttons */}
+      <div
+        className="flex items-center gap-2"
+        role="group"
+        aria-label="View mode selection"
+      >
         <button
           type="button"
           onClick={() => setViewMode("list")}
+          aria-pressed={viewMode === "list"}
           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
             viewMode === "list"
               ? "bg-arch-accent-green text-white"
@@ -126,6 +132,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
         <button
           type="button"
           onClick={() => setViewMode("scada")}
+          aria-pressed={viewMode === "scada"}
           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
             viewMode === "scada"
               ? "bg-arch-accent-green text-white"
@@ -138,50 +145,58 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
 
       {viewMode === "list" ? (
         <>
+          {/* AGENT-TRACE: UX improvement - Skeleton loader instead of text-only loading state */}
           {loading && (
-            <p className="text-[var(--text-secondary)] text-sm">
-              Loading machines...
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 bg-[var(--bg-tertiary)] rounded-2xl animate-pulse"
+                />
+              ))}
+            </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {machines.map((machine) => (
-              <GlassCard key={machine.id}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-[var(--text-heading)] font-medium">
-                      {machine.name}
-                    </p>
-                    <p className="text-[var(--text-secondary)] text-xs mt-0.5">
-                      {machine.machine_type}
-                    </p>
-                    {machine.serial_number && (
-                      <p className="text-[var(--text-secondary)] text-xs">
-                        SN: {machine.serial_number}
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {machines.map((machine) => (
+                <GlassCard key={machine.id}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[var(--text-heading)] font-medium">
+                        {machine.name}
                       </p>
-                    )}
+                      <p className="text-[var(--text-secondary)] text-xs mt-0.5">
+                        {machine.machine_type}
+                      </p>
+                      {machine.serial_number && (
+                        <p className="text-[var(--text-secondary)] text-xs">
+                          SN: {machine.serial_number}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        machine.active
+                          ? "bg-accent-green/10 text-accent-green border border-accent-green/20"
+                          : "bg-accent-red/10 text-accent-red border border-accent-red/20"
+                      }`}
+                    >
+                      {machine.active ? "Online" : "Offline"}
+                    </span>
                   </div>
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      machine.active
-                        ? "bg-accent-green/10 text-accent-green border border-accent-green/20"
-                        : "bg-accent-red/10 text-accent-red border border-accent-red/20"
-                    }`}
-                  >
-                    {machine.active ? "Online" : "Offline"}
-                  </span>
-                </div>
-              </GlassCard>
-            ))}
+                </GlassCard>
+              ))}
 
-            {!loading && machines.length === 0 && (
-              <GlassCard>
-                <p className="text-[var(--text-secondary)] text-sm text-center py-8">
-                  No machines registered for this department.
-                </p>
-              </GlassCard>
-            )}
-          </div>
+              {machines.length === 0 && (
+                <GlassCard>
+                  <p className="text-[var(--text-secondary)] text-sm text-center py-8">
+                    No machines registered for this department.
+                  </p>
+                </GlassCard>
+              )}
+            </div>
+          )}
 
           <MachineControl />
         </>

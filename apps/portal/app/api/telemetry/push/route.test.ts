@@ -42,7 +42,7 @@ describe("POST /api/telemetry/push", () => {
 
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toBe("Missing required fields: name, value");
+    expect(json.error).toBe("Request body validation failed");
   });
 
   it("successfully forwards direct single tag payload to FUXA", async () => {

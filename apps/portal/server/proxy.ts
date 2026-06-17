@@ -50,6 +50,7 @@ function isValidRedirect(path: string): boolean {
     /^\/safety\//, // Safety department
     /^\/training\//, // Training department
     /^\/satellite-monitoring\//, // Satellite monitoring department
+    /^\/access-card-actions\//, // Access Card Actions department
     /^\/hub/, // Hub
     /^\/admin\//, // Admin
   ];
@@ -70,6 +71,7 @@ const DEPARTMENT_ROUTES = [
   "safety",
   "training",
   "satellite-monitoring",
+  "access-card-actions",
 ];
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
@@ -77,6 +79,7 @@ const RESTRICTED_ROUTES: Record<string, string[]> = {
   "control-room": ["control_room_operator", "admin"],
   tools: ["admin", "supervisor"],
   admin: ["admin"],
+  "access-card-actions": ["access_control", "admin"],
 };
 
 export function normalizeRole(role: unknown): string {

@@ -436,7 +436,7 @@ export function HourlyLoadsGrid({
                 "select",
                 {
                   class:
-                    "w-full bg-transparent border-0 text-xs font-semibold text-[var(--text-body)] focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-black/[0.04] transition-all",
+                    "w-full bg-transparent border-0 text-xs font-semibold text-arch-text-secondary focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-[var(--overlay-subtle)] transition-all",
                   "data-row": String(rowIndex),
                   "data-action": "select-site",
                 },
@@ -488,8 +488,8 @@ export function HourlyLoadsGrid({
                 {
                   class: `px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 cursor-pointer ${
                     isCoal
-                      ? "bg-[#1d1d1f] text-[#ffffff] border-[#1d1d1f] hover:bg-[#3a3a3c]"
-                      : "bg-[#f5f5f7] text-[#6e6e73] border-black/[0.08] hover:bg-[#e8e8ed]"
+                      ? "bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary"
+                      : "bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary"
                   }`,
                   "data-row": String(rowIndex),
                   "data-action": "toggle-material",
@@ -519,7 +519,11 @@ export function HourlyLoadsGrid({
               "div",
               { class: "flex items-center justify-between px-1 gap-1 h-full" },
               [
-                h("span", { class: "text-sm font-medium" }, value),
+                h(
+                  "span",
+                  { class: "text-sm font-medium font-mono tabular-nums px-1" },
+                  value,
+                ),
                 h("div", { class: "flex flex-col" }, [
                   h(
                     "button",
@@ -590,6 +594,16 @@ export function HourlyLoadsGrid({
         name: "Total",
         size: totalColSize,
         readonly: true,
+        cellTemplate: (h: any, { model }: { model: any }) => {
+          return h(
+            "div",
+            {
+              class:
+                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+            },
+            model?.total ?? 0,
+          );
+        },
       },
     ];
 
@@ -600,12 +614,32 @@ export function HourlyLoadsGrid({
         name: "Bin Factor",
         size: binFactorColSize,
         readonly: true,
+        cellTemplate: (h: any, { model }: { model: any }) => {
+          return h(
+            "div",
+            {
+              class:
+                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+            },
+            model?.binFactor ?? "-",
+          );
+        },
       });
       cols.push({
         prop: "totalMaterial",
         name: "Total Material (t)",
         size: totalMaterialColSize,
         readonly: true,
+        cellTemplate: (h: any, { model }: { model: any }) => {
+          return h(
+            "div",
+            {
+              class:
+                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+            },
+            model?.totalMaterial ?? "-",
+          );
+        },
       });
     }
 
@@ -811,8 +845,8 @@ export function HourlyLoadsGrid({
               onClick={() => setSelectedShift("day")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 selectedShift === "day"
-                  ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-                  : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                  ? "bg-arch-accent-blue text-arch-surface-secondary"
+                  : "bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary"
               }`}
             >
               Day (06:00 - 17:59)
@@ -822,8 +856,8 @@ export function HourlyLoadsGrid({
               onClick={() => setSelectedShift("night")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 selectedShift === "night"
-                  ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-                  : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                  ? "bg-arch-accent-blue text-arch-surface-secondary"
+                  : "bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary"
               }`}
             >
               Night (18:00 - 05:59)

@@ -35,8 +35,12 @@ module.exports = {
     "^@repo/ui/lib/(.*)$": "<rootDir>/../../packages/ui/src/lib/$1",
     "^@repo/ui/GlassCard$":
       "<rootDir>/../../packages/ui/src/components/GlassCard.tsx",
+    "^@repo/ui/Pagination$":
+      "<rootDir>/../../packages/ui/src/components/ui/pagination.tsx",
     "^@repo/ui/SecondaryButton$":
       "<rootDir>/../../packages/ui/src/components/SecondaryButton.tsx",
+    "^@repo/ui/AcknowledgeButton$":
+      "<rootDir>/../../packages/ui/src/components/AcknowledgeButton.tsx",
     "^@repo/ui/ShiftToggle$":
       "<rootDir>/../../packages/ui/src/components/ShiftToggle.tsx",
     "^@repo/ui/Input$": "<rootDir>/../../packages/ui/src/components/Input.tsx",
@@ -51,6 +55,7 @@ module.exports = {
       "<rootDir>/../../packages/ui/src/components/MacMenuBar.tsx",
     "^@repo/ui/MacTitleBar$":
       "<rootDir>/../../packages/ui/src/components/MacTitleBar.tsx",
+    "^@repo/ui/Logo$": "<rootDir>/../../packages/ui/src/components/Logo.tsx",
     "^@repo/utils$": "<rootDir>/../../packages/utils/src/index.ts",
     "^@repo/utils/(.*)$": "<rootDir>/../../packages/utils/src/$1",
     "^@repo/ui/DataGrid$":

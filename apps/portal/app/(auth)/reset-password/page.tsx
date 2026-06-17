@@ -56,9 +56,9 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="w-full max-w-md space-y-3">
-      <div className="rounded-xl overflow-hidden border border-[var(--border-default)] bg-white/70 backdrop-blur-2xl shadow-window animate-window-open glass-top-border">
+      <div className="glass-card rounded-xl overflow-hidden animate-window-open glass-top-border">
         {/* Title bar */}
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--border-subtle)] bg-white/50">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--glass-surface-hover)]">
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="w-3 h-3 rounded-full bg-[var(--mac-red)] border border-[var(--border-subtle)]" />
             <span className="w-3 h-3 rounded-full bg-[var(--mac-yellow)] border border-[var(--border-subtle)]" />

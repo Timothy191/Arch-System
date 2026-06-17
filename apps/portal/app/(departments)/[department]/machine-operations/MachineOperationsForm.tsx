@@ -332,7 +332,7 @@ export function MachineOperationsForm({
                   }
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     formData.shiftType === shift
-                      ? "bg-[var(--accent-cyan)] text-[var(--bg-secondary)]"
+                      ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
                       : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
                   }`}
                 >
@@ -385,7 +385,7 @@ export function MachineOperationsForm({
             <span className="text-[var(--text-muted)] text-sm">
               Hours Worked:
             </span>
-            <span className="text-2xl font-medium text-[var(--accent-cyan)]">
+            <span className="text-2xl font-medium text-[var(--accent-blue)]">
               {hoursWorked.toFixed(2)}h
             </span>
             <span className="text-[var(--text-muted)] text-xs">
@@ -399,7 +399,7 @@ export function MachineOperationsForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
+            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
           >
             {isSubmitting ? "Saving..." : "Save Operation"}
           </button>
@@ -411,7 +411,7 @@ export function MachineOperationsForm({
 
         {/* Help Text */}
         <p className="text-[var(--text-muted)] text-xs">
-          <span className="text-[var(--accent-cyan)]">Tip:</span> End time is
+          <span className="text-[var(--accent-blue)]">Tip:</span> End time is
           optional. You can come back and add it later. Hours are calculated
           automatically.
         </p>

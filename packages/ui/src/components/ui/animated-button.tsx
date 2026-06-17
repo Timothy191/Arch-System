@@ -6,23 +6,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@repo/ui/lib/utils";
 
 const animatedButtonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-cyan)]/50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--accent-cyan)] text-black hover:bg-[var(--accent-cyan)]/90 active:bg-[var(--accent-cyan)]/80",
+          "bg-[var(--accent-blue)] text-black hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80",
         accent:
-          "bg-[var(--accent-indigo)] text-white hover:bg-[var(--accent-indigo)]/90 active:bg-[var(--accent-indigo)]/80",
+          "bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80",
         destructive:
-          "bg-[var(--accent-alert)] text-white hover:bg-[var(--accent-alert)]/90 active:bg-[var(--accent-alert)]/80",
+          "bg-[var(--accent-red)] text-white hover:bg-[var(--accent-red)]/90 active:bg-[var(--accent-red)]/80",
         outline:
           "border border-[var(--border-default)] bg-transparent hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:bg-[var(--bg-secondary)]",
         secondary:
           "bg-[var(--bg-tertiary)] text-[var(--text-body)] hover:bg-[var(--bg-tertiary)]/80 active:bg-[var(--bg-tertiary)]/60",
         ghost:
           "hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)] active:bg-[var(--bg-secondary)]",
-        link: "text-[var(--accent-cyan)] underline-offset-4 hover:underline",
+        link: "text-[var(--accent-blue)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

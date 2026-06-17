@@ -60,7 +60,7 @@ const severityConfig = {
 export function AlertTicker({ events }: AlertTickerProps) {
   if (events.length === 0) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-green/20 w-fit caustic-glow-optimal backdrop-blur-xl">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-green/20 w-fit backdrop-blur-xl">
         <div className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
         <p className="text-xs text-accent-green font-medium">
           All systems operational
@@ -69,24 +69,15 @@ export function AlertTicker({ events }: AlertTickerProps) {
     );
   }
 
-  const hasCritical = events.some((e) => e.severity === "critical");
-  const hasWarning = events.some((e) => e.severity === "warning");
-  const glowClass = hasCritical
-    ? "caustic-glow-critical"
-    : hasWarning
-      ? "caustic-glow-warning"
-      : "caustic-glow-optimal";
-
   return (
     <div
       className={cn(
         "w-full rounded-xl border border-arch-border-primary overflow-hidden backdrop-blur-xl will-change-[backdrop-filter]",
-        glowClass,
       )}
     >
       <div className="flex items-center gap-2 px-4 py-2 border-b border-arch-border-primary bg-arch-surface-tertiary/60">
         <AlertTriangle className="w-3.5 h-3.5 text-accent-amber" />
-        <span className="text-xs font-semibold text-arch-text-primary uppercase tracking-wider">
+        <span className="text-xs font-medium text-arch-text-primary uppercase tracking-wider">
           Live Alerts
         </span>
         <span className="ml-auto text-[10px] font-mono text-arch-text-tertiary">
@@ -119,12 +110,12 @@ export function AlertTicker({ events }: AlertTickerProps) {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-semibold text-arch-text-primary truncate">
+                  <span className="text-sm font-medium text-arch-text-primary truncate">
                     {event.title}
                   </span>
                   <span
                     className={cn(
-                      "shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider",
+                      "shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wider",
                       config.iconBg,
                     )}
                   >

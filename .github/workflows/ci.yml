@@ -91,6 +91,23 @@ jobs:
       - name: Lint & Type Check
         run: pnpm nx affected -t lint type-check
 
+      - name: Terraform Lint (tflint)
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tflint
+        run: tflint --recursive
+        working-directory: infra/redis/terraform
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          exit-code: 1
+
       - name: Token & CSS Lint
         run: pnpm nx affected -t lint:tokens lint:css
 
@@ -113,13 +130,16 @@ jobs:
       - name: Bundle Size Check
         run: pnpm bundlesize
 
-      - name: Start portal for Lighthouse
+      - name: Start portal for Lighthouse & Playwright E2E
         run: pnpm --filter portal start &
         env:
           PORT: 3000
 
       - name: Wait for portal
         run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Playwright E2E Tests (Visual Regression)
+        run: pnpm test:e2e
 
       - name: Run Lighthouse CI
         run: npx @lhci/cli@0.14.x autorun
@@ -135,3 +155,38 @@ jobs:
       - name: Run Self-Healing CI
         run: pnpm exec nx fix-ci
         if: always()
+
+  a11y:
+    name: Accessibility Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm nx run @repo/ui:build-storybook
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run A11y Audit
+        run: |
+          npx serve storybook-static -l 6006 &
+          npx wait-on http://localhost:6006 --timeout 60000
+          pnpm test:a11y --url http://localhost:6006
+        working-directory: packages/ui
+

@@ -9,6 +9,7 @@ import {
   useReducedMotion,
   HTMLMotionProps,
 } from "framer-motion";
+import { glassVariants, GlassVariant } from "@repo/theme";
 
 export interface GlassCardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export interface GlassCardProps extends HTMLMotionProps<"div"> {
     | "alert"
     | "none";
   variant?: "default" | "window" | "spotlight" | "glowborder" | "liquid";
+  glassIntensity?: GlassVariant;
   title?: string;
   padding?: boolean;
 
@@ -231,16 +233,16 @@ const colorPresets: Record<string, string[]> = {
     "#00ff87",
   ],
   custom: [
-    "var(--accent-cyan)",
-    "var(--accent-indigo)",
-    "var(--accent-violet)",
-    "var(--accent-cyan)",
     "var(--accent-blue)",
-    "var(--accent-indigo)",
-    "var(--accent-violet)",
-    "var(--accent-cyan)",
     "var(--accent-blue)",
-    "var(--accent-indigo)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
+    "var(--accent-blue)",
   ],
 };
 
@@ -262,6 +264,7 @@ export function GlassCard({
   onClick,
   accent = "none",
   variant = "default",
+  glassIntensity,
   title,
   padding = true,
 
@@ -276,12 +279,19 @@ export function GlassCard({
   blur = true,
   backgroundOpacity,
 
+  // Accessibility overrides (extracted so defaults apply when not provided by caller)
+  tabIndex: tabIndexProp,
+  role: roleProp,
+  onKeyDown: onKeyDownProp,
+
   ...props
 }: GlassCardProps) {
   const isWindow = variant === "window";
   const isSpotlight = variant === "spotlight";
   const isGlowBorder = variant === "glowborder";
   const isLiquid = variant === "liquid";
+
+  const intensityTokens = glassIntensity ? glassVariants[glassIntensity] : null;
 
   const prefersReduced = useReducedMotion();
   const [isTouch, setIsTouch] = useState(false);
@@ -457,7 +467,16 @@ export function GlassCard({
           ? { duration: 0 }
           : { duration: 0.3, ease: [0.2, 0, 0, 1] }
       }
+      tabIndex={tabIndexProp ?? (hover && onClick ? 0 : undefined)}
+      role={roleProp ?? (onClick ? "button" : undefined)}
       onClick={onClick}
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick();
+        }
+        onKeyDownProp?.(e);
+      }}
       onMouseMove={isSpotlight ? handleMouseMove : undefined}
       onMouseEnter={(e) => {
         if (hover && isLiquid && !prefersReduced) {
@@ -475,22 +494,25 @@ export function GlassCard({
           : "shadow-glass-depth",
 
         variant !== "liquid" &&
-          "glass-card glass-depth-card border border-black/[0.08]",
+          "glass-card glass-depth-card border border-arch-border-subtle",
 
         // Window & Default share standard glass style
         (variant === "default" || variant === "window") && [
-          "group/window rounded-card backdrop-blur-xl backdrop-saturate-[1.3] bg-white/70 animate-window-open",
+          "group/window rounded-card backdrop-saturate-[1.3] animate-window-open",
+          !intensityTokens && "backdrop-blur-xl bg-arch-surface-secondary/80",
           hover && ACCENT_COLORS[accent],
         ],
 
         // Spotlight custom layout style
         variant === "spotlight" && [
-          "group rounded-card backdrop-blur-xl backdrop-saturate-[1.3] bg-white/70",
+          "group rounded-card backdrop-saturate-[1.3]",
+          !intensityTokens && "backdrop-blur-xl bg-arch-surface-secondary/80",
         ],
 
         // GlowBorder custom layout style
         variant === "glowborder" && [
-          "backdrop-blur-xl backdrop-saturate-[1.3]",
+          "backdrop-saturate-[1.3]",
+          !intensityTokens && "backdrop-blur-xl",
         ],
 
         // Liquid custom layout style
@@ -499,17 +521,28 @@ export function GlassCard({
           hover && "liquid-glass-interactive",
         ],
 
-        hover && "cursor-pointer",
+        hover &&
+          onClick &&
+          "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
         (variant === "default" || variant === "liquid") && padding && "p-6",
         className,
       )}
       style={
-        variant === "glowborder"
-          ? ({
-              "--glow-animation-duration": `${animationDuration}s`,
-              ...props.style,
-            } as React.CSSProperties)
-          : props.style
+        {
+          ...(intensityTokens
+            ? {
+                backdropFilter: `blur(${intensityTokens.blur})`,
+                WebkitBackdropFilter: `blur(${intensityTokens.blur})`,
+                backgroundColor: `rgba(255, 255, 255, ${intensityTokens.opacity})`,
+              }
+            : {}),
+          ...(variant === "glowborder"
+            ? {
+                "--glow-animation-duration": `${animationDuration}s`,
+              }
+            : {}),
+          ...props.style,
+        } as React.CSSProperties
       }
       {...props}
     >
@@ -536,7 +569,7 @@ export function GlassCard({
 
       {/* macOS window title bar */}
       {isWindow && (
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-black/[0.06] bg-white/60 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-arch-surface-secondary/60 backdrop-blur-md">
           <MacTrafficLights />
           {title && (
             <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">

@@ -6,6 +6,131 @@ import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
 import { scannerBadgeSchema } from "@repo/contract";
 
+/**
+ * @swagger
+ * /api/c66:
+ *   post:
+ *     summary: Badge scanner validation endpoint
+ *     description: Validates badge QR codes from C66 hardware scanners. Checks badge status, personnel/visitor authorization, and logs access events. Requires scanner API token authentication.
+ *     tags:
+ *       - Access Control
+ *     security:
+ *       - bearerAuth: []
+ *     headers:
+ *       - name: x-scanner-token
+ *         required: true
+ *         description: Scanner API token for authentication
+ *         schema:
+ *           type: string
+ *       - name: x-scanner-source
+ *         required: true
+ *         description: Scanner source identifier
+ *         schema:
+ *           type: string
+ *           enum: [C66-HARDWARE, C66-SCANNER, GATE-TERMINAL]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: Badge QR code
+ *               barcode:
+ *                 type: string
+ *                 description: Barcode data (alternative to code)
+ *               barcodeData:
+ *                 type: string
+ *                 description: Barcode data field (alternative to code)
+ *               data:
+ *                 type: string
+ *                 description: Raw data field (alternative to code)
+ *               qr_code:
+ *                 type: string
+ *                 description: QR code field (alternative to code)
+ *     responses:
+ *       200:
+ *         description: Badge validation result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 name:
+ *                   type: string
+ *                   description: Personnel or visitor name
+ *                 message:
+ *                   type: string
+ *                   description: Access result message
+ *       400:
+ *         description: Bad request - empty code payload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - invalid scanner token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *       403:
+ *         description: Forbidden - unauthorized scanner source or revoked badge
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *       404:
+ *         description: Badge not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 name:
+ *                   type: string
+ *                   example: Unrecognized Badge
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ */
+
 const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(
   ",",
 ).map((s) => s.trim()) || ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];

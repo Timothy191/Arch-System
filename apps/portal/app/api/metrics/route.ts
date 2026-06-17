@@ -1,3 +1,20 @@
+/**
+ * @swagger
+ * /api/metrics:
+ *   get:
+ *     summary: Portal metrics (Prometheus format)
+ *     description: Exposes Prometheus-compatible metrics including cache performance, Inngest job executions, and database query statistics. For use with Prometheus or Grafana.
+ *     tags:
+ *       - Metrics
+ *     responses:
+ *       200:
+ *         description: Prometheus metrics in text format
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               description: Prometheus metrics exposition format
+ */
 import { getCacheStats } from "@repo/redis";
 import { getObservabilityMetrics } from "@/lib/observability/metrics";
 

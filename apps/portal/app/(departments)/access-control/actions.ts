@@ -143,6 +143,20 @@ export async function getAccessControlMetrics(
 /*  2. Recent Activity Feed                                            */
 /* ------------------------------------------------------------------ */
 
+interface AccessLogWithBadge {
+  id: string;
+  scanned_at: string;
+  gate_location: string;
+  access_granted: boolean;
+  denial_reason: string | null;
+  badge: {
+    qr_code: string;
+    entity_type: string;
+    personnel: { first_name: string; surname: string } | null;
+    visitor: { first_name: string; surname: string } | null;
+  };
+}
+
 export async function getRecentAccessActivity(
   deptId: string,
   limit = 8,
@@ -167,8 +181,8 @@ export async function getRecentAccessActivity(
 
   if (!logs) return [];
 
-  return logs.map((log: any) => {
-    const badge = log.badge as any;
+  return (logs as unknown as AccessLogWithBadge[]).map((log) => {
+    const { badge } = log;
     let entityName = "Unknown";
     let entityType = badge?.entity_type ?? "Unknown";
 

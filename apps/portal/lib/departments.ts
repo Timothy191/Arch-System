@@ -70,6 +70,22 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    name: "access-card-actions",
+    displayName: "Access Card Actions",
+    icon: "CreditCard",
+    description: "Manage printed badges, print cards & QR generation",
+    color: "blue",
+    type: "standard",
+    status: "active",
+    gridSpan: "md:col-span-1 xl:col-span-1",
+    stats: { label: "Cards", value: "0" },
+    trend: [0, 0, 0, 0, 0, 0, 0, 0],
+    actions: [
+      { label: "Print Cards", href: "/access-card-actions" },
+      { label: "QR Codes", href: "/access-card-actions" },
+    ],
+  },
+  {
     name: "engineering",
     displayName: "Engineering",
     icon: "Wrench",
@@ -217,12 +233,14 @@ export const DEPARTMENT_TABS = [
 /**
  * Control Room specific tabs - optimized for mining operations monitoring
  * with automation-focused design for operators
+ * AGENT-TRACE: Removed 'operational-delays' tab as delay tracking is now integrated
+ * into machine-operations page. The old operational_delays table was deprecated
+ * in favor of delay_entries, which are managed within the Machine Ops interface.
  */
 export const CONTROL_ROOM_TABS = [
   { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
   { name: "hourly-loads", label: "Hourly Loads", icon: "Clock" },
   { name: "machine-operations", label: "Machine Ops", icon: "Cpu" },
-  { name: "operational-delays", label: "Delays", icon: "AlertTriangle" },
   { name: "engineering-notes", label: "Eng Notes", icon: "ClipboardList" },
   { name: "excavator-activity", label: "Excavator", icon: "Pickaxe" },
   { name: "reports", label: "Reports", icon: "FileText" },
@@ -268,6 +286,16 @@ export const ACCESS_CONTROL_TABS = [
 ] as const;
 
 /**
+ * Access Card Actions specific tabs - focused on badge printing and QR generation
+ */
+export const ACCESS_CARD_ACTIONS_TABS = [
+  { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
+  { name: "print-cards", label: "Print Cards", icon: "Printer" },
+  { name: "qr-codes", label: "QR Codes", icon: "QrCode" },
+  { name: "reports", label: "Reports", icon: "FileText" },
+] as const;
+
+/**
  * Training specific tabs - focused on training programs, certifications, schedules, and LMS progress
  */
 export const TRAINING_TABS = [
@@ -288,6 +316,9 @@ export function getDepartmentTabs(departmentName: string) {
   }
   if (departmentName === "access-control") {
     return ACCESS_CONTROL_TABS;
+  }
+  if (departmentName === "access-card-actions") {
+    return ACCESS_CARD_ACTIONS_TABS;
   }
   if (departmentName === "satellite-monitoring") {
     return SATELLITE_MONITORING_TABS;

@@ -148,7 +148,7 @@ export default async function TrainingDashboardPage() {
               {ongoingClasses.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3 rounded-xl bg-black/[0.02] border border-black/[0.04] space-y-2"
+                  className="p-3 rounded-xl bg-[var(--overlay-dim)] border border-[var(--border-subtle)] space-y-2"
                 >
                   <div className="flex justify-between items-start">
                     <h4 className="font-medium text-sm text-[var(--text-heading)]">
@@ -208,9 +208,9 @@ export default async function TrainingDashboardPage() {
                     <th className="pb-2 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-black/[0.02]">
+                <tbody className="divide-y divide-[var(--overlay-dim)]">
                   {recentCertifications.map((cert, idx) => (
-                    <tr key={idx} className="hover:bg-black/[0.01]">
+                    <tr key={idx} className="hover:bg-[var(--overlay-dim)]">
                       <td className="py-2.5 font-medium text-[var(--text-heading)]">
                         {cert.employee}
                       </td>

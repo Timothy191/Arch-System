@@ -11,6 +11,22 @@ import {
 } from "@repo/ui/components/ui/table";
 import { ShieldOff, Clock } from "lucide-react";
 
+interface AccessLogWithBadge {
+  id: string;
+  scanned_at: string;
+  gate_location: string;
+  access_granted: boolean;
+  denial_reason: string | null;
+  access_type: string;
+  direction: string;
+  badge: {
+    qr_code: string;
+    entity_type: string;
+    personnel: { first_name: string; surname: string } | null;
+    visitor: { first_name: string; surname: string } | null;
+  };
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function AccessLogsPage() {
@@ -50,43 +66,45 @@ export default async function AccessLogsPage() {
     .order("scanned_at", { ascending: false })
     .limit(100);
 
-  const resolvedLogs = (logs || []).map((log: any) => {
-    const badge = log.badge as any;
-    let entityName = "Unknown";
-    let entityType: string = badge?.entity_type ?? "Unknown";
+  const resolvedLogs = ((logs ?? []) as unknown as AccessLogWithBadge[]).map(
+    (log) => {
+      const { badge } = log;
+      let entityName = "Unknown";
+      let entityType: string = badge?.entity_type ?? "Unknown";
 
-    if (badge?.personnel) {
-      entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
-      entityType = "Employee";
-    } else if (badge?.visitor) {
-      entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
-      entityType = "Visitor";
-    }
-
-    let status = log.access_granted ? "Granted" : "Denied";
-    if (!log.access_granted && log.denial_reason) {
-      if (
-        log.denial_reason.includes("Expired") ||
-        log.denial_reason.includes("expired")
-      ) {
-        status = "Expired Credential";
-      } else if (log.denial_reason.includes("Tailgate")) {
-        status = "Tailgate Alert";
+      if (badge?.personnel) {
+        entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
+        entityType = "Employee";
+      } else if (badge?.visitor) {
+        entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
+        entityType = "Visitor";
       }
-    }
 
-    return {
-      id: log.id,
-      timestamp: log.scanned_at,
-      entityName,
-      entityType,
-      qrCodeId: badge?.qr_code ?? "N/A",
-      zone: log.gate_location,
-      accessMethod: log.access_type ?? "QR Scan",
-      status,
-      direction: log.direction,
-    };
-  });
+      let status = log.access_granted ? "Granted" : "Denied";
+      if (!log.access_granted && log.denial_reason) {
+        if (
+          log.denial_reason.includes("Expired") ||
+          log.denial_reason.includes("expired")
+        ) {
+          status = "Expired Credential";
+        } else if (log.denial_reason.includes("Tailgate")) {
+          status = "Tailgate Alert";
+        }
+      }
+
+      return {
+        id: log.id,
+        timestamp: log.scanned_at,
+        entityName,
+        entityType,
+        qrCodeId: badge?.qr_code ?? "N/A",
+        zone: log.gate_location,
+        accessMethod: log.access_type ?? "QR Scan",
+        status,
+        direction: log.direction,
+      };
+    },
+  );
 
   return (
     <div className="space-y-6">

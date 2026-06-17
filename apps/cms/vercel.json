@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && nx build cms",
+  "outputDirectory": ".next"
+}

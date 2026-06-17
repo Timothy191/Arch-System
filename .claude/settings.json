@@ -177,7 +177,8 @@
     "linear@claude-plugins-official": false,
     "remember@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
-    "qodo-skills@claude-plugins-official": true
+    "qodo-skills@claude-plugins-official": true,
+    "nx@nx-claude-plugins": true
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
@@ -239,6 +240,14 @@
     "reporecall": {
       "command": "npx",
       "args": ["-y", "@proofofwork-agency/reporecall", "mcp"]
+    }
+  },
+  "extraKnownMarketplaces": {
+    "nx-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "nrwl/nx-ai-agents-config"
+      }
     }
   }
 }

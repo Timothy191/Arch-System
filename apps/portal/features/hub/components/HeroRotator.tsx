@@ -101,7 +101,7 @@ export function HeroRotator({
             )}
           >
             <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-arch-text-primary text-balance">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-arch-text-primary text-balance">
                 {panel.title}
               </h1>
               <p className="text-arch-text-secondary text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-pretty">
@@ -113,7 +113,7 @@ export function HeroRotator({
               <Link
                 href={panel.primary.href}
                 data-cta="primary-hero"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-glow-primary transition-all hover:bg-indigo-700 active:bg-indigo-800 hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 min-h-[44px]"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-blue)] text-white font-medium text-sm shadow-glow-primary transition-all hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80 hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)] focus-visible:outline-offset-2 min-h-[44px]"
               >
                 {panel.primary.icon}
                 {panel.primary.label}
@@ -122,7 +122,7 @@ export function HeroRotator({
                 <Link
                   href={panel.secondary.href}
                   data-cta="secondary-hero"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-arch-surface-tertiary/60 text-arch-text-secondary font-semibold text-sm border border-arch-border-subtle hover:bg-arch-surface-secondary hover:text-arch-text-primary hover:border-arch-border-emphasis active:bg-arch-surface-primary transition-all hover:scale-[1.02] active:scale-[0.97] backdrop-blur-md focus-visible:outline-2 focus-visible:outline-slate-400 focus-visible:outline-offset-2 min-h-[44px]"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-arch-surface-tertiary/60 text-arch-text-secondary font-medium text-sm border border-arch-border-subtle hover:bg-arch-surface-secondary hover:text-arch-text-primary hover:border-arch-border-emphasis active:bg-arch-surface-primary transition-all hover:scale-[1.02] active:scale-[0.97] backdrop-blur-md focus-visible:outline-2 focus-visible:outline-[var(--text-secondary)] focus-visible:outline-offset-2 min-h-[44px]"
                 >
                   {panel.secondary.icon}
                   {panel.secondary.label}
@@ -142,7 +142,7 @@ export function HeroRotator({
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
                 idx === activeIndex
-                  ? "bg-indigo-600 w-4"
+                  ? "bg-[var(--accent-blue)] w-4"
                   : "bg-arch-border-emphasis",
               )}
             />

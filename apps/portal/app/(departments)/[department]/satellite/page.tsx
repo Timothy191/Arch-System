@@ -26,7 +26,7 @@ export default function ControlRoomSatellitePage() {
         </div>
         <a
           href="/executive"
-          className="px-3 py-1.5 text-xs font-medium text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 rounded-lg hover:bg-[var(--accent-cyan)]/10 transition-colors"
+          className="px-3 py-1.5 text-xs font-medium text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 rounded-lg hover:bg-[var(--accent-blue)]/10 transition-colors"
         >
           Executive Hub →
         </a>
@@ -37,7 +37,7 @@ export default function ControlRoomSatellitePage() {
         <GlassCard>
           <p className="system-label">Critical Alerts</p>
           <p
-            className={`text-2xl font-bold mt-1 ${critical > 0 ? "text-accent-red" : "text-[var(--accent-cyan)]"}`}
+            className={`text-2xl font-bold mt-1 ${critical > 0 ? "text-accent-red" : "text-[var(--accent-blue)]"}`}
           >
             {critical}
           </p>

@@ -159,7 +159,7 @@ export function CloseShiftModal({
 
         {state.type === "validating" && (
           <div className="flex flex-col items-center py-8 gap-3">
-            <Loader2 className="w-8 h-8 text-[var(--accent-cyan)] animate-spin" />
+            <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
             <p className="text-[var(--text-muted)] text-sm">
               Validating shift data...
             </p>

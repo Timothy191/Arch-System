@@ -177,7 +177,7 @@ describe("ServerHealthRow", () => {
         status="healthy"
         db="ok"
         redis="ok"
-        aiRouter="ok"
+        fuxa="ok"
         responseTime={42}
         loading={false}
       />,
@@ -193,7 +193,7 @@ describe("ServerHealthRow", () => {
         status="degraded"
         db="ok"
         redis="unavailable"
-        aiRouter="disabled"
+        fuxa="disabled"
         responseTime={120}
         loading={false}
       />,
@@ -210,7 +210,7 @@ describe("ServerHealthRow", () => {
         status="error"
         db="unavailable"
         redis="unavailable"
-        aiRouter="unavailable"
+        fuxa="unavailable"
         responseTime={0}
         loading={true}
       />,

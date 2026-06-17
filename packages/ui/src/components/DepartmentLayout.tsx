@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { MacTitleBar } from "./MacTitleBar";
 import { useFocusMode } from "../lib/useFocusMode";
+import { Logo } from "./Logo";
 import {
   BarChart3,
   Clock,
@@ -116,11 +117,7 @@ export function DepartmentLayout({
             </span>
             <span>Back to Hub</span>
           </Link>
-          <img
-            src={isFocusMode ? "/logo-focused.jpeg" : "/logo.png"}
-            alt="Arch Logo"
-            className="w-4 h-4 object-contain opacity-60 mr-2"
-          />
+          <Logo className="w-4 h-4 opacity-60 mr-2" />
         </div>
 
         {/* Department icon + label */}
@@ -128,17 +125,18 @@ export function DepartmentLayout({
           <div
             className={cn(
               "p-1.5 rounded-lg",
-              department.color === "blue" && "bg-blue-500/10 text-blue-600",
+              department.color === "blue" &&
+                "bg-dept-drilling/10 text-dept-drilling",
               department.color === "emerald" &&
-                "bg-accent-green/10 text-accent-green",
-              department.color === "blue" && "bg-blue-500/10 text-blue-600",
+                "bg-dept-production/10 text-dept-production",
               department.color === "violet" &&
-                "bg-violet-500/10 text-violet-600",
-              department.color === "red" && "bg-red-500/10 text-red-600",
-              department.color === "blue" && "bg-blue-500/10 text-blue-600",
-              department.color === "cyan" && "bg-cyan-500/10 text-cyan-600",
+                "bg-dept-engineering/10 text-dept-engineering",
+              department.color === "red" &&
+                "bg-dept-control-room/10 text-dept-control-room",
+              department.color === "cyan" &&
+                "bg-dept-training/10 text-dept-training",
               department.color === "indigo" &&
-                "bg-indigo-500/10 text-indigo-600",
+                "bg-dept-satellite/10 text-dept-satellite",
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />

@@ -115,61 +115,66 @@ export function RouteBackground() {
     <>
       {prefersReducedMotion ? (
         // For users who prefer reduced motion, show static gradient only
-        <div
-          className="fixed inset-0 bg-gradient-to-br from-white/80 to-white/60 -z-10"
-          aria-hidden="true"
-        />
+        <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
+          <div className="w-full h-full bg-gradient-to-br from-white/80 to-white/60" />
+        </div>
       ) : (
         <>
           {/* ── Light mode: loop the user's video background (lazy-loaded) ── */}
-          <video
-            ref={lightVideoRef}
-            id="route-bg-light-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="none"
-            poster="/auth-bg-poster.jpg"
-            className="route-bg-video"
-            aria-hidden="true"
-          >
-            {/* AGENT-TRACE: Global light-mode background video relocated to a subfolder to match monorepo asset organization standard */}
-            <source
-              src="/background/light-mode/light%20mode.mp4"
-              type="video/mp4"
-            />
-            Your browser does not support the video tag.
-          </video>
+          <div className="route-bg-video-container" aria-hidden="true">
+            <video
+              ref={lightVideoRef}
+              id="route-bg-light-video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="none"
+              poster="/auth-bg-poster.jpg"
+              className="route-bg-video"
+            >
+              {/* AGENT-TRACE: Global light-mode background video relocated to a subfolder to match monorepo asset organization standard */}
+              <source
+                src="/background/light-mode/light-mode.mp4"
+                type="video/mp4"
+              />
+              Your browser does not support the video tag.
+            </video>
+          </div>
 
           {/* ── Focus mode: full-screen atmospheric video (lazy-loaded) ── */}
-          <video
-            ref={focusVideoRef}
-            id="route-bg-focus-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="none"
-            poster="/auth-bg-poster.jpg"
-            className="route-bg-focus-video"
-            aria-hidden="true"
-          >
-            <source
-              src="/background/focused-mode/focused%20mode.mp4"
-              type="video/mp4"
-            />
-            Your browser does not support the video tag.
-          </video>
+          <div className="route-bg-focus-video-container" aria-hidden="true">
+            <video
+              ref={focusVideoRef}
+              id="route-bg-focus-video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="none"
+              poster="/auth-bg-poster.jpg"
+              className="route-bg-focus-video"
+            >
+              <source
+                src="/background/focused-mode/focused-mode.mp4"
+                type="video/mp4"
+              />
+              Your browser does not support the video tag.
+            </video>
+          </div>
 
           {/* ── Poster fallback overlay — shown until videos load ── */}
           {!lightVideoLoaded && !focusVideoLoaded && (
-            <img
-              src="/auth-bg-poster.jpg"
-              alt=""
-              className="fixed inset-0 w-full h-full object-cover -z-10"
+            <div
+              className="fixed inset-0 overflow-hidden -z-10"
               aria-hidden="true"
-            />
+            >
+              <img
+                src="/auth-bg-poster.jpg"
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
         </>
       )}

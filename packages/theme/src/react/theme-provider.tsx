@@ -51,7 +51,7 @@ function ArchThemeInner({ children }: { children: ReactNode }) {
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", "#f5f5f7");
+      metaThemeColor.setAttribute("content", "#ffffff");
     }
   }, []);
 

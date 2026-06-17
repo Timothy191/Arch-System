@@ -10,36 +10,6 @@ import { trace, Span, SpanStatusCode } from "@opentelemetry/api";
 const tracer = trace.getTracer("arch-portal", "1.0.0");
 
 /**
- * Create a span for a synchronous operation
- */
-export function withSpan<T>(
-  name: string,
-  attributes: Record<string, string | number | boolean>,
-  fn: (_span: Span) => T,
-): T {
-  const span = tracer.startSpan(name, {
-    attributes,
-  });
-
-  try {
-    const result = fn(span);
-    span.setStatus({ code: SpanStatusCode.OK });
-    return result;
-  } catch (error) {
-    span.setStatus({
-      code: SpanStatusCode.ERROR,
-      message: error instanceof Error ? error.message : String(error),
-    });
-    span.recordException(
-      error instanceof Error ? error : new Error(String(error)),
-    );
-    throw error;
-  } finally {
-    span.end();
-  }
-}
-
-/**
  * Create a span for an asynchronous operation
  */
 export async function withAsyncSpan<T>(
@@ -91,15 +61,5 @@ export function setAttributes(
   const activeSpan = trace.getActiveSpan();
   if (activeSpan) {
     activeSpan.setAttributes(attributes);
-  }
-}
-
-/**
- * Record an exception on the current active span
- */
-export function recordException(error: Error): void {
-  const activeSpan = trace.getActiveSpan();
-  if (activeSpan) {
-    activeSpan.recordException(error);
   }
 }

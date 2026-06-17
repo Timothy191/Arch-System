@@ -9,7 +9,6 @@ type KPIColor =
   | "green"
   | "blue"
   | "red"
-  | "blue"
   | "cyan"
   | "indigo"
   | "alert";
@@ -17,10 +16,10 @@ type KPIColor =
 const colorMap: Record<KPIColor, string> = {
   default: "text-[var(--text-heading)]",
   green: "text-accent-green",
-  blue: "text-blue-400",
-  red: "text-red-400",
-  cyan: "text-[var(--accent-blue)]",
-  indigo: "text-[var(--accent-blue)]",
+  blue: "text-dept-drilling",
+  red: "text-[var(--accent-red)]",
+  cyan: "text-[var(--accent-green)]",
+  indigo: "text-dept-satellite",
   alert: "text-[var(--accent-red)]",
 };
 
@@ -30,6 +29,7 @@ interface KPICardProps {
   color?: KPIColor;
   sub?: string;
   subColor?: KPIColor;
+  icon?: React.ReactNode;
 }
 
 export function KPICard({
@@ -38,13 +38,28 @@ export function KPICard({
   color = "default",
   sub,
   subColor = "default",
+  icon,
 }: KPICardProps) {
   return (
-    <GlassCard>
-      <p className="system-label">{label}</p>
-      <p className={cn("text-2xl font-medium mt-1", colorMap[color])}>
-        {value}
-      </p>
+    <GlassCard className="relative overflow-hidden group">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="system-label">{label}</p>
+          <p className={cn("text-2xl font-medium mt-1", colorMap[color])}>
+            {value}
+          </p>
+        </div>
+        {icon && (
+          <div
+            className={cn(
+              "opacity-20 group-hover:opacity-40 transition-opacity duration-300",
+              colorMap[color],
+            )}
+          >
+            {icon}
+          </div>
+        )}
+      </div>
       {sub && <p className={cn("text-xs mt-1", colorMap[subColor])}>{sub}</p>}
     </GlassCard>
   );

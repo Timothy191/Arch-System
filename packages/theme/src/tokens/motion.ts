@@ -118,11 +118,11 @@ export const VARIANTS = {
 } as const;
 
 // Legacy support exports
-export const springPhysics = SPRING_PHYSICS;
-export const easings = EASINGS;
-export const transitions = TRANSITIONS;
-export const stagger = STAGGER;
-export const variants = VARIANTS;
+export const springPhysics = { ...SPRING_PHYSICS } as const;
+export const easings = { ...EASINGS } as const;
+export const transitions = { ...TRANSITIONS } as const;
+export const stagger = { ...STAGGER } as const;
+export const variants = { ...VARIANTS } as const;
 export const liquidGlassVariants = VARIANTS.liquidGlass;
 export const magneticVariants = VARIANTS.magnetic;
 export const perpetualVariants = VARIANTS.perpetual;

@@ -94,7 +94,7 @@ export function ExcavatorActivityList({
             {/* Site header */}
             <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
               <h4 className="text-base font-medium text-[var(--text-heading)] flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-cyan)]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-blue)]" />
                 {siteName}
               </h4>
               <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
@@ -104,7 +104,7 @@ export function ExcavatorActivityList({
                   </span>
                 )}
                 {siteLoads > 0 && (
-                  <span className="text-[var(--accent-cyan)] font-medium">
+                  <span className="text-[var(--accent-blue)] font-medium">
                     {siteLoads.toLocaleString()} loads
                   </span>
                 )}
@@ -262,7 +262,7 @@ function ActivityCard({
                     <td className="py-1.5 px-2 text-right text-[var(--text-heading)]">
                       {assignment.total_loads}
                     </td>
-                    <td className="py-1.5 px-2 text-right text-[var(--accent-cyan)] font-medium">
+                    <td className="py-1.5 px-2 text-right text-[var(--accent-blue)] font-medium">
                       {(assignment.total_bcm || 0).toFixed(1)}
                     </td>
                   </tr>
@@ -279,7 +279,7 @@ function ActivityCard({
                   <td className="py-1.5 px-2 text-right text-[var(--text-heading)] font-medium text-xs">
                     {totalLoads}
                   </td>
-                  <td className="py-1.5 px-2 text-right text-[var(--accent-cyan)] font-medium text-xs">
+                  <td className="py-1.5 px-2 text-right text-[var(--accent-blue)] font-medium text-xs">
                     {totalBcm.toFixed(1)}
                   </td>
                 </tr>

@@ -214,6 +214,22 @@
   }
 }
 
+@keyframes liquid-bg-shift {
+  0% {
+    filter: saturate(1.05) hue-rotate(0deg);
+  }
+  50% {
+    filter: saturate(1.15) hue-rotate(4deg);
+  }
+  100% {
+    filter: saturate(1.05) hue-rotate(0deg);
+  }
+}
+
+.animate-liquid-bg {
+  animation: liquid-bg-shift 12s ease-in-out infinite;
+}
+
 /* ── Animation Utility Classes ── */
 
 .animate-float {

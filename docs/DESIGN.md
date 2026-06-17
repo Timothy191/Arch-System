@@ -169,15 +169,32 @@ All interactive elements must support and visually manifest this complete state 
 
 ## Interactive Card System
 
-Glass cards serve as the foundational boundaries of the application layout. They exist in three variants, governed by strict usage criteria:
+Glass cards serve as the foundational boundaries of the application layout. They exist in four variants, governed by strict usage criteria:
 
 ### Card Variants Matrix
 
-| Variant                | Spacing/Padding                       | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
-| :--------------------- | :------------------------------------ | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
-| **Standard GlassCard** | `md` (16px), radius `radius-lg` (8px) | Background shift to `bg-hover` (`150ms` duration).                 | None on layout; standard hover fade.                                      | Default container. Used for standard lists, charts, and metrics grouping.                |
-| **SpotlightCard**      | `md` (16px), radius `radius-lg` (8px) | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
-| **GlowBorderCard**     | `md` (16px), radius `radius-lg` (8px) | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
+| Variant                | Spacing/Padding                        | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
+| :--------------------- | :------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **Standard GlassCard** | `md` (16px), radius `radius-lg` (8px)  | Background shift to `bg-hover` (`150ms` duration).                 | None on layout; standard hover fade.                                      | Default container. Used for standard lists, charts, and metrics grouping.                |
+| **SpotlightCard**      | `md` (16px), radius `radius-lg` (8px)  | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
+| **GlowBorderCard**     | `md` (16px), radius `radius-lg` (8px)  | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
+| **MacOSPanelCard**     | `lg` (24px), radius `radius-xl` (12px) | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
+
+### MacOSPanel Variant Specifications
+
+**Visual Tokens**:
+
+- **Background**: Extra-frosted glass via `bg-white/75 backdrop-blur-2xl` (light) or `bg-black/60 backdrop-blur-2xl` (dark).
+- **Border**: Inner rim light: `border border-white/60` (light) / `border-white/10` (dark).
+- **Corner radius**: `rounded-xl` (12px) or `rounded-2xl` (16px) depending on container scale.
+- **Static shadow stack**: Two-layer soft shadow for ambient occlusion:  
+  `0 2px 8px rgba(0,0,0,0.04), 0 8px 30px rgba(0,0,0,0.06)`
+
+**Interactive Motion (250ms ease-out-expo)**:
+
+- **Hover lift**: Micro-transform with `translateZ(2px)` and slight `rotateX`/`rotateY` driven by cursor position (parallax effect).
+- **Shadow expansion**: The deeper shadow stretches to `0 12px 40px rgba(0,0,0,0.08)`, visibly detaching the panel.
+- **Dark-mode adaptation**: Shadows become subtle glows (`box-shadow` with white/0.05) to maintain edge definition on black backgrounds.
 
 ### Card Variant Decision Flowchart
 
@@ -187,6 +204,8 @@ Glass cards serve as the foundational boundaries of the application layout. They
    ➔ Use **SpotlightCard** (Limit: 1 per viewport).
 3. _Do you need to direct immediate operator focus to a critical action path or severe condition warning?_  
    ➔ Use **GlowBorderCard** (Limit: 2 per viewport).
+4. _Do you need a floating panel, sidebar, tooltip, or HUD element that requires physical depth?_  
+   ➔ Use **MacOSPanelCard**.
 
 _Note: Nesting cards inside cards is strictly forbidden across all variants._
 
@@ -846,3 +865,152 @@ Add to `.github/workflows/ci.yml` (or equivalent):
 ---
 
 **Final Output:** A fully tokenized, unified, and rigorously validated design system implementation that meets the highest standards of performance, accessibility, and maintainability — ready for production.
+
+---
+
+## Hub Visual Identity & Interaction Framework
+
+**Design intent:** A premium, macOS‑inspired light‑mode interface built on liquid glass, semantic color, and orchestrated motion. The aesthetic is calm and hyper‑legible, allowing operators to scan critical data instantly without distraction.
+
+### 1. Liquid Glass Foundation & Depth
+
+- **Hero Background:** The top of the hub features a fluid `HeroBackground` layer with liquid‑glass video/animation that bleeds through the overlaid UI.
+- **Card treatment:** Primary content sits in `GlassCard` components using `variant="liquid"`. Instead of opaque fills, cards use `backdrop-blur-sm` + semi‑transparent surface tokens (`bg-arch-surface-secondary/80`), letting the background show organically.
+- **Edge highlighting:** Depth is reinforced with an inner `ring-1 ring-inset ring-arch-border-emphasis/40`, simulating light catching the edge of physical glass.
+
+### 2. Strict Semantic Color System (OKLCH)
+
+- **No raw values:** All colors are mapped to `@repo/theme` semantic tokens (e.g., `arch-text-primary`, `arch-surface-tertiary`, `arch-border-subtle`). Flat hex or standard Tailwind colors are forbidden (enforced by Stylelint).
+- **Neutral‑dominant palette:** Pure whites and soft grays form the backdrop.
+- **Functional accent usage:** Color is reserved for status signals:
+  - `text-accent-red` / `bg-accent-red/10` – Open safety incidents
+  - Amber tones – Active breakdowns
+  - Green – Active sector indicator
+
+### 3. Orchestrated Motion & Micro‑Interactions
+
+- **Staggered entrance:** Page sections load sequentially with `animate-fade-up` and custom `animationDelay` values (0s → 0.4s), creating a deliberate, polished cascade.
+- **Subtle layering:** `liquid-shift-y` class provides a gentle floating effect on background elements.
+- **Hover transitions:** Interactive rows use `group-hover/row:text-arch-accent-blue` + `transition-colors duration-300` to smoothly guide focus across modules.
+- **Performance guardrails:** Animations are restricted to opacity, transform, and color changes only; no layout‑triggering properties are animated, ensuring 60fps interactions.
+
+### 4. Visual Hierarchy & Scannability
+
+- **Eyebrow badges:** Compact pill‑shaped badges at the top of the hero card surface dense data like active incident counts and portal version, keeping critical info glanceable without crowding main headings.
+- **Diffuse glow effect:** The “Core Operational Modules” area uses `aurora-shadow` for a soft, premium halo around the department grid.
+- **Icon + type pairing:** Consistent Lucide icons (Shield, Activity, Wrench) with contextual colors (red shield for Urgencies, green activity line for Telemetry) provide instant visual differentiation.
+
+### Summary
+
+The result is a **premium, dynamic, and scan‑friendly hub**—a light‑mode sanctuary where every surface feels like polished glass, every status cue is immediate, and the entire experience arrives with a choreographed sense of calm authority.
+
+---
+
+## Hub Panel System – Aesthetic & Interaction
+
+The panels extend the liquid-glass, semantic-color, and motion language into a scannable grid of operational modules. They function like app icons carved from the same polished glass sheet, with subtle glow, hierarchy, and hover feedback.
+
+### 1. Glass Panel Surface & Depth
+
+- **Card variants:** Panels likely use a `GlassCard` variant similar to the hero but optimized for density—`variant="panel"` or default—retaining:
+  - `backdrop-blur-sm` over the flowing background.
+  - Semi-transparent surface fill (`bg-arch-surface-secondary/70–80`).
+  - Inner border highlight (`ring-1 ring-inset ring-arch-border-emphasis/30`) for edge definition.
+- **Shadow approach:** Instead of heavy drop shadows, panels rely on the `aurora-shadow` utility—a soft, diffuse, colored glow that sits behind the card, giving the module grid a premium, atmospheric lift. This shadow is low-opacity and tinted subtly toward the accent of the current active sector or default slate.
+
+### 2. Semantic Token Mapping
+
+- **Background & borders:** `bg-arch-surface-secondary`, `border-arch-border-subtle`, ensuring all panels sit on the same light, neutral base.
+- **Text hierarchy:**
+  - Module title: `text-arch-text-primary` (strong, compact).
+  - Status/description: `text-arch-text-secondary` (softer, smaller).
+  - Metric highlights: `text-arch-accent-blue` or sector-specific accent via `group-hover` transitions.
+- **Status indicators:** Miniature colored dots or badges inside the panel (red, amber, green) use the same functional accent tokens as the hero, keeping incident counts, breakdowns, and active status immediately recognizable.
+
+### 3. Motion & Micro-Interactions
+
+- **Staggered entrance:** Panels share the hero’s `animate-fade-up` cascade. They appear after the hero, with delays typically starting at 0.2s and incrementing by 0.05s per panel, creating a wave from top-left to bottom-right.
+- **Hover lift:** On hover, the panel gently translates up (`liquid-shift-y` or a subtle `hover:-translate-y-0.5`), the `aurora-shadow` intensifies, and the border ring becomes slightly more opaque. All transitions are `duration-300` on `transform`, `box-shadow`, and `border-color`.
+- **Group hover linking:** The entire row or card acts as a group (`group/panel`), so hovering anywhere triggers:
+  - Title color shift to `text-arch-accent-blue`.
+  - An icon may subtly scale or rotate (e.g., `group-hover:scale-110`).
+- **No layout animations:** Only transforms, opacity, and colors are animated; margins and padding are static, keeping the grid rock-solid during interaction.
+
+### 4. Layout & Content Density
+
+- **Grid structure:** Panels are arranged in a responsive CSS grid (likely `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`), with consistent gap tokens from the design system.
+- **Eyebrow & pill badges:** Like the hero, each panel can surface compact information (counts, version, status) in `rounded-full` pills at the top or top-right of the card, using `text-xs` and a muted background.
+- **Icon + label pairing:** Each module has a Lucide icon (Wrench, Activity, Shield, etc.) placed prominently but restrained, often in a soft rounded square or circle. The icon color follows the module’s status—red for incidents, green for nominal, blue for informational.
+- **Aurora accent tie-in:** The `aurora-shadow` tint may shift based on the module’s active state or, globally, based on the active sector indicator, creating a unified atmospheric cue across the entire panel grid.
+
+### 5. Overall Role in the Hub
+
+The panels are the functional heart of the hub—transforming the ethereal hero into actionable entry points. They feel like pressed-glass tiles floating just above the background, each one a calm, hyper-legible dashboard fragment that reinforces the “premium, non-distracting” light-mode philosophy.
+
+## GlassCard API
+
+**Component:** `GlassCard`  
+**Path:** `packages/ui/src/components/GlassCard.tsx` (or similar)  
+**Role:** The foundational surface primitive for all elevated content in the portal. It enforces a glass‑morphism language through variants, semantic tokens, and strict motion constraints.
+
+### Variants
+
+| Variant     | Visual Effect                                                                                                                                                                    | Usage                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `window`    | Subtle transparency (`bg-arch-surface-primary/70`), `backdrop-blur`, `border-arch-border-subtle`. Light inner shadow for depth.                                                  | Default cards, sidebars, settings panels.   |
+| `liquid`    | High transparency (`bg-arch-surface-secondary/80`), `backdrop-blur-sm`, `ring-1 ring-inset ring-arch-border-emphasis/40`. No inner shadow; edge highlight simulates fluid glass. | Hero, primary call‑to‑action, panel grid.   |
+| `spotlight` | Semi‑opaque surface with a radial gradient from a corner accent (e.g., `arch-accent-blue`), `backdrop-blur`, subtle border glow.                                                 | Featured module, promotional cards.         |
+| `raised`    | Opaque surface (`bg-arch-surface-primary`) with standard box‑shadow for elevation. No blur.                                                                                      | High‑contrast contexts, dark‑mode fallback. |
+
+### Props
+
+| Prop        | Type                                              | Default    | Description                                                                                           |
+| ----------- | ------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `variant`   | `"window" \| "liquid" \| "spotlight" \| "raised"` | `"window"` | Controls transparency, blur, and border style.                                                        |
+| `depth`     | `"flat" \| "sm" \| "md" \| "lg"`                  | `"md"`     | Applies predefined shadow/elevation tokens. Overridden by variant if it uses `ring` (e.g., `liquid`). |
+| `noBorder`  | `boolean`                                         | `false`    | Removes the border ring for seamless integration (e.g., inside larger glass containers).              |
+| `as`        | `React.ElementType`                               | `"div"`    | Polymorphic container (e.g., `"section"`, `"article"`).                                               |
+| `className` | `string`                                          | –          | Additional custom classes. Must use semantic tokens or be approved by design system.                  |
+
+### Semantic Token Bindings
+
+- **Backgrounds:** All backgrounds pull from `arch-surface-*` tokens (primary, secondary, tertiary). No raw `#fff` or `bg-white`.
+- **Borders:** `border-arch-border-subtle` or `ring-arch-border-emphasis/40` for highlights.
+- **Text inside:** Inherits from parent; cards do not force text colors, but content should always use `arch-text-*`.
+- **Accents:** Variants like `spotlight` may use `via-arch-accent-blue/10` in gradient overlays.
+
+### Motion & Interaction Rules
+
+- **Hover transitions:** Only `opacity`, `transform`, and `color` may be animated. No margin, padding, or layout‑shift properties.
+- **Default transition:** `transition-all duration-300` (or more targeted via `transition-colors`, `transition-transform`).
+- **Group interactivity:** Cards can act as `group` to change children’s style on hover (e.g., `group-hover/panel:text-arch-accent-blue`).
+- **Entrance animation:** When used in a staggered list, cards receive `animate-fade-up` with `animationDelay` values set by the parent layout.
+
+### Integration with Global Utilities
+
+- **`aurora-shadow`:** Applies a soft, tinted glow behind the card. Works best with `liquid` and `spotlight` variants. Must not conflict with `ring` highlights – `aurora-shadow` uses `box-shadow`, while `ring` is an inset border.
+- **`liquid-shift-y`:** Adds a subtle floating translateY animation on hover. Recommended only for cards that sit on a visually rich background (like `liquid` variant).
+
+### Accessibility
+
+- Cards that are interactive (clickable) must have `role="button"`, `tabIndex={0}`, and appropriate `aria-label` if they are solely icons.
+- All content remains scannable; glass effects must not reduce contrast below WCAG AA. The design system ensures the token choices (`arch-text-primary` on `arch-surface-secondary/80`) meet minimum contrast ratios.
+
+### Usage Example
+
+```tsx
+<GlassCard variant="liquid" depth="flat" className="group cursor-pointer">
+  <h3 className="text-arch-text-primary group-hover:text-arch-accent-blue transition-colors duration-300">
+    Module Title
+  </h3>
+  <p className="text-arch-text-secondary">Short description</p>
+  <span className="inline-block w-2 h-2 rounded-full bg-accent-red" />
+</GlassCard>
+```
+
+### Anti‑Patterns
+
+- ❌ Using `variant="liquid"` with a solid white background – destroys transparency.
+- ❌ Animating padding or margins on hover – causes layout shift.
+- ❌ Overriding border colours with raw hex values – breaks semantic consistency.
+- ❌ Combining `depth` with `ring-*` variants – `ring` replaces shadow‑based depth.

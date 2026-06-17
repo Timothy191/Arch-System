@@ -6,9 +6,35 @@
     "@secretlint/secretlint-rule-preset-recommend",
     "preflight",
     "@repo/eslint-config",
-    "@typescript-eslint/parser"
+    "@typescript-eslint/parser",
+    // CI/CD tooling
+    "bundlesize",
+    "wait-on",
+    "serve",
+    // E2E testing
+    "web-vitals",
+    // Commitlint packages (used via config files, not direct imports)
+    "@commitlint/cli",
+    "@commitlint/config-conventional",
+    // pnpm npm: protocol aliases (partial names truncated by knip)
+    "commitlint-config-.",
+    "commitlint-config-"
   ],
-  "ignore": ["**/jest.config.*", "**/postcss.config.*"],
+  "ignoreBinaries": [
+    // External tools
+    "python3",
+    "psql",
+    // CI/CD tools
+    "bundlesize",
+    "wait-on",
+    "serve"
+  ],
+  "ignore": [
+    "**/jest.config.*",
+    "**/postcss.config.*",
+    "packages/contract/scripts/generate-spec-local.js",
+    "packages/ui/storybook-static/**"
+  ],
   "workspaces": {
     ".": {
       "entry": ["scripts/**/*.{ts,js}", ".eslintrc.{js,cjs}"],
@@ -65,7 +91,8 @@
     },
     "packages/eslint-config": {
       "entry": ["*.js"],
-      "project": ["*.js"]
+      "project": ["*.js"],
+      "ignoreDependencies": ["eslint-import-resolver-typescript"]
     },
     "packages/supabase": {
       "entry": [

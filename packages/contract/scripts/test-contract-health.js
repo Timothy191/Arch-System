@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Contract validation test for /api/health endpoint
  *

@@ -19,6 +19,22 @@ export interface Breakdown {
   updated_at: string;
 }
 
+// AGENT-TRACE: BreakdownControlRoomView matches the breakdowns_control_room_view schema
+// This interface is used by Control Room to read Engineering breakdowns in read-only mode
+// Only exposes operational fields required for awareness, not sensitive data like repair_notes
+export interface BreakdownControlRoomView {
+  id: string;
+  fleet_id: string;
+  machine_name: string | null;
+  machine_type: string;
+  reason: string;
+  date_in: string;
+  time_in: string;
+  date_out: string | null;
+  status: "active" | "completed";
+  created_at: string;
+}
+
 export interface BreakdownMetrics {
   total: number;
   active: number;

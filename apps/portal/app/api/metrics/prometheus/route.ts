@@ -2,12 +2,27 @@ import { NextResponse } from "next/server";
 import { getMetrics } from "@/lib/observability/metrics";
 
 /**
- * Prometheus Metrics Endpoint
- *
- * Exposes Prometheus-compatible metrics for Control Room operations.
- * This endpoint can be scraped by Prometheus server or Grafana.
- *
- * GET /api/metrics
+ * @swagger
+ * /api/metrics/prometheus:
+ *   get:
+ *     summary: Prometheus metrics endpoint
+ *     description: Exposes Prometheus-compatible metrics for Control Room operations. This endpoint can be scraped by Prometheus server or Grafana for monitoring and alerting.
+ *     tags:
+ *       - Metrics
+ *     responses:
+ *       200:
+ *         description: Prometheus metrics in text format
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               description: Prometheus metrics exposition format
+ *       500:
+ *         description: Error generating metrics
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
  */
 
 export async function GET() {

@@ -1,3 +1,42 @@
+/**
+ * @swagger
+ * /api/health/fuxa:
+ *   get:
+ *     summary: FUXA SCADA health check
+ *     description: Monitors FUXA SCADA server connectivity and response latency. Critical for production monitoring of telemetry integration.
+ *     tags:
+ *       - Health
+ *     responses:
+ *       200:
+ *         description: FUXA health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, degraded, down]
+ *                 latency_ms:
+ *                   type: integer
+ *                   description: Response latency in milliseconds
+ *                 last_check:
+ *                   type: string
+ *                   format: date-time
+ *                 details:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                     http_status:
+ *                       type: integer
+ *                       nullable: true
+ *                     error:
+ *                       type: string
+ *                       nullable: true
+ *       503:
+ *         description: FUXA server is down
+ */
 import { NextRequest, NextResponse } from "next/server";
 
 // AGENT-TRACE: Health check endpoint for FUXA SCADA integration

@@ -1,4 +1,51 @@
 /**
+ * @swagger
+ * /api/csp-violations:
+ *   post:
+ *     summary: Content Security Policy violation reporting
+ *     description: Browsers POST CSP violations here when the policy includes a report-uri or report-to directive. Logs violations for monitoring before enforcing strict CSP. Always returns 204 No Content per CSP spec.
+ *     tags:
+ *       - Security
+ *       - CSP
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               csp-report:
+ *                 type: object
+ *                 properties:
+ *                   document-uri:
+ *                     type: string
+ *                   referrer:
+ *                     type: string
+ *                   blocked-uri:
+ *                     type: string
+ *                   violated-directive:
+ *                     type: string
+ *                   effective-directive:
+ *                     type: string
+ *                   original-policy:
+ *                     type: string
+ *                   disposition:
+ *                     type: string
+ *                   script-sample:
+ *                     type: string
+ *                   status-code:
+ *                     type: number
+ *                   source-file:
+ *                     type: string
+ *                   line-number:
+ *                     type: number
+ *                   column-number:
+ *                     type: number
+ *     responses:
+ *       204:
+ *         description: Report received (always returned per CSP spec)
+ */
+
+/**
  * CSP Violation Reporting Endpoint
  *
  * Browsers POST Content Security Policy violations here when the policy

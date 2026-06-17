@@ -106,7 +106,7 @@ export function MachineOperationsList({
             {/* Site header */}
             <div className="flex items-center justify-between border-b border-[var(--border-default)] pb-2">
               <h4 className="text-base font-medium text-[var(--text-heading)] flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-cyan)]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-blue)]" />
                 {siteName}
               </h4>
               <div className="flex items-center gap-4 text-xs">
@@ -116,7 +116,7 @@ export function MachineOperationsList({
                   </span>
                 )}
                 {siteBcm > 0 && (
-                  <span className="text-[var(--accent-cyan)] font-medium">
+                  <span className="text-[var(--accent-blue)] font-medium">
                     {siteBcm.toFixed(1)} BCM
                   </span>
                 )}
@@ -262,7 +262,7 @@ function OperationCard({
               {binFactor > 0 && (
                 <>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-[var(--accent-cyan)] text-xs">
+                  <span className="text-[var(--accent-blue)] text-xs">
                     {materialBCM.toFixed(1)} BCM
                   </span>
                   <span className="text-[var(--border-emphasis)]">|</span>

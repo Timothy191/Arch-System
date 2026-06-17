@@ -1,3 +1,189 @@
+/**
+ * @swagger
+ * /api/admin/data/{table}:
+ *   get:
+ *     summary: Query admin data tables
+ *     description: Query operational tables (machines, daily_logs, breakdowns, safety_incidents, etc.) with pagination. Admin-only access.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: table
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Table name (must be in OPERATIONAL_TABLES whitelist)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of records
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Pagination offset
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *         description: Sort column
+ *       - in: query
+ *         name: eq
+ *         schema:
+ *           type: string
+ *         description: Equality filter (column=value)
+ *     responses:
+ *       200:
+ *         description: Query results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                 count:
+ *                   type: integer
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin-only)
+ *       404:
+ *         description: Table not found or not allowed
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ *   post:
+ *     summary: Insert into admin data tables
+ *     description: Insert records into operational tables. Admin-only access with rate limiting for machine status updates.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: table
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Table name (must be in OPERATIONAL_TABLES whitelist)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Record to insert (schema depends on table)
+ *     responses:
+ *       200:
+ *         description: Insert successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin-only)
+ *       404:
+ *         description: Table not found or not allowed
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ *   put:
+ *     summary: Update admin data tables
+ *     description: Update records in operational tables. Admin-only access with rate limiting for machine status updates.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: table
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Table name (must be in OPERATIONAL_TABLES whitelist)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Record updates (schema depends on table)
+ *     responses:
+ *       200:
+ *         description: Update successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Invalid request body
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin-only)
+ *       404:
+ *         description: Table not found or not allowed
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ *   delete:
+ *     summary: Delete from admin data tables
+ *     description: Delete records from operational tables. Admin-only access.
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: table
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Table name (must be in OPERATIONAL_TABLES whitelist)
+ *       - in: query
+ *         name: eq
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Equality filter for delete (column=value)
+ *     responses:
+ *       200:
+ *         description: Delete successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (admin-only)
+ *       404:
+ *         description: Table not found or not allowed
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { createServerSupabaseClient } from "@repo/supabase/server";

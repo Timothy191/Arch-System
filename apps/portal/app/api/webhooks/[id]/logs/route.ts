@@ -1,3 +1,62 @@
+/**
+ * @swagger
+ * /api/webhooks/{id}/logs:
+ *   get:
+ *     summary: Get webhook delivery logs
+ *     description: Retrieve delivery logs for a specific webhook endpoint. Returns the last 50 log entries in reverse chronological order. Non-admins can only view logs for webhooks in their department.
+ *     tags:
+ *       - Webhooks
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Webhook endpoint ID
+ *     responses:
+ *       200:
+ *         description: List of delivery logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       webhook_endpoint_id:
+ *                         type: string
+ *                       event_type:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                         enum: [success, failed, retrying]
+ *                       response_status:
+ *                         type: number
+ *                         nullable: true
+ *                       error_message:
+ *                         type: string
+ *                         nullable: true
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Webhook not found
+ *       429:
+ *         description: Rate limit exceeded
+ *       500:
+ *         description: Internal server error
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";

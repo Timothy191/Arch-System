@@ -1,15 +1,15 @@
 {
   "arch0": {
     "key": "{arch0}",
-    "value": "#f5f5f7",
+    "value": "#ffffff",
     "type": "color",
-    "description": "macOS base background",
+    "description": "macOS pure white background",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "#f5f5f7",
+      "value": "#ffffff",
       "type": "color",
-      "description": "macOS base background",
+      "description": "macOS pure white background",
       "key": "{arch0}"
     },
     "name": "arch0",
@@ -229,13 +229,13 @@
   },
   "arch12": {
     "key": "{arch12}",
-    "value": "#ff3b30",
+    "value": "#d22118",
     "type": "color",
     "description": "red — error / danger",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "#ff3b30",
+      "value": "#d22118",
       "type": "color",
       "description": "red — error / danger",
       "key": "{arch12}"
@@ -374,7 +374,7 @@
   "bg": {
     "primary": {
       "key": "{bg.primary}",
-      "value": "#f5f5f7",
+      "value": "#ffffff",
       "type": "color",
       "filePath": "tokens.json",
       "isSource": true,
@@ -589,12 +589,12 @@
   },
   "accent-red": {
     "key": "{accent-red}",
-    "value": "#ff3b30",
+    "value": "#d22118",
     "type": "color",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "{arch12}",
+      "value": "#d22118",
       "type": "color",
       "key": "{accent-red}"
     },
@@ -640,12 +640,12 @@
   },
   "accent-alert": {
     "key": "{accent-alert}",
-    "value": "#ff3b30",
+    "value": "#d22118",
     "type": "color",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "{arch12}",
+      "value": "#d22118",
       "type": "color",
       "key": "{accent-alert}"
     },
@@ -952,12 +952,12 @@
     },
     "border-gradient": {
       "key": "{glass.border-gradient}",
-      "value": "linear-gradient(to bottom, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05))",
+      "value": "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
       "type": "color",
       "filePath": "tokens.json",
       "isSource": true,
       "original": {
-        "value": "linear-gradient(to bottom, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05))",
+        "value": "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
         "type": "color",
         "key": "{glass.border-gradient}"
       },
@@ -1112,6 +1112,57 @@
         "border"
       ]
     }
+  },
+  "overlay-dim": {
+    "key": "{overlay-dim}",
+    "value": "rgba(0, 0, 0, 0.02)",
+    "type": "color",
+    "filePath": "tokens.json",
+    "isSource": true,
+    "original": {
+      "value": "rgba(0, 0, 0, 0.02)",
+      "type": "color",
+      "key": "{overlay-dim}"
+    },
+    "name": "overlay-dim",
+    "attributes": {},
+    "path": [
+      "overlay-dim"
+    ]
+  },
+  "overlay-subtle": {
+    "key": "{overlay-subtle}",
+    "value": "rgba(0, 0, 0, 0.04)",
+    "type": "color",
+    "filePath": "tokens.json",
+    "isSource": true,
+    "original": {
+      "value": "rgba(0, 0, 0, 0.04)",
+      "type": "color",
+      "key": "{overlay-subtle}"
+    },
+    "name": "overlay-subtle",
+    "attributes": {},
+    "path": [
+      "overlay-subtle"
+    ]
+  },
+  "overlay-medium": {
+    "key": "{overlay-medium}",
+    "value": "rgba(0, 0, 0, 0.06)",
+    "type": "color",
+    "filePath": "tokens.json",
+    "isSource": true,
+    "original": {
+      "value": "rgba(0, 0, 0, 0.06)",
+      "type": "color",
+      "key": "{overlay-medium}"
+    },
+    "name": "overlay-medium",
+    "attributes": {},
+    "path": [
+      "overlay-medium"
+    ]
   },
   "background": {
     "key": "{background}",

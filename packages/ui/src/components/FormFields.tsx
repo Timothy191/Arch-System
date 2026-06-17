@@ -40,7 +40,7 @@ export function FormInput({
           <span className="text-[var(--text-muted)]"> (Optional)</span>
         )}
         {!optional && props.required && (
-          <span className="text-red-400"> *</span>
+          <span className="text-[var(--accent-red)]"> *</span>
         )}
       </label>
       <input
@@ -51,7 +51,11 @@ export function FormInput({
         {...props}
       />
       {error && (
-        <p id={errorId} className="text-red-400 text-xs" role="alert">
+        <p
+          id={errorId}
+          className="text-[var(--accent-red)] text-xs"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -107,7 +111,11 @@ export function FormSelect({
         ))}
       </select>
       {error && (
-        <p id={errorId} className="text-red-400 text-xs" role="alert">
+        <p
+          id={errorId}
+          className="text-[var(--accent-red)] text-xs"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -152,7 +160,11 @@ export function FormTextarea({
         {...props}
       />
       {error && (
-        <p id={errorId} className="text-red-400 text-xs" role="alert">
+        <p
+          id={errorId}
+          className="text-[var(--accent-red)] text-xs"
+          role="alert"
+        >
           {error}
         </p>
       )}

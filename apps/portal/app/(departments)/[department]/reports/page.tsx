@@ -275,7 +275,7 @@ export default async function ReportsPage({
                   </div>
                   <Link
                     href={s.formPath}
-                    className="text-[var(--accent-cyan)] text-sm hover:underline"
+                    className="text-[var(--accent-blue)] text-sm hover:underline"
                   >
                     → {s.formLabel}
                   </Link>
@@ -284,7 +284,7 @@ export default async function ReportsPage({
             </div>
             <Link
               href={`/${deptSlug}/machine-operations`}
-              className="inline-flex items-center gap-1.5 text-sm text-[var(--accent-cyan)] hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--accent-blue)] hover:underline"
             >
               View full coverage checklist →
             </Link>
@@ -323,7 +323,7 @@ export default async function ReportsPage({
           </GlassCard>
           <GlassCard>
             <p className="text-[var(--text-muted)] text-sm">Total Loads</p>
-            <p className="text-2xl font-medium text-[var(--accent-cyan)] mt-1">
+            <p className="text-2xl font-medium text-[var(--accent-blue)] mt-1">
               {totalLoads.toLocaleString()}
             </p>
           </GlassCard>
@@ -409,7 +409,7 @@ export default async function ReportsPage({
                   >
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                       {row.site ? (
-                        <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/20">
+                        <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
                           {row.site}
                         </span>
                       ) : (
@@ -435,7 +435,7 @@ export default async function ReportsPage({
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
                       {row.hours.toFixed(1)}
                     </td>
-                    <td className="px-6 py-4 text-[var(--accent-cyan)] text-sm text-right">
+                    <td className="px-6 py-4 text-[var(--accent-blue)] text-sm text-right">
                       {row.loads.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-accent-green text-sm text-right">
