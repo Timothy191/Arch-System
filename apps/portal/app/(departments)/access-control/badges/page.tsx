@@ -1,7 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Button } from "@repo/ui/components/ui/button";
+import { Pagination } from "@repo/ui/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -28,43 +28,43 @@ interface BadgeWithRelations {
 
 export const dynamic = "force-dynamic";
 
-export default async function BadgesPage() {
+export default async function BadgesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
+}) {
+  const params = await searchParams;
+  const page = parseInt(params.page || "1", 10);
+  const pageSize = parseInt(params.pageSize || "50", 10);
+
   const { deptId } = await getDepartmentContext({
     department: "access-control",
   });
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return (
-      <div className="space-y-6">
-        <p className="text-[var(--text-muted)]">
-          Please log in to view badges.
-        </p>
-      </div>
-    );
-  }
-
-  const badges = (await getBadgesForDepartment(
+  const { badges, totalCount } = await getBadgesForDepartment(
     deptId,
-  )) as unknown as BadgeWithRelations[];
+    page,
+    pageSize,
+  );
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // Resolve entity names from nested relation data
-  const resolvedBadges = badges.map((b) => {
-    let entityName = "Unknown";
-    if (b.personnel) {
-      entityName = `${b.personnel.first_name} ${b.personnel.surname}`;
-    } else if (b.visitor) {
-      entityName = `${b.visitor.first_name} ${b.visitor.surname}`;
-    } else if (b.fleet) {
-      entityName = `${b.fleet.fleet_code} (${b.fleet.vehicle_type})`;
-    } else if (b.equipment) {
-      entityName = `${b.equipment.equip_code} (${b.equipment.equipment_type})`;
-    }
-    return { ...b, entity_name: entityName };
-  });
+  const resolvedBadges = (badges as unknown as BadgeWithRelations[]).map(
+    (b) => {
+      let entityName = "Unknown";
+      if (b.personnel) {
+        entityName = `${b.personnel.first_name} ${b.personnel.surname}`;
+      } else if (b.visitor) {
+        entityName = `${b.visitor.first_name} ${b.visitor.surname}`;
+      } else if (b.fleet) {
+        entityName = `${b.fleet.fleet_code} (${b.fleet.vehicle_type})`;
+      } else if (b.equipment) {
+        entityName = `${b.equipment.equip_code} (${b.equipment.equipment_type})`;
+      }
+      return { ...b, entity_name: entityName };
+    },
+  );
 
   return (
     <div className="space-y-6">
@@ -152,6 +152,30 @@ export default async function BadgesPage() {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Pagination */}
+            {totalCount > 0 && (
+              <div className="p-4 border-t border-[var(--border-default)]">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  pageSize={pageSize}
+                  onPageChange={(newPage) => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("page", newPage.toString());
+                    url.searchParams.set("pageSize", pageSize.toString());
+                    window.location.href = url.toString();
+                  }}
+                  onPageSizeChange={(newSize) => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("page", "1");
+                    url.searchParams.set("pageSize", newSize.toString());
+                    window.location.href = url.toString();
+                  }}
+                />
+              </div>
+            )}
           </GlassCard>
         </div>
 
