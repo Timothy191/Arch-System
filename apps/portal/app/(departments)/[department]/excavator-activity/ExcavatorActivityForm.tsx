@@ -9,6 +9,7 @@ import {
   ExcavatorDumperTable,
   DumperAssignmentRow,
 } from "./ExcavatorDumperTable";
+import { toast } from "sonner";
 
 interface ExcavatorMachine {
   id: string;
@@ -195,7 +196,10 @@ export function ExcavatorActivityForm({
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -261,6 +265,7 @@ export function ExcavatorActivityForm({
       }));
       setDumperAssignments([]);
       setErrors({});
+      toast.success("Activity logged successfully");
       setShowSuccessPlus(true);
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
@@ -270,6 +275,7 @@ export function ExcavatorActivityForm({
         err instanceof Error
           ? err.message
           : "Failed to save. Please try again.";
+      toast.error(message);
       setErrors({ submit: message });
     } finally {
       setIsSubmitting(false);
@@ -528,9 +534,6 @@ export function ExcavatorActivityForm({
               >
                 {isSubmitting ? "Saving..." : "Log Activity"}
               </button>
-              {errors.submit && (
-                <p className="text-accent-red text-sm">{errors.submit}</p>
-              )}
             </div>
 
             <p className="text-[var(--text-muted)] text-xs">

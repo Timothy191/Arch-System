@@ -1,8 +1,44 @@
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { MachineOperationsForm } from "./MachineOperationsForm";
-import { MachineOperationsList } from "./MachineOperationsList";
-import { MachineOperationsComplianceWidget } from "./MachineOperationsComplianceWidget";
+
+const MachineOperationsForm = dynamic(
+  () => import("./MachineOperationsForm").then((m) => m.MachineOperationsForm),
+  {
+    loading: () => (
+      <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+    ),
+  },
+);
+
+const MachineOperationsList = dynamic(
+  () => import("./MachineOperationsList").then((m) => m.MachineOperationsList),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl"
+          />
+        ))}
+      </div>
+    ),
+  },
+);
+
+const MachineOperationsComplianceWidget = dynamic(
+  () =>
+    import("./MachineOperationsComplianceWidget").then(
+      (m) => m.MachineOperationsComplianceWidget,
+    ),
+  {
+    loading: () => (
+      <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+    ),
+  },
+);
 
 export default async function MachineOperationsPage({
   params,
@@ -149,29 +185,54 @@ export default async function MachineOperationsPage({
       </div>
 
       {/* Shift Coverage Compliance Widget */}
-      <MachineOperationsComplianceWidget
-        departmentId={deptId}
-        departmentSlug={deptSlug}
-      />
+      <Suspense
+        fallback={
+          <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        }
+      >
+        <MachineOperationsComplianceWidget
+          departmentId={deptId}
+          departmentSlug={deptSlug}
+        />
+      </Suspense>
 
       {/* Add Operation Form */}
-      <MachineOperationsForm
-        departmentId={deptId}
-        machines={machines || []}
-        operators={operators || []}
-        sites={sites || []}
-        todayOperations={todayOperations || []}
-      />
+      <Suspense
+        fallback={
+          <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        }
+      >
+        <MachineOperationsForm
+          departmentId={deptId}
+          machines={machines || []}
+          operators={operators || []}
+          sites={sites || []}
+          todayOperations={todayOperations || []}
+        />
+      </Suspense>
 
       {/* Today's Operations List */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-[var(--text-heading)]">
           Today&apos;s Operations
         </h3>
-        <MachineOperationsList
-          operations={todayOperations || []}
-          todayLoads={todayLoads || []}
-        />
+        <Suspense
+          fallback={
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl"
+                />
+              ))}
+            </div>
+          }
+        >
+          <MachineOperationsList
+            operations={todayOperations || []}
+            todayLoads={todayLoads || []}
+          />
+        </Suspense>
       </div>
     </div>
   );

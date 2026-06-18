@@ -6,8 +6,9 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### New to the Project?
 
-- **[README.md](./README.md)** - Project overview and quick start (5 min read)
-- **[CLAUDE.md](CLAUDE.md)** - Complete technical guide (30 min read)
+- **[docs/ONBOARDING.md](./ONBOARDING.md)** - Step-by-step developer onboarding checklist
+- **[README.md](../README.md)** - Project overview and quick start (5 min read)
+- **[CLAUDE.md](../CLAUDE.md)** - Complete technical guide (30 min read)
 - **[docs/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference

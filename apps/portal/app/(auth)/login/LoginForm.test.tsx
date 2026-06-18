@@ -1,5 +1,6 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { LoginForm } from "./LoginForm";
+import { toast } from "sonner";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
@@ -24,6 +25,13 @@ jest.mock("@repo/ui/Input", () => ({
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
     <input {...props} />
   ),
+}));
+
+jest.mock("sonner", () => ({
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
 }));
 
 jest.mock("@repo/ui/AnimatedButton", () => ({
@@ -142,7 +150,9 @@ describe("LoginForm", () => {
     fireEvent.submit(screen.getByTestId("login-form"));
 
     await waitFor(() => {
-      expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringMatching(/Invalid credentials/i),
+      );
     });
 
     expect(mockPush).not.toHaveBeenCalled();
@@ -164,9 +174,9 @@ describe("LoginForm", () => {
     fireEvent.submit(screen.getByTestId("login-form"));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Network error\. Please try again\./i),
-      ).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith(
+        "Network error. Please try again.",
+      );
     });
   });
 

@@ -198,10 +198,14 @@ export function DozerRollForm({
             {/* Dozer & Site */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">
+                <label
+                  htmlFor="dozer-select"
+                  className="block text-sm text-[var(--text-secondary)]"
+                >
                   Dozer <span className="text-accent-red">*</span>
                 </label>
                 <select
+                  id="dozer-select"
                   value={machineId}
                   onChange={(e) => setMachineId(e.target.value)}
                   className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 transition-colors"
@@ -319,8 +323,15 @@ export function DozerRollForm({
               </div>
             </div>
 
-            {/* Error */}
-            {error && <p className="text-accent-red text-sm">{error}</p>}
+            {error && (
+              <p
+                className="text-accent-red text-sm"
+                role="alert"
+                aria-live="assertive"
+              >
+                {error}
+              </p>
+            )}
 
             {/* Actions */}
             <div className="flex items-center gap-4">

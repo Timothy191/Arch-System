@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { speculativeEmbedShiftLog } from "@/app/actions";
 import { BreakdownControlRoomView } from "@/features/departments/components/engineering/breakdowns/types";
+import { toast } from "sonner";
 
 interface Machine {
   id: string;
@@ -134,7 +135,10 @@ export function EngineeringNotesForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -177,9 +181,11 @@ export function EngineeringNotesForm({
         requiresFollowUp: false,
       });
       setIsTemplatePreFilled(false);
+      toast.success("Engineering issue logged successfully");
 
       router.refresh();
     } catch (err) {
+      toast.error("Failed to save. Please try again.");
       setErrors({ submit: "Failed to save. Please try again." });
     } finally {
       setIsSubmitting(false);
@@ -467,7 +473,6 @@ export function EngineeringNotesForm({
             </span>
           </label>
 
-          {/* Submit */}
           <div className="flex items-center gap-4">
             <button
               type="submit"
@@ -476,9 +481,6 @@ export function EngineeringNotesForm({
             >
               {isSubmitting ? "Saving..." : "Log Issue"}
             </button>
-            {errors.submit && (
-              <p className="text-accent-red text-sm">{errors.submit}</p>
-            )}
           </div>
         </form>
       </GlassCard>

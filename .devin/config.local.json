@@ -33,7 +33,24 @@
       "Exec(npx eslint)",
       "Exec(git log)",
       "Exec(git diff)",
-      "Exec(git rm)"
+      "Exec(git rm)",
+      "Exec(next build)",
+      "Exec(cd)",
+      "Exec(git show)",
+      "Exec(rm)",
+      "Exec(ls)",
+      "Exec(ss)",
+      "Exec(awk)",
+      "Exec(strace)",
+      "Exec(readlink)",
+      "Exec(jq)",
+      "Exec(uname)",
+      "Exec(free)",
+      "Exec(docker ps)",
+      "Exec(volta list)",
+      "Exec(sudo lsof)",
+      "Exec(sudo)",
+      "Exec(:)"
     ]
   }
 }

@@ -52,6 +52,8 @@ export function TrustLogos({ logos }: TrustLogosProps) {
               alt={logo.alt}
               className="h-6 w-auto object-contain"
               loading="lazy"
+              width={96}
+              height={24}
             />
           ))}
         </div>

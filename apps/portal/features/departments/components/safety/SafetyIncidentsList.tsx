@@ -29,14 +29,18 @@ const statusColors: Record<string, string> = {
   closed: "text-[var(--text-secondary)]",
 };
 
+import { EmptyState } from "@repo/ui/EmptyState";
+import { ShieldAlert } from "lucide-react";
+
 export function SafetyIncidentsList({ incidents }: SafetyIncidentsListProps) {
   if (incidents.length === 0) {
     return (
-      <GlassCard className="py-8">
-        <p className="text-[var(--text-secondary)] text-sm text-center">
-          No incidents recorded today
-        </p>
-      </GlassCard>
+      <EmptyState
+        icon={ShieldAlert}
+        title="No Incidents"
+        description="No safety incidents recorded today."
+        className="py-8"
+      />
     );
   }
 

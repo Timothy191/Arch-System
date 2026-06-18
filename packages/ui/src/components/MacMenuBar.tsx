@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
 import { getServiceUrls } from "../lib/urls";
@@ -437,10 +438,12 @@ export function MacMenuBar({
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
           title="WhatsApp Web"
         >
-          <img
+          <Image
             src="/whatsapp-logo.jpeg"
             alt="WhatsApp Logo"
-            className="w-5 h-5 rounded-full object-cover shrink-0"
+            width={20}
+            height={20}
+            className="rounded-full object-cover shrink-0"
           />
         </button>
 
@@ -717,6 +720,7 @@ export function MacMenuBar({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
+                aria-label="Search"
                 className="w-full h-6 pl-7 pr-3 rounded-full bg-black/[0.04] hover:bg-black/[0.07] border border-arch-border-emphasis/75 focus:border-[var(--accent-blue)]/50 focus:bg-black/[0.05] focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] transition-colors"
               />
             </div>

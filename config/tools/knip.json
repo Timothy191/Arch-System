@@ -7,6 +7,7 @@
     "preflight",
     "@repo/eslint-config",
     "@typescript-eslint/parser",
+    "@nx/eslint-plugin",
     // CI/CD tooling
     "bundlesize",
     "wait-on",
@@ -64,7 +65,9 @@
         "lib/observability/metrics.ts",
         "components/ui/PrecisionInput.tsx",
         "features/analytics/components/ReportTemplate.tsx",
-        "lib/ai/tool-dispatch.ts"
+        "lib/ai/tool-dispatch.ts",
+        "hooks/use-form-submit.ts",
+        "lib/errors/utils.ts"
       ]
     },
     "apps/cms": {

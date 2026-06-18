@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useFocusMode } from "@/hooks/useFocusMode";
 
 /**
@@ -169,10 +170,12 @@ export function RouteBackground() {
               className="fixed inset-0 overflow-hidden -z-10"
               aria-hidden="true"
             >
-              <img
+              <Image
                 src="/auth-bg-poster.jpg"
                 alt=""
-                className="w-full h-full object-cover"
+                fill
+                priority
+                className="object-cover"
               />
             </div>
           )}

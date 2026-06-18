@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { EmptyState } from "@repo/ui/EmptyState";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { CloseShiftModal } from "./CloseShiftModal";
@@ -173,9 +174,12 @@ export function ShiftCoverageWidget({
         </div>
 
         {machines.length === 0 ? (
-          <p className="text-[var(--text-muted)] text-sm py-4 text-center">
-            No machines registered
-          </p>
+          <EmptyState
+            icon={Clock}
+            title="No Machines"
+            description="No machines registered for this department."
+            className="py-4"
+          />
         ) : (
           <>
             <p className="text-[var(--text-muted)] text-xs mb-3">

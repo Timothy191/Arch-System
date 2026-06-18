@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AcknowledgeButton } from "@repo/ui/AcknowledgeButton";
+import { EmptyState } from "@repo/ui/EmptyState";
+import { CheckCircle2 } from "lucide-react";
 import { useThrottledState } from "@/hooks/useThrottledState";
 import { trackClientMetric } from "@/lib/observability/client-telemetry";
 
@@ -129,11 +131,12 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
       </div>
 
       {alerts.length === 0 && (
-        <GlassCard>
-          <p className="text-[var(--text-secondary)] text-sm text-center py-8">
-            All systems operational. No active alerts.
-          </p>
-        </GlassCard>
+        <EmptyState
+          icon={CheckCircle2}
+          title="All Systems Operational"
+          description="No active alerts at this time."
+          className="py-8"
+        />
       )}
 
       <div className="space-y-3">

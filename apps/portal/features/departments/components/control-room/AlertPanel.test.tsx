@@ -63,8 +63,9 @@ describe("AlertPanel", () => {
     render(<AlertPanel departmentId="dept-1" />);
 
     await waitFor(() => {
+      expect(screen.getByText("All Systems Operational")).toBeInTheDocument();
       expect(
-        screen.getByText("All systems operational. No active alerts."),
+        screen.getByText("No active alerts at this time."),
       ).toBeInTheDocument();
     });
   });

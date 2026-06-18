@@ -155,3 +155,5 @@
   - `telemetry-chart.tsx`: Replaced hardcoded hex `#3ecf8e` default with CSS variable `var(--accent-green)` for recharts SVG usage.
   - `cyber-button.tsx`: Replaced deprecated `--accent-cyan`, `--accent-blue`, `--accent-alert` with canonical `--accent-mint`, `--accent-electric-blue`, `--accent-red`; replaced hardcoded rgba shadows with `shadow-glow-mint`, `shadow-glow-electric`, and `shadow-md`/`shadow-lg` utilities.
 - **Status**: Completed, type-check and lint pass with 0 new errors.
+
+- **2026-06-17T11:52:06Z**: Added CookieConsent component.

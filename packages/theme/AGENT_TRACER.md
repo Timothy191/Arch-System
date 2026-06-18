@@ -1,5 +1,17 @@
 # Agent Tracer - @repo/theme
 
+## 2026-06-18 - Background Tint Overlay z-index Layering Fix
+
+- **Purpose**: Fix visual layering issue where `.route-bg-tint` overlay was incorrectly positioned at `z-index: 0`, causing potential interference with foreground content and interactive elements.
+- **Root Cause**: The tint overlay had `z-index: 0` (default stacking level) instead of the documented `z-index: -9`. This placed it at the same level as normal content, risking overlap issues with components lacking explicit z-indexes.
+- **Changes**:
+  - `packages/theme/src/css/glass.css`: Changed `.route-bg-tint` from `z-index: 0` to `z-index: -9` (line 1060)
+  - This aligns with the existing comment that states the tint should "sit at z-index -9 (one above the video/fallback)"
+  - Corrected layer stack: videos at -10, tint/focus-scrim at -9, grain at -8, content at 30+
+- **Impact**: Resolves potential layering conflicts where interactive elements could be covered by the semi-transparent tint, and ensures the tint stays in the background decoration layer where it belongs.
+- **Status**: Layering fix applied, matches documented intent.
+- **Next Steps**: None.
+
 ## 2026-06-17 - Root Stylelint and Token Guard Implementation
 
 - **Purpose**: Implement strict Stylelint rules at the workspace root to prevent raw color bypasses of the theme tokens.

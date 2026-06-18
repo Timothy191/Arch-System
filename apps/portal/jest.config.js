@@ -62,6 +62,8 @@ module.exports = {
       "<rootDir>/../../packages/ui/src/components/ui/data-grid.tsx",
     "^@repo/ui/AnimatedList$":
       "<rootDir>/../../packages/ui/src/components/ui/animated-list.tsx",
+    "^@repo/ui/EmptyState$":
+      "<rootDir>/../../packages/ui/src/components/EmptyState.tsx",
     "^@repo/ui/Marquee$":
       "<rootDir>/../../packages/ui/src/components/ui/marquee.tsx",
 

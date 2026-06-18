@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { DelayEntriesForm } from "./DelayEntriesForm";
+import { toast } from "sonner";
 
 interface Machine {
   id: string;
@@ -177,7 +178,10 @@ export function MachineOperationsForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -218,9 +222,11 @@ export function MachineOperationsForm({
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
+      toast.success("Machine operation logged successfully");
       // Refresh page to show new data
       router.refresh();
     } catch (err) {
+      toast.error("Failed to save. Please try again.");
       setErrors({ submit: "Failed to save. Please try again." });
     } finally {
       setIsSubmitting(false);
@@ -403,10 +409,6 @@ export function MachineOperationsForm({
           >
             {isSubmitting ? "Saving..." : "Save Operation"}
           </button>
-
-          {errors.submit && (
-            <p className="text-accent-red text-sm">{errors.submit}</p>
-          )}
         </div>
 
         {/* Help Text */}

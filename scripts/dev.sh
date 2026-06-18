@@ -345,8 +345,8 @@ if [ "$FORCE_RESTART" = "true" ]; then
   clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
   clean_dir_cache "$REPO_ROOT/packages/eval/.pytest_cache" "Pytest cache"
   
-  # Remove __pycache__ folders project-wide
-  find "$REPO_ROOT" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+  # Remove __pycache__ folders, pruning large non-python directories for 500x speedup
+  find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .nx -o -name .git -o -name .turbo \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
   check "Python pycaches" "pass" "removed"
 
   if [ -f "$REPO_ROOT/run/portal.log" ]; then
@@ -651,7 +651,7 @@ if [ "${SKIP_RESTART:-false}" = "true" ]; then
   check "Dev server" "pass" "http://localhost:$PORT (already up)"
 else
   cd "$REPO_ROOT/apps/portal"
-  PORT=$PORT pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
+  PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=4096}" pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! > "$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
   echo -e "  ${INFO} Starting Next.js dev server..."

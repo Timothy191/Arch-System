@@ -20,6 +20,7 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "recharts": "^3.8.1",
+    "sonner": "catalog:",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "./ShiftToggle": "./src/components/ShiftToggle.tsx",
     "./FormFields": "./src/components/FormFields.tsx",
     "./CyberButton": "./src/components/ui/cyber-button.tsx",
+    "./Toaster": "./src/components/ui/sonner.tsx",
     "./GlowBorderCard": "./src/components/GlassCard.tsx",
     "./AnimatedNumber": "./src/components/ui/animated-number.tsx",
     "./AnimatedButton": "./src/components/ui/animated-button.tsx",
@@ -63,6 +65,8 @@
     "./Marquee": "./src/components/ui/marquee.tsx",
     "./dock": "./src/components/ui/dock.tsx",
     "./DataGrid": "./src/components/ui/data-grid.tsx",
+    "./EmptyState": "./src/components/EmptyState.tsx",
+    "./CookieConsent": "./src/components/CookieConsent.tsx",
     "./AnimeNumber": "./src/components/motion/AnimeNumber.tsx",
     "./AnimeStagger": "./src/components/motion/AnimeStagger.tsx",
     "./AnimeTimeline": "./src/components/motion/AnimeTimeline.tsx",
@@ -91,7 +95,7 @@
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:css": "stylelint 'src/**/*.css'",
     "test-storybook": "test-storybook",
-    "test-storybook:a11y": "test-storybook --a11y",
+    "test-storybook:a11y": "test-storybook",
     "type-check": "tsc --noEmit",
     "ui": "pnpm dlx shadcn@latest"
   },

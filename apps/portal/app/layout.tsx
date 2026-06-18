@@ -15,6 +15,7 @@ import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
+import { CookieConsent } from "@repo/ui/CookieConsent";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -46,7 +47,7 @@ const inter = Inter({
   variable: "--font-sans",
   weight: ["400", "500", "600"],
   display: "swap",
-  adjustFontFallback: false,
+  adjustFontFallback: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -54,7 +55,7 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   weight: ["400", "500"],
   display: "swap",
-  adjustFontFallback: false,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -190,6 +191,7 @@ export default function RootLayout({
 
               <CommandBar />
               <ViewportBoundaries />
+              <CookieConsent />
               <Toaster />
 
               {/* Footer landmark - if exists, otherwise contentinfo on body or create footer */}

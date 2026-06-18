@@ -1,9 +1,9 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { useState } from "react";
 import { registerPrinter } from "../actions";
 import { Button } from "@repo/ui/components/ui/button";
+import { toast } from "sonner";
 
 interface RegisterFormProps {
   cupsName: string;
@@ -31,10 +31,7 @@ function SubmitButton() {
 }
 
 export function RegisterPrinterForm(props: RegisterFormProps) {
-  const [error, setError] = useState<string | null>(null);
-
   async function handleSubmit(formData: FormData) {
-    setError(null);
     const cupsName = formData.get("cupsName") as string;
     const name = formData.get("name") as string;
     const model = formData.get("model") as string;
@@ -53,8 +50,9 @@ export function RegisterPrinterForm(props: RegisterFormProps) {
         productId: productId || undefined,
         devicePath: devicePath || undefined,
       });
+      toast.success("Printer registered successfully");
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error ? err.message : "Failed to register printer",
       );
     }
@@ -70,7 +68,6 @@ export function RegisterPrinterForm(props: RegisterFormProps) {
       <input type="hidden" name="productId" value={props.productId ?? ""} />
       <input type="hidden" name="devicePath" value={props.devicePath ?? ""} />
       <SubmitButton />
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
     </form>
   );
 }

@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "devDependencies": {
     "eslint": "catalog:",
-    "eslint-plugin-only-warn": "^1.1.0",
     "typescript": "catalog:"
   },
   "files": [

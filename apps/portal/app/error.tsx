@@ -82,7 +82,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
             className="opacity-80 hover:opacity-100 transition-opacity duration-200"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2" role="alert" aria-live="assertive">
           <h1 className="text-3xl font-medium text-[var(--text-heading)]">
             {title}
           </h1>

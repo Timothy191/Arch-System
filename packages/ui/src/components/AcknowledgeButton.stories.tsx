@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AcknowledgeButton } from "./AcknowledgeButton";
-import React from "react";
 
 const meta: Meta<typeof AcknowledgeButton> = {
   title: "Industrial/AcknowledgeButton",

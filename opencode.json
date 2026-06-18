@@ -1,14 +1,10 @@
 {
-  "$schema": "https://app.kilo.ai/config.json",
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": true,
   "mcp": {
-    "nx-mcp": {
+    "codebase-memory": {
       "type": "local",
-      "command": ["npx", "nx", "mcp"],
-      "enabled": true
-    },
-    "supabase": {
-      "type": "remote",
-      "url": "https://mcp.supabase.com/mcp",
+      "command": ["npx", "-y", "codebase-memory-mcp"],
       "enabled": true
     },
     "context7": {
@@ -21,19 +17,56 @@
       "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
       "enabled": true
     },
+    "inngest": {
+      "type": "remote",
+      "url": "http://127.0.0.1:8288/mcp",
+      "enabled": true
+    },
     "memory": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
       "enabled": true
     },
+    "next-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "next-devtools-mcp@0.3.10"],
+      "enabled": true
+    },
+    "npm-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "@mikusnuz/npm-mcp"],
+      "enabled": true
+    },
+    "nx-mcp": {
+      "type": "local",
+      "command": ["npx", "nx", "mcp"],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@0.0.76"],
+      "enabled": true
+    },
     "postgres": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-postgres", "postgresql://postgres:postgres@localhost:54322/postgres"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:54322/postgres"
+      ],
       "enabled": true
     },
     "redis": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-redis"],
+      "command": [
+        "uvx",
+        "--from",
+        "redis-mcp-server@latest",
+        "redis-mcp-server",
+        "--url",
+        "redis://localhost:6379/0"
+      ],
       "enabled": true
     }
   }

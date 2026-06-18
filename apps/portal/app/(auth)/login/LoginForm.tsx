@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@repo/ui/Input";
 import { AnimatedButton } from "@repo/ui/AnimatedButton";
 import { Eye, EyeOff, Lock } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * Validates whether a redirect path is internal to the application to prevent open redirects.
@@ -74,7 +75,6 @@ export function LoginForm() {
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -107,7 +107,6 @@ export function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setRateLimitCountdown(null);
     setLoading(true);
 
@@ -132,15 +131,15 @@ export function LoginForm() {
             const now = Math.floor(Date.now() / 1000);
             const remaining = Math.max(0, retryTimestamp - now);
             setRateLimitCountdown(remaining);
-            setError("Too many attempts. Please wait before trying again.");
+            toast.error("Too many attempts. Please wait before trying again.");
           } else {
-            setError(
+            toast.error(
               data.error ||
                 "Too many attempts. Please wait before trying again.",
             );
           }
         } else {
-          setError(data.error || "Sign in failed. Please try again.");
+          toast.error(data.error || "Sign in failed. Please try again.");
         }
         setPassword("");
 
@@ -178,7 +177,7 @@ export function LoginForm() {
       router.push(redirectTo);
       router.refresh();
     } catch {
-      setError("Network error. Please try again.");
+      toast.error("Network error. Please try again.");
       setLoading(false);
     }
   }
@@ -212,8 +211,7 @@ export function LoginForm() {
             placeholder="Employee ID or email"
             aria-label="Employee ID / Email"
             autoComplete="username"
-            aria-describedby={error ? "login-error email-hint" : "email-hint"}
-            aria-invalid={error ? "true" : "false"}
+            aria-describedby="email-hint"
             pattern="[a-zA-Z0-9@._-]+"
             title="Enter your employee ID or email address"
           />
@@ -271,8 +269,6 @@ export function LoginForm() {
             placeholder="Enter your password"
             aria-label="Password"
             autoComplete="current-password"
-            aria-describedby={error ? "login-error" : undefined}
-            aria-invalid={error ? "true" : "false"}
           />
           <button
             type="button"
@@ -297,20 +293,15 @@ export function LoginForm() {
             <span>Caps Lock is on</span>
           </div>
         )}
+        {rateLimitCountdown !== null && (
+          <div
+            className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
+            role="alert"
+          >
+            <span>Too many attempts. Try again in {rateLimitCountdown}s</span>
+          </div>
+        )}
       </div>
-
-      {error && (
-        <p
-          id="login-error"
-          className="text-sm text-red-700 bg-red-50/80 px-3 py-2 rounded-md text-left animate-fade-up"
-          role="alert"
-          aria-live="polite"
-        >
-          {rateLimitCountdown !== null
-            ? `Too many attempts. Try again in ${rateLimitCountdown}s`
-            : error}
-        </p>
-      )}
 
       <div className="flex flex-col gap-4">
         <AnimatedButton
@@ -349,13 +340,13 @@ export function LoginForm() {
                 try {
                   const parsedUrl = new URL(ssoUrl);
                   if (!allowedSSODomains.includes(parsedUrl.hostname)) {
-                    setError(
+                    toast.error(
                       "SSO configuration is invalid. Please contact your administrator.",
                     );
                     return;
                   }
                 } catch {
-                  setError(
+                  toast.error(
                     "SSO configuration is invalid. Please contact your administrator.",
                   );
                   return;
@@ -365,7 +356,7 @@ export function LoginForm() {
               window.location.href = ssoUrl;
             } else {
               // Fallback: show error if SSO not configured
-              setError(
+              toast.error(
                 "Single Sign-On is not configured. Please contact your administrator.",
               );
             }
