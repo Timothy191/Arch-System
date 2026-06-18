@@ -106,7 +106,7 @@ jobs:
       # Option 2: Docker/Server Deployment
       - name: Deploy via SSH
         if: vars.DEPLOY_TARGET == 'ssh'
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -167,7 +167,7 @@ jobs:
       # Option 2: On-Premises Server
       - name: Deploy to Production Server
         if: vars.DEPLOY_TARGET == 'ssh'
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -203,7 +203,7 @@ jobs:
 
       - name: Deploy Docker Image
         if: vars.DEPLOY_TARGET == 'docker'
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
