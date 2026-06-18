@@ -203,7 +203,6 @@ show_results() {
     echo -e "  ${BOLD}Overview:${NC}  ${CYAN}http://localhost:3002${NC}"
   fi
   echo -e "  ${BOLD}Redis:${NC}    ${CYAN}redis://localhost:6379${NC}"
-  echo -e "  ${BOLD}Ollama:${NC}   ${CYAN}http://localhost:11434${NC}"
   echo -e "  ${BOLD}Studio:${NC}   ${CYAN}http://localhost:54323${NC}"
   echo -e "  ${BOLD}API:${NC}      ${CYAN}http://localhost:54321${NC}"
   echo
@@ -231,6 +230,37 @@ clean_dir_cache() {
     check "$name" "pass" "freed ${size:-?}"
   else
     check "$name" "skip" "not present"
+  fi
+}
+
+smart_cache_cleanup() {
+  local max_size_mb=500
+  local max_age_days=7
+
+  if [ -d "$REPO_ROOT/.nx/cache" ]; then
+    local cache_size
+    cache_size=$(du -sm "$REPO_ROOT/.nx/cache" 2>/dev/null | cut -f1)
+    if [ -n "$cache_size" ] && [ "$cache_size" -gt "$max_size_mb" ]; then
+      echo "  🧹 Cache size (${cache_size}MB) exceeds limit, cleaning entries older than ${max_age_days} days..."
+      find "$REPO_ROOT/.nx/cache" -type f -mtime +$max_age_days -delete
+      check "Nx cache cleanup" "pass" "removed old entries (${cache_size}MB → cleaned)"
+    else
+      check "Nx cache" "pass" "size acceptable (${cache_size}MB)"
+    fi
+  else
+    check "Nx cache" "skip" "not present"
+  fi
+
+  # Clean Python bytecode (safe operation)
+  if [ -d "$REPO_ROOT" ]; then
+    local pycache_count
+    pycache_count=$(find "$REPO_ROOT" -type d -name "__pycache__" 2>/dev/null | wc -l)
+    if [ "$pycache_count" -gt 0 ]; then
+      find "$REPO_ROOT" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+      check "Python bytecode" "pass" "removed ${pycache_count} __pycache__ directories"
+    else
+      check "Python bytecode" "skip" "no __pycache__ directories"
+    fi
   fi
 }
 
@@ -271,10 +301,12 @@ phase 0 "Pre-flight"
 rm -f "$REPO_ROOT/.dev-status-"*.sh
 check "Temp artifacts" "pass" "cleaned"
 
-# Sync global assets
-if [ -f "$REPO_ROOT/scripts/sync-assets.sh" ]; then
+# Sync global assets (smart sync with checksums)
+if [ -f "$REPO_ROOT/scripts/sync-assets-smart.cjs" ]; then
+  node "$REPO_ROOT/scripts/sync-assets-smart.cjs"
+elif [ -f "$REPO_ROOT/scripts/sync-assets.sh" ]; then
   bash "$REPO_ROOT/scripts/sync-assets.sh"
-  check "Global assets" "pass" "synchronized"
+  check "Global assets" "pass" "synchronized (legacy)"
 else
   check "Global assets" "fail" "sync script missing"
 fi
@@ -327,27 +359,23 @@ if [ "$FORCE_RESTART" = "true" ]; then
     check "Port $PORT cleared" "pass" "already free"
   fi
 
-  # Project-wide Cache Cleanup
+  # Project-wide Cache Cleanup (Smart Cleanup)
   clean_dir_cache "$REPO_ROOT/.kilo" "Agent run cache (.kilo)"
   clean_dir_cache "$REPO_ROOT/.remember" "Agent memory cache (.remember)"
-  clean_dir_cache "$REPO_ROOT/.nx/cache" "Nx cache"
+  smart_cache_cleanup  # Smart Nx cache cleanup + Python bytecode
   clean_dir_cache "$REPO_ROOT/.venv" "Python virtual environment (.venv)"
   clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
-  
+
   if [ -f "$REPO_ROOT/skills-lock.json" ]; then
     rm -f "$REPO_ROOT/skills-lock.json"
     check "skills-lock.json" "pass" "removed"
   fi
-  
+
   clean_dir_cache "$REPO_ROOT/deployment-logs" "Deployment logs directory"
   clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
   clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
   clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
   clean_dir_cache "$REPO_ROOT/packages/eval/.pytest_cache" "Pytest cache"
-  
-  # Remove __pycache__ folders, pruning large non-python directories for 500x speedup
-  find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .nx -o -name .git -o -name .turbo \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-  check "Python pycaches" "pass" "removed"
 
   if [ -f "$REPO_ROOT/run/portal.log" ]; then
     logsize=$(du -sh "$REPO_ROOT/run/portal.log" 2>/dev/null | awk '{print $1}')
@@ -606,27 +634,7 @@ else
     fi
   fi
 
-  # 2c. Ollama — check if available (warn-only, non-blocking)
-  if curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; then
-    OLLAMA_MODELS=$(curl -sf http://localhost:11434/api/tags 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('models',[])))" 2>/dev/null || echo "?")
-    check "Ollama" "pass" "localhost:11434 (${OLLAMA_MODELS} models)"
-  elif curl -sf http://localhost:5243/api/tags > /dev/null 2>&1; then
-    check "Ollama" "pass" "localhost:5243 (mirrored)"
-  else
-    # Try to start via systemd
-    if command -v systemctl > /dev/null 2>&1 && sudo systemctl start ollama 2>/dev/null; then
-      sleep 2
-      if curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; then
-        check "Ollama" "pass" "started via systemd"
-      else
-        check "Ollama" "warn" "systemd start attempted but not responding"
-      fi
-    else
-      check "Ollama" "warn" "not running — AI features unavailable (install: https://ollama.com)"
-    fi
-  fi
-
-  # 2d. Open WebUI — launch if tools compose configuration has it
+  # 2c. Open WebUI — launch if tools compose configuration has it
   # if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
   #   if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "plantcor-open-webui"; then
   #     check "Open WebUI" "pass" "http://localhost:3005"

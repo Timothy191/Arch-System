@@ -1,6 +1,7 @@
 import React from "react";
 import { CloudOff } from "lucide-react";
 import type { Metadata } from "next";
+import ReloadButton from "./ReloadButton";
 
 export const metadata: Metadata = {
   title: "Offline | Arch OS",
@@ -20,12 +21,7 @@ export default function OfflinePage(): React.JSX.Element {
         It looks like you've lost your network connection. Some features of the
         Arch Portal are unavailable until your connection is restored.
       </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="px-6 py-2 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-heading)] rounded-lg font-medium transition-colors border border-[var(--border-subtle)]"
-      >
-        Try Again
-      </button>
+      <ReloadButton />
     </div>
   );
 }

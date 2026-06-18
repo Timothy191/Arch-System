@@ -65,7 +65,6 @@
         "lib/observability/metrics.ts",
         "components/ui/PrecisionInput.tsx",
         "features/analytics/components/ReportTemplate.tsx",
-        "lib/ai/tool-dispatch.ts",
         "hooks/use-form-submit.ts",
         "lib/errors/utils.ts"
       ]

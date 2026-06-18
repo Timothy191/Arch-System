@@ -20,8 +20,8 @@ const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   turbopack: {
-    // AGENT-TRACE: Root restricted to apps/portal to prevent OOM on heavy monorepos
-    root: path.resolve(__dirname),
+    // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled
+    root: workspaceRoot,
   },
   output: enableHeavyPlugins ? "standalone" : undefined,
   env: {

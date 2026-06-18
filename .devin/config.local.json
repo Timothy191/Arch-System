@@ -50,7 +50,12 @@
       "Exec(volta list)",
       "Exec(sudo lsof)",
       "Exec(sudo)",
-      "Exec(:)"
+      "Exec(:)",
+      "Exec(git lfs)",
+      "Exec(git config)",
+      "Exec(chmod)",
+      "Exec(bash)",
+      "Exec(python3)"
     ]
   }
 }

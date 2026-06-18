@@ -356,7 +356,6 @@ DATABASE_URL=postgres://postgres:postgres@127.0.0.1:54322/postgres
 REDIS_URL=redis://localhost:6379
 N8N_URL=http://localhost:5678
 FLOWISE_URL=http://localhost:3001
-OLLAMA_URL=http://localhost:11434
 ```
 
 ### Production Requirements
@@ -596,6 +595,16 @@ The `archive/` directory contains deprecated or one-off scripts that are no long
 
 These scripts are kept in archive rather than deleted to preserve git history and enable restoration if needed.
 
+## 🗑️ Removed Scripts
+
+The following scripts have been removed as redundant or obsolete:
+
+- **`deploy-dev.sh`** - Superseded by `dev.sh` (use `./dev.sh --quick` for minimal startup)
+- **`dev-minimal.sh`** - Superseded by `dev.sh --quick` flag
+- **`dev-warmup.sh`** - Redundant warmup script
+- **`setup-desktop-shortcuts.sh`** - Environment-specific desktop shortcut setup
+- \*\*`docs-generators/generate_video.py` - Removed due to AI-generated content dependencies
+
 **Note**: `ROCKY_LINUX_COMPATIBILITY.md` was moved to `docs/ROCKY_LINUX_COMPATIBILITY.md` as it is documentation, not an executable script.
 
 ## 🔄 Version Requirements
@@ -661,7 +670,7 @@ See `DELAY_TRACKING_TEST_PLAN.md` for full test coverage including:
 
 ---
 
-**Last Updated**: January 27, 2026
-**Script Count**: 14 active scripts
+**Last Updated**: June 18, 2026
+**Script Count**: 15 active scripts (12 shell + 3 Python)
 **Build System**: Nx 22.7.5 (not Turborepo)
-**Removed Scripts**: 7 redundant/stale scripts removed in cleanup (2 archived, 5 previously removed)
+**Removed Scripts**: 5 redundant scripts removed in this cleanup (deploy-dev.sh, dev-minimal.sh, dev-warmup.sh, setup-desktop-shortcuts.sh, docs-generators/generate_video.py)

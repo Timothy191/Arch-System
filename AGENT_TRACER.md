@@ -1,5 +1,38 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-18: Audit and Clean Up Ollama/LM Studio References & Obsolete Docs
+
+### Purpose
+
+Conduct a full-project audit to ensure all Ollama and LM Studio dependencies/references are completely removed. Clean up obsolete and outdated documentation files referencing the discontinued local AI service to prevent broken wiki links and maintain documentation accuracy.
+
+### Changes Made
+
+1. **Obsolete Documentation Removed**:
+   - Deleted [ai-providers.md](file:///home/timothy/Documents/Arch-System/docs/wiki/comparisons/ai-providers.md) (obsolete comparison of AI providers).
+   - Deleted [ai-service.md](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/ai-service.md) (obsolete system description of the discontinued local AI service).
+
+2. **Documentation Cleaned Up**:
+   - Updated [ENVIRONMENT_FILES_GUIDE.md](file:///home/timothy/Documents/Arch-System/docs/ENVIRONMENT_FILES_GUIDE.md) to remove Ollama environment variables (`OLLAMA_URL`, `OLLAMA_EMBED_MODEL`) and troubleshooting references.
+   - Updated [STATUS.md](file:///home/timothy/Documents/Arch-System/docs/wiki/STATUS.md) to remove Ollama from technology stack, deliverables, and next steps.
+   - Updated [index.md](file:///home/timothy/Documents/Arch-System/docs/wiki/index.md) to remove links to obsolete AI/Ollama-related pages.
+   - Updated [project-overview.md](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/project-overview.md) to remove Section 5 (Local Offline AI Architecture) and renumber subsequent sections.
+   - Updated [arch-systems.md](file:///home/timothy/Documents/Arch-System/docs/wiki/entities/arch-systems.md) to remove AI stack definitions, `api/ai` endpoints, and Ollama status references.
+   - Updated [UPDATE_SUMMARY.md](file:///home/timothy/Documents/Arch-System/docs/wiki/UPDATE_SUMMARY.md) to mark deleted AI concept files as `[Deleted]`.
+
+3. **Code/Dependency Verification**:
+   - Verified that no code files, configurations, package dependencies, or docker compose setups contain Ollama or LM Studio references.
+
+### Verification
+
+- Run `pnpm format` to ensure formatting complies with project styles.
+- Run `pnpm quality` to verify all quality gates pass successfully.
+
+### What the Next Agent Should Know
+
+- All active references to local AI inference, Ollama dependencies, and LM Studio are completely removed from the workspace.
+- The embedding cache table (`embedding_cache`) and historic vector schemas (768-dim Nomics) remain in database migrations and schema configurations for potential future caching usage, but all generative execution pathways have been discontinued.
+
 ## 2026-06-18: Resolve Unused Catalog Entry Warning for @modelcontextprotocol/sdk
 
 ### Purpose
@@ -76,3 +109,24 @@ Remove Supabase and Grafana MCP servers that are not needed.
 ### What the Next Agent Should Know
 
 - Both git stale markers have been removed from `opencode.json`. The file now contains 11 MCP entries (down from 13): codebase-memory, context7, github, inngest, memory, next-devtools, npm-mcp, nx-mcp, playwright, postgres, redis.
+
+## 2026-06-18: Resolve MCP Issues & Command Conflicts
+
+### Purpose
+
+Resolve the disconnected `codebase-memory-mcp` server and the command name collision for `/monitor-ci`.
+
+### Changes Made
+
+1. **MCP Fix**:
+   - Identified that `codebase-memory-mcp` was disconnected due to a missing binary at `~/.local/bin/codebase-memory-mcp`.
+   - Created a symlink from the Volta-managed binary to `~/.local/bin/codebase-memory-mcp`.
+   - Verified connection status via `gemini mcp list`.
+2. **Command Conflict Resolution**:
+   - Resolved the collision between the workspace command (`.gemini/commands/monitor-ci.toml`) and the skill command (`.agents/skills/monitor-ci/SKILL.md`).
+   - Renamed `.gemini/commands/monitor-ci.toml` to `.gemini/commands/monitor-ci.toml.bak` to allow the skill-based command to take precedence as `/monitor-ci`.
+
+### What the Next Agent Should Know
+
+- `codebase-memory-mcp` is now connected and available for use (search_graph, trace_path, etc.).
+- The `/monitor-ci` command is now exclusively handled by the `monitor-ci` skill. If customization is needed, modify the skill directly or restore the `.toml` with a different name.

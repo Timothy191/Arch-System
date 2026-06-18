@@ -15,7 +15,6 @@
 - **Frontend:** Next.js 15 (App Router) + React 19.2.6 + TypeScript
 - **Backend:** Supabase (PostgreSQL + Auth + RLS + Read Replicas)
 - **State:** Zustand 5
-- **AI:** Local Ollama (`gemma4:latest` for chat, `nomic-embed-text` for 768-dim embeddings)
 - **Infrastructure:** N8N workflow engine, Payload CMS v3, Docker
 - **Monitoring:** Sentry, Redis cache, WebSocket subscriptions, Highlight session replay, OpenTelemetry
 - **Tools:** Nx 22 + pnpm workspaces
@@ -151,7 +150,7 @@
   - Detection window: 3s→1.5s (responds faster)
   - All 480 existing tests pass, zero regressions
 
-### Phase 5.2: Monorepo & AI Service Localisation ✅
+### Phase 5.2: Monorepo Migration ✅
 
 **Status:** Complete
 **Commits:** 011a577 → HEAD (`f04974e`)
@@ -159,12 +158,6 @@
 **Deliverables:**
 
 - [x] **Nx Migration**: Replaced Turborepo with Nx 22.7.5 to stabilize Jest unit testing runner and environment
-- [x] **Local AI Execution**: Migrated from cloud APIs (Groq, OpenRouter) to locally running Ollama model (`gemma4:latest`) for 100% offline air-gapped readiness
-- [x] **Vector Dimensions**: Transitioned embeddings in `memories` table from 1536-dim (OpenAI) to 768-dim Nomics vectors (`nomic-embed-text`) via migration 058
-- [x] **Embedding Cache**: Added `embedding_cache` database table (user-isolated, text hash-keyed) to store pre-calculated vector embeddings and save local CPU/GPU cycles
-- [x] **LLM-Driven Tool Dispatch**: Implemented intelligent tool dispatch in `tool-dispatch.ts` replacing regex keyword matching, evaluating intent with confidence scores 1-5
-- [x] **Tool Output Caching**: Added LRU cache in `tool-cache.ts` with 5s TTL to prevent database storming during fast user requests
-- [x] **Procedural Memory Removal**: Cleaned up DB schema and code logic (migration 061) to drop the `procedural` memory type, merging its data into semantic memory
 - [x] **Security Hardening**: Hardened `handle_new_user` triggers (ignoring user-supplied metadata roles), locked down employee update self-elevation rules, and added dozer roll authoritativeness constraints (migration 057)
 - [x] **Performance Optimization**: Created `access_control_metrics_jsonb` RPC (migration 055) replacing 22 separate database queries with a single query, and indexed missing FK columns (migration 060)
 - [x] `pnpm quality` fully passing under Nx orchestration
@@ -182,7 +175,7 @@
 | 034–040 | Access control schema updates (visitors/badges), fleet & equipment tables, documents, personnel area, department personality, access logs operator device, production fixes                  |
 | 041–048 | RLS performance indexes, machine configurations, admin data lockdown, access control dashboard, add access_control role, control room archiving, machines site_id, machine report exempt     |
 | 049–054 | Control room dumpers (bin_factor), material type, centralized fleet csv seeding, admin user seed, telemetry webhooks, dozer roll date validation                                             |
-| 055–061 | AC metrics count JSONB RPC, drilling v2 (editable site/delays), security P0 fixes, Ollama embeddings (768-dim), embedding cache, index optimization, drop procedural memory type             |
+| 055–061 | AC metrics count JSONB RPC, drilling v2 (editable site/delays), security P0 fixes, index optimization, drop procedural memory type                                                           |
 
 ### Schema Quality Scores
 
@@ -251,7 +244,6 @@
 - ADR-006: Multi-Provider AI (Superseded)
 - ADR-007: React 19.2.6 Adoption
 - ADR-008: Nx for Monorepo Management (New)
-- ADR-009: Local Ollama for AI Service (New)
 
 **Operational Guides (4):** ✅
 
@@ -262,7 +254,6 @@
 
 **Comparisons (10):** ✅
 
-- AI Providers
 - Testing Frameworks
 - State Management
 - Rich Text Editors
@@ -336,13 +327,11 @@
 - ✅ Production authentication & RLS (61 migrations)
 - ✅ Real-time dashboards & monitoring
 - ✅ Light-only theme (macOS Sonoma palette, design system compliant)
-- ✅ AI service with LangGraph orchestrator + local Ollama chat and embedding execution
 - ✅ Highlight + OTEL observability (session replay, server tracing)
 - ✅ Inngest background jobs + Novu notifications
 - ✅ QR access control with full dashboard & metrics RPC
 - ✅ Fleet & equipment tracking (access-control domain)
 - ✅ Documents (word-processing with storage bucket + version history)
-- ✅ Department AI personalities (SOUL.md per department)
 - ✅ Machine configurations (per-department operational setpoints)
 - ✅ N8N workflow automation
 - ✅ Style Dictionary token pipeline
@@ -372,13 +361,13 @@ From `project-comprehensive-report.md` §9 — 5 priority actions:
 
 #### 1. 🟢 On-Premises Server Setup & Cockpit `[HIGH]` — 1–2 days
 
-Provision the mining site server and deploy the full stack via `./scripts/deploy.sh local`. The local dev environment is already production-identical and local Ollama is fully wired for offline execution.
+Provision the mining site server and deploy the full stack via `./scripts/deploy.sh local`. The local dev environment is already production-identical.
 
 - [ ] Provision Linux server (Ubuntu 22.04 / RHEL 9) at mining site
 - [ ] Install Cockpit (`port 9090`) for web-based server management
 - [ ] Configure Docker Compose with all services
 - [ ] Test offline-capable deployment workflow
-- [ ] Validate all 8 departments, local AI chat, n8n, Grafana
+- [ ] Validate all 8 departments, n8n, Grafana
 
 📖 [[on-premises-deployment|Full guide: On-Premises Deployment & Cockpit]]
 
@@ -468,7 +457,6 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 - ~~Read replica client~~ → Done (@repo/supabase)
 - ~~Admin data API security~~ → Done (migration 043, superadmin lockdown)
 - ~~Vulnerability cleanup~~ → Done (migration 057, ignore client role metadata)
-- ~~Offline AI execution~~ → Done (local Ollama gemma4 & nomic-embed-text)
 - ~~Test runner stabilization~~ → Done (migrated from Turborepo to Nx)
 
 ### Remaining Future Work
@@ -500,6 +488,6 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 
 ## Summary
 
-**Arch-Systems (Plantcor)** has completed Phase 5.2 with a production-ready multi-departmental portal, full light-theme UI, local Ollama AI execution, Highlight + OTEL observability, Inngest background jobs, QR access control, 61 database migrations, and a passing `pnpm quality` gate. Phase 5.2 added the migration to Nx build orchestration and local AI model integration, resolving test-runner instability and enabling 100% offline air-gapped readiness. The project is well-documented, secure, and ready for on-premises deployment.
+**Arch-Systems (Plantcor)** has completed Phase 5.2 with a production-ready multi-departmental portal, full light-theme UI, Highlight + OTEL observability, Inngest background jobs, QR access control, 61 database migrations, and a passing `pnpm quality` gate. Phase 5.2 added the migration to Nx build orchestration, resolving test-runner instability. The project is well-documented, secure, and ready for on-premises deployment.
 
-**Project Health:** 🟢 **Excellent** — Phase 5.2 complete, 61 migrations, full local AI execution, Nx build system, `pnpm quality` passing.
+**Project Health:** 🟢 **Excellent** — Phase 5.2 complete, 61 migrations, Nx build system, `pnpm quality` passing.

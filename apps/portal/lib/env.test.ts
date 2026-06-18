@@ -35,8 +35,6 @@ describe("env validation", () => {
     "PORT",
     "NODE_ENV",
     "REDIS_URL",
-    "OLLAMA_URL",
-    "OLLAMA_DEFAULT_MODEL",
     "OPENAI_API_KEY",
     "OPENAI_MODEL",
     "ENABLE_LOAD_ADAPTIVE_TEST",
@@ -91,8 +89,6 @@ describe("env validation", () => {
     resetEnv();
 
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe("http://127.0.0.1:54321");
-    expect(env.OLLAMA_URL).toBe("http://localhost:11434");
-    expect(env.OLLAMA_DEFAULT_MODEL).toBe("gemma4:latest");
     expect(env.PORT).toBe(3000);
     expect(env.NODE_ENV).toBe("development");
     expect(env.OTEL_SERVICE_NAME).toBe("arch-portal");

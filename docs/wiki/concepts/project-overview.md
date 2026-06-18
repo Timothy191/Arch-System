@@ -115,43 +115,7 @@ Previously managed under Turborepo, the monorepo was migrated to **Nx** to:
 
 ---
 
-## 5. Local Offline AI Architecture
-
-A core highlight of the portal is the **local, air-gapped AI agent infrastructure**, designed to run completely offline on-site.
-
-```
-┌────────────────────────────────────────────────────────┐
-│                      LOCAL AI STACK                    │
-├────────────────────────────────────────────────────────┤
-│                                                        │
-│  [User Query] ──> [Portal API /api/ai]                  │
-│                          │                             │
-│                          ▼                             │
-│               [LangGraph Orchestrator]                 │
-│                 (gemma4:latest @ 11434)                │
-│                 │                     │                │
-│                 ▼                     ▼                │
-│        [Tool Dispatcher]      [Vector Memory]          │
-│       (Confidence Gated)     (pgvector + Nomic)        │
-│                                                        │
-│  Cache Systems:                                        │
-│  - Embedding Cache (768-dim Nomics in DB)               │
-│  - Tool Output Cache (In-memory LRU, 5s TTL)           │
-│                                                        │
-└────────────────────────────────────────────────────────┘
-```
-
-### Key Decisions & Optimization
-
-- **Local Ollama Inference**: All generative tasks utilize a local Ollama instance running the `gemma4:latest` model.
-- **768-Dim Nomic Embeddings**: Swapped out cloud-based OpenAI embedding models for local `nomic-embed-text` (Migration 058). This reduced database vector dimensions from 1536 to 768, cutting database index overhead and speeding up cosine distance searches in `pgvector`.
-- **LLM-Driven Tool Dispatching**: Rather than relying on fragile regex patterns, queries are evaluated by the local LLM to determine tool requirements. A confidence score (1-5 scale) is calculated. If the LLM has a confidence score of less than 3, the orchestrator halts execution to ask the user for clarification, preventing runaway token loops.
-- **Persistent Embedding Cache**: A database table `embedding_cache` stores text hashes mapping to their 768-dim vectors. Duplicate text inputs bypass local LLM compute, retrieving pre-generated vectors instantly.
-- **Tool Output Caching**: An in-memory LRU cache in `apps/portal/lib/ai/tool-cache.ts` deduplicates identical tool calls made during a user's session with a 5-second TTL.
-
----
-
-## 6. Observability & Telemetry
+## 5. Observability & Telemetry
 
 High-availability mining operations require telemetry to detect silent failures and regressions.
 
@@ -161,7 +125,7 @@ High-availability mining operations require telemetry to detect silent failures 
 
 ---
 
-## 7. Development & Quality Check workflow
+## 6. Development & Quality Check workflow
 
 Developers are subject to a strict quality check gate to ensure the system remains production-ready and deployable at all times.
 
@@ -183,12 +147,12 @@ Before pushing changes or staging deployments, developers must pass the full ver
 
 ---
 
-## 8. Deployment Stack
+## 7. Deployment Stack
 
 On-premises deployments target **Rocky Linux / RHEL** architectures.
 
 - **Cockpit**: Installed on the local host to provide web-based system administration, service logs, and container monitoring.
-- **Docker Compose**: Orchestrates target stacks (Portal, CMS, Redis caching, Supabase database, Ollama, Grafana).
+- **Docker Compose**: Orchestrates target stacks (Portal, CMS, Redis caching, Supabase database, Grafana).
 - **systemd & firewalld**: Managed system services and local port restrictions configured via `./scripts/setup-production-environment.sh` to ensure high uptime and security.
 
 ---
@@ -202,4 +166,3 @@ On-premises deployments target **Rocky Linux / RHEL** architectures.
 - **[DEPLOYMENT.md](file:///home/timothy/Documents/Arch-System/DEPLOYMENT.md)** — Local and production deploy instructions.
 - **[nx-monorepo](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/nx-monorepo.md)** — Workspace and build configs.
 - **[supabase-local-dev](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/supabase-local-dev.md)** — Supabase local configuration.
-- **[ai-service](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/ai-service.md)** — Ollama and local LLM configurations.

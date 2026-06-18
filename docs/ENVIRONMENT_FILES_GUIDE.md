@@ -61,7 +61,7 @@ Arch-Mk2/
 
 - Server configuration (PORT)
 - Supabase configuration (URLs, keys, database URLs)
-- AI/LLM configuration (OpenAI, Together, Ollama)
+- AI/LLM configuration (OpenAI, Together) [Deprecated]
 - Monitoring/Observability (Sentry, OpenTelemetry)
 - Tools configuration (n8n, Flowise, FUXA, ClickHouse)
 - Redis configuration
@@ -118,7 +118,6 @@ Arch-Mk2/
 
 - External tools configuration (n8n, Flowise, FUXA)
 - Supabase configuration (URLs, keys)
-- Ollama configuration for AI features
 - Redis configuration for caching and rate limiting
 - Sentry configuration for error monitoring
 - Hardware scanner configuration
@@ -213,7 +212,6 @@ Arch-Mk2/
 Start → Copy apps/portal/.env.example to apps/portal/.env
      → Fill in Supabase credentials (local: http://127.0.0.1:54321)
      → Add tool URLs if using external tools
-     → Configure Ollama URL for AI features
      → Set Redis URL for caching
      → (Optional) Configure Sentry for error tracking
 ```
@@ -271,7 +269,7 @@ Start → Use synthetic values from GitHub Secrets
 
 ### Medium Priority (Required for Full Features)
 
-- **AI Configuration**: Ollama URL, optional OpenAI/Together API keys
+- **AI Configuration**: Optional OpenAI/Together API keys [Deprecated]
 - **Redis Configuration**: URL for caching and rate limiting
 - **Monitoring**: Sentry DSN for error tracking
 - **Tools Configuration**: n8n, Flowise, FUXA for extended features
@@ -288,10 +286,6 @@ Start → Use synthetic values from GitHub Secrets
 ### Issue: "Database connection failed"
 
 **Solution**: Check Supabase is running, verify DATABASE_URL and credentials in .env
-
-### Issue: "AI features not working"
-
-**Solution**: Verify OLLAMA_URL points to running Ollama instance, check Ollama is accessible
 
 ### Issue: "Rate limiting errors"
 
@@ -318,12 +312,10 @@ Start → Use synthetic values from GitHub Secrets
 - `DATABASE_POOLER_URL`: Connection pooler URL (production recommended)
 - `SUPABASE_READ_REPLICA_URL`: Read replica URL (optional, for performance)
 
-### AI/LLM Variables
+### AI/LLM Variables [Deprecated]
 
-- `OLLAMA_URL`: Local Ollama instance URL (default: <http://localhost:5243>)
-- `OLLAMA_EMBED_MODEL`: Embedding model for AI memory (default: nomic-embed-text:latest)
-- `OPENAI_API_KEY`: OpenAI API key (optional, for additional AI features)
-- `TOGETHER_API_KEY`: Together AI API key (optional, for additional AI features)
+- `OPENAI_API_KEY`: OpenAI API key (optional)
+- `TOGETHER_API_KEY`: Together AI API key (optional)
 
 ### Monitoring Variables
 

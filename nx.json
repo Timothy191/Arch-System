@@ -81,7 +81,8 @@
         "!{projectRoot}/.next/cache/**",
         "{projectRoot}/dist/**"
       ],
-      "cache": true
+      "cache": true,
+      "parallel": true
     },
     "db:pull": {
       "outputs": ["{projectRoot}/packages/supabase/migrations/**"],

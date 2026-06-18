@@ -2,8 +2,8 @@
 
 > Content catalog for the Arch-Systems (Plantcor) company knowledge base.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-06-15 | Total pages: 63 (17 concepts + 9 entities + 10 comparisons + 9 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
-> Current project version: Phase 5.2 (Localisation & Nx) | Next.js 15 | React 19.2.6 | Supabase | Local Ollama AI (gemma4) | Light Theme | 61 Migrations
+> Last updated: 2026-06-18 | Total pages: 60 (16 concepts + 9 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
+> Current project version: Phase 5.2 (Localisation & Nx) | Next.js 15 | React 19.2.6 | Supabase | Light Theme | 61 Migrations
 
 ## Quick Reference
 
@@ -17,7 +17,6 @@
 | Add UI components             | [[design-system]]                                     |
 | Work with database            | [[database-schema]] → [[rls-policy]]                  |
 | Implement auth                | [[auth-middleware]]                                   |
-| Use AI service                | [[ai-service]]                                        |
 | Set up external tools         | [[external-tools]]                                    |
 | Monitor/debug                 | [[monitoring-error-tracking]]                         |
 | Run tests/eval                | [[deepeval-integration]]                              |
@@ -55,7 +54,7 @@
 - [[project-overview|Project Overview & Tech Stack]] — Authoritative entry point for system architecture, the technology stack, design decisions, and development workflow
 - [[nx-monorepo|Nx Monorepo Structure]] — Workspace layout, target configuration defaults, and build commands (migrated from Turborepo)
 - [[supabase-local-dev|Supabase Local Development]] — Local DB, auth, and storage setup with remote sync
-- [[portal-app-architecture|Portal App Architecture]] — Next.js 15 App Router, RSC, server actions, local Ollama AI orchestrator state machine, and feature organization
+- [[portal-app-architecture|Portal App Architecture]] — Next.js 15 App Router, RSC, server actions, and feature organization
 
 #### Architecture Decision Records (ADRs)
 
@@ -67,7 +66,6 @@
 - [[adr-006-multi-provider-ai|ADR-006 (Superseded)]] — Multi-provider AI with failover
 - [[adr-007-react-19-adoption|ADR-007]] — React 19 adoption strategy
 - [[adr-008-nx-monorepo|ADR-008]] — Nx for Monorepo Management (supersedes ADR-003)
-- [[adr-009-local-ollama-ai|ADR-009]] — Local Ollama for AI Service (supersedes ADR-006)
 
 #### Operational Guides
 
@@ -88,7 +86,6 @@
 
 - [[department-features|Department Features]] — Control room, engineering, safety, satellite monitoring capabilities
 - [[external-tools|External Tools Integration]] — n8n, Flowise, Univer embedding, Inngest background jobs, Novu notifications, health checks
-- [[ai-service|AI Service]] — Local Ollama integration, LLM-driven tool dispatch, persistent embedding cache, tool output cache, pgvector memories, Redis rate limiters
 - [[monitoring-error-tracking|Monitoring and Error Tracking]] — Sentry, Highlight session replay, OpenTelemetry tracing, Prometheus/Grafana, real-time subscriptions, satellite monitoring API
 - [[analytics-reporting|Advanced Analytics & Reporting]] — Executive KPI dashboard, PDF/Excel export, trend analysis, ML predictive maintenance
 
@@ -106,9 +103,8 @@
 - [[gittree/conceptual-code-graphs|Conceptual Code Graphs]] — ASTs, CFGs, CPGs for static analysis and security scanning
 - [[gittree/graph-data-structures|Graph Data Structures]] — Algorithms (BFS, DFS, Dijkstra), adjacency representations
 
-## Comparisons (10)
+## Comparisons (9)
 
-- [[ai-providers|AI Provider Comparison]] — Ollama vs Groq vs OpenRouter for multi-provider and local execution
 - [[testing-frameworks|Testing Framework Comparison]] — Jest vs Vitest vs Node.js Test Runner for React 19
 - [[state-management|State Management Comparison]] — Zustand vs Redux Toolkit vs React Context for RSC architecture
 - [[rich-text-editors|Rich Text Editor Comparison]] — Novel vs Tiptap vs Slate.js vs Lexical

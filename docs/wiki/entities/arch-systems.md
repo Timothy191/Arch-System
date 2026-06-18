@@ -20,7 +20,6 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 - **Testing:** Jest 30 (unit), Playwright 1.60 (E2E)
 - **3D:** @react-three/fiber 8 + @react-three/drei 9
 - **Maps:** react-map-gl 8 + maplibre-gl 5
-- **AI:** Local Ollama (`gemma4:latest` for chat, `nomic-embed-text` for 768-dim embeddings)
 - **State:** Zustand 5
 - **Observability:** Highlight.io (session replay, server tracing) + OpenTelemetry
 
@@ -53,7 +52,6 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 - `(hub)/` → Department grid + productivity tools
 - `(departments)/[department]/` → Dynamic department routes with layouts
 - `admin/` → Admin panel with role-based access
-- `api/ai/` → LLM agent graph execution endpoint
 
 ## Department Routes
 
@@ -81,10 +79,10 @@ Specialized routes:
 - React version divergence: `apps/overview` uses React 18, `apps/portal` uses React 19 — no cross-app component sharing
 - All Tailwind config originates from `@repo/theme` — never add theme values directly in portal
 
-## Current Status (Nx & Ollama Era)
+## Current Status (Nx Era)
 
 - **Previous milestones:** Foundation → Phase 2 (Safety & Agentic Loop) → Phase 3 (Advanced Agent Infrastructure) → Phase 5.1 (Performance) — all complete.
-- **Nx & Ollama Migration complete:** Migrated workspace task runner to Nx to stabilize Jest unit tests and partition caches. Swapped cloud-based AI endpoints (Groq, OpenRouter) with local Ollama (`gemma4`) to support 100% offline air-gapped deployments, migrating embeddings to 768-dim Nomics vectors with a persistent, user-isolated embedding cache.
+- **Nx Migration complete:** Migrated workspace task runner to Nx to stabilize Jest unit tests and partition caches. Removed generative AI features and Ollama service from deployment stack.
 
 ### Current Metrics
 

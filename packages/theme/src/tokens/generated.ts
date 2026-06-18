@@ -57,11 +57,6 @@ export const tokens = {
       amberHover: "var(--accent-amber-hover)",
       amberSubtle: "var(--accent-amber-subtle)",
       amberBorder: "var(--accent-amber-border)",
-      cyan: "var(--accent-cyan)",
-      indigo: "var(--accent-indigo)",
-      violet: "var(--accent-violet)",
-      alert: "var(--accent-alert)",
-      emerald: "var(--accent-emerald)",
       foreground: "var(--accent-foreground)",
     },
     mac: {

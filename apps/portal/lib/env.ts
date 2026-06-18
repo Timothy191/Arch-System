@@ -41,8 +41,6 @@ const envSchema = z.object({
   REDIS_URL: z.string().optional(),
 
   // ── LLM / AI providers (optional) ──────────────────────────────────
-  OLLAMA_URL: z.string().url().default("http://localhost:11434"),
-  OLLAMA_DEFAULT_MODEL: z.string().default("gemma4:latest"),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().optional(),
 
@@ -127,8 +125,6 @@ function parseEnv(): EnvVars {
     PORT: process.env.PORT,
     NODE_ENV: process.env.NODE_ENV,
     REDIS_URL: process.env.REDIS_URL,
-    OLLAMA_URL: process.env.OLLAMA_URL,
-    OLLAMA_DEFAULT_MODEL: process.env.OLLAMA_DEFAULT_MODEL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     SENTRY_ORG: process.env.SENTRY_ORG,

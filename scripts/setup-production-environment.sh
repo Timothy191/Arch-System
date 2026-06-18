@@ -718,7 +718,7 @@ print_summary() {
   echo -e "  3. Access the portal at: ${CYAN}http://localhost:3000${NC}"
 
   echo -e "\nLocal services recommendations:"
-  echo -e "  • Flowise, Supabase, n8n, Ollama, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
+  echo -e "  • Flowise, Supabase, n8n, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
   echo -e "  • Open required ports (3000, 3001, 5678, 5243, 6333, 8123, 9090, 3001) in your firewall for internal access."
   echo -e "  • Confirm .env.tools has correct credentials for services (N8N, FLOWISE, REDIS_PASSWORD)."
   echo -e "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."

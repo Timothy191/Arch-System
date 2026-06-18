@@ -81,8 +81,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Cards", value: "0" },
     trend: [0, 0, 0, 0, 0, 0, 0, 0],
     actions: [
-      { label: "Print Cards", href: "/access-card-actions" },
-      { label: "QR Codes", href: "/access-card-actions" },
+      { label: "Print Cards", href: "/access-card-actions/print-cards" },
+      { label: "QR Codes", href: "/access-card-actions/qr-codes" },
     ],
   },
   {
@@ -130,7 +130,7 @@ export const DEPARTMENTS: Department[] = [
     trend: [445, 446, 447, 448, 449, 450, 450, 450],
     actions: [
       { label: "Daily Log", href: "/safety/daily-log" },
-      { label: "Incidents", href: "/safety/incidents" },
+      { label: "Incidents", href: "/safety/daily-log" },
     ],
   },
   {

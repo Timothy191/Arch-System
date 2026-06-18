@@ -2,10 +2,14 @@ import * as Sentry from "@sentry/nextjs";
 
 export async function register() {
   // OpenTelemetry NodeSDK — dynamic import to prevent webpack from bundling native gRPC modules
-  if (
+  // Conditional initialization: only enable in production or when explicitly enabled
+  const shouldInstrumentOtel =
     process.env.NEXT_RUNTIME === "nodejs" &&
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-  ) {
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT &&
+    (process.env.OTEL_ENABLED === "true" ||
+      process.env.NODE_ENV === "production");
+
+  if (shouldInstrumentOtel) {
     const { NodeSDK } = await import("@opentelemetry/sdk-node");
     const { getNodeAutoInstrumentations } = await import(
       "@opentelemetry/auto-instrumentations-node"

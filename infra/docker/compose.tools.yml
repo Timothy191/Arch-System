@@ -260,26 +260,6 @@ services:
     networks:
       - plantcor-tools
 
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: plantcor-open-webui
-    restart: unless-stopped
-    ports:
-      - "3005:8080"
-    environment:
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    volumes:
-      - open-webui_data:/app/backend/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      interval: 15s
-      timeout: 10s
-      retries: 3
-    networks:
-      - plantcor-tools
-
 volumes:
   flowise_data:
   redis_data:
@@ -288,7 +268,6 @@ volumes:
   prometheus_data:
   fuxa_data:
   clickhouse_data:
-  open-webui_data:
 
 networks:
   plantcor-tools:

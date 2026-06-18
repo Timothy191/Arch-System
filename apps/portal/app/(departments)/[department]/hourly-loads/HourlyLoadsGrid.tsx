@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import dynamic from "next/dynamic";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
@@ -11,11 +10,7 @@ import { Download, Upload } from "lucide-react";
 import { logError } from "@/lib/errors/error-logger";
 import { updateMachineSite } from "./actions";
 import { trackClientMetric } from "@/lib/observability/client-telemetry";
-
-const DataGrid = dynamic(
-  () => import("@repo/ui/DataGrid").then((m) => m.DataGrid),
-  { ssr: false },
-);
+import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
 
 interface Machine {
   id: string;

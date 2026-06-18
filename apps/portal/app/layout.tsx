@@ -33,10 +33,8 @@ const HeaderWidgets = dynamic(
   },
 );
 
-const CommandBar = dynamic(
-  () =>
-    import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
-  { ssr: false },
+const CommandBar = dynamic(() =>
+  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
 );
 import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
 import { RouteBackground } from "@/components/RouteBackground";
