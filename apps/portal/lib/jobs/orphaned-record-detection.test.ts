@@ -67,8 +67,16 @@ describe("Orphaned Record Detection Job", () => {
       then: jest.fn().mockImplementation((callback) => callback({ data: [], error: null })),
     });
 
+    // Provide mock step and event to avoid destructuring errors if implementation changes
+    const mockContext = {
+      event: {},
+      step: {
+        run: jest.fn((id, fn) => fn()),
+      },
+    };
+
     // orphanedRecordDetectionFn should be the handler itself because of our mock
-    await (orphanedRecordDetectionFn as any)();
+    await (orphanedRecordDetectionFn as any)(mockContext);
 
     // After optimization, it should be called 1 time for all records in the batch
     expect(insertSpy).toHaveBeenCalledTimes(1);
