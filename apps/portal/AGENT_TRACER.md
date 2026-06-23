@@ -1221,6 +1221,34 @@ When mobile toolbar is visible:
 - If you insist on a min-height, use `100svh` (not `100vh`) to avoid forcing overflow
 - This correction applies to both the CSS classes and inline Tailwind classes
 
+## 2026-06-23: Orphaned Record Detection Job Optimization
+
+### Purpose
+
+Optimize the `orphaned-record-detection` job by replacing multiple N+1 queries with bulk inserts.
+
+### Changes Made
+
+1. **`apps/portal/lib/jobs/orphaned-record-detection.ts`**:
+   - Refactored the job to collect orphaned records and insert them into the `data_integrity_issues` table using a single bulk `insert()` call per check, instead of iterating and inserting each record individually.
+   - Applied this optimization to all four checks:
+     - Machine operations without valid machine_id
+     - Hourly loads without matching machine operation
+     - Machine operations without valid operator
+     - Shift status without valid department
+
+### Performance Impact
+
+- **Before**: N inserts for N orphaned records (N+1 issue).
+- **After**: 1 bulk insert per check regardless of the number of orphaned records found.
+- **Result**: Significant reduction in database roundtrips and improved job execution time, especially when many integrity issues are detected.
+
+### Verification
+
+- Created a baseline test in `apps/portal/lib/jobs/orphaned-record-detection.test.ts` to verify the reduction in `.insert()` calls.
+- Verified that 2 orphaned records now result in only 1 call to the Supabase `insert` method with an array of 2 records.
+- All existing portal tests pass.
+
 ---
 
 ## 2026-06-16: Video Background Window Resizing Fix (Container Pattern + Mobile Support)
