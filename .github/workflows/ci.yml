@@ -183,6 +183,6 @@ jobs:
         run: |
           npx serve@latest storybook-static -l 6006 &
           npx wait-on@latest http://localhost:6006 --timeout 60000
-          pnpm test:a11y --url http://localhost:6006
+          pnpm test-storybook:a11y --url http://localhost:6006
         working-directory: packages/ui
 
