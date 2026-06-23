@@ -1,0 +1,6 @@
+## 2026-06-18 - [Secure Dual-Layer Caching Pattern]
+**Learning:** When implementing caching (Next.js Data Cache + Redis) for Supabase-backed Server Components, the cache key must include the `userId` to prevent unauthorized data exposure (Information Leakage) between users with different RLS-based access levels. Additionally, `cookieList` must be explicitly passed to the Supabase client when it's instantiated inside a cached function to avoid "headers/cookies called inside cache" errors.
+**Action:** Always include `userId` in cache keys for departmental dashboards and pass `cookieList` from the page component down to the cached data fetchers.
+## 2026-06-18 - [CI Dependency & Script Fixes]
+**Learning:** In a monorepo with strict dependency management (syncpack), ensuring all workspace packages use compatible version ranges for core framework dependencies (like Next.js) is critical for CI pass. Additionally, CI workflows should avoid hardcoding pnpm versions that may conflict with the `packageManager` field in `package.json`. Correction of script names in CI (e.g., `test-storybook:a11y`) and using `@latest` for volatile CLI tools ensures environment consistency.
+**Action:** Run `pnpm deps:fix` when dependency mismatches occur and remove explicit pnpm versions from GitHub Actions to let them auto-detect the repo's preferred version.
