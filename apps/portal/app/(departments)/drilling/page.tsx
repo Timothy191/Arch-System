@@ -2,72 +2,118 @@ import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { Drill, Clock, AlertTriangle } from "lucide-react";
+import { cookies } from "next/headers";
+import { withCache } from "@/lib/cache-utils";
+import { cachedRSC } from "@/lib/server-cache";
+import { CacheCategory } from "@repo/redis";
 
 export const dynamic = "force-dynamic";
 
-async function getDrillingDashboardData(deptId: string, today: string) {
-  const db = await createReadReplicaClient();
+async function getDrillingDashboardData(
+  deptId: string,
+  today: string,
+  userId: string,
+  cookieList: Array<{ name: string; value: string }>,
+) {
+  return cachedRSC(
+    ["drilling", "dashboard", deptId, today, userId],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
 
-  const [
-    { data: todayLogs },
-    { count: machineCount },
-    { data: todayOperations },
-    { data: todayDelays },
-  ] = await Promise.all([
-    db
-      .from("daily_logs")
-      .select("id, log_date, shift")
-      .eq("department_id", deptId)
-      .eq("log_date", today)
-      .order("shift"),
-    db
-      .from("machines")
-      .select("*", { count: "exact", head: true })
-      .eq("machine_type", "Drill Rig")
-      .eq("active", true),
-    db
-      .from("drill_operations")
-      .select("total_hours, status")
-      .eq("department_id", deptId)
-      .eq("operation_date", today),
-    db
-      .from("operational_delays")
-      .select("delay_minutes, status")
-      .eq("department_id", deptId)
-      .eq("delay_date", today),
-  ]);
+          const [
+            { data: todayLogs },
+            { count: machineCount },
+            { data: todayOperations },
+            { data: todayDelays },
+          ] = await Promise.all([
+            db
+              .from("daily_logs")
+              .select("id, log_date, shift")
+              .eq("department_id", deptId)
+              .eq("log_date", today)
+              .order("shift"),
+            db
+              .from("machines")
+              .select("*", { count: "exact", head: true })
+              .eq("machine_type", "Drill Rig")
+              .eq("active", true),
+            db
+              .from("drill_operations")
+              .select("total_hours, status")
+              .eq("department_id", deptId)
+              .eq("operation_date", today),
+            db
+              .from("operational_delays")
+              .select("delay_minutes, status")
+              .eq("department_id", deptId)
+              .eq("delay_date", today),
+          ]);
 
-  const shiftCount = todayLogs?.length ?? 0;
-  const latestShift = todayLogs?.[todayLogs.length - 1]?.shift;
+          const shiftCount = todayLogs?.length ?? 0;
+          const latestShift = todayLogs?.[todayLogs.length - 1]?.shift;
 
-  const totalHours =
-    todayOperations?.reduce(
-      (sum, op) => sum + (Number(op.total_hours) || 0),
-      0,
-    ) || 0;
+          const totalHours =
+            todayOperations?.reduce(
+              (sum, op) => sum + (Number(op.total_hours) || 0),
+              0,
+            ) || 0;
 
-  const activeOps =
-    todayOperations?.filter((op) => op.status === "active").length || 0;
+          const activeOps =
+            todayOperations?.filter((op) => op.status === "active").length || 0;
 
-  const delayCount = todayDelays?.length || 0;
-  const delayMinutes =
-    todayDelays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
+          const delayCount = todayDelays?.length || 0;
+          const delayMinutes =
+            todayDelays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) ||
+            0;
 
-  return {
-    shiftCount,
-    latestShift,
-    machineCount: machineCount ?? 0,
-    totalHours,
-    activeOps,
-    delayCount,
-    delayMinutes,
-  };
+          return {
+            shiftCount,
+            latestShift,
+            machineCount: machineCount ?? 0,
+            totalHours,
+            activeOps,
+            delayCount,
+            delayMinutes,
+          };
+        },
+        {
+          category: CacheCategory.METRICS,
+          keyParts: ["drilling", "dashboard", deptId, today, userId],
+          tags: [
+            "table:daily_logs",
+            "table:machines",
+            "table:drill_operations",
+            "table:operational_delays",
+          ],
+        },
+      );
+    },
+    {
+      revalidate: 300,
+      tags: [
+        "table:daily_logs",
+        "table:machines",
+        "table:drill_operations",
+        "table:operational_delays",
+      ],
+    },
+  );
 }
 
 export default async function DrillingDashboardPage() {
-  const { deptId, today } = await getDepartmentContext({
+  const { deptId, today, supabase } = await getDepartmentContext({
     department: "drilling",
   });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id ?? "anonymous";
+
+  const cookieStore = await cookies();
+  const cookieList = cookieStore.getAll();
 
   const {
     shiftCount,
@@ -77,7 +123,7 @@ export default async function DrillingDashboardPage() {
     activeOps,
     delayCount,
     delayMinutes,
-  } = await getDrillingDashboardData(deptId, today);
+  } = await getDrillingDashboardData(deptId, today, userId, cookieList);
 
   return (
     <div className="space-y-6">

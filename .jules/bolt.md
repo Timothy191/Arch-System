@@ -1,0 +1,3 @@
+## 2026-06-18 - [Secure Dual-Layer Caching Pattern]
+**Learning:** When implementing caching (Next.js Data Cache + Redis) for Supabase-backed Server Components, the cache key must include the `userId` to prevent unauthorized data exposure (Information Leakage) between users with different RLS-based access levels. Additionally, `cookieList` must be explicitly passed to the Supabase client when it's instantiated inside a cached function to avoid "headers/cookies called inside cache" errors.
+**Action:** Always include `userId` in cache keys for departmental dashboards and pass `cookieList` from the page component down to the cached data fetchers.
