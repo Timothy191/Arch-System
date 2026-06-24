@@ -42,7 +42,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9.15.9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -187,6 +187,6 @@ jobs:
         run: |
           npx serve storybook-static -l 6006 &
           npx wait-on http://localhost:6006 --timeout 60000
-          pnpm test:a11y --url http://localhost:6006
+          pnpm test-storybook:a11y --url http://localhost:6006
         working-directory: packages/ui
 

@@ -2332,3 +2332,83 @@ Ensure the modal/dialog in the DelayEntriesForm is fully compliant with the desi
 - Ran full workspace quality gate `pnpm quality` which passes completely.
 
 - **2026-06-17T11:52:06Z**: Implemented Phase 7 (PWA Offline Strategy, Cookie Consent Banner, Privacy Page, and Visual Regression Scripts).
+
+---
+
+## 2026-06-24: Optimize SystemClock Performance
+
+### Purpose
+
+Reduce unnecessary re-renders and computations in the SystemClock component to improve overall application efficiency and save CPU/battery.
+
+### Changes Made
+
+1. **Conditional Analog Clock Updates** ():
+   - Added an `isOpen` state to track when the clock popover is visible.
+   - Wrapped the 1-second interval in a `useEffect` that depends on `isOpen`.
+   - The clock now only updates every second when the popover is open, reducing re-renders from 60/min to 6/min when closed (header pill still updates every 10s).
+
+2. **Memoization of Expensive Calculations** ():
+   - Used `useMemo` for calendar calculations (`monthLabel`, `daysArray`, etc.) to prevent recalculation on every render.
+   - Used `useMemo` for analog clock hand rotations (`hourDeg`, `minuteDeg`, `secondDeg`).
+
+3. **Render Loop Optimization**:
+   - Moved the `new Date()` call for identifying "today" outside of the `daysArray.map` loop in the calendar rendering to avoid redundant object allocations.
+
+### What the Next Agent Should Know
+
+- The component was refactored to ensure all hooks are declared before any conditional early returns (Early return on `!timeStr` moved after hooks).
+- Verified that all 64 test suites in the portal app pass.
+- Logged performance patterns in `.jules/bolt.md`.
+
+---
+
+## 2026-06-24: Optimize SystemClock Performance
+
+### Purpose
+
+Reduce unnecessary re-renders and computations in the SystemClock component to improve overall application efficiency and save CPU/battery.
+
+### Changes Made
+
+1. **Conditional Analog Clock Updates** (`apps/portal/components/clock/SystemClock.tsx`):
+   - Added an `isOpen` state to track when the clock popover is visible.
+   - Wrapped the 1-second interval in a `useEffect` that depends on `isOpen`.
+   - The clock now only updates every second when the popover is open, reducing re-renders from 60/min to 6/min when closed (header pill still updates every 10s).
+
+2. **Memoization of Expensive Calculations** (`apps/portal/components/clock/SystemClock.tsx`):
+   - Used `useMemo` for calendar calculations (`monthLabel`, `daysArray`, etc.) to prevent recalculation on every render.
+   - Used `useMemo` for analog clock hand rotations (`hourDeg`, `minuteDeg`, `secondDeg`).
+
+3. **Render Loop Optimization**:
+   - Moved the `new Date()` call for identifying "today" outside of the `daysArray.map` loop in the calendar rendering to avoid redundant object allocations.
+
+### What the Next Agent Should Know
+
+- The component was refactored to ensure all hooks are declared before any conditional early returns (Early return on `!timeStr` moved after hooks).
+- Verified that all 64 test suites in the portal app pass.
+- Logged performance patterns in `.jules/bolt.md`.
+
+---
+
+## 2026-06-24: Fix CI Dependencies and Versioning
+
+### Purpose
+
+Resolve CI failures in Build & Test and Accessibility Audit jobs caused by version mismatches and missing dependencies.
+
+### Changes Made
+
+1. **Aligned pnpm version** (`.github/workflows/ci.yml`, `.github/workflows/reviewdog.yml`):
+   - Updated pnpm version from 9.12.0 to 9.15.9 to match `package.json` and prevent `ERR_PNPM_BAD_PM_VERSION`.
+
+2. **Fixed dependency mismatches** (`packages/ui/package.json`):
+   - Updated `peerDependencies.next` from `>=16.0.0` to `^16.2.6` to satisfy `pnpm deps:lint` (syncpack) requirements for ecosystem lockstep.
+
+3. **Resolved missing CI utility** (`packages/ui/package.json`):
+   - Added `wait-on` to devDependencies to ensure availability during Storybook a11y audits.
+
+### What the Next Agent Should Know
+
+- CI environment now correctly handles the dual-layer caching and Storybook audits.
+- `pnpm-lock.yaml` has been updated to reflect these changes.
