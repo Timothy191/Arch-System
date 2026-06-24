@@ -185,12 +185,13 @@ Implement controlled data sharing from Engineering Department to Control Room De
 
 ## [2026-06-24T16:51:00Z] Migration Renumbering & Database Alignment
 
-**Purpose:** Resolve migration sequencing overlap by renumbering `013` migrations to `091` and `092`.
+**Purpose:** Resolve migration sequencing overlap by renumbering legacy migrations to the `09x` range.
 
 **Changes:**
 
 - Renamed `013_json_validation.sql` to `091_json_validation.sql`.
 - Renamed `013_slo_monitoring.sql` to `092_slo_monitoring.sql`.
+- Renamed `015_shift_closeout.sql` to `094_shift_closeout.sql`.
 
 **What the next agent should know:**
 
