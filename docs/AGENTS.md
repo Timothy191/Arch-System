@@ -176,6 +176,8 @@ Root layout mounts `ArchThemeProvider`, `OfflineBanner`, `AnimatedWavesBackgroun
 - **Never bypass with `--no-verify`.**
 - One commit per logical task. Never amend. Never force-push to `master`.
 - **NEVER execute git write commands without user permission.**
+- **Git Hook Portability**: Never hardcode absolute user-home paths (e.g. `/home/timothy/.volta/bin/pnpm`) in git hooks (`.husky/`). Always use relative path binaries (e.g. `pnpm`) or environment variables (e.g. `$HOME`) to ensure hooks remain portable across all developers' environments.
+- **Git LFS Hooks**: The repository does not use Git LFS (no `.gitattributes` exists). Do not add `git-lfs` pre-commit or pre-push checks as they fail execution on systems missing the LFS command.
 
 ---
 
@@ -246,10 +248,12 @@ Defined in `nx.json` under `dependencyConstraints`:
 
 ## Common gotchas
 
-| Problem                            | Fix                                                         |
-| ---------------------------------- | ----------------------------------------------------------- |
-| Types not updating after migration | Run `supabase:gen` and restart TS server                    |
-| Jest can't resolve `@repo/*`       | Add to `apps/portal/jest.config.js` `moduleNameMapper`      |
-| knip false positives on new routes | Add entry points to `config/tools/knip.json`                |
-| Icon chunk too large               | Never `import * as Icons` — use named imports only          |
-| Supabase connection refused        | Docker must be running; `supabase:dev` on ports 54321/54322 |
+| Problem                                     | Fix                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Types not updating after migration          | Run `supabase:gen` and restart TS server                                                                                                                                                                                                                                                                                                                                            |
+| Jest can't resolve `@repo/*`                | Add to `apps/portal/jest.config.js` `moduleNameMapper`                                                                                                                                                                                                                                                                                                                              |
+| knip false positives on new routes          | Add entry points to `config/tools/knip.json`                                                                                                                                                                                                                                                                                                                                        |
+| Icon chunk too large                        | Never `import * as Icons` — use named imports only                                                                                                                                                                                                                                                                                                                                  |
+| Supabase connection refused                 | Docker must be running; `supabase:dev` on ports 54321/54322                                                                                                                                                                                                                                                                                                                         |
+| ESLint false positives on TS signatures     | Standard JS `no-unused-vars` and `no-undef` rules fail on TS overloads, type signatures, or `NodeJS`/`process` globals. Overrides in `@repo/eslint-config/library.js` and `react-internal.js` disable these rules for `*.ts` and `*.tsx` files. Leave them disabled as the TypeScript compiler (`tsc`) validates unused locals, parameters, and variable definition rules strictly. |
+| Lint-staged eslint failures on root configs | Root configuration files (e.g., `prettier.config.mjs`, `playwright.config.ts`) are not included in the main TS project and throw parsing errors under ESLint. `.lintstagedrc.mjs` explicitly filters out root-level files (paths with no `/` relative to `process.cwd()`) from ESLint checks.                                                                                       |

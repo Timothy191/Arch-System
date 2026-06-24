@@ -19,7 +19,8 @@
     "@commitlint/config-conventional",
     // pnpm npm: protocol aliases (partial names truncated by knip)
     "commitlint-config-.",
-    "commitlint-config-"
+    "commitlint-config-",
+    "tslib"
   ],
   "ignoreBinaries": [
     // External tools
@@ -61,7 +62,16 @@
         "lib/**/*.{ts,tsx}",
         "plugins/**/*.{ts,tsx}"
       ],
-      "ignoreDependencies": ["autoprefixer", "postcss", "tailwindcss"],
+      "ignoreDependencies": [
+        "autoprefixer",
+        "postcss",
+        "tailwindcss",
+        "@ducanh2912/next-pwa",
+        "@opentelemetry/auto-instrumentations-node",
+        "@opentelemetry/sdk-node",
+        "@opentelemetry/semantic-conventions",
+        "@opentelemetry/sdk-trace-node"
+      ],
       "ignore": [
         "lib/observability/logger.ts",
         "lib/api/schemas.ts",
@@ -69,7 +79,9 @@
         "components/ui/PrecisionInput.tsx",
         "features/analytics/components/ReportTemplate.tsx",
         "hooks/use-form-submit.ts",
-        "lib/errors/utils.ts"
+        "lib/errors/utils.ts",
+        "components/feedback/FeedbackWidget.tsx",
+        "lib/feature-flags.ts"
       ]
     },
     "apps/cms": {

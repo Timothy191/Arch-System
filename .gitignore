@@ -172,3 +172,7 @@ packages/ui/storybook-static/
 
 # Build artifact checksums
 .assets-checksum
+
+# External execution / AI temp files
+.claude-flow/
+QWEN.md

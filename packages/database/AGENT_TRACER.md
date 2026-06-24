@@ -182,3 +182,16 @@ Implement controlled data sharing from Engineering Department to Control Room De
 **What the next agent should know:**
 
 - `console.info` is permitted under the shared `@repo/eslint-config/library.js` eslint rule configuration.
+
+## [2026-06-24T16:51:00Z] Migration Renumbering & Database Alignment
+
+**Purpose:** Resolve migration sequencing overlap by renumbering `013` migrations to `091` and `092`.
+
+**Changes:**
+
+- Renamed `013_json_validation.sql` to `091_json_validation.sql`.
+- Renamed `013_slo_monitoring.sql` to `092_slo_monitoring.sql`.
+
+**What the next agent should know:**
+
+- All database migrations are sequential. Sequence numbers above `085` represent newly renumbered migration steps to prevent conflicts with intermediate numbers.
