@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 
@@ -8,6 +8,7 @@ export function SystemClock() {
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  const [isOpen, setIsOpen] = useState(false);
 
   // Update clock time string (day + time) every 10 seconds for the header pill
   useEffect(() => {
@@ -35,30 +36,39 @@ export function SystemClock() {
   }, []);
 
   // Update the analog clock every second (independent of the pill updates)
+  // ONLY runs when the popover is open to save CPU/battery
   useEffect(() => {
+    if (!isOpen) return;
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
-
-  if (!timeStr) return null;
+  }, [isOpen]);
 
   // Calendar calculations
-  const viewYear = calendarDate.getFullYear();
-  const viewMonth = calendarDate.getMonth();
+  const { viewYear, viewMonth, monthLabel, daysArray } = useMemo(() => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const label = calendarDate.toLocaleString("en-US", { month: "long" });
+    const firstDayIdx = new Date(year, month, 1).getDay();
+    const totalD = new Date(year, month + 1, 0).getDate();
 
-  const monthLabel = calendarDate.toLocaleString("en-US", { month: "long" });
-  const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
-  const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const days: (number | null)[] = [];
+    for (let i = 0; i < firstDayIdx; i++) {
+      days.push(null);
+    }
+    for (let d = 1; d <= totalD; d++) {
+      days.push(d);
+    }
 
-  const daysArray: (number | null)[] = [];
-  for (let i = 0; i < firstDayIndex; i++) {
-    daysArray.push(null);
-  }
-  for (let d = 1; d <= totalDays; d++) {
-    daysArray.push(d);
-  }
+    return {
+      viewYear: year,
+      viewMonth: month,
+      monthLabel: label,
+      daysArray: days,
+    };
+  }, [calendarDate]);
 
   // Navigation handlers
   const prevMonth = () => {
@@ -75,16 +85,22 @@ export function SystemClock() {
   };
 
   // Analog clock hands rotations
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
+  const { hourDeg, minuteDeg, secondDeg } = useMemo(() => {
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
+    const seconds = time.getSeconds();
 
-  const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
-  const minuteDeg = (minutes / 60) * 360 + (seconds / 60) * 6;
-  const secondDeg = (seconds / 60) * 360;
+    return {
+      hourDeg: ((hours % 12) / 12) * 360 + (minutes / 60) * 30,
+      minuteDeg: (minutes / 60) * 360 + (seconds / 60) * 6,
+      secondDeg: (seconds / 60) * 360,
+    };
+  }, [time]);
+
+  if (!timeStr) return null;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -168,21 +184,26 @@ export function SystemClock() {
 
             {/* Days grid */}
             <div className="grid grid-cols-7 gap-0.5">
-              {daysArray.map((day, idx) => {
-                if (day === null) {
-                  return (
-                    <div key={`empty-${idx}`} className="w-[24px] h-[24px]" />
-                  );
-                }
+              {(() => {
                 const today = new Date();
-                const isToday =
-                  day === today.getDate() &&
-                  viewMonth === today.getMonth() &&
-                  viewYear === today.getFullYear();
+                const todayDate = today.getDate();
+                const todayMonth = today.getMonth();
+                const todayYear = today.getFullYear();
 
-                return (
-                  <div
-                    key={`day-${day}`}
+                return daysArray.map((day, idx) => {
+                  if (day === null) {
+                    return (
+                      <div key={`empty-${idx}`} className="w-[24px] h-[24px]" />
+                    );
+                  }
+                  const isToday =
+                    day === todayDate &&
+                    viewMonth === todayMonth &&
+                    viewYear === todayYear;
+
+                  return (
+                    <div
+                      key={`day-${day}`}
                     className={cn(
                       "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
                       isToday
@@ -193,7 +214,8 @@ export function SystemClock() {
                     {day}
                   </div>
                 );
-              })}
+                });
+              })()}
             </div>
           </div>
 
