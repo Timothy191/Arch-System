@@ -51,23 +51,11 @@ export default async function HourlyLoadsPage({
       <PageHeader title="Hourly Loads Sheet" />
 
       <KPIGrid cols={3}>
-        <KPICard
-          label="Total Loads Today"
-          value={grandTotal.toLocaleString()}
-          color="green"
-        />
-        <KPICard
-          label="Machines Active"
-          value={loadsByMachine.size}
-          color="green"
-        />
+        <KPICard label="Total Loads Today" value={grandTotal.toLocaleString()} color="green" />
+        <KPICard label="Machines Active" value={loadsByMachine.size} color="green" />
         <KPICard
           label="Avg Loads per Machine"
-          value={
-            loadsByMachine.size > 0
-              ? Math.round(grandTotal / loadsByMachine.size)
-              : 0
-          }
+          value={loadsByMachine.size > 0 ? Math.round(grandTotal / loadsByMachine.size) : 0}
         />
       </KPIGrid>
 
@@ -87,9 +75,7 @@ export default async function HourlyLoadsPage({
           <span className="w-3 h-3 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"></span>
           <span>No loads recorded</span>
         </div>
-        <p className="ml-auto">
-          Tip: Click any cell to edit load count. Auto-saves on change.
-        </p>
+        <p className="ml-auto">Tip: Click any cell to edit load count. Auto-saves on change.</p>
       </div>
     </div>
   );

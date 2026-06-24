@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  AlertTriangle,
-  RefreshCw,
-  Wifi,
-  WifiOff,
-  Activity,
-} from "lucide-react";
+import { AlertTriangle, RefreshCw, Wifi, WifiOff, Activity } from "lucide-react";
 
 interface FuxaFrameProps {
   dashboardId?: string;
@@ -28,16 +22,11 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 // AGENT-TRACE: FuxaFrame now includes degraded mode with cache fallback, automatic retry, and connection status
 // Critical for production resilience when FUXA SCADA server is unavailable
 
-export function FuxaFrame({
-  dashboardId,
-  height = "600px",
-  departmentId,
-}: FuxaFrameProps) {
+export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaFrameProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [key, setKey] = useState(0);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("connecting");
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting");
   const [retryCount, setRetryCount] = useState(0);
   const [cachedData, setCachedData] = useState<CachedScadaData | null>(null);
   const [showFallback, setShowFallback] = useState(false);
@@ -134,9 +123,7 @@ export function FuxaFrame({
     saveToCache();
 
     try {
-      const iframe = document.getElementById(
-        "fuxa-iframe",
-      ) as HTMLIFrameElement;
+      const iframe = document.getElementById("fuxa-iframe") as HTMLIFrameElement;
       if (iframe && iframe.contentDocument) {
         const link = iframe.contentDocument.createElement("link");
         link.rel = "stylesheet";
@@ -211,26 +198,19 @@ export function FuxaFrame({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-accent-amber" />
-          <h4 className="text-[var(--text-heading)] font-medium">
-            SCADA Degraded Mode
-          </h4>
+          <h4 className="text-[var(--text-heading)] font-medium">SCADA Degraded Mode</h4>
         </div>
         <StatusIndicator />
       </div>
 
       <p className="text-sm text-[var(--text-secondary)]">
         Showing last known machine status from cache. Data updated{" "}
-        {cachedData
-          ? `${Math.floor((Date.now() - cachedData.timestamp) / 1000)}s ago`
-          : "recently"}
+        {cachedData ? `${Math.floor((Date.now() - cachedData.timestamp) / 1000)}s ago` : "recently"}
         .
       </p>
 
       <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-        <span>
-          Next retry in:{" "}
-          {retryCount < 3 ? `${[30, 60, 120][retryCount]}s` : "manual"}
-        </span>
+        <span>Next retry in: {retryCount < 3 ? `${[30, 60, 120][retryCount]}s` : "manual"}</span>
       </div>
 
       <button
@@ -244,10 +224,7 @@ export function FuxaFrame({
   );
 
   return (
-    <div
-      className="glass rounded-xl overflow-hidden relative"
-      style={{ height }}
-    >
+    <div className="glass rounded-xl overflow-hidden relative" style={{ height }}>
       {/* Connection Status Indicator */}
       <div className="absolute top-4 right-4 z-30">
         <StatusIndicator />
@@ -257,9 +234,7 @@ export function FuxaFrame({
         <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-xl z-10">
           <div className="flex flex-col items-center gap-3">
             <div className="border-2 border-arch-accent-green border-t-transparent rounded-full animate-spin w-6 h-6" />
-            <span className="text-sm text-[var(--text-secondary)]">
-              Loading SCADA dashboard...
-            </span>
+            <span className="text-sm text-[var(--text-secondary)]">Loading SCADA dashboard...</span>
           </div>
         </div>
       )}
@@ -279,9 +254,7 @@ export function FuxaFrame({
                   <AlertTriangle className="w-6 h-6 text-accent-red" />
                 </div>
               </div>
-              <h3 className="text-[var(--text-heading)] font-medium">
-                SCADA Unavailable
-              </h3>
+              <h3 className="text-[var(--text-heading)] font-medium">SCADA Unavailable</h3>
               <p className="text-sm text-[var(--text-secondary)]">
                 The FUXA SCADA server at{" "}
                 <code className="text-xs bg-[var(--bg-tertiary)] px-1.5 py-0.5 rounded">
@@ -301,14 +274,9 @@ export function FuxaFrame({
                 </p>
                 <p className="text-xs text-[var(--text-secondary)]">
                   Set{" "}
-                  <span className="font-mono text-[var(--accent-blue)]">
-                    NEXT_PUBLIC_FUXA_URL
-                  </span>{" "}
-                  in{" "}
-                  <code className="font-mono text-[var(--text-muted)]">
-                    apps/portal/.env
-                  </code>{" "}
-                  to your FUXA instance.
+                  <span className="font-mono text-[var(--accent-blue)]">NEXT_PUBLIC_FUXA_URL</span>{" "}
+                  in <code className="font-mono text-[var(--text-muted)]">apps/portal/.env</code> to
+                  your FUXA instance.
                 </p>
               </div>
               <button

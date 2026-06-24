@@ -81,9 +81,7 @@ const BULK_DENSITIES: Record<string, number> = {
 };
 
 export function HighResPanel({ scenes }: HighResPanelProps) {
-  const [selectedScene, setSelectedScene] = useState<string | null>(
-    scenes[0]?.id ?? null,
-  );
+  const [selectedScene, setSelectedScene] = useState<string | null>(scenes[0]?.id ?? null);
 
   const [baseElev, setBaseElev] = useState<string>("1250");
   const [peakElev, setPeakElev] = useState<string>("1278");
@@ -116,10 +114,9 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
               High-Resolution Commercial Imagery
             </p>
             <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              CubeSat constellations (Planet Labs, Maxar, Airbus) image the site
-              daily at 0.3–3 m. DEM differencing between acquisition dates
-              calculates excavation volumes and stockpile tonnage without ground
-              survey. Sentinel-2 (10 m, free) used here as baseline.
+              CubeSat constellations (Planet Labs, Maxar, Airbus) image the site daily at 0.3–3 m.
+              DEM differencing between acquisition dates calculates excavation volumes and stockpile
+              tonnage without ground survey. Sentinel-2 (10 m, free) used here as baseline.
             </p>
           </div>
         </div>
@@ -131,9 +128,8 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
           Stockpile Volume Estimator
         </p>
         <p className="text-[10px] text-[var(--text-secondary)] mb-3">
-          Conical approximation from DEM-derived base + peak elevation and
-          mapped area. For certified survey use LiDAR or photogrammetric point
-          cloud.
+          Conical approximation from DEM-derived base + peak elevation and mapped area. For
+          certified survey use LiDAR or photogrammetric point cloud.
         </p>
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
@@ -189,17 +185,13 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
         {stockpileResult ? (
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2.5 bg-[var(--bg-primary)] rounded-lg">
-              <p className="text-[10px] text-[var(--text-secondary)]">
-                Volume (m³)
-              </p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Volume (m³)</p>
               <p className="text-lg font-bold text-[var(--accent-green)]">
                 {stockpileResult.volumeM3.toLocaleString()}
               </p>
             </div>
             <div className="p-2.5 bg-[var(--bg-primary)] rounded-lg">
-              <p className="text-[10px] text-[var(--text-secondary)]">
-                Tonnage (t)
-              </p>
+              <p className="text-[10px] text-[var(--text-secondary)]">Tonnage (t)</p>
               <p className="text-lg font-bold text-[var(--text-heading)]">
                 {stockpileResult.tonnage.toLocaleString()}
               </p>
@@ -218,14 +210,12 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
           Change Detection Period
         </p>
         <p className="text-[10px] text-[var(--text-secondary)] mb-3">
-          Select two dates to compare imagery and detect stockpile movement, new
-          infrastructure, or tailings pond level changes.
+          Select two dates to compare imagery and detect stockpile movement, new infrastructure, or
+          tailings pond level changes.
         </p>
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
-            <label className="text-[10px] text-[var(--text-secondary)] block mb-1">
-              From date
-            </label>
+            <label className="text-[10px] text-[var(--text-secondary)] block mb-1">From date</label>
             <input
               type="date"
               value={cdFrom}
@@ -234,9 +224,7 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
             />
           </div>
           <div>
-            <label className="text-[10px] text-[var(--text-secondary)] block mb-1">
-              To date
-            </label>
+            <label className="text-[10px] text-[var(--text-secondary)] block mb-1">To date</label>
             <input
               type="date"
               value={cdTo}
@@ -249,21 +237,14 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
           <div className="p-2 bg-[#3ecf8e]/10 border border-[#3ecf8e]/20 rounded-lg">
             <p className="text-[11px] text-[var(--accent-green)]">
               ✓ Period selected:{" "}
-              {Math.round(
-                (new Date(cdTo).getTime() - new Date(cdFrom).getTime()) /
-                  86400000,
-              )}{" "}
-              days
+              {Math.round((new Date(cdTo).getTime() - new Date(cdFrom).getTime()) / 86400000)} days
             </p>
             <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
-              Order Planet/Maxar archive imagery for this window to run DEM
-              differencing.
+              Order Planet/Maxar archive imagery for this window to run DEM differencing.
             </p>
           </div>
         ) : cdFrom && cdTo ? (
-          <p className="text-[10px] text-accent-blue">
-            "To" date must be after "From" date.
-          </p>
+          <p className="text-[10px] text-accent-blue">"To" date must be after "From" date.</p>
         ) : null}
       </div>
 
@@ -280,9 +261,7 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
             >
               <span className="text-xl shrink-0">{uc.icon}</span>
               <div>
-                <p className="text-sm font-medium text-[var(--text-heading)]">
-                  {uc.title}
-                </p>
+                <p className="text-sm font-medium text-[var(--text-heading)]">{uc.title}</p>
                 <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
                   {uc.description}
                 </p>
@@ -341,12 +320,8 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
                       </span>
                     )}
                   </td>
-                  <td className="p-2.5 text-[var(--text-muted)] text-[11px]">
-                    {p.resolution}
-                  </td>
-                  <td className="p-2.5 text-[var(--text-muted)] text-[11px]">
-                    {p.revisit}
-                  </td>
+                  <td className="p-2.5 text-[var(--text-muted)] text-[11px]">{p.resolution}</td>
+                  <td className="p-2.5 text-[var(--text-muted)] text-[11px]">{p.revisit}</td>
                   <td className="p-2.5 text-[11px]">
                     <span
                       className={
@@ -372,9 +347,7 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
         </p>
         {scenes.length === 0 ? (
           <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-center">
-            <p className="text-[var(--text-secondary)] text-sm">
-              No recent scenes available
-            </p>
+            <p className="text-[var(--text-secondary)] text-sm">No recent scenes available</p>
             <p className="text-[var(--text-secondary)] text-xs mt-1">
               Add Planet/Maxar API keys in Settings for daily sub-metre imagery
             </p>
@@ -387,11 +360,7 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
               return (
                 <button
                   key={scene.id}
-                  onClick={() =>
-                    setSelectedScene(
-                      scene.id === selectedScene ? null : scene.id,
-                    )
-                  }
+                  onClick={() => setSelectedScene(scene.id === selectedScene ? null : scene.id)}
                   className={`w-full text-left rounded-xl border transition-colors overflow-hidden ${
                     selectedScene === scene.id
                       ? "bg-accent-green/10 border-accent-green/30"

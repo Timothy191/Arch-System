@@ -1,9 +1,4 @@
-import {
-  IStore,
-  IStrategy,
-  RateLimitOptions,
-  RateLimitResult,
-} from "./interfaces";
+import { IStore, IStrategy, RateLimitOptions, RateLimitResult } from "./interfaces";
 
 export * from "./interfaces";
 export * from "./stores/memory.store";

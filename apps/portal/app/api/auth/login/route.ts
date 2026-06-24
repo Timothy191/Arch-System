@@ -112,10 +112,7 @@ export async function POST(request: NextRequest) {
   // ── Content-Type validation ──────────────────────────────────────────
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
-    return NextResponse.json(
-      { error: "Content-Type must be application/json" },
-      { status: 415 },
-    );
+    return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 415 });
   }
 
   // ── CSRF protection (production only) ────────────────────────────────
@@ -127,10 +124,7 @@ export async function POST(request: NextRequest) {
       try {
         appOrigin = new URL(appUrl).origin;
       } catch {
-        return NextResponse.json(
-          { error: "Invalid request origin" },
-          { status: 403 },
-        );
+        return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
       }
 
       const origin = request.headers.get("origin");
@@ -139,10 +133,7 @@ export async function POST(request: NextRequest) {
       if (origin) {
         // Origin header is always protocol + host + port; compare directly
         if (origin !== appOrigin) {
-          return NextResponse.json(
-            { error: "Invalid request origin" },
-            { status: 403 },
-          );
+          return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
         }
       } else if (referer) {
         // Referer includes full path; parse it and compare origins to
@@ -150,24 +141,15 @@ export async function POST(request: NextRequest) {
         try {
           const refUrl = new URL(referer);
           if (refUrl.origin !== appOrigin) {
-            return NextResponse.json(
-              { error: "Invalid request origin" },
-              { status: 403 },
-            );
+            return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
           }
         } catch {
           // Invalid Referer URL — reject
-          return NextResponse.json(
-            { error: "Invalid request origin" },
-            { status: 403 },
-          );
+          return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
         }
       } else {
         // Neither Origin nor Referer present — reject
-        return NextResponse.json(
-          { error: "Invalid request origin" },
-          { status: 403 },
-        );
+        return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
       }
     }
   }
@@ -181,10 +163,7 @@ export async function POST(request: NextRequest) {
 
         // Validate input
         if (!email || !password) {
-          return NextResponse.json(
-            { error: "Email and password are required" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
         }
 
         const supabase = await createServerSupabaseClient();
@@ -195,9 +174,7 @@ export async function POST(request: NextRequest) {
 
         if (error) {
           // Return generic error message to avoid account enumeration
-          const isRateLimitError = error.message
-            .toLowerCase()
-            .includes("rate limit");
+          const isRateLimitError = error.message.toLowerCase().includes("rate limit");
           return NextResponse.json(
             {
               error: isRateLimitError
@@ -220,15 +197,9 @@ export async function POST(request: NextRequest) {
       } catch (err) {
         // Distinguish malformed JSON from internal server errors
         if (err instanceof SyntaxError) {
-          return NextResponse.json(
-            { error: "Invalid JSON in request body" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
         }
-        return NextResponse.json(
-          { error: "An error occurred during sign in" },
-          { status: 500 },
-        );
+        return NextResponse.json({ error: "An error occurred during sign in" }, { status: 500 });
       }
     },
     {

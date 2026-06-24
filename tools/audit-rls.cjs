@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+/**
+ * @fileoverview Audits Row Level Security (RLS) policies in PostgreSQL migrations.
+ * Usage: node tools/audit-rls.cjs
+ */
 //
 // Static RLS policy audit for packages/database/migrations/*.sql.
 //
@@ -46,6 +51,11 @@ const REFERENCE_TABLES = new Set([
   "material_density",
 ]);
 
+/**
+ * Lists all SQL migration files in packages/database/migrations in numeric order.
+ *
+ * @returns {string[]} An array of sorted migration file names.
+ */
 function listMigrations() {
   if (!fs.existsSync(MIGRATIONS_DIR)) {
     console.error("Migration directory not found: " + MIGRATIONS_DIR);
@@ -57,11 +67,22 @@ function listMigrations() {
     .sort(); // zero-padded NNN_... sort gives migration order
 }
 
+/**
+ * Reads the content of a migration file.
+ *
+ * @param {string} file - The file name of the migration.
+ * @returns {string} The text content of the migration file.
+ */
 function readMigration(file) {
   return fs.readFileSync(path.join(MIGRATIONS_DIR, file), "utf-8");
 }
 
-// Strip SQL comments so regex matches inside a comment don't trip the parser.
+/**
+ * Strips SQL comments (block and inline) from SQL content to prevent false matches.
+ *
+ * @param {string} sql - Raw SQL text.
+ * @returns {string} Clean SQL text without comments.
+ */
 function stripComments(sql) {
   // Block comments.
   let out = sql.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -75,8 +96,7 @@ function stripComments(sql) {
 //   CREATE TABLE IF NOT EXISTS foo (
 //   CREATE TABLE public.foo (
 //   CREATE TABLE foo PARTITION OF ...   (child partitions — skipped)
-const RE_CREATE_TABLE =
-  /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\b[^;]*?\(/gi;
+const RE_CREATE_TABLE = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w]+\.)?([\w]+)\b[^;]*?\(/gi;
 const PARTITION_HINT = /PARTITION\s+OF/i;
 
 // Match ALTER TABLE ... ENABLE ROW LEVEL SECURITY for a specific table.
@@ -105,6 +125,12 @@ const RE_DEPT_ID_COLUMN = /department_id\s+UUID/i;
 // Build the table→set-of-files list. Tables declared in a CREATE TABLE in
 // file F are considered "born" in F; if a later file enables RLS for them,
 // the CRITICAL finding goes away.
+/**
+ * Scans all migrations to record where tables were first created (their "births").
+ *
+ * @param {string[]} files - Array of migration file names.
+ * @returns {Map<string, Set<number>>} Map of table name to set of file indices where they were created.
+ */
 function buildTableBirths(files) {
   const births = new Map(); // tableName -> Set<fileIndex>
   files.forEach((file, idx) => {
@@ -122,9 +148,13 @@ function buildTableBirths(files) {
   return births;
 }
 
-// Walk the migrations in order, recording the set of files (indices)
-// that enable RLS for each table and the policies attached to each
-// table.
+/**
+ * Scans migration SQL contents to track where RLS is enabled, what policies exist,
+ * and which tables contain department_id columns.
+ *
+ * @param {string[]} files - Array of migration file names.
+ * @returns {{enabled: Map<string, Set<number>>, policies: object[], tablesWithDeptColumn: Set<string>}} Scan results.
+ */
 function scanMigrations(files) {
   const enabled = new Map(); // tableName -> Set<fileIndex>
   const policies = []; // [{ table, command, name, body, file, hasUsingTrue, hasWithCheckTrue, hasAuthUid, hasEmployeesRef }]
@@ -147,8 +177,7 @@ function scanMigrations(files) {
     while ((m = RE_POLICY.exec(sql)) !== null) {
       const name = m[1];
       const table = m[2];
-      const command =
-        (m[3] || "").toUpperCase().replace(/^FOR\s+/, "") || "ALL";
+      const command = (m[3] || "").toUpperCase().replace(/^FOR\s+/, "") || "ALL";
       const body = m[4] || "";
       policies.push({
         table,
@@ -176,6 +205,14 @@ function scanMigrations(files) {
   return { enabled, policies, tablesWithDeptColumn };
 }
 
+/**
+ * Identifies tables that have been declared but never have RLS enabled.
+ *
+ * @param {Map<string, Set<number>>} births - Map of table name to creation file index set.
+ * @param {Map<string, Set<number>>} enabled - Map of table name to RLS enabled file index set.
+ * @param {string[]} files - Array of migration file names.
+ * @returns {object[]} Array of tables missing RLS, with table name and origin file.
+ */
 function findCriticalTables(births, enabled, files) {
   // A table is CRITICAL only if it has zero RLS enables across the entire
   // migration sequence (cumulative — RLS enabled in a later file counts).
@@ -191,6 +228,13 @@ function findCriticalTables(births, enabled, files) {
   return critical;
 }
 
+/**
+ * Audit policies for suspicious settings (e.g. USING(true) on sensitive data, missing department checks).
+ *
+ * @param {object[]} policies - Scanned policy objects.
+ * @param {Set<string>} tablesWithDeptColumn - Set of tables that have department isolation columns.
+ * @returns {object[]} Array of warning objects with details.
+ */
 function findSuspiciousPolicies(policies, tablesWithDeptColumn) {
   const warnings = [];
   for (const p of policies) {
@@ -235,6 +279,19 @@ function findSuspiciousPolicies(policies, tablesWithDeptColumn) {
   return warnings;
 }
 
+/**
+ * Generates a Markdown report of the RLS audit findings.
+ *
+ * @param {object} params - Input parameters.
+ * @param {string[]} params.files - List of migrations.
+ * @param {object[]} params.critical - Critical issues list.
+ * @param {object[]} params.warnings - Warning issues list.
+ * @param {string[]} params.allTables - List of all tables.
+ * @param {object[]} params.enabledTables - List of tables with RLS enabled.
+ * @param {number} params.policyCount - Total policies count.
+ * @param {Set<string>} params.suspiciousTableSet - Tables with warnings.
+ * @returns {string} The formatted Markdown report.
+ */
 function renderReport({
   files,
   critical,
@@ -248,9 +305,7 @@ function renderReport({
   lines.push("# RLS Policy Audit");
   lines.push("");
   lines.push(
-    "Generated by `tools/audit-rls.cjs` from `" +
-      path.relative(ROOT, MIGRATIONS_DIR) +
-      "`.",
+    "Generated by `tools/audit-rls.cjs` from `" + path.relative(ROOT, MIGRATIONS_DIR) + "`.",
   );
   lines.push("");
   lines.push("## Summary");
@@ -261,11 +316,7 @@ function renderReport({
   lines.push("| Tables declared | " + allTables.length + " |");
   lines.push("| Tables with RLS enabled | " + enabledTables.length + " |");
   lines.push("| Tables missing RLS (CRITICAL) | " + critical.length + " |");
-  lines.push(
-    "| Tables with suspicious policies (WARNING) | " +
-      suspiciousTableSet.size +
-      " |",
-  );
+  lines.push("| Tables with suspicious policies (WARNING) | " + suspiciousTableSet.size + " |");
   lines.push("| Total CREATE POLICY statements | " + policyCount + " |");
   lines.push("");
 
@@ -331,6 +382,12 @@ function renderReport({
   return lines.join("\n");
 }
 
+/**
+ * Main entry point of the RLS auditor.
+ * Parses migrations, executes checks, writes markdown report, and exits.
+ *
+ * @returns {void}
+ */
 function main() {
   const files = listMigrations();
   const births = buildTableBirths(files);
@@ -342,9 +399,7 @@ function main() {
   const enabledTableNames = [...enabled.keys()].sort();
   const enabledTables = enabledTableNames.map((name) => ({
     name,
-    files: [...(enabled.get(name) || new Set())]
-      .sort((a, b) => a - b)
-      .map((i) => files[i]),
+    files: [...(enabled.get(name) || new Set())].sort((a, b) => a - b).map((i) => files[i]),
   }));
   const suspiciousTableSet = new Set(warnings.map((w) => w.table));
 

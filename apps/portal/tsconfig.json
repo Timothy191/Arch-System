@@ -8,11 +8,13 @@
     ],
     "paths": {
       "~/*": ["./*"],
+      "@/*": ["./*"],
       "@/app/*": ["./app/*"],
       "@/features/*": ["./features/*"],
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
-      "@/hooks/*": ["./hooks/*"]
+      "@/hooks/*": ["./hooks/*"],
+      "@/assets/*": ["./assets/*"]
     }
   },
   "include": [

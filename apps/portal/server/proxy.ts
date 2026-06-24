@@ -91,17 +91,10 @@ export function isTokenExpiredError(error: unknown): boolean {
     return false;
   }
   const msg = String(error.message);
-  return (
-    msg.includes("Invalid Refresh Token") ||
-    msg.includes("Refresh Token Not Found")
-  );
+  return msg.includes("Invalid Refresh Token") || msg.includes("Refresh Token Not Found");
 }
 
-function redirectWithError(
-  request: NextRequest,
-  error: string,
-  clientResponse?: NextResponse,
-) {
+function redirectWithError(request: NextRequest, error: string, clientResponse?: NextResponse) {
   const url = new URL("/", request.url);
   url.searchParams.set("error", error);
   const res = NextResponse.redirect(url);
@@ -129,11 +122,7 @@ async function resolveDeptUuid(
   const cached = await cacheGet<string>(cacheKey);
   if (cached) return cached;
 
-  const { data } = await supabase
-    .from("departments")
-    .select("id")
-    .eq("name", slug)
-    .single();
+  const { data } = await supabase.from("departments").select("id").eq("name", slug).single();
   if (data?.id) {
     await cacheSet(cacheKey, data.id, 3600); // 1 hour
   }
@@ -153,10 +142,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Exempt password reset and update flows from middleware auth gating
-  if (
-    pathname.startsWith("/reset-password") ||
-    pathname.startsWith("/update-password")
-  ) {
+  if (pathname.startsWith("/reset-password") || pathname.startsWith("/update-password")) {
     return NextResponse.next();
   }
 
@@ -321,11 +307,7 @@ export async function proxy(request: NextRequest) {
   // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
     if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
-      return redirectWithError(
-        request,
-        "unauthorized_department",
-        client.response,
-      );
+      return redirectWithError(request, "unauthorized_department", client.response);
     }
   }
 
@@ -335,11 +317,7 @@ export async function proxy(request: NextRequest) {
     RESTRICTED_ROUTES.tools &&
     !RESTRICTED_ROUTES.tools.includes(userRole)
   ) {
-    return redirectWithError(
-      request,
-      "unauthorized_department",
-      client.response,
-    );
+    return redirectWithError(request, "unauthorized_department", client.response);
   }
 
   // Check department isolation
@@ -351,14 +329,9 @@ export async function proxy(request: NextRequest) {
       return redirectWithError(request, "unknown_department", client.response);
     }
 
-    const hasAccess =
-      isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
+    const hasAccess = isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
     if (!hasAccess) {
-      return redirectWithError(
-        request,
-        "unauthorized_department",
-        client.response,
-      );
+      return redirectWithError(request, "unauthorized_department", client.response);
     }
   }
 

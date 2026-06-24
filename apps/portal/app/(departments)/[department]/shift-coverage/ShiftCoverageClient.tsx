@@ -85,15 +85,13 @@ export function ShiftCoverageClient({
           hasEntryMap.set(op.machine_id, true);
         }
 
-        const machinesWithOps: MachineWithOp[] = (machinesRes.data || []).map(
-          (m) => ({
-            id: m.id,
-            name: m.name,
-            machine_type: m.machine_type,
-            hours_worked: opsMap.get(m.id) ?? null,
-            has_entry: hasEntryMap.has(m.id),
-          }),
-        );
+        const machinesWithOps: MachineWithOp[] = (machinesRes.data || []).map((m) => ({
+          id: m.id,
+          name: m.name,
+          machine_type: m.machine_type,
+          hours_worked: opsMap.get(m.id) ?? null,
+          has_entry: hasEntryMap.has(m.id),
+        }));
 
         setMachines(machinesWithOps);
 
@@ -160,9 +158,7 @@ export function ShiftCoverageClient({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-          Shift Coverage
-        </h2>
+        <h2 className="text-2xl font-bold text-[var(--text-heading)]">Shift Coverage</h2>
       </div>
 
       <GlassCard>
@@ -208,9 +204,7 @@ export function ShiftCoverageClient({
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <h3 className="text-lg font-bold text-[var(--text-heading)]">
-              Machine Coverage
-            </h3>
+            <h3 className="text-lg font-bold text-[var(--text-heading)]">Machine Coverage</h3>
             {isClosed && (
               <span className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
                 <span className="badge-pulse-dot bg-emerald-500" />
@@ -219,19 +213,14 @@ export function ShiftCoverageClient({
             )}
           </div>
           <p className="text-[var(--text-muted)] text-sm">
-            {loading
-              ? "Loading..."
-              : `${reportedCount} / ${machines.length} reported`}
+            {loading ? "Loading..." : `${reportedCount} / ${machines.length} reported`}
           </p>
         </div>
 
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-12 bg-[var(--bg-tertiary)] rounded-lg animate-pulse"
-              />
+              <div key={i} className="h-12 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
             ))}
           </div>
         ) : machines.length === 0 ? (
@@ -265,10 +254,7 @@ export function ShiftCoverageClient({
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
                 {machines.map((m) => (
-                  <tr
-                    key={m.id}
-                    className="hover:bg-[var(--bg-tertiary)]/50 transition-colors"
-                  >
+                  <tr key={m.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
                     <td className="px-4 py-2.5 text-[var(--text-heading)]">
                       <span className="text-[var(--text-muted)] text-xs mr-2 uppercase">
                         {m.machine_type}
@@ -276,33 +262,23 @@ export function ShiftCoverageClient({
                       {m.name}
                     </td>
                     <td className="px-4 py-2.5 text-right text-[var(--text-heading)] font-medium tabular-nums">
-                      {m.hours_worked !== null
-                        ? `${Number(m.hours_worked).toFixed(1)}h`
-                        : "—"}
+                      {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : "—"}
                     </td>
                     <td className="px-4 py-2.5 text-center">
-                      {m.has_entry &&
-                      m.hours_worked !== null &&
-                      m.hours_worked > 0 ? (
+                      {m.has_entry && m.hours_worked !== null && m.hours_worked > 0 ? (
                         <div className="flex items-center justify-center gap-1.5">
                           <CheckCircle className="w-4 h-4 text-accent-green" />
-                          <span className="text-accent-green text-xs">
-                            Reported
-                          </span>
+                          <span className="text-accent-green text-xs">Reported</span>
                         </div>
                       ) : m.has_entry && m.hours_worked === 0 ? (
                         <div className="flex items-center justify-center gap-1.5">
                           <AlertTriangle className="w-4 h-4 text-accent-blue" />
-                          <span className="text-accent-blue text-xs">
-                            Partial
-                          </span>
+                          <span className="text-accent-blue text-xs">Partial</span>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-1.5">
                           <XCircle className="w-4 h-4 text-accent-red" />
-                          <span className="text-accent-red text-xs">
-                            Missing
-                          </span>
+                          <span className="text-accent-red text-xs">Missing</span>
                         </div>
                       )}
                     </td>
@@ -326,9 +302,7 @@ export function ShiftCoverageClient({
       </GlassCard>
 
       <GlassCard>
-        <h3 className="text-lg font-bold text-[var(--text-heading)] mb-4">
-          Close-out History
-        </h3>
+        <h3 className="text-lg font-bold text-[var(--text-heading)] mb-4">Close-out History</h3>
 
         {history.length === 0 ? (
           <p className="text-[var(--text-muted)] text-sm py-4 text-center">
@@ -361,10 +335,7 @@ export function ShiftCoverageClient({
               </thead>
               <tbody className="divide-y divide-[var(--border-default)]">
                 {history.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-[var(--bg-tertiary)]/50 transition-colors"
-                  >
+                  <tr key={item.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
                     <td className="px-4 py-2.5 text-[var(--text-heading)]">
                       {new Date(item.shift_date).toLocaleDateString("en-ZA", {
                         year: "numeric",

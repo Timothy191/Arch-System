@@ -50,12 +50,9 @@ export const useSplitWindow = create<SplitWindowState>((set, get) => ({
       set({ isOpen: false, tabs: [], activeTabId: null });
       return;
     }
-    const candidate =
-      filtered[Math.max(0, tabs.findIndex((t) => t.id === id) - 1)];
+    const candidate = filtered[Math.max(0, tabs.findIndex((t) => t.id === id) - 1)];
     const nextActive =
-      activeTabId === id
-        ? (candidate?.id ?? filtered[0]?.id ?? null)
-        : activeTabId;
+      activeTabId === id ? (candidate?.id ?? filtered[0]?.id ?? null) : activeTabId;
     set({ tabs: filtered, activeTabId: nextActive });
   },
 

@@ -15,10 +15,7 @@ import {
 import { ExportButton } from "@/features/analytics/components/ExportButton";
 import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
 import { ProductionTrendChart } from "@/features/analytics/components/ProductionTrendChartWrapper";
-import {
-  classifyReconciliationDrift,
-  RECONCILIATION_UI,
-} from "@/lib/production-reconciliation";
+import { classifyReconciliationDrift, RECONCILIATION_UI } from "@/lib/production-reconciliation";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +40,7 @@ export default async function ExecutiveDashboardPage() {
   const db = await createReadReplicaClient();
   const today = new Date().toISOString().split("T")[0]!;
   const monthStart = today.slice(0, 7) + "-01";
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
-    .toISOString()
-    .split("T")[0]!;
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
 
   // Step 1: Fetch Unified Production Summary (RPC)
   // This single call replaces multiple production_logs, machine_hours, and fuel_logs fetches.
@@ -54,8 +49,7 @@ export default async function ExecutiveDashboardPage() {
     p_end_date: today,
   });
 
-  const mtdSummary =
-    summaryData?.filter((s: any) => s.log_date >= monthStart) ?? [];
+  const mtdSummary = summaryData?.filter((s: any) => s.log_date >= monthStart) ?? [];
 
   // Step 2: parallel fetch of remaining KPI data
   const [
@@ -70,23 +64,10 @@ export default async function ExecutiveDashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("active", true)
       .is("deleted_at", null),
-    db
-      .from("machines")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null),
-    db
-      .from("safety_incidents")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "open"),
-    db
-      .from("employees")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null),
-    db
-      .from("breakdowns")
-      .select("id, status")
-      .gte("date_in", monthStart)
-      .is("deleted_at", null),
+    db.from("machines").select("id", { count: "exact", head: true }).is("deleted_at", null),
+    db.from("safety_incidents").select("id", { count: "exact", head: true }).eq("status", "open"),
+    db.from("employees").select("id", { count: "exact", head: true }).is("deleted_at", null),
+    db.from("breakdowns").select("id, status").gte("date_in", monthStart).is("deleted_at", null),
   ]);
 
   // Compute MTD aggregates from server-side summary
@@ -99,10 +80,7 @@ export default async function ExecutiveDashboardPage() {
     0,
   );
   const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
-  const totalFuelMtd = mtdSummary.reduce(
-    (s: number, r: any) => s + Number(r.total_fuel_litres),
-    0,
-  );
+  const totalFuelMtd = mtdSummary.reduce((s: number, r: any) => s + Number(r.total_fuel_litres), 0);
   const totalHoursMtd = mtdSummary.reduce(
     (s: number, r: any) => s + Number(r.total_hours_worked),
     0,
@@ -112,8 +90,7 @@ export default async function ExecutiveDashboardPage() {
   const avgDriftPct =
     mtdSummary.length > 0
       ? mtdSummary.reduce(
-          (s: number, r: any) =>
-            s + Math.abs(Number(r.reconciliation_drift_pct)),
+          (s: number, r: any) => s + Math.abs(Number(r.reconciliation_drift_pct)),
           0,
         ) / mtdSummary.length
       : 0;
@@ -125,10 +102,8 @@ export default async function ExecutiveDashboardPage() {
     totalMachines && totalMachines > 0
       ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
       : 0;
-  const fuelPerTonne =
-    totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : "—";
-  const openBreakdowns =
-    breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
+  const fuelPerTonne = totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : "—";
+  const openBreakdowns = breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
 
   // Build 30-day chart data from summary
   const chartData = (summaryData ?? []).map((s: any) => ({
@@ -158,13 +133,7 @@ export default async function ExecutiveDashboardPage() {
       { label: "Fleet Availability", value: `${fleetPct}%` },
       { label: "Active Breakdowns", value: `${openBreakdowns}` },
     ],
-    tableHeaders: [
-      "Date",
-      "Coal (t)",
-      "Waste (t)",
-      "Total Tonnage (t)",
-      "Drift %",
-    ],
+    tableHeaders: ["Date", "Coal (t)", "Waste (t)", "Total Tonnage (t)", "Drift %"],
     tableRows: chartData.map((r: any) => [
       r.date,
       r.coal.toFixed(2),
@@ -189,30 +158,18 @@ export default async function ExecutiveDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <PDFDownloadButton reportData={pdfReportData} />
-          <ExportButton
-            filename={`executive-report-${today}`}
-            rows={exportRows}
-          />
+          <ExportButton filename={`executive-report-${today}`} rows={exportRows} />
         </div>
       </div>
 
       {/* KPI Row 1 — Production & Reconciliation */}
       <section className="space-y-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <TrendingUp className="w-3.5 h-3.5" /> Production & Reconciliation
-          (MTD)
+          <TrendingUp className="w-3.5 h-3.5" /> Production & Reconciliation (MTD)
         </h2>
         <KPIGrid cols={4}>
-          <KPICard
-            label="Total Tonnage"
-            value={`${totalTonnageMtd.toFixed(0)} t`}
-            color="green"
-          />
-          <KPICard
-            label="Coal Removed"
-            value={`${totalCoalMtd.toFixed(0)} t`}
-            color="green"
-          />
+          <KPICard label="Total Tonnage" value={`${totalTonnageMtd.toFixed(0)} t`} color="green" />
+          <KPICard label="Coal Removed" value={`${totalCoalMtd.toFixed(0)} t`} color="green" />
           <KPICard
             label="Reconciliation Drift"
             value={`${avgDriftPct.toFixed(1)}%`}
@@ -233,9 +190,7 @@ export default async function ExecutiveDashboardPage() {
           <div
             className={`p-3 rounded-lg border flex items-start gap-3 bg-${driftUi.color}/10 border-${driftUi.color}/30 text-sm`}
           >
-            <AlertCircle
-              className={`w-5 h-5 text-${driftUi.color} mt-0.5 shrink-0`}
-            />
+            <AlertCircle className={`w-5 h-5 text-${driftUi.color} mt-0.5 shrink-0`} />
             <div>
               <p className="font-medium">Operational Drift Warning</p>
               <p className="text-[var(--text-muted)]">{driftUi.description}</p>
@@ -264,15 +219,9 @@ export default async function ExecutiveDashboardPage() {
           <KPICard
             label="Active Breakdowns"
             value={openBreakdowns}
-            color={
-              openBreakdowns > 5 ? "red" : openBreakdowns > 2 ? "blue" : "green"
-            }
+            color={openBreakdowns > 5 ? "red" : openBreakdowns > 2 ? "blue" : "green"}
           />
-          <KPICard
-            label="Active Personnel"
-            value={activeEmployees ?? 0}
-            color="default"
-          />
+          <KPICard label="Active Personnel" value={activeEmployees ?? 0} color="default" />
         </KPIGrid>
       </section>
 
@@ -292,11 +241,7 @@ export default async function ExecutiveDashboardPage() {
             value={`${totalFuelMtd.toFixed(0)} L`}
             color="blue"
           />
-          <KPICard
-            label="Waste Removed"
-            value={`${totalWasteMtd.toFixed(0)} t`}
-            color="default"
-          />
+          <KPICard label="Waste Removed" value={`${totalWasteMtd.toFixed(0)} t`} color="default" />
           <KPICard label="Reporting Date" value={today} color="default" />
         </KPIGrid>
       </section>

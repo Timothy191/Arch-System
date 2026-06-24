@@ -23,11 +23,7 @@ function RootNode({ data }: { data: { label: string } }) {
   return (
     <div className="px-6 py-3 bg-[#171717] border-2 border-[#3ecf8e] rounded-xl shadow-lg">
       <div className="text-[#3ecf8e] font-semibold text-lg">{data.label}</div>
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="!bg-[#3ecf8e]"
-      />
+      <Handle type="source" position={Position.Bottom} className="!bg-[#3ecf8e]" />
     </div>
   );
 }
@@ -36,11 +32,7 @@ function AuthNode({ data }: { data: { label: string } }) {
   return (
     <div className="px-5 py-2 bg-[#171717] border border-[#898989] rounded-lg">
       <div className="text-[#898989] font-medium">{data.label}</div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!bg-[#898989]"
-      />
+      <Handle type="source" position={Position.Right} className="!bg-[#898989]" />
     </div>
   );
 }
@@ -49,20 +41,12 @@ function AdminNode({ data }: { data: { label: string } }) {
   return (
     <div className="px-5 py-2 bg-[#171717] border border-[#ef4444] rounded-lg">
       <div className="text-[#ef4444] font-medium">{data.label}</div>
-      <Handle
-        type="source"
-        position={Position.Left}
-        className="!bg-[#ef4444]"
-      />
+      <Handle type="source" position={Position.Left} className="!bg-[#ef4444]" />
     </div>
   );
 }
 
-function DepartmentNode({
-  data,
-}: {
-  data: { label: string; color: string; slug: string };
-}) {
+function DepartmentNode({ data }: { data: { label: string; color: string; slug: string } }) {
   const dept = DEPARTMENTS.find((d) => d.id === data.slug);
 
   return (
@@ -77,10 +61,7 @@ function DepartmentNode({
         className="px-4 py-3 border-b border-[#363636]"
         style={{ borderBottomColor: data.color }}
       >
-        <div
-          className="font-semibold text-[#fafafa]"
-          style={{ color: data.color }}
-        >
+        <div className="font-semibold text-[#fafafa]" style={{ color: data.color }}>
           {data.label}
         </div>
         <div className="text-xs text-[#898989] mt-1">{dept?.description}</div>
@@ -246,9 +227,7 @@ export default function SystemArchitecture() {
             <span>Department</span>
           </div>
         </div>
-        <div className="mt-3 text-xs text-[#898989]">
-          Drag nodes to rearrange • Scroll to zoom
-        </div>
+        <div className="mt-3 text-xs text-[#898989]">Drag nodes to rearrange • Scroll to zoom</div>
       </div>
     </div>
   );

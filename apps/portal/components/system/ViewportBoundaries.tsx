@@ -38,8 +38,7 @@ const DOCK_APPS = [
  * Automatically shifts bottom right widgets to avoid overlapping persistent split-pane windows.
  */
 export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
-  const { websocketLatency, serverTimeSAST, currentShift, online } =
-    useSystemMetrics();
+  const { websocketLatency, serverTimeSAST, currentShift, online } = useSystemMetrics();
   const splitWindowOpen = useSplitWindow((s) => s.isOpen);
   const pathname = usePathname();
 
@@ -81,9 +80,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
               className="group relative flex items-center gap-2 p-2 px-3 rounded-xl hover:bg-black/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
             >
               <Command className="w-4 h-4 text-[var(--text-heading)] group-hover:scale-110 transition-transform duration-300 ease-glass" />
-              <span className="text-xs font-medium text-[var(--text-heading)]">
-                Start
-              </span>
+              <span className="text-xs font-medium text-[var(--text-heading)]">Start</span>
             </button>
           </div>
 

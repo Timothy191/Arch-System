@@ -57,33 +57,17 @@ describe("BookInForm", () => {
   });
 
   it("renders form fields and book in button", () => {
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
     expect(screen.getByLabelText(/Select Machine/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Date In/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Time In/i)).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/Describe the issue/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Book In Machine/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Describe the issue/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Book In Machine/i })).toBeInTheDocument();
   });
 
   it("shows 'No active breakdowns' when activeBreakdowns is empty", () => {
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
     expect(screen.getByText(/No active breakdowns/i)).toBeInTheDocument();
   });
 
@@ -113,17 +97,9 @@ describe("BookInForm", () => {
   });
 
   it("shows error when machine is not selected on submit", async () => {
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
-    fireEvent.submit(
-      screen.getByRole("button", { name: /Book In Machine/i }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: /Book In Machine/i }).closest("form")!);
 
     await waitFor(() => {
       expect(screen.getByText("Please select a machine")).toBeInTheDocument();
@@ -132,13 +108,7 @@ describe("BookInForm", () => {
   });
 
   it("shows error when reason is too short", async () => {
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
     fireEvent.change(screen.getByLabelText(/Select Machine/i), {
       target: { value: "m-1" },
@@ -149,21 +119,13 @@ describe("BookInForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Book In Machine/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Reason must be at least 5 characters"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Reason must be at least 5 characters")).toBeInTheDocument();
     });
     expect(createBreakdown).not.toHaveBeenCalled();
   });
 
   it("submits successfully and shows success message", async () => {
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
     fireEvent.change(screen.getByLabelText(/Select Machine/i), {
       target: { value: "m-1" },
@@ -187,22 +149,14 @@ describe("BookInForm", () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Machine booked in successfully!"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Machine booked in successfully!")).toBeInTheDocument();
     });
   });
 
   it("shows error message when createBreakdown throws", async () => {
     createBreakdown.mockRejectedValueOnce(new Error("DB error"));
 
-    render(
-      <BookInForm
-        departmentId="dept-eng"
-        activeBreakdowns={[]}
-        machines={MOCK_MACHINES}
-      />,
-    );
+    render(<BookInForm departmentId="dept-eng" activeBreakdowns={[]} machines={MOCK_MACHINES} />);
 
     fireEvent.change(screen.getByLabelText(/Select Machine/i), {
       target: { value: "m-1" },
@@ -213,9 +167,7 @@ describe("BookInForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Book In Machine/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Failed to book in machine."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Failed to book in machine.")).toBeInTheDocument();
     });
   });
 });

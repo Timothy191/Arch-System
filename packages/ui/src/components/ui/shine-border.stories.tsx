@@ -37,9 +37,7 @@ export const Default: Story = {
 export const CyanGlow: Story = {
   render: (args) => (
     <div className="relative flex h-[200px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl border bg-black md:shadow-xl">
-      <span className="text-white font-mono uppercase tracking-widest">
-        Active System
-      </span>
+      <span className="text-white font-mono uppercase tracking-widest">Active System</span>
       <ShineBorder {...args} />
     </div>
   ),

@@ -5,10 +5,7 @@ updated: 2026-05-16
 type: concept
 tags: [design, system, convention]
 sources:
-  [
-    raw/articles/arch-systems-project-overview.md,
-    raw/articles/deepeval-integration-design.md,
-  ]
+  [raw/articles/arch-systems-project-overview.md, raw/articles/deepeval-integration-design.md]
 confidence: high
 ---
 

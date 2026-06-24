@@ -1,11 +1,5 @@
 import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  FileText,
-  TrendingUp,
-  ShieldAlert,
-  CheckCircle,
-  BarChart3,
-} from "lucide-react";
+import { FileText, TrendingUp, ShieldAlert, CheckCircle, BarChart3 } from "lucide-react";
 import { ExportButton } from "../components/ExportButton";
 
 interface Report {
@@ -84,8 +78,7 @@ export default function ReportsPage() {
             Training & LMS Audits
           </h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            Access training history, compliance audits, and legal certificate
-            registry lists.
+            Access training history, compliance audits, and legal certificate registry lists.
           </p>
         </div>
       </div>
@@ -101,8 +94,7 @@ export default function ReportsPage() {
                   Departmental Compliance Rates
                 </h3>
                 <p className="text-[var(--text-muted)] text-[11px]">
-                  Percentage of personnel with all active, non-expired
-                  credentials
+                  Percentage of personnel with all active, non-expired credentials
                 </p>
               </div>
               <BarChart3 className="w-4 h-4 text-[var(--text-muted)]" />
@@ -112,9 +104,7 @@ export default function ReportsPage() {
               {complianceRates.map((dept, i) => (
                 <div key={i} className="space-y-1.5">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-medium text-[var(--text-secondary)]">
-                      {dept.name}
-                    </span>
+                    <span className="font-medium text-[var(--text-secondary)]">{dept.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-[var(--text-muted)]">
                         ({dept.trainees} active staff)
@@ -161,9 +151,7 @@ export default function ReportsPage() {
                 <p className="text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wider">
                   Overall Site Compliance
                 </p>
-                <p className="text-xl font-bold text-[var(--text-heading)]">
-                  94.2%
-                </p>
+                <p className="text-xl font-bold text-[var(--text-heading)]">94.2%</p>
               </div>
             </div>
           </GlassCard>
@@ -177,9 +165,7 @@ export default function ReportsPage() {
                 <p className="text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wider">
                   Pending Expirations (15d)
                 </p>
-                <p className="text-xl font-bold text-[var(--text-heading)]">
-                  5 Personnel
-                </p>
+                <p className="text-xl font-bold text-[var(--text-heading)]">5 Personnel</p>
               </div>
             </div>
           </GlassCard>
@@ -193,9 +179,7 @@ export default function ReportsPage() {
                 <p className="text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wider">
                   LMS Course Completions MTD
                 </p>
-                <p className="text-xl font-bold text-[var(--text-heading)]">
-                  118 modules
-                </p>
+                <p className="text-xl font-bold text-[var(--text-heading)]">118 modules</p>
               </div>
             </div>
           </GlassCard>
@@ -228,9 +212,7 @@ export default function ReportsPage() {
             <tbody className="divide-y divide-[var(--overlay-dim)]">
               {initialReports.map((report) => (
                 <tr key={report.id} className="hover:bg-[var(--overlay-dim)]">
-                  <td className="py-3 font-semibold text-[var(--text-muted)]">
-                    {report.id}
-                  </td>
+                  <td className="py-3 font-semibold text-[var(--text-muted)]">{report.id}</td>
                   <td className="py-3 font-medium text-[var(--text-heading)] flex items-center gap-2">
                     <FileText className="w-3.5 h-3.5 text-blue-500" />
                     <span>{report.name}</span>
@@ -240,12 +222,8 @@ export default function ReportsPage() {
                       {report.type}
                     </span>
                   </td>
-                  <td className="py-3 text-[var(--text-muted)]">
-                    {report.generatedDate}
-                  </td>
-                  <td className="py-3 text-[var(--text-muted)]">
-                    {report.author}
-                  </td>
+                  <td className="py-3 text-[var(--text-muted)]">{report.generatedDate}</td>
+                  <td className="py-3 text-[var(--text-muted)]">{report.author}</td>
                   <td className="py-3 text-right">
                     <ExportButton />
                   </td>

@@ -10,15 +10,7 @@ const meta: Meta<typeof AnimatedButton> = {
   argTypes: {
     variant: {
       control: "select",
-      options: [
-        "default",
-        "accent",
-        "destructive",
-        "outline",
-        "secondary",
-        "ghost",
-        "link",
-      ],
+      options: ["default", "accent", "destructive", "outline", "secondary", "ghost", "link"],
     },
     size: {
       control: "select",

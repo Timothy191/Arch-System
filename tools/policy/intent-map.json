@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-06-15T08:11:06.234Z",
+  "generatedAt": "2026-06-24T13:48:54.102Z",
   "capabilities": {
     "authentication": {
       "allowedClients": ["scope:app", "scope:package:supabase"],
@@ -27,21 +27,13 @@
       "description": "LangGraph AI agent; only portal can orchestrate"
     },
     "design-tokens": {
-      "allowedClients": [
-        "scope:app",
-        "scope:package:ui",
-        "scope:package:theme"
-      ],
+      "allowedClients": ["scope:app", "scope:package:ui", "scope:package:theme"],
       "dbAccess": false,
       "auditRequired": false,
       "description": "OKLCH design tokens from @repo/theme"
     },
     "ui-rendering": {
-      "allowedClients": [
-        "scope:app:portal",
-        "scope:app:cms",
-        "scope:app:overview"
-      ],
+      "allowedClients": ["scope:app:portal", "scope:app:cms", "scope:app:overview"],
       "dbAccess": false,
       "auditRequired": false,
       "description": "React components and shadcn primitives"

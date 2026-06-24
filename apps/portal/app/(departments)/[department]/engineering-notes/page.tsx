@@ -3,6 +3,7 @@ import { KPIGrid, KPICard } from "@repo/ui/KPI";
 import { PageHeader } from "@repo/ui/PageHeader";
 import { EngineeringNotesForm } from "./EngineeringNotesForm";
 import { EngineeringNotesList } from "./EngineeringNotesList";
+import { PredictiveAlertsWidget } from "./PredictiveAlertsWidget";
 
 export default async function EngineeringNotesPage({
   params,
@@ -22,39 +23,32 @@ export default async function EngineeringNotesPage({
   // 2. Are either active or completed today
   // 3. Only exposes required fields (no repair_notes, created_by, etc.)
   // The view is read-only and enforced by RLS policies on the base table.
-  const [{ data: machines }, { data: todayNotes }, { data: engBreakdowns }] =
-    await Promise.all([
-      supabase
-        .from("machines")
-        .select("id, name, machine_type")
-        .eq("active", true)
-        .order("name"),
-      supabase
-        .from("engineering_notes")
-        .select("*, machine:machines(name, sites(name))")
-        .eq("department_id", deptId)
-        .eq("note_date", today)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("breakdowns_control_room_view")
-        .select("*")
-        .order("created_at", { ascending: false }),
-    ]);
+  const [{ data: machines }, { data: todayNotes }, { data: engBreakdowns }] = await Promise.all([
+    supabase.from("machines").select("id, name, machine_type").eq("active", true).order("name"),
+    supabase
+      .from("engineering_notes")
+      .select("*, machine:machines(name, sites(name))")
+      .eq("department_id", deptId)
+      .eq("note_date", today)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("breakdowns_control_room_view")
+      .select("*")
+      .order("created_at", { ascending: false }),
+  ]);
 
   // Calculate statistics
-  const criticalCount =
-    todayNotes?.filter((n) => n.severity === "critical").length || 0;
+  const criticalCount = todayNotes?.filter((n) => n.severity === "critical").length || 0;
   const openCount =
-    todayNotes?.filter((n) => n.status === "open" || n.status === "in_progress")
-      .length || 0;
-  const resolvedCount =
-    todayNotes?.filter((n) => n.status === "resolved").length || 0;
-  const followUpCount =
-    todayNotes?.filter((n) => n.requires_follow_up).length || 0;
+    todayNotes?.filter((n) => n.status === "open" || n.status === "in_progress").length || 0;
+  const resolvedCount = todayNotes?.filter((n) => n.status === "resolved").length || 0;
+  const followUpCount = todayNotes?.filter((n) => n.requires_follow_up).length || 0;
 
   return (
     <div className="space-y-6">
       <PageHeader title="Engineering Notes" />
+
+      <PredictiveAlertsWidget />
 
       <KPIGrid cols={4}>
         <KPICard label="Critical" value={criticalCount} color="red" />

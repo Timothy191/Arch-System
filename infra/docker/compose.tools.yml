@@ -22,11 +22,7 @@ services:
     volumes:
       - /home/timothy/.n8n:/home/node/.n8n
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,11 +46,7 @@ services:
     volumes:
       - flowise_data:/root/.flowise
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://localhost:3000/ > /dev/null 2>&1 || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ > /dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -146,11 +138,7 @@ services:
     volumes:
       - langfuse_db_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${LANGFUSE_DB_USER} -d ${LANGFUSE_DB_NAME}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_DB_USER} -d ${LANGFUSE_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -202,15 +190,7 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://127.0.0.1:8123/ping",
-        ]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8123/ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -228,14 +208,7 @@ services:
       - prometheus_data:/prometheus
     healthcheck:
       test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://127.0.0.1:9090/-/healthy",
-        ]
+        ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 5

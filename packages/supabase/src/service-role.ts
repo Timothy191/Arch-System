@@ -14,9 +14,7 @@ export function createServiceRoleClient() {
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) {
-    throw new APIError(
-      "Missing SUPABASE_URL or SUPABASE_SERVICE_KEY environment variables",
-    );
+    throw new APIError("Missing SUPABASE_URL or SUPABASE_SERVICE_KEY environment variables");
   }
   return createClient(url, key, {
     auth: {

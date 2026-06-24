@@ -38,3 +38,11 @@
 - **Files touched**: `src/database.types.ts`, `apps/portal/features/departments/components/engineering/breakdowns/types.ts`, `apps/portal/app/(departments)/[department]/engineering-notes/EngineeringNotesForm.tsx`
 - **Status**: Type-check passes cleanly, migration applied to local database.
 - **Next Steps**: When Supabase CLI is properly authenticated, run `pnpm --filter @repo/database supabase:gen` to regenerate full type definitions and migrate away from manual additions.
+
+## [2026-06-24T07:59:00Z] Phase 1: Architecture and Data Layer
+
+**Purpose:** Updated database types to reflect new employee profile fields.
+**Changes:**
+
+- Updated `manual-types.ts` interfaces (`EmployeesRow`, `EmployeesInsert`, `EmployeesUpdate`) to include the new fields: `first_name`, `last_name`, `national_id`, `job_title`, `areas`, `medical_expiry_date`, `induction_expiry_date`, `qr_code_data`, and `photo_url`.
+  **Next Agent Notes:** Forms interacting with employee data can now use these strongly typed fields.

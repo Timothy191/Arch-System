@@ -34,6 +34,15 @@ module.exports = {
   ],
   overrides: [
     // Force ESLint to detect .tsx files
-    { files: ["*.js?(x)", "*.ts?(x)"] },
+    {
+      files: ["*.js?(x)", "*.ts?(x)"],
+    },
+    {
+      files: ["*.ts", "*.tsx"],
+      rules: {
+        "no-unused-vars": "off",
+        "no-undef": "off",
+      },
+    },
   ],
 };

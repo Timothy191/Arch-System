@@ -14,19 +14,17 @@ test.describe("SCADA overview", () => {
 
   test("loads SCADA Overview section", async ({ page }) => {
     await page.goto("/control-room");
-    await expect(
-      page.getByRole("heading", { name: "SCADA Overview" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "SCADA Overview" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("displays view mode toggle buttons", async ({ page }) => {
     await page.goto("/control-room");
-    await expect(
-      page.getByRole("button", { name: "Machine List" }),
-    ).toBeVisible({ timeout: 15000 });
-    await expect(
-      page.getByRole("button", { name: "SCADA Dashboard" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Machine List" })).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByRole("button", { name: "SCADA Dashboard" })).toBeVisible();
   });
 });
 

@@ -32,9 +32,7 @@ describe("Shift Completeness Validation", () => {
       const warnings = errors.filter((e) => e.severity === "warning");
       expect(warnings).toHaveLength(1);
       expect(warnings[0]!.field).toBe("hours_worked");
-      expect(warnings[0]!.message).toContain(
-        "combined day + night shifts < 16h",
-      );
+      expect(warnings[0]!.message).toContain("combined day + night shifts < 16h");
     });
   });
 
@@ -95,18 +93,10 @@ describe("Shift Completeness Validation", () => {
   describe("validateShiftDataIntegrity", () => {
     it("aggregates validations correctly", () => {
       // Valid run
-      expect(
-        validateShiftDataIntegrity("machine-1", 8, 160, 40, "day"),
-      ).toHaveLength(0);
+      expect(validateShiftDataIntegrity("machine-1", 8, 160, 40, "day")).toHaveLength(0);
 
       // Invalid run with multiple failures: hours > 12, bin_factor > 100, loads per hour too high
-      const errors = validateShiftDataIntegrity(
-        "machine-1",
-        13,
-        800,
-        150,
-        "day",
-      );
+      const errors = validateShiftDataIntegrity("machine-1", 13, 800, 150, "day");
       expect(errors.length).toBeGreaterThanOrEqual(3);
     });
   });
@@ -123,25 +113,19 @@ describe("Shift Completeness Validation", () => {
         from: jest.fn().mockImplementation((table: string) => {
           let responseData: any[] = [];
           if (table === "machines") responseData = data.machines;
-          else if (table === "machine_operations")
-            responseData = data.machineOps;
-          else if (table === "excavator_activity")
-            responseData = data.excavatorActs;
+          else if (table === "machine_operations") responseData = data.machineOps;
+          else if (table === "excavator_activity") responseData = data.excavatorActs;
           else if (table === "dozer_rolls") responseData = data.dozerRolls;
           else if (table === "hourly_loads") responseData = data.hourlyLoads;
 
           return {
             select: jest.fn().mockReturnThis(),
             eq: jest.fn().mockReturnThis(),
-            order: jest
-              .fn()
-              .mockResolvedValue({ data: responseData, error: null }),
+            order: jest.fn().mockResolvedValue({ data: responseData, error: null }),
             // Handle cases where .order is not called but it resolves
             then: jest
               .fn()
-              .mockImplementation((resolve) =>
-                resolve({ data: responseData, error: null }),
-              ),
+              .mockImplementation((resolve) => resolve({ data: responseData, error: null })),
           };
         }),
       } as any;

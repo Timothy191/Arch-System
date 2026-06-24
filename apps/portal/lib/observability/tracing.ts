@@ -30,9 +30,7 @@ export async function withAsyncSpan<T>(
       code: SpanStatusCode.ERROR,
       message: error instanceof Error ? error.message : String(error),
     });
-    span.recordException(
-      error instanceof Error ? error : new Error(String(error)),
-    );
+    span.recordException(error instanceof Error ? error : new Error(String(error)));
     throw error;
   } finally {
     span.end();
@@ -55,9 +53,7 @@ export function addEvent(
 /**
  * Set attributes on the current active span
  */
-export function setAttributes(
-  attributes: Record<string, string | number | boolean>,
-): void {
+export function setAttributes(attributes: Record<string, string | number | boolean>): void {
   const activeSpan = trace.getActiveSpan();
   if (activeSpan) {
     activeSpan.setAttributes(attributes);

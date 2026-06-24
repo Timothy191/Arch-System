@@ -14,12 +14,7 @@ export interface IStore {
 }
 
 export interface IStrategy {
-  check(
-    key: string,
-    limit: number,
-    windowMs: number,
-    store: IStore,
-  ): Promise<RateLimitResult>;
+  check(key: string, limit: number, windowMs: number, store: IStore): Promise<RateLimitResult>;
 }
 
 export interface RateLimitOptions {

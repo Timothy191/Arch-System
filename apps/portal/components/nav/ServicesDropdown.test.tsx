@@ -17,13 +17,7 @@ jest.mock("@repo/ui/components/ui/dropdown-menu", () => {
         </div>
       );
     },
-    DropdownMenuTrigger: ({
-      children,
-      asChild,
-      onClick,
-      isOpen,
-      onOpenChange,
-    }: any) => {
+    DropdownMenuTrigger: ({ children, asChild, onClick, isOpen, onOpenChange }: any) => {
       const handleClick = (e: any) => {
         if (onClick) onClick(e);
         if (onOpenChange) onOpenChange(!isOpen);
@@ -223,9 +217,7 @@ describe("ServicesDropdown", () => {
 
     fireEvent.click(screen.getByText("Click anywhere to unlock"));
     await waitFor(() => {
-      expect(
-        screen.queryByText("Click anywhere to unlock"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Click anywhere to unlock")).not.toBeInTheDocument();
     });
   });
 
@@ -247,9 +239,7 @@ describe("ServicesDropdown", () => {
     fireEvent.click(shutDownItem);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("It is now safe to turn off your computer."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("It is now safe to turn off your computer.")).toBeInTheDocument();
     });
   });
 

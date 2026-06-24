@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import type { STACItem, DeformationReading } from "@/lib/monitoring-api";
-import {
-  formatSceneDate,
-  ALERT_THRESHOLDS,
-  getSentinel1RevisitDates,
-} from "@/lib/monitoring-api";
+import { formatSceneDate, ALERT_THRESHOLDS, getSentinel1RevisitDates } from "@/lib/monitoring-api";
 import { DeformationVelocityChart } from "./DeformationVelocityChart";
 
 interface SARLayerPanelProps {
@@ -32,14 +28,8 @@ const AREA_LABELS: Record<string, string> = {
   "processing-plant": "Processing Plant",
 };
 
-export function SARLayerPanel({
-  scenes,
-  readings = [],
-  onSceneSelect,
-}: SARLayerPanelProps) {
-  const [selectedScene, setSelectedScene] = useState<string | null>(
-    scenes[0]?.id ?? null,
-  );
+export function SARLayerPanel({ scenes, readings = [], onSceneSelect }: SARLayerPanelProps) {
+  const [selectedScene, setSelectedScene] = useState<string | null>(scenes[0]?.id ?? null);
   const [selectedZone, setSelectedZone] = useState<DeformationReading | null>(
     readings.length > 0 ? readings[0]! : null,
   );
@@ -58,14 +48,11 @@ export function SARLayerPanel({
         <div className="flex items-start gap-3">
           <span className="text-accent-blue text-xl mt-0.5">📡</span>
           <div>
-            <p className="text-sm font-semibold text-accent-blue">
-              Sentinel-1 SAR / InSAR
-            </p>
+            <p className="text-sm font-semibold text-accent-blue">Sentinel-1 SAR / InSAR</p>
             <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              Synthetic Aperture Radar operates through clouds and at night.
-              Differential InSAR (D-InSAR) measures millimetre-level ground
-              deformation between acquisition pairs — critical for pit wall
-              stability monitoring and tailings dam integrity assessments.
+              Synthetic Aperture Radar operates through clouds and at night. Differential InSAR
+              (D-InSAR) measures millimetre-level ground deformation between acquisition pairs —
+              critical for pit wall stability monitoring and tailings dam integrity assessments.
             </p>
           </div>
         </div>
@@ -75,11 +62,10 @@ export function SARLayerPanel({
       <div className="p-3 rounded-xl bg-accent-blue/10 border border-accent-blue/20 flex items-start gap-2">
         <span className="text-accent-blue text-sm mt-0.5 shrink-0">⚠</span>
         <p className="text-[11px] text-accent-blue/80 leading-relaxed">
-          <strong>LOS displacement, not vertical:</strong> All deformation
-          values are Line-of-Sight (LOS) measurements at the satellite's
-          incidence angle (~38–40°). True vertical subsidence = LOS ÷
-          cos(θ_inc). Decomposition into horizontal + vertical components
-          requires ascending + descending passes.
+          <strong>LOS displacement, not vertical:</strong> All deformation values are Line-of-Sight
+          (LOS) measurements at the satellite's incidence angle (~38–40°). True vertical subsidence
+          = LOS ÷ cos(θ_inc). Decomposition into horizontal + vertical components requires ascending
+          + descending passes.
         </p>
       </div>
 
@@ -100,10 +86,7 @@ export function SARLayerPanel({
         </div>
         <div className="flex justify-between mt-1">
           {COLORMAP_STEPS.map((step) => (
-            <span
-              key={step.label}
-              className="text-[9px] text-[var(--text-secondary)]"
-            >
+            <span key={step.label} className="text-[9px] text-[var(--text-secondary)]">
               {step.label}
             </span>
           ))}
@@ -121,28 +104,16 @@ export function SARLayerPanel({
         <table className="w-full text-[11px]">
           <thead>
             <tr>
-              <th
-                scope="col"
-                className="text-left text-[var(--text-secondary)] pb-1.5 font-medium"
-              >
+              <th scope="col" className="text-left text-[var(--text-secondary)] pb-1.5 font-medium">
                 Area
               </th>
-              <th
-                scope="col"
-                className="text-center text-accent-blue pb-1.5 font-medium"
-              >
+              <th scope="col" className="text-center text-accent-blue pb-1.5 font-medium">
                 Minor
               </th>
-              <th
-                scope="col"
-                className="text-center text-accent-blue pb-1.5 font-medium"
-              >
+              <th scope="col" className="text-center text-accent-blue pb-1.5 font-medium">
                 Moderate
               </th>
-              <th
-                scope="col"
-                className="text-center text-accent-red pb-1.5 font-medium"
-              >
+              <th scope="col" className="text-center text-accent-red pb-1.5 font-medium">
                 Critical
               </th>
             </tr>
@@ -155,18 +126,10 @@ export function SARLayerPanel({
               ][]
             ).map(([area, t]) => (
               <tr key={area}>
-                <td className="py-1 text-[var(--text-muted)]">
-                  {AREA_LABELS[area] ?? area}
-                </td>
-                <td className="py-1 text-center text-accent-blue">
-                  ≥{t.minor}
-                </td>
-                <td className="py-1 text-center text-accent-blue">
-                  ≥{t.moderate}
-                </td>
-                <td className="py-1 text-center text-accent-red">
-                  ≥{t.critical}
-                </td>
+                <td className="py-1 text-[var(--text-muted)]">{AREA_LABELS[area] ?? area}</td>
+                <td className="py-1 text-center text-accent-blue">≥{t.minor}</td>
+                <td className="py-1 text-center text-accent-blue">≥{t.moderate}</td>
+                <td className="py-1 text-center text-accent-red">≥{t.critical}</td>
               </tr>
             ))}
           </tbody>
@@ -203,8 +166,8 @@ export function SARLayerPanel({
                 height={90}
               />
               <p className="text-[10px] text-[var(--text-secondary)] mt-2">
-                LOS incidence angle: {selectedZone.losAngleDeg}° · Vertical ≈
-                LOS ÷ cos({selectedZone.losAngleDeg}°) ={" "}
+                LOS incidence angle: {selectedZone.losAngleDeg}° · Vertical ≈ LOS ÷ cos(
+                {selectedZone.losAngleDeg}°) ={" "}
                 {Math.abs(
                   Math.round(
                     (selectedZone.velocityMmPerMonth /
@@ -246,9 +209,7 @@ export function SARLayerPanel({
         </div>
         <div className="flex items-center gap-2 mt-3">
           <div className="flex-1 h-px bg-gradient-to-r from-[#3ecf8e] to-[var(--border-emphasis)]" />
-          <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
-            → 60 days
-          </span>
+          <span className="text-[10px] text-[var(--text-secondary)] shrink-0">→ 60 days</span>
         </div>
         <p className="text-[10px] text-[var(--text-secondary)] mt-1">
           Sentinel-1A/B combined repeat: 6 days (when both satellites active)
@@ -302,10 +263,9 @@ export function SARLayerPanel({
       {/* Technical footer */}
       <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-default)]">
         <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
-          Full InSAR time-series processing requires StaMPS, MintPy, or ISCE2
-          pipelines. Pre-computed deformation estimates shown here — contact
-          your geotechnical team for certified InSAR displacement reports per
-          SANS/ISO 17123.
+          Full InSAR time-series processing requires StaMPS, MintPy, or ISCE2 pipelines.
+          Pre-computed deformation estimates shown here — contact your geotechnical team for
+          certified InSAR displacement reports per SANS/ISO 17123.
         </p>
       </div>
     </div>

@@ -73,9 +73,7 @@ function mergeExtra(
     }
   }
   for (const key of Object.keys(extra)) {
-    (next as Record<string, unknown>)[key] = (extra as Record<string, unknown>)[
-      key
-    ];
+    (next as Record<string, unknown>)[key] = (extra as Record<string, unknown>)[key];
   }
   return next;
 }
@@ -149,10 +147,7 @@ export class ValidationError extends AppError {
       context: { ...options?.context, ...extra },
     });
     const { field: _field, value: _value, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }
@@ -175,10 +170,7 @@ export class AuthError extends AppError {
       context: options?.context,
     });
     const { cause: _cause, context: _context, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }
@@ -201,10 +193,7 @@ export class DatabaseError extends AppError {
       context: options?.context,
     });
     const { cause: _cause, context: _context, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }
@@ -227,10 +216,7 @@ export class NotFoundError extends AppError {
       context: options?.context,
     });
     const { cause: _cause, context: _context, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }
@@ -253,10 +239,7 @@ export class ConflictError extends AppError {
       context: options?.context,
     });
     const { cause: _cause, context: _context, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }
@@ -279,10 +262,7 @@ export class ForbiddenError extends AppError {
       context: options?.context,
     });
     const { cause: _cause, context: _context, ...rest } = options ?? {};
-    const merged = mergeExtra(
-      this.context,
-      (rest as Record<string, unknown>) ?? {},
-    );
+    const merged = mergeExtra(this.context, (rest as Record<string, unknown>) ?? {});
     if (Object.keys(merged).length > 0) {
       this.context = merged;
     }

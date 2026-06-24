@@ -27,18 +27,10 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2 text-xs">
       <p className="font-semibold text-foreground mb-1.5">{label}</p>
       {payload.map((p) => (
-        <div
-          key={`tooltip-${p.name}`}
-          className="flex items-center gap-2 mb-0.5"
-        >
-          <span
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: p.color }}
-          />
+        <div key={`tooltip-${p.name}`} className="flex items-center gap-2 mb-0.5">
+          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
           <span className="text-muted-foreground capitalize">{p.name}:</span>
-          <span className="font-semibold text-foreground tabular-nums">
-            {p.value}
-          </span>
+          <span className="font-semibold text-foreground tabular-nums">{p.value}</span>
         </div>
       ))}
     </div>
@@ -48,10 +40,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export default function HourlyAccessChart({ data }: HourlyAccessChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <AreaChart
-        data={data}
-        margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
-      >
+      <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="gradGranted" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="var(--success)" stopOpacity={0.25} />
@@ -62,11 +51,7 @@ export default function HourlyAccessChart({ data }: HourlyAccessChartProps) {
             <stop offset="95%" stopColor="var(--danger)" stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="var(--border-subtle)"
-          vertical={false}
-        />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
         <XAxis
           dataKey="hour"
           tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}

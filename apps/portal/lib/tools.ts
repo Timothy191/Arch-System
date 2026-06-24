@@ -34,10 +34,7 @@ export async function getTools(): Promise<Tool[]> {
 
   if (error) {
     // eslint-disable-next-line no-console
-    console.warn(
-      "Failed to fetch tools from database, falling back to constant:",
-      error,
-    );
+    console.warn("Failed to fetch tools from database, falling back to constant:", error);
     return PRODUCTIVITY_TOOLS.map((t, i) => ({
       id: String(i),
       name: t.name,
@@ -92,8 +89,7 @@ export const EXTERNAL_TOOLS: ExternalTool[] = [
     name: "flowise",
     displayName: "Flowise",
     url: process.env.FLOWISE_URL ?? "http://localhost:3001",
-    description:
-      "Visual AI workflow builder — drag-and-drop LangChain agents and LLM pipelines",
+    description: "Visual AI workflow builder — drag-and-drop LangChain agents and LLM pipelines",
     icon: "Bot",
     color: "#3ecf8e",
   },

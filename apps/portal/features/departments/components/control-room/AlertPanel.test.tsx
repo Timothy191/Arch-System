@@ -6,13 +6,7 @@ jest.mock("@repo/supabase/client", () => ({
 }));
 
 jest.mock("@repo/ui/GlassCard", () => ({
-  GlassCard: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
     </div>
@@ -25,9 +19,7 @@ function createMockSupabase(data: unknown[]) {
     subscribe: jest.fn().mockReturnThis(),
   };
 
-  const { createBrowserSupabaseClient } = jest.requireMock(
-    "@repo/supabase/client",
-  );
+  const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
   createBrowserSupabaseClient.mockReturnValue({
     from: jest.fn().mockReturnValue({
@@ -64,9 +56,7 @@ describe("AlertPanel", () => {
 
     await waitFor(() => {
       expect(screen.getByText("All Systems Operational")).toBeInTheDocument();
-      expect(
-        screen.getByText("No active alerts at this time."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("No active alerts at this time.")).toBeInTheDocument();
     });
   });
 
@@ -99,9 +89,7 @@ describe("AlertPanel", () => {
     fireEvent.click(screen.getByText("Dismiss"));
 
     await waitFor(() => {
-      expect(
-        screen.queryByText(/Conveyor 1 is offline/),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/Conveyor 1 is offline/)).not.toBeInTheDocument();
     });
   });
 });

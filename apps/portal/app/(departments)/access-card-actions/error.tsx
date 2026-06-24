@@ -19,18 +19,11 @@ export default function AccessCardActionsError({
             <div className="w-12 h-12 rounded-full bg-red-50/70 flex items-center justify-center">
               <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
-            <h2 className="font-medium text-[var(--text-heading)] text-lg">
-              Something went wrong
-            </h2>
+            <h2 className="font-medium text-[var(--text-heading)] text-lg">Something went wrong</h2>
             <p className="text-sm text-[var(--text-muted)]">
               An error occurred while loading this page. Please try again.
             </p>
-            <Button
-              onClick={reset}
-              size="sm"
-              variant="outline"
-              className="mt-2"
-            >
+            <Button onClick={reset} size="sm" variant="outline" className="mt-2">
               <RefreshCw className="w-4 h-4 mr-2" />
               Try again
             </Button>

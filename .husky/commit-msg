@@ -1,1 +1,1 @@
-/home/timothy/.volta/bin/pnpm commitlint
+pnpm commitlint --edit "$1"

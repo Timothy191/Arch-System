@@ -30,7 +30,10 @@
     "@swc/core": "^1.15.40",
     "@vitejs/plugin-react": "^6.0.2",
     "axe-playwright": "^2.2.2",
+    "bundlesize": "^0.18.1",
     "eslint": "catalog:",
+    "eslint-plugin-only-warn": "^1.2.1",
+    "glob": "^13.0.6",
     "husky": "^9.1.7",
     "knip": "^5.45.0",
     "lint-staged": "^17.0.7",
@@ -53,18 +56,6 @@
     "node": ">=22"
   },
   "license": "MIT",
-  "lint-staged": {
-    "*.{css,scss}": [
-      "stylelint --fix",
-      "prettier --write"
-    ],
-    "*.{js,jsx,ts,tsx,md,json}": [
-      "prettier --write"
-    ],
-    "packages/theme/**/*": [
-      "pnpm --filter @repo/theme lint:tokens"
-    ]
-  },
   "markdownlint": {
     "config": "config/.markdownlint.json"
   },
@@ -88,6 +79,7 @@
   "private": true,
   "scripts": {
     "analyze": "ANALYZE=true pnpm --filter portal build",
+    "bundlesize": "bundlesize",
     "audit:design": "node tools/design-audit.cjs",
     "audit:rls": "node tools/audit-rls.cjs",
     "build": "node scripts/sync-assets-smart.cjs && nx run-many -t build",
@@ -108,6 +100,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "fresh-start": "bash scripts/deploy.sh local --clean",
+    "inngest:dev": "bash scripts/inngest-dev.sh",
     "knip": "knip --config config/tools/knip.json --no-config-hints",
     "knip:fix": "knip --config config/tools/knip.json --fix --no-config-hints",
     "lint": "nx run-many -t lint",
@@ -119,10 +112,11 @@
     "monitor:bundle": "bash scripts/monitor-bundle-size.sh",
     "monitor:grafana": "docker compose -f docker/docker-compose.monitoring.yml up -d",
     "monitor:grafana-stop": "docker compose -f docker/docker-compose.monitoring.yml down",
-    "policy:check": "node tools/policy-compiler.cjs --check",
+    "policy:check": "node tools/policy-compiler.cjs --check && pnpm policy:security --ci",
     "policy:gen": "node tools/policy-compiler.cjs",
+    "policy:security": "node tools/enforce-security-checks.cjs",
     "prepare": "husky",
-    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm lint:styles && pnpm format:check && pnpm deps:lint && pnpm knip",
+    "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm lint:styles && pnpm format:check && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:rls && pnpm audit:design",
     "shutdown": "bash scripts/shutdown.sh",
     "sync-assets": "node scripts/sync-assets-smart.cjs",
     "test": "nx run-many -t test",

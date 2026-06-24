@@ -61,14 +61,11 @@ function mdToHtml(md, slugMap) {
 
   // Escape HTML in code blocks first, then restore later
   const codeBlocks = [];
-  html = html.replace(
-    /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g,
-    (_, lang, code) => {
-      const idx = codeBlocks.length;
-      codeBlocks.push({ lang, code: escapeHtml(code) });
-      return `\x00CODEBLOCK${idx}\x00`;
-    },
-  );
+  html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const idx = codeBlocks.length;
+    codeBlocks.push({ lang, code: escapeHtml(code) });
+    return `\x00CODEBLOCK${idx}\x00`;
+  });
 
   const inlineCodes = [];
   html = html.replace(/`([^`]+)`/g, (_, code) => {
@@ -78,17 +75,14 @@ function mdToHtml(md, slugMap) {
   });
 
   // Wikilinks
-  html = html.replace(
-    /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
-    (_, target, display) => {
-      const t = target.trim().replace(/\s+/g, "-").toLowerCase();
-      const d = (display || target).trim();
-      if (slugMap.has(t)) {
-        return `<a class="wiki-link" href="#page=${t}">${escapeHtml(d)}</a>`;
-      }
-      return `<span class="wiki-link missing" title="Missing page: ${escapeHtml(t)}">${escapeHtml(d)}</span>`;
-    },
-  );
+  html = html.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, display) => {
+    const t = target.trim().replace(/\s+/g, "-").toLowerCase();
+    const d = (display || target).trim();
+    if (slugMap.has(t)) {
+      return `<a class="wiki-link" href="#page=${t}">${escapeHtml(d)}</a>`;
+    }
+    return `<span class="wiki-link missing" title="Missing page: ${escapeHtml(t)}">${escapeHtml(d)}</span>`;
+  });
 
   // Headings
   html = html.replace(/^###### (.*)$/gm, "<h6>$1</h6>");
@@ -107,32 +101,29 @@ function mdToHtml(md, slugMap) {
   html = html.replace(/<\/blockquote>\n<blockquote>/g, "<br>");
 
   // Tables (simple parser)
-  html = html.replace(
-    /(\|.*\|[ \t]*\n)(\|[-:\| \t]+\|[ \t]*\n)((?:\|.*\|[ \t]*\n)+)/g,
-    (match) => {
-      const lines = match.trim().split("\n");
-      if (lines.length < 3) return match;
-      let out = "<table><thead><tr>";
-      const headers = lines[0]
+  html = html.replace(/(\|.*\|[ \t]*\n)(\|[-:\| \t]+\|[ \t]*\n)((?:\|.*\|[ \t]*\n)+)/g, (match) => {
+    const lines = match.trim().split("\n");
+    if (lines.length < 3) return match;
+    let out = "<table><thead><tr>";
+    const headers = lines[0]
+      .split("|")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const h of headers) out += `<th>${h}</th>`;
+    out += "</tr></thead><tbody>";
+    for (let i = 2; i < lines.length; i++) {
+      const cells = lines[i]
         .split("|")
         .map((s) => s.trim())
         .filter(Boolean);
-      for (const h of headers) out += `<th>${h}</th>`;
-      out += "</tr></thead><tbody>";
-      for (let i = 2; i < lines.length; i++) {
-        const cells = lines[i]
-          .split("|")
-          .map((s) => s.trim())
-          .filter(Boolean);
-        if (!cells.length) continue;
-        out += "<tr>";
-        for (const c of cells) out += `<td>${c}</td>`;
-        out += "</tr>";
-      }
-      out += "</tbody></table>";
-      return out;
-    },
-  );
+      if (!cells.length) continue;
+      out += "<tr>";
+      for (const c of cells) out += `<td>${c}</td>`;
+      out += "</tr>";
+    }
+    out += "</tbody></table>";
+    return out;
+  });
 
   // Lists
   html = html.replace(/(^|\n)((?:\s*[-*+] .+\n?)+)/g, (_, pre, block) => {
@@ -169,10 +160,7 @@ function mdToHtml(md, slugMap) {
   html = html.replace(/\*([^*]+)\*/g, "<i>$1</i>");
 
   // Restore inline code
-  html = html.replace(
-    /\x00INLINECODE(\d+)\x00/g,
-    (_, idx) => `<code>${inlineCodes[+idx]}</code>`,
-  );
+  html = html.replace(/\x00INLINECODE(\d+)\x00/g, (_, idx) => `<code>${inlineCodes[+idx]}</code>`);
 
   // Restore code blocks
   html = html.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
@@ -228,9 +216,7 @@ function walk(dir) {
         sources: Array.isArray(meta.sources) ? meta.sources : [],
         confidence: meta.confidence || "",
         contested: meta.contested || false,
-        contradictions: Array.isArray(meta.contradictions)
-          ? meta.contradictions
-          : [],
+        contradictions: Array.isArray(meta.contradictions) ? meta.contradictions : [],
         created: meta.created || "",
         updated: meta.updated || "",
         source_url: meta.source_url || "",
@@ -290,20 +276,10 @@ const groups = {
   concept: pageData.filter((p) => p.type === "concept"),
   comparison: pageData.filter((p) => p.type === "comparison"),
   query: pageData.filter((p) => p.type === "query"),
-  raw: pageData.filter(
-    (p) => p.slug.startsWith("raw-") || p.rel.startsWith("raw/"),
-  ),
+  raw: pageData.filter((p) => p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
   other: pageData.filter(
     (p) =>
-      ![
-        "index",
-        "SCHEMA",
-        "log",
-        "entity",
-        "concept",
-        "comparison",
-        "query",
-      ].includes(p.type) &&
+      !["index", "SCHEMA", "log", "entity", "concept", "comparison", "query"].includes(p.type) &&
       !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
   ),
 };

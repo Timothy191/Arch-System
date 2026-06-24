@@ -44,9 +44,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
 
   useUnsavedChangesWarning(isDirty);
 
-  const [status, setStatus] = useState<
-    "idle" | "submitting" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const shiftValue = watch("shift");
 
   async function onSubmit(data: DailyLogFormValues) {
@@ -72,11 +70,9 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       toast.success("Daily log saved successfully");
 
       // Revalidate cached RSC data
-      revalidateRSC(["table:daily_logs", "table:production_logs"]).catch(
-        (err) => {
-          logError(err instanceof Error ? err : new Error(String(err)));
-        },
-      );
+      revalidateRSC(["table:daily_logs", "table:production_logs"]).catch((err) => {
+        logError(err instanceof Error ? err : new Error(String(err)));
+      });
 
       // Speculatively generate embedding for the notes in background
       if (data.notes && data.notes.trim() !== "") {
@@ -97,10 +93,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Shift selector */}
       <div className="space-y-2">
-        <label
-          htmlFor="shift-day"
-          className="block text-sm text-[var(--text-muted)]"
-        >
+        <label htmlFor="shift-day" className="block text-sm text-[var(--text-muted)]">
           Shift
         </label>
         <ShiftToggle
@@ -116,9 +109,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       {/* Machines list (read-only reference) */}
       {machines.length > 0 && (
         <div className="space-y-2">
-          <label className="block text-sm text-[var(--text-muted)]">
-            Machines
-          </label>
+          <label className="block text-sm text-[var(--text-muted)]">Machines</label>
           <div className="flex flex-wrap gap-2">
             {machines.map((m) => (
               <span
@@ -134,10 +125,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
 
       {/* Notes */}
       <div className="space-y-2">
-        <label
-          htmlFor="daily-log-notes"
-          className="block text-sm text-[var(--text-muted)]"
-        >
+        <label htmlFor="daily-log-notes" className="block text-sm text-[var(--text-muted)]">
           Notes
         </label>
         <textarea
@@ -154,10 +142,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
           aria-describedby={errors.notes ? "daily-log-notes-error" : undefined}
         />
         {errors.notes && (
-          <p
-            id="daily-log-notes-error"
-            className="text-accent-red text-xs mt-1"
-          >
+          <p id="daily-log-notes-error" className="text-accent-red text-xs mt-1">
             {errors.notes.message}
           </p>
         )}
@@ -170,20 +155,12 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
         </SecondaryButton>
 
         {status === "success" && (
-          <span
-            className="text-sm text-accent-green"
-            role="status"
-            aria-live="polite"
-          >
+          <span className="text-sm text-accent-green" role="status" aria-live="polite">
             Log saved successfully.
           </span>
         )}
         {status === "error" && (
-          <span
-            className="text-sm text-accent-red"
-            role="alert"
-            aria-live="assertive"
-          >
+          <span className="text-sm text-accent-red" role="alert" aria-live="assertive">
             Failed to save log. Please try again.
           </span>
         )}

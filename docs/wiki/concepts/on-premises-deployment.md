@@ -156,7 +156,7 @@ For quick production updates (git pull + restart without rebuilding):
 Install as a systemd service for auto-start on boot:
 
 ```bash
-sudo cp infra/systemd/arch-systems.service /etc/infra/systemd/system/
+sudo cp infra/systemd/arch-systems.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now arch-systems
 # Check status:

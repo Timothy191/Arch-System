@@ -1,17 +1,13 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("daily log data entry (unauthenticated)", () => {
-  test("accessing daily-log redirects to login with correct return path", async ({
-    page,
-  }) => {
+  test("accessing daily-log redirects to login with correct return path", async ({ page }) => {
     await page.goto("/drilling/daily-log");
     await expect(page).toHaveURL(/\/login/);
     expect(page.url()).toContain("redirect=%2Fdrilling%2Fdaily-log");
   });
 
-  test("accessing production daily-log redirects to login", async ({
-    page,
-  }) => {
+  test("accessing production daily-log redirects to login", async ({ page }) => {
     await page.goto("/production/daily-log");
     await expect(page).toHaveURL(/\/login/);
     expect(page.url()).toContain("redirect=%2Fproduction%2Fdaily-log");
@@ -25,9 +21,7 @@ test.describe("daily log data entry (unauthenticated)", () => {
 });
 
 test.describe("breakdown data entry (unauthenticated)", () => {
-  test("accessing engineering breakdowns redirects to login", async ({
-    page,
-  }) => {
+  test("accessing engineering breakdowns redirects to login", async ({ page }) => {
     await page.goto("/engineering/breakdowns");
     await expect(page).toHaveURL(/\/login/);
     expect(page.url()).toContain("redirect=%2Fengineering%2Fbreakdowns");
@@ -35,39 +29,27 @@ test.describe("breakdown data entry (unauthenticated)", () => {
 });
 
 test.describe("machine operations data entry (unauthenticated)", () => {
-  test("accessing control-room machine-operations redirects to login", async ({
-    page,
-  }) => {
+  test("accessing control-room machine-operations redirects to login", async ({ page }) => {
     await page.goto("/control-room/machine-operations");
     await expect(page).toHaveURL(/\/login/);
-    expect(page.url()).toContain(
-      "redirect=%2Fcontrol-room%2Fmachine-operations",
-    );
+    expect(page.url()).toContain("redirect=%2Fcontrol-room%2Fmachine-operations");
   });
 
-  test("accessing control-room hourly-loads redirects to login", async ({
-    page,
-  }) => {
+  test("accessing control-room hourly-loads redirects to login", async ({ page }) => {
     await page.goto("/control-room/hourly-loads");
     await expect(page).toHaveURL(/\/login/);
     expect(page.url()).toContain("redirect=%2Fcontrol-room%2Fhourly-loads");
   });
 
-  test("accessing control-room operational-delays redirects to login", async ({
-    page,
-  }) => {
+  test("accessing control-room operational-delays redirects to login", async ({ page }) => {
     await page.goto("/control-room/operational-delays");
     await expect(page).toHaveURL(/\/login/);
-    expect(page.url()).toContain(
-      "redirect=%2Fcontrol-room%2Foperational-delays",
-    );
+    expect(page.url()).toContain("redirect=%2Fcontrol-room%2Foperational-delays");
   });
 });
 
 test.describe("login form data entry", () => {
-  test("submitting empty credentials does not navigate away", async ({
-    page,
-  }) => {
+  test("submitting empty credentials does not navigate away", async ({ page }) => {
     await page.goto("/login");
     await page.locator("button[type='submit']").click();
     await expect(page).toHaveURL(/\/login/);
@@ -94,15 +76,10 @@ test.describe("login form data entry", () => {
     await expect(passwordInput).toHaveAttribute("type", "password");
   });
 
-  test("submitting invalid credentials shows error message", async ({
-    page,
-  }) => {
+  test("submitting invalid credentials shows error message", async ({ page }) => {
     await page.goto("/login");
 
-    await page
-      .locator("input[type='email'], input#email")
-      .first()
-      .fill("bad@email.com");
+    await page.locator("input[type='email'], input#email").first().fill("bad@email.com");
     await page.locator("input[type='password']").first().fill("wrongpassword");
     await page.locator("button[type='submit']").click();
 
@@ -111,9 +88,7 @@ test.describe("login form data entry", () => {
 
     // Error message should appear (generic check for any error text)
     await expect(
-      page
-        .locator("[role='alert'], .text-red-400, [data-testid='error-message']")
-        .first(),
+      page.locator("[role='alert'], .text-red-400, [data-testid='error-message']").first(),
     ).toBeVisible({ timeout: 5000 });
   });
 });

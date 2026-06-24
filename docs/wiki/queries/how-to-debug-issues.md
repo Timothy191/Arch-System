@@ -4,8 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: query
 tags: [troubleshooting, debugging, quick-reference, support]
-sources:
-  [docs/wiki/concepts/troubleshooting.md, docs/wiki/concepts/onboarding.md]
+sources: [docs/wiki/concepts/troubleshooting.md, docs/wiki/concepts/onboarding.md]
 confidence: high
 ---
 

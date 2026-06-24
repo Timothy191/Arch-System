@@ -72,8 +72,7 @@ export function SafetyIncidentForm({
     const newErrors: Record<string, string> = {};
     if (!formData.incidentType) newErrors.incidentType = "Select incident type";
     if (!formData.severityId) newErrors.severityId = "Select severity";
-    if (!formData.description.trim())
-      newErrors.description = "Enter description";
+    if (!formData.description.trim()) newErrors.description = "Enter description";
     if (formData.injuredParties < 0 || formData.injuredParties > 100)
       newErrors.injuredParties = "Invalid number";
     setErrors(newErrors);
@@ -148,17 +147,12 @@ export function SafetyIncidentForm({
   return (
     <GlassCard>
       <form onSubmit={handleSubmit} className="space-y-5">
-        <h3 className="text-lg font-medium text-[var(--text-heading)]">
-          Log Safety Incident
-        </h3>
+        <h3 className="text-lg font-medium text-[var(--text-heading)]">Log Safety Incident</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Incident Type */}
           <div className="space-y-2">
-            <label
-              htmlFor="incident-type"
-              className="text-[var(--text-muted)] text-sm block"
-            >
+            <label htmlFor="incident-type" className="text-[var(--text-muted)] text-sm block">
               Type <span className="text-accent-red">*</span>
             </label>
             <select
@@ -193,9 +187,7 @@ export function SafetyIncidentForm({
             <select
               aria-label="Severity Level"
               value={formData.severityId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, severityId: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, severityId: e.target.value }))}
               className="w-full bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[#3ecf8e] transition-colors"
             >
               <option value="">Select severity...</option>
@@ -205,22 +197,16 @@ export function SafetyIncidentForm({
                 </option>
               ))}
             </select>
-            {errors.severityId && (
-              <p className="text-accent-red text-xs">{errors.severityId}</p>
-            )}
+            {errors.severityId && <p className="text-accent-red text-xs">{errors.severityId}</p>}
           </div>
 
           {/* Category */}
           <div className="space-y-2">
-            <label className="text-[var(--text-muted)] text-sm block">
-              Category
-            </label>
+            <label className="text-[var(--text-muted)] text-sm block">Category</label>
             <select
               aria-label="Incident Category"
               value={formData.categoryId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, categoryId: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, categoryId: e.target.value }))}
               className="w-full bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[#3ecf8e] transition-colors"
             >
               <option value="">Select category...</option>
@@ -236,9 +222,7 @@ export function SafetyIncidentForm({
         {/* Shift & Injured Parties */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[var(--text-muted)] text-sm block">
-              Shift
-            </label>
+            <label className="text-[var(--text-muted)] text-sm block">Shift</label>
             <div className="flex gap-2">
               {["day", "night"].map((shift) => (
                 <button
@@ -263,9 +247,7 @@ export function SafetyIncidentForm({
           </div>
 
           <div className="space-y-2">
-            <label className="text-[var(--text-muted)] text-sm block">
-              Injured Parties
-            </label>
+            <label className="text-[var(--text-muted)] text-sm block">Injured Parties</label>
             <input
               type="number"
               aria-label="Number of Injured Parties"
@@ -292,18 +274,14 @@ export function SafetyIncidentForm({
           <textarea
             aria-label="Description"
             value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             placeholder="Describe the incident..."
             rows={4}
             maxLength={500}
             className="w-full bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[#3ecf8e] transition-colors resize-none"
           />
           <div className="flex justify-between">
-            {errors.description && (
-              <p className="text-accent-red text-xs">{errors.description}</p>
-            )}
+            {errors.description && <p className="text-accent-red text-xs">{errors.description}</p>}
             <p className="text-[var(--text-secondary)] text-xs ml-auto">
               {formData.description.length}/500
             </p>
@@ -312,16 +290,12 @@ export function SafetyIncidentForm({
 
         {/* Location */}
         <div className="space-y-2">
-          <label className="text-[var(--text-muted)] text-sm block">
-            Location
-          </label>
+          <label className="text-[var(--text-muted)] text-sm block">Location</label>
           <input
             type="text"
             aria-label="Location"
             value={formData.location}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, location: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
             placeholder="e.g., Main Pit, South Stockpile"
             className="w-full bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[#3ecf8e]"
           />
@@ -330,23 +304,17 @@ export function SafetyIncidentForm({
         {/* Root Cause & Corrective Action */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[var(--text-muted)] text-sm block">
-              Root Cause
-            </label>
+            <label className="text-[var(--text-muted)] text-sm block">Root Cause</label>
             <input
               type="text"
               value={formData.rootCause}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, rootCause: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, rootCause: e.target.value }))}
               placeholder="Root cause of incident"
               className="w-full bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[#3ecf8e]"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[var(--text-muted)] text-sm block">
-              Corrective Action
-            </label>
+            <label className="text-[var(--text-muted)] text-sm block">Corrective Action</label>
             <input
               type="text"
               value={formData.correctiveAction}
@@ -364,17 +332,13 @@ export function SafetyIncidentForm({
 
         {/* Status */}
         <div className="space-y-2">
-          <label className="text-[var(--text-muted)] text-sm block">
-            Status
-          </label>
+          <label className="text-[var(--text-muted)] text-sm block">Status</label>
           <div className="flex flex-wrap gap-2">
             {STATUSES.map((s) => (
               <button
                 key={s.value}
                 type="button"
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, status: s.value }))
-                }
+                onClick={() => setFormData((prev) => ({ ...prev, status: s.value }))}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   formData.status === s.value
                     ? "bg-[#3ecf8e] text-[var(--text-heading)]"
@@ -396,9 +360,7 @@ export function SafetyIncidentForm({
           >
             {isSubmitting ? "Saving..." : "Log Incident"}
           </button>
-          {errors.submit && (
-            <p className="text-accent-red text-sm">{errors.submit}</p>
-          )}
+          {errors.submit && <p className="text-accent-red text-sm">{errors.submit}</p>}
         </div>
       </form>
     </GlassCard>

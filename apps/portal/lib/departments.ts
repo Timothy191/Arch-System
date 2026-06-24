@@ -290,6 +290,7 @@ export const ACCESS_CONTROL_TABS = [
  */
 export const ACCESS_CARD_ACTIONS_TABS = [
   { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
+  { name: "card-actions", label: "Card Actions", icon: "CreditCard" },
   { name: "print-cards", label: "Print Cards", icon: "Printer" },
   { name: "qr-codes", label: "QR Codes", icon: "QrCode" },
   { name: "reports", label: "Reports", icon: "FileText" },

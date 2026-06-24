@@ -579,9 +579,7 @@ Run lint and fix automatically if possible.
 In a consuming app (e.g., `apps/portal`), test new utility classes:
 
 ```tsx
-<div className="bg-hud text-hud-text-primary rounded-xl shadow-lg opacity-focus-dim">
-  HUD Panel
-</div>
+<div className="bg-hud text-hud-text-primary rounded-xl shadow-lg opacity-focus-dim">HUD Panel</div>
 ```
 
 Ensure styles resolve correctly at compile time.
@@ -646,15 +644,8 @@ import { useRef, useState, useCallback } from "react";
 import { useReducedMotion } from "framer-motion"; // or custom hook
 import clsx from "clsx";
 
-export function GlassCard({
-  variant = "default",
-  children,
-  className,
-  ...props
-}: GlassCardProps) {
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
-    null,
-  );
+export function GlassCard({ variant = "default", children, className, ...props }: GlassCardProps) {
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReduced = useReducedMotion();
 
@@ -694,9 +685,7 @@ export function GlassCard({
           style={spotlightStyle}
         />
       )}
-      {variant === "glowborder" && (
-        <div className="glow-border-overlay" aria-hidden="true" />
-      )}
+      {variant === "glowborder" && <div className="glow-border-overlay" aria-hidden="true" />}
       {children}
     </div>
   );

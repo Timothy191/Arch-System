@@ -9,11 +9,7 @@ const config: StorybookConfig = {
     "../src/components/**/*.@(mdx|stories.@(js|jsx|ts|tsx))",
     "../src/lib/**/*.@(mdx|stories.@(js|jsx|ts|tsx))",
   ],
-  addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "@storybook/addon-a11y",
-  ],
+  addons: ["@storybook/addon-essentials", "@storybook/addon-interactions", "@storybook/addon-a11y"],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},

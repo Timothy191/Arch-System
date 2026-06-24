@@ -83,18 +83,18 @@ describe("PluginOrchestrator.executeEngine", () => {
     const { pluginOrchestrator } = await import("./orchestrator");
     const { NotFoundError } = await import("@/lib/errors/error-classes");
 
-    await expect(
-      pluginOrchestrator.executeEngine("nonexistent-plugin"),
-    ).rejects.toThrow(NotFoundError);
+    await expect(pluginOrchestrator.executeEngine("nonexistent-plugin")).rejects.toThrow(
+      NotFoundError,
+    );
   });
 
   it("throws NotFoundError with plugin ID in message", async () => {
     jest.resetModules();
     const { pluginOrchestrator } = await import("./orchestrator");
 
-    await expect(
-      pluginOrchestrator.executeEngine("some-missing-id"),
-    ).rejects.toThrow("some-missing-id");
+    await expect(pluginOrchestrator.executeEngine("some-missing-id")).rejects.toThrow(
+      "some-missing-id",
+    );
   });
 });
 
@@ -178,9 +178,7 @@ describe("PluginOrchestrator.executeEngine – success", () => {
     };
     injectMockPlugin(pluginOrchestrator, "crash-plugin", mockPlugin);
 
-    await expect(
-      pluginOrchestrator.executeEngine("crash-plugin"),
-    ).rejects.toThrow(APIError);
+    await expect(pluginOrchestrator.executeEngine("crash-plugin")).rejects.toThrow(APIError);
   });
 });
 
@@ -227,9 +225,7 @@ describe("PluginOrchestrator.triggerHook – with hooks", () => {
     };
     injectMockPlugin(pluginOrchestrator, "bad-hook-plugin", mockPlugin);
 
-    await expect(
-      pluginOrchestrator.triggerHook("onLogCreated", {}),
-    ).resolves.toBeUndefined();
+    await expect(pluginOrchestrator.triggerHook("onLogCreated", {})).resolves.toBeUndefined();
   });
 });
 

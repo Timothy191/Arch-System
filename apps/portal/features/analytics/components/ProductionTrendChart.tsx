@@ -14,13 +14,9 @@ export interface ProductionTrendChartProps {
   showForecast?: boolean;
 }
 
-export function ProductionTrendChart({
-  data,
-  showForecast = true,
-}: ProductionTrendChartProps) {
+export function ProductionTrendChart({ data, showForecast = true }: ProductionTrendChartProps) {
   const coalValues = data.map((d) => d.coal);
-  const forecast: number[] =
-    showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
+  const forecast: number[] = showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
 
   const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
 
@@ -53,9 +49,7 @@ export function ProductionTrendChart({
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-48">
-        <Text className="text-[var(--text-muted)]">
-          No production data in the last 30 days
-        </Text>
+        <Text className="text-[var(--text-muted)]">No production data in the last 30 days</Text>
       </div>
     );
   }

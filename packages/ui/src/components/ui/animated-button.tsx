@@ -45,14 +45,36 @@ interface AnimatedButtonProps
   tapScale?: number;
 }
 
-export const AnimatedButton = React.forwardRef<
-  HTMLButtonElement,
-  AnimatedButtonProps
->(
-  (
-    { className, variant, size, hoverScale = 1.02, tapScale = 0.97, ...props },
-    ref,
-  ) => {
+export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
+  ({ className, variant, size, hoverScale = 1.02, tapScale = 0.97, children, ...props }, ref) => {
+    const isUiverse = variant === "default" || variant === "accent" || !variant;
+    const hasCustomBg = className && (className.includes("bg-") || className.includes("bg-["));
+
+    if (isUiverse && !hasCustomBg) {
+      const sizeClass =
+        size === "sm"
+          ? "button-sm"
+          : size === "lg"
+            ? "button-lg"
+            : size === "icon"
+              ? "button-sm p-1 w-10 h-10"
+              : "button-md";
+
+      return (
+        <motion.button
+          ref={ref}
+          whileHover={{ scale: hoverScale }}
+          whileTap={{ scale: tapScale }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          className={cn("button", sizeClass, className)}
+          {...props}
+        >
+          <span className="blob1" />
+          <span className="inner">{children as React.ReactNode}</span>
+        </motion.button>
+      );
+    }
+
     return (
       <motion.button
         ref={ref}
@@ -61,7 +83,9 @@ export const AnimatedButton = React.forwardRef<
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
         className={cn(animatedButtonVariants({ variant, size, className }))}
         {...props}
-      />
+      >
+        {children}
+      </motion.button>
     );
   },
 );

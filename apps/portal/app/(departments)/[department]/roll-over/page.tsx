@@ -24,25 +24,18 @@ export default async function RollOverPage({
   // Fetch today's roll data — include site via machine join
   const { data: todayRolls } = await supabase
     .from("dozer_rolls")
-    .select(
-      "*, machine:machines(name, site_id, sites(name)), operator:operators(full_name)",
-    )
+    .select("*, machine:machines(name, site_id, sites(name)), operator:operators(full_name)")
     .eq("department_id", deptId)
     .eq("roll_date", today);
 
-  const totalPasses =
-    todayRolls?.reduce((sum, r) => sum + (r.blade_passes || 0), 0) || 0;
-  const totalPushes =
-    todayRolls?.reduce((sum, r) => sum + (r.push_count || 0), 0) || 0;
-  const totalHours =
-    todayRolls?.reduce((sum, r) => sum + (r.hours_operated || 0), 0) || 0;
+  const totalPasses = todayRolls?.reduce((sum, r) => sum + (r.blade_passes || 0), 0) || 0;
+  const totalPushes = todayRolls?.reduce((sum, r) => sum + (r.push_count || 0), 0) || 0;
+  const totalHours = todayRolls?.reduce((sum, r) => sum + (r.hours_operated || 0), 0) || 0;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">
-          Roll Over (Dozers)
-        </h2>
+        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Roll Over (Dozers)</h2>
         <p className="text-[var(--text-muted)] text-sm">
           {new Date().toLocaleDateString("en-ZA", {
             weekday: "long",
@@ -69,9 +62,7 @@ export default async function RollOverPage({
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Hours Operated</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">
-            {totalHours.toFixed(1)}h
-          </p>
+          <p className="text-2xl font-medium text-accent-green mt-1">{totalHours.toFixed(1)}h</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Active Dozers</p>
@@ -82,11 +73,7 @@ export default async function RollOverPage({
       </div>
 
       {/* Add Roll Form */}
-      <DozerRollForm
-        departmentId={deptId}
-        dozers={dozers || []}
-        today={today}
-      />
+      <DozerRollForm departmentId={deptId} dozers={dozers || []} today={today} />
 
       {/* Roll List — grouped by site → shift */}
       {todayRolls &&
@@ -94,24 +81,13 @@ export default async function RollOverPage({
         (() => {
           // Build site map
           type RollRow = (typeof todayRolls)[number];
-          const siteMap = new Map<
-            string,
-            { siteName: string; rolls: RollRow[] }
-          >();
+          const siteMap = new Map<string, { siteName: string; rolls: RollRow[] }>();
 
           for (const roll of todayRolls) {
-            const machine = Array.isArray(roll.machine)
-              ? roll.machine[0]
-              : roll.machine;
-            const siteId =
-              (machine as { site_id?: string | null } | null)?.site_id ??
-              "__none__";
-            const sites = (
-              machine as { sites?: { name: string }[] | null } | null
-            )?.sites;
-            const siteName =
-              (Array.isArray(sites) ? sites[0]?.name : null) ??
-              "No Site Assigned";
+            const machine = Array.isArray(roll.machine) ? roll.machine[0] : roll.machine;
+            const siteId = (machine as { site_id?: string | null } | null)?.site_id ?? "__none__";
+            const sites = (machine as { sites?: { name: string }[] | null } | null)?.sites;
+            const siteName = (Array.isArray(sites) ? sites[0]?.name : null) ?? "No Site Assigned";
 
             if (!siteMap.has(siteId)) {
               siteMap.set(siteId, { siteName, rolls: [] });
@@ -127,23 +103,13 @@ export default async function RollOverPage({
 
           return (
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-[var(--text-heading)]">
-                Today&apos;s Rolls
-              </h3>
+              <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Rolls</h3>
 
               {siteEntries.map(([siteKey, { siteName, rolls }]) => {
-                const sitePasses = rolls.reduce(
-                  (sum, r) => sum + (r.blade_passes || 0),
-                  0,
-                );
-                const siteHours = rolls.reduce(
-                  (sum, r) => sum + (r.hours_operated || 0),
-                  0,
-                );
+                const sitePasses = rolls.reduce((sum, r) => sum + (r.blade_passes || 0), 0);
+                const siteHours = rolls.reduce((sum, r) => sum + (r.hours_operated || 0), 0);
                 const dayRolls = rolls.filter((r) => r.shift_type === "day");
-                const nightRolls = rolls.filter(
-                  (r) => r.shift_type === "night",
-                );
+                const nightRolls = rolls.filter((r) => r.shift_type === "night");
 
                 return (
                   <div key={siteKey} className="space-y-3">
@@ -192,14 +158,12 @@ export default async function RollOverPage({
                                 </p>
                                 {roll.area_covered_sqm > 0 && (
                                   <p className="text-[var(--text-muted)] text-xs">
-                                    {Number(roll.area_covered_sqm).toFixed(2)}{" "}
-                                    m²
+                                    {Number(roll.area_covered_sqm).toFixed(2)} m²
                                   </p>
                                 )}
                                 {roll.material_moved_tonnes && (
                                   <p className="text-[var(--text-muted)] text-xs">
-                                    {roll.material_moved_tonnes.toFixed(1)}{" "}
-                                    tonnes
+                                    {roll.material_moved_tonnes.toFixed(1)} tonnes
                                   </p>
                                 )}
                               </div>
@@ -234,14 +198,12 @@ export default async function RollOverPage({
                                 </p>
                                 {roll.area_covered_sqm > 0 && (
                                   <p className="text-[var(--text-muted)] text-xs">
-                                    {Number(roll.area_covered_sqm).toFixed(2)}{" "}
-                                    m²
+                                    {Number(roll.area_covered_sqm).toFixed(2)} m²
                                   </p>
                                 )}
                                 {roll.material_moved_tonnes && (
                                   <p className="text-[var(--text-muted)] text-xs">
-                                    {roll.material_moved_tonnes.toFixed(1)}{" "}
-                                    tonnes
+                                    {roll.material_moved_tonnes.toFixed(1)} tonnes
                                   </p>
                                 )}
                               </div>

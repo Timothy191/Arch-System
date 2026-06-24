@@ -50,21 +50,9 @@
         width: 140%;
         height: 140%;
         background:
-          radial-gradient(
-            circle at 20% 30%,
-            rgba(59, 130, 246, 0.15) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 80% 70%,
-            rgba(6, 182, 212, 0.1) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 50% 50%,
-            rgba(245, 158, 11, 0.05) 0%,
-            transparent 50%
-          );
+          radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
         filter: blur(80px);
         z-index: 1;
         animation: floatGlow 20s ease-in-out infinite alternate;
@@ -87,16 +75,8 @@
         width: 100%;
         height: 100%;
         background-image:
-          linear-gradient(
-            to right,
-            rgba(255, 255, 255, 0.015) 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0.015) 1px,
-            transparent 1px
-          );
+          linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
         background-size: 40px 40px;
         z-index: 2;
       }
@@ -302,11 +282,7 @@
         font-size: 2.5rem;
         font-weight: 800;
         font-family: var(--font-display);
-        background: linear-gradient(
-          135deg,
-          var(--accent-blue),
-          var(--accent-cyan)
-        );
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 4px;
@@ -373,11 +349,7 @@
       .progress-bar {
         height: 100%;
         width: 0%;
-        background: linear-gradient(
-          90deg,
-          var(--accent-blue),
-          var(--accent-cyan)
-        );
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
         position: absolute;
         top: 0;
         left: 0;
@@ -400,12 +372,7 @@
       .slide-welcome .slide-title {
         font-size: 4rem;
         margin-bottom: 16px;
-        background: linear-gradient(
-          135deg,
-          #ffffff 20%,
-          #60a5fa 60%,
-          #06b6d4 100%
-        );
+        background: linear-gradient(135deg, #ffffff 20%, #60a5fa 60%, #06b6d4 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -560,19 +527,13 @@
       <div class="slide slide-welcome active" id="slide-1">
         <div
           class="glass-panel"
-          style="
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-          "
+          style="align-items: center; justify-content: center; text-align: center"
         >
           <span class="welcome-badge">SYSTEM PREVIEW & ROADMAP</span>
-          <h1 class="slide-title">
-            Arch-Systems (Plantcor)<br />Mining Operations Portal
-          </h1>
+          <h1 class="slide-title">Arch-Systems (Plantcor)<br />Mining Operations Portal</h1>
           <p>
-            A high-performance, multi-departmental command center and data-entry
-            system built for surface mining operations.
+            A high-performance, multi-departmental command center and data-entry system built for
+            surface mining operations.
           </p>
           <div
             style="
@@ -602,8 +563,8 @@
                   <div class="feature-text">
                     <h4>8 Core Operations Departments</h4>
                     <p>
-                      Drilling, Production, Access Control, Engineering, Control
-                      Room, Safety, Training, and Satellite Monitoring.
+                      Drilling, Production, Access Control, Engineering, Control Room, Safety,
+                      Training, and Satellite Monitoring.
                     </p>
                   </div>
                 </li>
@@ -612,9 +573,8 @@
                   <div class="feature-text">
                     <h4>Industrial Grade High-Density Dashboards</h4>
                     <p>
-                      Optimized for low-light control rooms. Visualizes
-                      excavator activities, load grids, and telemetry with
-                      minimal friction.
+                      Optimized for low-light control rooms. Visualizes excavator activities, load
+                      grids, and telemetry with minimal friction.
                     </p>
                   </div>
                 </li>
@@ -623,8 +583,8 @@
                   <div class="feature-text">
                     <h4>Real-Time Telemetry & GIS Mapping</h4>
                     <p>
-                      Combines react-map-gl, satellite SAR, and WebGL elements
-                      to track equipment positions and ground displacements.
+                      Combines react-map-gl, satellite SAR, and WebGL elements to track equipment
+                      positions and ground displacements.
                     </p>
                   </div>
                 </li>
@@ -669,9 +629,8 @@
                   <div class="feature-text">
                     <h4>Turborepo & pnpm Workspaces</h4>
                     <p>
-                      Strict dependency catalogs prevent version drift across
-                      applications (`apps/portal`, `apps/cms`, `apps/overview`)
-                      and shared packages.
+                      Strict dependency catalogs prevent version drift across applications
+                      (`apps/portal`, `apps/cms`, `apps/overview`) and shared packages.
                     </p>
                   </div>
                 </li>
@@ -680,9 +639,8 @@
                   <div class="feature-text">
                     <h4>Supabase with Row-Level Security (RLS)</h4>
                     <p>
-                      All database tables are secured using PostgreSQL policies
-                      scoped to employee authorization records and department
-                      assignments.
+                      All database tables are secured using PostgreSQL policies scoped to employee
+                      authorization records and department assignments.
                     </p>
                   </div>
                 </li>
@@ -691,9 +649,8 @@
                   <div class="feature-text">
                     <h4>Integrated Tools & Cache Tier</h4>
                     <p>
-                      Redis caching handles fast routing, while local services
-                      like LocalStack, n8n workflows, and Langfuse trace logging
-                      run concurrently.
+                      Redis caching handles fast routing, while local services like LocalStack, n8n
+                      workflows, and Langfuse trace logging run concurrently.
                     </p>
                   </div>
                 </li>
@@ -701,17 +658,11 @@
             </div>
             <div class="slide-right" style="height: 280px">
               <div class="tech-diagram">
-                <div class="tech-node highlight">
-                  apps/portal (Next.js 15 + React 19)
-                </div>
+                <div class="tech-node highlight">apps/portal (Next.js 15 + React 19)</div>
                 <div class="tech-arrow">↕ pnpm workspace</div>
-                <div class="tech-node">
-                  packages/ui & packages/theme (Single Source of Truth)
-                </div>
+                <div class="tech-node">packages/ui & packages/theme (Single Source of Truth)</div>
                 <div class="tech-arrow">↕ Supabase Client</div>
-                <div class="tech-node highlight">
-                  PostgreSQL DB + Redis Cache + RLS Policies
-                </div>
+                <div class="tech-node highlight">PostgreSQL DB + Redis Cache + RLS Policies</div>
               </div>
             </div>
           </div>
@@ -732,14 +683,12 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title"
-                        >1. On-Premises & Cockpit Setup</span
-                      >
+                      <span class="timeline-title">1. On-Premises & Cockpit Setup</span>
                       <span class="timeline-meta critical">CRITICAL</span>
                     </div>
                     <p class="timeline-desc">
-                      Establish local edge servers and Cockpit control panels
-                      for reliable offline mining operations.
+                      Establish local edge servers and Cockpit control panels for reliable offline
+                      mining operations.
                     </p>
                   </div>
                 </div>
@@ -747,14 +696,12 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title"
-                        >2. Test Coverage Expansion (40% → 80%)</span
-                      >
+                      <span class="timeline-title">2. Test Coverage Expansion (40% → 80%)</span>
                       <span class="timeline-meta high">HIGH PRIORITY</span>
                     </div>
                     <p class="timeline-desc">
-                      Build on the newly stabilized 40% test suite to reach
-                      enterprise-grade 80% coverage in CI.
+                      Build on the newly stabilized 40% test suite to reach enterprise-grade 80%
+                      coverage in CI.
                     </p>
                   </div>
                 </div>
@@ -762,21 +709,16 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title"
-                        >3. Database Optimization & Scaling</span
-                      >
+                      <span class="timeline-title">3. Database Optimization & Scaling</span>
                       <span
                         class="timeline-meta"
-                        style="
-                          background: rgba(59, 130, 246, 0.1);
-                          color: #93c5fd;
-                        "
+                        style="background: rgba(59, 130, 246, 0.1); color: #93c5fd"
                         >MEDIUM</span
                       >
                     </div>
                     <p class="timeline-desc">
-                      Implement materialized views, pgBouncer connection
-                      pooling, and read replica configurations.
+                      Implement materialized views, pgBouncer connection pooling, and read replica
+                      configurations.
                     </p>
                   </div>
                 </div>
@@ -788,21 +730,16 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title"
-                        >4. Mobile Responsiveness & PWA</span
-                      >
+                      <span class="timeline-title">4. Mobile Responsiveness & PWA</span>
                       <span
                         class="timeline-meta"
-                        style="
-                          background: rgba(59, 130, 246, 0.1);
-                          color: #93c5fd;
-                        "
+                        style="background: rgba(59, 130, 246, 0.1); color: #93c5fd"
                         >MEDIUM</span
                       >
                     </div>
                     <p class="timeline-desc">
-                      Optimize layouts for field operators on tablets and ensure
-                      progressive web app installation.
+                      Optimize layouts for field operators on tablets and ensure progressive web app
+                      installation.
                     </p>
                   </div>
                 </div>
@@ -810,21 +747,16 @@
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title"
-                        >5. Advanced Analytics & Reporting</span
-                      >
+                      <span class="timeline-title">5. Advanced Analytics & Reporting</span>
                       <span
                         class="timeline-meta"
-                        style="
-                          background: rgba(59, 130, 246, 0.1);
-                          color: #93c5fd;
-                        "
+                        style="background: rgba(59, 130, 246, 0.1); color: #93c5fd"
                         >MEDIUM</span
                       >
                     </div>
                     <p class="timeline-desc">
-                      Develop shift-reconciliation engines, custom PDF report
-                      builders, and automated daily export delivery.
+                      Develop shift-reconciliation engines, custom PDF report builders, and
+                      automated daily export delivery.
                     </p>
                   </div>
                 </div>

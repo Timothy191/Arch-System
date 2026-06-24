@@ -17,9 +17,7 @@ export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="border-b border-[var(--border-subtle)] glass-card rounded-none backdrop-blur-xl p-4">
-        <h1 className="text-2xl font-semibold text-[var(--text-heading)]">
-          API Documentation
-        </h1>
+        <h1 className="text-2xl font-semibold text-[var(--text-heading)]">API Documentation</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">
           Interactive API reference for Arch-Systems Portal
         </p>

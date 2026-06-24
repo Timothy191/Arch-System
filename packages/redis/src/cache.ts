@@ -1,9 +1,5 @@
 import { recordCacheHit, recordCacheMiss, recordRedisError } from "./stats";
-import {
-  cacheInvalidateTags,
-  cacheInvalidatePrefixes,
-  indexCacheKeyByTags,
-} from "./invalidation";
+import { cacheInvalidateTags, cacheInvalidatePrefixes, indexCacheKeyByTags } from "./invalidation";
 
 // ------------------------------------------------------------------
 // L1 In-Memory Cache with TTL + LRU eviction
@@ -153,11 +149,7 @@ export async function cacheGetWithStats<T>(
  * Store a value in cache with a TTL (seconds).
  * Writes to both L1 (Memory) and L2 (Redis) - Write-Through.
  */
-export async function cacheSet<T>(
-  key: string,
-  value: T,
-  ttlSeconds: number,
-): Promise<void> {
+export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
   // 1. Write to L1 Cache (Local Memory) - cap L1 TTL at 30s to keep memory footprint lean
   const l1Ttl = Math.min(ttlSeconds, 30);
   memorySet(key, value, l1Ttl);

@@ -17,9 +17,7 @@ function createMockSupabase(data: unknown[]) {
     subscribe: jest.fn().mockReturnThis(),
   };
 
-  const { createBrowserSupabaseClient } = jest.requireMock(
-    "@repo/supabase/client",
-  );
+  const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
   createBrowserSupabaseClient.mockReturnValue({
     from: jest.fn().mockReturnValue({
@@ -74,9 +72,7 @@ describe("ScadaPanel", () => {
     render(<ScadaPanel departmentId="dept-1" />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("No machines registered for this department."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("No machines registered for this department.")).toBeInTheDocument();
     });
   });
 

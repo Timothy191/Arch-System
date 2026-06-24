@@ -28,14 +28,10 @@ export function MachineControl() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-arch-accent-green" />
-          <h3 className="text-[var(--text-heading)] font-medium">
-            Operational Parameters
-          </h3>
+          <h3 className="text-[var(--text-heading)] font-medium">Operational Parameters</h3>
         </div>
         {lastApplied && (
-          <span className="text-[10px] text-[var(--text-muted)]">
-            Applied at {lastApplied}
-          </span>
+          <span className="text-[10px] text-[var(--text-muted)]">Applied at {lastApplied}</span>
         )}
       </div>
 

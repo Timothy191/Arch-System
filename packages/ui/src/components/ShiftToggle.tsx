@@ -1,4 +1,4 @@
-"use client";
+import * as React from "react";
 
 interface ShiftToggleProps {
   value: "day" | "night";
@@ -7,25 +7,28 @@ interface ShiftToggleProps {
   name?: string;
 }
 
-export function ShiftToggle({ value, onChange }: ShiftToggleProps) {
+export function ShiftToggle({ value, onChange, name = "shift-toggle" }: ShiftToggleProps) {
   return (
-    <div className="flex gap-2" role="radiogroup" aria-label="Shift selector">
-      {(["day", "night"] as const).map((shift) => (
-        <button
-          key={shift}
-          type="button"
-          role="radio"
-          aria-checked={value === shift ? "true" : "false"}
-          onClick={() => onChange(shift)}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-            value === shift
-              ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-              : "bg-[var(--card)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
-          }`}
-        >
-          {shift === "day" ? "Day" : "Night"}
-        </button>
-      ))}
+    <div className="cir-tabs" role="radiogroup" aria-label="Shift selector">
+      {(["day", "night"] as const).map((shift) => {
+        const id = `${name}-${shift}`;
+        const isChecked = value === shift;
+        return (
+          <React.Fragment key={shift}>
+            <input
+              type="radio"
+              id={id}
+              name={name}
+              checked={isChecked}
+              onChange={() => onChange(shift)}
+              className="cir-tabs-r"
+            />
+            <label htmlFor={id} className="cir-tabs-t">
+              {shift === "day" ? "Day" : "Night"}
+            </label>
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }

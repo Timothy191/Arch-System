@@ -3,10 +3,7 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 
-export async function updateMachineSite(
-  machineId: string,
-  siteId: string | null,
-) {
+export async function updateMachineSite(machineId: string, siteId: string | null) {
   // Always validate the user at the top
   const supabase = await createServerSupabaseClient();
   const {

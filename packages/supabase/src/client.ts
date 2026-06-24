@@ -21,20 +21,16 @@ export function createBrowserSupabaseClient() {
     }
   }
 
-  return createBrowserClient(
-    supabaseUrl,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: true,
-        // Use Supabase's default cookie-based storage instead of localStorage/sessionStorage
-        // This ensures tokens are stored in HttpOnly Secure cookies for better security
-        storage: undefined,
-      },
-      cookieOptions: {
-        maxAge: undefined,
-        expires: undefined,
-      },
+  return createBrowserClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: {
+      persistSession: true,
+      // Use Supabase's default cookie-based storage instead of localStorage/sessionStorage
+      // This ensures tokens are stored in HttpOnly Secure cookies for better security
+      storage: undefined,
     },
-  );
+    cookieOptions: {
+      maxAge: undefined,
+      expires: undefined,
+    },
+  });
 }

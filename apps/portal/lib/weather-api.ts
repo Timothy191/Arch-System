@@ -111,21 +111,19 @@ export async function fetchWeather(
   const weatherInfo = getWeatherDescription(current.weather_code);
 
   // Parse daily forecast (next 5 days)
-  const daily: DailyForecast[] = data.daily.time
-    .slice(0, 5)
-    .map((date: string, index: number) => {
-      const code = data.daily.weather_code[index];
-      const info = getWeatherDescription(code);
-      return {
-        date,
-        maxTemp: Math.round(data.daily.temperature_2m_max[index]),
-        minTemp: Math.round(data.daily.temperature_2m_min[index]),
-        weatherCode: code,
-        description: info.description,
-        icon: info.icon,
-        precipitation: data.daily.precipitation_sum[index],
-      };
-    });
+  const daily: DailyForecast[] = data.daily.time.slice(0, 5).map((date: string, index: number) => {
+    const code = data.daily.weather_code[index];
+    const info = getWeatherDescription(code);
+    return {
+      date,
+      maxTemp: Math.round(data.daily.temperature_2m_max[index]),
+      minTemp: Math.round(data.daily.temperature_2m_min[index]),
+      weatherCode: code,
+      description: info.description,
+      icon: info.icon,
+      precipitation: data.daily.precipitation_sum[index],
+    };
+  });
 
   return {
     temperature: Math.round(current.temperature_2m),

@@ -15,7 +15,7 @@ jest.mock("@repo/supabase/server", () => ({
 }));
 
 // Mock LoginForm
-jest.mock("./LoginForm", () => ({
+jest.mock("@/features/auth/components/LoginForm", () => ({
   LoginForm: () => <div data-testid="mock-login-form" />,
 }));
 

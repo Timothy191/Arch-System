@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getMetrics } from "@/lib/observability/metrics";
 
 /**
@@ -17,6 +17,12 @@ import { getMetrics } from "@/lib/observability/metrics";
  *             schema:
  *               type: string
  *               description: Prometheus metrics exposition format
+ *       401:
+ *         description: Unauthorized - Scrape token mismatch
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
  *       500:
  *         description: Error generating metrics
  *         content:
@@ -25,8 +31,25 @@ import { getMetrics } from "@/lib/observability/metrics";
  *               type: string
  */
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    // AGENT-TRACE: Optional token validation for Prometheus scraping security
+    const scrapeToken = process.env.METRICS_SCRAPE_TOKEN;
+    if (scrapeToken) {
+      const authHeader = req.headers.get("Authorization");
+      const queryToken = req.nextUrl.searchParams.get("token");
+      const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : queryToken;
+
+      if (token !== scrapeToken) {
+        return new NextResponse("Unauthorized", {
+          status: 401,
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        });
+      }
+    }
+
     const metrics = await getMetrics();
     return new NextResponse(metrics, {
       status: 200,

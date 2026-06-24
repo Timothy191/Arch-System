@@ -78,9 +78,7 @@
   ],
   "connections": {
     "Webhook Trigger": {
-      "main": [
-        [{ "node": "Initialize Guardrails", "type": "main", "index": 0 }]
-      ]
+      "main": [[{ "node": "Initialize Guardrails", "type": "main", "index": 0 }]]
     },
     "Initialize Guardrails": {
       "main": [[{ "node": "Check Safety Rules", "type": "main", "index": 0 }]]

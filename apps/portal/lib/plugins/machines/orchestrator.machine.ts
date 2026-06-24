@@ -1,21 +1,12 @@
 import { setup, assign, type SnapshotFrom } from "xstate";
 import { pluginMachine } from "./plugin.machine";
-import {
-  OrchestratorContext,
-  OrchestratorEvent,
-  HealthReport,
-  PluginActor,
-} from "./types";
+import { OrchestratorContext, OrchestratorEvent, HealthReport, PluginActor } from "./types";
 
 // =============================================================================
 // Default Installed Plugins (matches current orchestrator)
 // =============================================================================
 
-const DEFAULT_PLUGINS = [
-  "predictive-maintenance",
-  "rust-telemetry-engine",
-  "buggy-plugin",
-];
+const DEFAULT_PLUGINS = ["predictive-maintenance", "rust-telemetry-engine", "buggy-plugin"];
 
 // =============================================================================
 // Health Report Computation
@@ -33,8 +24,7 @@ function computeHealthReport(plugins: Map<string, PluginActor>): HealthReport {
 
   for (const [name, actor] of plugins.entries()) {
     const snapshot = actor.getSnapshot() as PluginSnapshot;
-    const state =
-      snapshot.status === "active" ? (snapshot.value as string) : "idle";
+    const state = snapshot.status === "active" ? (snapshot.value as string) : "idle";
     const context = snapshot.context as { error?: string };
 
     switch (state) {
@@ -147,8 +137,7 @@ export const orchestratorMachine = setup({
     allPluginsLoaded: ({ context }) => {
       for (const actor of context.plugins.values()) {
         const snapshot = actor.getSnapshot() as PluginSnapshot;
-        const state =
-          snapshot.status === "active" ? (snapshot.value as string) : "idle";
+        const state = snapshot.status === "active" ? (snapshot.value as string) : "idle";
         if (state === "idle" || state === "loading") {
           return false;
         }

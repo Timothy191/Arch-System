@@ -37,12 +37,9 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     const supabase = createBrowserSupabaseClient();
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: `${window.location.origin}/update-password`,
-      },
-    );
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
 
     setLoading(false);
 
@@ -73,21 +70,14 @@ export default function ResetPasswordPage() {
           {sent ? (
             <div className="space-y-4 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-green)]/10 mx-auto">
-                <Check
-                  className="w-6 h-6 text-[var(--accent-green)]"
-                  strokeWidth={1.5}
-                />
+                <Check className="w-6 h-6 text-[var(--accent-green)]" strokeWidth={1.5} />
               </div>
               <div className="space-y-1">
-                <h1 className="text-lg font-medium text-[var(--text-heading)]">
-                  Check Your Email
-                </h1>
+                <h1 className="text-lg font-medium text-[var(--text-heading)]">Check Your Email</h1>
                 <p className="text-sm text-[var(--text-muted)]">
                   If an account exists for{" "}
-                  <span className="font-medium text-[var(--text-secondary)]">
-                    {email}
-                  </span>
-                  , you will receive a password reset link.
+                  <span className="font-medium text-[var(--text-secondary)]">{email}</span>, you
+                  will receive a password reset link.
                 </p>
               </div>
               <Link
@@ -100,16 +90,11 @@ export default function ResetPasswordPage() {
           ) : (
             <>
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-blue)]/10 mx-auto">
-                <Lock
-                  className="w-6 h-6 text-[var(--accent-blue)]"
-                  strokeWidth={1.5}
-                />
+                <Lock className="w-6 h-6 text-[var(--accent-blue)]" strokeWidth={1.5} />
               </div>
 
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-medium text-[var(--text-heading)]">
-                  Reset Password
-                </h1>
+                <h1 className="text-xl font-medium text-[var(--text-heading)]">Reset Password</h1>
                 <p className="text-sm text-[var(--text-muted)]">
                   Enter your email and we will send you a reset link.
                 </p>
@@ -145,10 +130,7 @@ export default function ResetPasswordPage() {
                     className="text-sm text-red-700 bg-red-50/80 px-3 py-2 rounded-md flex items-center gap-2"
                     role="alert"
                   >
-                    <AlertTriangle
-                      className="w-4 h-4 shrink-0"
-                      strokeWidth={1.5}
-                    />
+                    <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={1.5} />
                     {error}
                   </p>
                 )}

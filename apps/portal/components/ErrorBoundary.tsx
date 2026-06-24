@@ -21,10 +21,7 @@ interface ErrorBoundaryState {
   errorInfo: React.ErrorInfo | null;
 }
 
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -130,40 +127,31 @@ export class ErrorBoundary extends Component<
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={this.handleReset}
-                  variant="outline"
-                  className="flex-1"
-                >
+                <Button onClick={this.handleReset} variant="outline" className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                <Button
-                  onClick={this.handleGoHome}
-                  variant="default"
-                  className="flex-1"
-                >
+                <Button onClick={this.handleGoHome} variant="default" className="flex-1">
                   <Home className="w-4 h-4 mr-2" />
                   Go Home
                 </Button>
               </div>
 
               {/* Development Info */}
-              {process.env.NODE_ENV === "development" &&
-                this.state.errorInfo && (
-                  <details className="mt-4">
-                    <summary className="text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-secondary)]">
-                      Error Details (Development Only)
-                    </summary>
-                    <pre className="mt-2 p-3 bg-[var(--bg-tertiary)] rounded-lg text-xs overflow-auto max-h-48">
-                      <code>
-                        {this.state.error?.toString()}
-                        {"\n\n"}
-                        {this.state.errorInfo?.componentStack}
-                      </code>
-                    </pre>
-                  </details>
-                )}
+              {process.env.NODE_ENV === "development" && this.state.errorInfo && (
+                <details className="mt-4">
+                  <summary className="text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-secondary)]">
+                    Error Details (Development Only)
+                  </summary>
+                  <pre className="mt-2 p-3 bg-[var(--bg-tertiary)] rounded-lg text-xs overflow-auto max-h-48">
+                    <code>
+                      {this.state.error?.toString()}
+                      {"\n\n"}
+                      {this.state.errorInfo?.componentStack}
+                    </code>
+                  </pre>
+                </details>
+              )}
             </div>
           </GlassCard>
         </div>

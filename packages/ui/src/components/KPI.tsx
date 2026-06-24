@@ -4,14 +4,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { cn } from "../lib/utils";
 import { GlassCard } from "./GlassCard";
 
-type KPIColor =
-  | "default"
-  | "green"
-  | "blue"
-  | "red"
-  | "cyan"
-  | "indigo"
-  | "alert";
+type KPIColor = "default" | "green" | "blue" | "red" | "cyan" | "indigo" | "alert";
 
 const colorMap: Record<KPIColor, string> = {
   default: "text-[var(--text-heading)]",
@@ -45,9 +38,7 @@ export function KPICard({
       <div className="flex items-start justify-between">
         <div>
           <p className="system-label">{label}</p>
-          <p className={cn("text-2xl font-medium mt-1", colorMap[color])}>
-            {value}
-          </p>
+          <p className={cn("text-2xl font-medium mt-1", colorMap[color])}>{value}</p>
         </div>
         {icon && (
           <div

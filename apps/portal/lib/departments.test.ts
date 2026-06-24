@@ -74,9 +74,7 @@ describe("getDepartmentTabs", () => {
   });
 
   it("returns SATELLITE_MONITORING_TABS for satellite-monitoring", () => {
-    expect(getDepartmentTabs("satellite-monitoring")).toBe(
-      SATELLITE_MONITORING_TABS,
-    );
+    expect(getDepartmentTabs("satellite-monitoring")).toBe(SATELLITE_MONITORING_TABS);
   });
 
   it("returns ENGINEERING_TABS for engineering", () => {
@@ -103,9 +101,7 @@ describe("getDepartmentTabs", () => {
   });
 
   it("returns ACCESS_CARD_ACTIONS_TABS for access-card-actions", () => {
-    expect(getDepartmentTabs("access-card-actions")).toBe(
-      ACCESS_CARD_ACTIONS_TABS,
-    );
+    expect(getDepartmentTabs("access-card-actions")).toBe(ACCESS_CARD_ACTIONS_TABS);
   });
 
   it("returns standard DEPARTMENT_TABS for unknown slugs", () => {

@@ -51,6 +51,7 @@
     "./KPI": "./src/components/KPI.tsx",
     "./PageHeader": "./src/components/PageHeader.tsx",
     "./ShiftToggle": "./src/components/ShiftToggle.tsx",
+    "./Checkbox": "./src/components/Checkbox.tsx",
     "./FormFields": "./src/components/FormFields.tsx",
     "./CyberButton": "./src/components/ui/cyber-button.tsx",
     "./Toaster": "./src/components/ui/sonner.tsx",
@@ -59,6 +60,7 @@
     "./AnimatedButton": "./src/components/ui/animated-button.tsx",
     "./AnimatedDialog": "./src/components/ui/animated-dialog.tsx",
     "./RevealLoader": "./src/components/ui/reveal-loader.tsx",
+    "./Loader": "./src/components/ui/loader.tsx",
     "./SpotlightCard": "./src/components/GlassCard.tsx",
     "./Marquee": "./src/components/ui/marquee.tsx",
     "./dock": "./src/components/ui/dock.tsx",
@@ -87,7 +89,7 @@
   "peerDependencies": {
     "react": "^19",
     "react-dom": "^19",
-    "next": ">=16.0.0"
+    "next": "^16.2.6"
   },
   "private": true,
   "scripts": {

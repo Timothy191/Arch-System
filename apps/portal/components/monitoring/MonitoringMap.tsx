@@ -5,20 +5,9 @@ import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
-import {
-  MAP_TILE_URLS,
-  LAYER_META,
-  type DeformationReading,
-} from "@/lib/monitoring-api";
+import { MAP_TILE_URLS, LAYER_META, type DeformationReading } from "@/lib/monitoring-api";
 
-type MapLayerKey =
-  | "none"
-  | "sar"
-  | "optical"
-  | "ndvi"
-  | "geology"
-  | "terrain"
-  | "osm";
+type MapLayerKey = "none" | "sar" | "optical" | "ndvi" | "geology" | "terrain" | "osm";
 
 interface MonitoringMapProps {
   center?: { lat: number; lon: number };
@@ -114,14 +103,11 @@ export function MonitoringMap({
       <DeckGL
         viewState={viewState}
         onViewStateChange={
-          ((e: { viewState: typeof viewState }) =>
-            setViewState(e.viewState)) as any
+          ((e: { viewState: typeof viewState }) => setViewState(e.viewState)) as any
         }
         controller={true}
         layers={layers}
-        getCursor={({ isHovering }: { isHovering?: boolean }) =>
-          isHovering ? "pointer" : "grab"
-        }
+        getCursor={({ isHovering }: { isHovering?: boolean }) => (isHovering ? "pointer" : "grab")}
       >
         <Map
           mapStyle={{
@@ -180,9 +166,7 @@ export function MonitoringMap({
               className="w-2.5 h-2.5 rounded-full inline-block"
               style={{ background: LEVEL_COLORS[lvl] }}
             />
-            <span className="text-[10px] text-[var(--text-secondary)] capitalize">
-              {lvl}
-            </span>
+            <span className="text-[10px] text-[var(--text-secondary)] capitalize">{lvl}</span>
           </div>
         ))}
       </div>

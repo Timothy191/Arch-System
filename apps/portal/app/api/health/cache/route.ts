@@ -46,8 +46,7 @@ export async function GET() {
   }
 
   const total = stats.hits + stats.misses;
-  const hitRate =
-    total > 0 ? Math.round((stats.hits / total) * 10000) / 10000 : 0;
+  const hitRate = total > 0 ? Math.round((stats.hits / total) * 10000) / 10000 : 0;
 
   return NextResponse.json({
     status: redisConnected ? "healthy" : "degraded",

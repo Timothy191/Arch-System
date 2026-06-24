@@ -13,13 +13,7 @@
     "enabled": false,
     "minLines": 100000,
     "minTokens": 100000,
-    "ignore": [
-      "**/database.types.ts",
-      "tools/**",
-      "**/tests/**",
-      "**/*.test.ts",
-      "**/*.test.tsx"
-    ]
+    "ignore": ["**/database.types.ts", "tools/**", "**/tests/**", "**/*.test.ts", "**/*.test.tsx"]
   },
   "rules": {
     "unused-files": "warn",

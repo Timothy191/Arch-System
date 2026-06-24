@@ -75,27 +75,15 @@ describe("getWeatherAlert", () => {
   });
 
   it("returns critical for thunderstorm (code ≥ 95)", () => {
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 95 }).level).toBe(
-      "critical",
-    );
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 99 }).level).toBe(
-      "critical",
-    );
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 96 }).level).toBe(
-      "critical",
-    );
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 95 }).level).toBe("critical");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 99 }).level).toBe("critical");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 96 }).level).toBe("critical");
   });
 
   it("returns warning for snow conditions (codes 71–75)", () => {
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 71 }).level).toBe(
-      "warning",
-    );
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 73 }).level).toBe(
-      "warning",
-    );
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 75 }).level).toBe(
-      "warning",
-    );
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 71 }).level).toBe("warning");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 73 }).level).toBe("warning");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 75 }).level).toBe("warning");
   });
 
   it("returns warning for heavy rain (code 65)", () => {
@@ -114,15 +102,9 @@ describe("getWeatherAlert", () => {
   });
 
   it("returns advisory for fog (codes 45–48)", () => {
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 45 }).level).toBe(
-      "advisory",
-    );
-    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 48 }).level).toBe(
-      "advisory",
-    );
-    expect(
-      getWeatherAlert({ ...BASE_WEATHER, weatherCode: 45 }).message,
-    ).toContain("Fog");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 45 }).level).toBe("advisory");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 48 }).level).toBe("advisory");
+    expect(getWeatherAlert({ ...BASE_WEATHER, weatherCode: 45 }).message).toContain("Fog");
   });
 
   it("returns advisory for moderate winds (> 30 km/h)", () => {
@@ -193,12 +175,8 @@ describe("fetchWeather", () => {
   });
 
   it("throws on non-ok response", async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: false, status: 503 } as Response);
-    await expect(fetchWeather(-26.2, 28.0)).rejects.toThrow(
-      "Weather API error: 503",
-    );
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 503 } as Response);
+    await expect(fetchWeather(-26.2, 28.0)).rejects.toThrow("Weather API error: 503");
   });
 
   it("returns parsed WeatherData on success", async () => {
@@ -215,13 +193,7 @@ describe("fetchWeather", () => {
           time: "2026-05-17T08:00",
         },
         daily: {
-          time: [
-            "2026-05-17",
-            "2026-05-18",
-            "2026-05-19",
-            "2026-05-20",
-            "2026-05-21",
-          ],
+          time: ["2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21"],
           weather_code: [1, 2, 3, 63, 0],
           temperature_2m_max: [26, 24, 22, 18, 25],
           temperature_2m_min: [14, 12, 11, 10, 13],
@@ -282,9 +254,7 @@ describe("searchLocation", () => {
   });
 
   it("returns empty array on non-ok response", async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: false, status: 500 } as Response);
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 } as Response);
     const result = await searchLocation("Johannesburg");
     expect(result).toEqual([]);
   });

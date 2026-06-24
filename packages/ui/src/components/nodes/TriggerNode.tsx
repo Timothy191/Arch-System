@@ -16,10 +16,7 @@ export interface TriggerNodeData extends Record<string, unknown> {
 // Trigger Node Component
 // =============================================================================
 
-export const TriggerNode = memo(function TriggerNode({
-  data: rawData,
-  selected,
-}: NodeProps) {
+export const TriggerNode = memo(function TriggerNode({ data: rawData, selected }: NodeProps) {
   const data = rawData as TriggerNodeData;
 
   return (
@@ -38,9 +35,7 @@ export const TriggerNode = memo(function TriggerNode({
         <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#007aff]">
           <Play className="w-3 h-3 text-white fill-white" />
         </div>
-        <span className="text-xs font-medium text-[#1d1d1f] truncate">
-          {data.label || "Start"}
-        </span>
+        <span className="text-xs font-medium text-[#1d1d1f] truncate">{data.label || "Start"}</span>
       </div>
 
       {/* Output Handle Only (trigger is start node) */}

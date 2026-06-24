@@ -39,19 +39,11 @@ interface BatteryManager extends EventTarget {
   chargingTime: number;
   dischargingTime: number;
   addEventListener(
-    _type:
-      | "chargingchange"
-      | "levelchange"
-      | "chargingtimechange"
-      | "dischargingtimechange",
+    _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
     _listener: EventListenerOrEventListenerObject,
   ): void;
   removeEventListener(
-    _type:
-      | "chargingchange"
-      | "levelchange"
-      | "chargingtimechange"
-      | "dischargingtimechange",
+    _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
     _listener: EventListenerOrEventListenerObject,
   ): void;
 }
@@ -62,15 +54,7 @@ interface NavigatorWithBattery extends Navigator {
 
 interface NetworkConnection extends EventTarget {
   effectiveType?: "4g" | "3g" | "2g" | "slow-2g";
-  type?:
-    | "bluetooth"
-    | "cellular"
-    | "ethernet"
-    | "none"
-    | "wifi"
-    | "wimax"
-    | "other"
-    | "unknown";
+  type?: "bluetooth" | "cellular" | "ethernet" | "none" | "wifi" | "wimax" | "other" | "unknown";
   downlink?: number;
   downlinkMax?: number;
   rtt?: number;
@@ -87,8 +71,7 @@ interface NavigatorWithConnection extends Navigator {
 //  Helpers
 /* ------------------------------------------------------------------ */
 export function formatTimeSeconds(totalSeconds: number): string {
-  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0)
-    return "Calculating…";
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return "Calculating…";
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   if (h > 0) return `${h}h ${m}m`;
@@ -100,10 +83,8 @@ export function formatTimeSeconds(totalSeconds: number): string {
 /* ------------------------------------------------------------------ */
 export function useNetworkStatus() {
   const [online, setOnline] = useState(true);
-  const [effectiveType, setEffectiveType] =
-    useState<NetworkConnection["effectiveType"]>(undefined);
-  const [connType, setConnType] =
-    useState<NetworkConnection["type"]>(undefined);
+  const [effectiveType, setEffectiveType] = useState<NetworkConnection["effectiveType"]>(undefined);
+  const [connType, setConnType] = useState<NetworkConnection["type"]>(undefined);
   const [downlink, setDownlink] = useState<number | undefined>(undefined);
   const [rtt, setRtt] = useState<number | undefined>(undefined);
   const [supported, setSupported] = useState(true);
@@ -116,8 +97,7 @@ export function useNetworkStatus() {
     window.addEventListener("offline", handleOffline);
 
     const nav = navigator as NavigatorWithConnection;
-    const connection =
-      nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
+    const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
 
     if (!connection) {
       setSupported(false);
@@ -390,17 +370,13 @@ export function NetworkStatusRow({
             {online ? "Connected" : "Offline"}
           </span>
           {effectiveType && (
-            <span className="text-[10px] uppercase text-[var(--text-muted)]">
-              {effectiveType}
-            </span>
+            <span className="text-[10px] uppercase text-[var(--text-muted)]">{effectiveType}</span>
           )}
         </div>
         {supported && online && (
           <div className="flex items-center gap-2 mt-0.5">
             {connType && (
-              <span className="text-[10px] text-[var(--text-muted)] capitalize">
-                {connType}
-              </span>
+              <span className="text-[10px] text-[var(--text-muted)] capitalize">{connType}</span>
             )}
             {typeof downlink === "number" && (
               <span className="text-[10px] text-[var(--text-muted)]">
@@ -408,16 +384,12 @@ export function NetworkStatusRow({
               </span>
             )}
             {typeof rtt === "number" && (
-              <span className="text-[10px] text-[var(--text-muted)]">
-                {rtt} ms
-              </span>
+              <span className="text-[10px] text-[var(--text-muted)]">{rtt} ms</span>
             )}
           </div>
         )}
         {!supported && (
-          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-            Network API unavailable
-          </p>
+          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Network API unavailable</p>
         )}
       </div>
     </div>
@@ -435,9 +407,7 @@ export function BatteryStatusRow({
     return (
       <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
         <BatteryMedium className="w-4 h-4 text-[var(--text-secondary)]" />
-        <span className="text-[12px] text-[var(--text-muted)]">
-          Battery status unavailable
-        </span>
+        <span className="text-[12px] text-[var(--text-muted)]">Battery status unavailable</span>
       </div>
     );
   }
@@ -483,10 +453,7 @@ export function BatteryStatusRow({
       </div>
       <div className="w-full h-1.5 rounded-full bg-[var(--bg-tertiary)] overflow-hidden">
         <div
-          className={cn(
-            "h-full rounded-full transition-all duration-500",
-            barColor,
-          )}
+          className={cn("h-full rounded-full transition-all duration-500", barColor)}
           style={{ width: `${Math.round(level * 100)}%` }}
         />
       </div>
@@ -510,12 +477,9 @@ export function VolumeControlRow({
   toggleMute,
   adjust,
 }: ReturnType<typeof useAppVolume>) {
-  const VolumeIcon =
-    muted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
+  const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
   const volumeColor =
-    muted || volume === 0
-      ? "text-[var(--text-muted)]"
-      : "text-[var(--accent-blue)]";
+    muted || volume === 0 ? "text-[var(--text-muted)]" : "text-[var(--accent-blue)]";
 
   return (
     <div className="px-2 py-1.5 rounded-md space-y-1.5">
@@ -545,10 +509,7 @@ export function VolumeControlRow({
   );
 }
 
-export function NotificationRow({
-  count,
-  clear,
-}: ReturnType<typeof useNotificationCount>) {
+export function NotificationRow({ count, clear }: ReturnType<typeof useNotificationCount>) {
   return (
     <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
       <div className="relative">
@@ -564,9 +525,7 @@ export function NotificationRow({
         )}
       </div>
       <span className="text-[12px] text-[var(--text-heading)] flex-1">
-        {count > 0
-          ? `${count} notification${count === 1 ? "" : "s"}`
-          : "No notifications"}
+        {count > 0 ? `${count} notification${count === 1 ? "" : "s"}` : "No notifications"}
       </span>
       {count > 0 && (
         <button
@@ -605,9 +564,7 @@ function HealthSubRow({
   return (
     <div className="flex items-center gap-2">
       <Icon className={cn("w-3 h-3 shrink-0", c.color)} />
-      <span className="text-[11px] text-[var(--text-secondary)] flex-1">
-        {label}
-      </span>
+      <span className="text-[11px] text-[var(--text-secondary)] flex-1">{label}</span>
       <span className={cn("text-[10px] font-medium", c.color)}>{c.label}</span>
     </div>
   );
@@ -648,9 +605,7 @@ export function ServerHealthRow({
         <span className="text-[12px] font-medium text-[var(--text-heading)] flex-1">
           Server Health
         </span>
-        <span className={cn("text-[10px] font-medium", current.color)}>
-          {current.label}
-        </span>
+        <span className={cn("text-[10px] font-medium", current.color)}>{current.label}</span>
       </div>
 
       <div className="space-y-1">
@@ -662,11 +617,7 @@ export function ServerHealthRow({
       <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
         <Clock className="w-3 h-3" />
         <span className="text-[10px]">
-          {loading
-            ? "Checking…"
-            : responseTime > 0
-              ? `${responseTime}ms`
-              : "Unavailable"}
+          {loading ? "Checking…" : responseTime > 0 ? `${responseTime}ms` : "Unavailable"}
         </span>
       </div>
     </div>
@@ -691,20 +642,12 @@ export function SystemTrayPill() {
         : "bg-[var(--accent-red)]";
 
   const VolumeIcon =
-    volume.muted || volume.volume === 0
-      ? VolumeX
-      : volume.volume < 50
-        ? Volume1
-        : Volume2;
+    volume.muted || volume.volume === 0 ? VolumeX : volume.volume < 50 ? Volume1 : Volume2;
   const volumeColor =
-    volume.muted || volume.volume === 0
-      ? "text-[var(--text-muted)]"
-      : "text-[var(--accent-blue)]";
+    volume.muted || volume.volume === 0 ? "text-[var(--text-muted)]" : "text-[var(--accent-blue)]";
 
   const ConnIcon = !network.online ? WifiOff : Wifi;
-  const connColor = network.online
-    ? "text-[var(--accent-green)]"
-    : "text-[var(--accent-red)]";
+  const connColor = network.online ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]";
 
   const BatteryIcon = battery.charging
     ? BatteryCharging
@@ -757,12 +700,7 @@ export function SystemTrayPill() {
               {health.status === "healthy" && !health.loading && (
                 <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[var(--accent-green)] opacity-75" />
               )}
-              <span
-                className={cn(
-                  "relative inline-flex rounded-full h-2 w-2",
-                  healthDotColor,
-                )}
-              />
+              <span className={cn("relative inline-flex rounded-full h-2 w-2", healthDotColor)} />
             </span>
             <span className="w-[1px] h-3 bg-black/[0.08]" />
 
@@ -818,10 +756,7 @@ export function SystemTrayPill() {
               <div className="h-[1px] bg-black/[0.05]" />
 
               {/* Notifications Section */}
-              <NotificationRow
-                count={notifications.count}
-                clear={notifications.clear}
-              />
+              <NotificationRow count={notifications.count} clear={notifications.clear} />
             </div>
           </Popover.Content>
         </Popover.Portal>

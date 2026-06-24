@@ -1,6 +1,5 @@
 const N8N_URL =
-  (typeof process !== "undefined" &&
-    (process as any).env?.NEXT_PUBLIC_N8N_URL) ||
+  (typeof process !== "undefined" && (process as any).env?.NEXT_PUBLIC_N8N_URL) ||
   (typeof process !== "undefined" && (process as any).env?.N8N_URL) ||
   "http://localhost:5678";
 
@@ -21,10 +20,7 @@ function getN8nAuth(): { user: string; password: string } | null {
   return null;
 }
 
-async function authFetch(
-  url: string,
-  options: RequestInit = {},
-): Promise<Response> {
+async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const credentials = getN8nAuth();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -57,10 +53,7 @@ export interface N8nResult {
   error?: string;
 }
 
-export async function triggerWorkflow(
-  path: string,
-  data?: unknown,
-): Promise<N8nResult> {
+export async function triggerWorkflow(path: string, data?: unknown): Promise<N8nResult> {
   try {
     const response = await fetch(`${N8N_URL}/webhook/${path}`, {
       method: "POST",
@@ -81,8 +74,7 @@ export async function listWorkflows(search?: string): Promise<N8nResult> {
   try {
     const url = `${N8N_URL}/rest/workflows${search ? `?search=${encodeURIComponent(search)}` : ""}`;
     const response = await authFetch(url);
-    if (!response.ok)
-      return { success: false, error: `HTTP ${response.status}` };
+    if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
     const body = await response.json();
     return {
       success: true,
@@ -101,17 +93,13 @@ export async function listWorkflows(search?: string): Promise<N8nResult> {
   }
 }
 
-export async function importWorkflow(
-  workflowJson: object,
-  activate = false,
-): Promise<N8nResult> {
+export async function importWorkflow(workflowJson: object, activate = false): Promise<N8nResult> {
   try {
     const response = await authFetch(`${N8N_URL}/rest/workflows`, {
       method: "POST",
       body: JSON.stringify(workflowJson),
     });
-    if (!response.ok)
-      return { success: false, error: `HTTP ${response.status}` };
+    if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
     const body = await response.json();
     if (activate && body.data?.id) {
       await authFetch(`${N8N_URL}/rest/workflows/${body.data.id}/activate`, {
@@ -130,20 +118,13 @@ export async function importWorkflow(
   }
 }
 
-export async function executeWorkflow(
-  workflowId: string,
-  data?: unknown,
-): Promise<N8nResult> {
+export async function executeWorkflow(workflowId: string, data?: unknown): Promise<N8nResult> {
   try {
-    const response = await authFetch(
-      `${N8N_URL}/rest/workflows/${workflowId}/execute`,
-      {
-        method: "POST",
-        body: data ? JSON.stringify(data) : undefined,
-      },
-    );
-    if (!response.ok)
-      return { success: false, error: `HTTP ${response.status}` };
+    const response = await authFetch(`${N8N_URL}/rest/workflows/${workflowId}/execute`, {
+      method: "POST",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
     const body = await response.json();
     return { success: true, data: body };
   } catch (error) {
@@ -156,11 +137,8 @@ export async function executeWorkflow(
 
 export async function getExecution(executionId: string): Promise<N8nResult> {
   try {
-    const response = await authFetch(
-      `${N8N_URL}/rest/executions/${executionId}`,
-    );
-    if (!response.ok)
-      return { success: false, error: `HTTP ${response.status}` };
+    const response = await authFetch(`${N8N_URL}/rest/executions/${executionId}`);
+    if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
     const body = await response.json();
     return { success: true, data: body.data };
   } catch (error) {

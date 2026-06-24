@@ -70,9 +70,7 @@ export function MacTitleBar({
       )}
 
       {/* Right slot (e.g. toolbar buttons) */}
-      {rightSlot && (
-        <div className="flex items-center gap-1.5 shrink-0">{rightSlot}</div>
-      )}
+      {rightSlot && <div className="flex items-center gap-1.5 shrink-0">{rightSlot}</div>}
 
       {/* Empty spacer to balance title centering when no rightSlot */}
       {title && !rightSlot && <div className="w-[54px] shrink-0" />}

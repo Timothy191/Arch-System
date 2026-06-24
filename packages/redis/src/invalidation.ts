@@ -14,10 +14,7 @@ async function getRedisClientSafe() {
  * Associate a cache key with one or more tags in Redis.
  * Tags are stored as Redis Sets under arch:__tags__:<tag>.
  */
-export async function indexCacheKeyByTags(
-  key: string,
-  tags: string[],
-): Promise<void> {
+export async function indexCacheKeyByTags(key: string, tags: string[]): Promise<void> {
   const redis = await getRedisClientSafe();
   if (!redis) return;
 
@@ -76,9 +73,7 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
  * Uses SCAN (not KEYS) to avoid blocking the Redis server.
  * Also clears matching keys from the in-memory L1 cache.
  */
-export async function cacheInvalidatePrefixes(
-  prefixes: string[],
-): Promise<number> {
+export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<number> {
   const redis = await getRedisClientSafe();
   if (!redis) return 0;
 

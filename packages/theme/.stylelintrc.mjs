@@ -31,6 +31,11 @@ export default {
         "src/css/animations.css",
         "src/css/focus.css",
         "src/css/transitions.css",
+        "src/css/buttons.css",
+        "src/css/tabs.css",
+        "src/css/loaders.css",
+        "src/css/checks.css",
+        "src/css/cards.css",
       ],
       rules: {
         // Disallow raw box-shadow values — must use var(--shadow-*)
@@ -59,10 +64,7 @@ export default {
     "custom-property-pattern": null,
 
     // Allow unknown pseudo-elements (Tailwind uses them)
-    "selector-pseudo-element-no-unknown": [
-      true,
-      { ignorePseudoElements: ["global", "local"] },
-    ],
+    "selector-pseudo-element-no-unknown": [true, { ignorePseudoElements: ["global", "local"] }],
 
     // Allow unknown at-rules (Tailwind's @apply, @layer, etc.)
     "at-rule-no-unknown": [

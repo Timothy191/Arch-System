@@ -43,10 +43,8 @@ export function useSystemMetrics(): SystemMetrics {
 
   useEffect(() => {
     // Network status change listeners
-    const handleOnline = () =>
-      setMetrics((prev) => ({ ...prev, online: true }));
-    const handleOffline = () =>
-      setMetrics((prev) => ({ ...prev, online: false }));
+    const handleOnline = () => setMetrics((prev) => ({ ...prev, online: true }));
+    const handleOffline = () => setMetrics((prev) => ({ ...prev, online: false }));
 
     if (typeof window !== "undefined") {
       window.addEventListener("online", handleOnline);

@@ -15,10 +15,7 @@ import { getRateLimitConfig } from "./rate-limit-config";
 class MemoryStore {
   private counters = new Map<string, { count: number; resetTime: number }>();
 
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
+  async increment(key: string, windowMs: number): Promise<{ count: number; resetTime: number }> {
     const now = Date.now();
     const entry = this.counters.get(key);
 
@@ -32,9 +29,7 @@ class MemoryStore {
     return entry;
   }
 
-  async get(
-    key: string,
-  ): Promise<{ count: number; resetTime: number } | undefined> {
+  async get(key: string): Promise<{ count: number; resetTime: number } | undefined> {
     return this.counters.get(key);
   }
 
@@ -47,10 +42,7 @@ class MemoryStore {
 class RedisStore {
   constructor(private _redis: Awaited<ReturnType<typeof getRedisClient>>) {}
 
-  async increment(
-    key: string,
-    windowMs: number,
-  ): Promise<{ count: number; resetTime: number }> {
+  async increment(key: string, windowMs: number): Promise<{ count: number; resetTime: number }> {
     const now = Date.now();
     const resetTime = now + windowMs;
 
@@ -62,9 +54,7 @@ class RedisStore {
     return { count: result, resetTime };
   }
 
-  async get(
-    key: string,
-  ): Promise<{ count: number; resetTime: number } | undefined> {
+  async get(key: string): Promise<{ count: number; resetTime: number } | undefined> {
     const count = await this._redis.get(key);
     if (!count) return undefined;
     return { count: parseInt(count, 10), resetTime: Date.now() + 60000 };
@@ -88,10 +78,7 @@ class TokenBucketStrategy {
       limit,
       remaining,
       resetTime: result.resetTime,
-      retryAfter: Math.max(
-        0,
-        Math.ceil((result.resetTime - Date.now()) / 1000),
-      ),
+      retryAfter: Math.max(0, Math.ceil((result.resetTime - Date.now()) / 1000)),
     };
   }
 }
@@ -113,10 +100,7 @@ class SlidingWindowStrategy {
       limit,
       remaining,
       resetTime: result.resetTime,
-      retryAfter: Math.max(
-        0,
-        Math.ceil((result.resetTime - Date.now()) / 1000),
-      ),
+      retryAfter: Math.max(0, Math.ceil((result.resetTime - Date.now()) / 1000)),
     };
   }
 }
@@ -142,14 +126,12 @@ function isIpWhitelisted(ip: string): boolean {
 function getClientIp(request: Request | NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
   const realIp =
-    forwarded?.split(",")[0]?.trim() ||
-    ("ip" in request ? (request as any).ip : undefined);
+    forwarded?.split(",")[0]?.trim() || ("ip" in request ? (request as any).ip : undefined);
   return realIp || "unknown";
 }
 
 function isSystemUnderHighLoad(): boolean {
-  if (process.env.NODE_ENV === "test" && !process.env.ENABLE_LOAD_ADAPTIVE_TEST)
-    return false;
+  if (process.env.NODE_ENV === "test" && !process.env.ENABLE_LOAD_ADAPTIVE_TEST) return false;
   try {
     const load = os.loadavg()[0]; // 1-minute load average
     if (load === undefined) return false;
@@ -187,9 +169,7 @@ async function checkRateLimit(
   }
 
   // Token Bucket Strategy for bursty AI calls, Sliding Window for all others
-  const strategy = path.startsWith("/api/ai/")
-    ? tokenBucketStrategy
-    : slidingWindowStrategy;
+  const strategy = path.startsWith("/api/ai/") ? tokenBucketStrategy : slidingWindowStrategy;
 
   const key = `ratelimit:${identifier}`;
   return strategy.check(key, config.maxRequests, config.windowMs, store);
@@ -201,9 +181,7 @@ async function checkRateLimit(
 function getClientIdentifier(request: Request | NextRequest): string {
   // Try to get real IP, fallback to user ID if authenticated
   const forwarded = request.headers.get("x-forwarded-for");
-  const realIp =
-    forwarded?.split(",")[0]?.trim() ||
-    ("ip" in request ? request.ip : undefined);
+  const realIp = forwarded?.split(",")[0]?.trim() || ("ip" in request ? request.ip : undefined);
 
   // For authenticated requests, use user ID for more precise limiting
   const userId = request.headers.get("x-user-id");

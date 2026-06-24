@@ -81,16 +81,13 @@ export default async function ReportsPage() {
   const completed = jobs.filter((j) => j.status === "completed").length;
   const failed = jobs.filter((j) => j.status === "failed").length;
   const cancelled = jobs.filter((j) => j.status === "cancelled").length;
-  const successRate =
-    totalIssued > 0 ? `${Math.round((completed / totalIssued) * 100)}%` : "—";
+  const successRate = totalIssued > 0 ? `${Math.round((completed / totalIssued) * 100)}%` : "—";
 
   const activeCardCount = 0; // Will be wired to dedicated endpoint
   const revokedLostCount = 0; // Will be wired to dedicated endpoint
 
   // Show only terminal statuses for activity log
-  const terminalJobs = jobs.filter((j) =>
-    ["completed", "failed", "cancelled"].includes(j.status),
-  );
+  const terminalJobs = jobs.filter((j) => ["completed", "failed", "cancelled"].includes(j.status));
 
   return (
     <div className="space-y-6">
@@ -151,29 +148,18 @@ export default async function ReportsPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-              <TableHead className="text-[var(--text-muted)]">
-                Employee
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Department
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">Employee</TableHead>
+              <TableHead className="text-[var(--text-muted)]">Department</TableHead>
               <TableHead className="text-[var(--text-muted)]">Status</TableHead>
               <TableHead className="text-[var(--text-muted)]">Date</TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Printer
-              </TableHead>
-              <TableHead className="text-right text-[var(--text-muted)]">
-                Template
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">Printer</TableHead>
+              <TableHead className="text-right text-[var(--text-muted)]">Template</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {terminalJobs.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="text-center py-8 text-[var(--text-muted)]"
-                >
+                <TableCell colSpan={6} className="text-center py-8 text-[var(--text-muted)]">
                   No completed print job activity yet.
                 </TableCell>
               </TableRow>
@@ -183,9 +169,7 @@ export default async function ReportsPage() {
                 key={job.id}
                 className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
               >
-                <TableCell className="text-[var(--text-heading)]">
-                  {job.employee_name}
-                </TableCell>
+                <TableCell className="text-[var(--text-heading)]">{job.employee_name}</TableCell>
                 <TableCell className="text-[var(--text-secondary)] text-sm">
                   {job.department_name ?? "—"}
                 </TableCell>
@@ -221,13 +205,10 @@ export default async function ReportsPage() {
               <Download className="w-5 h-5 text-[var(--accent-blue)]" />
             </div>
             <div>
-              <h3 className="font-medium text-[var(--text-heading)]">
-                Export Reports
-              </h3>
+              <h3 className="font-medium text-[var(--text-heading)]">Export Reports</h3>
               <p className="text-sm text-[var(--text-muted)] mt-1">
-                Export print job history, card issuance logs, and printer
-                activity as CSV or JSON for external analysis and
-                record-keeping.
+                Export print job history, card issuance logs, and printer activity as CSV or JSON
+                for external analysis and record-keeping.
               </p>
             </div>
           </div>
@@ -243,8 +224,8 @@ export default async function ReportsPage() {
           </div>
         </div>
         <p className="text-xs text-[var(--text-muted)] mt-3 border-t border-[var(--border-default)] pt-3">
-          CSV and JSON export functionality is planned for a future release.
-          Data shown on this page can be copied manually.
+          CSV and JSON export functionality is planned for a future release. Data shown on this page
+          can be copied manually.
         </p>
       </GlassCard>
     </div>

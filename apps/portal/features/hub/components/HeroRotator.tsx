@@ -35,9 +35,7 @@ export function HeroRotator({
       primary: {
         href: primaryHref,
         label: primaryLabel,
-        icon: (
-          <Play className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />
-        ),
+        icon: <Play className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />,
       },
       secondary: {
         href: secondaryHref,
@@ -53,24 +51,18 @@ export function HeroRotator({
         ? {
             href: dept.actions[0].href,
             label: dept.actions[0].label,
-            icon: (
-              <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-            ),
+            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
           }
         : {
             href: `/${dept.name}`,
             label: `Go to ${dept.displayName}`,
-            icon: (
-              <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-            ),
+            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
           },
       secondary: dept.actions?.[1]
         ? {
             href: dept.actions[1].href,
             label: dept.actions[1].label,
-            icon: (
-              <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-            ),
+            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
           }
         : null,
     })),
@@ -141,9 +133,7 @@ export function HeroRotator({
               key={idx}
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
-                idx === activeIndex
-                  ? "bg-[var(--accent-blue)] w-4"
-                  : "bg-arch-border-emphasis",
+                idx === activeIndex ? "bg-[var(--accent-blue)] w-4" : "bg-arch-border-emphasis",
               )}
             />
           ))}

@@ -23,9 +23,6 @@ export async function validateBody<T>(
     }
     return { data: result.data };
   } catch {
-    return NextResponse.json(
-      { error: "invalid json in request body" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "invalid json in request body" }, { status: 400 });
   }
 }

@@ -28,10 +28,7 @@ const SERVICE_META: Record<
     label: "WhatsApp: Operations Chat",
     shortLabel: "WhatsApp",
     Icon: (
-      <svg
-        className="w-3.5 h-3.5 text-emerald-600 fill-current"
-        viewBox="0 0 24 24"
-      >
+      <svg className="w-3.5 h-3.5 text-emerald-600 fill-current" viewBox="0 0 24 24">
         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.79-4.896c1.675.993 3.324 1.558 5.207 1.559 5.405 0 9.803-4.375 9.806-9.754.002-2.607-1.002-5.06-2.83-6.892-1.829-1.83-4.263-2.836-6.868-2.837-5.39 0-9.786 4.377-9.79 9.753-.001 2.03.535 3.738 1.555 5.262l-.994 3.63 3.74-.981z" />
       </svg>
     ),
@@ -41,15 +38,7 @@ const SERVICE_META: Record<
 /* ─────────────────────────── SplitWindowLayout ─────────────────────────── */
 
 export function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
-  const {
-    isOpen,
-    tabs,
-    activeTabId,
-    openTab,
-    closeTab,
-    activateTab,
-    closeAll,
-  } = useSplitWindow();
+  const { isOpen, tabs, activeTabId, openTab, closeTab, activateTab, closeAll } = useSplitWindow();
 
   // Listen to custom window events dispatched from the navigation taskbar
   useEffect(() => {
@@ -83,9 +72,7 @@ export function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
           "fixed top-16 right-2 bottom-2 w-[390px] md:w-[440px] z-40",
           "liquid-glass-light border border-white/40 shadow-window rounded-2xl flex flex-col",
           "transition-all duration-300 ease-glass transform",
-          isOpen
-            ? "translate-x-0 opacity-100"
-            : "translate-x-full opacity-0 pointer-events-none",
+          isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none",
         )}
       >
         {/* Tab Bar */}
@@ -149,9 +136,7 @@ export function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
         <div
           className={cn(
             "flex-1 min-h-0",
-            activeTab?.service === "github"
-              ? "overflow-y-auto"
-              : "overflow-hidden",
+            activeTab?.service === "github" ? "overflow-y-auto" : "overflow-hidden",
           )}
         >
           {activeTab?.service === "github" && <GitHubMockView />}
@@ -194,9 +179,7 @@ function GitHubMockView() {
       <div className="flex items-center justify-between bg-black/[0.02] border border-black/[0.05] p-3 rounded-xl">
         <div className="flex items-center gap-2">
           <GitBranch className="w-4 h-4 text-[var(--text-secondary)]" />
-          <span className="font-semibold text-[var(--text-heading)]">
-            master
-          </span>
+          <span className="font-semibold text-[var(--text-heading)]">master</span>
         </div>
         <div className="flex items-center gap-1.5 text-[var(--accent-green)] font-medium">
           <svg
@@ -271,16 +254,10 @@ function GitHubMockView() {
                   <span className="font-semibold text-blue-600 hover:underline cursor-pointer">
                     {c.hash}
                   </span>
-                  <span className="text-[11px] text-[var(--text-muted)]">
-                    {c.date}
-                  </span>
+                  <span className="text-[11px] text-[var(--text-muted)]">{c.date}</span>
                 </div>
-                <p className="text-[12px] text-[var(--text-heading)] leading-snug">
-                  {c.msg}
-                </p>
-                <span className="text-[10px] text-[var(--text-muted)]">
-                  By {c.author}
-                </span>
+                <p className="text-[12px] text-[var(--text-heading)] leading-snug">{c.msg}</p>
+                <span className="text-[10px] text-[var(--text-muted)]">By {c.author}</span>
               </div>
             ))}
           </div>
@@ -303,8 +280,7 @@ function GitHubMockView() {
               </svg>
               <div>
                 <p className="font-bold text-[13px] text-[var(--text-heading)] leading-snug">
-                  #104 Feature: Centered Connection Status & Clock Calendar
-                  Popover
+                  #104 Feature: Centered Connection Status & Clock Calendar Popover
                 </p>
                 <p className="text-[11px] text-[var(--text-muted)] mt-1">
                   Opened by Timothy • 3 checks passed

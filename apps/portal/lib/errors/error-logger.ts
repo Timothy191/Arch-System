@@ -57,10 +57,7 @@ function createErrorLog(
 
   // Check if error has AppError-like properties
   const hasAppErrorProps =
-    "code" in error &&
-    "statusCode" in error &&
-    "context" in error &&
-    "cause" in error;
+    "code" in error && "statusCode" in error && "context" in error && "cause" in error;
 
   if (hasAppErrorProps) {
     const appError = error as Error & {
@@ -116,16 +113,13 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
       ? console.error // eslint-disable-line no-console
       : console.warn; // eslint-disable-line no-console
 
-  logMethod(
-    `[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`,
-    {
-      timestamp: entry.timestamp,
-      statusCode: entry.statusCode,
-      context: entry.context,
-      url: entry.url,
-      method: entry.method,
-    },
-  );
+  logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`, {
+    timestamp: entry.timestamp,
+    statusCode: entry.statusCode,
+    context: entry.context,
+    url: entry.url,
+    method: entry.method,
+  });
 
   // Forward server-side errors to Sentry — warn/info are expected control-flow (4xx) and not captured
   if (entry.severity === "error" || entry.severity === "fatal") {

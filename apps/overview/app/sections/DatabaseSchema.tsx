@@ -1,11 +1,5 @@
 import { DATABASE_SCHEMA } from "@/lib/data";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Table2, Key, ArrowRight } from "lucide-react";
 
@@ -13,9 +7,7 @@ export default function DatabaseSchema() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#fafafa]">
-          Database Schema
-        </h2>
+        <h2 className="text-2xl font-semibold text-[#fafafa]">Database Schema</h2>
         <p className="text-[#b4b4b4] mt-1">
           PostgreSQL tables with Row Level Security (RLS) policies
         </p>
@@ -24,31 +16,21 @@ export default function DatabaseSchema() {
       {/* Tables Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         {DATABASE_SCHEMA.map((table) => (
-          <Card
-            key={table.name}
-            className="bg-[#171717] border-[#363636] overflow-hidden"
-          >
+          <Card key={table.name} className="bg-[#171717] border-[#363636] overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Table2 className="w-5 h-5 text-[#60a5fa]" />
-                  <CardTitle className="text-lg text-[#fafafa] font-mono">
-                    {table.name}
-                  </CardTitle>
+                  <CardTitle className="text-lg text-[#fafafa] font-mono">{table.name}</CardTitle>
                 </div>
                 {table.rls && (
-                  <Badge
-                    variant="accent"
-                    className="text-[10px] flex items-center gap-1"
-                  >
+                  <Badge variant="accent" className="text-[10px] flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     RLS
                   </Badge>
                 )}
               </div>
-              <CardDescription className="text-xs">
-                {table.description}
-              </CardDescription>
+              <CardDescription className="text-xs">{table.description}</CardDescription>
             </CardHeader>
 
             <CardContent className="pt-0">
@@ -58,15 +40,9 @@ export default function DatabaseSchema() {
                     key={column}
                     className="flex items-center gap-2 px-2 py-1.5 rounded bg-[#242424] text-xs"
                   >
-                    {column.includes("PK") && (
-                      <Key className="w-3 h-3 text-[#007aff]" />
-                    )}
-                    {column.includes("FK") && (
-                      <ArrowRight className="w-3 h-3 text-[#60a5fa]" />
-                    )}
-                    {!column.includes("PK") && !column.includes("FK") && (
-                      <div className="w-3" />
-                    )}
+                    {column.includes("PK") && <Key className="w-3 h-3 text-[#007aff]" />}
+                    {column.includes("FK") && <ArrowRight className="w-3 h-3 text-[#60a5fa]" />}
+                    {!column.includes("PK") && !column.includes("FK") && <div className="w-3" />}
                     <span className="font-mono text-[#b4b4b4]">{column}</span>
                   </div>
                 ))}
@@ -78,9 +54,7 @@ export default function DatabaseSchema() {
 
       {/* Relationships Diagram */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-[#fafafa] mb-4">
-          Table Relationships
-        </h3>
+        <h3 className="text-lg font-medium text-[#fafafa] mb-4">Table Relationships</h3>
         <div className="glass-card p-6 rounded-xl">
           <div className="flex flex-wrap justify-center gap-8">
             {/* Central: departments */}
@@ -114,17 +88,15 @@ export default function DatabaseSchema() {
               Child Tables (reference daily_logs)
             </div>
             <div className="flex flex-wrap justify-center gap-4">
-              {["machine_hours", "fuel_logs", "production_logs"].map(
-                (table) => (
-                  <div key={table} className="flex flex-col items-center">
-                    <div className="px-4 py-2 bg-[#a78bfa]/10 border border-[#a78bfa] rounded-lg text-[#a78bfa] font-mono text-sm font-medium">
-                      {table}
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-[#363636] -rotate-90 mt-2" />
-                    <span className="text-xs text-[#898989] mt-1">N:1</span>
+              {["machine_hours", "fuel_logs", "production_logs"].map((table) => (
+                <div key={table} className="flex flex-col items-center">
+                  <div className="px-4 py-2 bg-[#a78bfa]/10 border border-[#a78bfa] rounded-lg text-[#a78bfa] font-mono text-sm font-medium">
+                    {table}
                   </div>
-                ),
-              )}
+                  <ArrowRight className="w-4 h-4 text-[#363636] -rotate-90 mt-2" />
+                  <span className="text-xs text-[#898989] mt-1">N:1</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -135,9 +107,7 @@ export default function DatabaseSchema() {
         <div className="glass-card p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Lock className="w-5 h-5 text-[#3ecf8e]" />
-            <span className="text-sm font-medium text-[#fafafa]">
-              Row Level Security
-            </span>
+            <span className="text-sm font-medium text-[#fafafa]">Row Level Security</span>
           </div>
           <p className="text-xs text-[#b4b4b4]">
             All tables have RLS enabled with department-based access policies
@@ -147,35 +117,27 @@ export default function DatabaseSchema() {
         <div className="glass-card p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Key className="w-5 h-5 text-[#007aff]" />
-            <span className="text-sm font-medium text-[#fafafa]">
-              Auth Integration
-            </span>
+            <span className="text-sm font-medium text-[#fafafa]">Auth Integration</span>
           </div>
           <p className="text-xs text-[#b4b4b4]">
-            employees table linked to auth.users via auth_id with trigger on
-            signup
+            employees table linked to auth.users via auth_id with trigger on signup
           </p>
         </div>
 
         <div className="glass-card p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Table2 className="w-5 h-5 text-[#60a5fa]" />
-            <span className="text-sm font-medium text-[#fafafa]">
-              7 Tables Total
-            </span>
+            <span className="text-sm font-medium text-[#fafafa]">7 Tables Total</span>
           </div>
           <p className="text-xs text-[#b4b4b4]">
-            Core tables: departments, employees, machines, daily_logs + 3 child
-            tables
+            Core tables: departments, employees, machines, daily_logs + 3 child tables
           </p>
         </div>
       </div>
 
       {/* Helper Functions */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-[#fafafa] mb-4">
-          RLS Helper Functions
-        </h3>
+        <h3 className="text-lg font-medium text-[#fafafa] mb-4">RLS Helper Functions</h3>
         <div className="glass-card p-6 rounded-xl font-mono text-sm">
           <div className="text-[#b4b4b4] space-y-2">
             <div className="text-[#898989]">-- Department access check</div>
@@ -190,9 +152,7 @@ export default function DatabaseSchema() {
               <span className="text-[#b4b4b4]">() → boolean</span>
             </div>
             <br />
-            <div className="text-[#898989]">
-              -- Department access with array support
-            </div>
+            <div className="text-[#898989]">-- Department access with array support</div>
             <div>
               <span className="text-[#3ecf8e]">auth.has_department_access</span>
               <span className="text-[#b4b4b4]">(dept_id UUID) → boolean</span>

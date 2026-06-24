@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, Wrench, Clock } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { AutoAnimateList } from "@repo/ui/AnimatedList";
 
 export interface AlertEvent {
   id: string;
@@ -62,9 +63,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-green/20 w-fit backdrop-blur-xl">
         <div className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
-        <p className="text-xs text-accent-green font-medium">
-          All systems operational
-        </p>
+        <p className="text-xs text-accent-green font-medium">All systems operational</p>
       </div>
     );
   }
@@ -85,7 +84,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
         </span>
       </div>
 
-      <div className="max-h-[200px] overflow-y-auto">
+      <AutoAnimateList className="max-h-[200px] overflow-y-auto">
         {events.map((event) => {
           const config = severityConfig[event.severity];
           const Icon = event.type === "breakdown" ? Wrench : AlertTriangle;
@@ -99,12 +98,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
                 "hover:bg-arch-surface-secondary/50 transition-colors duration-150",
               )}
             >
-              <div
-                className={cn(
-                  "mt-0.5 p-1.5 rounded-lg shrink-0",
-                  config.iconBg,
-                )}
-              >
+              <div className={cn("mt-0.5 p-1.5 rounded-lg shrink-0", config.iconBg)}>
                 <Icon className="w-3.5 h-3.5" />
               </div>
 
@@ -135,7 +129,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
             </Link>
           );
         })}
-      </div>
+      </AutoAnimateList>
     </div>
   );
 }

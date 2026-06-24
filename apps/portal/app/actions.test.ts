@@ -1,11 +1,7 @@
 /**
  * @jest-environment node
  */
-import {
-  logout,
-  speculativeEmbedShiftLog,
-  generateMonthlyReport,
-} from "./actions";
+import { logout, speculativeEmbedShiftLog, generateMonthlyReport } from "./actions";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -14,8 +10,7 @@ jest.mock("@repo/supabase/server", () => ({
 jest.mock("@react-pdf/renderer", () => {
   const React = require("react");
   const createMockComponent = (name: string) => {
-    const MockComp = (props: any) =>
-      React.createElement(name, props, props.children);
+    const MockComp = (props: any) => React.createElement(name, props, props.children);
     MockComp.displayName = name;
     return MockComp;
   };
@@ -46,9 +41,7 @@ jest.mock("@repo/utils/inngest", () => ({
   aiGenerateEmbeddingEvent: "ai/generate-embedding",
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 
 const { inngest } = jest.requireMock("@repo/utils/inngest");
 
@@ -73,9 +66,7 @@ describe("actions", () => {
         },
       });
 
-      await expect(
-        speculativeEmbedShiftLog("test shift log note"),
-      ).rejects.toThrow("Unauthorized");
+      await expect(speculativeEmbedShiftLog("test shift log note")).rejects.toThrow("Unauthorized");
       expect(inngest.send).not.toHaveBeenCalled();
     });
 
@@ -120,9 +111,7 @@ describe("actions", () => {
         },
       });
 
-      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow(
-        "Unauthorized",
-      );
+      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow("Unauthorized");
     });
 
     it("throws error if user is not admin or manager", async () => {
@@ -142,9 +131,7 @@ describe("actions", () => {
         from: jest.fn().mockReturnValue({ select: mockSelect }),
       } as any);
 
-      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow(
-        "Unauthorized",
-      );
+      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow("Unauthorized");
     });
 
     it("generates report and returns signed URL for authorized users", async () => {

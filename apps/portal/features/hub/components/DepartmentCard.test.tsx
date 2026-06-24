@@ -48,9 +48,7 @@ describe("DepartmentCard", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByText("Drilling Operations")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Core drilling operations telemetry and systems control.",
-      ),
+      screen.getByText("Core drilling operations telemetry and systems control."),
     ).toBeInTheDocument();
     expect(screen.getByText("1,240 m")).toBeInTheDocument();
     expect(screen.getByText("Daily Logs")).toBeInTheDocument();
@@ -58,9 +56,7 @@ describe("DepartmentCard", () => {
 
   it("triggers router push on click", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen
-      .getByText("Drilling Operations")
-      .closest(".interactive-element");
+    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
     expect(card).toBeInTheDocument();
     if (card) {
       fireEvent.click(card);
@@ -70,9 +66,7 @@ describe("DepartmentCard", () => {
 
   it("triggers router push on Enter keydown", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen
-      .getByText("Drilling Operations")
-      .closest(".interactive-element");
+    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
     expect(card).toBeInTheDocument();
     if (card) {
       fireEvent.keyDown(card, { key: "Enter" });
@@ -82,9 +76,7 @@ describe("DepartmentCard", () => {
 
   it("triggers router push on Space keydown", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen
-      .getByText("Drilling Operations")
-      .closest(".interactive-element");
+    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
     expect(card).toBeInTheDocument();
     if (card) {
       fireEvent.keyDown(card, { key: " " });
@@ -94,9 +86,7 @@ describe("DepartmentCard", () => {
 
   it("applies tabIndex=0 to the outer interactive wrapper", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen
-      .getByText("Drilling Operations")
-      .closest(".interactive-element");
+    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
     expect(card).toHaveAttribute("tabIndex", "0");
   });
 });

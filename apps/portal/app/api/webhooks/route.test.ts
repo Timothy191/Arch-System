@@ -12,9 +12,7 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 
 function buildMock(
   overrides: {
@@ -146,9 +144,7 @@ describe("GET /api/webhooks", () => {
     };
     const mock = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "admin-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "admin-1" } } }),
       },
       from: jest.fn().mockImplementation((table: string) => {
         if (table === "employees") {
@@ -166,9 +162,7 @@ describe("GET /api/webhooks", () => {
           select: jest.fn().mockReturnValue({
             is: jest.fn().mockReturnValue(
               Object.assign(isResult, {
-                or: jest
-                  .fn()
-                  .mockResolvedValue({ data: webhookList, error: null }),
+                or: jest.fn().mockResolvedValue({ data: webhookList, error: null }),
               }),
             ),
           }),
@@ -195,9 +189,7 @@ describe("POST /api/webhooks", () => {
       department_id: DEFAULT_DEPT,
     };
     const finalBody =
-      body && typeof body === "object" && !Array.isArray(body)
-        ? { ...defaultBody, ...body }
-        : body;
+      body && typeof body === "object" && !Array.isArray(body) ? { ...defaultBody, ...body } : body;
     return new NextRequest("http://localhost/api/webhooks", {
       method: "POST",
       body: JSON.stringify(finalBody),
@@ -291,9 +283,7 @@ describe("POST /api/webhooks", () => {
     // Custom mock where insert returns an error
     const mock = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockImplementation((table: string) => {
         if (table === "employees") {
@@ -308,9 +298,7 @@ describe("POST /api/webhooks", () => {
         return {
           insert: jest.fn().mockReturnValue({
             select: jest.fn().mockReturnValue({
-              single: jest
-                .fn()
-                .mockResolvedValue({ data: null, error: insertError }),
+              single: jest.fn().mockResolvedValue({ data: null, error: insertError }),
             }),
           }),
         };

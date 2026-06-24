@@ -193,7 +193,7 @@ Required variables:
 2. **Systemd Service** (optional but recommended):
 
 ```bash
-sudo cp scripts/arch-systems.service /etc/infra/systemd/system/
+sudo cp scripts/arch-systems.service /etc/systemd/system/
 sudo systemctl enable arch-systems
 ```
 

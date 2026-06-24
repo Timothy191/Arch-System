@@ -48,16 +48,13 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
         .limit(5);
 
       if (queryError) {
-        throw new Error(
-          `Failed to query session memories: ${queryError.message}`,
-        );
+        throw new Error(`Failed to query session memories: ${queryError.message}`);
       }
 
       // The user message was already stored by loadMemoryNode.
       // The assistant response is what we're recovering.
       const assistantMemories = recentMemories?.filter(
-        (m) =>
-          m.memory_type === "episodic" && m.content.startsWith("Assistant:"),
+        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:"),
       );
 
       if (!assistantMemories || assistantMemories.length === 0) {
@@ -65,9 +62,7 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
         // This is informational; the next user request will still have
         // the user message in context via loadMemoryNode.
         logError(
-          new Error(
-            "Assistant response not persisted — stream may have been terminated early",
-          ),
+          new Error("Assistant response not persisted — stream may have been terminated early"),
           {
             context: "memory_persist_job",
             sessionId,

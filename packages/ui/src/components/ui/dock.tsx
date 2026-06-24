@@ -2,13 +2,7 @@
 
 import React, { PropsWithChildren, useRef } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import {
-  motion,
-  MotionValue,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, MotionValue, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { MotionProps } from "framer-motion";
 
 import { cn } from "@repo/ui/lib/utils";
@@ -51,10 +45,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
 
     const renderChildren = () => {
       return React.Children.map(children, (child) => {
-        if (
-          React.isValidElement<DockIconProps>(child) &&
-          child.type === DockIcon
-        ) {
+        if (React.isValidElement<DockIconProps>(child) && child.type === DockIcon) {
           return React.cloneElement(child, {
             ...child.props,
             mouseX: mouseX,

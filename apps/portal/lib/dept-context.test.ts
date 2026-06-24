@@ -15,9 +15,7 @@ jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 const { notFound } = jest.requireMock("next/navigation");
 
 describe("getDepartmentContext", () => {
@@ -47,9 +45,9 @@ describe("getDepartmentContext", () => {
   });
 
   it("calls notFound for an invalid department slug", async () => {
-    await expect(
-      getDepartmentContext({ department: "nonexistent-dept" }),
-    ).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(getDepartmentContext({ department: "nonexistent-dept" })).rejects.toThrow(
+      "NEXT_NOT_FOUND",
+    );
 
     expect(notFound).toHaveBeenCalledTimes(1);
   });
@@ -67,9 +65,9 @@ describe("getDepartmentContext", () => {
       }),
     });
 
-    await expect(
-      getDepartmentContext({ department: "drilling" }),
-    ).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(getDepartmentContext({ department: "drilling" })).rejects.toThrow(
+      "NEXT_NOT_FOUND",
+    );
 
     expect(notFound).toHaveBeenCalledTimes(1);
   });
@@ -81,28 +79,22 @@ describe("requireDepartment", () => {
   });
 
   it("does nothing when department is allowed", () => {
-    expect(() =>
-      requireDepartment("control-room", "control-room"),
-    ).not.toThrow();
+    expect(() => requireDepartment("control-room", "control-room")).not.toThrow();
   });
 
   it("calls notFound when department is not allowed", () => {
-    expect(() => requireDepartment("safety", "control-room")).toThrow(
-      "NEXT_NOT_FOUND",
-    );
+    expect(() => requireDepartment("safety", "control-room")).toThrow("NEXT_NOT_FOUND");
     expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("allows department when in array of allowed departments", () => {
-    expect(() =>
-      requireDepartment("safety", ["control-room", "safety"]),
-    ).not.toThrow();
+    expect(() => requireDepartment("safety", ["control-room", "safety"])).not.toThrow();
   });
 
   it("calls notFound when department is not in allowed array", () => {
-    expect(() =>
-      requireDepartment("drilling", ["control-room", "safety"]),
-    ).toThrow("NEXT_NOT_FOUND");
+    expect(() => requireDepartment("drilling", ["control-room", "safety"])).toThrow(
+      "NEXT_NOT_FOUND",
+    );
     expect(notFound).toHaveBeenCalledTimes(1);
   });
 });

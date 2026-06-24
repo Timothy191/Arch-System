@@ -17,18 +17,11 @@ jest.mock("@/lib/errors/error-logger", () => ({
   logError: jest.fn(),
 }));
 
-const { createServiceRoleClient } = jest.requireMock(
-  "@repo/supabase/service-role",
-);
+const { createServiceRoleClient } = jest.requireMock("@repo/supabase/service-role");
 
-let lastServiceRoleClient: ReturnType<typeof buildServiceRoleMock> | null =
-  null;
+let lastServiceRoleClient: ReturnType<typeof buildServiceRoleMock> | null = null;
 
-const PUBLICLY_DOCUMENTED_SCANNER_SOURCES = [
-  "C66-HARDWARE",
-  "C66-SCANNER",
-  "GATE-TERMINAL",
-];
+const PUBLICLY_DOCUMENTED_SCANNER_SOURCES = ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
 
 function buildServiceRoleMock() {
   const badge = {
@@ -55,9 +48,7 @@ function buildServiceRoleMock() {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              single: jest
-                .fn()
-                .mockResolvedValue({ data: person, error: null }),
+              single: jest.fn().mockResolvedValue({ data: person, error: null }),
             }),
           }),
         };
@@ -149,16 +140,12 @@ describe("P0 /api/c66 secure access checks", () => {
   );
 
   it("missing token is rejected with 401", async () => {
-    const res = await POST(
-      makeRequest({ source: "C66-HARDWARE", token: null }),
-    );
+    const res = await POST(makeRequest({ source: "C66-HARDWARE", token: null }));
     expect(res.status).toBe(401);
   });
 
   it("invalid source with valid token is rejected with 403", async () => {
-    const res = await POST(
-      makeRequest({ source: "INVALID-SOURCE", token: TEST_TOKEN }),
-    );
+    const res = await POST(makeRequest({ source: "INVALID-SOURCE", token: TEST_TOKEN }));
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toBe("Unauthorized scanner source");
@@ -166,9 +153,7 @@ describe("P0 /api/c66 secure access checks", () => {
 
   it("unconfigured SCANNER_API_KEY environment variable rejects all requests", async () => {
     delete process.env.SCANNER_API_KEY;
-    const res = await POST(
-      makeRequest({ source: "C66-HARDWARE", token: TEST_TOKEN }),
-    );
+    const res = await POST(makeRequest({ source: "C66-HARDWARE", token: TEST_TOKEN }));
     expect(res.status).toBe(401);
   });
 });

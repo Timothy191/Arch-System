@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import {
-  createServerSupabaseClient,
-  getUserSafely,
-} from "@repo/supabase/server";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { AlertTicker } from "@/features/hub/components/AlertTicker";
 import type { AlertEvent } from "@/features/hub/components/AlertTicker";
@@ -14,6 +11,7 @@ import { HeroBackground } from "@/features/hub/components/HeroBackground";
 import { HeroRotator } from "@/features/hub/components/HeroRotator";
 import { TrustLogos } from "@/features/hub/components/TrustLogos";
 import { ToolBanner } from "@/features/hub/components/ToolBanner";
+import { DepartmentReviews } from "@/features/hub/components/DepartmentReviews";
 import { getTools } from "@/lib/tools";
 import { DEPARTMENTS } from "~/lib/departments";
 import { DepartmentCard } from "@/features/hub/components/DepartmentCard";
@@ -57,10 +55,7 @@ async function getDashboardCounts(
               .select("id", { count: "exact", head: true })
               .eq("status", "active")
               .is("deleted_at", null),
-            db
-              .from("machines")
-              .select("id", { count: "exact", head: true })
-              .eq("active", false),
+            db.from("machines").select("id", { count: "exact", head: true }).eq("active", false),
           ]);
           return {
             incidentCount: incidents.count ?? 0,
@@ -71,11 +66,7 @@ async function getDashboardCounts(
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "counts", today],
-          tags: [
-            "table:safety_incidents",
-            "table:breakdowns",
-            "table:machines",
-          ],
+          tags: ["table:safety_incidents", "table:breakdowns", "table:machines"],
         },
       );
     },
@@ -104,12 +95,9 @@ async function getProductionTrendData(
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
-          const { data: trendData, error } = await db.rpc(
-            "get_production_trend",
-            {
-              p_hours_back: 24,
-            },
-          );
+          const { data: trendData, error } = await db.rpc("get_production_trend", {
+            p_hours_back: 24,
+          });
 
           if (error || !trendData || trendData.length === 0) {
             return FALLBACK_TREND_DATA;
@@ -131,15 +119,8 @@ async function getProductionTrendData(
             const point = hourlyMap.get(hour)!;
             // Map department name to the specific key in TrendDataPoint
             // If department name is not one of the keys, we skip or handle accordingly
-            const deptKey = row.department_name as keyof Omit<
-              TrendDataPoint,
-              "date"
-            >;
-            if (
-              deptKey === "Drilling" ||
-              deptKey === "Production" ||
-              deptKey === "Engineering"
-            ) {
+            const deptKey = row.department_name as keyof Omit<TrendDataPoint, "date">;
+            if (deptKey === "Drilling" || deptKey === "Production" || deptKey === "Engineering") {
               point[deptKey] = Number(row.tonnes);
             }
           }
@@ -187,11 +168,7 @@ async function getRecentAlertEvents(
           function mapSeverityLevel(level?: string): AlertEvent["severity"] {
             if (!level) return "warning";
             const lower = level.toLowerCase();
-            if (
-              lower.includes("critical") ||
-              lower.includes("high") ||
-              lower.includes("severe")
-            ) {
+            if (lower.includes("critical") || lower.includes("high") || lower.includes("severe")) {
               return "critical";
             }
             if (
@@ -212,9 +189,7 @@ async function getRecentAlertEvents(
               events.push({
                 id: `incident-${incident.id}`,
                 type: "incident",
-                title: incident.location
-                  ? `${incident.location}: Incident`
-                  : "Safety Incident",
+                title: incident.location ? `${incident.location}: Incident` : "Safety Incident",
                 description: incident.description,
                 timestamp: incident.created_at,
                 severity: mapSeverityLevel(sev?.level),
@@ -226,9 +201,7 @@ async function getRecentAlertEvents(
           // Fetch recent active breakdowns
           const { data: breakdownsData } = await db
             .from("breakdowns")
-            .select(
-              "id, machine_name, machine_type, reason, created_at, date_in",
-            )
+            .select("id, machine_name, machine_type, reason, created_at, date_in")
             .eq("status", "active")
             .is("deleted_at", null)
             .order("created_at", { ascending: false })
@@ -252,11 +225,7 @@ async function getRecentAlertEvents(
 
           // Sort by timestamp descending and limit to 8 total
           return events
-            .sort(
-              (a, b) =>
-                new Date(b.timestamp).getTime() -
-                new Date(a.timestamp).getTime(),
-            )
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, 8);
         },
         {
@@ -289,8 +258,7 @@ async function getEmployeeDepartments(
             .eq("auth_id", userId)
             .single();
 
-          const accessibleDeptIds = (empData?.accessible_departments ??
-            []) as string[];
+          const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
           if (accessibleDeptIds.length === 0) return [];
 
           const { data: deptData } = await db
@@ -378,10 +346,7 @@ export default async function HubPage() {
             {/* Eyebrow badge row */}
             <div className="flex items-center gap-3 flex-wrap liquid-shift-y">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-medium tracking-wide text-arch-text-secondary">
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-accent-green"
-                  aria-hidden="true"
-                />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-green" aria-hidden="true" />
                 Sector-01 Active
               </span>
               <span className="text-xs font-mono text-arch-text-tertiary tracking-wider">
@@ -429,9 +394,7 @@ export default async function HubPage() {
                     : "/"
               }
               primaryLabel={
-                accessibleDeptIds.includes("control-room")
-                  ? "Launch Monitor"
-                  : "Go to Department"
+                accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
               }
               secondaryHref={
                 accessibleDeptIds.includes("training")
@@ -449,6 +412,9 @@ export default async function HubPage() {
           </div>
         </GlassCard>
       </section>
+
+      {/* Department & Operational Testimonials Double Marquee */}
+      <DepartmentReviews />
 
       {/* Operational Urgencies & Alerts */}
       <div
@@ -514,9 +480,7 @@ export default async function HubPage() {
           </div>
 
           <Suspense
-            fallback={
-              <div className="h-24 animate-pulse bg-arch-surface-tertiary rounded-xl" />
-            }
+            fallback={<div className="h-24 animate-pulse bg-arch-surface-tertiary rounded-xl" />}
           >
             <ToolBanner tools={tools} />
           </Suspense>
@@ -540,9 +504,7 @@ export default async function HubPage() {
           className="bg-arch-surface-secondary/70 border-arch-border-subtle"
         >
           <Suspense
-            fallback={
-              <div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-xl" />
-            }
+            fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-xl" />}
           >
             <ProductionTrendSection />
           </Suspense>

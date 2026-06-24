@@ -58,11 +58,7 @@ type RateLimitType = keyof typeof RATE_LIMIT_CONFIGS;
  */
 function getRateLimitType(path: string): RateLimitType {
   if (path.startsWith("/api/ai/")) return "ai";
-  if (
-    path.startsWith("/api/auth/") ||
-    path.includes("/login") ||
-    path.includes("/reset-password")
-  )
+  if (path.startsWith("/api/auth/") || path.includes("/login") || path.includes("/reset-password"))
     return "auth";
   if (path.startsWith("/api/export/")) return "export";
   if (path.startsWith("/api/admin/")) return "admin";

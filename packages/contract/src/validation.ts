@@ -51,19 +51,13 @@ export class ValidationError extends Error {
  * @throws {ValidationError} If the body is missing, not valid JSON,
  *   or fails schema validation.
  */
-export async function validateBody<T>(
-  schema: z.ZodType<T>,
-  request: Request,
-): Promise<T> {
+export async function validateBody<T>(schema: z.ZodType<T>, request: Request): Promise<T> {
   try {
     const body = await request.json();
     const result = schema.safeParse(body);
 
     if (!result.success) {
-      throw new ValidationError(
-        "Request body validation failed",
-        result.error.issues,
-      );
+      throw new ValidationError("Request body validation failed", result.error.issues);
     }
 
     return result.data;
@@ -115,10 +109,7 @@ export function withValidation<T>(
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
   context: { params: Promise<unknown> },
 ) => Promise<Response> {
-  return async (
-    request: Request,
-    context: { params: Promise<unknown> },
-  ): Promise<Response> => {
+  return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
       const data = await validateBody(schema, request);
       return await handler(request, data, context);
@@ -170,10 +161,7 @@ export function withQueryValidation<T>(
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
   context: { params: Promise<unknown> },
 ) => Promise<Response> {
-  return async (
-    request: Request,
-    context: { params: Promise<unknown> },
-  ): Promise<Response> => {
+  return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
       const url = new URL(request.url);
       const params = Object.fromEntries(url.searchParams.entries());

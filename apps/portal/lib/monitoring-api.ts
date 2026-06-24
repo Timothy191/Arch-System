@@ -52,11 +52,7 @@ interface STACCollection {
   };
 }
 
-export type DeformationArea =
-  | "pit-wall"
-  | "tailings-dam"
-  | "haul-road"
-  | "processing-plant";
+export type DeformationArea = "pit-wall" | "tailings-dam" | "haul-road" | "processing-plant";
 
 export interface VelocityPoint {
   month: string;
@@ -113,17 +109,14 @@ const COPERNICUS_STAC = "https://catalogue.dataspace.copernicus.eu/stac";
  * EOX terms: https://maps.eox.at/terms_of_service
  */
 export const MAP_TILE_URLS: Record<string, string> = {
-  optical:
-    "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg",
-  terrain:
-    "https://tiles.maps.eox.at/wmts/1.0.0/terrain-light_3857/default/g/{z}/{y}/{x}.jpg",
+  optical: "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg",
+  terrain: "https://tiles.maps.eox.at/wmts/1.0.0/terrain-light_3857/default/g/{z}/{y}/{x}.jpg",
   osm: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
   // SAR pseudo-color: use terrain + overlay markers (no free public SAR XYZ tiles exist)
   sar: "https://tiles.maps.eox.at/wmts/1.0.0/terrain_3857/default/g/{z}/{y}/{x}.jpg",
   // NDVI/geology: use S2 cloudless as base (band composites require SH instance ID)
   ndvi: "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg",
-  geology:
-    "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg",
+  geology: "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg",
   none: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 };
 
@@ -217,9 +210,7 @@ export async function fetchSentinel2Scenes(
     if (!res.ok) return [];
     const data: STACCollection = await res.json();
     const features = data.features ?? [];
-    return features.filter(
-      (f) => (f.properties["eo:cloud_cover"] ?? 100) <= maxCloudCover,
-    );
+    return features.filter((f) => (f.properties["eo:cloud_cover"] ?? 100) <= maxCloudCover);
   } catch {
     return [];
   }
@@ -241,10 +232,7 @@ export function getSTACQuicklookUrl(item: STACItem): string | null {
 /**
  * Sentinel-1 12-day repeat cycle — generate next N acquisition dates from a start date
  */
-export function getSentinel1RevisitDates(
-  startDate: Date,
-  count: number = 6,
-): Date[] {
+export function getSentinel1RevisitDates(startDate: Date, count: number = 6): Date[] {
   return Array.from({ length: count }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(d.getDate() + i * 12);
@@ -267,10 +255,7 @@ export function classifyDeformation(shiftMm: number): DeformationLevel {
  * Generate 6-month velocity history for a zone (mm/month)
  * In production: output from StaMPS / MintPy InSAR time-series processor
  */
-function generateHistory(
-  baseVelocity: number,
-  noiseScale: number = 1.5,
-): VelocityPoint[] {
+function generateHistory(baseVelocity: number, noiseScale: number = 1.5): VelocityPoint[] {
   const months = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
   return months.map((month) => {
     const noise = (Math.random() - 0.5) * noiseScale;

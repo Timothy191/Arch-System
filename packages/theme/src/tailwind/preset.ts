@@ -281,8 +281,7 @@ const archTheme: Config = {
         "diffusion-md": "var(--shadow-diffusion-md)",
         "diffusion-lg": "var(--shadow-diffusion-lg)",
         "diffusion-xl": "var(--shadow-diffusion-xl)",
-        "diffusion-cyan":
-          "0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06)",
+        "diffusion-cyan": "0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06)",
         card: "var(--shadow-card)",
         "card-hover": "var(--shadow-card-hover)",
         elevated: "var(--shadow-elevated)",
@@ -291,10 +290,8 @@ const archTheme: Config = {
         "glow-mint": "var(--shadow-glow-mint)",
         // Tremor-compatible shadows
         "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-        "tremor-card":
-          "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-        "tremor-dropdown":
-          "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "tremor-card": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        "tremor-dropdown": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
         // Custom volumetric glass shadows
         "glass-depth":
           "0 1px 2px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03), 0 12px 32px rgba(0,0,0,0.03), 0 20px 48px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,0.7)",
@@ -402,12 +399,10 @@ const archTheme: Config = {
         },
         "status-glow-pulse": {
           "0%, 100%": {
-            boxShadow:
-              "0 0 8px rgba(28, 28, 30, 0.2), inset 0 0 4px rgba(28, 28, 30, 0.1)",
+            boxShadow: "0 0 8px rgba(28, 28, 30, 0.2), inset 0 0 4px rgba(28, 28, 30, 0.1)",
           },
           "50%": {
-            boxShadow:
-              "0 0 20px rgba(28, 28, 30, 0.6), inset 0 0 10px rgba(28, 28, 30, 0.3)",
+            boxShadow: "0 0 20px rgba(28, 28, 30, 0.6), inset 0 0 10px rgba(28, 28, 30, 0.3)",
           },
         },
       },

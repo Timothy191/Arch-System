@@ -118,19 +118,13 @@ async function handleGetLogs(
     .limit(50);
 
   if (error) {
-    return NextResponse.json(
-      { error: "Database query failed" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Database query failed" }, { status: 500 });
   }
 
   return NextResponse.json({ logs });
 }
 
 // GET /api/webhooks/[id]/logs - Get delivery logs for a webhook
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   return withRateLimit(request, () => handleGetLogs(request, { params }));
 }

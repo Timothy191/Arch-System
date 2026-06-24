@@ -70,10 +70,7 @@ curl -I https://fuxa.production-mining.com
 ```javascript
 // FUXA server configuration
 // Allow portal domain to embed FUXA in iframe
-const corsOrigins = [
-  "https://portal.production-mining.com",
-  "https://portal.staging-mining.com",
-];
+const corsOrigins = ["https://portal.production-mining.com", "https://portal.staging-mining.com"];
 ```
 
 ### **4. Test iframe Loading**

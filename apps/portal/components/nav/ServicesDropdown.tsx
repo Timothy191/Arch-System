@@ -30,11 +30,7 @@ import {
   ClipboardList,
   Siren,
 } from "lucide-react";
-import {
-  fetchWeather,
-  getWindDirection,
-  type WeatherData,
-} from "@/lib/weather-api";
+import { fetchWeather, getWindDirection, type WeatherData } from "@/lib/weather-api";
 
 /* ------------------------------------------------------------------ */
 //  Shift helpers
@@ -187,9 +183,7 @@ export function ServicesDropdown() {
               {weatherLoading || !weather ? (
                 <div className="flex items-center gap-2">
                   <CloudSun className="w-4 h-4 text-[var(--text-muted)] animate-pulse" />
-                  <span className="text-[11px] text-[var(--text-muted)]">
-                    Loading…
-                  </span>
+                  <span className="text-[11px] text-[var(--text-muted)]">Loading…</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -230,9 +224,7 @@ export function ServicesDropdown() {
               {weatherLoading || !weather ? (
                 <div className="flex items-center gap-2">
                   <Wind className="w-4 h-4 text-[var(--text-muted)] animate-pulse" />
-                  <span className="text-[11px] text-[var(--text-muted)]">
-                    Loading conditions…
-                  </span>
+                  <span className="text-[11px] text-[var(--text-muted)]">Loading conditions…</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -297,20 +289,14 @@ export function ServicesDropdown() {
                   onSelect={() => window.location.reload()}
                 >
                   <RotateCcw className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                  <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                    Reload
-                  </span>
-                  <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-                    ⌘R
-                  </span>
+                  <span className="text-[13px] font-medium text-[var(--text-heading)]">Reload</span>
+                  <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘R</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
                     if (!document.fullscreenElement) {
-                      document.documentElement
-                        .requestFullscreen()
-                        .catch(() => {});
+                      document.documentElement.requestFullscreen().catch(() => {});
                     } else if (document.exitFullscreen) {
                       document.exitFullscreen().catch(() => {});
                     }
@@ -320,9 +306,7 @@ export function ServicesDropdown() {
                   <span className="text-[13px] font-medium text-[var(--text-heading)]">
                     Toggle Fullscreen
                   </span>
-                  <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-                    ⌃⌘F
-                  </span>
+                  <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘F</span>
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
@@ -364,9 +348,7 @@ export function ServicesDropdown() {
                   onSelect={() => window.open("tel:+27170000000", "_self")}
                 >
                   <Phone className="h-3.5 w-3.5 text-accent-red" />
-                  <span className="text-[13px] font-medium text-accent-red">
-                    Emergency Line
-                  </span>
+                  <span className="text-[13px] font-medium text-accent-red">Emergency Line</span>
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
@@ -380,12 +362,8 @@ export function ServicesDropdown() {
             onSelect={() => setLocked(true)}
           >
             <Lock className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-            <span className="text-[13px] font-medium text-[var(--text-heading)]">
-              Lock Screen
-            </span>
-            <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-              ⌃⌘Q
-            </span>
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">Lock Screen</span>
+            <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘Q</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -393,9 +371,7 @@ export function ServicesDropdown() {
             onSelect={() => setSleeping(true)}
           >
             <Moon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-            <span className="text-[13px] font-medium text-[var(--text-heading)]">
-              Sleep
-            </span>
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">Sleep</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="bg-black/[0.06] my-1.5 mx-1" />
@@ -405,17 +381,10 @@ export function ServicesDropdown() {
               asChild
               className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
             >
-              <button
-                type="submit"
-                className="w-full flex items-center gap-2.5 px-2 py-1.5"
-              >
+              <button type="submit" className="w-full flex items-center gap-2.5 px-2 py-1.5">
                 <LogOut className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                  Log Out
-                </span>
-                <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-                  ⇧⌘Q
-                </span>
+                <span className="text-[13px] font-medium text-[var(--text-heading)]">Log Out</span>
+                <span className="ml-auto text-[11px] text-[var(--text-muted)]">⇧⌘Q</span>
               </button>
             </DropdownMenuItem>
           </form>
@@ -425,9 +394,7 @@ export function ServicesDropdown() {
             onSelect={() => window.location.reload()}
           >
             <RotateCcw className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-            <span className="text-[13px] font-medium text-[var(--text-heading)]">
-              Restart…
-            </span>
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">Restart…</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="bg-black/[0.06] my-1.5 mx-1" />
@@ -437,9 +404,7 @@ export function ServicesDropdown() {
             onSelect={() => setShutDown(true)}
           >
             <PowerOff className="h-3.5 w-3.5 text-accent-red" />
-            <span className="text-[13px] font-medium text-accent-red">
-              Shut Down…
-            </span>
+            <span className="text-[13px] font-medium text-accent-red">Shut Down…</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -453,9 +418,7 @@ export function ServicesDropdown() {
           onClick={() => setLocked(false)}
         >
           <Lock className="w-8 h-8 text-white/60" />
-          <span className="text-sm text-white/60 font-medium">
-            Click anywhere to unlock
-          </span>
+          <span className="text-sm text-white/60 font-medium">Click anywhere to unlock</span>
         </div>
       )}
 
@@ -468,9 +431,7 @@ export function ServicesDropdown() {
           onClick={() => setSleeping(false)}
         >
           <Moon className="w-8 h-8 text-white/40" />
-          <span className="text-sm text-white/40 font-medium">
-            Click anywhere to wake
-          </span>
+          <span className="text-sm text-white/40 font-medium">Click anywhere to wake</span>
         </div>
       )}
 

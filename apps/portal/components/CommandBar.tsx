@@ -146,11 +146,7 @@ const TOOLS_COMMANDS: CommandItem[] = [
   },
 ];
 
-const ALL_COMMANDS = [
-  ...DEPARTMENT_COMMANDS,
-  ...NAV_COMMANDS,
-  ...TOOLS_COMMANDS,
-];
+const ALL_COMMANDS = [...DEPARTMENT_COMMANDS, ...NAV_COMMANDS, ...TOOLS_COMMANDS];
 
 export function CommandBar() {
   const [open, setOpen] = useState(false);
@@ -296,16 +292,12 @@ export function CommandBar() {
                       <span
                         className={cn(
                           "shrink-0",
-                          isSelected
-                            ? "text-arch-accent-blue"
-                            : "text-arch-text-tertiary",
+                          isSelected ? "text-arch-accent-blue" : "text-arch-text-tertiary",
                         )}
                       >
                         {item.icon}
                       </span>
-                      <span className="flex-1 text-sm font-medium">
-                        {item.label}
-                      </span>
+                      <span className="flex-1 text-sm font-medium">{item.label}</span>
                       {item.shortcut && (
                         <kbd className="px-1.5 py-0.5 rounded bg-arch-surface-tertiary text-[10px] font-mono text-arch-text-tertiary">
                           {item.shortcut}
@@ -322,18 +314,12 @@ export function CommandBar() {
         {/* Footer */}
         <div className="flex items-center gap-4 px-4 py-2 border-t border-arch-border-subtle text-[10px] text-arch-text-tertiary">
           <span className="flex items-center gap-1">
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">
-              ↑
-            </kbd>
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">
-              ↓
-            </kbd>
+            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">↑</kbd>
+            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">↓</kbd>
             to navigate
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">
-              Enter
-            </kbd>
+            <kbd className="px-1 rounded bg-arch-surface-tertiary font-mono">Enter</kbd>
             to select
           </span>
         </div>

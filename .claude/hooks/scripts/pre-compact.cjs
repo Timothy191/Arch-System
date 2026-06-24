@@ -52,10 +52,7 @@ async function main() {
       const compactDir = path.join(tempDir, "compacts");
       ensureDir(compactDir);
 
-      const compactFile = path.join(
-        compactDir,
-        `${getDateString()}-${sessionId.slice(-6)}.json`,
-      );
+      const compactFile = path.join(compactDir, `${getDateString()}-${sessionId.slice(-6)}.json`);
 
       const state = {
         timestamp: new Date().toISOString(),
@@ -66,10 +63,7 @@ async function main() {
       // Read edit count if exists
       const editCountFile = path.join(tempDir, `edit-count-${sessionId}`);
       if (fs.existsSync(editCountFile)) {
-        state.edits_before_compact = parseInt(
-          fs.readFileSync(editCountFile, "utf8").trim(),
-          10,
-        );
+        state.edits_before_compact = parseInt(fs.readFileSync(editCountFile, "utf8").trim(), 10);
       }
 
       // Read prompt count if exists

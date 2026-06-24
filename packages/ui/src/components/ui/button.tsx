@@ -10,20 +10,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-10 max-md:min-h-[44px] px-4 py-2",
+        sm: "h-9 max-md:min-h-[44px] rounded-md px-3",
+        lg: "h-11 max-md:min-h-[44px] rounded-md px-8",
+        icon: "h-10 w-10 max-md:min-h-[44px] max-md:min-w-[44px]",
       },
     },
     defaultVariants: {
@@ -40,14 +37,33 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const isDefault = variant === "default" || !variant;
+    const hasCustomBg = className && (className.includes("bg-") || className.includes("bg-["));
+
+    if (isDefault && !asChild && !hasCustomBg) {
+      const sizeClass =
+        size === "sm"
+          ? "button-sm"
+          : size === "lg"
+            ? "button-lg"
+            : size === "icon"
+              ? "button-sm p-1 w-10 h-10"
+              : "button-md";
+
+      return (
+        <Comp className={cn("button", sizeClass, className)} ref={ref} {...props}>
+          <span className="blob1" />
+          <span className="inner">{children}</span>
+        </Comp>
+      );
+    }
+
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
+        {children}
+      </Comp>
     );
   },
 );

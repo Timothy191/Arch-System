@@ -11,9 +11,350 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: Build & Test
+  # Deps Lint job - runs in parallel
+  deps-lint:
+    name: Dependency Lint
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run syncpack deps lint
+        run: pnpm deps:lint
+
+  # Security Audit job - runs in parallel
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run dependency audit
+        run: pnpm audit --audit-level=high --prod
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  # Knip dead-code detection job - runs in parallel
+  knip:
+    name: Dead Code Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Knip
+        run: pnpm knip
+
+  # Policy Check job - runs in parallel
+  policy-check:
+    name: Policy Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Policy Check
+        run: pnpm policy:check
+
+  # Markdown Lint job - runs in parallel
+  md-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Markdown Lint
+        run: pnpm md:lint
+
+  # Lint & Type Check job - runs in parallel with static checks
+  lint-type-check:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint & Type Check
+        run: pnpm nx affected -t lint type-check
+
+  # Token & CSS Lint job - runs in parallel
+  token-css-lint:
+    name: Token & CSS Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Token & CSS Lint
+        run: pnpm nx affected -t lint:tokens lint:css
+
+  # Build job - depends on lint/type-check
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint-type-check, token-css-lint]
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      # Dummy values required for Next.js builds
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
+      PORT: 3000
+      N8N_URL: http://localhost:5678
+      FLOWISE_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres # secretlint-disable-line
+      PAYLOAD_SECRET: dummy-payload-secret-for-ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: "javascript-typescript"
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Next.js Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/apps/portal/.next/cache
+            ${{ github.workspace }}/apps/overview/.next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Terraform Lint (tflint)
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tflint
+        run: tflint --recursive
+        working-directory: infra/redis/terraform
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: 1
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: bom.json
+
+      - name: Run DeepEval AI Compliance Tests
+        run: |
+          pipx install poetry
+          poetry install
+          poetry run deepeval test run tests/
+        working-directory: packages/eval
+
+      - name: Build
+        run: pnpm nx affected -t build
+
+      - name: Bundle Size Check
+        run: pnpm bundlesize
+
+  # Test job - depends on build
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test with Coverage
+        run: pnpm nx affected -t test -- --coverage --passWithNoTests
+        env:
+          CI: true
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/portal/coverage/
+          retention-days: 14
+
+  # E2E job - depends on build
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build]
     permissions:
       contents: read
       issues: write
@@ -42,7 +383,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9.15.9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,80 +407,74 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check dependency versions
-        run: pnpm deps:lint
-
-      - name: Audit dependencies (high/critical vulnerabilities)
-        run: pnpm audit --audit-level=high --prod
-        continue-on-error: false
-
-      - name: Check for dead code
-        run: pnpm knip
-
-      - name: Verify policy SSoT (drift detection)
-        run: pnpm policy:check
-
-      - name: Markdown Lint
-        run: pnpm md:lint
-
-      - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks.toml
-
-      - name: Lint & Type Check
-        run: pnpm nx affected -t lint type-check
-
-      - name: Terraform Lint (tflint)
-        uses: terraform-linters/setup-tflint@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run tflint
-        run: tflint --recursive
-        working-directory: infra/redis/terraform
-
-      - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-          severity: 'HIGH,CRITICAL'
-          exit-code: 1
-
-      - name: Token & CSS Lint
-        run: pnpm nx affected -t lint:tokens lint:css
-
-      - name: Test with Coverage
-        run: pnpm nx affected -t test -- --coverage --passWithNoTests
-        env:
-          CI: true
-
-      - name: Upload Coverage Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: apps/portal/coverage/
-          retention-days: 14
-
       - name: Build
         run: pnpm nx affected -t build
 
-      - name: Bundle Size Check
-        run: pnpm bundlesize
-
-      - name: Start portal for Lighthouse & Playwright E2E
-        run: pnpm --filter portal start &
-        env:
-          PORT: 3000
-
-      - name: Wait for portal
-        run: npx wait-on http://localhost:3000 --timeout 60000
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright E2E Tests (Visual Regression)
         run: pnpm test:e2e
+
+  # Lighthouse job - depends on build
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      # Dummy values required for Next.js builds
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
+      PORT: 3000
+      N8N_URL: http://localhost:5678
+      FLOWISE_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres # secretlint-disable-line
+      PAYLOAD_SECRET: dummy-payload-secret-for-ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Derive base and head SHAs for Nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Next.js Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/apps/portal/.next/cache
+            ${{ github.workspace }}/apps/overview/.next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm nx affected -t build
 
       - name: Run Lighthouse CI
         run: npx @lhci/cli@0.14.x autorun
@@ -152,9 +487,53 @@ jobs:
           path: .lighthouseci/
           retention-days: 14
 
+  # Self-healing job - runs after all jobs
+  self-healing:
+    name: Self-Healing CI
+    runs-on: ubuntu-latest
+    needs:
+      [
+        deps-lint,
+        security-audit,
+        knip,
+        policy-check,
+        md-lint,
+        lint-type-check,
+        token-css-lint,
+        build,
+        test,
+        e2e,
+        lighthouse,
+        a11y,
+      ]
+    if: always()
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Run Self-Healing CI
         run: pnpm exec nx fix-ci
-        if: always()
 
   a11y:
     name: Accessibility Audit
@@ -189,4 +568,3 @@ jobs:
           npx wait-on http://localhost:6006 --timeout 60000
           pnpm test:a11y --url http://localhost:6006
         working-directory: packages/ui
-

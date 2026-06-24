@@ -12,9 +12,7 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 
 function buildMock(
   overrides: {
@@ -73,9 +71,7 @@ function buildMock(
               }),
             }),
             // for DELETE (no .select())
-            then: jest
-              .fn()
-              .mockResolvedValue({ error: overrides.updateError ?? null }),
+            then: jest.fn().mockResolvedValue({ error: overrides.updateError ?? null }),
           }),
         }),
       };
@@ -205,9 +201,7 @@ describe("DELETE /api/webhooks/[id]", () => {
 
     const mock = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockImplementation((table: string) => {
         if (table === "employees") {
@@ -253,9 +247,7 @@ describe("DELETE /api/webhooks/[id]", () => {
 
     const mock = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockImplementation((table: string) => {
         if (table === "employees") {
@@ -315,9 +307,7 @@ describe("PUT /api/webhooks/[id] – success paths", () => {
 
     const mock = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockImplementation((table: string) => {
         if (table === "employees") {
@@ -338,9 +328,7 @@ describe("PUT /api/webhooks/[id] – success paths", () => {
           update: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
               select: jest.fn().mockReturnValue({
-                single: jest
-                  .fn()
-                  .mockResolvedValue({ data: updatedWebhook, error: null }),
+                single: jest.fn().mockResolvedValue({ data: updatedWebhook, error: null }),
               }),
             }),
           }),

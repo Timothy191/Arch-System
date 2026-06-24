@@ -46,10 +46,7 @@ function mockExecCommand(commands: Record<string, string>): void {
     (
       cmd: string,
       _opts: unknown,
-      cb: (
-        _err: Error | null,
-        _result: { stdout: string; stderr: string } | null,
-      ) => void,
+      cb: (_err: Error | null, _result: { stdout: string; stderr: string } | null) => void,
     ) => {
       for (const [match, stdout] of Object.entries(commands)) {
         if (cmd.includes(match)) {
@@ -90,11 +87,7 @@ beforeEach(() => {
 describe("scanCupsPrinters()", () => {
   it("returns empty array when lpstat is not found (exec throws)", async () => {
     mockExec.mockImplementation(
-      (
-        _cmd: unknown,
-        _opts: unknown,
-        cb: (_err: Error | null, _result: undefined) => void,
-      ) => {
+      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found: lpstat"), undefined);
       },
     );
@@ -174,8 +167,7 @@ describe("scanCupsPrinters()", () => {
 describe("getPrinterStatus()", () => {
   it("returns 'online' when printer is idle", async () => {
     mockExecCommand({
-      "lpstat -p":
-        "printer printer1 is idle.  enabled since Mon Jan 1 00:00:00 2024",
+      "lpstat -p": "printer printer1 is idle.  enabled since Mon Jan 1 00:00:00 2024",
     });
 
     const result = await getPrinterStatus("printer1");
@@ -185,8 +177,7 @@ describe("getPrinterStatus()", () => {
 
   it("returns 'online' when printer is printing", async () => {
     mockExecCommand({
-      "lpstat -p":
-        "printer printer1 is printing.  enabled since Mon Jan 1 00:00:00 2024",
+      "lpstat -p": "printer printer1 is printing.  enabled since Mon Jan 1 00:00:00 2024",
     });
 
     const result = await getPrinterStatus("printer1");
@@ -196,8 +187,7 @@ describe("getPrinterStatus()", () => {
 
   it("returns 'offline' when printer is disabled", async () => {
     mockExecCommand({
-      "lpstat -p":
-        "printer printer1 is disabled.  enabled since Mon Jan 1 00:00:00 2024",
+      "lpstat -p": "printer printer1 is disabled.  enabled since Mon Jan 1 00:00:00 2024",
     });
 
     const result = await getPrinterStatus("printer1");
@@ -207,11 +197,7 @@ describe("getPrinterStatus()", () => {
 
   it("returns 'error' when lpstat fails (exec throws)", async () => {
     mockExec.mockImplementation(
-      (
-        _cmd: unknown,
-        _opts: unknown,
-        cb: (_err: Error | null, _result: undefined) => void,
-      ) => {
+      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found"), undefined);
       },
     );
@@ -229,11 +215,7 @@ describe("getPrinterStatus()", () => {
 describe("getPrinterQueue()", () => {
   it("returns empty array when lpq fails (exec throws)", async () => {
     mockExec.mockImplementation(
-      (
-        _cmd: unknown,
-        _opts: unknown,
-        cb: (_err: Error | null, _result: undefined) => void,
-      ) => {
+      (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found"), undefined);
       },
     );
@@ -323,8 +305,7 @@ describe("detectAllPrinters()", () => {
   it("merges CUPS printers with USB-only devices", async () => {
     // CUPS sees one network printer
     mockExecCommand({
-      "lpstat -a":
-        "network-printer1 accepting requests since Mon Jan 1 00:00:00 2024",
+      "lpstat -a": "network-printer1 accepting requests since Mon Jan 1 00:00:00 2024",
       "lpstat -l -p": "", // getPrinterDetails returns empty defaults
     });
 

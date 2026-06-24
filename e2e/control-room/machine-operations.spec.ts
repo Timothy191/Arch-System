@@ -5,9 +5,7 @@ test.describe("unauthenticated access", () => {
   test("redirects to login with correct return path", async ({ page }) => {
     await page.goto("/control-room/machine-operations");
     await expect(page).toHaveURL(/\/login/);
-    expect(page.url()).toContain(
-      "redirect=%2Fcontrol-room%2Fmachine-operations",
-    );
+    expect(page.url()).toContain("redirect=%2Fcontrol-room%2Fmachine-operations");
   });
 });
 
@@ -19,9 +17,7 @@ test.describe("department access control", () => {
     await expect(page.getByRole("heading", { name: "404" })).toBeVisible({
       timeout: 15000,
     });
-    await expect(
-      page.getByText("The page you are looking for does not exist."),
-    ).toBeVisible();
+    await expect(page.getByText("The page you are looking for does not exist.")).toBeVisible();
   });
 });
 
@@ -30,9 +26,9 @@ test.describe("machine operations page", () => {
 
   test("loads with correct heading", async ({ page }) => {
     await page.goto("/control-room/machine-operations");
-    await expect(
-      page.getByRole("heading", { name: "Machine Operations" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Machine Operations" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("displays summary cards", async ({ page }) => {

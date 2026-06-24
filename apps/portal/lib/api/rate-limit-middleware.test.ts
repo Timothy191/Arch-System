@@ -29,10 +29,7 @@ jest.mock("@repo/redis", () => ({
   getRedisClient: jest.fn(async () => mockRedisClient),
 }));
 
-function makeRequest(
-  url: string,
-  headers?: Record<string, string>,
-): NextRequest {
+function makeRequest(url: string, headers?: Record<string, string>): NextRequest {
   return new NextRequest(url, { headers });
 }
 

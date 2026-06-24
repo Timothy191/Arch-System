@@ -67,8 +67,7 @@ export const shiftCompletenessCheckFn: any = inngest.createFunction(
 
         // AGENT-TRACE: Check if we're >30 minutes into shift
         const shiftStartHour = isDayShift ? 6 : 18;
-        const minutesIntoShift =
-          (hour - shiftStartHour) * 60 + now.getMinutes();
+        const minutesIntoShift = (hour - shiftStartHour) * 60 + now.getMinutes();
 
         // Handle night shift crossing midnight
         const actualMinutesIntoShift =
@@ -76,9 +75,7 @@ export const shiftCompletenessCheckFn: any = inngest.createFunction(
 
         if (missingMachines.length > 0 && actualMinutesIntoShift > 30) {
           // AGENT-TRACE: Create alert for missing machines
-          const machineNames = missingMachines
-            .map((m) => m.machineName)
-            .join(", ");
+          const machineNames = missingMachines.map((m) => m.machineName).join(", ");
           const alert = `Department: ${department.name}, Shift: ${shiftType}, Missing machines (${missingMachines.length}): ${machineNames}`;
           alerts.push(alert);
 
@@ -111,11 +108,7 @@ export const shiftCompletenessCheckFn: any = inngest.createFunction(
       });
       throw err;
     } finally {
-      recordJobExecution(
-        "shift-completeness-check",
-        performance.now() - start,
-        success,
-      );
+      recordJobExecution("shift-completeness-check", performance.now() - start, success);
     }
   },
 );

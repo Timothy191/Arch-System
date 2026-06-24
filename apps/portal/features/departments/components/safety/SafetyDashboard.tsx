@@ -16,10 +16,8 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
     .eq("incident_date", today);
 
   const todayCount = todayIncidents?.length ?? 0;
-  const openCount =
-    todayIncidents?.filter((i) => i.status === "open").length ?? 0;
-  const injuredToday =
-    todayIncidents?.reduce((sum, i) => sum + (i.injured_parties || 0), 0) ?? 0;
+  const openCount = todayIncidents?.filter((i) => i.status === "open").length ?? 0;
+  const injuredToday = todayIncidents?.reduce((sum, i) => sum + (i.injured_parties || 0), 0) ?? 0;
 
   // Last 30 days stats
   const thirtyDaysAgo = new Date();
@@ -32,8 +30,7 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
 
   const monthlyCount = monthlyIncidents?.length ?? 0;
   const monthlyLostTime =
-    monthlyIncidents?.filter((i) => i.incident_type === "lost-time").length ??
-    0;
+    monthlyIncidents?.filter((i) => i.incident_type === "lost-time").length ?? 0;
 
   // LTI-free days (consecutive days without lost time incident)
   // This is a simplified version - get the last lost-time incident date
@@ -46,12 +43,8 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
     .limit(1)
     .single();
 
-  const lastLTIDate = lastLTI
-    ? new Date(lastLTI.incident_date)
-    : new Date("2000-01-01");
-  const ltiFreeDays = Math.floor(
-    (Date.now() - lastLTIDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const lastLTIDate = lastLTI ? new Date(lastLTI.incident_date) : new Date("2000-01-01");
+  const ltiFreeDays = Math.floor((Date.now() - lastLTIDate.getTime()) / (1000 * 60 * 60 * 24));
 
   // Incident-free days
   const { data: allIncidentDates } = await supabase
@@ -60,9 +53,7 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
     .eq("department_id", deptId)
     .gte("incident_date", thirtyDaysAgo.toISOString().split("T")[0]);
 
-  const uniqueDates = new Set(
-    allIncidentDates?.map((d) => d.incident_date) ?? [],
-  );
+  const uniqueDates = new Set(allIncidentDates?.map((d) => d.incident_date) ?? []);
   const incidentFreeDays = 30 - uniqueDates.size;
 
   return (
@@ -75,42 +66,30 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
           <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
             LTI-Free Days
           </p>
-          <p className="text-2xl font-medium text-[#3ecf8e] mt-1">
-            {ltiFreeDays}d
-          </p>
-          {ltiFreeDays > 30 && (
-            <p className="text-[#3ecf8e] text-xs mt-1">Target met</p>
-          )}
+          <p className="text-2xl font-medium text-[#3ecf8e] mt-1">{ltiFreeDays}d</p>
+          {ltiFreeDays > 30 && <p className="text-[#3ecf8e] text-xs mt-1">Target met</p>}
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
             Incident-Free Days (30d)
           </p>
-          <p className="text-2xl font-medium text-accent-green mt-1">
-            {incidentFreeDays}d
-          </p>
+          <p className="text-2xl font-medium text-accent-green mt-1">{incidentFreeDays}d</p>
           <p className="text-[var(--text-secondary)] text-xs mt-1">out of 30</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
             Open Incidents
           </p>
-          <p className="text-2xl font-medium text-accent-blue mt-1">
-            {openCount}
-          </p>
+          <p className="text-2xl font-medium text-accent-blue mt-1">{openCount}</p>
           {todayCount > 0 && (
-            <p className="text-[var(--text-secondary)] text-xs mt-1">
-              {todayCount} today
-            </p>
+            <p className="text-[var(--text-secondary)] text-xs mt-1">{todayCount} today</p>
           )}
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide">
             Lost Time (30d)
           </p>
-          <p className="text-2xl font-medium text-accent-red mt-1">
-            {monthlyLostTime}
-          </p>
+          <p className="text-2xl font-medium text-accent-red mt-1">{monthlyLostTime}</p>
           <p className="text-[var(--text-secondary)] text-xs mt-1">
             {monthlyCount} total incidents
           </p>
@@ -120,10 +99,7 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
       {/* Safety Visualizations */}
       <SafetyCharts
         trendData={(() => {
-          const trend: Record<
-            string,
-            { date: string; incidents: number; severity: number }
-          > = {};
+          const trend: Record<string, { date: string; incidents: number; severity: number }> = {};
           // Initialize last 30 days
           for (let i = 29; i >= 0; i--) {
             const d = new Date();
@@ -178,13 +154,9 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GlassCard>
-          <h3 className="text-sm font-medium text-[var(--text-heading)] mb-3">
-            Today's Incidents
-          </h3>
+          <h3 className="text-sm font-medium text-[var(--text-heading)] mb-3">Today's Incidents</h3>
           {todayCount === 0 ? (
-            <p className="text-[#3ecf8e] text-sm">
-              No incidents reported today
-            </p>
+            <p className="text-[#3ecf8e] text-sm">No incidents reported today</p>
           ) : (
             <div className="space-y-2">
               {todayIncidents?.map((inc) => (
@@ -210,9 +182,7 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
         </GlassCard>
 
         <GlassCard>
-          <h3 className="text-sm font-medium text-[var(--text-heading)] mb-3">
-            30-Day Summary
-          </h3>
+          <h3 className="text-sm font-medium text-[var(--text-heading)] mb-3">30-Day Summary</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Total incidents</span>
@@ -221,30 +191,19 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Near misses</span>
               <span className="text-[var(--text-heading)]">
-                {monthlyIncidents?.filter(
-                  (i) => i.incident_type === "near-miss",
-                ).length ?? 0}
+                {monthlyIncidents?.filter((i) => i.incident_type === "near-miss").length ?? 0}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Equipment damage</span>
               <span className="text-[var(--text-heading)]">
-                {monthlyIncidents?.filter(
-                  (i) => i.incident_type === "equipment-damage",
-                ).length ?? 0}
+                {monthlyIncidents?.filter((i) => i.incident_type === "equipment-damage").length ??
+                  0}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[var(--text-muted)]">
-                Injured parties (today)
-              </span>
-              <span
-                className={
-                  injuredToday > 0
-                    ? "text-accent-red"
-                    : "text-[var(--text-heading)]"
-                }
-              >
+              <span className="text-[var(--text-muted)]">Injured parties (today)</span>
+              <span className={injuredToday > 0 ? "text-accent-red" : "text-[var(--text-heading)]"}>
                 {injuredToday}
               </span>
             </div>

@@ -52,9 +52,7 @@ export function RegisterPrinterForm(props: RegisterFormProps) {
       });
       toast.success("Printer registered successfully");
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to register printer",
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to register printer");
     }
   }
 

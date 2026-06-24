@@ -10,15 +10,10 @@ import { BookOutForm } from "./BookOutForm";
 import { BreakdownsTable } from "./BreakdownsTable";
 import dynamic from "next/dynamic";
 
-const BreakdownCharts = dynamic(
-  () => import("./BreakdownCharts").then((m) => m.BreakdownCharts),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />
-    ),
-  },
-);
+const BreakdownCharts = dynamic(() => import("./BreakdownCharts").then((m) => m.BreakdownCharts), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
+});
 
 type Tab = "overview" | "bookin" | "bookout" | "query";
 
@@ -112,10 +107,7 @@ export function BreakdownsDashboard({
                 statusData={[
                   {
                     name: "Operational",
-                    value:
-                      metrics.active === 0
-                        ? 100
-                        : Math.max(0, 100 - metrics.active),
+                    value: metrics.active === 0 ? 100 : Math.max(0, 100 - metrics.active),
                   },
                   { name: "Broken Down", value: metrics.active },
                 ]}
@@ -131,10 +123,7 @@ export function BreakdownsDashboard({
                 <h3 className="text-lg font-medium text-[var(--text-heading)] mb-3">
                   Active Breakdowns
                 </h3>
-                <BreakdownsTable
-                  breakdowns={activeBreakdowns}
-                  showStatus={false}
-                />
+                <BreakdownsTable breakdowns={activeBreakdowns} showStatus={false} />
               </div>
             </div>
           )}
@@ -148,15 +137,10 @@ export function BreakdownsDashboard({
           )}
 
           {activeTab === "bookout" && (
-            <BookOutForm
-              departmentId={departmentId}
-              activeBreakdowns={activeBreakdowns}
-            />
+            <BookOutForm departmentId={departmentId} activeBreakdowns={activeBreakdowns} />
           )}
 
-          {activeTab === "query" && (
-            <BreakdownsTable breakdowns={breakdowns} showStatus={true} />
-          )}
+          {activeTab === "query" && <BreakdownsTable breakdowns={breakdowns} showStatus={true} />}
         </motion.div>
       </AnimatePresence>
     </div>

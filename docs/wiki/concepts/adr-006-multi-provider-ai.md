@@ -5,8 +5,7 @@ updated: 2026-06-03
 type: decision
 status: superseded
 tags: [adr, ai, architecture, decision]
-sources:
-  [docs/wiki/comparisons/ai-providers.md, docs/wiki/concepts/ai-service.md]
+sources: [docs/wiki/comparisons/ai-providers.md, docs/wiki/concepts/ai-service.md]
 confidence: high
 ---
 
@@ -94,10 +93,7 @@ const providers = [
 export async function generateWithFailover(prompt: string) {
   for (const provider of providers) {
     try {
-      return await withTimeout(
-        provider.client.generate(prompt),
-        provider.timeout,
-      );
+      return await withTimeout(provider.client.generate(prompt), provider.timeout);
     } catch (err) {
       console.warn(`${provider.name} failed, trying next...`);
       continue;

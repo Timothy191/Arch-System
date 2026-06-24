@@ -105,10 +105,8 @@ export function RouteBackground() {
     if (focusVideo) focusVideo.addEventListener("canplay", handleFocusCanPlay);
 
     return () => {
-      if (lightVideo)
-        lightVideo.removeEventListener("canplay", handleLightCanPlay);
-      if (focusVideo)
-        focusVideo.removeEventListener("canplay", handleFocusCanPlay);
+      if (lightVideo) lightVideo.removeEventListener("canplay", handleLightCanPlay);
+      if (focusVideo) focusVideo.removeEventListener("canplay", handleFocusCanPlay);
     };
   }, []);
 
@@ -135,10 +133,7 @@ export function RouteBackground() {
               className="route-bg-video"
             >
               {/* AGENT-TRACE: Global light-mode background video relocated to a subfolder to match monorepo asset organization standard */}
-              <source
-                src="/background/light-mode/light-mode.mp4"
-                type="video/mp4"
-              />
+              <source src="/background/light-mode/light-mode.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -156,27 +151,15 @@ export function RouteBackground() {
               poster="/auth-bg-poster.jpg"
               className="route-bg-focus-video"
             >
-              <source
-                src="/background/focused-mode/focused-mode.mp4"
-                type="video/mp4"
-              />
+              <source src="/background/focused-mode/focused-mode.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
 
           {/* ── Poster fallback overlay — shown until videos load ── */}
           {!lightVideoLoaded && !focusVideoLoaded && (
-            <div
-              className="fixed inset-0 overflow-hidden -z-10"
-              aria-hidden="true"
-            >
-              <Image
-                src="/auth-bg-poster.jpg"
-                alt=""
-                fill
-                priority
-                className="object-cover"
-              />
+            <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
+              <Image src="/auth-bg-poster.jpg" alt="" fill priority className="object-cover" />
             </div>
           )}
         </>

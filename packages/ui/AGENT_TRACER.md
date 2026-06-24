@@ -1,5 +1,28 @@
 # Agent Tracer - @repo/ui
 
+## 2026-06-24 - Concentric Animated Loader Component
+
+- **Purpose**: Create and export the Uiverse concentric animated loader component for global use across the system.
+- **Changes**:
+  - `loader.tsx`: Implemented `<Loader>` component rendering the SVG concentric circles with sizing, accessibility, and class forwarding support.
+  - `package.json`: Registered `./Loader` in the package exports section to allow clean imports.
+- **Next Steps**: Verification complete, all compilation, linting, and quality checks pass cleanly.
+
+## 2026-06-24 - Uiverse Tabs integration for ShiftToggle
+
+- **Purpose**: Refactor ShiftToggle to use Uiverse circular tabs styling as the visual design foundation.
+- **Changes**:
+  - `ShiftToggle.tsx`: Refactored to use standard HTML radio inputs and labels inside a `.cir-tabs` container. This integrates natively with the Uiverse CSS selectors and ensures keyboard accessibility.
+- **Next Steps**: Verification complete, all tests and linters pass cleanly.
+
+## 2026-06-24 - Uiverse Button Foundation integration
+
+- **Purpose**: Refactor UI button components to use the Uiverse button style as the global action button foundation.
+- **Changes**:
+  - `button.tsx`: Refactored primary `default` variant. If no custom background class (`bg-` or `bg-[`) is supplied, automatically wrap the button children in the Uiverse `.blob1` and `.inner` markup, mapping `size` props to the Uiverse size classes.
+  - `animated-button.tsx`: Refactored `default`/`accent` variants similarly, applying Uiverse wrappers and size classes while preserving custom Framer Motion scale and hover/tap options.
+- **Next Steps**: Verification complete, all tests and linters pass cleanly.
+
 ## 2026-06-20 - Deprecated Accent Token Migration
 
 - **Purpose**: Migrate all usages of deprecated accent color tokens to canonical equivalents in the UI package components and stories.
@@ -157,3 +180,14 @@
 - **Status**: Completed, type-check and lint pass with 0 new errors.
 
 - **2026-06-17T11:52:06Z**: Added CookieConsent component.
+
+## 2026-06-24 - Resolve Unused ESLint Warnings
+
+- **Purpose**: Clean up unused imports and variables flagged in pre-commit lint gates.
+- **Changes**:
+  - Removed unused `cn` import in `src/components/CookieConsent.tsx`.
+  - Removed unused `useFocusMode` hook import and `isFocusMode` local variable declaration in `src/components/DepartmentLayout.tsx`.
+  - Removed unused `DialogClose` import in `src/components/ui/Dialog.stories.tsx`.
+  - Removed unused `LifeBuoy` import in `src/components/ui/DropdownMenu.stories.tsx`.
+- **Status**: Lint warnings resolved, pre-commit checks passing.
+- **Next Steps**: None.

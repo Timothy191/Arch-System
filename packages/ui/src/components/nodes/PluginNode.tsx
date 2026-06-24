@@ -18,10 +18,7 @@ export interface PluginNodeData extends Record<string, unknown> {
 // Plugin Node Component
 // =============================================================================
 
-export const PluginNode = memo(function PluginNode({
-  data: rawData,
-  selected,
-}: NodeProps) {
+export const PluginNode = memo(function PluginNode({ data: rawData, selected }: NodeProps) {
   const data = rawData as PluginNodeData;
   return (
     <div
@@ -54,18 +51,14 @@ export const PluginNode = memo(function PluginNode({
       {/* Body */}
       <div className="px-3 py-2 space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-[#6e6e73] uppercase tracking-wide">
-            Plugin ID
-          </span>
+          <span className="text-[10px] text-[#6e6e73] uppercase tracking-wide">Plugin ID</span>
           <span className="text-[10px] font-mono text-[#3a3a3c] truncate max-w-[100px]">
             {data.pluginId || "not set"}
           </span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-[#6e6e73] uppercase tracking-wide">
-            Config
-          </span>
+          <span className="text-[10px] text-[#6e6e73] uppercase tracking-wide">Config</span>
           <span className="text-[10px] text-[#3a3a3c]">
             {Object.keys(data.config || {}).length} params
           </span>

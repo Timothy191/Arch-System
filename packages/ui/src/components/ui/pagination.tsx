@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@repo/ui/lib/utils";
 
@@ -79,30 +74,14 @@ export function Pagination({
       <div className="text-sm text-[var(--text-muted)] font-medium">
         {totalCount !== undefined ? (
           <>
-            Showing{" "}
-            <span className="font-semibold text-[var(--text-heading)]">
-              {startRange}
-            </span>{" "}
-            to{" "}
-            <span className="font-semibold text-[var(--text-heading)]">
-              {endRange}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-[var(--text-heading)]">
-              {totalCount}
-            </span>{" "}
-            entries
+            Showing <span className="font-semibold text-[var(--text-heading)]">{startRange}</span>{" "}
+            to <span className="font-semibold text-[var(--text-heading)]">{endRange}</span> of{" "}
+            <span className="font-semibold text-[var(--text-heading)]">{totalCount}</span> entries
           </>
         ) : (
           <>
-            Page{" "}
-            <span className="font-semibold text-[var(--text-heading)]">
-              {currentPage}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-[var(--text-heading)]">
-              {totalPages}
-            </span>
+            Page <span className="font-semibold text-[var(--text-heading)]">{currentPage}</span> of{" "}
+            <span className="font-semibold text-[var(--text-heading)]">{totalPages}</span>
           </>
         )}
       </div>

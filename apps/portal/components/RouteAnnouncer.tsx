@@ -29,12 +29,5 @@ export function RouteAnnouncer() {
     return () => cancelAnimationFrame(id);
   }, [pathname]);
 
-  return (
-    <div
-      ref={announcerRef}
-      aria-live="polite"
-      aria-atomic="true"
-      className="sr-only"
-    />
-  );
+  return <div ref={announcerRef} aria-live="polite" aria-atomic="true" className="sr-only" />;
 }

@@ -82,9 +82,7 @@ function chunkConversation(text: string, options: ChunkOptions = {}): Chunk[] {
   const maxChars = maxTokens * CHARS_PER_TOKEN;
 
   // Split on double newlines or markdown horizontal rules (common message separators)
-  const messages = text
-    .split(/\n\n+|\n---\n/)
-    .filter((m) => m.trim().length > 0);
+  const messages = text.split(/\n\n+|\n---\n/).filter((m) => m.trim().length > 0);
 
   const chunks: Chunk[] = [];
   let charOffset = 0;
@@ -359,10 +357,7 @@ export function estimateTokens(text: string): number {
  * Chunk and prepare for embedding in one step.
  * Returns chunks ready for batch embedding.
  */
-export function chunkForEmbedding(
-  text: string,
-  options?: ChunkOptions,
-): Chunk[] {
+export function chunkForEmbedding(text: string, options?: ChunkOptions): Chunk[] {
   const chunks = chunkText(text, options);
   return mergeSmallChunks(chunks, options?.maxChunkSize ?? DEFAULT_MAX_TOKENS);
 }

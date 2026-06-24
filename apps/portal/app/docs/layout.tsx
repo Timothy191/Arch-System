@@ -5,11 +5,7 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 // Only accessible to authenticated users with admin or engineering roles
 // Redirects unauthorized users to login
 
-export default async function DocsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DocsLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

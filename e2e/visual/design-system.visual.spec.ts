@@ -8,9 +8,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("design system visual regression", () => {
-  test("login page has no forbidden design system classes in HTML", async ({
-    page,
-  }) => {
+  test("login page has no forbidden design system classes in HTML", async ({ page }) => {
     await page.goto("/login");
     const html = await page.content();
 
@@ -45,27 +43,19 @@ test.describe("design system visual regression", () => {
   test("login form uses correct card background", async ({ page }) => {
     await page.goto("/login");
 
-    const cardClasses = await page
-      .locator('[data-testid="login-card"]')
-      .getAttribute("class");
-    expect(cardClasses).toMatch(
-      /bg-arch-surface-secondary|bg-white\/70|layer-signin-card/,
-    );
+    const cardClasses = await page.locator('[data-testid="login-card"]').getAttribute("class");
+    expect(cardClasses).toMatch(/bg-arch-surface-secondary|bg-white\/70|layer-signin-card/);
   });
 
   test("login heading uses correct text token", async ({ page }) => {
     await page.goto("/login");
     const h1Classes = await page.locator("h1").getAttribute("class");
-    expect(h1Classes).toMatch(
-      /text-\[#fafafa\]|text-\[var\(--text-heading\)\]/,
-    );
+    expect(h1Classes).toMatch(/text-\[#fafafa\]|text-\[var\(--text-heading\)\]/);
   });
 
   test("login page — border uses correct token", async ({ page }) => {
     await page.goto("/login");
-    const cardClasses = await page
-      .locator('[data-testid="login-card"]')
-      .getAttribute("class");
+    const cardClasses = await page.locator('[data-testid="login-card"]').getAttribute("class");
     expect(cardClasses).toMatch(
       /border-arch-border-primary|border-\[var\(--border-default\)\]|layer-signin-card/,
     );

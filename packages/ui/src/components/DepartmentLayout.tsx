@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { MacTitleBar } from "./MacTitleBar";
-import { useFocusMode } from "../lib/useFocusMode";
 import { Logo } from "./Logo";
 import {
   BarChart3,
@@ -36,10 +35,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-const ICON_MAP: Record<
-  string,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
-> = {
+const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   BarChart2: BarChart3,
   Clock,
   Cpu,
@@ -86,14 +82,9 @@ interface DepartmentLayoutProps {
   children: React.ReactNode;
 }
 
-export function DepartmentLayout({
-  department,
-  tabs,
-  children,
-}: DepartmentLayoutProps) {
+export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
   const basePath = `/${department.name}`;
-  const isFocusMode = useFocusMode();
 
   return (
     <div className="flex h-[calc(100vh-28px)]">
@@ -112,9 +103,7 @@ export function DepartmentLayout({
             href="/"
             className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
           >
-            <span className="group-hover:-translate-x-0.5 transition-transform text-sm">
-              ‹
-            </span>
+            <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>
             <span>Back to Hub</span>
           </Link>
           <Logo className="w-4 h-4 opacity-60 mr-2" />
@@ -125,18 +114,12 @@ export function DepartmentLayout({
           <div
             className={cn(
               "p-1.5 rounded-lg",
-              department.color === "blue" &&
-                "bg-dept-drilling/10 text-dept-drilling",
-              department.color === "emerald" &&
-                "bg-dept-production/10 text-dept-production",
-              department.color === "violet" &&
-                "bg-dept-engineering/10 text-dept-engineering",
-              department.color === "red" &&
-                "bg-dept-control-room/10 text-dept-control-room",
-              department.color === "cyan" &&
-                "bg-dept-training/10 text-dept-training",
-              department.color === "indigo" &&
-                "bg-dept-satellite/10 text-dept-satellite",
+              department.color === "blue" && "bg-dept-drilling/10 text-dept-drilling",
+              department.color === "emerald" && "bg-dept-production/10 text-dept-production",
+              department.color === "violet" && "bg-dept-engineering/10 text-dept-engineering",
+              department.color === "red" && "bg-dept-control-room/10 text-dept-control-room",
+              department.color === "cyan" && "bg-dept-training/10 text-dept-training",
+              department.color === "indigo" && "bg-dept-satellite/10 text-dept-satellite",
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -149,11 +132,9 @@ export function DepartmentLayout({
         {/* Navigation items */}
         <nav className="flex-1 px-2 pb-2 space-y-0.5 overflow-y-auto">
           {tabs.map((tab) => {
-            const href =
-              tab.name === "dashboard" ? basePath : `${basePath}/${tab.name}`;
+            const href = tab.name === "dashboard" ? basePath : `${basePath}/${tab.name}`;
             const isActive =
-              pathname === href ||
-              (tab.name === "dashboard" && pathname === basePath);
+              pathname === href || (tab.name === "dashboard" && pathname === basePath);
             const Icon = ICON_MAP[tab.icon];
             return (
               <Link

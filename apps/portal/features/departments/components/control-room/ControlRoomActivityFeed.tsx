@@ -19,9 +19,7 @@ interface ControlRoomActivityFeedProps {
   departmentId: string;
 }
 
-export function ControlRoomActivityFeed({
-  departmentId,
-}: ControlRoomActivityFeedProps) {
+export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFeedProps) {
   const [activities, setActivities] = useThrottledState<ActivityItem[]>([]);
   const [filter, setFilter] = useState<ActivityType | "all">("all");
 
@@ -41,11 +39,7 @@ export function ControlRoomActivityFeed({
         (payload) => {
           const rawEvent = payload.eventType;
           const eventType: ActivityType =
-            rawEvent === "INSERT"
-              ? "insert"
-              : rawEvent === "UPDATE"
-                ? "update"
-                : "delete";
+            rawEvent === "INSERT" ? "insert" : rawEvent === "UPDATE" ? "update" : "delete";
           const machine = (payload.new || payload.old) as {
             name?: string;
           };
@@ -69,21 +63,14 @@ export function ControlRoomActivityFeed({
     };
   }, [departmentId]);
 
-  const filtered =
-    filter === "all" ? activities : activities.filter((a) => a.type === filter);
+  const filtered = filter === "all" ? activities : activities.filter((a) => a.type === filter);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-[var(--text-heading)]">
-          Activity Feed
-        </h2>
+        <h2 className="text-xl font-medium text-[var(--text-heading)]">Activity Feed</h2>
         {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for filter toggle buttons */}
-        <div
-          className="flex items-center gap-2"
-          role="group"
-          aria-label="Activity filter"
-        >
+        <div className="flex items-center gap-2" role="group" aria-label="Activity filter">
           {(["all", "insert", "update", "delete"] as const).map((f) => (
             <button
               key={f}
@@ -116,9 +103,7 @@ export function ControlRoomActivityFeed({
                           : "bg-accent-red"
                     }`}
                   />
-                  <p className="text-[var(--text-heading)] text-sm">
-                    {activity.message}
-                  </p>
+                  <p className="text-[var(--text-heading)] text-sm">{activity.message}</p>
                 </div>
                 <span className="text-[var(--text-secondary)] text-xs">
                   {new Date(activity.timestamp).toLocaleTimeString()}

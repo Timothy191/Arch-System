@@ -6,11 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: "default" | "login";
 }
 
-export function Input({
-  variant = "default",
-  className,
-  ...props
-}: InputProps) {
+export function Input({ variant = "default", className, ...props }: InputProps) {
   return (
     <input
       className={cn(

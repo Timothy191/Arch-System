@@ -43,9 +43,7 @@ export function AuditLogsTab() {
   // Load available table names and actions for select filters once on mount
   useEffect(() => {
     const loadFilters = async () => {
-      const { data } = await supabase
-        .from("audit_logs")
-        .select("table_name, action");
+      const { data } = await supabase.from("audit_logs").select("table_name, action");
       if (data) {
         const uniqueTables = Array.from(new Set(data.map((d) => d.table_name)));
         const uniqueActions = Array.from(new Set(data.map((d) => d.action)));
@@ -74,9 +72,7 @@ export function AuditLogsTab() {
   ) => {
     setLoading(true);
 
-    let query = supabase
-      .from("audit_logs")
-      .select("*, employees(full_name)", { count: "exact" });
+    let query = supabase.from("audit_logs").select("*, employees(full_name)", { count: "exact" });
 
     if (action !== "all") {
       query = query.eq("action", action);
@@ -205,28 +201,19 @@ export function AuditLogsTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No audit logs found.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
+                  <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                       {new Date(log.created_at).toLocaleString()}
                     </td>

@@ -120,14 +120,7 @@ describe("BatteryStatusRow", () => {
 describe("VolumeControlRow", () => {
   it("renders volume and calls adjust on change", () => {
     const adjust = jest.fn();
-    render(
-      <VolumeControlRow
-        volume={75}
-        muted={false}
-        toggleMute={jest.fn()}
-        adjust={adjust}
-      />,
-    );
+    render(<VolumeControlRow volume={75} muted={false} toggleMute={jest.fn()} adjust={adjust} />);
     expect(screen.getByText("75%")).toBeInTheDocument();
 
     const slider = screen.getByLabelText("Volume");
@@ -137,14 +130,7 @@ describe("VolumeControlRow", () => {
 
   it("renders muted state", () => {
     const toggleMute = jest.fn();
-    render(
-      <VolumeControlRow
-        volume={0}
-        muted={true}
-        toggleMute={toggleMute}
-        adjust={jest.fn()}
-      />,
-    );
+    render(<VolumeControlRow volume={0} muted={true} toggleMute={toggleMute} adjust={jest.fn()} />);
     expect(screen.getByText("Muted")).toBeInTheDocument();
 
     const muteButton = screen.getByLabelText("Unmute");

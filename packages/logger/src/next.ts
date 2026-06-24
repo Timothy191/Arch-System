@@ -36,20 +36,14 @@ export function withLogging<T>(
     context: { params: Promise<unknown> },
   ) => Promise<T> | T,
 ) {
-  return async (
-    request: NextRequest,
-    routeContext: { params: Promise<unknown> },
-  ) => {
+  return async (request: NextRequest, routeContext: { params: Promise<unknown> }) => {
     const { logger } = createRouteLogger(request);
     const start = Date.now();
 
     logger.info("request started");
 
     try {
-      const result = await handler(
-        Object.assign(request, { log: logger }),
-        routeContext,
-      );
+      const result = await handler(Object.assign(request, { log: logger }), routeContext);
       const duration = Date.now() - start;
       logger.info(
         { duration, status: result instanceof Response ? result.status : 200 },

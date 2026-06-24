@@ -8,9 +8,7 @@ jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 
 describe("GET /api/export/fuel-logs", () => {
   beforeEach(() => {
@@ -20,9 +18,7 @@ describe("GET /api/export/fuel-logs", () => {
   it("returns 401 if unauthenticated", async () => {
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: null }, error: null }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
       },
     });
 
@@ -58,18 +54,12 @@ describe("GET /api/export/fuel-logs", () => {
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
-      range: jest
-        .fn()
-        .mockImplementation(() =>
-          Promise.resolve({ data: mockData, error: null }),
-        ),
+      range: jest.fn().mockImplementation(() => Promise.resolve({ data: mockData, error: null })),
     };
 
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
       },
       ...mockQuery,
     } as any);
@@ -113,18 +103,12 @@ describe("GET /api/export/fuel-logs", () => {
       gte: jest.fn().mockReturnThis(),
       lte: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
-      range: jest
-        .fn()
-        .mockImplementation(() =>
-          Promise.resolve({ data: mockData, error: null }),
-        ),
+      range: jest.fn().mockImplementation(() => Promise.resolve({ data: mockData, error: null })),
     };
 
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
       },
       ...mockQuery,
     } as any);

@@ -69,15 +69,13 @@ export function ShiftCoverageWidget({
           hasEntryMap.set(op.machine_id, true);
         }
 
-        const machinesWithOps: MachineWithOp[] = (machinesRes.data || []).map(
-          (m) => ({
-            id: m.id,
-            name: m.name,
-            machine_type: m.machine_type,
-            hours_worked: opsMap.get(m.id) ?? null,
-            has_entry: hasEntryMap.has(m.id),
-          }),
-        );
+        const machinesWithOps: MachineWithOp[] = (machinesRes.data || []).map((m) => ({
+          id: m.id,
+          name: m.name,
+          machine_type: m.machine_type,
+          hours_worked: opsMap.get(m.id) ?? null,
+          has_entry: hasEntryMap.has(m.id),
+        }));
 
         setMachines(machinesWithOps);
 
@@ -113,17 +111,12 @@ export function ShiftCoverageWidget({
     return (
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Shift Coverage
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
           <Clock className="w-5 h-5 text-[var(--text-muted)]" />
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-10 bg-[var(--bg-tertiary)] rounded-lg animate-pulse"
-            />
+            <div key={i} className="h-10 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
           ))}
         </div>
       </GlassCard>
@@ -135,15 +128,11 @@ export function ShiftCoverageWidget({
     return (
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Shift Coverage
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
           <Clock className="w-5 h-5 text-[var(--text-muted)]" />
         </div>
         <div className="space-y-2">
-          <p className="text-accent-red text-sm font-medium">
-            Unable to load shift coverage data
-          </p>
+          <p className="text-accent-red text-sm font-medium">Unable to load shift coverage data</p>
           <p className="text-[var(--text-muted)] text-xs">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -160,9 +149,7 @@ export function ShiftCoverageWidget({
     <>
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Shift Coverage
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
           <div className="flex items-center gap-2">
             {isClosed && (
               <span className="text-[10px] uppercase tracking-wider text-accent-green bg-accent-green/10 border border-accent-green/20 px-2 py-0.5 rounded-full font-medium">
@@ -212,10 +199,7 @@ export function ShiftCoverageWidget({
                 </thead>
                 <tbody className="divide-y divide-[var(--border-default)]">
                   {machines.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="hover:bg-[var(--bg-tertiary)]/50 transition-colors"
-                    >
+                    <tr key={m.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
                       <td className="px-3 py-2 text-[var(--text-heading)]">
                         <span className="text-[var(--text-muted)] text-xs mr-1.5">
                           {m.machine_type}
@@ -223,14 +207,10 @@ export function ShiftCoverageWidget({
                         {m.name}
                       </td>
                       <td className="px-3 py-2 text-right text-[var(--text-heading)]">
-                        {m.hours_worked !== null
-                          ? `${Number(m.hours_worked).toFixed(1)}h`
-                          : "—"}
+                        {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : "—"}
                       </td>
                       <td className="px-3 py-2 text-center">
-                        {m.has_entry &&
-                        m.hours_worked !== null &&
-                        m.hours_worked > 0 ? (
+                        {m.has_entry && m.hours_worked !== null && m.hours_worked > 0 ? (
                           <CheckCircle className="w-4 h-4 text-accent-green mx-auto" />
                         ) : m.has_entry && m.hours_worked === 0 ? (
                           <AlertTriangle className="w-4 h-4 text-accent-blue mx-auto" />

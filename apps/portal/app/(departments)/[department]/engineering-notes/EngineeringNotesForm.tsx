@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { useAutoSave } from "@repo/ui/hooks/useAutoSave";
+import { Checkbox } from "@repo/ui/Checkbox";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
@@ -39,20 +40,13 @@ const SEVERITY_LEVELS = [
 
 function inferIssueType(machineType: string): string {
   const t = machineType.toLowerCase();
-  if (
-    t.includes("electric") ||
-    t.includes("switchgear") ||
-    t.includes("transformer")
-  )
+  if (t.includes("electric") || t.includes("switchgear") || t.includes("transformer"))
     return "electrical";
   if (t.includes("hydraul")) return "hydraulic";
   return "mechanical";
 }
 
-function matchMachineId(
-  machines: Machine[],
-  machineName: string | null,
-): string {
+function matchMachineId(machines: Machine[], machineName: string | null): string {
   if (!machineName) return "";
   const needle = machineName.toLowerCase();
   const match = machines.find(
@@ -221,18 +215,13 @@ export function EngineeringNotesForm({
           {draftsExpanded && (
             <div className="divide-y divide-[var(--border-default)] border-t border-[var(--border-default)]">
               {breakdownDrafts.map((bd) => (
-                <div
-                  key={bd.id}
-                  className="flex items-start justify-between gap-4 px-4 py-3"
-                >
+                <div key={bd.id} className="flex items-start justify-between gap-4 px-4 py-3">
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium text-[var(--text-heading)]">
                         {bd.machine_name || bd.fleet_id}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        [{bd.fleet_id}]
-                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">[{bd.fleet_id}]</span>
                       {bd.status === "active" ? (
                         <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20">
                           <AlertTriangle className="w-3 h-3" />
@@ -245,9 +234,7 @@ export function EngineeringNotesForm({
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
-                      {bd.reason}
-                    </p>
+                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{bd.reason}</p>
                     <p className="text-xs text-[var(--text-muted)]">
                       {bd.machine_type} &middot; In: {bd.date_in} {bd.time_in}
                       {bd.date_out && ` → Out: ${bd.date_out}`}
@@ -323,9 +310,7 @@ export function EngineeringNotesForm({
                   </option>
                 ))}
               </select>
-              {errors.issueType && (
-                <p className="text-accent-red text-xs">{errors.issueType}</p>
-              )}
+              {errors.issueType && <p className="text-accent-red text-xs">{errors.issueType}</p>}
             </div>
 
             {/* Severity */}
@@ -335,9 +320,7 @@ export function EngineeringNotesForm({
               </label>
               <select
                 value={formData.severity}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, severity: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, severity: e.target.value }))}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
               >
                 <option value="">Select severity...</option>
@@ -347,16 +330,13 @@ export function EngineeringNotesForm({
                   </option>
                 ))}
               </select>
-              {errors.severity && (
-                <p className="text-accent-red text-xs">{errors.severity}</p>
-              )}
+              {errors.severity && <p className="text-accent-red text-xs">{errors.severity}</p>}
             </div>
 
             {/* Machine (Optional) */}
             <div className="space-y-2">
               <label className="text-[var(--text-secondary)] text-sm block">
-                Affected Machine{" "}
-                <span className="text-[var(--text-muted)]">(Optional)</span>
+                Affected Machine <span className="text-[var(--text-muted)]">(Optional)</span>
               </label>
               <select
                 value={formData.machineId}
@@ -380,9 +360,7 @@ export function EngineeringNotesForm({
 
           {/* Shift Type */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
-              Shift
-            </label>
+            <label className="text-[var(--text-secondary)] text-sm block">Shift</label>
             <div className="flex gap-2 max-w-xs">
               {["day", "night"].map((shift) => (
                 <button
@@ -437,8 +415,7 @@ export function EngineeringNotesForm({
           {/* Action Taken */}
           <div className="space-y-2">
             <label className="text-[var(--text-secondary)] text-sm block">
-              Action Taken{" "}
-              <span className="text-[var(--text-muted)]">(Optional)</span>
+              Action Taken <span className="text-[var(--text-muted)]">(Optional)</span>
             </label>
             <textarea
               value={formData.actionTaken}
@@ -456,22 +433,17 @@ export function EngineeringNotesForm({
           </div>
 
           {/* Follow-up Checkbox */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.requiresFollowUp}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  requiresFollowUp: e.target.checked,
-                }))
-              }
-              className="w-4 h-4 rounded border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
-            />
-            <span className="text-[var(--text-secondary)] text-sm">
-              Requires follow-up
-            </span>
-          </label>
+          <Checkbox
+            checked={formData.requiresFollowUp}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                requiresFollowUp: e.target.checked,
+              }))
+            }
+            label="Requires follow-up"
+            className="text-[var(--text-secondary)] text-sm"
+          />
 
           <div className="flex items-center gap-4">
             <button

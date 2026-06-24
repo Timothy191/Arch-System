@@ -82,8 +82,7 @@ export function AnimatedDialog({
 
       if (e.key !== "Tab" || !panelRef.current) return;
 
-      const focusable =
-        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
       if (focusable.length === 0) {
         e.preventDefault();
         return;
@@ -165,18 +164,12 @@ export function AnimatedDialog({
             {(title || description) && (
               <div className="mb-4 pr-8">
                 {title && (
-                  <h2
-                    id={titleId}
-                    className="text-lg font-medium text-[var(--text-heading)]"
-                  >
+                  <h2 id={titleId} className="text-lg font-medium text-[var(--text-heading)]">
                     {title}
                   </h2>
                 )}
                 {description && (
-                  <p
-                    id={descriptionId}
-                    className="text-sm text-[var(--text-muted)] mt-1"
-                  >
+                  <p id={descriptionId} className="text-sm text-[var(--text-muted)] mt-1">
                     {description}
                   </p>
                 )}

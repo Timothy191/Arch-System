@@ -57,9 +57,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
     if (isAppError(error)) {
       logError(error);
     } else {
-      logError(
-        (error as any) instanceof Error ? error : new Error(String(error)),
-      );
+      logError((error as any) instanceof Error ? error : new Error(String(error)));
     }
   }, [error]);
 
@@ -83,9 +81,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
           />
         </div>
         <div className="space-y-2" role="alert" aria-live="assertive">
-          <h1 className="text-3xl font-medium text-[var(--text-heading)]">
-            {title}
-          </h1>
+          <h1 className="text-3xl font-medium text-[var(--text-heading)]">{title}</h1>
           <p className="text-[var(--text-muted)] text-sm">{message}</p>
         </div>
 

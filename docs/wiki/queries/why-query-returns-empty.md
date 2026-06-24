@@ -278,10 +278,7 @@ async function debugDataFetching(supabase: any) {
   console.log("4. Accessible departments:", employee?.accessible_departments);
 
   // 5. RLS test query
-  const { data: testData, error } = await supabase
-    .from("machines")
-    .select("*")
-    .limit(5);
+  const { data: testData, error } = await supabase.from("machines").select("*").limit(5);
   console.log("5. Query result:", testData?.length ?? 0, "rows");
   console.log("6. Query error:", error ?? "none");
 }

@@ -1,10 +1,7 @@
 import { cookies } from "next/headers";
-import {
-  createServerSupabaseClient,
-  getUserSafely,
-} from "@repo/supabase/server";
-import { LoginForm } from "./LoginForm";
-import { RefractionGlow } from "./RefractionGlow";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
+import { LoginForm } from "@/features/auth/components/LoginForm";
+import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
 import { AlertTriangle, Lock } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 
@@ -34,10 +31,7 @@ export default async function LoginPage() {
       ) {
         // Transient — don't show unavailable, just serve the form
         // eslint-disable-next-line no-console
-        console.warn(
-          "Transient auth check failure, serving login form:",
-          e.message,
-        );
+        console.warn("Transient auth check failure, serving login form:", e.message);
       } else {
         systemUnavailable = true;
       }
@@ -63,16 +57,11 @@ export default async function LoginPage() {
               </span>
             </div>
             <div className="p-6 space-y-4 text-center">
-              <AlertTriangle
-                className="w-8 h-8 text-arch-accent-red mx-auto"
-                strokeWidth={1.5}
-              />
-              <h1 className="text-lg font-medium text-arch-text-primary">
-                System Unavailable
-              </h1>
+              <AlertTriangle className="w-8 h-8 text-arch-accent-red mx-auto" strokeWidth={1.5} />
+              <h1 className="text-lg font-medium text-arch-text-primary">System Unavailable</h1>
               <p className="text-sm text-arch-text-tertiary">
-                Unable to reach authentication services. Please try again
-                shortly or contact IT Support.
+                Unable to reach authentication services. Please try again shortly or contact IT
+                Support.
               </p>
               <a
                 href="/login"
@@ -120,9 +109,7 @@ export default async function LoginPage() {
                   <h1 className="text-2xl font-medium tracking-tight text-[var(--text-heading)]">
                     Arch
                   </h1>
-                  <p className="text-[var(--text-muted)] text-sm">
-                    Sign in to Arch Systems
-                  </p>
+                  <p className="text-[var(--text-muted)] text-sm">Sign in to Arch Systems</p>
                 </div>
               </div>
 
@@ -144,8 +131,7 @@ export default async function LoginPage() {
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
                 <span>
-                  <strong>Notice:</strong> Please ensure you are connected to
-                  the corporate VPN.
+                  <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
                 </span>
               </div>
             </div>
@@ -172,9 +158,7 @@ export default async function LoginPage() {
               </button>
               <div className="flex items-center gap-3">
                 <span>v{PORTAL_VERSION}</span>
-                <span className="uppercase tracking-wider font-medium">
-                  Arch OS
-                </span>
+                <span className="uppercase tracking-wider font-medium">Arch OS</span>
               </div>
             </div>
           </div>

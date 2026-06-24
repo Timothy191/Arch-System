@@ -35,12 +35,8 @@ process.stdin.on("end", () => {
 
     // Only remind if AGENT_TRACER.md exists in the package
     if (fs.existsSync(tracerPath)) {
-      console.log(
-        `\n💡 Remember to update ${packagePath}/AGENT_TRACER.md with your changes`,
-      );
-      console.log(
-        "   Add context breadcrumbs with // AGENT-TRACE: for complex logic\n",
-      );
+      console.log(`\n💡 Remember to update ${packagePath}/AGENT_TRACER.md with your changes`);
+      console.log("   Add context breadcrumbs with // AGENT-TRACE: for complex logic\n");
     }
   } catch (error) {
     // Silent fail - don't break the edit workflow

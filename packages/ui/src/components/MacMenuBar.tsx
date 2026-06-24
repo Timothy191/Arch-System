@@ -91,8 +91,7 @@ const DEPARTMENTS_LIST = [
     displayName: "Access Card Actions",
     icon: CreditCard,
     iconColor: "text-dept-access-card-actions",
-    bgColor:
-      "bg-dept-access-card-actions/10 hover:bg-dept-access-card-actions/15",
+    bgColor: "bg-dept-access-card-actions/10 hover:bg-dept-access-card-actions/15",
     description: "Badge printing & QR generation",
   },
   {
@@ -232,10 +231,7 @@ export function MacMenuBar({
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
-      <nav
-        className="flex items-center gap-0.5 shrink-0"
-        aria-label="Main Navigation"
-      >
+      <nav className="flex items-center gap-0.5 shrink-0" aria-label="Main Navigation">
         {/* ── System Logo Dropdown ── */}
         <DropdownMenu>
           <div className="flex items-center gap-2">
@@ -325,10 +321,7 @@ export function MacMenuBar({
                       className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <Icon
-                        className={cn(
-                          "w-3.5 h-3.5 shrink-0 transition-colors",
-                          tool.colorClass,
-                        )}
+                        className={cn("w-3.5 h-3.5 shrink-0 transition-colors", tool.colorClass)}
                       />
                       <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                         {tool.displayName}
@@ -393,12 +386,7 @@ export function MacMenuBar({
                       className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon
-                          className={cn(
-                            "w-3.5 h-3.5 shrink-0",
-                            tool.colorClass,
-                          )}
-                        />
+                        <Icon className={cn("w-3.5 h-3.5 shrink-0", tool.colorClass)} />
                         <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                           {tool.displayName}
                         </span>
@@ -455,10 +443,7 @@ export function MacMenuBar({
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-60", DROPDOWN_CONTENT)}
-                >
+                <DropdownMenuContent align="start" className={cn("w-60", DROPDOWN_CONTENT)}>
                   {DEPARTMENTS_LIST.map((dept) => {
                     const Icon = dept.icon;
                     return (
@@ -477,9 +462,7 @@ export function MacMenuBar({
                               dept.bgColor,
                             )}
                           >
-                            <Icon
-                              className={cn("w-3.5 h-3.5", dept.iconColor)}
-                            />
+                            <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
                           </div>
                           <span className="text-[13px] font-medium text-[var(--text-heading)]">
                             {dept.displayName}
@@ -499,10 +482,7 @@ export function MacMenuBar({
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-52", DROPDOWN_CONTENT)}
-                >
+                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
                   {PRODUCTIVITY_LIST.map((tool) => {
                     const Icon = tool.icon;
                     return (
@@ -515,9 +495,7 @@ export function MacMenuBar({
                           href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
                           className="w-full flex items-center px-2 py-1.5 gap-2.5"
                         >
-                          <Icon
-                            className={cn("w-4 h-4 shrink-0", tool.colorClass)}
-                          />
+                          <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
                           <span className="text-[13px] font-medium text-[var(--text-heading)]">
                             {tool.displayName}
                           </span>
@@ -563,12 +541,7 @@ export function MacMenuBar({
                           className="w-full flex items-center justify-between px-2 py-1.5"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon
-                              className={cn(
-                                "w-4 h-4 shrink-0",
-                                tool.colorClass,
-                              )}
-                            />
+                            <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
                             <span className="text-[13px] font-medium text-[var(--text-heading)]">
                               {tool.displayName}
                             </span>
@@ -589,10 +562,7 @@ export function MacMenuBar({
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-48", DROPDOWN_CONTENT)}
-                >
+                <DropdownMenuContent align="start" className={cn("w-48", DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                     onClick={() => window.location.reload()}
@@ -601,17 +571,13 @@ export function MacMenuBar({
                     <span className="text-[13px] font-medium text-[var(--text-heading)]">
                       Reload
                     </span>
-                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-                      ⌘R
-                    </span>
+                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘R</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                     onClick={() => {
                       if (!document.fullscreenElement) {
-                        document.documentElement
-                          .requestFullscreen()
-                          .catch(() => {});
+                        document.documentElement.requestFullscreen().catch(() => {});
                       } else if (document.exitFullscreen) {
                         document.exitFullscreen().catch(() => {});
                       }
@@ -621,9 +587,7 @@ export function MacMenuBar({
                     <span className="text-[13px] font-medium text-[var(--text-heading)]">
                       Toggle Fullscreen
                     </span>
-                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">
-                      ⌃⌘F
-                    </span>
+                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘F</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -636,10 +600,7 @@ export function MacMenuBar({
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className={cn("w-52", DROPDOWN_CONTENT)}
-                >
+                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
                     asChild
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"

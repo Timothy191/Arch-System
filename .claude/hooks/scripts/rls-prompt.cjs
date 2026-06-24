@@ -29,9 +29,7 @@ function readStdin() {
 }
 
 function hasCreateTable(content) {
-  return (
-    /\bCREATE\s+TABLE\b/i.test(content) || /\bALTER\s+TABLE\b/i.test(content)
-  );
+  return /\bCREATE\s+TABLE\b/i.test(content) || /\bALTER\s+TABLE\b/i.test(content);
 }
 
 function hasRls(content) {
@@ -46,13 +44,10 @@ function hasRls(content) {
   } catch {
     process.exit(0);
   }
-  const filePath =
-    input?.tool_input?.file_path || input?.tool_input?.TargetFile || "";
-  if (!/packages\/database\/migrations\/.*\.sql$/.test(filePath))
-    process.exit(0);
+  const filePath = input?.tool_input?.file_path || input?.tool_input?.TargetFile || "";
+  if (!/packages\/database\/migrations\/.*\.sql$/.test(filePath)) process.exit(0);
 
-  const content =
-    input?.tool_input?.content || input?.tool_input?.new_string || "";
+  const content = input?.tool_input?.content || input?.tool_input?.new_string || "";
   if (!content || !hasCreateTable(content)) process.exit(0);
   if (hasRls(content)) process.exit(0);
 

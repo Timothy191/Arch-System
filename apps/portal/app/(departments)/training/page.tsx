@@ -119,13 +119,9 @@ export default async function TrainingDashboardPage() {
                 </p>
                 <Icon className={`w-5 h-5 ${stat.color}`} />
               </div>
-              <p className="text-3xl font-bold text-[var(--text-heading)] mt-2">
-                {stat.value}
-              </p>
+              <p className="text-3xl font-bold text-[var(--text-heading)] mt-2">{stat.value}</p>
               <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-                <span className="text-emerald-600 font-medium">
-                  {stat.change.split(" ")[0]}
-                </span>
+                <span className="text-emerald-600 font-medium">{stat.change.split(" ")[0]}</span>
                 <span>{stat.change.substring(stat.change.indexOf(" "))}</span>
               </p>
             </GlassCard>
@@ -139,9 +135,7 @@ export default async function TrainingDashboardPage() {
         <div className="lg:col-span-1 space-y-4">
           <GlassCard className="h-full">
             <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
-              <h3 className="font-semibold text-sm text-[var(--text-heading)]">
-                Today's Sessions
-              </h3>
+              <h3 className="font-semibold text-sm text-[var(--text-heading)]">Today's Sessions</h3>
               <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
             </div>
             <div className="mt-4 space-y-4">
@@ -171,11 +165,7 @@ export default async function TrainingDashboardPage() {
                     <span>{item.time}</span>
                   </div>
                   <div className="text-[11px] text-[var(--text-muted)]">
-                    👥{" "}
-                    <span className="font-semibold">
-                      {item.trainees} trainees
-                    </span>{" "}
-                    enrolled
+                    👥 <span className="font-semibold">{item.trainees} trainees</span> enrolled
                   </div>
                 </div>
               ))}
@@ -214,15 +204,9 @@ export default async function TrainingDashboardPage() {
                       <td className="py-2.5 font-medium text-[var(--text-heading)]">
                         {cert.employee}
                       </td>
-                      <td className="py-2.5 text-[var(--text-muted)]">
-                        {cert.role}
-                      </td>
-                      <td className="py-2.5 text-[var(--text-heading)]">
-                        {cert.certification}
-                      </td>
-                      <td className="py-2.5 text-[var(--text-muted)]">
-                        {cert.issueDate}
-                      </td>
+                      <td className="py-2.5 text-[var(--text-muted)]">{cert.role}</td>
+                      <td className="py-2.5 text-[var(--text-heading)]">{cert.certification}</td>
+                      <td className="py-2.5 text-[var(--text-muted)]">{cert.issueDate}</td>
                       <td className="py-2.5 text-right">
                         <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-600 font-semibold rounded-full">
                           {cert.status}

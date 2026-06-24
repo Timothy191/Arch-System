@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
-import {
-  ClipboardPlus,
-  ClipboardList,
-  Clock,
-  CalendarDays,
-} from "lucide-react";
+import { ClipboardPlus, ClipboardList, Clock, CalendarDays } from "lucide-react";
 import { createBreakdown } from "./actions";
 import type { Breakdown, Machine } from "./types";
 
@@ -16,11 +11,7 @@ interface BookInFormProps {
   machines: Machine[];
 }
 
-export function BookInForm({
-  departmentId,
-  activeBreakdowns,
-  machines,
-}: BookInFormProps) {
+export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInFormProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -28,9 +19,7 @@ export function BookInForm({
   } | null>(null);
 
   const [selectedMachineId, setSelectedMachineId] = useState("");
-  const [dateIn, setDateIn] = useState(
-    new Date().toISOString().split("T")[0] ?? "",
-  );
+  const [dateIn, setDateIn] = useState(new Date().toISOString().split("T")[0] ?? "");
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
   const [reason, setReason] = useState("");
 
@@ -97,9 +86,7 @@ export function BookInForm({
       <div className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6">
         <div className="flex items-center gap-3 mb-5">
           <ClipboardPlus className="w-5 h-5 text-violet-400" />
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Book In Machine
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Book In Machine</h3>
         </div>
 
         {message && (
@@ -147,8 +134,7 @@ export function BookInForm({
                   Fleet / Serial
                 </p>
                 <p className="text-sm text-[var(--text-heading)] font-medium">
-                  {selectedMachine.serial_number ||
-                    selectedMachine.id.slice(0, 8)}
+                  {selectedMachine.serial_number || selectedMachine.id.slice(0, 8)}
                 </p>
               </div>
               <div>
@@ -224,9 +210,7 @@ export function BookInForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-violet-400" />
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">
-              Active Breakdowns
-            </h3>
+            <h3 className="text-lg font-medium text-[var(--text-heading)]">Active Breakdowns</h3>
           </div>
           <span className="text-[var(--text-secondary)] text-sm">
             {activeBreakdowns.length} machines
@@ -281,9 +265,7 @@ export function BookInForm({
                       <td className="px-4 py-3 text-[var(--text-heading)]">
                         {b.machine_name || b.fleet_id}
                       </td>
-                      <td className="px-4 py-3 text-[var(--text-muted)]">
-                        {b.machine_type}
-                      </td>
+                      <td className="px-4 py-3 text-[var(--text-muted)]">{b.machine_type}</td>
                       <td className="px-4 py-3 text-[var(--text-muted)] whitespace-nowrap">
                         {b.date_in}
                       </td>

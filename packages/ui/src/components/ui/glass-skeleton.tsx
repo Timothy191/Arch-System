@@ -47,8 +47,7 @@ export function GlassSkeleton({
               transparent 70%
             )`,
             transform: "translateX(-100%) skewX(-12deg)",
-            animation:
-              "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
+            animation: "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
           }}
         />
       </div>

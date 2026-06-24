@@ -169,3 +169,6 @@ packages/ui/storybook-static/
 **/storybook-static
 .claude/worktrees
 .claude/settings.local.json
+
+# Build artifact checksums
+.assets-checksum

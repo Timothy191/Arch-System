@@ -22,6 +22,10 @@ export const tokens = {
       primary: "var(--bg-primary)",
       secondary: "var(--bg-secondary)",
       tertiary: "var(--bg-tertiary)",
+      buttonUiverse: "var(--bg-button-uiverse)",
+      buttonUiverseInner: "var(--bg-button-uiverse-inner)",
+      buttonUiverseBlob: "var(--bg-button-uiverse-blob)",
+      buttonUiverseInnerBefore: "var(--bg-button-uiverse-inner-before)",
     },
     border: {
       subtle: "var(--border-subtle)",
@@ -89,6 +93,11 @@ export const tokens = {
     },
   },
   shadow: {
+    buttonUiverseAfter: "var(--shadow-button-uiverse-after)",
+    buttonUiverseBlob: "var(--shadow-button-uiverse-blob)",
+    cirTabs: "var(--shadow-cir-tabs)",
+    cirTabsActive: "var(--shadow-cir-tabs-active)",
+    cirCheckFocus: "var(--shadow-cir-check-focus)",
     sm: "var(--shadow-sm)",
     md: "var(--shadow-md)",
     lg: "var(--shadow-lg)",

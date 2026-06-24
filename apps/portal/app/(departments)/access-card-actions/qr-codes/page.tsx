@@ -8,14 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import {
-  QrCode,
-  Smartphone,
-  ShieldCheck,
-  ShieldOff,
-  AlertTriangle,
-  Scan,
-} from "lucide-react";
+import { QrCode, Smartphone, ShieldCheck, ShieldOff, AlertTriangle, Scan } from "lucide-react";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { assertAccessCardActionsRole } from "../actions";
 
@@ -79,9 +72,7 @@ export default async function QrCodesPage() {
     } | null;
     const name = person ? `${person.first_name} ${person.surname}` : "Unknown";
     const qrTruncated =
-      card.qr_code_data.length > 16
-        ? `${card.qr_code_data.slice(0, 16)}…`
-        : card.qr_code_data;
+      card.qr_code_data.length > 16 ? `${card.qr_code_data.slice(0, 16)}…` : card.qr_code_data;
     return { ...card, entityName: name, qrTruncated };
   });
 
@@ -96,14 +87,11 @@ export default async function QrCodesPage() {
             <QrCode className="w-5 h-5 text-[var(--accent-blue)]" />
           </div>
           <div>
-            <h3 className="font-medium text-[var(--text-heading)]">
-              QR / RFID Card Management
-            </h3>
+            <h3 className="font-medium text-[var(--text-heading)]">QR / RFID Card Management</h3>
             <p className="text-sm text-[var(--text-muted)] mt-1 leading-relaxed">
-              Each issued access card contains a unique QR code and an optional
-              RFID UID for contactless entry. QR codes are embedded at print
-              time and linked to personnel records for identity verification at
-              site access points.
+              Each issued access card contains a unique QR code and an optional RFID UID for
+              contactless entry. QR codes are embedded at print time and linked to personnel records
+              for identity verification at site access points.
             </p>
           </div>
         </div>
@@ -113,9 +101,7 @@ export default async function QrCodesPage() {
       <GlassCard className="relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-12 -mt-12 w-40 h-40 rounded-full bg-[var(--accent-blue)]/8 blur-3xl" />
         <div className="flex flex-col items-center py-8">
-          <h3 className="font-medium text-[var(--text-heading)] mb-6">
-            Card Preview
-          </h3>
+          <h3 className="font-medium text-[var(--text-heading)] mb-6">Card Preview</h3>
 
           {/* Credit-card sized preview */}
           <div className="w-[340px] h-[214px] rounded-xl bg-gradient-to-br from-white to-[var(--bg-secondary)] border border-[var(--border-default)] shadow-window p-5 flex flex-col justify-between relative overflow-hidden">
@@ -139,12 +125,8 @@ export default async function QrCodesPage() {
 
             {/* Employee info */}
             <div>
-              <p className="text-sm font-medium text-[var(--text-heading)]">
-                Employee Name
-              </p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Department · Role
-              </p>
+              <p className="text-sm font-medium text-[var(--text-heading)]">Employee Name</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Department · Role</p>
             </div>
 
             {/* Bottom strip */}
@@ -155,9 +137,8 @@ export default async function QrCodesPage() {
           </div>
 
           <p className="text-xs text-[var(--text-muted)] mt-4 text-center max-w-md">
-            Preview shows where the QR code, personnel details, and department
-            role appear on the printed CR80 card. Actual layout depends on the
-            selected card template.
+            Preview shows where the QR code, personnel details, and department role appear on the
+            printed CR80 card. Actual layout depends on the selected card template.
           </p>
         </div>
       </GlassCard>
@@ -176,31 +157,18 @@ export default async function QrCodesPage() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-              <TableHead className="text-[var(--text-muted)]">
-                Personnel
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                QR Code
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                RFID UID
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">Personnel</TableHead>
+              <TableHead className="text-[var(--text-muted)]">QR Code</TableHead>
+              <TableHead className="text-[var(--text-muted)]">RFID UID</TableHead>
               <TableHead className="text-[var(--text-muted)]">Status</TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Issued At
-              </TableHead>
-              <TableHead className="text-right text-[var(--text-muted)]">
-                Expires At
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">Issued At</TableHead>
+              <TableHead className="text-right text-[var(--text-muted)]">Expires At</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {cards.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="text-center py-8 text-[var(--text-muted)]"
-                >
+                <TableCell colSpan={6} className="text-center py-8 text-[var(--text-muted)]">
                   No issued cards found.
                 </TableCell>
               </TableRow>
@@ -210,9 +178,7 @@ export default async function QrCodesPage() {
                 key={card.id}
                 className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
               >
-                <TableCell className="text-[var(--text-heading)]">
-                  {card.entityName}
-                </TableCell>
+                <TableCell className="text-[var(--text-heading)]">{card.entityName}</TableCell>
                 <TableCell className="font-mono text-sm text-[var(--accent-blue)]">
                   {card.qrTruncated}
                 </TableCell>

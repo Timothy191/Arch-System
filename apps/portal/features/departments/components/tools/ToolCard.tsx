@@ -48,19 +48,12 @@ export default function ToolCard({ tool }: ToolCardProps) {
     <GlassCard className="flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div
-            className="p-2 rounded-lg"
-            style={{ backgroundColor: `${tool.color}20` }}
-          >
+          <div className="p-2 rounded-lg" style={{ backgroundColor: `${tool.color}20` }}>
             <Icon className="w-5 h-5" style={{ color: tool.color }} />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">
-              {tool.displayName}
-            </h3>
-            <p className="text-[var(--text-secondary)] text-sm">
-              {tool.description}
-            </p>
+            <h3 className="text-lg font-medium text-[var(--text-heading)]">{tool.displayName}</h3>
+            <p className="text-[var(--text-secondary)] text-sm">{tool.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -69,9 +62,7 @@ export default function ToolCard({ tool }: ToolCardProps) {
           >
             <StatusIcon className="w-3.5 h-3.5" />
             <span className="capitalize">{tool.status}</span>
-            {tool.responseTime && tool.status === "online" && (
-              <span>({tool.responseTime}ms)</span>
-            )}
+            {tool.responseTime && tool.status === "online" && <span>({tool.responseTime}ms)</span>}
           </div>
           <a
             href={tool.url}
@@ -112,9 +103,7 @@ export default function ToolCard({ tool }: ToolCardProps) {
         <div className="flex-1 min-h-[200px] rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] flex items-center justify-center">
           <div className="text-center">
             <WifiOff className="w-8 h-8 text-[#ef4444] mx-auto mb-2" />
-            <p className="text-[var(--text-muted)]">
-              {tool.displayName} is not running
-            </p>
+            <p className="text-[var(--text-muted)]">{tool.displayName} is not running</p>
             <p className="text-[var(--text-secondary)] text-sm mt-1">
               Start it locally or configure the URL
             </p>

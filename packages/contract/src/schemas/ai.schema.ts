@@ -11,9 +11,7 @@ export const aiChatSchema = z.object({
         id: z.string().min(1).max(128),
         role: z.enum(["user", "assistant", "system"]),
         content: z.string().max(32768),
-        parts: z
-          .array(z.object({ type: z.string(), text: z.string().optional() }))
-          .optional(),
+        parts: z.array(z.object({ type: z.string(), text: z.string().optional() })).optional(),
       }),
     )
     .min(1, "At least one message required")

@@ -5,11 +5,7 @@ import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter"
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 import type { Metadata } from "next";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<any>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<any> }): Promise<Metadata> {
   const { department } = await params;
   const dept = DEPARTMENTS.find((d) => d.name === department);
   return {

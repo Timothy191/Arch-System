@@ -295,9 +295,7 @@
     --glass-surface-hover: rgba(24, 34, 56, 0.62);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-border-top: rgba(255, 255, 255, 0.18);
-    --glass-shadow:
-      0 8px 32px -4px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     --text-on-glass: rgba(255, 255, 255, 0.9);
 
     --vibrancy-surface: rgba(15, 20, 35, 0.6);

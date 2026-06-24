@@ -32,9 +32,7 @@ const MODEL_OPTIONS = [
 export function AIAssistant({ context, className }: AIAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState<string>(
-    MODEL_OPTIONS[0].value,
-  );
+  const [selectedModel, setSelectedModel] = useState<string>(MODEL_OPTIONS[0].value);
   const panelRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
 
@@ -57,9 +55,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
         );
         if (focusableElements && focusableElements.length > 0) {
           const firstElement = focusableElements[0] as HTMLElement;
-          const lastElement = focusableElements[
-            focusableElements.length - 1
-          ] as HTMLElement;
+          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
           if (e.shiftKey && document.activeElement === firstElement) {
             e.preventDefault();
@@ -141,12 +137,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
           className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-electric-blue)] text-white flex items-center justify-center drop-shadow-[0_0_8px_rgba(0,102,255,0.5)] hover:from-[var(--accent-electric-blue)] hover:to-[var(--accent-blue)] hover:scale-110 active:scale-95 transition-all duration-200 z-50"
           aria-label="Open AI Assistant"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -183,9 +174,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-arch-text-primary">
-                    AI Assistant
-                  </p>
+                  <p className="font-medium text-arch-text-primary">AI Assistant</p>
                   <div className="flex items-center gap-1">
                     <select
                       value={selectedModel}
@@ -219,12 +208,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
                   className="p-1.5 rounded-lg text-arch-text-tertiary hover:text-arch-text-primary hover:bg-[var(--bg-tertiary)] transition-colors"
                   aria-label="Close AI Assistant"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -241,8 +225,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
               {[
                 {
                   label: "Predict maintenance",
-                  prompt:
-                    "Analyze our drilling equipment and predict maintenance needs",
+                  prompt: "Analyze our drilling equipment and predict maintenance needs",
                 },
                 {
                   label: "Shift summary",
@@ -268,10 +251,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "user" ? "justify-end" : "justify-start",
-                  )}
+                  className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
                 >
                   <div
                     className={cn(
@@ -292,19 +272,15 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
                       if (part.type === "tool-invocation") {
                         const invocation = part.toolInvocation;
                         const toolName = invocation.toolName ?? "unknown";
-                        const label =
-                          TOOL_LABELS[toolName] ?? `Running ${toolName}...`;
+                        const label = TOOL_LABELS[toolName] ?? `Running ${toolName}...`;
                         const hasResult =
-                          invocation.state === "result" &&
-                          invocation.result != null;
+                          invocation.state === "result" && invocation.result != null;
                         return (
                           <div
                             key={i}
                             className="mt-2 p-2 rounded bg-arch-surface-primary border border-arch-border-subtle text-xs"
                           >
-                            <span className="text-arch-accent-blue">
-                              {label}
-                            </span>
+                            <span className="text-arch-accent-blue">{label}</span>
                             {hasResult && (
                               <div className="mt-1">
                                 <ToolOutputRenderer
@@ -343,10 +319,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
             </div>
 
             {/* Input */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-4 border-t border-[var(--border-default)]"
-            >
+            <form onSubmit={handleSubmit} className="p-4 border-t border-[var(--border-default)]">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -363,12 +336,7 @@ export function AIAssistant({ context, className }: AIAssistantProps) {
                   className="px-4 py-2.5 rounded-lg bg-arch-accent-blue text-white font-medium hover:bg-accent-blue active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
                   aria-label="Send message"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

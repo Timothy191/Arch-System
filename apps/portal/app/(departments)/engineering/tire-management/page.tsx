@@ -13,9 +13,7 @@ export default async function TireManagementPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-            Tire Management
-          </h2>
+          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Tire Management</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Inspections, wear tracking &amp; replacement scheduling
           </p>
@@ -34,9 +32,7 @@ export default async function TireManagementPage() {
               Total Tires
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
-            —
-          </p>
+          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">—</p>
         </GlassCard>
 
         <GlassCard>
@@ -66,9 +62,8 @@ export default async function TireManagementPage() {
           Tire Management Module
         </h3>
         <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-          This module will track tire inspections, tread depth, pressure
-          monitoring, and replacement schedules for the fleet. Database table
-          pending creation.
+          This module will track tire inspections, tread depth, pressure monitoring, and replacement
+          schedules for the fleet. Database table pending creation.
         </p>
       </GlassCard>
     </div>

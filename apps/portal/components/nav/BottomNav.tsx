@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Drill,
-  Factory,
-  Radar,
-  HardHat,
-  BarChart3,
-} from "lucide-react";
+import { LayoutDashboard, Drill, Factory, Radar, HardHat, BarChart3 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
 const NAV_ITEMS = [
@@ -40,9 +33,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
 
   const visibleItems =
     accessibleDepartments && accessibleDepartments.length > 0
-      ? NAV_ITEMS.filter(
-          (item) => !item.dept || accessibleDepartments.includes(item.dept),
-        )
+      ? NAV_ITEMS.filter((item) => !item.dept || accessibleDepartments.includes(item.dept))
       : NAV_ITEMS;
 
   return (
@@ -51,8 +42,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
       className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-[var(--border-default)] bg-white/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
     >
       {visibleItems.map(({ href, label, icon: Icon }) => {
-        const isActive =
-          href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -64,12 +54,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
                 : "text-[var(--text-muted)] hover:text-[var(--text-body)]",
             )}
           >
-            <Icon
-              className={cn(
-                "h-5 w-5 shrink-0",
-                isActive && "text-[var(--accent-emerald)]",
-              )}
-            />
+            <Icon className={cn("h-5 w-5 shrink-0", isActive && "text-[var(--accent-emerald)]")} />
             <span>{label}</span>
           </Link>
         );

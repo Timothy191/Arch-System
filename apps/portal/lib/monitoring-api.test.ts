@@ -44,9 +44,7 @@ describe("classifyDeformationByVelocity", () => {
     expect(classifyDeformationByVelocity(25, "pit-wall")).toBe("critical");
     expect(classifyDeformationByVelocity(15, "tailings-dam")).toBe("critical");
     expect(classifyDeformationByVelocity(35, "haul-road")).toBe("critical");
-    expect(classifyDeformationByVelocity(10, "processing-plant")).toBe(
-      "critical",
-    );
+    expect(classifyDeformationByVelocity(10, "processing-plant")).toBe("critical");
   });
 
   it("uses absolute value — negative velocity classifies the same as positive", () => {
@@ -56,54 +54,30 @@ describe("classifyDeformationByVelocity", () => {
   });
 
   it("applies different thresholds per area type", () => {
-    const areas: DeformationArea[] = [
-      "pit-wall",
-      "tailings-dam",
-      "haul-road",
-      "processing-plant",
-    ];
+    const areas: DeformationArea[] = ["pit-wall", "tailings-dam", "haul-road", "processing-plant"];
     for (const area of areas) {
       const { critical } = ALERT_THRESHOLDS[area];
       expect(classifyDeformationByVelocity(critical, area)).toBe("critical");
-      expect(classifyDeformationByVelocity(critical - 1, area)).not.toBe(
-        "critical",
-      );
+      expect(classifyDeformationByVelocity(critical - 1, area)).not.toBe("critical");
     }
   });
 });
 
 describe("ALERT_THRESHOLDS", () => {
   it("has entries for all 4 area types", () => {
-    const areas: DeformationArea[] = [
-      "pit-wall",
-      "tailings-dam",
-      "haul-road",
-      "processing-plant",
-    ];
+    const areas: DeformationArea[] = ["pit-wall", "tailings-dam", "haul-road", "processing-plant"];
     for (const area of areas) {
       expect(ALERT_THRESHOLDS[area]).toBeDefined();
       expect(ALERT_THRESHOLDS[area].minor).toBeGreaterThan(0);
-      expect(ALERT_THRESHOLDS[area].moderate).toBeGreaterThan(
-        ALERT_THRESHOLDS[area].minor,
-      );
-      expect(ALERT_THRESHOLDS[area].critical).toBeGreaterThan(
-        ALERT_THRESHOLDS[area].moderate,
-      );
+      expect(ALERT_THRESHOLDS[area].moderate).toBeGreaterThan(ALERT_THRESHOLDS[area].minor);
+      expect(ALERT_THRESHOLDS[area].critical).toBeGreaterThan(ALERT_THRESHOLDS[area].moderate);
     }
   });
 });
 
 describe("MAP_TILE_URLS", () => {
   it("has URLs for all expected layer keys", () => {
-    const expectedKeys = [
-      "optical",
-      "terrain",
-      "sar",
-      "ndvi",
-      "geology",
-      "osm",
-      "none",
-    ];
+    const expectedKeys = ["optical", "terrain", "sar", "ndvi", "geology", "osm", "none"];
     for (const key of expectedKeys) {
       expect(MAP_TILE_URLS[key]).toBeTruthy();
       expect(MAP_TILE_URLS[key]).toMatch(/^https:\/\//);
@@ -133,9 +107,7 @@ describe("fetchSentinel1Scenes", () => {
   });
 
   it("returns empty array on non-ok response", async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({ ok: false, status: 500 } as Response);
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 } as Response);
     const result = await fetchSentinel1Scenes(TEST_BBOX);
     expect(result).toEqual([]);
   });
@@ -315,9 +287,7 @@ describe("classifyDeformation (legacy, shift-based)", () => {
 });
 
 describe("getSTACQuicklookUrl", () => {
-  function makeItem(
-    assets: Record<string, { href: string; type: string }>,
-  ): STACItem {
+  function makeItem(assets: Record<string, { href: string; type: string }>): STACItem {
     return {
       id: "test",
       type: "Feature",
@@ -413,15 +383,9 @@ describe("DEFAULT_MINE_BBOX and DEFAULT_MINE_CENTER", () => {
   });
 
   it("center is within bbox", () => {
-    expect(DEFAULT_MINE_CENTER.lat).toBeGreaterThanOrEqual(
-      DEFAULT_MINE_BBOX.south,
-    );
-    expect(DEFAULT_MINE_CENTER.lat).toBeLessThanOrEqual(
-      DEFAULT_MINE_BBOX.north,
-    );
-    expect(DEFAULT_MINE_CENTER.lon).toBeGreaterThanOrEqual(
-      DEFAULT_MINE_BBOX.west,
-    );
+    expect(DEFAULT_MINE_CENTER.lat).toBeGreaterThanOrEqual(DEFAULT_MINE_BBOX.south);
+    expect(DEFAULT_MINE_CENTER.lat).toBeLessThanOrEqual(DEFAULT_MINE_BBOX.north);
+    expect(DEFAULT_MINE_CENTER.lon).toBeGreaterThanOrEqual(DEFAULT_MINE_BBOX.west);
     expect(DEFAULT_MINE_CENTER.lon).toBeLessThanOrEqual(DEFAULT_MINE_BBOX.east);
   });
 });

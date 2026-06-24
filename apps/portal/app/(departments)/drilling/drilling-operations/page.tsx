@@ -23,27 +23,26 @@ async function getDrillingOpsData() {
 
   const today = getOperationalToday();
 
-  const [{ data: drills }, { data: ops }, { data: operators }] =
-    await Promise.all([
-      supabase
-        .from("machines")
-        .select("id, name")
-        .eq("machine_type", "Drill Rig")
-        .eq("active", true)
-        .order("name"),
-      supabase
-        .from("drill_operations")
-        .select(
-          "id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, comments, status",
-        )
-        .eq("department_id", dept.id)
-        .eq("operation_date", today),
-      supabase
-        .from("employees")
-        .select("id, full_name")
-        .eq("department_id", dept.id)
-        .order("full_name"),
-    ]);
+  const [{ data: drills }, { data: ops }, { data: operators }] = await Promise.all([
+    supabase
+      .from("machines")
+      .select("id, name")
+      .eq("machine_type", "Drill Rig")
+      .eq("active", true)
+      .order("name"),
+    supabase
+      .from("drill_operations")
+      .select(
+        "id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, comments, status",
+      )
+      .eq("department_id", dept.id)
+      .eq("operation_date", today),
+    supabase
+      .from("employees")
+      .select("id, full_name")
+      .eq("department_id", dept.id)
+      .order("full_name"),
+  ]);
 
   return {
     drills: drills ?? [],
@@ -59,9 +58,7 @@ export default async function DrillingOperationsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-          Drilling Operations
-        </h2>
+        <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Drilling Operations</h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">
           Inline log per drill rig, per shift. Edits save on blur.
         </p>

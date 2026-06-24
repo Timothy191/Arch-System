@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import UpdatePasswordPage from "./page";
 
 const mockPush = jest.fn();
@@ -19,9 +13,7 @@ jest.mock("@repo/supabase/client", () => ({
 }));
 
 jest.mock("@repo/ui/Input", () => ({
-  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} />
-  ),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 
 jest.mock("@repo/ui/AnimatedButton", () => ({
@@ -38,20 +30,13 @@ jest.mock("@repo/ui/AnimatedButton", () => ({
     type?: "button" | "submit" | "reset";
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
   }) => (
-    <button
-      type={type}
-      disabled={disabled}
-      className={className}
-      onClick={onClick}
-    >
+    <button type={type} disabled={disabled} className={className} onClick={onClick}>
       {children}
     </button>
   ),
 }));
 
-const { createBrowserSupabaseClient } = jest.requireMock(
-  "@repo/supabase/client",
-);
+const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 describe("UpdatePasswordPage", () => {
   let mockGetSession: jest.Mock;
@@ -112,9 +97,7 @@ describe("UpdatePasswordPage", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("New Password")).toBeInTheDocument();
       expect(screen.getByLabelText("Confirm Password")).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /Update Password/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Update Password/i })).toBeInTheDocument();
     });
   });
 
@@ -162,9 +145,7 @@ describe("UpdatePasswordPage", () => {
 
     fireEvent.submit(screen.getByLabelText("New Password").closest("form")!);
 
-    expect(
-      screen.getByText("Password must be at least 8 characters."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument();
     expect(mockUpdateUser).not.toHaveBeenCalled();
   });
 
@@ -220,9 +201,7 @@ describe("UpdatePasswordPage", () => {
     fireEvent.submit(screen.getByLabelText("New Password").closest("form")!);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/New password must be different/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/New password must be different/i)).toBeInTheDocument();
     });
   });
 

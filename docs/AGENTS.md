@@ -15,7 +15,7 @@
 
 ---
 
-## One‑shot dev environment
+## One-shot dev environment
 
 ```bash
 pnpm install
@@ -26,7 +26,7 @@ pnpm dev                                     # portal on :3000, uses next dev --
 pnpm quality                                 # full gate before pushing
 ```
 
-Full bootstrap with flags: `pnpm dev:up --all`
+Full bootstrap with flags: `pnpm dev:up --all` (`--quick`, `--tools`, `--cms`, `--overview`, `--force`)
 
 ---
 
@@ -48,14 +48,16 @@ Full bootstrap with flags: `pnpm dev:up --all`
 | -------------------- | ------------------------------------------------------------------------------- |
 | `@repo/theme`        | OKLCH design tokens → generated CSS, Tailwind preset. SSoT: `tokens.json`       |
 | `@repo/ui`           | Shared Radix/shadcn UI components, `cn()` utility, glass primitives             |
-| `@repo/supabase`     | Browser/server/middleware Supabase clients + auto‑generated `database.types.ts` |
+| `@repo/supabase`     | Browser/server/middleware Supabase clients + auto-generated `database.types.ts` |
 | `@repo/database`     | SQL migrations (`migrations/NNN_*.sql` — SSoT for schema)                       |
 | `@repo/redis`        | Redis helpers (department slug → UUID resolution, caching)                      |
 | `@repo/utils`        | Shared utilities, Inngest & Novu integrations                                   |
-| `@repo/errors`       | Domain‑specific error classes                                                   |
+| `@repo/errors`       | Domain-specific error classes                                                   |
 | `@repo/rate-limiter` | Rate limiting primitives                                                        |
 | `@repo/logger`       | Structured logging                                                              |
 | `@repo/eval`         | Python/DeepEval AI compliance suite (Poetry, not in `pnpm quality`)             |
+| `@repo/contract`     | Type contracts and domain schemas                                               |
+| `@repo/agents`       | Agent orchestration helpers                                                     |
 
 ### Dependency versioning
 
@@ -65,23 +67,23 @@ Full bootstrap with flags: `pnpm dev:up --all`
 
 ## Essential commands
 
-| Command                                                  | What                                                                                                                       |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`                                               | Portal dev server (:3000), turbopack                                                                                       |
-| `pnpm --filter <name> dev`                               | Dev a specific app/package                                                                                                 |
-| `pnpm build`                                             | Build all (via `nx run-many -t build`)                                                                                     |
-| `pnpm quality`                                           | Full gate: `lint → type-check → test → lint:tokens → lint:css → lint:root → lint:styles → format:check → deps:lint → knip` |
-| `pnpm test`                                              | All unit tests (Jest)                                                                                                      |
-| `pnpm --filter portal test -- --testPathPatterns=<file>` | Single portal test file                                                                                                    |
-| `pnpm test:e2e`                                          | Playwright (requires :3000, Chromium at `/usr/bin/google-chrome`)                                                          |
-| `pnpm format` / `pnpm format:check`                      | Prettier write/check                                                                                                       |
-| `pnpm knip` / `pnpm knip:fix`                            | Dead code detection/fix                                                                                                    |
-| `pnpm deps:lint` / `pnpm deps:fix`                       | syncpack — workspace version consistency                                                                                   |
-| `pnpm md:lint` / `pnpm md:fix`                           | Markdownlint                                                                                                               |
-| `pnpm analyze`                                           | Bundle analyzer (env `ANALYZE=true`)                                                                                       |
-| `pnpm db:docs`                                           | Generate ER diagrams                                                                                                       |
-| `pnpm deploy:local`                                      | Full‑stack local deploy                                                                                                    |
-| `pnpm fresh-start`                                       | Clean rebuild from scratch                                                                                                 |
+| Command                                                  | What                                                                                                                                                                 |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                                               | Portal dev server (:3000), turbopack                                                                                                                                 |
+| `pnpm --filter <name> dev`                               | Dev a specific app/package                                                                                                                                           |
+| `pnpm build`                                             | Build all (via `nx run-many -t build`)                                                                                                                               |
+| `pnpm quality`                                           | Full gate: `lint → type-check → test → lint:tokens → lint:css → lint:root → lint:styles → format:check → deps:lint → knip → policy:check → audit:rls → audit:design` |
+| `pnpm test`                                              | All unit tests (Jest)                                                                                                                                                |
+| `pnpm --filter portal test -- --testPathPatterns=<file>` | Single portal test file                                                                                                                                              |
+| `pnpm test:e2e`                                          | Playwright (requires :3000, Chromium at `/usr/bin/google-chrome`)                                                                                                    |
+| `pnpm format` / `pnpm format:check`                      | Prettier write/check                                                                                                                                                 |
+| `pnpm knip` / `pnpm knip:fix`                            | Dead code detection/fix                                                                                                                                              |
+| `pnpm deps:lint` / `pnpm deps:fix`                       | syncpack — workspace version consistency                                                                                                                             |
+| `pnpm md:lint` / `pnpm md:fix`                           | Markdownlint                                                                                                                                                         |
+| `pnpm analyze`                                           | Bundle analyzer (env `ANALYZE=true`)                                                                                                                                 |
+| `pnpm db:docs`                                           | Generate ER diagrams                                                                                                                                                 |
+| `pnpm deploy:local`                                      | Full‑stack local deploy                                                                                                                                              |
+| `pnpm fresh-start`                                       | Clean rebuild from scratch                                                                                                                                           |
 
 ---
 
@@ -101,6 +103,7 @@ Full bootstrap with flags: `pnpm dev:up --all`
 - **Generate:** `pnpm --filter @repo/database supabase:gen` → `packages/supabase/src/database.types.ts`
 - **Never edit** `packages/supabase/supabase/migrations/` directly.
 - **Commit** migration + updated types.
+- **Note:** Types file is `packages/supabase/src/database.types.ts` (not `packages/database/`).
 
 ---
 
@@ -181,7 +184,7 @@ Root layout mounts `ArchThemeProvider`, `OfflineBanner`, `AnimatedWavesBackgroun
 Runs on push/PR to `main`/`master`. Order:
 
 ```
-deps:lint → audit (high/critical) → knip → policy:check → md:lint →
+deps:lint → audit (high/critical) → knip → policy:check → audit:rls → audit:design → md:lint →
 gitleaks → nx affected -t lint type-check → tflint → trivy →
 nx affected -t lint:tokens lint:css → nx affected -t test →
 build → bundlesize → E2E → Lighthouse
@@ -198,14 +201,46 @@ CI needs these synthetic env vars (set in workflow):
 
 ## Key config files
 
-| File                                     | What it controls                                                      |
-| ---------------------------------------- | --------------------------------------------------------------------- |
-| `packages/database/supabase/config.toml` | Local Supabase ports/keys                                             |
-| `nx.json`                                | Pipeline DAG, caching, S3 remote cache                                |
-| `apps/portal/next.config.mjs`            | PWA, Sentry, `transpilePackages`, Turbopack root                      |
-| `config/tools/knip.json`                 | Entry points for dead‑code detection                                  |
-| `pnpm-workspace.yaml`                    | Package catalog versions                                              |
-| `opencode.json`                          | MCP server config (nx-mcp, supabase, github, memory, postgres, redis) |
+| File                                     | What it controls                                                     |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| `packages/database/supabase/config.toml` | Local Supabase ports/keys                                            |
+| `nx.json`                                | Pipeline DAG, caching, S3 remote cache, dependency constraints       |
+| `apps/portal/next.config.mjs`            | PWA, Sentry, `transpilePackages`, Turbopack root                     |
+| `config/tools/knip.json`                 | Entry points for dead‑code detection                                 |
+| `pnpm-workspace.yaml`                    | Package catalog versions                                             |
+| `opencode.json`                          | MCP server config (nx-mcp, supabase, github, memory, redis)          |
+| `tools/apply-project-tags.cjs`           | Auto-tags Nx projects with scope:\* tags based on directory location |
+
+---
+
+## Nx Project Tags & Architectural Enforcement
+
+The monorepo uses `tools/apply-project-tags.cjs` to automatically tag projects based on their directory location. These tags are used by Nx's dependency constraints to enforce architectural rules.
+
+### Tag Vocabulary
+
+Tags are automatically applied by `apply-project-tags.cjs`:
+
+- **`scope:app`** - All applications in `apps/`
+- **`scope:app:<name>`** - Specific app (e.g., `scope:app:portal`)
+- **`scope:package`** - All packages in `packages/`
+- **`scope:package:<name>`** - Specific package (e.g., `scope:package:ui`)
+- **`scope:package:db`** - Database package (architectural significance)
+- **`scope:package:db-internal`** - Database internals (restricted access)
+- **`scope:tool`** - Build-time tools in `tools/` (only specific subdirectories: wiki-viewer, n8n-mcp, preflight-mcp, policy)
+
+### Dependency Constraints
+
+Defined in `nx.json` under `dependencyConstraints`:
+
+- Apps can only depend on packages (`scope:app` → `scope:package`)
+- Apps cannot depend on database internals (`scope:app` ↛ `scope:package:db-internal`)
+- UI packages cannot depend on database-related packages (`scope:package:ui` ↛ `scope:package:db`, `scope:package:db-internal`, `scope:package:supabase`)
+- Theme packages cannot depend on UI packages (`scope:package:theme` ↛ `scope:package:ui`)
+- Tools cannot depend on apps or Supabase (`scope:tool` ↛ `scope:app`, `scope:package:supabase`)
+- Packages cannot depend on apps (`scope:package` ↛ `scope:app`)
+
+**Run `node tools/apply-project-tags.cjs` after adding new projects or when project structure changes.**
 
 ---
 

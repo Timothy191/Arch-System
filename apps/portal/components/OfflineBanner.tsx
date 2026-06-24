@@ -84,9 +84,7 @@ export function OfflineBanner() {
           <WifiOff className="h-4 w-4 shrink-0" />
           <span>
             Offline mode — changes are queued locally
-            {queueCount > 0 && (
-              <span className="ml-1 font-semibold">({queueCount} pending)</span>
-            )}
+            {queueCount > 0 && <span className="ml-1 font-semibold">({queueCount} pending)</span>}
           </span>
         </>
       )}

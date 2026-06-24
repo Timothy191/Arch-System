@@ -41,17 +41,12 @@ async function getDrillingDashboardData(deptId: string, today: string) {
   const latestShift = todayLogs?.[todayLogs.length - 1]?.shift;
 
   const totalHours =
-    todayOperations?.reduce(
-      (sum, op) => sum + (Number(op.total_hours) || 0),
-      0,
-    ) || 0;
+    todayOperations?.reduce((sum, op) => sum + (Number(op.total_hours) || 0), 0) || 0;
 
-  const activeOps =
-    todayOperations?.filter((op) => op.status === "active").length || 0;
+  const activeOps = todayOperations?.filter((op) => op.status === "active").length || 0;
 
   const delayCount = todayDelays?.length || 0;
-  const delayMinutes =
-    todayDelays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
+  const delayMinutes = todayDelays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
 
   return {
     shiftCount,
@@ -69,22 +64,13 @@ export default async function DrillingDashboardPage() {
     department: "drilling",
   });
 
-  const {
-    shiftCount,
-    latestShift,
-    machineCount,
-    totalHours,
-    activeOps,
-    delayCount,
-    delayMinutes,
-  } = await getDrillingDashboardData(deptId, today);
+  const { shiftCount, latestShift, machineCount, totalHours, activeOps, delayCount, delayMinutes } =
+    await getDrillingDashboardData(deptId, today);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-          Drilling Dashboard
-        </h2>
+        <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Drilling Dashboard</h2>
         <p className="text-[var(--text-muted)] text-sm">
           {new Date().toLocaleDateString("en-ZA", {
             weekday: "long",
@@ -109,9 +95,7 @@ export default async function DrillingDashboardPage() {
               : "Not logged"}
           </p>
           {latestShift && (
-            <p className="text-[var(--text-muted)] text-xs mt-1">
-              Latest: {latestShift}
-            </p>
+            <p className="text-[var(--text-muted)] text-xs mt-1">Latest: {latestShift}</p>
           )}
         </GlassCard>
 
@@ -122,9 +106,7 @@ export default async function DrillingDashboardPage() {
               Active Drills
             </p>
           </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
-            {machineCount}
-          </p>
+          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{machineCount}</p>
           {activeOps > 0 && (
             <p className="text-accent-green text-xs mt-1">
               {activeOps} operation{activeOps > 1 ? "s" : ""} active
@@ -139,9 +121,7 @@ export default async function DrillingDashboardPage() {
               Hours Today
             </p>
           </div>
-          <p className="text-2xl font-bold text-cyan-400 mt-2">
-            {totalHours.toFixed(1)}h
-          </p>
+          <p className="text-2xl font-bold text-cyan-400 mt-2">{totalHours.toFixed(1)}h</p>
         </GlassCard>
 
         <GlassCard>
@@ -151,13 +131,9 @@ export default async function DrillingDashboardPage() {
               Delays
             </p>
           </div>
-          <p className="text-2xl font-bold text-accent-blue mt-2">
-            {delayCount}
-          </p>
+          <p className="text-2xl font-bold text-accent-blue mt-2">{delayCount}</p>
           {delayMinutes > 0 && (
-            <p className="text-[var(--text-muted)] text-xs mt-1">
-              {delayMinutes} min lost
-            </p>
+            <p className="text-[var(--text-muted)] text-xs mt-1">{delayMinutes} min lost</p>
           )}
         </GlassCard>
       </div>

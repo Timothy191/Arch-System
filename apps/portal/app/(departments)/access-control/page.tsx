@@ -12,36 +12,31 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const DashboardKPIGrid = nextDynamic(
-  () => import("./components/DashboardKPIGrid"),
-  { loading: () => <Skeleton className="h-[140px] w-full" /> },
-);
-const DashboardChartsRow = nextDynamic(
-  () => import("./components/DashboardChartsRow"),
-  { loading: () => <Skeleton className="h-[260px] w-full" /> },
-);
-const DashboardActivityFeed = nextDynamic(
-  () => import("./components/DashboardActivityFeed"),
-  { loading: () => <Skeleton className="h-[360px] w-full" /> },
-);
-const DashboardEntityStatus = nextDynamic(
-  () => import("./components/DashboardEntityStatus"),
-  { loading: () => <Skeleton className="h-[360px] w-full" /> },
-);
+const DashboardKPIGrid = nextDynamic(() => import("./components/DashboardKPIGrid"), {
+  loading: () => <Skeleton className="h-[140px] w-full" />,
+});
+const DashboardChartsRow = nextDynamic(() => import("./components/DashboardChartsRow"), {
+  loading: () => <Skeleton className="h-[260px] w-full" />,
+});
+const DashboardActivityFeed = nextDynamic(() => import("./components/DashboardActivityFeed"), {
+  loading: () => <Skeleton className="h-[360px] w-full" />,
+});
+const DashboardEntityStatus = nextDynamic(() => import("./components/DashboardEntityStatus"), {
+  loading: () => <Skeleton className="h-[360px] w-full" />,
+});
 
 export default async function AccessControlDashboardPage() {
   const { deptId, today } = await getDepartmentContext({
     department: "access-control",
   });
 
-  const [metrics, activity, entityStatus, hourlyStats, distribution] =
-    await Promise.all([
-      getAccessControlMetrics(deptId),
-      getRecentAccessActivity(deptId, 8),
-      getEntityBadgeStatus(deptId),
-      getHourlyAccessStats(deptId, today),
-      getBadgeStatusDistribution(deptId),
-    ]);
+  const [metrics, activity, entityStatus, hourlyStats, distribution] = await Promise.all([
+    getAccessControlMetrics(deptId),
+    getRecentAccessActivity(deptId, 8),
+    getEntityBadgeStatus(deptId),
+    getHourlyAccessStats(deptId, today),
+    getBadgeStatusDistribution(deptId),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -50,9 +45,7 @@ export default async function AccessControlDashboardPage() {
         <GlassCard>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-accent-green/10 rounded-lg">
-              <span className="text-accent-green font-bold text-sm">
-                BADGES
-              </span>
+              <span className="text-accent-green font-bold text-sm">BADGES</span>
             </div>
             <div>
               <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
@@ -73,9 +66,7 @@ export default async function AccessControlDashboardPage() {
               <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
                 Active Visitors
               </p>
-              <p className="text-2xl font-bold text-cyan-400 mt-1">
-                {metrics.accessEventsToday}
-              </p>
+              <p className="text-2xl font-bold text-cyan-400 mt-1">{metrics.accessEventsToday}</p>
             </div>
           </div>
         </GlassCard>
@@ -88,9 +79,7 @@ export default async function AccessControlDashboardPage() {
               <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
                 Alerts Today
               </p>
-              <p className="text-2xl font-bold text-accent-blue mt-1">
-                {metrics.deniedToday}
-              </p>
+              <p className="text-2xl font-bold text-accent-blue mt-1">{metrics.deniedToday}</p>
             </div>
           </div>
         </GlassCard>
@@ -100,10 +89,7 @@ export default async function AccessControlDashboardPage() {
       <DashboardKPIGrid metrics={metrics} />
 
       {/* Charts Row with real data */}
-      <DashboardChartsRow
-        hourlyStats={hourlyStats}
-        distribution={distribution}
-      />
+      <DashboardChartsRow hourlyStats={hourlyStats} distribution={distribution} />
 
       {/* Bottom Row: Activity Feed + Entity Status */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">

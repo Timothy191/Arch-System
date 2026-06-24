@@ -5,6 +5,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card } from "@repo/ui/components/ui/card";
+import { Checkbox } from "@repo/ui/Checkbox";
 import { Trash2, Plus, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,9 +55,7 @@ export function WebhookManager() {
   const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingWebhook, setEditingWebhook] = useState<WebhookEndpoint | null>(
-    null,
-  );
+  const [editingWebhook, setEditingWebhook] = useState<WebhookEndpoint | null>(null);
   const [formData, setFormData] = useState({
     url: "",
     description: "",
@@ -196,9 +195,7 @@ export function WebhookManager() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-arch-text-primary">
-          Webhook Endpoints
-        </h2>
+        <h2 className="text-2xl font-semibold text-arch-text-primary">Webhook Endpoints</h2>
         <Button
           onClick={() => {
             setEditingWebhook(null);
@@ -222,10 +219,7 @@ export function WebhookManager() {
           <h3 className="text-lg font-semibold text-arch-text-primary mb-4">
             {editingWebhook ? "Edit Webhook" : "Create Webhook"}
           </h3>
-          <form
-            onSubmit={editingWebhook ? handleUpdate : handleSubmit}
-            className="space-y-4"
-          >
+          <form onSubmit={editingWebhook ? handleUpdate : handleSubmit} className="space-y-4">
             <div>
               <label
                 htmlFor="url"
@@ -238,9 +232,7 @@ export function WebhookManager() {
                 type="url"
                 placeholder="https://your-endpoint.com/webhook"
                 value={formData.url}
-                onChange={(e) =>
-                  setFormData({ ...formData, url: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 className="bg-arch-surface-primary border-arch-border-subtle focus-visible:ring-arch-accent-blue"
                 required
               />
@@ -257,9 +249,7 @@ export function WebhookManager() {
                 id="description"
                 placeholder="Describe what this webhook is for"
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-arch-border-subtle rounded-lg bg-arch-surface-primary text-arch-text-primary focus:outline-none focus:border-arch-accent-blue/50 transition-colors text-sm"
               />
@@ -287,22 +277,14 @@ export function WebhookManager() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 pt-2">
-              <input
-                type="checkbox"
+            <div className="pt-2">
+              <Checkbox
                 id="active"
                 checked={formData.active}
-                onChange={(e) =>
-                  setFormData({ ...formData, active: e.target.checked })
-                }
-                className="w-4 h-4 rounded border-arch-border-subtle text-arch-accent-blue focus:ring-arch-accent-blue"
-              />
-              <label
-                htmlFor="active"
+                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                label="Active"
                 className="text-sm font-medium text-arch-text-secondary"
-              >
-                Active
-              </label>
+              />
             </div>
 
             <div className="flex gap-2 pt-4">
@@ -337,9 +319,7 @@ export function WebhookManager() {
       <div className="space-y-4">
         {webhooks.length === 0 ? (
           <Card className="p-8 text-center border-arch-border-subtle bg-arch-surface-primary/30">
-            <p className="text-arch-text-tertiary">
-              No webhooks configured yet
-            </p>
+            <p className="text-arch-text-tertiary">No webhooks configured yet</p>
           </Card>
         ) : (
           webhooks.map((webhook) => (
@@ -350,9 +330,7 @@ export function WebhookManager() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-arch-text-primary">
-                      {webhook.url}
-                    </h3>
+                    <h3 className="font-semibold text-arch-text-primary">{webhook.url}</h3>
                     {webhook.active ? (
                       <Badge
                         variant="default"
@@ -372,9 +350,7 @@ export function WebhookManager() {
                     )}
                   </div>
                   {webhook.description && (
-                    <p className="text-sm text-arch-text-secondary mb-3">
-                      {webhook.description}
-                    </p>
+                    <p className="text-sm text-arch-text-secondary mb-3">{webhook.description}</p>
                   )}
                   <div className="flex flex-wrap gap-1">
                     {webhook.event_types.map((eventType: WebhookEventType) => (

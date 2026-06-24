@@ -30,9 +30,7 @@ jest.mock("./audit", () => ({
   logAuditEvent: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 const bcrypt = jest.requireMock("bcryptjs");
 
 const mockDbQuery: any = {
@@ -210,14 +208,7 @@ describe("closeShift (validateOnly=true)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-      true,
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain("Shift is already closed");
@@ -250,19 +241,10 @@ describe("closeShift (validateOnly=true)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-      true,
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
 
     expect(result.success).toBe(false);
-    expect(result.errors).toContain(
-      "No active machines found for this department",
-    );
+    expect(result.errors).toContain("No active machines found for this department");
   });
 
   it("returns errors for unreported machines", async () => {
@@ -303,14 +285,7 @@ describe("closeShift (validateOnly=true)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-      true,
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
 
     expect(result.success).toBe(false);
     expect(result.errors?.some((e) => e.includes("Excavator A"))).toBe(true);
@@ -356,21 +331,10 @@ describe("closeShift (validateOnly=true)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-      true,
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
 
     expect(result.success).toBe(false);
-    expect(
-      result.errors?.some(
-        (e) => e.includes("15h exceeds") && e.includes("12h"),
-      ),
-    ).toBe(true);
+    expect(result.errors?.some((e) => e.includes("15h exceeds") && e.includes("12h"))).toBe(true);
   });
 
   it("returns success when all machines are reported within limits", async () => {
@@ -417,14 +381,7 @@ describe("closeShift (validateOnly=true)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-      true,
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
 
     expect(result.success).toBe(true);
     expect(result.errors).toBeUndefined();
@@ -454,9 +411,7 @@ describe("setPin", () => {
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            single: jest
-              .fn()
-              .mockResolvedValue({ data: null, error: new Error("not found") }),
+            single: jest.fn().mockResolvedValue({ data: null, error: new Error("not found") }),
           }),
         }),
       }),
@@ -496,9 +451,7 @@ describe("setPin", () => {
               }),
             }),
             update: jest.fn().mockReturnValue({
-              eq: jest
-                .fn()
-                .mockResolvedValue({ error: { message: "DB error" } }),
+              eq: jest.fn().mockResolvedValue({ error: { message: "DB error" } }),
             }),
           };
         }
@@ -610,9 +563,7 @@ describe("closeShift (validateOnly=false)", () => {
       }),
     });
 
-    await expect(
-      closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234"),
-    ).rejects.toThrow();
+    await expect(closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234")).rejects.toThrow();
   });
 
   it("returns error when approver has no PIN set", async () => {
@@ -663,9 +614,7 @@ describe("closeShift (validateOnly=false)", () => {
             return {
               select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                  single: jest
-                    .fn()
-                    .mockResolvedValue({ data: { id: "emp-1" }, error: null }),
+                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
                 }),
               }),
             };
@@ -689,17 +638,9 @@ describe("closeShift (validateOnly=false)", () => {
       }),
     });
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
     expect(result.success).toBe(false);
-    expect(result.errors).toContain(
-      "Approving supervisor not found or has no PIN set",
-    );
+    expect(result.errors).toContain("Approving supervisor not found or has no PIN set");
   });
 
   it("returns error when supervisor PIN is wrong", async () => {
@@ -749,9 +690,7 @@ describe("closeShift (validateOnly=false)", () => {
             return {
               select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                  single: jest
-                    .fn()
-                    .mockResolvedValue({ data: { id: "emp-1" }, error: null }),
+                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
                 }),
               }),
             };
@@ -776,13 +715,7 @@ describe("closeShift (validateOnly=false)", () => {
 
     bcrypt.compare.mockResolvedValue(false);
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "wrong",
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "wrong");
     expect(result.success).toBe(false);
     expect(result.errors).toContain("Invalid supervisor PIN");
   });
@@ -842,9 +775,7 @@ describe("closeShift (validateOnly=false)", () => {
             return {
               select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                  single: jest
-                    .fn()
-                    .mockResolvedValue({ data: { id: "emp-1" }, error: null }),
+                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
                 }),
               }),
             };
@@ -869,13 +800,7 @@ describe("closeShift (validateOnly=false)", () => {
 
     bcrypt.compare.mockResolvedValue(true);
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
     expect(result.success).toBe(false);
     expect(result.errors).toContain("Failed to close shift");
   });
@@ -927,9 +852,7 @@ describe("closeShift (validateOnly=false)", () => {
       }),
     });
 
-    await expect(
-      closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234"),
-    ).rejects.toThrow();
+    await expect(closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234")).rejects.toThrow();
   });
 
   it("returns success when PIN is valid and shift is closed", async () => {
@@ -988,9 +911,7 @@ describe("closeShift (validateOnly=false)", () => {
             return {
               select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                  single: jest
-                    .fn()
-                    .mockResolvedValue({ data: { id: "emp-1" }, error: null }),
+                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
                 }),
               }),
             };
@@ -1015,13 +936,7 @@ describe("closeShift (validateOnly=false)", () => {
 
     bcrypt.compare.mockResolvedValue(true);
 
-    const result = await closeShift(
-      "dept-1",
-      "2026-05-17",
-      "day",
-      "approver-1",
-      "1234",
-    );
+    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
     expect(result.success).toBe(true);
     expect(result.shiftStatusId).toBe("status-99");
     expect(logAuditEvent).toHaveBeenCalledWith(

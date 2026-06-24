@@ -9,14 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import {
-  Printer,
-  Layers,
-  Clock,
-  AlertTriangle,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@repo/ui/components/ui/tabs";
+import { CardActionsTab } from "./components/CardActionsTab";
+import { Printer, Layers, Clock, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import type { IssuedCardsRow } from "@repo/supabase";
 import { getDashboardMetrics, getExpiringCards } from "./actions";
@@ -28,9 +23,7 @@ interface ExpiringCard extends IssuedCardsRow {
 export const dynamic = "force-dynamic";
 
 function daysRemaining(expiresAt: string): number {
-  return Math.ceil(
-    (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-  );
+  return Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
 function getExpiryStatus(days: number): { label: string; pillClass: string } {
@@ -89,128 +82,117 @@ export default async function AccessCardActionsDashboardPage() {
     <div className="space-y-6">
       <PageHeader title="Access Card Actions Dashboard" showDate />
 
-      <KPIGrid cols={4}>
-        <KPICard
-          label="Printers Online"
-          value={`${metrics.onlinePrinters} / ${metrics.totalPrinters}`}
-          color={
-            onlinePrintersPct >= 50
-              ? "green"
-              : onlinePrintersPct > 0
-                ? "default"
-                : "red"
-          }
-          sub={
-            metrics.totalPrinters > 0
-              ? `${onlinePrintersPct}% online`
-              : "No printers registered"
-          }
-          icon={<Printer className="w-8 h-8" />}
-        />
-        <KPICard
-          label="Cards Printed Today"
-          value={metrics.cardsPrintedToday}
-          color="default"
-          icon={<Layers className="w-8 h-8" />}
-        />
-        <KPICard
-          label="Pending Jobs"
-          value={metrics.pendingJobs}
-          color={metrics.pendingJobs > 0 ? "blue" : "default"}
-          sub={metrics.pendingJobs > 0 ? "Awaiting processing" : "All clear"}
-          icon={<Clock className="w-8 h-8" />}
-        />
-        <KPICard
-          label="Expiring Cards (7 days)"
-          value={metrics.expiringCards}
-          color={metrics.expiringCards > 0 ? "red" : "default"}
-          sub={
-            metrics.expiringCards > 0 ? "Action required" : "No cards expiring"
-          }
-          icon={<AlertTriangle className="w-8 h-8" />}
-        />
-      </KPIGrid>
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="actions">Card Actions</TabsTrigger>
+        </TabsList>
 
-      <GlassCard className="p-0 overflow-hidden">
-        <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50 flex items-center justify-between">
-          <h3 className="font-medium text-[var(--text-heading)] flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-[var(--text-muted)]" />
-            Expiring Cards
-          </h3>
-          <span className="text-xs text-[var(--text-muted)]">
-            {cards.length} card{cards.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-              <TableHead className="text-[var(--text-muted)]">
-                Personnel
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Expiry Date
-              </TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Days Remaining
-              </TableHead>
-              <TableHead className="text-right text-[var(--text-muted)]">
-                Status
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {cards.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center py-8 text-[var(--text-muted)]"
-                >
-                  No expiring cards found.
-                </TableCell>
-              </TableRow>
-            )}
-            {cards.map((card) => (
-              <TableRow
-                key={card.id}
-                className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
-              >
-                <TableCell className="text-[var(--text-heading)]">
-                  {card.entityName}
-                </TableCell>
-                <TableCell className="text-[var(--text-secondary)]">
-                  {card.expires_at
-                    ? new Date(card.expires_at).toLocaleDateString("en-ZA", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : "—"}
-                </TableCell>
-                <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
-                  {card.daysRemaining < 0
-                    ? "Overdue"
-                    : `${card.daysRemaining}d`}
-                </TableCell>
-                <TableCell className="text-right">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border",
-                      card.expiryStatus.pillClass,
-                    )}
+        <TabsContent value="dashboard" className="space-y-6 mt-0">
+          <KPIGrid cols={4}>
+            <KPICard
+              label="Printers Online"
+              value={`${metrics.onlinePrinters} / ${metrics.totalPrinters}`}
+              color={onlinePrintersPct >= 50 ? "green" : onlinePrintersPct > 0 ? "default" : "red"}
+              sub={
+                metrics.totalPrinters > 0
+                  ? `${onlinePrintersPct}% online`
+                  : "No printers registered"
+              }
+              icon={<Printer className="w-8 h-8" />}
+            />
+            <KPICard
+              label="Cards Printed Today"
+              value={metrics.cardsPrintedToday}
+              color="default"
+              icon={<Layers className="w-8 h-8" />}
+            />
+            <KPICard
+              label="Pending Jobs"
+              value={metrics.pendingJobs}
+              color={metrics.pendingJobs > 0 ? "blue" : "default"}
+              sub={metrics.pendingJobs > 0 ? "Awaiting processing" : "All clear"}
+              icon={<Clock className="w-8 h-8" />}
+            />
+            <KPICard
+              label="Expiring Cards (7 days)"
+              value={metrics.expiringCards}
+              color={metrics.expiringCards > 0 ? "red" : "default"}
+              sub={metrics.expiringCards > 0 ? "Action required" : "No cards expiring"}
+              icon={<AlertTriangle className="w-8 h-8" />}
+            />
+          </KPIGrid>
+
+          <GlassCard className="p-0 overflow-hidden">
+            <div className="p-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/50 flex items-center justify-between">
+              <h3 className="font-medium text-[var(--text-heading)] flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-[var(--text-muted)]" />
+                Expiring Cards
+              </h3>
+              <span className="text-xs text-[var(--text-muted)]">
+                {cards.length} card{cards.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
+                  <TableHead className="text-[var(--text-muted)]">Personnel</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Expiry Date</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Days Remaining</TableHead>
+                  <TableHead className="text-right text-[var(--text-muted)]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {cards.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-[var(--text-muted)]">
+                      No expiring cards found.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {cards.map((card) => (
+                  <TableRow
+                    key={card.id}
+                    className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
                   >
-                    {card.daysRemaining < 0 ? (
-                      <WifiOff className="w-3 h-3" />
-                    ) : (
-                      <Wifi className="w-3 h-3" />
-                    )}
-                    {card.expiryStatus.label}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </GlassCard>
+                    <TableCell className="text-[var(--text-heading)]">{card.entityName}</TableCell>
+                    <TableCell className="text-[var(--text-secondary)]">
+                      {card.expires_at
+                        ? new Date(card.expires_at).toLocaleDateString("en-ZA", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
+                      {card.daysRemaining < 0 ? "Overdue" : `${card.daysRemaining}d`}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border",
+                          card.expiryStatus.pillClass,
+                        )}
+                      >
+                        {card.daysRemaining < 0 ? (
+                          <WifiOff className="w-3 h-3" />
+                        ) : (
+                          <Wifi className="w-3 h-3" />
+                        )}
+                        {card.expiryStatus.label}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </GlassCard>
+        </TabsContent>
+        <TabsContent value="actions" className="space-y-6 mt-0">
+          <CardActionsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

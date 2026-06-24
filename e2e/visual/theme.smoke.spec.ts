@@ -1,11 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test("light-mode liquid glass background should be pure white with rgba tint", async ({
-  page,
-}) => {
-  page.on("request", (req) =>
-    console.log("Request:", req.url(), req.resourceType()),
-  );
+test("light-mode liquid glass background should be pure white with rgba tint", async ({ page }) => {
+  page.on("request", (req) => console.log("Request:", req.url(), req.resourceType()));
   page.on("requestfailed", (req) =>
     console.log("Request Failed:", req.url(), req.failure()?.errorText),
   );
@@ -21,9 +17,7 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   const bgTint = page.locator(".route-bg-tint");
   await expect(bgTint).toBeAttached();
 
-  const bgColor = await bgTint.evaluate(
-    (el) => getComputedStyle(el).backgroundColor,
-  );
+  const bgColor = await bgTint.evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(bgColor).toBe("rgba(255, 255, 255, 0.5)");
 
   // 2. Check that a key token variable (arch0) is defined and used
@@ -39,18 +33,14 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   // Wait for the video metadata to load (readyState >= 2)
   await page.waitForFunction(
     () => {
-      const video = document.querySelector(
-        "#route-bg-light-video",
-      ) as HTMLVideoElement;
+      const video = document.querySelector("#route-bg-light-video") as HTMLVideoElement;
       return video && video.readyState >= 2;
     },
     { timeout: 15000 },
   );
 
   const videoState = await page.evaluate(() => {
-    const video = document.querySelector(
-      "#route-bg-light-video",
-    ) as HTMLVideoElement;
+    const video = document.querySelector("#route-bg-light-video") as HTMLVideoElement;
     return {
       exists: true,
       paused: video.paused,

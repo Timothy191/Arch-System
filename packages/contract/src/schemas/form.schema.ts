@@ -10,10 +10,7 @@ export const dozerRollSchema = z.object({
   machineId: z.string().uuid("Please select a dozer"),
   today: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
   shiftType: z.enum(["day", "night"]),
-  bladePasses: z
-    .number()
-    .int()
-    .min(0, "Blade passes must be a positive integer"),
+  bladePasses: z.number().int().min(0, "Blade passes must be a positive integer"),
   pushCount: z.number().int().min(0, "Push count must be a positive integer"),
   hoursOperated: z
     .number()

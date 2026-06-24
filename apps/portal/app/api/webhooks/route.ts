@@ -162,10 +162,7 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   }
 
   // Admins can see all webhooks, supervisors only their department's
-  let query = supabase
-    .from("webhook_endpoints")
-    .select("*")
-    .is("deleted_at", null);
+  let query = supabase.from("webhook_endpoints").select("*").is("deleted_at", null);
 
   if (employee.role !== "admin") {
     query = query.or(
@@ -176,10 +173,7 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   const { data: webhooks, error } = await query;
 
   if (error) {
-    return NextResponse.json(
-      { error: "Database query failed" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Database query failed" }, { status: 500 });
   }
 
   return NextResponse.json({ webhooks });
@@ -187,15 +181,11 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
 
 // GET /api/webhooks - List all webhook endpoints
 export async function GET(request: NextRequest) {
-  const response = await withRateLimit(request, () =>
-    handleGetWebhooks(request),
-  );
+  const response = await withRateLimit(request, () => handleGetWebhooks(request));
   return applyCors(request, response);
 }
 
-async function handleCreateWebhook(
-  request: NextRequest,
-): Promise<NextResponse> {
+async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -244,10 +234,7 @@ async function handleCreateWebhook(
     .single();
 
   if (error) {
-    return NextResponse.json(
-      { error: "Failed to create webhook" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create webhook" }, { status: 500 });
   }
 
   revalidatePath("/admin/tools");

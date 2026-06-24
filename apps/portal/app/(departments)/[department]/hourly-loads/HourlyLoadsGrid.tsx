@@ -50,34 +50,8 @@ interface HourlyLoadsGridProps {
 
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 
-const DAY_HOUR_LABELS = [
-  "06",
-  "07",
-  "08",
-  "09",
-  "10",
-  "11",
-  "12",
-  "13",
-  "14",
-  "15",
-  "16",
-  "17",
-];
-const NIGHT_HOUR_LABELS = [
-  "18",
-  "19",
-  "20",
-  "21",
-  "22",
-  "23",
-  "00",
-  "01",
-  "02",
-  "03",
-  "04",
-  "05",
-];
+const DAY_HOUR_LABELS = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"];
+const NIGHT_HOUR_LABELS = ["18", "19", "20", "21", "22", "23", "00", "01", "02", "03", "04", "05"];
 
 export function HourlyLoadsGrid({
   departmentId,
@@ -114,15 +88,13 @@ export function HourlyLoadsGrid({
   );
   const [saving, setSaving] = useState(false);
 
-  const hourLabels =
-    selectedShift === "day" ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
+  const hourLabels = selectedShift === "day" ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
       const load = loadsByMachine.get(machineId);
       if (!load || load.shift_type !== selectedShift) return 0;
-      const field =
-        `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
+      const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
     [loadsByMachine, selectedShift],
@@ -147,9 +119,7 @@ export function HourlyLoadsGrid({
   );
 
   // Check if any machine in this department has a bin_factor set
-  const hasBinFactors = machines.some(
-    (m) => m.bin_factor != null && m.bin_factor > 0,
-  );
+  const hasBinFactors = machines.some((m) => m.bin_factor != null && m.bin_factor > 0);
 
   // Build RevoGrid source rows (stable reference)
   const source = useMemo(() => {
@@ -158,9 +128,8 @@ export function HourlyLoadsGrid({
       const binFactor = machine.bin_factor ?? 0;
       const sites = machine.sites;
       const siteName =
-        (Array.isArray(sites)
-          ? sites[0]?.name
-          : (sites as { name?: string } | null)?.name) ?? "No Site";
+        (Array.isArray(sites) ? sites[0]?.name : (sites as { name?: string } | null)?.name) ??
+        "No Site";
       const row: Record<string, string | number> = {
         machineName: machine.name,
         siteName,
@@ -168,16 +137,12 @@ export function HourlyLoadsGrid({
         materialType: getMaterialType(machine.id),
       };
       HOURS_12.forEach((_, index) => {
-        row[`hour_${(index + 1).toString().padStart(2, "0")}`] = getHourValue(
-          machine.id,
-          index,
-        );
+        row[`hour_${(index + 1).toString().padStart(2, "0")}`] = getHourValue(machine.id, index);
       });
       row.total = totalLoads;
       if (hasBinFactors) {
         row.binFactor = binFactor > 0 ? binFactor : "-";
-        row.totalMaterial =
-          binFactor > 0 ? Math.round(totalLoads * binFactor * 10) / 10 : "-";
+        row.totalMaterial = binFactor > 0 ? Math.round(totalLoads * binFactor * 10) / 10 : "-";
       }
       return row;
     });
@@ -209,8 +174,7 @@ export function HourlyLoadsGrid({
         async () => {
           try {
             const existingLoad = hourlyLoads.find(
-              (l) =>
-                l.machine_id === machine.id && l.shift_type === selectedShift,
+              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
             );
 
             if (existingLoad) {
@@ -249,16 +213,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [
-      machines,
-      hourlyLoads,
-      selectedShift,
-      departmentId,
-      today,
-      supabase,
-      router,
-      getHourValue,
-    ],
+    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getHourValue],
   );
 
   // Handle toggling material type for a row
@@ -302,16 +257,7 @@ export function HourlyLoadsGrid({
         setSaving(false);
       }
     },
-    [
-      machines,
-      hourlyLoads,
-      selectedShift,
-      departmentId,
-      today,
-      supabase,
-      router,
-      getMaterialType,
-    ],
+    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getMaterialType],
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -319,9 +265,7 @@ export function HourlyLoadsGrid({
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
 
-      const toggleBtn = target.closest(
-        '[data-action="toggle-material"]',
-      ) as HTMLElement | null;
+      const toggleBtn = target.closest('[data-action="toggle-material"]') as HTMLElement | null;
       if (toggleBtn) {
         const rowIndex = parseInt(toggleBtn.dataset.row || "0", 10);
         handleMaterialToggle(rowIndex);
@@ -423,42 +367,37 @@ export function HourlyLoadsGrid({
         cellTemplate: (h: any, { rowIndex }: { rowIndex: number }) => {
           const currentMachine = machines[rowIndex];
           const currentSiteId = currentMachine?.site_id ?? "";
-          return h(
-            "div",
-            { class: "flex items-center justify-center h-full w-full px-1" },
-            [
-              h(
-                "select",
-                {
-                  class:
-                    "w-full bg-transparent border-0 text-xs font-semibold text-arch-text-secondary focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-[var(--overlay-subtle)] transition-all",
-                  "data-row": String(rowIndex),
-                  "data-action": "select-site",
-                },
-                [
+          return h("div", { class: "flex items-center justify-center h-full w-full px-1" }, [
+            h(
+              "select",
+              {
+                class:
+                  "w-full bg-transparent border-0 text-xs font-semibold text-arch-text-secondary focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-[var(--overlay-subtle)] transition-all",
+                "data-row": String(rowIndex),
+                "data-action": "select-site",
+              },
+              [
+                h(
+                  "option",
+                  {
+                    value: "",
+                    selected: !currentSiteId ? "selected" : undefined,
+                  },
+                  "No Site",
+                ),
+                ...sites.map((s) =>
                   h(
                     "option",
                     {
-                      value: "",
-                      selected: !currentSiteId ? "selected" : undefined,
+                      value: s.id,
+                      selected: s.id === currentSiteId ? "selected" : undefined,
                     },
-                    "No Site",
+                    s.name,
                   ),
-                  ...sites.map((s) =>
-                    h(
-                      "option",
-                      {
-                        value: s.id,
-                        selected:
-                          s.id === currentSiteId ? "selected" : undefined,
-                      },
-                      s.name,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
+                ),
+              ],
+            ),
+          ]);
         },
       },
       {
@@ -468,32 +407,25 @@ export function HourlyLoadsGrid({
         pin: "colPinStart" as const,
         sortable: false,
         readonly: true,
-        cellTemplate: (
-          h: any,
-          { rowIndex, model }: { rowIndex: number; model: any },
-        ) => {
+        cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
           const value = model?.materialType ?? "Waste";
           const isCoal = value === "Coal";
-          return h(
-            "div",
-            { class: "flex items-center justify-center h-full w-full px-1" },
-            [
-              h(
-                "button",
-                {
-                  class: `px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 cursor-pointer ${
-                    isCoal
-                      ? "bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary"
-                      : "bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary"
-                  }`,
-                  "data-row": String(rowIndex),
-                  "data-action": "toggle-material",
-                  title: "Click to toggle between Waste and Coal",
-                },
-                value,
-              ),
-            ],
-          );
+          return h("div", { class: "flex items-center justify-center h-full w-full px-1" }, [
+            h(
+              "button",
+              {
+                class: `px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 cursor-pointer ${
+                  isCoal
+                    ? "bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary"
+                    : "bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary"
+                }`,
+                "data-row": String(rowIndex),
+                "data-action": "toggle-material",
+                title: "Click to toggle between Waste and Coal",
+              },
+              value,
+            ),
+          ]);
         },
       },
       ...HOURS_12.map((_, index) => {
@@ -503,84 +435,69 @@ export function HourlyLoadsGrid({
           name: `${hourLabels[index]}:00`,
           size: hourColSize,
           sortable: false,
-          cellTemplate: (
-            h: any,
-            { rowIndex, model }: { rowIndex: number; model: any },
-          ) => {
+          cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
             const value = model?.[hourProp] ?? 0;
             const isMax = value >= 100;
             const isMin = value <= 0;
-            return h(
-              "div",
-              { class: "flex items-center justify-between px-1 gap-1 h-full" },
-              [
+            return h("div", { class: "flex items-center justify-between px-1 gap-1 h-full" }, [
+              h("span", { class: "text-sm font-medium font-mono tabular-nums px-1" }, value),
+              h("div", { class: "flex flex-col" }, [
                 h(
-                  "span",
-                  { class: "text-sm font-medium font-mono tabular-nums px-1" },
-                  value,
+                  "button",
+                  {
+                    class:
+                      "hour-btn-up p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
+                    "data-row": String(rowIndex),
+                    "data-hour": hourProp,
+                    "data-action": "up",
+                    disabled: isMax,
+                    style: isMax ? { opacity: "0.3", cursor: "not-allowed" } : undefined,
+                  },
+                  h(
+                    "svg",
+                    {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "10",
+                      height: "10",
+                      viewBox: "0 0 24 24",
+                      fill: "none",
+                      stroke: "currentColor",
+                      "stroke-width": "3",
+                      "stroke-linecap": "round",
+                      "stroke-linejoin": "round",
+                    },
+                    h("path", { d: "m18 15-6-6-6 6" }),
+                  ),
                 ),
-                h("div", { class: "flex flex-col" }, [
+                h(
+                  "button",
+                  {
+                    class:
+                      "hour-btn-down p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
+                    "data-row": String(rowIndex),
+                    "data-hour": hourProp,
+                    "data-action": "down",
+                    disabled: isMin,
+                    style: isMin ? { opacity: "0.3", cursor: "not-allowed" } : undefined,
+                  },
                   h(
-                    "button",
+                    "svg",
                     {
-                      class:
-                        "hour-btn-up p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
-                      "data-row": String(rowIndex),
-                      "data-hour": hourProp,
-                      "data-action": "up",
-                      disabled: isMax,
-                      style: isMax
-                        ? { opacity: "0.3", cursor: "not-allowed" }
-                        : undefined,
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "10",
+                      height: "10",
+                      viewBox: "0 0 24 24",
+                      fill: "none",
+                      stroke: "currentColor",
+                      "stroke-width": "3",
+                      "stroke-linecap": "round",
+                      "stroke-linejoin": "round",
                     },
-                    h(
-                      "svg",
-                      {
-                        xmlns: "http://www.w3.org/2000/svg",
-                        width: "10",
-                        height: "10",
-                        viewBox: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        "stroke-width": "3",
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                      },
-                      h("path", { d: "m18 15-6-6-6 6" }),
-                    ),
+                    h("path", { d: "m6 9 6 6 6-6" }),
                   ),
-                  h(
-                    "button",
-                    {
-                      class:
-                        "hour-btn-down p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
-                      "data-row": String(rowIndex),
-                      "data-hour": hourProp,
-                      "data-action": "down",
-                      disabled: isMin,
-                      style: isMin
-                        ? { opacity: "0.3", cursor: "not-allowed" }
-                        : undefined,
-                    },
-                    h(
-                      "svg",
-                      {
-                        xmlns: "http://www.w3.org/2000/svg",
-                        width: "10",
-                        height: "10",
-                        viewBox: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        "stroke-width": "3",
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                      },
-                      h("path", { d: "m6 9 6 6 6-6" }),
-                    ),
-                  ),
-                ]),
-              ],
-            );
+                ),
+              ]),
+            ]);
           },
         };
       }),
@@ -593,8 +510,7 @@ export function HourlyLoadsGrid({
           return h(
             "div",
             {
-              class:
-                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
             model?.total ?? 0,
           );
@@ -613,8 +529,7 @@ export function HourlyLoadsGrid({
           return h(
             "div",
             {
-              class:
-                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
             model?.binFactor ?? "-",
           );
@@ -629,8 +544,7 @@ export function HourlyLoadsGrid({
           return h(
             "div",
             {
-              class:
-                "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
             model?.totalMaterial ?? "-",
           );
@@ -648,12 +562,7 @@ export function HourlyLoadsGrid({
       const rowIndex: number = detail?.rowIndex ?? detail?.row?.index;
       const val = detail?.val;
 
-      if (
-        typeof rowIndex !== "number" ||
-        !prop?.startsWith("hour_") ||
-        val === undefined
-      )
-        return;
+      if (typeof rowIndex !== "number" || !prop?.startsWith("hour_") || val === undefined) return;
 
       const value = parseInt(String(val), 10) || 0;
       if (value < 0 || value > 100) {
@@ -672,8 +581,7 @@ export function HourlyLoadsGrid({
         async () => {
           try {
             const existingLoad = hourlyLoads.find(
-              (l) =>
-                l.machine_id === machine.id && l.shift_type === selectedShift,
+              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
             );
 
             if (existingLoad) {
@@ -711,24 +619,15 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [
-      machines,
-      hourlyLoads,
-      selectedShift,
-      departmentId,
-      today,
-      supabase,
-      router,
-    ],
+    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router],
   );
 
   const handleExport = async () => {
     const exportData = machines.map((machine) => {
       const sites = machine.sites;
       const siteName =
-        (Array.isArray(sites)
-          ? sites[0]?.name
-          : (sites as { name?: string } | null)?.name) ?? "No Site";
+        (Array.isArray(sites) ? sites[0]?.name : (sites as { name?: string } | null)?.name) ??
+        "No Site";
       const data: any = {
         Machine: machine.name,
         Site: siteName,
@@ -743,11 +642,7 @@ export function HourlyLoadsGrid({
       return data;
     });
 
-    await exportToExcel(
-      exportData,
-      `hourly-loads-${selectedShift}-${today}`,
-      "Hourly Loads",
-    );
+    await exportToExcel(exportData, `hourly-loads-${selectedShift}-${today}`, "Hourly Loads");
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -789,11 +684,9 @@ export function HourlyLoadsGrid({
         }
 
         if (hasData) {
-          const { error } = await supabase
-            .from("hourly_loads")
-            .upsert(updateData, {
-              onConflict: "machine_id,load_date,shift_type",
-            });
+          const { error } = await supabase.from("hourly_loads").upsert(updateData, {
+            onConflict: "machine_id,load_date,shift_type",
+          });
 
           if (error)
             logError(new Error(error.message), {
@@ -809,9 +702,7 @@ export function HourlyLoadsGrid({
       logError(err instanceof Error ? err : new Error(String(err)), {
         context: "hourly_loads_import_failed",
       });
-      alert(
-        "Failed to parse Excel file. Please ensure it follows the exported template.",
-      );
+      alert("Failed to parse Excel file. Please ensure it follows the exported template.");
     } finally {
       setSaving(false);
       if (e.target) e.target.value = "";
@@ -878,12 +769,7 @@ export function HourlyLoadsGrid({
             <Upload className="w-4 h-4 mr-2" />
             Import
           </SecondaryButton>
-          <SecondaryButton
-            size="sm"
-            variant="rounded-lg"
-            onClick={handleExport}
-            disabled={saving}
-          >
+          <SecondaryButton size="sm" variant="rounded-lg" onClick={handleExport} disabled={saving}>
             <Download className="w-4 h-4 mr-2" />
             Export
           </SecondaryButton>

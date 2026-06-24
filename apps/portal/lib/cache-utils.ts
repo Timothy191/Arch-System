@@ -27,10 +27,7 @@ interface WithCacheOptions {
  */
 const activePortalFetches = new Map<string, Promise<any>>();
 
-export async function withCache<T>(
-  fn: () => Promise<T>,
-  options: WithCacheOptions,
-): Promise<T> {
+export async function withCache<T>(fn: () => Promise<T>, options: WithCacheOptions): Promise<T> {
   const { category, keyParts = [], tags, fallback = true } = options;
 
   const key = buildCacheKey(category, ...keyParts);

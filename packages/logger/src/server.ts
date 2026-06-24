@@ -49,9 +49,6 @@ export const logger = createLogger("arch-portal");
 /**
  * Create a child logger with additional bound context.
  */
-export function createChildLogger(
-  bindings: Record<string, unknown>,
-  name?: string,
-) {
+export function createChildLogger(bindings: Record<string, unknown>, name?: string) {
   return (name ? createLogger(name) : logger).child(bindings);
 }

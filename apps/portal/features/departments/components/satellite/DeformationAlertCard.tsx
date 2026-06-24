@@ -70,9 +70,7 @@ function DeformationAlertCard({ reading, onClick }: DeformationAlertCardProps) {
             {AREA_ICONS[reading.area]} {reading.location}
           </span>
         </div>
-        <span
-          className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}
-        >
+        <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
           {cfg.label}
         </span>
       </div>
@@ -84,14 +82,10 @@ function DeformationAlertCard({ reading, onClick }: DeformationAlertCardProps) {
             {reading.shiftMm.toFixed(1)} mm
             <span className="ml-1 text-base">{TREND_ICONS[reading.trend]}</span>
           </p>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            {reading.sensor}
-          </p>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">{reading.sensor}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-[var(--text-secondary)] capitalize">
-            {reading.trend}
-          </p>
+          <p className="text-xs text-[var(--text-secondary)] capitalize">{reading.trend}</p>
           <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             {new Date(reading.lastUpdated).toLocaleDateString("en-ZA", {
               day: "2-digit",
@@ -109,10 +103,7 @@ interface DeformationSummaryProps {
   onReadingClick?: (_reading: DeformationReading) => void;
 }
 
-export function DeformationSummary({
-  readings,
-  onReadingClick,
-}: DeformationSummaryProps) {
+export function DeformationSummary({ readings, onReadingClick }: DeformationSummaryProps) {
   const criticalCount = readings.filter((r) => r.level === "critical").length;
   const moderateCount = readings.filter((r) => r.level === "moderate").length;
   const sortedReadings = [...readings].sort((a, b) => {
@@ -140,11 +131,7 @@ export function DeformationSummary({
       )}
       <div className="space-y-2">
         {sortedReadings.map((reading) => (
-          <DeformationAlertCard
-            key={reading.id}
-            reading={reading}
-            onClick={onReadingClick}
-          />
+          <DeformationAlertCard key={reading.id} reading={reading} onClick={onReadingClick} />
         ))}
       </div>
     </div>

@@ -44,10 +44,7 @@ export default function VisitorsLoading() {
               <div className="border-b border-[var(--border-default)]">
                 <div className="grid grid-cols-5 p-4 gap-4">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="h-4 bg-[var(--bg-tertiary)]/40 rounded animate-pulse"
-                    />
+                    <div key={i} className="h-4 bg-[var(--bg-tertiary)]/40 rounded animate-pulse" />
                   ))}
                 </div>
               </div>

@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "path": "./apps/portal/.next/static/chunks/main-*.js",
+      "maxSize": "200 kB"
+    },
+    {
+      "path": "./apps/portal/.next/static/chunks/pages/_app-*.js",
+      "maxSize": "150 kB"
+    },
+    {
+      "path": "./apps/portal/.next/static/chunks/framework-*.js",
+      "maxSize": "100 kB"
+    },
+    {
+      "path": "./apps/portal/.next/static/chunks/react-*.js",
+      "maxSize": "80 kB"
+    },
+    {
+      "path": "./apps/portal/public/**/*.{png,jpg,jpeg,svg,webp}",
+      "maxSize": "1 MB"
+    }
+  ]
+}

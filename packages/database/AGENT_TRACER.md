@@ -73,3 +73,112 @@ Implement controlled data sharing from Engineering Department to Control Room De
 - The view is read-only and enforces the field filtering at the database level.
 - Engineering users retain full access to their own breakdowns via the base table.
 - The trigger runs on INSERT and UPDATE to automatically manage sharing based on breakdown status and date.
+
+## [2026-06-24T07:59:00Z] Phase 1: Architecture and Data Layer
+
+**Purpose:** Added missing employee fields for personnel tracking.
+**Changes:**
+
+- Created migration `080_employee_profile_fields.sql` adding `first_name`, `last_name`, `national_id`, `job_title`, `areas`, `medical_expiry_date`, `induction_expiry_date`, `qr_code_data`, and `photo_url` to the `employees` table.
+- Updated `enforce_employee_update_constraints` trigger to protect these new fields from non-admin modification.
+  **Next Agent Notes:** The new fields are synced to `EmployeesRow` in `@repo/supabase`. Admin UIs and profile views need to be updated to capture and show these new fields.
+
+## [2026-06-24T08:30:00Z] Performance Monitoring - Slow Query Logging
+
+**Purpose:** Add database slow query logging and analysis functions for production hardening.
+
+**Changes:**
+
+- Created migration `011_performance_monitoring.sql` with:
+  - PostgreSQL slow query configuration (log_min_duration_statement = 100ms)
+  - Checkpoint, temporary file, and connection logging enabled
+  - `get_slow_queries()` function for analyzing top N slowest queries via pg_stat_statements
+- Agent note: Requires `pg_stat_statements` extension enabled on Supabase
+
+**What the next agent should know:**
+
+- Slow query logs appear in Supabase dashboard logs
+- Run `SELECT * FROM get_slow_queries(20)` to see top 20 slowest queries
+- Adjust `log_min_duration_statement` for different thresholds
+- Created migration `012_secrets_rotation_log.sql` adding `secrets_rotation_log` table for audit tracking
+
+## [2026-06-24T08:45:00Z] Secrets Rotation Infrastructure
+
+**Purpose:** Add automated secrets rotation mechanism and audit trail.
+
+**Changes:**
+
+- Created `tools/rotate-secrets.mjs` script for rotating:
+  - Supabase service keys
+  - Sentry tokens
+  - Redis passwords
+  - Novu/Inngest API keys
+- Created database migration `012_secrets_rotation_log.sql` with audit table
+
+**What the next agent should know:**
+
+- Run `node tools/rotate-secrets.mjs --dry-run` to preview
+- Run `node tools/rotate-secrets.mjs` to execute rotation
+- All rotations are logged to `secrets_rotation_log` table
+
+## [2026-06-24T09:00:00Z] Cost & SLO Monitoring
+
+**Purpose:** Add cost monitoring and SLO compliance tracking.
+
+**Changes:**
+
+- Created `config/cost-monitoring.json` with budget thresholds per service
+- Created `tools/cost-monitor.mjs` for cost tracking and alerting
+- Created `config/slo-config.json` with SLO definitions
+- Created database migration `013_slo_monitoring.sql` with `slo_metrics` table and views
+
+**What the next agent should know:**
+
+- Run `node tools/cost-monitor.mjs --notify` to check costs and send alerts
+- SLO metrics are recorded via `record_slo_measurement()` function
+- Query `current_slo_status` view for real-time SLO compliance
+
+## [2026-06-24T09:15:00Z] Anomaly Detection & Feature Flags
+
+**Purpose:** Add anomaly detection and A/B testing framework.
+
+**Changes:**
+
+- Created `config/anomaly-detection.json` with metric thresholds and algorithms
+- Created `tools/anomaly-detector.mjs` for detecting anomalies via z-score/threshold/percentile
+- Created database migration `014_feature_flags.sql` with feature flag system
+- Created `apps/portal/lib/feature-flags.ts` client for evaluating flags
+
+**What the next agent should know:**
+
+- Run `node tools/anomaly-detector.mjs --notify` to detect and alert on anomalies
+- Feature flags: Use `getFeatureFlag('flag-key', userId)` to evaluate
+- Log conversions with `logConversion()` for A/B test analytics
+
+## [2026-06-24T09:45:00Z] Runbooks & Incident Response
+
+**Purpose:** Document operational procedures and incident response.
+
+**Changes:**
+
+- Created `docs/ops-runbook.md` with quick reference, common issues, health checks
+- Created `docs/incident-playbook.md` with severity levels and 5 playbooks
+
+**What the next agent should know:**
+
+- Runbook: First stop for operational issues
+- Playbooks: Step-by-step for specific incident types
+- Always conduct post-incident review after P1/P2 incidents
+
+## [2026-06-24T16:20:00Z] Resolve ESLint Warnings in Tests
+
+**Purpose:** Fix eslint `no-unused-vars` and `no-console` warnings in the migration rollback test script to pass the pre-commit gate.
+
+**Changes:**
+
+- Removed unused `CREATE_TABLE_IF_RE` and `CREATE_INDEX_IF_RE` regexes from `tests/migration-rollback-safety.mjs`.
+- Replaced `console.log` statements with `console.info` in `tests/migration-rollback-safety.mjs`.
+
+**What the next agent should know:**
+
+- `console.info` is permitted under the shared `@repo/eslint-config/library.js` eslint rule configuration.

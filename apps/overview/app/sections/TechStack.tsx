@@ -14,9 +14,7 @@ export default function TechStack() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#fafafa]">
-          Technology Stack
-        </h2>
+        <h2 className="text-2xl font-semibold text-[#fafafa]">Technology Stack</h2>
         <p className="text-[#b4b4b4] mt-1">
           Complete overview of technologies used in Arch Systems
         </p>
@@ -24,10 +22,7 @@ export default function TechStack() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {TECH_STACK.map((category) => (
-          <Card
-            key={category.category}
-            className="bg-[#171717] border-[#363636] overflow-hidden"
-          >
+          <Card key={category.category} className="bg-[#171717] border-[#363636] overflow-hidden">
             {/* Category header with color */}
             <div className="h-1" style={{ backgroundColor: category.color }} />
 
@@ -40,10 +35,7 @@ export default function TechStack() {
                   {categoryIcons[category.category] || "📦"}
                 </div>
                 <div>
-                  <CardTitle
-                    className="text-lg"
-                    style={{ color: category.color }}
-                  >
+                  <CardTitle className="text-lg" style={{ color: category.color }}>
                     {category.category}
                   </CardTitle>
                   <div className="text-xs text-[#898989] mt-0.5">
@@ -62,9 +54,7 @@ export default function TechStack() {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-[#fafafa]">
-                          {item.name}
-                        </span>
+                        <span className="font-medium text-[#fafafa]">{item.name}</span>
                         {item.version && (
                           <Badge
                             variant="outline"
@@ -74,9 +64,7 @@ export default function TechStack() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-[#898989] mt-1">
-                        {item.description}
-                      </p>
+                      <p className="text-xs text-[#898989] mt-1">{item.description}</p>
                     </div>
                   </div>
                 ))}
@@ -88,16 +76,12 @@ export default function TechStack() {
 
       {/* Core Architecture Diagram */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-[#fafafa] mb-4">
-          Architecture Overview
-        </h3>
+        <h3 className="text-lg font-medium text-[#fafafa] mb-4">Architecture Overview</h3>
         <div className="glass-card p-6 rounded-xl">
           <div className="flex flex-wrap items-center justify-center gap-4">
             {/* Frontend Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">
-                Frontend
-              </div>
+              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">Frontend</div>
               <div className="flex gap-2">
                 <div className="px-4 py-3 bg-[#3ecf8e]/10 border border-[#3ecf8e]/30 rounded-lg text-[#3ecf8e] text-sm font-medium">
                   Next.js 14
@@ -115,9 +99,7 @@ export default function TechStack() {
 
             {/* API Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">
-                API
-              </div>
+              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">API</div>
               <div className="px-4 py-3 bg-[#60a5fa]/10 border border-[#60a5fa]/30 rounded-lg text-[#60a5fa] text-sm font-medium">
                 Supabase Client
               </div>
@@ -127,9 +109,7 @@ export default function TechStack() {
 
             {/* Backend Layer */}
             <div className="flex flex-col items-center">
-              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">
-                Backend
-              </div>
+              <div className="text-xs text-[#898989] mb-2 uppercase tracking-wider">Backend</div>
               <div className="flex gap-2">
                 <div className="px-4 py-3 bg-[#60a5fa]/10 border border-[#60a5fa]/30 rounded-lg text-[#60a5fa] text-sm font-medium">
                   PostgreSQL
@@ -161,8 +141,8 @@ export default function TechStack() {
           {/* Data Flow */}
           <div className="mt-6 pt-6 border-t border-[#363636]">
             <div className="text-xs text-[#898989] text-center">
-              Data Flow: User → Middleware → Server Component → Supabase →
-              PostgreSQL (RLS) → Response
+              Data Flow: User → Middleware → Server Component → Supabase → PostgreSQL (RLS) →
+              Response
             </div>
           </div>
         </div>
@@ -170,24 +150,19 @@ export default function TechStack() {
 
       {/* Monorepo Structure */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-[#fafafa] mb-4">
-          Monorepo Structure
-        </h3>
+        <h3 className="text-lg font-medium text-[#fafafa] mb-4">Monorepo Structure</h3>
         <div className="glass-card p-6 rounded-xl font-mono text-sm">
           <div className="text-[#b4b4b4]">
             <span className="text-[#3ecf8e]">Arch-Mk2/</span>
             <br />
             &nbsp;&nbsp;├── <span className="text-[#60a5fa]">apps/</span>
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└──{" "}
-            <span className="text-[#3ecf8e]">portal/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
-            Next.js 14 application
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-[#3ecf8e]">portal/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 14 application
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{" "}
             <span className="text-[#898989]">app/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App
-            Router routes
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App Router routes
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{" "}
             <span className="text-[#898989]">features/</span>
@@ -195,27 +170,22 @@ export default function TechStack() {
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──{" "}
             <span className="text-[#898989]">lib/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App
-            constants
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App constants
             <br />
             &nbsp;&nbsp;├── <span className="text-[#60a5fa]">packages/</span>
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──{" "}
-            <span className="text-[#3ecf8e]">ui/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
-            Shared components
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-[#3ecf8e]">ui/</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Shared
+            components
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├──{" "}
-            <span className="text-[#3ecf8e]">supabase/</span>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span className="text-[#3ecf8e]">supabase/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SSR clients (server/client split)
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└──{" "}
-            <span className="text-[#3ecf8e]">database/</span>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-[#3ecf8e]">database/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Migrations & types
             <br />
             &nbsp;&nbsp;└── <span className="text-[#60a5fa]">overview/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
-            This visualizer
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# This visualizer
           </div>
         </div>
       </div>

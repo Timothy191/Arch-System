@@ -20,12 +20,8 @@ export function ProductionTrend({ data }: ProductionTrendProps) {
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <Title className="text-arch-text-primary">
-            Site Production Trend
-          </Title>
-          <Text className="text-arch-text-tertiary">
-            Real-time output across core departments
-          </Text>
+          <Title className="text-arch-text-primary">Site Production Trend</Title>
+          <Text className="text-arch-text-tertiary">Real-time output across core departments</Text>
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">

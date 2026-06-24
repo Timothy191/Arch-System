@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { SplitWindowLayout } from "./SplitWindowLayout";
 import { useSplitWindow } from "@/hooks/useSplitWindow";
 
@@ -56,12 +50,8 @@ describe("SplitWindowLayout", () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "github" } }),
-      );
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }),
-      );
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "github" } }));
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }));
     });
 
     await waitFor(() => {
@@ -78,12 +68,8 @@ describe("SplitWindowLayout", () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }),
-      );
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }),
-      );
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }));
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }));
     });
 
     await waitFor(() => {
@@ -100,14 +86,10 @@ describe("SplitWindowLayout", () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }),
-      );
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }));
     });
 
-    const closeButton = await waitFor(() =>
-      screen.getByTestId("close-tab-whatsapp"),
-    );
+    const closeButton = await waitFor(() => screen.getByTestId("close-tab-whatsapp"));
 
     await act(async () => {
       fireEvent.click(closeButton);
@@ -126,17 +108,11 @@ describe("SplitWindowLayout", () => {
     );
 
     await act(async () => {
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "github" } }),
-      );
-      window.dispatchEvent(
-        new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }),
-      );
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "github" } }));
+      window.dispatchEvent(new CustomEvent("open-split-view", { detail: { service: "whatsapp" } }));
     });
 
-    const closeAllButton = await waitFor(() =>
-      screen.getByLabelText("Close all tabs"),
-    );
+    const closeAllButton = await waitFor(() => screen.getByLabelText("Close all tabs"));
 
     await act(async () => {
       fireEvent.click(closeAllButton);

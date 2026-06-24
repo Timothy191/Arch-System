@@ -1,0 +1,21 @@
+name: Staging DAST Scan
+
+on:
+  push:
+    branches: [staging]
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "https://staging.arch-system.internal"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"

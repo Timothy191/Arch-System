@@ -5,9 +5,7 @@
 import { POST, clearTelemetryCache } from "./route";
 
 jest.mock("@repo/redis", () => ({
-  getRedisClient: jest
-    .fn()
-    .mockRejectedValue(new Error("Redis disabled in tests")),
+  getRedisClient: jest.fn().mockRejectedValue(new Error("Redis disabled in tests")),
 }));
 
 describe("POST /api/telemetry/push", () => {
@@ -87,9 +85,7 @@ describe("POST /api/telemetry/push", () => {
   });
 
   it("gracefully returns warning when FUXA is unreachable", async () => {
-    const mockFetch = jest
-      .fn()
-      .mockRejectedValue(new Error("Connection refused"));
+    const mockFetch = jest.fn().mockRejectedValue(new Error("Connection refused"));
     global.fetch = mockFetch;
 
     const req = createRequest({ name: "machine_1_engine_rpm", value: 1200 });

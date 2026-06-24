@@ -134,8 +134,7 @@ export function WeatherWidget({
                     Wind
                   </p>
                   <p className="font-semibold text-[var(--text-heading)] truncate">
-                    💨 {weather.windSpeed} km/h{" "}
-                    {getWindDirection(weather.windDirection)}
+                    💨 {weather.windSpeed} km/h {getWindDirection(weather.windDirection)}
                   </p>
                 </div>
                 <div className="bg-black/[0.02] p-2 rounded-lg border border-black/[0.04] min-w-0">
@@ -179,9 +178,7 @@ export function WeatherWidget({
               <p className="text-2xl font-semibold text-arch-text-primary">
                 {weather.temperature}°C
               </p>
-              <p className="text-sm text-arch-text-tertiary">
-                {weather.description}
-              </p>
+              <p className="text-sm text-arch-text-tertiary">{weather.description}</p>
             </div>
           </div>
           <div className="text-right text-sm text-arch-text-tertiary">
@@ -211,12 +208,8 @@ export function WeatherWidget({
     <GlassCard className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-medium text-arch-text-primary">
-            Weather Conditions
-          </h3>
-          <p className="text-sm text-arch-text-tertiary">
-            {weather.location.name}
-          </p>
+          <h3 className="text-lg font-medium text-arch-text-primary">Weather Conditions</h3>
+          <p className="text-sm text-arch-text-tertiary">{weather.location.name}</p>
         </div>
         <span className="text-xs text-arch-text-tertiary">
           Updated{" "}
@@ -232,26 +225,14 @@ export function WeatherWidget({
       <div className="flex items-center gap-4 mb-6">
         <span className="text-5xl">{weather.icon}</span>
         <div>
-          <p className="text-3xl font-semibold text-arch-text-primary">
-            {weather.temperature}°C
-          </p>
-          <p className="text-arch-text-tertiary">
-            Feels like {weather.feelsLike}°C
-          </p>
-          <p className="text-sm text-arch-text-secondary">
-            {weather.description}
-          </p>
+          <p className="text-3xl font-semibold text-arch-text-primary">{weather.temperature}°C</p>
+          <p className="text-arch-text-tertiary">Feels like {weather.feelsLike}°C</p>
+          <p className="text-sm text-arch-text-secondary">{weather.description}</p>
         </div>
         <div className="ml-auto text-right text-sm space-y-1">
-          <p className="text-arch-text-tertiary">
-            💧 Humidity: {weather.humidity}%
-          </p>
-          <p className="text-arch-text-tertiary">
-            💨 Wind: {weather.windSpeed} km/h
-          </p>
-          <p className="text-arch-text-tertiary">
-            🧭 Direction: {weather.windDirection}°
-          </p>
+          <p className="text-arch-text-tertiary">💧 Humidity: {weather.humidity}%</p>
+          <p className="text-arch-text-tertiary">💨 Wind: {weather.windSpeed} km/h</p>
+          <p className="text-arch-text-tertiary">🧭 Direction: {weather.windDirection}°</p>
         </div>
       </div>
 
@@ -282,15 +263,10 @@ export function WeatherWidget({
 
       {/* 5-day forecast */}
       <div>
-        <p className="text-sm font-medium text-arch-text-secondary mb-3">
-          5-Day Forecast
-        </p>
+        <p className="text-sm font-medium text-arch-text-secondary mb-3">5-Day Forecast</p>
         <div className="grid grid-cols-5 gap-2">
           {weather.daily?.map((day, i) => (
-            <div
-              key={i}
-              className="text-center p-2 rounded-lg bg-arch-surface-primary/50"
-            >
+            <div key={i} className="text-center p-2 rounded-lg bg-arch-surface-primary/50">
               <p className="text-xs text-arch-text-tertiary mb-1">
                 {new Date(day.date).toLocaleDateString([], {
                   weekday: "short",

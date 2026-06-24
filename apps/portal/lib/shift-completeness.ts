@@ -39,8 +39,7 @@ function machineTypeLC(t: string) {
 
 function requiredFormFor(machineType: string): RequiredForm {
   const t = machineTypeLC(machineType);
-  if (EXCAVATOR_KEYWORDS.some((k) => t.includes(k)))
-    return "excavator-activity";
+  if (EXCAVATOR_KEYWORDS.some((k) => t.includes(k))) return "excavator-activity";
   if (DOZER_KEYWORDS.some((k) => t.includes(k))) return "roll-over";
   if (DUMPER_KEYWORDS.some((k) => t.includes(k))) return "hourly-loads";
   return "machine-operations";
@@ -236,29 +235,20 @@ export async function getShiftCompleteness(
       const excavatorIds = new Set(
         (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id),
       );
-      const dozerIds = new Set(
-        (dozerRolls ?? []).map((r: { machine_id: string }) => r.machine_id),
-      );
+      const dozerIds = new Set((dozerRolls ?? []).map((r: { machine_id: string }) => r.machine_id));
       const loadIds = new Set(
         (hourlyLoads ?? [])
           .filter(
-            (r: { machine_id: string; total_loads: number | null }) =>
-              (r.total_loads ?? 0) > 0,
+            (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0,
           )
-          .map(
-            (r: { machine_id: string; total_loads: number | null }) =>
-              r.machine_id,
-          ),
+          .map((r: { machine_id: string; total_loads: number | null }) => r.machine_id),
       );
 
       const machineOpHoursMap = new Map<string, number>();
       for (const op of machineOps ?? []) {
         if (op.machine_id && op.hours_worked !== null) {
           const current = machineOpHoursMap.get(op.machine_id) || 0;
-          machineOpHoursMap.set(
-            op.machine_id,
-            current + Number(op.hours_worked),
-          );
+          machineOpHoursMap.set(op.machine_id, current + Number(op.hours_worked));
         }
       }
 
@@ -266,20 +256,12 @@ export async function getShiftCompleteness(
       for (const roll of dozerRolls ?? []) {
         if (roll.machine_id && roll.hours_operated !== null) {
           const current = dozerHoursMap.get(roll.machine_id) || 0;
-          dozerHoursMap.set(
-            roll.machine_id,
-            current + Number(roll.hours_operated),
-          );
+          dozerHoursMap.set(roll.machine_id, current + Number(roll.hours_operated));
         }
       }
 
       const statuses: MachineCoverageStatus[] = (machines ?? []).map(
-        (m: {
-          id: string;
-          name: string;
-          machine_type: string;
-          report_exempt: boolean | null;
-        }) => {
+        (m: { id: string; name: string; machine_type: string; report_exempt: boolean | null }) => {
           const requiredForm = requiredFormFor(m.machine_type);
           const meta = FORM_META[requiredForm];
 
@@ -311,9 +293,7 @@ export async function getShiftCompleteness(
             machineType: m.machine_type,
             requiredForm,
             formLabel: meta.label,
-            formPath: departmentSlug
-              ? `/${departmentSlug}/${meta.path}`
-              : `/${meta.path}`,
+            formPath: departmentSlug ? `/${departmentSlug}/${meta.path}` : `/${meta.path}`,
             hasEntry,
             exempt: m.report_exempt ?? false,
             hoursWorked,

@@ -78,10 +78,7 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     const body = await reqClone.json().catch(() => ({}));
     const { idempotencyKey, actionType, payload, departmentId } = body;
     if (!idempotencyKey || !actionType || !payload || !departmentId) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const parsed = await validateBody(req, syncPlaybackSchema);
@@ -113,10 +110,7 @@ export async function POST(req: NextRequest) {
   return withBodyLimit(
     req,
     async () => {
-      return applyCors(
-        req,
-        await withRateLimit(req, () => handlePlaybackRequest(req)),
-      );
+      return applyCors(req, await withRateLimit(req, () => handlePlaybackRequest(req)));
     },
     { maxSize: 1048576 },
   );

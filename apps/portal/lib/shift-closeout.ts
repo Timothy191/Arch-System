@@ -12,16 +12,8 @@ import {
 } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 import { getShiftCompleteness } from "./shift-completeness";
-import {
-  withAsyncSpan,
-  addEvent,
-  setAttributes,
-} from "@/lib/observability/tracing";
-import {
-  RateLimiter,
-  RedisStore,
-  FixedWindowStrategy,
-} from "@repo/rate-limiter";
+import { withAsyncSpan, addEvent, setAttributes } from "@/lib/observability/tracing";
+import { RateLimiter, RedisStore, FixedWindowStrategy } from "@repo/rate-limiter";
 import { getRedisClient } from "@repo/redis";
 import {
   validateShiftDataIntegrity,
@@ -188,15 +180,8 @@ async function validateShiftData(
       for (const status of completeness.statuses) {
         if (status.hoursWorked !== undefined && status.hoursWorked !== null) {
           // Validate hours worked
-          const hourErrors = validateMachineHours(
-            Number(status.hoursWorked),
-            shiftType,
-          );
-          errors.push(
-            ...hourErrors.map(
-              (e) => `Machine '${status.machineName}': ${e.message}`,
-            ),
-          );
+          const hourErrors = validateMachineHours(Number(status.hoursWorked), shiftType);
+          errors.push(...hourErrors.map((e) => `Machine '${status.machineName}': ${e.message}`));
         }
       }
 
@@ -220,25 +205,17 @@ async function validateShiftData(
       for (const machine of machines || []) {
         if (machine.bin_factor) {
           const binFactorErrors = validateBinFactor(machine.bin_factor);
-          errors.push(
-            ...binFactorErrors.map(
-              (e) => `Machine '${machine.name}': ${e.message}`,
-            ),
-          );
+          errors.push(...binFactorErrors.map((e) => `Machine '${machine.name}': ${e.message}`));
         }
       }
 
       // AGENT-TRACE: Validate load consistency for hourly loads
-      const loadMap = new Map(
-        (hourlyLoads || []).map((load) => [load.machine_id, load]),
-      );
+      const loadMap = new Map((hourlyLoads || []).map((load) => [load.machine_id, load]));
 
       for (const [machineId, loads] of loadMap.entries()) {
         const machine = machineMap.get(machineId);
         if (machine && loads.total_loads && completeness.statuses) {
-          const status = completeness.statuses.find(
-            (s) => s.machineId === machineId,
-          );
+          const status = completeness.statuses.find((s) => s.machineId === machineId);
           if (status && status.hoursWorked) {
             const consistencyErrors = validateShiftDataIntegrity(
               machineId,
@@ -247,11 +224,7 @@ async function validateShiftData(
               machine.bin_factor,
               shiftType,
             );
-            errors.push(
-              ...consistencyErrors.map(
-                (e) => `Machine '${machine.name}': ${e.message}`,
-              ),
-            );
+            errors.push(...consistencyErrors.map((e) => `Machine '${machine.name}': ${e.message}`));
           }
         }
       }
@@ -322,59 +295,52 @@ export async function setPin(employeeCode: string, pin: string) {
 
 export async function verifyPin(employeeCode: string, pin: string) {
   // AGENT-TRACE: OpenTelemetry instrumentation for PIN verification
-  return withAsyncSpan(
-    "pin_verification",
-    { employee_code: employeeCode },
-    async (_span) => {
-      addEvent("pin_verify");
+  return withAsyncSpan("pin_verification", { employee_code: employeeCode }, async (_span) => {
+    addEvent("pin_verify");
 
-      // AGENT-TRACE: Check for PIN attempt lockout
-      const isLockedOut = await checkPinAttemptLockout(employeeCode);
-      setAttributes({ locked_out: isLockedOut });
-      if (isLockedOut) {
-        return {
-          valid: false,
-          employee: null,
-          lockedOut: true,
-          message:
-            "Too many failed PIN attempts. Please try again in 15 minutes.",
-        };
-      }
-
-      const supabase = await createServerSupabaseClient();
-
-      const { data: employee, error } = await supabase
-        .from("employees")
-        .select("id, full_name, pin_hash")
-        .eq("employee_code", employeeCode)
-        .single();
-
-      if (error || !employee || !employee.pin_hash) {
-        setAttributes({ pin_found: false });
-        return { valid: false, employee: null };
-      }
-
-      const valid = await bcrypt.compare(pin, employee.pin_hash);
-
-      if (!valid) {
-        // AGENT-TRACE: Record failed PIN attempt
-        await recordFailedPinAttempt(employeeCode);
-      }
-
-      setAttributes({
-        pin_found: true,
-        pin_valid: valid,
-        employee_id: employee.id,
-      });
-
+    // AGENT-TRACE: Check for PIN attempt lockout
+    const isLockedOut = await checkPinAttemptLockout(employeeCode);
+    setAttributes({ locked_out: isLockedOut });
+    if (isLockedOut) {
       return {
-        valid,
-        employee: valid
-          ? { id: employee.id, full_name: employee.full_name }
-          : null,
+        valid: false,
+        employee: null,
+        lockedOut: true,
+        message: "Too many failed PIN attempts. Please try again in 15 minutes.",
       };
-    },
-  );
+    }
+
+    const supabase = await createServerSupabaseClient();
+
+    const { data: employee, error } = await supabase
+      .from("employees")
+      .select("id, full_name, pin_hash")
+      .eq("employee_code", employeeCode)
+      .single();
+
+    if (error || !employee || !employee.pin_hash) {
+      setAttributes({ pin_found: false });
+      return { valid: false, employee: null };
+    }
+
+    const valid = await bcrypt.compare(pin, employee.pin_hash);
+
+    if (!valid) {
+      // AGENT-TRACE: Record failed PIN attempt
+      await recordFailedPinAttempt(employeeCode);
+    }
+
+    setAttributes({
+      pin_found: true,
+      pin_valid: valid,
+      employee_id: employee.id,
+    });
+
+    return {
+      valid,
+      employee: valid ? { id: employee.id, full_name: employee.full_name } : null,
+    };
+  });
 }
 
 export async function closeShift(
@@ -427,12 +393,7 @@ export async function closeShift(
         }
       }
 
-      const errors = await validateShiftData(
-        supabase,
-        departmentId,
-        date,
-        shiftType,
-      );
+      const errors = await validateShiftData(supabase, departmentId, date, shiftType);
       if (errors.length > 0) {
         setAttributes({ validation_errors: errors.length });
         return { success: false, errors };

@@ -5,10 +5,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { getCurrentShift } from "@repo/utils";
-import {
-  ExcavatorDumperTable,
-  DumperAssignmentRow,
-} from "./ExcavatorDumperTable";
+import { ExcavatorDumperTable, DumperAssignmentRow } from "./ExcavatorDumperTable";
 import { toast } from "sonner";
 
 interface ExcavatorMachine {
@@ -86,9 +83,7 @@ export function ExcavatorActivityForm({
     notes: "",
   });
 
-  const [dumperAssignments, setDumperAssignments] = useState<
-    DumperAssignmentRow[]
-  >([]);
+  const [dumperAssignments, setDumperAssignments] = useState<DumperAssignmentRow[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -116,8 +111,7 @@ export function ExcavatorActivityForm({
       try {
         const parsed = JSON.parse(saved);
         if (parsed.formData) setFormData(parsed.formData);
-        if (parsed.dumperAssignments)
-          setDumperAssignments(parsed.dumperAssignments);
+        if (parsed.dumperAssignments) setDumperAssignments(parsed.dumperAssignments);
       } catch {
         // ignore parse errors
       }
@@ -140,21 +134,15 @@ export function ExcavatorActivityForm({
     : [];
 
   const siteMineBlocks = formData.siteId
-    ? mineBlocks.filter(
-        (mb) => mb.site_id === formData.siteId || mb.site_id === null,
-      )
+    ? mineBlocks.filter((mb) => mb.site_id === formData.siteId || mb.site_id === null)
     : mineBlocks;
 
   // Auto-calculated metrics
-  const totalLoads = dumperAssignments.reduce(
-    (sum, a) => sum + a.totalLoads,
-    0,
-  );
+  const totalLoads = dumperAssignments.reduce((sum, a) => sum + a.totalLoads, 0);
   const totalBcm = dumperAssignments.reduce((sum, a) => sum + a.totalBcm, 0);
   const bcmPerHour = totalBcm > 0 ? totalBcm / SHIFT_HOURS : 0;
   const loadsPerHour = totalLoads > 0 ? totalLoads / SHIFT_HOURS : 0;
-  const estimatedScoopTimeMinutes =
-    totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
+  const estimatedScoopTimeMinutes = totalLoads > 0 ? (SHIFT_HOURS * 60) / totalLoads : 0;
 
   // Validation
   const validate = () => {
@@ -173,8 +161,7 @@ export function ExcavatorActivityForm({
       newErrors.dumperAssignments = "Add at least one dumper assignment";
     }
     if (dumperAssignments.some((a) => !a.dumperMachineId)) {
-      newErrors.dumperAssignments =
-        "All dumper rows must have a machine selected";
+      newErrors.dumperAssignments = "All dumper rows must have a machine selected";
     }
 
     const seen = new Set<string>();
@@ -246,10 +233,7 @@ export function ExcavatorActivityForm({
 
         if (assignError) {
           // Clean up the activity record if assignments fail
-          await supabase
-            .from("excavator_activity")
-            .delete()
-            .eq("id", activityId);
+          await supabase.from("excavator_activity").delete().eq("id", activityId);
           throw assignError;
         }
       }
@@ -271,10 +255,7 @@ export function ExcavatorActivityForm({
 
       router.refresh();
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to save. Please try again.";
+      const message = err instanceof Error ? err.message : "Failed to save. Please try again.";
       toast.error(message);
       setErrors({ submit: message });
     } finally {
@@ -290,9 +271,7 @@ export function ExcavatorActivityForm({
     <GlassCard>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Log Excavator Activity
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Log Excavator Activity</h3>
           {lastSaved && (
             <span className="text-[var(--text-muted)] text-xs">
               Draft saved {lastSaved.toLocaleTimeString()}
@@ -302,9 +281,7 @@ export function ExcavatorActivityForm({
 
         {showSuccessPlus ? (
           <div className="flex flex-col items-center gap-4 py-6">
-            <p className="text-accent-green font-medium">
-              Activity logged successfully
-            </p>
+            <p className="text-accent-green font-medium">Activity logged successfully</p>
             <button
               type="button"
               onClick={handleAddAnother}
@@ -312,9 +289,7 @@ export function ExcavatorActivityForm({
             >
               +
             </button>
-            <p className="text-[var(--text-muted)] text-sm">
-              Add another excavator log
-            </p>
+            <p className="text-[var(--text-muted)] text-sm">Add another excavator log</p>
           </div>
         ) : (
           <>
@@ -338,15 +313,12 @@ export function ExcavatorActivityForm({
                   <option value="">Select excavator...</option>
                   {excavators.map((ex) => (
                     <option key={ex.id} value={ex.id}>
-                      {ex.name}{" "}
-                      {ex.serial_number ? `(${ex.serial_number})` : ""}
+                      {ex.name} {ex.serial_number ? `(${ex.serial_number})` : ""}
                     </option>
                   ))}
                 </select>
                 {errors.excavatorId && (
-                  <p className="text-accent-red text-xs">
-                    {errors.excavatorId}
-                  </p>
+                  <p className="text-accent-red text-xs">{errors.excavatorId}</p>
                 )}
               </div>
 
@@ -400,9 +372,7 @@ export function ExcavatorActivityForm({
                     </option>
                   ))}
                 </select>
-                {errors.siteId && (
-                  <p className="text-accent-red text-xs">{errors.siteId}</p>
-                )}
+                {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
               </div>
 
               {/* Shift Type */}
@@ -435,9 +405,7 @@ export function ExcavatorActivityForm({
 
               {/* Block Mined Dropdown */}
               <div className="space-y-2">
-                <label className="text-[var(--text-secondary)] text-sm block">
-                  Block Mined
-                </label>
+                <label className="text-[var(--text-secondary)] text-sm block">Block Mined</label>
                 <select
                   value={formData.blockMinedId}
                   onChange={(e) =>
@@ -471,54 +439,39 @@ export function ExcavatorActivityForm({
             </div>
 
             {/* Auto-calculated Metrics */}
-            {dumperAssignments.length > 0 &&
-              dumperAssignments.some((a) => a.dumperMachineId) && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-                  <div>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Total Hauled
-                    </p>
-                    <p className="text-lg font-medium text-[var(--accent-blue)]">
-                      {totalBcm.toFixed(1)} BCM
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[var(--text-muted)] text-xs">BCM/Hour</p>
-                    <p className="text-lg font-medium text-accent-blue">
-                      {bcmPerHour.toFixed(1)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Loads/Hour
-                    </p>
-                    <p className="text-lg font-medium text-accent-green">
-                      {loadsPerHour.toFixed(1)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      Est. Scoop Time
-                    </p>
-                    <p className="text-lg font-medium text-[var(--text-heading)]">
-                      {estimatedScoopTimeMinutes > 0
-                        ? `${estimatedScoopTimeMinutes.toFixed(1)} min/load`
-                        : "--"}
-                    </p>
-                  </div>
+            {dumperAssignments.length > 0 && dumperAssignments.some((a) => a.dumperMachineId) && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
+                <div>
+                  <p className="text-[var(--text-muted)] text-xs">Total Hauled</p>
+                  <p className="text-lg font-medium text-[var(--accent-blue)]">
+                    {totalBcm.toFixed(1)} BCM
+                  </p>
                 </div>
-              )}
+                <div>
+                  <p className="text-[var(--text-muted)] text-xs">BCM/Hour</p>
+                  <p className="text-lg font-medium text-accent-blue">{bcmPerHour.toFixed(1)}</p>
+                </div>
+                <div>
+                  <p className="text-[var(--text-muted)] text-xs">Loads/Hour</p>
+                  <p className="text-lg font-medium text-accent-green">{loadsPerHour.toFixed(1)}</p>
+                </div>
+                <div>
+                  <p className="text-[var(--text-muted)] text-xs">Est. Scoop Time</p>
+                  <p className="text-lg font-medium text-[var(--text-heading)]">
+                    {estimatedScoopTimeMinutes > 0
+                      ? `${estimatedScoopTimeMinutes.toFixed(1)} min/load`
+                      : "--"}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Notes */}
             <div className="space-y-2">
-              <label className="text-[var(--text-secondary)] text-sm block">
-                Notes
-              </label>
+              <label className="text-[var(--text-secondary)] text-sm block">Notes</label>
               <textarea
                 value={formData.notes}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, notes: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
                 rows={3}
                 placeholder="Optional notes about this excavator activity..."
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors resize-none"
@@ -537,9 +490,8 @@ export function ExcavatorActivityForm({
             </div>
 
             <p className="text-[var(--text-muted)] text-xs">
-              <span className="text-[var(--accent-blue)]">Tip:</span> BCM is
-              auto-calculated from hourly loads data. Select a site to see
-              available dumpers.
+              <span className="text-[var(--accent-blue)]">Tip:</span> BCM is auto-calculated from
+              hourly loads data. Select a site to see available dumpers.
             </p>
           </>
         )}

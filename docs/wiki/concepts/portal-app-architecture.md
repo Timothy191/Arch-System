@@ -94,11 +94,7 @@ Default rendering strategy. Server components:
 ```typescript
 import { getDepartmentContext } from "@/lib/dept-context";
 
-export default async function Page({
-  params,
-}: {
-  params: { department: string };
-}) {
+export default async function Page({ params }: { params: { department: string } }) {
   const { dept, deptId, supabase, today } = await getDepartmentContext(params);
   // ...fetch data
 }
@@ -136,9 +132,7 @@ Used for:
 Four-state machine: `idle` → `submitting` → `success`/`error`
 
 ```typescript
-const [status, setStatus] = useState<
-  "idle" | "submitting" | "success" | "error"
->("idle");
+const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 ```
 
 - Uses `createBrowserSupabaseClient()` for inserts

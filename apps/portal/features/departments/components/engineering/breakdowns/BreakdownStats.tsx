@@ -55,12 +55,8 @@ export function BreakdownStats({ metrics }: BreakdownStatsProps) {
                 <p className="text-[var(--text-secondary)] text-xs uppercase tracking-wide font-medium">
                   {stat.label}
                 </p>
-                <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
-                  {stat.value}
-                </p>
-                <p className="text-[var(--text-secondary)] text-xs mt-1">
-                  {stat.sub}
-                </p>
+                <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">{stat.value}</p>
+                <p className="text-[var(--text-secondary)] text-xs mt-1">{stat.sub}</p>
               </div>
               <div className={`p-2 rounded-lg border ${stat.bg}`}>
                 <Icon className={`w-4 h-4 ${stat.color}`} />

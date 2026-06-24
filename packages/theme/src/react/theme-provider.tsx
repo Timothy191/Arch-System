@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
-import {
-  ThemeProvider as NextThemesProvider,
-  useTheme as useNextThemes,
-} from "next-themes";
+import { createContext, useContext, useEffect, useCallback, type ReactNode } from "react";
+import { ThemeProvider as NextThemesProvider, useTheme as useNextThemes } from "next-themes";
 
 interface ArchThemeContextType {
   theme: "light";
@@ -19,9 +10,7 @@ interface ArchThemeContextType {
   toggleTheme: () => void;
 }
 
-const ArchThemeContext = createContext<ArchThemeContextType | undefined>(
-  undefined,
-);
+const ArchThemeContext = createContext<ArchThemeContextType | undefined>(undefined);
 
 /**
  * ArchThemeProvider — Light-only theme provider for the Arch System.

@@ -1,4 +1,7 @@
+"use client";
+
 import { GlassCard } from "@repo/ui/GlassCard";
+import { AutoAnimateList } from "@repo/ui/AnimatedList";
 
 interface EngineeringNote {
   id: string;
@@ -73,11 +76,11 @@ export function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
             <span className="w-2 h-2 rounded-full bg-accent-blue"></span>
             Day Shift
           </h4>
-          <div className="space-y-2">
+          <AutoAnimateList className="space-y-2">
             {dayNotes.map((note) => (
               <NoteCard key={note.id} note={note} />
             ))}
-          </div>
+          </AutoAnimateList>
         </div>
       )}
 
@@ -87,11 +90,11 @@ export function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
             <span className="w-2 h-2 rounded-full bg-accent-blue"></span>
             Night Shift
           </h4>
-          <div className="space-y-2">
+          <AutoAnimateList className="space-y-2">
             {nightNotes.map((note) => (
               <NoteCard key={note.id} note={note} />
             ))}
-          </div>
+          </AutoAnimateList>
         </div>
       )}
     </div>
@@ -104,9 +107,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
   const statusColor = STATUS_COLORS[note.status] || "var(--text-muted)";
 
   return (
-    <GlassCard
-      className={`py-3 ${note.severity === "critical" ? "border-accent-red/30" : ""}`}
-    >
+    <GlassCard className={`py-3 ${note.severity === "critical" ? "border-accent-red/30" : ""}`}>
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -147,17 +148,14 @@ function NoteCard({ note }: { note: EngineeringNote }) {
             (() => {
               const siteName = Array.isArray(note.machine!.sites)
                 ? note.machine!.sites[0]?.name
-                : (note.machine!.sites as { name: string } | null | undefined)
-                    ?.name;
+                : (note.machine!.sites as { name: string } | null | undefined)?.name;
               return (
                 <span className="text-[var(--text-muted)] text-xs flex items-center gap-1.5">
                   {note.machine!.name}
                   {siteName && (
                     <>
                       <span className="text-[var(--border-emphasis)]">·</span>
-                      <span className="text-[var(--accent-blue)]">
-                        {siteName}
-                      </span>
+                      <span className="text-[var(--accent-blue)]">{siteName}</span>
                     </>
                   )}
                 </span>
@@ -177,9 +175,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
         {note.action_taken && (
           <div className="text-sm">
             <span className="text-[var(--accent-blue)]">Action:</span>{" "}
-            <span className="text-[var(--text-secondary)]">
-              {note.action_taken}
-            </span>
+            <span className="text-[var(--text-secondary)]">{note.action_taken}</span>
           </div>
         )}
 

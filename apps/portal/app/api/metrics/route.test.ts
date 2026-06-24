@@ -49,23 +49,15 @@ describe("GET /api/metrics", () => {
     expect(text).toContain('portal_cache_latency_ms{metric="p95"} 12.2');
 
     // 2. Verify Inngest job metrics
-    expect(text).toContain(
-      'portal_inngest_job_executions_total{job_id="test-job"} 2',
-    );
-    expect(text).toContain(
-      'portal_inngest_job_errors_total{job_id="test-job"} 1',
-    );
-    expect(text).toContain(
-      'portal_inngest_job_duration_ms_total{job_id="test-job"} 350.5',
-    );
+    expect(text).toContain('portal_inngest_job_executions_total{job_id="test-job"} 2');
+    expect(text).toContain('portal_inngest_job_errors_total{job_id="test-job"} 1');
+    expect(text).toContain('portal_inngest_job_duration_ms_total{job_id="test-job"} 350.5');
 
     // 3. Verify DB query metrics
     expect(text).toContain(
       'portal_db_query_executions_total{table="machines",operation="SELECT"} 2',
     );
-    expect(text).toContain(
-      'portal_db_query_errors_total{table="machines",operation="SELECT"} 1',
-    );
+    expect(text).toContain('portal_db_query_errors_total{table="machines",operation="SELECT"} 1');
     expect(text).toContain(
       'portal_db_query_duration_ms_total{table="machines",operation="SELECT"} 125.2',
     );

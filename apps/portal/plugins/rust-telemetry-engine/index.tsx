@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ArchPlugin } from "../../lib/plugins/types";
+import { ArchPlugin } from "@/lib/plugins/types";
 import { APIError } from "@repo/errors";
 
 // Types matching our Rust binary JSON output contract
@@ -15,11 +15,7 @@ interface RustTelemetryData {
 }
 
 // React UI Dashboard component
-function RustTelemetryWidget({
-  departmentId: _departmentId,
-}: {
-  departmentId: string;
-}) {
+function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: string }) {
   const [data, setData] = useState<RustTelemetryData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -110,9 +106,7 @@ function RustTelemetryWidget({
             <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
               Wear Index
             </p>
-            <p className="text-lg font-bold text-[var(--text-heading)] mt-0.5">
-              {data?.wearIndex}
-            </p>
+            <p className="text-lg font-bold text-[var(--text-heading)] mt-0.5">{data?.wearIndex}</p>
           </div>
           <div>
             <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
@@ -129,9 +123,7 @@ function RustTelemetryWidget({
             <span className="text-[var(--text-secondary)] uppercase tracking-wider">
               Failure Probability
             </span>
-            <span className="text-violet-400 font-semibold">
-              {data?.probability}%
-            </span>
+            <span className="text-violet-400 font-semibold">{data?.probability}%</span>
           </div>
           <div className="w-full bg-[var(--bg-primary)] h-1.5 rounded-full overflow-hidden border border-[var(--border-default)]">
             <div className="bg-gradient-to-r from-violet-600 to-violet-400 h-full rounded-full transition-all duration-500 w-[88%]" />
@@ -139,14 +131,9 @@ function RustTelemetryWidget({
         </div>
 
         <div className="flex justify-between items-center border-t border-[#1c1c1c] pt-2 text-[10px] text-[var(--text-secondary)]">
-          <span>
-            Engine type:{" "}
-            {data?.isNative ? "Rust binary (compiled)" : "JS fallback"}
-          </span>
+          <span>Engine type: {data?.isNative ? "Rust binary (compiled)" : "JS fallback"}</span>
           {data?.error && (
-            <span className="text-accent-red italic text-[9px]">
-              Sensor read timeout
-            </span>
+            <span className="text-accent-red italic text-[9px]">Sensor read timeout</span>
           )}
         </div>
       </div>

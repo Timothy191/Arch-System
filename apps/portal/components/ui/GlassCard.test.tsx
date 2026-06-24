@@ -19,9 +19,7 @@ describe("GlassCard", () => {
   });
 
   it("renders spotlight variant and handles mouse movement", () => {
-    const { container } = render(
-      <GlassCard variant="spotlight">Spotlight Content</GlassCard>,
-    );
+    const { container } = render(<GlassCard variant="spotlight">Spotlight Content</GlassCard>);
     expect(screen.getByText("Spotlight Content")).toBeInTheDocument();
 
     const element = container.firstChild;
@@ -43,9 +41,7 @@ describe("GlassCard", () => {
   });
 
   it("renders liquid variant with background layer and sheen sweep layer", () => {
-    const { container } = render(
-      <GlassCard variant="liquid">Liquid Content</GlassCard>,
-    );
+    const { container } = render(<GlassCard variant="liquid">Liquid Content</GlassCard>);
     expect(screen.getByText("Liquid Content")).toBeInTheDocument();
 
     const pane = container.querySelector(".liquid-glass-pane-rounded");

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("login page", () => {
   test("renders login form with all fields", async ({ page }) => {
     await page.goto("/login");
@@ -30,15 +32,11 @@ test.describe("login page", () => {
     }
   });
 
-  test("empty form submission is blocked by browser validation", async ({
-    page,
-  }) => {
+  test("empty form submission is blocked by browser validation", async ({ page }) => {
     await page.goto("/login");
 
     // Try to submit without filling anything
-    await page
-      .locator("form[data-testid='login-form'] button[type='submit']")
-      .click();
+    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Form should still be visible (submission blocked)
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
@@ -58,9 +56,7 @@ test.describe("login page", () => {
 });
 
 test.describe("auth middleware", () => {
-  test("unauthenticated user is redirected to login from protected routes", async ({
-    page,
-  }) => {
+  test("unauthenticated user is redirected to login from protected routes", async ({ page }) => {
     await page.goto("/drilling");
 
     // Should redirect to login (may include redirect query param)
@@ -85,9 +81,7 @@ test.describe("auth middleware", () => {
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
   });
 
-  test("unauthenticated user is redirected from department tools", async ({
-    page,
-  }) => {
+  test("unauthenticated user is redirected from department tools", async ({ page }) => {
     await page.goto("/drilling/tools");
 
     await expect(page).toHaveURL(/.*\/login.*/);
@@ -117,9 +111,7 @@ test.describe("design system", () => {
 
     // Form card should use the card background class
     const card = page.locator('[data-testid="login-card"]');
-    await expect(card).toHaveClass(
-      /bg-arch-surface-secondary|bg-white\/70|layer-signin-card/,
-    );
+    await expect(card).toHaveClass(/bg-arch-surface-secondary|bg-white\/70|layer-signin-card/);
 
     // Heading should be present and use dark text
     const heading = page.locator("h1");
@@ -148,9 +140,7 @@ test.describe("design system", () => {
 });
 
 test.describe("full login and reset password flows", () => {
-  test("intro overlay is skipped automatically in E2E environment", async ({
-    page,
-  }) => {
+  test("intro overlay is skipped automatically in E2E environment", async ({ page }) => {
     await page.goto("/login");
     await expect(
       page.locator("text=Initializing industrial operations terminal..."),
@@ -164,9 +154,7 @@ test.describe("full login and reset password flows", () => {
     await page.goto("/login");
     await page.locator("input#email").fill("admin@plantcor.os");
     await page.locator("input#password").fill("wrong-password");
-    await page
-      .locator("form[data-testid='login-form'] button[type='submit']")
-      .click();
+    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Check for error message or that the form is still visible (some envs do not surface auth failure text)
     try {
@@ -177,9 +165,7 @@ test.describe("full login and reset password flows", () => {
       ).toBeVisible({ timeout: 3000 });
     } catch {
       // Fallback: ensure the login form remains visible after failed attempt
-      await expect(
-        page.locator("form[data-testid='login-form']"),
-      ).toBeVisible();
+      await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
     }
 
     // 2. Navigation to Reset Password
@@ -192,9 +178,7 @@ test.describe("full login and reset password flows", () => {
 
     // Verify "Check Your Email" screen or error alert
     await expect(
-      page
-        .locator("text=Check Your Email")
-        .or(page.locator("text=Unable to send reset email")),
+      page.locator("text=Check Your Email").or(page.locator("text=Unable to send reset email")),
     ).toBeVisible();
 
     // 4. Navigate back to login
@@ -204,9 +188,7 @@ test.describe("full login and reset password flows", () => {
     // 5. Successful login redirect
     await page.locator("input#email").fill("admin@plantcor.os");
     await page.locator("input#password").fill("Yugioh@123#");
-    await page
-      .locator("form[data-testid='login-form'] button[type='submit']")
-      .click();
+    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login
     try {

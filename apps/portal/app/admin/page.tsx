@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
-import {
-  createServerSupabaseClient,
-  getUserSafely,
-} from "@repo/supabase/server";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { AdminTabsClient } from "~/features/admin/components/AdminTabsClient";
 import { UsersTab } from "~/features/admin/tabs/UsersTab";
 import { DepartmentsTab } from "~/features/admin/tabs/DepartmentsTab";
@@ -12,15 +9,7 @@ import { WebhooksTab } from "~/features/admin/tabs/WebhooksTab";
 import { AuditLogsTab } from "~/features/admin/tabs/AuditLogsTab";
 import { SettingsTab } from "~/features/admin/tabs/SettingsTab";
 
-const TABS = [
-  "users",
-  "departments",
-  "fleet",
-  "sites",
-  "webhooks",
-  "audit-logs",
-  "settings",
-];
+const TABS = ["users", "departments", "fleet", "sites", "webhooks", "audit-logs", "settings"];
 
 export default async function AdminPage({
   searchParams,
@@ -45,16 +34,13 @@ export default async function AdminPage({
   }
 
   const { tab: rawTab } = await searchParams;
-  const activeTab =
-    typeof rawTab === "string" && TABS.includes(rawTab) ? rawTab : "users";
+  const activeTab = typeof rawTab === "string" && TABS.includes(rawTab) ? rawTab : "users";
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-heading)]">
       <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-[var(--bg-primary)]/80 backdrop-blur">
         <div className="flex items-center justify-between px-6 py-3">
-          <span className="text-lg font-medium text-[var(--text-heading)]">
-            Admin Dashboard
-          </span>
+          <span className="text-lg font-medium text-[var(--text-heading)]">Admin Dashboard</span>
         </div>
       </header>
 

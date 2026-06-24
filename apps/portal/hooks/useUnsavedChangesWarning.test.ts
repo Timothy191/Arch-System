@@ -19,61 +19,31 @@ describe("useUnsavedChangesWarning", () => {
   it("does not add any listeners when isDirty is false", () => {
     renderHook(() => useUnsavedChangesWarning(false));
 
-    expect(window.addEventListener).not.toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-    expect(document.addEventListener).not.toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      true,
-    );
-    expect(window.addEventListener).not.toHaveBeenCalledWith(
-      "popstate",
-      expect.any(Function),
-    );
+    expect(window.addEventListener).not.toHaveBeenCalledWith("beforeunload", expect.any(Function));
+    expect(document.addEventListener).not.toHaveBeenCalledWith("click", expect.any(Function), true);
+    expect(window.addEventListener).not.toHaveBeenCalledWith("popstate", expect.any(Function));
   });
 
   it("adds listeners when isDirty is true and removes them on unmount", () => {
     const { unmount } = renderHook(() => useUnsavedChangesWarning(true));
 
-    expect(window.addEventListener).toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-    expect(document.addEventListener).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      true,
-    );
-    expect(window.addEventListener).toHaveBeenCalledWith(
-      "popstate",
-      expect.any(Function),
-    );
+    expect(window.addEventListener).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+    expect(document.addEventListener).toHaveBeenCalledWith("click", expect.any(Function), true);
+    expect(window.addEventListener).toHaveBeenCalledWith("popstate", expect.any(Function));
 
     unmount();
 
-    expect(window.removeEventListener).toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-    expect(document.removeEventListener).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function),
-      true,
-    );
-    expect(window.removeEventListener).toHaveBeenCalledWith(
-      "popstate",
-      expect.any(Function),
-    );
+    expect(window.removeEventListener).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+    expect(document.removeEventListener).toHaveBeenCalledWith("click", expect.any(Function), true);
+    expect(window.removeEventListener).toHaveBeenCalledWith("popstate", expect.any(Function));
   });
 
   it("triggers beforeunload confirmation when event is fired", () => {
     renderHook(() => useUnsavedChangesWarning(true));
 
-    const beforeUnloadCall = (
-      window.addEventListener as jest.Mock
-    ).mock.calls.find((call) => call[0] === "beforeunload");
+    const beforeUnloadCall = (window.addEventListener as jest.Mock).mock.calls.find(
+      (call) => call[0] === "beforeunload",
+    );
     expect(beforeUnloadCall).toBeDefined();
 
     const handler = beforeUnloadCall[1];

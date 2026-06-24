@@ -16,6 +16,7 @@ import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import { CookieConsent } from "@repo/ui/CookieConsent";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -80,11 +81,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html
       lang="en"
@@ -94,11 +91,7 @@ export default function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="preconnect"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
@@ -179,17 +172,14 @@ export default function RootLayout({
               </header>
 
               {/* Content wrapper with main landmark */}
-              <main
-                id="main-content"
-                role="main"
-                className="relative z-primary-card pt-16"
-              >
+              <main id="main-content" role="main" className="relative z-primary-card pt-16">
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
 
               <CommandBar />
               <ViewportBoundaries />
               <CookieConsent />
+              <FeedbackWidget />
               <Toaster />
 
               {/* Footer landmark - if exists, otherwise contentinfo on body or create footer */}

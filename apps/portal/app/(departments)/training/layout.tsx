@@ -4,11 +4,7 @@ import { notFound } from "next/navigation";
 import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 
-export default async function TrainingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function TrainingLayout({ children }: { children: React.ReactNode }) {
   const dept = DEPARTMENTS.find((d) => d.name === "training");
   if (!dept) notFound();
 

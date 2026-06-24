@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { ControlRoomActivityFeed } from "./ControlRoomActivityFeed";
 
 jest.mock("@repo/supabase/client", () => ({
@@ -12,13 +6,7 @@ jest.mock("@repo/supabase/client", () => ({
 }));
 
 jest.mock("@repo/ui/AnimatedList", () => ({
-  AnimatedFeed: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  AnimatedFeed: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="animated-feed" className={className}>
       {children}
     </div>
@@ -26,13 +14,7 @@ jest.mock("@repo/ui/AnimatedList", () => ({
 }));
 
 jest.mock("@repo/ui/GlassCard", () => ({
-  GlassCard: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
     </div>
@@ -45,9 +27,7 @@ function createMockSupabase() {
     subscribe: jest.fn().mockReturnThis(),
   };
 
-  const { createBrowserSupabaseClient } = jest.requireMock(
-    "@repo/supabase/client",
-  );
+  const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
   createBrowserSupabaseClient.mockReturnValue({
     channel: jest.fn().mockReturnValue(mockChannel),

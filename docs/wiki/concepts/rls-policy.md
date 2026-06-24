@@ -4,11 +4,7 @@ created: 2026-05-14
 updated: 2026-05-14
 type: concept
 tags: [security, policy, convention, database]
-sources:
-  [
-    raw/articles/arch-systems-project-overview.md,
-    raw/articles/supabase-local-dev-guide.md,
-  ]
+sources: [raw/articles/arch-systems-project-overview.md, raw/articles/supabase-local-dev-guide.md]
 confidence: high
 ---
 

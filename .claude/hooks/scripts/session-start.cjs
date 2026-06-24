@@ -32,8 +32,7 @@ async function main() {
   const projectName = path.basename(projectRoot);
   const claudeDir = path.join(projectRoot, ".claude");
   const learnedFile = path.join(claudeDir, "docs", "LEARNED.md");
-  const sessionId =
-    process.env.CLAUDE_SESSION_ID || String(process.ppid) || "default";
+  const sessionId = process.env.CLAUDE_SESSION_ID || String(process.ppid) || "default";
 
   let store = null;
   try {
@@ -53,9 +52,7 @@ async function main() {
       const recentLearnings = getRecentLearnings(store.db, 5, projectName);
 
       if (recentLearnings.length > 0) {
-        log(
-          `[ProWorkflow] Loaded ${recentLearnings.length} learnings from database:`,
-        );
+        log(`[ProWorkflow] Loaded ${recentLearnings.length} learnings from database:`);
         recentLearnings.slice(0, 3).forEach((l) => {
           log(`  - [${l.category}] ${l.rule}`);
         });
@@ -101,9 +98,7 @@ async function main() {
       const learnedPatterns = (content.match(/\[LEARN\]/g) || []).length;
 
       if (learnedPatterns > 0) {
-        log(
-          `[ProWorkflow] Loaded ${learnedPatterns} learned patterns from LEARNED.md`,
-        );
+        log(`[ProWorkflow] Loaded ${learnedPatterns} learned patterns from LEARNED.md`);
       }
     }
 
@@ -136,9 +131,7 @@ async function main() {
     // Not a git repo or git not available
   }
 
-  log(
-    "[ProWorkflow] Ready. Use /wrap-up before ending, /learn to capture corrections.",
-  );
+  log("[ProWorkflow] Ready. Use /wrap-up before ending, /learn to capture corrections.");
 
   process.exit(0);
 }

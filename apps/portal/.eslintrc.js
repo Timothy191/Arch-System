@@ -19,12 +19,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/*.spec.ts",
-        "**/setupTests.ts",
-      ],
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/setupTests.ts"],
       env: { jest: true },
     },
     {

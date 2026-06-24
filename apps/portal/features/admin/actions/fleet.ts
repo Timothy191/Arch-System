@@ -86,10 +86,8 @@ export async function adminUpdateMachine(
 
   const name = data.name?.trim();
   const machineType = data.machine_type?.trim();
-  if (name !== undefined && !name)
-    return { error: "Machine name cannot be empty." };
-  if (machineType !== undefined && !machineType)
-    return { error: "Machine type cannot be empty." };
+  if (name !== undefined && !name) return { error: "Machine name cannot be empty." };
+  if (machineType !== undefined && !machineType) return { error: "Machine type cannot be empty." };
 
   const { error } = await supabase
     .from("machines")

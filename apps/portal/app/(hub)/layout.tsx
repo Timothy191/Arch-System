@@ -1,8 +1,5 @@
 import { BottomNav } from "@/components/nav/BottomNav";
-import {
-  createServerSupabaseClient,
-  getUserSafely,
-} from "@repo/supabase/server";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { redirect } from "next/navigation";
 
@@ -25,11 +22,7 @@ async function getAccessibleDepartmentNames(userId: string): Promise<string[]> {
   return (deptData ?? []).map((d) => d.name);
 }
 
-export default async function HubLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function HubLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 

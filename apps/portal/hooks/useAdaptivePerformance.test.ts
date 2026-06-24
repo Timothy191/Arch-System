@@ -24,25 +24,19 @@ describe("useAdaptivePerformance", () => {
   });
 
   it("returns false initially when frame rate is fine", () => {
-    (useFocusMode as any).mockImplementation((selector: any) =>
-      selector({ enabled: false }),
-    );
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
     expect(result.current).toBe(false);
   });
 
   it("returns true immediately if Focus Mode is enabled", () => {
-    (useFocusMode as any).mockImplementation((selector: any) =>
-      selector({ enabled: true }),
-    );
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: true }));
     const { result } = renderHook(() => useAdaptivePerformance());
     expect(result.current).toBe(true);
   });
 
   it("signals low performance if FPS drops below 50 for 1.5 seconds", () => {
-    (useFocusMode as any).mockImplementation((selector: any) =>
-      selector({ enabled: false }),
-    );
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
@@ -68,9 +62,7 @@ describe("useAdaptivePerformance", () => {
   });
 
   it("does not trigger fallback if FPS stays high (e.g. 60 FPS)", () => {
-    (useFocusMode as any).mockImplementation((selector: any) =>
-      selector({ enabled: false }),
-    );
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);

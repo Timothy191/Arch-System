@@ -15,8 +15,7 @@ interface LiveMetricsTickerProps {
  * low opacity, and a pulsing status dot showing system connection health.
  */
 export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
-  const { websocketLatency, serverTimeSAST, currentShift, online } =
-    useSystemMetrics();
+  const { websocketLatency, serverTimeSAST, currentShift, online } = useSystemMetrics();
 
   return (
     <div

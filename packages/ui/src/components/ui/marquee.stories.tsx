@@ -19,9 +19,7 @@ const Logo = () => (
     <div className="w-8 h-8 rounded bg-accent-blue/20 flex items-center justify-center">
       <div className="w-4 h-4 bg-accent-blue rounded-sm animate-pulse" />
     </div>
-    <span className="font-mono text-sm font-bold tracking-tighter">
-      ARCH_OS
-    </span>
+    <span className="font-mono text-sm font-bold tracking-tighter">ARCH_OS</span>
   </div>
 );
 
@@ -65,10 +63,7 @@ export const FastReverse: Story = {
     children: (
       <div className="flex gap-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <span
-            key={i}
-            className="text-4xl font-black text-black/10 uppercase italic"
-          >
+          <span key={i} className="text-4xl font-black text-black/10 uppercase italic">
             Telemetry Processing —
           </span>
         ))}

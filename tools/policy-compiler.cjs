@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+/**
+ * @fileoverview Compiles architectural and dependency boundary policies into ESLint configurations.
+ * Usage: node tools/policy-compiler.cjs [--check]
+ */
 /**
  * Policy SSoT Compiler (CommonJS runtime)
  *
@@ -25,8 +30,7 @@ const DEPENDENCY_RULES = [
     sourceTag: "scope:app",
     targetTag: "scope:package:db-internal",
     allowed: false,
-    reason:
-      "apps/* must not import packages/database directly; use packages/supabase client",
+    reason: "apps/* must not import packages/database directly; use packages/supabase client",
   },
 
   // Forbidden: UI components must remain pure (no data layer)
@@ -117,8 +121,7 @@ const INTENT_CAPABILITIES = [
     allowedClients: ["scope:package:supabase", "scope:package:database"],
     dbAccess: true,
     auditRequired: false,
-    description:
-      "Direct database access (must go through supabase or database packages)",
+    description: "Direct database access (must go through supabase or database packages)",
   },
   {
     name: "ai-orchestration",
@@ -193,24 +196,35 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
+/**
+ * Strips volatile generatedAt field from policy object to allow deterministic drift checks.
+ *
+ * @param {object} o - The policy object.
+ * @returns {object} Copy of the object without the volatile field.
+ */
 function stripVolatile(o) {
   const copy = JSON.parse(JSON.stringify(o));
   if (copy.generatedAt) delete copy.generatedAt;
   return copy;
 }
+
+/**
+ * Either writes policy content to the target file path, or compares it with the existing content
+ * depending on check mode.
+ *
+ * @param {string} filePath - Absolute path to target file.
+ * @param {string} content - Expected JSON/file content.
+ * @returns {boolean} True if write succeeded or check passed (no drift), false otherwise.
+ */
 function writeOrCheck(filePath, content) {
   if (CHECK_MODE) {
     if (!fs.existsSync(filePath)) {
       console.error(`❌ Missing: ${filePath}`);
       return false;
     }
-    const existing = stripVolatile(
-      JSON.parse(fs.readFileSync(filePath, "utf-8")),
-    );
+    const existing = stripVolatile(JSON.parse(fs.readFileSync(filePath, "utf-8")));
     const incoming = stripVolatile(JSON.parse(content));
-    if (
-      JSON.stringify(existing, null, 2) !== JSON.stringify(incoming, null, 2)
-    ) {
+    if (JSON.stringify(existing, null, 2) !== JSON.stringify(incoming, null, 2)) {
       console.error(`❌ Drift detected: ${filePath}`);
       return false;
     }
@@ -233,12 +247,14 @@ const JSON_FILES = [
 const timestamp = new Date().toISOString();
 let allOk = true;
 
+/**
+ * Wraps policy payload with metadata (version and timestamp) and converts it to JSON format.
+ *
+ * @param {object} data - Policy payload rules/checks/capabilities.
+ * @returns {string} Formatted JSON string.
+ */
 function generateJson(data) {
-  return JSON.stringify(
-    { version: POLICY_VERSION, generatedAt: timestamp, ...data },
-    null,
-    2,
-  );
+  return JSON.stringify({ version: POLICY_VERSION, generatedAt: timestamp, ...data }, null, 2);
 }
 
 const jsonOutputs = [
@@ -318,15 +334,11 @@ if (CHECK_MODE) {
 }
 
 if (CHECK_MODE && !allOk) {
-  console.error(
-    "\n🔴 DRIFT DETECTED. Run `pnpm policy:gen` locally and commit generated files.",
-  );
+  console.error("\n🔴 DRIFT DETECTED. Run `pnpm policy:gen` locally and commit generated files.");
   process.exit(1);
 }
 
 if (!CHECK_MODE) {
   console.log(`\n✅ All 5 policy files generated.`);
-  console.log(
-    "Next: git add tools/policy/ tools/policy-compiler.cjs package.json and commit.",
-  );
+  console.log("Next: git add tools/policy/ tools/policy-compiler.cjs package.json and commit.");
 }

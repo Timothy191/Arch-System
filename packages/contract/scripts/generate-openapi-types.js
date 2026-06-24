@@ -34,18 +34,16 @@ async function fetchOpenAPISpec() {
   try {
     const response = await fetch(`${API_URL}/api/doc`);
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch spec: ${response.status} ${response.statusText}`
-      );
+      throw new Error(`Failed to fetch spec: ${response.status} ${response.statusText}`);
     }
     return await response.json();
   } catch (error) {
     console.error("Error fetching OpenAPI spec:", error.message);
     console.error(
-      "\nMake sure the dev server is running or provide a SPEC_FILE environment variable."
+      "\nMake sure the dev server is running or provide a SPEC_FILE environment variable.",
     );
     console.error(
-      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`
+      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`,
     );
     process.exit(1);
   }
@@ -64,10 +62,7 @@ async function generateTypes(spec) {
   try {
     console.log("Generating TypeScript types from OpenAPI spec...");
     // Use openapi-typescript CLI
-    execSync(
-      `npx openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`,
-      { stdio: "inherit" }
-    );
+    execSync(`npx openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`, { stdio: "inherit" });
     console.log(`✓ Generated types saved to ${OUTPUT_FILE}`);
   } finally {
     // Clean up temp file

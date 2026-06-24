@@ -2,11 +2,7 @@
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
-import {
-  AuthError,
-  DatabaseError,
-  ForbiddenError,
-} from "@/lib/errors/error-classes";
+import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
 import { detectAllPrinters } from "./lib/printer-detection";
 
 // AGENT-TRACE: Error handling pattern - Server Actions use typed error classes
@@ -31,13 +27,10 @@ export async function assertAccessCardActionsRole() {
     .single();
 
   if (!employee || !["admin", "access_control"].includes(employee.role)) {
-    throw new ForbiddenError(
-      "Forbidden: access_control or admin role required",
-      {
-        resource: "access_card_actions",
-        action: "assert_role",
-      },
-    );
+    throw new ForbiddenError("Forbidden: access_control or admin role required", {
+      resource: "access_card_actions",
+      action: "assert_role",
+    });
   }
 
   return { supabase, user, employee };
@@ -106,10 +99,10 @@ export async function registerPrinter(formData: {
 
   if (error) {
     if (error.code === "23505") {
-      throw new DatabaseError(
-        "A printer with this CUPS name is already registered",
-        { cause: error, table: "card_printers" },
-      );
+      throw new DatabaseError("A printer with this CUPS name is already registered", {
+        cause: error,
+        table: "card_printers",
+      });
     }
     throw new DatabaseError("Failed to register printer", {
       cause: error,
@@ -238,34 +231,25 @@ export async function getDashboardMetrics() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const [
-    printersResult,
-    jobsTodayResult,
-    pendingJobsResult,
-    expiringCardsResult,
-  ] = await Promise.all([
-    supabase.from("card_printers").select("status").is("deleted_at", null),
-    supabase
-      .from("print_jobs")
-      .select("id", { count: "exact", head: true })
-      .gte("queued_at", today),
-    supabase
-      .from("print_jobs")
-      .select("id", { count: "exact", head: true })
-      .in("status", ["queued", "rendering", "printing"]),
-    supabase
-      .from("issued_cards")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "active")
-      .lte(
-        "expires_at",
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      ),
-  ]);
+  const [printersResult, jobsTodayResult, pendingJobsResult, expiringCardsResult] =
+    await Promise.all([
+      supabase.from("card_printers").select("status").is("deleted_at", null),
+      supabase
+        .from("print_jobs")
+        .select("id", { count: "exact", head: true })
+        .gte("queued_at", today),
+      supabase
+        .from("print_jobs")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["queued", "rendering", "printing"]),
+      supabase
+        .from("issued_cards")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active")
+        .lte("expires_at", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()),
+    ]);
 
-  const onlinePrinters = (printersResult.data ?? []).filter(
-    (p) => p.status === "online",
-  ).length;
+  const onlinePrinters = (printersResult.data ?? []).filter((p) => p.status === "online").length;
   const totalPrinters = (printersResult.data ?? []).length;
 
   return {
@@ -287,10 +271,7 @@ export async function getExpiringCards() {
     .from("issued_cards")
     .select("*, personnel:personnel(first_name, surname)")
     .eq("status", "active")
-    .lte(
-      "expires_at",
-      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    )
+    .lte("expires_at", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
     .order("expires_at", { ascending: true });
 
   if (error) {
@@ -301,4 +282,30 @@ export async function getExpiringCards() {
   }
 
   return { cards: data ?? [] };
+}
+
+/**
+ * Search employees for card printing.
+ */
+export async function searchEmployees(query: string) {
+  const { supabase } = await assertAccessCardActionsRole();
+
+  if (!query || query.length < 2) return { employees: [] };
+
+  const { data, error } = await supabase
+    .from("employees")
+    .select(
+      "id, first_name, last_name, national_id, job_title, areas, medical_expiry_date, induction_expiry_date, qr_code_data, photo_url",
+    )
+    .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,national_id.ilike.%${query}%`)
+    .limit(10);
+
+  if (error) {
+    throw new DatabaseError("Failed to search employees", {
+      cause: error,
+      table: "employees",
+    });
+  }
+
+  return { employees: data ?? [] };
 }

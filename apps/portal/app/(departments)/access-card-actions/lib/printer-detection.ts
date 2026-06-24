@@ -73,8 +73,7 @@ function parseAcceptingStatus(line: string): {
     // Extract optional reason after the date portion
     // Format: <name> not accepting requests since <date> - <reason>
     const reasonIndex = line.indexOf(" - ");
-    const statusMessage =
-      reasonIndex !== -1 ? line.slice(reasonIndex + 3).trim() : undefined;
+    const statusMessage = reasonIndex !== -1 ? line.slice(reasonIndex + 3).trim() : undefined;
     return { status: "offline", statusMessage };
   }
 
@@ -101,10 +100,7 @@ function extractPrinterName(line: string): string | null {
  */
 function parseDeviceUri(
   uri: string,
-): Pick<
-  DetectedPrinter,
-  "connectionType" | "vendorId" | "productId" | "devicePath"
-> {
+): Pick<DetectedPrinter, "connectionType" | "vendorId" | "productId" | "devicePath"> {
   if (uri.startsWith("usb://")) {
     // Format: usb://Vendor/Product?serial=... or usb://Vendor:Product/...
     const ids = uri.match(/usb:\/\/([^/?#]+)[/:]([^/?#]+)/);
@@ -127,9 +123,7 @@ function parseDeviceUri(
  * This is the single exec entry point — all command execution flows through here
  * to ensure consistent error handling.
  */
-async function safeExec(
-  command: string,
-): Promise<{ stdout: string; stderr: string } | null> {
+async function safeExec(command: string): Promise<{ stdout: string; stderr: string } | null> {
   try {
     const result = await execAsync(command, { timeout: 10_000 });
     return { stdout: result.stdout.trim(), stderr: result.stderr.trim() };
@@ -150,9 +144,7 @@ async function safeExec(
  * If URI starts with "usb://" extract vendor/product IDs.
  * If URI starts with "socket://" or "lpd://" it's network.
  */
-async function getPrinterDetails(
-  cupsName: string,
-): Promise<Partial<DetectedPrinter>> {
+async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrinter>> {
   const result = await safeExec(`lpstat -l -p "${cupsName}"`);
   if (!result) return {};
 
@@ -171,10 +163,7 @@ async function getPrinterDetails(
     }
 
     // Collect model-related lines for Neo Magic detection
-    if (
-      trimmed.startsWith("Description:") ||
-      trimmed.startsWith("Make and model:")
-    ) {
+    if (trimmed.startsWith("Description:") || trimmed.startsWith("Make and model:")) {
       const value = trimmed.replace(/^(Description|Make and model):\s*/, "");
       modelParts.push(value);
     }
@@ -241,9 +230,7 @@ export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
  * Execute lpq -P <printer> to get the print queue for a printer.
  * Returns array of queued jobs or empty array if no jobs or printer unreachable.
  */
-export async function getPrinterQueue(
-  cupsName: string,
-): Promise<PrintQueueEntry[]> {
+export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry[]> {
   const result = await safeExec(`lpq -P "${cupsName}"`);
   if (!result) return [];
 
@@ -251,11 +238,7 @@ export async function getPrinterQueue(
 
   // Skip header lines — find the column header first, then parse data rows
   const dataStartIndex = lines.findIndex(
-    (l) =>
-      l.includes("Rank") &&
-      l.includes("Owner") &&
-      l.includes("Job") &&
-      l.includes("File"),
+    (l) => l.includes("Rank") && l.includes("Owner") && l.includes("Job") && l.includes("File"),
   );
   if (dataStartIndex === -1) return [];
 
@@ -292,24 +275,16 @@ export async function getPrinterQueue(
  * and checking the status line.
  * Returns "online" | "offline" | "error"
  */
-export async function getPrinterStatus(
-  cupsName: string,
-): Promise<"online" | "offline" | "error"> {
+export async function getPrinterStatus(cupsName: string): Promise<"online" | "offline" | "error"> {
   const result = await safeExec(`lpstat -p "${cupsName}"`);
   if (!result) return "error";
 
-  const statusLine = result.stdout
-    .split("\n")
-    .find((l) => l.toLowerCase().includes("printer"));
+  const statusLine = result.stdout.split("\n").find((l) => l.toLowerCase().includes("printer"));
   if (!statusLine) return "error";
 
   const lower = statusLine.toLowerCase();
 
-  if (
-    lower.includes("idle") ||
-    lower.includes("printing") ||
-    lower.includes("processing")
-  ) {
+  if (lower.includes("idle") || lower.includes("printing") || lower.includes("processing")) {
     return "online";
   }
 
@@ -326,12 +301,7 @@ export async function getPrinterStatus(
  * Uses fs.promises.access for each enumerated device.
  */
 export async function scanUsbDevices(): Promise<string[]> {
-  const candidates = [
-    "/dev/usb/lp0",
-    "/dev/usb/lp1",
-    "/dev/usb/lp2",
-    "/dev/usb/lp3",
-  ];
+  const candidates = ["/dev/usb/lp0", "/dev/usb/lp1", "/dev/usb/lp2", "/dev/usb/lp3"];
   const found: string[] = [];
 
   for (const devicePath of candidates) {
@@ -347,21 +317,42 @@ export async function scanUsbDevices(): Promise<string[]> {
 }
 
 /**
+ * Submit a print job to a CUPS printer.
+ * Uses lp command to send job data to the specified printer.
+ * Returns the CUPS job ID on success, or throws on failure.
+ */
+export async function submitCupsPrintJob(
+  cupsName: string,
+  jobName: string,
+  data?: string,
+): Promise<{ cupsJobId: number | null }> {
+  const cmd = data
+    ? `echo ${JSON.stringify(data)} | lp -d "${cupsName}" -t "${jobName}"`
+    : `lp -d "${cupsName}" -t "${jobName}" /dev/null`;
+
+  const result = await safeExec(cmd);
+  if (!result) {
+    return { cupsJobId: null };
+  }
+
+  // lp outputs: "request id is <printer>-<jobId> (1 file(s))"
+  const match = result.stdout.match(/request id is [\w-]+-(\d+)/);
+  const cupsJobId = match ? Number.parseInt(match[1]!, 10) : null;
+
+  return { cupsJobId };
+}
+
+/**
  * Perform a comprehensive scan: check CUPS + USB, merge results,
  * and detect Neo Magic 300 printers.
  *
  * This is the main function called by the API.
  */
 export async function detectAllPrinters(): Promise<DetectedPrinter[]> {
-  const [cupsPrinters, usbDevices] = await Promise.all([
-    scanCupsPrinters(),
-    scanUsbDevices(),
-  ]);
+  const [cupsPrinters, usbDevices] = await Promise.all([scanCupsPrinters(), scanUsbDevices()]);
 
   // Build a set of device paths already represented in CUPS results
-  const knownDevicePaths = new Set(
-    cupsPrinters.map((p) => p.devicePath).filter(Boolean),
-  );
+  const knownDevicePaths = new Set(cupsPrinters.map((p) => p.devicePath).filter(Boolean));
 
   // Add fallback entries for USB devices that CUPS doesn't know about
   for (const devPath of usbDevices) {

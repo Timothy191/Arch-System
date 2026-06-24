@@ -421,7 +421,7 @@ setup_systemd() {
 
   phase "3. SYSTEMD SERVICE SETUP"
 
-  local service_file="/etc/infra/systemd/system/arch-systems.service"
+  local service_file="/etc/systemd/system/arch-systems.service"
   local user="$(whoami)"
 
   log "Creating systemd service file..."

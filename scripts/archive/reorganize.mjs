@@ -112,22 +112,11 @@ if (existsSync(reportDir)) {
 }
 
 // 8. Consolidate AI memory: memory/ and .memory/data/ltm/ to .memory/data/
-move(
-  join(ROOT, ".memory/data/decisions.md"),
-  join(ROOT, ".memory/data/decisions.md"),
-);
+move(join(ROOT, ".memory/data/decisions.md"), join(ROOT, ".memory/data/decisions.md"));
 move(join(ROOT, "ltm"), join(ROOT, ".memory/data/ltm"));
 
 // 9. Remove empty directories
-const dirsToRemove = [
-  "docker",
-  "redis-topology",
-  "systemd",
-  "wiki",
-  "report",
-  "memory",
-  "ltm",
-];
+const dirsToRemove = ["docker", "redis-topology", "systemd", "wiki", "report", "memory", "ltm"];
 for (const dir of dirsToRemove) {
   const dirPath = join(ROOT, dir);
   if (existsSync(dirPath)) {
@@ -211,35 +200,14 @@ function updateFileContent(filePath, replacer) {
 function referenceReplacer(content, filePath) {
   let updated = content;
 
-  updated = updated.replace(
-    /config\/\.fallowrc\.json/g,
-    "config/tools/.fallowrc.json",
-  );
-  updated = updated.replace(
-    /config\/\.gitleaks\.toml/g,
-    "config/tools/.gitleaks.toml",
-  );
-  updated = updated.replace(
-    /config\/\.lintstagedrc\.mjs/g,
-    "config/tools/.lintstagedrc.mjs",
-  );
-  updated = updated.replace(
-    /config\/\.markdownlint\.json/g,
-    "config/tools/.markdownlint.json",
-  );
+  updated = updated.replace(/config\/\.fallowrc\.json/g, "config/tools/.fallowrc.json");
+  updated = updated.replace(/config\/\.gitleaks\.toml/g, "config/tools/.gitleaks.toml");
+  updated = updated.replace(/config\/\.lintstagedrc\.mjs/g, "config/tools/.lintstagedrc.mjs");
+  updated = updated.replace(/config\/\.markdownlint\.json/g, "config/tools/.markdownlint.json");
   updated = updated.replace(/config\/\.mcp\.json/g, "config/tools/mcp.json");
-  updated = updated.replace(
-    /config\/\.secretlintignore/g,
-    "config/tools/.secretlintignore",
-  );
-  updated = updated.replace(
-    /config\/\.secretlintrc\.json/g,
-    "config/tools/.secretlintrc.json",
-  );
-  updated = updated.replace(
-    /config\/\.syncpackrc\.js/g,
-    "config/tools/.syncpackrc.js",
-  );
+  updated = updated.replace(/config\/\.secretlintignore/g, "config/tools/.secretlintignore");
+  updated = updated.replace(/config\/\.secretlintrc\.json/g, "config/tools/.secretlintrc.json");
+  updated = updated.replace(/config\/\.syncpackrc\.js/g, "config/tools/.syncpackrc.js");
   updated = updated.replace(
     /config\/commitlint\.config\.mjs/g,
     "config/tools/commitlint.config.mjs",
@@ -249,14 +217,8 @@ function referenceReplacer(content, filePath) {
     "config/tools/eslint.boundaries.cjs",
   );
   updated = updated.replace(/config\/knip\.json/g, "config/tools/knip.json");
-  updated = updated.replace(
-    /config\/lighthouserc\.json/g,
-    "config/tools/lighthouserc.json",
-  );
-  updated = updated.replace(
-    /config\/\.memoryignore/g,
-    ".memory/.memory/config/.memoryignore",
-  );
+  updated = updated.replace(/config\/lighthouserc\.json/g, "config/tools/lighthouserc.json");
+  updated = updated.replace(/config\/\.memoryignore/g, ".memory/.memory/config/.memoryignore");
 
   updated = updated.replace(
     /docker\/docker-compose\.portal\.yml/g,
@@ -290,10 +252,7 @@ function referenceReplacer(content, filePath) {
   updated = updated.replace(/report\//g, "docs/reports/");
 
   updated = updated.replace(/ltm\//g, ".memory/data/.memory/data/ltm/");
-  updated = updated.replace(
-    /memory\/decisions\.md/g,
-    ".memory/data/decisions.md",
-  );
+  updated = updated.replace(/memory\/decisions\.md/g, ".memory/data/decisions.md");
 
   return updated;
 }
@@ -325,18 +284,12 @@ for (const file of movedDockerFiles) {
   if (existsSync(filePath)) {
     let content = readFileSync(filePath, "utf8");
     content = content.replace(/context:\s*\./g, "context: ../../");
-    content = content.replace(
-      /env_file:\s*\.env\.tools/g,
-      "env_file: ../../.env.tools",
-    );
+    content = content.replace(/env_file:\s*\.env\.tools/g, "env_file: ../../.env.tools");
     content = content.replace(
       /env_file:\s*apps\/portal\/\.env/g,
       "env_file: ../../apps/portal/.env",
     );
-    content = content.replace(
-      /\.\/config\/nginx\.conf/g,
-      "../../config/nginx.conf",
-    );
+    content = content.replace(/\.\/config\/nginx\.conf/g, "../../config/nginx.conf");
     content = content.replace(/\.\/certs/g, "../../certs");
     content = content.replace(/\.\/test-results/g, "../../test-results");
 
@@ -348,10 +301,7 @@ for (const file of movedDockerFiles) {
 const monitoringCompose = join(ROOT, "infra/monitoring/docker-compose.yml");
 if (existsSync(monitoringCompose)) {
   let content = readFileSync(monitoringCompose, "utf8");
-  content = content.replace(
-    /\.\/monitoring\/prometheus\.yml/g,
-    "./prometheus.yml",
-  );
+  content = content.replace(/\.\/monitoring\/prometheus\.yml/g, "./prometheus.yml");
   writeFileSync(monitoringCompose, content, "utf8");
   console.log(`Adjusted relative paths in: ${monitoringCompose}`);
 }

@@ -216,11 +216,7 @@ describe("SyncQueue", () => {
   describe("enqueueAction", () => {
     it("enqueues an action and returns an idempotency key", async () => {
       (syncQueue as any).db = fakeIDBDB;
-      const key = await syncQueue.enqueueAction(
-        "ADD_DAILY_LOG",
-        { note: "test" },
-        "dept-1",
-      );
+      const key = await syncQueue.enqueueAction("ADD_DAILY_LOG", { note: "test" }, "dept-1");
       expect(typeof key).toBe("string");
       expect(key).toMatch(/^uuid-/);
     });
@@ -228,11 +224,7 @@ describe("SyncQueue", () => {
     it("enqueues and does not call fetch when offline", async () => {
       (syncQueue as any).db = fakeIDBDB;
       (global as any).navigator = { onLine: false };
-      const key = await syncQueue.enqueueAction(
-        "ADD_SAFETY_INCIDENT",
-        { title: "slip" },
-        "dept-2",
-      );
+      const key = await syncQueue.enqueueAction("ADD_SAFETY_INCIDENT", { title: "slip" }, "dept-2");
       expect(typeof key).toBe("string");
       // No fetch because navigator.onLine=false
       expect((global as any).fetch).not.toHaveBeenCalled();
@@ -242,11 +234,7 @@ describe("SyncQueue", () => {
       (syncQueue as any).db = fakeIDBDB;
       (global as any).navigator = { onLine: true };
       (global as any).fetch = jest.fn().mockResolvedValue({ ok: true });
-      await syncQueue.enqueueAction(
-        "RESOLVE_BREAKDOWN",
-        { id: "b1" },
-        "dept-1",
-      );
+      await syncQueue.enqueueAction("RESOLVE_BREAKDOWN", { id: "b1" }, "dept-1");
       // processQueue runs async — just confirm enqueue returns a key
       await new Promise((r) => setTimeout(r, 20));
       expect((global as any).fetch).toHaveBeenCalled();

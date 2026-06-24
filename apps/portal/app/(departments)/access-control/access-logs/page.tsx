@@ -43,61 +43,50 @@ export default async function AccessLogsPage({
     department: "access-control",
   });
 
-  const { logs, totalCount } = await getAccessLogsForDepartment(
-    deptId,
-    page,
-    pageSize,
-  );
+  const { logs, totalCount } = await getAccessLogsForDepartment(deptId, page, pageSize);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const resolvedLogs = ((logs ?? []) as unknown as AccessLogWithBadge[]).map(
-    (log) => {
-      const { badge } = log;
-      let entityName = "Unknown";
-      let entityType: string = badge?.entity_type ?? "Unknown";
+  const resolvedLogs = ((logs ?? []) as unknown as AccessLogWithBadge[]).map((log) => {
+    const { badge } = log;
+    let entityName = "Unknown";
+    let entityType: string = badge?.entity_type ?? "Unknown";
 
-      if (badge?.personnel) {
-        entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
-        entityType = "Employee";
-      } else if (badge?.visitor) {
-        entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
-        entityType = "Visitor";
+    if (badge?.personnel) {
+      entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
+      entityType = "Employee";
+    } else if (badge?.visitor) {
+      entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
+      entityType = "Visitor";
+    }
+
+    let status = log.access_granted ? "Granted" : "Denied";
+    if (!log.access_granted && log.denial_reason) {
+      if (log.denial_reason.includes("Expired") || log.denial_reason.includes("expired")) {
+        status = "Expired Credential";
+      } else if (log.denial_reason.includes("Tailgate")) {
+        status = "Tailgate Alert";
       }
+    }
 
-      let status = log.access_granted ? "Granted" : "Denied";
-      if (!log.access_granted && log.denial_reason) {
-        if (
-          log.denial_reason.includes("Expired") ||
-          log.denial_reason.includes("expired")
-        ) {
-          status = "Expired Credential";
-        } else if (log.denial_reason.includes("Tailgate")) {
-          status = "Tailgate Alert";
-        }
-      }
-
-      return {
-        id: log.id,
-        timestamp: log.scanned_at,
-        entityName,
-        entityType,
-        qrCodeId: badge?.qr_code ?? "N/A",
-        zone: log.gate_location,
-        accessMethod: log.access_type ?? "QR Scan",
-        status,
-        direction: log.direction,
-      };
-    },
-  );
+    return {
+      id: log.id,
+      timestamp: log.scanned_at,
+      entityName,
+      entityType,
+      qrCodeId: badge?.qr_code ?? "N/A",
+      zone: log.gate_location,
+      accessMethod: log.access_type ?? "QR Scan",
+      status,
+      direction: log.direction,
+    };
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-            Access Logs
-          </h2>
+          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Access Logs</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Recent scan events across all entry points for this department.
           </p>
@@ -110,9 +99,7 @@ export default async function AccessLogsPage({
             <Clock className="w-4 h-4 mr-2 text-[var(--text-muted)]" />
             Recent Events
           </h3>
-          <span className="text-xs text-[var(--text-muted)]">
-            {totalCount} total events
-          </span>
+          <span className="text-xs text-[var(--text-muted)]">{totalCount} total events</span>
         </div>
         <Table>
           <TableHeader>
@@ -120,25 +107,16 @@ export default async function AccessLogsPage({
               <TableHead className="text-[var(--text-muted)]">Time</TableHead>
               <TableHead className="text-[var(--text-muted)]">Entity</TableHead>
               <TableHead className="text-[var(--text-muted)]">Type</TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                QR Code
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">QR Code</TableHead>
               <TableHead className="text-[var(--text-muted)]">Zone</TableHead>
-              <TableHead className="text-[var(--text-muted)]">
-                Direction
-              </TableHead>
-              <TableHead className="text-right text-[var(--text-muted)]">
-                Status
-              </TableHead>
+              <TableHead className="text-[var(--text-muted)]">Direction</TableHead>
+              <TableHead className="text-right text-[var(--text-muted)]">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {resolvedLogs.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center py-8 text-[var(--text-muted)]"
-                >
+                <TableCell colSpan={7} className="text-center py-8 text-[var(--text-muted)]">
                   No access logs found for this department.
                 </TableCell>
               </TableRow>
@@ -165,12 +143,8 @@ export default async function AccessLogsPage({
                 <TableCell className="font-mono text-sm text-[var(--accent-blue)]">
                   {log.qrCodeId}
                 </TableCell>
-                <TableCell className="text-[var(--text-secondary)]">
-                  {log.zone}
-                </TableCell>
-                <TableCell className="text-[var(--text-secondary)]">
-                  {log.direction}
-                </TableCell>
+                <TableCell className="text-[var(--text-secondary)]">{log.zone}</TableCell>
+                <TableCell className="text-[var(--text-secondary)]">{log.direction}</TableCell>
                 <TableCell className="text-right">
                   {log.status === "Granted" ? (
                     <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
@@ -188,9 +162,7 @@ export default async function AccessLogsPage({
                       Expired
                     </span>
                   ) : (
-                    <span className="text-xs text-[var(--text-muted)] font-mono">
-                      {log.status}
-                    </span>
+                    <span className="text-xs text-[var(--text-muted)] font-mono">{log.status}</span>
                   )}
                 </TableCell>
               </TableRow>

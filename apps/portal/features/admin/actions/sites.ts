@@ -24,11 +24,7 @@ async function assertAdmin() {
   return { supabase, employee };
 }
 
-export async function adminAddSite(data: {
-  name: string;
-  site_code: string;
-  active?: boolean;
-}) {
+export async function adminAddSite(data: { name: string; site_code: string; active?: boolean }) {
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };
 
@@ -67,10 +63,8 @@ export async function adminUpdateSite(
 
   const name = data.name?.trim();
   const siteCode = data.site_code?.trim().toUpperCase();
-  if (name !== undefined && !name)
-    return { error: "Site name cannot be empty." };
-  if (siteCode !== undefined && !siteCode)
-    return { error: "Site code cannot be empty." };
+  if (name !== undefined && !name) return { error: "Site name cannot be empty." };
+  if (siteCode !== undefined && !siteCode) return { error: "Site code cannot be empty." };
 
   const { error } = await supabase
     .from("sites")

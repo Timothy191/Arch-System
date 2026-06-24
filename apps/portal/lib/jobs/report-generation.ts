@@ -28,14 +28,8 @@ export const generateReportFn: InngestFunction.Any = inngest.createFunction(
         .gte("date", dateFrom)
         .lte("date", dateTo);
 
-      const totalCoal = productionLogs?.reduce(
-        (sum, log) => sum + (log.coal_tonnes ?? 0),
-        0,
-      );
-      const totalWaste = productionLogs?.reduce(
-        (sum, log) => sum + (log.waste_tonnes ?? 0),
-        0,
-      );
+      const totalCoal = productionLogs?.reduce((sum, log) => sum + (log.coal_tonnes ?? 0), 0);
+      const totalWaste = productionLogs?.reduce((sum, log) => sum + (log.waste_tonnes ?? 0), 0);
 
       const reportData = {
         department_id: departmentId,
@@ -47,9 +41,7 @@ export const generateReportFn: InngestFunction.Any = inngest.createFunction(
         generated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from("generated_reports")
-        .insert(reportData);
+      const { error } = await supabase.from("generated_reports").insert(reportData);
 
       if (error) throw error;
 
@@ -64,11 +56,7 @@ export const generateReportFn: InngestFunction.Any = inngest.createFunction(
       });
       throw err;
     } finally {
-      recordJobExecution(
-        "generate-shift-report",
-        performance.now() - start,
-        success,
-      );
+      recordJobExecution("generate-shift-report", performance.now() - start, success);
     }
   },
 );

@@ -9,10 +9,7 @@ interface FocusModeToggleProps {
   variant?: "default" | "icon";
 }
 
-export function FocusModeToggle({
-  className,
-  variant = "default",
-}: FocusModeToggleProps) {
+export function FocusModeToggle({ className, variant = "default" }: FocusModeToggleProps) {
   const { enabled, toggle } = useFocusMode();
 
   if (variant === "icon") {

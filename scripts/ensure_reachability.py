@@ -1,9 +1,28 @@
 #!/usr/bin/env python3
+"""
+Arch-System LAN Reachability Configurator
+
+Purpose:
+This script automates the configuration of Supabase and Fuxa URLs in `.env`
+files and `config.toml` to point to the host's LAN IP address. It is crucial
+for local development environments where services (like Supabase Edge Functions,
+mobile clients, or Fuxa SCADA panels) need to be reachable from other devices
+on the local network.
+
+Usage:
+  ./ensure_reachability.py [LAN_IP] [ANON_KEY] [SERVICE_KEY]
+
+If no arguments are provided, it attempts to dynamically detect the active LAN IP.
+If detection fails (e.g. returns a loopback address), it will prompt the user to
+manually enter the IP.
+"""
+
 import os
 import re
 import socket
 import sys
 import shutil
+import secrets
 
 # Paths
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -28,6 +47,16 @@ def get_primary_ip():
     finally:
         s.close()
     return ip
+
+def generate_dummy_jwt(role="anon"):
+    """Generates a dummy HS256 JWT structure for local development if keys are missing."""
+    header = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" # {"alg":"HS256","typ":"JWT"}
+    if role == "anon":
+        payload = "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ"
+    else:
+        payload = "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjIwMDAwMDAwMDB9"
+    signature = secrets.token_urlsafe(32).replace('-', '').replace('_', '')[:43]
+    return f"{header}.{payload}.{signature}"
 
 def update_file(file_path, replacements):
     """Safely updates a file by applying a list of regex patterns and backups."""
@@ -76,9 +105,20 @@ def main():
     else:
         lan_ip = get_primary_ip()
         if lan_ip == '127.0.0.1' or lan_ip.startswith('127.'):
-            print("[-] Warning: Loopback IP detected. Please connect to Wi-Fi/Ethernet.")
-            sys.exit(1)
-        print(f"[*] Detected Host LAN IP Address: {lan_ip}")
+            print("[-] Warning: Loopback IP detected. This will not be reachable on the LAN.")
+            manual_ip = input("Please manually enter your LAN IP (or press Enter to keep 127.0.0.1): ").strip()
+            if manual_ip:
+                lan_ip = manual_ip
+        
+        print(f"[*] Configured Target IP Address: {lan_ip}")
+
+        # Optionally prompt to generate dummy keys if not passing args
+        if not anon_key or not service_key:
+            gen_keys = input("Do you want to generate dummy Supabase keys for local development? (y/N): ").strip().lower()
+            if gen_keys == 'y':
+                anon_key = generate_dummy_jwt("anon")
+                service_key = generate_dummy_jwt("service_role")
+                print("[+] Dummy keys generated for local development.")
 
     # 2. Prepare replacement rules
     # .env rules (Root and Portal)
@@ -112,10 +152,15 @@ def main():
     print("-" * 60)
     if updated_any:
         print(f"[!] Reachability config updated to IP: {lan_ip}")
+        print("[!] Remember to sync these changes with deploy or local scripts if needed.")
         print("[!] Restart your Next.js and Supabase servers to apply changes.")
     else:
         print(f"[✓] Configurations are already correct for IP: {lan_ip}")
     print("=" * 60)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n[-] Operation cancelled.")
+        sys.exit(1)

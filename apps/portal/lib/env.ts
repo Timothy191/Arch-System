@@ -33,9 +33,7 @@ const envSchema = z.object({
 
   // ── Server — optional with defaults ────────────────────────────────
   PORT: z.coerce.number().int().positive().default(3000),
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 
   // ── Redis (optional, used only when configured) ────────────────────
   REDIS_URL: z.string().optional(),
@@ -136,8 +134,7 @@ function parseEnv(): EnvVars {
     N8N_PASSWORD: process.env.N8N_PASSWORD,
     FLOWISE_URL: process.env.FLOWISE_URL,
     NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
-    NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID:
-      process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
+    NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,
     ENABLE_LOAD_ADAPTIVE_TEST: process.env.ENABLE_LOAD_ADAPTIVE_TEST,
     DISABLE_RATE_LIMIT: process.env.DISABLE_RATE_LIMIT,
     RATE_LIMIT_IP_WHITELIST: process.env.RATE_LIMIT_IP_WHITELIST,
@@ -158,9 +155,7 @@ function parseEnv(): EnvVars {
   const cleaned = Object.fromEntries(
     Object.entries(raw).map(([key, val]) => [
       key,
-      typeof val === "string" && (val.trim() === "" || val.trim() === "...")
-        ? undefined
-        : val,
+      typeof val === "string" && (val.trim() === "" || val.trim() === "...") ? undefined : val,
     ]),
   ) as Record<keyof typeof raw, unknown>;
 
@@ -171,20 +166,11 @@ function parseEnv(): EnvVars {
 
     if (raw.NODE_ENV === "production") {
       const missing = result.error.issues
-        .filter(
-          (i) =>
-            i.code === "invalid_type" &&
-            "received" in i &&
-            i.received === "undefined",
-        )
+        .filter((i) => i.code === "invalid_type" && "received" in i && i.received === "undefined")
         .map((i) => i.path.join("."));
       if (missing.length > 0) {
-        console.error(
-          `[env] Missing required environment variables:\n  ${missing.join("\n  ")}`,
-        );
-        throw new Error(
-          `Missing required environment variables: ${missing.join(", ")}`,
-        );
+        console.error(`[env] Missing required environment variables:\n  ${missing.join("\n  ")}`);
+        throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
       }
     }
 

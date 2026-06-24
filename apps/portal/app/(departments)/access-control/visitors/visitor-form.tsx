@@ -51,8 +51,7 @@ export function VisitorForm() {
         toast.error("Registration failed");
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "An unexpected error occurred";
+      const message = err instanceof Error ? err.message : "An unexpected error occurred";
       setError(message);
       toast.error("An error occurred", {
         description: message,
@@ -66,9 +65,7 @@ export function VisitorForm() {
         <div className="p-2 bg-[var(--accent-blue)]/10 rounded-lg">
           <Users className="w-5 h-5 text-[var(--accent-blue)]" />
         </div>
-        <h3 className="font-semibold text-[var(--text-heading)]">
-          New Registration
-        </h3>
+        <h3 className="font-semibold text-[var(--text-heading)]">New Registration</h3>
       </div>
 
       <form ref={formRef} action={clientAction} className="space-y-4">
@@ -134,9 +131,7 @@ export function VisitorForm() {
           />
         </div>
 
-        {error && (
-          <p className="text-xs font-medium text-red-500 mt-2">{error}</p>
-        )}
+        {error && <p className="text-xs font-medium text-red-500 mt-2">{error}</p>}
 
         <div className="pt-4">
           <SubmitButton />

@@ -4,12 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [database, backend, architecture, decision]
-sources:
-  [
-    docs/wiki/concepts/supabase-local-dev.md,
-    docs/wiki/concepts/rls-policy.md,
-    CLAUDE.md,
-  ]
+sources: [docs/wiki/concepts/supabase-local-dev.md, docs/wiki/concepts/rls-policy.md, CLAUDE.md]
 confidence: high
 ---
 

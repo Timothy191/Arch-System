@@ -752,12 +752,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "idempotencyKey",
-                  "actionType",
-                  "payload",
-                  "departmentId"
-                ],
+                "required": ["idempotencyKey", "actionType", "payload", "departmentId"],
                 "properties": {
                   "idempotencyKey": {
                     "type": "string",
@@ -936,6 +931,16 @@
                 "schema": {
                   "type": "string",
                   "description": "Prometheus metrics exposition format"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Scrape token mismatch",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }

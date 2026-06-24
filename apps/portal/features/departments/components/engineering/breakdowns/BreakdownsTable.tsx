@@ -10,10 +10,7 @@ interface BreakdownsTableProps {
   showStatus: boolean;
 }
 
-export function BreakdownsTable({
-  breakdowns,
-  showStatus,
-}: BreakdownsTableProps) {
+export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -144,19 +141,13 @@ export function BreakdownsTable({
                       b.missing_book_in ? "border-l-2 border-l-blue-500" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 text-violet-400 font-medium">
-                      {b.fleet_id}
-                    </td>
+                    <td className="px-4 py-3 text-violet-400 font-medium">{b.fleet_id}</td>
                     <td className="px-4 py-3 text-[var(--text-heading)]">
                       {b.machine_name || b.fleet_id}
                     </td>
                     <td className="px-4 py-3 text-[#ccc]">{b.machine_type}</td>
-                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">
-                      {b.date_in}
-                    </td>
-                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">
-                      {b.date_out || "—"}
-                    </td>
+                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{b.date_in}</td>
+                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{b.date_out || "—"}</td>
                     <td className="px-4 py-3">
                       {b.status === "completed" ? (
                         <span className="px-2 py-0.5 rounded-full text-xs bg-accent-green/10 border border-accent-green/20 text-accent-green">
@@ -166,9 +157,7 @@ export function BreakdownsTable({
                         <span className="text-[var(--text-secondary)]">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#ccc] max-w-[200px] truncate">
-                      {b.reason}
-                    </td>
+                    <td className="px-4 py-3 text-[#ccc] max-w-[200px] truncate">{b.reason}</td>
                     {showStatus && (
                       <td className="px-4 py-3">
                         {b.status === "completed" ? (
@@ -189,9 +178,7 @@ export function BreakdownsTable({
                           Missing Book-In
                         </span>
                       ) : (
-                        <span className="text-[var(--text-secondary)] text-xs">
-                          Normal
-                        </span>
+                        <span className="text-[var(--text-secondary)] text-xs">Normal</span>
                       )}
                     </td>
                   </tr>

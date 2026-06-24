@@ -34,12 +34,7 @@ export function ActionConfirmDialog({
   };
 
   return (
-    <AnimatedDialog
-      open={open}
-      onClose={onClose}
-      title={title}
-      description={description}
-    >
+    <AnimatedDialog open={open} onClose={onClose} title={title} description={description}>
       <div className="flex justify-end gap-3 mt-6">
         <Button
           variant="ghost"

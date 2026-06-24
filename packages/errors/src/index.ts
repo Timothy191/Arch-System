@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export class AppError extends Error {
   public code?: string;
   public statusCode?: number;
@@ -228,22 +229,14 @@ export class APIError extends AppError {
     let extra: Record<string, unknown> = {};
 
     if (responseOrOptions) {
-      if (
-        "status" in responseOrOptions &&
-        typeof (responseOrOptions as any).status === "number"
-      ) {
+      if ("status" in responseOrOptions && typeof (responseOrOptions as any).status === "number") {
         response = responseOrOptions as Response;
         statusCode = (responseOrOptions as any).status;
       } else {
         statusCode = (responseOrOptions as any).statusCode;
         context = (responseOrOptions as any).context;
         cause = (responseOrOptions as any).cause;
-        const {
-          statusCode: _,
-          context: __,
-          cause: ___,
-          ...rest
-        } = responseOrOptions as any;
+        const { statusCode: _, context: __, cause: ___, ...rest } = responseOrOptions as any;
         extra = rest;
       }
     }

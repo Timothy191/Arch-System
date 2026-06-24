@@ -24,17 +24,13 @@ export const Default: Story = {
       <TabsContent value="account">
         <div className="p-4 border rounded-md bg-white/50">
           <p className="text-sm font-medium">Account Details</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Manage your system credentials.
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Manage your system credentials.</p>
         </div>
       </TabsContent>
       <TabsContent value="password">
         <div className="p-4 border rounded-md bg-white/50">
           <p className="text-sm font-medium">Security Policy</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Update your access codes.
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Update your access codes.</p>
         </div>
       </TabsContent>
     </Tabs>

@@ -490,14 +490,7 @@ export const DATABASE_SCHEMA = [
   {
     name: "machines",
     rls: true,
-    columns: [
-      "id (UUID PK)",
-      "department_id (FK)",
-      "name",
-      "type",
-      "status",
-      "created_at",
-    ],
+    columns: ["id (UUID PK)", "department_id (FK)", "name", "type", "status", "created_at"],
     description: "Per-department equipment",
   },
   {
@@ -517,25 +510,13 @@ export const DATABASE_SCHEMA = [
   {
     name: "machine_hours",
     rls: true,
-    columns: [
-      "id (UUID PK)",
-      "daily_log_id (FK)",
-      "machine_id (FK)",
-      "hours",
-      "created_at",
-    ],
+    columns: ["id (UUID PK)", "daily_log_id (FK)", "machine_id (FK)", "hours", "created_at"],
     description: "Child of daily_logs",
   },
   {
     name: "fuel_logs",
     rls: true,
-    columns: [
-      "id (UUID PK)",
-      "daily_log_id (FK)",
-      "machine_id (FK)",
-      "liters",
-      "created_at",
-    ],
+    columns: ["id (UUID PK)", "daily_log_id (FK)", "machine_id (FK)", "liters", "created_at"],
     description: "Fuel consumption records",
   },
   {

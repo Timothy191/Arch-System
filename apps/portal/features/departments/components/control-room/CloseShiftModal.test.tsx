@@ -15,13 +15,7 @@ jest.mock("~/lib/shift-closeout", () => ({
 }));
 
 jest.mock("@repo/ui/GlassCard", () => ({
-  GlassCard: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
     </div>
@@ -49,40 +43,24 @@ describe("CloseShiftModal", () => {
     render(<CloseShiftModal {...mockProps} />);
 
     expect(screen.getByText("Validating shift data...")).toBeInTheDocument();
-    expect(closeShift).toHaveBeenCalledWith(
-      "dept-123",
-      "2026-06-15",
-      "day",
-      "",
-      "",
-      true,
-    );
+    expect(closeShift).toHaveBeenCalledWith("dept-123", "2026-06-15", "day", "", "", true);
   });
 
   it("should transition to has_errors state if validation fails", async () => {
     (closeShift as jest.Mock).mockResolvedValue({
-      errors: [
-        "Machine M001 is missing hourly loads",
-        "Operator O002 has unacknowledged alerts",
-      ],
+      errors: ["Machine M001 is missing hourly loads", "Operator O002 has unacknowledged alerts"],
     });
 
     render(<CloseShiftModal {...mockProps} />);
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "Cannot close shift until the following are resolved:",
-        ),
+        screen.getByText("Cannot close shift until the following are resolved:"),
       ).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByText("Machine M001 is missing hourly loads"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Operator O002 has unacknowledged alerts"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Machine M001 is missing hourly loads")).toBeInTheDocument();
+    expect(screen.getByText("Operator O002 has unacknowledged alerts")).toBeInTheDocument();
 
     const closeBtn = screen.getByRole("button", { name: "Close" });
     fireEvent.click(closeBtn);
@@ -96,17 +74,13 @@ describe("CloseShiftModal", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "All machines accounted for. Supervisor PIN required to close.",
-        ),
+        screen.getByText("All machines accounted for. Supervisor PIN required to close."),
       ).toBeInTheDocument();
     });
 
     expect(screen.getByLabelText("Close modal")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("e.g. EMP001")).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("Enter supervisor PIN"),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Enter supervisor PIN")).toBeInTheDocument();
   });
 
   it("should handle invalid PIN input and display verification error", async () => {
@@ -130,9 +104,7 @@ describe("CloseShiftModal", () => {
     fireEvent.click(verifyBtn);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Invalid employee code or PIN"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Invalid employee code or PIN")).toBeInTheDocument();
     });
 
     // Verify it allows retrying validation

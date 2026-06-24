@@ -65,9 +65,7 @@ Your objective is to execute the instructions precisely. Output only the clear, 
 
       return response.choices?.[0]?.message?.content || "";
     } catch (error: any) {
-      throw new Error(
-        `Specialist subagent [${task.id}] failed: ${error.message}`,
-      );
+      throw new Error(`Specialist subagent [${task.id}] failed: ${error.message}`);
     }
   }
 

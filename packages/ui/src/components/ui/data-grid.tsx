@@ -46,11 +46,7 @@ export function DataGrid({
   const gridRef = React.useRef<any>(null);
 
   const sortingProp =
-    typeof sorting === "boolean"
-      ? sorting
-        ? { additive: false }
-        : undefined
-      : sorting;
+    typeof sorting === "boolean" ? (sorting ? { additive: false } : undefined) : sorting;
 
   return (
     <GlassCard className={cn("overflow-hidden p-0", className)}>
@@ -58,8 +54,7 @@ export function DataGrid({
         className="w-full"
         style={{
           height,
-          fontFamily:
-            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         <RevoGrid

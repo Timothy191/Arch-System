@@ -6,16 +6,9 @@ import { revalidatePath } from "next/cache";
 import { logAuditEvent } from "@/lib/audit";
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
-import type {
-  CreateBreakdownInput,
-  BookOutInput,
-  DirectCheckoutInput,
-} from "./types";
+import type { CreateBreakdownInput, BookOutInput, DirectCheckoutInput } from "./types";
 
-export async function createBreakdown(
-  departmentId: string,
-  input: CreateBreakdownInput,
-) {
+export async function createBreakdown(departmentId: string, input: CreateBreakdownInput) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -61,10 +54,7 @@ export async function createBreakdown(
   return { success: true };
 }
 
-export async function bookOutBreakdown(
-  breakdownId: string,
-  input: BookOutInput,
-) {
+export async function bookOutBreakdown(breakdownId: string, input: BookOutInput) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -121,10 +111,7 @@ export async function bookOutBreakdown(
   return { success: true };
 }
 
-export async function directCheckout(
-  departmentId: string,
-  input: DirectCheckoutInput,
-) {
+export async function directCheckout(departmentId: string, input: DirectCheckoutInput) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

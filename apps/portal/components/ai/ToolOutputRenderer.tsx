@@ -34,9 +34,7 @@ function MachineStatusOutput({ output }: { output: Record<string, unknown> }) {
             key={i}
             className="flex items-center justify-between text-xs px-2 py-1 rounded bg-arch-surface-tertiary/50"
           >
-            <span className="text-arch-text-primary font-medium">
-              {String(m.name ?? "—")}
-            </span>
+            <span className="text-arch-text-primary font-medium">{String(m.name ?? "—")}</span>
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                 m.active
@@ -76,12 +74,8 @@ function ShiftLogsOutput({ output }: { output: Record<string, unknown> }) {
             className="flex items-center gap-2 text-xs px-2 py-1 rounded bg-arch-surface-tertiary/50"
           >
             <ClipboardList className="w-3 h-3 text-arch-accent-blue shrink-0" />
-            <span className="text-arch-text-secondary">
-              {String(log.log_date ?? "—")}
-            </span>
-            <span className="text-arch-text-tertiary">
-              {String(log.shift ?? "—")}
-            </span>
+            <span className="text-arch-text-secondary">{String(log.log_date ?? "—")}</span>
+            <span className="text-arch-text-tertiary">{String(log.shift ?? "—")}</span>
           </div>
         ))}
       </div>
@@ -92,8 +86,7 @@ function ShiftLogsOutput({ output }: { output: Record<string, unknown> }) {
 function DelaysOutput({ output }: { output: Record<string, unknown> }) {
   const delays = (output.delays as Array<Record<string, unknown>>) ?? [];
   const totalMinutes = delays.reduce(
-    (sum, d) =>
-      sum + (typeof d.delay_minutes === "number" ? d.delay_minutes : 0),
+    (sum, d) => sum + (typeof d.delay_minutes === "number" ? d.delay_minutes : 0),
     0,
   );
 
@@ -125,13 +118,9 @@ function DelaysOutput({ output }: { output: Record<string, unknown> }) {
             className="flex items-center gap-2 text-xs px-2 py-1 rounded bg-arch-surface-tertiary/50"
           >
             <Clock className="w-3 h-3 text-arch-accent-blue shrink-0" />
-            <span className="text-arch-text-secondary">
-              {String(d.reason ?? "—")}
-            </span>
+            <span className="text-arch-text-secondary">{String(d.reason ?? "—")}</span>
             <span className="text-arch-text-tertiary ml-auto">
-              {typeof d.delay_minutes === "number"
-                ? `${d.delay_minutes} min`
-                : "—"}
+              {typeof d.delay_minutes === "number" ? `${d.delay_minutes} min` : "—"}
             </span>
             <span
               className={`px-1 py-0.5 rounded text-[10px] font-semibold ${

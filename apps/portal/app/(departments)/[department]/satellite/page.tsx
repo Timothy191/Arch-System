@@ -1,15 +1,9 @@
 import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  generateDeformationReadings,
-  DEFAULT_MINE_CENTER,
-} from "@/lib/monitoring-api";
+import { generateDeformationReadings, DEFAULT_MINE_CENTER } from "@/lib/monitoring-api";
 import { SatelliteMonitoringClient } from "@/components/monitoring/SatelliteMonitoringClient";
 
 export default function ControlRoomSatellitePage() {
-  const readings = generateDeformationReadings(
-    DEFAULT_MINE_CENTER.lat,
-    DEFAULT_MINE_CENTER.lon,
-  );
+  const readings = generateDeformationReadings(DEFAULT_MINE_CENTER.lat, DEFAULT_MINE_CENTER.lon);
   const critical = readings.filter((r) => r.level === "critical").length;
   const moderate = readings.filter((r) => r.level === "moderate").length;
 
@@ -17,9 +11,7 @@ export default function ControlRoomSatellitePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-medium text-[var(--text-heading)]">
-            Satellite Monitoring
-          </h2>
+          <h2 className="text-xl font-medium text-[var(--text-heading)]">Satellite Monitoring</h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
             Sentinel-1 InSAR deformation · Real-time site overview
           </p>
@@ -52,9 +44,7 @@ export default function ControlRoomSatellitePage() {
         </GlassCard>
         <GlassCard>
           <p className="system-label">Sensor</p>
-          <p className="text-sm font-bold text-[var(--text-heading)] mt-1">
-            Sentinel-1
-          </p>
+          <p className="text-sm font-bold text-[var(--text-heading)] mt-1">Sentinel-1</p>
           <p className="system-label">InSAR</p>
         </GlassCard>
       </div>

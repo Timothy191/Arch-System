@@ -92,10 +92,7 @@ export function MachineOperationsForm({
   useEffect(() => {
     const interval = setInterval(() => {
       if (formData.machineId || formData.operatorId) {
-        localStorage.setItem(
-          getAutoSaveKey(departmentId),
-          JSON.stringify(formData),
-        );
+        localStorage.setItem(getAutoSaveKey(departmentId), JSON.stringify(formData));
         setLastSaved(new Date());
       }
     }, 30000);
@@ -237,9 +234,7 @@ export function MachineOperationsForm({
     <GlassCard>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Log Machine Operation
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Log Machine Operation</h3>
           {lastSaved && (
             <span className="text-[var(--text-muted)] text-xs">
               Draft saved {lastSaved.toLocaleTimeString()}
@@ -255,9 +250,7 @@ export function MachineOperationsForm({
             </label>
             <select
               value={formData.machineId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, machineId: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, machineId: e.target.value }))}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             >
               <option value="">Select machine...</option>
@@ -267,9 +260,7 @@ export function MachineOperationsForm({
                 </option>
               ))}
             </select>
-            {errors.machineId && (
-              <p className="text-accent-red text-xs">{errors.machineId}</p>
-            )}
+            {errors.machineId && <p className="text-accent-red text-xs">{errors.machineId}</p>}
           </div>
 
           {/* Operator Dropdown */}
@@ -279,9 +270,7 @@ export function MachineOperationsForm({
             </label>
             <select
               value={formData.operatorId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, operatorId: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, operatorId: e.target.value }))}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             >
               <option value="">Select operator...</option>
@@ -291,9 +280,7 @@ export function MachineOperationsForm({
                 </option>
               ))}
             </select>
-            {errors.operatorId && (
-              <p className="text-accent-red text-xs">{errors.operatorId}</p>
-            )}
+            {errors.operatorId && <p className="text-accent-red text-xs">{errors.operatorId}</p>}
           </div>
 
           {/* Site Dropdown */}
@@ -303,9 +290,7 @@ export function MachineOperationsForm({
             </label>
             <select
               value={formData.siteId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, siteId: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, siteId: e.target.value }))}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             >
               <option value="">Select site...</option>
@@ -315,9 +300,7 @@ export function MachineOperationsForm({
                 </option>
               ))}
             </select>
-            {errors.siteId && (
-              <p className="text-accent-red text-xs">{errors.siteId}</p>
-            )}
+            {errors.siteId && <p className="text-accent-red text-xs">{errors.siteId}</p>}
           </div>
 
           {/* Shift Type */}
@@ -356,47 +339,33 @@ export function MachineOperationsForm({
             <input
               type="time"
               value={formData.startTime}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, startTime: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             />
-            {errors.startTime && (
-              <p className="text-accent-red text-xs">{errors.startTime}</p>
-            )}
+            {errors.startTime && <p className="text-accent-red text-xs">{errors.startTime}</p>}
           </div>
 
           {/* End Time */}
           <div className="space-y-2">
-            <label className="text-[var(--text-secondary)] text-sm block">
-              End Time
-            </label>
+            <label className="text-[var(--text-secondary)] text-sm block">End Time</label>
             <input
               type="time"
               value={formData.endTime}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, endTime: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
               className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             />
-            {errors.endTime && (
-              <p className="text-accent-red text-xs">{errors.endTime}</p>
-            )}
+            {errors.endTime && <p className="text-accent-red text-xs">{errors.endTime}</p>}
           </div>
         </div>
 
         {/* Hours Worked Display */}
         {hoursWorked !== null && (
           <div className="flex items-center gap-4 p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-            <span className="text-[var(--text-muted)] text-sm">
-              Hours Worked:
-            </span>
+            <span className="text-[var(--text-muted)] text-sm">Hours Worked:</span>
             <span className="text-2xl font-medium text-[var(--accent-blue)]">
               {hoursWorked.toFixed(2)}h
             </span>
-            <span className="text-[var(--text-muted)] text-xs">
-              (auto-calculated)
-            </span>
+            <span className="text-[var(--text-muted)] text-xs">(auto-calculated)</span>
           </div>
         )}
 
@@ -413,9 +382,8 @@ export function MachineOperationsForm({
 
         {/* Help Text */}
         <p className="text-[var(--text-muted)] text-xs">
-          <span className="text-[var(--accent-blue)]">Tip:</span> End time is
-          optional. You can come back and add it later. Hours are calculated
-          automatically.
+          <span className="text-[var(--accent-blue)]">Tip:</span> End time is optional. You can come
+          back and add it later. Hours are calculated automatically.
         </p>
       </form>
 
@@ -427,11 +395,7 @@ export function MachineOperationsForm({
             onClick={() => setShowDelaySection(!showDelaySection)}
             className="flex items-center gap-2 text-[var(--text-secondary)] text-sm hover:text-[var(--text-heading)] transition-colors"
           >
-            {showDelaySection ? (
-              <ChevronUp size={18} />
-            ) : (
-              <ChevronDown size={18} />
-            )}
+            {showDelaySection ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             <Clock size={18} />
             <span className="font-medium">
               {showDelaySection ? "Hide Delay Entries" : "Add Delay Entries"}
@@ -440,10 +404,7 @@ export function MachineOperationsForm({
 
           {showDelaySection && (
             <div className="mt-4">
-              <DelayEntriesForm
-                machineOperationId={lastOperationId}
-                departmentId={departmentId}
-              />
+              <DelayEntriesForm machineOperationId={lastOperationId} departmentId={departmentId} />
             </div>
           )}
         </div>

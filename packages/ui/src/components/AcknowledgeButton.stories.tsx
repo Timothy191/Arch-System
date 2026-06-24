@@ -17,7 +17,6 @@ export const Default: Story = {
   args: {
     onAcknowledge: () => alert("Acknowledged!"),
     confirmTitle: "Confirm System Reset",
-    confirmDescription:
-      "Are you sure you want to acknowledge this critical system alert?",
+    confirmDescription: "Are you sure you want to acknowledge this critical system alert?",
   },
 };

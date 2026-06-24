@@ -251,12 +251,11 @@ export function PredictiveAnalysis({ machineData }: { machineData: any }) {
 
 ```typescript
 // Fetch multiple datasets in parallel
-const [{ data: machines }, { data: operators }, { data: sites }] =
-  await Promise.all([
-    supabase.from("machines").select("*").eq("department_id", dept.id),
-    supabase.from("operators").select("*").eq("department_id", dept.id),
-    supabase.from("sites").select("*").eq("department_id", dept.id),
-  ]);
+const [{ data: machines }, { data: operators }, { data: sites }] = await Promise.all([
+  supabase.from("machines").select("*").eq("department_id", dept.id),
+  supabase.from("operators").select("*").eq("department_id", dept.id),
+  supabase.from("sites").select("*").eq("department_id", dept.id),
+]);
 ```
 
 ### Pattern: Nested Data

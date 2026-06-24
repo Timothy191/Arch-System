@@ -4,8 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: query
 tags: [how-to, deployment, production, quick-reference]
-sources:
-  [docs/wiki/concepts/deployment.md, docs/wiki/concepts/incident-response.md]
+sources: [docs/wiki/concepts/deployment.md, docs/wiki/concepts/incident-response.md]
 confidence: high
 ---
 

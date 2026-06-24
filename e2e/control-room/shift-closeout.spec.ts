@@ -17,9 +17,7 @@ test.describe("department access control", () => {
     await expect(page.getByRole("heading", { name: "404" })).toBeVisible({
       timeout: 15000,
     });
-    await expect(
-      page.getByText("The page you are looking for does not exist."),
-    ).toBeVisible();
+    await expect(page.getByText("The page you are looking for does not exist.")).toBeVisible();
   });
 });
 
@@ -28,9 +26,9 @@ test.describe("shift coverage page", () => {
 
   test("loads with correct heading", async ({ page }) => {
     await page.goto("/control-room/shift-coverage");
-    await expect(
-      page.getByRole("heading", { name: "Shift Coverage" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Shift Coverage" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("displays date navigation controls", async ({ page }) => {
@@ -41,9 +39,7 @@ test.describe("shift coverage page", () => {
 
   test("shows Close-out History section", async ({ page }) => {
     await page.goto("/control-room/shift-coverage");
-    await expect(
-      page.getByRole("heading", { name: "Close-out History" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Close-out History" })).toBeVisible();
   });
 
   test("shows shift status indicator", async ({ page }) => {
@@ -59,8 +55,8 @@ test.describe("shift coverage page", () => {
 
   test("loads Machine Coverage section", async ({ page }) => {
     await page.goto("/control-room/shift-coverage");
-    await expect(
-      page.getByRole("heading", { name: "Machine Coverage" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Machine Coverage" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 });

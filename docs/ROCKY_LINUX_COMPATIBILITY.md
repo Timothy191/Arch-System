@@ -87,7 +87,7 @@ The systemd service file created by the script should work on Rocky Linux, but e
 
 ```bash
 # If you encounter SELinux issues with the service file:
-sudo restorecon -R /etc/infra/systemd/system/
+sudo restorecon -R /etc/systemd/system/
 sudo systemctl daemon-reload
 ```
 

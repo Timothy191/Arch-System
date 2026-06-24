@@ -23,9 +23,7 @@ export default async function DrillingReportsPage({
   });
 
   const to = toParam || new Date().toISOString().split("T")[0];
-  const from =
-    fromParam ||
-    new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 
   const { data: operations } = await supabase
     .from("drill_operations")
@@ -64,15 +62,9 @@ export default async function DrillingReportsPage({
     .order("operation_date", { ascending: false });
 
   const totalMeters =
-    operations?.reduce(
-      (sum, op) => sum + (Number(op.meters_drilled) || 0),
-      0,
-    ) || 0;
-  const totalHoles =
-    operations?.reduce((sum, op) => sum + (Number(op.holes) || 0), 0) || 0;
-  const totalHours =
-    operations?.reduce((sum, op) => sum + (Number(op.total_hours) || 0), 0) ||
-    0;
+    operations?.reduce((sum, op) => sum + (Number(op.meters_drilled) || 0), 0) || 0;
+  const totalHoles = operations?.reduce((sum, op) => sum + (Number(op.holes) || 0), 0) || 0;
+  const totalHours = operations?.reduce((sum, op) => sum + (Number(op.total_hours) || 0), 0) || 0;
   const totalDelays =
     operations?.reduce((sum, op) => {
       const production_delays =
@@ -91,9 +83,7 @@ export default async function DrillingReportsPage({
         (Number(op.delay_hydraulic) || 0) +
         (Number(op.delay_scheduled_maintenance) || 0) +
         (Number(op.delay_unscheduled_maintenance) || 0);
-      return (
-        sum + production_delays + non_productional_delays + engineering_delays
-      );
+      return sum + production_delays + non_productional_delays + engineering_delays;
     }, 0) || 0;
 
   function formatDelay(minutes: number): string {
@@ -139,8 +129,7 @@ export default async function DrillingReportsPage({
         (Number(op.delay_unscheduled_maintenance) || 0);
       return [
         op.operation_date,
-        (op.machines as unknown as { name: string } | undefined)?.name ||
-          "Unknown",
+        (op.machines as unknown as { name: string } | undefined)?.name || "Unknown",
         op.operator_name || "",
         op.block_drilled || "",
         op.total_hours ? op.total_hours.toFixed(2) : "",
@@ -155,9 +144,7 @@ export default async function DrillingReportsPage({
   ];
 
   const csvContent = csvRows
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-    )
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
   return (
@@ -186,46 +173,30 @@ export default async function DrillingReportsPage({
         <GlassCard>
           <div className="flex items-center gap-2">
             <Drill className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">
-              Total Meters Drilled
-            </p>
+            <p className="text-[var(--text-muted)] text-sm font-medium">Total Meters Drilled</p>
           </div>
-          <p className="text-2xl font-semibold text-accent-green mt-2">
-            {totalMeters.toFixed(1)}m
-          </p>
+          <p className="text-2xl font-semibold text-accent-green mt-2">{totalMeters.toFixed(1)}m</p>
         </GlassCard>
         <GlassCard>
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-[var(--accent-blue)]" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">
-              Total Holes Drilled
-            </p>
+            <p className="text-[var(--text-muted)] text-sm font-medium">Total Holes Drilled</p>
           </div>
-          <p className="text-2xl font-semibold text-[var(--accent-blue)] mt-2">
-            {totalHoles}
-          </p>
+          <p className="text-2xl font-semibold text-[var(--accent-blue)] mt-2">{totalHoles}</p>
         </GlassCard>
         <GlassCard>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-cyan-400" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">
-              Total Operating Hours
-            </p>
+            <p className="text-[var(--text-muted)] text-sm font-medium">Total Operating Hours</p>
           </div>
-          <p className="text-2xl font-semibold text-cyan-400 mt-2">
-            {totalHours.toFixed(1)}h
-          </p>
+          <p className="text-2xl font-semibold text-cyan-400 mt-2">{totalHours.toFixed(1)}h</p>
         </GlassCard>
         <GlassCard>
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-accent-blue" />
-            <p className="text-[var(--text-muted)] text-sm font-medium">
-              Total Delays
-            </p>
+            <p className="text-[var(--text-muted)] text-sm font-medium">Total Delays</p>
           </div>
-          <p className="text-2xl font-semibold text-accent-blue mt-2">
-            {formatDelay(totalDelays)}
-          </p>
+          <p className="text-2xl font-semibold text-accent-blue mt-2">{formatDelay(totalDelays)}</p>
         </GlassCard>
       </div>
 
@@ -233,26 +204,12 @@ export default async function DrillingReportsPage({
       <GlassCard>
         <form method="GET" className="flex items-end gap-4">
           <div className="flex-1 max-w-[200px]">
-            <label className="block text-sm text-[var(--text-muted)] mb-1">
-              From
-            </label>
-            <Input
-              type="date"
-              name="from"
-              defaultValue={from}
-              className="px-4 py-2"
-            />
+            <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
+            <Input type="date" name="from" defaultValue={from} className="px-4 py-2" />
           </div>
           <div className="flex-1 max-w-[200px]">
-            <label className="block text-sm text-[var(--text-muted)] mb-1">
-              To
-            </label>
-            <Input
-              type="date"
-              name="to"
-              defaultValue={to}
-              className="px-4 py-2"
-            />
+            <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
+            <Input type="date" name="to" defaultValue={to} className="px-4 py-2" />
           </div>
           <button
             type="submit"
@@ -344,20 +301,14 @@ export default async function DrillingReportsPage({
                   (Number(op.delay_scheduled_maintenance) || 0) +
                   (Number(op.delay_unscheduled_maintenance) || 0);
                 const totalOpDelays =
-                  production_delays +
-                  non_productional_delays +
-                  engineering_delays;
+                  production_delays + non_productional_delays + engineering_delays;
                 return (
-                  <tr
-                    key={op.id}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
+                  <tr key={op.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
                       {op.operation_date}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-body)] text-sm">
-                      {(op.machines as unknown as { name: string } | undefined)
-                        ?.name || "Unknown"}
+                      {(op.machines as unknown as { name: string } | undefined)?.name || "Unknown"}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-body)] text-sm">
                       {op.operator_name || "—"}
@@ -372,9 +323,7 @@ export default async function DrillingReportsPage({
                       {op.holes || 0}
                     </td>
                     <td className="px-6 py-4 text-accent-green text-sm text-right font-medium">
-                      {op.meters_drilled
-                        ? Number(op.meters_drilled).toFixed(1)
-                        : "—"}
+                      {op.meters_drilled ? Number(op.meters_drilled).toFixed(1) : "—"}
                     </td>
                     <td className="px-6 py-4 text-accent-blue text-sm text-right">
                       {formatDelay(totalOpDelays)}

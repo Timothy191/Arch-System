@@ -10,10 +10,7 @@ interface BookOutFormProps {
   activeBreakdowns: Breakdown[];
 }
 
-export function BookOutForm({
-  departmentId,
-  activeBreakdowns,
-}: BookOutFormProps) {
+export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -23,9 +20,7 @@ export function BookOutForm({
 
   // Normal book-out state
   const [selectedId, setSelectedId] = useState("");
-  const [dateOut, setDateOut] = useState(
-    new Date().toISOString().split("T")[0] ?? "",
-  );
+  const [dateOut, setDateOut] = useState(new Date().toISOString().split("T")[0] ?? "");
   const [timeOut, setTimeOut] = useState(new Date().toTimeString().slice(0, 5));
   const [repairNotes, setRepairNotes] = useState("");
 
@@ -121,9 +116,7 @@ export function BookOutForm({
     <div className="max-w-2xl">
       {/* Header */}
       <div className="mb-5">
-        <h3 className="text-lg font-medium text-[var(--text-heading)]">
-          Book Out Machine
-        </h3>
+        <h3 className="text-lg font-medium text-[var(--text-heading)]">Book Out Machine</h3>
         <p className="text-[var(--text-secondary)] text-sm mt-0.5">
           Complete repair and return machine to service.
         </p>
@@ -159,10 +152,7 @@ export function BookOutForm({
             </span>
             <p className="text-[var(--text-secondary)] text-xs mt-0.5">
               Record will be flagged as{" "}
-              <span className="text-accent-blue font-medium">
-                Missing Book-In
-              </span>{" "}
-              in all reports.
+              <span className="text-accent-blue font-medium">Missing Book-In</span> in all reports.
             </p>
           </div>
         </label>
@@ -189,8 +179,7 @@ export function BookOutForm({
                 <option value="">— Select a booked-in machine —</option>
                 {activeBreakdowns.map((b) => (
                   <option key={b.id} value={b.id}>
-                    {b.fleet_id} — {b.machine_name || b.fleet_id} (Pending since{" "}
-                    {b.date_in})
+                    {b.fleet_id} — {b.machine_name || b.fleet_id} (Pending since {b.date_in})
                   </option>
                 ))}
               </select>
@@ -212,8 +201,7 @@ export function BookOutForm({
                     Machine Name
                   </p>
                   <p className="text-sm text-[var(--text-heading)] font-medium">
-                    {selectedBreakdown.machine_name ||
-                      selectedBreakdown.fleet_id}
+                    {selectedBreakdown.machine_name || selectedBreakdown.fleet_id}
                   </p>
                 </div>
                 <div>
@@ -236,9 +224,7 @@ export function BookOutForm({
                   <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
                     Reason
                   </p>
-                  <p className="text-sm text-[var(--text-heading)]">
-                    {selectedBreakdown.reason}
-                  </p>
+                  <p className="text-sm text-[var(--text-heading)]">{selectedBreakdown.reason}</p>
                 </div>
               </div>
             )}
@@ -302,28 +288,22 @@ export function BookOutForm({
         <div className="rounded-xl border border-accent-blue/20 bg-[var(--bg-tertiary)] p-6">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-accent-blue" />
-            <h4 className="text-accent-blue font-medium">
-              Direct Checkout — Missing Book-In
-            </h4>
+            <h4 className="text-accent-blue font-medium">Direct Checkout — Missing Book-In</h4>
           </div>
 
           <div className="mb-4 px-3 py-2 rounded-lg bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs">
-            <strong>Audit Notice:</strong> This record will be flagged as
-            "Missing Book-In" in all reports.
+            <strong>Audit Notice:</strong> This record will be flagged as "Missing Book-In" in all
+            reports.
           </div>
 
           <form onSubmit={handleDirectSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-1.5">
-                Fleet ID
-              </label>
+              <label className="block text-sm text-[var(--text-secondary)] mb-1.5">Fleet ID</label>
               <input
                 required
                 placeholder="e.g. FL-123"
                 value={direct.fleet_id}
-                onChange={(e) =>
-                  setDirect({ ...direct, fleet_id: e.target.value })
-                }
+                onChange={(e) => setDirect({ ...direct, fleet_id: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors"
               />
             </div>
@@ -335,9 +315,7 @@ export function BookOutForm({
               <select
                 required
                 value={direct.machine_type}
-                onChange={(e) =>
-                  setDirect({ ...direct, machine_type: e.target.value })
-                }
+                onChange={(e) => setDirect({ ...direct, machine_type: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors"
               >
                 <option value="">Select Type</option>
@@ -358,9 +336,7 @@ export function BookOutForm({
                 rows={3}
                 placeholder="Describe the fault that was repaired..."
                 value={direct.reason}
-                onChange={(e) =>
-                  setDirect({ ...direct, reason: e.target.value })
-                }
+                onChange={(e) => setDirect({ ...direct, reason: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors resize-none"
               />
             </div>
@@ -374,9 +350,7 @@ export function BookOutForm({
                   type="date"
                   required
                   value={direct.date_out}
-                  onChange={(e) =>
-                    setDirect({ ...direct, date_out: e.target.value })
-                  }
+                  onChange={(e) => setDirect({ ...direct, date_out: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors"
                 />
               </div>
@@ -388,9 +362,7 @@ export function BookOutForm({
                   type="time"
                   required
                   value={direct.time_out}
-                  onChange={(e) =>
-                    setDirect({ ...direct, time_out: e.target.value })
-                  }
+                  onChange={(e) => setDirect({ ...direct, time_out: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors"
                 />
               </div>
@@ -404,9 +376,7 @@ export function BookOutForm({
                 rows={3}
                 placeholder="What was done?"
                 value={direct.repair_notes}
-                onChange={(e) =>
-                  setDirect({ ...direct, repair_notes: e.target.value })
-                }
+                onChange={(e) => setDirect({ ...direct, repair_notes: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-accent-blue/50 focus:ring-1 focus:ring-accent-blue/20 transition-colors resize-none"
               />
             </div>
@@ -424,9 +394,8 @@ export function BookOutForm({
           <div className="mt-4 flex items-start gap-2 px-3 py-2 rounded-lg bg-accent-blue/10 border border-accent-blue/20">
             <Info className="w-4 h-4 text-accent-blue mt-0.5 shrink-0" />
             <p className="text-[var(--text-secondary)] text-xs">
-              Book-in date/time will be recorded as same as book-out since it is
-              unknown. Duration will show as{" "}
-              <strong className="text-[#ccc]">0h 0m</strong>.
+              Book-in date/time will be recorded as same as book-out since it is unknown. Duration
+              will show as <strong className="text-[#ccc]">0h 0m</strong>.
             </p>
           </div>
         </div>

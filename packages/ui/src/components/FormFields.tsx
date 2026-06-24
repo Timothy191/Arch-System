@@ -31,17 +31,10 @@ export function FormInput({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label
-        htmlFor={inputId}
-        className="block text-sm text-[var(--text-secondary)]"
-      >
+      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
         {label}
-        {optional && (
-          <span className="text-[var(--text-muted)]"> (Optional)</span>
-        )}
-        {!optional && props.required && (
-          <span className="text-[var(--accent-red)]"> *</span>
-        )}
+        {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
+        {!optional && props.required && <span className="text-[var(--accent-red)]"> *</span>}
       </label>
       <input
         id={inputId}
@@ -51,11 +44,7 @@ export function FormInput({
         {...props}
       />
       {error && (
-        <p
-          id={errorId}
-          className="text-[var(--accent-red)] text-xs"
-          role="alert"
-        >
+        <p id={errorId} className="text-[var(--accent-red)] text-xs" role="alert">
           {error}
         </p>
       )}
@@ -63,8 +52,7 @@ export function FormInput({
   );
 }
 
-interface FormSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface FormSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   error?: string;
   optional?: boolean;
@@ -87,14 +75,9 @@ export function FormSelect({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label
-        htmlFor={inputId}
-        className="block text-sm text-[var(--text-secondary)]"
-      >
+      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
         {label}
-        {optional && (
-          <span className="text-[var(--text-muted)]"> (Optional)</span>
-        )}
+        {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
       </label>
       <select
         id={inputId}
@@ -111,11 +94,7 @@ export function FormSelect({
         ))}
       </select>
       {error && (
-        <p
-          id={errorId}
-          className="text-[var(--accent-red)] text-xs"
-          role="alert"
-        >
+        <p id={errorId} className="text-[var(--accent-red)] text-xs" role="alert">
           {error}
         </p>
       )}
@@ -123,8 +102,7 @@ export function FormSelect({
   );
 }
 
-interface FormTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface FormTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   error?: string;
   optional?: boolean;
@@ -143,14 +121,9 @@ export function FormTextarea({
   const errorId = error ? `${inputId}-error` : undefined;
   return (
     <div className="space-y-2">
-      <label
-        htmlFor={inputId}
-        className="block text-sm text-[var(--text-secondary)]"
-      >
+      <label htmlFor={inputId} className="block text-sm text-[var(--text-secondary)]">
         {label}
-        {optional && (
-          <span className="text-[var(--text-muted)]"> (Optional)</span>
-        )}
+        {optional && <span className="text-[var(--text-muted)]"> (Optional)</span>}
       </label>
       <textarea
         id={inputId}
@@ -160,11 +133,7 @@ export function FormTextarea({
         {...props}
       />
       {error && (
-        <p
-          id={errorId}
-          className="text-[var(--accent-red)] text-xs"
-          role="alert"
-        >
+        <p id={errorId} className="text-[var(--accent-red)] text-xs" role="alert">
           {error}
         </p>
       )}
@@ -172,17 +141,11 @@ export function FormTextarea({
   );
 }
 
-interface SubmitButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SubmitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-export function SubmitButton({
-  loading,
-  children,
-  className,
-  ...props
-}: SubmitButtonProps) {
+export function SubmitButton({ loading, children, className, ...props }: SubmitButtonProps) {
   return (
     <button
       type="submit"

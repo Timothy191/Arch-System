@@ -170,9 +170,7 @@ export function ReportTemplate({ data }: { data: ReportData }) {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Arch-Systems Mining Operations Portal
-          </Text>
+          <Text style={styles.footerText}>Arch-Systems Mining Operations Portal</Text>
           <Text style={styles.footerText}>
             Generated on{" "}
             {new Date().toLocaleDateString("en-ZA", {

@@ -1,11 +1,5 @@
 import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  Award,
-  CheckCircle,
-  AlertTriangle,
-  AlertOctagon,
-  Plus,
-} from "lucide-react";
+import { Award, CheckCircle, AlertTriangle, AlertOctagon, Plus } from "lucide-react";
 import { SearchForm } from "../components/SearchForm";
 import { FilterTabs } from "../components/FilterTabs";
 
@@ -111,15 +105,9 @@ export default async function CertificationsPage({
     return matchesSearch && matchesFilter;
   });
 
-  const activeCount = initialCertifications.filter(
-    (c) => c.status === "Active",
-  ).length;
-  const expiringCount = initialCertifications.filter(
-    (c) => c.status === "Expiring Soon",
-  ).length;
-  const expiredCount = initialCertifications.filter(
-    (c) => c.status === "Expired",
-  ).length;
+  const activeCount = initialCertifications.filter((c) => c.status === "Active").length;
+  const expiringCount = initialCertifications.filter((c) => c.status === "Expiring Soon").length;
+  const expiredCount = initialCertifications.filter((c) => c.status === "Expired").length;
 
   return (
     <div className="space-y-6">
@@ -129,8 +117,7 @@ export default async function CertificationsPage({
             Certifications & Competencies
           </h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            Audit and manage site-wide equipment licenses, regulatory tickets,
-            and safety training.
+            Audit and manage site-wide equipment licenses, regulatory tickets, and safety training.
           </p>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-blue)] text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">
@@ -149,9 +136,7 @@ export default async function CertificationsPage({
             <p className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
               Active Credentials
             </p>
-            <p className="text-2xl font-bold text-[var(--text-heading)]">
-              {activeCount}
-            </p>
+            <p className="text-2xl font-bold text-[var(--text-heading)]">{activeCount}</p>
           </div>
         </GlassCard>
 
@@ -163,9 +148,7 @@ export default async function CertificationsPage({
             <p className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
               Expiring within 30d
             </p>
-            <p className="text-2xl font-bold text-[var(--text-heading)]">
-              {expiringCount}
-            </p>
+            <p className="text-2xl font-bold text-[var(--text-heading)]">{expiringCount}</p>
           </div>
         </GlassCard>
 
@@ -177,9 +160,7 @@ export default async function CertificationsPage({
             <p className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
               Expired / Suspended
             </p>
-            <p className="text-2xl font-bold text-[var(--text-heading)]">
-              {expiredCount}
-            </p>
+            <p className="text-2xl font-bold text-[var(--text-heading)]">{expiredCount}</p>
           </div>
         </GlassCard>
       </div>
@@ -215,26 +196,15 @@ export default async function CertificationsPage({
             <tbody className="divide-y divide-[var(--overlay-dim)]">
               {filteredCerts.length > 0 ? (
                 filteredCerts.map((cert) => (
-                  <tr
-                    key={cert.id}
-                    className="hover:bg-[var(--overlay-dim)] transition-colors"
-                  >
-                    <td className="py-3 font-medium text-[var(--text-heading)]">
-                      {cert.employee}
-                    </td>
-                    <td className="py-3 text-[var(--text-muted)]">
-                      {cert.role}
-                    </td>
+                  <tr key={cert.id} className="hover:bg-[var(--overlay-dim)] transition-colors">
+                    <td className="py-3 font-medium text-[var(--text-heading)]">{cert.employee}</td>
+                    <td className="py-3 text-[var(--text-muted)]">{cert.role}</td>
                     <td className="py-3 font-semibold text-[var(--text-heading)] flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
                       <span>{cert.certification}</span>
                     </td>
-                    <td className="py-3 text-[var(--text-muted)]">
-                      {cert.issueDate}
-                    </td>
-                    <td className="py-3 text-[var(--text-muted)]">
-                      {cert.expiryDate}
-                    </td>
+                    <td className="py-3 text-[var(--text-muted)]">{cert.issueDate}</td>
+                    <td className="py-3 text-[var(--text-muted)]">{cert.expiryDate}</td>
                     <td className="py-3 text-right">
                       <span
                         className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${
@@ -252,10 +222,7 @@ export default async function CertificationsPage({
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="py-8 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={6} className="py-8 text-center text-[var(--text-muted)]">
                     No certifications found matching your filters.
                   </td>
                 </tr>

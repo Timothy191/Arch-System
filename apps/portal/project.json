@@ -7,10 +7,7 @@
       "options": {
         "command": "bash scripts/sync-assets.sh"
       },
-      "inputs": [
-        "{workspaceRoot}/assets/**/*",
-        "{workspaceRoot}/scripts/sync-assets.sh"
-      ],
+      "inputs": ["{workspaceRoot}/assets/**/*", "{workspaceRoot}/scripts/sync-assets.sh"],
       "outputs": [
         "{projectRoot}/public/background",
         "{projectRoot}/public/error-pages",

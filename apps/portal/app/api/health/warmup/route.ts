@@ -11,10 +11,7 @@ export async function GET(_req: NextRequest) {
 
   try {
     const supabase = createServiceRoleClient();
-    const { error: pgError } = await supabase
-      .from("departments")
-      .select("id")
-      .limit(1);
+    const { error: pgError } = await supabase.from("departments").select("id").limit(1);
 
     if (pgError) {
       components.postgres = `error: ${pgError.message}`;
@@ -33,9 +30,7 @@ export async function GET(_req: NextRequest) {
     components.redis = `error: ${error instanceof Error ? error.message : String(error)}`;
   }
 
-  const degraded = Object.values(components).some((value) =>
-    value.startsWith("error"),
-  );
+  const degraded = Object.values(components).some((value) => value.startsWith("error"));
   const status = degraded ? "degraded" : "ok";
 
   return NextResponse.json(

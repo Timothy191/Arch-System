@@ -170,10 +170,7 @@ async function handlePutWebhook(
     .single();
 
   if (error) {
-    return NextResponse.json(
-      { error: "Failed to update webhook" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update webhook" }, { status: 500 });
   }
 
   revalidatePath("/admin/tools");
@@ -183,13 +180,8 @@ async function handlePutWebhook(
 }
 
 // PUT /api/webhooks/[id] - Update a webhook endpoint
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const response = await withRateLimit(request, () =>
-    handlePutWebhook(request, { params }),
-  );
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const response = await withRateLimit(request, () => handlePutWebhook(request, { params }));
   return applyCors(request, response);
 }
 
@@ -246,10 +238,7 @@ async function handleDeleteWebhook(
     .eq("id", id);
 
   if (error) {
-    return NextResponse.json(
-      { error: "Failed to delete webhook" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete webhook" }, { status: 500 });
   }
 
   revalidatePath("/admin/tools");
@@ -263,8 +252,6 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const response = await withRateLimit(request, () =>
-    handleDeleteWebhook(request, { params }),
-  );
+  const response = await withRateLimit(request, () => handleDeleteWebhook(request, { params }));
   return applyCors(request, response);
 }

@@ -4,9 +4,7 @@ import { cacheGetWithStats, cacheSetWithTags } from "@repo/redis";
 jest.mock("@repo/redis", () => ({
   cacheGetWithStats: jest.fn(),
   cacheSetWithTags: jest.fn(),
-  buildCacheKey: jest.fn(
-    (category, ...parts) => `${category}:${parts.join(":")}`,
-  ),
+  buildCacheKey: jest.fn((category, ...parts) => `${category}:${parts.join(":")}`),
   CACHE_TTL_REGISTRY: {
     auth: { l1Seconds: 15, l2Seconds: 3600 },
     dept: { l1Seconds: 15, l2Seconds: 3600 },
@@ -43,12 +41,7 @@ describe("withCache coalescing & single-flight behavior", () => {
 
     expect(result).toBe("fresh-data");
     expect(fn).toHaveBeenCalledTimes(1);
-    expect(mockCacheSetWithTags).toHaveBeenCalledWith(
-      "auth:123",
-      "fresh-data",
-      3600,
-      undefined,
-    );
+    expect(mockCacheSetWithTags).toHaveBeenCalledWith("auth:123", "fresh-data", 3600, undefined);
   });
 
   it("coalesces concurrent duplicate requests (single-flight)", async () => {
@@ -69,11 +62,7 @@ describe("withCache coalescing & single-flight behavior", () => {
     // Await them only after resolving the underlying mock function
     resolveFn("coalesced-data");
 
-    const [res1, res2, res3] = await Promise.all([
-      promise1,
-      promise2,
-      promise3,
-    ]);
+    const [res1, res2, res3] = await Promise.all([promise1, promise2, promise3]);
 
     expect(res1).toBe("coalesced-data");
     expect(res2).toBe("coalesced-data");

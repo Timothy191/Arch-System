@@ -111,10 +111,7 @@ const WorkflowPage = () => {
 
   return (
     <div>
-      <button
-        onClick={() => setShowBuilder(true)}
-        onMouseEnter={handleMouseEnter}
-      >
+      <button onClick={() => setShowBuilder(true)} onMouseEnter={handleMouseEnter}>
         Create Workflow
       </button>
 

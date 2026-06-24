@@ -6,12 +6,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { Edit2, Plus, Power, Search } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@repo/ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
 import { logError } from "@/lib/errors/error-logger";
 import { adminAddMachine, adminUpdateMachine } from "../actions/fleet";
@@ -43,12 +38,7 @@ interface Site {
   active: boolean;
 }
 
-const DUMPER_TYPES = [
-  "articulated dumper",
-  "rigid dumper",
-  "dump truck",
-  "hauler",
-];
+const DUMPER_TYPES = ["articulated dumper", "rigid dumper", "dump truck", "hauler"];
 
 export function FleetTab() {
   const supabase = createBrowserSupabaseClient();
@@ -68,29 +58,20 @@ export function FleetTab() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const [{ data: machineData }, { data: deptData }, { data: siteData }] =
-      await Promise.all([
-        supabase
-          .from("machines")
-          .select(
-            "id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)",
-          )
-          .order("name"),
-        supabase
-          .from("departments")
-          .select("id, display_name")
-          .order("display_name"),
-        supabase
-          .from("sites")
-          .select("id, name, site_code, active")
-          .order("name"),
-      ]);
+    const [{ data: machineData }, { data: deptData }, { data: siteData }] = await Promise.all([
+      supabase
+        .from("machines")
+        .select(
+          "id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)",
+        )
+        .order("name"),
+      supabase.from("departments").select("id, display_name").order("display_name"),
+      supabase.from("sites").select("id, name, site_code, active").order("name"),
+    ]);
     if (machineData) {
       const normalised = machineData.map((m) => ({
         ...m,
-        department: Array.isArray(m.department)
-          ? (m.department[0] ?? null)
-          : m.department,
+        department: Array.isArray(m.department) ? (m.department[0] ?? null) : m.department,
         site: Array.isArray(m.site) ? (m.site[0] ?? null) : m.site,
       })) as Machine[];
       setMachines(normalised);
@@ -114,8 +95,7 @@ export function FleetTab() {
         (m.serial_number ?? "").toLowerCase().includes(q);
       const matchDept = !filterDept || m.department_id === filterDept;
       const matchSite =
-        !filterSite ||
-        (filterSite === "__none__" ? !m.site_id : m.site_id === filterSite);
+        !filterSite || (filterSite === "__none__" ? !m.site_id : m.site_id === filterSite);
       return matchSearch && matchDept && matchSite;
     });
   }, [machines, search, filterDept, filterSite]);
@@ -190,9 +170,7 @@ export function FleetTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">
-          Fleet
-        </h2>
+        <h2 className="text-lg font-medium text-[var(--text-heading)]">Fleet</h2>
         <Button
           onClick={handleAdd}
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
@@ -212,15 +190,11 @@ export function FleetTab() {
         </GlassCard>
         <GlassCard className="py-3 px-4">
           <p className="text-[var(--text-muted)] text-xs">Active</p>
-          <p className="text-2xl font-medium text-accent-green mt-0.5">
-            {totalActive}
-          </p>
+          <p className="text-2xl font-medium text-accent-green mt-0.5">{totalActive}</p>
         </GlassCard>
         <GlassCard className="py-3 px-4">
           <p className="text-[var(--text-muted)] text-xs">Inactive</p>
-          <p className="text-2xl font-medium text-[var(--text-muted)] mt-0.5">
-            {totalInactive}
-          </p>
+          <p className="text-2xl font-medium text-[var(--text-muted)] mt-0.5">{totalInactive}</p>
         </GlassCard>
       </div>
 
@@ -305,19 +279,13 @@ export function FleetTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading…
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={8}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     {machines.length === 0
                       ? "No machines registered. Add one to get started."
                       : "No machines match the current filters."}
@@ -329,17 +297,12 @@ export function FleetTab() {
                     m.machine_type.toLowerCase().includes(t),
                   );
                   return (
-                    <tr
-                      key={m.id}
-                      className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                    >
+                    <tr key={m.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                       <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
                         {m.name}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="text-[var(--text-muted)] font-mono">
-                          {m.machine_type}
-                        </span>
+                        <span className="text-[var(--text-muted)] font-mono">{m.machine_type}</span>
                         {isDumper && m.bin_factor != null && (
                           <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20 font-mono">
                             {m.bin_factor} BCM
@@ -361,14 +324,10 @@ export function FleetTab() {
                         {m.site ? (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] border border-[var(--accent-blue)]/20">
                             {m.site.site_code}
-                            <span className="text-[var(--text-muted)]">
-                              {m.site.name}
-                            </span>
+                            <span className="text-[var(--text-muted)]">{m.site.name}</span>
                           </span>
                         ) : (
-                          <span className="text-[var(--text-muted)] text-xs">
-                            —
-                          </span>
+                          <span className="text-[var(--text-muted)] text-xs">—</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -389,18 +348,12 @@ export function FleetTab() {
                             Exempt
                           </span>
                         ) : (
-                          <span className="text-[var(--text-muted)] text-xs">
-                            —
-                          </span>
+                          <span className="text-[var(--text-muted)] text-xs">—</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex gap-2 justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(m)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(m)}>
                             <Edit2 className="w-4 h-4" />
                           </Button>
                           <Button
@@ -426,22 +379,18 @@ export function FleetTab() {
             </tbody>
           </table>
         </div>
-        {!loading &&
-          filtered.length > 0 &&
-          filtered.length < machines.length && (
-            <p className="px-6 py-2 text-xs text-[var(--text-muted)] border-t border-[var(--border-default)]">
-              Showing {filtered.length} of {machines.length} machines
-            </p>
-          )}
+        {!loading && filtered.length > 0 && filtered.length < machines.length && (
+          <p className="px-6 py-2 text-xs text-[var(--text-muted)] border-t border-[var(--border-default)]">
+            Showing {filtered.length} of {machines.length} machines
+          </p>
+        )}
       </GlassCard>
 
       {/* Add / Edit dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-lg">
           <DialogHeader>
-            <DialogTitle>
-              {editingMachine ? "Edit Machine" : "Add Machine"}
-            </DialogTitle>
+            <DialogTitle>{editingMachine ? "Edit Machine" : "Add Machine"}</DialogTitle>
           </DialogHeader>
           <MachineForm
             machine={editingMachine}
@@ -456,16 +405,11 @@ export function FleetTab() {
       </Dialog>
 
       {/* Confirm deactivate / activate dialog */}
-      <Dialog
-        open={!!pendingToggle}
-        onOpenChange={(open) => !open && setPendingToggle(null)}
-      >
+      <Dialog open={!!pendingToggle} onOpenChange={(open) => !open && setPendingToggle(null)}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {pendingToggle?.active
-                ? "Deactivate Machine?"
-                : "Activate Machine?"}
+              {pendingToggle?.active ? "Deactivate Machine?" : "Activate Machine?"}
             </DialogTitle>
           </DialogHeader>
           <p className="text-[var(--text-body)] text-sm">
@@ -474,11 +418,7 @@ export function FleetTab() {
               : `"${pendingToggle?.name}" will become available again in all shift entry forms.`}
           </p>
           <div className="flex gap-2 justify-end pt-2">
-            <Button
-              variant="outline"
-              onClick={() => setPendingToggle(null)}
-              disabled={saving}
-            >
+            <Button variant="outline" onClick={() => setPendingToggle(null)} disabled={saving}>
               Cancel
             </Button>
             <Button
@@ -490,11 +430,7 @@ export function FleetTab() {
               }
               onClick={handleConfirmToggle}
             >
-              {saving
-                ? "Saving…"
-                : pendingToggle?.active
-                  ? "Deactivate"
-                  : "Activate"}
+              {saving ? "Saving…" : pendingToggle?.active ? "Deactivate" : "Activate"}
             </Button>
           </div>
         </DialogContent>
@@ -531,24 +467,14 @@ function MachineForm({
 }) {
   const [name, setName] = useState(machine?.name || "");
   const [machineType, setMachineType] = useState(machine?.machine_type || "");
-  const [serialNumber, setSerialNumber] = useState(
-    machine?.serial_number || "",
-  );
-  const [binFactor, setBinFactor] = useState(
-    machine?.bin_factor?.toString() || "",
-  );
-  const [departmentId, setDepartmentId] = useState(
-    machine?.department_id || "",
-  );
+  const [serialNumber, setSerialNumber] = useState(machine?.serial_number || "");
+  const [binFactor, setBinFactor] = useState(machine?.bin_factor?.toString() || "");
+  const [departmentId, setDepartmentId] = useState(machine?.department_id || "");
   const [siteId, setSiteId] = useState(machine?.site_id || "");
   const [active, setActive] = useState(machine?.active ?? true);
-  const [reportExempt, setReportExempt] = useState(
-    machine?.report_exempt ?? false,
-  );
+  const [reportExempt, setReportExempt] = useState(machine?.report_exempt ?? false);
 
-  const isDumperType = DUMPER_TYPES.some((t) =>
-    machineType.toLowerCase().includes(t),
-  );
+  const isDumperType = DUMPER_TYPES.some((t) => machineType.toLowerCase().includes(t));
 
   const activeSites = sites.filter((s) => s.active || s.id === siteId);
 
@@ -648,9 +574,7 @@ function MachineForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-          Site
-        </label>
+        <label className="block text-sm font-medium text-[var(--text-body)] mb-2">Site</label>
         <select
           value={siteId}
           onChange={(e) => setSiteId(e.target.value)}
@@ -674,10 +598,7 @@ function MachineForm({
           onChange={(e) => setActive(e.target.checked)}
           className="w-4 h-4 accent-[var(--accent-emerald)]"
         />
-        <label
-          htmlFor="active"
-          className="text-sm font-medium text-[var(--text-body)]"
-        >
+        <label htmlFor="active" className="text-sm font-medium text-[var(--text-body)]">
           Active
         </label>
       </div>
@@ -698,8 +619,8 @@ function MachineForm({
             Exempt from shift reporting
           </label>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            When checked, control room users will not be required to log this
-            machine before generating reports.
+            When checked, control room users will not be required to log this machine before
+            generating reports.
           </p>
         </div>
       </div>

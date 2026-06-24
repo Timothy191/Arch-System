@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  RadialBarChart,
-  RadialBar,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { RadialBarChart, RadialBar, ResponsiveContainer, Tooltip } from "recharts";
 
 interface QRStatusDistributionChartProps {
   data: Array<{ name: string; value: number; fill: string }>;
@@ -21,15 +16,11 @@ interface CustomTooltipProps {
 function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
   if (!active || !payload?.length || !payload[0]?.payload) return null;
   const d = payload[0].payload;
-  const pct =
-    totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(1) : "0.0";
+  const pct = totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(1) : "0.0";
   return (
     <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2 text-xs">
       <div className="flex items-center gap-2 mb-0.5">
-        <span
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: d.fill }}
-        />
+        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.fill }} />
         <span className="font-semibold text-foreground">{d.name}</span>
       </div>
       <p className="text-muted-foreground">
@@ -42,9 +33,7 @@ function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
   );
 }
 
-export default function QRStatusDistributionChart({
-  data,
-}: QRStatusDistributionChartProps) {
+export default function QRStatusDistributionChart({ data }: QRStatusDistributionChartProps) {
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
@@ -76,9 +65,7 @@ export default function QRStatusDistributionChart({
               style={{ backgroundColor: d.fill }}
             />
             <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground truncate">
-                {d.name}
-              </p>
+              <p className="text-[10px] text-muted-foreground truncate">{d.name}</p>
               <p className="text-xs font-bold text-foreground tabular-nums">
                 {d.value.toLocaleString()}
               </p>

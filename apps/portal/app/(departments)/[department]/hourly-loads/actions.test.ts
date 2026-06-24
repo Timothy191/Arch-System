@@ -11,12 +11,8 @@ jest.mock("@repo/supabase/service-role", () => ({
   createServiceRoleClient: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock(
-  "@repo/supabase/server",
-);
-const { createServiceRoleClient } = jest.requireMock(
-  "@repo/supabase/service-role",
-);
+const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
+const { createServiceRoleClient } = jest.requireMock("@repo/supabase/service-role");
 
 describe("updateMachineSite", () => {
   beforeEach(() => {
@@ -30,17 +26,13 @@ describe("updateMachineSite", () => {
       },
     });
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow(
-      "Unauthorized",
-    );
+    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow("Unauthorized");
   });
 
   it("throws Error('Unauthorized') when employee record is missing", async () => {
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -51,18 +43,14 @@ describe("updateMachineSite", () => {
       }),
     });
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow(
-      "Unauthorized",
-    );
+    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow("Unauthorized");
   });
 
   it("calls service role client to update machine site_id when authorized", async () => {
     // Mock standard client for auth and employee check
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -97,9 +85,7 @@ describe("updateMachineSite", () => {
     // Mock standard client
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest
-          .fn()
-          .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
       },
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -124,8 +110,6 @@ describe("updateMachineSite", () => {
     };
     createServiceRoleClient.mockReturnValue(mockService);
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow(
-      dbError,
-    );
+    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow(dbError);
   });
 });

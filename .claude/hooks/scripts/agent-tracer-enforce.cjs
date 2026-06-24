@@ -18,12 +18,7 @@ function getTempDir() {
 }
 
 function getSessionId(input) {
-  return (
-    input?.session_id ||
-    process.env.CLAUDE_SESSION_ID ||
-    String(process.ppid) ||
-    "default"
-  );
+  return input?.session_id || process.env.CLAUDE_SESSION_ID || String(process.ppid) || "default";
 }
 
 async function main() {
@@ -37,14 +32,8 @@ async function main() {
       const sessionId = getSessionId(input);
       const tempDir = getTempDir();
 
-      const sourceEditsFile = path.join(
-        tempDir,
-        `source-edits-${sessionId}.json`,
-      );
-      const tracerEditsFile = path.join(
-        tempDir,
-        `tracer-edits-${sessionId}.json`,
-      );
+      const sourceEditsFile = path.join(tempDir, `source-edits-${sessionId}.json`);
+      const tracerEditsFile = path.join(tempDir, `tracer-edits-${sessionId}.json`);
 
       if (!fs.existsSync(sourceEditsFile)) {
         console.log(data);
@@ -60,34 +49,22 @@ async function main() {
         tracerEdits = JSON.parse(fs.readFileSync(tracerEditsFile, "utf8"));
       } catch {}
 
-      const missing = Object.keys(sourceEdits).filter(
-        (pkg) => !tracerEdits[pkg],
-      );
+      const missing = Object.keys(sourceEdits).filter((pkg) => !tracerEdits[pkg]);
 
       if (missing.length > 0) {
-        console.error(
-          "\n═══════════════════════════════════════════════════════════════",
-        );
+        console.error("\n═══════════════════════════════════════════════════════════════");
         console.error("📍 AGENT TRACING ENFORCEMENT");
-        console.error(
-          "═══════════════════════════════════════════════════════════════",
-        );
-        console.error(
-          "The following packages had source edits but no AGENT_TRACER.md update:",
-        );
+        console.error("═══════════════════════════════════════════════════════════════");
+        console.error("The following packages had source edits but no AGENT_TRACER.md update:");
         for (const pkg of missing) {
           console.error(`  - ${pkg}/AGENT_TRACER.md`);
         }
         console.error("");
         console.error("Per CLAUDE.md Agent Contracts, every code change MUST:");
-        console.error(
-          "  1. Update AGENT_TRACER.md in the modified package/app",
-        );
+        console.error("  1. Update AGENT_TRACER.md in the modified package/app");
         console.error("  2. Leave inline // AGENT-TRACE: comments");
         console.error("  3. Add runtime telemetry where applicable");
-        console.error(
-          "═══════════════════════════════════════════════════════════════\n",
-        );
+        console.error("═══════════════════════════════════════════════════════════════\n");
       }
 
       // Clean up session files

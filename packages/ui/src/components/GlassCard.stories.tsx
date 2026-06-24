@@ -11,16 +11,7 @@ const meta: Meta<typeof GlassCard> = {
   argTypes: {
     accent: {
       control: "select",
-      options: [
-        "green",
-        "blue",
-        "red",
-        "cyan",
-        "indigo",
-        "violet",
-        "alert",
-        "none",
-      ],
+      options: ["green", "blue", "red", "cyan", "indigo", "violet", "alert", "none"],
     },
     variant: {
       control: "select",
@@ -41,9 +32,7 @@ export const Default: Story = {
   args: {
     children: (
       <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">
-          Standard Glass Card
-        </p>
+        <p className="text-[var(--text-heading)] font-medium">Standard Glass Card</p>
       </div>
     ),
     variant: "default",
@@ -85,9 +74,7 @@ export const GlowBorder: Story = {
   args: {
     children: (
       <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">
-          Glow Border variant
-        </p>
+        <p className="text-[var(--text-heading)] font-medium">Glow Border variant</p>
       </div>
     ),
     variant: "glowborder",
@@ -99,9 +86,7 @@ export const Liquid: Story = {
   args: {
     children: (
       <div className="w-64 h-32 flex items-center justify-center">
-        <p className="text-[var(--text-heading)] font-medium">
-          Liquid Glass Refraction
-        </p>
+        <p className="text-[var(--text-heading)] font-medium">Liquid Glass Refraction</p>
       </div>
     ),
     variant: "liquid",

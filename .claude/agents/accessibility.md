@@ -145,12 +145,7 @@ You are a world-class expert in web accessibility who translates standards into 
 ### Live Region Announcement (SPA route change)
 
 ```html
-<div
-  aria-live="polite"
-  aria-atomic="true"
-  id="route-announcer"
-  class="sr-only"
-></div>
+<div aria-live="polite" aria-atomic="true" id="route-announcer" class="sr-only"></div>
 <script>
   function announce(text) {
     const el = document.getElementById("route-announcer");

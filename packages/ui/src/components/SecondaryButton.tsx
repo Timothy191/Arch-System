@@ -4,8 +4,7 @@ import { forwardRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "../lib/utils";
 
-interface SecondaryButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SecondaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "default";
   variant?: "default" | "rounded-lg";
   asChild?: boolean;
@@ -13,14 +12,7 @@ interface SecondaryButtonProps
 
 const SecondaryButton = forwardRef<HTMLButtonElement, SecondaryButtonProps>(
   (
-    {
-      size = "default",
-      variant = "default",
-      asChild = false,
-      className,
-      children,
-      ...props
-    },
+    { size = "default", variant = "default", asChild = false, className, children, ...props },
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";

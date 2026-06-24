@@ -45,11 +45,7 @@ function findCoLocatedTest(sourcePath) {
   const candidates = [
     `${base}.test${ext}`,
     `${base}.spec${ext}`,
-    path.join(
-      path.dirname(sourcePath),
-      "__tests__",
-      `${path.basename(base)}.test${ext}`,
-    ),
+    path.join(path.dirname(sourcePath), "__tests__", `${path.basename(base)}.test${ext}`),
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
@@ -85,22 +81,15 @@ function findCoLocatedTest(sourcePath) {
         stdio: "pipe",
       },
     );
-    if (
-      out.toString().includes("Tests:") &&
-      !out.toString().includes("failed")
-    ) {
+    if (out.toString().includes("Tests:") && !out.toString().includes("failed")) {
       console.error(`[portal-test-on-edit] ${relTest} passed.`);
     } else {
-      console.error(
-        `[portal-test-on-edit] ${relTest} output:\n${out.toString()}`,
-      );
+      console.error(`[portal-test-on-edit] ${relTest} output:\n${out.toString()}`);
     }
   } catch (err) {
     const stdout = (err.stdout || "").toString();
     const stderr = (err.stderr || "").toString();
-    console.error(
-      `[portal-test-on-edit] ${testFile} failed:\n${stdout}\n${stderr}`,
-    );
+    console.error(`[portal-test-on-edit] ${testFile} failed:\n${stdout}\n${stderr}`);
   }
   process.exit(0);
 })();

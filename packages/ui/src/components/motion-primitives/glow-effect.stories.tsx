@@ -11,26 +11,11 @@ const meta: Meta<typeof GlowEffect> = {
   argTypes: {
     mode: {
       control: "select",
-      options: [
-        "rotate",
-        "pulse",
-        "breathe",
-        "colorShift",
-        "flowHorizontal",
-        "static",
-      ],
+      options: ["rotate", "pulse", "breathe", "colorShift", "flowHorizontal", "static"],
     },
     blur: {
       control: "select",
-      options: [
-        "softest",
-        "soft",
-        "medium",
-        "strong",
-        "stronger",
-        "strongest",
-        "none",
-      ],
+      options: ["softest", "soft", "medium", "strong", "stronger", "strongest", "none"],
     },
   },
 };
@@ -43,9 +28,7 @@ export const Default: Story = {
   render: (args) => (
     <div className="relative w-64 h-64 flex items-center justify-center bg-black rounded-3xl overflow-hidden shadow-2xl">
       <GlowEffect {...args} />
-      <div className="relative z-10 text-white font-bold text-xl">
-        ARCH CORE
-      </div>
+      <div className="relative z-10 text-white font-bold text-xl">ARCH CORE</div>
     </div>
   ),
   args: {

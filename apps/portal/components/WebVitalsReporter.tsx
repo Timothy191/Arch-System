@@ -49,9 +49,7 @@ export function WebVitalsReporter() {
     try {
       const key = `wv:${metric.name}`;
       const raw = sessionStorage.getItem(key);
-      const entries: Array<{ value: number; rating: string }> = raw
-        ? JSON.parse(raw)
-        : [];
+      const entries: Array<{ value: number; rating: string }> = raw ? JSON.parse(raw) : [];
       entries.push({ value: metric.value, rating: metric.rating });
       // Keep only last 50 entries per metric
       if (entries.length > 50) entries.shift();

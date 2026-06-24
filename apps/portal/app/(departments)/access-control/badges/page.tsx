@@ -41,39 +41,31 @@ export default async function BadgesPage({
     department: "access-control",
   });
 
-  const { badges, totalCount } = await getBadgesForDepartment(
-    deptId,
-    page,
-    pageSize,
-  );
+  const { badges, totalCount } = await getBadgesForDepartment(deptId, page, pageSize);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   // Resolve entity names from nested relation data
-  const resolvedBadges = (badges as unknown as BadgeWithRelations[]).map(
-    (b) => {
-      let entityName = "Unknown";
-      if (b.personnel) {
-        entityName = `${b.personnel.first_name} ${b.personnel.surname}`;
-      } else if (b.visitor) {
-        entityName = `${b.visitor.first_name} ${b.visitor.surname}`;
-      } else if (b.fleet) {
-        entityName = `${b.fleet.fleet_code} (${b.fleet.vehicle_type})`;
-      } else if (b.equipment) {
-        entityName = `${b.equipment.equip_code} (${b.equipment.equipment_type})`;
-      }
-      return { ...b, entity_name: entityName };
-    },
-  );
+  const resolvedBadges = (badges as unknown as BadgeWithRelations[]).map((b) => {
+    let entityName = "Unknown";
+    if (b.personnel) {
+      entityName = `${b.personnel.first_name} ${b.personnel.surname}`;
+    } else if (b.visitor) {
+      entityName = `${b.visitor.first_name} ${b.visitor.surname}`;
+    } else if (b.fleet) {
+      entityName = `${b.fleet.fleet_code} (${b.fleet.vehicle_type})`;
+    } else if (b.equipment) {
+      entityName = `${b.equipment.equip_code} (${b.equipment.equipment_type})`;
+    }
+    return { ...b, entity_name: entityName };
+  });
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-            Credential Management
-          </h2>
+          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Credential Management</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Issue, print, and revoke physical QR access credentials.
           </p>
@@ -97,27 +89,16 @@ export default async function BadgesPage({
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-                  <TableHead className="text-[var(--text-muted)]">
-                    QR Code Data
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Assigned To
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Entity Type
-                  </TableHead>
-                  <TableHead className="text-right text-[var(--text-muted)]">
-                    Status
-                  </TableHead>
+                  <TableHead className="text-[var(--text-muted)]">QR Code Data</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Assigned To</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Entity Type</TableHead>
+                  <TableHead className="text-right text-[var(--text-muted)]">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {resolvedBadges.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="text-center py-8 text-[var(--text-muted)]"
-                    >
+                    <TableCell colSpan={4} className="text-center py-8 text-[var(--text-muted)]">
                       No badges found for this department.
                     </TableCell>
                   </TableRow>
@@ -195,16 +176,14 @@ export default async function BadgesPage({
               </h3>
 
               <p className="text-sm text-[var(--text-muted)]">
-                Select a badge from the registry to securely display its
-                scannable matrix code for physical printing or mobile sync.
+                Select a badge from the registry to securely display its scannable matrix code for
+                physical printing or mobile sync.
               </p>
 
               {/* Placeholder for actual QR code rendering */}
               <div className="w-48 h-48 bg-[var(--bg-secondary)] rounded-xl p-2 flex items-center justify-center mt-4 shadow-card group-hover:shadow-[var(--accent-blue)]/10 transition-[box-shadow] duration-500">
                 <div className="w-full h-full border-2 border-dashed border-[var(--border-subtle)] rounded-lg flex items-center justify-center bg-[var(--bg-tertiary)]">
-                  <span className="text-xs text-[var(--text-muted)] font-medium">
-                    Select Badge
-                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-medium">Select Badge</span>
                 </div>
               </div>
 

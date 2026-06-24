@@ -23,24 +23,16 @@ process.stdin.on("end", () => {
         .sort()
         .reverse();
       if (files.length > 0) {
-        const saved = JSON.parse(
-          fs.readFileSync(path.join(compactsDir, files[0]), "utf8"),
-        );
+        const saved = JSON.parse(fs.readFileSync(path.join(compactsDir, files[0]), "utf8"));
         console.error("[ProWorkflow] Context restored after compaction:");
         if (saved.summary) {
           console.error("[ProWorkflow]   Summary: " + saved.summary);
         }
         if (saved.edits_before_compact) {
-          console.error(
-            "[ProWorkflow]   Edits before compact: " +
-              saved.edits_before_compact,
-          );
+          console.error("[ProWorkflow]   Edits before compact: " + saved.edits_before_compact);
         }
         if (saved.prompts_before_compact) {
-          console.error(
-            "[ProWorkflow]   Prompts before compact: " +
-              saved.prompts_before_compact,
-          );
+          console.error("[ProWorkflow]   Prompts before compact: " + saved.prompts_before_compact);
         }
         if (saved.session_id) {
           console.error("[ProWorkflow]   Session: " + saved.session_id);

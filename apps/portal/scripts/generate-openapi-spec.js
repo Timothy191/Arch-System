@@ -37,10 +37,7 @@ const options = {
       },
     ],
   },
-  apis: [
-    join(__dirname, "../app/api/**/*.ts"),
-    join(__dirname, "../app/api/**/*.js"),
-  ],
+  apis: [join(__dirname, "../app/api/**/*.ts"), join(__dirname, "../app/api/**/*.js")],
 };
 
 try {

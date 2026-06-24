@@ -16,10 +16,7 @@ interface PDFDownloadButtonProps {
   departmentId?: string;
 }
 
-export function PDFDownloadButton({
-  reportData,
-  departmentId,
-}: PDFDownloadButtonProps) {
+export function PDFDownloadButton({ reportData, departmentId }: PDFDownloadButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {

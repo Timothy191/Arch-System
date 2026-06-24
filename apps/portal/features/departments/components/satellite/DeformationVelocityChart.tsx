@@ -175,13 +175,7 @@ export function DeformationVelocityChart({
                 stroke="var(--text-heading)"
                 strokeWidth={1}
               />
-              <text
-                x={cx}
-                y={H - 3}
-                textAnchor="middle"
-                fontSize={7}
-                fill="var(--text-secondary)"
-              >
+              <text x={cx} y={H - 3} textAnchor="middle" fontSize={7} fill="var(--text-secondary)">
                 {p.month}
               </text>
             </g>

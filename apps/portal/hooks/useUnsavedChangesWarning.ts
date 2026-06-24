@@ -14,8 +14,7 @@ export function useUnsavedChangesWarning(isDirty: boolean) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       // Most modern browsers require returnValue to be set to a string
-      e.returnValue =
-        "You have unsaved changes. Are you sure you want to leave?";
+      e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
       return e.returnValue;
     };
 

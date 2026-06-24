@@ -6,12 +6,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { Edit2, Plus, Power } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@repo/ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
 import { logError } from "@/lib/errors/error-logger";
 import { adminAddSite, adminUpdateSite } from "../actions/sites";
@@ -37,21 +32,15 @@ export function SitesTab() {
   const loadSites = useCallback(async () => {
     setLoading(true);
     const [{ data: siteData }, { data: machineCounts }] = await Promise.all([
-      supabase
-        .from("sites")
-        .select("id, name, site_code, active, created_at")
-        .order("name"),
+      supabase.from("sites").select("id, name, site_code, active, created_at").order("name"),
       supabase.from("machines").select("site_id").not("site_id", "is", null),
     ]);
     if (siteData) {
       const countMap = new Map<string, number>();
       (machineCounts ?? []).forEach((m) => {
-        if (m.site_id)
-          countMap.set(m.site_id, (countMap.get(m.site_id) ?? 0) + 1);
+        if (m.site_id) countMap.set(m.site_id, (countMap.get(m.site_id) ?? 0) + 1);
       });
-      setSites(
-        siteData.map((s) => ({ ...s, machineCount: countMap.get(s.id) ?? 0 })),
-      );
+      setSites(siteData.map((s) => ({ ...s, machineCount: countMap.get(s.id) ?? 0 })));
     }
     setLoading(false);
   }, [supabase]);
@@ -88,11 +77,7 @@ export function SitesTab() {
     await loadSites();
   };
 
-  const handleSave = async (data: {
-    name: string;
-    site_code: string;
-    active: boolean;
-  }) => {
+  const handleSave = async (data: { name: string; site_code: string; active: boolean }) => {
     setSaving(true);
     setDialogError("");
 
@@ -112,9 +97,7 @@ export function SitesTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-[var(--text-heading)]">
-          Sites
-        </h2>
+        <h2 className="text-lg font-medium text-[var(--text-heading)]">Sites</h2>
         <Button
           onClick={handleAdd}
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
@@ -129,14 +112,7 @@ export function SitesTab() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[var(--border-default)]">
-                {[
-                  "Name",
-                  "Site Code",
-                  "Machines",
-                  "Status",
-                  "Created",
-                  "Actions",
-                ].map((h) => (
+                {["Name", "Site Code", "Machines", "Status", "Created", "Actions"].map((h) => (
                   <th
                     key={h}
                     scope="col"
@@ -150,28 +126,19 @@ export function SitesTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading…
                   </td>
                 </tr>
               ) : sites.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No sites configured. Add one to get started.
                   </td>
                 </tr>
               ) : (
                 sites.map((s) => (
-                  <tr
-                    key={s.id}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
+                  <tr key={s.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
                       {s.name}
                     </td>
@@ -186,9 +153,7 @@ export function SitesTab() {
                           {s.machineCount}
                         </span>
                       ) : (
-                        <span className="text-[var(--text-muted)] text-xs">
-                          0
-                        </span>
+                        <span className="text-[var(--text-muted)] text-xs">0</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -208,11 +173,7 @@ export function SitesTab() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(s)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(s)}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
@@ -240,10 +201,7 @@ export function SitesTab() {
       </GlassCard>
 
       {/* Confirm deactivate / activate dialog */}
-      <Dialog
-        open={!!pendingToggle}
-        onOpenChange={(open) => !open && setPendingToggle(null)}
-      >
+      <Dialog open={!!pendingToggle} onOpenChange={(open) => !open && setPendingToggle(null)}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-sm">
           <DialogHeader>
             <DialogTitle>
@@ -260,11 +218,7 @@ export function SitesTab() {
               : `"${pendingToggle?.name}" will become active and available for machine assignments.`}
           </p>
           <div className="flex gap-2 justify-end pt-2">
-            <Button
-              variant="outline"
-              onClick={() => setPendingToggle(null)}
-              disabled={saving}
-            >
+            <Button variant="outline" onClick={() => setPendingToggle(null)} disabled={saving}>
               Cancel
             </Button>
             <Button
@@ -276,11 +230,7 @@ export function SitesTab() {
               }
               onClick={handleConfirmToggle}
             >
-              {saving
-                ? "Saving…"
-                : pendingToggle?.active
-                  ? "Deactivate"
-                  : "Activate"}
+              {saving ? "Saving…" : pendingToggle?.active ? "Deactivate" : "Activate"}
             </Button>
           </div>
         </DialogContent>
@@ -314,11 +264,7 @@ function SiteForm({
   site: Site | null;
   error: string;
   saving: boolean;
-  onSubmit: (_data: {
-    name: string;
-    site_code: string;
-    active: boolean;
-  }) => void;
+  onSubmit: (_data: { name: string; site_code: string; active: boolean }) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(site?.name || "");
@@ -351,16 +297,12 @@ function SiteForm({
         </label>
         <Input
           value={siteCode}
-          onChange={(e) =>
-            setSiteCode(e.target.value.toUpperCase().replace(/\s+/g, "-"))
-          }
+          onChange={(e) => setSiteCode(e.target.value.toUpperCase().replace(/\s+/g, "-"))}
           placeholder="e.g. NP-01"
           className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
           required
         />
-        <p className="text-[var(--text-muted)] text-xs mt-1">
-          Unique short code. Auto-uppercased.
-        </p>
+        <p className="text-[var(--text-muted)] text-xs mt-1">Unique short code. Auto-uppercased.</p>
       </div>
 
       <div className="flex items-center gap-3">
@@ -371,10 +313,7 @@ function SiteForm({
           onChange={(e) => setActive(e.target.checked)}
           className="w-4 h-4 accent-[var(--accent-emerald)]"
         />
-        <label
-          htmlFor="site-active"
-          className="text-sm font-medium text-[var(--text-body)]"
-        >
+        <label htmlFor="site-active" className="text-sm font-medium text-[var(--text-body)]">
           Active
         </label>
       </div>

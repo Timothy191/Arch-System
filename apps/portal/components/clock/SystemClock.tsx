@@ -170,9 +170,7 @@ export function SystemClock() {
             <div className="grid grid-cols-7 gap-0.5">
               {daysArray.map((day, idx) => {
                 if (day === null) {
-                  return (
-                    <div key={`empty-${idx}`} className="w-[24px] h-[24px]" />
-                  );
+                  return <div key={`empty-${idx}`} className="w-[24px] h-[24px]" />;
                 }
                 const today = new Date();
                 const isToday =
@@ -215,8 +213,7 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[3px] h-6 rounded-full bg-black/85 origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${hourDeg}deg)`,
-                  transition:
-                    "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                 }}
               />
               {/* Minute hand */}
@@ -224,8 +221,7 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[2px] h-9 rounded-full bg-black/60 origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${minuteDeg}deg)`,
-                  transition:
-                    "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                 }}
               />
               {/* Second hand */}
@@ -233,8 +229,7 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[1px] h-10 rounded-full bg-[var(--accent-red)] origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${secondDeg}deg)`,
-                  transition:
-                    secondDeg === 0 ? "none" : "transform 0.1s ease-out",
+                  transition: secondDeg === 0 ? "none" : "transform 0.1s ease-out",
                 }}
               />
               {/* Center Pin */}

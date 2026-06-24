@@ -112,12 +112,10 @@ export default async function SchedulesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-            Training Schedules
-          </h2>
+          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Training Schedules</h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            Book classrooms, configure instructors, and schedule heavy equipment
-            practical evaluations.
+            Book classrooms, configure instructors, and schedule heavy equipment practical
+            evaluations.
           </p>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-blue)] text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">

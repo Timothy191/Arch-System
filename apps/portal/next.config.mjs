@@ -2,7 +2,6 @@ import { createRequire } from "module";
 import { fileURLToPath } from "url";
 import path from "path";
 import { withSentryConfig } from "@sentry/nextjs";
-import withPWA from "@ducanh2912/next-pwa";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const require = createRequire(import.meta.url);
@@ -28,7 +27,10 @@ const nextConfig = {
     PORTAL_VERSION,
   },
   typescript: {
-    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === "true",
+    // !! DANGER !!
+    // Only allow skipping type checks in local development!
+    // Never skip type checking in CI.
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === "true" && process.env.CI !== "true",
   },
   transpilePackages: [
     "@repo/ui",
@@ -54,6 +56,18 @@ const nextConfig = {
     },
   },
   reactStrictMode: true,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.performance = {
+        hints: "warning",
+        maxAssetSize: 512000, // 500 KB
+        maxEntrypointSize: 1024000, // 1 MB
+        assetFilter: (assetFilename) =>
+          assetFilename.endsWith(".js") || assetFilename.endsWith(".css"),
+      };
+    }
+    return config;
+  },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
     inlineCss: true,
@@ -89,14 +103,14 @@ const nextConfig = {
                 {
                   key: "Content-Security-Policy",
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in; frame-src 'self' http://localhost:* https://*.ngrok-free.app; frame-ancestors 'none';",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in; frame-src 'self' http://localhost:* https://*.ngrok-free.app; frame-ancestors 'none';",
                 },
               ]
             : [
                 {
                   key: "Content-Security-Policy-Report-Only",
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in; frame-src 'self' http://localhost:* https://*.ngrok-free.app; frame-ancestors 'none'; report-uri /api/csp-violations;",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in; frame-src 'self' http://localhost:* https://*.ngrok-free.app; frame-ancestors 'none'; report-uri /api/csp-violations;",
                 },
               ]),
         ],

@@ -14,12 +14,10 @@ export default function OfflinePage(): React.JSX.Element {
       <div className="p-4 bg-[var(--bg-tertiary)]/60 rounded-full mb-6">
         <CloudOff className="w-12 h-12 text-[var(--text-muted)]" />
       </div>
-      <h1 className="text-2xl font-semibold text-[var(--text-heading)] mb-2">
-        You're Offline
-      </h1>
+      <h1 className="text-2xl font-semibold text-[var(--text-heading)] mb-2">You're Offline</h1>
       <p className="text-[var(--text-muted)] max-w-md mb-8">
-        It looks like you've lost your network connection. Some features of the
-        Arch Portal are unavailable until your connection is restored.
+        It looks like you've lost your network connection. Some features of the Arch Portal are
+        unavailable until your connection is restored.
       </p>
       <ReloadButton />
     </div>

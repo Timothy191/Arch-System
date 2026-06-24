@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+/**
+ * @fileoverview Detects circular dependencies within the monorepo packages and apps.
+ * Usage: node tools/circular-dep-detect.cjs
+ */
 //
 // Detect circular dependencies in the Nx project graph.
 //
@@ -15,6 +20,12 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 
+/**
+ * Reads dependencies of a project and filters workspace dependencies.
+ *
+ * @param {string} projectPath - The relative path of the project from the root (e.g. 'apps/portal')
+ * @returns {string[]} An array of package names this project depends on via workspace:*
+ */
 function readDeps(projectPath) {
   const pkgPath = path.join(ROOT, projectPath, "package.json");
   if (!fs.existsSync(pkgPath)) return [];
@@ -29,6 +40,11 @@ function readDeps(projectPath) {
   return result;
 }
 
+/**
+ * Builds the dependency graph of all applications and packages.
+ *
+ * @returns {Map<string, string[]>} A map where keys are project names and values are their workspace dependencies.
+ */
 function buildGraph() {
   const graph = new Map();
   const dirs = ["apps", "packages"];
@@ -48,6 +64,12 @@ function buildGraph() {
   return graph;
 }
 
+/**
+ * Finds all circular dependencies in the given project dependency graph using Depth-First Search.
+ *
+ * @param {Map<string, string[]>} graph - The dependency graph map.
+ * @returns {string[][]} An array of cycles, where each cycle is represented as an array of package names.
+ */
 function findCycles(graph) {
   const WHITE = 0,
     GRAY = 1,
@@ -56,6 +78,12 @@ function findCycles(graph) {
   for (const k of graph.keys()) color.set(k, WHITE);
   const cycles = [];
 
+  /**
+   * Helper DFS function to traverse nodes and detect cycles.
+   *
+   * @param {string} node - Current node name.
+   * @param {string[]} stack - Traversal stack to track the current path.
+   */
   function dfs(node, stack) {
     color.set(node, GRAY);
     stack.push(node);
@@ -84,15 +112,11 @@ const graph = buildGraph();
 const cycles = findCycles(graph);
 
 if (cycles.length === 0) {
-  console.log(
-    "OK No circular dependencies found across " + graph.size + " projects.",
-  );
+  console.log("OK No circular dependencies found across " + graph.size + " projects.");
   process.exit(0);
 }
 
-console.error(
-  "FAIL " + cycles.length + " circular dependency cycle(s) detected:\n",
-);
+console.error("FAIL " + cycles.length + " circular dependency cycle(s) detected:\n");
 for (const cycle of cycles) {
   console.error("  " + cycle.join(" -> "));
 }

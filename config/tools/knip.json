@@ -26,7 +26,6 @@
     "python3",
     "psql",
     // CI/CD tools
-    "bundlesize",
     "wait-on",
     "serve"
   ],
@@ -48,6 +47,10 @@
         "app/**/route.ts",
         "server/proxy.ts",
         "plugins/rust-telemetry-engine/index.tsx",
+        "hooks/useOfflineQueue.ts",
+        "lib/ai/embeddings.ts",
+        "lib/api/rate-limit-middleware.ts",
+        "components/dynamic/LazyHeavyComponents.tsx",
         ".eslintrc.{js,cjs}"
       ],
       "project": [
@@ -75,11 +78,7 @@
     },
     "apps/overview": {
       "entry": [".eslintrc.{js,cjs}"],
-      "project": [
-        "app/**/*.{ts,tsx}",
-        "components/**/*.{ts,tsx}",
-        "lib/**/*.{ts,tsx}"
-      ]
+      "project": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"]
     },
     "packages/theme": {
       "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],

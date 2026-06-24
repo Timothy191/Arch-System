@@ -139,11 +139,7 @@ The SCADA panel and AlertPanel use Supabase realtime subscriptions for updates:
 ```typescript
 supabase
   .channel("machines")
-  .on(
-    "postgres_changes",
-    { event: "*", schema: "public", table: "machines" },
-    handleUpdate,
-  )
+  .on("postgres_changes", { event: "*", schema: "public", table: "machines" }, handleUpdate)
   .subscribe();
 ```
 
@@ -186,10 +182,7 @@ GET /api/metrics/prometheus
 **Recommendation:** Implement pagination for large machine fleets (>50 machines)
 
 ```typescript
-const { data: machines } = await supabase
-  .from("machines")
-  .select("*")
-  .range(0, 49); // First 50 machines
+const { data: machines } = await supabase.from("machines").select("*").range(0, 49); // First 50 machines
 ```
 
 **Impact:** Reduced query time and memory usage for large datasets

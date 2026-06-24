@@ -24,8 +24,7 @@ body,
   background-color: var(--fuxa-bg-primary) !important;
   color: var(--fuxa-text-primary) !important;
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Outfit", "Segoe UI",
-    sans-serif !important;
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Outfit", "Segoe UI", sans-serif !important;
 }
 
 /* Sidebars and headers - Frosted Glass effect */

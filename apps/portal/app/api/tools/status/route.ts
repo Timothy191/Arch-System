@@ -67,9 +67,7 @@ interface ToolStatus {
   responseTime?: number;
 }
 
-async function checkToolHealth(
-  tool: (typeof EXTERNAL_TOOLS)[number],
-): Promise<ToolStatus> {
+async function checkToolHealth(tool: (typeof EXTERNAL_TOOLS)[number]): Promise<ToolStatus> {
   const start = Date.now();
   try {
     const controller = new AbortController();

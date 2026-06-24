@@ -1,15 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
-import {
-  Users,
-  Building2,
-  Webhook,
-  FileText,
-  Settings,
-  Truck,
-  MapPin,
-} from "lucide-react";
+import { Users, Building2, Webhook, FileText, Settings, Truck, MapPin } from "lucide-react";
 
 const TABS = [
   { value: "users", label: "Users", icon: Users },
@@ -28,12 +20,7 @@ interface AdminTabsProps {
   children: React.ReactNode;
 }
 
-export function AdminTabs({
-  defaultValue,
-  value,
-  onValueChange,
-  children,
-}: AdminTabsProps) {
+export function AdminTabs({ defaultValue, value, onValueChange, children }: AdminTabsProps) {
   return (
     <Tabs
       defaultValue={defaultValue}

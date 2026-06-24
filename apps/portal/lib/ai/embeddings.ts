@@ -29,10 +29,7 @@ function getL1CacheKey(hash: string, userId: string): string {
   return `${userId}:${hash}`;
 }
 
-function getCachedEmbedding(
-  hash: string,
-  userId: string,
-): number[] | undefined {
+function getCachedEmbedding(hash: string, userId: string): number[] | undefined {
   const key = getL1CacheKey(hash, userId);
   const entry = embeddingCache.get(key);
   if (entry === undefined) return undefined;
@@ -43,11 +40,7 @@ function getCachedEmbedding(
   return entry;
 }
 
-function setCachedEmbedding(
-  hash: string,
-  userId: string,
-  vector: number[],
-): void {
+function setCachedEmbedding(hash: string, userId: string, vector: number[]): void {
   const key = getL1CacheKey(hash, userId);
   if (embeddingCache.has(key)) {
     // Move to end (most recently used) by re-inserting
@@ -73,10 +66,7 @@ function computeHash(text: string): string {
 // L2 Cache (Database)
 // ------------------------------------------------------------------
 
-async function getDbCachedEmbedding(
-  hash: string,
-  userId: string,
-): Promise<number[] | undefined> {
+async function getDbCachedEmbedding(hash: string, userId: string): Promise<number[] | undefined> {
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
@@ -155,10 +145,7 @@ async function _saveDbCachedEmbedding(
  *
  * @throws {APIError} If embedding is not found in cache
  */
-export async function generateEmbedding(
-  text: string,
-  userId: string,
-): Promise<number[]> {
+export async function generateEmbedding(text: string, userId: string): Promise<number[]> {
   const hash = computeHash(text);
   const cached = getCachedEmbedding(hash, userId);
   if (cached !== undefined) return cached;
@@ -171,13 +158,10 @@ export async function generateEmbedding(
   }
 
   // Embedding not found in cache and generation is disabled
-  throw new APIError(
-    "Embedding not found in cache. Generation has been disabled.",
-    {
-      statusCode: 503,
-      context: { hash, userId, reason: "generation_disabled" },
-    },
-  );
+  throw new APIError("Embedding not found in cache. Generation has been disabled.", {
+    statusCode: 503,
+    context: { hash, userId, reason: "generation_disabled" },
+  });
 }
 
 /**

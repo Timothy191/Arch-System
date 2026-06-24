@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  type ComponentPropsWithoutRef,
-} from "react";
+import React, { useEffect, useMemo, useState, type ComponentPropsWithoutRef } from "react";
 import { AnimatePresence, motion, type MotionProps } from "framer-motion";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
@@ -34,10 +29,7 @@ export interface AnimatedListProps extends ComponentPropsWithoutRef<"div"> {
 export const AnimatedList = React.memo(
   ({ children, className, delay = 1000, ...props }: AnimatedListProps) => {
     const [index, setIndex] = useState(0);
-    const childrenArray = useMemo(
-      () => React.Children.toArray(children),
-      [children],
-    );
+    const childrenArray = useMemo(() => React.Children.toArray(children), [children]);
 
     useEffect(() => {
       let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -61,15 +53,10 @@ export const AnimatedList = React.memo(
     }, [index, childrenArray]);
 
     return (
-      <div
-        className={cn(`flex flex-col items-center gap-4`, className)}
-        {...props}
-      >
+      <div className={cn(`flex flex-col items-center gap-4`, className)} {...props}>
         <AnimatePresence>
           {itemsToShow.map((item) => (
-            <AnimatedListItem key={(item as React.ReactElement).key}>
-              {item}
-            </AnimatedListItem>
+            <AnimatedListItem key={(item as React.ReactElement).key}>{item}</AnimatedListItem>
           ))}
         </AnimatePresence>
       </div>
@@ -88,16 +75,9 @@ export interface AnimatedFeedProps extends ComponentPropsWithoutRef<"div"> {
   children: React.ReactNode;
 }
 
-export function AnimatedFeed({
-  children,
-  className,
-  ...props
-}: AnimatedFeedProps) {
+export function AnimatedFeed({ children, className, ...props }: AnimatedFeedProps) {
   return (
-    <div
-      className={cn("flex flex-col items-center gap-2", className)}
-      {...props}
-    >
+    <div className={cn("flex flex-col items-center gap-2", className)} {...props}>
       <AnimatePresence initial={false}>
         {React.Children.toArray(children).map((item) => (
           <motion.div
@@ -126,11 +106,7 @@ export interface AutoAnimateListProps extends ComponentPropsWithoutRef<"div"> {
   children: React.ReactNode;
 }
 
-export function AutoAnimateList({
-  children,
-  className,
-  ...props
-}: AutoAnimateListProps) {
+export function AutoAnimateList({ children, className, ...props }: AutoAnimateListProps) {
   const [parent] = useAutoAnimate({ duration: 250, easing: "ease-out" });
 
   return (

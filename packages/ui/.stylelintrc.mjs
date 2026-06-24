@@ -50,10 +50,7 @@ export default {
     "custom-property-empty-line-before": null,
     "property-no-deprecated": null,
 
-    "selector-pseudo-element-no-unknown": [
-      true,
-      { ignorePseudoElements: ["global", "local"] },
-    ],
+    "selector-pseudo-element-no-unknown": [true, { ignorePseudoElements: ["global", "local"] }],
 
     "custom-property-no-missing-var-function": null,
     "color-named": null,

@@ -182,9 +182,7 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
-  "companyAnnouncements": [
-    "features: /spec | bugfixes: /fix | requirements: /prd"
-  ],
+  "companyAnnouncements": ["features: /spec | bugfixes: /fix | requirements: /prd"],
   "prefersReducedMotion": true,
   "showThinkingSummaries": true,
   "theme": "dark",

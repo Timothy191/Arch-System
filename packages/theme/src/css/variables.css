@@ -20,6 +20,7 @@
   /* Background range — macOS system grays */
   /* ARCH PALETTE — macOS Ventura/Sonoma Light */
   --arch0: #ffffff; /* macOS pure white background */
+  --white: #ffffff; /* Primitive token for white color checks */
   --arch1: #ffffff; /* elevated surface / card */
   --arch2: #e8e8ed; /* sunken / input bg */
   --arch3: #d2d2d7; /* pressed / deeply sunken */
@@ -101,12 +102,9 @@
   --color-status-danger: var(--accent-red);
 
   /* Glow shadows for the extended palette */
-  --shadow-glow-electric-blue:
-    0 0 20px rgba(220, 38, 38, 0.22), 0 0 60px rgba(220, 38, 38, 0.08);
-  --shadow-glow-mint:
-    0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
-  --shadow-glow-amber:
-    0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
+  --shadow-glow-electric-blue: 0 0 20px rgba(220, 38, 38, 0.22), 0 0 60px rgba(220, 38, 38, 0.08);
+  --shadow-glow-mint: 0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
+  --shadow-glow-amber: 0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
 
   /* Semantic status colors — used by QR access control and similar modules */
   --success: #34c759;
@@ -141,16 +139,16 @@
        Used by MacMenuBar, DepartmentLayout, KPI, and any component
        that renders per-department color accents.
        ═══════════════════════════════════════════════════════════════ */
-  --dept-drilling: #2563eb;         /* blue-600 */
-  --dept-production: #34c759;       /* green / accent-green */
-  --dept-access-control: #0284c7;   /* sky-600 */
+  --dept-drilling: #2563eb; /* blue-600 */
+  --dept-production: #34c759; /* green / accent-green */
+  --dept-access-control: #0284c7; /* sky-600 */
   --dept-access-card-actions: #3b82f6; /* blue-500 */
-  --dept-engineering: #7c3aed;      /* violet-600 */
-  --dept-control-room: #dc2626;     /* red-600 */
-  --dept-safety: #d97706;           /* amber-600 */
-  --dept-training: #0891b2;         /* cyan-600 */
-  --dept-satellite: #4f46e5;        /* indigo-600 */
-  --dept-admin: #7c3aed;            /* violet-600 */
+  --dept-engineering: #7c3aed; /* violet-600 */
+  --dept-control-room: #dc2626; /* red-600 */
+  --dept-safety: #d97706; /* amber-600 */
+  --dept-training: #0891b2; /* cyan-600 */
+  --dept-satellite: #4f46e5; /* indigo-600 */
+  --dept-admin: #7c3aed; /* violet-600 */
 
   /* macOS traffic light colors */
   --mac-red: #ff5f56;
@@ -238,8 +236,7 @@
   --glass-video-border: rgba(255, 255, 255, 0.15);
   --glass-video-border-bottom: rgba(0, 0, 0, 0.06);
   --glass-video-sheen: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
-  --glass-video-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
+  --glass-video-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
   --text-on-glass-video: rgba(10, 10, 20, 0.92);
   --text-on-glass-video-muted: rgba(10, 10, 20, 0.55);
   --glass-video-radius: 20px;
@@ -288,11 +285,7 @@
      ─────────────────────────────────────────────────────────────────── */
   --canvas-bg-from: #f4f4f7;
   --canvas-bg-to: #e4e4e7;
-  --canvas-gradient: linear-gradient(
-    135deg,
-    var(--canvas-bg-from) 0%,
-    var(--canvas-bg-to) 100%
-  );
+  --canvas-gradient: linear-gradient(135deg, var(--canvas-bg-from) 0%, var(--canvas-bg-to) 100%);
   /* Wave layer tint — subtle charcoal/slate radial used by the animated orbs */
   --canvas-wave-tint-a: rgba(28, 28, 30, 0.06);
   --canvas-wave-tint-b: rgba(16, 185, 129, 0.04);
@@ -301,36 +294,25 @@
   /* ═══════════════════════════════════════════════════════════════
        DIFFUSION SHADOW SYSTEM — Light mode (softer)
        ═══════════════════════════════════════════════════════════════ */
-  --shadow-diffusion-sm:
-    0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03);
-  --shadow-diffusion-md:
-    0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
-  --shadow-diffusion-lg:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
-  --shadow-diffusion-xl:
-    0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04);
+  --shadow-diffusion-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-md: 0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
+  --shadow-diffusion-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04);
   --shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03),
-    0 12px 32px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.04),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.03),
+    0 20px 48px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
   --shadow-card-hover:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04),
-    0 16px 40px rgba(0, 0, 0, 0.04), 0 28px 64px rgba(0, 0, 0, 0.05),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.04),
+    0 28px 64px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
   --shadow-elevated:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03),
-    0 20px 48px rgba(0, 0, 0, 0.03), 0 32px 72px rgba(0, 0, 0, 0.04),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
-  --shadow-glow-blue:
-    0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-primary:
-    0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-electric:
-    0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
+    0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-glow-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-primary: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-electric: 0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
   --shadow-window:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03),
-    0 24px 56px rgba(0, 0, 0, 0.04), 0 40px 96px rgba(0, 0, 0, 0.05),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
+    0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
 
   /* ═══════════════════════════════════════════════════════════════
        REFRACTION SYSTEM
@@ -380,6 +362,43 @@
   --color-text-hud-secondary: oklch(100% 0 0deg / 70%);
   --color-text-hud-tertiary: oklch(100% 0 0deg / 40%);
 
+  /* Uiverse.io by Spacious74 Button Foundation */
+  --bg-button-uiverse: radial-gradient(circle 80px at 80% -10%, #ffffff, #181b1b);
+  --bg-button-uiverse-inner: radial-gradient(circle 80px at 80% -50%, #777777, #0f1111);
+  --bg-button-uiverse-blob: radial-gradient(
+    circle 60px at 0% 100%,
+    #3fe9ff,
+    rgba(0, 0, 255, 0.5),
+    transparent
+  );
+  --bg-button-uiverse-inner-before: radial-gradient(
+    circle 60px at 0% 100%,
+    rgba(0, 225, 255, 0.1),
+    rgba(0, 0, 255, 0.06),
+    transparent
+  );
+  --shadow-button-uiverse-after: 0 0 20px rgba(255, 255, 255, 0.22);
+  --shadow-button-uiverse-blob: -10px 10px 30px rgba(0, 81, 255, 0.176);
+
+  /* Uiverse.io by uiverse-astronaut Circular Tabs Foundation */
+  --color-cloud: var(--arch0);
+  --color-edge: var(--arch4);
+  --color-mist: var(--arch9);
+  --color-ink: var(--arch11);
+  --shadow-cir-tabs: 0 1px 1px rgba(14, 17, 22, 0.04), 0 20px 40px -24px rgba(14, 17, 22, 0.18);
+  --shadow-cir-tabs-active:
+    0 1px 1px rgba(14, 17, 22, 0.06), 0 8px 18px -10px rgba(14, 17, 22, 0.5);
+
+  /* Uiverse.io by Nawsome Animated Loader */
+  --loader-ring-a: #f42f25;
+  --loader-ring-b: #f49725;
+  --loader-ring-c: #255ff4;
+  --loader-ring-d: #f42582;
+
+  /* Uiverse.io by uiverse-astronaut Circular Checklist Foundation */
+  --icon-cir-check-mark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+  --shadow-cir-check-focus: 0 0 0 3px rgba(46, 125, 239, 0.32);
+
   /* ---- Opacity Tokens ---- */
   --opacity-focus-dim: 0.4;
   --opacity-disabled: 0.38;
@@ -415,15 +434,11 @@
   --theme-transition-duration: 0ms;
 
   /* Font variables used in Tailwind config preset */
-  --font-sans:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
-    sans-serif;
+  --font-sans: "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-inter:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
-    sans-serif;
+    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-outfit:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
-    sans-serif;
+    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;

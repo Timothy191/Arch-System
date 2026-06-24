@@ -2,11 +2,7 @@ import { IStore } from "../interfaces";
 
 export interface SimpleRedisClient {
   get(key: string): Promise<string | null>;
-  set(
-    key: string,
-    value: string,
-    options?: { EX: number },
-  ): Promise<string | null | void>;
+  set(key: string, value: string, options?: { EX: number }): Promise<string | null | void>;
   del(key: string): Promise<number | void>;
 }
 

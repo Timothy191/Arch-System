@@ -30,13 +30,9 @@ export function EmptyState({
           <Icon className="w-8 h-8 text-[var(--text-muted)]" />
         </div>
       )}
-      <h3 className="text-lg font-semibold text-[var(--text-heading)] mb-1">
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold text-[var(--text-heading)] mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-[var(--text-muted)] max-w-sm mb-6">
-          {description}
-        </p>
+        <p className="text-sm text-[var(--text-muted)] max-w-sm mb-6">{description}</p>
       )}
       {action && <div>{action}</div>}
     </div>

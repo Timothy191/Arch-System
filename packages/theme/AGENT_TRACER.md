@@ -1,5 +1,35 @@
 # Agent Tracer - @repo/theme
 
+## 2026-06-24 - Uiverse Concentric Animated Loader Integration
+
+- **Purpose**: Integrate the Uiverse concentric animated loader (by Nawsome) as the core spinner styling.
+- **Changes**:
+  - `packages/theme/src/css/variables.css`: Declared tokenized stroke color variables (`--loader-ring-a` to `--loader-ring-d`) for the concentric loader rings.
+  - `packages/theme/src/css/loaders.css`: Created a stylesheet implementing `.loader-pl` and `.loader-pl-ring` selectors conforming to Stylelint rules and percentage-based keyframes.
+  - `packages/theme/src/css/index.css`: Imported the new `loaders.css` stylesheet in the `theme` layer.
+  - `packages/theme/.stylelintrc.mjs`: Added `src/css/loaders.css` to overrides to guarantee design token compliance.
+- **Next Steps**: Rebuild theme to sync generated typescript token maps.
+
+## 2026-06-24 - Uiverse Circular Tabs / Segmented Control integration
+
+- **Purpose**: Integrate the Uiverse circular tabs style (by uiverse-astronaut) as the visual design foundation for ShiftToggle and segmented tab components.
+- **Changes**:
+  - `packages/theme/src/css/variables.css`: Declared tokenized background, border, text color, and active shadow variables for the circular tabs.
+  - `packages/theme/src/css/tabs.css`: Created a stylesheet implementing `.cir-tabs`, `.cir-tabs-r`, and `.cir-tabs-t` selectors conforming to Stylelint patterns.
+  - `packages/theme/src/css/index.css`: Imported the new `tabs.css` stylesheet in the `theme` layer.
+  - `packages/theme/.stylelintrc.mjs`: Added `src/css/tabs.css` to overrides to guarantee design token compliance.
+- **Next Steps**: Rebuild theme to sync generated typescript token maps.
+
+## 2026-06-24 - Global Uiverse Button Foundation integration
+
+- **Purpose**: Integrate the Uiverse button style (by Spacious74) as the global button foundation.
+- **Changes**:
+  - `packages/theme/src/css/variables.css`: Declared tokenized background, shadow, and color variables for the Uiverse button.
+  - `packages/theme/src/css/buttons.css`: Created a new stylesheet implementing Uiverse button geometry, glowing shadow effects, and size overrides.
+  - `packages/theme/src/css/index.css`: Imported the new `buttons.css` stylesheet in the `theme` layer.
+  - `packages/theme/.stylelintrc.mjs`: Added `src/css/buttons.css` to overrides to guarantee design token compliance.
+- **Next Steps**: Already built the theme to sync generated typescript token maps.
+
 ## 2026-06-18 - Background Tint Overlay z-index Layering Fix
 
 - **Purpose**: Fix visual layering issue where `.route-bg-tint` overlay was incorrectly positioned at `z-index: 0`, causing potential interference with foreground content and interactive elements.

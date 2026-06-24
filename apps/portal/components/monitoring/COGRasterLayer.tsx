@@ -92,13 +92,11 @@ export function COGRasterLayer({
         <div className="flex items-start gap-3">
           <span className="text-purple-400 text-xl mt-0.5">🗺️</span>
           <div>
-            <p className="text-sm font-semibold text-purple-400">
-              Cloud-Optimized GeoTIFF (COG)
-            </p>
+            <p className="text-sm font-semibold text-purple-400">Cloud-Optimized GeoTIFF (COG)</p>
             <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              GPU-accelerated raster rendering directly in the browser. Supports
-              multi-spectral band composites, NDVI analytics, and SAR mosaics
-              via COG / WMTS endpoints. Imagery &copy; EOX / ESA Copernicus.
+              GPU-accelerated raster rendering directly in the browser. Supports multi-spectral band
+              composites, NDVI analytics, and SAR mosaics via COG / WMTS endpoints. Imagery &copy;
+              EOX / ESA Copernicus.
             </p>
           </div>
         </div>
@@ -124,9 +122,7 @@ export function COGRasterLayer({
 
       {/* Opacity slider */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-[var(--text-secondary)] w-14">
-          Opacity
-        </span>
+        <span className="text-xs text-[var(--text-secondary)] w-14">Opacity</span>
         <input
           type="range"
           min={0}
@@ -166,8 +162,7 @@ export function COGRasterLayer({
                   type: "raster",
                   tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
                   tileSize: 256,
-                  attribution:
-                    "&copy; <a href='https://www.openstreetmap.org/copyright'>OSM</a>",
+                  attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OSM</a>",
                 },
               },
               layers: [

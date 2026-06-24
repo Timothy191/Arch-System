@@ -13,8 +13,7 @@ export default async function ShiftCoveragePage({
   });
 
   const currentHour = new Date().getHours();
-  const initialShift: "day" | "night" =
-    currentHour >= 6 && currentHour < 18 ? "day" : "night";
+  const initialShift: "day" | "night" = currentHour >= 6 && currentHour < 18 ? "day" : "night";
 
   return (
     <ShiftCoverageClient

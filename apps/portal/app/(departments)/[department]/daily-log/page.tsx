@@ -18,44 +18,32 @@ export default async function DailyLogPage({
 
   if (isSafety) {
     // Parallel fetch of independent safety reference data and incidents
-    const [
-      { data: categories },
-      { data: severities },
-      { data: todayIncidents },
-    ] = await Promise.all([
-      supabase
-        .from("safety_incident_categories")
-        .select("id, name, color, icon")
-        .order("sort_order"),
-      supabase
-        .from("safety_severities")
-        .select("id, level, color")
-        .order("sort_order"),
-      supabase
-        .from("safety_incidents")
-        .select(
-          "id, incident_type, severity_id, severity:safety_severities(color), category:safety_incident_categories(name), description, location, injured_parties, status, shift_type, created_at",
-        )
-        .eq("department_id", deptId)
-        .eq("incident_date", today)
-        .order("created_at", { ascending: false }),
-    ]);
+    const [{ data: categories }, { data: severities }, { data: todayIncidents }] =
+      await Promise.all([
+        supabase
+          .from("safety_incident_categories")
+          .select("id, name, color, icon")
+          .order("sort_order"),
+        supabase.from("safety_severities").select("id, level, color").order("sort_order"),
+        supabase
+          .from("safety_incidents")
+          .select(
+            "id, incident_type, severity_id, severity:safety_severities(color), category:safety_incident_categories(name), description, location, injured_parties, status, shift_type, created_at",
+          )
+          .eq("department_id", deptId)
+          .eq("incident_date", today)
+          .order("created_at", { ascending: false }),
+      ]);
 
     const formattedIncidents = (todayIncidents || []).map((inc: any) => ({
       ...inc,
-      severity_color: Array.isArray(inc.severity)
-        ? inc.severity[0]?.color
-        : inc.severity?.color,
-      category_name: Array.isArray(inc.category)
-        ? inc.category[0]?.name
-        : inc.category?.name,
+      severity_color: Array.isArray(inc.severity) ? inc.severity[0]?.color : inc.severity?.color,
+      category_name: Array.isArray(inc.category) ? inc.category[0]?.name : inc.category?.name,
     }));
 
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">
-          Safety Daily Log
-        </h2>
+        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Safety Daily Log</h2>
 
         {formattedIncidents.length > 0 && (
           <GlassCard className="border-accent-blue/20">
@@ -73,9 +61,7 @@ export default async function DailyLogPage({
         />
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Today&apos;s Incidents
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Incidents</h3>
           <SafetyIncidentsList incidents={formattedIncidents} />
         </div>
       </div>
@@ -95,16 +81,12 @@ export default async function DailyLogPage({
     .eq("department_id", deptId)
     .eq("log_date", today);
 
-  const existingShifts = (todayLogs || []).map(
-    (l) => l.shift as "day" | "night",
-  );
+  const existingShifts = (todayLogs || []).map((l) => l.shift as "day" | "night");
   const allShiftsLogged = existingShifts.length >= 2;
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">
-        Daily Log
-      </h2>
+      <h2 className="text-2xl font-medium text-[var(--text-heading)]">Daily Log</h2>
 
       {allShiftsLogged ? (
         <GlassCard className="border-accent-green/20">
@@ -126,8 +108,7 @@ export default async function DailyLogPage({
             <GlassCard className="border-accent-blue/20">
               <p className="text-accent-blue text-sm font-medium">
                 {existingShifts.length} shift
-                {existingShifts.length > 1 ? "s" : ""} already logged:{" "}
-                {existingShifts.join(", ")}
+                {existingShifts.length > 1 ? "s" : ""} already logged: {existingShifts.join(", ")}
               </p>
             </GlassCard>
           )}

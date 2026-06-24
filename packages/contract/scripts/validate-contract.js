@@ -24,9 +24,7 @@ const SCHEMAS_DIR = path.join(__dirname, "..", "src", "schemas");
 
 function checkSpecExists() {
   if (!fs.existsSync(SPEC_FILE)) {
-    console.error(
-      `✗ OpenAPI spec file not found: ${SPEC_FILE}`
-    );
+    console.error(`✗ OpenAPI spec file not found: ${SPEC_FILE}`);
     console.error("\nPlease run: pnpm --filter portal generate-openapi-spec");
     process.exit(1);
   }
@@ -35,9 +33,7 @@ function checkSpecExists() {
 
 function checkGeneratedTypesExist() {
   if (!fs.existsSync(GENERATED_TYPES_FILE)) {
-    console.error(
-      `✗ Generated types file not found: ${GENERATED_TYPES_FILE}`
-    );
+    console.error(`✗ Generated types file not found: ${GENERATED_TYPES_FILE}`);
     console.error("\nPlease run: pnpm --filter @repo/contract openapi:generate");
     process.exit(1);
   }
@@ -68,7 +64,7 @@ function extractOpenAPIEndpoints() {
   const endpoints = [];
   for (const [path, methods] of Object.entries(spec.paths)) {
     const operations = Object.keys(methods).filter(
-      m => m !== "parameters" && m !== "$ref" && m !== "servers"
+      (m) => m !== "parameters" && m !== "$ref" && m !== "servers",
     );
     for (const operation of operations) {
       endpoints.push({
@@ -107,14 +103,19 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
     const pathParts = endpoint.path.split("/").filter(Boolean);
     if (pathParts.length >= 2) {
       // Convert path to schema name pattern (e.g., /api/ai/chat -> aiChat)
-      const potentialSchema = pathParts[1] + pathParts.slice(2).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join("");
+      const potentialSchema =
+        pathParts[1] +
+        pathParts
+          .slice(2)
+          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+          .join("");
       if (schemaNames.has(potentialSchema)) {
         coveredSchemas.add(potentialSchema);
       }
     }
   }
 
-  const uncoveredSchemas = contractSchemas.filter(s => !coveredSchemas.has(s));
+  const uncoveredSchemas = contractSchemas.filter((s) => !coveredSchemas.has(s));
   const orphanEndpoints = openAPIEndpoints.length - coveredSchemas.size;
 
   console.log(`\n✓ Schemas covered by OpenAPI: ${coveredSchemas.size}`);

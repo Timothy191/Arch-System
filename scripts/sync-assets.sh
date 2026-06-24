@@ -19,8 +19,8 @@ ASSET_DIRS=("background" "error-pages" "large")
 
 echo "  → Synchronizing global assets from root assets/..."
 
-if [ ! -d "$REPO_ROOT/assets" ]; then
-  echo "  ✗ Error: Root assets/ directory not found."
+if [ ! -d "$REPO_ROOT/apps/portal/assets" ]; then
+  echo "  ✗ Error: apps/portal/assets/ directory not found."
   exit 1
 fi
 
@@ -41,7 +41,7 @@ for TARGET in "${TARGETS[@]}"; do
   
   # Copy files while preserving directory structure
   # Using cp -R ensures spaces in names (like "light mode.mp4") are handled properly
-  cp -R "$REPO_ROOT/assets/." "$FULL_TARGET/"
+  cp -R "$REPO_ROOT/apps/portal/assets/." "$FULL_TARGET/"
   
   echo "  ✓ Successfully synced assets to $TARGET"
 done

@@ -48,9 +48,7 @@ process.stdin.on("end", () => {
                 query: `verify edits in ${rel}`,
                 depth: 0,
               });
-              console.error(
-                `[ProWorkflow] enqueued verify seed for ${slug}/${rel}`,
-              );
+              console.error(`[ProWorkflow] enqueued verify seed for ${slug}/${rel}`);
             }
           } finally {
             store.close();
@@ -67,43 +65,25 @@ process.stdin.on("end", () => {
       if (/package\.json$/.test(filePath)) {
         console.error("[ProWorkflow]   Run: npm install to sync dependencies");
       } else if (/\/\.env$|^\.env$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   CAUTION: .env changed — verify no secrets are committed",
-        );
+        console.error("[ProWorkflow]   CAUTION: .env changed — verify no secrets are committed");
       } else if (/tsconfig.*\.json$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   Run: tsc --noEmit to verify TypeScript config",
-        );
+        console.error("[ProWorkflow]   Run: tsc --noEmit to verify TypeScript config");
       } else if (/Dockerfile|docker-compose/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   Rebuild containers: docker compose up --build",
-        );
+        console.error("[ProWorkflow]   Rebuild containers: docker compose up --build");
       } else if (/\.github\/workflows\//.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   CI workflow changed — verify pipeline still passes",
-        );
+        console.error("[ProWorkflow]   CI workflow changed — verify pipeline still passes");
       } else if (/CLAUDE\.md$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   CLAUDE.md changed — context instructions updated",
-        );
+        console.error("[ProWorkflow]   CLAUDE.md changed — context instructions updated");
       } else if (/Cargo\.toml$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   Run: cargo check to verify dependencies",
-        );
+        console.error("[ProWorkflow]   Run: cargo check to verify dependencies");
       } else if (/pyproject\.toml$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   Run: pip install -e . to sync dependencies",
-        );
+        console.error("[ProWorkflow]   Run: pip install -e . to sync dependencies");
       } else if (/go\.mod$/.test(filePath)) {
         console.error("[ProWorkflow]   Run: go mod tidy to sync dependencies");
       } else if (/\.claude\//.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   .claude/ config changed — context or rules may be affected",
-        );
+        console.error("[ProWorkflow]   .claude/ config changed — context or rules may be affected");
       } else if (/Makefile$/.test(filePath)) {
-        console.error(
-          "[ProWorkflow]   Makefile changed — verify build targets still work",
-        );
+        console.error("[ProWorkflow]   Makefile changed — verify build targets still work");
       }
     }
 

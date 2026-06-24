@@ -87,11 +87,7 @@ export async function POST(req: Request): Promise<Response> {
       return new Response(null, { status: 204 });
     }
 
-    const {
-      "violated-directive": directive,
-      "blocked-uri": blocked,
-      "document-uri": doc,
-    } = report;
+    const { "violated-directive": directive, "blocked-uri": blocked, "document-uri": doc } = report;
 
     // Log as a structured error for monitoring/alerting
     logError(new Error(`CSP violation: ${directive}`), {

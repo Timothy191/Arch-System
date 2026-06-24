@@ -13,6 +13,7 @@ export function formatDate(dateStr: string) {
  * Returns the current shift (day/night) based on the hour
  */
 export * from "./n8n";
+export * from "./analytics";
 export function getCurrentShift(): "day" | "night" {
   const hour = new Date().getHours();
   // Day shift usually 06:00 to 18:00
@@ -56,8 +57,6 @@ export function getThreeShift(
  * Returns the current date in the mine's operational timezone as YYYY-MM-DD.
  * Use this on the SERVER only – never on the client.
  */
-export function getOperationalToday(
-  timeZone: string = "Africa/Johannesburg",
-): string {
+export function getOperationalToday(timeZone: string = "Africa/Johannesburg"): string {
   return new Date().toLocaleDateString("en-CA", { timeZone });
 }

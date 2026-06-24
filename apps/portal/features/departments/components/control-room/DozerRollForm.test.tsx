@@ -2,13 +2,7 @@
 // initial guard, empty dozers, date display, area calculation, client-side
 // validation, Zod schema validation, successful submission, submission error,
 // and saving indicator.
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { DozerRollForm } from "./DozerRollForm";
 
 // --- Mocks ---
@@ -25,13 +19,7 @@ jest.mock("@repo/supabase/client", () => ({
 }));
 
 jest.mock("@repo/ui/GlassCard", () => ({
-  GlassCard: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
     </div>
@@ -107,9 +95,7 @@ const defaultProps = {
   today: "2026-06-15",
 };
 
-const { createBrowserSupabaseClient } = jest.requireMock(
-  "@repo/supabase/client",
-);
+const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 // --- Helper ---
 
@@ -130,9 +116,7 @@ describe("DozerRollForm", () => {
   it("renders 'Add Roll' button in closed state", () => {
     render(<DozerRollForm {...defaultProps} />);
 
-    expect(
-      screen.getByRole("button", { name: /add roll/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add roll/i })).toBeInTheDocument();
     expect(screen.getByText("Add Roll")).toBeInTheDocument();
 
     // Form elements must NOT be present
@@ -157,9 +141,7 @@ describe("DozerRollForm", () => {
     expect(screen.getByPlaceholderText("e.g. 8")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("e.g. 8.5")).toBeInTheDocument();
     expect(screen.getByTestId("shift-toggle")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /save roll/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save roll/i })).toBeInTheDocument();
 
     // "Add Roll" must be hidden while form is open
     expect(screen.queryByText("Add Roll")).not.toBeInTheDocument();
@@ -176,9 +158,7 @@ describe("DozerRollForm", () => {
     fireEvent.click(screen.getByText("Cancel"));
 
     expect(screen.queryByText("Record Dozer Roll")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /add roll/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add roll/i })).toBeInTheDocument();
   });
 
   // ── 4. Invalid today date guard ───────────────────────────────────────
@@ -194,9 +174,7 @@ describe("DozerRollForm", () => {
 
     expect(screen.getByTestId("glass-card")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Operational date is missing or invalid. Please reload the page.",
-      ),
+      screen.getByText("Operational date is missing or invalid. Please reload the page."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Add Roll")).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
@@ -229,9 +207,7 @@ describe("DozerRollForm", () => {
 
     openForm();
 
-    expect(
-      screen.getByText(/2026-06-15 \(Africa\/Johannesburg\)/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/2026-06-15 \(Africa\/Johannesburg\)/)).toBeInTheDocument();
   });
 
   // ── 7. Area calculation ────────────────────────────────────────────────
@@ -284,9 +260,7 @@ describe("DozerRollForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /save roll/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Enter both length and width"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Enter both length and width")).toBeInTheDocument();
     });
   });
 
@@ -298,13 +272,7 @@ describe("DozerRollForm", () => {
       from: jest.fn(() => ({ insert: mockInsert })),
     });
 
-    render(
-      <DozerRollForm
-        departmentId="not-a-uuid"
-        dozers={mockDozers}
-        today="2026-06-15"
-      />,
-    );
+    render(<DozerRollForm departmentId="not-a-uuid" dozers={mockDozers} today="2026-06-15" />);
 
     openForm();
 
@@ -405,9 +373,7 @@ describe("DozerRollForm", () => {
 
     // Verify the form resets to closed state
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /add roll/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add roll/i })).toBeInTheDocument();
     });
     expect(screen.queryByText("Record Dozer Roll")).not.toBeInTheDocument();
   });

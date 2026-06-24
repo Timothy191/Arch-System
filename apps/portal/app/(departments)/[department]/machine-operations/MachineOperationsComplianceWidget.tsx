@@ -3,18 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  CheckCircle2,
-  XCircle,
-  ShieldOff,
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-} from "lucide-react";
-import type {
-  ShiftCompleteness,
-  MachineCoverageStatus,
-} from "@/lib/shift-completeness";
+import { CheckCircle2, XCircle, ShieldOff, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import type { ShiftCompleteness, MachineCoverageStatus } from "@/lib/shift-completeness";
 
 interface Props {
   departmentId: string;
@@ -30,10 +20,7 @@ function todayDate(): string {
   return new Date().toISOString().split("T")[0]!;
 }
 
-export function MachineOperationsComplianceWidget({
-  departmentId,
-  departmentSlug,
-}: Props) {
+export function MachineOperationsComplianceWidget({ departmentId, departmentSlug }: Props) {
   const router = useRouter();
   const [data, setData] = useState<ShiftCompleteness | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,9 +56,7 @@ export function MachineOperationsComplianceWidget({
   if (loading && !data) {
     return (
       <GlassCard className="py-3">
-        <p className="text-[var(--text-muted)] text-sm text-center">
-          Checking shift coverage…
-        </p>
+        <p className="text-[var(--text-muted)] text-sm text-center">Checking shift coverage…</p>
       </GlassCard>
     );
   }
@@ -138,11 +123,7 @@ export function MachineOperationsComplianceWidget({
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
-          {expanded ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </div>
 
@@ -150,11 +131,7 @@ export function MachineOperationsComplianceWidget({
       {expanded && (
         <div className="border-t border-[var(--border-default)] divide-y divide-[var(--border-default)]">
           {statuses.map((s: MachineCoverageStatus) => (
-            <MachineRow
-              key={s.machineId}
-              status={s}
-              departmentSlug={departmentSlug}
-            />
+            <MachineRow key={s.machineId} status={s} departmentSlug={departmentSlug} />
           ))}
           {statuses.length === 0 && (
             <p className="px-4 py-3 text-[var(--text-muted)] text-sm text-center">
@@ -182,9 +159,7 @@ function MachineRow({
         <ShieldOff className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
         <span className="text-[var(--text-muted)] text-sm flex-1">
           {status.machineName}
-          <span className="text-xs ml-2 text-[var(--text-muted)]">
-            ({status.machineType})
-          </span>
+          <span className="text-xs ml-2 text-[var(--text-muted)]">({status.machineType})</span>
         </span>
         <span className="text-[var(--text-muted)] text-xs">Exempt</span>
       </div>
@@ -197,9 +172,7 @@ function MachineRow({
         <CheckCircle2 className="w-4 h-4 text-accent-green shrink-0" />
         <span className="text-[var(--text-secondary)] text-sm flex-1">
           {status.machineName}
-          <span className="text-xs ml-2 text-[var(--text-muted)]">
-            ({status.machineType})
-          </span>
+          <span className="text-xs ml-2 text-[var(--text-muted)]">({status.machineType})</span>
         </span>
         <span className="text-accent-green text-xs">{status.formLabel}</span>
       </div>
@@ -209,9 +182,7 @@ function MachineRow({
   return (
     <button
       type="button"
-      onClick={() =>
-        router.push(`/${departmentSlug}/${status.formPath.split("/").pop()}`)
-      }
+      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split("/").pop()}`)}
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent-red/5 transition-colors text-left group"
     >
       <XCircle className="w-4 h-4 text-accent-red shrink-0" />
@@ -221,9 +192,7 @@ function MachineRow({
           ({status.machineType})
         </span>
       </span>
-      <span className="text-accent-red text-xs group-hover:underline">
-        → {status.formLabel}
-      </span>
+      <span className="text-accent-red text-xs group-hover:underline">→ {status.formLabel}</span>
     </button>
   );
 }

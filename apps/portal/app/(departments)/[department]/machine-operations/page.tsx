@@ -6,9 +6,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 const MachineOperationsForm = dynamic(
   () => import("./MachineOperationsForm").then((m) => m.MachineOperationsForm),
   {
-    loading: () => (
-      <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-    ),
+    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
@@ -18,10 +16,7 @@ const MachineOperationsList = dynamic(
     loading: () => (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl"
-          />
+          <div key={i} className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
         ))}
       </div>
     ),
@@ -30,13 +25,9 @@ const MachineOperationsList = dynamic(
 
 const MachineOperationsComplianceWidget = dynamic(
   () =>
-    import("./MachineOperationsComplianceWidget").then(
-      (m) => m.MachineOperationsComplianceWidget,
-    ),
+    import("./MachineOperationsComplianceWidget").then((m) => m.MachineOperationsComplianceWidget),
   {
-    loading: () => (
-      <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-    ),
+    loading: () => <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
@@ -62,9 +53,7 @@ export default async function MachineOperationsPage({
   ] = await Promise.all([
     supabase
       .from("machines")
-      .select(
-        "id, name, machine_type, serial_number, active, bin_factor, site_id",
-      )
+      .select("id, name, machine_type, serial_number, active, bin_factor, site_id")
       .eq("active", true)
       .order("name"),
     supabase
@@ -72,11 +61,7 @@ export default async function MachineOperationsPage({
       .select("id, full_name, employee_code")
       .eq("active", true)
       .order("full_name"),
-    supabase
-      .from("sites")
-      .select("id, name, site_code")
-      .eq("active", true)
-      .order("name"),
+    supabase.from("sites").select("id, name, site_code").eq("active", true).order("name"),
     supabase
       .from("machine_operations")
       .select(
@@ -103,8 +88,7 @@ export default async function MachineOperationsPage({
       return sum + (op.hours_worked || 0);
     }, 0) || 0;
 
-  const activeMachines = new Set(todayOperations?.map((op) => op.machine_id))
-    .size;
+  const activeMachines = new Set(todayOperations?.map((op) => op.machine_id)).size;
 
   // AGENT-TRACE: Calculate total delay hours across all operations
   const totalDelayHours =
@@ -112,10 +96,7 @@ export default async function MachineOperationsPage({
       const operationDelays = (op as any).delay_entries || [];
       return (
         sum +
-        operationDelays.reduce(
-          (delaySum: number, d: any) => delaySum + (d.duration_hours || 0),
-          0,
-        )
+        operationDelays.reduce((delaySum: number, d: any) => delaySum + (d.duration_hours || 0), 0)
       );
     }, 0) || 0;
 
@@ -137,9 +118,7 @@ export default async function MachineOperationsPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">
-          Machine Operations
-        </h2>
+        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Machine Operations</h2>
         <p className="text-[var(--text-muted)] text-sm">
           {new Date().toLocaleDateString("en-ZA", {
             weekday: "long",
@@ -160,9 +139,7 @@ export default async function MachineOperationsPage({
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Active Machines</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">
-            {activeMachines}
-          </p>
+          <p className="text-2xl font-medium text-accent-green mt-1">{activeMachines}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Material Moved</p>
@@ -172,35 +149,24 @@ export default async function MachineOperationsPage({
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">BCM/Hour</p>
-          <p className="text-2xl font-medium text-accent-blue mt-1">
-            {avgBcmPerHour.toFixed(1)}
-          </p>
+          <p className="text-2xl font-medium text-accent-blue mt-1">{avgBcmPerHour.toFixed(1)}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Total Delays</p>
-          <p className="text-2xl font-medium text-accent-red mt-1">
-            {totalDelayHours.toFixed(1)}h
-          </p>
+          <p className="text-2xl font-medium text-accent-red mt-1">{totalDelayHours.toFixed(1)}h</p>
         </GlassCard>
       </div>
 
       {/* Shift Coverage Compliance Widget */}
       <Suspense
-        fallback={
-          <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-        }
+        fallback={<div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
       >
-        <MachineOperationsComplianceWidget
-          departmentId={deptId}
-          departmentSlug={deptSlug}
-        />
+        <MachineOperationsComplianceWidget departmentId={deptId} departmentSlug={deptSlug} />
       </Suspense>
 
       {/* Add Operation Form */}
       <Suspense
-        fallback={
-          <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-        }
+        fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
       >
         <MachineOperationsForm
           departmentId={deptId}
@@ -213,25 +179,17 @@ export default async function MachineOperationsPage({
 
       {/* Today's Operations List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-[var(--text-heading)]">
-          Today&apos;s Operations
-        </h3>
+        <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Operations</h3>
         <Suspense
           fallback={
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl"
-                />
+                <div key={i} className="h-24 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
               ))}
             </div>
           }
         >
-          <MachineOperationsList
-            operations={todayOperations || []}
-            todayLoads={todayLoads || []}
-          />
+          <MachineOperationsList operations={todayOperations || []} todayLoads={todayLoads || []} />
         </Suspense>
       </div>
     </div>

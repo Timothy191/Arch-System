@@ -14,10 +14,7 @@ export interface SafetyChartsProps {
   }[];
 }
 
-export function SafetyCharts({
-  trendData,
-  distributionData,
-}: SafetyChartsProps) {
+export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Incident Trend Chart */}

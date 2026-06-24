@@ -46,9 +46,7 @@ function parseCatalogs(yamlText) {
   for (const line of lines) {
     const stripped = line.replace(/#.*$/, "").replace(/\s+$/, "");
     if (!stripped.trim()) continue;
-    const catalogMatch = stripped.match(
-      /^((?:catalog(?::[\w-]+)?)|(?:[a-z0-9][\w-]*)):\s*$/i,
-    );
+    const catalogMatch = stripped.match(/^((?:catalog(?::[\w-]+)?)|(?:[a-z0-9][\w-]*)):\s*$/i);
     if (catalogMatch) {
       currentCatalog = catalogMatch[1];
       if (!result.byCatalog.has(currentCatalog)) {
@@ -60,9 +58,7 @@ function parseCatalogs(yamlText) {
       currentCatalog = null;
     }
     if (currentCatalog) {
-      const entry = stripped.match(
-        /^\s+([A-Za-z0-9_@/.-]+):\s*['"]?([^'"]+)['"]?\s*$/,
-      );
+      const entry = stripped.match(/^\s+([A-Za-z0-9_@/.-]+):\s*['"]?([^'"]+)['"]?\s*$/);
       if (entry) {
         const [, name, version] = entry;
         result.flat.add(name);
@@ -82,12 +78,7 @@ function extractAddedDeps(content) {
     return { deps: new Set() };
   }
   const all = new Set();
-  for (const k of [
-    "dependencies",
-    "devDependencies",
-    "peerDependencies",
-    "optionalDependencies",
-  ]) {
+  for (const k of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
     for (const name of Object.keys(json[k] || {})) {
       all.add(name);
     }
@@ -103,13 +94,11 @@ function extractAddedDeps(content) {
   } catch {
     process.exit(0);
   }
-  const filePath =
-    input?.tool_input?.file_path || input?.tool_input?.TargetFile || "";
+  const filePath = input?.tool_input?.file_path || input?.tool_input?.TargetFile || "";
   if (!filePath) process.exit(0);
   if (!/package\.json$|pnpm-workspace\.yaml$/.test(filePath)) process.exit(0);
 
-  const content =
-    input?.tool_input?.content || input?.tool_input?.new_string || "";
+  const content = input?.tool_input?.content || input?.tool_input?.new_string || "";
   if (!content) process.exit(0);
 
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();

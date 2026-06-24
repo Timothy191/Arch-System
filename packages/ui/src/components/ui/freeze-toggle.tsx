@@ -14,11 +14,7 @@ interface FreezeToggleProps {
  * A specialized toggle button for "freezing" live data updates.
  * Essential for industrial operators to inspect transient spikes or anomalies.
  */
-export function FreezeToggle({
-  isFrozen,
-  onToggle,
-  className,
-}: FreezeToggleProps) {
+export function FreezeToggle({ isFrozen, onToggle, className }: FreezeToggleProps) {
   return (
     <button
       type="button"

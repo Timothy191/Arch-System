@@ -22,9 +22,7 @@ export default async function ReportsPage({
 
   const todayStr = new Date().toISOString().split("T")[0]!;
   const toDateStr = toParam || todayStr;
-  const fromDateStr =
-    fromParam ||
-    new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const fromDateStr = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 
   const isControlRoom = dept.type === "control_room";
 
@@ -73,15 +71,10 @@ export default async function ReportsPage({
     ]);
 
     // Aggregate totals for KPIs
-    const totalHours =
-      operations?.reduce((sum, o) => sum + (o.hours_worked || 0), 0) || 0;
-    const totalLoads =
-      loads?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
-    const totalDelayMin =
-      delays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
-    const totalBcm =
-      excavatorAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) ||
-      0;
+    const totalHours = operations?.reduce((sum, o) => sum + (o.hours_worked || 0), 0) || 0;
+    const totalLoads = loads?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+    const totalDelayMin = delays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
+    const totalBcm = excavatorAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
 
     // Build per-(site, date, shift) row map
     type CRRow = {
@@ -96,8 +89,7 @@ export default async function ReportsPage({
     };
     const rowMap = new Map<string, CRRow>();
 
-    const key = (site: string, date: string, shift: string) =>
-      `${site}|${date}|${shift}`;
+    const key = (site: string, date: string, shift: string) => `${site}|${date}|${shift}`;
 
     const getOrCreate = (site: string, date: string, shift: string): CRRow => {
       const k = key(site, date, shift);
@@ -123,8 +115,7 @@ export default async function ReportsPage({
       getOrCreate("", l.load_date, l.shift_type).loads += l.total_loads || 0;
     });
     delays?.forEach((d) => {
-      getOrCreate("", d.delay_date, d.shift_type).delayMin +=
-        d.delay_minutes || 0;
+      getOrCreate("", d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;
     });
     excavatorAssignments?.forEach((a) => {
       const act = Array.isArray(a.excavator_activity)
@@ -135,13 +126,11 @@ export default async function ReportsPage({
         const siteObj = Array.isArray(rawSite)
           ? ((rawSite as { name: string }[])[0]?.name ?? "")
           : ((rawSite as { name: string } | null | undefined)?.name ?? "");
-        getOrCreate(siteObj, act.activity_date, act.shift_type).bcm +=
-          a.total_bcm || 0;
+        getOrCreate(siteObj, act.activity_date, act.shift_type).bcm += a.total_bcm || 0;
       }
     });
     dozerRolls?.forEach((r) => {
-      getOrCreate("", r.roll_date, r.shift_type).dozerPasses +=
-        r.blade_passes || 0;
+      getOrCreate("", r.roll_date, r.shift_type).dozerPasses += r.blade_passes || 0;
     });
 
     const rows = Array.from(rowMap.values()).sort((a, b) => {
@@ -151,16 +140,7 @@ export default async function ReportsPage({
     });
 
     const csvRows = [
-      [
-        "Site",
-        "Date",
-        "Shift",
-        "Hours",
-        "Total Loads",
-        "BCM",
-        "Delay (min)",
-        "Dozer Passes",
-      ],
+      ["Site", "Date", "Shift", "Hours", "Total Loads", "BCM", "Delay (min)", "Dozer Passes"],
       ...rows.map((r) => [
         r.site || "—",
         r.date,
@@ -174,9 +154,7 @@ export default async function ReportsPage({
     ];
 
     const csvContent = csvRows
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-      )
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
       .join("\n");
 
     const exportRows = rows.map((r) => ({
@@ -223,8 +201,7 @@ export default async function ReportsPage({
 
     // ── Shift completeness gate ──────────────────────────────────────────────
     const currentHour = new Date().getHours();
-    const currentShift: "day" | "night" =
-      currentHour >= 6 && currentHour < 18 ? "day" : "night";
+    const currentShift: "day" | "night" = currentHour >= 6 && currentHour < 18 ? "day" : "night";
 
     const completeness = await getShiftCompleteness(
       supabase,
@@ -235,15 +212,11 @@ export default async function ReportsPage({
     );
 
     if (!completeness.complete) {
-      const missing = completeness.statuses.filter(
-        (s) => !s.exempt && !s.hasEntry,
-      );
+      const missing = completeness.statuses.filter((s) => !s.exempt && !s.hasEntry);
       return (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-              Reports
-            </h2>
+            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
           </div>
           <GlassCard className="border-accent-red/30 space-y-4">
             <div className="flex items-start gap-3">
@@ -254,8 +227,8 @@ export default async function ReportsPage({
                 </p>
                 <p className="text-[var(--text-muted)] text-sm mt-0.5">
                   {missing.length} machine
-                  {missing.length !== 1 ? "s are" : " is"} missing entries for
-                  the current {currentShift} shift. Complete all entries first.
+                  {missing.length !== 1 ? "s are" : " is"} missing entries for the current{" "}
+                  {currentShift} shift. Complete all entries first.
                 </p>
               </div>
             </div>
@@ -269,9 +242,7 @@ export default async function ReportsPage({
                     <p className="text-[var(--text-heading)] text-sm font-medium">
                       {s.machineName}
                     </p>
-                    <p className="text-[var(--text-muted)] text-xs">
-                      {s.machineType}
-                    </p>
+                    <p className="text-[var(--text-muted)] text-xs">{s.machineType}</p>
                   </div>
                   <Link
                     href={s.formPath}
@@ -297,15 +268,10 @@ export default async function ReportsPage({
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-            Reports
-          </h2>
+          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
           <div className="flex items-center gap-2">
             <CopyReportButton csvContent={csvContent} />
-            <PDFDownloadButton
-              reportData={pdfReportData}
-              departmentId={deptId}
-            />
+            <PDFDownloadButton reportData={pdfReportData} departmentId={deptId} />
             <ExportButton
               filename={`control-room-report-${fromDateStr}-to-${toDateStr}`}
               rows={exportRows}
@@ -329,9 +295,7 @@ export default async function ReportsPage({
           </GlassCard>
           <GlassCard>
             <p className="text-[var(--text-muted)] text-sm">Total BCM</p>
-            <p className="text-2xl font-medium text-accent-green mt-1">
-              {totalBcm.toFixed(1)}
-            </p>
+            <p className="text-2xl font-medium text-accent-green mt-1">{totalBcm.toFixed(1)}</p>
           </GlassCard>
           <GlassCard>
             <p className="text-[var(--text-muted)] text-sm">Delay Minutes</p>
@@ -345,26 +309,12 @@ export default async function ReportsPage({
         <GlassCard>
           <form method="GET" className="flex items-end gap-4">
             <div>
-              <label className="block text-sm text-[var(--text-muted)] mb-1">
-                From
-              </label>
-              <Input
-                type="date"
-                name="from"
-                defaultValue={fromDateStr}
-                className="px-4 py-2"
-              />
+              <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
+              <Input type="date" name="from" defaultValue={fromDateStr} className="px-4 py-2" />
             </div>
             <div>
-              <label className="block text-sm text-[var(--text-muted)] mb-1">
-                To
-              </label>
-              <Input
-                type="date"
-                name="to"
-                defaultValue={toDateStr}
-                className="px-4 py-2"
-              />
+              <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
+              <Input type="date" name="to" defaultValue={toDateStr} className="px-4 py-2" />
             </div>
             <button
               type="submit"
@@ -413,14 +363,10 @@ export default async function ReportsPage({
                           {row.site}
                         </span>
                       ) : (
-                        <span className="text-[var(--text-muted)] text-xs">
-                          —
-                        </span>
+                        <span className="text-[var(--text-muted)] text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                      {row.date}
-                    </td>
+                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{row.date}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -478,36 +424,28 @@ export default async function ReportsPage({
 
   const logIds = logs?.map((l) => l.id) || [];
 
-  const [{ data: machineHours }, { data: fuelLogs }, { data: productionLogs }] =
-    await Promise.all([
-      logIds.length > 0
-        ? supabase
-            .from("machine_hours")
-            .select("daily_log_id, hours_worked")
-            .in("daily_log_id", logIds)
-        : Promise.resolve({ data: [] }),
-      logIds.length > 0
-        ? supabase
-            .from("fuel_logs")
-            .select("daily_log_id, diesel_litres")
-            .in("daily_log_id", logIds)
-        : Promise.resolve({ data: [] }),
-      logIds.length > 0
-        ? supabase
-            .from("production_logs")
-            .select("daily_log_id, coal_tonnes, waste_tonnes")
-            .in("daily_log_id", logIds)
-        : Promise.resolve({ data: [] }),
-    ]);
+  const [{ data: machineHours }, { data: fuelLogs }, { data: productionLogs }] = await Promise.all([
+    logIds.length > 0
+      ? supabase
+          .from("machine_hours")
+          .select("daily_log_id, hours_worked")
+          .in("daily_log_id", logIds)
+      : Promise.resolve({ data: [] }),
+    logIds.length > 0
+      ? supabase.from("fuel_logs").select("daily_log_id, diesel_litres").in("daily_log_id", logIds)
+      : Promise.resolve({ data: [] }),
+    logIds.length > 0
+      ? supabase
+          .from("production_logs")
+          .select("daily_log_id, coal_tonnes, waste_tonnes")
+          .in("daily_log_id", logIds)
+      : Promise.resolve({ data: [] }),
+  ]);
 
-  const totalHours =
-    machineHours?.reduce((sum, m) => sum + (m.hours_worked || 0), 0) || 0;
-  const totalFuel =
-    fuelLogs?.reduce((sum, f) => sum + (f.diesel_litres || 0), 0) || 0;
-  const totalCoal =
-    productionLogs?.reduce((sum, p) => sum + (p.coal_tonnes || 0), 0) || 0;
-  const totalWaste =
-    productionLogs?.reduce((sum, p) => sum + (p.waste_tonnes || 0), 0) || 0;
+  const totalHours = machineHours?.reduce((sum, m) => sum + (m.hours_worked || 0), 0) || 0;
+  const totalFuel = fuelLogs?.reduce((sum, f) => sum + (f.diesel_litres || 0), 0) || 0;
+  const totalCoal = productionLogs?.reduce((sum, p) => sum + (p.coal_tonnes || 0), 0) || 0;
+  const totalWaste = productionLogs?.reduce((sum, p) => sum + (p.waste_tonnes || 0), 0) || 0;
 
   const machineHoursByLog = new Map<string, number>();
   machineHours?.forEach((m) => {
@@ -525,24 +463,13 @@ export default async function ReportsPage({
     );
   });
 
-  const productionByLog = new Map<
-    string,
-    { coal_tonnes: number; waste_tonnes: number }
-  >();
+  const productionByLog = new Map<string, { coal_tonnes: number; waste_tonnes: number }>();
   productionLogs?.forEach((p) => {
     productionByLog.set(p.daily_log_id, p);
   });
 
   const csvRows = [
-    [
-      "Date",
-      "Shift",
-      "Notes",
-      "Total Hours",
-      "Total Fuel (L)",
-      "Coal (t)",
-      "Waste (t)",
-    ],
+    ["Date", "Shift", "Notes", "Total Hours", "Total Fuel (L)", "Coal (t)", "Waste (t)"],
     ...(logs || []).map((log) => {
       const mh = machineHoursByLog.get(log.id) || 0;
       const fl = fuelLogsByLog.get(log.id) || 0;
@@ -560,9 +487,7 @@ export default async function ReportsPage({
   ];
 
   const csvContent = csvRows
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-    )
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
   const exportRows = (logs || []).map((log) => {
@@ -589,14 +514,7 @@ export default async function ReportsPage({
       { label: "Coal Removed (t)", value: `${totalCoal.toFixed(1)} t` },
       { label: "Waste Removed (t)", value: `${totalWaste.toFixed(1)} t` },
     ],
-    tableHeaders: [
-      "Date",
-      "Shift",
-      "Hours",
-      "Fuel (L)",
-      "Coal (t)",
-      "Waste (t)",
-    ],
+    tableHeaders: ["Date", "Shift", "Hours", "Fuel (L)", "Coal (t)", "Waste (t)"],
     tableRows: exportRows.map((r) => [
       r.Date,
       r.Shift,
@@ -610,9 +528,7 @@ export default async function ReportsPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-          Reports
-        </h2>
+        <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
         <div className="flex items-center gap-2">
           <CopyReportButton csvContent={csvContent} />
           <PDFDownloadButton reportData={pdfReportData} departmentId={deptId} />
@@ -626,32 +542,24 @@ export default async function ReportsPage({
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">
-            Total Machine Hours
-          </p>
+          <p className="text-[var(--text-muted)] text-sm">Total Machine Hours</p>
           <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
             {totalHours.toFixed(1)}
           </p>
         </GlassCard>
         <GlassCard>
-          <p className="text-[var(--text-muted)] text-sm">
-            Diesel Consumed (L)
-          </p>
+          <p className="text-[var(--text-muted)] text-sm">Diesel Consumed (L)</p>
           <p className="text-2xl font-medium text-[var(--text-heading)] mt-1">
             {totalFuel.toFixed(1)}
           </p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Coal Removed (t)</p>
-          <p className="text-2xl font-medium text-accent-green mt-1">
-            {totalCoal.toFixed(1)}
-          </p>
+          <p className="text-2xl font-medium text-accent-green mt-1">{totalCoal.toFixed(1)}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-sm">Waste Removed (t)</p>
-          <p className="text-2xl font-medium text-accent-blue mt-1">
-            {totalWaste.toFixed(1)}
-          </p>
+          <p className="text-2xl font-medium text-accent-blue mt-1">{totalWaste.toFixed(1)}</p>
         </GlassCard>
       </div>
 
@@ -659,26 +567,12 @@ export default async function ReportsPage({
       <GlassCard>
         <form method="GET" className="flex items-end gap-4">
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1">
-              From
-            </label>
-            <Input
-              type="date"
-              name="from"
-              defaultValue={fromDateStr}
-              className="px-4 py-2"
-            />
+            <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
+            <Input type="date" name="from" defaultValue={fromDateStr} className="px-4 py-2" />
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1">
-              To
-            </label>
-            <Input
-              type="date"
-              name="to"
-              defaultValue={toDateStr}
-              className="px-4 py-2"
-            />
+            <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
+            <Input type="date" name="to" defaultValue={toDateStr} className="px-4 py-2" />
           </div>
           <button
             type="submit"
@@ -739,13 +633,8 @@ export default async function ReportsPage({
                 const fl = fuelLogsByLog.get(log.id) || 0;
                 const pl = productionByLog.get(log.id);
                 return (
-                  <tr
-                    key={log.id}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
-                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                      {log.log_date}
-                    </td>
+                  <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                    <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{log.log_date}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${

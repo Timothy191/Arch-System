@@ -5,3 +5,8 @@
 @import "./transitions.css" layer(theme);
 @import "./focus.css" layer(theme);
 @import "./reset.css" layer(theme);
+@import "./buttons.css" layer(theme);
+@import "./tabs.css" layer(theme);
+@import "./loaders.css" layer(theme);
+@import "./checks.css" layer(theme);
+@import "./cards.css" layer(theme);

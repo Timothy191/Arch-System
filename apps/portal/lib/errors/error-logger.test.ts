@@ -2,11 +2,7 @@
  * @jest-environment node
  */
 /* eslint-disable no-console */
-import {
-  logError,
-  withErrorLogging,
-  withServerActionLogging,
-} from "./error-logger";
+import { logError, withErrorLogging, withServerActionLogging } from "./error-logger";
 
 const mockCaptureException = jest.fn();
 jest.mock("@sentry/nextjs", () => ({
@@ -34,9 +30,7 @@ describe("logError", () => {
 
   it("logs with optional context (url, method)", async () => {
     const err = new Error("route error");
-    await expect(
-      logError(err, { url: "/api/test", method: "POST" }),
-    ).resolves.toBeUndefined();
+    await expect(logError(err, { url: "/api/test", method: "POST" })).resolves.toBeUndefined();
   });
 
   it("logs AppError with statusCode determining severity", async () => {
@@ -57,9 +51,7 @@ describe("logError", () => {
 
   it("does NOT forward 4xx AppErrors to Sentry", async () => {
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
-    const { AuthError, ValidationError } = await import(
-      "@/lib/errors/error-classes"
-    );
+    const { AuthError, ValidationError } = await import("@/lib/errors/error-classes");
     await logError(new AuthError("Unauthorized"));
     await logError(new ValidationError("bad input"));
     expect(mockCaptureException).not.toHaveBeenCalled();

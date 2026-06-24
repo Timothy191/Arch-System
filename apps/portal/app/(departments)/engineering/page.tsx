@@ -65,9 +65,7 @@ export default async function EngineeringDashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-            Engineering Hub
-          </h2>
+          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Engineering Hub</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Breakdowns, tire management &amp; maintenance overview
           </p>
@@ -93,9 +91,7 @@ export default async function EngineeringDashboardPage() {
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[var(--text-heading)]">
-                    Breakdowns
-                  </h3>
+                  <h3 className="text-lg font-semibold text-[var(--text-heading)]">Breakdowns</h3>
                   <p className="text-sm text-[var(--text-muted)]">
                     Active faults &amp; maintenance issues
                   </p>
@@ -106,20 +102,12 @@ export default async function EngineeringDashboardPage() {
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-accent-red/5 border border-accent-red/10">
-                <p className="text-2xl font-bold text-accent-red">
-                  {activeBreakdowns}
-                </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Active Breakdowns
-                </p>
+                <p className="text-2xl font-bold text-accent-red">{activeBreakdowns}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Active Breakdowns</p>
               </div>
               <div className="p-3 rounded-lg bg-accent-green/5 border border-accent-green/10">
-                <p className="text-2xl font-bold text-accent-green">
-                  {resolvedToday}
-                </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Resolved Today
-                </p>
+                <p className="text-2xl font-bold text-accent-green">{resolvedToday}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Resolved Today</p>
               </div>
             </div>
 
@@ -179,20 +167,12 @@ export default async function EngineeringDashboardPage() {
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-arch-accent-blue/5 border border-arch-accent-blue/10">
-                <p className="text-2xl font-bold text-arch-accent-blue">
-                  {tireAlerts}
-                </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Tire Alerts
-                </p>
+                <p className="text-2xl font-bold text-arch-accent-blue">{tireAlerts}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Tire Alerts</p>
               </div>
               <div className="p-3 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]">
-                <p className="text-2xl font-bold text-[var(--text-heading)]">
-                  —
-                </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Due This Week
-                </p>
+                <p className="text-2xl font-bold text-[var(--text-heading)]">—</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Due This Week</p>
               </div>
             </div>
 

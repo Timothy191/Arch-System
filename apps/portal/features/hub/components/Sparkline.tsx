@@ -77,13 +77,7 @@ export function Sparkline({
           />
         </filter>
         {/* Glowing refraction filter for the line path */}
-        <filter
-          id={`sparkGlowPath-${id}`}
-          x="-20%"
-          y="-20%"
-          width="140%"
-          height="140%"
-        >
+        <filter id={`sparkGlowPath-${id}`} x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur stdDeviation="1.0" result="blur" />
           <feComponentTransfer in="blur" result="boost">
             <feFuncA type="linear" slope="0.45" />

@@ -14,9 +14,7 @@ export default function PrivacyPage(): React.JSX.Element {
         <div className="p-3 bg-[var(--bg-tertiary)] rounded-xl">
           <Shield className="w-8 h-8 text-[var(--text-heading)]" />
         </div>
-        <h1 className="text-3xl font-semibold text-[var(--text-heading)]">
-          Privacy Policy
-        </h1>
+        <h1 className="text-3xl font-semibold text-[var(--text-heading)]">Privacy Policy</h1>
       </div>
 
       <div className="prose prose-neutral max-w-none text-[var(--text-muted)] space-y-6">
@@ -33,23 +31,22 @@ export default function PrivacyPage(): React.JSX.Element {
             1. Data Collection and Usage
           </h2>
           <p className="mb-4">
-            The Arch Portal collects operational telemetry, user interaction
-            data, and system performance metrics necessary to ensure the
-            continuous and safe operation of mining facilities.
+            The Arch Portal collects operational telemetry, user interaction data, and system
+            performance metrics necessary to ensure the continuous and safe operation of mining
+            facilities.
           </p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>Authentication Data:</strong> Employee IDs, roles, and
-              department affiliations to enforce access control (via Supabase
-              RLS).
+              <strong>Authentication Data:</strong> Employee IDs, roles, and department affiliations
+              to enforce access control (via Supabase RLS).
             </li>
             <li>
-              <strong>Operational Telemetry:</strong> Machine status, fuel logs,
-              and safety incidents entered by users.
+              <strong>Operational Telemetry:</strong> Machine status, fuel logs, and safety
+              incidents entered by users.
             </li>
             <li>
-              <strong>System Metrics:</strong> Client-side performance metrics
-              to optimize dashboard responsiveness.
+              <strong>System Metrics:</strong> Client-side performance metrics to optimize dashboard
+              responsiveness.
             </li>
           </ul>
         </section>
@@ -59,10 +56,9 @@ export default function PrivacyPage(): React.JSX.Element {
             2. Cookies and Tracking
           </h2>
           <p>
-            We use strictly necessary cookies to maintain your authenticated
-            session. Optional cookies may be used to analyze system performance
-            and improve the user interface. You can manage your preferences
-            through the cookie consent banner.
+            We use strictly necessary cookies to maintain your authenticated session. Optional
+            cookies may be used to analyze system performance and improve the user interface. You
+            can manage your preferences through the cookie consent banner.
           </p>
         </section>
 
@@ -71,10 +67,9 @@ export default function PrivacyPage(): React.JSX.Element {
             3. Data Security and Isolation
           </h2>
           <p>
-            Data is strictly isolated by department. Personnel can only view and
-            modify data relevant to their assigned department and role level.
-            All data is transmitted over encrypted channels (HTTPS/WSS) and
-            stored securely in our enterprise database.
+            Data is strictly isolated by department. Personnel can only view and modify data
+            relevant to their assigned department and role level. All data is transmitted over
+            encrypted channels (HTTPS/WSS) and stored securely in our enterprise database.
           </p>
         </section>
 
@@ -83,10 +78,9 @@ export default function PrivacyPage(): React.JSX.Element {
             4. Compliance and Contact
           </h2>
           <p>
-            This portal complies with internal IT security standards and
-            applicable data protection regulations. For privacy-related
-            inquiries, please contact the IT Security Department or your Shift
-            Supervisor.
+            This portal complies with internal IT security standards and applicable data protection
+            regulations. For privacy-related inquiries, please contact the IT Security Department or
+            your Shift Supervisor.
           </p>
         </section>
       </div>

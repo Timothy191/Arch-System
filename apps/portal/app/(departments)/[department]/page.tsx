@@ -11,9 +11,7 @@ const ScadaPanel = dynamic(
       (mod) => mod.ScadaPanel,
     ),
   {
-    loading: () => (
-      <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-    ),
+    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
@@ -23,53 +21,42 @@ const AlertPanel = dynamic(
       (mod) => mod.AlertPanel,
     ),
   {
-    loading: () => (
-      <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-    ),
+    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const ControlRoomActivityFeed = dynamic(
   () =>
-    import(
-      "@/features/departments/components/control-room/ControlRoomActivityFeed"
-    ).then((mod) => mod.ControlRoomActivityFeed),
-  {
-    loading: () => (
-      <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+    import("@/features/departments/components/control-room/ControlRoomActivityFeed").then(
+      (mod) => mod.ControlRoomActivityFeed,
     ),
+  {
+    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const WeatherWidget = dynamic(
-  () =>
-    import("@/components/weather/WeatherWidget").then(
-      (mod) => mod.WeatherWidget,
-    ),
+  () => import("@/components/weather/WeatherWidget").then((mod) => mod.WeatherWidget),
   {
-    loading: () => (
-      <div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-    ),
+    loading: () => <div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const ShiftCoverageWidget = dynamic(
   () =>
-    import(
-      "@/features/departments/components/control-room/ShiftCoverageWidget"
-    ).then((mod) => mod.ShiftCoverageWidget),
-  {
-    loading: () => (
-      <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+    import("@/features/departments/components/control-room/ShiftCoverageWidget").then(
+      (mod) => mod.ShiftCoverageWidget,
     ),
+  {
+    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const SatelliteMonitoringDashboard = dynamic(
   () =>
-    import(
-      "@/features/departments/components/satellite/SatelliteMonitoringDashboard"
-    ).then((mod) => mod.SatelliteMonitoringDashboard),
+    import("@/features/departments/components/satellite/SatelliteMonitoringDashboard").then(
+      (mod) => mod.SatelliteMonitoringDashboard,
+    ),
   {
     loading: () => (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
@@ -151,9 +138,7 @@ export default async function DepartmentDashboard({
 
             {/* Weather Conditions */}
             <Suspense
-              fallback={
-                <div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-              }
+              fallback={<div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
             >
               <WeatherWidget variant="compact" />
             </Suspense>
@@ -180,15 +165,9 @@ export default async function DepartmentDashboard({
             </div>
 
             <Suspense
-              fallback={
-                <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-              }
+              fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
             >
-              <ShiftCoverageSection
-                deptId={deptId}
-                deptSlug={deptSlug}
-                today={today}
-              />
+              <ShiftCoverageSection deptId={deptId} deptSlug={deptSlug} today={today} />
             </Suspense>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -217,9 +196,7 @@ export default async function DepartmentDashboard({
           </>
         ) : (
           <>
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-              Dashboard
-            </h2>
+            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
 
             {/* Weather for drilling department - critical for outdoor operations */}
             {deptSlug === "drilling" && (
@@ -252,54 +229,35 @@ export default async function DepartmentDashboard({
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
 
-async function ControlRoomSummaryGrid({
-  deptId,
-  today,
-}: {
-  deptId: string;
-  today: string;
-}) {
+async function ControlRoomSummaryGrid({ deptId, today }: { deptId: string; today: string }) {
   const supabase = await createServerSupabaseClient();
-  const [todayOperations, todayDelayEntries, todayLoads, machines] =
-    await Promise.all([
-      supabase
-        .from("machine_operations")
-        .select(
-          "hours_worked, end_time, delay_entries:delay_entries(duration_hours, status)",
-        )
-        .eq("department_id", deptId)
-        .eq("shift_date", today),
-      supabase
-        .from("delay_entries")
-        .select("duration_hours, status")
-        .eq("department_id", deptId)
-        .gte("delay_start_time", `${today}T00:00:00`)
-        .lt("delay_start_time", `${today}T23:59:59`),
-      supabase
-        .from("hourly_loads")
-        .select("total_loads")
-        .eq("department_id", deptId)
-        .eq("load_date", today),
-      supabase
-        .from("machines")
-        .select("*", { count: "exact", head: true })
-        .eq("active", true),
-    ]);
+  const [todayOperations, todayDelayEntries, todayLoads, machines] = await Promise.all([
+    supabase
+      .from("machine_operations")
+      .select("hours_worked, end_time, delay_entries:delay_entries(duration_hours, status)")
+      .eq("department_id", deptId)
+      .eq("shift_date", today),
+    supabase
+      .from("delay_entries")
+      .select("duration_hours, status")
+      .eq("department_id", deptId)
+      .gte("delay_start_time", `${today}T00:00:00`)
+      .lt("delay_start_time", `${today}T23:59:59`),
+    supabase
+      .from("hourly_loads")
+      .select("total_loads")
+      .eq("department_id", deptId)
+      .eq("load_date", today),
+    supabase.from("machines").select("*", { count: "exact", head: true }).eq("active", true),
+  ]);
 
   const totalHours =
-    todayOperations.data?.reduce(
-      (sum, op) => sum + (op.hours_worked || 0),
-      0,
-    ) || 0;
-  const activeOperations =
-    todayOperations.data?.filter((op) => op.end_time === null).length || 0;
+    todayOperations.data?.reduce((sum, op) => sum + (op.hours_worked || 0), 0) || 0;
+  const activeOperations = todayOperations.data?.filter((op) => op.end_time === null).length || 0;
 
   // AGENT-TRACE: Calculate delay hours from new delay_entries table
   const totalDelayHours =
-    todayDelayEntries.data?.reduce(
-      (sum, d) => sum + (d.duration_hours || 0),
-      0,
-    ) || 0;
+    todayDelayEntries.data?.reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
   const committedDelayHours =
     todayDelayEntries.data
       ?.filter((d) => d.status === "committed")
@@ -309,8 +267,7 @@ async function ControlRoomSummaryGrid({
       ?.filter((d) => d.status === "draft")
       .reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
 
-  const totalLoads =
-    todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+  const totalLoads = todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
 
   const machineCount = machines.count ?? 0;
 
@@ -322,9 +279,7 @@ async function ControlRoomSummaryGrid({
           {totalHours.toFixed(1)}h
         </p>
         {activeOperations > 0 && (
-          <p className="text-[var(--accent-blue)] text-xs mt-1">
-            {activeOperations} in progress
-          </p>
+          <p className="text-[var(--accent-blue)] text-xs mt-1">{activeOperations} in progress</p>
         )}
       </GlassCard>
       <GlassCard hover accent="none">
@@ -335,9 +290,7 @@ async function ControlRoomSummaryGrid({
       </GlassCard>
       <GlassCard hover accent="red">
         <p className="system-label">Delay Hours</p>
-        <p className="text-2xl font-bold text-accent-red mt-1">
-          {totalDelayHours.toFixed(1)}h
-        </p>
+        <p className="text-2xl font-bold text-accent-red mt-1">{totalDelayHours.toFixed(1)}h</p>
         {draftDelayHours > 0 && (
           <p className="text-[var(--accent-yellow)] text-xs mt-1">
             {draftDelayHours.toFixed(1)}h draft
@@ -346,9 +299,7 @@ async function ControlRoomSummaryGrid({
       </GlassCard>
       <GlassCard hover accent="green">
         <p className="system-label">Machines</p>
-        <p className="text-2xl font-bold text-accent-green mt-1">
-          {machineCount}
-        </p>
+        <p className="text-2xl font-bold text-accent-green mt-1">{machineCount}</p>
         <p className="system-label mt-1">Active</p>
       </GlassCard>
       <GlassCard hover accent="cyan">
@@ -366,13 +317,7 @@ async function ControlRoomSummaryGrid({
   );
 }
 
-async function NonControlRoomSummaryGrid({
-  deptId,
-  today,
-}: {
-  deptId: string;
-  today: string;
-}) {
+async function NonControlRoomSummaryGrid({ deptId, today }: { deptId: string; today: string }) {
   const supabase = await createServerSupabaseClient();
   const [todayLogs, machines] = await Promise.all([
     supabase
@@ -381,10 +326,7 @@ async function NonControlRoomSummaryGrid({
       .eq("department_id", deptId)
       .eq("log_date", today)
       .order("shift"),
-    supabase
-      .from("machines")
-      .select("*", { count: "exact", head: true })
-      .eq("active", true),
+    supabase.from("machines").select("*", { count: "exact", head: true }).eq("active", true),
   ]);
 
   const shiftCount = todayLogs.data?.length ?? 0;
@@ -396,21 +338,15 @@ async function NonControlRoomSummaryGrid({
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm">Today&apos;s Log</p>
         <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
-          {shiftCount > 0
-            ? `${shiftCount} shift${shiftCount > 1 ? "s" : ""} logged`
-            : "Not logged"}
+          {shiftCount > 0 ? `${shiftCount} shift${shiftCount > 1 ? "s" : ""} logged` : "Not logged"}
         </p>
         {latestShift && (
-          <p className="text-[var(--text-muted)] text-xs mt-1">
-            Latest: {latestShift}
-          </p>
+          <p className="text-[var(--text-muted)] text-xs mt-1">Latest: {latestShift}</p>
         )}
       </GlassCard>
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm">Active Machines</p>
-        <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
-          {machineCount}
-        </p>
+        <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">{machineCount}</p>
       </GlassCard>
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm">Status</p>

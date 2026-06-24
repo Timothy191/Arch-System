@@ -10,10 +10,7 @@ export interface FormSubmitResult<T = any> {
   data?: T;
 }
 
-export function useFormSubmit<
-  TArgs extends any[],
-  TResult extends FormSubmitResult,
->(
+export function useFormSubmit<TArgs extends any[], TResult extends FormSubmitResult>(
   // eslint-disable-next-line no-unused-vars
   action: (...args: TArgs) => Promise<TResult>,
   options?: {

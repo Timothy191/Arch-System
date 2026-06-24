@@ -98,9 +98,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
 
     // Wait for weather data to load
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Weather details" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
     });
 
     const trigger = screen.getByRole("button", { name: "Weather details" });
@@ -114,9 +112,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Weather details" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
     });
 
     const trigger = screen.getByRole("button", { name: "Weather details" });
@@ -147,9 +143,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Weather details" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
     });
 
     const trigger = screen.getByRole("button", { name: "Weather details" });
@@ -159,9 +153,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
     // Open popover to see alert message
     fireEvent.click(trigger);
     expect(
-      screen.getByText(
-        "⚠️ Thunderstorm - Cease outdoor operations immediately",
-      ),
+      screen.getByText("⚠️ Thunderstorm - Cease outdoor operations immediately"),
     ).toBeInTheDocument();
   });
 });

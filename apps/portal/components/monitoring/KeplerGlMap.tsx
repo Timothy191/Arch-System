@@ -26,25 +26,9 @@ export function KeplerGlMap({
   height = "600px",
 }: KeplerGlMapProps) {
   const points = useMemo((): DeformationPoint[] => {
-    const areaTypes = [
-      "pit-wall",
-      "tailings-dam",
-      "haul-road",
-      "conveyor",
-      "stockpile",
-      "crusher",
-    ];
-    const levels: DeformationPoint["level"][] = [
-      "stable",
-      "minor",
-      "moderate",
-      "critical",
-    ];
-    const trends: DeformationPoint["trend"][] = [
-      "stable",
-      "accelerating",
-      "decelerating",
-    ];
+    const areaTypes = ["pit-wall", "tailings-dam", "haul-road", "conveyor", "stockpile", "crusher"];
+    const levels: DeformationPoint["level"][] = ["stable", "minor", "moderate", "critical"];
+    const trends: DeformationPoint["trend"][] = ["stable", "accelerating", "decelerating"];
 
     return Array.from({ length: 250 }, () => {
       const angle = Math.random() * Math.PI * 2;
@@ -98,12 +82,9 @@ export function KeplerGlMap({
     <div className="space-y-3">
       <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
         <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-          <strong className="text-indigo-400">
-            Kepler.gl Spatial Analysis
-          </strong>{" "}
-          — High-performance geospatial engine for mining deformation data.
-          Supports point clustering, heatmaps, hexagon binning, and arc layers
-          via deck.gl.
+          <strong className="text-indigo-400">Kepler.gl Spatial Analysis</strong> — High-performance
+          geospatial engine for mining deformation data. Supports point clustering, heatmaps,
+          hexagon binning, and arc layers via deck.gl.
         </p>
       </div>
 
@@ -159,15 +140,11 @@ export function KeplerGlMap({
       {/* Integration note */}
       <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
         <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
-          <strong className="text-[var(--text-heading)]">
-            Kepler.gl setup:
-          </strong>{" "}
-          To enable the full Kepler.gl UI, add{" "}
-          <code className="text-[#3ecf8e]">kepler.gl</code> to your Redux store
-          with <code className="text-[#3ecf8e]">keplerGlReducer</code>. See{" "}
-          <code className="text-[#3ecf8e]">docs.kepler.gl</code> for the
-          complete integration guide. The GeoJSON export above lets you load
-          this data directly into any Kepler.gl instance.
+          <strong className="text-[var(--text-heading)]">Kepler.gl setup:</strong> To enable the
+          full Kepler.gl UI, add <code className="text-[#3ecf8e]">kepler.gl</code> to your Redux
+          store with <code className="text-[#3ecf8e]">keplerGlReducer</code>. See{" "}
+          <code className="text-[#3ecf8e]">docs.kepler.gl</code> for the complete integration guide.
+          The GeoJSON export above lets you load this data directly into any Kepler.gl instance.
         </p>
       </div>
     </div>

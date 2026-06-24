@@ -102,8 +102,7 @@ export default async function CoursesPage({
       !q ||
       c.title.toLowerCase().includes(q.toLowerCase()) ||
       c.description.toLowerCase().includes(q.toLowerCase());
-    const matchesCategory =
-      !category || category === "All" || c.category === category;
+    const matchesCategory = !category || category === "All" || c.category === category;
     return matchesSearch && matchesCategory;
   });
 
@@ -111,12 +110,9 @@ export default async function CoursesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-            LMS Course Catalog
-          </h2>
+          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">LMS Course Catalog</h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            Create, manage, and assign technical learning plans and regulatory
-            safety modules.
+            Create, manage, and assign technical learning plans and regulatory safety modules.
           </p>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-blue)] text-[var(--bg-secondary)] text-sm font-medium rounded-lg hover:opacity-90 transition-all shadow-card">
@@ -195,9 +191,7 @@ export default async function CoursesPage({
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--text-muted)] font-medium">
-                      Compliance Rate
-                    </span>
+                    <span className="text-[var(--text-muted)] font-medium">Compliance Rate</span>
                     <span className="font-semibold text-[var(--text-heading)]">
                       {course.completionRate}%
                     </span>

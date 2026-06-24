@@ -58,11 +58,7 @@ function KPICard({
 }: KPICardProps) {
   const styles = variantStyles[variant];
   const TrendIcon =
-    trend?.direction === "up"
-      ? TrendingUp
-      : trend?.direction === "down"
-        ? TrendingDown
-        : Minus;
+    trend?.direction === "up" ? TrendingUp : trend?.direction === "down" ? TrendingDown : Minus;
   const trendColor =
     trend?.direction === "up"
       ? "text-success"
@@ -81,9 +77,7 @@ function KPICard({
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">
             {title}
           </p>
-          <p
-            className={`tabular-nums font-bold ${hero ? "text-4xl" : "text-3xl"} ${styles.value}`}
-          >
+          <p className={`tabular-nums font-bold ${hero ? "text-4xl" : "text-3xl"} ${styles.value}`}>
             {value}
           </p>
         </div>
@@ -96,9 +90,7 @@ function KPICard({
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-muted-foreground">{subtext}</p>
         {trend && (
-          <span
-            className={`flex items-center gap-1 text-xs font-medium ${trendColor}`}
-          >
+          <span className={`flex items-center gap-1 text-xs font-medium ${trendColor}`}>
             <TrendIcon size={12} />
             {trend.label}
           </span>

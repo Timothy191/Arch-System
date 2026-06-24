@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { detectAllPrinters } from "../../../(departments)/access-card-actions/lib/printer-detection";
+import { detectAllPrinters } from "@/app/(departments)/access-card-actions/lib/printer-detection";
 
 export async function GET() {
   try {
@@ -39,8 +39,7 @@ export async function GET() {
     const results = detected.map((printer) => ({
       ...printer,
       isRegistered: registeredNames.has(printer.cupsName),
-      dbId:
-        registered?.find((r) => r.cups_name === printer.cupsName)?.id ?? null,
+      dbId: registered?.find((r) => r.cups_name === printer.cupsName)?.id ?? null,
     }));
 
     return NextResponse.json({ printers: results, count: results.length });

@@ -58,10 +58,7 @@ export async function revalidateRSC(tags: string[]) {
   return { success: true };
 }
 
-export async function generateMonthlyReport(
-  reportData: any,
-  departmentId?: string,
-) {
+export async function generateMonthlyReport(reportData: any, departmentId?: string) {
   // Validate that the user is authenticated (Always validate the user at the top)
   const supabase = await createServerSupabaseClient();
   const {
@@ -85,17 +82,13 @@ export async function generateMonthlyReport(
 
   try {
     const { pdf } = await import("@react-pdf/renderer");
-    const { ReportTemplate } = await import(
-      "@/features/analytics/components/ReportTemplate"
-    );
+    const { ReportTemplate } = await import("@/features/analytics/components/ReportTemplate");
     const React = await import("react");
 
     // Use employee department ID as fallback for folder categorization
     const deptId = departmentId || employee.department_id;
     if (!deptId) {
-      throw new Error(
-        "Department ID is required to determine storage permissions",
-      );
+      throw new Error("Department ID is required to determine storage permissions");
     }
 
     const doc = React.createElement(ReportTemplate, { data: reportData });

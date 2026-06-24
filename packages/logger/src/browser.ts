@@ -2,12 +2,19 @@
 import type { Logger, LogLevel } from "./types";
 
 function baseLog(level: LogLevel, msg: string, ...args: unknown[]) {
-  const payload = JSON.stringify({
+  // Mask potential PII/sensitive data (basic implementation)
+  const safeMsg = msg.replace(
+    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    "[EMAIL_REDACTED]",
+  );
+
+  const payloadData = {
     level,
-    msg,
+    msg: safeMsg,
     timestamp: new Date().toISOString(),
     ...(args.length > 0 ? { data: args } : {}),
-  });
+  };
+  const payload = JSON.stringify(payloadData);
 
   switch (level) {
     case "debug":
@@ -18,11 +25,26 @@ function baseLog(level: LogLevel, msg: string, ...args: unknown[]) {
       break;
     case "warn":
       console.warn(payload);
+      sendRemoteLog(payload);
       break;
     case "error":
       console.error(payload);
+      sendRemoteLog(payload);
       break;
   }
+}
+
+function sendRemoteLog(payload: string) {
+  if (typeof window === "undefined") return;
+  // Send asynchronously without blocking or throwing unhandled rejections
+  fetch("/api/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {
+    /* ignore */
+  });
 }
 
 /**
@@ -47,14 +69,10 @@ export const logger: Logger = {
       .map(([k, v]) => `${k}=${v}`)
       .join(" ");
     return {
-      debug: (msg: string, ...args: unknown[]) =>
-        baseLog("debug", `[${prefix}] ${msg}`, ...args),
-      info: (msg: string, ...args: unknown[]) =>
-        baseLog("info", `[${prefix}] ${msg}`, ...args),
-      warn: (msg: string, ...args: unknown[]) =>
-        baseLog("warn", `[${prefix}] ${msg}`, ...args),
-      error: (msg: string, ...args: unknown[]) =>
-        baseLog("error", `[${prefix}] ${msg}`, ...args),
+      debug: (msg: string, ...args: unknown[]) => baseLog("debug", `[${prefix}] ${msg}`, ...args),
+      info: (msg: string, ...args: unknown[]) => baseLog("info", `[${prefix}] ${msg}`, ...args),
+      warn: (msg: string, ...args: unknown[]) => baseLog("warn", `[${prefix}] ${msg}`, ...args),
+      error: (msg: string, ...args: unknown[]) => baseLog("error", `[${prefix}] ${msg}`, ...args),
       child: (nestedBindings: Record<string, unknown>) =>
         logger.child({ ...bindings, ...nestedBindings }),
     };

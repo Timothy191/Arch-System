@@ -1,24 +1,16 @@
 #!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 const N8N_URL = process.env.N8N_URL || "http://localhost:5678";
 const N8N_EMAIL = process.env.N8N_EMAIL;
 const N8N_PASSWORD = process.env.N8N_PASSWORD;
-const N8N_FETCH_TIMEOUT = parseInt(
-  process.env.N8N_FETCH_TIMEOUT || "30000",
-  10,
-);
+const N8N_FETCH_TIMEOUT = parseInt(process.env.N8N_FETCH_TIMEOUT || "30000", 10);
 const COOKIE_MARGIN_MS = 5 * 60 * 1000;
 
 if (!N8N_EMAIL || !N8N_PASSWORD) {
-  console.error(
-    "Fatal: N8N_EMAIL and N8N_PASSWORD environment variables are required",
-  );
+  console.error("Fatal: N8N_EMAIL and N8N_PASSWORD environment variables are required");
   process.exit(1);
 }
 
@@ -27,28 +19,16 @@ let cookieExpiry = 0;
 
 function sanitizePathSegment(segment) {
   if (typeof segment !== "string" || !segment) return "";
-  if (
-    segment.includes("..") ||
-    segment.includes("/") ||
-    segment.includes("\\")
-  ) {
-    throw new Error(
-      "Invalid path segment: must not contain '..', '/', or '\\'",
-    );
+  if (segment.includes("..") || segment.includes("/") || segment.includes("\\")) {
+    throw new Error("Invalid path segment: must not contain '..', '/', or '\\'");
   }
   if (/[^a-zA-Z0-9_.-]/.test(segment)) {
-    throw new Error(
-      "Invalid path segment: only alphanumeric, _, ., and - allowed",
-    );
+    throw new Error("Invalid path segment: only alphanumeric, _, ., and - allowed");
   }
   return segment;
 }
 
-async function fetchWithTimeout(
-  url,
-  options = {},
-  timeoutMs = N8N_FETCH_TIMEOUT,
-) {
+async function fetchWithTimeout(url, options = {}, timeoutMs = N8N_FETCH_TIMEOUT) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -75,8 +55,7 @@ async function ensureLogin() {
     throw new Error(`n8n login failed (${res.status}): ${text}`);
   }
   const setCookie = res.headers.get("set-cookie");
-  if (!setCookie)
-    throw new Error("n8n login failed: no session cookie returned");
+  if (!setCookie) throw new Error("n8n login failed: no session cookie returned");
   n8nCookie = setCookie.split(";")[0];
   cookieExpiry = Date.now() + 50 * 60 * 1000 - COOKIE_MARGIN_MS;
 }
@@ -115,8 +94,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: "n8n_list_workflows",
-      description:
-        "List all workflows with IDs, names, active status, and tags.",
+      description: "List all workflows with IDs, names, active status, and tags.",
       inputSchema: {
         type: "object",
         properties: {
@@ -141,8 +119,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "n8n_execute_workflow",
-      description:
-        "Execute a workflow via its webhook trigger. Returns the workflow response.",
+      description: "Execute a workflow via its webhook trigger. Returns the workflow response.",
       inputSchema: {
         type: "object",
         properties: {
@@ -355,11 +332,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(
-              { id: safeId, active: data.data?.active ?? true },
-              null,
-              2,
-            ),
+            text: JSON.stringify({ id: safeId, active: data.data?.active ?? true }, null, 2),
           },
         ],
       };
@@ -374,11 +347,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(
-              { id: safeId, active: data.data?.active ?? false },
-              null,
-              2,
-            ),
+            text: JSON.stringify({ id: safeId, active: data.data?.active ?? false }, null, 2),
           },
         ],
       };

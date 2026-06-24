@@ -33,10 +33,7 @@ async function formLogin(page: Page): Promise<boolean> {
  *
  * Returns true if login succeeded.
  */
-export async function loginWithTestUser(
-  context: BrowserContext,
-  page: Page,
-): Promise<boolean> {
+export async function loginWithTestUser(context: BrowserContext, page: Page): Promise<boolean> {
   // Create auth directory if it doesn't exist
   const authDir = path.dirname(AUTH_FILE);
   if (!fs.existsSync(authDir)) {
@@ -68,6 +65,27 @@ export async function loginWithTestUser(
     await context.storageState({ path: AUTH_FILE });
   }
   return success;
+}
+
+/**
+ * Perform a mock login for E2E tests.
+ * This is a simplified version that bypasses actual authentication for test purposes.
+ * It sets the necessary session state directly.
+ */
+export async function performMockLogin(page: Page, role: string = "admin"): Promise<void> {
+  // In a real implementation, this would set mock session cookies or localStorage
+  // For now, we'll use the existing loginWithTestUser function
+  // The role parameter is reserved for future role-based testing
+
+  // Create a temporary context for this login
+  const context = page.context();
+
+  // Use the existing login function
+  const success = await loginWithTestUser(context, page);
+
+  if (!success) {
+    throw new Error(`Failed to perform mock login for role: ${role}`);
+  }
 }
 
 export { AUTH_FILE };

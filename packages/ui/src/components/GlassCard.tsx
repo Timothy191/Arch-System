@@ -16,15 +16,7 @@ export interface GlassCardProps extends HTMLMotionProps<"div"> {
   className?: string;
   hover?: boolean;
   onClick?: () => void;
-  accent?:
-    | "green"
-    | "blue"
-    | "red"
-    | "cyan"
-    | "indigo"
-    | "violet"
-    | "alert"
-    | "none";
+  accent?: "green" | "blue" | "red" | "cyan" | "indigo" | "violet" | "alert" | "none";
   variant?: "default" | "window" | "spotlight" | "glowborder" | "liquid";
   glassIntensity?: GlassVariant;
   title?: string;
@@ -68,11 +60,7 @@ function roundedRectSDF(
 
   const qx = Math.abs(x) - absWidth + absRadius;
   const qy = Math.abs(y) - absHeight + absRadius;
-  return (
-    Math.min(Math.max(qx, qy), 0) +
-    getLength(Math.max(qx, 0), Math.max(qy, 0)) -
-    absRadius
-  );
+  return Math.min(Math.max(qx, qy), 0) + getLength(Math.max(qx, 0), Math.max(qy, 0)) - absRadius;
 }
 
 function createDisplacementFragment(
@@ -86,13 +74,7 @@ function createDisplacementFragment(
   const ix = uv.x - 0.5;
   const iy = uv.y - 0.5;
 
-  const distanceToEdge = roundedRectSDF(
-    ix,
-    iy,
-    shapeWidth,
-    shapeHeight,
-    roundness,
-  );
+  const distanceToEdge = roundedRectSDF(ix, iy, shapeWidth, shapeHeight, roundness);
   const displacement = smoothStep(0.8, 0, distanceToEdge - Math.abs(intensity));
   const scaled = smoothStep(0, 1, displacement);
 
@@ -107,12 +89,8 @@ function createDisplacementFragment(
     effectMultiplier = 1 - scaled * 0.7;
   }
 
-  const finalX = widthReverse
-    ? ix * (2 - effectMultiplier) + 0.5
-    : ix * effectMultiplier + 0.5;
-  const finalY = heightReverse
-    ? iy * (2 - effectMultiplier) + 0.5
-    : iy * effectMultiplier + 0.5;
+  const finalX = widthReverse ? ix * (2 - effectMultiplier) + 0.5 : ix * effectMultiplier + 0.5;
+  const finalY = heightReverse ? iy * (2 - effectMultiplier) + 0.5 : iy * effectMultiplier + 0.5;
 
   return {
     x: finalX,
@@ -299,8 +277,7 @@ export function GlassCard({
 
   useEffect(() => {
     setIsTouch(
-      typeof window !== "undefined" &&
-        ("ontouchstart" in window || navigator.maxTouchPoints > 0),
+      typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0),
     );
   }, []);
 
@@ -328,9 +305,7 @@ export function GlassCard({
 
   // GlowBorder colors setup
   const glowColors =
-    gradientColors ??
-    (colorPresets[colorPreset] as string[]) ??
-    colorPresets.custom;
+    gradientColors ?? (colorPresets[colorPreset] as string[]) ?? colorPresets.custom;
 
   // Let's determine if glow animation should be paused
   const isGlowPaused = paused || prefersReduced;
@@ -359,10 +334,8 @@ export function GlassCard({
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const width =
-          entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
-        const height =
-          entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+        const width = entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+        const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
         setSize({ width, height });
       }
     });
@@ -398,11 +371,7 @@ export function GlassCard({
       const sh = Math.max(0.01, 0.5 - borderWidth / finalHeight);
 
       // Compute roundness relative to sizes (matching border-radius: 16px)
-      const roundness = Math.min(
-        sw,
-        sh,
-        16 / Math.min(finalWidth, finalHeight),
-      );
+      const roundness = Math.min(sw, sh, 16 / Math.min(finalWidth, finalHeight));
 
       const { data, maxScale } = generateDisplacementData(
         canvasWidth,
@@ -418,21 +387,14 @@ export function GlassCard({
         const imageData = new ImageData(data, canvasWidth, canvasHeight);
         ctx.putImageData(imageData, 0, 0);
 
-        feImage.setAttributeNS(
-          "http://www.w3.org/1999/xlink",
-          "href",
-          canvas.toDataURL(),
-        );
+        feImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", canvas.toDataURL());
         feImage.setAttribute("width", `${finalWidth}`);
         feImage.setAttribute("height", `${finalHeight}`);
 
         const finalScale = Math.max(0, (maxScale * 1.2) / canvasDPI);
         feDisplacementMap.setAttribute("scale", finalScale.toString());
         feDisplacementMap.parentElement?.setAttribute("width", `${finalWidth}`);
-        feDisplacementMap.parentElement?.setAttribute(
-          "height",
-          `${finalHeight}`,
-        );
+        feDisplacementMap.parentElement?.setAttribute("height", `${finalHeight}`);
       }
     } catch (err) {
       console.error("Error generating liquid glass displacement:", err);
@@ -456,17 +418,9 @@ export function GlassCard({
           (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }}
-      whileHover={
-        hover && !prefersReduced && !isLiquid ? { scale: 1.01 } : undefined
-      }
-      whileTap={
-        hover && !prefersReduced && !isLiquid ? { scale: 0.995 } : undefined
-      }
-      transition={
-        prefersReduced
-          ? { duration: 0 }
-          : { duration: 0.3, ease: [0.2, 0, 0, 1] }
-      }
+      whileHover={hover && !prefersReduced && !isLiquid ? { scale: 1.01 } : undefined}
+      whileTap={hover && !prefersReduced && !isLiquid ? { scale: 0.995 } : undefined}
+      transition={prefersReduced ? { duration: 0 } : { duration: 0.3, ease: [0.2, 0, 0, 1] }}
       tabIndex={tabIndexProp ?? (hover && onClick ? 0 : undefined)}
       role={roleProp ?? (onClick ? "button" : undefined)}
       onClick={onClick}
@@ -493,8 +447,7 @@ export function GlassCard({
           ? "transition-all duration-300 ease-glass shadow-glass-depth hover:shadow-glass-depth-hover active:shadow-glass-depth-active"
           : "shadow-glass-depth",
 
-        variant !== "liquid" &&
-          "glass-card glass-depth-card border border-arch-border-subtle",
+        variant !== "liquid" && "glass-card glass-depth-card border border-arch-border-subtle",
 
         // Window & Default share standard glass style
         (variant === "default" || variant === "window") && [
@@ -551,8 +504,7 @@ export function GlassCard({
         <div
           className={cn(
             "absolute inset-[-2px] -z-10 rounded-[inherit]",
-            !isGlowPaused &&
-              "animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]",
+            !isGlowPaused && "animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]",
           )}
           style={{
             background: `conic-gradient(from 0deg, ${glowColors.join(", ")})`,
@@ -604,8 +556,7 @@ export function GlassCard({
               transparent 70%
             )`,
             transform: "translateX(-100%) skewX(-12deg)",
-            animation:
-              "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
+            animation: "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
           }}
         />
       </div>
@@ -671,12 +622,7 @@ export function GlassCard({
                 {/* Chromatic aberration / dispersion (using offset-isolation-recombine additive blending) */}
                 <feOffset dx="1.5" dy="1.5" in="displaced" result="redShift" />
                 <feOffset dx="0" dy="0" in="displaced" result="greenCenter" />
-                <feOffset
-                  dx="-1.5"
-                  dy="-1.5"
-                  in="displaced"
-                  result="blueShift"
-                />
+                <feOffset dx="-1.5" dy="-1.5" in="displaced" result="blueShift" />
                 <feColorMatrix
                   in="redShift"
                   type="matrix"
@@ -695,21 +641,12 @@ export function GlassCard({
                   values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
                   result="blueOnly"
                 />
-                <feComposite
-                  in="redOnly"
-                  in2="greenOnly"
-                  operator="lighter"
-                  result="redGreen"
-                />
+                <feComposite in="redOnly" in2="greenOnly" operator="lighter" result="redGreen" />
                 <feComposite in="redGreen" in2="blueOnly" operator="lighter" />
               </filter>
             </defs>
           </svg>
-          <canvas
-            ref={canvasRef}
-            className="hidden pointer-events-none"
-            aria-hidden="true"
-          />
+          <canvas ref={canvasRef} className="hidden pointer-events-none" aria-hidden="true" />
         </>
       )}
 
@@ -739,10 +676,7 @@ export function GlassCard({
 
       {/* Content wrapper */}
       <div
-        className={cn(
-          "relative z-10 w-full h-full",
-          (isWindow || isLiquid) && padding && "p-6",
-        )}
+        className={cn("relative z-10 w-full h-full", (isWindow || isLiquid) && padding && "p-6")}
       >
         {children}
       </div>

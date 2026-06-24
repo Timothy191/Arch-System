@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   ArrowUpRight,
+  Bookmark,
   CreditCard,
   Factory,
   FileText,
@@ -15,11 +17,10 @@ import {
   ShieldCheck,
   Wrench,
 } from "lucide-react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Badge } from "@repo/ui/components/ui/badge";
 import { cn } from "@repo/ui/lib/utils";
 import type { Department } from "~/lib/departments";
 import { Sparkline } from "./Sparkline";
+import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Drill: Pickaxe,
@@ -75,103 +76,30 @@ interface DepartmentCardProps {
 
 export function DepartmentCard({ department, index }: DepartmentCardProps) {
   const router = useRouter();
+  const [isPinned, setIsPinned] = useState(false);
+
+  useEffect(() => {
+    const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
+    setIsPinned(pinned === "true");
+  }, [department.name]);
+
+  const togglePin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextState = !isPinned;
+    localStorage.setItem(`pinned_dept_${department.name}`, String(nextState));
+    setIsPinned(nextState);
+    if (nextState) {
+      toast.success(`Pinned ${department.displayName} to dashboard`);
+    } else {
+      toast.success(`Unpinned ${department.displayName}`);
+    }
+  };
+
   const Icon = ICON_MAP[department.icon] || Factory;
   const config = COLOR_MAP[department.color] || {
     bg: "border-arch-border-subtle text-arch-text-primary",
-    glow: "rgba(0,0,0,0.04)",
     text: "text-arch-text-primary",
   };
-  const cardContent = (
-    <>
-      <div className="flex items-center justify-between mb-6 liquid-shift-y">
-        <div
-          className={cn(
-            "p-2.5 rounded-xl border backdrop-blur-md transition-[opacity,transform] duration-300 group-hover:scale-110 group-hover:shadow-glow-blue",
-            config.bg,
-          )}
-        >
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="flex items-center gap-2">
-          {department.status && (
-            <Badge
-              variant="outline"
-              className={cn(
-                "text-[9px] font-medium uppercase tracking-[0.05em] px-2 py-0.5 rounded-full border",
-                department.status === "active" &&
-                  "bg-accent-green/10 border-accent-green/20 text-accent-green",
-                department.status === "maintenance" &&
-                  "bg-accent-amber/10 border-accent-amber/20 text-accent-amber",
-                department.status === "alert" &&
-                  "bg-accent-red/10 border-accent-red/20 text-accent-red",
-              )}
-            >
-              <span className="flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full animate-pulse",
-                    department.status === "active" && "bg-accent-green",
-                    department.status === "maintenance" && "bg-accent-amber",
-                    department.status === "alert" && "bg-accent-red",
-                  )}
-                />
-                {department.status}
-              </span>
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 liquid-shift-y">
-        <h3 className="text-arch-text-primary font-medium text-xl tracking-tighter group-hover:text-arch-accent-blue transition-colors duration-300">
-          {department.displayName}
-        </h3>
-        <p className="text-arch-text-secondary antialiased text-sm mt-2 line-clamp-2 leading-relaxed">
-          {department.description}
-        </p>
-      </div>
-
-      {department.stats && (
-        <div className="mt-6 pt-4 border-t border-black/[0.06] flex items-center justify-between group/stat">
-          <div className="flex flex-col gap-1 liquid-shift-y">
-            <span className="text-[10px] font-mono font-medium text-arch-text-tertiary uppercase tracking-widest transition-colors group-hover:text-arch-text-secondary">
-              {department.stats.label}
-            </span>
-            {department.trend && (
-              <div className="liquid-shift-y-delay">
-                <Sparkline data={department.trend} width={72} height={20} />
-              </div>
-            )}
-          </div>
-          <span
-            className={cn(
-              "text-lg font-mono tabular-nums font-medium transition-all duration-300 group-hover:scale-110 liquid-shift-y",
-              config.text,
-            )}
-          >
-            {department.stats.value}
-          </span>
-        </div>
-      )}
-
-      {department.actions && department.actions.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 liquid-shift-y-delay">
-          {department.actions.map((action) => (
-            <Link
-              key={action.label}
-              href={action.href}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[11px] font-medium transition-all interactive-element"
-            >
-              <FileText className="w-3 h-3 shrink-0" />
-              <span>{action.label}</span>
-              <ArrowUpRight className="w-3 h-3 opacity-50 shrink-0" />
-            </Link>
-          ))}
-        </div>
-      )}
-    </>
-  );
 
   return (
     <div
@@ -192,22 +120,89 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           }
         }}
         tabIndex={0}
-        className="block h-full outline-none group cursor-pointer active:scale-[0.99] transition-transform duration-200 will-change-backdrop-filter interactive-element"
+        className="uiverse-card group outline-none h-full interactive-element"
       >
-        <GlassCard
-          variant="liquid"
-          hover
-          padding={false}
-          className="h-full aurora-shadow"
-        >
-          {/* Inner glass highlight ring for edge definition */}
-          <div
-            className="absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-arch-border-emphasis/30 pointer-events-none"
-            aria-hidden="true"
-          />
+        {/* Banner area */}
+        <div className={cn("uiverse-card-banner", `uiverse-card-banner-${department.name}`)}>
+          {/* Save/Pin Button */}
+          <button
+            type="button"
+            onClick={togglePin}
+            className="uiverse-card-pin hover:scale-110 active:scale-95"
+            title={isPinned ? "Unpin department" : "Pin department"}
+          >
+            <Bookmark
+              className={cn(
+                "w-3.5 h-3.5 transition-all duration-200",
+                isPinned
+                  ? "fill-arch-accent-blue text-arch-accent-blue"
+                  : "text-arch-text-tertiary",
+              )}
+            />
+          </button>
 
-          <div className="p-5 flex flex-col h-full">{cardContent}</div>
-        </GlassCard>
+          {/* Department Icon Bubble */}
+          <div className={cn("uiverse-card-icon-bubble border-arch-border-emphasis/25", config.bg)}>
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="uiverse-card-body">
+          <div className="space-y-2">
+            <div className="uiverse-card-title-row">
+              <h3 className="uiverse-card-title">{department.displayName}</h3>
+              {department.status && (
+                <span className="flex items-center gap-1.5 shrink-0">
+                  <span
+                    className={cn(
+                      "w-1.5 h-1.5 rounded-full animate-pulse",
+                      department.status === "active" && "bg-accent-green",
+                      department.status === "maintenance" && "bg-accent-amber",
+                      department.status === "alert" && "bg-accent-red",
+                    )}
+                  />
+                  <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-arch-text-tertiary">
+                    {department.status}
+                  </span>
+                </span>
+              )}
+            </div>
+            <p className="uiverse-card-subtitle">{department.description}</p>
+
+            {department.actions && department.actions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                {department.actions.map((action) => (
+                  <Link
+                    key={action.label}
+                    href={action.href}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 h-5.5 rounded-full glass-action-button text-[10px] font-medium transition-all interactive-element"
+                  >
+                    <FileText className="w-2.5 h-2.5 shrink-0" />
+                    <span>{action.label}</span>
+                    <ArrowUpRight className="w-2.5 h-2.5 opacity-50 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tag / Stats row */}
+          {department.stats && (
+            <div className="uiverse-card-tag-row">
+              <div className="flex items-center gap-2">
+                <span className="uiverse-card-tag-row-text">{department.stats.label}</span>
+                {department.trend && (
+                  <div className="opacity-80">
+                    <Sparkline data={department.trend} width={52} height={14} />
+                  </div>
+                )}
+              </div>
+              <span className="uiverse-card-tag-row-value">{department.stats.value}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

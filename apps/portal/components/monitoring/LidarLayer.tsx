@@ -48,10 +48,7 @@ interface LidarLayerPanelProps {
   zoom?: number;
 }
 
-function generateDemoPoints(
-  center: { lat: number; lon: number },
-  count = 5000,
-): LidarPoint[] {
+function generateDemoPoints(center: { lat: number; lon: number }, count = 5000): LidarPoint[] {
   const points: LidarPoint[] = [];
   const baseLat = center.lat;
   const baseLon = center.lon;
@@ -62,9 +59,7 @@ function generateDemoPoints(
     const lat = baseLat + Math.cos(angle) * radius;
     const lon = baseLon + Math.sin(angle) * radius;
     const elevation = Math.random() * 80 + 20;
-    const classification = ([1, 2, 3, 4, 5, 6] as const)[
-      Math.floor(Math.random() * 6)
-    ]!;
+    const classification = ([1, 2, 3, 4, 5, 6] as const)[Math.floor(Math.random() * 6)]!;
     const intensity = Math.random();
 
     const color = CLASSIFICATION_COLORS[classification] ?? [200, 200, 200];
@@ -151,13 +146,10 @@ export function LidarLayerPanel({
         <div className="flex items-start gap-3">
           <span className="text-accent-green text-xl mt-0.5">🔭</span>
           <div>
-            <p className="text-sm font-semibold text-accent-green">
-              LiDAR Point Cloud
-            </p>
+            <p className="text-sm font-semibold text-accent-green">LiDAR Point Cloud</p>
             <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              Airborne LiDAR (ALS) point cloud showing pit topography. Colorized
-              by classification: ground, vegetation, buildings. Supports COPC
-              streaming for large datasets.
+              Airborne LiDAR (ALS) point cloud showing pit topography. Colorized by classification:
+              ground, vegetation, buildings. Supports COPC streaming for large datasets.
             </p>
           </div>
         </div>
@@ -191,9 +183,7 @@ export function LidarLayerPanel({
             onChange={(e) => setPointSize(Number(e.target.value))}
             className="w-20 accent-[#3ecf8e]"
           />
-          <span className="text-[11px] text-[var(--text-muted)] font-mono w-4">
-            {pointSize}
-          </span>
+          <span className="text-[11px] text-[var(--text-muted)] font-mono w-4">{pointSize}</span>
         </div>
       </div>
 
@@ -238,9 +228,7 @@ export function LidarLayerPanel({
       {colorMode === "classification" && (
         <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
           {Object.entries(CLASSIFICATION_LABELS).map(([code, label]) => {
-            const color = CLASSIFICATION_COLORS[Number(code)] ?? [
-              200, 200, 200,
-            ];
+            const color = CLASSIFICATION_COLORS[Number(code)] ?? [200, 200, 200];
             return (
               <div key={code} className="flex items-center gap-1.5">
                 <span
@@ -249,9 +237,7 @@ export function LidarLayerPanel({
                     background: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
                   }}
                 />
-                <span className="text-[10px] text-[var(--text-secondary)]">
-                  {label}
-                </span>
+                <span className="text-[10px] text-[var(--text-secondary)]">{label}</span>
               </div>
             );
           })}
@@ -275,8 +261,7 @@ export function LidarLayerPanel({
 
       {/* Point count */}
       <p className="text-[10px] text-[var(--text-secondary)] text-right">
-        {demoPoints.length.toLocaleString()} points · interactive 3D view (drag
-        to rotate)
+        {demoPoints.length.toLocaleString()} points · interactive 3D view (drag to rotate)
       </p>
     </div>
   );

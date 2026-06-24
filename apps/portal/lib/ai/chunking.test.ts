@@ -29,9 +29,7 @@ describe("detectContentType", () => {
   });
 
   it("detects document for longer prose", () => {
-    const doc = Array(10)
-      .fill("This is a sentence about mining operations.")
-      .join(" ");
+    const doc = Array(10).fill("This is a sentence about mining operations.").join(" ");
     expect(detectContentType(doc)).toBe("document");
   });
 });
@@ -91,8 +89,7 @@ describe("chunkText – document", () => {
   });
 
   it("splits long document into multiple chunks", () => {
-    const sentence =
-      "The mining site reported elevated deformation readings today. ";
+    const sentence = "The mining site reported elevated deformation readings today. ";
     const longDoc = sentence.repeat(200); // ~12400 chars >> 512 tokens (2048 chars)
     const result = chunkText(longDoc, {
       contentType: "document",
@@ -102,8 +99,7 @@ describe("chunkText – document", () => {
   });
 
   it("every chunk has tokenEstimate > 0", () => {
-    const sentence =
-      "Each sentence carries important safety data for the shift. ";
+    const sentence = "Each sentence carries important safety data for the shift. ";
     const doc = sentence.repeat(50);
     const result = chunkText(doc, {
       contentType: "document",
@@ -113,8 +109,7 @@ describe("chunkText – document", () => {
   });
 
   it("chunk indices are sequential", () => {
-    const sentence =
-      "Repeated content line for boundary testing purposes here. ";
+    const sentence = "Repeated content line for boundary testing purposes here. ";
     const doc = sentence.repeat(100);
     const result = chunkText(doc, {
       contentType: "document",
@@ -178,11 +173,7 @@ describe("mergeSmallChunks", () => {
 
   it("does not merge chunks that would exceed maxTokens", () => {
     const bigText = "a".repeat(400); // 100 tokens
-    const chunks = [
-      makeChunk(bigText, 0),
-      makeChunk(bigText, 1),
-      makeChunk(bigText, 2),
-    ];
+    const chunks = [makeChunk(bigText, 0), makeChunk(bigText, 1), makeChunk(bigText, 2)];
     // maxTokens = 128 → maxChars = 512; each chunk is 400 chars, two merged = 800+2 > 512
     const result = mergeSmallChunks(chunks, 128);
     expect(result.length).toBe(3);
@@ -284,8 +275,7 @@ describe("chunkText – document sentence boundary", () => {
 describe("chunkText – code with large function", () => {
   it("uses splitByLines when a code block exceeds maxChars", () => {
     // Build code with multiple function boundaries but each is huge
-    const bigFn =
-      `export function bigFunc() {\n` + "  const x = 1;\n".repeat(50) + `}\n\n`;
+    const bigFn = `export function bigFunc() {\n` + "  const x = 1;\n".repeat(50) + `}\n\n`;
     const code = bigFn.repeat(3);
     const result = chunkText(code, { contentType: "code", maxChunkSize: 16 });
     expect(result.length).toBeGreaterThan(1);

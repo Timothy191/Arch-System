@@ -2,14 +2,7 @@
 
 import { GlassCard } from "@repo/ui/GlassCard";
 
-const MATERIAL_TYPES = [
-  "Overburden",
-  "Coal",
-  "Waste",
-  "Partings",
-  "Soil",
-  "Other",
-];
+const MATERIAL_TYPES = ["Overburden", "Coal", "Waste", "Partings", "Soil", "Other"];
 
 interface DumperMachine {
   id: string;
@@ -122,10 +115,7 @@ export function ExcavatorDumperTable({
   };
 
   const runningTotalBcm = assignments.reduce((sum, a) => sum + a.totalBcm, 0);
-  const runningTotalLoads = assignments.reduce(
-    (sum, a) => sum + a.totalLoads,
-    0,
-  );
+  const runningTotalLoads = assignments.reduce((sum, a) => sum + a.totalLoads, 0);
 
   if (siteDumpers.length === 0) {
     return (
@@ -140,9 +130,7 @@ export function ExcavatorDumperTable({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-[var(--text-heading)]">
-          Dumper Assignments
-        </h4>
+        <h4 className="text-sm font-medium text-[var(--text-heading)]">Dumper Assignments</h4>
         <button
           type="button"
           onClick={handleAddRow}
@@ -204,19 +192,12 @@ export function ExcavatorDumperTable({
             <tbody>
               {assignments.map((assignment, index) => {
                 return (
-                  <tr
-                    key={assignment.key}
-                    className="border-b border-[var(--border-default)]/50"
-                  >
-                    <td className="py-2 px-2 text-[var(--text-muted)]">
-                      {index + 1}
-                    </td>
+                  <tr key={assignment.key} className="border-b border-[var(--border-default)]/50">
+                    <td className="py-2 px-2 text-[var(--text-muted)]">{index + 1}</td>
                     <td className="py-2 px-2">
                       <select
                         value={assignment.dumperMachineId}
-                        onChange={(e) =>
-                          handleDumperChange(index, e.target.value)
-                        }
+                        onChange={(e) => handleDumperChange(index, e.target.value)}
                         className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
                       >
                         <option value="">
@@ -235,9 +216,7 @@ export function ExcavatorDumperTable({
                     <td className="py-2 px-2">
                       <select
                         value={assignment.materialType}
-                        onChange={(e) =>
-                          handleMaterialChange(index, e.target.value)
-                        }
+                        onChange={(e) => handleMaterialChange(index, e.target.value)}
                         className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
                       >
                         {MATERIAL_TYPES.map((mt) => (
@@ -289,10 +268,7 @@ export function ExcavatorDumperTable({
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-[var(--border-default)]">
-                <td
-                  colSpan={3}
-                  className="py-2 px-2 text-[var(--text-heading)] font-medium"
-                >
+                <td colSpan={3} className="py-2 px-2 text-[var(--text-heading)] font-medium">
                   Total
                 </td>
                 <td className="py-2 px-2 text-right text-[var(--text-heading)] font-medium">

@@ -121,19 +121,14 @@ async function getTelemetryData(selectedMachineId?: string): Promise<{
       .eq("department_id", dept.id)
       .order("archived_at", { ascending: false })
       .limit(12),
-    supabase
-      .from("machines")
-      .select("id, name")
-      .eq("machine_type", "Drill Rig"),
+    supabase.from("machines").select("id, name").eq("machine_type", "Drill Rig"),
     supabase.rpc("get_drill_monthly_summary", {
       p_department_id: dept.id,
       p_year_month: currentMonth,
     }),
   ]);
 
-  const machineNameMap = new Map(
-    (allMachines || []).map((m) => [m.id, m.name]),
-  );
+  const machineNameMap = new Map((allMachines || []).map((m) => [m.id, m.name]));
 
   const transformedArchives: ArchivedMonth[] = (archives || []).map((a) => ({
     id: a.id,
@@ -152,10 +147,7 @@ async function getTelemetryData(selectedMachineId?: string): Promise<{
   };
 }
 
-function formatNumber(
-  num: number | null | undefined,
-  decimals: number = 1,
-): string {
+function formatNumber(num: number | null | undefined, decimals: number = 1): string {
   if (num === null || num === undefined) return "—";
   return num.toFixed(decimals);
 }
@@ -180,41 +172,27 @@ interface MachineTelemetryPageProps {
   searchParams: Promise<{ machineId?: string }>;
 }
 
-export default async function MachineTelemetryPage({
-  searchParams,
-}: MachineTelemetryPageProps) {
+export default async function MachineTelemetryPage({ searchParams }: MachineTelemetryPageProps) {
   const { machineId } = await searchParams;
   const selectedMachineId = machineId === "all" ? undefined : machineId;
   const { currentMonth, telemetry, archives, drills, monthlySummary } =
     await getTelemetryData(selectedMachineId);
 
   // Calculate monthly totals
-  const totalRecords = telemetry.reduce(
-    (sum, t) => sum + (t.record_count || 0),
-    0,
-  );
-  const totalAlerts = telemetry.reduce(
-    (sum, t) => sum + (t.total_alerts || 0),
-    0,
-  );
+  const totalRecords = telemetry.reduce((sum, t) => sum + (t.record_count || 0), 0);
+  const totalAlerts = telemetry.reduce((sum, t) => sum + (t.total_alerts || 0), 0);
   const avgPenetration =
     telemetry.length > 0
-      ? telemetry.reduce((sum, t) => sum + (t.avg_penetration_rate || 0), 0) /
-        telemetry.length
+      ? telemetry.reduce((sum, t) => sum + (t.avg_penetration_rate || 0), 0) / telemetry.length
       : 0;
-  const maxBitDepth = Math.max(
-    ...telemetry.map((t) => t.max_bit_depth || 0),
-    0,
-  );
+  const maxBitDepth = Math.max(...telemetry.map((t) => t.max_bit_depth || 0), 0);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">
-            Machine Telemetry
-          </h2>
+          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Machine Telemetry</h2>
           <div className="flex items-center gap-2 mt-1">
             <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
             <p className="text-sm text-[var(--text-muted)]">
@@ -245,9 +223,7 @@ export default async function MachineTelemetryPage({
           <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
             Active Drills
           </p>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
-            {drills.length}
-          </p>
+          <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">{drills.length}</p>
         </GlassCard>
         <GlassCard>
           <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
@@ -269,9 +245,7 @@ export default async function MachineTelemetryPage({
           <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider text-accent-red">
             Alerts
           </p>
-          <p className="text-2xl font-bold text-accent-red mt-1">
-            {totalAlerts}
-          </p>
+          <p className="text-2xl font-bold text-accent-red mt-1">{totalAlerts}</p>
         </GlassCard>
       </div>
 
@@ -286,8 +260,8 @@ export default async function MachineTelemetryPage({
               </h3>
             </div>
             <p className="text-sm text-[var(--text-muted)] mt-1">
-              Auto-built from {formatMonth(currentMonth)} drill operations.
-              Downtime = Standard + External + Production + Engineering delays.
+              Auto-built from {formatMonth(currentMonth)} drill operations. Downtime = Standard +
+              External + Production + Engineering delays.
             </p>
           </div>
         </div>
@@ -323,15 +297,9 @@ export default async function MachineTelemetryPage({
             <TableBody>
               {monthlySummary.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center py-10 text-[var(--text-muted)]"
-                  >
+                  <TableCell colSpan={6} className="text-center py-10 text-[var(--text-muted)]">
                     <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                    <p>
-                      No drill operations logged for {formatMonth(currentMonth)}{" "}
-                      yet.
-                    </p>
+                    <p>No drill operations logged for {formatMonth(currentMonth)} yet.</p>
                     <p className="text-sm mt-1">
                       Log shifts in Drilling Operations to populate the summary.
                     </p>
@@ -383,16 +351,12 @@ export default async function MachineTelemetryPage({
                       <TableCell
                         className={`text-right tabular-nums font-semibold ${availabilityClass}`}
                       >
-                        {availabilityPct === null
-                          ? "—"
-                          : `${availabilityPct.toFixed(1)}%`}
+                        {availabilityPct === null ? "—" : `${availabilityPct.toFixed(1)}%`}
                       </TableCell>
                       <TableCell
                         className={`text-right tabular-nums font-semibold ${utilizationClass}`}
                       >
-                        {utilizationPct === null
-                          ? "—"
-                          : `${utilizationPct.toFixed(1)}%`}
+                        {utilizationPct === null ? "—" : `${utilizationPct.toFixed(1)}%`}
                       </TableCell>
                     </TableRow>
                   );
@@ -506,10 +470,7 @@ export default async function MachineTelemetryPage({
             <TableBody>
               {telemetry.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={10}
-                    className="text-center py-12 text-[var(--text-muted)]"
-                  >
+                  <TableCell colSpan={10} className="text-center py-12 text-[var(--text-muted)]">
                     <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>No telemetry data for {formatMonth(currentMonth)}</p>
                     <p className="text-sm mt-1">
@@ -519,10 +480,8 @@ export default async function MachineTelemetryPage({
                 </TableRow>
               ) : (
                 telemetry.map((record) => {
-                  const isHighRPM =
-                    record.avg_engine_rpm && record.avg_engine_rpm > 2100;
-                  const isOverheating =
-                    record.avg_engine_temp && record.avg_engine_temp > 95;
+                  const isHighRPM = record.avg_engine_rpm && record.avg_engine_rpm > 2100;
+                  const isOverheating = record.avg_engine_temp && record.avg_engine_temp > 95;
                   const isWarm =
                     record.avg_engine_temp &&
                     record.avg_engine_temp > 85 &&
@@ -589,13 +548,10 @@ export default async function MachineTelemetryPage({
         <div className="p-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
             <Archive className="w-5 h-5 text-[var(--text-muted)]" />
-            <h3 className="text-lg font-semibold text-[var(--text-heading)]">
-              Archived Months
-            </h3>
+            <h3 className="text-lg font-semibold text-[var(--text-heading)]">Archived Months</h3>
           </div>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Previous months telemetry data is automatically archived and
-            preserved for safe keeping
+            Previous months telemetry data is automatically archived and preserved for safe keeping
           </p>
         </div>
 
@@ -627,10 +583,7 @@ export default async function MachineTelemetryPage({
             <TableBody>
               {archives.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-8 text-[var(--text-muted)]"
-                  >
+                  <TableCell colSpan={5} className="text-center py-8 text-[var(--text-muted)]">
                     <Archive className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p>No archived telemetry data yet</p>
                     <p className="text-sm mt-1">

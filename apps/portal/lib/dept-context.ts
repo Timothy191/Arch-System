@@ -12,9 +12,7 @@ import { getOperationalToday } from "@repo/utils";
  *
  * @returns `{ dept, deptId, supabase, today }`
  */
-export async function getDepartmentContext(params: {
-  department: string;
-}): Promise<{
+export async function getDepartmentContext(params: { department: string }): Promise<{
   dept: (typeof DEPARTMENTS)[number];
   deptId: string;
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -55,10 +53,7 @@ export async function getDepartmentContext(params: {
  * Calls notFound() if the department is not in the allowed list.
  * Use this for tabs that should only be accessible by specific departments.
  */
-export function requireDepartment(
-  departmentSlug: string,
-  allowed: string | string[],
-) {
+export function requireDepartment(departmentSlug: string, allowed: string | string[]) {
   const allowedList = Array.isArray(allowed) ? allowed : [allowed];
   if (!allowedList.includes(departmentSlug)) {
     notFound();

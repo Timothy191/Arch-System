@@ -89,13 +89,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const completeness = await getShiftCompleteness(
-    supabase,
-    deptId,
-    deptSlug,
-    date,
-    shift,
-  );
+  const completeness = await getShiftCompleteness(supabase, deptId, deptSlug, date, shift);
 
   return NextResponse.json(completeness);
 }

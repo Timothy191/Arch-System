@@ -57,9 +57,7 @@ export function SafetyIncidentsList({ incidents }: SafetyIncidentsListProps) {
                 <span
                   className={cn(
                     "text-xs font-medium px-2 py-0.5 rounded-full",
-                    incident.severity_color
-                      ? "text-white"
-                      : "text-[var(--text-secondary)]",
+                    incident.severity_color ? "text-white" : "text-[var(--text-secondary)]",
                   )}
                   style={
                     incident.severity_color
@@ -78,22 +76,17 @@ export function SafetyIncidentsList({ incidents }: SafetyIncidentsListProps) {
                 <span
                   className={cn(
                     "text-xs font-medium capitalize",
-                    statusColors[incident.status] ||
-                      "text-[var(--text-secondary)]",
+                    statusColors[incident.status] || "text-[var(--text-secondary)]",
                   )}
                 >
                   {incident.status.replace("-", " ")}
                 </span>
               </div>
 
-              <p className="text-[var(--text-heading)] text-sm mt-2">
-                {incident.description}
-              </p>
+              <p className="text-[var(--text-heading)] text-sm mt-2">{incident.description}</p>
 
               {incident.location && (
-                <p className="text-[var(--text-secondary)] text-xs mt-1">
-                  📍 {incident.location}
-                </p>
+                <p className="text-[var(--text-secondary)] text-xs mt-1">📍 {incident.location}</p>
               )}
 
               {incident.injured_parties > 0 && (

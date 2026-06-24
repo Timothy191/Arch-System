@@ -172,11 +172,7 @@ export function clearObservabilityMetrics(): void {
   dbMetrics.clear();
 }
 
-export function recordJobExecution(
-  jobId: string,
-  durationMs: number,
-  success: boolean,
-): void {
+export function recordJobExecution(jobId: string, durationMs: number, success: boolean): void {
   const entry = jobMetrics.get(jobId) || {
     count: 0,
     errors: 0,

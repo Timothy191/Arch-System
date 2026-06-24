@@ -35,9 +35,7 @@ export default async function ExcavatorActivityPage({
       .order("name"),
     supabase
       .from("machines")
-      .select(
-        "id, name, machine_type, serial_number, active, bin_factor, site_id",
-      )
+      .select("id, name, machine_type, serial_number, active, bin_factor, site_id")
       .eq("machine_type", "Dump Truck")
       .eq("active", true)
       .order("name"),
@@ -46,11 +44,7 @@ export default async function ExcavatorActivityPage({
       .select("id, full_name, employee_code")
       .eq("active", true)
       .order("full_name"),
-    supabase
-      .from("sites")
-      .select("id, name, site_code, active")
-      .eq("active", true)
-      .order("name"),
+    supabase.from("sites").select("id, name, site_code, active").eq("active", true).order("name"),
     supabase
       .from("mine_blocks")
       .select("id, name, code, site_id, active")
@@ -88,9 +82,7 @@ export default async function ExcavatorActivityPage({
     activityIds.length > 0
       ? supabase
           .from("excavator_dumper_assignments")
-          .select(
-            "*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)",
-          )
+          .select("*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)")
           .in("excavator_activity_id", activityIds)
       : Promise.resolve({ data: [] }),
     supabase
@@ -102,12 +94,9 @@ export default async function ExcavatorActivityPage({
   todayAssignments = assignments || [];
 
   // Compute KPIs
-  const totalLoads =
-    todayAssignments?.reduce((sum, a) => sum + (a.total_loads || 0), 0) || 0;
-  const totalBcm =
-    todayAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
-  const activeExcavators = new Set(todayActivity?.map((a) => a.machine_id))
-    .size;
+  const totalLoads = todayAssignments?.reduce((sum, a) => sum + (a.total_loads || 0), 0) || 0;
+  const totalBcm = todayAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
+  const activeExcavators = new Set(todayActivity?.map((a) => a.machine_id)).size;
 
   return (
     <div className="space-y-6">
@@ -115,16 +104,8 @@ export default async function ExcavatorActivityPage({
 
       <KPIGrid cols={3}>
         <KPICard label="Total BCM" value={totalBcm.toFixed(1)} color="green" />
-        <KPICard
-          label="Total Loads"
-          value={totalLoads.toLocaleString()}
-          color="green"
-        />
-        <KPICard
-          label="Active Excavators"
-          value={activeExcavators}
-          color="cyan"
-        />
+        <KPICard label="Total Loads" value={totalLoads.toLocaleString()} color="green" />
+        <KPICard label="Active Excavators" value={activeExcavators} color="cyan" />
       </KPIGrid>
 
       <ExcavatorActivityForm

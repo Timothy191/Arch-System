@@ -141,10 +141,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       rulHours: 780.0,
       status: "warning",
       isNative: false,
-      error:
-        err instanceof Error
-          ? err.message
-          : "Native Rust pipeline runtime exception",
+      error: err instanceof Error ? err.message : "Native Rust pipeline runtime exception",
     });
   }
 }

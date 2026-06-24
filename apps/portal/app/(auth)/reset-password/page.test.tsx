@@ -3,13 +3,9 @@ import ResetPasswordPage from "./page";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 jest.mock("@repo/supabase/client", () => ({
@@ -17,9 +13,7 @@ jest.mock("@repo/supabase/client", () => ({
 }));
 
 jest.mock("@repo/ui/Input", () => ({
-  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} />
-  ),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 
 jest.mock("@repo/ui/AnimatedButton", () => ({
@@ -36,20 +30,13 @@ jest.mock("@repo/ui/AnimatedButton", () => ({
     type?: "button" | "submit" | "reset";
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
   }) => (
-    <button
-      type={type}
-      disabled={disabled}
-      className={className}
-      onClick={onClick}
-    >
+    <button type={type} disabled={disabled} className={className} onClick={onClick}>
       {children}
     </button>
   ),
 }));
 
-const { createBrowserSupabaseClient } = jest.requireMock(
-  "@repo/supabase/client",
-);
+const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 describe("ResetPasswordPage", () => {
   beforeEach(() => {
@@ -60,9 +47,7 @@ describe("ResetPasswordPage", () => {
     render(<ResetPasswordPage />);
 
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Send Reset Link/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Send Reset Link/i })).toBeInTheDocument();
     expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
   });
 
@@ -113,9 +98,7 @@ describe("ResetPasswordPage", () => {
     fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Too many requests. Please wait a moment."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Too many requests. Please wait a moment.")).toBeInTheDocument();
     });
   });
 
@@ -138,9 +121,7 @@ describe("ResetPasswordPage", () => {
     fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Please enter a valid email address."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Please enter a valid email address.")).toBeInTheDocument();
     });
   });
 
@@ -164,9 +145,7 @@ describe("ResetPasswordPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "Unable to send reset email. Please try again or contact IT Support.",
-        ),
+        screen.getByText("Unable to send reset email. Please try again or contact IT Support."),
       ).toBeInTheDocument();
     });
   });

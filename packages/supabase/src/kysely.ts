@@ -1,9 +1,4 @@
-import {
-  Kysely,
-  PostgresDialect,
-  type Generated,
-  type ColumnType,
-} from "kysely";
+import { Kysely, PostgresDialect, type Generated, type ColumnType } from "kysely";
 import { Pool } from "pg";
 
 // AGENT-TRACE: Simple APIError class for package-level use

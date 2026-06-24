@@ -51,12 +51,9 @@ export async function GET() {
       headers: { "Cache-Control": "no-store, max-age=0" },
     });
   } catch (error) {
-    await logError(
-      error instanceof Error ? error : new Error("Weather fetch failed"),
-      {
-        context: "weather_api",
-      },
-    );
+    await logError(error instanceof Error ? error : new Error("Weather fetch failed"), {
+      context: "weather_api",
+    });
     return NextResponse.json(null);
   }
 }

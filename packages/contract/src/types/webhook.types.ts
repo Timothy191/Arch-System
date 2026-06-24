@@ -1,8 +1,5 @@
 import type { z } from "zod";
-import type {
-  createWebhookSchema,
-  updateWebhookSchema,
-} from "../schemas/webhook.schema.js";
+import type { createWebhookSchema, updateWebhookSchema } from "../schemas/webhook.schema.js";
 
 export type CreateWebhookInput = z.infer<typeof createWebhookSchema>;
 export type UpdateWebhookInput = z.infer<typeof updateWebhookSchema>;

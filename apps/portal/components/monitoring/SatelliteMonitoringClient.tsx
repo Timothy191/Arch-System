@@ -4,30 +4,21 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { DeformationSummary } from "@/features/departments/components/satellite/DeformationAlertCard";
-import {
-  DEFAULT_MINE_CENTER,
-  type DeformationReading,
-} from "@/lib/monitoring-api";
+import { DEFAULT_MINE_CENTER, type DeformationReading } from "@/lib/monitoring-api";
 
-const MonitoringMap = dynamic(
-  () => import("./MonitoringMap").then((m) => m.MonitoringMap),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[340px] bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl animate-pulse" />
-    ),
-  },
-);
+const MonitoringMap = dynamic(() => import("./MonitoringMap").then((m) => m.MonitoringMap), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[340px] bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl animate-pulse" />
+  ),
+});
 
 interface SatelliteMonitoringClientProps {
   readings: DeformationReading[];
 }
 
-export function SatelliteMonitoringClient({
-  readings,
-}: SatelliteMonitoringClientProps) {
-  const [selectedReading, setSelectedReading] =
-    useState<DeformationReading | null>(null);
+export function SatelliteMonitoringClient({ readings }: SatelliteMonitoringClientProps) {
+  const [selectedReading, setSelectedReading] = useState<DeformationReading | null>(null);
 
   return (
     <>
@@ -56,15 +47,10 @@ export function SatelliteMonitoringClient({
             </button>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Shift:{" "}
-            <span className="text-[var(--text-heading)]">
-              {selectedReading.shiftMm} mm
-            </span>{" "}
+            Shift: <span className="text-[var(--text-heading)]">{selectedReading.shiftMm} mm</span>{" "}
             · Trend:{" "}
-            <span className="text-[var(--text-heading)] capitalize">
-              {selectedReading.trend}
-            </span>{" "}
-            · Area:{" "}
+            <span className="text-[var(--text-heading)] capitalize">{selectedReading.trend}</span> ·
+            Area:{" "}
             <span className="text-[var(--text-heading)] capitalize">
               {selectedReading.area.replace("-", " ")}
             </span>
@@ -73,10 +59,7 @@ export function SatelliteMonitoringClient({
       )}
 
       {/* Alert list */}
-      <DeformationSummary
-        readings={readings}
-        onReadingClick={setSelectedReading}
-      />
+      <DeformationSummary readings={readings} onReadingClick={setSelectedReading} />
     </>
   );
 }

@@ -13,10 +13,7 @@ interface BreakdownChartsProps {
   }[];
 }
 
-export function BreakdownCharts({
-  statusData,
-  mttrData,
-}: BreakdownChartsProps) {
+export function BreakdownCharts({ statusData, mttrData }: BreakdownChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* MTTR by Machine Type */}
@@ -52,21 +49,12 @@ export function BreakdownCharts({
         />
         <div className="mt-6 flex flex-col gap-2">
           {statusData.map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between text-xs"
-            >
+            <div key={idx} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
-                <div
-                  className={`w-2 h-2 rounded-full bg-${idx === 0 ? "emerald" : "rose"}-500`}
-                />
-                <span className="text-[var(--text-secondary)]">
-                  {item.name}
-                </span>
+                <div className={`w-2 h-2 rounded-full bg-${idx === 0 ? "emerald" : "rose"}-500`} />
+                <span className="text-[var(--text-secondary)]">{item.name}</span>
               </div>
-              <span className="text-[var(--text-heading)] font-medium">
-                {item.value} units
-              </span>
+              <span className="text-[var(--text-heading)] font-medium">{item.value} units</span>
             </div>
           ))}
         </div>

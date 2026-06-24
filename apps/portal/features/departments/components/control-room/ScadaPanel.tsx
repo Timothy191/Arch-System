@@ -68,9 +68,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
                   return [...prev, payload.new as Machine];
                 }
                 if (payload.eventType === "UPDATE") {
-                  return prev.map((m) =>
-                    m.id === payload.new.id ? (payload.new as Machine) : m,
-                  );
+                  return prev.map((m) => (m.id === payload.new.id ? (payload.new as Machine) : m));
                 }
                 if (payload.eventType === "DELETE") {
                   return prev.filter((m) => m.id !== payload.old.id);
@@ -98,9 +96,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-[var(--text-heading)]">
-          SCADA Overview
-        </h2>
+        <h2 className="text-xl font-medium text-[var(--text-heading)]">SCADA Overview</h2>
         <div className="flex items-center gap-3 text-sm">
           <span className="px-2.5 py-1 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20">
             {activeCount} Online
@@ -112,11 +108,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
       </div>
 
       {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for toggle buttons */}
-      <div
-        className="flex items-center gap-2"
-        role="group"
-        aria-label="View mode selection"
-      >
+      <div className="flex items-center gap-2" role="group" aria-label="View mode selection">
         <button
           type="button"
           onClick={() => setViewMode("list")}
@@ -149,10 +141,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
           {loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="h-24 bg-[var(--bg-tertiary)] rounded-2xl animate-pulse"
-                />
+                <div key={i} className="h-24 bg-[var(--bg-tertiary)] rounded-2xl animate-pulse" />
               ))}
             </div>
           )}
@@ -163,9 +152,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
                 <GlassCard key={machine.id}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[var(--text-heading)] font-medium">
-                        {machine.name}
-                      </p>
+                      <p className="text-[var(--text-heading)] font-medium">{machine.name}</p>
                       <p className="text-[var(--text-secondary)] text-xs mt-0.5">
                         {machine.machine_type}
                       </p>

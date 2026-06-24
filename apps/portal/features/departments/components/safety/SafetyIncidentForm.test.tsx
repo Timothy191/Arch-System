@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { SafetyIncidentForm } from "./SafetyIncidentForm";
 
 jest.mock("next/navigation", () => ({
@@ -23,9 +17,7 @@ jest.mock("@repo/ui/GlassCard", () => ({
   ),
 }));
 
-const { createBrowserSupabaseClient } = jest.requireMock(
-  "@repo/supabase/client",
-);
+const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 describe("SafetyIncidentForm", () => {
   const categories = [
@@ -56,11 +48,7 @@ describe("SafetyIncidentForm", () => {
 
   it("renders form fields", () => {
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     expect(screen.getByLabelText(/Type/i)).toBeInTheDocument();
@@ -68,18 +56,12 @@ describe("SafetyIncidentForm", () => {
     expect(screen.getByLabelText(/Category/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Location/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Log Incident/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Log Incident/i })).toBeInTheDocument();
   });
 
   it("validates required fields on submit", async () => {
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: /Log Incident/i }));
@@ -120,11 +102,7 @@ describe("SafetyIncidentForm", () => {
     });
 
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     fillRequiredFields();
@@ -153,9 +131,7 @@ describe("SafetyIncidentForm", () => {
   });
 
   it("shows error when submission fails", async () => {
-    const mockInsert = jest
-      .fn()
-      .mockResolvedValue({ error: { message: "DB error" } });
+    const mockInsert = jest.fn().mockResolvedValue({ error: { message: "DB error" } });
     const mockSingle = jest.fn().mockResolvedValue({
       data: { id: "emp-1" },
     });
@@ -183,20 +159,14 @@ describe("SafetyIncidentForm", () => {
     });
 
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     fillRequiredFields();
     fireEvent.click(screen.getByRole("button", { name: /Log Incident/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Failed to save incident. Please try again."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Failed to save incident. Please try again.")).toBeInTheDocument();
     });
   });
 
@@ -234,11 +204,7 @@ describe("SafetyIncidentForm", () => {
     });
 
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     fillRequiredFields();
@@ -259,11 +225,7 @@ describe("SafetyIncidentForm", () => {
 
   it("validates injured parties range", async () => {
     render(
-      <SafetyIncidentForm
-        departmentId="dept-1"
-        categories={categories}
-        severities={severities}
-      />,
+      <SafetyIncidentForm departmentId="dept-1" categories={categories} severities={severities} />,
     );
 
     // Fill required fields first so injured parties validation is reached

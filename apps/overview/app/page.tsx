@@ -6,9 +6,7 @@ import { Network, Building2, Layers, Database } from "lucide-react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
-const DepartmentBreakdown = lazy(
-  () => import("./sections/DepartmentBreakdown"),
-);
+const DepartmentBreakdown = lazy(() => import("./sections/DepartmentBreakdown"));
 const TechStack = lazy(() => import("./sections/TechStack"));
 const DatabaseSchema = lazy(() => import("./sections/DatabaseSchema"));
 
@@ -124,8 +122,7 @@ export default function OverviewPage() {
         <div className="max-w-[1600px] mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#898989]">
             <div>
-              Arch Systems — Multi-departmental business portal for opencast
-              coal mine operations
+              Arch Systems — Multi-departmental business portal for opencast coal mine operations
             </div>
             <div className="flex items-center gap-4">
               <span>Built with Next.js 14 + Supabase</span>

@@ -1,15 +1,8 @@
 import React from "react";
-import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Clock,
-  ArrowRight,
-} from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import StatusBadge, {
-  AccessStatus,
-} from "@/features/access-control/components/StatusBadge";
+import StatusBadge, { AccessStatus } from "@/features/access-control/components/StatusBadge";
+import { AutoAnimateList } from "@repo/ui/AnimatedList";
 
 interface ActivityEntry {
   id: string;
@@ -38,16 +31,12 @@ interface DashboardActivityFeedProps {
   activity: ActivityEntry[];
 }
 
-export default function DashboardActivityFeed({
-  activity,
-}: DashboardActivityFeedProps) {
+export default function DashboardActivityFeed({ activity }: DashboardActivityFeedProps) {
   return (
     <div className="bg-card rounded-xl border border-border shadow-card">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h2 className="text-sm font-bold text-foreground">
-            Recent Access Events
-          </h2>
+          <h2 className="text-sm font-bold text-foreground">Recent Access Events</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Last {activity.length} scan events across all zones
           </p>
@@ -59,7 +48,7 @@ export default function DashboardActivityFeed({
           View all <ArrowRight size={12} />
         </Link>
       </div>
-      <div className="divide-y divide-border">
+      <AutoAnimateList className="divide-y divide-border">
         {activity.map((entry) => {
           const StatusIcon = statusIcons[entry.status] ?? CheckCircle2;
           return (
@@ -73,8 +62,7 @@ export default function DashboardActivityFeed({
                   className={
                     entry.status === "Granted"
                       ? "text-success"
-                      : entry.status === "Denied" ||
-                          entry.status === "Expired Credential"
+                      : entry.status === "Denied" || entry.status === "Expired Credential"
                         ? "text-danger"
                         : "text-warning"
                   }
@@ -92,25 +80,19 @@ export default function DashboardActivityFeed({
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-muted-foreground">
-                    {entry.zone}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{entry.zone}</span>
                   <span className="text-muted-foreground">·</span>
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    {entry.qrId}
-                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground">{entry.qrId}</span>
                 </div>
               </div>
               <div className="shrink-0 flex flex-col items-end gap-1">
                 <StatusBadge status={entry.status as AccessStatus} size="sm" />
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  {entry.time}
-                </span>
+                <span className="text-[10px] font-mono text-muted-foreground">{entry.time}</span>
               </div>
             </div>
           );
         })}
-      </div>
+      </AutoAnimateList>
     </div>
   );
 }

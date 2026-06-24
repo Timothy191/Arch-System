@@ -19,22 +19,17 @@ const typeToIcon: Record<string, React.ElementType> = {
   Equipment: Wrench,
 };
 
-export default function DashboardEntityStatus({
-  entityStatus,
-}: DashboardEntityStatusProps) {
+export default function DashboardEntityStatus({ entityStatus }: DashboardEntityStatusProps) {
   return (
     <div className="bg-card rounded-xl border border-border shadow-card h-full">
       <div className="px-5 py-4 border-b border-border">
         <h2 className="text-sm font-bold text-foreground">Entity QR Status</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Coverage across all entity types
-        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">Coverage across all entity types</p>
       </div>
       <div className="divide-y divide-border">
         {entityStatus.map((row) => {
           const Icon = typeToIcon[row.type] ?? Wrench;
-          const coveragePct =
-            row.total > 0 ? Math.round((row.active / row.total) * 100) : 0;
+          const coveragePct = row.total > 0 ? Math.round((row.active / row.total) * 100) : 0;
           return (
             <div
               key={row.type}
@@ -46,9 +41,7 @@ export default function DashboardEntityStatus({
                     <Icon size={16} className="text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {row.type}
-                    </p>
+                    <p className="text-sm font-semibold text-foreground">{row.type}</p>
                     <p className="text-[10px] text-muted-foreground tabular-nums">
                       {row.total} total
                     </p>
@@ -66,18 +59,10 @@ export default function DashboardEntityStatus({
                 />
               </div>
               <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                <span className="tabular-nums font-semibold text-success">
-                  {row.active} active
-                </span>
-                <span className="tabular-nums text-warning">
-                  {row.expiring} expiring
-                </span>
-                <span className="tabular-nums text-danger">
-                  {row.expired} expired
-                </span>
-                <span className="tabular-nums font-bold text-foreground">
-                  {coveragePct}%
-                </span>
+                <span className="tabular-nums font-semibold text-success">{row.active} active</span>
+                <span className="tabular-nums text-warning">{row.expiring} expiring</span>
+                <span className="tabular-nums text-danger">{row.expired} expired</span>
+                <span className="tabular-nums font-bold text-foreground">{coveragePct}%</span>
               </div>
             </div>
           );
@@ -89,35 +74,25 @@ export default function DashboardEntityStatus({
             {
               id: "sum-active",
               label: "Total Active",
-              value: entityStatus
-                .reduce((s, r) => s + r.active, 0)
-                .toLocaleString(),
+              value: entityStatus.reduce((s, r) => s + r.active, 0).toLocaleString(),
               color: "text-success",
             },
             {
               id: "sum-expiring",
               label: "Expiring",
-              value: entityStatus
-                .reduce((s, r) => s + r.expiring, 0)
-                .toLocaleString(),
+              value: entityStatus.reduce((s, r) => s + r.expiring, 0).toLocaleString(),
               color: "text-warning",
             },
             {
               id: "sum-expired",
               label: "Expired",
-              value: entityStatus
-                .reduce((s, r) => s + r.expired, 0)
-                .toLocaleString(),
+              value: entityStatus.reduce((s, r) => s + r.expired, 0).toLocaleString(),
               color: "text-danger",
             },
           ].map((s) => (
             <div key={s.id} className="text-center">
-              <p className={`text-lg font-bold tabular-nums ${s.color}`}>
-                {s.value}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {s.label}
-              </p>
+              <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>

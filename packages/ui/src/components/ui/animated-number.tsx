@@ -104,8 +104,7 @@ function DigitStrip({
   const currentVal = parseInt(value);
   const prevVal = parseInt(prev.current);
   const diff = prevVal - currentVal;
-  const dir =
-    currentVal > prevVal ? heightInNumber * diff * -1 : heightInNumber * diff;
+  const dir = currentVal > prevVal ? heightInNumber * diff * -1 : heightInNumber * diff;
 
   useEffect(() => {
     prev.current = value;

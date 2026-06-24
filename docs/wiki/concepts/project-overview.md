@@ -4,8 +4,7 @@ created: 2026-06-15
 updated: 2026-06-15
 type: concept
 tags: [architecture, overview, documentation, system, stack]
-sources:
-  [package.json, pnpm-workspace.yaml, nx.json, CLAUDE.md, PRODUCT.md, DESIGN.md]
+sources: [package.json, pnpm-workspace.yaml, nx.json, CLAUDE.md, PRODUCT.md, DESIGN.md]
 confidence: high
 ---
 

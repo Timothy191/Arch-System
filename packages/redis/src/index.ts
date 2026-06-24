@@ -12,12 +12,7 @@ export {
   cacheEvictL1ByPrefix,
   clearMemoryCache,
 } from "./cache";
-export {
-  CacheCategory,
-  CACHE_TTL_REGISTRY,
-  buildCacheKey,
-  type CacheTtlConfig,
-} from "./registry";
+export { CacheCategory, CACHE_TTL_REGISTRY, buildCacheKey, type CacheTtlConfig } from "./registry";
 export {
   recordCacheHit,
   recordCacheMiss,

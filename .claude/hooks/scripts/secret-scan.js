@@ -73,13 +73,10 @@ function scan(content) {
   try {
     input = JSON.parse(raw);
   } catch {}
-  const content =
-    input?.tool_input?.content || input?.tool_input?.new_string || "";
+  const content = input?.tool_input?.content || input?.tool_input?.new_string || "";
   const path = input?.tool_input?.file_path || "";
   if (/\.(env|pem|key)$|\/secrets?\//i.test(path)) {
-    console.error(
-      `[pro-workflow] secret-scan: refusing to write to secret-like path: ${path}`,
-    );
+    console.error(`[pro-workflow] secret-scan: refusing to write to secret-like path: ${path}`);
     process.exit(2);
   }
   const hit = scan(content);

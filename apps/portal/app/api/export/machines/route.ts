@@ -96,10 +96,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return applyCors(
-      req,
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    );
+    return applyCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
   const { searchParams } = req.nextUrl;
@@ -116,9 +113,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
   }
   const { dept, limit, offset } = parsed.data;
 
-  const format = req.headers.get("accept")?.includes("text/csv")
-    ? "csv"
-    : "json";
+  const format = req.headers.get("accept")?.includes("text/csv") ? "csv" : "json";
 
   let query = supabase
     .from("machines")
@@ -140,10 +135,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
 
   const { data, error, count } = await query;
   if (error) {
-    return applyCors(
-      req,
-      NextResponse.json({ error: "Database query failed" }, { status: 500 }),
-    );
+    return applyCors(req, NextResponse.json({ error: "Database query failed" }, { status: 500 }));
   }
 
   if (format === "csv") {
@@ -160,9 +152,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     ] as const;
     const csv = [
       keys.join(","),
-      ...(data ?? []).map((r) =>
-        keys.map((k) => sanitizeCsvCell(String(r[k] ?? ""))).join(","),
-      ),
+      ...(data ?? []).map((r) => keys.map((k) => sanitizeCsvCell(String(r[k] ?? ""))).join(",")),
     ].join("\n");
     const response = new NextResponse(csv, {
       headers: {

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { cn } from "../lib/utils";
 
 export function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
@@ -26,13 +25,10 @@ export function CookieConsent() {
     <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 bg-white/70 backdrop-blur-xl border-t border-black/[0.08] shadow-window flex flex-col sm:flex-row items-center justify-between gap-4">
       <div className="flex-1 text-sm text-[var(--text-muted)]">
         <p>
-          We use cookies to improve your experience, analyze site traffic, and
-          support operational security. By continuing to use the Arch Portal,
-          you consent to our use of cookies as described in our{" "}
-          <Link
-            href="/privacy"
-            className="text-[var(--accent-blue)] hover:underline font-medium"
-          >
+          We use cookies to improve your experience, analyze site traffic, and support operational
+          security. By continuing to use the Arch Portal, you consent to our use of cookies as
+          described in our{" "}
+          <Link href="/privacy" className="text-[var(--accent-blue)] hover:underline font-medium">
             Privacy Policy
           </Link>
           .

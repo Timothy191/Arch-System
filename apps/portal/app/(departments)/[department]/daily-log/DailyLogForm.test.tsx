@@ -14,18 +14,14 @@ jest.mock("sonner", () => ({
   },
 }));
 
-const { createBrowserSupabaseClient } = jest.requireMock(
-  "@repo/supabase/client",
-);
+const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 describe("DailyLogForm", () => {
   const mockSupabase = {
     from: jest.fn().mockReturnThis(),
     insert: jest.fn().mockResolvedValue({ error: null }),
     auth: {
-      getUser: jest
-        .fn()
-        .mockResolvedValue({ data: { user: { id: "test-user-id" } } }),
+      getUser: jest.fn().mockResolvedValue({ data: { user: { id: "test-user-id" } } }),
     },
   };
 

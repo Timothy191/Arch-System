@@ -90,10 +90,7 @@ function PrinterStatusPill({ status }: { status: string }) {
 }
 
 function JobStatusPill({ status }: { status: string }) {
-  const pills: Record<
-    string,
-    { label: string; icon: React.ReactNode; className: string }
-  > = {
+  const pills: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
     queued: {
       label: "Queued",
       icon: <Clock className="w-3 h-3" />,
@@ -159,9 +156,7 @@ export default async function PrintCardsPage({
 
   const [{ printers }, { jobs }] = await Promise.all([
     rescanPrinters().catch(() => ({ printers: [], count: 0 })),
-    getPrintJobs(statusFilter === "all" ? undefined : statusFilter).catch(
-      () => ({ jobs: [] }),
-    ),
+    getPrintJobs(statusFilter === "all" ? undefined : statusFilter).catch(() => ({ jobs: [] })),
   ]);
 
   return (
@@ -178,16 +173,9 @@ export default async function PrintCardsPage({
                 Printers
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--text-muted)]">
-                  {printers.length} detected
-                </span>
+                <span className="text-xs text-[var(--text-muted)]">{printers.length} detected</span>
                 <form action={rescanAction}>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    variant="outline"
-                    className="text-xs font-medium"
-                  >
+                  <Button type="submit" size="sm" variant="outline" className="text-xs font-medium">
                     <RefreshCw className="w-3 h-3 mr-1" />
                     Rescan
                   </Button>
@@ -197,30 +185,17 @@ export default async function PrintCardsPage({
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-                  <TableHead className="text-[var(--text-muted)]">
-                    Name
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Model
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    CUPS Queue
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-right text-[var(--text-muted)]">
-                    Actions
-                  </TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Name</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Model</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">CUPS Queue</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Status</TableHead>
+                  <TableHead className="text-right text-[var(--text-muted)]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {printers.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center py-8 text-[var(--text-muted)]"
-                    >
+                    <TableCell colSpan={5} className="text-center py-8 text-[var(--text-muted)]">
                       No printers detected. Run a rescan to discover printers.
                     </TableCell>
                   </TableRow>
@@ -230,9 +205,7 @@ export default async function PrintCardsPage({
                     key={printer.cupsName}
                     className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
                   >
-                    <TableCell className="text-[var(--text-heading)]">
-                      {printer.cupsName}
-                    </TableCell>
+                    <TableCell className="text-[var(--text-heading)]">{printer.cupsName}</TableCell>
                     <TableCell className="text-[var(--text-secondary)] text-sm">
                       {printer.model}
                     </TableCell>
@@ -244,9 +217,7 @@ export default async function PrintCardsPage({
                     </TableCell>
                     <TableCell className="text-right">
                       {printer.isRegistered ? (
-                        <form
-                          action={unregisterAction.bind(null, printer.dbId)}
-                        >
+                        <form action={unregisterAction.bind(null, printer.dbId)}>
                           <Button
                             type="submit"
                             size="sm"
@@ -294,33 +265,18 @@ export default async function PrintCardsPage({
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-                  <TableHead className="text-[var(--text-muted)]">
-                    Employee
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Department
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Queued At
-                  </TableHead>
-                  <TableHead className="text-[var(--text-muted)]">
-                    Printer
-                  </TableHead>
-                  <TableHead className="text-right text-[var(--text-muted)]">
-                    Actions
-                  </TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Employee</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Department</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Status</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Queued At</TableHead>
+                  <TableHead className="text-[var(--text-muted)]">Printer</TableHead>
+                  <TableHead className="text-right text-[var(--text-muted)]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {jobs.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-8 text-[var(--text-muted)]"
-                    >
+                    <TableCell colSpan={6} className="text-center py-8 text-[var(--text-muted)]">
                       No print jobs found.
                     </TableCell>
                   </TableRow>

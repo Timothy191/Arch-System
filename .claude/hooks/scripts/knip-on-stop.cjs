@@ -19,12 +19,7 @@ function getTempDir() {
 }
 
 function getSessionId(input) {
-  return (
-    input?.session_id ||
-    process.env.CLAUDE_SESSION_ID ||
-    String(process.ppid) ||
-    "default"
-  );
+  return input?.session_id || process.env.CLAUDE_SESSION_ID || String(process.ppid) || "default";
 }
 
 async function main() {
@@ -75,9 +70,7 @@ async function main() {
         } catch (err) {
           const stdout = (err.stdout || "").toString();
           const stderr = (err.stderr || "").toString();
-          console.error(
-            "[ProWorkflow] knip output:\n" + (stdout || stderr || err.message),
-          );
+          console.error("[ProWorkflow] knip output:\n" + (stdout || stderr || err.message));
         }
       } else {
         console.error(

@@ -101,8 +101,7 @@ export async function GET(_req: NextRequest) {
   };
 
   // Return appropriate HTTP status based on FUXA health
-  const httpStatusCode =
-    status === "healthy" ? 200 : status === "degraded" ? 200 : 503;
+  const httpStatusCode = status === "healthy" ? 200 : status === "degraded" ? 200 : 503;
 
   return NextResponse.json(response, { status: httpStatusCode });
 }

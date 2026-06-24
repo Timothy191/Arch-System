@@ -14,9 +14,9 @@ test.describe("alerts panel", () => {
 
   test("loads Control Room Dashboard", async ({ page }) => {
     await page.goto("/control-room");
-    await expect(
-      page.getByRole("heading", { name: "Control Room Dashboard" }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: "Control Room Dashboard" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("shows Alerts section heading", async ({ page }) => {
@@ -30,9 +30,7 @@ test.describe("alerts panel", () => {
     await page.goto("/control-room");
     // The alerts section always renders — either the empty state text
     // or individual alert cards. Check that content is present.
-    const emptyState = page.getByText(
-      "All systems operational. No active alerts.",
-    );
+    const emptyState = page.getByText("All systems operational. No active alerts.");
     const anyAlert = page.locator("text=/ is offline/");
     await expect(emptyState.or(anyAlert).first()).toBeVisible({
       timeout: 15000,

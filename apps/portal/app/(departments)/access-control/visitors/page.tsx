@@ -29,11 +29,7 @@ export default async function VisitorsPage({
     department: "access-control",
   });
 
-  const { visitors, totalCount } = await getVisitorsForDepartment(
-    deptId,
-    page,
-    pageSize,
-  );
+  const { visitors, totalCount } = await getVisitorsForDepartment(deptId, page, pageSize);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -42,9 +38,7 @@ export default async function VisitorsPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-            Visitor Management
-          </h2>
+          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Visitor Management</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Register guests, assign temporary credentials, and track site hosts.
           </p>
@@ -65,9 +59,7 @@ export default async function VisitorsPage({
                 <Clock className="w-4 h-4 mr-2 text-[var(--text-muted)]" />
                 Today&apos;s Visitors
               </h3>
-              <span className="text-xs text-[var(--text-muted)]">
-                {totalCount} total visitors
-              </span>
+              <span className="text-xs text-[var(--text-muted)]">{totalCount} total visitors</span>
             </div>
 
             <div className="flex-1">
@@ -83,21 +75,11 @@ export default async function VisitorsPage({
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b border-[var(--border-default)] hover:bg-transparent">
-                      <TableHead className="text-[var(--text-muted)]">
-                        Visitor Name
-                      </TableHead>
-                      <TableHead className="text-[var(--text-muted)]">
-                        Company
-                      </TableHead>
-                      <TableHead className="text-[var(--text-muted)]">
-                        Reason
-                      </TableHead>
-                      <TableHead className="text-[var(--text-muted)]">
-                        Check-In
-                      </TableHead>
-                      <TableHead className="text-right text-[var(--text-muted)]">
-                        Status
-                      </TableHead>
+                      <TableHead className="text-[var(--text-muted)]">Visitor Name</TableHead>
+                      <TableHead className="text-[var(--text-muted)]">Company</TableHead>
+                      <TableHead className="text-[var(--text-muted)]">Reason</TableHead>
+                      <TableHead className="text-[var(--text-muted)]">Check-In</TableHead>
+                      <TableHead className="text-right text-[var(--text-muted)]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -117,9 +99,7 @@ export default async function VisitorsPage({
                         </TableCell>
                         <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
                           {visitor.check_in_time
-                            ? new Date(
-                                visitor.check_in_time,
-                              ).toLocaleTimeString("en-US", {
+                            ? new Date(visitor.check_in_time).toLocaleTimeString("en-US", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: false,

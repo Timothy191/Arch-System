@@ -7,9 +7,7 @@ import ToolCard from "./ToolCard";
 
 const UniverSheet = dynamic(() => import("./UniverSheet"), {
   ssr: false,
-  loading: () => (
-    <div className="h-[600px] animate-pulse bg-arch-surface-tertiary rounded-lg" />
-  ),
+  loading: () => <div className="h-[600px] animate-pulse bg-arch-surface-tertiary rounded-lg" />,
 });
 
 interface ToolStatus {
@@ -28,10 +26,7 @@ interface ToolsPageClientProps {
   initialTools: ToolStatus[];
 }
 
-export default function ToolsPageClient({
-  departmentName,
-  initialTools,
-}: ToolsPageClientProps) {
+export default function ToolsPageClient({ departmentName, initialTools }: ToolsPageClientProps) {
   const [tools, setTools] = useState<ToolStatus[]>(initialTools);
   const [loading, setLoading] = useState(false);
 
@@ -61,13 +56,9 @@ export default function ToolsPageClient({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium text-[var(--text-heading)]">
-          Tools
-        </h2>
+        <h2 className="text-2xl font-medium text-[var(--text-heading)]">Tools</h2>
         {loading && (
-          <span className="text-[var(--text-secondary)] text-sm">
-            Checking status...
-          </span>
+          <span className="text-[var(--text-secondary)] text-sm">Checking status...</span>
         )}
       </div>
 
@@ -75,9 +66,7 @@ export default function ToolsPageClient({
         <GlassCard className="flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-medium text-[var(--text-heading)]">
-                Spreadsheet
-              </h3>
+              <h3 className="text-lg font-medium text-[var(--text-heading)]">Spreadsheet</h3>
               <p className="text-[var(--text-secondary)] text-sm">
                 Embedded Univer spreadsheet for calculations and data entry
               </p>

@@ -58,9 +58,7 @@ async function main() {
       }
 
       if (count > 0) {
-        console.error(
-          `[ProWorkflow] Auto-saved ${count} learning(s) to database`,
-        );
+        console.error(`[ProWorkflow] Auto-saved ${count} learning(s) to database`);
       }
       if (store) store.close();
     } catch (err) {

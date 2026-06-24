@@ -224,9 +224,7 @@ import { normalizeRole } from "./middleware";
 describe("normalizeRole", () => {
   it("returns the role as-is for valid non-empty strings", () => {
     expect(normalizeRole("admin")).toBe("admin");
-    expect(normalizeRole("control_room_operator")).toBe(
-      "control_room_operator",
-    );
+    expect(normalizeRole("control_room_operator")).toBe("control_room_operator");
     expect(normalizeRole("supervisor")).toBe("supervisor");
   });
 

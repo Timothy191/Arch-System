@@ -4,15 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
-import {
-  Plus,
-  Trash2,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  Info,
-  HelpCircle,
-} from "lucide-react";
+import { Plus, Trash2, Clock, AlertCircle, CheckCircle, Info, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
 // AGENT-TRACE: Delay entry form with granular tracking, auto-calculation, and manual override
@@ -22,16 +14,12 @@ import { toast } from "sonner";
 // AGENT-TRACE: Timezone utilities for consistent time handling across the system
 const toLocalTime = (utcString: string): string => {
   const date = new Date(utcString);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
 const toUTC = (localString: string): string => {
   const date = new Date(localString);
-  return new Date(
-    date.getTime() + date.getTimezoneOffset() * 60000,
-  ).toISOString();
+  return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toISOString();
 };
 
 interface DelayCategory {
@@ -76,14 +64,11 @@ export function DelayEntriesForm({
   const [isCommitting, setIsCommitting] = useState(false);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<
-    "commit" | "remove" | null
-  >(null);
+  const [confirmAction, setConfirmAction] = useState<"commit" | "remove" | null>(null);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
-  const isDirty =
-    JSON.stringify(delayEntries) !== JSON.stringify(initialDelays);
+  const isDirty = JSON.stringify(delayEntries) !== JSON.stringify(initialDelays);
   useUnsavedChangesWarning(isDirty);
 
   // Load delay categories
@@ -131,15 +116,12 @@ export function DelayEntriesForm({
   }, [machineOperationId, supabase]);
 
   // Calculate duration from start/end times
-  const calculateDuration = useCallback(
-    (startTime: string, endTime: string): number => {
-      const start = new Date(startTime);
-      const end = new Date(endTime);
-      const diffMs = end.getTime() - start.getTime();
-      return diffMs / (1000 * 60 * 60); // Convert to hours
-    },
-    [],
-  );
+  const calculateDuration = useCallback((startTime: string, endTime: string): number => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const diffMs = end.getTime() - start.getTime();
+    return diffMs / (1000 * 60 * 60); // Convert to hours
+  }, []);
 
   // Validate a single delay entry
   const validateEntry = useCallback(
@@ -173,10 +155,7 @@ export function DelayEntriesForm({
       if (entry.is_manual_override) {
         duration = entry.manual_duration_hours || 0;
       } else if (entry.delay_end_time) {
-        duration = calculateDuration(
-          entry.delay_start_time,
-          entry.delay_end_time,
-        );
+        duration = calculateDuration(entry.delay_start_time, entry.delay_end_time);
       } else {
         return "Duration cannot be calculated without end time";
       }
@@ -208,9 +187,7 @@ export function DelayEntriesForm({
     const newEntry: DelayEntry = {
       delay_category_id: "",
       delay_start_time: new Date().toISOString().slice(0, 16),
-      delay_end_time: new Date(Date.now() + 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 16),
+      delay_end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
       is_manual_override: false,
       manual_duration_hours: null,
       description: "",
@@ -311,9 +288,7 @@ export function DelayEntriesForm({
           if (error) throw error;
         } else {
           // Insert new
-          const { error } = await supabase
-            .from("delay_entries")
-            .insert(entryData);
+          const { error } = await supabase.from("delay_entries").insert(entryData);
           if (error) throw error;
         }
       }
@@ -432,9 +407,7 @@ export function DelayEntriesForm({
         setInitialDelays(formatted);
       }
 
-      toast.success(
-        `${draftDelays.length} delay entry(ies) committed successfully`,
-      );
+      toast.success(`${draftDelays.length} delay entry(ies) committed successfully`);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to commit delays:", err);
@@ -472,23 +445,17 @@ export function DelayEntriesForm({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-[var(--text-heading)]">
-              Delay Entries
-            </h3>
+            <h3 className="text-lg font-medium text-[var(--text-heading)]">Delay Entries</h3>
             <p className="text-[var(--text-muted)] text-sm">
               Log delays with start/end times for accurate tracking
             </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-[var(--text-muted)] text-xs">
-                Total Delay Hours
-              </p>
+              <p className="text-[var(--text-muted)] text-xs">Total Delay Hours</p>
               <p className="text-2xl font-medium text-accent-red">
                 {totalDelayHours.toFixed(2)}h
-                <span className="text-xs text-[var(--text-muted)] ml-1">
-                  / 12h max
-                </span>
+                <span className="text-xs text-[var(--text-muted)] ml-1">/ 12h max</span>
               </p>
             </div>
             <button
@@ -516,41 +483,32 @@ export function DelayEntriesForm({
         {showHelp && (
           <div className="p-4 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg space-y-3">
             <div className="flex items-start gap-2">
-              <Info
-                size={16}
-                className="text-[var(--accent-blue)] mt-0.5 flex-shrink-0"
-              />
+              <Info size={16} className="text-[var(--accent-blue)] mt-0.5 flex-shrink-0" />
               <div className="text-sm text-[var(--text-secondary)]">
-                <p className="font-medium text-[var(--text-heading)] mb-1">
-                  Delay Entry Guide
-                </p>
+                <p className="font-medium text-[var(--text-heading)] mb-1">Delay Entry Guide</p>
                 <ul className="space-y-1.5 list-disc list-inside">
                   <li>
-                    <strong>Category:</strong> Select the type of delay
-                    (External, Production, Engineering)
+                    <strong>Category:</strong> Select the type of delay (External, Production,
+                    Engineering)
                   </li>
                   <li>
-                    <strong>Start/End Time:</strong> Auto-calculates duration.
-                    Times are stored in UTC and displayed in your local
-                    timezone.
+                    <strong>Start/End Time:</strong> Auto-calculates duration. Times are stored in
+                    UTC and displayed in your local timezone.
                   </li>
                   <li>
-                    <strong>Manual Override:</strong> Enable to manually specify
-                    duration when exact times aren't available. This is flagged
-                    for audit trail.
+                    <strong>Manual Override:</strong> Enable to manually specify duration when exact
+                    times aren't available. This is flagged for audit trail.
                   </li>
                   <li>
-                    <strong>12-Hour Limit:</strong> Total delay hours per
-                    operation cannot exceed 12 hours per shift.
+                    <strong>12-Hour Limit:</strong> Total delay hours per operation cannot exceed 12
+                    hours per shift.
                   </li>
                   <li>
-                    <strong>Draft vs. Committed:</strong> Draft entries can be
-                    edited. Only supervisors can commit entries, which locks
-                    them for editing.
+                    <strong>Draft vs. Committed:</strong> Draft entries can be edited. Only
+                    supervisors can commit entries, which locks them for editing.
                   </li>
                   <li>
-                    <strong>Description:</strong> Optional context about the
-                    delay cause and impact.
+                    <strong>Description:</strong> Optional context about the delay cause and impact.
                   </li>
                 </ul>
               </div>
@@ -562,19 +520,14 @@ export function DelayEntriesForm({
           <div className="text-center py-8 text-[var(--text-muted)]">
             <Clock size={32} className="mx-auto mb-2 opacity-50" />
             <p>No delay entries yet</p>
-            {!readOnly && (
-              <p className="text-sm mt-1">Click "Add Delay" to log a delay</p>
-            )}
+            {!readOnly && <p className="text-sm mt-1">Click "Add Delay" to log a delay</p>}
           </div>
         ) : (
           <div className="space-y-3">
             {delayEntries.map((entry, index) => {
               const duration = entry.is_manual_override
                 ? entry.manual_duration_hours || 0
-                : calculateDuration(
-                    entry.delay_start_time,
-                    entry.delay_end_time,
-                  );
+                : calculateDuration(entry.delay_start_time, entry.delay_end_time);
 
               return (
                 <div
@@ -588,10 +541,7 @@ export function DelayEntriesForm({
                         <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
                           Category <span className="text-accent-red">*</span>
                           <span title="Select the type of delay: External, Production, or Engineering">
-                            <HelpCircle
-                              size={12}
-                              className="text-[var(--text-muted)]"
-                            />
+                            <HelpCircle size={12} className="text-[var(--text-muted)]" />
                           </span>
                         </label>
                         <select
@@ -599,11 +549,7 @@ export function DelayEntriesForm({
                           title="Category"
                           value={entry.delay_category_id}
                           onChange={(e) =>
-                            updateDelayEntry(
-                              index,
-                              "delay_category_id",
-                              e.target.value,
-                            )
+                            updateDelayEntry(index, "delay_category_id", e.target.value)
                           }
                           disabled={readOnly || entry.status === "committed"}
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -622,10 +568,7 @@ export function DelayEntriesForm({
                         <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
                           Start Time <span className="text-accent-red">*</span>
                           <span title="When the delay began. Displayed in local time, stored in UTC.">
-                            <HelpCircle
-                              size={12}
-                              className="text-[var(--text-muted)]"
-                            />
+                            <HelpCircle size={12} className="text-[var(--text-muted)]" />
                           </span>
                         </label>
                         <input
@@ -641,9 +584,7 @@ export function DelayEntriesForm({
                             )
                           }
                           disabled={
-                            readOnly ||
-                            entry.status === "committed" ||
-                            entry.is_manual_override
+                            readOnly || entry.status === "committed" || entry.is_manual_override
                           }
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
                         />
@@ -654,10 +595,7 @@ export function DelayEntriesForm({
                         <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
                           End Time <span className="text-accent-red">*</span>
                           <span title="When the delay ended. Duration is auto-calculated from start time.">
-                            <HelpCircle
-                              size={12}
-                              className="text-[var(--text-muted)]"
-                            />
+                            <HelpCircle size={12} className="text-[var(--text-muted)]" />
                           </span>
                         </label>
                         <input
@@ -673,9 +611,7 @@ export function DelayEntriesForm({
                             )
                           }
                           disabled={
-                            readOnly ||
-                            entry.status === "committed" ||
-                            entry.is_manual_override
+                            readOnly || entry.status === "committed" || entry.is_manual_override
                           }
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
                         />
@@ -699,20 +635,13 @@ export function DelayEntriesForm({
                                 type="checkbox"
                                 checked={entry.is_manual_override}
                                 onChange={(e) =>
-                                  updateDelayEntry(
-                                    index,
-                                    "is_manual_override",
-                                    e.target.checked,
-                                  )
+                                  updateDelayEntry(index, "is_manual_override", e.target.checked)
                                 }
                                 className="w-4 h-4 rounded border-[var(--border-default)]"
                               />
                               <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
                                 Override
-                                <HelpCircle
-                                  size={10}
-                                  className="text-[var(--text-muted)]"
-                                />
+                                <HelpCircle size={10} className="text-[var(--text-muted)]" />
                               </span>
                             </label>
                           )}
@@ -734,36 +663,33 @@ export function DelayEntriesForm({
                   </div>
 
                   {/* Manual Override Duration */}
-                  {entry.is_manual_override &&
-                    !readOnly &&
-                    entry.status === "draft" && (
-                      <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs block">
-                          Manual Duration (hours){" "}
-                          <span className="text-accent-red">*</span>
-                        </label>
-                        <input
-                          id={`delay-manual-duration-${index}`}
-                          title="Manual Duration"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max="12"
-                          value={entry.manual_duration_hours || ""}
-                          onChange={(e) =>
-                            updateDelayEntry(
-                              index,
-                              "manual_duration_hours",
-                              parseFloat(e.target.value) || null,
-                            )
-                          }
-                          className="w-full md:w-48 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
-                        />
-                        <p className="text-[var(--text-muted)] text-xs">
-                          Manual entry flagged for audit trail
-                        </p>
-                      </div>
-                    )}
+                  {entry.is_manual_override && !readOnly && entry.status === "draft" && (
+                    <div className="space-y-1">
+                      <label className="text-[var(--text-secondary)] text-xs block">
+                        Manual Duration (hours) <span className="text-accent-red">*</span>
+                      </label>
+                      <input
+                        id={`delay-manual-duration-${index}`}
+                        title="Manual Duration"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="12"
+                        value={entry.manual_duration_hours || ""}
+                        onChange={(e) =>
+                          updateDelayEntry(
+                            index,
+                            "manual_duration_hours",
+                            parseFloat(e.target.value) || null,
+                          )
+                        }
+                        className="w-full md:w-48 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
+                      />
+                      <p className="text-[var(--text-muted)] text-xs">
+                        Manual entry flagged for audit trail
+                      </p>
+                    </div>
+                  )}
 
                   {/* Description */}
                   <div className="space-y-1">
@@ -772,9 +698,7 @@ export function DelayEntriesForm({
                     </label>
                     <textarea
                       value={entry.description || ""}
-                      onChange={(e) =>
-                        updateDelayEntry(index, "description", e.target.value)
-                      }
+                      onChange={(e) => updateDelayEntry(index, "description", e.target.value)}
                       disabled={readOnly || entry.status === "committed"}
                       rows={2}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed resize-none"
@@ -804,35 +728,33 @@ export function DelayEntriesForm({
         )}
 
         {/* Save Button */}
-        {!readOnly &&
-          delayEntries.length > 0 &&
-          delayEntries.some((d) => d.status === "draft") && (
-            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
-              <button
-                type="button"
-                onClick={saveDelayEntries}
-                disabled={isSubmitting}
-                className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
-              >
-                {isSubmitting ? "Saving..." : "Save Delays"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCommitClick}
-                disabled={isCommitting}
-                className="bg-[var(--accent-green)] hover:bg-[var(--accent-green)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 min-w-[140px]"
-              >
-                {isCommitting ? (
-                  "Committing..."
-                ) : (
-                  <>
-                    <CheckCircle size={16} />
-                    Submit Delays
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+        {!readOnly && delayEntries.length > 0 && delayEntries.some((d) => d.status === "draft") && (
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+            <button
+              type="button"
+              onClick={saveDelayEntries}
+              disabled={isSubmitting}
+              className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
+            >
+              {isSubmitting ? "Saving..." : "Save Delays"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCommitClick}
+              disabled={isCommitting}
+              className="bg-[var(--accent-green)] hover:bg-[var(--accent-green)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 min-w-[140px]"
+            >
+              {isCommitting ? (
+                "Committing..."
+              ) : (
+                <>
+                  <CheckCircle size={16} />
+                  Submit Delays
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Confirmation Dialog */}
         {showConfirmDialog && (
@@ -840,18 +762,13 @@ export function DelayEntriesForm({
             <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
               <div className="flex items-start gap-3 mb-4">
                 {confirmAction === "commit" ? (
-                  <CheckCircle
-                    className="text-[var(--accent-green)]"
-                    size={24}
-                  />
+                  <CheckCircle className="text-[var(--accent-green)]" size={24} />
                 ) : (
                   <Trash2 className="text-accent-red" size={24} />
                 )}
                 <div>
                   <h3 className="text-lg font-medium text-[var(--text-heading)]">
-                    {confirmAction === "commit"
-                      ? "Commit Delay Entries"
-                      : "Remove Delay Entry"}
+                    {confirmAction === "commit" ? "Commit Delay Entries" : "Remove Delay Entry"}
                   </h3>
                   <p className="text-[var(--text-secondary)] text-sm mt-1">
                     {confirmAction === "commit"
@@ -877,10 +794,7 @@ export function DelayEntriesForm({
                   onClick={() => {
                     if (confirmAction === "commit") {
                       commitDelays();
-                    } else if (
-                      confirmAction === "remove" &&
-                      confirmIndex !== null
-                    ) {
+                    } else if (confirmAction === "remove" && confirmIndex !== null) {
                       removeDelayEntry(confirmIndex);
                     }
                     setShowConfirmDialog(false);

@@ -71,22 +71,15 @@ export function FuxaFrame({ dashboardId, height = "600px" }: FuxaFrameProps) {
   const [loading, setLoading] = useState(true);
 
   const baseUrl = process.env.NEXT_PUBLIC_FUXA_URL ?? "http://localhost:1881";
-  const src = dashboardId
-    ? `${baseUrl}/dashboard/${dashboardId}`
-    : `${baseUrl}/`;
+  const src = dashboardId ? `${baseUrl}/dashboard/${dashboardId}` : `${baseUrl}/`;
 
   return (
     <div className="relative rounded-xl overflow-hidden border border-[var(--border-emphasis)]">
       {loading && (
-        <div
-          className="flex items-center justify-center bg-[var(--bg-primary)]"
-          style={{ height }}
-        >
+        <div className="flex items-center justify-center bg-[var(--bg-primary)]" style={{ height }}>
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 border-2 border-[#3ecf8e] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-[var(--text-secondary)]">
-              Loading SCADA…
-            </p>
+            <p className="text-xs text-[var(--text-secondary)]">Loading SCADA…</p>
           </div>
         </div>
       )}

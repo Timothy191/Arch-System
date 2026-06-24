@@ -28,7 +28,8 @@ export default {
       packages: ["**"],
       dependencies: ["react", "react-dom", "@types/react", "@types/react-dom"],
       isIgnored: true,
-      label: "Ignore React 19 dependencies to allow peerDependencies to be ^19 while others are catalog:react19",
+      label:
+        "Ignore React 19 dependencies to allow peerDependencies to be ^19 while others are catalog:react19",
     },
     {
       packages: ["**"],

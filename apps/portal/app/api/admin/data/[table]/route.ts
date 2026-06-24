@@ -188,11 +188,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import {
-  RateLimiter,
-  RedisStore,
-  FixedWindowStrategy,
-} from "@repo/rate-limiter";
+import { RateLimiter, RedisStore, FixedWindowStrategy } from "@repo/rate-limiter";
 import { getRedisClient } from "@repo/redis";
 
 const OPERATIONAL_TABLES = new Set([
@@ -304,10 +300,7 @@ async function handleGetRequest(
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json(
-      { error: "Database query failed" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Database query failed" }, { status: 500 });
   }
 
   return NextResponse.json({ data, count, limit, offset });
@@ -350,8 +343,7 @@ async function handlePutRequest(
       if (!rateLimitResult.allowed) {
         return NextResponse.json(
           {
-            error:
-              "Too many status updates for this machine. Please try again later.",
+            error: "Too many status updates for this machine. Please try again later.",
             retryAfter: rateLimitResult.retryAfter,
           },
           { status: 429 },
@@ -362,11 +354,7 @@ async function handlePutRequest(
 
   const serviceRole = createServiceRoleClient();
 
-  const { data: before } = await serviceRole
-    .from(table)
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data: before } = await serviceRole.from(table).select("*").eq("id", id).single();
 
   const { error } = await serviceRole.from(table).update(data).eq("id", id);
 
@@ -411,19 +399,12 @@ async function handleDeleteRequest(
   const { searchParams } = request.nextUrl;
   const id = searchParams.get("id");
   if (!id) {
-    return NextResponse.json(
-      { error: "Missing id query parameter" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Missing id query parameter" }, { status: 400 });
   }
 
   const serviceRole = createServiceRoleClient();
 
-  const { data: before } = await serviceRole
-    .from(table)
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data: before } = await serviceRole.from(table).select("*").eq("id", id).single();
 
   const { error } = await serviceRole.from(table).delete().eq("id", id);
 

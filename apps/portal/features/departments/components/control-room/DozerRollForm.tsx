@@ -23,11 +23,7 @@ interface DozerRollFormProps {
   today: string;
 }
 
-export function DozerRollForm({
-  departmentId,
-  dozers,
-  today,
-}: DozerRollFormProps) {
+export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProps) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
 
@@ -38,22 +34,12 @@ export function DozerRollForm({
   const [bladePasses, setBladePasses] = useState("");
   const [pushCount, setPushCount] = useState("");
   const [hoursOperated, setHoursOperated] = useState("");
-  const [shiftType, setShiftType] = useState<"day" | "night">(
-    getCurrentShift(),
-  );
+  const [shiftType, setShiftType] = useState<"day" | "night">(getCurrentShift());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isDirty =
-    isOpen &&
-    !!(
-      machineId ||
-      lengthM ||
-      widthM ||
-      bladePasses ||
-      pushCount ||
-      hoursOperated
-    );
+    isOpen && !!(machineId || lengthM || widthM || bladePasses || pushCount || hoursOperated);
 
   useUnsavedChangesWarning(isDirty);
 
@@ -67,10 +53,7 @@ export function DozerRollForm({
     );
   }
 
-  const selectedDozer = useMemo(
-    () => dozers.find((d) => d.id === machineId),
-    [machineId, dozers],
-  );
+  const selectedDozer = useMemo(() => dozers.find((d) => d.id === machineId), [machineId, dozers]);
 
   const siteName = selectedDozer?.sites?.[0]?.name ?? "—";
 
@@ -143,9 +126,7 @@ export function DozerRollForm({
       reset();
       router.refresh();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to save roll. Try again.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to save roll. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -187,9 +168,7 @@ export function DozerRollForm({
 
             {/* Display operational date (read‑only) */}
             <div className="bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2 flex items-center justify-between text-sm">
-              <span className="text-[var(--text-secondary)] font-medium">
-                Operational Date:
-              </span>
+              <span className="text-[var(--text-secondary)] font-medium">Operational Date:</span>
               <span className="font-mono font-semibold text-[var(--accent-blue)]">
                 {today} (Africa/Johannesburg)
               </span>
@@ -221,9 +200,7 @@ export function DozerRollForm({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">
-                  Site
-                </label>
+                <label className="block text-sm text-[var(--text-secondary)]">Site</label>
                 <div className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm">
                   {siteName}
                 </div>
@@ -232,17 +209,13 @@ export function DozerRollForm({
 
             {/* Shift */}
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">
-                Shift
-              </label>
+              <label className="block text-sm text-[var(--text-secondary)]">Shift</label>
               <ShiftToggle value={shiftType} onChange={setShiftType} />
             </div>
 
             {/* Calculation: Length x Width = Area */}
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">
-                Area Calculation
-              </label>
+              <label className="block text-sm text-[var(--text-secondary)]">Area Calculation</label>
               <div className="flex items-center gap-3">
                 <div className="flex-1 space-y-1">
                   <input
@@ -279,9 +252,7 @@ export function DozerRollForm({
             {/* Roll Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">
-                  Blade Passes
-                </label>
+                <label className="block text-sm text-[var(--text-secondary)]">Blade Passes</label>
                 <input
                   type="number"
                   min={0}
@@ -293,9 +264,7 @@ export function DozerRollForm({
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">
-                  Push Count
-                </label>
+                <label className="block text-sm text-[var(--text-secondary)]">Push Count</label>
                 <input
                   type="number"
                   min={0}
@@ -307,9 +276,7 @@ export function DozerRollForm({
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm text-[var(--text-secondary)]">
-                  Hours Operated
-                </label>
+                <label className="block text-sm text-[var(--text-secondary)]">Hours Operated</label>
                 <input
                   type="number"
                   min={0}
@@ -324,11 +291,7 @@ export function DozerRollForm({
             </div>
 
             {error && (
-              <p
-                className="text-accent-red text-sm"
-                role="alert"
-                aria-live="assertive"
-              >
+              <p className="text-accent-red text-sm" role="alert" aria-live="assertive">
                 {error}
               </p>
             )}

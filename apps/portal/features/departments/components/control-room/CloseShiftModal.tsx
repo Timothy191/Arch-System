@@ -3,14 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { useRouter } from "next/navigation";
-import {
-  X,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  UserCheck,
-  Lock,
-} from "lucide-react";
+import { X, AlertCircle, CheckCircle, Loader2, UserCheck, Lock } from "lucide-react";
 import { verifyPin, closeShift } from "~/lib/shift-closeout";
 
 interface CloseShiftModalProps {
@@ -50,14 +43,7 @@ export function CloseShiftModal({
   const validate = useCallback(async () => {
     setState({ type: "validating" });
     try {
-      const result = await closeShift(
-        departmentId,
-        date,
-        shiftType,
-        "",
-        "",
-        true,
-      );
+      const result = await closeShift(departmentId, date, shiftType, "", "", true);
       if (result.errors && result.errors.length > 0) {
         setState({ type: "has_errors", errors: result.errors });
       } else {
@@ -144,9 +130,7 @@ export function CloseShiftModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <GlassCard className="w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">
-            Close Shift
-          </h3>
+          <h3 className="text-lg font-medium text-[var(--text-heading)]">Close Shift</h3>
           <button
             type="button"
             onClick={onClose}
@@ -160,9 +144,7 @@ export function CloseShiftModal({
         {state.type === "validating" && (
           <div className="flex flex-col items-center py-8 gap-3">
             <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
-            <p className="text-[var(--text-muted)] text-sm">
-              Validating shift data...
-            </p>
+            <p className="text-[var(--text-muted)] text-sm">Validating shift data...</p>
           </div>
         )}
 
@@ -176,10 +158,7 @@ export function CloseShiftModal({
                 </p>
                 <ul className="space-y-1">
                   {state.errors.map((err, i) => (
-                    <li
-                      key={i}
-                      className="text-accent-red/80 text-xs flex items-start gap-2"
-                    >
+                    <li key={i} className="text-accent-red/80 text-xs flex items-start gap-2">
                       <span className="mt-1.5 w-1 h-1 rounded-full bg-accent-red shrink-0" />
                       {err}
                     </li>
@@ -207,9 +186,7 @@ export function CloseShiftModal({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">
-                Employee Code
-              </label>
+              <label className="block text-sm text-[var(--text-secondary)]">Employee Code</label>
               <input
                 type="text"
                 value={employeeCode}
@@ -220,9 +197,7 @@ export function CloseShiftModal({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm text-[var(--text-secondary)]">
-                PIN
-              </label>
+              <label className="block text-sm text-[var(--text-secondary)]">PIN</label>
               <input
                 type="password"
                 value={pin}
@@ -258,12 +233,8 @@ export function CloseShiftModal({
             <div className="flex items-center gap-3 p-3 bg-accent-green/10 border border-accent-green/20 rounded-lg">
               <UserCheck className="w-5 h-5 text-accent-green shrink-0" />
               <div>
-                <p className="text-accent-green text-sm font-medium">
-                  Approved by
-                </p>
-                <p className="text-accent-green text-sm">
-                  {state.employeeName}
-                </p>
+                <p className="text-accent-green text-sm font-medium">Approved by</p>
+                <p className="text-accent-green text-sm">{state.employeeName}</p>
               </div>
             </div>
 
@@ -296,9 +267,7 @@ export function CloseShiftModal({
         {state.type === "success" && (
           <div className="flex flex-col items-center py-8 gap-3">
             <CheckCircle className="w-12 h-12 text-accent-green" />
-            <p className="text-accent-green font-medium text-lg">
-              Shift closed successfully
-            </p>
+            <p className="text-accent-green font-medium text-lg">Shift closed successfully</p>
           </div>
         )}
 

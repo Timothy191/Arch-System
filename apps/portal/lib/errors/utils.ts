@@ -29,10 +29,7 @@ export function extractErrorMessage(
 /**
  * Standardized API error handler that extracts the message and shows a toast.
  */
-export function handleApiError(
-  error: unknown,
-  fallbackMessage?: string,
-): string {
+export function handleApiError(error: unknown, fallbackMessage?: string): string {
   const message = extractErrorMessage(error, fallbackMessage);
   toast.error(message);
   return message;

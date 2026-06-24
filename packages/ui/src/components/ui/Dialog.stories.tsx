@@ -7,7 +7,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from "./dialog";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -40,24 +39,13 @@ export const Default: Story = {
             <label htmlFor="name" className="text-right text-sm font-medium">
               Name
             </label>
-            <Input
-              id="name"
-              defaultValue="Arch Operator"
-              className="col-span-3"
-            />
+            <Input id="name" defaultValue="Arch Operator" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label
-              htmlFor="username"
-              className="text-right text-sm font-medium"
-            >
+            <label htmlFor="username" className="text-right text-sm font-medium">
               Username
             </label>
-            <Input
-              id="username"
-              defaultValue="@arch_admin"
-              className="col-span-3"
-            />
+            <Input id="username" defaultValue="@arch_admin" className="col-span-3" />
           </div>
         </div>
         <DialogFooter>

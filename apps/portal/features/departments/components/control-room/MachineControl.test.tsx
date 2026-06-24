@@ -11,13 +11,7 @@ jest.mock("lucide-react", () => ({
 }));
 
 jest.mock("@repo/ui/GlassCard", () => ({
-  GlassCard: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
     </div>
@@ -42,15 +36,9 @@ describe("MachineControl", () => {
 
     expect(screen.getByText("Operational Parameters")).toBeInTheDocument();
 
-    const rpmInput = screen.getByLabelText(
-      "Target Rotation Speed",
-    ) as HTMLInputElement;
-    const powerInput = screen.getByLabelText(
-      "Power Allocation",
-    ) as HTMLInputElement;
-    const pressureInput = screen.getByLabelText(
-      "Hydraulic Pressure",
-    ) as HTMLInputElement;
+    const rpmInput = screen.getByLabelText("Target Rotation Speed") as HTMLInputElement;
+    const powerInput = screen.getByLabelText("Power Allocation") as HTMLInputElement;
+    const pressureInput = screen.getByLabelText("Hydraulic Pressure") as HTMLInputElement;
 
     expect(rpmInput.value).toBe("1250");
     expect(powerInput.value).toBe("85");
@@ -60,15 +48,9 @@ describe("MachineControl", () => {
   it("should allow editing parameter values", () => {
     render(<MachineControl />);
 
-    const rpmInput = screen.getByLabelText(
-      "Target Rotation Speed",
-    ) as HTMLInputElement;
-    const powerInput = screen.getByLabelText(
-      "Power Allocation",
-    ) as HTMLInputElement;
-    const pressureInput = screen.getByLabelText(
-      "Hydraulic Pressure",
-    ) as HTMLInputElement;
+    const rpmInput = screen.getByLabelText("Target Rotation Speed") as HTMLInputElement;
+    const powerInput = screen.getByLabelText("Power Allocation") as HTMLInputElement;
+    const pressureInput = screen.getByLabelText("Hydraulic Pressure") as HTMLInputElement;
 
     fireEvent.change(rpmInput, { target: { value: "1500" } });
     fireEvent.change(powerInput, { target: { value: "90" } });
@@ -89,17 +71,13 @@ describe("MachineControl", () => {
     });
     fireEvent.click(applyBtn);
 
-    expect(
-      screen.getByText(/Applied at \d{1,2}:\d{2}:\d{2}/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Applied at \d{1,2}:\d{2}:\d{2}/)).toBeInTheDocument();
   });
 
   it("should reset inputs to defaults and clear applied timestamp when Reset Defaults is clicked", () => {
     render(<MachineControl />);
 
-    const rpmInput = screen.getByLabelText(
-      "Target Rotation Speed",
-    ) as HTMLInputElement;
+    const rpmInput = screen.getByLabelText("Target Rotation Speed") as HTMLInputElement;
     fireEvent.change(rpmInput, { target: { value: "2000" } });
 
     const applyBtn = screen.getByRole("button", {

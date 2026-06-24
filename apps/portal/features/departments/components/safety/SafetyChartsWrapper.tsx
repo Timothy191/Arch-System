@@ -8,8 +8,6 @@ export const SafetyCharts: ComponentType<SafetyChartsProps> = dynamic(
   () => import("./SafetyCharts").then((m) => m.SafetyCharts),
   {
     ssr: false,
-    loading: () => (
-      <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />
-    ),
+    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
   },
 );

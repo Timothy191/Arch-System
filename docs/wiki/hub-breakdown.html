@@ -24,23 +24,19 @@
         --mac-yellow: #ffbd2e;
         --mac-green: #27c93f;
         --shadow-card:
-          0 2px 12px -2px rgba(0, 0, 0, 0.1),
-          0 1px 0 0 rgba(255, 255, 255, 0.95),
+          0 2px 12px -2px rgba(0, 0, 0, 0.1), 0 1px 0 0 rgba(255, 255, 255, 0.95),
           inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
         --shadow-window:
-          0 20px 60px -10px rgba(0, 0, 0, 0.2),
-          0 8px 24px -8px rgba(0, 0, 0, 0.12),
+          0 20px 60px -10px rgba(0, 0, 0, 0.2), 0 8px 24px -8px rgba(0, 0, 0, 0.12),
           inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
         --shadow-diffusion-sm:
           0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
         --shadow-diffusion-md:
           0 4px 16px -4px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
         --shadow-diffusion-lg:
-          0 8px 32px -8px rgba(0, 0, 0, 0.14),
-          0 4px 8px -4px rgba(0, 0, 0, 0.08);
+          0 8px 32px -8px rgba(0, 0, 0, 0.14), 0 4px 8px -4px rgba(0, 0, 0, 0.08);
         --shadow-diffusion-xl:
-          0 16px 48px -12px rgba(0, 0, 0, 0.18),
-          0 8px 16px -8px rgba(0, 0, 0, 0.1);
+          0 16px 48px -12px rgba(0, 0, 0, 0.18), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
       }
 
       *,
@@ -52,9 +48,7 @@
       }
 
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-          sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
         background: var(--arch0);
         color: var(--arch11);
         font-size: 14px;
@@ -826,16 +820,14 @@
         <button class="top-bar-item">View</button>
         <button class="top-bar-item">Help</button>
       </div>
-      <div class="top-bar-right">
-        Hub Page — Theme &amp; Component Breakdown
-      </div>
+      <div class="top-bar-right">Hub Page — Theme &amp; Component Breakdown</div>
     </div>
 
     <div class="page">
       <p class="page-title">Hub Page Breakdown</p>
       <p class="page-subtitle">
-        Annotated map of every file, component, theme token, and data source
-        that renders <code>app/(hub)/page.tsx</code>
+        Annotated map of every file, component, theme token, and data source that renders
+        <code>app/(hub)/page.tsx</code>
       </p>
 
       <nav class="nav-pills">
@@ -856,8 +848,8 @@
           Annotated Page Layer Diagram
         </p>
         <p class="section-sub">
-          Each coloured region represents a distinct render layer on the hub
-          page, from outermost shell to innermost data widget.
+          Each coloured region represents a distinct render layer on the hub page, from outermost
+          shell to innermost data widget.
         </p>
 
         <div class="glass">
@@ -866,26 +858,14 @@
             <div class="diagram-bar bar-layout">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(0, 122, 255, 0.1); color: #007aff"
-                  >
+                  <div class="icon" style="background: rgba(0, 122, 255, 0.1); color: #007aff">
                     🗂
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">
                       Layout Shell
                     </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       app/(hub)/layout.tsx
                     </div>
                   </div>
@@ -894,30 +874,26 @@
                 <div class="sub-bars" style="margin-top: 10px">
                   <div class="sub-bar">
                     MacMenuBar (fixed top-0) —
-                    <span>@repo/ui/MacMenuBar</span> — bg-white/80
-                    backdrop-blur-2xl
+                    <span>@repo/ui/MacMenuBar</span> — bg-white/80 backdrop-blur-2xl
                   </div>
                   <div class="sub-bar">
                     WeatherWidget variant="header" —
                     <span>components/weather/WeatherWidget.tsx</span>
                   </div>
                   <div class="sub-bar">
-                    UserNav dropdown — <span>components/nav/UserNav.tsx</span> —
-                    shadcn DropdownMenu
+                    UserNav dropdown — <span>components/nav/UserNav.tsx</span> — shadcn DropdownMenu
                   </div>
                   <div class="sub-bar">
-                    Dock (fixed bottom-6, md+) — <span>@repo/ui/dock</span> —
-                    bg-white/60 backdrop-blur-2xl shadow-diffusion-lg
+                    Dock (fixed bottom-6, md+) — <span>@repo/ui/dock</span> — bg-white/60
+                    backdrop-blur-2xl shadow-diffusion-lg
                   </div>
                   <div class="sub-bar">
                     AIAssistant floating bubble —
-                    <span>components/ai/AIAssistant.tsx</span> — fixed bottom-6
-                    right-6
+                    <span>components/ai/AIAssistant.tsx</span> — fixed bottom-6 right-6
                   </div>
                   <div class="sub-bar">
                     BottomNav (mobile only, hidden md+) —
-                    <span>components/nav/BottomNav.tsx</span> — bg-white/90
-                    backdrop-blur-xl
+                    <span>components/nav/BottomNav.tsx</span> — bg-white/90 backdrop-blur-xl
                   </div>
                 </div>
               </div>
@@ -927,34 +903,18 @@
               </div>
             </div>
 
-            <div style="text-align: center; color: #a1a1a6; font-size: 18px">
-              ↓ children
-            </div>
+            <div style="text-align: center; color: #a1a1a6; font-size: 18px">↓ children</div>
 
             <!-- Hero card -->
             <div class="diagram-bar bar-hero">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(52, 199, 89, 0.1); color: #34c759"
-                  >
+                  <div class="icon" style="background: rgba(52, 199, 89, 0.1); color: #34c759">
                     🖼
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
-                      ① Hero Card
-                    </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">① Hero Card</div>
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       macOS frosted glass window
                     </div>
                   </div>
@@ -962,28 +922,23 @@
                 </div>
                 <div class="sub-bars" style="margin-top: 10px">
                   <div class="sub-bar">
-                    rounded-2xl bg-white/70 backdrop-blur-2xl shadow-window
-                    border-black/[0.08]
+                    rounded-2xl bg-white/70 backdrop-blur-2xl shadow-window border-black/[0.08]
                   </div>
                   <div class="sub-bar">
-                    Background: /arch_logo_background.png @ opacity:0.12 (inline
-                    style)
+                    Background: /arch_logo_background.png @ opacity:0.12 (inline style)
                   </div>
                   <div class="sub-bar">
-                    Gradient overlay: bg-gradient-to-br from-white/60
-                    via-white/30 to-accent-blue/5
+                    Gradient overlay: bg-gradient-to-br from-white/60 via-white/30 to-accent-blue/5
                   </div>
                   <div class="sub-bar">
-                    "Sector-01 Active" badge — accent-green pill with
-                    animate-pulse dot
+                    "Sector-01 Active" badge — accent-green pill with animate-pulse dot
                   </div>
                   <div class="sub-bar">
-                    "Launch Monitor" CTA — bg-accent-blue hover:bg-[#0071e3]
-                    shadow-diffusion-sm
+                    "Launch Monitor" CTA — bg-accent-blue hover:bg-[#0071e3] shadow-diffusion-sm
                   </div>
                   <div class="sub-bar">
-                    "System Guidelines" secondary — bg-white/70
-                    hover:bg-white/90 border-black/[0.10]
+                    "System Guidelines" secondary — bg-white/70 hover:bg-white/90
+                    border-black/[0.10]
                   </div>
                   <div class="sub-bar">
                     UrgencyBar —
@@ -1001,26 +956,14 @@
             <div class="diagram-bar bar-urgency">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(255, 59, 48, 0.1); color: #ff3b30"
-                  >
+                  <div class="icon" style="background: rgba(255, 59, 48, 0.1); color: #ff3b30">
                     🚨
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">
                       ② Operational Urgency
                     </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       Live counts from Supabase read-replica
                     </div>
                   </div>
@@ -1028,16 +971,13 @@
                 </div>
                 <div class="sub-bars" style="margin-top: 10px">
                   <div class="sub-bar">
-                    All OK state: bg-emerald-500/5 border-emerald-500/10 — green
-                    pulse dot
+                    All OK state: bg-emerald-500/5 border-emerald-500/10 — green pulse dot
                   </div>
                   <div class="sub-bar">
-                    Incidents link → /safety/daily-log — text-blue-400 —
-                    AnimatedNumber
+                    Incidents link → /safety/daily-log — text-blue-400 — AnimatedNumber
                   </div>
                   <div class="sub-bar">
-                    Breakdowns link → /engineering/breakdowns — text-red-400 —
-                    AnimatedNumber
+                    Breakdowns link → /engineering/breakdowns — text-red-400 — AnimatedNumber
                   </div>
                   <div class="sub-bar">
                     Offline machines — text-[var(--text-muted)] — AnimatedNumber
@@ -1056,26 +996,14 @@
             <div class="diagram-bar bar-depts">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(255, 159, 10, 0.1); color: #007aff"
-                  >
+                  <div class="icon" style="background: rgba(255, 159, 10, 0.1); color: #007aff">
                     🏭
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">
                       ③ Core Operational Modules
                     </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       Horizontal scroll of DepartmentCard — filtered by
                       employee.accessible_departments
                     </div>
@@ -1084,34 +1012,26 @@
                 </div>
                 <div class="sub-bars" style="margin-top: 10px">
                   <div class="sub-bar">
-                    Container: overflow-x-auto snap-x -mx-4 px-4 sm:-mx-8
-                    sm:px-8
+                    Container: overflow-x-auto snap-x -mx-4 px-4 sm:-mx-8 sm:px-8
+                  </div>
+                  <div class="sub-bar">Each card: w-[280px]→w-[360px] shrink-0 snap-start</div>
+                  <div class="sub-bar">
+                    DepartmentCard (status=active): SpotlightCard — radial gradient on hover —
+                    framer-motion stagger
                   </div>
                   <div class="sub-bar">
-                    Each card: w-[280px]→w-[360px] shrink-0 snap-start
+                    DepartmentCard (status=maintenance): GlowBorderCard colorPreset="aurora" — conic
+                    gradient border animation
                   </div>
                   <div class="sub-bar">
-                    DepartmentCard (status=active): SpotlightCard — radial
-                    gradient on hover — framer-motion stagger
+                    DepartmentCard (status=alert): GlowBorderCard colorPreset="sunset"
                   </div>
                   <div class="sub-bar">
-                    DepartmentCard (status=maintenance): GlowBorderCard
-                    colorPreset="aurora" — conic gradient border animation
+                    Card icon: dept color badge (bg-{color}-500/5 border-{color}-500/20) — scale on
+                    hover
                   </div>
-                  <div class="sub-bar">
-                    DepartmentCard (status=alert): GlowBorderCard
-                    colorPreset="sunset"
-                  </div>
-                  <div class="sub-bar">
-                    Card icon: dept color badge (bg-{color}-500/5
-                    border-{color}-500/20) — scale on hover
-                  </div>
-                  <div class="sub-bar">
-                    Status badge: animate-pulse dot — emerald/blue/red
-                  </div>
-                  <div class="sub-bar">
-                    Stats row: text-lg font-mono with dept accent color
-                  </div>
+                  <div class="sub-bar">Status badge: animate-pulse dot — emerald/blue/red</div>
+                  <div class="sub-bar">Stats row: text-lg font-mono with dept accent color</div>
                 </div>
               </div>
               <div class="diagram-bar-meta">
@@ -1126,53 +1046,36 @@
             <div class="diagram-bar bar-tools">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(139, 92, 246, 0.1); color: #7c3aed"
-                  >
+                  <div class="icon" style="background: rgba(139, 92, 246, 0.1); color: #7c3aed">
                     🔧
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">
                       ④ Daily Workflow &amp; Efficiency Tools
                     </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       Horizontal scroll of ToolCard — PRODUCTIVITY_TOOLS[]
                     </div>
                   </div>
                   <span class="section-badge violet">Client</span>
                 </div>
                 <div class="sub-bars" style="margin-top: 10px">
+                  <div class="sub-bar">Each card: w-[240px]→w-[280px] shrink-0 snap-start</div>
                   <div class="sub-bar">
-                    Each card: w-[240px]→w-[280px] shrink-0 snap-start
+                    ToolCard: SpotlightCard + arcane gradient border (opacity-0 →
+                    group-hover:opacity-100)
                   </div>
                   <div class="sub-bar">
-                    ToolCard: SpotlightCard + arcane gradient border (opacity-0
-                    → group-hover:opacity-100)
-                  </div>
-                  <div class="sub-bar">
-                    Arcane border: absolute -inset-[1px] bg-gradient-to-r
-                    from-{color}-500/50 to-transparent blur-[1px]
+                    Arcane border: absolute -inset-[1px] bg-gradient-to-r from-{color}-500/50
+                    to-transparent blur-[1px]
                   </div>
                   <div class="sub-bar">
                     Hover: ArrowUpRight icon translates + text → accent-cyan
                   </div>
                   <div class="sub-bar">
-                    Inner shimmer: bg-gradient-to-br from-white/[0.02] —
-                    group-hover:opacity-100
+                    Inner shimmer: bg-gradient-to-br from-white/[0.02] — group-hover:opacity-100
                   </div>
-                  <div class="sub-bar">
-                    useNavigationState hook: tracks hovered tool name
-                  </div>
+                  <div class="sub-bar">useNavigationState hook: tracks hovered tool name</div>
                 </div>
               </div>
               <div class="diagram-bar-meta">
@@ -1186,26 +1089,14 @@
             <div class="diagram-bar bar-trend">
               <div style="flex: 1">
                 <div class="diagram-bar-label">
-                  <div
-                    class="icon"
-                    style="background: rgba(6, 182, 212, 0.1); color: #0891b2"
-                  >
+                  <div class="icon" style="background: rgba(6, 182, 212, 0.1); color: #0891b2">
                     📈
                   </div>
                   <div>
-                    <div
-                      style="color: #1d1d1f; font-size: 13px; font-weight: 700"
-                    >
+                    <div style="color: #1d1d1f; font-size: 13px; font-weight: 700">
                       ⑤ Operational Ingestion Telemetry
                     </div>
-                    <div
-                      style="
-                        color: #6e6e73;
-                        font-size: 11px;
-                        font-weight: 400;
-                        margin-top: 1px;
-                      "
-                    >
+                    <div style="color: #6e6e73; font-size: 11px; font-weight: 400; margin-top: 1px">
                       ProductionTrend inside glass wrapper
                     </div>
                   </div>
@@ -1213,12 +1104,12 @@
                 </div>
                 <div class="sub-bars" style="margin-top: 10px">
                   <div class="sub-bar">
-                    Wrapper: bg-white/70 border-black/[0.08] rounded-2xl p-6
-                    backdrop-blur-xl shadow-card
+                    Wrapper: bg-white/70 border-black/[0.08] rounded-2xl p-6 backdrop-blur-xl
+                    shadow-card
                   </div>
                   <div class="sub-bar">
-                    ProductionTrend: @tremor/react AreaChart — Drilling +
-                    Production — curveType="monotone"
+                    ProductionTrend: @tremor/react AreaChart — Drilling + Production —
+                    curveType="monotone"
                   </div>
                   <div
                     class="sub-bar"
@@ -1227,8 +1118,7 @@
                       background: rgba(255, 59, 48, 0.04);
                     "
                   >
-                    ⚠ Data is static mock (hardcoded chartdata) — not wired to
-                    live DB yet
+                    ⚠ Data is static mock (hardcoded chartdata) — not wired to live DB yet
                   </div>
                   <div
                     class="sub-bar"
@@ -1237,8 +1127,8 @@
                       background: rgba(255, 59, 48, 0.04);
                     "
                   >
-                    ⚠ Card background: bg-[#171717] — dark theme hardcode
-                    (should be bg-[var(--bg-secondary)])
+                    ⚠ Card background: bg-[#171717] — dark theme hardcode (should be
+                    bg-[var(--bg-secondary)])
                   </div>
                 </div>
               </div>
@@ -1262,8 +1152,8 @@
           Component Registry
         </p>
         <p class="section-sub">
-          Every component in the hub render tree. Compliance = adherence to
-          macOS light theme tokens.
+          Every component in the hub render tree. Compliance = adherence to macOS light theme
+          tokens.
         </p>
 
         <div class="glass" style="overflow: hidden">
@@ -1279,8 +1169,7 @@
             <tbody>
               <tr>
                 <td>
-                  <span class="comp-name">MacMenuBar</span
-                  ><span class="comp-path">@repo/ui</span>
+                  <span class="comp-name">MacMenuBar</span><span class="comp-path">@repo/ui</span>
                 </td>
                 <td><code>packages/ui/src/components/MacMenuBar.tsx</code></td>
                 <td>
@@ -1294,8 +1183,7 @@
 
               <tr>
                 <td>
-                  <span class="comp-name">Dock</span
-                  ><span class="comp-path">@repo/ui/dock</span>
+                  <span class="comp-name">Dock</span><span class="comp-path">@repo/ui/dock</span>
                 </td>
                 <td><code>packages/ui/src/components/ui/dock.tsx</code></td>
                 <td>
@@ -1310,8 +1198,7 @@
 
               <tr>
                 <td>
-                  <span class="comp-name">GlassCard</span
-                  ><span class="comp-path">@repo/ui</span>
+                  <span class="comp-name">GlassCard</span><span class="comp-path">@repo/ui</span>
                 </td>
                 <td><code>packages/ui/src/components/GlassCard.tsx</code></td>
                 <td>
@@ -1320,9 +1207,7 @@
                   <span class="tag tag-green">shadow-card</span>
                   <span class="tag tag-green">border-black/[0.08]</span>
                   <span class="tag tag-blue">framer-motion</span>
-                  <span class="tag tag-gray"
-                    >variant=window includes MacTitleBar</span
-                  >
+                  <span class="tag tag-gray">variant=window includes MacTitleBar</span>
                 </td>
                 <td><span class="badge-ok">✓ Light</span></td>
               </tr>
@@ -1338,9 +1223,7 @@
                 <td>
                   <span class="tag tag-green">var(--bg-tertiary)/50</span>
                   <span class="tag tag-green">var(--border-default)</span>
-                  <span class="tag tag-blue"
-                    >framer-motion radial gradient</span
-                  >
+                  <span class="tag tag-blue">framer-motion radial gradient</span>
                 </td>
                 <td><span class="badge-ok">✓ Light</span></td>
               </tr>
@@ -1351,17 +1234,13 @@
                   ><span class="comp-path">@repo/ui</span>
                 </td>
                 <td>
-                  <code
-                    >packages/ui/src/components/ui/glow-border-card.tsx</code
-                  >
+                  <code>packages/ui/src/components/ui/glow-border-card.tsx</code>
                 </td>
                 <td>
                   <span class="tag tag-green">var(--bg-secondary)/60</span>
                   <span class="tag tag-green">backdrop-blur-md</span>
                   <span class="tag tag-blue">conic-gradient animation</span>
-                  <span class="tag tag-blue"
-                    >presets: nature/ocean/sunset/aurora/custom</span
-                  >
+                  <span class="tag tag-blue">presets: nature/ocean/sunset/aurora/custom</span>
                 </td>
                 <td><span class="badge-ok">✓ Light</span></td>
               </tr>
@@ -1372,9 +1251,7 @@
                   ><span class="comp-path">features/hub</span>
                 </td>
                 <td>
-                  <code
-                    >apps/portal/features/hub/components/DepartmentCard.tsx</code
-                  >
+                  <code>apps/portal/features/hub/components/DepartmentCard.tsx</code>
                 </td>
                 <td>
                   <span class="tag tag-green">SpotlightCard</span>
@@ -1389,8 +1266,7 @@
 
               <tr>
                 <td>
-                  <span class="comp-name">ToolCard</span
-                  ><span class="comp-path">features/hub</span>
+                  <span class="comp-name">ToolCard</span><span class="comp-path">features/hub</span>
                 </td>
                 <td>
                   <code>apps/portal/features/hub/components/ToolCard.tsx</code>
@@ -1411,9 +1287,7 @@
                   ><span class="comp-path">features/hub</span>
                 </td>
                 <td>
-                  <code
-                    >apps/portal/features/hub/components/UrgencyBar.tsx</code
-                  >
+                  <code>apps/portal/features/hub/components/UrgencyBar.tsx</code>
                 </td>
                 <td>
                   <span class="tag tag-green">var(--bg-tertiary)/40</span>
@@ -1430,9 +1304,7 @@
                   ><span class="comp-path">features/hub</span>
                 </td>
                 <td>
-                  <code
-                    >apps/portal/features/hub/components/ProductionTrend.tsx</code
-                  >
+                  <code>apps/portal/features/hub/components/ProductionTrend.tsx</code>
                 </td>
                 <td>
                   <span class="tag tag-cyan">@tremor/react AreaChart</span>
@@ -1453,14 +1325,10 @@
                   <code>apps/portal/components/weather/WeatherWidget.tsx</code>
                 </td>
                 <td>
-                  <span class="tag tag-green"
-                    >GlassCard (compact/full variants)</span
-                  >
+                  <span class="tag tag-green">GlassCard (compact/full variants)</span>
                   <span class="tag tag-red">header: bg-[#171717]</span>
                   <span class="tag tag-red">header: border-[#363636]</span>
-                  <span class="tag tag-red"
-                    >text-[#fafafa], text-[#898989]</span
-                  >
+                  <span class="tag tag-red">text-[#fafafa], text-[#898989]</span>
                 </td>
                 <td><span class="badge-err">✗ Dark</span></td>
               </tr>
@@ -1489,9 +1357,7 @@
                 <td><code>apps/portal/components/ai/AIAssistant.tsx</code></td>
                 <td>
                   <span class="tag tag-green">GlassCard shell</span>
-                  <span class="tag tag-red"
-                    >panel: bg-[#171717], [#242424]</span
-                  >
+                  <span class="tag tag-red">panel: bg-[#171717], [#242424]</span>
                   <span class="tag tag-red">borders: [#363636]</span>
                   <span class="tag tag-blue"
                     >FAB: bg-[#3ecf8e] (Supabase teal, not macOS blue)</span
@@ -1534,43 +1400,29 @@
         <p class="section-sub">
           All tokens defined in
           <code>packages/theme/src/css/variables.css</code> and registered in
-          <code>packages/theme/src/tailwind/preset.ts</code>. Source of truth:
-          macOS Ventura/Sonoma light palette.
+          <code>packages/theme/src/tailwind/preset.ts</code>. Source of truth: macOS Ventura/Sonoma
+          light palette.
         </p>
 
         <div class="two-col" style="margin-bottom: 16px">
           <div class="info-box">
             <strong>Single source of truth</strong> —
-            <code>packages/theme/src/tailwind/preset.ts</code> exposes all CSS
-            vars as Tailwind utilities. All apps consume this preset. Never
-            hardcode hex — use <code>var(--...)</code> or the Tailwind semantic
-            class.
+            <code>packages/theme/src/tailwind/preset.ts</code> exposes all CSS vars as Tailwind
+            utilities. All apps consume this preset. Never hardcode hex — use
+            <code>var(--...)</code> or the Tailwind semantic class.
           </div>
           <div
             class="info-box"
-            style="
-              background: rgba(255, 59, 48, 0.04);
-              border-color: rgba(255, 59, 48, 0.15);
-            "
+            style="background: rgba(255, 59, 48, 0.04); border-color: rgba(255, 59, 48, 0.15)"
           >
-            <strong style="color: #c0392b">Forbidden</strong> — raw
-            <code>box-shadow</code> inline styles, raw Tailwind
-            <code>shadow-sm/md/lg/xl</code>, hardcoded
-            <code>#171717</code>/<code>#363636</code>/<code>#fafafa</code>/<code
-              >#898989</code
-            >
+            <strong style="color: #c0392b">Forbidden</strong> — raw <code>box-shadow</code> inline
+            styles, raw Tailwind <code>shadow-sm/md/lg/xl</code>, hardcoded
+            <code>#171717</code>/<code>#363636</code>/<code>#fafafa</code>/<code>#898989</code>
             (dark palette).
           </div>
         </div>
 
-        <p
-          style="
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--arch11);
-            margin-bottom: 12px;
-          "
-        >
+        <p style="font-size: 13px; font-weight: 700; color: var(--arch11); margin-bottom: 12px">
           Backgrounds
         </p>
         <div class="glass" style="margin-bottom: 20px">
@@ -1607,10 +1459,7 @@
             </div>
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(255, 255, 255, 0.72)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(255, 255, 255, 0.72)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">glass-surface</div>
@@ -1620,10 +1469,7 @@
             </div>
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(246, 246, 250, 0.82)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(246, 246, 250, 0.82)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">vibrancy</div>
@@ -1634,14 +1480,7 @@
           </div>
         </div>
 
-        <p
-          style="
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--arch11);
-            margin-bottom: 12px;
-          "
-        >
+        <p style="font-size: 13px; font-weight: 700; color: var(--arch11); margin-bottom: 12px">
           Text Hierarchy
         </p>
         <div class="glass" style="margin-bottom: 20px">
@@ -1689,14 +1528,7 @@
           </div>
         </div>
 
-        <p
-          style="
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--arch11);
-            margin-bottom: 12px;
-          "
-        >
+        <p style="font-size: 13px; font-weight: 700; color: var(--arch11); margin-bottom: 12px">
           Accents &amp; Status
         </p>
         <div class="glass" style="margin-bottom: 20px">
@@ -1774,24 +1606,14 @@
           </div>
         </div>
 
-        <p
-          style="
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--arch11);
-            margin-bottom: 12px;
-          "
-        >
+        <p style="font-size: 13px; font-weight: 700; color: var(--arch11); margin-bottom: 12px">
           Borders
         </p>
         <div class="glass">
           <div class="swatch-grid">
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(0, 0, 0, 0.06)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(0, 0, 0, 0.06)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">border-subtle</div>
@@ -1801,10 +1623,7 @@
             </div>
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(0, 0, 0, 0.12)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(0, 0, 0, 0.12)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">border-default</div>
@@ -1814,10 +1633,7 @@
             </div>
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(0, 0, 0, 0.2)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(0, 0, 0, 0.2)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">border-emphasis</div>
@@ -1827,17 +1643,12 @@
             </div>
             <div class="swatch">
               <div class="swatch-color checkered">
-                <div
-                  class="swatch-inner"
-                  style="background: rgba(255, 255, 255, 0.9)"
-                ></div>
+                <div class="swatch-inner" style="background: rgba(255, 255, 255, 0.9)"></div>
               </div>
               <div class="swatch-info">
                 <div class="swatch-name">glass-border-top</div>
                 <div class="swatch-var">--glass-border-top</div>
-                <div class="swatch-hex">
-                  rgba(255,255,255,0.90) — top highlight
-                </div>
+                <div class="swatch-hex">rgba(255,255,255,0.90) — top highlight</div>
               </div>
             </div>
           </div>
@@ -1889,9 +1700,7 @@
             <div class="shadow-card">
               <div class="shadow-swatch s-card"></div>
               <div class="shadow-name">shadow-card</div>
-              <div class="shadow-usage">
-                Standard glass cards — includes top inset highlight
-              </div>
+              <div class="shadow-usage">Standard glass cards — includes top inset highlight</div>
             </div>
 
             <div class="shadow-card">
@@ -1903,9 +1712,7 @@
             <div class="shadow-card">
               <div class="shadow-swatch s-window"></div>
               <div class="shadow-name">shadow-window</div>
-              <div class="shadow-usage">
-                Hero card, window chrome — deepest shadow
-              </div>
+              <div class="shadow-usage">Hero card, window chrome — deepest shadow</div>
             </div>
           </div>
         </div>
@@ -1923,8 +1730,7 @@
         </p>
         <p class="section-sub">
           All 4 queries run in parallel via <code>Promise.all()</code> on the
-          <strong>read replica</strong> client. Auth check runs first on the
-          primary client.
+          <strong>read replica</strong> client. Auth check runs first on the primary client.
         </p>
 
         <div class="glass" style="margin-bottom: 16px">
@@ -1932,25 +1738,22 @@
             <div class="flow-node flow-db">
               <div class="flow-node-title">🔐 Auth Check</div>
               <div class="flow-node-sub">
-                Primary Supabase client<br /><code
-                  >createServerSupabaseClient()</code
-                ><br />→ redirect if no user
+                Primary Supabase client<br /><code>createServerSupabaseClient()</code><br />→
+                redirect if no user
               </div>
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-node flow-mid">
               <div class="flow-node-title">📡 Promise.all()</div>
               <div class="flow-node-sub">
-                Read replica<br /><code>createReadReplicaClient()</code><br />4
-                parallel queries
+                Read replica<br /><code>createReadReplicaClient()</code><br />4 parallel queries
               </div>
             </div>
             <div class="flow-arrow">→</div>
             <div class="flow-node flow-ui">
               <div class="flow-node-title">🖥 Hub Page RSC</div>
               <div class="flow-node-sub">
-                Props passed to<br />UrgencyBar, DepartmentCard<br />filter,
-                HubGrid
+                Props passed to<br />UrgencyBar, DepartmentCard<br />filter, HubGrid
               </div>
             </div>
           </div>
@@ -1972,9 +1775,7 @@
             </div>
             <div class="flow-query">
               <div class="flow-query-table">machines</div>
-              <div class="flow-query-condition">
-                WHERE active = false → count
-              </div>
+              <div class="flow-query-condition">WHERE active = false → count</div>
               <div class="flow-query-target">→ UrgencyBar offline</div>
             </div>
             <div class="flow-query">
@@ -1989,10 +1790,9 @@
 
         <div class="info-box" style="margin-bottom: 0">
           <strong>Note:</strong> <code>ProductionTrend</code> uses
-          <strong>static mock data</strong> (hardcoded chartdata array). It is
-          not yet wired to a live query. The read replica pattern is already in
-          place — the chart just needs a real DB query when production telemetry
-          is available.
+          <strong>static mock data</strong> (hardcoded chartdata array). It is not yet wired to a
+          live query. The read replica pattern is already in place — the chart just needs a real DB
+          query when production telemetry is available.
         </div>
       </section>
 
@@ -2007,19 +1807,14 @@
           Theme Compliance Issues
         </p>
         <p class="section-sub">
-          Components using hardcoded dark-theme values instead of macOS light
-          tokens. These are leftover from an earlier dark theme iteration.
+          Components using hardcoded dark-theme values instead of macOS light tokens. These are
+          leftover from an earlier dark theme iteration.
         </p>
 
         <div class="glass">
           <div class="issue-section">
             <div class="issue-title">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
                 <path
                   d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 11a1 1 0 110-2 1 1 0 010 2zm.75-3.25a.75.75 0 01-1.5 0V5a.75.75 0 011.5 0v3.75z"
                 />
@@ -2031,9 +1826,7 @@
               <div class="issue-item">
                 <div class="issue-header">
                   <span class="issue-comp">AIAssistant</span>
-                  <span class="issue-file"
-                    >apps/portal/components/ai/AIAssistant.tsx</span
-                  >
+                  <span class="issue-file">apps/portal/components/ai/AIAssistant.tsx</span>
                 </div>
                 <div class="issue-body">
                   <div class="issue-values">
@@ -2048,10 +1841,8 @@
                     Replace dark values with light tokens: panel →
                     <code>bg-white/80 backdrop-blur-2xl</code>, borders →
                     <code>border-black/[0.08]</code>, text →
-                    <code>text-[var(--text-heading)]</code> /
-                    <code>text-[var(--text-muted)]</code>, FAB →
-                    <code>bg-[var(--accent-blue)]</code> (macOS blue
-                    <code>#007aff</code>)
+                    <code>text-[var(--text-heading)]</code> / <code>text-[var(--text-muted)]</code>,
+                    FAB → <code>bg-[var(--accent-blue)]</code> (macOS blue <code>#007aff</code>)
                   </div>
                 </div>
               </div>
@@ -2059,9 +1850,7 @@
               <div class="issue-item">
                 <div class="issue-header">
                   <span class="issue-comp">UserNav</span>
-                  <span class="issue-file"
-                    >apps/portal/components/nav/UserNav.tsx</span
-                  >
+                  <span class="issue-file">apps/portal/components/nav/UserNav.tsx</span>
                 </div>
                 <div class="issue-body">
                   <div class="issue-values">
@@ -2073,9 +1862,8 @@
                   </div>
                   <div class="issue-fix">
                     Dropdown →
-                    <code
-                      >bg-white/90 backdrop-blur-2xl border-black/[0.08]</code
-                    >, text → <code>text-[var(--text-heading)]</code>, hover →
+                    <code>bg-white/90 backdrop-blur-2xl border-black/[0.08]</code>, text →
+                    <code>text-[var(--text-heading)]</code>, hover →
                     <code>hover:bg-black/[0.04]</code>, separator →
                     <code>bg-black/[0.06]</code>
                   </div>
@@ -2097,9 +1885,9 @@
                     <span class="issue-chip">#898989 subtitle text</span>
                   </div>
                   <div class="issue-fix">
-                    Remove Tremor <code>Card</code> wrapper — use existing glass
-                    wrapper from <code>page.tsx</code>. Title →
-                    <code>text-[var(--text-heading)]</code>, subtitle →
+                    Remove Tremor <code>Card</code> wrapper — use existing glass wrapper from
+                    <code>page.tsx</code>. Title → <code>text-[var(--text-heading)]</code>, subtitle
+                    →
                     <code>text-[var(--text-secondary)]</code>
                   </div>
                 </div>
@@ -2108,9 +1896,7 @@
               <div class="issue-item">
                 <div class="issue-header">
                   <span class="issue-comp">WeatherWidget (header variant)</span>
-                  <span class="issue-file"
-                    >apps/portal/components/weather/WeatherWidget.tsx</span
-                  >
+                  <span class="issue-file">apps/portal/components/weather/WeatherWidget.tsx</span>
                 </div>
                 <div class="issue-body">
                   <div class="issue-values">
@@ -2121,10 +1907,8 @@
                   </div>
                   <div class="issue-fix">
                     Header variant →
-                    <code
-                      >bg-white/70 backdrop-blur-md border border-black/[0.08]
-                      rounded-lg</code
-                    >, text → <code>text-[var(--text-heading)]</code> /
+                    <code>bg-white/70 backdrop-blur-md border border-black/[0.08] rounded-lg</code>,
+                    text → <code>text-[var(--text-heading)]</code> /
                     <code>text-[var(--text-muted)]</code>
                   </div>
                 </div>
@@ -2132,12 +1916,9 @@
 
               <div class="issue-item">
                 <div class="issue-header">
-                  <span class="issue-comp"
-                    >DepartmentCard + ToolCard (text)</span
-                  >
+                  <span class="issue-comp">DepartmentCard + ToolCard (text)</span>
                   <span class="issue-file"
-                    >features/hub/components/DepartmentCard.tsx ·
-                    ToolCard.tsx</span
+                    >features/hub/components/DepartmentCard.tsx · ToolCard.tsx</span
                   >
                 </div>
                 <div class="issue-body">
@@ -2147,9 +1928,9 @@
                     <span class="issue-chip">ArrowUpRight: text-[#363636]</span>
                   </div>
                   <div class="issue-fix">
-                    Card titles → <code>text-[var(--text-heading)]</code>,
-                    descriptions → <code>text-[var(--text-secondary)]</code>,
-                    icon arrow → <code>text-[var(--text-muted)]</code>
+                    Card titles → <code>text-[var(--text-heading)]</code>, descriptions →
+                    <code>text-[var(--text-secondary)]</code>, icon arrow →
+                    <code>text-[var(--text-muted)]</code>
                   </div>
                 </div>
               </div>
@@ -2160,14 +1941,7 @@
 
       <!-- footer -->
       <div class="divider"></div>
-      <div
-        style="
-          text-align: center;
-          color: var(--arch8);
-          font-size: 12px;
-          padding-bottom: 16px;
-        "
-      >
+      <div style="text-align: center; color: var(--arch8); font-size: 12px; padding-bottom: 16px">
         Generated from <code>apps/portal/app/(hub)/page.tsx</code> ·
         <code>packages/theme/src/css/variables.css</code> ·
         <code>packages/ui/src/</code>

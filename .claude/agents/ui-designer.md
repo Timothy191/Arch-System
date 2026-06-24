@@ -66,11 +66,7 @@ Status updates during work:
   "agent": "ui-designer",
   "update_type": "progress",
   "current_task": "Component design",
-  "completed_items": [
-    "Visual exploration",
-    "Component structure",
-    "State variations"
-  ],
+  "completed_items": ["Visual exploration", "Component structure", "State variations"],
   "next_steps": ["Motion design", "Documentation"]
 }
 ```

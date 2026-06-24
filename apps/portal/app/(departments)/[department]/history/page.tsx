@@ -17,9 +17,7 @@ export default async function HistoryPage({
   });
 
   const to = toParam || new Date().toISOString().split("T")[0];
-  const from =
-    fromParam ||
-    new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 
   const isControlRoom = dept.type === "control_room";
 
@@ -27,26 +25,12 @@ export default async function HistoryPage({
     <GlassCard>
       <form method="GET" className="flex items-end gap-4">
         <div>
-          <label className="block text-sm text-[var(--text-muted)] mb-1">
-            From
-          </label>
-          <Input
-            type="date"
-            name="from"
-            defaultValue={from}
-            className="px-4 py-2"
-          />
+          <label className="block text-sm text-[var(--text-muted)] mb-1">From</label>
+          <Input type="date" name="from" defaultValue={from} className="px-4 py-2" />
         </div>
         <div>
-          <label className="block text-sm text-[var(--text-muted)] mb-1">
-            To
-          </label>
-          <Input
-            type="date"
-            name="to"
-            defaultValue={to}
-            className="px-4 py-2"
-          />
+          <label className="block text-sm text-[var(--text-muted)] mb-1">To</label>
+          <Input type="date" name="to" defaultValue={to} className="px-4 py-2" />
         </div>
         <button
           type="submit"
@@ -60,40 +44,36 @@ export default async function HistoryPage({
 
   // ─── Control Room branch ───────────────────────────────────────────────────
   if (isControlRoom) {
-    const [
-      { data: shiftStatuses },
-      { data: operations },
-      { data: loads },
-      { data: delays },
-    ] = await Promise.all([
-      supabase
-        .from("shift_status")
-        .select(
-          "shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)",
-        )
-        .eq("department_id", deptId)
-        .gte("shift_date", from)
-        .lte("shift_date", to)
-        .order("shift_date", { ascending: false }),
-      supabase
-        .from("machine_operations")
-        .select("shift_date, shift_type, hours_worked")
-        .eq("department_id", deptId)
-        .gte("shift_date", from)
-        .lte("shift_date", to),
-      supabase
-        .from("hourly_loads")
-        .select("load_date, shift_type, total_loads")
-        .eq("department_id", deptId)
-        .gte("load_date", from)
-        .lte("load_date", to),
-      supabase
-        .from("operational_delays")
-        .select("delay_date, shift_type, delay_minutes")
-        .eq("department_id", deptId)
-        .gte("delay_date", from)
-        .lte("delay_date", to),
-    ]);
+    const [{ data: shiftStatuses }, { data: operations }, { data: loads }, { data: delays }] =
+      await Promise.all([
+        supabase
+          .from("shift_status")
+          .select(
+            "shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)",
+          )
+          .eq("department_id", deptId)
+          .gte("shift_date", from)
+          .lte("shift_date", to)
+          .order("shift_date", { ascending: false }),
+        supabase
+          .from("machine_operations")
+          .select("shift_date, shift_type, hours_worked")
+          .eq("department_id", deptId)
+          .gte("shift_date", from)
+          .lte("shift_date", to),
+        supabase
+          .from("hourly_loads")
+          .select("load_date, shift_type, total_loads")
+          .eq("department_id", deptId)
+          .gte("load_date", from)
+          .lte("load_date", to),
+        supabase
+          .from("operational_delays")
+          .select("delay_date, shift_type, delay_minutes")
+          .eq("department_id", deptId)
+          .gte("delay_date", from)
+          .lte("delay_date", to),
+      ]);
 
     type ShiftKey = string;
     const keyOf = (date: string, shift: string): ShiftKey => `${date}|${shift}`;
@@ -119,9 +99,7 @@ export default async function HistoryPage({
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-            Shift History
-          </h2>
+          <h2 className="text-2xl font-bold text-[var(--text-heading)]">Shift History</h2>
           <Link
             href={`/${deptSlug}/reports?from=${from}&to=${to}`}
             className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
@@ -159,14 +137,9 @@ export default async function HistoryPage({
               <tbody className="divide-y divide-[var(--border-default)]">
                 {shiftStatuses?.map((ss) => {
                   const k = keyOf(ss.shift_date, ss.shift_type);
-                  const closer = Array.isArray(ss.closer)
-                    ? ss.closer[0]
-                    : ss.closer;
+                  const closer = Array.isArray(ss.closer) ? ss.closer[0] : ss.closer;
                   return (
-                    <tr
-                      key={k}
-                      className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                    >
+                    <tr key={k} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                       <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
                         {ss.shift_date}
                       </td>
@@ -254,9 +227,7 @@ export default async function HistoryPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[var(--text-heading)]">
-          History
-        </h2>
+        <h2 className="text-2xl font-bold text-[var(--text-heading)]">History</h2>
         <Link
           href={`/${deptSlug}/reports?from=${from}&to=${to}`}
           className="px-4 py-2 rounded-lg bg-[var(--bg-tertiary)] text-[var(--accent-blue)] text-sm font-medium hover:bg-[var(--bg-tertiary)] transition-colors"
@@ -301,13 +272,8 @@ export default async function HistoryPage({
             </thead>
             <tbody className="divide-y divide-[var(--border-default)]">
               {logs?.map((log) => (
-                <tr
-                  key={log.id}
-                  className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                >
-                  <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                    {log.log_date}
-                  </td>
+                <tr key={log.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                  <td className="px-6 py-4 text-[var(--text-heading)] text-sm">{log.log_date}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${

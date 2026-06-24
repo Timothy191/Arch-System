@@ -106,9 +106,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
   }, [departmentId]);
 
   function acknowledge(alertId: string) {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a)),
-    );
+    setAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a)));
   }
 
   function dismiss(alertId: string) {
@@ -120,9 +118,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-[var(--text-heading)]">
-          Alerts
-        </h2>
+        <h2 className="text-xl font-medium text-[var(--text-heading)]">Alerts</h2>
         {unacknowledged.length > 0 && (
           <span className="px-2.5 py-1 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20 text-xs font-medium">
             {unacknowledged.length} unacknowledged
@@ -141,23 +137,16 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
 
       <div className="space-y-3">
         {alerts.map((alert) => (
-          <GlassCard
-            key={alert.id}
-            className={alert.acknowledged ? "opacity-60" : ""}
-          >
+          <GlassCard key={alert.id} className={alert.acknowledged ? "opacity-60" : ""}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    alert.severity === "critical"
-                      ? "bg-accent-red"
-                      : "bg-accent-blue"
+                    alert.severity === "critical" ? "bg-accent-red" : "bg-accent-blue"
                   }`}
                 />
                 <div>
-                  <p className="text-[var(--text-heading)] text-sm">
-                    {alert.message}
-                  </p>
+                  <p className="text-[var(--text-heading)] text-sm">{alert.message}</p>
                   <p className="text-[var(--text-secondary)] text-xs">
                     {new Date(alert.timestamp).toLocaleTimeString()}
                   </p>

@@ -1,9 +1,5 @@
 import { ArchPlugin, PluginHooks, PluginWidget } from "./types";
-import {
-  NotFoundError,
-  APIError,
-  ConflictError,
-} from "@/lib/errors/error-classes";
+import { NotFoundError, APIError, ConflictError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 import { interpret, type ActorRefFrom } from "xstate";
 import { orchestratorMachine, type HealthReport } from "./machines";
@@ -96,13 +92,10 @@ class PluginOrchestrator {
     const pluginActor = snapshot.context.plugins.get(pluginId);
 
     if (!pluginActor) {
-      throw new NotFoundError(
-        `Active engine for plugin ID [${pluginId}] not found.`,
-        {
-          resource: "plugin_engine",
-          id: pluginId,
-        },
-      );
+      throw new NotFoundError(`Active engine for plugin ID [${pluginId}] not found.`, {
+        resource: "plugin_engine",
+        id: pluginId,
+      });
     }
 
     // Get plugin data from actor
@@ -113,18 +106,14 @@ class PluginOrchestrator {
         id: pluginId,
       });
     }
-    const plugin = (
-      pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }
-    ).context.plugin;
+    const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
+      .plugin;
 
     if (!plugin || !plugin.engine || !plugin.engine.execute) {
-      throw new NotFoundError(
-        `Plugin [${pluginId}] has no executable engine.`,
-        {
-          resource: "plugin_engine",
-          id: pluginId,
-        },
-      );
+      throw new NotFoundError(`Plugin [${pluginId}] has no executable engine.`, {
+        resource: "plugin_engine",
+        id: pluginId,
+      });
     }
 
     try {
@@ -147,10 +136,7 @@ class PluginOrchestrator {
    * Sandboxed Lifecycle Event Dispatcher.
    * Triggers plugin background listeners in parallel using parallel settle bounds.
    */
-  public async triggerHook(
-    hookName: keyof PluginHooks,
-    data: any,
-  ): Promise<void> {
+  public async triggerHook(hookName: keyof PluginHooks, data: any): Promise<void> {
     await this.loadAllPlugins();
 
     const snapshot = this.actor.getSnapshot();
@@ -160,9 +146,8 @@ class PluginOrchestrator {
     for (const actor of snapshot.context.plugins.values()) {
       const pluginSnapshot = actor.getSnapshot();
       if (pluginSnapshot.status !== "active") continue;
-      const plugin = (
-        pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }
-      ).context.plugin;
+      const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
+        .plugin;
       if (plugin) {
         plugins.push(plugin);
       }
@@ -203,9 +188,8 @@ class PluginOrchestrator {
     for (const actor of snapshot.context.plugins.values()) {
       const pluginSnapshot = actor.getSnapshot();
       if (pluginSnapshot.status !== "active") continue;
-      const plugin = (
-        pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }
-      ).context.plugin;
+      const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
+        .plugin;
 
       if (plugin && plugin.widgets && plugin.widgets.length > 0) {
         widgets.push(...plugin.widgets);
@@ -234,9 +218,7 @@ class PluginOrchestrator {
   /**
    * XState Integration: Subscribe to orchestrator state changes
    */
-  public subscribe(
-    callback: (_healthReport: HealthReport) => void,
-  ): () => void {
+  public subscribe(callback: (_healthReport: HealthReport) => void): () => void {
     const sub = this.actor.subscribe((snapshot) => {
       callback(snapshot.context.healthReport);
     });

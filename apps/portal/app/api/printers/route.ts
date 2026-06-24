@@ -33,10 +33,7 @@ export async function GET() {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Failed to list printers:", error);
-    return NextResponse.json(
-      { error: "Failed to list printers", printers: [] },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to list printers", printers: [] }, { status: 500 });
   }
 }
 
@@ -63,21 +60,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      cups_name,
-      name,
-      model,
-      connection_type,
-      vendor_id,
-      product_id,
-      device_path,
-    } = body;
+    const { cups_name, name, model, connection_type, vendor_id, product_id, device_path } = body;
 
     if (!cups_name || !name) {
-      return NextResponse.json(
-        { error: "cups_name and name are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "cups_name and name are required" }, { status: 400 });
     }
     const { data, error } = await supabase
       .from("card_printers")
@@ -110,9 +96,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Failed to register printer:", error);
-    return NextResponse.json(
-      { error: "Failed to register printer" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to register printer" }, { status: 500 });
   }
 }

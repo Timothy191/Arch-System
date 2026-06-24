@@ -92,11 +92,7 @@ export function AlertPanel() {
   useEffect(() => {
     const channel = supabase
       .channel("alerts")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "alerts" },
-        callback,
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "alerts" }, callback)
       .subscribe();
   }, []);
 }

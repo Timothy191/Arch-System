@@ -47,10 +47,7 @@ function formatTime(timeStr: string) {
   return timeStr.slice(0, 5); // HH:MM format
 }
 
-export function MachineOperationsList({
-  operations,
-  todayLoads,
-}: MachineOperationsListProps) {
+export function MachineOperationsList({ operations, todayLoads }: MachineOperationsListProps) {
   if (operations.length === 0) {
     return (
       <GlassCard>
@@ -62,10 +59,7 @@ export function MachineOperationsList({
   }
 
   // Group by site_id, then by shift
-  const siteMap = new Map<
-    string,
-    { siteName: string; operations: MachineOperation[] }
-  >();
+  const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
 
   for (const op of operations) {
     const siteKey = op.site_id ?? "__none__";
@@ -86,10 +80,7 @@ export function MachineOperationsList({
   return (
     <div className="space-y-6">
       {siteEntries.map(([siteKey, { siteName, operations: siteOps }]) => {
-        const siteHours = siteOps.reduce(
-          (sum, op) => sum + (op.hours_worked || 0),
-          0,
-        );
+        const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
           const bf = op.machine?.bin_factor || 0;
           const loads = todayLoads
@@ -111,9 +102,7 @@ export function MachineOperationsList({
               </h4>
               <div className="flex items-center gap-4 text-xs">
                 {siteHours > 0 && (
-                  <span className="text-accent-green font-medium">
-                    {siteHours.toFixed(1)}h
-                  </span>
+                  <span className="text-accent-green font-medium">{siteHours.toFixed(1)}h</span>
                 )}
                 {siteBcm > 0 && (
                   <span className="text-[var(--accent-blue)] font-medium">
@@ -131,11 +120,7 @@ export function MachineOperationsList({
                 </h5>
                 <div className="space-y-2">
                   {dayOps.map((op) => (
-                    <OperationCard
-                      key={op.id}
-                      operation={op}
-                      todayLoads={todayLoads}
-                    />
+                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
                   ))}
                 </div>
               </div>
@@ -149,11 +134,7 @@ export function MachineOperationsList({
                 </h5>
                 <div className="space-y-2">
                   {nightOps.map((op) => (
-                    <OperationCard
-                      key={op.id}
-                      operation={op}
-                      todayLoads={todayLoads}
-                    />
+                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
                   ))}
                 </div>
               </div>
@@ -172,8 +153,7 @@ function OperationCard({
   operation: MachineOperation;
   todayLoads: HourlyLoadSummary[];
 }) {
-  const isComplete =
-    operation.end_time !== null && operation.hours_worked !== null;
+  const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
   // Calculate BCM metrics
@@ -184,16 +164,11 @@ function OperationCard({
       ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
-    (operation.hours_worked || 0) > 0
-      ? materialBCM / (operation.hours_worked || 1)
-      : 0;
+    (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
 
   // AGENT-TRACE: Calculate delay totals by category and status
   const delayEntries = operation.delay_entries || [];
-  const totalDelayHours = delayEntries.reduce(
-    (sum, d) => sum + d.duration_hours,
-    0,
-  );
+  const totalDelayHours = delayEntries.reduce((sum, d) => sum + d.duration_hours, 0);
   const _committedDelayHours = delayEntries
     .filter((d) => d.status === "committed")
     .reduce((sum, d) => sum + d.duration_hours, 0);
@@ -249,9 +224,7 @@ function OperationCard({
           <div className="text-right">
             <p className="text-[var(--text-heading)] text-sm">
               {formatTime(operation.start_time)} -{" "}
-              {operation.end_time
-                ? formatTime(operation.end_time)
-                : "In Progress"}
+              {operation.end_time ? formatTime(operation.end_time) : "In Progress"}
             </p>
             <div className="flex items-center gap-3 mt-0.5 justify-end">
               {operation.hours_worked !== null && (
@@ -266,9 +239,7 @@ function OperationCard({
                     {materialBCM.toFixed(1)} BCM
                   </span>
                   <span className="text-[var(--border-emphasis)]">|</span>
-                  <span className="text-accent-blue text-xs">
-                    {bcmPerHour.toFixed(1)} BCM/h
-                  </span>
+                  <span className="text-accent-blue text-xs">{bcmPerHour.toFixed(1)} BCM/h</span>
                 </>
               )}
             </div>
@@ -286,9 +257,7 @@ function OperationCard({
               <span className="font-medium">
                 {delayEntries.length} delay{delayEntries.length > 1 ? "s" : ""}
               </span>
-              <span className="text-accent-red">
-                {totalDelayHours.toFixed(2)}h total
-              </span>
+              <span className="text-accent-red">{totalDelayHours.toFixed(2)}h total</span>
               {draftDelayHours > 0 && (
                 <span className="text-[var(--accent-yellow)]">
                   ({draftDelayHours.toFixed(2)}h draft)
@@ -299,14 +268,9 @@ function OperationCard({
             {showDelays && (
               <div className="mt-2 space-y-1 pl-6">
                 {Object.entries(delaysByCategory).map(([category, hours]) => (
-                  <div
-                    key={category}
-                    className="flex items-center justify-between text-xs"
-                  >
+                  <div key={category} className="flex items-center justify-between text-xs">
                     <span className="text-[var(--text-muted)]">{category}</span>
-                    <span className="text-[var(--text-heading)]">
-                      {hours.toFixed(2)}h
-                    </span>
+                    <span className="text-[var(--text-heading)]">{hours.toFixed(2)}h</span>
                   </div>
                 ))}
                 {delayEntries.some((d) => d.is_manual_override) && (

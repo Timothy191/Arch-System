@@ -6,17 +6,13 @@ describe("getEmployeeIdForAuthUser", () => {
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            maybeSingle: jest
-              .fn()
-              .mockResolvedValue({ data: { id: "emp-uuid" } }),
+            maybeSingle: jest.fn().mockResolvedValue({ data: { id: "emp-uuid" } }),
           }),
         }),
       }),
     } as unknown as Parameters<typeof getEmployeeIdForAuthUser>[0];
 
-    await expect(getEmployeeIdForAuthUser(supabase, "auth-uuid")).resolves.toBe(
-      "emp-uuid",
-    );
+    await expect(getEmployeeIdForAuthUser(supabase, "auth-uuid")).resolves.toBe("emp-uuid");
   });
 
   it("returns null when no employee row", async () => {
@@ -30,8 +26,6 @@ describe("getEmployeeIdForAuthUser", () => {
       }),
     } as unknown as Parameters<typeof getEmployeeIdForAuthUser>[0];
 
-    await expect(getEmployeeIdForAuthUser(supabase, "auth-uuid")).resolves.toBe(
-      null,
-    );
+    await expect(getEmployeeIdForAuthUser(supabase, "auth-uuid")).resolves.toBe(null);
   });
 });

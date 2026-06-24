@@ -19,9 +19,7 @@ const RECONCILIATION_THRESHOLDS = {
  * Classify the severity of reconciliation drift.
  * @param driftPct The absolute difference percentage between actual and expected tonnage.
  */
-export function classifyReconciliationDrift(
-  driftPct: number,
-): ReconciliationLevel {
+export function classifyReconciliationDrift(driftPct: number): ReconciliationLevel {
   const abs = Math.abs(driftPct);
   if (abs >= RECONCILIATION_THRESHOLDS.critical) return "critical";
   if (abs >= RECONCILIATION_THRESHOLDS.moderate) return "moderate";

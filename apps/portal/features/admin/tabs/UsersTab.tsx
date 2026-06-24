@@ -6,12 +6,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { Search, UserPlus, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@repo/ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
 import { logError } from "@/lib/errors/error-logger";
 
@@ -29,9 +24,7 @@ interface Employee {
 
 export function UsersTab() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departments, setDepartments] = useState<
-    { id: string; display_name: string }[]
-  >([]);
+  const [departments, setDepartments] = useState<{ id: string; display_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -159,28 +152,19 @@ export function UsersTab() {
             <tbody className="divide-y divide-[var(--border-default)]">
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     Loading...
                   </td>
                 </tr>
               ) : filteredEmployees.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center text-[var(--text-muted)]"
-                  >
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     No employees found.
                   </td>
                 </tr>
               ) : (
                 filteredEmployees.map((emp) => (
-                  <tr
-                    key={emp.id}
-                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
-                  >
+                  <tr key={emp.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="px-6 py-4 text-[var(--text-heading)] text-sm font-medium">
                       {emp.full_name}
                     </td>
@@ -199,9 +183,7 @@ export function UsersTab() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {emp.department_id
-                        ? deptMap.get(emp.department_id)
-                        : "Unassigned"}
+                      {emp.department_id ? deptMap.get(emp.department_id) : "Unassigned"}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                       {emp.accessible_departments?.length || 0} departments
@@ -211,11 +193,7 @@ export function UsersTab() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(emp)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(emp)}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
@@ -271,9 +249,7 @@ function EditEmployeeForm({
   onCancel: () => void;
 }) {
   const [role, setRole] = useState(employee?.role || "operator");
-  const [departmentId, setDepartmentId] = useState(
-    employee?.department_id || "",
-  );
+  const [departmentId, setDepartmentId] = useState(employee?.department_id || "");
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
     employee?.accessible_departments || [],
   );
@@ -289,19 +265,14 @@ function EditEmployeeForm({
 
   const toggleAccessibleDept = (deptId: string) => {
     setAccessibleDepts((prev) =>
-      prev.includes(deptId)
-        ? prev.filter((d) => d !== deptId)
-        : [...prev, deptId],
+      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId],
     );
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label
-          htmlFor="role"
-          className="block text-sm font-medium text-[var(--text-body)] mb-2"
-        >
+        <label htmlFor="role" className="block text-sm font-medium text-[var(--text-body)] mb-2">
           Role
         </label>
         <select

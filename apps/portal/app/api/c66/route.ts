@@ -131,9 +131,9 @@ import { scannerBadgeSchema } from "@repo/contract";
  *                   type: string
  */
 
-const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(
-  ",",
-).map((s) => s.trim()) || ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
+const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(",").map((s) =>
+  s.trim(),
+) || ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
 
 export async function POST(request: Request) {
   return withBodyLimit(
@@ -180,10 +180,7 @@ async function handlePost(request: Request) {
       ""
     ).trim();
     if (!code) {
-      return NextResponse.json(
-        { success: false, error: "Empty code payload" },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: "Empty code payload" }, { status: 400 });
     }
 
     // 1. Find the Badge and check if it's active
@@ -195,32 +192,14 @@ async function handlePost(request: Request) {
 
     if (badgeError || !badge) {
       // Badge not found in database at all
-      await logAccess(
-        supabase,
-        null,
-        "UNKNOWN",
-        "DENIED - Unrecognized Badge",
-        source,
-      );
-      return NextResponse.json(
-        { success: false, name: "Unrecognized Badge" },
-        { status: 404 },
-      );
+      await logAccess(supabase, null, "UNKNOWN", "DENIED - Unrecognized Badge", source);
+      return NextResponse.json({ success: false, name: "Unrecognized Badge" }, { status: 404 });
     }
 
     if (!badge.is_active) {
       // Badge revoked
-      await logAccess(
-        supabase,
-        badge.id,
-        badge.entity_type,
-        "DENIED - Badge Revoked",
-        source,
-      );
-      return NextResponse.json(
-        { success: false, name: "Revoked Badge" },
-        { status: 403 },
-      );
+      await logAccess(supabase, badge.id, badge.entity_type, "DENIED - Badge Revoked", source);
+      return NextResponse.json({ success: false, name: "Revoked Badge" }, { status: 403 });
     }
 
     // 2. Resolve the Identity
@@ -276,10 +255,7 @@ async function handlePost(request: Request) {
       url: "/api/c66",
       method: "POST",
     });
-    return NextResponse.json(
-      { success: false, error: "Internal Server Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
 }
 

@@ -12,13 +12,7 @@
  */
 
 // Json type for jsonb columns
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 // === departments (migration 001) ===
 
@@ -59,9 +53,22 @@ export interface EmployeesRow {
   auth_id: string;
   department_id: string | null;
   full_name: string;
+  first_name: string | null; // Added by migration 080
+  last_name: string | null; // Added by migration 080
+  national_id: string | null; // Added by migration 080
+  job_title: string | null; // Added by migration 080
+  areas: string[] | null; // Added by migration 080
+  medical_expiry_date: string | null; // Added by migration 080
+  induction_expiry_date: string | null; // Added by migration 080
+  qr_code_data: string | null; // Added by migration 080
+  photo_url: string | null; // Added by migration 080
   role: string;
   accessible_departments: string[];
+  employee_code: string | null; // Added by migration 015
+  pin_hash: string | null; // Added by migration 015
   created_at: string;
+  updated_at: string | null; // Added by migration 014
+  deleted_at: string | null; // Added by migration 010
 }
 
 export interface EmployeesInsert {
@@ -69,9 +76,22 @@ export interface EmployeesInsert {
   auth_id: string;
   department_id?: string | null;
   full_name: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  national_id?: string | null;
+  job_title?: string | null;
+  areas?: string[] | null;
+  medical_expiry_date?: string | null;
+  induction_expiry_date?: string | null;
+  qr_code_data?: string | null;
+  photo_url?: string | null;
   role?: string;
   accessible_departments?: string[];
+  employee_code?: string | null;
+  pin_hash?: string | null;
   created_at?: string;
+  updated_at?: string | null;
+  deleted_at?: string | null;
 }
 
 export interface EmployeesUpdate {
@@ -79,9 +99,22 @@ export interface EmployeesUpdate {
   auth_id?: string;
   department_id?: string | null;
   full_name?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  national_id?: string | null;
+  job_title?: string | null;
+  areas?: string[] | null;
+  medical_expiry_date?: string | null;
+  induction_expiry_date?: string | null;
+  qr_code_data?: string | null;
+  photo_url?: string | null;
   role?: string;
   accessible_departments?: string[];
+  employee_code?: string | null;
+  pin_hash?: string | null;
   created_at?: string;
+  updated_at?: string | null;
+  deleted_at?: string | null;
 }
 
 // === personnel (migration 028) ===
@@ -94,6 +127,7 @@ export interface PersonnelRow {
   id_number: string;
   job_title: string | null;
   department_id: string | null;
+  area: string | null; // Added by migration 037
   induction_expiry: string | null;
   medical_expiry: string | null;
   status: string;
@@ -110,6 +144,7 @@ export interface PersonnelInsert {
   id_number: string;
   job_title?: string | null;
   department_id?: string | null;
+  area?: string | null;
   induction_expiry?: string | null;
   medical_expiry?: string | null;
   status?: string;
@@ -126,6 +161,7 @@ export interface PersonnelUpdate {
   id_number?: string;
   job_title?: string | null;
   department_id?: string | null;
+  area?: string | null;
   induction_expiry?: string | null;
   medical_expiry?: string | null;
   status?: string;

@@ -91,9 +91,7 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md space-y-3">
         <div className="glass-card rounded-xl overflow-hidden p-6 text-center space-y-4">
           <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin mx-auto" />
-          <p className="text-sm text-[var(--text-muted)]">
-            Verifying session...
-          </p>
+          <p className="text-sm text-[var(--text-muted)]">Verifying session...</p>
         </div>
       </div>
     );
@@ -103,16 +101,10 @@ export default function UpdatePasswordPage() {
     return (
       <div className="w-full max-w-md space-y-3">
         <div className="glass-card rounded-xl overflow-hidden p-6 text-center space-y-4">
-          <AlertTriangle
-            className="w-8 h-8 text-[var(--accent-red)] mx-auto"
-            strokeWidth={1.5}
-          />
-          <h1 className="text-lg font-medium text-[var(--text-heading)]">
-            Link Expired
-          </h1>
+          <AlertTriangle className="w-8 h-8 text-[var(--accent-red)] mx-auto" strokeWidth={1.5} />
+          <h1 className="text-lg font-medium text-[var(--text-heading)]">Link Expired</h1>
           <p className="text-sm text-[var(--text-muted)]">
-            This password reset link is invalid or has expired. Please request a
-            new one.
+            This password reset link is invalid or has expired. Please request a new one.
           </p>
           <a
             href="/reset-password"
@@ -143,15 +135,10 @@ export default function UpdatePasswordPage() {
           {updated ? (
             <div className="space-y-4 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-green)]/10 mx-auto">
-                <Check
-                  className="w-6 h-6 text-[var(--accent-green)]"
-                  strokeWidth={1.5}
-                />
+                <Check className="w-6 h-6 text-[var(--accent-green)]" strokeWidth={1.5} />
               </div>
               <div className="space-y-1">
-                <h1 className="text-lg font-medium text-[var(--text-heading)]">
-                  Password Updated
-                </h1>
+                <h1 className="text-lg font-medium text-[var(--text-heading)]">Password Updated</h1>
                 <p className="text-sm text-[var(--text-muted)]">
                   Your password has been updated. Redirecting to sign in...
                 </p>
@@ -160,16 +147,11 @@ export default function UpdatePasswordPage() {
           ) : (
             <>
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent-blue)]/10 mx-auto">
-                <Lock
-                  className="w-6 h-6 text-[var(--accent-blue)]"
-                  strokeWidth={1.5}
-                />
+                <Lock className="w-6 h-6 text-[var(--accent-blue)]" strokeWidth={1.5} />
               </div>
 
               <div className="text-center space-y-1">
-                <h1 className="text-xl font-medium text-[var(--text-heading)]">
-                  Set New Password
-                </h1>
+                <h1 className="text-xl font-medium text-[var(--text-heading)]">Set New Password</h1>
                 <p className="text-sm text-[var(--text-muted)]">
                   Choose a strong password you have not used before.
                 </p>
@@ -230,10 +212,7 @@ export default function UpdatePasswordPage() {
                     className="text-sm text-red-700 bg-red-50/80 px-3 py-2 rounded-md flex items-center gap-2"
                     role="alert"
                   >
-                    <AlertTriangle
-                      className="w-4 h-4 shrink-0"
-                      strokeWidth={1.5}
-                    />
+                    <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={1.5} />
                     {error}
                   </p>
                 )}
