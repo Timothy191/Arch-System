@@ -7,3 +7,7 @@
 
 **Learning:** Modifying `package.json` in an Nx/pnpm workspace can inadvertently remove `catalog:` resolutions if using automated tools or manual edits without care, breaking monorepo dependency management.
 **Action:** Never modify `package.json` unless explicitly instructed, and always verify `catalog:` references remain intact.
+
+## 2026-06-24 - [CI Recovery and Security Hardening]
+**Learning:** CI failures often cascade from tool version mismatches (pnpm) and missing script definitions. High-severity vulnerabilities can block CI audits.
+**Action:** Always check `packageManager` in root `package.json` before configuring CI workflows. Use `overrides` or direct version installs to resolve high-severity audit failures during optimization cycles.
