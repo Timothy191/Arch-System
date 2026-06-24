@@ -101,12 +101,13 @@ export default {
     return commands;
   },
 
-  // JSON / CSS / MJS / YAML / SQL / TOML → prettier only (excluding package.json which has syncpack)
+  // JSON / CSS / MJS / YAML / SQL / TOML → prettier only (excluding package.json which has syncpack, and project.json which has its own chain)
   "*.{json,css,mjs,yaml,yml}": (files) => {
     const filtered = files.filter(
       (f) =>
         matchesAny(f, PRETTIER_GLOBS) &&
         !f.endsWith("package.json") &&
+        !f.endsWith("project.json") &&
         !f.endsWith(".css") &&
         !f.endsWith(".scss"),
     );
@@ -124,10 +125,14 @@ export default {
     return ["pnpm --filter @repo/theme lint:tokens"];
   },
 
-  // project.json files → apply project tags
+  // project.json files → apply project tags then prettier format
   "**/project.json": (files) => {
     if (files.length === 0) return [];
-    return ["node tools/apply-project-tags.cjs"];
+    const commands = ["node tools/apply-project-tags.cjs"];
+    for (const batch of chunk(files, 30)) {
+      commands.push(`prettier --write ${batch.join(" ")}`);
+    }
+    return commands;
   },
 
   // Everything else → secretlint (skip .env*, lockfiles, config files, already-handled exts)
