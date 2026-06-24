@@ -1,4 +1,7 @@
 {
   "name": "@repo/eval",
-  "tags": ["scope:package", "scope:package:eval"]
+  "tags": [
+    "scope:package",
+    "scope:package:eval"
+  ]
 }

@@ -41,6 +41,9 @@ const nextConfig = {
     "@repo/rate-limiter",
     "@repo/logger",
     "@repo/contract",
+    "@repo/feature-auth-ui",
+    "@repo/feature-auth-utils",
+    "@repo/feature-auth-data-access",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

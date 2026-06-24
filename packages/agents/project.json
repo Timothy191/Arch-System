@@ -1,4 +1,7 @@
 {
   "name": "@repo/agents",
-  "tags": ["scope:package", "scope:package:agents"]
+  "tags": [
+    "scope:package",
+    "scope:package:agents"
+  ]
 }

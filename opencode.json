@@ -32,6 +32,11 @@
       "command": ["npx", "-y", "next-devtools-mcp@0.3.10"],
       "enabled": true
     },
+    "notebooklm": {
+      "type": "local",
+      "command": ["notebooklm-mcp"],
+      "enabled": true
+    },
     "npm-mcp": {
       "type": "local",
       "command": ["npx", "-y", "@mikusnuz/npm-mcp"],
@@ -39,7 +44,7 @@
     },
     "nx-mcp": {
       "type": "local",
-      "command": ["npx", "nx", "mcp"],
+      "command": ["npx", "-y", "@nx/mcp-server@latest"],
       "enabled": true
     },
     "playwright": {

@@ -1,3 +1,5 @@
+@layer reset, base, theme, components, utilities;
+
 @import "@repo/theme/css";
 
 @tailwind base;

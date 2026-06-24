@@ -150,6 +150,19 @@
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"]
     },
+    "packages/features/auth/ui": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["src/**/*.test.{ts,tsx}"]
+    },
+    "packages/features/auth/utils": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/features/auth/data-access": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    },
     "packages/eval": {
       "entry": ["tests/**/*.py"],
       "project": ["**/*.{py,toml}"]

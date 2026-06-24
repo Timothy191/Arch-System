@@ -55,6 +55,17 @@ const { useRouter, useSearchParams } = jest.requireMock("next/navigation");
 describe("LoginForm", () => {
   const mockPush = jest.fn();
   const mockRefresh = jest.fn();
+  const mockLoginWithCredentials = jest.fn();
+  const mockPushAuthTelemetry = jest.fn();
+
+  const renderLoginForm = (props = {}) =>
+    render(
+      <LoginForm
+        loginWithCredentials={mockLoginWithCredentials}
+        pushAuthTelemetry={mockPushAuthTelemetry}
+        {...props}
+      />
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,6 +77,37 @@ describe("LoginForm", () => {
       get: jest.fn(() => null),
     });
     global.fetch = jest.fn();
+
+    mockLoginWithCredentials.mockImplementation(async (email, password) => {
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json().catch(() => ({}));
+        const result = { ok: response.ok, status: response.status, error: data.error };
+        if (!response.ok && response.status === 429) {
+          const retryAfter = response.headers?.get?.("X-RateLimit-Reset");
+          if (retryAfter) {
+            (result as any).rateLimitReset = parseInt(retryAfter, 10);
+          }
+        }
+        return result;
+      } catch {
+        return { ok: false, status: 0, error: "Network error. Please try again." };
+      }
+    });
+
+    mockPushAuthTelemetry.mockImplementation(async (name) => {
+      try {
+        await fetch("/api/telemetry/push", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, value: 1 }),
+        });
+      } catch {}
+    });
   });
 
   afterEach(() => {
@@ -73,7 +115,7 @@ describe("LoginForm", () => {
   });
 
   it("renders employee ID and password inputs", () => {
-    render(<LoginForm />);
+    renderLoginForm();
 
     expect(screen.getByPlaceholderText("Employee ID or email")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
@@ -93,7 +135,7 @@ describe("LoginForm", () => {
       json: jest.fn().mockResolvedValue({}),
     });
 
-    render(<LoginForm />);
+    renderLoginForm();
 
     fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
       target: { value: "PC-12345" },
@@ -126,7 +168,7 @@ describe("LoginForm", () => {
       json: jest.fn().mockResolvedValue({ error: "Invalid credentials" }),
     });
 
-    render(<LoginForm />);
+    renderLoginForm();
 
     fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
       target: { value: "PC-12345" },
@@ -146,7 +188,7 @@ describe("LoginForm", () => {
   it("shows network error when fetch throws", async () => {
     (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network failure"));
 
-    render(<LoginForm />);
+    renderLoginForm();
 
     fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
       target: { value: "PC-12345" },
@@ -172,7 +214,7 @@ describe("LoginForm", () => {
 
     (global.fetch as jest.Mock).mockReturnValueOnce(fetchPromise);
 
-    render(<LoginForm />);
+    renderLoginForm();
 
     fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
       target: { value: "PC-12345" },
@@ -209,7 +251,7 @@ describe("LoginForm", () => {
       json: jest.fn().mockResolvedValue({}),
     });
 
-    render(<LoginForm />);
+    renderLoginForm();
 
     fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
       target: { value: "PC-12345" },
@@ -225,7 +267,7 @@ describe("LoginForm", () => {
   });
 
   it("toggles password visibility when the eye button is clicked", () => {
-    render(<LoginForm />);
+    renderLoginForm();
     const passwordInput = screen.getByPlaceholderText("Enter your password");
     const toggleButton = screen.getByRole("button", { name: /show password/i });
 
@@ -243,7 +285,7 @@ describe("LoginForm", () => {
   });
 
   it("detects Caps Lock key down and up states", () => {
-    render(<LoginForm />);
+    renderLoginForm();
     const passwordInput = screen.getByPlaceholderText("Enter your password");
 
     // Press key with CapsLock active
@@ -287,7 +329,7 @@ describe("LoginForm", () => {
         get: jest.fn((key: string) => (key === "redirect" ? path : null)),
       });
 
-      const { unmount } = render(<LoginForm />);
+      const { unmount } = renderLoginForm();
 
       fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
         target: { value: "PC-12345" },

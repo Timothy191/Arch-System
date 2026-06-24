@@ -1,4 +1,6 @@
 {
   "name": "n8n-mcp-server",
-  "tags": ["scope:tool"]
+  "tags": [
+    "scope:tool"
+  ]
 }

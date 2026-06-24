@@ -1,0 +1,9 @@
+{
+  "name": "@repo/feature-auth-data-access",
+  "tags": [
+    "scope:package",
+    "scope:package:feature-auth-data-access",
+    "scope:auth",
+    "type:data-access"
+  ]
+}

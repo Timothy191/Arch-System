@@ -14,9 +14,10 @@ jest.mock("@repo/supabase/server", () => ({
   getUserSafely: jest.fn(),
 }));
 
-// Mock LoginForm
-jest.mock("@/features/auth/components/LoginForm", () => ({
+// Mock LoginForm & RefractionGlow from the feature package
+jest.mock("@repo/feature-auth-ui", () => ({
   LoginForm: () => <div data-testid="mock-login-form" />,
+  RefractionGlow: () => <div data-testid="mock-refraction-glow" />,
 }));
 
 // Mock GlassCard

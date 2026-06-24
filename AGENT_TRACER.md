@@ -1,5 +1,72 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-24: Refine CSS Layer Order in Overview App
+
+### Purpose
+
+Add explicit global `@layer` order declaration to the overview application's `globals.css` to ensure consistent cascading order across the workspace apps.
+
+### Changes Made
+
+1. **[apps/overview/app/globals.css](file:///home/timoty/Desktop/project/Arch-System/apps/overview/app/globals.css)**:
+   - Added `@layer reset, base, theme, components, utilities;` declaration at the top of the file.
+
+### Verification
+
+- Confirmed that `packages/ui/src/globals.css` already has this declaration.
+- Verified that all style linting and quality gate checks pass.
+
+---
+
+## 2026-06-24: Add Workspace Automations and Best Practices
+
+### Purpose
+
+Configure autonomous workspace automation recipes (skills) and document folder layout/best practices for agents.
+
+### Changes Made
+
+1. **[.agents/skills/](file:///home/timoty/Desktop/project/Arch-System/.agents/skills/)**:
+   - Created `self-healing-agent` skill.
+   - Created `feature-scaffolder` skill.
+   - Created `tag-auditor` skill.
+   - Created `workspace-janitor` skill.
+2. **[.agents/AGENTS.md](file:///home/timoty/Desktop/project/Arch-System/.agents/AGENTS.md)**:
+   - Created project-scoped rules covering Nx automation best practices.
+3. **[@HOW.md](file:///home/timoty/Desktop/project/Arch-System/@HOW.md)**:
+   - Created root-level workspace module layout guide.
+
+### Verification
+
+- Verified all files are created in the correct directories with appropriate headers.
+
+---
+
+## 2026-06-24: Add NotebookLM and Update Nx MCP Server Configurations
+
+### Purpose
+
+Install and configure the NotebookLM MCP server and update the Nx MCP configuration to use the latest `@nx/mcp-server` package.
+
+### Changes Made
+
+1. **[opencode.json](file:///home/timoty/Desktop/project/Arch-System/opencode.json)**:
+   - Added `"notebooklm"` MCP entry configured to execute `notebooklm-mcp` locally, sorted alphabetically.
+   - Updated `"nx-mcp"` entry to use `["npx", "-y", "@nx/mcp-server@latest"]`.
+
+### Verification
+
+- Installed `notebooklm-mcp-cli` via `uv tool install`.
+- Verified `notebooklm-mcp` responds to `--help`.
+- Verified the updated `nx-mcp` command string in config.
+
+### What the Next Agent Should Know
+
+- The NotebookLM MCP server (`notebooklm-mcp`) is installed and configured in `opencode.json`.
+- The CLI tool `nlm` is also available for managing notebooks and logging in.
+
+---
+
 ## 2026-07-23: Enhanced lint-staged Coverage
 
 ### Purpose

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { LoginForm } from "@/features/auth/components/LoginForm";
-import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
+import { RefractionGlow } from "@repo/feature-auth-ui";
+import { LoginFormContainer } from "./LoginFormContainer";
 import { AlertTriangle, Lock } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 
@@ -113,7 +113,7 @@ export default async function LoginPage() {
                 </div>
               </div>
 
-              <LoginForm />
+              <LoginFormContainer />
 
               {/* Contextual System Notice */}
               <div className="px-3.5 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--overlay-dim)] text-[11px] text-[var(--text-secondary)] leading-relaxed flex items-start gap-2.5 select-none">

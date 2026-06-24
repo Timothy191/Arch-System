@@ -112,6 +112,21 @@ for (const n of fs.readdirSync(APPS_DIR)) {
 for (const n of fs.readdirSync(PACKAGES_DIR)) {
   targets.push({ name: n, p: path.join("packages", n) });
 }
+// Recursively scan packages/features/*/* for feature-sliced packages
+const featuresDir = path.join(PACKAGES_DIR, "features");
+if (fs.existsSync(featuresDir)) {
+  for (const feature of fs.readdirSync(featuresDir)) {
+    const featurePath = path.join(featuresDir, feature);
+    if (fs.statSync(featurePath).isDirectory()) {
+      for (const subPkg of fs.readdirSync(featurePath)) {
+        const subPkgPath = path.join(featurePath, subPkg);
+        if (fs.statSync(subPkgPath).isDirectory()) {
+          targets.push({ name: subPkg, p: path.join("packages", "features", feature, subPkg) });
+        }
+      }
+    }
+  }
+}
 if (fs.existsSync(TOOLS_DIR)) {
   for (const n of fs.readdirSync(TOOLS_DIR)) {
     if (TAGGED_TOOLS.includes(n)) {

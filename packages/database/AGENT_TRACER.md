@@ -189,10 +189,22 @@ Implement controlled data sharing from Engineering Department to Control Room De
 
 **Changes:**
 
+- Renamed `011_performance_monitoring.sql` to `084_performance_monitoring.sql` (kept original 011_automated_auditing.sql).
+- Renamed `012_secrets_rotation_log.sql` to `085_secrets_rotation_log.sql` (kept original 012_rls_refinement.sql).
 - Renamed `013_json_validation.sql` to `091_json_validation.sql`.
 - Renamed `013_slo_monitoring.sql` to `092_slo_monitoring.sql`.
-- Renamed `015_shift_closeout.sql` to `094_shift_closeout.sql`.
+- Renamed `014_feature_flags.sql` to `093_feature_flags.sql` (kept original 014_schema_refinement.sql).
+- Renamed `015_shift_closeout.sql` to `094_shift_closeout.sql` (kept original 015_user_feedback.sql).
+- Renamed `050_hourly_loads_material_type.sql` to `095_hourly_loads_material_type.sql` (kept original 050_shift_completeness_alerts.sql).
+- Renamed `050_hourly_loads_material_type.sql` to `095_hourly_loads_material_type.sql`.
+- Renamed `051_data_integrity_issues.sql` to `096_data_integrity_issues.sql`.
+- Renamed `052_seed_admin_user.sql` to `097_seed_admin_user.sql`.
+- Renamed `068_delay_entries_table.sql` to `100_delay_entries_table.sql`.
+- Renamed `069_migrate_operational_delays_to_delay_entries.sql` to `101_migrate_operational_delays_to_delay_entries.sql`.
+- Renamed `068_rollback_delay_entries_table.sql` moved to `_rollback/098_rollback_delay_entries_table.sql` (run manually only).
+- Renamed `069_migration_integrity_checks.sql` moved to `_rollback/099_migration_integrity_checks.sql` (run manually only).
 
 **What the next agent should know:**
 
-- All database migrations are sequential. Sequence numbers above `085` represent newly renumbered migration steps to prevent conflicts with intermediate numbers.
+- All database migrations are sequential. Sequence numbers above `090` represent newly renumbered migration steps to prevent conflicts with intermediate numbers.
+- The AGENT_TRACER.md below this entry may reference old migration numbers - treat them as context, not canonical identifiers.

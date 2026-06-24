@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/ui
 
+## 2026-06-24 - Define Predictable Cascade Order in globals.css
+
+- **Purpose**: Ensure CSS layering order is fully transparent and predictable across the application as per styling audit.
+- **Changes**:
+  - `globals.css`: Added explicit `@layer reset, base, theme, components, utilities;` declaration at the very top of the stylesheet.
+- **Next Steps**: None.
+
 ## 2026-06-24 - Concentric Animated Loader Component
 
 - **Purpose**: Create and export the Uiverse concentric animated loader component for global use across the system.

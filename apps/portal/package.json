@@ -17,6 +17,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "@repo/contract": "1.0.0",
     "@repo/errors": "1.0.0",
+    "@repo/feature-auth-ui": "1.0.0",
     "@repo/logger": "1.0.0",
     "@repo/rate-limiter": "1.0.0",
     "@repo/redis": "1.0.0",

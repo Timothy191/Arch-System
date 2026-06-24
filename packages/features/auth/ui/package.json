@@ -1,0 +1,32 @@
+{
+  "name": "@repo/feature-auth-ui",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "framer-motion": "catalog:",
+    "lucide-react": "catalog:",
+    "sonner": "catalog:",
+    "@repo/ui": "1.0.0",
+    "@repo/feature-auth-utils": "1.0.0",
+    "@sentry/nextjs": "catalog:",
+    "next": "^16.2.6"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@repo/eslint-config": "0.0.0",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "@testing-library/react": "^16.3.0"
+  },
+  "scripts": {
+    "clean": "rm -rf .nx",
+    "type-check": "tsc --noEmit"
+  }
+}

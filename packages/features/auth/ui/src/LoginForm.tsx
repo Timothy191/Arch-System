@@ -9,47 +9,8 @@ import { AnimatedButton } from "@repo/ui/AnimatedButton";
 import { Checkbox } from "@repo/ui/Checkbox";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { toast } from "sonner";
-
-/**
- * Validates whether a redirect path is internal to the application to prevent open redirects.
- * Ensures the path starts with a single slash and does not contain protocol bypass backslashes or double slashes.
- *
- * @param path - The target redirect path to validate.
- * @returns True if the path is an internal relative URL, otherwise false.
- */
-function isInternalRedirect(path: string): boolean {
-  return path.startsWith("/") && !path.startsWith("//") && !path.startsWith("/\\");
-}
-
-/**
- * Fire telemetry push (fire-and-forget). Extracted from handleSubmit to avoid
- * recreating the function on every submission.
- */
-async function pushTelemetry(name: string) {
-  try {
-    await fetch("/api/telemetry/push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, value: 1 }),
-    });
-  } catch {
-    // Ignore telemetry failures in the client
-  }
-}
-
-/**
- * Filter out non-page paths (assets, manifests, static files, etc.) that should never be redirect targets.
- * Ensures redirect targets only resolve to internal application route paths.
- *
- * @param path - The target redirect path to filter.
- * @returns True if the path points to a valid internal route page, otherwise false.
- */
-function isValidPageRedirect(path: string): boolean {
-  return (
-    isInternalRedirect(path) &&
-    !/\.(json|ico|png|jpg|jpeg|svg|xml|txt|webmanifest|css|js|woff|woff2)$/.test(path)
-  );
-}
+import { resolveSafeRedirect, validateSsoUrl } from "@repo/feature-auth-utils";
+import type { LoginFormProps } from "./login-types";
 
 /**
  * LoginForm Component
@@ -63,11 +24,11 @@ function isValidPageRedirect(path: string): boolean {
  * - Design system colors (OKLCH) should meet WCAG AA contrast ratios
  * - Respects prefers-reduced-motion via theme CSS
  */
-export function LoginForm() {
+export function LoginForm({ loginWithCredentials, pushAuthTelemetry }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/";
-  const redirectTo = isValidPageRedirect(rawRedirect) ? rawRedirect : "/";
+  const redirectTo = resolveSafeRedirect(rawRedirect);
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
@@ -105,32 +66,21 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: employeeId,
-          password,
-        }),
-      });
+      const result = await loginWithCredentials(employeeId, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!result.ok) {
         // Surface rate-limit info to the user with a live countdown
-        if (response.status === 429) {
-          const retryAfter = response.headers.get("X-RateLimit-Reset");
-          if (retryAfter) {
-            const retryTimestamp = parseInt(retryAfter, 10);
+        if (result.status === 429) {
+          if (result.rateLimitReset) {
             const now = Math.floor(Date.now() / 1000);
-            const remaining = Math.max(0, retryTimestamp - now);
+            const remaining = Math.max(0, result.rateLimitReset - now);
             setRateLimitCountdown(remaining);
             toast.error("Too many attempts. Please wait before trying again.");
           } else {
-            toast.error(data.error || "Too many attempts. Please wait before trying again.");
+            toast.error(result.error || "Too many attempts. Please wait before trying again.");
           }
         } else {
-          toast.error(data.error || "Sign in failed. Please try again.");
+          toast.error(result.error || "Sign in failed. Please try again.");
         }
         setPassword("");
 
@@ -140,13 +90,13 @@ export function LoginForm() {
             message: "Auth failed",
             category: "auth",
             level: "error",
-            data: { reason: data.error || "Unknown error" },
+            data: { reason: result.error || "Unknown error" },
           });
           // eslint-disable-next-line no-empty
         } catch {}
 
         // Push lightweight telemetry tag (fire-and-forget)
-        void pushTelemetry("auth.failure");
+        void pushAuthTelemetry("auth.failure");
 
         setLoading(false);
         return;
@@ -162,7 +112,7 @@ export function LoginForm() {
         });
         // eslint-disable-next-line no-empty
       } catch {}
-      void pushTelemetry("auth.success");
+      void pushAuthTelemetry("auth.success");
 
       setLoading(false);
       router.push(redirectTo);
@@ -309,29 +259,13 @@ export function LoginForm() {
           disabled={loading}
           onClick={() => {
             const ssoUrl = process.env.NEXT_PUBLIC_SSO_URL;
-            const allowedSSODomains = (process.env.NEXT_PUBLIC_ALLOWED_SSO_DOMAINS || "")
-              .split(",")
-              .filter(Boolean);
-            if (ssoUrl) {
-              // Validate SSO URL against allowed domains before redirecting
-              if (allowedSSODomains.length > 0) {
-                try {
-                  const parsedUrl = new URL(ssoUrl);
-                  if (!allowedSSODomains.includes(parsedUrl.hostname)) {
-                    toast.error("SSO configuration is invalid. Please contact your administrator.");
-                    return;
-                  }
-                } catch {
-                  toast.error("SSO configuration is invalid. Please contact your administrator.");
-                  return;
-                }
-              }
-              // Redirect to corporate SSO/OIDC endpoint
-              window.location.href = ssoUrl;
-            } else {
-              // Fallback: show error if SSO not configured
-              toast.error("Single Sign-On is not configured. Please contact your administrator.");
+            const allowedSSODomains = process.env.NEXT_PUBLIC_ALLOWED_SSO_DOMAINS;
+            const error = validateSsoUrl(ssoUrl, allowedSSODomains);
+            if (error) {
+              toast.error(error);
+              return;
             }
+            window.location.href = ssoUrl!;
           }}
           className="w-full h-12 border border-[var(--border-default)] bg-[var(--overlay-dim)] hover:bg-[var(--overlay-subtle)] text-[var(--text-secondary)] font-medium text-xs rounded-md liquid-glass-button flex items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 focus-visible:ring-offset-1"
           hoverScale={1}

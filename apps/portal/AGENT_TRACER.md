@@ -2527,3 +2527,12 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-06-24T20:37:00Z] Refactor: Auth UI & Data-Access Dependency Boundary
+
+**Purpose:** De-couple the `@repo/feature-auth-ui` package from `@repo/feature-auth-data-access` package, routing through `LoginFormContainer` in the portal app to comply with Nx boundary constraints.
+**Changes:**
+- Created `LoginFormContainer.tsx` to handle the injection of `loginWithCredentials` and `pushAuthTelemetry` into the `LoginForm` component.
+- Updated `apps/portal/app/(auth)/login/page.tsx` to use `LoginFormContainer` instead of rendering `LoginForm` directly.
+- Next Agent Notes: All dependency constraints for `type:ui` and `type:data-access` are now strictly checked and enforced.
+

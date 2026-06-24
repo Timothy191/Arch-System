@@ -177,6 +177,22 @@
     {
       "sourceTag": "scope:package",
       "notDependOnLibsWithTags": ["scope:app"]
+    },
+    {
+      "sourceTag": "scope:auth",
+      "onlyDependOnLibsWithTags": ["scope:package"]
+    },
+    {
+      "sourceTag": "type:util",
+      "onlyDependOnLibsWithTags": ["scope:package"]
+    },
+    {
+      "sourceTag": "type:data-access",
+      "onlyDependOnLibsWithTags": ["scope:package", "type:util", "type:data-access"]
+    },
+    {
+      "sourceTag": "type:ui",
+      "onlyDependOnLibsWithTags": ["scope:package", "type:ui", "type:util"]
     }
   ]
 }

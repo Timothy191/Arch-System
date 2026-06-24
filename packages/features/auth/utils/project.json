@@ -1,0 +1,9 @@
+{
+  "name": "@repo/feature-auth-utils",
+  "tags": [
+    "scope:package",
+    "scope:package:feature-auth-utils",
+    "scope:auth",
+    "type:util"
+  ]
+}

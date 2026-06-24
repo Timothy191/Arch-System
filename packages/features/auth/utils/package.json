@@ -1,0 +1,16 @@
+{
+  "name": "@repo/feature-auth-utils",
+  "version": "1.0.0",
+  "private": true,
+  "exports": { ".": "./src/index.ts" },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@repo/eslint-config": "0.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "scripts": {
+    "clean": "rm -rf .nx",
+    "type-check": "tsc --noEmit"
+  }
+}
