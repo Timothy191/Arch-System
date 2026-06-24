@@ -204,16 +204,16 @@ export function SystemClock() {
                   return (
                     <div
                       key={`day-${day}`}
-                    className={cn(
-                      "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
-                      isToday
-                        ? "bg-[var(--accent-blue)] text-white font-bold shadow-card"
-                        : "text-[var(--text-heading)] hover:bg-black/[0.04]",
-                    )}
-                  >
-                    {day}
-                  </div>
-                );
+                      className={cn(
+                        "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
+                        isToday
+                          ? "bg-[var(--accent-blue)] text-white font-bold shadow-card"
+                          : "text-[var(--text-heading)] hover:bg-black/[0.04]",
+                      )}
+                    >
+                      {day}
+                    </div>
+                  );
                 });
               })()}
             </div>

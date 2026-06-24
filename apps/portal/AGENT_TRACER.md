@@ -2388,3 +2388,27 @@ Reduce unnecessary re-renders and computations in the SystemClock component to i
 - The component was refactored to ensure all hooks are declared before any conditional early returns (Early return on `!timeStr` moved after hooks).
 - Verified that all 64 test suites in the portal app pass.
 - Logged performance patterns in `.jules/bolt.md`.
+
+---
+
+## 2026-06-24: Fix CI Dependencies and Versioning
+
+### Purpose
+
+Resolve CI failures in Build & Test and Accessibility Audit jobs caused by version mismatches and missing dependencies.
+
+### Changes Made
+
+1. **Aligned pnpm version** (`.github/workflows/ci.yml`, `.github/workflows/reviewdog.yml`):
+   - Updated pnpm version from 9.12.0 to 9.15.9 to match `package.json` and prevent `ERR_PNPM_BAD_PM_VERSION`.
+
+2. **Fixed dependency mismatches** (`packages/ui/package.json`):
+   - Updated `peerDependencies.next` from `>=16.0.0` to `^16.2.6` to satisfy `pnpm deps:lint` (syncpack) requirements for ecosystem lockstep.
+
+3. **Resolved missing CI utility** (`packages/ui/package.json`):
+   - Added `wait-on` to devDependencies to ensure availability during Storybook a11y audits.
+
+### What the Next Agent Should Know
+
+- CI environment now correctly handles the dual-layer caching and Storybook audits.
+- `pnpm-lock.yaml` has been updated to reflect these changes.

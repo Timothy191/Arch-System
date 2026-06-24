@@ -35,7 +35,8 @@
     "stylelint": "^17.11.1",
     "stylelint-config-standard": "^40.0.0",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "wait-on": "^9.0.10"
   },
   "exports": {
     "./globals.css": "./src/globals.css",
@@ -85,9 +86,9 @@
     "./edges/FlowEdge": "./src/components/edges/FlowEdge.tsx"
   },
   "peerDependencies": {
+    "next": "^16.2.6",
     "react": "^19",
-    "react-dom": "^19",
-    "next": ">=16.0.0"
+    "react-dom": "^19"
   },
   "private": true,
   "scripts": {
