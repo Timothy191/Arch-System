@@ -85,6 +85,7 @@ const archTheme: Config = {
         "brand-blue-hover": "var(--arch-brand-blue-hover)",
 
         // macOS system accent colors
+        "accent-charcoal": "var(--accent-charcoal)",
         "accent-blue": "var(--accent-blue)",
         "accent-red": "var(--accent-red)",
         "accent-green": "var(--accent-green)",
@@ -116,7 +117,7 @@ const archTheme: Config = {
         // Arch semantic namespace — for production-ready theme consistency
         arch: {
           surface: {
-            primary: "var(--bg-primary)", // --arch0 #f5f5f7
+            primary: "var(--bg-primary)", // --arch0 #ffffff
             secondary: "var(--bg-secondary)", // --arch1 #ffffff
             tertiary: "var(--bg-tertiary)", // --arch2 #e8e8ed
           },
@@ -131,8 +132,9 @@ const archTheme: Config = {
             emphasis: "var(--border-emphasis)", // --arch6
           },
           accent: {
-            blue: "var(--accent-blue)", // --arch15 #007aff
-            red: "var(--accent-red)", // --arch12 #ff3b30
+            charcoal: "var(--accent-charcoal)", // --arch13 #1c1c1e
+            blue: "var(--accent-blue)", // deprecated alias → charcoal
+            red: "var(--accent-red)", // --arch12 #d22118
             green: "var(--accent-green)", // --arch14 #34c759
           },
         },

@@ -57,7 +57,7 @@ export function EmployeeSearch({ onSelect }: EmployeeSearchProps) {
       </div>
 
       {isOpen && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-md shadow-diffusion-md z-50 max-h-60 overflow-y-auto">
           {results.map((emp) => (
             <button
               key={emp.id}

@@ -63,6 +63,9 @@
   --text-heading: var(--arch11);
 
   --accent-red: var(--arch12);
+  /* Canonical brand interactive — deep charcoal (not macOS blue) */
+  --accent-charcoal: var(--arch13);
+  /** @deprecated use --accent-charcoal — name retained for backward compatibility */
   --accent-blue: var(--arch13);
   --accent-green: var(--arch14);
 
@@ -102,7 +105,7 @@
   --color-status-danger: var(--accent-red);
 
   /* Glow shadows for the extended palette */
-  --shadow-glow-electric-blue: 0 0 20px rgba(220, 38, 38, 0.22), 0 0 60px rgba(220, 38, 38, 0.08);
+  --shadow-glow-electric-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
   --shadow-glow-mint: 0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
   --shadow-glow-amber: 0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
 
@@ -111,7 +114,7 @@
   --success-foreground: 0 0% 100%;
   --warning: #1c1c1e;
   --warning-foreground: 0 0% 100%;
-  --danger: #ff3b30;
+  --danger: var(--arch12);
   --danger-foreground: 0 0% 100%;
   --info: #1c1c1e;
   --info-foreground: 0 0% 100%;
@@ -172,7 +175,7 @@
   --muted-foreground: 240 3% 44%; /* #6e6e73 */
   --accent: 240 5% 91%;
   --accent-foreground: 240 6% 10%;
-  --destructive: 4 86% 58%; /* #ff3b30 */
+  --destructive: 3 78% 46%; /* #d22118 — matches arch12 */
   --destructive-foreground: 0 0% 100%;
   --border: 240 6% 87%; /* rgba-ish light border */
   --input: 240 5% 91%;
@@ -183,7 +186,7 @@
   --chart-1: 240 6% 10%; /* Slate / Pitch Black */
   --chart-2: 142 71% 45%; /* green */
   --chart-3: 240 5% 45%; /* slate gray */
-  --chart-4: 4 86% 58%; /* red */
+  --chart-4: 3 78% 46%; /* red — matches arch12 */
   --chart-5: 270 60% 55%; /* purple */
 
   /* ═══════════════════════════════════════════════════════════════
@@ -437,8 +440,8 @@
   --font-sans: "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-inter:
     "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-  --font-outfit:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  /* Fallback until next/font hydrates; portal layout overrides via Outfit.variable */
+  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;

@@ -20,7 +20,7 @@ type Story = StoryObj<typeof ShineBorder>;
 
 export const Default: Story = {
   render: (args) => (
-    <div className="relative flex h-[200px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl border bg-background md:shadow-xl">
+    <div className="relative flex h-[200px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl border bg-background md:shadow-diffusion-lg">
       <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-4xl font-semibold leading-none text-transparent">
         Shine Border
       </span>
@@ -36,7 +36,7 @@ export const Default: Story = {
 
 export const CyanGlow: Story = {
   render: (args) => (
-    <div className="relative flex h-[200px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl border bg-black md:shadow-xl">
+    <div className="relative flex h-[200px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-xl border bg-black md:shadow-diffusion-lg">
       <span className="text-white font-mono uppercase tracking-widest">Active System</span>
       <ShineBorder {...args} />
     </div>

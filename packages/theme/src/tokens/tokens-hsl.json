@@ -530,15 +530,34 @@
     "attributes": {},
     "path": ["accent-red"]
   },
+  "accent-charcoal": {
+    "key": "{accent-charcoal}",
+    "value": "#1c1c1e",
+    "type": "color",
+    "description": "Canonical brand interactive — deep charcoal",
+    "filePath": "tokens.json",
+    "isSource": true,
+    "original": {
+      "value": "{arch13}",
+      "type": "color",
+      "description": "Canonical brand interactive — deep charcoal",
+      "key": "{accent-charcoal}"
+    },
+    "name": "accent-charcoal",
+    "attributes": {},
+    "path": ["accent-charcoal"]
+  },
   "accent-blue": {
     "key": "{accent-blue}",
     "value": "#1c1c1e",
     "type": "color",
+    "description": "@deprecated alias — use accent-charcoal",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "{arch15}",
+      "value": "{arch13}",
       "type": "color",
+      "description": "@deprecated alias — use accent-charcoal",
       "key": "{accent-blue}"
     },
     "name": "accent-blue",
@@ -697,12 +716,12 @@
   },
   "danger": {
     "key": "{danger}",
-    "value": "#ff3b30",
+    "value": "#d22118",
     "type": "color",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "#ff3b30",
+      "value": "#d22118",
       "type": "color",
       "key": "{danger}"
     },
@@ -1226,12 +1245,12 @@
   },
   "destructive": {
     "key": "{destructive}",
-    "value": "4 86% 58%",
+    "value": "3 78% 46%",
     "type": "color",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "4 86% 58%",
+      "value": "3 78% 46%",
       "type": "color",
       "key": "{destructive}"
     },
@@ -1346,12 +1365,12 @@
   },
   "chart-4": {
     "key": "{chart-4}",
-    "value": "4 86% 58%",
+    "value": "3 78% 46%",
     "type": "color",
     "filePath": "tokens.json",
     "isSource": true,
     "original": {
-      "value": "4 86% 58%",
+      "value": "3 78% 46%",
       "type": "color",
       "key": "{chart-4}"
     },

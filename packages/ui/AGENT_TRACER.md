@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-06-25 - Design system shadow token compliance
+
+- **Purpose**: Remove forbidden Tailwind `shadow-*` utilities per DESIGN.md / design-system rules.
+- **Changes**:
+  - `cyber-button.tsx`: `shadow-md/lg` → `shadow-glow-electric` for blue variant.
+  - `sonner.tsx`: `shadow-lg` → `shadow-diffusion-md`.
+  - Storybook demos: `shadow-2xl` / `shadow-xl` → `shadow-window` / `shadow-diffusion-lg`.
+
 ## 2026-06-25 - Phase 3 CSS cascade layer consolidation
 
 - **Purpose**: Complete Phase 3 `@layer` standard — single consolidated layer blocks and aligned theme package imports.

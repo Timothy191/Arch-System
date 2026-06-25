@@ -24,10 +24,10 @@ Bootstrap: `pnpm dev:up --all` (`--quick`, `--tools`, `--cms`, `--overview`).
 
 ## Codegen — never edit generated output
 
-| Pipeline      | Source                          | Generate                                                                     |
-| ------------- | ------------------------------- | ---------------------------------------------------------------------------- |
-| Design tokens | `packages/theme/tokens.json`    | `pnpm --filter @repo/theme build`                                            |
-| DB types      | `packages/database/migrations/` | `supabase:push` → `supabase:gen` → `packages/supabase/src/database.types.ts` |
+| Pipeline      | Source                                                 | Generate                                                                      |
+| ------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Design tokens | `packages/theme/src/css/variables.css` + `tokens.json` | `pnpm --filter @repo/theme build` → `generated.ts`, `variables-generated.css` |
+| DB types      | `packages/database/migrations/`                        | `supabase:push` → `supabase:gen` → `packages/supabase/src/database.types.ts`  |
 
 Never edit `packages/supabase/supabase/migrations/` directly (PreToolUse hook blocks it).
 

@@ -30,8 +30,8 @@ export function CyberButton({
     blue: {
       border: "border-[var(--accent-electric-blue)]/40",
       text: "text-[var(--accent-electric-blue)]",
-      glow: "shadow-md",
-      glowHover: "hover:shadow-lg",
+      glow: "shadow-glow-electric",
+      glowHover: "hover:shadow-glow-electric",
       bg: "bg-[var(--accent-electric-blue)]/5",
       bgHover: "hover:bg-[var(--accent-electric-blue)]/10",
       before: "before:bg-[var(--accent-electric-blue)]",

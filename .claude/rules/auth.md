@@ -2,7 +2,7 @@
 
 ## Proxy (Middleware)
 
-`apps/portal/proxy.ts` handles session refresh, department slug → UUID resolution (cached in Redis), and role-based route restrictions.
+`apps/portal/middleware.ts` delegates to `apps/portal/server/proxy.ts` for session refresh, department slug → UUID resolution (cached in Redis), and role-based route restrictions.
 
 - **Proxy matcher**: `matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"]` — static assets and `_next` internals bypass the proxy entirely.
 - **Hardware API exemption**: `/api/c66` endpoints are exempt from authentication in `proxy.ts`.

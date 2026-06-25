@@ -1,3 +1,2 @@
-export { ArchThemeProvider, useArchTheme } from "./theme-provider";
-export { useTheme } from "next-themes";
+export { ArchThemeProvider, useArchTheme, useTheme } from "./theme-provider";
 export { ThemeToggle } from "./theme-toggle";

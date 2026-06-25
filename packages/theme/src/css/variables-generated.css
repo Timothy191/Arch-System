@@ -30,7 +30,7 @@
   --success-foreground: 0 0% 100%;
   --warning: #1c1c1e;
   --warning-foreground: 0 0% 100%;
-  --danger: #ff3b30;
+  --danger: #d22118;
   --danger-foreground: 0 0% 100%;
   --info: #1c1c1e;
   --info-foreground: 0 0% 100%;
@@ -71,7 +71,7 @@
   --muted-foreground: 240 3% 44%;
   --accent: 240 5% 91%;
   --accent-foreground: 240 6% 10%;
-  --destructive: 4 86% 58%;
+  --destructive: 3 78% 46%;
   --destructive-foreground: 0 0% 100%;
   --input: 240 5% 91%;
   --ring: 240 6% 10%;
@@ -79,7 +79,7 @@
   --chart-1: 240 6% 10%;
   --chart-2: 142 71% 45%;
   --chart-3: 240 5% 45%;
-  --chart-4: 4 86% 58%;
+  --chart-4: 3 78% 46%;
   --chart-5: 270 60% 55%;
   --tremor-brand-faint: 240 5% 96%;
   --tremor-brand-muted: 240 5% 90%;
@@ -154,7 +154,8 @@
   --text-body: var(--arch10);
   --text-primary: var(--arch10);
   --text-heading: var(--arch11);
-  --accent-blue: var(--arch15);
+  --accent-charcoal: var(--arch13);
+  --accent-blue: var(--arch13);
   --accent-green: var(--arch14);
   --accent-cyan: var(--arch15);
   --accent-emerald: var(--arch14);

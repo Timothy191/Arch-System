@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useCallback, type ReactNode } from "react";
-import { ThemeProvider as NextThemesProvider, useTheme as useNextThemes } from "next-themes";
 
 interface ArchThemeContextType {
   theme: "light";
@@ -12,31 +11,24 @@ interface ArchThemeContextType {
 
 const ArchThemeContext = createContext<ArchThemeContextType | undefined>(undefined);
 
+const LIGHT_THEME = {
+  theme: "light" as const,
+  resolvedTheme: "light" as const,
+  setTheme: () => {},
+  toggleTheme: () => {},
+};
+
 /**
  * ArchThemeProvider — Light-only theme provider for the Arch System.
  *
- * Defaults to light. No dark mode support.
- * Syncs `data-theme="light"` and updates `<meta name="theme-color">`.
+ * Sets `data-theme="light"` and `<meta name="theme-color">` on mount.
+ * No dark mode; no next-themes dependency.
  */
 export function ArchThemeProvider({ children }: { children: ReactNode }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      forcedTheme="light"
-      enableSystem={false}
-      enableColorScheme={false}
-    >
-      <ArchThemeInner>{children}</ArchThemeInner>
-    </NextThemesProvider>
-  );
-}
-
-function ArchThemeInner({ children }: { children: ReactNode }) {
-  useNextThemes();
-
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute("data-theme", "light");
+    root.style.colorScheme = "light";
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
@@ -44,22 +36,7 @@ function ArchThemeInner({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    // No-op: light only
-  }, []);
-
-  return (
-    <ArchThemeContext.Provider
-      value={{
-        theme: "light",
-        resolvedTheme: "light",
-        setTheme: () => {},
-        toggleTheme,
-      }}
-    >
-      {children}
-    </ArchThemeContext.Provider>
-  );
+  return <ArchThemeContext.Provider value={LIGHT_THEME}>{children}</ArchThemeContext.Provider>;
 }
 
 export function useArchTheme() {
@@ -70,4 +47,7 @@ export function useArchTheme() {
   return ctx;
 }
 
-export { useNextThemes as useTheme };
+/** @deprecated use useArchTheme — light-only stub for legacy imports */
+export function useTheme() {
+  return useArchTheme();
+}

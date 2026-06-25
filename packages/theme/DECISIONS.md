@@ -98,15 +98,31 @@ it via `scripts/generate-tokens.mjs`. The JS values should never be edited manua
 
 ---
 
+## 008 — `--accent-charcoal` as canonical brand interactive
+
+**Decision**: `--accent-charcoal` (`var(--arch13)`, `#1c1c1e`) is the canonical Tier 2 token for brand
+interactive accents. `--accent-blue` remains as a deprecated alias mapping to `--accent-charcoal`.
+
+**Why**: The palette moved from macOS system blue (`#007aff`) to deep charcoal for brand consistency.
+The name `accent-blue` was misleading after the migration — 600+ component references still use
+`var(--accent-blue)` and Tailwind `accent-blue` utilities.
+
+**Migration strategy**: New code uses `--accent-charcoal` / `colors.accent.charcoal` / `accent-charcoal`
+Tailwind utility. Existing `accent-blue` references continue to work via alias. Migrate on touch.
+
+**Tracking**: `tokens.json`, `variables.css`, `preset.ts`, and `colors.ts` all expose both names.
+
+---
+
 ## 007 — Token tier system
 
 Three tiers enforced by `scripts/validate-tokens.mjs` and documented inline in `variables.css`:
 
-| Tier           | Tokens                                                                                                       | Rule                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| **Primitive**  | `--arch0`–`--arch15`                                                                                         | Raw values only. Never referenced in components or `preset.ts` semantic sections. |
-| **Semantic**   | `--bg-primary`, `--text-body`, `--shadow-card`, etc.                                                         | All component and utility references. Auto-updated by dark mode.                  |
-| **Deprecated** | `--accent-cyan`, `--accent-indigo`, `--accent-violet`, `--accent-alert`, `--accent-blue`, `--accent-emerald` | Map to canonical Tier 2. Stylelint warns. Migrate on touch.                       |
+| Tier           | Tokens                                                                                                       | Rule                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **Primitive**  | `--arch0`–`--arch15`                                                                                         | Raw values only. Never referenced in components or `preset.ts` semantic sections.                                   |
+| **Semantic**   | `--bg-primary`, `--text-body`, `--shadow-card`, etc.                                                         | All component and utility references. Auto-updated by dark mode.                                                    |
+| **Deprecated** | `--accent-cyan`, `--accent-indigo`, `--accent-violet`, `--accent-alert`, `--accent-blue`, `--accent-emerald` | Map to canonical Tier 2 (`--accent-charcoal`, `--accent-red`, `--accent-green`). Stylelint warns. Migrate on touch. |
 
 ---
 

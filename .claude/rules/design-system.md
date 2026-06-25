@@ -26,7 +26,7 @@ Always use `cn()` from `@repo/ui/lib/utils` for conditional class names.
 
 ## Typography
 
-Inter + Outfit for UI, JetBrains Mono for tabular data/code.
+Inter + Outfit for UI, JetBrains Mono for tabular data/code. Outfit is loaded via `next/font` in portal `layout.tsx` (`--font-outfit`).
 
 ## Animation
 

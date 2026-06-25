@@ -1,6 +1,27 @@
 # Agent Tracer - @repo/theme
 
-## 2026-06-25 - Phase 3 CSS cascade layer alignment
+## 2026-06-25 - Follow-up alignment (codegen HSL, accent-charcoal, theme provider)
+
+- **Purpose**: Complete alignment audit follow-ups — auto HSL sync, canonical accent naming, remove next-themes, Outfit font.
+- **Changes**:
+  - `scripts/generate-tokens.mjs`: Emits `tokens.hsl` + `tokens.primitives` from `variables.css`; `colors.ts` re-exports `hsl` from generated.
+  - `variables.css`: Added `--accent-charcoal` (canonical); `--accent-blue` deprecated alias → `arch13`; `--font-outfit` fallback stack.
+  - `preset.ts`: `accent-charcoal` utility; fixed stale arch.accent comments.
+  - `react/theme-provider.tsx`: Removed `next-themes`; light-only `data-theme` + `useTheme` stub.
+  - `package.json`: Removed `next-themes` dependency.
+  - `tokens.json`, `DECISIONS.md` (008), `DESIGN.md` shadow/typography docs updated.
+- **Next agent**: Prefer `--accent-charcoal` / `colors.accent.charcoal` in new code; run `pnpm --filter @repo/theme build` after palette edits.
+
+## 2026-06-25 - Token alignment remediation (colors.ts + CSS drift)
+
+- **Purpose**: Resolve misalignment between `colors.ts`, `variables.css`, and `tokens.json` after brand charcoal refresh.
+- **Changes**:
+  - `src/tokens/colors.ts`: Synced `arch0`–`arch15`, deprecated accent exports, and shadcn HSL block to match `variables.css` / `tokens.json`.
+  - `src/css/variables.css`: `--danger` → `var(--arch12)`; `--destructive` / `--chart-4` → `#d22118` HSL; fixed `--shadow-glow-electric-blue` (was red RGBA typo).
+  - `tokens.json`: `danger`, `destructive`, `chart-4` aligned to arch12 contrast values.
+  - `src/tokens/shadows.ts`: Glow shadows updated to charcoal RGBA (matches CSS).
+- **SSoT**: Semantic tokens in `variables.css`; primitives in `tokens.json` for Style Dictionary; `colors.ts` must be updated when arch palette changes (codegen for arch block planned).
+- **Next agent**: Run `pnpm --filter @repo/theme build && lint:tokens` after any palette edit; consider extending `generate-tokens.mjs` to emit arch constants from CSS.
 
 - **Purpose**: Map theme CSS imports to the canonical cascade layers declared in `@repo/ui/globals.css`.
 - **Changes**:

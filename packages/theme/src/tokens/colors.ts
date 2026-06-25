@@ -5,33 +5,35 @@
  * Mirrors CSS custom properties in variables.css for JS/TS usage (charts, shaders, dynamic values).
  */
 
+import { tokens } from "./generated";
+
 // ═══════════════════════════════════════════════════════════════
 // ARCH COLOR PALETTE — macOS Ventura/Sonoma Light
 // ═══════════════════════════════════════════════════════════════
 
-/** Background range — macOS system grays */
-export const arch0 = "#f5f5f7"; // macOS base background
-export const arch1 = "#ffffff"; // elevated surface / card
-export const arch2 = "#e8e8ed"; // sunken / input bg
-export const arch3 = "#d2d2d7"; // pressed / deeply sunken
+/** Background range — macOS system grays (mirrors variables.css / tokens.json) */
+export const arch0 = tokens.primitives.arch0; // macOS pure white background
+export const arch1 = tokens.primitives.arch1; // elevated surface / card
+export const arch2 = tokens.primitives.arch2; // sunken / input bg
+export const arch3 = tokens.primitives.arch3; // pressed / deeply sunken
 
 /** Border range — hairline to emphasis (stored as hex approximations for JS use) */
-export const arch4 = "rgba(0,0,0,0.06)"; // border subtle
-export const arch5 = "rgba(0,0,0,0.12)"; // border default
-export const arch6 = "rgba(0,0,0,0.20)"; // border emphasis
-export const arch7 = "rgba(0,0,0,0.30)"; // border strong
+export const arch4 = tokens.primitives.arch4; // border subtle
+export const arch5 = tokens.primitives.arch5; // border default
+export const arch6 = tokens.primitives.arch6; // border emphasis
+export const arch7 = tokens.primitives.arch7; // border strong
 
 /** Text range — macOS type hierarchy */
-export const arch8 = "#a1a1a6"; // muted / placeholder
-export const arch9 = "#6e6e73"; // secondary / caption
-export const arch10 = "#3a3a3c"; // body
-export const arch11 = "#1d1d1f"; // heading / primary
+export const arch8 = tokens.primitives.arch8; // muted / placeholder
+export const arch9 = tokens.primitives.arch9; // secondary / caption
+export const arch10 = tokens.primitives.arch10; // body
+export const arch11 = tokens.primitives.arch11; // heading / primary
 
-/** Aurora Accents — macOS system colors */
-export const arch12 = "#ff3b30"; // red — error / danger
-export const arch13 = "#007aff"; // blue — warning
-export const arch14 = "#34c759"; // green — success
-export const arch15 = "#007aff"; // blue — macOS system blue
+/** Aurora Accents — semantic status (charcoal primary per brand refresh) */
+export const arch12 = tokens.primitives.arch12; // red — error / danger (WCAG 4.5:1)
+export const arch13 = tokens.primitives.arch13; // deep charcoal — accent-blue alias
+export const arch14 = tokens.primitives.arch14; // green — success
+export const arch15 = tokens.primitives.arch15; // deep charcoal — brand primary
 
 /** Complete palette array (for iteration) */
 export const ARCH_PALETTE = [
@@ -77,6 +79,8 @@ export const colors = {
   },
   accent: {
     red: arch12,
+    charcoal: arch13,
+    /** @deprecated use charcoal — maps to arch13 deep charcoal */
     blue: arch13,
     green: arch14,
   },
@@ -90,18 +94,18 @@ export const colorsDark = { ...colors } as const;
 // @deprecated — Migrate all usages to the canonical accent-* names.
 // Stylelint will emit warnings on var(--accent-cyan/indigo/violet) usage.
 // ═══════════════════════════════════════════════════════════════
-/** @deprecated → use colors.accent.blue */
-export const accentCyan = "#007aff";
-/** @deprecated → use colors.accent.blue */
-export const accentIndigo = "#007aff";
-/** @deprecated → use colors.accent.blue */
-export const accentViolet = "#007aff";
-/** @deprecated → use colors.accent.red */
-export const accentAlert = "#ff3b30";
-/** @deprecated → use colors.accent.blue */
-export const accentBlue = "#007aff";
-/** @deprecated → use colors.accent.green */
-export const accentEmerald = "#34c759";
+/** @deprecated → use colors.accent.charcoal (arch13) */
+export const accentCyan = arch13;
+/** @deprecated → use colors.accent.charcoal (arch13) */
+export const accentIndigo = arch13;
+/** @deprecated → use colors.accent.charcoal (arch13) */
+export const accentViolet = arch13;
+/** @deprecated → use colors.accent.red (arch12) */
+export const accentAlert = arch12;
+/** @deprecated → use colors.accent.charcoal (arch13) */
+export const accentBlue = arch13;
+/** @deprecated → use colors.accent.green (arch14) */
+export const accentEmerald = arch14;
 
 // ═══════════════════════════════════════════════════════════════
 // GLASSMORPHISM TOKENS (RGBA for runtime use)
@@ -128,35 +132,10 @@ export const glass = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════
-// HSL VALUES (for shadcn/ui compatibility - macOS Light Mode)
-// ═══════════════════════════════════════════════════════════════ */
+// HSL VALUES (for shadcn/ui compatibility — auto-synced from variables.css)
+// ═══════════════════════════════════════════════════════════════
 
-export const hsl = {
-  primary: "211 100% 50%", // #007aff macOS blue
-  primaryForeground: "0 0% 100%",
-  background: "240 5% 96%", // #f5f5f7
-  foreground: "240 6% 10%", // #1d1d1f
-  card: "0 0% 100%",
-  cardForeground: "240 6% 10%",
-  popover: "0 0% 100%",
-  popoverForeground: "240 6% 10%",
-  secondary: "240 5% 91%",
-  secondaryForeground: "240 6% 10%",
-  muted: "240 5% 91%",
-  mutedForeground: "240 3% 44%",
-  accent: "240 5% 91%",
-  accentForeground: "240 6% 10%",
-  destructive: "4 86% 58%", // #ff3b30
-  destructiveForeground: "0 0% 100%",
-  border: "240 6% 87%",
-  input: "240 5% 91%",
-  ring: "211 100% 50%",
-  chart1: "211 100% 50%",
-  chart2: "142 71% 45%",
-  chart3: "37 100% 50%",
-  chart4: "4 86% 58%",
-  chart5: "270 60% 55%",
-} as const;
+export const hsl = tokens.hsl;
 
 /** @deprecated light-only — kept for backward compatibility */
 export const hslDark = { ...hsl } as const;

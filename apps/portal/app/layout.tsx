@@ -1,7 +1,7 @@
 import "@repo/ui/globals.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
 import dynamic from "next/dynamic";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -57,6 +57,14 @@ const jetbrainsMono = JetBrains_Mono({
   adjustFontFallback: true,
 });
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  weight: ["400", "500", "600"],
+  display: "swap",
+  adjustFontFallback: true,
+});
+
 export const metadata: Metadata = {
   title: "Arch-Systems | Arch OS",
   description: "Multi-departmental industrial operations portal",
@@ -87,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -19,7 +19,7 @@ Arch-Mk2 (the Plantcor mining operations portal) is an industrial operations pla
 git clone <repo-url> arch-mk2
 cd arch-mk2
 pnpm install                       # installs deps and activates Husky hooks
-cp apps/portal/.env.example apps/portal/.env
+cp apps/portal/env/.env.example apps/portal/.env
 # edit apps/portal/.env — fill Supabase keys, Sentry DSN, etc.
 ```
 

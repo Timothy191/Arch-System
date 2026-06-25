@@ -1,7 +1,7 @@
 import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { getShiftCompleteness } from "@/lib/shift-completeness";
-import { logError } from "@/lib/errors/error-logger";
+import { getShiftCompleteness } from "@repo/shared/data-access";
+import { logError } from "@repo/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/metrics";
 
 /**

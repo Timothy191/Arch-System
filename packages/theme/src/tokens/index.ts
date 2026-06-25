@@ -54,4 +54,11 @@ export {
 } from "./motion";
 export { tokens } from "./generated";
 export * from "./glass";
-export type { Tokens, ColorTokens, ShadowTokens, RadiusTokens } from "./generated";
+export type {
+  Tokens,
+  ColorTokens,
+  ShadowTokens,
+  RadiusTokens,
+  PrimitiveTokens,
+  HslTokens,
+} from "./generated";

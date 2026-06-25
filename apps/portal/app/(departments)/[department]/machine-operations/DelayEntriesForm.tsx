@@ -759,7 +759,7 @@ export function DelayEntriesForm({
         {/* Confirmation Dialog */}
         {showConfirmDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+            <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-window">
               <div className="flex items-start gap-3 mb-4">
                 {confirmAction === "commit" ? (
                   <CheckCircle className="text-[var(--accent-green)]" size={24} />

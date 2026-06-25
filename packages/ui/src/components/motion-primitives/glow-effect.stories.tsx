@@ -26,7 +26,7 @@ type Story = StoryObj<typeof GlowEffect>;
 
 export const Default: Story = {
   render: (args) => (
-    <div className="relative w-64 h-64 flex items-center justify-center bg-black rounded-3xl overflow-hidden shadow-2xl">
+    <div className="relative w-64 h-64 flex items-center justify-center bg-black rounded-3xl overflow-hidden shadow-window">
       <GlowEffect {...args} />
       <div className="relative z-10 text-white font-bold text-xl">ARCH CORE</div>
     </div>

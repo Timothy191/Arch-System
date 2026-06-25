@@ -38,7 +38,7 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
    ```
 
 2. **Environment Variables**:
-   Copy `apps/portal/.env.example` to `apps/portal/.env` and fill in your Supabase credentials.
+   Copy `apps/portal/env/.env.example` to `apps/portal/.env` and fill in your Supabase credentials.
 3. **Start Local Database** (requires Docker):
 
    ```bash

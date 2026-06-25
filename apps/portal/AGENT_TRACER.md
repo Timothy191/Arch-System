@@ -1,5 +1,22 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
+
+- **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
+- **Changes**:
+  - All portal jobs/reports/metrics routes → `@/lib/observability/metrics`.
+  - `app/layout.tsx`: `Outfit` font with `--font-outfit` CSS variable on `<html>`.
+- **Next agent**: Metrics module lives at `apps/portal/lib/observability/metrics.ts` only.
+
+## 2026-06-25 - Alignment remediation: middleware → proxy + design tokens
+
+- **Purpose**: Wire full auth stack and fix cross-package misalignments from alignment audit.
+- **Changes**:
+  - `middleware.ts`: Delegates to `server/proxy.ts` (session refresh, RBAC, dept isolation, Redis slug cache).
+  - `server/proxy.ts`: Fixed broken metrics import (`@/lib/observability/metrics`).
+  - Portal/UI: Replaced forbidden `shadow-lg/md/xl` with `shadow-window`, `shadow-diffusion-*`, `shadow-glow-*`.
+- **Next agent**: Role/dept gating is live at the edge again; run `proxy.test.ts` after auth changes.
+
 ## 2026-06-25 - Phase 3 CSS cascade @layer verification
 
 - **Purpose**: Confirm portal consumes consolidated `@layer` architecture via `@repo/ui/globals.css` (no portal-local globals.css).

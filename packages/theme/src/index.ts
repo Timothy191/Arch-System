@@ -2,6 +2,5 @@
 export * from "./tokens";
 
 // React
-export { ArchThemeProvider, useArchTheme } from "./react/theme-provider";
-export { useTheme } from "next-themes";
+export { ArchThemeProvider, useArchTheme, useTheme } from "./react/theme-provider";
 export { ThemeToggle } from "./react/theme-toggle";

@@ -3,8 +3,7 @@
   "description": "OKLCH design tokens, Style Dictionary code generation, Tailwind preset, and CSS variables as single source of truth for design system",
   "version": "1.0.0",
   "dependencies": {
-    "lucide-react": "catalog:",
-    "next-themes": "^0.4.6"
+    "lucide-react": "catalog:"
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",

@@ -1,35 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { proxy, config as proxyConfig } from "./server/proxy";
 
-// Paths that don't require authentication
-const publicPaths = ["/login", "/reset-password", "/update-password"];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Allow public paths
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
-
-  // Check for authentication token (Supabase session)
-  const hasAuthCookie =
-    request.cookies.has("sb-access-token") ||
-    [...request.cookies.getAll()].some(
-      (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
-    );
-
-  // If no auth cookie and trying to access protected route, redirect to login
-  if (!hasAuthCookie) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // If we have an auth cookie, allow the request to proceed
-  return NextResponse.next();
+/**
+ * Next.js edge middleware — delegates to server/proxy.ts for:
+ * - Supabase session refresh
+ * - Role / department route gating (employees table)
+ * - Redis-cached department slug → UUID resolution
+ * - API exemptions (/api/c66, /api/health, /api/metrics)
+ */
+export async function middleware(request: NextRequest) {
+  return proxy(request);
 }
 
-export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|api/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|ico|json|txt|woff2?|css|js)$).*)",
-  ],
-};
+export const config = proxyConfig;

@@ -112,7 +112,7 @@ Packages reference these via `"catalog:"` or `"catalog:react19:"` in their `pack
 2. Copy environment files and fill in secrets:
 
    ```bash
-   cp apps/portal/.env.example apps/portal/.env
+   cp apps/portal/env/.env.example apps/portal/.env
    cp .env.example .env            # if root .env.example exists
    ```
 
@@ -215,7 +215,7 @@ Two automated pipelines produce derived artifacts — **never edit generated fil
 
 ## Authentication & Middleware
 
-- Next.js 16 uses `proxy.ts` (not `middleware.ts`). It handles:
+- `apps/portal/middleware.ts` delegates to `apps/portal/server/proxy.ts`. It handles:
   - Session refresh
   - Department‑slug → UUID resolution (Redis‑cached, `packages/redis`)
   - Role‑based route gating (`RESTRICTED_ROUTES` and `DEPARTMENT_ROUTES` maps)

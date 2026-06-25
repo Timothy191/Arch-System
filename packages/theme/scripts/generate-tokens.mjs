@@ -21,6 +21,50 @@ const OUT = resolve(ROOT, "src/tokens/generated.ts");
 
 const css = readFileSync(CSS_SRC, "utf8");
 
+const SHADCN_HSL_KEYS = new Set([
+  "background",
+  "foreground",
+  "card",
+  "card-foreground",
+  "popover",
+  "popover-foreground",
+  "primary",
+  "primary-foreground",
+  "secondary",
+  "secondary-foreground",
+  "muted",
+  "muted-foreground",
+  "accent",
+  "accent-foreground",
+  "destructive",
+  "destructive-foreground",
+  "border",
+  "input",
+  "ring",
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+  "chart-5",
+]);
+
+function toCamelCase(key) {
+  return key.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
+
+/** Extract shadcn HSL components (--primary: 240 6% 10%;) */
+function extractHsl(cssText) {
+  const hsl = {};
+  for (const line of cssText.split("\n")) {
+    const match = line.match(/^\s*--([\w-]+)\s*:\s*([^;/]+)\s*;/);
+    if (!match) continue;
+    const [, name, rawValue] = match;
+    if (!SHADCN_HSL_KEYS.has(name)) continue;
+    hsl[toCamelCase(name)] = rawValue.trim();
+  }
+  return hsl;
+}
+
 /** Extract all --token: value; pairs from the :root block */
 function extractTokens(cssText) {
   const tokens = {
@@ -33,6 +77,8 @@ function extractTokens(cssText) {
       glass: {},
       vibrancy: {},
     },
+    primitives: {},
+    hsl: extractHsl(cssText),
     shadow: {},
     radius: {},
     wave: {},
@@ -45,8 +91,12 @@ function extractTokens(cssText) {
     const [, name, rawValue] = match;
     const value = rawValue.trim();
 
-    // Skip @deprecated comment lines but still capture the token
-    if (name.startsWith("--arch")) continue; // primitives — not emitted
+    // Capture primitives
+    if (name.startsWith("--arch") || name === "--white") {
+      const key = name.replace("--", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      tokens.primitives[key] = value;
+      continue;
+    }
 
     // Categorise by name prefix
     if (name.startsWith("--bg-")) {
@@ -122,6 +172,8 @@ export const tokens = ${renderObject(tokens, 0)} as const;
 
 export type Tokens = typeof tokens;
 export type ColorTokens = typeof tokens.color;
+export type PrimitiveTokens = typeof tokens.primitives;
+export type HslTokens = typeof tokens.hsl;
 export type ShadowTokens = typeof tokens.shadow;
 export type RadiusTokens = typeof tokens.radius;
 `;

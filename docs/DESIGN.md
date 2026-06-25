@@ -21,7 +21,7 @@ This document serves as the single source of truth for the visual style, design 
 
 | Token Naming (`namespace--category--variant`) | OKLCH                    | Hex Reference        | Dark Mode Equivalent (Future-Proof) | Usage                                                   |
 | :-------------------------------------------- | :----------------------- | :------------------- | :---------------------------------- | :------------------------------------------------------ |
-| `color-bg-base`                               | `oklch(97% 0.001 250)`   | `#f5f5f7`            | `oklch(15% 0.01 250)`               | Main application background. macOS base background.     |
+| `color-bg-base`                               | `oklch(100% 0 0)`        | `#ffffff (arch0)`    | `oklch(15% 0.01 250)`               | Main application background. macOS base background.     |
 | `color-bg-elevated`                           | `oklch(100% 0 0)`        | `#ffffff`            | `oklch(22% 0.015 250)`              | Cards, panels, sidebar, elevated surfaces.              |
 | `color-bg-sunken`                             | `oklch(93% 0.002 250)`   | `#e8e8ed`            | `oklch(10% 0.005 250)`              | Input backgrounds, nested containers, code blocks.      |
 | `color-border-subtle`                         | `oklch(90% 0.003 250)`   | `rgba(0,0,0,0.06)`   | `oklch(30% 0.01 250)`               | Dividers, table borders, inactive tab borders.          |
@@ -33,7 +33,7 @@ This document serves as the single source of truth for the visual style, design 
 | `color-action-primary-hover`                  | `oklch(27.4% 0.007 240)` | `#2c2c2e`            | `oklch(27.4% 0.007 240)`            | Primary CTA hover state (dark slate/charcoal).          |
 | `color-status-positive`                       | `oklch(70% 0.15 160)`    | `#10b981`            | `oklch(70% 0.15 160)`               | Mint Green — optimal / active / healthy.                |
 | `color-status-warning`                        | `oklch(75% 0.15 65)`     | `#f59e0b`            | `oklch(75% 0.15 65)`                | Amber — caution, warnings, pending.                     |
-| `color-status-danger`                         | `oklch(55% 0.2 25)`      | `#ff3b30`            | `oklch(55% 0.2 25)`                 | Red — critical alerts, errors, offline.                 |
+| `color-status-danger`                         | `oklch(55% 0.2 25)`      | `#d22118`            | `oklch(55% 0.2 25)`                 | Red — critical alerts, errors, offline.                 |
 | `color-accent-subtle`                         | `oklch(92% 0.005 240)`   | `rgba(28,28,30,.08)` | `oklch(25% 0.04 250)`               | Accent backgrounds, tags, subtle highlights.            |
 | `color-bg-hud`                                | `oklch(0% 0 0 / 60%)`    | `rgba(0,0,0,0.6)`    | `oklch(0% 0 0 / 70%)`               | Dark glassmorphic background for HUD overlays.          |
 
@@ -67,7 +67,8 @@ All core text and background pairings are strictly verified to ensure accessibil
 
 ## Typography
 
-**Font stack**: `Inter, system-ui, -apple-system, sans-serif` (clean, legible at small sizes).  
+**Font stack**: `Inter, Outfit, system-ui, -apple-system, sans-serif` (clean, legible at small sizes).  
+**Display stack**: `Outfit` for marketing headings where configured in the Tailwind preset.  
 **Monospace stack**: `JetBrains Mono, ui-monospace, monospace` (for tabular data, code blocks, timestamps).
 
 ### Type Scale & Line Heights
@@ -95,12 +96,12 @@ Depth is established by combining standard card geometry with precise shadows an
 
 ### Shadow Scale
 
-Avoid generic box shadows. Use the following structured elevation system:
+**Do not use** raw Tailwind `shadow-sm` / `shadow-md` / `shadow-lg` or arbitrary `box-shadow` in components. Use named tokens only:
 
-- `shadow-sm` (`0 1px 2px rgba(0,0,0,0.05)`) — Used for subtle, low-elevation items like cards and inset buttons.
-- `shadow-md` (`0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04)`) — Standard elevation for popovers and hover elements.
-- `shadow-lg` (`0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)`) — Floating system overlays, modals, and dropdown containers.
-- `shadow-window` (Custom Glass Shadow) — Used on system toolbars and popovers to reinforce glass panels.
+- `shadow-diffusion-sm` / `shadow-diffusion-md` / `shadow-diffusion-lg` / `shadow-diffusion-xl` — Layered soft depth for popovers, dropdowns, and hover states.
+- `shadow-card` / `shadow-card-hover` — Dual-shadow glass cards with inner top highlight.
+- `shadow-window` — System toolbars, modals, and floating panels.
+- `shadow-glow-charcoal` / `shadow-glow-electric` — Brand accent glow (charcoal RGBA, not macOS blue).
 
 ### Radius Scale
 
@@ -421,13 +422,13 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 
 ### 1.1 Current State Audit
 
-| **Area**              | **Observation**                                                                     | **Risk/Gap**                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Tokens**            | DESIGN.md defines colors, radii, shadows, but they are not fully reflected in code. | Inconsistent styling, reliance on ad‑hoc values (`bg-[#f5f5f7]`), no single source of truth. |
-| **Cards**             | Three separate implementations (`GlassCard`, `SpotlightCard`, `GlowBorderCard`).    | Visual drift, duplicated layout logic, maintenance burden.                                   |
-| **Accessibility**     | Focus rings defined but not systematically enforced; touch targets undocumented.    | Risk of non‑compliance with WCAG 2.1 AA, poor mobile/tablet experience.                      |
-| **Overlays / HUD**    | No shared surface token for glassmorphic popovers, weather, system tray.            | Each widget reimplements backdrop‑blur, leading to inconsistency.                            |
-| **Design Governance** | Lacks automated token linting and usage enforcement.                                | Drift will continue over time.                                                               |
+| **Area**              | **Observation**                                                                     | **Risk/Gap**                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Tokens**            | DESIGN.md defines colors, radii, shadows, but they are not fully reflected in code. | Inconsistent styling, reliance on ad‑hoc values (`bg-white`), no single source of truth. |
+| **Cards**             | Three separate implementations (`GlassCard`, `SpotlightCard`, `GlowBorderCard`).    | Visual drift, duplicated layout logic, maintenance burden.                               |
+| **Accessibility**     | Focus rings defined but not systematically enforced; touch targets undocumented.    | Risk of non‑compliance with WCAG 2.1 AA, poor mobile/tablet experience.                  |
+| **Overlays / HUD**    | No shared surface token for glassmorphic popovers, weather, system tray.            | Each widget reimplements backdrop‑blur, leading to inconsistency.                        |
+| **Design Governance** | Lacks automated token linting and usage enforcement.                                | Drift will continue over time.                                                           |
 
 ### 1.2 Success Criteria (Acceptance Tests)
 

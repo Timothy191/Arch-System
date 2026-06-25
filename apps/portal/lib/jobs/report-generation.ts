@@ -1,6 +1,6 @@
 import { inngest } from "@repo/utils/inngest";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { logError } from "@/lib/errors/error-logger";
+import { logError } from "@repo/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/metrics";
 import type { InngestFunction } from "inngest";
 
