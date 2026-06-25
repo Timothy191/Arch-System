@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Play, Info, ArrowUpRight } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
-import type { Department } from "~/lib/departments";
+import type { Department } from "@repo/departments/data-access";
 
 interface HeroRotatorProps {
   defaultTitle: string;

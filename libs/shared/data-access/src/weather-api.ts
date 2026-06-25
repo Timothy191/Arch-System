@@ -1,3 +1,5 @@
+/// <reference types="next" />
+
 /**
  * Open-Meteo Weather API Integration
  * Free weather API with no API key required

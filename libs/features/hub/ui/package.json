@@ -9,10 +9,14 @@
   },
   "dependencies": {
     "@repo/ui": "1.0.0",
+    "@repo/departments/data-access": "1.0.0",
+    "@tremor/react": "catalog:",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
+    "next": "^16.2.6",
     "react": "catalog:react19",
-    "react-dom": "catalog:react19"
+    "react-dom": "catalog:react19",
+    "sonner": "catalog:"
   },
   "peerDependencies": {
     "react": "^19",

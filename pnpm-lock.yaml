@@ -743,12 +743,21 @@ importers:
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
+      '@univerjs/preset-sheets-core':
+        specifier: ^0.23.0
+        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
+      '@univerjs/presets':
+        specifier: ^0.23.0
+        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
       framer-motion:
         specifier: 'catalog:'
         version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
         specifier: 'catalog:'
         version: 1.18.0(react@19.2.7)
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
       react:
         specifier: catalog:react19
         version: 19.2.7
@@ -771,21 +780,33 @@ importers:
 
   libs/features/hub/ui:
     dependencies:
+      '@repo/departments/data-access':
+        specifier: 1.0.0
+        version: link:../../departments/data-access
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
+      '@tremor/react':
+        specifier: 'catalog:'
+        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       framer-motion:
         specifier: 'catalog:'
         version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
         specifier: 'catalog:'
         version: 1.18.0(react@19.2.7)
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
       react:
         specifier: catalog:react19
         version: 19.2.7
       react-dom:
         specifier: catalog:react19
         version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     devDependencies:
       '@repo/typescript-config':
         specifier: 1.0.0

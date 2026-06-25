@@ -1,8 +1,10 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "baseUrl": "../../../../",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
 }

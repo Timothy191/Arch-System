@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DepartmentCard } from "./DepartmentCard";
 import { useRouter } from "next/navigation";
-import type { Department } from "~/lib/departments";
+import type { Department } from "@repo/departments/data-access";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),

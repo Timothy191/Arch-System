@@ -4,7 +4,7 @@ import { useFocusMode } from "@repo/ui/lib/useFocusMode";
 import { useEffect, useState } from "react";
 
 export function HeroBackground() {
-  const { enabled } = useFocusMode();
+  const enabled = useFocusMode();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {

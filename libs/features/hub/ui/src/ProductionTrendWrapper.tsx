@@ -15,6 +15,6 @@ interface ProductionTrendProps {
   data: TrendDataPoint[];
 }
 
-export function ProductionTrend({ data }: ProductionTrendProps) {
+export function ProductionTrendWrapper({ data }: ProductionTrendProps) {
   return <ProductionTrendInner data={data} />;
 }

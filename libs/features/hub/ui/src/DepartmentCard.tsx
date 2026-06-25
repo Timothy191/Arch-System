@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentType } from "react";
 import {
   ArrowUpRight,
   Bookmark,
@@ -18,11 +18,11 @@ import {
   Wrench,
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
-import type { Department } from "~/lib/departments";
+import type { Department } from "@repo/departments/data-access";
 import { Sparkline } from "./Sparkline";
 import { toast } from "sonner";
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   Drill: Pickaxe,
   Factory,
   ShieldCheck,

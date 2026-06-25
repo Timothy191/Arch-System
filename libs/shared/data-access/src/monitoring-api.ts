@@ -1,3 +1,5 @@
+/// <reference types="next" />
+
 /**
  * Advanced Satellite Monitoring API
  * Sources: Copernicus STAC API (free, no key), EOX WMTS (free, no key)
