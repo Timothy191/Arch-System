@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-24 - Fix OpenTelemetry instrumentation build
+
+- **Purpose**: Resolve portal build failure — `BatchSpanProcessor` was imported from undeclared `@opentelemetry/sdk-trace-node`.
+- **Changes**:
+  - `instrumentation.ts`: Import `BatchSpanProcessor` from `@opentelemetry/sdk-trace-base` (matches exporter peer dependency at 2.7.x).
+  - `package.json`: Added explicit `@opentelemetry/sdk-trace-base` dependency.
+- **Next Steps**: Re-run `pnpm nx run portal:build` after `pnpm install`.
+
 ## 2026-06-24: Frontend Architecture Implementation (Phase 2, 3, 4)
 
 ### Purpose

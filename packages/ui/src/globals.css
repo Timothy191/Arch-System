@@ -1,5 +1,8 @@
 @import "@repo/theme/css";
 
+/* AGENT-TRACE: Explicit layer order ensures predictable cascade — reset < base < theme < components < utilities */
+@layer reset, base, theme, components, utilities;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -237,6 +240,11 @@
 }
 
 @layer base {
+  :root {
+    --arch-brand-blue: #007aff;
+    --arch-brand-blue-hover: #0066eb;
+  }
+
   .hide-cursor,
   .hide-cursor * {
     cursor: none !important;
@@ -388,11 +396,6 @@
   /* stylelint-enable selector-class-pattern */
 }
 
-:root {
-  --arch-brand-blue: #007aff;
-  --arch-brand-blue-hover: #0066eb;
-}
-
 @layer utilities {
   .text-arch-blue {
     color: var(--arch-brand-blue);
@@ -410,13 +413,15 @@
   }
 }
 
-/* RevoGrid visible table grid lines overrides */
-revo-grid .rgCell {
-  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
+@layer components {
+  /* RevoGrid visible table grid lines overrides */
+  revo-grid .rgCell {
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
 
-revo-grid .rgHeaderCell {
-  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  revo-grid .rgHeaderCell {
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
 }

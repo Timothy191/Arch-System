@@ -1,6 +1,6 @@
 import { registerOTel } from "@vercel/otel";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 
 export function register() {
   const exporter = new OTLPTraceExporter({

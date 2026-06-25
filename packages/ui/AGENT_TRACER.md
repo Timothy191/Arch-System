@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-06-24 - Explicit CSS layer order in globals.css
+
+- **Purpose**: Declare explicit `@layer` cascade order so Tailwind directives and custom layer blocks resolve predictably (reset → base → theme → components → utilities).
+- **Changes**:
+  - `globals.css`: Inserted `@layer reset, base, theme, components, utilities;` immediately after `@import "@repo/theme/css"` and before `@tailwind` directives.
+  - Step 2 audit: Moved `:root` brand token definitions into `@layer base` (merged with `.hide-cursor`). Moved RevoGrid grid-line overrides into `@layer components` (retains `!important` for third-party specificity).
+- **Next Steps**: Run portal build + manual QA on buttons, modals, cards, focus-mode overrides. If utilities unexpectedly override `@layer components` rules, consider migrating to `@import 'tailwindcss/*' layer(...)` syntax.
+
 ## 2026-06-24 - Concentric Animated Loader Component
 
 - **Purpose**: Create and export the Uiverse concentric animated loader component for global use across the system.
