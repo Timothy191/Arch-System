@@ -1,5 +1,23 @@
 # Portal Agent Tracer
 
+## 2026-06-25: Optimize SystemClock Visibility
+
+### Purpose
+Optimize the `SystemClock` component to prevent unnecessary high-frequency background re-renders.
+
+### Changes Made
+1.  **[apps/portal/components/clock/SystemClock.tsx](file:///home/timoty/Desktop/project/Arch-System/apps/portal/components/clock/SystemClock.tsx)**:
+    -   Converted `Popover` to a controlled component with `isOpen` state.
+    -   Wrapped the 1-second `setInterval` (used for analog clock updates) in a conditional check for `isOpen`.
+    -   This ensures the high-frequency 1s update only runs when the popover is actually visible.
+
+### Verification
+-   Verified code changes via `read_file`.
+-   The 10-second header pill update remains active for persistent visibility.
+
+### What the Next Agent Should Know
+-   The `SystemClock` now avoids background re-render overhead when the clock popover is closed.
+
 ## 2026-06-24: Frontend Architecture Implementation (Phase 2, 3, 4)
 
 ### Purpose
