@@ -1,6 +1,6 @@
 import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { logError } from "@repo/errors/error-logger";
+import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/metrics";
 
 /**
