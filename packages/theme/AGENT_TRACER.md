@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-06-25 - Phase 3 CSS cascade layer alignment
+
+- **Purpose**: Map theme CSS imports to the canonical cascade layers declared in `@repo/ui/globals.css`.
+- **Changes**:
+  - `src/css/index.css`: `reset.css` → `layer(reset)`; Uiverse component sheets (`buttons`, `tabs`, `loaders`, `checks`, `cards`) → `layer(components)`; token/animation/glass/focus sheets remain in `layer(theme)`.
+- **Next Steps**: Run `pnpm --filter @repo/theme lint:css` and portal build to confirm no cascade regressions.
+
 ## 2026-06-24 - Uiverse Concentric Animated Loader Integration
 
 - **Purpose**: Integrate the Uiverse concentric animated loader (by Nawsome) as the core spinner styling.

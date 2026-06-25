@@ -1,5 +1,11 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - Phase 3 CSS cascade @layer verification
+
+- **Purpose**: Confirm portal consumes consolidated `@layer` architecture via `@repo/ui/globals.css` (no portal-local globals.css).
+- **Changes**: None in portal source — portal `app/layout.tsx` imports `@repo/ui/globals.css` which declares layer order and hosts all shared component/utility layers.
+- **Next Steps**: Run `pnpm nx run portal:build` and manual QA on MacMenuBar, focus-mode, RevoGrid tables, modals.
+
 ## 2026-06-24 - Fix OpenTelemetry instrumentation build
 
 - **Purpose**: Resolve portal build failure — `BatchSpanProcessor` was imported from undeclared `@opentelemetry/sdk-trace-node`.

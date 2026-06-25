@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-06-25 - Phase 3 CSS cascade layer consolidation
+
+- **Purpose**: Complete Phase 3 `@layer` standard — single consolidated layer blocks and aligned theme package imports.
+- **Changes**:
+  - `globals.css`: Merged three `@layer components` blocks (skip-link, focus-mode, RevoGrid) into one; merged two `@layer utilities` blocks (z-index/glass + arch-blue) into one.
+  - Explicit `@layer reset, base, theme, components, utilities;` declaration retained after theme import.
+- **Next Steps**: Portal build + visual QA on focus-mode, RevoGrid tables, glass utilities. Theme `index.css` now assigns Uiverse component CSS to `components` layer (see `@repo/theme` tracer).
+
 ## 2026-06-24 - Explicit CSS layer order in globals.css
 
 - **Purpose**: Declare explicit `@layer` cascade order so Tailwind directives and custom layer blocks resolve predictably (reset → base → theme → components → utilities).

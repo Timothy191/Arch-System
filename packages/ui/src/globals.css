@@ -237,6 +237,21 @@
       caustic-wave 6s ease-in-out infinite,
       caustic-shadow-critical 6s ease-in-out infinite;
   }
+
+  .text-arch-blue {
+    color: var(--arch-brand-blue);
+  }
+  .bg-arch-blue {
+    background-color: var(--arch-brand-blue);
+  }
+  .border-arch-blue {
+    border-color: var(--arch-brand-blue);
+  }
+  .focus-ring-arch-blue {
+    outline: none;
+    border-color: var(--arch-brand-blue) !important;
+    box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2) !important;
+  }
 }
 
 @layer base {
@@ -268,9 +283,7 @@
   .skip-link:active {
     top: 0;
   }
-}
 
-@layer components {
   /* ══════════════════════════════════════════════════════════════════════
      FOCUS MODE — dark atmospheric theme (active over focused.jpeg)
      All tokens shift to dark glass palette so every surface reads cleanly
@@ -394,26 +407,7 @@
     background-color: rgba(24, 34, 56, 0.75);
   }
   /* stylelint-enable selector-class-pattern */
-}
 
-@layer utilities {
-  .text-arch-blue {
-    color: var(--arch-brand-blue);
-  }
-  .bg-arch-blue {
-    background-color: var(--arch-brand-blue);
-  }
-  .border-arch-blue {
-    border-color: var(--arch-brand-blue);
-  }
-  .focus-ring-arch-blue {
-    outline: none;
-    border-color: var(--arch-brand-blue) !important;
-    box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2) !important;
-  }
-}
-
-@layer components {
   /* RevoGrid visible table grid lines overrides */
   revo-grid .rgCell {
     border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
