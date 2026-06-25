@@ -22,4 +22,4 @@ Modular rules loaded every session. Each file covers a specific domain.
 | `auth.md`          | Proxy/middleware, auth resolution flow, RLS, restricted routes, Server Action auth patterns     |
 | `design-system.md` | Light-only theme, OKLCH colors, glass pattern, shadow tokens, typography, animation constraints |
 
-These rules complement `CLAUDE.md` "Agent Contracts" section (agent contracts + quality gates).
+These rules complement the slim [`CLAUDE.md`](../CLAUDE.md) index and the full [operational handbook](../guides/operational-handbook.md).

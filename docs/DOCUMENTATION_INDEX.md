@@ -8,7 +8,8 @@ Quick navigation guide for Arch-Systems documentation.
 
 - **[docs/ONBOARDING.md](./ONBOARDING.md)** - Step-by-step developer onboarding checklist
 - **[README.md](../README.md)** - Project overview and quick start (5 min read)
-- **[CLAUDE.md](../CLAUDE.md)** - Complete technical guide (30 min read)
+- **[CLAUDE.md](../CLAUDE.md)** - Slim always-on agent index (~2 min read)
+- **[.claude/guides/operational-handbook.md](../.claude/guides/operational-handbook.md)** - Full technical onboarding (archived detail)
 - **[docs/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference
@@ -22,20 +23,12 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Core Development
 
-- **[CLAUDE.md](CLAUDE.md)** - Comprehensive technical guide covering:
-  - Runtime requirements (Node.js ≥22, pnpm 9.15.9)
-  - All development commands
-  - Architecture (apps, packages, dependency versioning)
-  - Portal internals (middleware, directories, instrumentation)
-  - Git & quality infrastructure
+- **[CLAUDE.md](CLAUDE.md)** - Slim session index (commands, tracing, links to rules)
+- **[.claude/guides/operational-handbook.md](../.claude/guides/operational-handbook.md)** - Full technical guide (workflows, pitfalls, MCP, agent contracts)
 
 ### Workflow & Quality
 
-- **[AGENTS.md](AGENTS.md)** - Development workflow and agent contracts
-  - Phase boundaries (Discuss, Plan, Execute, Verify, Ship)
-  - Quality gates and verification steps
-  - Subagent discipline
-  - Git safety rules
+- **[AGENTS.md](AGENTS.md)** - Slim agent contract index (tracing, phases, Nx tags; links to rules)
 
 ### AI Development
 

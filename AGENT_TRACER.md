@@ -1,6 +1,26 @@
 # Root Workspace Agent Tracer
 
-## 2026-07-23: Enhanced lint-staged Coverage
+## 2026-06-25: Context optimization — slim CLAUDE.md / AGENTS.md
+
+### Purpose
+
+Reduce always-on token injection by replacing 602-line `CLAUDE.md` and 259-line `AGENTS.md` with slim indexes; archive full content for on-demand reads.
+
+### Changes Made
+
+1. **[CLAUDE.md](CLAUDE.md)** — Slim ~80-line session index (tracing, quick start, codegen, rule links, Nx block preserved).
+2. **[AGENTS.md](AGENTS.md)** — Slim ~30-line agent contract index (no duplicate monorepo tables).
+3. **[.claude/guides/operational-handbook.md](.claude/guides/operational-handbook.md)** — Archived full former `CLAUDE.md` body.
+4. **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** — Updated links to handbook + slim indexes.
+5. **[.claude/rules/README.md](.claude/rules/README.md)** — Points to handbook.
+6. **[.claude/settings.json](.claude/settings.json)** — `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50` (prior turn).
+
+### What the Next Agent Should Know
+
+- Always-on rules are in slim `CLAUDE.md` + `AGENTS.md`; load `.claude/rules/*.md` or the handbook when detail is needed.
+- Do not re-expand root `CLAUDE.md` — add domain detail to `.claude/rules/` or the handbook instead.
+
+---
 
 ### Purpose
 
