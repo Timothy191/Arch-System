@@ -1,7 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { DailyLogForm } from "./DailyLogForm";
-import { SafetyIncidentForm } from "@/features/departments/components/safety/SafetyIncidentForm";
-import { SafetyIncidentsList } from "@/features/departments/components/safety/SafetyIncidentsList";
+import { SafetyIncidentForm } from "@/features/departments";
+import { SafetyIncidentsList } from "@/features/departments";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 export default async function DailyLogPage({

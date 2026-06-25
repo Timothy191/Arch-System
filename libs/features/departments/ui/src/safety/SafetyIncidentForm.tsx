@@ -4,7 +4,7 @@ import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
-import { revalidateRSC } from "@/app/actions";
+import { revalidateRSC } from "@repo/shared/data-access";
 
 interface Category {
   id: string;

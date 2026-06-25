@@ -8,7 +8,7 @@ import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { speculativeEmbedShiftLog } from "@/app/actions";
-import { BreakdownControlRoomView } from "@/features/departments/components/engineering/breakdowns/types";
+import { BreakdownControlRoomView } from "@/features/departments";
 import { toast } from "sonner";
 
 interface Machine {

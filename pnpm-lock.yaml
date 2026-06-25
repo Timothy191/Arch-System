@@ -383,9 +383,18 @@ importers:
       '@repo/contract':
         specifier: 1.0.0
         version: link:../../packages/contract
+      '@repo/dashboard/data-access':
+        specifier: 1.0.0
+        version: link:../../libs/features/dashboard/data-access
+      '@repo/departments/ui':
+        specifier: 1.0.0
+        version: link:../../libs/features/departments/ui
       '@repo/errors':
         specifier: 1.0.0
         version: link:../../packages/errors
+      '@repo/hub/ui':
+        specifier: 1.0.0
+        version: link:../../libs/features/hub/ui
       '@repo/logger':
         specifier: 1.0.0
         version: link:../../packages/logger
@@ -725,12 +734,18 @@ importers:
 
   libs/features/departments/ui:
     dependencies:
+      '@repo/contract':
+        specifier: 1.0.0
+        version: link:../../../../packages/contract
       '@repo/errors':
         specifier: 1.0.0
         version: link:../../../../packages/errors
       '@repo/logger':
         specifier: 1.0.0
         version: link:../../../../packages/logger
+      '@repo/redis':
+        specifier: 1.0.0
+        version: link:../../../../packages/redis
       '@repo/shared/data-access':
         specifier: 1.0.0
         version: link:../../../shared/data-access
@@ -743,6 +758,12 @@ importers:
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
+      '@repo/utils':
+        specifier: 1.0.0
+        version: link:../../../../packages/utils
+      '@tremor/react':
+        specifier: 'catalog:'
+        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@univerjs/preset-sheets-core':
         specifier: ^0.23.0
         version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)

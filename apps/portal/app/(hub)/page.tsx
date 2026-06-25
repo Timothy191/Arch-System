@@ -3,18 +3,20 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { AlertTicker } from "@/features/hub/components/AlertTicker";
-import type { AlertEvent } from "@/features/hub/components/AlertTicker";
-import { ProductionTrend } from "@/features/hub/components/ProductionTrendWrapper";
-import type { TrendDataPoint } from "@/features/hub/components/ProductionTrend";
-import { HeroBackground } from "@/features/hub/components/HeroBackground";
-import { HeroRotator } from "@/features/hub/components/HeroRotator";
-import { TrustLogos } from "@/features/hub/components/TrustLogos";
-import { ToolBanner } from "@/features/hub/components/ToolBanner";
-import { DepartmentReviews } from "@/features/hub/components/DepartmentReviews";
+import {
+  AlertTicker,
+  ProductionTrendWrapper as ProductionTrend,
+  HeroBackground,
+  HeroRotator,
+  TrustLogos,
+  ToolBanner,
+  DepartmentReviews,
+  DepartmentCard,
+} from "@/features/hub";
+import type { AlertEvent } from "@/features/hub";
+import type { TrendDataPoint } from "@/features/hub";
 import { getTools } from "@/lib/tools";
 import { DEPARTMENTS } from "~/lib/departments";
-import { DepartmentCard } from "@/features/hub/components/DepartmentCard";
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
   Shield,

@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-/** Throttled useState — batches rapid updates to at most one render per `delay` ms. */
+/**
+ * useThrottledState
+ *
+ * A hook that behaves like useState, but throttles state updates to at most once
+ * per `delay` milliseconds. Intermediate updates are queued and processed together
+ * at the next tick, ensuring functional state transitions (like appending to an array)
+ * are not lost while significantly reducing React render and layout recalculation frequency.
+ */
 export function useThrottledState<T>(
   initialValue: T | (() => T),
   delay = 500,

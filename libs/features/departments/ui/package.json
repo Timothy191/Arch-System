@@ -8,12 +8,17 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/ui": "1.0.0",
-    "@repo/supabase": "1.0.0",
-    "@repo/shared/hooks": "1.0.0",
-    "@repo/shared/data-access": "1.0.0",
+    "@repo/contract": "1.0.0",
     "@repo/errors": "1.0.0",
     "@repo/logger": "1.0.0",
+    "@repo/rate-limiter": "1.0.0",
+    "@repo/redis": "1.0.0",
+    "@repo/shared/data-access": "1.0.0",
+    "@repo/shared/hooks": "1.0.0",
+    "@repo/supabase": "1.0.0",
+    "@repo/ui": "1.0.0",
+    "@repo/utils": "1.0.0",
+    "@tremor/react": "catalog:",
     "@univerjs/preset-sheets-core": "^0.23.0",
     "@univerjs/presets": "^0.23.0",
     "lucide-react": "catalog:",
@@ -27,7 +32,8 @@
     "react-dom": "^19"
   },
   "scripts": {
-    "lint": "echo 'Scaffold: lint deferred until portal cutover'"
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",

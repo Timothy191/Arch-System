@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { PrecisionInput } from "@/components/ui/PrecisionInput";
+import { PrecisionInput } from "@repo/ui/components/ui/PrecisionInput";
 import { Activity, RotateCcw } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 

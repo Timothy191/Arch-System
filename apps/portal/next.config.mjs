@@ -47,6 +47,9 @@ const nextConfig = {
     "@repo/shared/data-access",
     "@repo/shared/utils",
     "@repo/shared/hooks",
+    "@repo/departments/ui",
+    "@repo/hub/ui",
+    "@repo/dashboard/data-access",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

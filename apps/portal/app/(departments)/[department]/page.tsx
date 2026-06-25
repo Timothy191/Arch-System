@@ -5,31 +5,16 @@ import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
 
-const ScadaPanel = dynamic(
-  () =>
-    import("@/features/departments/components/control-room/ScadaPanel").then(
-      (mod) => mod.ScadaPanel,
-    ),
-  {
-    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
-);
+const ScadaPanel = dynamic(() => import("@/features/departments").then((mod) => mod.ScadaPanel), {
+  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+});
 
-const AlertPanel = dynamic(
-  () =>
-    import("@/features/departments/components/control-room/AlertPanel").then(
-      (mod) => mod.AlertPanel,
-    ),
-  {
-    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
-);
+const AlertPanel = dynamic(() => import("@/features/departments").then((mod) => mod.AlertPanel), {
+  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+});
 
 const ControlRoomActivityFeed = dynamic(
-  () =>
-    import("@/features/departments/components/control-room/ControlRoomActivityFeed").then(
-      (mod) => mod.ControlRoomActivityFeed,
-    ),
+  () => import("@/features/departments").then((mod) => mod.ControlRoomActivityFeed),
   {
     loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
@@ -43,20 +28,14 @@ const WeatherWidget = dynamic(
 );
 
 const ShiftCoverageWidget = dynamic(
-  () =>
-    import("@/features/departments/components/control-room/ShiftCoverageWidget").then(
-      (mod) => mod.ShiftCoverageWidget,
-    ),
+  () => import("@/features/departments").then((mod) => mod.ShiftCoverageWidget),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const SatelliteMonitoringDashboard = dynamic(
-  () =>
-    import("@/features/departments/components/satellite/SatelliteMonitoringDashboard").then(
-      (mod) => mod.SatelliteMonitoringDashboard,
-    ),
+  () => import("@/features/departments").then((mod) => mod.SatelliteMonitoringDashboard),
   {
     loading: () => (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
@@ -67,10 +46,7 @@ const SatelliteMonitoringDashboard = dynamic(
 );
 
 const SafetyDashboard = dynamic(
-  () =>
-    import("@/features/departments/components/safety/SafetyDashboard").then(
-      (mod) => mod.SafetyDashboard,
-    ),
+  () => import("@/features/departments").then((mod) => mod.SafetyDashboard),
   {
     loading: () => (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">

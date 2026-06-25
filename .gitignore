@@ -131,7 +131,8 @@ dev_run.log
 .antigravitycli/
 populating-data/
 
-
+.cursor/
+knowledge.md
 
 .nx/cache
 .nx/workspace-data

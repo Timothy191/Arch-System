@@ -1,10 +1,6 @@
 import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { BreakdownsDashboard } from "@/features/departments/components/engineering/breakdowns";
-import type {
-  Breakdown,
-  BreakdownMetrics,
-  Machine,
-} from "@/features/departments/components/engineering/breakdowns";
+import { BreakdownsDashboard } from "@/features/departments";
+import type { Breakdown, BreakdownMetrics, Machine } from "@/features/departments";
 
 export default async function BreakdownsPage({
   params,

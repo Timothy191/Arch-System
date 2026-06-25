@@ -1,5 +1,26 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-25: Wire portal to departments, hub, and shared libs (phase 2)
+
+### Purpose
+
+Cut portal department/hub routes over to `@repo/departments/ui`, `@repo/hub/ui`, and shared server actions via thin feature barrels.
+
+### Changes Made
+
+1. **Portal barrels** — `apps/portal/features/{departments,hub,dashboard}/index.ts` re-export libs.
+2. **Routes** — Department and hub pages import from `@/features/departments` and `@/features/hub`.
+3. **`@repo/shared/data-access`** — `revalidateRSC` server action for lib consumers.
+4. **`packages/ui`** — `PrecisionInput` moved for `MachineControl` in departments lib.
+5. **`.gitignore`** — ignore `.cursor/` and `knowledge.md`.
+
+### What the Next Agent Should Know
+
+- Departments lib still uses portal `@/lib` and `@/components` path aliases in tsconfig for shift-closeout and monitoring map layers.
+- Do not duplicate `apps/portal/components/monitoring` into `packages/ui` without adding map deps to `@repo/ui`.
+
+---
+
 ## 2026-06-25: Complete libs/ feature library migration (phase 1)
 
 ### Purpose

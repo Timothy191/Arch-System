@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { useRouter } from "next/navigation";
 import { X, AlertCircle, CheckCircle, Loader2, UserCheck, Lock } from "lucide-react";
-import { verifyPin, closeShift } from "~/lib/shift-closeout";
+import { verifyPin, closeShift } from "@/lib/shift-closeout";
 
 interface CloseShiftModalProps {
   open: boolean;
