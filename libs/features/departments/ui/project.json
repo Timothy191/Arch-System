@@ -1,0 +1,6 @@
+{
+  "name": "features-departments-ui",
+  "tags": ["scope:departments", "type:ui", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "libs/features/departments/ui/src"
+}

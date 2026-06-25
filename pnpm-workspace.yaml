@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "libs/features/*/*"
+  - "libs/shared/*"
 catalog:
   lucide-react: "^1.18.0"
   tailwindcss: "^3.4.17"

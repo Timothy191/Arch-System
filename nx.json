@@ -85,8 +85,6 @@
       "parallel": true
     },
     "db:pull": {
-      // Pulls remote database schema changes into local migration files.
-      // Cache is disabled because it relies on external database state, not local files.
       "outputs": ["{projectRoot}/packages/supabase/migrations/**"],
       "cache": false
     },
@@ -152,11 +150,19 @@
   "dependencyConstraints": [
     {
       "sourceTag": "scope:app",
-      "onlyDependOnLibsWithTags": ["scope:package"]
+      "onlyDependOnLibsWithTags": ["scope:package", "scope:feature"]
     },
     {
       "sourceTag": "scope:app",
       "notDependOnLibsWithTags": ["scope:package:db-internal"]
+    },
+    {
+      "sourceTag": "scope:feature",
+      "onlyDependOnLibsWithTags": ["scope:package", "scope:feature"]
+    },
+    {
+      "sourceTag": "scope:feature",
+      "notDependOnLibsWithTags": ["scope:app"]
     },
     {
       "sourceTag": "scope:package:ui",

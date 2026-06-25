@@ -1,0 +1,6 @@
+{
+  "name": "features-auth-ui",
+  "tags": ["scope:auth", "type:ui", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "libs/features/auth/ui/src"
+}

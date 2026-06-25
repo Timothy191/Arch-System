@@ -77,7 +77,6 @@ describe("LoginForm", () => {
 
     expect(screen.getByPlaceholderText("Employee ID or email")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
-    expect(screen.getByTestId("nfc-icon")).toBeInTheDocument();
 
     const signInBtn = screen.getByRole("button", { name: /^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();

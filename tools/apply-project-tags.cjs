@@ -36,6 +36,8 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const APPS_DIR = path.join(ROOT, "apps");
 const PACKAGES_DIR = path.join(ROOT, "packages");
+const LIBS_FEATURES_DIR = path.join(ROOT, "libs", "features");
+const LIBS_SHARED_DIR = path.join(ROOT, "libs", "shared");
 const TOOLS_DIR = path.join(ROOT, "tools");
 
 // Explicitly tagged tools subdirectories (build-time scripts requiring Nx integration)
@@ -62,6 +64,11 @@ function deriveTags(projectName, projectPath) {
       tags.add("scope:package:db");
       tags.add("scope:package:db-internal");
     }
+  } else if (projectPath.startsWith("libs/features/")) {
+    tags.add("scope:feature");
+  } else if (projectPath.startsWith("libs/shared/")) {
+    tags.add("scope:package");
+    tags.add("scope:feature");
   } else if (projectPath.startsWith("tools/")) {
     tags.add("scope:tool");
   }
@@ -111,6 +118,26 @@ for (const n of fs.readdirSync(APPS_DIR)) {
 }
 for (const n of fs.readdirSync(PACKAGES_DIR)) {
   targets.push({ name: n, p: path.join("packages", n) });
+}
+if (fs.existsSync(LIBS_FEATURES_DIR)) {
+  for (const feature of fs.readdirSync(LIBS_FEATURES_DIR)) {
+    const featureDir = path.join(LIBS_FEATURES_DIR, feature);
+    if (!fs.statSync(featureDir).isDirectory()) continue;
+    for (const layer of fs.readdirSync(featureDir)) {
+      const layerDir = path.join(featureDir, layer);
+      if (fs.statSync(layerDir).isDirectory()) {
+        targets.push({ name: layer, p: path.join("libs", "features", feature, layer) });
+      }
+    }
+  }
+}
+if (fs.existsSync(LIBS_SHARED_DIR)) {
+  for (const n of fs.readdirSync(LIBS_SHARED_DIR)) {
+    const sharedDir = path.join(LIBS_SHARED_DIR, n);
+    if (fs.statSync(sharedDir).isDirectory()) {
+      targets.push({ name: n, p: path.join("libs", "shared", n) });
+    }
+  }
 }
 if (fs.existsSync(TOOLS_DIR)) {
   for (const n of fs.readdirSync(TOOLS_DIR)) {

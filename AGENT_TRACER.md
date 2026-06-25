@@ -1,5 +1,48 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-25: Complete libs/ feature library migration (phase 1)
+
+### Purpose
+
+Finish Nx `libs/features` + `libs/shared` scaffold: workspace packages, path aliases, portal wiring for auth and shared modules.
+
+### Changes Made
+
+1. **`libs/`** — 13 workspace packages with `package.json`, `project.json` (`scope:feature`), and fixed `@repo/*` imports.
+2. **`libs/shared/hooks`** — `useThrottledState`, `trackClientMetric` extracted from portal.
+3. **`pnpm-workspace.yaml`** — `libs/features/*/*`, `libs/shared/*` globs.
+4. **`tsconfig.base.json`** + **`apps/portal/tsconfig.json`** — path aliases for wired libs.
+5. **Portal re-exports** — `lib/env`, `cache-utils`, `audit`, `weather-api`; auth `LoginForm`/`RefractionGlow` → `@repo/auth/ui`.
+6. **`tools/apply-project-tags.cjs`** — tags libs projects automatically.
+7. **`nx.json`** — `scope:feature` dependency constraints.
+8. **`next.config.mjs`**, **`jest.config.js`** — transpilePackages + moduleNameMapper for libs.
+
+### What the Next Agent Should Know
+
+- Departments/hub/dashboard UI in `libs/` are scaffolded but portal still uses `apps/portal/features/*` copies — migrate via thin re-exports when ready.
+- Run `pnpm install` after adding lib `package.json` deps.
+
+---
+
+## 2026-06-25: Scaffold `libs/` feature libraries (WIP)
+
+### Purpose
+
+Introduce Nx `libs/features` and `libs/shared` layout with path aliases and `scope:feature` dependency constraints. Portal consumers are not wired yet — incomplete import migration was reverted.
+
+### Changes Made
+
+1. **`libs/`** — Auth, departments, dashboard, hub, access-control, analytics, and shared data-access/utils scaffolds with `project.json` tags.
+2. **`tsconfig.base.json`** — Path aliases for `@repo/auth/*`, `@repo/departments/*`, `@repo/shared/*`, etc.
+3. **`nx.json`** — `scope:feature` dependency constraints; preserved `defaultBase` and `analytics`.
+
+### What the Next Agent Should Know
+
+- Do not bulk-rewrite portal imports until each lib has `package.json`, tsconfig, and workspace registration in `pnpm-workspace.yaml`.
+- Login extraction to `@repo/auth/ui` is prepared in `libs/features/auth` but not consumed by portal yet.
+
+---
+
 ## 2026-06-25: Context optimization — slim CLAUDE.md / AGENTS.md
 
 ### Purpose
@@ -461,3 +504,20 @@ Resolve lint-staged errors caused by:
 
 - Root-level configuration files will no longer be linted by ESLint during staged runs, but will still be formatted by Prettier.
 - Unused/undefined warnings on TypeScript typings are suppressed in ESLint as they are managed by the TS compiler.
+
+## 2026-06-25: Continuous Improvement & Operational Excellence Strategy
+
+### Purpose
+
+Document the strategic roadmap and action plan for long-term health and efficiency of the portal application, addressing testing, performance, DX/documentation, and CI/CD automation.
+
+### Changes Made
+
+1. **[docs/reports/continuous_improvement_operational_excellence.md](file:///home/timoty/Desktop/project/Arch-System/docs/reports/continuous_improvement_operational_excellence.md)** (NEW):
+   - Created the strategy guide mapping out goals, current status, and concrete implementation plans for Testing, Performance, DX, and CI/CD automation.
+2. **[docs/DOCUMENTATION_INDEX.md](file:///home/timoty/Desktop/project/Arch-System/docs/DOCUMENTATION_INDEX.md)**:
+   - Added links and updated the tree structure mapping to reference the new strategy document.
+
+### What the Next Agent Should Know
+
+- The operational roadmap is fully documented under `docs/reports/continuous_improvement_operational_excellence.md` for reference during the implementation phase of these enhancements.
