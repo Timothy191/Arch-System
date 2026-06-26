@@ -1,7 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { SARLayerPanel } from "./SARLayer";
 import { HyperspectralLayer, type SpectralComposite } from "./HyperspectralLayer";
@@ -14,50 +13,20 @@ import {
   type DeformationReading,
 } from "@repo/shared/data-access";
 
-const LidarLayerPanel = dynamic(
-  () => import("@/components/monitoring/LidarLayer").then((m) => m.LidarLayerPanel),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[340px] bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl animate-pulse" />
-    ),
-  },
-);
-
-const COGRasterLayer = dynamic(
-  () => import("@/components/monitoring/COGRasterLayer").then((m) => m.COGRasterLayer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[340px] bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl animate-pulse" />
-    ),
-  },
-);
-
-const KeplerGlMap = dynamic(
-  () => import("@/components/monitoring/KeplerGlMap").then((m) => m.KeplerGlMap),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[340px] bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl animate-pulse" />
-    ),
-  },
-);
-
-const MonitoringMap = dynamic(
-  () => import("@/components/monitoring/MonitoringMap").then((m) => m.MonitoringMap),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[480px] bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-xl flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#3ecf8e] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[var(--text-secondary)] text-sm">Loading satellite map…</p>
-        </div>
-      </div>
-    ),
-  },
-);
+// AGENT-TRACE: Injected monitoring components to decouple from portal @/components/monitoring/*
+interface MonitoringComponents {
+  LidarLayerPanel: ComponentType;
+  COGRasterLayer: ComponentType;
+  KeplerGlMap: ComponentType;
+  MonitoringMap: ComponentType<{
+    center?: { lat: number; lon: number };
+    zoom?: number;
+    deformationReadings?: DeformationReading[];
+    activeLayer?: string;
+    height?: string;
+    onReadingClick?: (_reading: DeformationReading) => void;
+  }>;
+}
 
 type ActiveTab = "overview" | "sar" | "hyperspectral" | "highres" | "lidar" | "raster" | "kepler";
 type MapLayer = "none" | "sar" | "optical" | "ndvi" | "geology" | "terrain";
@@ -86,10 +55,13 @@ const readings = generateDeformationReadings(DEFAULT_MINE_CENTER.lat, DEFAULT_MI
 
 interface SatelliteMonitoringDashboardProps {
   defaultTab?: ActiveTab;
+  /** Injected monitoring components (decouples lib from portal @/components/monitoring) */
+  monitoring: MonitoringComponents;
 }
 
 export function SatelliteMonitoringDashboard({
   defaultTab = "overview",
+  monitoring: { LidarLayerPanel, COGRasterLayer, KeplerGlMap, MonitoringMap },
 }: SatelliteMonitoringDashboardProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>(defaultTab);
   const [activeComposite, setActiveComposite] = useState<SpectralComposite>("truecolor");

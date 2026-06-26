@@ -30,7 +30,7 @@ export default async function AdminPage({
     .single();
 
   if (employee?.role !== "admin") {
-    redirect("/");
+    redirect("/hub");
   }
 
   const { tab: rawTab } = await searchParams;

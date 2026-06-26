@@ -4,6 +4,7 @@ import React from "react";
 import { useSystemMetrics } from "@/hooks/useSystemMetrics";
 import { useSplitWindow } from "@/hooks/useSplitWindow";
 import { cn } from "@repo/ui/lib/utils";
+import { departmentPath, HUB_PATH } from "@repo/utils";
 import {
   Clock,
   Wifi,
@@ -23,10 +24,10 @@ interface ViewportBoundariesProps {
 }
 
 const DOCK_APPS = [
-  { name: "Hub", icon: LayoutDashboard, href: "/" },
-  { name: "Drilling", icon: MapIcon, href: "/drilling" },
-  { name: "Engineering", icon: Wrench, href: "/engineering" },
-  { name: "Alerts", icon: Bell, href: "/safety" },
+  { name: "Hub", icon: LayoutDashboard, href: HUB_PATH },
+  { name: "Drilling", icon: MapIcon, href: departmentPath("drilling") },
+  { name: "Engineering", icon: Wrench, href: departmentPath("engineering") },
+  { name: "Alerts", icon: Bell, href: departmentPath("safety") },
   { name: "Settings", icon: Settings, href: "/admin" },
 ];
 

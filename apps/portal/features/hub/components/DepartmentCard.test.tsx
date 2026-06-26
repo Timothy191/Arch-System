@@ -61,7 +61,7 @@ describe("DepartmentCard", () => {
     if (card) {
       fireEvent.click(card);
     }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+    expect(mockPush).toHaveBeenCalledWith("/hub/drilling");
   });
 
   it("triggers router push on Enter keydown", () => {
@@ -71,7 +71,7 @@ describe("DepartmentCard", () => {
     if (card) {
       fireEvent.keyDown(card, { key: "Enter" });
     }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+    expect(mockPush).toHaveBeenCalledWith("/hub/drilling");
   });
 
   it("triggers router push on Space keydown", () => {
@@ -81,7 +81,7 @@ describe("DepartmentCard", () => {
     if (card) {
       fireEvent.keyDown(card, { key: " " });
     }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+    expect(mockPush).toHaveBeenCalledWith("/hub/drilling");
   });
 
   it("applies tabIndex=0 to the outer interactive wrapper", () => {

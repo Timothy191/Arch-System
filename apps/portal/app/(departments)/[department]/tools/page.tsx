@@ -1,6 +1,6 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { EXTERNAL_TOOLS } from "~/lib/tools";
-import ToolsPageClient from "~/features/departments/components/tools/ToolsPageClient";
+import { ToolsPageClient } from "@repo/departments/ui";
 
 export default async function ToolsPage({ params }: { params: Promise<{ department: string }> }) {
   const { department } = await params;

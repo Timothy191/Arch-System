@@ -26,6 +26,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import { departmentPath } from "@repo/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -204,7 +205,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/drilling/drilling-operations">
+          <Link href={departmentPath("drilling", "drilling-operations")}>
             <Button variant="outline" className="border-[var(--border-subtle)]">
               <Activity className="w-4 h-4 mr-2" />
               Live Operations

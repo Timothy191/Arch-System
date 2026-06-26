@@ -25,12 +25,12 @@ function getErrorMessage(error: Error): string {
 
 function getActionLink(error: Error): { href: string; label: string } {
   if (isNotFoundError(error)) {
-    return { href: "/", label: "Back to Hub" };
+    return { href: "/hub", label: "Back to Hub" };
   }
   if (isAuthError(error)) {
     return { href: "/login", label: "Sign in" };
   }
-  return { href: "/", label: "Back to Hub" };
+  return { href: "/hub", label: "Back to Hub" };
 }
 
 export default function DepartmentError({ error, reset }: DepartmentErrorProps) {

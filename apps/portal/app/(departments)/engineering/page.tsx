@@ -2,6 +2,7 @@ import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import Link from "next/link";
+import { departmentPath } from "@repo/utils";
 import {
   AlertTriangle,
   CircleDot,
@@ -83,7 +84,7 @@ export default async function EngineeringDashboardPage() {
       {/* Secondary Hub Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Breakdowns Card */}
-        <Link href="/engineering/breakdowns" className="group">
+        <Link href={departmentPath("engineering", "breakdowns")} className="group">
           <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -146,7 +147,7 @@ export default async function EngineeringDashboardPage() {
         </Link>
 
         {/* Tire Management Card */}
-        <Link href="/engineering/tire-management" className="group">
+        <Link href={departmentPath("engineering", "tire-management")} className="group">
           <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">

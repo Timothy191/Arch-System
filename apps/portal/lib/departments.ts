@@ -1,3 +1,5 @@
+import { departmentPath } from "@repo/utils";
+
 export interface QuickAction {
   label: string;
   href: string;
@@ -33,8 +35,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Depth", value: "1,240m" },
     trend: [1180, 1195, 1205, 1210, 1220, 1235, 1240, 1245],
     actions: [
-      { label: "View Logs", href: "/drilling/drilling-operations" },
-      { label: "Telemetry", href: "/drilling/machine-telemetry" },
+      { label: "View Logs", href: departmentPath("drilling", "drilling-operations") },
+      { label: "Telemetry", href: departmentPath("drilling", "machine-telemetry") },
     ],
   },
   {
@@ -49,8 +51,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Yield", value: "85%" },
     trend: [78, 80, 79, 82, 83, 84, 85, 86],
     actions: [
-      { label: "Daily Log", href: "/production/daily-log" },
-      { label: "Reports", href: "/production/reports" },
+      { label: "Daily Log", href: departmentPath("production", "daily-log") },
+      { label: "Reports", href: departmentPath("production", "reports") },
     ],
   },
   {
@@ -65,8 +67,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "On-site", value: "142" },
     trend: [135, 138, 140, 139, 141, 142, 142, 143],
     actions: [
-      { label: "Access Logs", href: "/access-control/access-logs" },
-      { label: "Badges", href: "/access-control/badges" },
+      { label: "Access Logs", href: departmentPath("access-control", "access-logs") },
+      { label: "Badges", href: departmentPath("access-control", "badges") },
     ],
   },
   {
@@ -81,8 +83,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Cards", value: "0" },
     trend: [0, 0, 0, 0, 0, 0, 0, 0],
     actions: [
-      { label: "Print Cards", href: "/access-card-actions/print-cards" },
-      { label: "QR Codes", href: "/access-card-actions/qr-codes" },
+      { label: "Print Cards", href: departmentPath("access-card-actions", "print-cards") },
+      { label: "QR Codes", href: departmentPath("access-card-actions", "qr-codes") },
     ],
   },
   {
@@ -97,8 +99,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Pending", value: "12" },
     trend: [8, 10, 9, 11, 12, 11, 12, 13],
     actions: [
-      { label: "Breakdowns", href: "/engineering/breakdowns" },
-      { label: "Tires", href: "/engineering/tire-management" },
+      { label: "Breakdowns", href: departmentPath("engineering", "breakdowns") },
+      { label: "Tires", href: departmentPath("engineering", "tire-management") },
     ],
   },
   {
@@ -113,8 +115,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Alerts", value: "0" },
     trend: [2, 1, 1, 0, 0, 0, 0, 0],
     actions: [
-      { label: "Hourly Loads", href: "/control-room/hourly-loads" },
-      { label: "Machine Ops", href: "/control-room/machine-operations" },
+      { label: "Hourly Loads", href: departmentPath("control-room", "hourly-loads") },
+      { label: "Machine Ops", href: departmentPath("control-room", "machine-operations") },
     ],
   },
   {
@@ -129,8 +131,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "LTI-free", value: "450d" },
     trend: [445, 446, 447, 448, 449, 450, 450, 450],
     actions: [
-      { label: "Daily Log", href: "/safety/daily-log" },
-      { label: "Incidents", href: "/safety/daily-log" },
+      { label: "Daily Log", href: departmentPath("safety", "daily-log") },
+      { label: "Incidents", href: departmentPath("safety", "daily-log") },
     ],
   },
   {
@@ -145,8 +147,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Courses", value: "8" },
     trend: [6, 7, 7, 8, 8, 8, 8, 9],
     actions: [
-      { label: "Certifications", href: "/training/certifications" },
-      { label: "Schedules", href: "/training/schedules" },
+      { label: "Certifications", href: departmentPath("training", "certifications") },
+      { label: "Schedules", href: departmentPath("training", "schedules") },
     ],
   },
   {
@@ -161,8 +163,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Imagery", value: "Latest" },
     trend: [3, 4, 4, 5, 5, 6, 6, 7],
     actions: [
-      { label: "SAR View", href: "/satellite-monitoring/sar" },
-      { label: "High-Res", href: "/satellite-monitoring/highres" },
+      { label: "SAR View", href: departmentPath("satellite-monitoring", "sar") },
+      { label: "High-Res", href: departmentPath("satellite-monitoring", "highres") },
     ],
   },
   {

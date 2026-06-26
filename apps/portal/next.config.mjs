@@ -16,6 +16,9 @@ const isCI = process.env.CI === "true";
 // next build always sets NODE_ENV=production, so we use CI to distinguish local builds
 const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 
+const DEPARTMENT_SLUG_PATTERN =
+  "drilling|production|access-control|engineering|control-room|safety|training|satellite-monitoring|access-card-actions";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   turbopack: {
@@ -81,6 +84,32 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
     inlineCss: true,
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
+  },
+  async rewrites() {
+    return [
+      {
+        source: `/hub/:dept(${DEPARTMENT_SLUG_PATTERN})/:path*`,
+        destination: "/:dept/:path*",
+      },
+      {
+        source: `/hub/:dept(${DEPARTMENT_SLUG_PATTERN})`,
+        destination: "/:dept",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: `/:dept(${DEPARTMENT_SLUG_PATTERN})/:path*`,
+        destination: "/hub/:dept/:path*",
+        permanent: false,
+      },
+      {
+        source: `/:dept(${DEPARTMENT_SLUG_PATTERN})`,
+        destination: "/hub/:dept",
+        permanent: false,
+      },
+    ];
   },
   async headers() {
     return [

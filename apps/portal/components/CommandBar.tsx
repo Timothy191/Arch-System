@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { logout } from "~/app/actions";
 import { cn } from "@repo/ui/lib/utils";
 import { getServiceUrls } from "@repo/ui/lib/urls";
+import { departmentPath, HUB_PATH } from "@repo/utils";
 
 const urls = getServiceUrls();
 import {
@@ -40,56 +41,56 @@ const DEPARTMENT_COMMANDS: CommandItem[] = [
   {
     id: "dept-drilling",
     label: "Drilling Operations",
-    href: "/drilling",
+    href: departmentPath("drilling"),
     category: "Departments",
     icon: <Pickaxe className="w-4 h-4" />,
   },
   {
     id: "dept-production",
     label: "Production",
-    href: "/production",
+    href: departmentPath("production"),
     category: "Departments",
     icon: <Factory className="w-4 h-4" />,
   },
   {
     id: "dept-control",
     label: "Control Room",
-    href: "/control-room",
+    href: departmentPath("control-room"),
     category: "Departments",
     icon: <Monitor className="w-4 h-4" />,
   },
   {
     id: "dept-safety",
     label: "Safety Dashboard",
-    href: "/safety",
+    href: departmentPath("safety"),
     category: "Departments",
     icon: <Shield className="w-4 h-4" />,
   },
   {
     id: "dept-engineering",
     label: "Engineering",
-    href: "/engineering",
+    href: departmentPath("engineering"),
     category: "Departments",
     icon: <Wrench className="w-4 h-4" />,
   },
   {
     id: "dept-access",
     label: "Access Control",
-    href: "/access-control",
+    href: departmentPath("access-control"),
     category: "Departments",
     icon: <ShieldCheck className="w-4 h-4" />,
   },
   {
     id: "dept-training",
     label: "Training",
-    href: "/training",
+    href: departmentPath("training"),
     category: "Departments",
     icon: <GraduationCap className="w-4 h-4" />,
   },
   {
     id: "dept-satellite",
     label: "Satellite Monitoring",
-    href: "/satellite-monitoring",
+    href: departmentPath("satellite-monitoring"),
     category: "Departments",
     icon: <Satellite className="w-4 h-4" />,
   },
@@ -99,7 +100,7 @@ const NAV_COMMANDS: CommandItem[] = [
   {
     id: "nav-hub",
     label: "Hub Dashboard",
-    href: "/",
+    href: HUB_PATH,
     category: "Navigation",
     icon: <LayoutDashboard className="w-4 h-4" />,
   },

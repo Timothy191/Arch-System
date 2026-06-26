@@ -1,5 +1,5 @@
-import { SatelliteMonitoringDashboard } from "@/features/departments";
+import { SatelliteDashboardPortal } from "@/components/monitoring/SatelliteDashboardPortal";
 
 export default function HyperspectralPage() {
-  return <SatelliteMonitoringDashboard defaultTab="hyperspectral" />;
+  return <SatelliteDashboardPortal defaultTab="hyperspectral" />;
 }

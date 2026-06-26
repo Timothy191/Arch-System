@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { departmentPath } from "@repo/utils";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { CheckCircle2, XCircle, ShieldOff, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import type { ShiftCompleteness, MachineCoverageStatus } from "@/lib/shift-completeness";
@@ -182,7 +183,9 @@ function MachineRow({
   return (
     <button
       type="button"
-      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split("/").pop()}`)}
+      onClick={() =>
+        router.push(departmentPath(departmentSlug, status.formPath.split("/").pop() ?? undefined))
+      }
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent-red/5 transition-colors text-left group"
     >
       <XCircle className="w-4 h-4 text-accent-red shrink-0" />

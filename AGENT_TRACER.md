@@ -1,5 +1,25 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-26: Implement and run workspace onboarding /init command
+
+### Purpose
+
+Provide localized virtual onboarding command (/init) and create ANTIGRAVITY.md alignment hub to track state and bootstrap session guidelines.
+
+### Changes Made
+
+1. **`10-src/` directory**: Created directory and populated it with `@WHY.md`, `@HOW.md`, `@PROGRESSIVE_DISCLOSURE.md`, `agents.md`, `checkout-skill.py`, and `return-skill.py` to establish the modular foundational architecture.
+2. **`scripts/init_command.py`**: Implemented the virtual `/init` command script to parse architectural documentation, verify skills state, persist state to `.gemini/init_state.json`, and generate the root `ANTIGRAVITY.md`.
+3. **`ANTIGRAVITY.md`**: Created the root alignment hub for terminal session bootstrapping.
+4. **Execution**: Executed `python scripts/init_command.py` to verify functionality.
+
+### What the Next Agent Should Know
+
+- The alignment hub `ANTIGRAVITY.md` is now generated. The current session profile is set to `Antigravity Lead Orchestrator` with loaded modular skill `feature-scaffolder`.
+- Run `python scripts/init_command.py` to re-synchronize state.
+
+---
+
 ## 2026-06-25: Wire portal to departments, hub, and shared libs (phase 2)
 
 ### Purpose

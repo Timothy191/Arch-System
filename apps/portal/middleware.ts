@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { proxy, config as proxyConfig } from "./server/proxy";
+import { proxy } from "./server/proxy";
 
 /**
  * Next.js edge middleware — delegates to server/proxy.ts for:
@@ -12,4 +12,6 @@ export async function middleware(request: NextRequest) {
   return proxy(request);
 }
 
-export const config = proxyConfig;
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|api/|favicon.ico).*)"],
+};

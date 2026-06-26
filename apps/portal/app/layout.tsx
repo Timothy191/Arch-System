@@ -17,6 +17,7 @@ import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import { CookieConsent } from "@repo/ui/CookieConsent";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { HUB_PATH } from "@repo/utils";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -118,18 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   where: {
                     and: [
                       {
-                        href_matches: [
-                          "/",
-                          "/drilling/*",
-                          "/production/*",
-                          "/access-control/*",
-                          "/engineering/*",
-                          "/control-room/*",
-                          "/safety/*",
-                          "/training/*",
-                          "/satellite-monitoring/*",
-                          "/admin/*",
-                        ],
+                        href_matches: [HUB_PATH, "/hub/*", "/admin/*"],
                       },
                       { not: { href_matches: "/api/*" } },
                       { not: { href_matches: "/_next/*" } },

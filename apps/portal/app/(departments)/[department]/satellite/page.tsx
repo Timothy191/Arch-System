@@ -17,7 +17,7 @@ export default function ControlRoomSatellitePage() {
           </p>
         </div>
         <a
-          href="/executive"
+          href="/hub/executive"
           className="px-3 py-1.5 text-xs font-medium text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 rounded-lg hover:bg-[var(--accent-blue)]/10 transition-colors"
         >
           Executive Hub →

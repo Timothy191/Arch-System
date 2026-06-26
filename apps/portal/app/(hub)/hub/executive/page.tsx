@@ -34,7 +34,7 @@ export default async function ExecutiveDashboardPage() {
     .single();
 
   if (employee?.role !== "admin" && employee?.role !== "manager") {
-    redirect("/");
+    redirect("/hub");
   }
 
   const db = await createReadReplicaClient();

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { DeformationSummary } from "@/features/departments/components/satellite/DeformationAlertCard";
+import { DeformationSummary } from "@repo/departments/ui";
 import { DEFAULT_MINE_CENTER, type DeformationReading } from "@/lib/monitoring-api";
 
 const MonitoringMap = dynamic(() => import("./MonitoringMap").then((m) => m.MonitoringMap), {

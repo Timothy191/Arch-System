@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { departmentPath } from "@repo/utils";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { PageHeader } from "@repo/ui/PageHeader";
 import { SafetyCharts } from "./SafetyChartsWrapper";
@@ -138,13 +139,13 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
         <a
-          href={`/safety/daily-log`}
+          href={departmentPath("safety", "daily-log")}
           className="px-4 py-2 bg-[#3ecf8e] text-[var(--text-heading)] font-medium rounded-lg hover:bg-[#35b37d] transition-colors text-sm"
         >
           + Log Daily Check
         </a>
         <a
-          href={`/safety/reports`}
+          href={departmentPath("safety", "reports")}
           className="px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] font-medium rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors text-sm"
         >
           View Reports

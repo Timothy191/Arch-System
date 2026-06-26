@@ -17,6 +17,7 @@ import type { AlertEvent } from "@/features/hub";
 import type { TrendDataPoint } from "@/features/hub";
 import { getTools } from "@/lib/tools";
 import { DEPARTMENTS } from "~/lib/departments";
+import { departmentPath, HUB_PATH } from "@repo/utils";
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
   Shield,
@@ -195,7 +196,7 @@ async function getRecentAlertEvents(
                 description: incident.description,
                 timestamp: incident.created_at,
                 severity: mapSeverityLevel(sev?.level),
-                href: "/safety/daily-log",
+                href: departmentPath("safety", "daily-log"),
               });
             }
           }
@@ -220,7 +221,7 @@ async function getRecentAlertEvents(
                 description: b.reason,
                 timestamp: b.created_at,
                 severity: "warning",
-                href: "/engineering/breakdowns",
+                href: departmentPath("engineering", "breakdowns"),
               });
             }
           }
@@ -390,20 +391,20 @@ export default async function HubPage() {
               defaultDescription="Centralized monitoring and control system for Arch Systems industrial complexes. Access Modbus diagnostics, machine breakdowns, shifts, and live telemetry."
               primaryHref={
                 accessibleDeptIds.includes("control-room")
-                  ? "/control-room"
+                  ? departmentPath("control-room")
                   : accessibleDeptIds.length > 0
-                    ? `/${accessibleDeptIds[0]}`
-                    : "/"
+                    ? departmentPath(accessibleDeptIds[0])
+                    : HUB_PATH
               }
               primaryLabel={
                 accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
               }
               secondaryHref={
                 accessibleDeptIds.includes("training")
-                  ? "/training"
+                  ? departmentPath("training")
                   : accessibleDeptIds.length > 0
-                    ? `/${accessibleDeptIds[0]}`
-                    : "/"
+                    ? departmentPath(accessibleDeptIds[0])
+                    : HUB_PATH
               }
               secondaryLabel="System Guidelines"
               departments={departments}
