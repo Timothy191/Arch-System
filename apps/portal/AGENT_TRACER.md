@@ -2558,3 +2558,12 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-06-26T04:00:00Z] Performance Optimization: Memoize HourlyLoadsGrid Derived Data
+
+**Purpose:** Reduce unnecessary re-renders of the heavy DataGrid (RevoGrid) component by memoizing derived data structures in the HourlyLoadsGrid component.
+**Changes:**
+- Wrapped `loadsByMachine` (Map) creation in `useMemo` in `HourlyLoadsGrid.tsx`.
+- Wrapped `hasBinFactors` boolean calculation in `useMemo` in `HourlyLoadsGrid.tsx`.
+- Updated `getHourValue`, `getMachineTotal`, `getMaterialType`, and `source` dependency arrays to include memoized values.
+**Impact:** Prevents cascading re-renders of the `DataGrid` when local state (like `saving` or `containerWidth`) changes, stabilizing the rendering of the heavy \~900KB grid component.
