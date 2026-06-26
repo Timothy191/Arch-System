@@ -1,0 +1,34 @@
+---
+description: Zero-Trust pre-execution planning — detect, isolate, recover before writing code.
+alwaysApply: true
+---
+
+# Zero-Trust Defensiveness (Pre-Execution)
+
+Engineer for environments where networks drop, hardware throttles, and corrupt data is normal. **Before writing code**, define failure handling:
+
+## 1. DETECT
+
+How does the system know an input or connection is invalid or timed out?
+
+- Boundary validation, explicit timeouts, health checks, schema validation.
+
+## 2. ISOLATE
+
+How do you prevent one module's failure from freezing the UI thread or stalling the local server?
+
+- Contained failures, non-blocking UI paths, bounded retries on I/O.
+
+## 3. RECOVER
+
+What is the silent fallback, local retry, or gradual recovery path without manual resets?
+
+- Offline-first persistence, idempotent retries, degraded-mode behavior.
+
+Incorporate these bounds **into the logic** — not as post-hoc disclaimers.
+
+## Automation
+
+`sessionStart` injects via `.cursor/hooks/zero-trust-defensiveness-session.py`.
+
+**Disable:** `ZERO_TRUST_HOOK_ENABLED=false`

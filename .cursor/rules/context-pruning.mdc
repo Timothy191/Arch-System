@@ -1,0 +1,37 @@
+---
+description: Context-Window Pruning on long sessions and compaction boundaries.
+alwaysApply: true
+---
+
+# Context-Pruning Hook (Cycle-Reset)
+
+When a session spans multiple turns or context is compacted, prune stale context before continuing implementation work.
+
+## When to prune
+
+- After **6+ completed turns** in the same session (automated via `stop` hook), or
+- When you see **`[CONTEXT-PRUNING HOOK]`** (automated follow-up or `preCompact` notification), or
+- When context feels bloated with obsolete paths, symlinks, or abandoned plans
+
+## Required output format
+
+Summarize the current architecture state in **exactly 3 bullets**:
+
+1. **What was successfully implemented:**
+2. **What stale configurations or symlinks must be ignored:**
+3. **The exact next modular skill or file path to focus on:**
+
+Discard conversational fluff. Retain only this state-vector for the next execution cycle.
+
+## During a pruning pass
+
+- **Read-only** unless the user explicitly asked for implementation in this turn.
+- Do not re-litigate completed decisions unless they are wrong.
+- Prefer concrete paths (`10-src/…`, `libs/features/…`, `apps/portal/…`) over vague references.
+
+## Automation
+
+- `preCompact` — `.cursor/hooks/context-pruning-compact.py` (user notification + state tracking)
+- `stop` — pruning follow-up every `CONTEXT_PRUNE_TURN_INTERVAL` turns (default `6`), orchestrated before QA review
+
+**Disable:** `CONTEXT_PRUNING_HOOK_ENABLED=false`

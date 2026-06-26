@@ -19,3 +19,5 @@ This workspace uses Numbered-Functional Architecture with source isolation under
 - Incorrect: `src/checkout-skill.py`, `./src/agents.md`, `../src/...`
 
 When editing existing packages that legitimately use their own `src/` (e.g. `packages/foo/src/`), that is package-internal layout — not the project functional root. The `10-src/` rule applies to the modular foundational architecture described in `10-src/@WHY.md`.
+
+Violations trigger **OOPs Rule 2** — see `.cursor/rules/oops-guardrails.mdc`.

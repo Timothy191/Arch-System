@@ -1,0 +1,66 @@
+---
+description: OOPs out-of-bounds guardrails — six hard stops; abort and refactor on trigger.
+alwaysApply: true
+---
+
+# OOPs Guardrails (Out-of-Bounds & Hard Stops)
+
+**OOPs** = programmatic breaks. If you detect a trigger during internal reasoning or while drafting, **abort the current approach and refactor** before continuing.
+
+## Rule 1: No Metaphors / Pure Functional
+
+| | |
+|---|---|
+| **Trigger** | Organic, abstract, or overly complex metaphors for folders, modules, or data structures |
+| **OOPs action** | Stop. Remove metaphors. Use **Numbered-Functional** paths with deterministic prefixes (`01_Admin`, `10-src`, `20_docs`; plus `apps/`, `libs/features/`, `packages/`). Keep files flat and modular. |
+
+## Rule 2: Stale Reference / Symlink Guardrail
+
+| | |
+|---|---|
+| **Trigger** | Generic paths (`src/`, root `utils/`), outdated monolithic files, or unverified symlinks |
+| **OOPs action** | Halt. Verify exact locations. Use **`10-src/`** for modular functional roots. Package-internal `packages/foo/src/` is valid only inside that package — not a substitute for `10-src/`. |
+
+See also: `.cursor/rules/path-resolution-10-src.mdc`
+
+## Rule 3: No-Sensor Assumption
+
+| | |
+|---|---|
+| **Trigger** | Automated cloud APIs, continuous remote sensor sync, PLC/SCADA, or live telemetry feeds without documented repo adapters |
+| **OOPs action** | Pivot to **human-input-first**, manual entry, offline-first local operation, and eventual consistency. Verify real integration points before automating. |
+
+See also: `.cursor/rules/anti-hallucination-control-room.mdc`
+
+## Rule 4: Anti-Volatile State
+
+| | |
+|---|---|
+| **Trigger** | Short-lived in-memory caching or volatile session state for critical operational tracking |
+| **OOPs action** | Stop. Use **offline-first** state machines with persistent local storage or transaction logs as the single source of truth. |
+
+## Rule 5: No-Magic-Numbers Performance
+
+| | |
+|---|---|
+| **Trigger** | Arbitrary timeouts, un-clamped loops, or hardcoded thresholds (e.g., `sleep(5)`, unbounded queries) |
+| **OOPs action** | Halt. Replace with configuration objects, explicit backoff, resource limits, or cooperative yielding. |
+
+## Rule 6: No-Side-Effects Modularity
+
+| | |
+|---|---|
+| **Trigger** | Module modifies global state, touches paths outside its scope, or alters environment variables implicitly |
+| **OOPs action** | Aborted. Explicit validated inputs and outputs only — zero side effects outside module scope. |
+
+## When OOPs fires
+
+1. Stop the current line of reasoning or code path.
+2. Refactor to comply — do not bury the violation in the final answer.
+3. QA review (`[QA_RESPONSE_REVIEW]`) must reject drafts that still violate OOPs rules.
+
+## Automation
+
+`sessionStart` injects guardrails via `.cursor/hooks/oops-guardrails-session.py`.
+
+**Disable:** `OOPS_GUARDRAILS_ENABLED=false`

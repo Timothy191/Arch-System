@@ -131,7 +131,15 @@ dev_run.log
 .antigravitycli/
 populating-data/
 
-.cursor/
+# Cursor IDE — track shared hooks/rules; ignore local IDE state
+.cursor/*
+!.cursor/hooks.json
+!.cursor/hooks/
+!.cursor/hooks/**
+!.cursor/rules/
+!.cursor/rules/**
+.cursor/hooks/state/
+.cursor/hooks/__pycache__/
 knowledge.md
 
 .nx/cache

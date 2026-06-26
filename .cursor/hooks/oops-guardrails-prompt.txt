@@ -1,0 +1,62 @@
+[OOPS GUARDRAILS]
+
+"OOPs" rules are hard programmatic breaks. If you detect any trigger during internal reasoning **before or while drafting**, abort the current approach and refactor immediately.
+
+## Rule 1: No Metaphors / Pure Functional
+
+**Trigger:** You begin using organic, abstract, or overly complex metaphors to describe system folders, modules, or data structures (e.g., "the nervous system of the app", "data lake flows", "organism layers").
+
+**OOPs action:** Stop. Remove all abstract or conversational metaphors. Revert to rigid **Numbered-Functional** structure with clear, deterministic prefixes:
+
+- `01_Admin`, `10-src`, `20_docs` (and existing repo conventions: `apps/`, `libs/features/`, `packages/`)
+- Keep files flat and modular; name paths literally, not figuratively.
+
+## Rule 2: Stale Reference / Symlink Guardrail
+
+**Trigger:** You reference generic directory paths like bare `src/`, root-level `utils/`, or outdated monolithic files without verifying they exist in this workspace.
+
+**OOPs action:** Halt execution. Verify the **exact** source location before writing or citing paths.
+
+- Modular functional root: **`10-src/`** (never un-prefixed `src/` for new functional resources)
+- Package-internal `packages/foo/src/` is allowed only for that package's layout — not as a substitute for `10-src/`
+- Never write code that depends on loose or potentially stale symbolic links
+
+## Rule 3: No-Sensor Assumption
+
+**Trigger:** You design an automated cloud API, continuous remote sensor sync, PLC/SCADA integration, or "live machine feed" telemetry for industrial/control-room data without documented adapters in this repository.
+
+**OOPs action:** Pivot immediately.
+
+- Prioritize **human data input**, manual confirmation, and operator-entered reporting
+- Design for **offline-first** local operation and **eventual consistency** when sync is explicitly requested and implemented
+- If automation is required, search the codebase for real integration points first — do not invent endpoints
+
+## Rule 4: Anti-Volatile State
+
+**Trigger:** You rely heavily on short-lived, in-memory caching or volatile session state for critical operational tracking.
+
+**OOPs action:** Stop. Unexpected power loss, service restarts, or hardware stabilization routines will wipe volatile memory.
+
+- Pivot to **offline-first, eventual-consistency** state machines
+- Persistent local storage or local transaction logs must be the single source of truth
+
+## Rule 5: No-Magic-Numbers Performance
+
+**Trigger:** You inject arbitrary timeouts, un-clamped loops, or hardcoded threshold constants (e.g., `time.sleep(5)`, unbounded database queries).
+
+**OOPs action:** Halt. Magic numbers cause production bottlenecks and UI stuttering.
+
+- Replace with deterministic configuration objects, explicit backoff algorithms, resource limits, or cooperative yielding logic
+
+## Rule 6: No-Side-Effects Modularity
+
+**Trigger:** A module or script modifies global state, touches directories outside its assigned path, or alters environment variables implicitly.
+
+**OOPs action:** Aborted. Every script, skill, or module must be self-contained and isolated.
+
+- Data enters through explicit, validated inputs and leaves through explicit outputs
+- Zero side effects outside the designated module scope
+
+## Enforcement
+
+These rules apply during thinking and implementation. Violations require refactor before continuing — not a footnote in the final response.

@@ -1,0 +1,28 @@
+[ZERO-TRUST DEFENSIVENESS HOOK]
+
+You are engineering for environments where networks drop, hardware throttles, and corrupt data is normal. **Before writing code**, explicitly define your failure-handling strategy:
+
+## 1. DETECT
+
+How does the system instantly know an input or connection is invalid or timed out?
+
+- Validate at system boundaries (user input, API payloads, file reads, DB connections).
+- Use explicit timeouts, health checks, and schema validation — never assume success.
+
+## 2. ISOLATE
+
+How do you prevent a single module's failure from freezing the entire UI thread or stalling the local server?
+
+- Contain failures inside the module boundary.
+- Use non-blocking async patterns on UI paths; circuit-breakers and bounded retries on I/O.
+- Never let one unhandled exception collapse the whole session or request pipeline.
+
+## 3. RECOVER
+
+What is the silent fallback, local retry mechanism, or gradual recovery path that requires zero manual system resets?
+
+- Prefer offline-first local persistence and idempotent retries.
+- Surface operator-visible errors only when recovery is impossible.
+- Document degraded-mode behavior when dependencies are missing.
+
+Incorporate these safety bounds **directly into the logic** — not as post-hoc comments.

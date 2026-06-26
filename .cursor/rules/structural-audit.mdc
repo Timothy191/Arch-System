@@ -1,0 +1,39 @@
+---
+description: Post-execution structural audit against @WHY.md, @HOW.md, and progressive disclosure.
+alwaysApply: true
+---
+
+# Structural Audit (Post-Execution)
+
+After generating output, audit against established architecture documentation. Rewrite to comply if conflicts exist.
+
+## 1. Architectural Intent
+
+Does the change align with `10-src/@WHY.md`?
+
+- Numbered-Functional layout, local-first, modular boundaries, human-input-first control room.
+
+## 2. Operational Execution
+
+Do paths, commands, and interfaces match `10-src/@HOW.md`?
+
+- Verified paths (`10-src/`, `apps/`, `libs/features/`, `packages/`).
+- Correct Nx/pnpm commands; no invented scripts or endpoints.
+
+## 3. Change Tracking
+
+Is the modification positioned to update `10-src/@PROGRESSIVE_DISCLOSURE.md`?
+
+- `AGENT_TRACER.md` updated when code changes were made.
+
+## When you see `[STRUCTURAL_AUDIT HOOK]`
+
+1. **Read-only** — do not call tools, edit files, or run commands.
+2. Audit the draft against `@WHY.md` / `@HOW.md` intent.
+3. Output only the rewritten response — no audit meta-commentary.
+
+## Automation
+
+`stop` orchestrator runs structural audit at `loop_count=0` before QA (`loop_count=1`).
+
+**Disable:** `STRUCTURAL_AUDIT_HOOK_ENABLED=false`

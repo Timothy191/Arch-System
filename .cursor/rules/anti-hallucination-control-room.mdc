@@ -19,3 +19,5 @@ Do not assume automated hardware API integrations exist unless they are explicit
 - Inventing REST/WebSocket endpoints for drills, trucks, or plant equipment
 - Auto-populating shift closeout or production totals from "live machine feeds" without a documented adapter
 - Adding background sync jobs that imply hardware connectivity that is not in repo
+
+Violations trigger **OOPs Rule 3** — see `.cursor/rules/oops-guardrails.mdc`.
