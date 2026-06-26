@@ -1,0 +1,404 @@
+# Arch-Systems Prometheus Alert Rules
+# PURPOSE: Production alerting for critical infrastructure and application paths
+# SEE: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+# USAGE: Loaded by Prometheus via config/prometheus/prometheus.yml
+
+groups:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLICATION ALERTS - Portal Service
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: portal-alerts
+    interval: 30s
+    rules:
+      # Portal Down
+      - alert: PortalDown
+        expr: up{job="portal"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Portal service is down"
+          description: "Portal instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/portal-down.md"
+          dashboard: "https://grafana.internal/d/portal-overview"
+
+      # High Error Rate
+      - alert: PortalHighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="portal",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="portal"}[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Portal error rate is above 5%"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/high-error-rate.md"
+
+      # High Latency (P95)
+      - alert: PortalHighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="portal"}[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Portal P95 latency is above 2 seconds"
+          description: "P95 latency is {{ $value | humanizeDuration }} over the last 5 minutes."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/high-latency.md"
+
+      # High Memory Usage
+      - alert: PortalHighMemory
+        expr: |
+          (
+            process_resident_memory_bytes{job="portal"}
+            /
+            2147483648  # 2GB limit
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Portal memory usage is above 90%"
+          description: "Memory usage is {{ $value | humanizePercentage }} of 2GB limit."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/high-memory.md"
+
+      # High CPU Usage
+      - alert: PortalHighCPU
+        expr: |
+          (
+            rate(process_cpu_seconds_total{job="portal"}[5m])
+            /
+            2  # 2 CPU limit
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Portal CPU usage is above 90%"
+          description: "CPU usage is {{ $value | humanizePercentage }} of 2 CPU limit."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/high-cpu.md"
+
+      # Health Check Failed
+      - alert: PortalHealthCheckFailed
+        expr: |
+          probe_success{job="portal-health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Portal health check failed"
+          description: "The /api/health endpoint has been failing for more than 2 minutes."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/health-check-failed.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DATABASE ALERTS - PostgreSQL/Supabase
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: database-alerts
+    interval: 30s
+    rules:
+      # Database Down
+      - alert: DatabaseDown
+        expr: |
+          pg_up{job="supabase-db"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/database-down.md"
+
+      # Database Connections High
+      - alert: DatabaseConnectionsHigh
+        expr: |
+          (
+            pg_stat_activity_count{datname="postgres"}
+            /
+            pg_settings_max_connections{datname="postgres"}
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "Database connections above 80%"
+          description: "Database is using {{ $value | humanizePercentage }} of max connections."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/db-connections-high.md"
+
+      # Database Replication Lag (if streaming replication enabled)
+      - alert: DatabaseReplicationLag
+        expr: |
+          pg_replication_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "Database replication lag is high"
+          description: "Replication lag is {{ $value | humanizeDuration }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/replication-lag.md"
+
+      # Database Disk Space Low
+      - alert: DatabaseDiskSpaceLow
+        expr: |
+          (
+            pg_database_size_bytes{datname="postgres"}
+            /
+            pg_tablespace_size_bytes{datname="pg_default"}
+          ) > 0.85
+        for: 1h
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "Database disk space is low"
+          description: "Database is using {{ $value | humanizePercentage }} of available disk space."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/db-disk-space.md"
+
+      # Database Long Running Queries
+      - alert: DatabaseLongRunningQueries
+        expr: |
+          pg_stat_activity_max_tx_duration{datname="postgres"} > 300
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "Database has long-running queries"
+          description: "Maximum query duration is {{ $value | humanizeDuration }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/long-running-queries.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CACHE ALERTS - Redis
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: cache-alerts
+    interval: 30s
+    rules:
+      # Redis Down
+      - alert: RedisDown
+        expr: |
+          up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/redis-down.md"
+
+      # Redis Memory High
+      - alert: RedisMemoryHigh
+        expr: |
+          (
+            redis_memory_used_bytes{job="redis"}
+            /
+            redis_memory_max_bytes{job="redis"}
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Redis memory usage is above 90%"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/redis-memory-high.md"
+
+      # Redis Evicted Keys
+      - alert: RedisEvictedKeys
+        expr: |
+          rate(redis_evicted_keys_total{job="redis"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Redis is evicting keys"
+          description: "Redis is evicting {{ $value }} keys per second due to memory pressure."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/redis-eviction.md"
+
+      # Redis Persistence Failed
+      - alert: RedisPersistenceFailed
+        expr: |
+          redis_rdb_last_save_status{job="redis"} != 1
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Redis persistence failed"
+          description: "Redis RDB save operation failed. Data loss risk."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/redis-persistence.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # INFRASTRUCTURE ALERTS - Host & Docker
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: infrastructure-alerts
+    interval: 30s
+    rules:
+      # Host Disk Space Low
+      - alert: HostDiskSpaceLow
+        expr: |
+          (
+            1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+          ) > 0.85
+        for: 1h
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Host disk space is low"
+          description: "Root filesystem is {{ $value | humanizePercentage }} full."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/disk-space-low.md"
+
+      # Host Memory High
+      - alert: HostMemoryHigh
+        expr: |
+          (
+            1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          ) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Host memory usage is high"
+          description: "Host memory usage is {{ $value | humanizePercentage }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/host-memory-high.md"
+
+      # Host CPU High
+      - alert: HostCPUHigh
+        expr: |
+          (
+            1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))
+          ) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "Host CPU usage is high"
+          description: "Host CPU usage is {{ $value | humanizePercentage }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/host-cpu-high.md"
+
+      # Docker Container Down
+      - alert: DockerContainerDown
+        expr: |
+          container_last_seen{container_label_com_docker_compose_project="arch"} < time() - 300
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Docker container {{ $labels.name }} is down"
+          description: "Container {{ $labels.name }} has not reported metrics for 5 minutes."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/container-down.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BACKUP ALERTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: backup-alerts
+    interval: 1h
+    rules:
+      # Backup Failed
+      - alert: BackupFailed
+        expr: |
+          postgres_backup_status != 1
+        for: 1h
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "Database backup failed"
+          description: "The last database backup job failed."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/backup-failed.md"
+
+      # Backup Too Old
+      - alert: BackupTooOld
+        expr: |
+          (
+            time() - postgres_backup_last_success_timestamp_seconds
+          ) > 172800  # 48 hours
+        for: 1h
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "Database backup is older than 48 hours"
+          description: "Last successful backup was {{ $value | humanizeDuration }} ago."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/backup-old.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SSL/TLS ALERTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: ssl-alerts
+    interval: 1h
+    rules:
+      # SSL Certificate Expiring Soon
+      - alert: SSLCertificateExpiringSoon
+        expr: |
+          probe_ssl_earliest_cert_expiry - time() < 86400 * 30
+        for: 1h
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "SSL certificate expires in less than 30 days"
+          description: "Certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/ssl-expiring.md"
+
+      # SSL Certificate Expired
+      - alert: SSLCertificateExpired
+        expr: |
+          probe_ssl_earliest_cert_expiry - time() < 0
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "SSL certificate has expired"
+          description: "Certificate for {{ $labels.instance }} has expired."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/ssl-expired.md"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SECURITY ALERTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: security-alerts
+    interval: 1m
+    rules:
+      # High Rate of Failed Logins
+      - alert: HighFailedLoginRate
+        expr: |
+          sum(rate(login_attempts_total{status="failed"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High rate of failed login attempts"
+          description: "{{ $value }} failed login attempts per second over the last 5 minutes."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/failed-logins.md"
+
+      # Potential Brute Force Attack
+      - alert: PotentialBruteForce
+        expr: |
+          sum(increase(login_attempts_total{status="failed"}[1m])) by (source_ip) > 20
+        for: 2m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Potential brute force attack detected"
+          description: "IP {{ $labels.source_ip }} has {{ $value }} failed login attempts in 1 minute."
+          runbook_url: "https://github.com/timothy191/Arch-System/blob/master/docs/runbooks/brute-force.md"

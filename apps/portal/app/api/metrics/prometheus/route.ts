@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMetrics } from "@/lib/observability/metrics";
+import { getMetrics } from "@/lib/observability/prom-metrics";
 
 /**
  * @swagger

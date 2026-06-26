@@ -177,3 +177,7 @@ packages/ui/storybook-static/
 # External execution / AI temp files
 .claude-flow/
 QWEN.md
+# Secrets
+.env.vault.local
+.secrets/
+!.secrets/README.md

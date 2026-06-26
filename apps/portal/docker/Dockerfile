@@ -13,7 +13,7 @@ RUN turbo prune --scope=portal --docker
 # ── Stage 2: deps ──────────────────────────────────────
 # Installs dependencies from the pruned lockfile with pnpm store cache mount
 FROM node:22-alpine AS deps
-RUN apk add --no-cache libc6-compat && \
+RUN apk add --no-cache libc6-compat python3 make g++ && \
     npm install -g pnpm@9.15.9
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
