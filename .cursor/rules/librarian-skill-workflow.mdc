@@ -1,0 +1,32 @@
+---
+description: Librarian Skill Workflow — checkout one skill per turn, return it after completion.
+alwaysApply: true
+---
+
+# Workflow: Librarian Skill Injection
+
+Operate on a **modular Lending Library Architecture**. Do not load the entire knowledge base into every turn.
+
+## Per-turn procedure
+
+1. **Identify** the sub-domain for this turn only (e.g., Nx scaffolding, CI monitoring, UI layout, file parsing).
+2. **Check out** the minimum required context:
+   - Workspace skills: `.agents/skills/{skill-name}/SKILL.md`
+   - Checkout signal: `python 10-src/checkout-skill.py`
+   - Read only the skill(s) relevant to this turn — not the full skills catalog
+3. **Complete** the task within that scoped context.
+4. **Return** the skill — purge domain-specific reasoning from active context:
+   - Return signal: `python 10-src/return-skill.py`
+   - Retain durable outcomes: file changes, decisions, `AGENT_TRACER.md` handoff notes
+
+## Constraints
+
+- One primary sub-domain per turn unless the user explicitly requires cross-domain work.
+- Do not inline entire skill libraries into responses.
+- Prefer `.agents/skills/` and `10-src/` docs over ad hoc rediscovery when a skill already exists.
+
+## Automation
+
+Injected at `sessionStart` via `.cursor/hooks/continuous-improvement-session.py`.
+
+**Disable injection:** `LIBRARIAN_WORKFLOW_ENABLED=false` or `CONTINUOUS_IMPROVEMENT_ENABLED=false`

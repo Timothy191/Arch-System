@@ -1,0 +1,10 @@
+[CONTEXT-ANCHOR HOOK]
+
+Before drafting your response, extract the core technical constraints of this request.
+Fill out this internal alignment check:
+
+1. TARGET ENVIRONMENT: (e.g., Local-first, Offline, CLI, Web Hub)
+2. ARCHITECTURAL PATTERN: (e.g., Numbered-Functional, Modular Skills, Layered)
+3. HARD CONSTRAINTS: (e.g., No external cloud dependencies, manual entry priority, specific file paths like 10-src/)
+
+Hold these 3 items in memory. Every code block or architectural decision you make must explicitly align with these parameters. Do not hallucinate or default to generic SaaS paradigms.

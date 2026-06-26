@@ -1,0 +1,28 @@
+---
+description: Zero-rewrite patch delivery — targeted diffs only, cascade-labeled, report format.
+alwaysApply: true
+---
+
+# Patching & Systematic Updates [ZERO-REWRITE]
+
+When implementing or fixing code, follow **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md` §5**.
+
+## Tags
+
+| Tag | Rule |
+|-----|------|
+| `[PATCH-ONLY]` | Never reprint unchanged files. Output only unified diffs or localized blocks for changed lines. |
+| `[CASCADE-UPDATE]` | External impact (exports, schemas, imports) → separate labeled block per path: `File: <verified-path>`. |
+| `[REPORT-FORMAT]` | Delivery order: **SYSTEMATIC STATUS** → **TARGETED PATCHES** → **POST-EXECUTION REPORT**. |
+
+## SYSTEMATIC STATUS
+
+Bulleted changelog: modified, added, removed — no prose filler.
+
+## TARGETED PATCHES
+
+Line-specific blocks or minimal hunks. Label every cross-file block with its target path under `10-src/`, `apps/`, `libs/features/`, or `packages/`.
+
+## POST-EXECUTION REPORT
+
+Verify: Numbered-Functional paths, import cascade, `AGENT_TRACER.md` updated, no OOPs violations.

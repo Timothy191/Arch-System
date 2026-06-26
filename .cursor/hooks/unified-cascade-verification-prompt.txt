@@ -1,0 +1,23 @@
+================================================================================
+WORKFLOW: UNIFIED SYSTEM CASCADE VERIFICATION
+================================================================================
+
+When updating or introducing a new system asset, perform comprehensive downstream impact analysis.
+
+## 1. IMPORT ARCHITECTURE AUDIT
+
+- Trace every import statement. Reference absolute, verified file paths (e.g., within `10-src/`).
+- Zero loose relative path imports (`../../`) that could break if a module is moved.
+- Cascade naming updates across the entire change set.
+
+## 2. METADATA REGISTRY REGISTRATION
+
+- If this asset is a modular skill or persona in the Lending Library Architecture, update local metadata registry definitions immediately.
+- Ensure checkout and return signatures align: `.agents/skills/`, `10-src/checkout-skill.py`, `10-src/return-skill.py`.
+
+## 3. TYPE INTEGRITY & SCHEMA HARMONIZATION
+
+- Check all data boundaries, database schemas, and validation models impacted by this adjustment.
+- A schema property change cannot be localized — cascade through validation layers, API endpoints, and reporting views simultaneously.
+
+Do not mark the task complete until cascade verification passes.

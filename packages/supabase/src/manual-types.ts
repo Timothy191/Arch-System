@@ -9,6 +9,7 @@
  * - departments, employees (migration 001)
  * - personnel, visitors, badges, access_logs (migration 028)
  * - card_printers, card_templates, print_jobs, issued_cards (migration 076)
+ * - delay_entries (migration 068)
  */
 
 // Json type for jsonb columns
@@ -494,4 +495,76 @@ export interface IssuedCardsUpdate {
   revoked_reason?: string | null;
   lost_at?: string | null;
   replaced_by?: string | null;
+}
+
+// === delay_entries (migration 068) ===
+
+export interface DelayEntriesRow {
+  id: string;
+  machine_operation_id: string;
+  delay_category_id: string;
+  delay_start_time: string;
+  delay_end_time: string | null;
+  duration_hours: number;
+  is_manual_override: boolean;
+  manual_duration_hours: number | null;
+  description: string | null;
+  status: "draft" | "committed";
+  committed_at: string | null;
+  committed_by: string | null;
+  uncommitted_at: string | null;
+  uncommitted_by: string | null;
+  uncommit_reason: string | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  deleted_reason: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DelayEntriesInsert {
+  id?: string;
+  machine_operation_id: string;
+  delay_category_id: string;
+  delay_start_time: string;
+  delay_end_time?: string | null;
+  is_manual_override?: boolean;
+  manual_duration_hours?: number | null;
+  description?: string | null;
+  status?: "draft" | "committed";
+  committed_at?: string | null;
+  committed_by?: string | null;
+  uncommitted_at?: string | null;
+  uncommitted_by?: string | null;
+  uncommit_reason?: string | null;
+  deleted_at?: string | null;
+  deleted_by?: string | null;
+  deleted_reason?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DelayEntriesUpdate {
+  id?: string;
+  machine_operation_id?: string;
+  delay_category_id?: string;
+  delay_start_time?: string;
+  delay_end_time?: string | null;
+  is_manual_override?: boolean;
+  manual_duration_hours?: number | null;
+  description?: string | null;
+  status?: "draft" | "committed";
+  committed_at?: string | null;
+  committed_by?: string | null;
+  uncommitted_at?: string | null;
+  uncommitted_by?: string | null;
+  uncommit_reason?: string | null;
+  deleted_at?: string | null;
+  deleted_by?: string | null;
+  deleted_reason?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }

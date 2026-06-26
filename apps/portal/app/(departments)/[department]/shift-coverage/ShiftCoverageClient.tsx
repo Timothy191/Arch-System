@@ -12,7 +12,8 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
-import { CloseShiftModal } from "~/features/departments/components/control-room/CloseShiftModal";
+import { CloseShiftModal } from "@repo/departments/ui";
+import { verifyPin, closeShift } from "@/lib/shift-closeout";
 
 interface ShiftCoverageClientProps {
   departmentId: string;
@@ -376,6 +377,7 @@ export function ShiftCoverageClient({
           setShowModal(false);
           window.location.reload();
         }}
+        shiftCloseout={{ verifyPin, closeShift }}
       />
     </div>
   );

@@ -1,5 +1,5 @@
-import { SatelliteMonitoringDashboard } from "@/features/departments";
+import { SatelliteDashboardPortal } from "@/components/monitoring/SatelliteDashboardPortal";
 
 export default function SARPage() {
-  return <SatelliteMonitoringDashboard defaultTab="sar" />;
+  return <SatelliteDashboardPortal defaultTab="sar" />;
 }

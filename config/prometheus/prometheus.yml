@@ -1,0 +1,131 @@
+# Arch-Systems Prometheus Configuration
+# PURPOSE: Scrape metrics from all production services
+# SEE: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    monitor: "arch-systems"
+    environment: "production"
+
+# Alertmanager configuration (optional - uncomment when Alertmanager is deployed)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Load alert rules
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+# Scrape configurations
+scrape_configs:
+  # ── Prometheus Self-Monitoring ─────────────────────────────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: "prometheus"
+
+  # ── Application - Portal ───────────────────────────────────────────────────
+  - job_name: "portal"
+    static_configs:
+      - targets: ["portal:3000"]
+        labels:
+          service: "portal"
+          team: "platform"
+    metrics_path: /api/metrics
+    scrape_timeout: 10s
+
+  - job_name: "portal-health"
+    static_configs:
+      - targets: ["portal:3000"]
+        labels:
+          service: "portal-health"
+    metrics_path: /api/health
+    scrape_timeout: 5s
+
+  # ── Database - PostgreSQL ──────────────────────────────────────────────────
+  - job_name: "supabase-db"
+    static_configs:
+      - targets: ["supabase-db:5432"]
+        labels:
+          service: "postgresql"
+          team: "database"
+    # Requires postgres-exporter sidecar or external exporter
+    # For direct scraping, use postgres-exporter on port 9187
+
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
+        labels:
+          service: "postgresql"
+          team: "database"
+
+  # ── Cache - Redis ──────────────────────────────────────────────────────────
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis-exporter:9121"]
+        labels:
+          service: "redis"
+          team: "platform"
+
+  # ── API Gateway - Kong ─────────────────────────────────────────────────────
+  - job_name: "kong"
+    static_configs:
+      - targets: ["supabase-kong:8001"]
+        labels:
+          service: "kong"
+          team: "platform"
+    metrics_path: /metrics
+
+  # ── Background Jobs - n8n ──────────────────────────────────────────────────
+  - job_name: "n8n"
+    static_configs:
+      - targets: ["n8n:5678"]
+        labels:
+          service: "n8n"
+          team: "automation"
+    metrics_path: /metrics
+
+  # ── AI Workflows - Flowise ─────────────────────────────────────────────────
+  - job_name: "flowise"
+    static_configs:
+      - targets: ["flowise:3001"]
+        labels:
+          service: "flowise"
+          team: "ai"
+
+  # ── Infrastructure - Node Exporter ─────────────────────────────────────────
+  - job_name: "node"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+        labels:
+          service: "node"
+          team: "infrastructure"
+
+  # ── Docker Container Metrics ───────────────────────────────────────────────
+  - job_name: "docker"
+    static_configs:
+      - targets: ["cadvisor:8080"]
+        labels:
+          service: "docker"
+          team: "infrastructure"
+
+  # ── Nginx ──────────────────────────────────────────────────────────────────
+  - job_name: "nginx"
+    static_configs:
+      - targets: ["nginx-exporter:9113"]
+        labels:
+          service: "nginx"
+          team: "infrastructure"
+
+  # ── Backup Service ─────────────────────────────────────────────────────────
+  - job_name: "backup"
+    static_configs:
+      - targets: ["backup-exporter:9100"]
+        labels:
+          service: "backup"
+          team: "database"

@@ -1,0 +1,29 @@
+---
+description: Unified system cascade verification — imports, registry, schema harmonization.
+alwaysApply: true
+---
+
+# Unified System Cascade Verification
+
+When updating or introducing system assets, perform downstream impact analysis before marking complete.
+
+## 1. Import architecture audit
+
+- Trace every import; use verified absolute paths (`10-src/`, package boundaries).
+- No fragile `../../` relative imports; cascade naming updates across the change set.
+
+## 2. Metadata registry registration
+
+- For modular skills/personas, update registry definitions immediately.
+- Align checkout/return: `.agents/skills/`, `10-src/checkout-skill.py`, `10-src/return-skill.py`.
+
+## 3. Type integrity and schema harmonization
+
+- Cascade schema changes through validation layers, API endpoints, and reporting views.
+- No localized property renames without full boundary updates.
+
+## Automation
+
+`sessionStart` injects via `.cursor/hooks/enterprise-production-session.py`.
+
+**Disable:** `ENTERPRISE_PRODUCTION_ENABLED=false` or `UNIFIED_CASCADE_ENABLED=false`

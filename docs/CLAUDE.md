@@ -53,6 +53,7 @@ Never edit `packages/supabase/supabase/migrations/` directly (PreToolUse hook bl
 - Git: no writes without user permission; never `--no-verify`; no force-push to `master`.
 - Heavy exploration → subagents; compact at task boundaries (~50% context).
 - Reporecall: use injected context first; search only to fill gaps.
+- **Token-Saving Manifest:** all agents follow `10-src/TOKEN-SAVING-AGENT-MANIFEST.md` (`[H-*]`, `[OOP-*]`, `[PATCH-*]`, `[TRACE-*]`, PASS_1–3, `[REPORT-FORMAT]`). Cursor hooks + `.cursor/rules/*.mdc` expand tags on violation. QA on `[QA_RESPONSE_REVIEW]`: read-only manifest pass, no tools.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

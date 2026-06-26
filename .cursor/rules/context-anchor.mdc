@@ -1,0 +1,32 @@
+---
+description: Context-Anchor alignment before every agent response (pre-execution).
+alwaysApply: true
+---
+
+# Context-Anchor Hook (Pre-Execution)
+
+Before drafting any response, run this internal alignment check on **every** user turn:
+
+## Alignment check
+
+1. **TARGET ENVIRONMENT** — e.g., Local-first, Offline, CLI, Web Hub, Nx monorepo, Supabase local
+2. **ARCHITECTURAL PATTERN** — e.g., Numbered-Functional (`10-src/`), Modular Skills, layered feature libs
+3. **HARD CONSTRAINTS** — e.g., no external cloud dependencies unless requested, human-input control room, specific paths like `10-src/`
+
+Hold these three items for the entire turn. Every code block, file path, and architectural decision **must** align. Do not hallucinate or default to generic SaaS patterns.
+
+**OOPs guardrails** (`.cursor/rules/oops-guardrails.mdc`) are hard stops during thinking — especially Rule 1 (no metaphors) and Rule 2 (verified paths).
+
+## Arch-System defaults (unless overridden by the user)
+
+| Dimension | Default |
+|-----------|---------|
+| Target | Local-first Nx + pnpm monorepo; Portal `:3000`; Node >= 22 |
+| Pattern | Numbered-Functional (`10-src/`); `libs/features/{domain}/{ui,data-access,utils}` |
+| Constraints | No bare `src/` for functional roots; control-room = human-input first; `pnpm quality` before done; update `AGENT_TRACER.md` on code changes |
+
+## Automation
+
+`sessionStart` injects the anchor via `.cursor/hooks/context-anchor-session.py`. This rule reinforces it on every turn.
+
+**Disable:** `CONTEXT_ANCHOR_HOOK_ENABLED=false`

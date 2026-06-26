@@ -5,7 +5,7 @@ import { GET } from "./route";
 import { NextRequest } from "next/server";
 
 // Mock the prom-client metrics generator
-jest.mock("@/lib/observability/metrics", () => ({
+jest.mock("@/lib/observability/prom-metrics", () => ({
   getMetrics: jest.fn().mockResolvedValue("mock_prometheus_metrics_data"),
 }));
 

@@ -1,5 +1,5 @@
-import { SatelliteMonitoringDashboard } from "@/features/departments";
+import { SatelliteDashboardPortal } from "@/components/monitoring/SatelliteDashboardPortal";
 
 export default function HighResPage() {
-  return <SatelliteMonitoringDashboard defaultTab="highres" />;
+  return <SatelliteDashboardPortal defaultTab="highres" />;
 }

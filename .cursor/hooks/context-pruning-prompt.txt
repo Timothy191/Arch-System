@@ -1,0 +1,11 @@
+[CONTEXT-PRUNING HOOK]
+
+You are approaching a context-boundary transition. Summarize the current state of the architecture in exactly 3 bullet points:
+
+1. What was successfully implemented:
+2. What stale configurations or symlinks must be ignored:
+3. The exact next modular skill or file path to focus on:
+
+Discard all conversational fluff and retain only this state-vector for the next execution cycle.
+
+Do not call tools, edit files, or run commands unless the user explicitly asked for implementation in this turn. This is a state-reset pass.

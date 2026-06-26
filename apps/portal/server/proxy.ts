@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createMiddlewareClient } from "@repo/supabase/middleware";
 import { cacheGet, cacheSet, cacheEvictL1ByPrefix } from "@repo/redis/cache";
 import { recordJobExecution } from "@/lib/observability/metrics";
+import { parseDepartmentPathname } from "@repo/utils";
 
 /**
  * Server-side redirect validation with canonicalization and allowlist
@@ -36,23 +37,19 @@ function isValidRedirect(path: string): boolean {
   // Must start with a single slash (internal relative path)
   if (!path.startsWith("/")) return false;
 
+  const departmentPathPattern =
+    "(?:drilling|production|access-control|engineering|control-room|safety|training|satellite-monitoring|access-card-actions)";
+
   // Allowlist of permitted path patterns
   const allowedPatterns = [
     /^\/$/, // Root
     /^\/login/, // Login page
     /^\/reset-password/, // Password reset
     /^\/update-password/, // Password update
-    /^\/drilling\//, // Drilling department
-    /^\/production\//, // Production department
-    /^\/access-control\//, // Access control department
-    /^\/engineering\//, // Engineering department
-    /^\/control-room\//, // Control room department
-    /^\/safety\//, // Safety department
-    /^\/training\//, // Training department
-    /^\/satellite-monitoring\//, // Satellite monitoring department
-    /^\/access-card-actions\//, // Access Card Actions department
-    /^\/hub/, // Hub
-    /^\/admin\//, // Admin
+    new RegExp(`^\\/hub\\/${departmentPathPattern}(?:\\/.*)?$`), // Hub department routes
+    new RegExp(`^\\/${departmentPathPattern}(?:\\/.*)?$`), // Legacy department routes
+    /^\/hub(?:\/executive(?:\/.*)?)?$/, // Hub dashboard and executive
+    /^\/admin(?:\/.*)?$/, // Admin
   ];
 
   // Check if path matches any allowed pattern
@@ -300,31 +297,31 @@ export async function proxy(request: NextRequest) {
   const userDept = employee?.department_id ?? null;
   const accessible = employee?.accessible_departments ?? [];
 
-  const pathSegments = pathname.split("/").filter(Boolean);
-  const topSegment = pathSegments[0];
-  const secondSegment = pathSegments[1];
+  const { deptSlug, subSegment } = parseDepartmentPathname(pathname);
 
-  // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
-    if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
+    if (route === "tools") continue;
+    if (
+      (pathname.startsWith(`/${route}`) || pathname.startsWith(`/hub/${route}`)) &&
+      !allowedRoles.includes(userRole)
+    ) {
       return redirectWithError(request, "unauthorized_department", client.response);
     }
   }
 
-  // Also check /{dept}/tools restriction
   if (
-    secondSegment === "tools" &&
+    subSegment === "tools" &&
     RESTRICTED_ROUTES.tools &&
     !RESTRICTED_ROUTES.tools.includes(userRole)
   ) {
     return redirectWithError(request, "unauthorized_department", client.response);
   }
 
-  // Check department isolation
-  if (topSegment && DEPARTMENT_ROUTES.includes(topSegment)) {
+  // Check department isolation for /hub/:dept and legacy /:dept URLs
+  if (deptSlug && DEPARTMENT_ROUTES.includes(deptSlug)) {
     const isAdmin = userRole === "admin";
 
-    const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
+    const deptUuid = await resolveDeptUuid(client.supabase, deptSlug);
     if (!deptUuid) {
       return redirectWithError(request, "unknown_department", client.response);
     }

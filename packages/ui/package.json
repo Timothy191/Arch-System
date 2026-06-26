@@ -11,6 +11,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.0",
     "@repo/theme": "1.0.0",
+    "@repo/utils": "1.0.0",
     "@revolist/react-datagrid": "^4.21.0",
     "@revolist/revogrid": "^4.21.0",
     "@xyflow/react": "^12.6.0",

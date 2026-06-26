@@ -24,7 +24,7 @@ export default async function DocsLayout({ children }: { children: React.ReactNo
   // Allow admin and engineering roles to access docs
   const allowedRoles = new Set(["admin", "engineering"]);
   if (!employee || !allowedRoles.has(employee.role)) {
-    redirect("/");
+    redirect("/hub");
   }
 
   return <>{children}</>;

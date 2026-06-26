@@ -718,6 +718,9 @@ importers:
       '@repo/supabase':
         specifier: 1.0.0
         version: link:../../../../packages/supabase
+      '@repo/utils':
+        specifier: 1.0.0
+        version: link:../../../../packages/utils
     devDependencies:
       '@repo/typescript-config':
         specifier: 1.0.0
@@ -743,6 +746,9 @@ importers:
       '@repo/logger':
         specifier: 1.0.0
         version: link:../../../../packages/logger
+      '@repo/rate-limiter':
+        specifier: 1.0.0
+        version: link:../../../../packages/rate-limiter
       '@repo/redis':
         specifier: 1.0.0
         version: link:../../../../packages/redis
@@ -807,6 +813,9 @@ importers:
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
+      '@repo/utils':
+        specifier: 1.0.0
+        version: link:../../../../packages/utils
       '@tremor/react':
         specifier: 'catalog:'
         version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -933,6 +942,10 @@ importers:
         version: 5.9.3
 
   packages/contract:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
     devDependencies:
       '@repo/typescript-config':
         specifier: 1.0.0
@@ -946,9 +959,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
-      zod:
-        specifier: 'catalog:'
-        version: 4.4.3
 
   packages/database:
     devDependencies:
@@ -1115,6 +1125,9 @@ importers:
       '@repo/theme':
         specifier: 1.0.0
         version: link:../theme
+      '@repo/utils':
+        specifier: 1.0.0
+        version: link:../utils
       '@revolist/react-datagrid':
         specifier: ^4.21.0
         version: 4.21.9

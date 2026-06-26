@@ -1,0 +1,29 @@
+---
+description: Deterministic performance sanity check — threads, memory bounds, idempotency.
+alwaysApply: true
+---
+
+# Deterministic Performance Runtime Sanity Check
+
+Before finalizing technical implementation, run a virtual profiling and resource-constraints pass.
+
+## 1. Time complexity and blocked threads
+
+- No blocking sync where async is mandatory on UI or constrained servers.
+- Avoid micro-stutters — use non-blocking primitives and bounded work units.
+
+## 2. Memory accumulation and bounds
+
+- No loading entire datasets into memory when streaming/chunking is required.
+- Enforce iterators, strict array limits, predictable memory under load.
+
+## 3. Idempotency verification
+
+- Interrupted retries must not corrupt DB state, duplicate logs, or break state.
+- Transactional execution must be idempotent — N runs ≡ 1 clean run.
+
+## Automation
+
+`sessionStart` injects via `.cursor/hooks/enterprise-production-session.py`.
+
+**Disable:** `ENTERPRISE_PRODUCTION_ENABLED=false` or `DETERMINISTIC_PERFORMANCE_ENABLED=false`

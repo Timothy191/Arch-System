@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { departmentPath } from "@repo/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
@@ -672,7 +673,7 @@ export function SystemTrayPill() {
   return (
     <div className="flex items-center gap-1.5">
       <Link
-        href="/drilling/tools?tab=tasks"
+        href={`${departmentPath("drilling", "tools")}?tab=tasks`}
         className={cn(
           "flex items-center justify-center w-[26px] h-[26px] rounded-full",
           "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",

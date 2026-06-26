@@ -4,24 +4,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Drill, Factory, Radar, HardHat, BarChart3 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { departmentPath, hubExecutivePath, HUB_PATH } from "@repo/utils";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Hub", icon: LayoutDashboard, dept: null },
-  { href: "/drilling", label: "Drilling", icon: Drill, dept: "drilling" },
+  { href: HUB_PATH, label: "Hub", icon: LayoutDashboard, dept: null },
+  { href: departmentPath("drilling"), label: "Drilling", icon: Drill, dept: "drilling" },
   {
-    href: "/production",
+    href: departmentPath("production"),
     label: "Production",
     icon: Factory,
     dept: "production",
   },
-  { href: "/safety", label: "Safety", icon: HardHat, dept: "safety" },
+  { href: departmentPath("safety"), label: "Safety", icon: HardHat, dept: "safety" },
   {
-    href: "/control-room",
+    href: departmentPath("control-room"),
     label: "Control",
     icon: Radar,
     dept: "control-room",
   },
-  { href: "/executive", label: "Analytics", icon: BarChart3, dept: null },
+  { href: hubExecutivePath(), label: "Analytics", icon: BarChart3, dept: null },
 ];
 
 interface BottomNavProps {
@@ -42,7 +43,8 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
       className="fixed bottom-0 left-0 right-0 z-40 flex md:hidden border-t border-[var(--border-default)] bg-white/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
     >
       {visibleItems.map(({ href, label, icon: Icon }) => {
-        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const isActive =
+          href === HUB_PATH ? pathname === HUB_PATH || pathname === "/" : pathname.startsWith(href);
         return (
           <Link
             key={href}

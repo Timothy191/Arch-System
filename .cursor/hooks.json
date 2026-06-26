@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/token-saving-manifest-session.py",
+        "timeout": 15
+      },
+      {
+        "command": ".cursor/hooks/context-anchor-session.py",
+        "timeout": 15
+      },
+      {
+        "command": ".cursor/hooks/oops-guardrails-session.py",
+        "timeout": 15
+      },
+      {
+        "command": ".cursor/hooks/continuous-improvement-session.py",
+        "timeout": 15
+      },
+      {
+        "command": ".cursor/hooks/zero-trust-defensiveness-session.py",
+        "timeout": 15
+      },
+      {
+        "command": ".cursor/hooks/enterprise-production-session.py",
+        "timeout": 15
+      }
+    ],
+    "preCompact": [
+      {
+        "command": ".cursor/hooks/context-pruning-compact.py",
+        "timeout": 15
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/agent-stop-orchestrator.py",
+        "loop_limit": 2,
+        "timeout": 45
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": ".cursor/hooks/qa-response-review.py",
+        "loop_limit": 1,
+        "timeout": 30
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+================================================================================
+WORKFLOW: 3-PASS OPTIMIZATION
+================================================================================
+
+You must execute your response in three distinct, sequential mental passes before marking a task complete.
+
+PASS 1: FUNCTIONAL DRAFT (Raw Execution)
+* Solve the core problem directly. Get the logic down.
+* Ensure technical mechanics are local-first and functional.
+* Do not polish yet — prioritize correctness and completeness of the core solution.
+
+PASS 2: ARCHITECTURAL ALIGNMENT (The Prune & Cascade)
+* Review the draft from Pass 1.
+* Replace generic patterns with project conventions:
+  - UI: clean macOS-style minimalism and white glassmorphism (see `10-src/@HOW.md`, `.claude/rules/design-system.md`)
+  - Backend: clean, offline-first logic with explicit boundaries
+* Cascade all naming updates. If a utility, function, or path changes, audit the entire output for broken imports, stale references, and inconsistent identifiers.
+
+PASS 3: HARDWARE & EDGE STABILIZATION (The Reality Check)
+* Review against constrained real-world compute environments.
+* Is this performant under strict resource limits? Does it avoid blocking the main thread or causing UI stuttering?
+* Ensure explicit error handling for missing local dependencies, intermittent database connections, and offline states.
+* Confirm OOPs compliance: no metaphors, verified paths (`10-src/` where applicable), human-input-first for industrial data.
+
+Deliver only the Pass 3 output to the user unless they explicitly asked for intermediate drafts.

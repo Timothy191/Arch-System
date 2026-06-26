@@ -41,6 +41,9 @@ export type {
   IssuedCardsRow,
   IssuedCardsInsert,
   IssuedCardsUpdate,
+  DelayEntriesRow,
+  DelayEntriesInsert,
+  DelayEntriesUpdate,
 } from "./manual-types";
 // Server client must be imported from @repo/supabase/server directly
 // to avoid pulling next/headers into client bundles

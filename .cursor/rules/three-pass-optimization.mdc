@@ -1,0 +1,38 @@
+---
+description: 3-Pass Optimization Loop — iterate functional, architectural, and edge stabilization before completing a task.
+alwaysApply: true
+---
+
+# Workflow: 3-Pass Optimization Loop
+
+Do not ship a first guess. Execute every substantive response through **three sequential mental passes** before marking a task complete.
+
+## Pass 1: Functional Draft (Raw Execution)
+
+- Solve the core problem directly; get the logic down.
+- Ensure mechanics are **local-first** and functional.
+- Prioritize correctness over polish.
+
+## Pass 2: Architectural Alignment (Prune & Cascade)
+
+- Review Pass 1 against project conventions.
+- **UI:** macOS-style minimalism and white glassmorphism (`10-src/@HOW.md`, `.claude/rules/design-system.md`).
+- **Backend:** offline-first logic, explicit module boundaries, Nx dependency rules.
+- **Cascade naming:** if any identifier or path changes, audit the entire output for broken imports and stale references.
+
+## Pass 3: Hardware & Edge Stabilization (Reality Check)
+
+- Validate under constrained compute (memory, latency, offline states).
+- Avoid main-thread blocking and UI jank.
+- Add explicit error handling for missing local deps and intermittent DB connections.
+- Confirm **OOPs** compliance (`.cursor/rules/oops-guardrails.mdc`).
+
+## Output rule
+
+Deliver **only the Pass 3 result** to the user unless they explicitly request intermediate drafts.
+
+## Automation
+
+Injected at `sessionStart` via `.cursor/hooks/continuous-improvement-session.py`. Enforced again in `[QA_RESPONSE_REVIEW]`.
+
+**Disable injection:** `THREE_PASS_WORKFLOW_ENABLED=false` or `CONTINUOUS_IMPROVEMENT_ENABLED=false`

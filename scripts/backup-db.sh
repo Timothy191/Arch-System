@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+# Arch-Systems Database Backup Script with Off-Site Sync
+# Dumps schema and data from Supabase/PostgreSQL to gzip'd SQL files
+# with optional S3/GCS/Azure cloud sync
+# USAGE: ./scripts/backup-db.sh [full|schema|data] [--sync]
+# ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-# ──────────────────────────────────────────────────────────
-# Arch-Systems — Database Backup Script
-# Dumps schema and data from Supabase/PostgreSQL to gzip'd
-# SQL files in scripts/backups/ with a metadata manifest.
-# ──────────────────────────────────────────────────────────
-
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BACKUP_DIR="$REPO_ROOT/scripts/backups"
+BACKUP_DIR="$REPO_ROOT/backups/database"
 TIMESTAMP="$(date +%Y-%m-%d_%H%M%S)"
+LOG_DIR="$REPO_ROOT/logs"
+
+# Cloud storage configuration
+S3_BUCKET="${S3_BACKUP_BUCKET:-}"
+S3_REGION="${S3_REGION:-us-east-1}"
+GCS_BUCKET="${GCS_BACKUP_BUCKET:-}"
+AZURE_CONTAINER="${AZURE_BACKUP_CONTAINER:-}"
 
 # ── Colors ───────────────────────────────────────────────
 RED='\033[0;31m'

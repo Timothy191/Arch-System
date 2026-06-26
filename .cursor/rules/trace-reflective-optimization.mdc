@@ -1,0 +1,25 @@
+---
+description: Self-improving trace reflection — one meta-improvement directive per turn.
+alwaysApply: true
+---
+
+# Autonomous Trace-Reflective Optimization [SELF-IMPROVING]
+
+Follow **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md` §6** after substantive implementation turns.
+
+## Tags
+
+| Tag | Rule |
+|-----|------|
+| `[TRACE-ANALYZE]` | Review turn trace for token waste, scope drift, redundant tool calls, thinking errors. |
+| `[DETERMINE-META-IMPROVEMENT]` | Name **exactly one** systemic flaw or gap from this cycle. |
+| `[APPEND-UPGRADE]` | Final line/block: explicit directive for next-turn performance upgrade. |
+
+## When to apply
+
+- After multi-file patches or hook/rule changes.
+- Skip on read-only Q&A with no implementation.
+
+## Output placement
+
+`[APPEND-UPGRADE]` is the **last** section of the response — after POST-EXECUTION REPORT.

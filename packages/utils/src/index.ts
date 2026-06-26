@@ -14,6 +14,7 @@ export function formatDate(dateStr: string) {
  */
 export * from "./n8n";
 export * from "./analytics";
+export * from "./routes";
 export function getCurrentShift(): "day" | "night" {
   const hour = new Date().getHours();
   // Day shift usually 06:00 to 18:00

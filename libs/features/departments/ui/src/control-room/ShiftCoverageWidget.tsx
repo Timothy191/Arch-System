@@ -5,13 +5,15 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { EmptyState } from "@repo/ui/EmptyState";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
-import { CloseShiftModal } from "./CloseShiftModal";
+import { CloseShiftModal, type ShiftCloseoutDeps } from "./CloseShiftModal";
 
 interface ShiftCoverageWidgetProps {
   departmentId: string;
   departmentSlug: string;
   today: string;
   currentShift: "day" | "night";
+  /** Injected shift-closeout functions (decouples lib from portal @/lib) */
+  shiftCloseout: ShiftCloseoutDeps;
 }
 
 interface MachineWithOp {
@@ -27,6 +29,7 @@ export function ShiftCoverageWidget({
   departmentSlug,
   today,
   currentShift,
+  shiftCloseout,
 }: ShiftCoverageWidgetProps) {
   const [machines, setMachines] = useState<MachineWithOp[]>([]);
   const [isClosed, setIsClosed] = useState(false);
@@ -245,6 +248,7 @@ export function ShiftCoverageWidget({
         departmentSlug={departmentSlug}
         date={today}
         shiftType={currentShift}
+        shiftCloseout={shiftCloseout}
         onComplete={() => setShowModal(false)}
       />
     </>

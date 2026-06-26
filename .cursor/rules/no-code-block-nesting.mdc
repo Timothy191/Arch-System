@@ -1,0 +1,21 @@
+---
+description: Write terminal-scannable markdown without nesting functional code blocks.
+alwaysApply: true
+---
+
+# No Code-Block Nesting
+
+Keep assistant output clean and easy to scan in the terminal and chat UI.
+
+## Requirements
+
+- Do not nest fenced code blocks inside other fenced code blocks.
+- Do not put markdown code fences inside examples that are themselves inside a code fence.
+- Prefer separate blocks, bullet lists, or inline backticks when showing nested syntax.
+- When documenting file formats (e.g. `.mdc` frontmatter), use indentation or a single outer fence with language `text`/`markdown` and describe inner fences in prose instead of literal nesting.
+
+## Examples
+
+Bad: a markdown tutorial inside a markdown code fence that also contains triple-backtick examples.
+
+Good: one fence per snippet; use "inner fence omitted" or show the inner part in a second standalone block below.

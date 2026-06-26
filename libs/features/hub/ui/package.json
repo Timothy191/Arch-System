@@ -10,6 +10,7 @@
   "dependencies": {
     "@repo/ui": "1.0.0",
     "@repo/departments/data-access": "1.0.0",
+    "@repo/utils": "1.0.0",
     "@tremor/react": "catalog:",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",

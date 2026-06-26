@@ -1,6 +1,6 @@
 import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { DozerRollForm } from "~/features/departments/components/control-room/DozerRollForm";
+import { DozerRollForm } from "@repo/departments/ui";
 
 export default async function RollOverPage({
   params,

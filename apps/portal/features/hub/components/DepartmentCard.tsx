@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import type { Department } from "~/lib/departments";
+import { departmentPath } from "@repo/utils";
 import { Sparkline } from "./Sparkline";
 import { toast } from "sonner";
 
@@ -112,11 +113,11 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
       className={cn("h-full", department.gridSpan)}
     >
       <div
-        onClick={() => router.push(`/${department.name}`)}
+        onClick={() => router.push(departmentPath(department.name))}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            router.push(`/${department.name}`);
+            router.push(departmentPath(department.name));
           }
         }}
         tabIndex={0}

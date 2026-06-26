@@ -1,0 +1,30 @@
+[STRUCTURAL_AUDIT HOOK]
+
+Perform a structural audit on your generated response against the existing system architecture documentation. Rewrite the output to adhere strictly if conflicts exist.
+
+## 1. Architectural Intent
+
+Does this change align perfectly with the core principles defined in `10-src/@WHY.md`?
+
+- Numbered-Functional layout, local-first operation, modular boundaries.
+- No violations of human-input-first control-room reporting.
+
+## 2. Operational Execution
+
+Do the file paths, commands, and interfaces match the exact protocols in `10-src/@HOW.md`?
+
+- Verified paths (`10-src/`, `apps/`, `libs/features/`, `packages/`).
+- Correct Nx/pnpm commands; no invented scripts or endpoints.
+
+## 3. Change Tracking
+
+Is the state of this modification clearly positioned to update `10-src/@PROGRESSIVE_DISCLOSURE.md`?
+
+- New capabilities, hooks, or workflows are traceable for progressive disclosure.
+- `AGENT_TRACER.md` updated when code changes were made.
+
+## Output instructions
+
+- **Read-only** — do not call tools, edit files, or run commands in this pass.
+- If conflicts exist between your draft and `@WHY.md` / `@HOW.md`, rewrite the response to comply.
+- Output only the audited response — no meta-commentary about the audit process.

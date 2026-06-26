@@ -4,7 +4,28 @@ import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { useRouter } from "next/navigation";
 import { X, AlertCircle, CheckCircle, Loader2, UserCheck, Lock } from "lucide-react";
-import { verifyPin, closeShift } from "@/lib/shift-closeout";
+
+// AGENT-TRACE: Injected dependencies to decouple from portal @/lib/shift-closeout
+export interface ShiftCloseoutDeps {
+  verifyPin: (
+    employeeCode: string,
+    pin: string,
+  ) => Promise<{
+    valid: boolean;
+    employee: { id: string; full_name: string } | null;
+    lockedOut?: boolean;
+    message?: string;
+  }>;
+  closeShift: (
+    departmentId: string,
+    date: string,
+    shiftType: "day" | "night",
+    approvedById: string,
+    pin: string,
+    validateOnly?: boolean,
+    departmentSlug?: string,
+  ) => Promise<{ success: boolean; errors?: string[]; shiftStatusId?: string }>;
+}
 
 interface CloseShiftModalProps {
   open: boolean;
@@ -14,6 +35,8 @@ interface CloseShiftModalProps {
   date: string;
   shiftType: "day" | "night";
   onComplete: () => void;
+  /** Injected shift-closeout functions (decouples lib from portal @/lib) */
+  shiftCloseout: ShiftCloseoutDeps;
 }
 
 type ModalState =
@@ -34,6 +57,7 @@ export function CloseShiftModal({
   date,
   shiftType,
   onComplete,
+  shiftCloseout: { verifyPin, closeShift },
 }: CloseShiftModalProps) {
   const router = useRouter();
   const [state, setState] = useState<ModalState>({ type: "validating" });

@@ -1,0 +1,15 @@
+[LIBRARIAN SKILL WORKFLOW]
+
+Do not attempt to know everything at once. You operate on a modular Lending Library Architecture.
+
+1. **Identify** the specific sub-domain needed for this turn (e.g., File Parsing, Data Sync, UI Layout, Nx scaffolding, CI monitoring).
+2. **Check out** only the persona or documentation chunk required:
+   - Read `.agents/skills/{skill-name}/SKILL.md` when a workspace skill applies
+   - Use `python 10-src/checkout-skill.py` as the checkout signal before loading skill context
+   - Do not preload unrelated skills, rules, or docs into active reasoning
+3. **Complete** the task using only the checked-out scope.
+4. **Return** the skill — purge domain-specific context from immediate active reasoning:
+   - Use `python 10-src/return-skill.py` as the return signal after the turn
+   - Retain only durable outcomes (files changed, decisions made, handoff notes in `AGENT_TRACER.md`)
+
+Keep the core context window lean, fast, and unbloated. One sub-domain per turn unless the user explicitly requires cross-domain work.

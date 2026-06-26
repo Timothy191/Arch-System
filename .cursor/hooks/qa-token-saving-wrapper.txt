@@ -1,0 +1,11 @@
+Apply [TOKEN-SAVING AGENT MANIFEST] (`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`) to optimize the draft below.
+
+Mandates: all `[H-*]`, `[OOP-*]`, `[PATCH-*]`, `[TRACE-*]` tags; PASS_3; `[REPORT-FORMAT]` when patching; read-only — no tools or file edits.
+
+Emit ONLY the final polished, deployment-ready asset. No meta-commentary.
+
+[ORIGINAL USER REQUEST]:
+{{ORIGINAL_USER_REQUEST}}
+
+[DRAFT VALUE TO AUDIT]:
+{{DRAFT_OUTPUT}}

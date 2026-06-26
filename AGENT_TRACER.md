@@ -1,5 +1,225 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-26: Manifest §5–6 — patch-only delivery + trace-reflective optimization
+
+### Purpose
+
+Add zero-rewrite patching (`[PATCH-ONLY]`, `[CASCADE-UPDATE]`, `[REPORT-FORMAT]`) and self-improving trace reflection (`[TRACE-ANALYZE]`, `[APPEND-UPGRADE]`) to the Token-Saving Agent Manifest for all CLI agents.
+
+### Changes Made
+
+1. **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`** — §5 patching, §6 trace-reflective optimization, tag map entries.
+2. **`.cursor/rules/patch-only-delivery.mdc`**, **`trace-reflective-optimization.mdc`** — always-on rules.
+3. **`token-saving-agent-manifest.mdc`**, **`hook_common.py`**, **`qa-token-saving-wrapper.txt`**, **`10-src/agents.md`**.
+
+### What the Next Agent Should Know
+
+- Implementation responses use REPORT-FORMAT; end with `[APPEND-UPGRADE]`.
+- Register tiers in `10-src/@PROGRESSIVE_DISCLOSURE.md` when documenting.
+
+---
+
+## 2026-06-26: Token-Saving Agent Manifest (CLI-wide)
+
+### Purpose
+
+Add hyper-dense, token-optimized agent contract (~60–70% instruction savings) for all CLI/IDE agents via symbolic tags, compressed 3-pass workflow, and minimal QA wrapper.
+
+### Changes Made
+
+1. **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`** — canonical manifest (`[H-*]`, `[OOP-*]`, PASS_1–3, output protocol, QA wrapper).
+2. **`.cursor/hooks/token-saving-manifest-session.py`** — first `sessionStart` injection from `10-src/`.
+3. **`.cursor/hooks/qa-token-saving-wrapper.txt`** — compressed QA followup template (replaces verbose `qa-prompt-template.txt`).
+4. **`.cursor/rules/token-saving-agent-manifest.mdc`** — always-on rule.
+5. **`hook_common.py`**, **`qa_response_review.py`**, **`qa-response-review.mdc`**, **`hooks.json`**, **`docs/AGENTS.md`**, **`docs/CLAUDE.md`**, **`10-src/agents.md`**.
+
+### What the Next Agent Should Know
+
+- Canonical path: `10-src/TOKEN-SAVING-AGENT-MANIFEST.md`.
+- Disable injection: `TOKEN_SAVING_MANIFEST_ENABLED=false`.
+- To cut duplicate tokens: disable verbose sessionStart hooks when manifest suffices.
+
+---
+
+## 2026-06-26: Analytics UI lib migration (phase 4)
+
+### Purpose
+
+Move analytics UI components from `apps/portal/features/analytics/` to `@repo/analytics/ui`, decoupling PDF generation from portal server actions via dependency injection.
+
+### Changes Made
+
+1. **`libs/features/analytics/ui`** — New package: ExportButton, PDFDownloadButton, ProductionTrendChart (+ wrapper), ReportTemplate, shared `ReportData` types.
+2. **`PDFDownloadButton`** — Requires injected `generateMonthlyReport` prop (portal passes server action from `app/actions.ts`).
+3. **`ProductionTrendChart`** — Uses `@repo/analytics/data-access` for `linearForecast`; removed duplicate `apps/portal/lib/analytics/forecast.ts`.
+4. **Portal wiring** — Executive dashboard and department reports pages updated; thin barrel at `apps/portal/features/analytics/index.ts`.
+5. **Workspace** — `@repo/analytics/ui` path in `tsconfig.base.json`, portal deps + transpilePackages.
+
+### What the Next Agent Should Know
+
+- Only `admin/` and `webhooks/` remain as portal-local feature implementations.
+- `generateMonthlyReport` in `app/actions.ts` imports `ReportTemplate` from `@repo/analytics/ui`.
+
+---
+
+## 2026-06-26: Complete portal → libs/features cutover (phase 3)
+
+### Purpose
+
+Finish the libs migration: portal routes consume `@repo/*` feature packages directly; remove duplicate implementations under `apps/portal/features/` for hub, departments, auth, dashboard, and access-control.
+
+### Changes Made
+
+1. **Portal imports** — Hub, department, auth, and access-control pages now import from `@repo/hub/ui`, `@repo/departments/ui`, `@repo/auth/ui`, and `@repo/access-control/ui` instead of `@/features/*` local copies.
+2. **Deleted duplicates** — Removed 62 stale files under `apps/portal/features/{hub,departments,auth,access-control,dashboard}/` (components, services, types).
+3. **Thin barrels retained** — `apps/portal/features/{hub,departments,dashboard}/index.ts` remain as documented re-exports only.
+4. **Portal-only features kept** — `admin/`, `analytics/`, `webhooks/` stay in portal until `@repo/analytics/ui` and admin lib scaffolds exist.
+5. **`@repo/access-control/ui`** — Added to portal `package.json`, `tsconfig.json` paths, and `next.config.mjs` transpilePackages; fixed default export in lib index.
+6. **`CloseShiftModal.test.tsx`** — Updated to inject `shiftCloseout` mocks (no portal `~/lib/shift-closeout` import in lib tests).
+
+### What the Next Agent Should Know
+
+- Portal wrapper DI pattern remains for shift closeout (`ShiftCoveragePortal`) and satellite monitoring (`SatelliteDashboardPortal`).
+- Next migration targets: `apps/portal/features/admin/*` → `@repo/admin/ui` (not scaffolded yet).
+- Analytics UI lives in `@repo/analytics/ui`; pass `generateMonthlyReport` from portal server actions to `PDFDownloadButton`.
+- Operational excellence roadmap gaps documented in `docs/reports/continuous_improvement_operational_excellence.md` §Implementation Status.
+
+---
+
+## 2026-06-26: Enterprise production hooks (Zero-Trust, Structural Audit, OOPs 4–6)
+
+### Purpose
+
+Elevate agent output to mission-critical industry standards: Zero-Trust pre-execution planning, post-execution structural audit, extended OOPs rules (anti-volatile state, no magic numbers, no side effects), and production workflows (deterministic performance + unified cascade verification).
+
+### Changes Made
+
+1. **Pre-execution:** `zero-trust-defensiveness-prompt.txt`, `zero-trust-defensiveness-session.py`, `zero-trust-defensiveness.mdc`.
+2. **Post-execution:** `structural-audit-prompt.txt`, `structural_audit_review.py`, `structural-audit.mdc`; orchestrator chains audit (`loop_count=0`) → QA (`loop_count=1`); `stop` `loop_limit` raised to 2.
+3. **Production workflows:** `deterministic-performance-prompt.txt`, `unified-cascade-verification-prompt.txt`, `enterprise-production-session.py`, matching `.mdc` rules.
+4. **OOPs Rules 4–6** in `oops-guardrails-prompt.txt` and `oops-guardrails.mdc`.
+5. **`hook_common.py`**, **`qa-prompt-template.txt`**, **`qa-response-review.mdc`**, **`qa_response_review.py`** — hook-marker skipping, QA loop coordination, expanded review mandates.
+6. **`hooks.json`** — two new `sessionStart` hooks.
+7. **`AGENTS.md`**, **`CLAUDE.md`**, **`10-src/agents.md`** — lifecycle documentation.
+
+### What the Next Agent Should Know
+
+- Stop hook flow: pruning (every 6 turns) **or** structural audit → QA.
+- Disable: `ZERO_TRUST_HOOK_ENABLED`, `STRUCTURAL_AUDIT_HOOK_ENABLED`, `ENTERPRISE_PRODUCTION_ENABLED`, `DETERMINISTIC_PERFORMANCE_ENABLED`, `UNIFIED_CASCADE_ENABLED`.
+- Always-on `.mdc` rules still apply when injection is disabled.
+
+---
+
+## 2026-06-26: Continuous improvement workflows (3-Pass + Librarian)
+
+### Purpose
+
+Add structural iteration loops so agents refine output through 3-Pass Optimization and modular Librarian skill checkout/return before marking tasks complete.
+
+### Changes Made
+
+1. **`.cursor/hooks/three-pass-optimization-prompt.txt`**, **`librarian-skill-workflow-prompt.txt`**, **`continuous-improvement-session.py`** — `sessionStart` injection.
+2. **`.cursor/rules/three-pass-optimization.mdc`**, **`.cursor/rules/librarian-skill-workflow.mdc`** — always-on workflow rules.
+3. **`.cursor/hooks.json`** — third `sessionStart` workflow hook entry.
+4. **`hook_common.py`**, **`qa-prompt-template.txt`**, **`qa-response-review.mdc`** — QA enforces 3-Pass and Librarian scope.
+5. **`AGENTS.md`**, **`CLAUDE.md`**, **`10-src/agents.md`** — lifecycle documentation.
+
+### What the Next Agent Should Know
+
+- Librarian checkout/return signals: `python 10-src/checkout-skill.py`, `python 10-src/return-skill.py`; skills live under `.agents/skills/`.
+- Disable: `CONTINUOUS_IMPROVEMENT_ENABLED=false`, or per-workflow `THREE_PASS_WORKFLOW_ENABLED` / `LIBRARIAN_WORKFLOW_ENABLED`.
+
+---
+
+## 2026-06-26: OOPs guardrails (out-of-bounds hard stops)
+
+### Purpose
+
+Add programmatic OOPs guardrails so all agents abort and refactor when violating metaphor-heavy architecture, stale path references, or no-sensor/industrial automation assumptions.
+
+### Changes Made
+
+1. **`.cursor/rules/oops-guardrails.mdc`** — always-on Rules 1–3 with cross-links to path-resolution and anti-hallucination rules.
+2. **`.cursor/hooks/oops-guardrails-prompt.txt`** + **`oops-guardrails-session.py`** — `sessionStart` injection.
+3. **`.cursor/hooks.json`** — second `sessionStart` entry for OOPs.
+4. **`hook_common.py`**, **`qa-prompt-template.txt`**, **`context-anchor.mdc`**, **`qa-response-review.mdc`** — OOPs enforcement in anchor defaults and QA review.
+5. **`path-resolution-10-src.mdc`**, **`anti-hallucination-control-room.mdc`** — cross-references to OOPs.
+6. **`AGENTS.md`**, **`CLAUDE.md`**, **`10-src/agents.md`** — lifecycle documentation.
+
+### What the Next Agent Should Know
+
+- OOPs fires during **thinking and drafting** — refactor before continuing, not as a post-hoc disclaimer.
+- Disable injection: `OOPS_GUARDRAILS_ENABLED=false` (rule file still applies via `alwaysApply`).
+
+---
+
+## 2026-06-26: Context-Anchor and Context-Pruning hooks (project-wide)
+
+### Purpose
+
+Add pre-execution context anchoring and multi-turn context pruning hooks alongside the existing QA review pipeline so all agents follow the same lifecycle.
+
+### Changes Made
+
+1. **`.cursor/hooks.json`** — `sessionStart` (anchor), `preCompact` (pruning notify), `stop` (orchestrator), `subagentStop` (QA).
+2. **`.cursor/hooks/context-anchor-session.py`** — injects `[CONTEXT-ANCHOR HOOK]` + Arch-System defaults via `additional_context`.
+3. **`.cursor/hooks/context-pruning-compact.py`** — `preCompact` user notification + compaction state tracking.
+4. **`.cursor/hooks/agent-stop-orchestrator.py`** — periodic pruning (every 6 turns) or QA review on `stop`.
+5. **`.cursor/hooks/hook_common.py`**, prompt templates, refactored **`qa_response_review.py`** module.
+6. **`.cursor/rules/context-anchor.mdc`**, **`.cursor/rules/context-pruning.mdc`** — always-on compliance rules.
+7. **`AGENTS.md`**, **`CLAUDE.md`**, **`10-src/agents.md`** — lifecycle documentation.
+8. **`.gitignore`** — ignore `.cursor/hooks/state/` runtime files.
+
+### What the Next Agent Should Know
+
+- `beforeSubmitPrompt` cannot inject agent context; anchor uses `sessionStart` + always-on rule.
+- Pruning takes priority over QA on every 6th completed turn (`CONTEXT_PRUNE_TURN_INTERVAL`).
+- Disable hooks individually via `CONTEXT_ANCHOR_HOOK_ENABLED`, `CONTEXT_PRUNING_HOOK_ENABLED`, `QA_REVIEW_HOOK_ENABLED`.
+
+---
+
+## 2026-06-26: Project-wide Cursor QA review hook for all agents
+
+### Purpose
+
+Make the QA response-review hook apply to every agent and subagent in the repository, with version-controlled hooks/rules and always-on compliance guidance.
+
+### Changes Made
+
+1. **`.cursor/hooks.json`** — added `subagentStop` hook (same script as `stop`, `loop_limit: 1`).
+2. **`.cursor/hooks/qa-response-review.py`** — `normalize_user_request()` extracts `<user_query>` for cleaner review input.
+3. **`.cursor/rules/qa-response-review.mdc`** — always-applied rule for `[QA_RESPONSE_REVIEW]` compliance.
+4. **`.gitignore`** — track `.cursor/hooks*` and `.cursor/rules*`; keep other `.cursor/` paths ignored.
+5. **`AGENTS.md`**, **`CLAUDE.md`**, **`10-src/agents.md`** — documented the QA pipeline for all agents.
+
+### What the Next Agent Should Know
+
+- Hooks are project-scoped under `.cursor/` and should be committed with `git add .cursor/hooks.json .cursor/hooks/ .cursor/rules/`.
+- On `[QA_RESPONSE_REVIEW]`: read-only editorial pass only; never call tools or edit files.
+- Disable hook: `QA_REVIEW_HOOK_ENABLED=false`.
+
+---
+
+## 2026-06-26: Implement and run workspace onboarding /init command
+
+### Purpose
+
+Provide localized virtual onboarding command (/init) and create ANTIGRAVITY.md alignment hub to track state and bootstrap session guidelines.
+
+### Changes Made
+
+1. **`10-src/` directory**: Created directory and populated it with `@WHY.md`, `@HOW.md`, `@PROGRESSIVE_DISCLOSURE.md`, `agents.md`, `checkout-skill.py`, and `return-skill.py` to establish the modular foundational architecture.
+2. **`scripts/init_command.py`**: Implemented the virtual `/init` command script to parse architectural documentation, verify skills state, persist state to `.gemini/init_state.json`, and generate the root `ANTIGRAVITY.md`.
+3. **`ANTIGRAVITY.md`**: Created the root alignment hub for terminal session bootstrapping.
+4. **Execution**: Executed `python scripts/init_command.py` to verify functionality.
+
+### What the Next Agent Should Know
+
+- The alignment hub `ANTIGRAVITY.md` is now generated. The current session profile is set to `Antigravity Lead Orchestrator` with loaded modular skill `feature-scaffolder`.
+- Run `python scripts/init_command.py` to re-synchronize state.
+
+---
+
 ## 2026-06-25: Wire portal to departments, hub, and shared libs (phase 2)
 
 ### Purpose

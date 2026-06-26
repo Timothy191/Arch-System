@@ -14,8 +14,8 @@ import { isValidPageRedirect } from "@repo/auth/utils";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get("redirect") || "/";
-  const redirectTo = isValidPageRedirect(rawRedirect) ? rawRedirect : "/";
+  const rawRedirect = searchParams.get("redirect") || "/hub";
+  const redirectTo = isValidPageRedirect(rawRedirect) ? rawRedirect : "/hub";
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");

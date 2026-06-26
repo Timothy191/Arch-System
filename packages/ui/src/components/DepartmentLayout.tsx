@@ -4,6 +4,7 @@ import { cn } from "../lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { departmentPath, HUB_PATH } from "@repo/utils";
 import { MacTitleBar } from "./MacTitleBar";
 import { Logo } from "./Logo";
 import {
@@ -84,7 +85,7 @@ interface DepartmentLayoutProps {
 
 export function DepartmentLayout({ department, tabs, children }: DepartmentLayoutProps) {
   const pathname = usePathname();
-  const basePath = `/${department.name}`;
+  const basePath = departmentPath(department.name);
 
   return (
     <div className="flex h-[calc(100vh-28px)]">
@@ -100,7 +101,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Back to Hub link */}
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
           <Link
-            href="/"
+            href={HUB_PATH}
             className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors group px-2 py-1 rounded"
           >
             <span className="group-hover:-translate-x-0.5 transition-transform text-sm">‹</span>

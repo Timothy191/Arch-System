@@ -16,7 +16,18 @@ CREATE TABLE IF NOT EXISTS sync_watermarks (
 -- RLS: only the application service role can read/write watermarks
 ALTER TABLE sync_watermarks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "sync_watermarks_service_only"
+CREATE POLICY "sync_watermarks_select_admin"
+  ON sync_watermarks
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM employees e
+      WHERE e.auth_id = auth.uid() AND e.role = 'admin'
+    )
+  );
+
+CREATE POLICY "sync_watermarks_modify_admin"
   ON sync_watermarks
   FOR ALL
   TO authenticated

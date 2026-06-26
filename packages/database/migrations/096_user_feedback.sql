@@ -38,7 +38,7 @@ CREATE POLICY "service_can_manage_feedback"
   ON user_feedback FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 CREATE POLICY "any_user_can_quick_feedback"
-  ON quick_feedback FOR INSERT TO anon USING (true) WITH CHECK (true);
+  ON quick_feedback FOR INSERT TO anon WITH CHECK (true);
 
 CREATE POLICY "service_can_manage_quick_feedback"
   ON quick_feedback FOR ALL TO service_role USING (true) WITH CHECK (true);

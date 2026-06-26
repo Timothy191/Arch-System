@@ -1,0 +1,24 @@
+================================================================================
+WORKFLOW: DETERMINISTIC PERFORMANCE RUNTIME SANITY CHECK
+================================================================================
+
+Before finalizing this technical implementation, run it through a virtual Profiling and Resource Constraints Pass.
+
+## 1. TIME COMPLEXITY & BLOCKED THREADS
+
+- Does this logic use blocking synchronous operations where asynchronous execution is mandatory?
+- If running on a client UI or a local resource-constrained server, could this execution cause a micro-stutter?
+- Optimize using non-blocking primitives, cooperative yielding, and bounded work units.
+
+## 2. MEMORY ACCUMULATION & BOUNDS
+
+- Are arrays, data collections, or file reads pulling entire datasets into memory at once?
+- Enforce chunked streaming, iterator patterns, and strict maximum limits on data arrays.
+- Keep memory consumption predictable and locked under heavy processing loads.
+
+## 3. IDEMPOTENCY VERIFICATION
+
+- If this function, script, or sync pipeline runs three times in succession due to an interrupted connection, does it corrupt the database, duplicate logs, or break state?
+- Rewrite logic so every transactional execution is entirely idempotent — multiple runs produce the same clean state as one run.
+
+Only deliver output that passes this sanity check.

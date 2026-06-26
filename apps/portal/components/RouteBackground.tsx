@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useFocusMode } from "@/hooks/useFocusMode";
-
 /**
  * RouteBackground
  *
@@ -38,16 +36,11 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  *    layers immediately, preventing re-paint on first frame.
  */
 export function RouteBackground() {
-  // Subscribe to keep the component re-rendering on toggle. The actual
-  // visibility is controlled via the `data-bg-mode` attribute on <html>,
-  // set by useFocusMode — see glass.css `.route-bg-focus-video` rules.
-  useFocusMode((s) => s.enabled);
+  // Removed focus mode subscription as we now use a single global background.
 
-  const lightVideoRef = useRef<HTMLVideoElement>(null);
-  const focusVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [lightVideoLoaded, setLightVideoLoaded] = useState(false);
-  const [focusVideoLoaded, setFocusVideoLoaded] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Check for reduced motion preference
@@ -84,31 +77,66 @@ export function RouteBackground() {
       { threshold: 0.1 },
     );
 
-    if (lightVideoRef.current) observer.observe(lightVideoRef.current);
-    if (focusVideoRef.current) observer.observe(focusVideoRef.current);
+    if (videoRef.current) observer.observe(videoRef.current);
 
     return () => {
-      if (lightVideoRef.current) observer.unobserve(lightVideoRef.current);
-      if (focusVideoRef.current) observer.unobserve(focusVideoRef.current);
+      if (videoRef.current) observer.unobserve(videoRef.current);
     };
   }, [prefersReducedMotion]);
 
   // Track video load states
   useEffect(() => {
-    const lightVideo = lightVideoRef.current;
-    const focusVideo = focusVideoRef.current;
+    const video = videoRef.current;
 
-    const handleLightCanPlay = () => setLightVideoLoaded(true);
-    const handleFocusCanPlay = () => setFocusVideoLoaded(true);
+    const handleCanPlay = () => setVideoLoaded(true);
 
-    if (lightVideo) lightVideo.addEventListener("canplay", handleLightCanPlay);
-    if (focusVideo) focusVideo.addEventListener("canplay", handleFocusCanPlay);
+    if (video) video.addEventListener("canplay", handleCanPlay);
 
     return () => {
-      if (lightVideo) lightVideo.removeEventListener("canplay", handleLightCanPlay);
-      if (focusVideo) focusVideo.removeEventListener("canplay", handleFocusCanPlay);
+      if (video) video.removeEventListener("canplay", handleCanPlay);
     };
   }, []);
+
+  // Performance-optimized 3D parallax effect on mouse movement
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    let requestId: number;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+
+      // Calculate offset from center (-0.5 to 0.5) and multiply by factor.
+      // Negative multipliers move the background opposite to the cursor, creating depth.
+      targetX = (clientX / innerWidth - 0.5) * -30;
+      targetY = (clientY / innerHeight - 0.5) * -30;
+    };
+
+    const updateParallax = () => {
+      // Linear interpolation (lerp) for smooth gliding transition
+      currentX += (targetX - currentX) * 0.08;
+      currentY += (targetY - currentY) * 0.08;
+
+      if (videoRef.current) {
+        videoRef.current.style.transform = `translate3d(${currentX}px, ${currentY}px, 0px) scale(1.08)`;
+      }
+
+      requestId = requestAnimationFrame(updateParallax);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    requestId = requestAnimationFrame(updateParallax);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(requestId);
+    };
+  }, [prefersReducedMotion, videoLoaded]);
 
   return (
     <>
@@ -119,45 +147,27 @@ export function RouteBackground() {
         </div>
       ) : (
         <>
-          {/* ── Light mode: loop the user's video background (lazy-loaded) ── */}
-          <div className="route-bg-video-container" aria-hidden="true">
+          {/* ── One True Global Background ── */}
+          <div className="fixed inset-0 overflow-hidden -z-10 bg-black" aria-hidden="true">
             <video
-              ref={lightVideoRef}
-              id="route-bg-light-video"
+              ref={videoRef}
+              id="global-background-video"
               autoPlay
               muted
               loop
               playsInline
               preload="none"
               poster="/auth-bg-poster.jpg"
-              className="route-bg-video"
+              className="w-full h-full object-cover opacity-80 mix-blend-screen"
+              style={{ willChange: "transform", transform: "scale(1.08)" }}
             >
-              {/* AGENT-TRACE: Global light-mode background video relocated to a subfolder to match monorepo asset organization standard */}
-              <source src="/background/light-mode/light-mode.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-
-          {/* ── Focus mode: full-screen atmospheric video (lazy-loaded) ── */}
-          <div className="route-bg-focus-video-container" aria-hidden="true">
-            <video
-              ref={focusVideoRef}
-              id="route-bg-focus-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="none"
-              poster="/auth-bg-poster.jpg"
-              className="route-bg-focus-video"
-            >
-              <source src="/background/focused-mode/focused-mode.mp4" type="video/mp4" />
+              <source src="/background/837668e02b8cc6414cd7a78c19d1746c.webm" type="video/webm" />
               Your browser does not support the video tag.
             </video>
           </div>
 
           {/* ── Poster fallback overlay — shown until videos load ── */}
-          {!lightVideoLoaded && !focusVideoLoaded && (
+          {!videoLoaded && (
             <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
               <Image src="/auth-bg-poster.jpg" alt="" fill priority className="object-cover" />
             </div>
