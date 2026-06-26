@@ -1,0 +1,21 @@
+---
+description: All generated source paths must use 10-src/ — never un-prefixed src/.
+alwaysApply: true
+---
+
+# Path Resolution — 10-src/
+
+This workspace uses Numbered-Functional Architecture with source isolation under `10-src/`.
+
+## Requirements
+
+- All source code path generation, file creation, imports, scripts, and documentation references must point to **`10-src/`**.
+- Never use a generic, un-prefixed `src/` folder for new or moved functional resources.
+- Un-prefixed `src/` may resolve to stale symlinks or legacy layouts — treat it as forbidden for agent-generated paths.
+
+## Examples
+
+- Correct: `10-src/checkout-skill.py`, `10-src/agents.md`, `10-src/@WHY.md`
+- Incorrect: `src/checkout-skill.py`, `./src/agents.md`, `../src/...`
+
+When editing existing packages that legitimately use their own `src/` (e.g. `packages/foo/src/`), that is package-internal layout — not the project functional root. The `10-src/` rule applies to the modular foundational architecture described in `10-src/@WHY.md`.

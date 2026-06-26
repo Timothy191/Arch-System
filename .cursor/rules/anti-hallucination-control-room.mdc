@@ -1,0 +1,21 @@
+---
+description: Control room reporting stays human-input first; do not invent hardware API integrations.
+alwaysApply: true
+---
+
+# Anti-Hallucination — Control Room Reporting
+
+Do not assume automated hardware API integrations exist unless they are explicitly implemented and documented in this repository.
+
+## Requirements
+
+- Control room reporting logic must remain **human-input first**.
+- Do not scaffold, reference, or wire up machine telemetry, PLC, SCADA, or fleet hardware APIs unless the user asks and matching code paths already exist.
+- When extending control room or shift-reporting features, design for operator-entered data, manual confirmation, and explicit user actions.
+- If automation is requested, verify real integration points in the codebase before proposing or implementing them.
+
+## Red flags (do not do without evidence)
+
+- Inventing REST/WebSocket endpoints for drills, trucks, or plant equipment
+- Auto-populating shift closeout or production totals from "live machine feeds" without a documented adapter
+- Adding background sync jobs that imply hardware connectivity that is not in repo
