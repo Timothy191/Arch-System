@@ -3,6 +3,10 @@
   "hooks": {
     "sessionStart": [
       {
+        "command": ".cursor/hooks/token-saving-manifest-session.py",
+        "timeout": 15
+      },
+      {
         "command": ".cursor/hooks/context-anchor-session.py",
         "timeout": 15
       },

@@ -53,15 +53,7 @@ Never edit `packages/supabase/supabase/migrations/` directly (PreToolUse hook bl
 - Git: no writes without user permission; never `--no-verify`; no force-push to `master`.
 - Heavy exploration → subagents; compact at task boundaries (~50% context).
 - Reporecall: use injected context first; search only to fill gaps.
-- **QA review hook:** on `[QA_RESPONSE_REVIEW]` follow-ups, run a read-only editorial pass only — no tools, no edits; output the polished final answer (see `.cursor/rules/qa-response-review.mdc`).
-- **Context-Anchor:** before every response, align to target environment, architectural pattern, and hard constraints (see `.cursor/rules/context-anchor.mdc`).
-- **OOPs guardrails:** during thinking or drafting, abort and refactor on trigger — no metaphors, verify paths (`10-src/`), no invented sensor/telemetry APIs, no volatile-only critical state, no magic-number performance hacks, no out-of-scope side effects (see `.cursor/rules/oops-guardrails.mdc`).
-- **Zero-Trust defensiveness:** before writing code, plan detect / isolate / recover failure handling (see `.cursor/rules/zero-trust-defensiveness.mdc`).
-- **Structural audit:** on `[STRUCTURAL_AUDIT HOOK]`, read-only alignment with `10-src/@WHY.md` and `10-src/@HOW.md` (see `.cursor/rules/structural-audit.mdc`).
-- **3-Pass Optimization:** run functional → architectural → edge-stabilization passes before marking work complete (see `.cursor/rules/three-pass-optimization.mdc`).
-- **Librarian workflow:** checkout one `.agents/skills/` skill per turn via `10-src/checkout-skill.py`; return via `10-src/return-skill.py` (see `.cursor/rules/librarian-skill-workflow.mdc`).
-- **Enterprise production:** deterministic performance sanity check + unified cascade verification on multi-file changes (see `.cursor/rules/deterministic-performance-sanity-check.mdc`, `.cursor/rules/unified-system-cascade-verification.mdc`).
-- **Context-Pruning:** on long sessions or `[CONTEXT-PRUNING HOOK]`, emit the 3-bullet state vector and drop stale context (see `.cursor/rules/context-pruning.mdc`).
+- **Token-Saving Manifest:** all agents follow `10-src/TOKEN-SAVING-AGENT-MANIFEST.md` (`[H-*]`, `[OOP-*]`, `[PATCH-*]`, `[TRACE-*]`, PASS_1–3, `[REPORT-FORMAT]`). Cursor hooks + `.cursor/rules/*.mdc` expand tags on violation. QA on `[QA_RESPONSE_REVIEW]`: read-only manifest pass, no tools.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

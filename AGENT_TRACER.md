@@ -1,5 +1,91 @@
 # Root Workspace Agent Tracer
 
+## 2026-06-26: Manifest §5–6 — patch-only delivery + trace-reflective optimization
+
+### Purpose
+
+Add zero-rewrite patching (`[PATCH-ONLY]`, `[CASCADE-UPDATE]`, `[REPORT-FORMAT]`) and self-improving trace reflection (`[TRACE-ANALYZE]`, `[APPEND-UPGRADE]`) to the Token-Saving Agent Manifest for all CLI agents.
+
+### Changes Made
+
+1. **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`** — §5 patching, §6 trace-reflective optimization, tag map entries.
+2. **`.cursor/rules/patch-only-delivery.mdc`**, **`trace-reflective-optimization.mdc`** — always-on rules.
+3. **`token-saving-agent-manifest.mdc`**, **`hook_common.py`**, **`qa-token-saving-wrapper.txt`**, **`10-src/agents.md`**.
+
+### What the Next Agent Should Know
+
+- Implementation responses use REPORT-FORMAT; end with `[APPEND-UPGRADE]`.
+- Register tiers in `10-src/@PROGRESSIVE_DISCLOSURE.md` when documenting.
+
+---
+
+## 2026-06-26: Token-Saving Agent Manifest (CLI-wide)
+
+### Purpose
+
+Add hyper-dense, token-optimized agent contract (~60–70% instruction savings) for all CLI/IDE agents via symbolic tags, compressed 3-pass workflow, and minimal QA wrapper.
+
+### Changes Made
+
+1. **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`** — canonical manifest (`[H-*]`, `[OOP-*]`, PASS_1–3, output protocol, QA wrapper).
+2. **`.cursor/hooks/token-saving-manifest-session.py`** — first `sessionStart` injection from `10-src/`.
+3. **`.cursor/hooks/qa-token-saving-wrapper.txt`** — compressed QA followup template (replaces verbose `qa-prompt-template.txt`).
+4. **`.cursor/rules/token-saving-agent-manifest.mdc`** — always-on rule.
+5. **`hook_common.py`**, **`qa_response_review.py`**, **`qa-response-review.mdc`**, **`hooks.json`**, **`docs/AGENTS.md`**, **`docs/CLAUDE.md`**, **`10-src/agents.md`**.
+
+### What the Next Agent Should Know
+
+- Canonical path: `10-src/TOKEN-SAVING-AGENT-MANIFEST.md`.
+- Disable injection: `TOKEN_SAVING_MANIFEST_ENABLED=false`.
+- To cut duplicate tokens: disable verbose sessionStart hooks when manifest suffices.
+
+---
+
+## 2026-06-26: Analytics UI lib migration (phase 4)
+
+### Purpose
+
+Move analytics UI components from `apps/portal/features/analytics/` to `@repo/analytics/ui`, decoupling PDF generation from portal server actions via dependency injection.
+
+### Changes Made
+
+1. **`libs/features/analytics/ui`** — New package: ExportButton, PDFDownloadButton, ProductionTrendChart (+ wrapper), ReportTemplate, shared `ReportData` types.
+2. **`PDFDownloadButton`** — Requires injected `generateMonthlyReport` prop (portal passes server action from `app/actions.ts`).
+3. **`ProductionTrendChart`** — Uses `@repo/analytics/data-access` for `linearForecast`; removed duplicate `apps/portal/lib/analytics/forecast.ts`.
+4. **Portal wiring** — Executive dashboard and department reports pages updated; thin barrel at `apps/portal/features/analytics/index.ts`.
+5. **Workspace** — `@repo/analytics/ui` path in `tsconfig.base.json`, portal deps + transpilePackages.
+
+### What the Next Agent Should Know
+
+- Only `admin/` and `webhooks/` remain as portal-local feature implementations.
+- `generateMonthlyReport` in `app/actions.ts` imports `ReportTemplate` from `@repo/analytics/ui`.
+
+---
+
+## 2026-06-26: Complete portal → libs/features cutover (phase 3)
+
+### Purpose
+
+Finish the libs migration: portal routes consume `@repo/*` feature packages directly; remove duplicate implementations under `apps/portal/features/` for hub, departments, auth, dashboard, and access-control.
+
+### Changes Made
+
+1. **Portal imports** — Hub, department, auth, and access-control pages now import from `@repo/hub/ui`, `@repo/departments/ui`, `@repo/auth/ui`, and `@repo/access-control/ui` instead of `@/features/*` local copies.
+2. **Deleted duplicates** — Removed 62 stale files under `apps/portal/features/{hub,departments,auth,access-control,dashboard}/` (components, services, types).
+3. **Thin barrels retained** — `apps/portal/features/{hub,departments,dashboard}/index.ts` remain as documented re-exports only.
+4. **Portal-only features kept** — `admin/`, `analytics/`, `webhooks/` stay in portal until `@repo/analytics/ui` and admin lib scaffolds exist.
+5. **`@repo/access-control/ui`** — Added to portal `package.json`, `tsconfig.json` paths, and `next.config.mjs` transpilePackages; fixed default export in lib index.
+6. **`CloseShiftModal.test.tsx`** — Updated to inject `shiftCloseout` mocks (no portal `~/lib/shift-closeout` import in lib tests).
+
+### What the Next Agent Should Know
+
+- Portal wrapper DI pattern remains for shift closeout (`ShiftCoveragePortal`) and satellite monitoring (`SatelliteDashboardPortal`).
+- Next migration targets: `apps/portal/features/admin/*` → `@repo/admin/ui` (not scaffolded yet).
+- Analytics UI lives in `@repo/analytics/ui`; pass `generateMonthlyReport` from portal server actions to `PDFDownloadButton`.
+- Operational excellence roadmap gaps documented in `docs/reports/continuous_improvement_operational_excellence.md` §Implementation Status.
+
+---
+
 ## 2026-06-26: Enterprise production hooks (Zero-Trust, Structural Audit, OOPs 4–6)
 
 ### Purpose

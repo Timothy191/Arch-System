@@ -8,14 +8,16 @@ import re
 import sys
 from pathlib import Path
 
-TEMPLATE_PATH = Path(__file__).with_name("qa-prompt-template.txt")
+TEMPLATE_PATH = Path(__file__).with_name("qa-token-saving-wrapper.txt")
 QA_MARKER = "[QA_RESPONSE_REVIEW]"
 PRUNING_MARKER = "[CONTEXT-PRUNING HOOK]"
 AUDIT_MARKER = "[STRUCTURAL_AUDIT HOOK]"
+MANIFEST_MARKER = "[TOKEN-SAVING AGENT MANIFEST]"
 HOOK_USER_MARKERS = (
     QA_MARKER,
     PRUNING_MARKER,
     AUDIT_MARKER,
+    MANIFEST_MARKER,
     "[CONTEXT-ANCHOR HOOK]",
     "[OOPS GUARDRAILS]",
     "[ZERO-TRUST DEFENSIVENESS HOOK]",
@@ -117,13 +119,13 @@ def load_template() -> str:
 
 
 def build_followup_message(user_request: str, draft_output: str) -> str:
-    template = load_template()
-    return (
-        f"{QA_MARKER}\n\n"
-        + template.replace("{{ORIGINAL_USER_REQUEST}}", user_request).replace(
+    wrapper = load_template()
+    body = (
+        wrapper.replace("{{ORIGINAL_USER_REQUEST}}", user_request).replace(
             "{{DRAFT_OUTPUT}}", draft_output
         )
     )
+    return f"{QA_MARKER}\n\n{body}"
 
 
 def should_skip(user_request: str, draft_output: str, loop_count: int, status: str) -> bool:

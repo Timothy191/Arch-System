@@ -1,0 +1,52 @@
+---
+description: Hyper-dense token-saving manifest — all CLI/IDE agents follow symbolic tag contract.
+alwaysApply: true
+---
+
+# Token-Saving Agent Manifest
+
+All agents in this repository follow the hyper-dense contract in **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`**.
+
+## Symbolic tags (single-token anchors)
+
+| Tag | Meaning |
+|-----|---------|
+| `[H-CONTEXT]` | Bind to `10-src/@WHY.md`, `@HOW.md`, `@PROGRESSIVE_DISCLOSURE.md` |
+| `[H-ZERO-TRUST]` | Explicit types, boundary validation, detect/isolate/recover |
+| `[H-OBSERVE]` | Structured logging; no silent failures |
+| `[OOP-STATE]` | Offline-first persistence; idempotent mutations |
+| `[OOP-PERF]` | No magic numbers, blocking sync, unbounded memory |
+| `[OOP-CLEAN]` | No side-effects, secrets, or absolute machine paths |
+| `[OOP-PATH]` | `10-src/` not bare `src/` |
+| `[OOP-SENSOR]` | Human-input-first industrial data |
+
+## 3-pass (internal)
+
+PASS_1 functionality → PASS_2 cascade → PASS_3 prune+edge. Deliver Pass 3 only.
+
+## Output protocol
+
+- No filler prose.
+- Emit **only** the final deployment-ready asset.
+- Implementation turns: `[PATCH-ONLY]` + `[REPORT-FORMAT]`; end with `[APPEND-UPGRADE]`.
+- On `[QA_RESPONSE_REVIEW]`: apply manifest read-only; no tools.
+
+## Patch & trace tags
+
+| Tag | Meaning |
+|-----|---------|
+| `[PATCH-ONLY]` | Targeted diffs only — zero full-file rewrites |
+| `[CASCADE-UPDATE]` | Labeled per-file patch blocks for downstream impact |
+| `[REPORT-FORMAT]` | STATUS → PATCHES → POST-EXECUTION REPORT |
+| `[TRACE-ANALYZE]` | Review turn for waste and drift |
+| `[APPEND-UPGRADE]` | One next-turn performance directive at response end |
+
+See `.cursor/rules/patch-only-delivery.mdc`, `trace-reflective-optimization.mdc`.
+
+## Automation
+
+`sessionStart` injects via `.cursor/hooks/token-saving-manifest-session.py`.
+
+**Disable injection:** `TOKEN_SAVING_MANIFEST_ENABLED=false` (manifest file + this rule still apply).
+
+**Reduce verbose hook injection:** set `CONTEXT_ANCHOR_HOOK_ENABLED=false`, `OOPS_GUARDRAILS_ENABLED=false`, `CONTINUOUS_IMPROVEMENT_ENABLED=false`, `ZERO_TRUST_HOOK_ENABLED=false`, `ENTERPRISE_PRODUCTION_ENABLED=false` when manifest alone is sufficient.

@@ -5,33 +5,24 @@ alwaysApply: true
 
 # QA Response Review (Project-Wide)
 
-Every Cursor agent session in this repository runs lifecycle hooks under `.cursor/hooks/`. The `stop` orchestrator may inject `[QA_RESPONSE_REVIEW]` for a one-shot editorial pass.
+Every Cursor agent session runs lifecycle hooks under `.cursor/hooks/`. The `stop` orchestrator may inject `[QA_RESPONSE_REVIEW]` for a one-shot editorial pass.
 
 ## When you see `[QA_RESPONSE_REVIEW]`
 
-This is **not** a new user task. It is an automated editorial pass on the draft you just produced.
+This is **not** a new user task. Apply **`10-src/TOKEN-SAVING-AGENT-MANIFEST.md`** read-only against the draft.
 
 ### Required behavior
 
 1. **Read-only** — do not call tools, edit files, run shell commands, or spawn subagents.
-2. **Review** the original user request and draft output against:
-   - real-world viability (edge cases, errors, security; no placeholders or unsafe shortcuts)
-   - logical correctness and completeness
-   - consistent naming everywhere (variables, functions, APIs, concepts)
-   - explicit dependencies, imports, prerequisites, and setup steps
-3. **Output only** the final polished response — no meta-commentary ("here is the fixed version", "I reviewed…", etc.).
+2. **Apply manifest tags** — `[H-CONTEXT]`, `[H-ZERO-TRUST]`, `[H-OBSERVE]`, `[OOP-*]`, `[PATCH-*]`, `[TRACE-*]`, PASS_3, `[REPORT-FORMAT]` when applicable.
+3. **Output only** the final polished response — no meta-commentary.
 4. **Preserve intent** — fix gaps without changing the user's goal or adding unrequested scope.
-5. **Enforce OOPs** — reject metaphors, stale `src/` paths, invented sensor/telemetry APIs, volatile-only critical state, magic-number performance hacks, and out-of-scope side effects (see `.cursor/rules/oops-guardrails.mdc`).
-6. **Zero-Trust** — technical output must reflect detect/isolate/recover failure planning (see `.cursor/rules/zero-trust-defensiveness.mdc`).
-7. **Structural alignment** — output must match `10-src/@WHY.md` and `10-src/@HOW.md` intent (see `.cursor/rules/structural-audit.mdc`).
-8. **3-Pass Optimization** — output must reflect Pass 3 (functional + architectural alignment + edge stabilization), not a raw first draft.
-9. **Librarian scope** — response must not load unrelated skills; one sub-domain per turn unless cross-domain was requested.
-10. **Performance & cascade** — reject blocking UI paths, unbounded memory, non-idempotent transactions, and unstated import/schema cascades.
+5. **Expand on violation** — full rules in `.cursor/rules/*.mdc` when a tag fails.
 
 ### Subagents
 
-Task/subagent runs use the same hook on `subagentStop`. Subagents that receive `[QA_RESPONSE_REVIEW]` follow the same read-only editorial rules.
+Task/subagent runs use the same hook on `subagentStop`. Same read-only manifest rules.
 
 ### Opt-out
 
-Set `QA_REVIEW_HOOK_ENABLED=false` in the environment to disable the hook for a session.
+`QA_REVIEW_HOOK_ENABLED=false` disables the hook. `TOKEN_SAVING_MANIFEST_ENABLED=false` skips manifest injection at `sessionStart`.

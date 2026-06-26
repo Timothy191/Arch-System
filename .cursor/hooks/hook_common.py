@@ -7,8 +7,11 @@ import os
 from pathlib import Path
 
 HOOKS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = HOOKS_DIR.parent.parent
 STATE_DIR = HOOKS_DIR / "state"
 STATE_PATH = STATE_DIR / "agent-lifecycle.json"
+MANIFEST_PATH = REPO_ROOT / "10-src" / "TOKEN-SAVING-AGENT-MANIFEST.md"
+MANIFEST_MARKER = "[TOKEN-SAVING AGENT MANIFEST]"
 
 ARCH_SYSTEM_DEFAULTS = """\
 ### Arch-System defaults (apply unless the user overrides)
@@ -16,10 +19,17 @@ ARCH_SYSTEM_DEFAULTS = """\
 1. **TARGET ENVIRONMENT:** Local-first Nx + pnpm monorepo; Portal on :3000; Supabase local Docker; Node >= 22.
 2. **ARCHITECTURAL PATTERN:** Numbered-Functional (`10-src/`); feature libs (`libs/features/{domain}/{ui,data-access,utils}`); Nx boundary tags.
 3. **HARD CONSTRAINTS:** Use `10-src/` for modular functional roots (never bare `src/`); control-room data is human-input first (no invented PLC/SCADA APIs); run `pnpm quality` before done; update `AGENT_TRACER.md` on code changes.
-4. **OOPs GUARDRAILS:** No metaphors for architecture; verify paths (no stale `src/`); no assumed sensor/cloud telemetry without documented adapters; no volatile-only critical state; no magic-number timeouts; no side effects outside module scope — abort and refactor on trigger.
-5. **CONTINUOUS IMPROVEMENT:** Run 3-Pass Optimization before completing tasks; use Librarian checkout/return for modular skills (`.agents/skills/`, `10-src/checkout-skill.py`, `10-src/return-skill.py`).
-6. **ENTERPRISE PRODUCTION:** Plan with Zero-Trust (detect/isolate/recover); run Deterministic Performance sanity check; perform Unified System Cascade verification on multi-file changes.
+4. **TOKEN MANIFEST:** Follow `10-src/TOKEN-SAVING-AGENT-MANIFEST.md` — `[H-*]`, `[OOP-*]`, `[PATCH-*]`, `[TRACE-*]`, PASS_1–3, `[REPORT-FORMAT]` (expand tags via `.cursor/rules/*.mdc` on violation).
+5. **OOPs GUARDRAILS:** No metaphors for architecture; verify paths (no stale `src/`); no assumed sensor/cloud telemetry without documented adapters; no volatile-only critical state; no magic-number timeouts; no side effects outside module scope — abort and refactor on trigger.
+6. **CONTINUOUS IMPROVEMENT:** Run 3-Pass Optimization before completing tasks; use Librarian checkout/return for modular skills (`.agents/skills/`, `10-src/checkout-skill.py`, `10-src/return-skill.py`).
+7. **ENTERPRISE PRODUCTION:** Plan with Zero-Trust (detect/isolate/recover); run Deterministic Performance sanity check; perform Unified System Cascade verification on multi-file changes.
 """
+
+
+def load_manifest() -> str:
+    if MANIFEST_PATH.is_file():
+        return MANIFEST_PATH.read_text(encoding="utf-8")
+    return f"{MANIFEST_MARKER}\n\n(Manifest file missing at 10-src/TOKEN-SAVING-AGENT-MANIFEST.md)"
 
 
 def parse_bool(value: str | None, default: bool = True) -> bool:
