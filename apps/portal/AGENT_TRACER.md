@@ -2567,3 +2567,9 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Wrapped `hasBinFactors` boolean calculation in `useMemo` in `HourlyLoadsGrid.tsx`.
 - Updated `getHourValue`, `getMachineTotal`, `getMaterialType`, and `source` dependency arrays to include memoized values.
 **Impact:** Prevents cascading re-renders of the `DataGrid` when local state (like `saving` or `containerWidth`) changes, stabilizing the rendering of the heavy \~900KB grid component.
+
+## [2026-06-26T04:10:00Z] CI Fix: Align pnpm versions
+
+**Purpose:** Resolve CI failures caused by multiple pnpm versions being specified.
+**Changes:**
+- Updated `.github/workflows/reviewdog.yml` and `.github/workflows/deploy.yml` to use pnpm version `9.15.9` to match `packageManager` in `package.json`.
