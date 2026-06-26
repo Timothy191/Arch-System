@@ -1,6 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
+import type { DeformationReading } from "@repo/shared/data-access";
 import { SatelliteMonitoringDashboard } from "@repo/departments/ui";
 // AGENT-TRACE: Portal-side wrapper that injects monitoring components into the lib's
 // SatelliteMonitoringDashboard, decoupling the lib from @/components/monitoring/* imports.
@@ -62,7 +64,19 @@ export function SatelliteDashboardPortal({
   return (
     <SatelliteMonitoringDashboard
       defaultTab={defaultTab}
-      monitoring={{ LidarLayerPanel, COGRasterLayer, KeplerGlMap, MonitoringMap }}
+      monitoring={{
+        LidarLayerPanel,
+        COGRasterLayer,
+        KeplerGlMap,
+        MonitoringMap: MonitoringMap as ComponentType<{
+          center?: { lat: number; lon: number };
+          zoom?: number;
+          deformationReadings?: DeformationReading[];
+          activeLayer?: string;
+          height?: string;
+          onReadingClick?: (_reading: DeformationReading) => void;
+        }>,
+      }}
     />
   );
 }

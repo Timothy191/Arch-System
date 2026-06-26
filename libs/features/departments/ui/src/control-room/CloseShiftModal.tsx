@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { X, AlertCircle, CheckCircle, Loader2, UserCheck, Lock } from "lucide-react";
 
 // AGENT-TRACE: Injected dependencies to decouple from portal @/lib/shift-closeout
-interface ShiftCloseoutDeps {
+export interface ShiftCloseoutDeps {
   verifyPin: (
     employeeCode: string,
     pin: string,

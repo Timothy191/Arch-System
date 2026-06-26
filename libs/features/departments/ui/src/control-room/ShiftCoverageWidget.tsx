@@ -248,6 +248,7 @@ export function ShiftCoverageWidget({
         departmentSlug={departmentSlug}
         date={today}
         shiftType={currentShift}
+        shiftCloseout={shiftCloseout}
         onComplete={() => setShowModal(false)}
       />
     </>

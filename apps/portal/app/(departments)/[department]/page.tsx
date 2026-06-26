@@ -28,14 +28,18 @@ const WeatherWidget = dynamic(
 );
 
 const ShiftCoverageWidget = dynamic(
-  () => import("@/features/departments").then((mod) => mod.ShiftCoverageWidget),
+  () =>
+    import("@/components/control-room/ShiftCoveragePortal").then((mod) => mod.ShiftCoveragePortal),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
   },
 );
 
 const SatelliteMonitoringDashboard = dynamic(
-  () => import("@/features/departments").then((mod) => mod.SatelliteMonitoringDashboard),
+  () =>
+    import("@/components/monitoring/SatelliteDashboardPortal").then(
+      (mod) => mod.SatelliteDashboardPortal,
+    ),
   {
     loading: () => (
       <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
