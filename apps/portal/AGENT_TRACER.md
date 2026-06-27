@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-27 - Performance: Memoized Derived Data in HourlyLoadsGrid
+
+- **Purpose**: Prevent unnecessary re-renders of the heavy DataGrid (RevoGrid) component.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Wrapped `loadsByMachine` Map creation in `useMemo`.
+  - Stabilized downstream `useCallback` and `useMemo` hooks that depended on `loadsByMachine`.
+- **Next agent**: Continue identifying derived data structures created in render bodies of components using heavy UI elements (DataGrid, WorkflowBuilder, TelemetryChart).
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
