@@ -1,0 +1,3 @@
+## 2026-06-27 - [Memoizing Derived Data in Heavy Components]
+**Learning:** Derived data structures (like `new Map()` or `new Set()`) created directly in a component's render body cause downstream `useMemo` and `useCallback` hooks to invalidate on every render, even if the underlying data hasn't changed. This is particularly impactful for "heavy" components like RevoGrid, where a stable reference for columns/source is critical to avoid expensive re-renders.
+**Action:** Always wrap the creation of derived data structures in `useMemo` when they are used as dependencies for other hooks or passed as props to heavy components.
