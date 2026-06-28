@@ -2562,9 +2562,11 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 ## 2026-06-28: Performance Optimization - Render Memoization
 
 ### Purpose
+
 Reduce unnecessary re-renders in high-density dashboard components and administrative views by memoizing derived data structures (Maps, filtered arrays) that are used in render loops or as hook dependencies.
 
 ### Changes Made
+
 1. **HourlyLoadsGrid.tsx**: Memoized the `loadsByMachine` Map creation using `useMemo` with `hourlyLoads` as a dependency. This stabilizes references for dependent callbacks (`getHourValue`, `getMachineTotal`, `getMaterialType`) and prevents redundant updates to the heavy `DataGrid` component.
 2. **UsersTab.tsx**:
    - Memoized search results (`filteredEmployees`) to prevent expensive array filtering on every keystroke when unrelated state changes.
@@ -2572,10 +2574,12 @@ Reduce unnecessary re-renders in high-density dashboard components and administr
 3. **CI/CD Workflows**: Corrected pnpm version mismatches in `.github/workflows/reviewdog.yml` and `deploy.yml` from 9.12.0 to 9.15.9 to align with the repository standard and fix CI failures.
 
 ### Impact
+
 - **HourlyLoadsGrid**: Expected ~40% reduction in heavy DataGrid re-renders during local cell updates.
 - **UsersTab**: Significant improvement in search responsiveness for large lists by skipping redundant filtering.
 
 ### Verification
+
 - Manual verification of hook call order and dependency correctness.
 - Code reviewed for runtime safety (verified missing imports were added).
 - CI configuration fixed to unblock automated validation.

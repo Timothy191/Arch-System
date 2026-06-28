@@ -61,3 +61,6 @@ jobs:
           filter_mode: added
           fail_on_error: false
           markdownlint_flags: '--ignore node_modules --ignore "**/node_modules" --ignore "**/.next" --ignore "**/dist"'
+      - name: Token & CSS Lint with Reviewdog
+        run: |
+          pnpm nx run-many -t lint:tokens lint:css
