@@ -32,6 +32,7 @@ graph TD
 - **Policy**: Enforce 80%+ test coverage for all new feature libraries (`libs/features/*`), especially targeting data-access and utility layers.
 - **Implementation**:
   - Set up Jest or Vitest coverage thresholds inside `jest.config.ts` or `vite.config.ts` for each library:
+
     ```json
     "coverageThreshold": {
       "global": {
@@ -42,6 +43,7 @@ graph TD
       }
     }
     ```
+
   - Focus tests on Supabase Client wrapper logic, server actions validations, and business logic mapping.
 
 #### 2. Isolated Component Testing with Storybook
@@ -180,6 +182,7 @@ Foster easier onboarding, consistent development patterns, and a robust document
 
 - Utilize the `feature-scaffolder` skill logic to generate custom generator schemas.
 - Run standard Nx generator paths for library creation, then apply custom tags:
+
   ```bash
   pnpm nx g @nx/react:library libs/features/my-new-feature --directory=libs/features
   node tools/apply-project-tags.cjs
@@ -213,6 +216,7 @@ Minimize CI build times, maximize build cache efficiency, and automate target de
 
 - Standardize the use of target dependencies in `nx.json` to ensure dependent builds are resolved in correct order.
 - Ensure all developers commit their changes to distinct feature branches so that `nx affected` commands can accurately calculate SHAs using:
+
   ```bash
   pnpm nx affected -t lint type-check test build
   ```

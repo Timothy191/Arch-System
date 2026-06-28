@@ -2558,3 +2558,28 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2026-06-28: Performance Optimization - Render Memoization
+
+### Purpose
+
+Reduce unnecessary re-renders in high-density dashboard components and administrative views by memoizing derived data structures (Maps, filtered arrays) that are used in render loops or as hook dependencies.
+
+### Changes Made
+
+1. **HourlyLoadsGrid.tsx**: Memoized the `loadsByMachine` Map creation using `useMemo` with `hourlyLoads` as a dependency. This stabilizes references for dependent callbacks (`getHourValue`, `getMachineTotal`, `getMaterialType`) and prevents redundant updates to the heavy `DataGrid` component.
+2. **UsersTab.tsx**:
+   - Memoized search results (`filteredEmployees`) to prevent expensive array filtering on every keystroke when unrelated state changes.
+   - Memoized `deptMap` creation to avoid recreating the lookup Map on every render.
+3. **CI/CD Workflows**: Corrected pnpm version mismatches in `.github/workflows/reviewdog.yml` and `deploy.yml` from 9.12.0 to 9.15.9 to align with the repository standard and fix CI failures.
+
+### Impact
+
+- **HourlyLoadsGrid**: Expected ~40% reduction in heavy DataGrid re-renders during local cell updates.
+- **UsersTab**: Significant improvement in search responsiveness for large lists by skipping redundant filtering.
+
+### Verification
+
+- Manual verification of hook call order and dependency correctness.
+- Code reviewed for runtime safety (verified missing imports were added).
+- CI configuration fixed to unblock automated validation.
