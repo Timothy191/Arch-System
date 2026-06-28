@@ -38,3 +38,15 @@
   [0;36m[1m  →[0m Apps portal .env missing. Copying from env/.env.example...
   [0;32m[1m  ✓[0m Environment file [0;2mcopied from template[0m
   [0;36m[1m  →[0m Installing dependencies...
+  [0;32m[1m  ✓[0m Dependencies
+
+  [1m[0;35m━━━  Phase 2: Infrastructure  ━━━[0m
+  [0;33m[1m  –[0m Supabase API [0;2mquick mode[0m
+  [0;33m[1m  –[0m Database [0;2mquick mode[0m
+  [0;33m[1m  –[0m Studio [0;2mquick mode[0m
+
+  [1m[0;35m━━━  Phase 3: Portal  ━━━[0m
+./scripts/dev.sh: line 663: /app/run/.portal.pid: No such file or directory
+
+  [0;33mShutting down...[0m
+./scripts/dev.sh: line 662: /app/run/portal.log: No such file or directory
