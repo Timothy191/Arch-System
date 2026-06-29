@@ -2580,3 +2580,21 @@ Reduce unnecessary re-renders in the `HourlyLoadsGrid` component and its child `
 ### What the Next Agent Should Know
 - Always check for `new Map()` or `new Set()` instantiation directly in the render body of components, especially when those objects are used in the dependency arrays of other hooks.
 - If accidental changes occur in `pnpm-lock.yaml` during development (e.g., due to `pnpm install` in a slightly different environment), use `git restore --staged pnpm-lock.yaml && git checkout pnpm-lock.yaml` to keep the PR clean.
+
+---
+
+## 2025-05-15: Fix GitHub CI PNPM Version Mismatch
+
+### Purpose
+Resolve CI failure caused by a version mismatch between the `pnpm/action-setup` configuration and the `packageManager` field in `package.json`.
+
+### Changes Made
+1. **`.github/workflows/reviewdog.yml`** and **`.github/workflows/deploy.yml`**:
+   - Updated `version` in `pnpm/action-setup` from `9.12.0` to `9.15.9` to match the project's required version.
+2. **`pnpm-lock.yaml`**:
+   - Re-synchronized the lockfile by running `pnpm install` to ensure it is in a clean and consistent state with all workspace packages.
+
+### Verification Results
+- `grep` confirmed all instances of `9.12.0` were replaced with `9.15.9`.
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓
