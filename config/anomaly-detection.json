@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "description": "Anomaly detection configuration for key metrics",
+  "metrics": {
+    "api_latency_ms": {
+      "algorithm": "zscore",
+      "threshold": 3,
+      "window": "1h",
+      "minDataPoints": 10,
+      "seasonality": "24h"
+    },
+    "error_rate": {
+      "algorithm": "threshold",
+      "threshold": 5,
+      "window": "5m",
+      "consecutiveBreaches": 2
+    },
+    "cpu_usage": {
+      "algorithm": "zscore",
+      "threshold": 2.5,
+      "window": "5m",
+      "minDataPoints": 20
+    },
+    "memory_usage": {
+      "algorithm": "zscore",
+      "threshold": 2.5,
+      "window": "5m",
+      "minDataPoints": 20
+    },
+    "db_connections": {
+      "algorithm": "threshold",
+      "threshold": 80,
+      "maxValue": 100,
+      "window": "1m"
+    },
+    "request_count": {
+      "algorithm": "percentile",
+      "lowerThreshold": 10,
+      "upperThreshold": 90,
+      "window": "15m"
+    }
+  },
+  "alerts": {
+    "severityThreshold": "warning",
+    "cooldownMinutes": 15,
+    "maxAlertsPerHour": 10
+  },
+  "learningPeriod": "7d"
+}

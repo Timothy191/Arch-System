@@ -1,0 +1,28 @@
+{
+  "name": "@repo/redis",
+  "description": "Redis client, caching helpers, cache statistics, and TTL registry for department slug resolution and general caching",
+  "version": "1.0.0",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./cache": "./src/cache.ts"
+  },
+  "main": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .nx",
+    "dev": "tsc --watch",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./src/index.ts"
+}

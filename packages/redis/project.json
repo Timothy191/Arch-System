@@ -1,0 +1,4 @@
+{
+  "name": "@repo/redis",
+  "tags": ["scope:package", "scope:package:redis"]
+}

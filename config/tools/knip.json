@@ -1,0 +1,166 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreDependencies": [
+    "secretlint",
+    "@modelcontextprotocol/sdk",
+    "@secretlint/secretlint-rule-preset-recommend",
+    "preflight",
+    "@repo/eslint-config",
+    "@typescript-eslint/parser",
+    "@nx/eslint-plugin",
+    // CI/CD tooling
+    "bundlesize",
+    "wait-on",
+    "serve",
+    // E2E testing
+    "web-vitals",
+    // Commitlint packages (used via config files, not direct imports)
+    "@commitlint/cli",
+    "@commitlint/config-conventional",
+    // pnpm npm: protocol aliases (partial names truncated by knip)
+    "commitlint-config-.",
+    "commitlint-config-",
+    "tslib"
+  ],
+  "ignoreBinaries": [
+    // External tools
+    "python3",
+    "psql",
+    // CI/CD tools
+    "wait-on",
+    "serve"
+  ],
+  "ignore": [
+    "**/jest.config.*",
+    "**/postcss.config.*",
+    "packages/contract/scripts/generate-spec-local.js",
+    "packages/ui/storybook-static/**"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/**/*.{ts,js}", ".eslintrc.{js,cjs}"],
+      "project": ["scripts/**/*.{ts,js}"]
+    },
+    "apps/portal": {
+      "entry": [
+        "app/**/layout.tsx",
+        "app/**/page.tsx",
+        "app/**/route.ts",
+        "server/proxy.ts",
+        "plugins/rust-telemetry-engine/index.tsx",
+        "hooks/useOfflineQueue.ts",
+        "lib/api/rate-limit-middleware.ts",
+        "components/dynamic/LazyHeavyComponents.tsx",
+        ".eslintrc.{js,cjs}"
+      ],
+      "project": [
+        "app/**/*.{ts,tsx}",
+        "components/**/*.{ts,tsx}",
+        "features/**/*.{ts,tsx}",
+        "hooks/**/*.{ts,tsx}",
+        "lib/**/*.{ts,tsx}",
+        "plugins/**/*.{ts,tsx}"
+      ],
+      "ignoreDependencies": [
+        "autoprefixer",
+        "postcss",
+        "tailwindcss",
+        "@ducanh2912/next-pwa",
+        "@opentelemetry/auto-instrumentations-node",
+        "@opentelemetry/sdk-node",
+        "@opentelemetry/semantic-conventions",
+        "@opentelemetry/sdk-trace-node"
+      ],
+      "ignore": [
+        "lib/observability/logger.ts",
+        "lib/api/schemas.ts",
+        "lib/observability/metrics.ts",
+        "components/ui/PrecisionInput.tsx",
+        "features/analytics/components/ReportTemplate.tsx",
+        "hooks/use-form-submit.ts",
+        "lib/errors/utils.ts",
+        "components/feedback/FeedbackWidget.tsx",
+        "lib/feature-flags.ts"
+      ]
+    },
+    "apps/cms": {
+      "entry": [".eslintrc.{js,cjs}"],
+      "project": ["app/**/*.{ts,tsx}"]
+    },
+    "apps/overview": {
+      "entry": [".eslintrc.{js,cjs}"],
+      "project": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"]
+    },
+    "packages/theme": {
+      "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.{ts,tsx,css}"],
+      "ignore": ["src/tokens/colors.ts", "src/tokens/motion.ts"]
+    },
+    "packages/database": {
+      "entry": [".eslintrc.{js,cjs}"],
+      "project": ["migrations/**/*.sql"],
+      "ignore": ["supabase/migrations/**"]
+    },
+    "packages/eslint-config": {
+      "entry": ["*.js"],
+      "project": ["*.js"],
+      "ignoreDependencies": ["eslint-import-resolver-typescript"]
+    },
+    "packages/supabase": {
+      "entry": [
+        "src/index.ts",
+        "src/server.ts",
+        "src/client.ts",
+        "src/middleware.ts",
+        "src/service-role.ts",
+        ".eslintrc.{js,cjs}"
+      ],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/database.types.ts"]
+    },
+    "packages/errors": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/typescript-config": {
+      "entry": ["*.json"],
+      "project": ["*.json"],
+      "ignoreDependencies": ["next"]
+    },
+    "packages/utils": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/ui": {
+      "entry": ["src/**/*.tsx", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.{ts,tsx,css}"],
+      "ignore": [
+        "src/components/edges/FlowEdge.tsx",
+        "src/components/nodes/PluginNode.tsx",
+        "src/components/nodes/TriggerNode.tsx",
+        "src/components/WorkflowBuilder.tsx"
+      ]
+    },
+    "packages/redis": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/rate-limiter": {
+      "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "rules": {
+    "files": "warn",
+    "dependencies": "warn",
+    "devDependencies": "warn",
+    "unlisted": "warn",
+    "binaries": "warn",
+    "exports": "warn",
+    "nsExports": "warn",
+    "types": "warn",
+    "nsTypes": "warn",
+    "duplicates": "warn",
+    "unresolved": "warn"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-06-24T13:48:54.102Z",
+  "capabilities": {
+    "authentication": {
+      "allowedClients": ["scope:app", "scope:package:supabase"],
+      "dbAccess": true,
+      "auditRequired": true,
+      "description": "User authentication via Supabase Auth"
+    },
+    "authorization": {
+      "allowedClients": ["scope:app", "scope:package:supabase"],
+      "dbAccess": true,
+      "auditRequired": true,
+      "description": "Role and department-based access control via employees table"
+    },
+    "database-access": {
+      "allowedClients": ["scope:package:supabase", "scope:package:database"],
+      "dbAccess": true,
+      "auditRequired": false,
+      "description": "Direct database access (must go through supabase or database packages)"
+    },
+    "design-tokens": {
+      "allowedClients": ["scope:app", "scope:package:ui", "scope:package:theme"],
+      "dbAccess": false,
+      "auditRequired": false,
+      "description": "OKLCH design tokens from @repo/theme"
+    },
+    "ui-rendering": {
+      "allowedClients": ["scope:app:portal", "scope:app:cms", "scope:app:overview"],
+      "dbAccess": false,
+      "auditRequired": false,
+      "description": "React components and shadcn primitives"
+    }
+  }
+}

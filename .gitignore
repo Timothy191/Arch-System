@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+storybook-static/
+
+# Nx
+.nx/cache/
+.nx/workspace-data/
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Testing & coverage
+coverage/
+test-results/
+playwright-report/
+blob-report/
+e2e/.auth/
+
+# Logs & debug
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Cursor local state
+.cursor/
+
+# Misc local artifacts
+.assets-checksum
+go*.linux-amd64.tar.gz
+run/
+.vercel

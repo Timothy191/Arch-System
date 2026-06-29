@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "description": "Cost monitoring and alert thresholds for production",
+  "costCategories": {
+    "supabase": {
+      "compute": { "monthlyBudgetUsd": 500, "alertThreshold": 0.8 },
+      "bandwidth": { "monthlyBudgetUsd": 150, "alertThreshold": 0.8 },
+      "storage": { "monthlyBudgetUsd": 100, "alertThreshold": 0.9 }
+    },
+    "redis": {
+      "instance": { "monthlyBudgetUsd": 50, "alertThreshold": 0.85 }
+    },
+    "sentry": {
+      "events": { "monthlyBudgetUsd": 100, "alertThreshold": 0.9 }
+    }
+  },
+  "alerts": {
+    "slackWebhookUrl": "${SLACK_WEBHOOK_URL}",
+    "emailRecipients": ["ops@archsystems.com"],
+    "thresholds": {
+      "warning": 0.75,
+      "critical": 0.9,
+      "cumulativeDailyIncrease": 0.2
+    }
+  },
+  "checkFrequency": "1h"
+}

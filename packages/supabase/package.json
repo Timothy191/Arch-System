@@ -1,0 +1,41 @@
+{
+  "name": "@repo/supabase",
+  "description": "Supabase clients (browser, server, middleware, read-replica, service-role) and Kysely query builder for type-safe database operations",
+  "version": "1.0.0",
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "catalog:",
+    "kysely": ">=0.28.17",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "^8.11.10",
+    "next": "^16.2.6",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts",
+    "./middleware": "./src/middleware.ts",
+    "./read-replica": "./src/read-replica.ts",
+    "./kysely": "./src/kysely.ts",
+    "./service-role": "./src/service-role.ts"
+  },
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .nx",
+    "dev": "tsc --watch",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "supabase:dev": "pnpx supabase start",
+    "supabase:init": "pnpx supabase init",
+    "supabase:link": "pnpx supabase link --project-ref <your-project-ID>",
+    "supabase:pull": "pnpx supabase db pull",
+    "supabase:push": "pnpx supabase db push",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./src/index.ts"
+}

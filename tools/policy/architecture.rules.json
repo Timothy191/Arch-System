@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-06-24T13:48:54.102Z",
+  "checks": [
+    {
+      "projectType": "app",
+      "targets": ["build", "lint", "typecheck", "test"],
+      "blocking": true
+    },
+    {
+      "projectType": "package",
+      "targets": ["build", "lint", "typecheck"],
+      "blocking": true
+    },
+    {
+      "projectType": "tool",
+      "targets": ["lint", "typecheck"],
+      "blocking": false
+    }
+  ]
+}

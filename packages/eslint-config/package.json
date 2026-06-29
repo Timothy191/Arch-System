@@ -1,0 +1,15 @@
+{
+  "name": "@repo/eslint-config",
+  "description": "Shared ESLint configurations for library, Next.js, and React projects",
+  "version": "0.0.0",
+  "devDependencies": {
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  },
+  "files": [
+    "library.js",
+    "next.js",
+    "react-internal.js"
+  ],
+  "private": true
+}

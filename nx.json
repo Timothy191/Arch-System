@@ -1,0 +1,188 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/pnpm-workspace.yaml",
+      "{workspaceRoot}/.npmrc",
+      {
+        "env": "NODE_ENV"
+      },
+      {
+        "env": "VERCEL_ENV"
+      },
+      {
+        "env": "CI"
+      },
+      {
+        "env": "OTEL_EXPORTER_OTLP_ENDPOINT"
+      },
+      {
+        "env": "INNGEST_EVENT_KEY"
+      },
+      {
+        "env": "NOVU_API_KEY"
+      },
+      {
+        "env": "OTEL_SERVICE_NAME"
+      },
+      {
+        "env": "PORTAL_VERSION"
+      },
+      {
+        "env": "RATE_LIMIT_IP_WHITELIST"
+      },
+      {
+        "env": "ENABLE_LOAD_ADAPTIVE_TEST"
+      },
+      {
+        "env": "DISABLE_RATE_LIMIT"
+      }
+    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.test.[jt]s?(x)",
+      "!{projectRoot}/**/*.spec.[jt]s?(x)",
+      "!{projectRoot}/**/__tests__/**/*",
+      "!{projectRoot}/**/*.stories.[jt]s?(x)",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+      "!{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/tsconfig.storybook.json"
+    ]
+  },
+  "targetDefaults": {
+    "codegen": {
+      "inputs": [
+        "{projectRoot}/src/css/variables.css",
+        "{projectRoot}/scripts/generate-tokens.mjs"
+      ],
+      "outputs": ["{projectRoot}/src/tokens/generated.ts"],
+      "cache": true
+    },
+    "lint:tokens": {
+      "inputs": [
+        "{projectRoot}/src/css/variables.css",
+        "{projectRoot}/src/tailwind/preset.ts",
+        "{projectRoot}/scripts/validate-tokens.mjs"
+      ],
+      "cache": true
+    },
+    "lint:css": {
+      "inputs": ["{projectRoot}/src/**/*.css", "{projectRoot}/.stylelintrc.*"],
+      "cache": true
+    },
+    "build": {
+      "dependsOn": ["^build", "^codegen", "sync-assets"],
+      "inputs": ["production", "^production"],
+      "outputs": [
+        "{projectRoot}/.next/**",
+        "!{projectRoot}/.next/cache/**",
+        "{projectRoot}/dist/**"
+      ],
+      "cache": true,
+      "parallel": true
+    },
+    "db:pull": {
+      "outputs": ["{projectRoot}/packages/supabase/migrations/**"],
+      "cache": false
+    },
+    "type-check": {
+      "inputs": ["production", "{projectRoot}/**/tsconfig.json"],
+      "outputs": ["{projectRoot}/**/*.tsbuildinfo"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default", "{projectRoot}/.eslintrc.*", "!{projectRoot}/pnpm-lock.yaml"],
+      "outputs": ["{projectRoot}/node_modules/.cache/.eslintcache"],
+      "cache": true
+    },
+    "dev": {
+      "cache": false
+    },
+    "test": {
+      "inputs": [
+        "default",
+        "{projectRoot}/jest.config.*",
+        "{projectRoot}/vitest.config.*",
+        "{projectRoot}/playwright.config.*"
+      ],
+      "outputs": ["{projectRoot}/coverage/**/*"],
+      "cache": true
+    },
+    "clean": {
+      "cache": false
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-remotecache-s3",
+      "options": {
+        "bucket": "{env.NXCACHE_S3_BUCKET}",
+        "accessKeyId": "{env.NXCACHE_S3_ACCESS_KEY_ID}",
+        "secretAccessKey": "{env.NXCACHE_S3_SECRET_ACCESS_KEY}",
+        "endpoint": "{env.NXCACHE_S3_ENDPOINT}",
+        "region": "{env.NXCACHE_S3_REGION}",
+        "forcePathStyle": true,
+        "read": true,
+        "write": true
+      }
+    }
+  },
+  "defaultBase": "master",
+  "analytics": true,
+  "plugins": [
+    {
+      "plugin": "@nx/storybook/plugin",
+      "options": {
+        "serveStorybookTargetName": "storybook",
+        "buildStorybookTargetName": "build-storybook",
+        "testStorybookTargetName": "test-storybook",
+        "staticStorybookTargetName": "static-storybook",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps"
+      }
+    }
+  ],
+  "defaultBase": "master",
+  "analytics": true,
+  "dependencyConstraints": [
+    {
+      "sourceTag": "scope:app",
+      "onlyDependOnLibsWithTags": ["scope:package", "scope:feature"]
+    },
+    {
+      "sourceTag": "scope:app",
+      "notDependOnLibsWithTags": ["scope:package:db-internal"]
+    },
+    {
+      "sourceTag": "scope:feature",
+      "onlyDependOnLibsWithTags": ["scope:package", "scope:feature"]
+    },
+    {
+      "sourceTag": "scope:feature",
+      "notDependOnLibsWithTags": ["scope:app"]
+    },
+    {
+      "sourceTag": "scope:package:ui",
+      "notDependOnLibsWithTags": [
+        "scope:package:db",
+        "scope:package:db-internal",
+        "scope:package:supabase"
+      ]
+    },
+    {
+      "sourceTag": "scope:package:theme",
+      "notDependOnLibsWithTags": ["scope:package:ui"]
+    },
+    {
+      "sourceTag": "scope:tool",
+      "notDependOnLibsWithTags": ["scope:app", "scope:package:supabase"]
+    },
+    {
+      "sourceTag": "scope:package",
+      "notDependOnLibsWithTags": ["scope:app"]
+    }
+  ]
+}

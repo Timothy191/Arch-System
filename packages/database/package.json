@@ -1,0 +1,23 @@
+{
+  "name": "@repo/database",
+  "description": "SQL migrations source of truth for Supabase database schema",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "supabase": "catalog:"
+  },
+  "exports": {
+    "./migrations/*": "./migrations/*"
+  },
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .nx",
+    "lint": "echo 'No lintable files in @repo/database'",
+    "supabase:dev": "python3 ../../scripts/ensure_reachability.py && pnpx supabase start",
+    "supabase:gen": "pnpx supabase gen types typescript --local > ../supabase/src/database.types.ts",
+    "supabase:push": "pnpx supabase db push",
+    "supabase:reset": "pnpx supabase db reset",
+    "test:migration-rollback": "node tests/migration-rollback-safety.mjs",
+    "test:security:p0-signup-role": "PGPASSWORD=${SUPABASE_DB_PASSWORD:-postgres} psql -h ${SUPABASE_DB_HOST:-localhost} -p ${SUPABASE_DB_PORT:-54322} -U ${SUPABASE_DB_USER:-postgres} -d ${SUPABASE_DB_NAME:-postgres} -v ON_ERROR_STOP=1 -f tests/p0_signup_role_self_elevation.sql"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@repo/database",
+  "tags": [
+    "scope:package",
+    "scope:package:database",
+    "scope:package:db",
+    "scope:package:db-internal"
+  ]
+}

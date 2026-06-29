@@ -1,0 +1,83 @@
+name: CI Quality Gate
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (root)
+        run: pnpm lint:root
+
+      - name: Lint (styles)
+        run: pnpm lint:styles
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint tokens
+        run: pnpm nx run-many -t lint:tokens
+
+      - name: Lint CSS
+        run: pnpm nx run-many -t lint:css
+
+      - name: Policy check
+        run: pnpm policy:check
+
+      - name: RLS audit
+        run: pnpm audit:rls
+
+      - name: Design audit
+        run: pnpm audit:design
+
+      - name: Dependency lint
+        run: pnpm deps:lint
+
+      - name: Dead code check
+        run: pnpm knip
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Markdown lint
+        run: pnpm md:lint
+
+  build:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@9.15.9 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build all projects
+        run: pnpm build

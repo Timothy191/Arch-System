@@ -1,0 +1,143 @@
+groups:
+  - name: control_room_alerts
+    interval: 30s
+    rules:
+      # AGENT-TRACE: SCADA connection alerts
+      - alert: SCADAConnectionDown
+        expr: control_room_scada_connection_status == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: "SCADA system disconnected"
+          description: "FUXA SCADA system has been disconnected for 5 minutes. Machine status updates may be delayed."
+
+      # AGENT-TRACE: Shift closeout latency alerts
+      - alert: ShiftCloseoutSlow
+        expr: histogram_quantile(0.95, rate(control_room_shift_closeout_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Shift closeout operations are slow"
+          description: "95th percentile shift closeout duration is {{ $value }}s (threshold: 30s)"
+
+      - alert: ShiftCloseoutVerySlow
+        expr: histogram_quantile(0.95, rate(control_room_shift_closeout_duration_seconds_bucket[5m])) > 60
+        for: 2m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: "Shift closeout operations are very slow"
+          description: "95th percentile shift closeout duration is {{ $value }}s (threshold: 60s)"
+
+      # AGENT-TRACE: Data integrity alerts
+      - alert: DataIntegrityScoreLow
+        expr: control_room_data_integrity_score < 70
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Data integrity score is low"
+          description: "Data integrity score is {{ $value }}% (threshold: 70%). Review data integrity issues."
+
+      - alert: DataIntegrityScoreCritical
+        expr: control_room_data_integrity_score < 50
+        for: 5m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: "Data integrity score is critical"
+          description: "Data integrity score is {{ $value }}% (threshold: 50%). Immediate review required."
+
+      # AGENT-TRACE: Shift completeness alerts
+      - alert: ShiftCompletenessLow
+        expr: control_room_shift_completeness_rate < 80
+        for: 30m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Shift completeness rate is low"
+          description: "Shift completeness rate is {{ $value }}% (threshold: 80%). Machines may be missing entries."
+
+      # AGENT-TRACE: Orphaned records alerts
+      - alert: OrphanedRecordsDetected
+        expr: control_room_orphaned_records_count > 0
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Orphaned records detected"
+          description: "{{ $value }} orphaned records found in {{ $labels.table_name }}. Review data integrity."
+
+      - alert: HighOrphanedRecordCount
+        expr: sum(control_room_orphaned_records_count) > 50
+        for: 5m
+        labels:
+          severity: critical
+          team: operations
+        annotations:
+          summary: "High number of orphaned records"
+          description: "{{ $value }} orphaned records detected. Immediate data quality review required."
+
+      # AGENT-TRACE: Active alerts alerts
+      - alert: HighAlertCount
+        expr: sum(control_room_active_alerts) > 10
+        for: 15m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "High number of active alerts"
+          description: "{{ $value }} active alerts in Control Room. Review and acknowledge as needed."
+
+      # AGENT-TRACE: API error rate alerts
+      - alert: HighAPIErrorRate
+        expr: rate(control_room_api_requests_total{status_code=~"5.."}[5m]) / rate(control_room_api_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 5%). Check application logs."
+
+      # AGENT-TRACE: Hourly loads update rate alerts
+      - alert: LowHourlyLoadsUpdateRate
+        expr: rate(control_room_hourly_loads_update_total[1h]) < 0.1
+        for: 2h
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "Low hourly loads update rate"
+          description: "Hourly loads are not being updated regularly. Check operator activity."
+
+  - name: control_room_info
+    interval: 5m
+    rules:
+      # AGENT-TRACE: Informational alerts
+      - alert: ShiftCloseoutSuccess
+        expr: increase(control_room_shift_closeout_total{success="true"}[1h]) > 0
+        labels:
+          severity: info
+          team: operations
+        annotations:
+          summary: "Shift closeout successful"
+          description: "{{ $value }} shifts closed successfully in the last hour."
+
+      - alert: NewShiftCompletenessAlerts
+        expr: increase(control_room_shift_completeness_alerts_created_total[1h]) > 0
+        labels:
+          severity: info
+          team: operations
+        annotations:
+          summary: "New shift completeness alerts"
+          description: "{{ $value }} new shift completeness alerts generated in the last hour."

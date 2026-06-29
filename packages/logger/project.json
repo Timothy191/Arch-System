@@ -1,0 +1,4 @@
+{
+  "name": "@repo/logger",
+  "tags": ["scope:package", "scope:package:logger"]
+}

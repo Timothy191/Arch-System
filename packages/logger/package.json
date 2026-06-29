@@ -1,0 +1,30 @@
+{
+  "name": "@repo/logger",
+  "description": "Structured logging with Pino — server, browser, and Next.js helpers",
+  "version": "1.0.0",
+  "dependencies": {
+    "pino": "^9.6.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "next": "^16.2.6",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./browser": "./src/browser.ts",
+    "./next": "./src/next.ts"
+  },
+  "main": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .nx",
+    "dev": "tsc --watch",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./src/index.ts"
+}
