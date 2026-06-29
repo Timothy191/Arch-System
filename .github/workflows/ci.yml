@@ -164,6 +164,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint & Type Check
+      - name: Build dependencies
+        run: pnpm --filter @repo/contract build && pnpm --filter @repo/supabase build
+
         run: pnpm nx affected -t lint type-check
 
   # Token & CSS Lint job - runs in parallel
@@ -565,6 +568,6 @@ jobs:
       - name: Run A11y Audit
         run: |
           npx serve storybook-static -l 6006 &
-          npx wait-on http://localhost:6006 --timeout 60000
+          npx wait-on@latest http://localhost:6006 --timeout 60000
           pnpm test:a11y --url http://localhost:6006
         working-directory: packages/ui

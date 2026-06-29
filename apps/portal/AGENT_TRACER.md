@@ -2558,3 +2558,80 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+---
+
+## 2025-05-15: Optimize HourlyLoadsGrid Component Performance
+
+### Purpose
+Reduce unnecessary re-renders in the `HourlyLoadsGrid` component and its child `DataGrid` by stabilizing derived state references.
+
+### Changes Made
+1. **`apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`**:
+   - Wrapped the derivation of the `loadsByMachine` Map in `useMemo` with `hourlyLoads` as a dependency.
+   - This ensures that the `Map` reference remains stable across renders unless the source data changes.
+   - This stabilization prevents downstream hooks (`useCallback`, `useMemo`) from re-calculating and triggering a cascade of re-renders in the heavy `DataGrid` component.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓ (569 tests)
+- Manual analysis confirmed the unstable reference was causing `source` to be re-calculated on every render (e.g., during window resize events).
+
+### What the Next Agent Should Know
+- Always check for `new Map()` or `new Set()` instantiation directly in the render body of components, especially when those objects are used in the dependency arrays of other hooks.
+- If accidental changes occur in `pnpm-lock.yaml` during development (e.g., due to `pnpm install` in a slightly different environment), use `git restore --staged pnpm-lock.yaml && git checkout pnpm-lock.yaml` to keep the PR clean.
+
+---
+
+## 2025-05-15: Fix GitHub CI PNPM Version Mismatch
+
+### Purpose
+Resolve CI failure caused by a version mismatch between the `pnpm/action-setup` configuration and the `packageManager` field in `package.json`.
+
+### Changes Made
+1. **`.github/workflows/reviewdog.yml`** and **`.github/workflows/deploy.yml`**:
+   - Updated `version` in `pnpm/action-setup` from `9.12.0` to `9.15.9` to match the project's required version.
+2. **`pnpm-lock.yaml`**:
+   - Re-synchronized the lockfile by running `pnpm install` to ensure it is in a clean and consistent state with all workspace packages.
+
+### Verification Results
+- `grep` confirmed all instances of `9.12.0` were replaced with `9.15.9`.
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓
+
+---
+
+## 2025-05-15: Final Fix for CI & Dependencies
+
+### Purpose
+Resolve remaining CI issues including pnpm version mismatch and unrelated dependency changes.
+
+### Changes Made
+1. **`.github/workflows/`**: Ensured all workflows use pnpm `9.15.9`.
+2. **`libs/features/departments/ui/package.json`**: Removed accidental `@repo/rate-limiter` dependency to keep the PR focused and clean.
+3. **`pnpm-lock.yaml`**: Synchronized with the clean `package.json`.
+
+### Verification Results
+- All tests and linting passed locally.
+- Workflow files verified for correct versioning.
+
+---
+
+## 2025-05-15: Infrastructure Stability Fixes
+
+### Purpose
+Address persistent CI failures (Type-check, Accessibility, Security) and restore environment consistency.
+
+### Changes Made
+1. **`.github/workflows/ci.yml`**:
+   - Added explicit build steps for `@repo/contract` and `@repo/supabase` in the type-check job to ensure required artifacts exist.
+   - Updated `wait-on` to `wait-on@latest` to avoid potential command-not-found errors in CI.
+2. **`package.json`**:
+   - Resolved `glob` version inconsistency between direct dependencies and overrides.
+3. **`pnpm-lock.yaml`**:
+   - Synchronized for a clean CI run.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓
+- `tsc --noEmit` for portal: PASS ✓ (with built dependencies)
