@@ -2598,3 +2598,19 @@ Resolve CI failure caused by a version mismatch between the `pnpm/action-setup` 
 - `grep` confirmed all instances of `9.12.0` were replaced with `9.15.9`.
 - `pnpm --filter portal lint`: PASS ✓
 - `pnpm --filter portal test`: PASS ✓
+
+---
+
+## 2025-05-15: Final Fix for CI & Dependencies
+
+### Purpose
+Resolve remaining CI issues including pnpm version mismatch and unrelated dependency changes.
+
+### Changes Made
+1. **`.github/workflows/`**: Ensured all workflows use pnpm `9.15.9`.
+2. **`libs/features/departments/ui/package.json`**: Removed accidental `@repo/rate-limiter` dependency to keep the PR focused and clean.
+3. **`pnpm-lock.yaml`**: Synchronized with the clean `package.json`.
+
+### Verification Results
+- All tests and linting passed locally.
+- Workflow files verified for correct versioning.
