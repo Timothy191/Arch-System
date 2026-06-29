@@ -9,7 +9,7 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  * RouteBackground
  *
  * Renders the full-screen ambient background beneath all portal content.
- * Uses the single globally shared MP4 from `shared/background/white-geometric-waves.3840x2160.mp4`.
+ * Uses the single canonical MP4 from `shared/background/white-geometric-waves.3840x2160.mp4`.
  */
 export function RouteBackground() {
   useFocusMode((s) => s.enabled);
@@ -48,14 +48,11 @@ export function RouteBackground() {
 
   return (
     <>
-      <div className="route-bg-canvas" aria-hidden="true" />
-
       {prefersReducedMotion ? (
-        <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-          <div className="w-full h-full bg-gradient-to-br from-white/80 to-white/60" />
-        </div>
+        <div className="route-bg-fallback" aria-hidden="true" />
       ) : (
         <>
+          <div className="route-bg-fallback route-bg-fallback--reserve" aria-hidden="true" />
           <div className="route-bg-video-container" aria-hidden="true">
             <video
               ref={videoRef}
@@ -69,7 +66,6 @@ export function RouteBackground() {
               className="route-bg-video"
             >
               <source src={GLOBAL_BACKGROUND_VIDEO} type="video/mp4" />
-              Your browser does not support the video tag.
             </video>
           </div>
 

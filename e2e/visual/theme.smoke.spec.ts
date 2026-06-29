@@ -1,16 +1,6 @@
 import { test, expect } from "@playwright/test";
 
 test("light-mode liquid glass background should be pure white with rgba tint", async ({ page }) => {
-  page.on("request", (req) => console.log("Request:", req.url(), req.resourceType()));
-  page.on("requestfailed", (req) =>
-    console.log("Request Failed:", req.url(), req.failure()?.errorText),
-  );
-  page.on("response", (res) => {
-    if (res.url().includes("white-geometric-waves") || res.status() >= 400) {
-      console.log("Response:", res.url(), res.status(), res.statusText());
-    }
-  });
-
   await page.goto("/hub");
 
   // 1. Verify the route background tint has the exact color from glass.css
@@ -26,11 +16,10 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   );
   expect(["#ffffff", "#fff"]).toContain(htmlBackground.trim().toLowerCase());
 
-  // 3. Verify the video element exists and is playing/loaded
+  // 3. Verify the canonical wave video is the active background
   const videoLocator = page.locator("#route-bg-video");
   await expect(videoLocator).toBeAttached();
 
-  // Wait for the video metadata to load (readyState >= 2)
   await page.waitForFunction(
     () => {
       const video = document.querySelector("#route-bg-video") as HTMLVideoElement;
@@ -42,19 +31,14 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   const videoState = await page.evaluate(() => {
     const video = document.querySelector("#route-bg-video") as HTMLVideoElement;
     return {
-      exists: true,
-      paused: video.paused,
-      currentTime: video.currentTime,
-      readyState: video.readyState,
       src: video.currentSrc || video.src,
-      networkState: video.networkState,
     };
   });
 
-  console.log("Video State:", videoState);
   expect(videoState.src).toContain("white-geometric-waves.3840x2160.mp4");
+  await expect(page.locator(".route-bg-canvas")).toHaveCount(0);
 
-  // 4. (Optional) Full‑page screenshot for visual comparison
+  // 4. Full-page screenshot for visual comparison
   await expect(page).toHaveScreenshot("light-glass-background.png", {
     fullPage: false,
   });

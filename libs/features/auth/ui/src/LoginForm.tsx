@@ -66,7 +66,7 @@ export function LoginForm() {
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
             placeholder="Employee ID or email"
             aria-label="Employee ID / Email"
             autoComplete="username"
@@ -98,7 +98,7 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
             placeholder="Enter your password"
             aria-label="Password"
             autoComplete="current-password"
@@ -135,7 +135,7 @@ export function LoginForm() {
         <AnimatedButton
           type="submit"
           disabled={loading}
-          className="w-full h-12 rounded-md liquid-glass-button liquid-glass-button-signin bg-[var(--color-signin-button)] hover:bg-[var(--color-signin-button-hover)] text-white font-medium relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signin-button)]/50 focus-visible:ring-offset-1 transition-colors"
+          className="w-full h-10 rounded-md liquid-glass-button liquid-glass-button-signin bg-[var(--color-signin-button)] hover:bg-[var(--color-signin-button-hover)] text-white font-medium relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signin-button)]/50 focus-visible:ring-offset-1 transition-colors"
           hoverScale={1}
           tapScale={0.97}
         >

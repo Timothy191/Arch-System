@@ -746,6 +746,99 @@
     0 20px 35px rgba(0, 0, 0, 0.12);
 }
 
+/* ── Login Card Float — 3D depth above route background ── */
+.login-card-float-wrapper {
+  perspective: 1200px;
+}
+
+.login-card-float-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: -28px;
+  left: 10%;
+  right: 10%;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(28% 0.02 265 / 14%) 0%,
+    oklch(72% 0.06 82 / 6%) 35%,
+    transparent 72%
+  );
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.login-card-container.layer-signin-card {
+  position: relative;
+  transform: translateY(-8px) translateZ(0);
+  box-shadow: var(--shadow-login-float);
+  background-image:
+    radial-gradient(ellipse 130% 90% at 0% 0%, var(--brand-gold-glow) 0%, transparent 48%),
+    radial-gradient(ellipse 100% 70% at 100% 100%, var(--brand-silver-glow) 0%, transparent 42%),
+    linear-gradient(155deg, var(--liquid-glass-bg) 0%, oklch(100% 0 0deg / 10%) 100%),
+    linear-gradient(
+      148deg,
+      var(--brand-silver-edge) 0%,
+      oklch(100% 0 0deg / 14%) 30%,
+      var(--brand-gold-edge) 50%,
+      oklch(100% 0 0deg / 10%) 70%,
+      var(--brand-silver-edge) 100%
+    );
+}
+
+.login-card-container.layer-signin-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.login-card-container.layer-signin-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    155deg,
+    oklch(100% 0 0deg / 58%) 0%,
+    var(--brand-gold-glow) 12%,
+    oklch(100% 0 0deg / 12%) 22%,
+    transparent 44%
+  );
+}
+
+.login-card-container.layer-signin-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--liquid-glass-radius-card, 16px) - 1px);
+  pointer-events: none;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0deg / 38%),
+    inset 0 1px 0 0 var(--brand-gold-edge),
+    inset 0 -2px 6px oklch(0% 0 0deg / 3%);
+}
+
+.login-card-container.layer-signin-card:hover {
+  transform: translateY(-12px) translateZ(0);
+  box-shadow: var(--shadow-login-float-hover);
+}
+
+.login-card-notice {
+  border: 1px solid var(--brand-silver-edge);
+  background: linear-gradient(
+    135deg,
+    oklch(100% 0 0deg / 28%) 0%,
+    var(--brand-silver-glow) 100%
+  );
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: inset 0 1px 0 oklch(100% 0 0deg / 45%);
+}
+
 .layer-signin-card-webgl {
   isolation: isolate;
   border: 1.5px solid transparent;
@@ -945,6 +1038,11 @@
     transition: none !important;
     animation: none !important;
   }
+  .login-card-container.layer-signin-card,
+  .login-card-container.layer-signin-card:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-login-float) !important;
+  }
   .liquid-grain-overlay {
     animation: none !important;
   }
@@ -990,19 +1088,10 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   ROUTE BACKGROUND — Wave Canvas Layers
-   Static CSS classes for RouteBackground.tsx so zero inline styles are
-   needed. All geometry and token refs live here; animation classes live
-   in animations.css (.animate-wave-canvas-a/b/c).
+   ROUTE BACKGROUND — Canonical wave video layer
+   Video source: shared/background/white-geometric-waves.3840x2160.mp4
+   Synced to apps/portal/public/background/ via sync-assets.
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* Base canvas: ice-blue gradient fill */
-.route-bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
-}
 
 /* Video container — fixed to the viewport; gradient base fills any letterboxing */
 .route-bg-video-container {
@@ -1068,7 +1157,6 @@
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
   background-size: 140px 140px;
   opacity: 0.024; /* extremely subtle but prevents gradient banding and feels sharp */
-  animation: grain-dance 8s steps(10) infinite;
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1093,81 +1181,20 @@ body {
   pointer-events: none;
 }
 
-/* Shared orb geometry */
-.route-bg-orb {
-  position: fixed;
-  z-index: -10;
-  pointer-events: none;
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* Orb A — electric-blue tint, upper-left */
-.route-bg-orb-a {
-  top: -10%;
-  left: -5%;
-  width: 70vw;
-  height: 70vw;
-  background: radial-gradient(
-    ellipse at center,
-    var(--canvas-wave-tint-a, rgba(0, 102, 255, 0.06)) 0%,
-    transparent 70%
-  );
-  filter: blur(60px);
-}
-
-/* Orb B — mint tint, lower-right */
-.route-bg-orb-b {
-  bottom: -15%;
-  right: -10%;
-  width: 65vw;
-  height: 65vw;
-  background: radial-gradient(
-    ellipse at center,
-    var(--canvas-wave-tint-b, rgba(16, 185, 129, 0.04)) 0%,
-    transparent 70%
-  );
-  filter: blur(80px);
-}
-
-/* Orb C — canvas-tone tint, center-right */
-.route-bg-orb-c {
-  top: 20%;
-  right: 5%;
-  width: 55vw;
-  height: 55vw;
-  background: radial-gradient(
-    ellipse at center,
-    var(--canvas-wave-tint-c, rgba(232, 236, 244, 0.8)) 0%,
-    transparent 65%
-  );
-  filter: blur(50px);
-}
-
-/* Shimmer overlay — faint diagonal surface-depth highlight.
-   z-index: -9 so it paints above the video (-10) but below all UI (0+). */
-.route-bg-shimmer {
-  position: fixed;
-  inset: 0;
-  z-index: -9;
-  pointer-events: none;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    transparent 50%,
-    rgba(232, 236, 244, 0.12) 100%
-  );
-}
-
-/* Reduced-motion flat fallback.
-   Sits at z-index: -10 — same layer as the video it replaces.
-   Always rendered but only visible via `motion-reduce:block hidden`
-   utilities on the element itself. */
+/* Reduced-motion / low-perf flat fallback — same layer as the video it replaces */
 .route-bg-fallback {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background: linear-gradient(135deg, #f4f4f7, #e8ecf4);
+  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
+}
+
+.route-bg-fallback--reserve {
+  display: none;
+}
+
+.low-perf-fallback .route-bg-fallback--reserve {
+  display: block !important;
 }
 
 /* ── Glass Typography & Text Hierarchy ── */
@@ -1325,7 +1352,7 @@ body {
   display: none !important;
 }
 
-.low-perf-fallback .route-bg-fallback {
+.low-perf-fallback .route-bg-fallback--reserve {
   display: block !important;
 }
 

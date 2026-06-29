@@ -44,6 +44,7 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./Logo": "./src/components/Logo.tsx",
+    "./AgenticAiLogo": "./src/components/AgenticAiLogo.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",
     "./SecondaryButton": "./src/components/SecondaryButton.tsx",

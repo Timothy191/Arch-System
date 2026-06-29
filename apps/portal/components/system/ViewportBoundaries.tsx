@@ -62,6 +62,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
       <div className="w-full flex justify-center pb-2 pointer-events-none">
         <div
           data-testid="unified-dock"
+          data-chrome-ui="dock"
           className={cn(
             "pointer-events-auto",
             "liquid-glass-light border border-white/40 shadow-window rounded-2xl px-3 py-2",

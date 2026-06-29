@@ -105,6 +105,15 @@
   --color-signin-button: oklch(62% 0.01 265);
   --color-signin-button-hover: oklch(56% 0.012 265);
   --color-signin-button-border: oklch(52% 0.012 265 / 35%);
+
+  /* Login panel — restrained gold & silver brand accents */
+  --brand-gold: oklch(72% 0.09 82);
+  --brand-gold-glow: oklch(72% 0.09 82 / 14%);
+  --brand-gold-edge: oklch(72% 0.09 82 / 32%);
+  --brand-silver: oklch(58% 0.014 265);
+  --brand-silver-muted: oklch(68% 0.012 265);
+  --brand-silver-glow: oklch(88% 0.01 265 / 22%);
+  --brand-silver-edge: oklch(92% 0.008 265 / 50%);
   --color-status-positive: var(--accent-mint);
   --color-status-warning: var(--accent-amber);
   --color-status-danger: var(--accent-red);
@@ -287,7 +296,7 @@
   --z-overlay: 50;
 
   /* ─── Canvas / Background Wave Tokens ──────────────────────────────────
-     Used by RouteBackground for the animated wave canvas fallback.
+     Used by RouteBackground for the canonical wave video layer.
      The gradient moves from soft gray to ice-blue to give depth
      while keeping the surface light enough for glass to read cleanly.
      ─────────────────────────────────────────────────────────────────── */
@@ -321,6 +330,20 @@
   --shadow-window:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
     0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-login-float:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+    inset 1px 0 0 rgba(255, 255, 255, 0.5), inset -1px 0 0 rgba(0, 0, 0, 0.03),
+    var(--refraction-inner-shadow), inset 0 12px 24px rgba(255, 255, 255, 0.42),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03),
+    0 10px 20px rgba(0, 0, 0, 0.04), 0 20px 40px rgba(0, 0, 0, 0.05),
+    0 36px 72px rgba(0, 0, 0, 0.06), 0 52px 104px rgba(0, 0, 0, 0.04);
+  --shadow-login-float-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    inset 1px 0 0 rgba(255, 255, 255, 0.6), inset -1px 0 0 rgba(0, 0, 0, 0.04),
+    var(--refraction-inner-shadow), inset 0 14px 28px rgba(255, 255, 255, 0.5),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.04),
+    0 14px 28px rgba(0, 0, 0, 0.05), 0 28px 56px rgba(0, 0, 0, 0.06),
+    0 48px 96px rgba(0, 0, 0, 0.07), 0 64px 128px rgba(0, 0, 0, 0.05);
 
   /* ═══════════════════════════════════════════════════════════════
        REFRACTION SYSTEM

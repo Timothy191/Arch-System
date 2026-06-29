@@ -1,0 +1,32 @@
+/* Auth chrome auto-hide — bottom dock and feedback pill only (top taskbar stays visible) */
+
+[data-chrome-ui="dock"],
+[data-chrome-ui="feedback"] {
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.chrome-auto-hidden [data-chrome-ui="dock"],
+html.chrome-auto-hidden [data-chrome-ui="feedback"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.chrome-auto-hidden [data-chrome-ui="dock"] {
+  transform: translateY(calc(100% + 1.5rem));
+}
+
+html.chrome-auto-hidden [data-chrome-ui="feedback"] {
+  transform: translateY(calc(100% + 1rem));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.chrome-auto-hidden [data-chrome-ui="dock"],
+  html.chrome-auto-hidden [data-chrome-ui="feedback"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
+  }
+}

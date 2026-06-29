@@ -9,7 +9,6 @@ import { FocusModeProvider } from "@/components/FocusModeProvider";
 import { PerformanceListener } from "@/components/PerformanceListener";
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { PWAInstallButton } from "@/components/PWAInstallButton";
-import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
@@ -168,7 +167,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   rightSlot={
                     <nav role="navigation" aria-label="Global">
                       <div className="flex items-center gap-3">
-                        <FocusModeToggle variant="icon" />
                         <SystemTrayPill />
                         <HeaderWidgets />
                       </div>

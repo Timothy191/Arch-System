@@ -2,6 +2,10 @@
 import { render } from "@testing-library/react";
 import AuthLayout from "./layout";
 
+jest.mock("@/components/system/ChromeAutoHide", () => ({
+  ChromeAutoHide: () => null,
+}));
+
 describe("AuthLayout", () => {
   let originalConsoleError: typeof console.error;
 

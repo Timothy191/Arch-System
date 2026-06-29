@@ -49,6 +49,7 @@ module.exports = {
     "^@repo/ui/MacMenuBar$": "<rootDir>/../../packages/ui/src/components/MacMenuBar.tsx",
     "^@repo/ui/MacTitleBar$": "<rootDir>/../../packages/ui/src/components/MacTitleBar.tsx",
     "^@repo/ui/Logo$": "<rootDir>/../../packages/ui/src/components/Logo.tsx",
+    "^@repo/ui/AgenticAiLogo$": "<rootDir>/../../packages/ui/src/components/AgenticAiLogo.tsx",
     "^@repo/utils$": "<rootDir>/../../packages/utils/src/index.ts",
     "^@repo/utils/(.*)$": "<rootDir>/../../packages/utils/src/$1",
     "^@repo/auth/ui$": "<rootDir>/../../libs/features/auth/ui/src/index.ts",
