@@ -2558,3 +2558,25 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+---
+
+## 2025-05-15: Optimize HourlyLoadsGrid Component Performance
+
+### Purpose
+Reduce unnecessary re-renders in the `HourlyLoadsGrid` component and its child `DataGrid` by stabilizing derived state references.
+
+### Changes Made
+1. **`apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`**:
+   - Wrapped the derivation of the `loadsByMachine` Map in `useMemo` with `hourlyLoads` as a dependency.
+   - This ensures that the `Map` reference remains stable across renders unless the source data changes.
+   - This stabilization prevents downstream hooks (`useCallback`, `useMemo`) from re-calculating and triggering a cascade of re-renders in the heavy `DataGrid` component.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓ (569 tests)
+- Manual analysis confirmed the unstable reference was causing `source` to be re-calculated on every render (e.g., during window resize events).
+
+### What the Next Agent Should Know
+- Always check for `new Map()` or `new Set()` instantiation directly in the render body of components, especially when those objects are used in the dependency arrays of other hooks.
+- If accidental changes occur in `pnpm-lock.yaml` during development (e.g., due to `pnpm install` in a slightly different environment), use `git restore --staged pnpm-lock.yaml && git checkout pnpm-lock.yaml` to keep the PR clean.
