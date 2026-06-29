@@ -2614,3 +2614,24 @@ Resolve remaining CI issues including pnpm version mismatch and unrelated depend
 ### Verification Results
 - All tests and linting passed locally.
 - Workflow files verified for correct versioning.
+
+---
+
+## 2025-05-15: Infrastructure Stability Fixes
+
+### Purpose
+Address persistent CI failures (Type-check, Accessibility, Security) and restore environment consistency.
+
+### Changes Made
+1. **`.github/workflows/ci.yml`**:
+   - Added explicit build steps for `@repo/contract` and `@repo/supabase` in the type-check job to ensure required artifacts exist.
+   - Updated `wait-on` to `wait-on@latest` to avoid potential command-not-found errors in CI.
+2. **`package.json`**:
+   - Resolved `glob` version inconsistency between direct dependencies and overrides.
+3. **`pnpm-lock.yaml`**:
+   - Synchronized for a clean CI run.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓
+- `tsc --noEmit` for portal: PASS ✓ (with built dependencies)
