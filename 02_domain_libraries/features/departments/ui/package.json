@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@repo/contract": "workspace:*",
+    "@repo/departments/data-access": "workspace:*",
     "@repo/errors": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/rate-limiter": "workspace:*",

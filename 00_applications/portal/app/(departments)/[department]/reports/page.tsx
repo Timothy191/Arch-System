@@ -49,11 +49,14 @@ export default async function ReportsPage({
         .gte("load_date", fromDateStr)
         .lte("load_date", toDateStr),
       supabase
-        .from("operational_delays")
-        .select("delay_date, shift_type, delay_minutes")
-        .eq("department_id", deptId)
-        .gte("delay_date", fromDateStr)
-        .lte("delay_date", toDateStr),
+        .from("delay_entries")
+        .select(
+          "duration_hours, is_manual_override, manual_duration_hours, machine_operation:machine_operations!inner(shift_date, shift_type, department_id)",
+        )
+        .eq("machine_operation.department_id", deptId)
+        .gte("machine_operation.shift_date", fromDateStr)
+        .lte("machine_operation.shift_date", toDateStr)
+        .is("deleted_at", null),
       supabase
         .from("excavator_dumper_assignments")
         .select(
@@ -73,7 +76,19 @@ export default async function ReportsPage({
     // Aggregate totals for KPIs
     const totalHours = operations?.reduce((sum, o) => sum + (o.hours_worked || 0), 0) || 0;
     const totalLoads = loads?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
-    const totalDelayMin = delays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
+    const delayMinutes = (entry: {
+      duration_hours: number | null;
+      is_manual_override: boolean;
+      manual_duration_hours: number | null;
+    }) => {
+      const hours =
+        entry.is_manual_override && entry.manual_duration_hours != null
+          ? entry.manual_duration_hours
+          : entry.duration_hours || 0;
+      return Math.round(hours * 60);
+    };
+
+    const totalDelayMin = delays?.reduce((sum, d) => sum + delayMinutes(d), 0) || 0;
     const totalBcm = excavatorAssignments?.reduce((sum, a) => sum + (a.total_bcm || 0), 0) || 0;
 
     // Build per-(site, date, shift) row map
@@ -115,7 +130,11 @@ export default async function ReportsPage({
       getOrCreate("", l.load_date, l.shift_type).loads += l.total_loads || 0;
     });
     delays?.forEach((d) => {
-      getOrCreate("", d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;
+      const op = Array.isArray(d.machine_operation)
+        ? d.machine_operation[0]
+        : d.machine_operation;
+      if (!op) return;
+      getOrCreate("", op.shift_date, op.shift_type).delayMin += delayMinutes(d);
     });
     excavatorAssignments?.forEach((a) => {
       const act = Array.isArray(a.excavator_activity)
@@ -211,29 +230,29 @@ export default async function ReportsPage({
       currentShift,
     );
 
-    if (!completeness.complete) {
-      const missing = completeness.statuses.filter((s) => !s.exempt && !s.hasEntry);
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
-          </div>
+    const missingShiftEntries = completeness.complete
+      ? []
+      : completeness.statuses.filter((s) => !s.exempt && !s.hasEntry);
+
+    return (
+      <div className="space-y-6">
+        {missingShiftEntries.length > 0 && (
           <GlassCard className="border-accent-red/30 space-y-4">
             <div className="flex items-start gap-3">
               <span className="w-2.5 h-2.5 rounded-full bg-accent-red mt-1 shrink-0" />
               <div>
                 <p className="text-[var(--text-heading)] font-medium">
-                  Shift report cannot be generated
+                  Current {currentShift} shift is incomplete
                 </p>
                 <p className="text-[var(--text-muted)] text-sm mt-0.5">
-                  {missing.length} machine
-                  {missing.length !== 1 ? "s are" : " is"} missing entries for the current{" "}
-                  {currentShift} shift. Complete all entries first.
+                  {missingShiftEntries.length} machine
+                  {missingShiftEntries.length !== 1 ? "s are" : " is"} missing entries for today.
+                  Historical exports below are still available.
                 </p>
               </div>
             </div>
             <div className="divide-y divide-[var(--border-default)] rounded-lg overflow-hidden border border-[var(--border-default)]">
-              {missing.map((s) => (
+              {missingShiftEntries.map((s) => (
                 <div
                   key={s.machineId}
                   className="flex items-center justify-between px-4 py-3 bg-[var(--bg-secondary)]"
@@ -260,13 +279,8 @@ export default async function ReportsPage({
               View full coverage checklist →
             </Link>
           </GlassCard>
-        </div>
-      );
-    }
-    // ─────────────────────────────────────────────────────────────────────────
+        )}
 
-    return (
-      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-[var(--text-heading)]">Reports</h2>
           <div className="flex items-center gap-2">

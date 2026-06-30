@@ -7,6 +7,7 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { LOGIN_SELECTORS } from "../helpers/auth";
 
 test.describe("login page visual regression", () => {
   test.beforeEach(async ({ page }) => {
@@ -43,7 +44,8 @@ test.describe("login page visual regression", () => {
   });
 
   test("login page with filled email field", async ({ page }) => {
-    await page.locator("input[type='email'], input#email").first().fill("operator@arch.os");
+    await page.locator(LOGIN_SELECTORS.email).fill("operator@arch.os");
+    await page.locator(LOGIN_SELECTORS.employeeId).fill("OP-001");
 
     await expect(page.getByTestId("login-form")).toHaveScreenshot("login-form-filled.png", {
       threshold: 0.02,

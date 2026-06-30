@@ -75,7 +75,7 @@ export default async function HourlyLoadsPage({
           <span className="w-3 h-3 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"></span>
           <span>No loads recorded</span>
         </div>
-        <p className="ml-auto">Tip: Click any cell to edit load count. Auto-saves on change.</p>
+        <p className="ml-auto">Tip: Use the ▲/▼ buttons on each hour cell to adjust load counts. Auto-saves on change.</p>
       </div>
     </div>
   );

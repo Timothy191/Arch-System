@@ -63,6 +63,7 @@ export function ShiftCoverageClient({
           supabase
             .from("machines")
             .select("id, name, machine_type")
+            .eq("department_id", departmentId)
             .eq("active", true)
             .order("name"),
           supabase

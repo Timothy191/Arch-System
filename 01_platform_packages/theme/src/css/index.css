@@ -1,6 +1,7 @@
 /* AGENT-TRACE: Layer assignments align with 01_platform_packages/ui/globals.css cascade order:
    reset → base → theme → components → utilities */
 @import "./reset.css" layer(reset);
+@import "./fonts.css" layer(theme);
 @import "./variables.css" layer(theme);
 @import "./variables-generated.css" layer(theme);
 @import "./glass.css" layer(theme);

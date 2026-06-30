@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Feature Flag Client
  * Usage: const { enabled, variant } = await getFeatureFlag('new-dashboard', userId)

@@ -66,7 +66,7 @@ describe("actions", () => {
       await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow("Unauthorized");
     });
 
-    it("throws error if user is not admin or manager", async () => {
+    it("throws error if user is not admin, manager, or supervisor", async () => {
       const mockSingle = jest.fn().mockResolvedValue({
         data: { role: "operator", department_id: "dept-1" },
         error: null,

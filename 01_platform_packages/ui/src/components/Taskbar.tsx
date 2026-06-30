@@ -70,14 +70,10 @@ const NAV_MENU_ICONS: Record<
 };
 
 const NAV_BTN_ICON =
-  "w-8 h-8 flex items-center justify-center rounded-[4px] text-[var(--text-heading)] opacity-90 hover:bg-black/[0.07] hover:opacity-100 data-[state=open]:bg-black/[0.07] transition-colors select-none outline-none cursor-default";
+  "w-8 h-8 flex items-center justify-center rounded-[8px] text-[var(--text-heading)] hover:bg-[var(--brand-silver-glow)] data-[state=open]:bg-[var(--brand-silver-glow)] transition-colors select-none outline-none cursor-default";
 
 function TaskbarNavDivider({ className }: { className?: string }) {
-  return (
-    <span className={cn("taskbar-nav-divider", className)} aria-hidden="true">
-      |
-    </span>
-  );
+  return <span className={cn("taskbar-nav-divider", className)} aria-hidden="true" />;
 }
 
 function NavMenuTrigger({ item }: { item: string }) {
@@ -422,7 +418,7 @@ export function Taskbar({
         "left-[max(0.75rem,env(safe-area-inset-left,0px))] right-[max(0.75rem,env(safe-area-inset-right,0px))]",
         "flex items-center gap-2",
         "pl-2 pr-2 sm:pl-3 sm:pr-4",
-        "layer-taskbar-brushed rounded-none shadow-window relative overflow-hidden",
+        "layer-taskbar-brushed rounded-[var(--radius-xl)] relative overflow-hidden",
         className,
       )}
     >
@@ -436,9 +432,9 @@ export function Taskbar({
               <button
                 aria-label="Application launcher"
                 aria-haspopup="true"
-                className="brand-chrome-orb relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)] transition-colors duration-150 ease-in-out cursor-default"
+                className="brand-chrome-orb relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-heading)] hover:bg-[var(--brand-silver-glow)] data-[state=open]:bg-[var(--brand-silver-glow)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]/50 transition-colors duration-150 ease-in-out cursor-default"
               >
-                <Logo className="h-6 w-6 text-[var(--brand-silver)]" />
+                <Logo className="h-6 w-6" />
               </button>
             </DropdownMenuTrigger>
           </div>
@@ -603,7 +599,7 @@ export function Taskbar({
       </nav>
 
       {/* Right: system tray slot */}
-      <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
+      <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-heading)]">
         {rightSlot}
       </div>
     </motion.div>

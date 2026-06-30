@@ -327,9 +327,14 @@ export function DelayEntriesForm({
   // AGENT-TRACE: Commit all draft delays for this operation
   // This transitions delays from draft to committed status, locking them for editing
   const handleCommitClick = useCallback(() => {
-    const draftDelays = delayEntries.filter((d) => d.status === "draft");
+    const draftDelays = delayEntries.filter((d) => d.status === "draft" && d.id);
+    const unsavedDrafts = delayEntries.filter((d) => d.status === "draft" && !d.id);
     if (draftDelays.length === 0) {
-      toast.error("No draft delays to commit");
+      toast.error(
+        unsavedDrafts.length > 0
+          ? "Save draft delays before committing"
+          : "No draft delays to commit",
+      );
       return;
     }
     setConfirmAction("commit");
@@ -368,8 +373,8 @@ export function DelayEntriesForm({
         return;
       }
 
-      // Commit all draft delays for this operation
-      const draftDelays = delayEntries.filter((d) => d.status === "draft");
+      // Commit all saved draft delays for this operation
+      const draftDelays = delayEntries.filter((d) => d.status === "draft" && d.id);
 
       for (const entry of draftDelays) {
         const { error } = await supabase

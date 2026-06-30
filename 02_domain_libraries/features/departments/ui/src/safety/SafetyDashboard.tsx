@@ -1,60 +1,21 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { PageHeader } from "@repo/ui/PageHeader";
 import { SafetyCharts } from "./SafetyChartsWrapper";
+import type { SafetyDashboardData } from "@repo/departments/data-access";
 
 // Safety-specific dashboard stats
-export async function SafetyDashboard({ deptId }: { deptId: string }) {
-  const supabase = await createServerSupabaseClient();
-  const today = new Date().toISOString().split("T")[0];
-
-  // Today's safety incidents
-  const { data: todayIncidents } = await supabase
-    .from("safety_incidents")
-    .select("id, incident_type, severity_id, status, injured_parties")
-    .eq("department_id", deptId)
-    .eq("incident_date", today);
-
-  const todayCount = todayIncidents?.length ?? 0;
-  const openCount = todayIncidents?.filter((i) => i.status === "open").length ?? 0;
-  const injuredToday = todayIncidents?.reduce((sum, i) => sum + (i.injured_parties || 0), 0) ?? 0;
-
-  // Last 30 days stats
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const { data: monthlyIncidents } = await supabase
-    .from("safety_incidents")
-    .select("incident_date, incident_type, severity_id")
-    .eq("department_id", deptId)
-    .gte("incident_date", thirtyDaysAgo.toISOString().split("T")[0]);
-
-  const monthlyCount = monthlyIncidents?.length ?? 0;
-  const monthlyLostTime =
-    monthlyIncidents?.filter((i) => i.incident_type === "lost-time").length ?? 0;
-
-  // LTI-free days (consecutive days without lost time incident)
-  // This is a simplified version - get the last lost-time incident date
-  const { data: lastLTI } = await supabase
-    .from("safety_incidents")
-    .select("incident_date")
-    .eq("department_id", deptId)
-    .eq("incident_type", "lost-time")
-    .order("incident_date", { ascending: false })
-    .limit(1)
-    .single();
-
-  const lastLTIDate = lastLTI ? new Date(lastLTI.incident_date) : new Date("2000-01-01");
-  const ltiFreeDays = Math.floor((Date.now() - lastLTIDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  // Incident-free days
-  const { data: allIncidentDates } = await supabase
-    .from("safety_incidents")
-    .select("incident_date")
-    .eq("department_id", deptId)
-    .gte("incident_date", thirtyDaysAgo.toISOString().split("T")[0]);
-
-  const uniqueDates = new Set(allIncidentDates?.map((d) => d.incident_date) ?? []);
-  const incidentFreeDays = 30 - uniqueDates.size;
+export function SafetyDashboard({ data }: { data: SafetyDashboardData }) {
+  const {
+    todayIncidents,
+    todayCount,
+    openCount,
+    injuredToday,
+    monthlyIncidents,
+    monthlyCount,
+    monthlyLostTime,
+    ltiFreeDays,
+    incidentFreeDays,
+  } = data;
 
   return (
     <div className="space-y-6">

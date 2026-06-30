@@ -23,8 +23,24 @@ const archTheme: Config = {
       fontFamily: {
         sans: [
           "var(--font-sans)",
-          "var(--font-inter)",
-          "var(--font-outfit)",
+          "Montserrat",
+          "Gotham",
+          "Proxima Nova",
+          "system-ui",
+          "sans-serif",
+        ],
+        display: [
+          "var(--font-display)",
+          "Anurati",
+          "Montserrat",
+          "system-ui",
+          "sans-serif",
+        ],
+        meta: [
+          "var(--font-meta)",
+          "Montserrat",
+          "Gotham",
+          "Proxima Nova",
           "system-ui",
           "sans-serif",
         ],

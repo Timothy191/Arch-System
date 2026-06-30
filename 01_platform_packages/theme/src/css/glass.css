@@ -1039,16 +1039,15 @@
 }
 
 .login-card-panel--main .login-card-footer-ticker-viewport {
-  padding-top: 0.5rem;
-  padding-bottom: 0;
-  padding-left: 0;
-  padding-right: 0;
+  padding: 0;
 }
 
 .login-card-panel--main .login-card-footer-ticker-band {
   --login-ticker-font-size: 0.6875rem;
   --login-ticker-icon-size: 0.875rem;
   --login-ticker-line-height: 1.2;
+  --login-ticker-band-pad: 0.625rem;
+  --login-ticker-chin: 0.375rem;
   position: relative;
   margin-top: 0;
   border: none;
@@ -1057,6 +1056,9 @@
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   font-size: var(--login-ticker-font-size);
   line-height: var(--login-ticker-line-height);
+  padding-top: 0;
+  padding-bottom: var(--login-ticker-chin);
+  box-sizing: border-box;
 }
 
 /* Soft seam — gold thread highlight above ticker */
@@ -1098,7 +1100,8 @@
 .login-card-panel--main .login-card-footer-ticker-band .login-card-footer-ticker-track {
   position: relative;
   z-index: 1;
-  padding-bottom: 0.625rem;
+  padding-top: var(--login-ticker-band-pad);
+  padding-bottom: var(--login-ticker-band-pad);
 }
 
 .login-card-footer-divider,
@@ -1353,59 +1356,92 @@
 .login-card-notice {
   position: relative;
   isolation: isolate;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  overflow: visible;
   margin: 0;
-  padding: 0.75rem 0.875rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--brand-gold-border);
-  background-color: oklch(99.1% 0.006 255 / 93%);
+  padding: 0.3125rem 0.75rem;
+  min-height: 1.75rem;
+  max-width: calc(100% - 0.5rem);
+  border-radius: 2px;
+  border: 1px solid var(--brand-gold-border-strong, var(--brand-gold-border));
+  background-color: oklch(97.8% 0.006 255 / 96%);
   background-image:
     repeating-linear-gradient(
       90deg,
-      oklch(100% 0 0deg / 18%) 0,
-      oklch(90% 0.01 255 / 7%) 0.5px,
+      oklch(100% 0 0deg / 22%) 0,
+      oklch(88% 0.01 255 / 9%) 0.5px,
       transparent 1px,
-      transparent 2.5px
+      transparent 2px
     ),
     linear-gradient(
       180deg,
-      oklch(99.6% 0.004 265 / 97%) 0%,
-      oklch(97.2% 0.008 255 / 94%) 100%
+      oklch(99.2% 0.004 265 / 98%) 0%,
+      oklch(95.5% 0.01 255 / 95%) 52%,
+      oklch(92.8% 0.012 255 / 94%) 100%
     );
-  -webkit-backdrop-filter: blur(8px) saturate(118%);
-  backdrop-filter: blur(8px) saturate(118%);
   box-shadow:
-    inset 0 2px 4px oklch(52% 0.02 255 / 11%),
-    inset 0 1px 0 oklch(100% 0 0deg / 88%),
-    inset 0 -1px 0 oklch(72% 0.012 255 / 15%),
-    0 2px 6px oklch(0% 0 0deg / 8%);
-  color: var(--text-secondary);
+    inset 0 1px 0 oklch(100% 0 0deg / 90%),
+    inset 0 -1px 0 oklch(68% 0.014 255 / 22%),
+    inset 0 0 0 0.5px oklch(100% 0 0deg / 45%),
+    0 1px 3px oklch(0% 0 0deg / 10%);
+  color: oklch(28% 0.02 265);
   transform-style: preserve-3d;
-  will-change: transform, box-shadow;
-  animation: login-card-notice-bump var(--login-card-notice-bump-duration) ease-in-out infinite;
+}
+
+.login-card-notice-rivet {
+  --login-notice-rivet-size: 0.4375rem;
+  position: absolute;
+  top: 50%;
+  width: var(--login-notice-rivet-size);
+  height: var(--login-notice-rivet-size);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 36% 30%,
+      oklch(95% 0.006 265) 0%,
+      oklch(80% 0.012 255) 38%,
+      oklch(56% 0.018 255) 100%
+    );
+  box-shadow:
+    inset 0 1px 1px oklch(100% 0 0deg / 72%),
+    inset 0 -1.5px 2px oklch(32% 0.02 255 / 48%),
+    0 0 0 0.5px oklch(46% 0.02 255 / 62%),
+    0 1px 2px oklch(0% 0 0deg / 22%);
+  transform: translateY(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.login-card-notice-rivet--start {
+  left: calc(var(--login-notice-rivet-size) * -0.52);
+}
+
+.login-card-notice-rivet--end {
+  right: calc(var(--login-notice-rivet-size) * -0.52);
 }
 
 .login-card-notice-icon {
-  width: 0.875rem;
-  height: 0.875rem;
-  margin-top: 0.125rem;
+  width: 0.6875rem;
+  height: 0.6875rem;
   flex-shrink: 0;
   color: var(--brand-gold-edge);
 }
 
 .login-card-notice-text {
   margin: 0;
-  font-size: 11px;
-  line-height: 1.45;
+  font-family: var(--font-meta);
+  font-size: 10px;
+  line-height: 1.35;
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .login-card-notice::before {
   --brand-gold-border-shine-inset: 1px;
   --brand-gold-border-reflect-delay: 9s;
+  border-radius: inherit;
   z-index: 2;
   background-image:
     linear-gradient(
@@ -1432,11 +1468,7 @@
     infinite;
 }
 
-.login-card-notice:hover {
-  animation-play-state: paused;
-}
-
-.login-card-notice > * {
+.login-card-notice > :not(.login-card-notice-rivet) {
   position: relative;
   z-index: 1;
 }
@@ -1813,6 +1845,7 @@
 }
 
 .login-brand-wordmark-tail {
+  font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -1824,11 +1857,12 @@
 }
 
 .login-brand-wordmark-tagline {
+  font-family: var(--font-meta);
   font-size: 0.6875rem;
-  font-weight: 500;
-  line-height: 1.35;
+  font-weight: 600;
+  line-height: 1.4;
   letter-spacing: 0.01em;
-  color: var(--text-secondary);
+  color: oklch(0% 0 0);
   user-select: none;
 }
 
@@ -1982,14 +2016,16 @@
 .login-card-footer-notice-block {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.375rem;
   overflow: visible;
-  padding-bottom: 0.125rem;
+  padding: 0.25rem 1.5rem 0.125rem;
 }
 
 .login-card-footer .login-card-notice,
 .login-card-panel--main .login-card-notice {
-  margin: 0;
+  margin: 0 auto;
 }
 
 .login-card-footer .login-card-secure,
@@ -2029,7 +2065,7 @@
   display: flex;
   align-items: center;
   width: max-content;
-  min-height: calc(var(--login-ticker-icon-size, 0.875rem) + 0.625rem);
+  min-height: 0;
   animation: login-card-footer-ticker 52s linear infinite;
 }
 
@@ -2269,19 +2305,24 @@
 }
 
 .layer-taskbar-brushed[data-component="taskbar"] {
+  --taskbar-chrome-stroke: 1.5px;
   width: auto;
 }
 
 .taskbar-nav-divider {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0.375rem;
-  margin-inline: 0.125rem;
-  color: oklch(58% 0.014 255 / 52%);
-  font-size: 0.6875rem;
-  font-weight: 300;
-  line-height: 1;
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--taskbar-chrome-stroke, 1.5px);
+  min-width: var(--taskbar-chrome-stroke, 1.5px);
+  height: 12px;
+  margin-inline: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--brand-gold-border-strong);
+  font-size: 0;
+  line-height: 0;
   user-select: none;
   pointer-events: none;
 }
@@ -2730,12 +2771,20 @@
 }
 
 .system-tray-pipe {
-  color: var(--brand-silver-muted);
-  font-size: 10px;
-  line-height: 1;
-  opacity: 0.75;
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--taskbar-chrome-stroke, 1.5px);
+  min-width: var(--taskbar-chrome-stroke, 1.5px);
+  height: 12px;
+  margin-inline: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--brand-gold-border-strong);
+  font-size: 0;
+  line-height: 0;
   user-select: none;
-  padding-inline: 1px;
 }
 
 .brand-chrome-orb {

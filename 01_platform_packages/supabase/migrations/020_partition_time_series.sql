@@ -14,7 +14,7 @@
 ALTER TABLE hourly_loads RENAME TO hourly_loads_legacy;
 
 -- 1b. Remove RLS from legacy (policies transferred below)
-ALTER TABLE hourly_loads_legacy DISABLE ROW LEVEL SECURITY;
+-- RLS left enabled on legacy table as migration runs as superuser
 
 -- 1c. Create new partitioned table
 --     NOTE: GENERATED ALWAYS AS columns are inherited by partitions.
@@ -144,7 +144,7 @@ CREATE TRIGGER update_hourly_loads_updated_at
 ALTER TABLE daily_logs RENAME TO daily_logs_legacy;
 
 -- 2b. Disable RLS on legacy
-ALTER TABLE daily_logs_legacy DISABLE ROW LEVEL SECURITY;
+-- RLS left enabled on legacy table as migration runs as superuser
 
 -- 2c. Create new partitioned table
 --     Note: machine_hours and fuel_logs reference daily_logs(id) via FK.

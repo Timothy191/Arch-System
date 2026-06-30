@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BookInForm } from "./BookInForm";
-import type { Breakdown, Machine } from "./types";
+import type { Breakdown, Machine } from "@repo/departments/data-access";
 
 jest.mock("./actions", () => ({
   createBreakdown: jest.fn(),

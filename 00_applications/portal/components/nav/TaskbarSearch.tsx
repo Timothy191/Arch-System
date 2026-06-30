@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Building2, UserRound, Clock3, Loader2 } from "lucide-react";
+import { Building2, UserRound, Clock3, Loader2 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { PerplexityMark } from "@/components/nav/PerplexityMark";
 import type { ArchSearchResponse, ArchSearchResult } from "~/lib/search/types";
 
 const CATEGORY_META = {
@@ -145,7 +146,7 @@ export function TaskbarSearch() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full min-w-0 max-w-[11.5rem] sm:max-w-[13rem] md:max-w-[15rem] lg:max-w-[16.5rem]"
+      className="relative w-full min-w-[16rem] max-w-[17.5rem] sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[22.5rem]"
     >
       <form
         className="brand-taskbar-search-wrap w-full"
@@ -155,7 +156,7 @@ export function TaskbarSearch() {
           if (item) navigateTo(item);
         }}
       >
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-[var(--brand-silver-muted)] pointer-events-none z-10" />
+        <PerplexityMark className="brand-taskbar-search-perplexity absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-heading)] opacity-80 pointer-events-none z-10" />
         <input
           ref={inputRef}
           type="search"
@@ -165,18 +166,18 @@ export function TaskbarSearch() {
             if (query.trim().length >= 2) setOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Search shifts, fleet, staff…"
+          placeholder="Search shifts, fleet, staff"
           aria-label="Search Arch"
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
           role="combobox"
           autoComplete="off"
-          className="w-full h-7 pl-7 pr-7 rounded-full brand-taskbar-search text-[11px] leading-none text-[var(--text-heading)] placeholder:text-[var(--brand-silver-muted)]"
+          className="w-full h-7 pl-9 pr-7 rounded-lg brand-taskbar-search text-[11px] leading-none font-medium text-[var(--text-heading)] placeholder:text-[var(--text-heading)] placeholder:opacity-50"
         />
         {loading && (
           <Loader2
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-2.5 h-2.5 animate-spin text-[var(--brand-silver-muted)]"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-2.5 h-2.5 animate-spin text-[var(--text-muted)]"
             aria-hidden="true"
           />
         )}
@@ -188,7 +189,7 @@ export function TaskbarSearch() {
           role="listbox"
           className={cn(
             "absolute left-0 right-0 top-[calc(100%+6px)] z-[130]",
-            "rounded-xl border border-[var(--brand-gold-border)] bg-white/97 backdrop-blur-xl shadow-window",
+            "rounded-xl border border-[var(--border-emphasis)] bg-white/95 backdrop-blur-xl shadow-window",
             "max-h-72 overflow-y-auto p-1.5",
           )}
         >
@@ -226,7 +227,7 @@ export function TaskbarSearch() {
                       isSelected ? "bg-black/[0.05]" : "hover:bg-black/[0.04]",
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[var(--brand-gold)]" />
+                    <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[var(--accent-blue)]" />
                     <span className="min-w-0">
                       <span className="block text-[12px] font-medium text-[var(--text-heading)] truncate">
                         {item.title}

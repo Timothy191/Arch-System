@@ -52,6 +52,10 @@ Order matters: lint → type-check → test → build. `pnpm quality` chains the
 - `00_applications/*` and `01_platform_packages/*` are workspace roots; feature libs live under `02_domain_libraries/features/*/*`.
 - Shared dependencies use `catalog:` or `catalog:react19` indirection (see `pnpm-workspace.yaml`).
 
+## Architecture & Boundaries
+
+- **Frontend Boundaries**: The frontend UI layer (`apps/portal/components`, `libs/features/*/ui`, `"use client"` modules) MUST NEVER import from `scripts/`, `infra/`, `@repo/redis`, or `@repo/supabase/server` directly. Backend utilities and data access should be encapsulated in `data-access` libraries or API routes.
+
 ## Nx specifics
 
 - Build depends on `^build` + `^codegen` + `sync-assets`. The `sync-assets` target copies `04_shared_static_assets/` into `00_applications/portal/public/`.

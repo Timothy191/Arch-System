@@ -46,7 +46,7 @@ export async function generateMonthlyReport(reportData: any, departmentId?: stri
     .eq("auth_id", user.id)
     .single();
 
-  if (employee?.role !== "admin" && employee?.role !== "manager") {
+  if (employee?.role !== "admin" && employee?.role !== "manager" && employee?.role !== "supervisor") {
     throw new Error("Unauthorized");
   }
 

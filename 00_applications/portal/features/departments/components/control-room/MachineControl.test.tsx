@@ -2,6 +2,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MachineControl } from "./MachineControl";
 
+jest.mock("sonner", () => ({
+  toast: { info: jest.fn(), error: jest.fn(), success: jest.fn() },
+}));
+
 // Mock Lucide icons
 jest.mock("lucide-react", () => ({
   Activity: () => <div data-testid="activity-icon" />,
@@ -35,6 +39,7 @@ describe("MachineControl", () => {
     render(<MachineControl />);
 
     expect(screen.getByText("Operational Parameters")).toBeInTheDocument();
+    expect(screen.getByText("Simulation")).toBeInTheDocument();
 
     const rpmInput = screen.getByLabelText("Target Rotation Speed") as HTMLInputElement;
     const powerInput = screen.getByLabelText("Power Allocation") as HTMLInputElement;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, LogIn, LogOut, Search, Zap } from "lucide-react";
-import type { Breakdown, BreakdownMetrics, Machine } from "./types";
+import type { Breakdown, BreakdownMetrics, Machine } from "@repo/departments/data-access";
 import { BreakdownStats } from "./BreakdownStats";
 import { BookInForm } from "./BookInForm";
 import { BookOutForm } from "./BookOutForm";

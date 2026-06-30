@@ -181,7 +181,7 @@ Implement controlled data sharing from Engineering Department to Control Room De
 
 **What the next agent should know:**
 
-- `console.info` is permitted under the shared `@repo/eslint-07_toolchain_configuration/library.js` eslint rule configuration.
+- `console.info` is permitted under the shared `@repo/eslint-config/library.js` eslint rule configuration.
 
 ## [2026-06-24T16:51:00Z] Migration Renumbering & Database Alignment
 

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { performMockLogin } from "./helpers/auth";
+import { performMockLogin, fillLoginForm, LOGIN_SELECTORS } from "./helpers/auth";
 
 test.describe("Comprehensive Error States", () => {
   test.describe("Network error handling", () => {
@@ -292,9 +292,12 @@ test.describe("Comprehensive Error States", () => {
     test("shows error for invalid credentials", async ({ page }) => {
       await page.goto("/login");
 
-      await page.fill("input#email", "invalid@example.com");
-      await page.fill("input#password", "wrongpassword");
-      await page.click("button[type='submit']");
+      await fillLoginForm(page, {
+        email: "invalid@example.com",
+        employeeId: "INVALID-001",
+        password: "wrongpassword",
+      });
+      await page.click(LOGIN_SELECTORS.submit);
 
       // Should show error message
       const errorMessage = page.getByText(/incorrect|invalid|failed/i);

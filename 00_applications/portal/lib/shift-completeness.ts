@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { createServerSupabaseClient } from "@repo/supabase/server";
 import { withCache } from "@/lib/cache-utils";
 import { CacheCategory } from "@repo/redis";

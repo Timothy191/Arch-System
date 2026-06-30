@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { LOGIN_SELECTORS } from "./helpers/auth";
 
 test.describe("department navigation", () => {
   test("unauthenticated access to any department redirects to login", async ({ page }) => {
@@ -77,7 +78,7 @@ test.describe("login page navigation", () => {
 
   test("login page renders email and password fields", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.locator("input[type='email'], input#email")).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.email)).toBeVisible();
     await expect(page.locator("input[type='password']")).toBeVisible();
     await expect(page.locator("button[type='submit']")).toBeVisible();
   });

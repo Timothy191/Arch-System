@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AutoAnimateList } from "@repo/ui/AnimatedList";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { toast } from "sonner";
 
 interface EngineeringNote {
   id: string;
@@ -64,7 +68,6 @@ export function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
     );
   }
 
-  // Group by shift
   const dayNotes = notes.filter((n) => n.shift_type === "day");
   const nightNotes = notes.filter((n) => n.shift_type === "night");
 
@@ -102,16 +105,35 @@ export function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
 }
 
 function NoteCard({ note }: { note: EngineeringNote }) {
+  const router = useRouter();
+  const [updating, setUpdating] = useState(false);
   const issueColor = ISSUE_TYPE_COLORS[note.issue_type] || "var(--text-muted)";
   const severityColor = SEVERITY_COLORS[note.severity] || "var(--text-muted)";
   const statusColor = STATUS_COLORS[note.status] || "var(--text-muted)";
+  const canResolve = note.status === "open" || note.status === "in_progress";
+
+  async function markResolved() {
+    setUpdating(true);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { error } = await supabase
+        .from("engineering_notes")
+        .update({ status: "resolved" })
+        .eq("id", note.id);
+      if (error) throw error;
+      toast.success("Issue marked as resolved");
+      router.refresh();
+    } catch {
+      toast.error("Failed to update issue status");
+    } finally {
+      setUpdating(false);
+    }
+  }
 
   return (
     <GlassCard className={`py-3 ${note.severity === "critical" ? "border-accent-red/30" : ""}`}>
       <div className="space-y-3">
-        {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Issue Type */}
           <span
             className="px-2 py-1 rounded text-xs font-medium text-[var(--bg-secondary)]"
             style={{ backgroundColor: issueColor }}
@@ -119,7 +141,6 @@ function NoteCard({ note }: { note: EngineeringNote }) {
             {note.issue_type.charAt(0).toUpperCase() + note.issue_type.slice(1)}
           </span>
 
-          {/* Severity */}
           <span
             className="px-2 py-1 rounded text-xs font-medium"
             style={{
@@ -131,7 +152,6 @@ function NoteCard({ note }: { note: EngineeringNote }) {
             {note.severity.toUpperCase()}
           </span>
 
-          {/* Status */}
           <span
             className="px-2 py-1 rounded text-xs font-medium"
             style={{
@@ -143,7 +163,6 @@ function NoteCard({ note }: { note: EngineeringNote }) {
             {note.status.replace("_", " ").toUpperCase()}
           </span>
 
-          {/* Machine & Site */}
           {note.machine &&
             (() => {
               const siteName = Array.isArray(note.machine!.sites)
@@ -162,16 +181,13 @@ function NoteCard({ note }: { note: EngineeringNote }) {
               );
             })()}
 
-          {/* Time */}
           <span className="text-[var(--text-muted)] text-xs ml-auto">
             {formatTime(note.created_at)}
           </span>
         </div>
 
-        {/* Description */}
         <p className="text-[var(--text-heading)] text-sm">{note.description}</p>
 
-        {/* Action Taken */}
         {note.action_taken && (
           <div className="text-sm">
             <span className="text-[var(--accent-blue)]">Action:</span>{" "}
@@ -179,12 +195,22 @@ function NoteCard({ note }: { note: EngineeringNote }) {
           </div>
         )}
 
-        {/* Follow-up Flag */}
         {note.requires_follow_up && (
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-blue"></span>
             <span className="text-accent-blue text-xs">Follow-up required</span>
           </div>
+        )}
+
+        {canResolve && (
+          <button
+            type="button"
+            onClick={markResolved}
+            disabled={updating}
+            className="text-sm text-[var(--accent-blue)] hover:underline disabled:opacity-50"
+          >
+            {updating ? "Updating…" : "Mark resolved"}
+          </button>
         )}
       </div>
     </GlassCard>

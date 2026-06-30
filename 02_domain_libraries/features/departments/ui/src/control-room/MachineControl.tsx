@@ -5,6 +5,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { PrecisionInput } from "@repo/ui/components/ui/PrecisionInput";
 import { Activity, RotateCcw } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
+import { toast } from "sonner";
 
 export function MachineControl() {
   const [rpm, setRpm] = useState<number | null>(1250);
@@ -14,6 +15,7 @@ export function MachineControl() {
 
   const handleApply = () => {
     setLastApplied(new Date().toLocaleTimeString());
+    toast.info("Simulation mode — configuration saved locally (not sent to SCADA)");
   };
 
   const handleReset = () => {
@@ -29,6 +31,9 @@ export function MachineControl() {
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-arch-accent-green" />
           <h3 className="text-[var(--text-heading)] font-medium">Operational Parameters</h3>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-[var(--accent-yellow)]/15 text-[var(--accent-yellow)] border border-[var(--accent-yellow)]/25">
+            Simulation
+          </span>
         </div>
         {lastApplied && (
           <span className="text-[10px] text-[var(--text-muted)]">Applied at {lastApplied}</span>

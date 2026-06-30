@@ -87,6 +87,13 @@ export function MachineOperationsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDelaySection, setShowDelaySection] = useState(false);
   const [lastOperationId, setLastOperationId] = useState<string | null>(null);
+  const [selectedDelayOperationId, setSelectedDelayOperationId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (todayOperations.length > 0) {
+      setSelectedDelayOperationId((current) => current ?? todayOperations[0]!.id);
+    }
+  }, [todayOperations]);
 
   // Auto-save to localStorage every 30 seconds
   useEffect(() => {
@@ -205,6 +212,7 @@ export function MachineOperationsForm({
       // Store the operation ID for delay entries
       if (data?.id) {
         setLastOperationId(data.id);
+        setSelectedDelayOperationId(data.id);
         setShowDelaySection(true);
       }
 
@@ -388,7 +396,7 @@ export function MachineOperationsForm({
       </form>
 
       {/* Expandable Delay Entries Section */}
-      {lastOperationId && (
+      {(todayOperations.length > 0 || lastOperationId) && selectedDelayOperationId && (
         <div className="border-t border-[var(--border-default)] pt-4">
           <button
             type="button"
@@ -403,8 +411,37 @@ export function MachineOperationsForm({
           </button>
 
           {showDelaySection && (
-            <div className="mt-4">
-              <DelayEntriesForm machineOperationId={lastOperationId} departmentId={departmentId} />
+            <div className="mt-4 space-y-3">
+              {todayOperations.length > 0 && (
+                <div className="space-y-1">
+                  <label
+                    htmlFor="delay-operation-select"
+                    className="text-xs text-[var(--text-muted)]"
+                  >
+                    Operation
+                  </label>
+                  <select
+                    id="delay-operation-select"
+                    value={selectedDelayOperationId}
+                    onChange={(e) => setSelectedDelayOperationId(e.target.value)}
+                    className="w-full md:max-w-md px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] text-sm"
+                  >
+                    {todayOperations.map((op) => {
+                      const machine = machines.find((m) => m.id === op.machine_id);
+                      return (
+                        <option key={op.id} value={op.id}>
+                          {machine?.name ?? "Machine"} · {op.shift_type} shift ·{" "}
+                          {op.start_time.slice(0, 5)}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
+              <DelayEntriesForm
+                machineOperationId={selectedDelayOperationId}
+                departmentId={departmentId}
+              />
             </div>
           )}
         </div>

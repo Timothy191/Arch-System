@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { cacheGet, cacheSet } from "@repo/redis/cache";
 import { DEPARTMENTS } from "./departments";

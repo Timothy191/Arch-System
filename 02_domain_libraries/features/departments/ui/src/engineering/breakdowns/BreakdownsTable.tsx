@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search, RefreshCw } from "lucide-react";
-import type { Breakdown } from "./types";
+import type { Breakdown } from "@repo/departments/data-access";
 import { useRouter } from "next/navigation";
 
 interface BreakdownsTableProps {

@@ -1,3 +1,5 @@
+import "server-only";
+
 export interface MonolithizedDashboardPayload {
   department_id: string;
   daily_logs: Array<{

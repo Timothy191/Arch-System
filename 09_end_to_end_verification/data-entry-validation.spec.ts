@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { LOGIN_SELECTORS } from "./helpers/auth";
 import { performMockLogin } from "./helpers/auth";
 
 test.describe("Edge Case Data Entry Validation", () => {
@@ -253,7 +254,7 @@ test.describe("Edge Case Data Entry Validation", () => {
     test("accepts valid email formats", async ({ page }) => {
       await page.goto("/login");
 
-      const emailInput = page.locator("input[type='email'], input#email").first();
+      const emailInput = page.locator(LOGIN_SELECTORS.email);
 
       const validEmails = [
         "test@example.com",
@@ -272,7 +273,7 @@ test.describe("Edge Case Data Entry Validation", () => {
     test("rejects invalid email formats", async ({ page }) => {
       await page.goto("/login");
 
-      const emailInput = page.locator("input[type='email'], input#email").first();
+      const emailInput = page.locator(LOGIN_SELECTORS.email);
 
       const invalidEmails = ["invalid", "@example.com", "user@", "user@.com"];
 
@@ -287,7 +288,7 @@ test.describe("Edge Case Data Entry Validation", () => {
     test("handles email with unicode", async ({ page }) => {
       await page.goto("/login");
 
-      const emailInput = page.locator("input[type='email'], input#email").first();
+      const emailInput = page.locator(LOGIN_SELECTORS.email);
       await emailInput.fill("用户@例子.广告");
 
       const currentValue = await emailInput.inputValue();

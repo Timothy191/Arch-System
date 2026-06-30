@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { LOGIN_SELECTORS } from "./helpers/auth";
 
 test.describe("daily log data entry (unauthenticated)", () => {
   test("accessing daily-log redirects to login with correct return path", async ({ page }) => {
@@ -58,7 +59,7 @@ test.describe("login form data entry", () => {
 
   test("typing in email field updates its value", async ({ page }) => {
     await page.goto("/login");
-    const emailInput = page.locator("input[type='email'], input#email").first();
+    const emailInput = page.locator(LOGIN_SELECTORS.email);
     await emailInput.fill("operator@arch.os");
     await expect(emailInput).toHaveValue("operator@arch.os");
   });
@@ -79,7 +80,7 @@ test.describe("login form data entry", () => {
   test("submitting invalid credentials shows error message", async ({ page }) => {
     await page.goto("/login");
 
-    await page.locator("input[type='email'], input#email").first().fill("bad@email.com");
+    await page.locator(LOGIN_SELECTORS.email).fill("bad@email.com");
     await page.locator("input[type='password']").first().fill("wrongpassword");
     await page.locator("button[type='submit']").click();
 

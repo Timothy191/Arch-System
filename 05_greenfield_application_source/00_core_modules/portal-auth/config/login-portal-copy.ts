@@ -2,6 +2,10 @@
 
 export const LOGIN_PORTAL_COPY = {
   cardTitle: "System Authentication",
+  wordmarkTitle: "Arch-Operational-System",
+  wordmarkTagline: "System Powered by Integrated Agentic AI & Advanced Capabilities",
+  wordmarkAriaLabel:
+    "Arch-Operational-System. System Powered by Integrated Agentic AI and Advanced Capabilities",
   employeeEmailPlaceholder: "username@company.com",
   employeeIdPlaceholder: "Employee ID",
   passwordPlaceholder: "Password",

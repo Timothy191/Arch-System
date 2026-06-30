@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 import { SystemClock } from "@/components/clock/SystemClock";
@@ -610,7 +610,7 @@ export function ServerHealthRow({
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
-export function SystemTrayPill() {
+export function SystemTrayPill({ trailing }: { trailing?: ReactNode }) {
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
   const volume = useAppVolume();
@@ -655,12 +655,7 @@ export function SystemTrayPill() {
 
   return (
     <div className="flex items-center gap-1.5">
-      <div
-        className={cn(
-          "system-tray-status-cluster flex items-center gap-1 h-[26px] px-1.5 rounded-full",
-          "select-none",
-        )}
-      >
+      <div className="system-tray-status-cluster flex items-center gap-1 select-none">
         <Popover.Root>
           <Popover.Trigger asChild>
             <button
@@ -668,9 +663,9 @@ export function SystemTrayPill() {
               aria-label="System Tray Popover"
               title="System status & options"
               className={cn(
-                "flex items-center gap-1 h-full px-0.5 rounded-full cursor-default outline-none",
+                "flex items-center gap-1 h-full px-0 cursor-default outline-none",
                 "bg-transparent border-0",
-                "focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]",
+                "focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]/50",
               )}
             >
             {/* Server health dot */}
@@ -686,14 +681,7 @@ export function SystemTrayPill() {
             <TrayStatusPipe />
             <ConnIcon className={cn("w-3.5 h-3.5", connColor)} />
             <TrayStatusPipe />
-            <div className="flex items-center gap-0.5">
-              <BatteryIcon className={cn("w-3.5 h-3.5", batteryColor)} />
-              {battery.supported && battery.level !== null && (
-                <span className="text-[11px] font-medium text-[var(--text-heading)] leading-none">
-                  {Math.round(battery.level * 100)}%
-                </span>
-              )}
-            </div>
+            <BatteryIcon className={cn("w-3.5 h-3.5", batteryColor)} />
           </button>
         </Popover.Trigger>
         <Popover.Portal>
@@ -742,6 +730,12 @@ export function SystemTrayPill() {
 
         <TrayStatusPipe />
         <SystemClock variant="strip" />
+        {trailing ? (
+          <>
+            <TrayStatusPipe />
+            {trailing}
+          </>
+        ) : null}
       </div>
     </div>
   );

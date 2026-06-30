@@ -1,5 +1,5 @@
 import { Zap, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import type { BreakdownMetrics } from "./types";
+import type { BreakdownMetrics } from "@repo/departments/data-access";
 
 interface BreakdownStatsProps {
   metrics: BreakdownMetrics;

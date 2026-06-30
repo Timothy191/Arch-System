@@ -713,7 +713,7 @@ export function HourlyLoadsGrid({
     return (
       <GlassCard>
         <p className="text-[var(--text-muted)] text-sm text-center py-8">
-          No machines available. Add machines in the Machine DB tab first.
+          No dump trucks available. Contact engineering to register active fleet machines.
         </p>
       </GlassCard>
     );

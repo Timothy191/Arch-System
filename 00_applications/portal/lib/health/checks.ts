@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { getRedisClient } from "@repo/redis";
 

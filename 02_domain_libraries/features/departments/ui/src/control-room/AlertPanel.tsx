@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AcknowledgeButton } from "@repo/ui/AcknowledgeButton";
@@ -28,13 +28,64 @@ interface AlertPanelProps {
   departmentId: string;
 }
 
+interface AlertPreferences {
+  acknowledgedMachineIds: string[];
+  dismissedMachineIds: string[];
+}
+
+function storageKey(departmentId: string) {
+  return `control-room-alert-prefs:${departmentId}`;
+}
+
+function readPreferences(departmentId: string): AlertPreferences {
+  if (typeof window === "undefined") {
+    return { acknowledgedMachineIds: [], dismissedMachineIds: [] };
+  }
+  try {
+    const raw = sessionStorage.getItem(storageKey(departmentId));
+    if (!raw) return { acknowledgedMachineIds: [], dismissedMachineIds: [] };
+    const parsed = JSON.parse(raw) as Partial<AlertPreferences>;
+    return {
+      acknowledgedMachineIds: parsed.acknowledgedMachineIds ?? [],
+      dismissedMachineIds: parsed.dismissedMachineIds ?? [],
+    };
+  } catch {
+    return { acknowledgedMachineIds: [], dismissedMachineIds: [] };
+  }
+}
+
+function writePreferences(departmentId: string, prefs: AlertPreferences) {
+  sessionStorage.setItem(storageKey(departmentId), JSON.stringify(prefs));
+}
+
 export function AlertPanel({ departmentId }: AlertPanelProps) {
   const [alerts, setAlerts] = useThrottledState<Alert[]>([]);
+
+  const persistAcknowledge = useCallback(
+    (machineId: string) => {
+      const prefs = readPreferences(departmentId);
+      if (!prefs.acknowledgedMachineIds.includes(machineId)) {
+        prefs.acknowledgedMachineIds.push(machineId);
+        writePreferences(departmentId, prefs);
+      }
+    },
+    [departmentId],
+  );
+
+  const persistDismiss = useCallback(
+    (machineId: string) => {
+      const prefs = readPreferences(departmentId);
+      if (!prefs.dismissedMachineIds.includes(machineId)) {
+        prefs.dismissedMachineIds.push(machineId);
+        writePreferences(departmentId, prefs);
+      }
+    },
+    [departmentId],
+  );
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
 
-    // AGENT-TRACE: Client-side telemetry for machine status checks
     async function fetchMachines() {
       await trackClientMetric(
         "machine_status_check",
@@ -45,31 +96,23 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
             .eq("department_id", departmentId);
 
           const machines = (data || []) as Machine[];
+          const prefs = readPreferences(departmentId);
           const now = Date.now();
           const newAlerts: Alert[] = machines
-            .filter((m) => !m.active)
+            .filter((m) => !m.active && !prefs.dismissedMachineIds.includes(m.id))
             .map((m) => ({
               id: `offline-${m.id}`,
               machineId: m.id,
               message: `${m.name} is offline`,
               severity: "critical",
-              acknowledged: false,
+              acknowledged: prefs.acknowledgedMachineIds.includes(m.id),
               timestamp: now,
             }));
 
-          // AGENT-TRACE: Track alert generation
           trackClientMetric(
             "alert_generation",
             () => {
-              setAlerts((prev) => {
-                const acknowledged = new Set(
-                  prev.filter((a) => a.acknowledged).map((a) => a.machineId),
-                );
-                return newAlerts.map((a) => ({
-                  ...a,
-                  acknowledged: acknowledged.has(a.machineId),
-                }));
-              });
+              setAlerts(newAlerts);
             },
             {
               department_id: departmentId,
@@ -103,13 +146,15 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [departmentId]);
+  }, [departmentId, setAlerts]);
 
-  function acknowledge(alertId: string) {
+  function acknowledge(alertId: string, machineId: string) {
+    persistAcknowledge(machineId);
     setAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a)));
   }
 
-  function dismiss(alertId: string) {
+  function dismiss(alertId: string, machineId: string) {
+    persistDismiss(machineId);
     setAlerts((prev) => prev.filter((a) => a.id !== alertId));
   }
 
@@ -155,13 +200,14 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               <div className="flex items-center gap-2">
                 {!alert.acknowledged && (
                   <AcknowledgeButton
-                    onAcknowledge={() => acknowledge(alert.id)}
+                    onAcknowledge={() => acknowledge(alert.id, alert.machineId)}
                     confirmTitle={`Acknowledge ${alert.machineId} Alert`}
                     confirmDescription={`Are you sure you want to acknowledge that ${alert.message}?`}
                   />
                 )}
                 <button
-                  onClick={() => dismiss(alert.id)}
+                  type="button"
+                  onClick={() => dismiss(alert.id, alert.machineId)}
                   className="px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-secondary)] text-xs hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
                   Dismiss

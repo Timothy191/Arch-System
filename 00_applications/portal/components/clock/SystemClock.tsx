@@ -96,8 +96,8 @@ export function SystemClock({ variant = "pill" }: SystemClockProps) {
 
   const triggerClass =
     variant === "strip"
-      ? "flex items-center gap-1 h-full px-0.5 bg-transparent border-0 cursor-default outline-none select-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)] rounded-sm"
-      : "flex items-center gap-1.5 px-2.5 py-1 rounded-full brand-chrome-pill transition-colors select-none cursor-default outline-none active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]";
+      ? "flex items-center gap-1 h-full px-0 bg-transparent border-0 cursor-default outline-none select-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]/50"
+      : "flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] brand-chrome-pill transition-colors select-none cursor-default outline-none active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]/50";
 
   return (
     <Popover.Root>
@@ -110,24 +110,24 @@ export function SystemClock({ variant = "pill" }: SystemClockProps) {
         >
           {variant === "strip" ? (
             <>
-              <span className="text-[11px] font-medium text-[var(--text-heading)] tabular-nums leading-none">
+              <span className="font-meta text-[11px] font-medium text-[var(--text-heading)] tabular-nums leading-none">
                 {dayPart}
               </span>
               <TrayStatusPipe />
-              <span className="text-[11px] font-semibold text-[var(--text-heading)] tabular-nums leading-none">
+              <span className="font-meta text-[11px] font-semibold text-[var(--text-heading)] tabular-nums leading-none">
                 {timePart}
               </span>
               <TrayStatusPipe />
-              <span className="text-[10px] text-[var(--brand-gold)] font-medium tracking-wider leading-none uppercase">
+              <span className="font-meta text-[10px] text-[var(--text-heading)] font-semibold tracking-wider leading-none uppercase">
                 SAST
               </span>
             </>
           ) : (
             <>
-              <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
+              <span className="font-meta font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
                 {dayPart} {timePart}
               </span>
-              <span className="text-[10px] text-[var(--brand-gold)] opacity-90 font-medium tracking-wider leading-none uppercase">
+              <span className="font-meta text-[10px] text-[var(--text-heading)] font-semibold tracking-wider leading-none uppercase">
                 SAST
               </span>
             </>
@@ -278,7 +278,7 @@ export function SystemClock({ variant = "pill" }: SystemClockProps) {
             </div>
 
             {/* Digital Time text */}
-            <span className="text-[11px] font-semibold text-[var(--text-secondary)] mt-3 tabular-nums select-all">
+            <span className="font-meta text-[11px] font-semibold text-[var(--text-secondary)] mt-3 tabular-nums select-all">
               {time.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",

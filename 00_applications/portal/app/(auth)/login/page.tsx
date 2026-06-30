@@ -4,7 +4,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { AlertTriangle } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 import { AgenticAiLogo } from "@repo/ui/AgenticAiLogo";
-import { GlassShineController, LoginCardHeader, LoginFormProduction } from "@05_greenfield_application_source/00_core_modules";
+import { GlassShineController, LoginCardHeader, LoginFormProduction, LOGIN_PORTAL_COPY } from "@05_greenfield_application_source/00_core_modules";
 import { CliAgentMark } from "@/components/auth/CliAgentMark";
 import { LoginServiceStatusBanner } from "@/components/auth/LoginServiceStatusBanner";
 import {
@@ -101,13 +101,13 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="relative w-full flex-1 min-h-0 flex flex-col items-start justify-start py-6 pl-6 pr-8 md:pl-12 md:pr-16 lg:pl-20 lg:pr-32 overflow-y-auto box-border">
+    <main className="portal-auth-login-main relative w-full flex-1 min-h-0 overflow-hidden box-border">
       <GlassShineController />
-      <div className="login-card-float-wrapper login-card-float-wrapper--top portal-layer-login relative z-[calc(var(--z-primary-card)+1)] w-[380px] max-w-full shrink-0">
+      <div className="login-card-float-wrapper login-card-float-wrapper--top portal-layer-login relative z-[calc(var(--z-primary-card)+1)] flex flex-1 min-h-0 max-h-full w-[380px] max-w-full flex-col">
         <div className="login-card-float-shadow" aria-hidden="true" />
         <div
           data-testid="login-card"
-          className="login-card-container layer-signin-card animate-fade-up flex flex-col px-8 pt-6 pb-0 min-h-[36rem] rounded-[var(--radius-xl)]"
+          className="login-card-container layer-signin-card animate-fade-up flex flex-1 min-h-0 max-h-full flex-col px-8 pt-5 pb-0 rounded-[var(--radius-xl)]"
         >
           {systemUnavailable ? (
           <div className="space-y-4 text-center">
@@ -136,16 +136,16 @@ export default async function LoginPage() {
                 <div className="login-card-brand">
                   <h1
                     className="login-brand-wordmark"
-                    aria-label="Arch-Operational System. Powered and Integrated with Agentic AI Capabilities"
+                    aria-label={LOGIN_PORTAL_COPY.wordmarkAriaLabel}
                   >
                     <span className="login-brand-wordmark-visual" aria-hidden="true">
                       <span className="login-brand-logo-a">
                         <Logo className="login-brand-logo-mark" splitTone />
                       </span>
                       <span className="login-brand-wordmark-copy">
-                        <span className="login-brand-wordmark-tail">Arch-Operational System</span>
+                        <span className="login-brand-wordmark-tail">{LOGIN_PORTAL_COPY.wordmarkTitle}</span>
                         <span className="login-brand-wordmark-tagline">
-                          Powered &amp; Integrated with Agentic AI Capabilities
+                          {LOGIN_PORTAL_COPY.wordmarkTagline}
                         </span>
                       </span>
                     </span>
@@ -157,13 +157,14 @@ export default async function LoginPage() {
 
               <section className="login-card-panel login-card-panel--main mt-auto -mx-8 shrink-0 select-none">
                 <div className="login-card-form-region login-card-main-form">
-                  <LoginFormProduction />
+                  <LoginFormProduction statusNode={<LoginServiceStatusBanner />} />
                 </div>
 
                 <div className="login-card-form-notice-divider" aria-hidden="true" />
 
                 <div className="login-card-footer-notice-block">
-                  <div className="login-card-notice shrink-0 select-none">
+                  <div className="login-card-notice shrink-0 select-none" role="note">
+                    <span className="login-card-notice-rivet login-card-notice-rivet--start" aria-hidden="true" />
                     <svg
                       className="login-card-notice-icon shrink-0"
                       viewBox="0 0 24 24"
@@ -181,8 +182,8 @@ export default async function LoginPage() {
                     <p className="login-card-notice-text">
                       <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
                     </p>
+                    <span className="login-card-notice-rivet login-card-notice-rivet--end" aria-hidden="true" />
                   </div>
-                  <LoginServiceStatusBanner />
                 </div>
 
                 <div

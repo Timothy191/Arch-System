@@ -105,7 +105,7 @@ function useSafetyAlerts() {
  * Shows environmental conditions, shift status, safety alerts,
  * and quick emergency actions.
  */
-export function ServicesDropdown() {
+export function ServicesDropdown({ variant = "inline" }: { variant?: "inline" | "pill" }) {
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const [sleeping, setSleeping] = useState(false);
@@ -156,18 +156,14 @@ export function ServicesDropdown() {
             aria-expanded={open}
             title="System Tray (Alt+S)"
             className={cn(
-              "relative flex items-center justify-center w-7 h-7 rounded-full brand-chrome-pill",
-              "text-[var(--brand-silver-muted)]",
-              "active:scale-[0.97]",
-              "transition-all duration-150 ease-in-out",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]",
-              "cursor-default select-none",
-              open && "border-[var(--brand-gold-edge)]",
+              variant === "inline"
+                ? "inline-flex items-center justify-center h-full p-0 bg-transparent border-0 text-[var(--text-heading)] hover:opacity-80 data-[state=open]:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]/50 cursor-default select-none transition-opacity duration-150"
+                : "brand-chrome-pill relative flex items-center justify-center w-7 h-7 rounded-[8px] text-[var(--text-secondary)] opacity-90 hover:bg-[var(--brand-silver-glow)] hover:opacity-100 data-[state=open]:bg-[var(--brand-silver-glow)] data-[state=open]:opacity-100 transition-colors duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)] cursor-default select-none",
             )}
           >
             <ChevronDown
               className={cn(
-                "w-3.5 h-3.5 transition-transform duration-200 ease-out",
+                "w-3 h-3 transition-transform duration-200 ease-out",
                 open && "rotate-180",
               )}
             />

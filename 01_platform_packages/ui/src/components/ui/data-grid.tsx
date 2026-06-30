@@ -54,7 +54,7 @@ export function DataGrid({
         className="w-full"
         style={{
           height,
-          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontFamily: 'var(--font-sans), "Montserrat", "Gotham", "Proxima Nova", sans-serif',
         }}
       >
         <RevoGrid

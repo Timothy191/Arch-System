@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Simple least-squares linear regression forecast.
  * @param data - Historical numeric values (chronological order)

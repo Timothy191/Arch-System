@@ -1,7 +1,7 @@
 import "@repo/ui/globals.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
+import { Montserrat, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -41,26 +41,18 @@ import { RouteBackground } from "@/components/RouteBackground";
 import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
 import { ConversationalBar } from "@/components/agent/ConversationalBar";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600"],
+  variable: "--font-montserrat",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   adjustFontFallback: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-mono-loaded",
   weight: ["400", "500"],
-  display: "swap",
-  adjustFontFallback: true,
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  weight: ["400", "500", "600"],
   display: "swap",
   adjustFontFallback: true,
 });
@@ -95,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
+      className={`${montserrat.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -169,10 +161,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   centerSlot={<TaskbarSearch />}
                   rightSlot={
                     <nav role="navigation" aria-label="Global">
-                      <div className="flex items-center gap-3">
-                        <SystemTrayPill />
-                        <HeaderWidgets />
-                      </div>
+                      <SystemTrayPill trailing={<HeaderWidgets />} />
                     </nav>
                   }
                 />

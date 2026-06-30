@@ -5,15 +5,15 @@
 module.exports = {
   arch0: {
     key: "{arch0}",
-    value: "#ffffff",
+    value: "#f7f8fb",
     type: "color",
-    description: "macOS pure white background",
+    description: "silver-white page canvas",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#ffffff",
+      value: "#f7f8fb",
       type: "color",
-      description: "macOS pure white background",
+      description: "silver-white page canvas",
       key: "{arch0}",
     },
     name: "Arch0",
@@ -24,13 +24,13 @@ module.exports = {
   },
   arch1: {
     key: "{arch1}",
-    value: "#ffffff",
+    value: "#f4f6f9",
     type: "color",
     description: "elevated surface / card",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#ffffff",
+      value: "#f4f6f9",
       type: "color",
       description: "elevated surface / card",
       key: "{arch1}",
@@ -43,13 +43,13 @@ module.exports = {
   },
   arch2: {
     key: "{arch2}",
-    value: "#e8e8ed",
+    value: "#e9ecf2",
     type: "color",
     description: "sunken / input bg",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#e8e8ed",
+      value: "#e9ecf2",
       type: "color",
       description: "sunken / input bg",
       key: "{arch2}",
@@ -62,13 +62,13 @@ module.exports = {
   },
   arch3: {
     key: "{arch3}",
-    value: "#d2d2d7",
+    value: "#dde1ea",
     type: "color",
     description: "pressed / deeply sunken",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "#d2d2d7",
+      value: "#dde1ea",
       type: "color",
       description: "pressed / deeply sunken",
       key: "{arch3}",
@@ -378,7 +378,7 @@ module.exports = {
   bg: {
     primary: {
       key: "{bg.primary}",
-      value: "#ffffff",
+      value: "#f7f8fb",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
@@ -396,7 +396,7 @@ module.exports = {
     },
     secondary: {
       key: "{bg.secondary}",
-      value: "#ffffff",
+      value: "#f4f6f9",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
@@ -414,7 +414,7 @@ module.exports = {
     },
     tertiary: {
       key: "{bg.tertiary}",
-      value: "#e8e8ed",
+      value: "#e9ecf2",
       type: "color",
       filePath: "tokens.json",
       isSource: true,

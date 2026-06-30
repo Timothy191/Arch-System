@@ -1,31 +1,19 @@
-import { test as setup, expect } from "@playwright/test";
+import { test as setup } from "@playwright/test";
 import path from "path";
+import { fillLoginForm, LOGIN_SELECTORS } from "./helpers/auth";
 
-const authFile = path.join(__dirname, ".auth/user.json");
+const authFile = path.resolve(process.cwd(), "09_end_to_end_verification/.auth/user.json");
 
 setup("authenticate", async ({ page }) => {
-  // Wait until we can reach the app
   await page.goto("/login");
 
-  // Skip the intro overlay if it's there
-  try {
-    const overlay = page.locator("text=Initializing industrial operations terminal...");
-    await expect(overlay).not.toBeVisible({ timeout: 2000 });
-  } catch (e) {
-    // Ignore if not found
-  }
+  await page.waitForSelector(LOGIN_SELECTORS.form, { timeout: 10000 });
+  await fillLoginForm(page);
+  await page.locator(LOGIN_SELECTORS.submit).click();
 
-  // Fill credentials and login
-  await page.locator("input#email").fill("admin@plantcor.os");
-  await page.locator("input#password").fill("Yugioh@123#");
-  await page.locator("form[data-testid='login-form'] button[type='submit']").click();
-
-  // Wait for the redirect to complete
-  await page.waitForURL("**/", { timeout: 10000 }).catch(() => {
+  await page.waitForURL("**/", { timeout: 15000 }).catch(() => {
     console.warn("Global setup: Timed out waiting for redirect, continuing anyway.");
   });
 
-  // End of authentication steps.
-  // Save the state to the designated file.
   await page.context().storageState({ path: authFile });
 });

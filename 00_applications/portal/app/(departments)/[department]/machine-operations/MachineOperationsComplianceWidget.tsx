@@ -24,11 +24,13 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
   const router = useRouter();
   const [data, setData] = useState<ShiftCompleteness | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const fetchCompleteness = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const shift = getCurrentShift();
       const date = todayDate();
@@ -38,9 +40,14 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
         const json: ShiftCompleteness = await res.json();
         setData(json);
         setLastRefresh(new Date());
-        // Auto-expand if not complete
         if (!json.complete) setExpanded(true);
+      } else {
+        setData(null);
+        setError("Unable to load shift coverage. Check your connection and try again.");
       }
+    } catch {
+      setData(null);
+      setError("Unable to load shift coverage. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -53,10 +60,27 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
     return () => clearInterval(interval);
   }, [fetchCompleteness]);
 
-  if (loading && !data) {
+  if (loading && !data && !error) {
     return (
       <GlassCard className="py-3">
         <p className="text-[var(--text-muted)] text-sm text-center">Checking shift coverage…</p>
+      </GlassCard>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <GlassCard className="border-accent-red/30 py-3 px-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-accent-red text-sm">{error}</p>
+          <button
+            type="button"
+            onClick={() => fetchCompleteness()}
+            className="text-[var(--accent-blue)] text-sm hover:underline shrink-0"
+          >
+            Retry
+          </button>
+        </div>
       </GlassCard>
     );
   }
@@ -182,7 +206,7 @@ function MachineRow({
   return (
     <button
       type="button"
-      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split("/").pop()}`)}
+      onClick={() => router.push(status.formPath)}
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent-red/5 transition-colors text-left group"
     >
       <XCircle className="w-4 h-4 text-accent-red shrink-0" />

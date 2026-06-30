@@ -1,0 +1,37 @@
+/**
+ * Arch typography — global font loading + utilities.
+ * Display: Anurati (brand wordmarks, primary headings)
+ * UI / meta: Montserrat with Gotham + Proxima Nova fallbacks (body, forms, clock)
+ */
+
+@import url("https://fonts.cdnfonts.com/css/anurati");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+@layer theme {
+  :root,
+  html {
+    --font-display: "Anurati", var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif,
+      sans-serif;
+    --font-sans: var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif, system-ui,
+      sans-serif;
+    --font-meta: var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif, sans-serif;
+    --font-mono: var(--font-mono-loaded, ui-monospace), SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-meta {
+    font-family: var(--font-meta);
+    font-feature-settings: "tnum" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  .login-brand-wordmark-tail,
+  .login-production-card-title {
+    font-family: var(--font-display);
+  }
+}

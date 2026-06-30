@@ -35,10 +35,11 @@ describe("AuthLayout", () => {
 
     const outerContainer = container.firstChild;
     expect(outerContainer).toHaveClass("relative");
-    expect(outerContainer).toHaveClass("min-h-[calc(100vh-4rem)]");
+    expect(outerContainer).toHaveClass("portal-auth-stage--viewport");
+    expect(outerContainer).toHaveClass("flex-1");
+    expect(outerContainer).toHaveClass("min-h-0");
     expect(outerContainer).toHaveClass("w-full");
     expect(outerContainer).toHaveClass("h-full");
-    expect(outerContainer).toHaveClass("flex");
     expect(outerContainer).toHaveClass("overflow-hidden");
   });
 

@@ -59,12 +59,12 @@ describe("LoginPage Server Component", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Arch-Operational System. Powered and Integrated with Agentic AI Capabilities",
+        name: "Arch-Operational-System. System Powered by Integrated Agentic AI and Advanced Capabilities",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Arch-Operational System")).toBeInTheDocument();
+    expect(screen.getByText("Arch-Operational-System")).toBeInTheDocument();
     expect(
-      screen.getByText("Powered & Integrated with Agentic AI Capabilities"),
+      screen.getByText("System Powered by Integrated Agentic AI & Advanced Capabilities"),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "System Authentication" })).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();

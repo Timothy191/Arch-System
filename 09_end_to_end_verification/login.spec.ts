@@ -1,31 +1,31 @@
 import { test, expect } from "@playwright/test";
+import { fillLoginForm, LOGIN_SELECTORS } from "./helpers/auth";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe("login page", () => {
   test("renders login form with all fields", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
-    await expect(page.locator("input#email")).toBeVisible();
-    await expect(page.locator("input#password")).toBeVisible();
-    await expect(
-      page.locator("form[data-testid='login-form'] button[type='submit']"),
-    ).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.form)).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.email)).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.employeeId)).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.password)).toBeVisible();
+    await expect(page.locator(LOGIN_SELECTORS.submit)).toBeVisible();
   });
 
   test("form has correct HTML5 validation attributes", async ({ page }) => {
     await page.goto("/login");
 
-    const email = page.locator("input#email");
-    const emailType = await email.getAttribute("type");
-    // Accept both email and text types — employee ID can be an email or badge id
-    expect(["email", "text"]).toContain(emailType);
+    const email = page.locator(LOGIN_SELECTORS.email);
+    await expect(email).toHaveAttribute("type", "email");
     await expect(email).toHaveAttribute("required", "");
 
-    const password = page.locator("input#password");
+    const employeeId = page.locator(LOGIN_SELECTORS.employeeId);
+    await expect(employeeId).toHaveAttribute("required", "");
+
+    const password = page.locator(LOGIN_SELECTORS.password);
     await expect(password).toHaveAttribute("type", "password");
     await expect(password).toHaveAttribute("required", "");
-    // Some input wrappers map minLength -> minlength attribute; accept numeric >= 6 if present
     const pwdMin = await password.getAttribute("minlength");
     if (pwdMin) {
       expect(Number(pwdMin)).toBeGreaterThanOrEqual(6);
@@ -35,12 +35,9 @@ test.describe("login page", () => {
   test("empty form submission is blocked by browser validation", async ({ page }) => {
     await page.goto("/login");
 
-    // Try to submit without filling anything
-    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
+    await page.locator(LOGIN_SELECTORS.submit).click();
 
-    // Form should still be visible (submission blocked)
-    await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
-    // URL should not change
+    await expect(page.locator(LOGIN_SELECTORS.form)).toBeVisible();
     expect(page.url()).toContain("/login");
   });
 
@@ -152,9 +149,8 @@ test.describe("full login and reset password flows", () => {
   }) => {
     // 1. Invalid credentials flow
     await page.goto("/login");
-    await page.locator("input#email").fill("admin@plantcor.os");
-    await page.locator("input#password").fill("wrong-password");
-    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
+    await fillLoginForm(page, { password: "wrong-password" });
+    await page.locator(LOGIN_SELECTORS.submit).click();
 
     // Check for error message or that the form is still visible (some envs do not surface auth failure text)
     try {
@@ -186,9 +182,8 @@ test.describe("full login and reset password flows", () => {
     await expect(page).toHaveURL(/.*\/login/);
 
     // 5. Successful login redirect
-    await page.locator("input#email").fill("admin@plantcor.os");
-    await page.locator("input#password").fill("Yugioh@123#");
-    await page.locator("form[data-testid='login-form'] button[type='submit']").click();
+    await fillLoginForm(page);
+    await page.locator(LOGIN_SELECTORS.submit).click();
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login
     try {

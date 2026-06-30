@@ -3,10 +3,10 @@
  */
 
 :root {
-  --arch0: #ffffff;
-  --arch1: #ffffff;
-  --arch2: #e8e8ed;
-  --arch3: #d2d2d7;
+  --arch0: #f7f8fb;
+  --arch1: #f4f6f9;
+  --arch2: #e9ecf2;
+  --arch3: #dde1ea;
   --arch4: rgba(0, 0, 0, 0.06);
   --arch5: rgba(0, 0, 0, 0.12);
   --arch6: rgba(0, 0, 0, 0.2);

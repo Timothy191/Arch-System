@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { Wrench, AlertTriangle, Info, Clock, CalendarDays } from "lucide-react";
-import { bookOutBreakdown, directCheckout } from "./actions";
-import { MACHINE_TYPES, type Breakdown } from "./types";
+import { bookOutBreakdown, directCheckout } from "@repo/departments/data-access";
+import { MACHINE_TYPES, type Breakdown } from "@repo/departments/data-access";
 
 interface BookOutFormProps {
   departmentId: string;

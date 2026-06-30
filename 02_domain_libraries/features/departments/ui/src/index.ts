@@ -12,8 +12,6 @@ export * from "./engineering/breakdowns/BookOutForm";
 export * from "./engineering/breakdowns/BreakdownCharts";
 export * from "./engineering/breakdowns/BreakdownStats";
 export * from "./engineering/breakdowns/BreakdownsTable";
-export * from "./engineering/breakdowns/types";
-export * from "./engineering/breakdowns/actions";
 export type { SafetyChartsProps } from "./safety/SafetyCharts";
 export { SafetyCharts } from "./safety/SafetyChartsWrapper";
 export * from "./safety/SafetyDashboard";

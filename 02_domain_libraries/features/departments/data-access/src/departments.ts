@@ -1,3 +1,5 @@
+import "server-only";
+
 export interface QuickAction {
   label: string;
   href: string;

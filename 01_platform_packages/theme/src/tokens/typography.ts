@@ -4,8 +4,10 @@
  */
 
 export const fonts = {
-  sans: 'var(--font-space-grotesk), "Inter", ui-sans-serif, system-ui, sans-serif',
-  mono: 'var(--font-geist-mono), "Geist Mono", ui-monospace, "Cascadia Code", monospace',
+  display: 'var(--font-display), "Anurati", "Montserrat", ui-sans-serif, sans-serif',
+  sans: 'var(--font-sans), "Montserrat", "Gotham", "Proxima Nova", ui-sans-serif, sans-serif',
+  meta: 'var(--font-meta), "Montserrat", "Gotham", "Proxima Nova", ui-sans-serif, sans-serif',
+  mono: 'var(--font-mono), ui-monospace, "Cascadia Code", monospace',
 } as const;
 
 export const fontWeights = {

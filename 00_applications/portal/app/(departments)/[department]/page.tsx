@@ -4,6 +4,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
+import { getSafetyDashboardData } from "@repo/departments/data-access";
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((mod) => mod.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
@@ -72,7 +73,8 @@ export default async function DepartmentDashboard({
   }
 
   if (dept.type === "safety") {
-    return <SafetyDashboard deptId={deptId} />;
+    const data = await getSafetyDashboardData(deptId);
+    return <SafetyDashboard data={data} />;
   }
 
   const isControlRoom = dept.type === "control_room";

@@ -17,13 +17,12 @@
        or utilities — use the Semantic aliases below.
        ═══════════════════════════════════════════════════════════════ */
 
-  /* Background range — macOS system grays */
-  /* ARCH PALETTE — macOS Ventura/Sonoma Light */
-  --arch0: #ffffff; /* macOS pure white background */
-  --white: #ffffff; /* Primitive token for white color checks */
-  --arch1: #ffffff; /* elevated surface / card */
-  --arch2: #e8e8ed; /* sunken / input bg */
-  --arch3: #d2d2d7; /* pressed / deeply sunken */
+  /* Background range — silver-white metallic canvas */
+  --arch0: oklch(98% 0.004 265); /* silver-white page canvas */
+  --white: #ffffff;
+  --arch1: oklch(97% 0.006 265); /* elevated surface / card */
+  --arch2: oklch(94% 0.01 265); /* sunken / input bg */
+  --arch3: oklch(90% 0.012 265); /* pressed / deeply sunken */
 
   /* Border range — hairline to emphasis */
   --arch4: rgba(0, 0, 0, 0.06); /* border subtle */
@@ -297,15 +296,15 @@
   /* ═══════════════════════════════════════════════════════════════
        GLASS TOKENS — macOS Frosted Glass (always active)
        ═══════════════════════════════════════════════════════════════ */
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-surface-hover: rgba(255, 255, 255, 0.85);
-  --glass-surface-strong: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-border-top: rgba(255, 255, 255, 0.25);
+  --glass-surface: oklch(98% 0.006 265 / 72%);
+  --glass-surface-hover: oklch(99% 0.005 265 / 86%);
+  --glass-surface-strong: oklch(100% 0 0deg / 92%);
+  --glass-border: oklch(72% 0.16 82 / 42%);
+  --glass-border-top: oklch(92% 0.12 82 / 58%);
   --glass-border-gradient: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.3)
+    oklch(96% 0.11 82 / 72%),
+    oklch(88% 0.018 265 / 38%)
   );
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
@@ -353,8 +352,8 @@
     0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 24px 35px -5px rgba(15, 23, 42, 0.06);
 
   /* Vibrancy — macOS sidebar/toolbar tint */
-  --vibrancy-surface: rgba(246, 246, 250, 0.82);
-  --vibrancy-border: rgba(0, 0, 0, 0.06);
+  --vibrancy-surface: oklch(97% 0.006 265 / 82%);
+  --vibrancy-border: oklch(72% 0.16 82 / 28%);
 
   /* ═══════════════════════════════════════════════════════════════
        Z-INDEX MATRIX — Single Source of Truth
@@ -370,13 +369,17 @@
      The gradient moves from soft gray to ice-blue to give depth
      while keeping the surface light enough for glass to read cleanly.
      ─────────────────────────────────────────────────────────────────── */
-  --canvas-bg-from: #f4f4f7;
-  --canvas-bg-to: #e4e4e7;
-  --canvas-gradient: linear-gradient(135deg, var(--canvas-bg-from) 0%, var(--canvas-bg-to) 100%);
-  /* Wave layer tint — subtle charcoal/slate radial used by the animated orbs */
-  --canvas-wave-tint-a: rgba(28, 28, 30, 0.06);
-  --canvas-wave-tint-b: rgba(16, 185, 129, 0.04);
-  --canvas-wave-tint-c: rgba(228, 228, 231, 0.8);
+  --canvas-bg-from: oklch(98.5% 0.004 265);
+  --canvas-bg-to: oklch(92% 0.012 265);
+  --canvas-gradient: linear-gradient(
+    165deg,
+    oklch(99% 0.005 265) 0%,
+    var(--canvas-bg-from) 36%,
+    var(--canvas-bg-to) 100%
+  );
+  --canvas-wave-tint-a: oklch(76% 0.15 82 / 8%);
+  --canvas-wave-tint-b: oklch(93% 0.018 265 / 42%);
+  --canvas-wave-tint-c: oklch(96% 0.01 265 / 72%);
 
   /* ═══════════════════════════════════════════════════════════════
        DIFFUSION SHADOW SYSTEM — Light mode (softer)
@@ -528,13 +531,13 @@
        ═══════════════════════════════════════════════════════════════ */
   --theme-transition-duration: 0ms;
 
-  /* Font variables used in Tailwind config preset */
-  --font-sans: "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-  --font-inter:
-    "SF Pro", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-  /* Fallback until next/font hydrates; portal layout overrides via Outfit.variable */
-  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Typography tokens — loaded via fonts.css; Montserrat may be hydrated by next/font on html */
+  --font-display: "Anurati", var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif,
+    sans-serif;
+  --font-sans: var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-meta: var(--font-montserrat, "Montserrat"), "Gotham", "Proxima Nova", ui-sans-serif, sans-serif;
+  --font-mono: var(--font-mono-loaded, ui-monospace), SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   color-scheme: light;
 }

@@ -2,8 +2,8 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { ClipboardPlus, ClipboardList, Clock, CalendarDays } from "lucide-react";
-import { createBreakdown } from "./actions";
-import type { Breakdown, Machine } from "./types";
+import { createBreakdown } from "@repo/departments/data-access";
+import type { Breakdown, Machine } from "@repo/departments/data-access";
 
 interface BookInFormProps {
   departmentId: string;

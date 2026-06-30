@@ -1,3 +1,5 @@
+import "server-only";
+
 import { inngest } from "@repo/utils/inngest";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";

@@ -9,21 +9,12 @@ const ServicesDropdown = lazy(() =>
 );
 
 /**
- * HeaderWidgets — services popover only (clock lives in SystemTrayPill status strip).
+ * HeaderWidgets — inline services chevron at the end of the taskbar status strip.
  */
-function WidgetFallback({ width = "w-7" }: { width?: string }) {
-  return (
-    <div
-      className={`${width} h-7 rounded-full brand-chrome-pill animate-pulse`}
-      aria-hidden="true"
-    />
-  );
-}
-
 export function HeaderWidgets() {
   return (
-    <Suspense fallback={<WidgetFallback />}>
-      <ServicesDropdown />
+    <Suspense fallback={null}>
+      <ServicesDropdown variant="inline" />
     </Suspense>
   );
 }

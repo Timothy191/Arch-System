@@ -16,7 +16,7 @@ const LOGIN_CONTROL =
 
 const INPUT_CLASS = `${LOGIN_CONTROL} transition-all duration-200 focus:outline-none liquid-glass-input`;
 
-export function LoginFormProduction() {
+export function LoginFormProduction({ statusNode }: { statusNode?: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/";
@@ -161,6 +161,12 @@ export function LoginFormProduction() {
           >
             {loading ? "Signing in..." : "Sign In"}
           </AnimatedButton>
+
+          {statusNode && (
+            <div className="login-form-status-node flex justify-center mt-2">
+              {statusNode}
+            </div>
+          )}
 
           <div className="login-form-footer-row flex items-center justify-between shrink-0">
             <Checkbox

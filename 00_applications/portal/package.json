@@ -24,6 +24,7 @@
     "@repo/contract": "workspace:*",
     "@repo/dashboard/data-access": "workspace:*",
     "@repo/departments/ui": "workspace:*",
+    "@repo/departments/data-access": "workspace:*",
     "@repo/errors": "workspace:*",
     "@repo/hub/ui": "workspace:*",
     "@repo/logger": "workspace:*",
