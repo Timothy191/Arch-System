@@ -91,3 +91,4 @@ Append the Markdown output of this command to the end of your final reply to rep
 - **Adaptive mode status** (tier, clean/dirty staging).
 - **Intelligence gain %** (checklist + learnings + verification status).
 - **Capabilities list** (skills and tools checked out, used, and returned).
+- **Summary of change & intelligence boost**: A short 1-2 sentence description of what intelligence gain occurred (checklist items completed, learnings recorded) and what changed in the workspace.
