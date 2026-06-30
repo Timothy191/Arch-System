@@ -1,3 +1,6 @@
+# Deprecated — use redis/docker-compose.yml (pnpm redis:dev)
+# Kept for backward compatibility with Makefile targets.
+
 version: "3.8"
 
 services:

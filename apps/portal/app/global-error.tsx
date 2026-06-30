@@ -20,7 +20,7 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-[100dvh] bg-[var(--bg-primary)]">
         <RootError error={error} reset={reset} />
       </body>
     </html>

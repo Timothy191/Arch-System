@@ -11,7 +11,8 @@ import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { PWAInstallButton } from "@/components/PWAInstallButton";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
-import { MacMenuBar } from "@repo/ui/MacMenuBar";
+import { Taskbar } from "@repo/ui/Taskbar";
+import { TaskbarSearch } from "@/components/nav/TaskbarSearch";
 import { Toaster } from "@repo/ui/Toaster";
 import { CookieConsent } from "@repo/ui/CookieConsent";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
@@ -38,6 +39,7 @@ const CommandBar = dynamic(() =>
 import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
 import { RouteBackground } from "@/components/RouteBackground";
 import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
+import { ConversationalBar } from "@/components/agent/ConversationalBar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -142,7 +144,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent"
+        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-[var(--bg-primary)]"
       >
         {/* Skip navigation link for keyboard users */}
         <a href="#main-content" className="skip-link">
@@ -161,9 +163,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <OfflineBanner />
               <PWAInstallButton />
 
-              {/* Global Navigation Header with proper landmark */}
-              <header role="banner" className="flex items-center gap-3">
-                <MacMenuBar
+              {/* Global taskbar */}
+              <header role="banner" className="contents" aria-label="Taskbar">
+                <Taskbar
+                  centerSlot={<TaskbarSearch />}
                   rightSlot={
                     <nav role="navigation" aria-label="Global">
                       <div className="flex items-center gap-3">
@@ -176,11 +179,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               </header>
 
               {/* Content wrapper with main landmark */}
-              <main id="main-content" role="main" className="relative z-primary-card pt-16">
+              <main id="main-content" role="main" className="relative z-primary-card pt-14 pb-24 lg:pb-28">
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
 
               <CommandBar />
+              <ConversationalBar />
               <ViewportBoundaries />
               <CookieConsent />
               <FeedbackWidget />

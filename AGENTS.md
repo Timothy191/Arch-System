@@ -17,12 +17,18 @@ Nx + pnpm monorepo: Next.js 15 portal (`apps/portal`), Payload CMS (`apps/cms`),
 | Single unit test | `pnpm --filter portal test -- --testPathPatterns=<file>` |
 | E2E tests | `pnpm test:e2e` (needs `:3000` dev server + `/usr/bin/google-chrome`) |
 | Start local Supabase | `pnpm --filter @repo/database supabase:dev` (Docker required) |
+| Start Redis offload stack | `pnpm redis:dev` (`redis/` on `127.0.0.1:6380`) |
+| Redis offload status | `pnpm redis:status` |
 | Apply migrations locally | `pnpm --filter @repo/database supabase:push` |
 | Regenerate DB types | `pnpm --filter @repo/database supabase:gen` |
 | Token/CSS lint | `pnpm nx run-many -t lint:tokens lint:css` |
 | Stylelint | `pnpm lint:styles` |
 | Markdown lint | `pnpm md:lint` |
 | Knip (dead-code) | `pnpm knip` |
+| Lending library catalog | `python3 scripts/lending-library/list-catalog.py` |
+| Checkout / return skill | `python3 scripts/lending-library/checkout-skill.py <name>` → `return-skill.py` |
+| Effort triage | `python3 scripts/agent-orchestrator/classify-effort.py "<task>"` |
+| Pre-ship verify gate | `bash scripts/agent-orchestrator/verify-gate.sh` |
 | Audit RLS | `pnpm audit:rls` |
 
 Order matters: lint → type-check → test → build. `pnpm quality` chains the main ones.

@@ -1,4 +1,5 @@
 export { createBrowserSupabaseClient } from "./client";
+export { resolveSupabaseStudioUrl } from "./studio-url";
 export { createMiddlewareClient } from "./middleware";
 export { withSpan } from "./tracing";
 export { getUserSafely } from "./server";

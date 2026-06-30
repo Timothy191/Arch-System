@@ -102,18 +102,83 @@
   --color-action-primary-hover: var(--accent-electric-blue-hover);
 
   /* Login CTA — darker cool silver so the sign-in button reads above the glass card */
-  --color-signin-button: oklch(62% 0.01 265);
-  --color-signin-button-hover: oklch(56% 0.012 265);
-  --color-signin-button-border: oklch(52% 0.012 265 / 35%);
+  --color-signin-button: oklch(11% 0.008 265);
+  --color-signin-button-hover: oklch(7% 0.006 265);
+  --color-signin-button-border: oklch(5% 0.004 265 / 72%);
 
-  /* Login panel — restrained gold & silver brand accents */
-  --brand-gold: oklch(72% 0.09 82);
-  --brand-gold-glow: oklch(72% 0.09 82 / 14%);
-  --brand-gold-edge: oklch(72% 0.09 82 / 32%);
-  --brand-silver: oklch(58% 0.014 265);
-  --brand-silver-muted: oklch(68% 0.012 265);
-  --brand-silver-glow: oklch(88% 0.01 265 / 22%);
-  --brand-silver-edge: oklch(92% 0.008 265 / 50%);
+  /* Login panel — brushed gold & silver brand accents */
+  --brand-gold: oklch(76% 0.15 82);
+  --brand-gold-glow: oklch(76% 0.15 82 / 44%);
+  --brand-gold-edge: oklch(80% 0.14 82 / 72%);
+  --brand-gold-border: oklch(72% 0.16 82 / 82%);
+  --brand-gold-border-strong: oklch(66% 0.17 82 / 94%);
+  --brand-gold-highlight: oklch(92% 0.12 82 / 78%);
+  --brand-gold-depth: oklch(52% 0.13 82 / 46%);
+  --brand-gold-rim: oklch(82% 0.13 82 / 72%);
+  --brand-gold-shine-ease: cubic-bezier(0.45, 0.05, 0.2, 1);
+  --brand-gold-shine-sweep-duration: 16s;
+  --brand-gold-shine-wash-duration: 20s;
+  --brand-gold-radial-drift-duration: 28s;
+  --brand-gold-watermark-glint-duration: 16s;
+  --brand-gold-rim-pulse-duration: 12s;
+  --brand-gold-text-shine-duration: 12s;
+  --brand-logo-shine-sweep-duration: 24s;
+  --brand-logo-specular-duration: 30s;
+  --brand-silver-shine-wash-duration: 24s;
+  --brand-metal-edge-pulse-duration: 13s;
+  --login-card-natural-light-duration: 22s;
+  --brand-gold-border-shine-duration: 26s;
+  --chrome-bar-shadow:
+    0 1px 0 oklch(100% 0 0deg / 92%),
+    0 2px 4px oklch(0% 0 0deg / 7%),
+    0 6px 14px oklch(0% 0 0deg / 10%),
+    0 14px 32px oklch(46% 0.1 82 / 14%),
+    0 24px 48px oklch(0% 0 0deg / 8%);
+  --chrome-pill-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 96%),
+    inset 0 -1px 0 var(--brand-gold-depth),
+    inset 0 -4px 8px oklch(0% 0 0deg / 9%),
+    0 1px 2px oklch(0% 0 0deg / 6%),
+    0 3px 8px oklch(46% 0.1 82 / 14%);
+  --chrome-pill-shadow-hover:
+    inset 0 1px 0 oklch(100% 0 0deg / 98%),
+    inset 0 -2px 0 var(--brand-gold-depth),
+    inset 0 -5px 10px oklch(0% 0 0deg / 11%),
+    0 2px 4px oklch(0% 0 0deg / 8%),
+    0 6px 14px oklch(46% 0.1 82 / 18%),
+    0 0 0 1px var(--brand-gold-glow);
+  --brand-silver: oklch(60% 0.024 265);
+  --brand-silver-muted: oklch(66% 0.022 265);
+  --brand-silver-glow: oklch(93% 0.018 265 / 52%);
+  --brand-silver-edge: oklch(86% 0.02 265 / 78%);
+  --brand-silver-highlight: oklch(96% 0.016 265 / 72%);
+  --brand-silver-rim: oklch(88% 0.018 265 / 64%);
+
+  /* Pearlescent iridescent accents — login panels & chrome reflect sweeps */
+  --pearl-shine-ease: cubic-bezier(0.45, 0.05, 0.2, 1);
+  --pearl-light-pass-duration: 26s;
+  --pearl-border-reflect-duration: 26s;
+  --pearl-panel-shine-duration: 22s;
+  --pearl-ambient-drift-duration: 30s;
+  --pearl-surface-drift-duration: 32s;
+  --pearl-edge-breathe-duration: 14s;
+  --pearl-text-shine-duration: 14s;
+  --pearl-base: oklch(97.5% 0.01 295);
+  --pearl-rose: oklch(94% 0.045 350);
+  --pearl-lavender: oklch(93% 0.04 295);
+  --pearl-sky: oklch(94% 0.038 230);
+  --pearl-mint: oklch(95% 0.034 165);
+  --pearl-champagne: oklch(96% 0.03 85);
+  --pearl-glow: oklch(98% 0.028 310 / 46%);
+  --pearl-glow-sky: oklch(96% 0.04 235 / 38%);
+  --pearl-glow-rose: oklch(95% 0.042 340 / 34%);
+  --pearl-border: oklch(86% 0.04 290 / 74%);
+  --pearl-border-strong: oklch(80% 0.05 285 / 88%);
+  --pearl-highlight: oklch(99% 0.035 320 / 84%);
+  --pearl-depth: oklch(68% 0.03 265 / 30%);
+  --pearl-rim: oklch(90% 0.038 305 / 68%);
+  --pearl-specular: oklch(100% 0.02 280);
+  --pearl-chrome-shadow: 0 14px 32px oklch(72% 0.04 290 / 12%);
   --color-status-positive: var(--accent-mint);
   --color-status-warning: var(--accent-amber);
   --color-status-danger: var(--accent-red);
@@ -153,7 +218,7 @@
   /* ═══════════════════════════════════════════════════════════════
        DEPARTMENT COLOR TOKENS
        Single source of truth for department-specific icon/badge colors.
-       Used by MacMenuBar, DepartmentLayout, KPI, and any component
+       Used by Taskbar, DepartmentLayout, KPI, and any component
        that renders per-department color accents.
        ═══════════════════════════════════════════════════════════════ */
   --dept-drilling: #2563eb; /* blue-600 */
@@ -331,19 +396,13 @@
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
     0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
   --shadow-login-float:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(0, 0, 0, 0.05),
-    inset 1px 0 0 rgba(255, 255, 255, 0.5), inset -1px 0 0 rgba(0, 0, 0, 0.03),
-    var(--refraction-inner-shadow), inset 0 12px 24px rgba(255, 255, 255, 0.42),
-    inset 0 -10px 18px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03),
-    0 10px 20px rgba(0, 0, 0, 0.04), 0 20px 40px rgba(0, 0, 0, 0.05),
-    0 36px 72px rgba(0, 0, 0, 0.06), 0 52px 104px rgba(0, 0, 0, 0.04);
+    var(--chrome-bar-shadow), inset 0 0 0 1px var(--brand-gold-rim),
+    inset 0 2px 0 var(--brand-gold-highlight), inset 0 -2px 4px var(--brand-gold-depth);
   --shadow-login-float-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(0, 0, 0, 0.06),
-    inset 1px 0 0 rgba(255, 255, 255, 0.6), inset -1px 0 0 rgba(0, 0, 0, 0.04),
-    var(--refraction-inner-shadow), inset 0 14px 28px rgba(255, 255, 255, 0.5),
-    inset 0 -12px 22px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.04),
-    0 14px 28px rgba(0, 0, 0, 0.05), 0 28px 56px rgba(0, 0, 0, 0.06),
-    0 48px 96px rgba(0, 0, 0, 0.07), 0 64px 128px rgba(0, 0, 0, 0.05);
+    0 1px 0 oklch(100% 0 0deg / 94%), 0 4px 8px oklch(0% 0 0deg / 9%),
+    0 10px 22px oklch(0% 0 0deg / 12%), 0 20px 44px oklch(46% 0.1 82 / 18%),
+    0 32px 56px oklch(0% 0 0deg / 10%), inset 0 0 0 1px var(--brand-gold-rim),
+    inset 0 2px 0 var(--brand-gold-highlight), inset 0 -3px 6px var(--brand-gold-depth);
 
   /* ═══════════════════════════════════════════════════════════════
        REFRACTION SYSTEM
@@ -456,8 +515,8 @@
   /* ---- Focus Mode Tokens (DESIGN.md lines 203-205) ---- */
   --transition-focus: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* macOS menu bar height */
-  --mac-menu-bar-height: 28px;
+  /* Taskbar height */
+  --taskbar-height: 28px;
 
   /* ═══════════════════════════════════════════════════════════════
        THEME TRANSITION

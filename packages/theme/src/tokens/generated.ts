@@ -66,7 +66,6 @@ export const tokens = {
       red: "var(--mac-red)",
       yellow: "var(--mac-yellow)",
       green: "var(--mac-green)",
-      menuBarHeight: "var(--mac-menu-bar-height)",
     },
     glass: {
       surface: "var(--glass-surface)",
@@ -164,6 +163,9 @@ export const tokens = {
     speedMult: "0.5",
     amplScale: "0.4",
     opacity: "0.25",
+  },
+  taskbar: {
+    height: "var(--taskbar-height)",
   },
 } as const;
 

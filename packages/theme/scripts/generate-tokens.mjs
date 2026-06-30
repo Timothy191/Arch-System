@@ -82,6 +82,7 @@ function extractTokens(cssText) {
     shadow: {},
     radius: {},
     wave: {},
+    taskbar: {},
   };
 
   const lines = cssText.split("\n");
@@ -126,6 +127,9 @@ function extractTokens(cssText) {
     } else if (name.startsWith("--radius-")) {
       const key = name.replace("--radius-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.radius[key] = `var(${name})`;
+    } else if (name.startsWith("--taskbar-")) {
+      const key = name.replace("--taskbar-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      tokens.taskbar[key] = `var(${name})`;
     } else if (name.startsWith("--wave-")) {
       const key = name.replace("--wave-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.wave[key] = value; // wave tokens are numbers, keep raw value

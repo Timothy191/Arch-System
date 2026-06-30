@@ -34,7 +34,7 @@ export function FeedbackWidget() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 right-4 z-50" data-chrome-ui="feedback">
+      <div className="fixed bottom-20 right-4 z-50" data-chrome-ui="feedback">
         <Button onClick={() => setIsOpen(true)} className="rounded-full shadow-diffusion-md">
           💬 Feedback / Support
         </Button>
@@ -43,7 +43,7 @@ export function FeedbackWidget() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-80 bg-background border rounded-lg shadow-window p-4 flex flex-col gap-4">
+    <div className="fixed bottom-24 lg:bottom-[4.75rem] right-4 z-50 w-80 bg-background border rounded-lg shadow-window p-4 flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold text-sm">Send Feedback</h3>
         <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>

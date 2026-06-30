@@ -358,8 +358,8 @@ module.exports = {
     },
     path: ["mac-green"],
   },
-  "mac-menu-bar-height": {
-    key: "{mac-menu-bar-height}",
+  "taskbar-height": {
+    key: "{taskbar-height}",
     value: "28px",
     type: "dimension",
     filePath: "tokens.json",
@@ -367,13 +367,13 @@ module.exports = {
     original: {
       value: "28px",
       type: "dimension",
-      key: "{mac-menu-bar-height}",
+      key: "{taskbar-height}",
     },
-    name: "MacMenuBarHeight",
+    name: "TaskbarHeight",
     attributes: {
-      category: "mac-menu-bar-height",
+      category: "taskbar-height",
     },
-    path: ["mac-menu-bar-height"],
+    path: ["taskbar-height"],
   },
   bg: {
     primary: {
@@ -977,12 +977,14 @@ module.exports = {
     },
     "border-gradient": {
       key: "{glass.border-gradient}",
-      value: "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
+      value:
+        "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
+        value:
+          "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
         type: "color",
         key: "{glass.border-gradient}",
       },
@@ -2063,12 +2065,14 @@ module.exports = {
   },
   "shadow-diffusion-sm": {
     key: "{shadow-diffusion-sm}",
-    value: "0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03)",
+    value:
+      "0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03)",
     type: "shadow",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03)",
+      value:
+        "0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03)",
       type: "shadow",
       key: "{shadow-diffusion-sm}",
     },
@@ -2080,12 +2084,14 @@ module.exports = {
   },
   "shadow-diffusion-md": {
     key: "{shadow-diffusion-md}",
-    value: "0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03)",
+    value:
+      "0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03)",
     type: "shadow",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03)",
+      value:
+        "0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03)",
       type: "shadow",
       key: "{shadow-diffusion-md}",
     },
@@ -2097,12 +2103,14 @@ module.exports = {
   },
   "shadow-diffusion-lg": {
     key: "{shadow-diffusion-lg}",
-    value: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03)",
+    value:
+      "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03)",
     type: "shadow",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03)",
+      value:
+        "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03)",
       type: "shadow",
       key: "{shadow-diffusion-lg}",
     },
@@ -2114,12 +2122,14 @@ module.exports = {
   },
   "shadow-diffusion-xl": {
     key: "{shadow-diffusion-xl}",
-    value: "0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04)",
+    value:
+      "0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04)",
     type: "shadow",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04)",
+      value:
+        "0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04)",
       type: "shadow",
       key: "{shadow-diffusion-xl}",
     },

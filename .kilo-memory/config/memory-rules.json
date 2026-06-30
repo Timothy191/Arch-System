@@ -1,0 +1,9 @@
+[
+  {
+    "trigger": "/compact",
+    "action": "log_compressed_content",
+    "path": ".kilo-memory/.memory/compact-archive.md",
+    "format": "markdown",
+    "timestamp": true
+  }
+]

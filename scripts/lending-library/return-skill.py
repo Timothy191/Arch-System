@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Return a checked-out skill and clear active session context."""
+"""Return a checked-out skill and remove ephemeral staging."""
 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
-RUN_DIR = Path(__file__).resolve().parents[2] / "run"
-ACTIVE_SKILL_FILE = RUN_DIR / ".active-skill.json"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lib.checkout import return_resource  # noqa: E402
 
 
 def main() -> int:
@@ -17,17 +17,9 @@ def main() -> int:
     parser.add_argument("skill_name", help="Skill name being returned")
     args = parser.parse_args()
 
-    if ACTIVE_SKILL_FILE.exists():
-        try:
-            active = json.loads(ACTIVE_SKILL_FILE.read_text(encoding="utf-8"))
-            if active.get("skill") != args.skill_name:
-                print(
-                    f"WARN: returning '{args.skill_name}' but active is '{active.get('skill')}'",
-                    file=sys.stderr,
-                )
-        except json.JSONDecodeError:
-            pass
-        ACTIVE_SKILL_FILE.unlink(missing_ok=True)
+    removed = return_resource("skill", args.skill_name)
+    if not removed:
+        print(f"WARN: '{args.skill_name}' was not active", file=sys.stderr)
 
     print(f"RETURNED: {args.skill_name}")
     return 0

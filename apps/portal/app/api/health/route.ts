@@ -1,58 +1,53 @@
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { getRedisClient } from "@repo/redis";
+import {
+  aggregateHealthStatus,
+  checkDatabaseHealth,
+  checkFuxaHealth,
+  checkRedisHealth,
+} from "~/lib/health/checks";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const startedAt = Date.now();
-  const checks: Record<string, any> = {};
-  let status: "healthy" | "degraded" | "unhealthy" = "healthy";
+  const last_check = new Date().toISOString();
 
-  // 1. Check Supabase / PostgreSQL Database connectivity
-  try {
-    const supabase = await createServerSupabaseClient();
-    // Fetch a single row/count from a basic table to check if connection works
-    const { error } = await supabase.from("employees").select("role").limit(1);
+  const [database, redis, fuxa] = await Promise.all([
+    checkDatabaseHealth(),
+    checkRedisHealth(),
+    checkFuxaHealth(),
+  ]);
 
-    if (error) {
-      checks.database = { status: "degraded", error: error.message };
-      status = "degraded";
-    } else {
-      checks.database = { status: "healthy" };
-    }
-  } catch (err: any) {
-    checks.database = { status: "unhealthy", error: err.message || String(err) };
-    status = "unhealthy";
-  }
+  const status = aggregateHealthStatus([database, redis, fuxa]);
+  const latency_ms = Date.now() - startedAt;
 
-  // 2. Check Redis Cache connectivity
-  try {
-    const redis = await getRedisClient();
-    const redisConnected = redis.isOpen ?? false;
-    checks.redis = {
-      status: redisConnected ? "healthy" : "degraded",
-      connected: redisConnected,
-    };
-    if (!redisConnected) {
-      if (status !== "unhealthy") {
-        status = "degraded";
-      }
-    }
-  } catch (err: any) {
-    checks.redis = { status: "unhealthy", error: err.message || String(err) };
-    status = "unhealthy";
-  }
+  const services = {
+    database,
+    redis,
+    fuxa,
+    // OpenAPI compatibility alias — same Postgres connectivity probe
+    supabase_realtime: database,
+  };
 
-  const responseStatus = status === "unhealthy" ? 503 : 200;
+  const checks = {
+    database,
+    redis,
+    fuxa,
+  };
+
+  const httpStatus = status === "down" ? 503 : 200;
 
   return NextResponse.json(
     {
       status,
-      timestamp: new Date().toISOString(),
-      latencyMs: Date.now() - startedAt,
+      overall_status: status,
+      services,
       checks,
+      last_check,
+      timestamp: last_check,
+      latency_ms,
+      latencyMs: latency_ms,
     },
-    { status: responseStatus },
+    { status: httpStatus },
   );
 }

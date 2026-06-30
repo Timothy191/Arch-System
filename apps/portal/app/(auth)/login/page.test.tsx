@@ -43,7 +43,15 @@ describe("LoginPage Server Component", () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
-    expect(screen.getByText("Welcome Back")).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { level: 2 });
+    expect(heading).toHaveTextContent("Welcome back to Arch");
+    expect(heading).toHaveTextContent("How can I assist you?");
+    expect(screen.getByRole("heading", { level: 1, name: "Arch-Operational System" })).toBeInTheDocument();
+    expect(screen.getByText("Arch-Operational System")).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
+    expect(screen.getAllByText("CLI Agents").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Claude Code").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Aider").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Antigravity").length).toBeGreaterThan(0);
   });
 });

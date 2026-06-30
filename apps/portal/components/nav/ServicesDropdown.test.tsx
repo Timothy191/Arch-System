@@ -106,6 +106,7 @@ jest.mock("@/lib/weather-api", () => ({
     ];
     return dirs[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16] ?? "N";
   }),
+  getWeatherAlert: jest.fn(() => ({ level: "none", message: "" })),
 }));
 
 jest.mock("~/app/actions", () => ({
@@ -174,7 +175,7 @@ describe("ServicesDropdown", () => {
     await waitFor(() => {
       // Weather
       expect(screen.getByText("24°C")).toBeInTheDocument();
-      expect(screen.getByText("Partly cloudy")).toBeInTheDocument();
+      expect(screen.getByText(/Partly cloudy/)).toBeInTheDocument();
 
       // Shift
       expect(screen.getByText(/Shift$/)).toBeInTheDocument(); // Day or Night Shift
@@ -240,6 +241,17 @@ describe("ServicesDropdown", () => {
 
     await waitFor(() => {
       expect(screen.getByText("It is now safe to turn off your computer.")).toBeInTheDocument();
+    });
+  });
+
+  it("renders communications actions when open", async () => {
+    render(<ServicesDropdown />);
+    const trigger = screen.getByRole("button", { name: /system tray/i });
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(screen.getByText("WhatsApp Web")).toBeInTheDocument();
+      expect(screen.getByText("WhatsApp Split View")).toBeInTheDocument();
     });
   });
 

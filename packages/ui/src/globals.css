@@ -327,16 +327,37 @@
 
   :is(body.focus-mode) .fixed.z-\[100\],
   :is(body.focus-mode) .fixed.z-navigation,
-  :is(body.focus-mode) .z-navigation {
-    background: rgba(12, 16, 28, 0.72);
-    border-color: rgba(255, 255, 255, 0.08);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+  :is(body.focus-mode) .z-navigation,
+  :is(body.focus-mode) .layer-taskbar-brushed,
+  :is(body.focus-mode) .layer-dock-brushed {
+    border-color: var(--brand-gold-border-strong);
+    box-shadow:
+      0 8px 24px oklch(0% 0 0deg / 45%),
+      0 16px 40px oklch(46% 0.1 82 / 22%),
+      inset 0 1px 0 var(--brand-gold-highlight),
+      inset 0 0 0 1px var(--brand-gold-rim),
+      inset 0 -2px 4px var(--brand-gold-depth);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
   }
 
-  :is(body.focus-mode) .z-navigation button[class*="bg-white"] {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.12);
+  :is(body.focus-mode) .layer-taskbar-brushed,
+  :is(body.focus-mode) .layer-dock-brushed {
+    background-image:
+      radial-gradient(ellipse 80% 120% at 0% 50%, var(--brand-gold-glow) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 100% at 100% 50%, var(--brand-silver-glow) 0%, transparent 50%),
+      linear-gradient(180deg, oklch(18% 0.015 265 / 92%) 0%, oklch(14% 0.012 265 / 88%) 100%);
+  }
+
+  :is(body.focus-mode) .z-navigation button[class*="bg-white"],
+  :is(body.focus-mode) .brand-chrome-pill,
+  :is(body.focus-mode) .brand-chrome-orb {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--brand-gold-border);
+    box-shadow:
+      inset 0 1px 0 oklch(100% 0 0deg / 12%),
+      inset 0 -1px 0 var(--brand-gold-depth),
+      0 2px 8px oklch(0% 0 0deg / 25%);
   }
 
   :is(body.focus-mode) .z-navigation button:hover,

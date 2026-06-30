@@ -1,9 +1,11 @@
 import { createClient, type RedisClientType } from "redis";
 
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
-
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
+
+function resolveRedisUrl(): string {
+  return process.env.REDIS_URL || "redis://127.0.0.1:6380";
+}
 
 /**
  * Get or create the singleton Redis client.
@@ -22,7 +24,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
     // spurious "Two different types with this name exist" errors. Cast to
     // any so TS uses structural typing instead of nominal.
     const next: RedisClientType = createClient({
-      url: REDIS_URL,
+      url: resolveRedisUrl(),
       socket: {
         keepAlive: true,
         reconnectStrategy(retries: number) {

@@ -170,6 +170,587 @@
   }
 }
 
+/* ── Brushed gold — realistic animated shine ── */
+
+@keyframes brand-gold-shine-sweep {
+  0%,
+  20% {
+    transform: translateX(-135%) skewX(-12deg);
+    opacity: 0;
+  }
+
+  26% {
+    opacity: 0.3;
+  }
+
+  34% {
+    opacity: 0.78;
+  }
+
+  54% {
+    transform: translateX(135%) skewX(-12deg);
+    opacity: 0.78;
+  }
+
+  62% {
+    opacity: 0.18;
+  }
+
+  68%,
+  100% {
+    transform: translateX(135%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes brand-gold-shine-wash {
+  0%,
+  14% {
+    background-position: -70% 0, 0 0;
+  }
+
+  46% {
+    background-position: 72% 0, 0 0;
+  }
+
+  58% {
+    background-position: 170% 0, 0 0;
+  }
+
+  86%,
+  100% {
+    background-position: 170% 0, 0 0;
+  }
+}
+
+@keyframes brand-gold-radial-drift {
+  0%,
+  100% {
+    background-position:
+      0% 50%,
+      100% 50%,
+      14% 0%,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      3% 49%,
+      97% 51%,
+      17% 2%,
+      0 0;
+  }
+}
+
+@keyframes brand-gold-text-shine {
+  0%,
+  8% {
+    background-position: 0% 50%;
+  }
+
+  92%,
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes brand-gold-watermark-glint {
+  0%,
+  78%,
+  100% {
+    opacity: 0.38;
+    filter: blur(8px) brightness(1);
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  40% {
+    opacity: 0.58;
+    filter: blur(9px) brightness(1.12);
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+
+  48% {
+    opacity: 0.68;
+    filter: blur(8px) brightness(1.22);
+    transform: translate(-50%, -49%) scale(1.03);
+  }
+}
+
+@keyframes pearl-border-reflect {
+  0%,
+  74%,
+  100% {
+    background-position: 0% 0%, -110% 0%;
+  }
+
+  80% {
+    background-position: 0% 0%, -50% 0%;
+  }
+
+  86% {
+    background-position: 0% 0%, 35% 0%;
+  }
+
+  92% {
+    background-position: 0% 0%, 130% 0%;
+  }
+
+  96% {
+    background-position: 0% 0%, 200% 0%;
+  }
+}
+
+@keyframes pearl-light-pass {
+  0%,
+  14% {
+    transform: translateX(-68%) skewX(-8deg);
+    opacity: 0;
+  }
+
+  22% {
+    opacity: 0.5;
+  }
+
+  36% {
+    opacity: 0.82;
+  }
+
+  50% {
+    transform: translateX(68%) skewX(-8deg);
+    opacity: 0.76;
+  }
+
+  62% {
+    opacity: 0.18;
+  }
+
+  72%,
+  100% {
+    transform: translateX(68%) skewX(-8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pearl-panel-shine-wash {
+  0%,
+  12% {
+    background-position: -80% 0, 0 0;
+  }
+
+  44% {
+    background-position: 78% 0, 0 0;
+  }
+
+  56% {
+    background-position: 175% 0, 0 0;
+  }
+
+  84%,
+  100% {
+    background-position: 175% 0, 0 0;
+  }
+}
+
+@keyframes pearl-ambient-drift {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(1) translate(0, 0);
+  }
+
+  50% {
+    opacity: 0.88;
+    transform: scale(1.04) translate(1%, 0.6%);
+  }
+}
+
+@keyframes pearl-edge-breathe {
+  0%,
+  100% {
+    border-color: var(--pearl-border);
+    filter: brightness(1);
+  }
+
+  50% {
+    border-color: var(--pearl-border-strong);
+    filter: brightness(1.04);
+  }
+}
+
+@keyframes pearl-thread-glint {
+  0%,
+  72%,
+  100% {
+    border-color: oklch(86% 0.04 290 / 76%);
+    box-shadow:
+      inset 1px 0 0 oklch(96% 0.035 305 / 42%),
+      inset -1px 0 0 oklch(96% 0.035 305 / 42%),
+      inset 0 -1px 0 oklch(96% 0.035 305 / 52%);
+  }
+
+  82% {
+    border-color: oklch(92% 0.05 300 / 92%);
+    box-shadow:
+      inset 1px 0 0 oklch(98% 0.04 310 / 58%),
+      inset -1px 0 0 oklch(98% 0.04 310 / 58%),
+      inset 0 -1px 0 oklch(98% 0.04 310 / 72%),
+      0 0 12px oklch(90% 0.06 295 / 18%);
+  }
+}
+
+@keyframes pearl-surface-drift {
+  0%,
+  100% {
+    background-position:
+      0% 24%,
+      100% 76%,
+      50% 0%,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      6% 20%,
+      94% 80%,
+      52% 4%,
+      0 0;
+  }
+}
+
+@keyframes pearl-text-shine {
+  0%,
+  8% {
+    background-position: 0% 50%;
+  }
+
+  44% {
+    background-position: 100% 50%;
+  }
+
+  92%,
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes brand-gold-border-reflect {
+  0%,
+  74%,
+  100% {
+    background-position: 0% 0%, -110% 0%;
+  }
+
+  80% {
+    background-position: 0% 0%, -50% 0%;
+  }
+
+  86% {
+    background-position: 0% 0%, 35% 0%;
+  }
+
+  92% {
+    background-position: 0% 0%, 130% 0%;
+  }
+
+  96% {
+    background-position: 0% 0%, 200% 0%;
+  }
+}
+
+@keyframes brand-gold-rim-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 1px oklch(82% 0.13 82 / 58%),
+      inset 0 1px 0 oklch(92% 0.12 82 / 62%),
+      inset 0 -1px 0 oklch(52% 0.13 82 / 34%);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 0 1px oklch(88% 0.14 82 / 78%),
+      inset 0 1px 0 oklch(96% 0.11 82 / 82%),
+      inset 0 -1px 0 oklch(52% 0.13 82 / 28%),
+      0 0 12px oklch(76% 0.15 82 / 22%);
+  }
+}
+
+@keyframes brand-silver-shine-wash {
+  0%,
+  12% {
+    background-position: 130% 0, 0 0;
+  }
+
+  48% {
+    background-position: -30% 0, 0 0;
+  }
+
+  72%,
+  100% {
+    background-position: -30% 0, 0 0;
+  }
+}
+
+@keyframes brand-metal-edge-travel {
+  0%,
+  6% {
+    background-position: 0% 50%;
+  }
+
+  94%,
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
+@keyframes brand-silver-edge-travel {
+  0%,
+  100% {
+    background-position: 0 0;
+  }
+
+  50% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes brand-gold-border-breathe {
+  0%,
+  100% {
+    border-color: var(--brand-gold-border-strong);
+    filter: brightness(1);
+  }
+
+  50% {
+    border-color: oklch(78% 0.17 82 / 98%);
+    filter: brightness(1.04);
+  }
+}
+
+/* Slow natural light — dark brand marks (login logo, launcher orb) */
+@keyframes brand-logo-light-sweep {
+  0%,
+  18% {
+    transform: translateX(-125%) skewX(-14deg);
+    opacity: 0;
+  }
+
+  26% {
+    opacity: 0.42;
+  }
+
+  36% {
+    opacity: 0.58;
+  }
+
+  52% {
+    transform: translateX(125%) skewX(-14deg);
+    opacity: 0.58;
+  }
+
+  62% {
+    opacity: 0.16;
+  }
+
+  72%,
+  100% {
+    transform: translateX(125%) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
+@keyframes brand-logo-specular-glint {
+  0%,
+  70%,
+  100% {
+    filter: drop-shadow(0 1px 1px oklch(52% 0.014 265 / 28%));
+    color: oklch(24% 0.012 265);
+  }
+
+  36% {
+    filter: drop-shadow(-0.5px -1px 0 oklch(100% 0 0deg / 20%))
+      drop-shadow(1px 2px 2px oklch(35% 0.012 265 / 36%));
+    color: oklch(28% 0.013 265);
+  }
+
+  44% {
+    filter: drop-shadow(0 0 10px oklch(84% 0.09 82 / 24%))
+      drop-shadow(0 1px 2px oklch(40% 0.012 265 / 32%)) brightness(1.07);
+    color: oklch(32% 0.015 82);
+  }
+}
+
+@keyframes login-card-natural-light {
+  0%,
+  16% {
+    transform: translateX(-62%) skewX(-7deg);
+    opacity: 0;
+  }
+
+  24% {
+    opacity: 0.42;
+  }
+
+  38% {
+    opacity: 0.68;
+  }
+
+  52% {
+    transform: translateX(62%) skewX(-7deg);
+    opacity: 0.62;
+  }
+
+  64% {
+    opacity: 0.14;
+  }
+
+  74%,
+  100% {
+    transform: translateX(62%) skewX(-7deg);
+    opacity: 0;
+  }
+}
+
+@keyframes login-card-ambient-warmth {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: scale(1) translate(0, 0);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: scale(1.05) translate(1.5%, 0.8%);
+  }
+}
+
+@keyframes login-card-float-idle {
+  0%,
+  100% {
+    transform: translateY(-12px) translateZ(36px) rotateX(2.2deg);
+  }
+
+  50% {
+    transform: translateY(-16px) translateZ(42px) rotateX(1.8deg);
+  }
+}
+
+@keyframes login-card-thread-glint {
+  0%,
+  72%,
+  100% {
+    border-color: oklch(78% 0.14 82 / 78%);
+    box-shadow:
+      0 0 0 0.5px oklch(94% 0.12 82 / 58%),
+      inset 0 0 0 0.5px oklch(100% 0 0deg / 42%);
+  }
+
+  82% {
+    border-color: oklch(88% 0.15 82 / 92%);
+    box-shadow:
+      0 0 0 0.5px oklch(98% 0.11 82 / 78%),
+      0 0 10px oklch(76% 0.15 82 / 22%),
+      inset 0 0 0 0.5px oklch(100% 0 0deg / 62%);
+  }
+}
+
+@keyframes login-card-brushed-grain {
+  0%,
+  100% {
+    background-position:
+      0 0,
+      100% 40%,
+      0% 26%,
+      0 0,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      0 3px,
+      96% 44%,
+      4% 24%,
+      0 0,
+      0 0;
+  }
+}
+
+@keyframes taskbar-brushed-grain {
+  0%,
+  100% {
+    background-position:
+      0 0,
+      0 0,
+      102% 8%,
+      -4% 92%,
+      0 0,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      2px 0,
+      0 1px,
+      98% 12%,
+      2% 88%,
+      0 0,
+      0 0;
+  }
+}
+
+@keyframes taskbar-silver-mirror-sweep {
+  0%,
+  10% {
+    transform: translateX(-130%) skewX(-14deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.95;
+  }
+
+  46% {
+    transform: translateX(230%) skewX(-14deg);
+    opacity: 0.95;
+  }
+
+  56%,
+  100% {
+    transform: translateX(230%) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
+@keyframes taskbar-silver-edge-breathe {
+  0%,
+  100% {
+    border-color: oklch(76% 0.012 255 / 74%);
+    filter: brightness(1);
+  }
+
+  50% {
+    border-color: oklch(90% 0.014 255 / 92%);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes brand-gold-surface-drift {
+  0%,
+  100% {
+    background-position:
+      0% 28%,
+      100% 72%,
+      0 0;
+  }
+
+  50% {
+    background-position:
+      8% 24%,
+      92% 76%,
+      0 0;
+  }
+}
+
 /* ── Modern Micro-Interactions ── */
 
 @keyframes soft-bounce {
@@ -477,9 +1058,49 @@
   .animate-ken-burns,
   .animate-gradient-shift,
   .animate-marquee,
-  .animate-marquee-vertical {
+  .animate-marquee-vertical,
+  .login-card-watermark-mark,
+  .login-card-float-wrapper--top .login-card-container.layer-signin-card,
+  .login-card-thread-border,
+  .login-card-container.layer-signin-card::before,
+  .login-card-container.layer-signin-card::after,
+  .login-card-watermark::after,
+  .login-card-footer.login-card-footer-panel::before,
+  .login-card-ambient,
+  .login-card-ambient::before,
+  .login-card-ambient::after,
+  .brand-gold-border-shine,
+  .login-card-border-shine,
+  .brand-taskbar-search-wrap::after,
+  .login-form-control-border-shine::before,
+  .login-card-notice::before,
+  .login-card-container .liquid-glass-button-signin::before,
+  .login-card-footer-os,
+  .login-brand-logo-a::before,
+  .login-brand-logo-a svg.login-brand-logo-mark,
+  .brand-chrome-orb::after,
+  .brand-chrome-orb svg,
+  .brand-taskbar-search-wrap::before,
+  .brand-divider,
+  .login-card-footer.login-card-footer-panel::after,
+  .route-bg-fallback,
+  .layer-taskbar-brushed:not(.layer-taskbar-kde),
+  .layer-taskbar-brushed:not(.layer-taskbar-kde)::before,
+  .layer-taskbar-brushed:not(.layer-taskbar-kde)::after,
+  .layer-dock-brushed::before,
+  .layer-dock-brushed::after {
     animation: none !important;
     transition: none !important;
+  }
+
+  .login-card-footer-ticker-track {
+    animation: none !important;
     transform: none !important;
+  }
+
+  .login-card-watermark-mark {
+    transform: translate(-50%, -50%) !important;
+    filter: blur(8px) !important;
+    opacity: 0.42 !important;
   }
 }

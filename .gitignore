@@ -41,8 +41,17 @@ Thumbs.db
 # Cursor local state
 .cursor/
 
+# Agent conversation memory (local summaries from /summarize)
+.memory/sessions/*.md
+.memory/index.jsonl
+.memory/state.json
+.memory/.compact-pending
+.memory/.compact-staging.md
+
 # Misc local artifacts
 .assets-checksum
 go*.linux-amd64.tar.gz
 run/
+__pycache__/
+*.py[cod]
 .vercel

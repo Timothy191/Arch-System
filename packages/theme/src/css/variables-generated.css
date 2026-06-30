@@ -22,7 +22,7 @@
   --mac-red: #ff5f56;
   --mac-yellow: #ffbd2e;
   --mac-green: #27c93f;
-  --mac-menu-bar-height: 28px;
+  --taskbar-height: 28px;
   --border: 240 6% 87%;
   --accent-red: #d22118;
   --accent-alert: #d22118;
@@ -39,17 +39,11 @@
   --glass-surface-strong: rgba(255, 255, 255, 0.92);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-border-top: rgba(255, 255, 255, 0.25);
-  --glass-border-gradient: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.3)
-  );
+  --glass-border-gradient: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3));
   --glass-text: rgba(10, 10, 20, 0.92);
   --glass-text-muted: rgba(10, 10, 20, 0.55);
   --glass-vibrancy: rgba(246, 246, 250, 0.82);
-  --glass-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
   --vibrancy-surface: rgba(246, 246, 250, 0.82);
@@ -98,21 +92,13 @@
   --tremor-content-emphasis: 240 6% 23%;
   --tremor-content-strong: 240 6% 10%;
   --tremor-content-inverted: 0 0% 100%;
-  --shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.03),
-    0 20px 48px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
-  --shadow-card-hover:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.04),
-    0 28px 64px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
-  --shadow-elevated:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
-    0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03), 0 12px 32px rgba(0,0,0,0.03), 0 20px 48px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
+  --shadow-card-hover: 0 2px 4px rgba(0,0,0,0.02), 0 6px 16px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.04), 0 28px 64px rgba(0,0,0,0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-elevated: 0 2px 4px rgba(0,0,0,0.02), 0 8px 20px rgba(0,0,0,0.03), 0 20px 48px rgba(0,0,0,0.03), 0 32px 72px rgba(0,0,0,0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
   --shadow-glow-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
   --shadow-glow-primary: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
   --shadow-glow-electric: 0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
-  --shadow-window:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
-    0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+  --shadow-window: 0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.03), 0 24px 56px rgba(0,0,0,0.04), 0 40px 96px rgba(0,0,0,0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
   --shadow-diffusion-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 8px 12px -4px rgba(0, 0, 0, 0.03);
   --shadow-diffusion-md: 0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
   --shadow-diffusion-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "scripts/memory/hooks/session-init.sh"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "scripts/memory/hooks/turn-counter.sh",
+        "matcher": "UserPromptSubmit"
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "scripts/memory/hooks/pre-compact.sh"
+      }
+    ]
+  }
+}

@@ -3,31 +3,42 @@
 import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
+import { TrayStatusPipe } from "@/components/nav/TrayStatusPipe";
 
-export function SystemClock() {
-  const [timeStr, setTimeStr] = useState<string>("");
+const SAST_TIMEZONE = "Africa/Johannesburg";
+
+interface SystemClockProps {
+  /** pill = standalone chrome button; strip = inline segment in taskbar status cluster */
+  variant?: "pill" | "strip";
+}
+
+export function SystemClock({ variant = "pill" }: SystemClockProps) {
+  const [dayPart, setDayPart] = useState("");
+  const [timePart, setTimePart] = useState("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
 
-  // Update clock time string (day + time) every 10 seconds for the header pill
+  // Update clock labels every 10 seconds for the header strip
   useEffect(() => {
     function updateClock() {
       const now = new Date();
       setTime(now);
 
-      const timePart = now.toLocaleTimeString("en-GB", {
-        timeZone: "Africa/Johannesburg",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+      setTimePart(
+        now.toLocaleTimeString("en-GB", {
+          timeZone: SAST_TIMEZONE,
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+      );
 
-      const dayPart = now.toLocaleDateString("en-GB", {
-        timeZone: "Africa/Johannesburg",
-        weekday: "short",
-      });
-
-      setTimeStr(`${dayPart} ${timePart}`);
+      setDayPart(
+        now.toLocaleDateString("en-GB", {
+          timeZone: SAST_TIMEZONE,
+          weekday: "short",
+        }),
+      );
     }
     updateClock();
     const interval = setInterval(updateClock, 10000);
@@ -42,7 +53,7 @@ export function SystemClock() {
     return () => clearInterval(secondInterval);
   }, []);
 
-  if (!timeStr) return null;
+  if (!dayPart || !timePart) return null;
 
   // Calendar calculations
   const viewYear = calendarDate.getFullYear();
@@ -83,6 +94,11 @@ export function SystemClock() {
   const minuteDeg = (minutes / 60) * 360 + (seconds / 60) * 6;
   const secondDeg = (seconds / 60) * 360;
 
+  const triggerClass =
+    variant === "strip"
+      ? "flex items-center gap-1 h-full px-0.5 bg-transparent border-0 cursor-default outline-none select-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)] rounded-sm"
+      : "flex items-center gap-1.5 px-2.5 py-1 rounded-full brand-chrome-pill transition-colors select-none cursor-default outline-none active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]";
+
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
@@ -90,14 +106,32 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05] transition-colors select-none cursor-default outline-none active:scale-95"
+          className={triggerClass}
         >
-          <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
-            {timeStr}
-          </span>
-          <span className="text-[10px] text-[var(--text-secondary)] opacity-60 font-medium tracking-wider leading-none uppercase">
-            SAST
-          </span>
+          {variant === "strip" ? (
+            <>
+              <span className="text-[11px] font-medium text-[var(--text-heading)] tabular-nums leading-none">
+                {dayPart}
+              </span>
+              <TrayStatusPipe />
+              <span className="text-[11px] font-semibold text-[var(--text-heading)] tabular-nums leading-none">
+                {timePart}
+              </span>
+              <TrayStatusPipe />
+              <span className="text-[10px] text-[var(--brand-gold)] font-medium tracking-wider leading-none uppercase">
+                SAST
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
+                {dayPart} {timePart}
+              </span>
+              <span className="text-[10px] text-[var(--brand-gold)] opacity-90 font-medium tracking-wider leading-none uppercase">
+                SAST
+              </span>
+            </>
+          )}
         </button>
       </Popover.Trigger>
 

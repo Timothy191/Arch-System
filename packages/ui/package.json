@@ -74,6 +74,7 @@
     "./BentoGrid": "./src/components/ui/bento-grid.tsx",
     "./AnimatedList": "./src/components/ui/animated-list.tsx",
     "./HeroVideoDialog": "./src/components/ui/hero-video-dialog.tsx",
+    "./Taskbar": "./src/components/Taskbar.tsx",
     "./MacMenuBar": "./src/components/MacMenuBar.tsx",
     "./MacTitleBar": "./src/components/MacTitleBar.tsx",
     "./WorkflowBuilder": "./src/components/WorkflowBuilder.tsx",

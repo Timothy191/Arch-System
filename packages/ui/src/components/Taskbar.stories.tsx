@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MacMenuBar } from "./MacMenuBar";
+import { Taskbar } from "./Taskbar";
 import React from "react";
 import { Bell, Wifi, Battery } from "lucide-react";
 
-const meta: Meta<typeof MacMenuBar> = {
-  title: "Components/MacMenuBar",
-  component: MacMenuBar,
+const meta: Meta<typeof Taskbar> = {
+  title: "Components/Taskbar",
+  component: Taskbar,
   parameters: {
     layout: "fullscreen",
   },
@@ -13,7 +13,7 @@ const meta: Meta<typeof MacMenuBar> = {
 
 export default meta;
 
-type Story = StoryObj<typeof MacMenuBar>;
+type Story = StoryObj<typeof Taskbar>;
 
 export const Default: Story = {
   args: {
@@ -31,7 +31,7 @@ export const Default: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="h-24 bg-slate-100 p-4">
+      <div className="min-h-24 w-full bg-slate-100">
         <Story />
       </div>
     ),
@@ -44,7 +44,7 @@ export const Minimal: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="h-24 bg-slate-100 p-4">
+      <div className="min-h-24 w-full bg-slate-100">
         <Story />
       </div>
     ),

@@ -1,19 +1,19 @@
-/* Auth chrome auto-hide — bottom dock and feedback pill only (top taskbar stays visible) */
+/* Auth chrome auto-hide — agent bar and feedback pill only (bottom KDE taskbar stays visible) */
 
-[data-chrome-ui="dock"],
+[data-chrome-ui="agent-bar"],
 [data-chrome-ui="feedback"] {
   transition:
     opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html.chrome-auto-hidden [data-chrome-ui="dock"],
+html.chrome-auto-hidden [data-chrome-ui="agent-bar"],
 html.chrome-auto-hidden [data-chrome-ui="feedback"] {
   opacity: 0;
   pointer-events: none;
 }
 
-html.chrome-auto-hidden [data-chrome-ui="dock"] {
+html.chrome-auto-hidden [data-chrome-ui="agent-bar"] {
   transform: translateY(calc(100% + 1.5rem));
 }
 
@@ -22,7 +22,7 @@ html.chrome-auto-hidden [data-chrome-ui="feedback"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.chrome-auto-hidden [data-chrome-ui="dock"],
+  html.chrome-auto-hidden [data-chrome-ui="agent-bar"],
   html.chrome-auto-hidden [data-chrome-ui="feedback"] {
     opacity: 1;
     pointer-events: auto;

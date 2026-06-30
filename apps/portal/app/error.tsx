@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";
+import { ErrorFullscreen } from "@/components/errors/ErrorFullscreen";
 import {
   isAppError,
   isValidationError,
@@ -68,45 +68,31 @@ export default function RootError({ error, reset }: RootErrorProps) {
   const appError = isAppError(error) ? (error as any) : null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="flex justify-center">
-          <Image
-            src="/error-pages/404-error.png"
-            alt="Error Graphic"
-            width={120}
-            height={120}
-            priority
-            className="opacity-80 hover:opacity-100 transition-opacity duration-200"
-          />
-        </div>
-        <div className="space-y-2" role="alert" aria-live="assertive">
-          <h1 className="text-3xl font-medium text-[var(--text-heading)]">{title}</h1>
-          <p className="text-[var(--text-muted)] text-sm">{message}</p>
-        </div>
-
-        {/* Show error code for AppErrors */}
-        {appError && (
-          <div className="text-xs text-[var(--text-muted)] font-mono">
-            Error code: {appError.code}
-            {appError.statusCode && ` (${appError.statusCode})`}
-          </div>
-        )}
-
-        {/* Show context in development */}
-        {isDev && context && (
-          <details className="text-left">
-            <summary className="text-xs text-[var(--text-muted)] cursor-pointer">
-              Error details (dev only)
-            </summary>
-            <pre className="mt-2 p-3 bg-[var(--bg-secondary)] rounded text-xs text-[var(--text-muted)] overflow-auto">
-              {JSON.stringify(context, null, 2)}
-            </pre>
-          </details>
-        )}
-
-        <SecondaryButton onClick={reset}>Try again</SecondaryButton>
+    <ErrorFullscreen>
+      <div className="space-y-2" role="alert" aria-live="assertive">
+        <h1 className="text-3xl font-medium text-[var(--text-heading)]">{title}</h1>
+        <p className="text-[var(--text-muted)] text-sm">{message}</p>
       </div>
-    </div>
+
+      {appError && (
+        <div className="text-xs text-[var(--text-muted)] font-mono">
+          Error code: {appError.code}
+          {appError.statusCode && ` (${appError.statusCode})`}
+        </div>
+      )}
+
+      {isDev && context && (
+        <details className="text-left">
+          <summary className="text-xs text-[var(--text-muted)] cursor-pointer">
+            Error details (dev only)
+          </summary>
+          <pre className="mt-2 p-3 bg-[var(--bg-secondary)] rounded text-xs text-[var(--text-muted)] overflow-auto">
+            {JSON.stringify(context, null, 2)}
+          </pre>
+        </details>
+      )}
+
+      <SecondaryButton onClick={reset}>Try again</SecondaryButton>
+    </ErrorFullscreen>
   );
 }

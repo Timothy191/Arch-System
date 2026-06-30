@@ -1,17 +1,32 @@
 "use client";
 
 import { Database } from "lucide-react";
+import { resolveSupabaseStudioUrl } from "@repo/supabase";
 import { cn } from "@repo/ui/lib/utils";
 import { GlassCard } from "@repo/ui/GlassCard";
 
+const STUDIO_URL = resolveSupabaseStudioUrl();
+
 export function DatabasePanel() {
+  const openStudio = () => {
+    window.open(STUDIO_URL, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="h-full">
-      <a
-        href="http://localhost:54323"
-        className="block h-full interactive-element outline-none uiverse-card group"
-        target="_self"
-        rel="noopener noreferrer"
+      <div
+        role="link"
+        tabIndex={0}
+        data-testid="database-panel"
+        aria-label="Open Supabase Studio to manage data, migrations and schema"
+        onClick={openStudio}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openStudio();
+          }
+        }}
+        className="block h-full interactive-element outline-none uiverse-card group cursor-pointer"
       >
         <GlassCard
           variant="default"
@@ -34,12 +49,12 @@ export function DatabasePanel() {
                 <h3 className="uiverse-card-title">Database</h3>
               </div>
               <p className="uiverse-card-subtitle">
-                Open Supabase Studio to manage data, migrations & schema
+                Open Supabase Studio to manage data, migrations &amp; schema
               </p>
             </div>
           </div>
         </GlassCard>
-      </a>
+      </div>
     </div>
   );
 }

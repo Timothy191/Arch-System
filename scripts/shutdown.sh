@@ -10,6 +10,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORTAL_PID_FILE="$REPO_ROOT/run/.portal.pid"
 TOOLS_COMPOSE="$REPO_ROOT/infra/docker/compose.tools.yml"
+REDIS_COMPOSE="$REPO_ROOT/redis/docker-compose.yml"
 MONITOR_COMPOSE="$REPO_ROOT/infra/monitoring/docker-compose.yml"
 DATABASE_DIR="$REPO_ROOT/packages/database"
 
@@ -94,7 +95,18 @@ if [ -f "$MONITOR_COMPOSE" ]; then
   fi
 fi
 
-# ── Step 3: Stop Secondary Helper Stack ──────────────────
+# ── Step 3b: Stop Redis offload stack ─────────────────────
+if [ -f "$REDIS_COMPOSE" ]; then
+  log "Stopping Redis offload stack (preserving volume)..."
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^arch-redis-offload$'; then
+    $COMPOSE_CMD -f "$REDIS_COMPOSE" stop || true
+    log "Redis offload stack suspended."
+  else
+    log "Redis offload stack is already suspended."
+  fi
+fi
+
+# ── Step 4: Stop Secondary Helper Stack ──────────────────
 if [ -f "$TOOLS_COMPOSE" ]; then
   log "Stopping Redis, n8n, and Flowise (preserving volumes)..."
   if docker ps --format '{{.Names}}' | grep -E "(plantcor-redis|plantcor-n8n|plantcor-flowise)" > /dev/null 2>&1; then
@@ -105,7 +117,7 @@ if [ -f "$TOOLS_COMPOSE" ]; then
   fi
 fi
 
-# ── Step 4: Stop Supabase local stack ────────────────────
+# ── Step 5: Stop Supabase local stack ────────────────────
 log "Stopping local Supabase stack safely (preserving database volumes)..."
 if docker ps --format '{{.Names}}' | grep -q 'supabase_'; then
   cd "$DATABASE_DIR"

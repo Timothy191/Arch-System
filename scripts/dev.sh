@@ -71,6 +71,118 @@ wait_for() {
   return 1
 }
 
+PORTAL_ENV_FILE="$REPO_ROOT/apps/portal/.env"
+PORTAL_ENV_LOCAL="$REPO_ROOT/apps/portal/.env.local"
+SUPABASE_API_URL="${NEXT_PUBLIC_SUPABASE_URL:-http://127.0.0.1:54321}"
+REMOTE_SUPABASE=false
+REDIS_URL="${REDIS_URL:-redis://127.0.0.1:6380}"
+REDIS_COMPOSE="$REPO_ROOT/redis/docker-compose.yml"
+REDIS_CONTAINER="arch-redis-offload"
+
+read_env_var() {
+  local key="$1" file="$2"
+  [ -f "$file" ] || return 1
+  local line
+  line=$(grep -E "^${key}=" "$file" 2>/dev/null | tail -n1 || true)
+  [ -n "$line" ] || return 1
+  echo "${line#*=}" | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
+}
+
+is_local_supabase_url() {
+  case "$1" in
+    http://127.0.0.1:*|http://localhost:*|https://127.0.0.1:*|https://localhost:*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+load_supabase_config() {
+  local from_file="" file
+
+  for file in "$PORTAL_ENV_LOCAL" "$PORTAL_ENV_FILE" "$REPO_ROOT/.env"; do
+    from_file=$(read_env_var "NEXT_PUBLIC_SUPABASE_URL" "$file" || true)
+    if [ -n "$from_file" ]; then
+      SUPABASE_API_URL="$from_file"
+      break
+    fi
+  done
+
+  if [ -z "$from_file" ]; then
+    for file in "$PORTAL_ENV_LOCAL" "$PORTAL_ENV_FILE" "$REPO_ROOT/.env"; do
+      from_file=$(read_env_var "SUPABASE_URL" "$file" || true)
+      if [ -n "$from_file" ]; then
+        SUPABASE_API_URL="$from_file"
+        break
+      fi
+    done
+  fi
+
+  SUPABASE_API_URL="${NEXT_PUBLIC_SUPABASE_URL:-${SUPABASE_URL:-$SUPABASE_API_URL}}"
+  SUPABASE_API_URL="${SUPABASE_API_URL%/}"
+
+  if is_local_supabase_url "$SUPABASE_API_URL"; then
+    REMOTE_SUPABASE=false
+  else
+    REMOTE_SUPABASE=true
+  fi
+}
+
+load_redis_config() {
+  local from_file="" file
+
+  for file in "$PORTAL_ENV_LOCAL" "$PORTAL_ENV_FILE" "$REPO_ROOT/.env"; do
+    from_file=$(read_env_var "REDIS_URL" "$file" || true)
+    if [ -n "$from_file" ]; then
+      REDIS_URL="$from_file"
+      break
+    fi
+  done
+
+  REDIS_URL="${REDIS_URL:-redis://127.0.0.1:6380}"
+}
+
+redis_reachable() {
+  local url="$1"
+  local host="localhost" port="6379"
+
+  if command -v redis-cli >/dev/null 2>&1; then
+    if redis-cli -u "$url" PING 2>/dev/null | grep -q "PONG"; then
+      return 0
+    fi
+  fi
+
+  if [[ "$url" =~ redis://([^:@/]+)(:([0-9]+))? ]]; then
+    host="${BASH_REMATCH[1]}"
+    if [ -n "${BASH_REMATCH[3]}" ]; then
+      port="${BASH_REMATCH[3]}"
+    fi
+  fi
+
+  if command -v nc >/dev/null 2>&1 && nc -z "$host" "$port" 2>/dev/null; then
+    return 0
+  fi
+
+  (timeout 1 bash -c "echo >/dev/tcp/${host}/${port}") 2>/dev/null
+}
+
+supabase_rest_url() {
+  echo "${SUPABASE_API_URL%/}/rest/v1/"
+}
+
+# Returns 0 when the REST endpoint responds (200 or 401 without a key is OK).
+supabase_api_reachable() {
+  local url="$1"
+  local code
+  code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+  case "$code" in
+    200|401) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 detect_compose_cmd() {
   if docker compose version > /dev/null 2>&1; then
     echo "docker compose"
@@ -202,9 +314,14 @@ show_results() {
   if [ "$START_OVERVIEW" = "true" ]; then
     echo -e "  ${BOLD}Overview:${NC}  ${CYAN}http://localhost:3002${NC}"
   fi
-  echo -e "  ${BOLD}Redis:${NC}    ${CYAN}redis://localhost:6379${NC}"
-  echo -e "  ${BOLD}Studio:${NC}   ${CYAN}http://localhost:54323${NC}"
-  echo -e "  ${BOLD}API:${NC}      ${CYAN}http://localhost:54321${NC}"
+  echo -e "  ${BOLD}Redis:${NC}    ${CYAN}${REDIS_URL}${NC}"
+  if [ "$REMOTE_SUPABASE" = "true" ]; then
+    echo -e "  ${BOLD}Studio:${NC}   ${DIM}Supabase Dashboard (remote)${NC}"
+    echo -e "  ${BOLD}API:${NC}      ${CYAN}${SUPABASE_API_URL}${NC}"
+  else
+    echo -e "  ${BOLD}Studio:${NC}   ${CYAN}http://localhost:54323${NC}"
+    echo -e "  ${BOLD}API:${NC}      ${CYAN}http://localhost:54321${NC}"
+  fi
   echo
   echo -e "  ${DIM}Stop with Ctrl+C${NC}"
   echo
@@ -291,6 +408,16 @@ banner
 
 if [ "$QUICK_MODE" = "true" ]; then
   echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
+  echo
+fi
+
+# Load portal Supabase URL early (after optional --quick flag) for remote detection.
+if [ -f "$PORTAL_ENV_LOCAL" ] || [ -f "$PORTAL_ENV_FILE" ] || [ -f "$REPO_ROOT/.env" ]; then
+  load_supabase_config
+fi
+if [ "$REMOTE_SUPABASE" = "true" ] && [ "$QUICK_MODE" != "true" ]; then
+  echo -e "  ${YELLOW}${BOLD}☁ Remote Supabase${NC} — skipping local Docker stack"
+  echo -e "  ${DIM}Using ${SUPABASE_API_URL}${NC}"
   echo
 fi
 
@@ -395,9 +522,51 @@ env_pass=true
 node -v > /dev/null 2>&1 && check "Node.js" "pass" "$(node -v)" || { check "Node.js" "fail"; env_pass=false; }
 pnpm -v > /dev/null 2>&1 && check "pnpm" "pass" "$(pnpm -v)" || { check "pnpm" "fail"; env_pass=false; }
 
-# 1a. Check & Fix Docker (skip in quick mode)
+# 1a. Portal environment file (needed before Supabase URL detection)
+if [ ! -f "$PORTAL_ENV_FILE" ] && [ ! -f "$PORTAL_ENV_LOCAL" ]; then
+  if [ -f "$REPO_ROOT/apps/portal/env/.env.example" ]; then
+    echo -e "  ${INFO} Apps portal .env missing. Copying from env/.env.example..."
+    cp "$REPO_ROOT/apps/portal/env/.env.example" "$PORTAL_ENV_FILE"
+    check "Environment file" "pass" "copied from template"
+    if grep -q -E "your-|TODO|CHANGEME" "$PORTAL_ENV_FILE" 2>/dev/null; then
+      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
+    fi
+  elif [ -f "$REPO_ROOT/apps/portal/.env.example" ]; then
+    echo -e "  ${INFO} Apps portal .env missing. Copying from .env.example..."
+    cp "$REPO_ROOT/apps/portal/.env.example" "$PORTAL_ENV_FILE"
+    check "Environment file" "pass" "copied from template"
+    if grep -q -E "your-|TODO|CHANGEME" "$PORTAL_ENV_FILE" 2>/dev/null; then
+      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
+    fi
+  else
+    check "Environment file" "fail" "missing and no .env.example found"
+    env_pass=false
+  fi
+else
+  check "Environment file" "pass" "exists"
+fi
+
+load_supabase_config
+load_redis_config
+if [ "$REMOTE_SUPABASE" = "true" ]; then
+  check "Supabase target" "pass" "remote ${SUPABASE_API_URL}"
+else
+  check "Supabase target" "pass" "local ${SUPABASE_API_URL}"
+fi
+
+check "Redis target" "pass" "${REDIS_URL}"
+
+# 1b. Check & Fix Docker (skip in quick mode; optional when remote + Redis already up)
 if [ "$QUICK_MODE" = "true" ]; then
   check "Docker" "skip" "quick mode"
+elif [ "$REMOTE_SUPABASE" = "true" ]; then
+  if docker info > /dev/null 2>&1; then
+    check "Docker" "pass" "available for Redis"
+  elif redis_reachable "$REDIS_URL"; then
+    check "Docker" "skip" "remote Supabase — native Redis already running"
+  else
+    check "Docker" "warn" "not running — Redis container may not start"
+  fi
 else
   if ! docker info > /dev/null 2>&1; then
     echo -e "  ${INFO} Docker is not running. Attempting to start docker..."
@@ -428,7 +597,7 @@ else
   fi
 fi
 
-# 1b. Check & Fix Port Conflicts
+# 1c. Check & Fix Port Conflicts
 check_and_fix_port() {
   local port="$1" name="$2" service="$3"
   if ss -tlnH | grep -q -E ":$port "; then
@@ -498,35 +667,14 @@ check_and_fix_port() {
 
 if [ "$QUICK_MODE" = "true" ]; then
   check_and_fix_port "$PORT" "Next.js portal" ""
+elif [ "$REMOTE_SUPABASE" = "true" ]; then
+  check_and_fix_port "$PORT" "Next.js portal" ""
+  check_and_fix_port 6379 "Redis" "redis-server"
 else
   check_and_fix_port 54322 "Supabase DB" ""
   check_and_fix_port 6379 "Redis" "redis-server"
   check_and_fix_port 54321 "Supabase API" ""
   check_and_fix_port 8000 "Kong Gateway" ""
-fi
-
-# 1c. Check & Fix Environment files
-if [ ! -f "$REPO_ROOT/apps/portal/.env" ] && [ ! -f "$REPO_ROOT/apps/portal/.env.local" ]; then
-  if [ -f "$REPO_ROOT/apps/portal/env/.env.example" ]; then
-    echo -e "  ${INFO} Apps portal .env missing. Copying from env/.env.example..."
-    cp "$REPO_ROOT/apps/portal/env/.env.example" "$REPO_ROOT/apps/portal/.env"
-    check "Environment file" "pass" "copied from template"
-    if grep -q -E "your-|TODO|CHANGEME" "$REPO_ROOT/apps/portal/.env" 2>/dev/null; then
-      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
-    fi
-  elif [ -f "$REPO_ROOT/apps/portal/.env.example" ]; then
-    echo -e "  ${INFO} Apps portal .env missing. Copying from .env.example..."
-    cp "$REPO_ROOT/apps/portal/.env.example" "$REPO_ROOT/apps/portal/.env"
-    check "Environment file" "pass" "copied from template"
-    if grep -q -E "your-|TODO|CHANGEME" "$REPO_ROOT/apps/portal/.env" 2>/dev/null; then
-      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
-    fi
-  else
-    check "Environment file" "fail" "missing and no .env.example found"
-    env_pass=false
-  fi
-else
-  check "Environment file" "pass" "exists"
 fi
 
 if [ -d "$REPO_ROOT/node_modules" ]; then
@@ -539,15 +687,30 @@ fi
 [ "$env_pass" = false ] && { echo -e "\n  ${RED}Environment checks failed. Aborting.${NC}\n"; exit 1; }
 
 # ── Phase 2: Infrastructure (Supabase) ───────────────────
+SUPABASE_REST_URL="$(supabase_rest_url)"
+
 if [ "$QUICK_MODE" = "true" ]; then
   phase 2 "Infrastructure"
   check "Supabase API" "skip" "quick mode"
   check "Database" "skip" "quick mode"
   check "Studio" "skip" "quick mode"
+elif [ "$REMOTE_SUPABASE" = "true" ]; then
+  phase 2 "Infrastructure"
+
+  if supabase_api_reachable "$SUPABASE_REST_URL"; then
+    check "Supabase API" "pass" "$SUPABASE_API_URL"
+  else
+    check "Supabase API" "fail" "unreachable at $SUPABASE_API_URL"
+    exit 1
+  fi
+
+  check "Database" "pass" "remote REST API responding"
+
+  check "Studio" "skip" "remote — use Supabase Dashboard"
 else
   phase 2 "Infrastructure"
 
-  if curl -fs "http://127.0.0.1:54321/rest/v1/" > /dev/null 2>&1; then
+  if curl -fs "$SUPABASE_REST_URL" > /dev/null 2>&1; then
     check "Supabase API" "pass" "http://localhost:54321"
   else
     echo -e "  ${INFO} Starting Supabase (Docker)..."
@@ -558,7 +721,7 @@ else
     SUPAPID=$!
     spinner "$SUPAPID" "Booting Supabase containers"
     cd "$REPO_ROOT"
-    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 30; then
+    if wait_for "$SUPABASE_REST_URL" "Supabase API" 30; then
       check "Supabase API" "pass" "http://localhost:54321"
     else
       check "Supabase API" "fail" "timed out — check 'docker ps'"
@@ -567,13 +730,18 @@ else
   fi
 
   # Verify database connection
-  if curl -fs "http://127.0.0.1:54321/rest/v1/" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
+  if curl -fs "$SUPABASE_REST_URL" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
     check "Database" "pass" "Postgres responding"
   else
     check "Database" "warn" "API up but unexpected response"
   fi
 
-  # 2b. Optional Tools
+  # Studio check (local stack only)
+  curl -fs "http://127.0.0.1:54323" > /dev/null 2>&1 && check "Studio" "pass" "http://localhost:54323" || check "Studio" "skip" "not required"
+fi
+
+if [ "$QUICK_MODE" != "true" ]; then
+  # Optional Tools (local or remote Supabase)
   if [ "$START_TOOLS" = "true" ]; then
     if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
       echo -e "  ${INFO} Starting Docker Tools..."
@@ -603,32 +771,36 @@ else
     fi
   fi
 
-  # Studio check
-  curl -fs "http://127.0.0.1:54323" > /dev/null 2>&1 && check "Studio" "pass" "http://localhost:54323" || check "Studio" "skip" "not required"
-
-  # 2b. Redis — auto-start if not already running
+  # Redis — isolated offload stack (redis/) or existing native listener
   REDIS_REQUIRED=true
   if [ "$REDIS_REQUIRED" = "true" ]; then
-    if echo "PING" | redis-cli 2>/dev/null | grep -q "PONG"; then
-      check "Redis" "pass" "redis://localhost:6379 (already running)"
-    elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q "arch-redis"; then
-      check "Redis" "pass" "Docker container already running"
-    else
-      echo -e "  ${INFO} Starting Redis (Docker)..."
-      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.redis.yml" up -d > /dev/null 2>&1
+    if redis_reachable "$REDIS_URL"; then
+      check "Redis" "pass" "${REDIS_URL} (offload link active)"
+    elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q "$REDIS_CONTAINER"; then
+      check "Redis" "pass" "${REDIS_URL} (container running)"
+    elif [ -f "$REDIS_COMPOSE" ]; then
+      echo -e "  ${INFO} Starting Redis offload stack (redis/)..."
+      $COMPOSE_CMD -f "$REDIS_COMPOSE" up -d > /dev/null 2>&1
       REDIS_HEALTHY=false
       for i in $(seq 1 15); do
-        if docker inspect --format='{{.State.Health.Status}}' arch-redis 2>/dev/null | grep -q "healthy"; then
+        if docker inspect --format='{{.State.Health.Status}}' "$REDIS_CONTAINER" 2>/dev/null | grep -q "healthy"; then
+          REDIS_HEALTHY=true
+          break
+        fi
+        if redis_reachable "$REDIS_URL"; then
           REDIS_HEALTHY=true
           break
         fi
         sleep 1
       done
       if [ "$REDIS_HEALTHY" = "true" ]; then
-        check "Redis" "pass" "redis://localhost:6379"
+        check "Redis" "pass" "${REDIS_URL} (offload stack started)"
       else
-        check "Redis" "warn" "started but health check pending — check 'docker ps'"
+        check "Redis" "warn" "offload stack started but health check pending — run pnpm redis:status"
       fi
+    else
+      check "Redis" "fail" "redis/docker-compose.yml missing"
+      exit 1
     fi
   fi
 
@@ -756,10 +928,11 @@ fi
 # 4d. Supabase RLS / anon key check
 if [ "$QUICK_MODE" = "true" ]; then
   check "Auth config" "skip" "quick mode"
-elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
+elif [ -n "${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}" ] || [ -n "${SUPABASE_ANON_KEY:-}" ] \
+  || grep -qE '^(NEXT_PUBLIC_)?SUPABASE_ANON_KEY=' "$PORTAL_ENV_LOCAL" "$PORTAL_ENV_FILE" "$REPO_ROOT/.env" 2>/dev/null; then
   check "Auth config" "pass" "anon key present"
 else
-  check "Auth config" "warn" "no SUPABASE_ANON_KEY in .env"
+  check "Auth config" "warn" "no SUPABASE_ANON_KEY in portal .env"
 fi
 
 # 4e. Static assets accessible

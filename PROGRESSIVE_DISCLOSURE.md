@@ -36,12 +36,31 @@
 | Pipeline | `.cursor/rules/git-github-pipeline.mdc` |
 | Decisions | `HOW.md` architectural decisions log |
 
+## Slice: frontend vs backend separation
+
+| Need | Read |
+|------|------|
+| Active spec | `HOW.md` Phase A–D |
+| Client trees | `rg '"use client"' apps/portal libs/features` |
+| Server entrypoints | `rg 'createServerSupabaseClient|server-only' apps/portal libs packages` |
+| Feature layout | `libs/features/*/ui` vs `libs/features/*/data-access` |
+
+## Slice: agent orchestrator
+
+| Need | Read |
+|------|------|
+| Frontier patterns | `.cursor/rules/frontier-agentic-patterns.mdc` |
+| Effort tier | `python3 scripts/agent-orchestrator/classify-effort.py "<task>"` |
+| High-tier workflow | `scripts/agent-orchestrator/dynamic-workflow.md` |
+| Pre-ship verify | `bash scripts/agent-orchestrator/verify-gate.sh` |
+| Post-compact recovery | `.memory/config/compaction-recovery.md` |
+
 ## Active context (update per task)
 
 ```
-task: none
-loaded: [MEMORY.md]
-skip: docs/wiki/**, AGENT_TRACER.md, docs/DESIGN.md (unless UI token work)
+task: separate frontend (UI) from background logic (API, data-access, infra)
+loaded: [HOW.md, active-context.md, MEMORY.md]
+skip: docs/wiki/**, AGENT_TRACER.md
 ```
 
 ## Past learnings

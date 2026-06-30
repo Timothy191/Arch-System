@@ -29,8 +29,11 @@ import {
   Phone,
   ClipboardList,
   Siren,
+  MessageCircle,
+  PanelRight,
 } from "lucide-react";
-import { fetchWeather, getWindDirection, type WeatherData } from "@/lib/weather-api";
+import { fetchWeather, getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
+import { openWhatsAppSplitView, openWhatsAppWebWindow } from "@/lib/communications/whatsapp";
 
 /* ------------------------------------------------------------------ */
 //  Shift helpers
@@ -113,6 +116,7 @@ export function ServicesDropdown() {
 
   const shift = useMemo(() => getShiftInfo(), [open]);
   const safety = useSafetyAlerts();
+  const weatherAlert = weather ? getWeatherAlert(weather) : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -152,14 +156,13 @@ export function ServicesDropdown() {
             aria-expanded={open}
             title="System Tray (Alt+S)"
             className={cn(
-              "relative flex items-center justify-center w-7 h-7 rounded-full",
-              "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
-              "text-[var(--text-secondary)]",
+              "relative flex items-center justify-center w-7 h-7 rounded-full brand-chrome-pill",
+              "text-[var(--brand-silver-muted)]",
               "active:scale-[0.97]",
               "transition-all duration-150 ease-in-out",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]",
               "cursor-default select-none",
-              open && "bg-black/[0.06]",
+              open && "border-[var(--brand-gold-edge)]",
             )}
           >
             <ChevronDown
@@ -179,7 +182,7 @@ export function ServicesDropdown() {
           {/* ── Environmental & Operations Status ── */}
           <div className="grid grid-cols-2 gap-1.5 px-2 pb-1.5">
             {/* Weather */}
-            <div className="bg-black/[0.02] border border-black/[0.04] rounded-lg p-2">
+            <div className="bg-black/[0.02] border border-black/[0.04] rounded-lg p-2 relative">
               {weatherLoading || !weather ? (
                 <div className="flex items-center gap-2">
                   <CloudSun className="w-4 h-4 text-[var(--text-muted)] animate-pulse" />
@@ -194,8 +197,20 @@ export function ServicesDropdown() {
                     </div>
                     <div className="text-[10px] text-[var(--text-muted)] truncate">
                       {weather.description}
+                      {weather.location.name ? ` · ${weather.location.name}` : ""}
                     </div>
                   </div>
+                  {weatherAlert && weatherAlert.level !== "none" && (
+                    <span
+                      className={cn(
+                        "absolute top-1.5 right-1.5 w-2 h-2 rounded-full",
+                        weatherAlert.level === "critical"
+                          ? "bg-[var(--accent-red)] animate-pulse"
+                          : "bg-[var(--accent-orange)]",
+                      )}
+                      title={weatherAlert.message}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -272,6 +287,47 @@ export function ServicesDropdown() {
                 )}
               </div>
             </div>
+          </div>
+
+          {weather && weatherAlert && weatherAlert.level !== "none" && (
+            <div
+              className={cn(
+                "mx-2 mb-1.5 rounded-lg border px-2.5 py-2 text-[11px] font-medium",
+                weatherAlert.level === "critical"
+                  ? "bg-accent-red/10 text-accent-red border-accent-red/20"
+                  : "bg-accent-orange/10 text-accent-orange border-accent-orange/20",
+              )}
+            >
+              {weatherAlert.message}
+            </div>
+          )}
+
+          <DropdownMenuSeparator className="bg-black/[0.06] my-1.5 mx-1" />
+
+          {/* ── Communications ── */}
+          <div className="px-2 pb-1">
+            <p className="px-2 pb-1 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]">
+              Communications
+            </p>
+            <DropdownMenuItem
+              className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-0 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+              onSelect={() => openWhatsAppWebWindow()}
+            >
+              <MessageCircle className="h-3.5 w-3.5 text-[var(--accent-green)]" />
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                WhatsApp Web
+              </span>
+              <span className="ml-auto text-[10px] text-[var(--text-muted)]">Window</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-0 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+              onSelect={() => openWhatsAppSplitView()}
+            >
+              <PanelRight className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                WhatsApp Split View
+              </span>
+            </DropdownMenuItem>
           </div>
 
           <DropdownMenuSeparator className="bg-black/[0.06] my-1.5 mx-1" />

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
+import { SystemClock } from "@/components/clock/SystemClock";
+import { TrayStatusPipe } from "@/components/nav/TrayStatusPipe";
+import { mapHealthApiResponse, type HealthApiResponse } from "~/lib/health/client";
 import {
   Wifi,
   WifiOff,
@@ -275,44 +278,27 @@ function useServerHealth() {
           method: "GET",
           cache: "no-store",
         });
-        const data = await res.json();
+        const data = (await res.json()) as HealthApiResponse;
         if (!cancelled) {
-          const statusMap = {
-            healthy: "healthy",
-            degraded: "degraded",
-            down: "error",
-          } as const;
-
-          const mapServiceStatus = (
-            s: { status: "healthy" | "degraded" | "down" } | null | undefined,
-          ): "ok" | "degraded" | "unavailable" => {
-            if (!s) return "unavailable";
-            if (s.status === "healthy") return "ok";
-            if (s.status === "degraded") return "degraded";
-            return "unavailable";
-          };
-
+          const mapped = mapHealthApiResponse(data);
           setHealth({
-            status: data.status
-              ? (statusMap[data.status as keyof typeof statusMap] ?? "error")
-              : "error",
-            db: mapServiceStatus(data.services?.supabase_realtime),
-            redis: mapServiceStatus(data.services?.redis),
-            fuxa: mapServiceStatus(data.services?.fuxa),
-            responseTime: data.latency_ms ?? 0,
-            timestamp: data.last_check ?? "",
+            ...mapped,
             loading: false,
             lastFetched: Date.now(),
           });
         }
       } catch {
         if (!cancelled) {
-          setHealth((prev) => ({
-            ...prev,
+          setHealth({
             status: "error",
+            db: "unavailable",
+            redis: "unavailable",
+            fuxa: "unavailable",
+            responseTime: 0,
+            timestamp: "",
             loading: false,
             lastFetched: Date.now(),
-          }));
+          });
         }
       }
     };
@@ -674,8 +660,7 @@ export function SystemTrayPill() {
       <Link
         href="/drilling/tools?tab=tasks"
         className={cn(
-          "flex items-center justify-center w-[26px] h-[26px] rounded-full",
-          "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
+          "flex items-center justify-center w-[26px] h-[26px] rounded-full brand-chrome-pill",
           "transition-colors active:scale-[0.97]",
         )}
         title="Task Manager"
@@ -683,18 +668,24 @@ export function SystemTrayPill() {
         <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
       </Link>
 
-      <Popover.Root>
-        <Popover.Trigger asChild>
-          <button
-            type="button"
-            aria-label="System Tray Popover"
-            title="System status & options"
-            className={cn(
-              "flex items-center gap-2 h-[26px] px-2.5 rounded-full select-none cursor-default outline-none",
-              "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
-              "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
-            )}
-          >
+      <div
+        className={cn(
+          "system-tray-status-cluster flex items-center gap-1 h-[26px] px-1.5 rounded-full",
+          "select-none",
+        )}
+      >
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              aria-label="System Tray Popover"
+              title="System status & options"
+              className={cn(
+                "flex items-center gap-1 h-full px-0.5 rounded-full cursor-default outline-none",
+                "bg-transparent border-0",
+                "focus-visible:ring-2 focus-visible:ring-[var(--brand-gold-edge)]",
+              )}
+            >
             {/* Server health dot */}
             <span className="relative flex h-2 w-2">
               {health.status === "healthy" && !health.loading && (
@@ -702,12 +693,12 @@ export function SystemTrayPill() {
               )}
               <span className={cn("relative inline-flex rounded-full h-2 w-2", healthDotColor)} />
             </span>
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <TrayStatusPipe />
 
             <VolumeIcon className={cn("w-3.5 h-3.5", volumeColor)} />
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <TrayStatusPipe />
             <ConnIcon className={cn("w-3.5 h-3.5", connColor)} />
-            <span className="w-[1px] h-3 bg-black/[0.08]" />
+            <TrayStatusPipe />
             <div className="flex items-center gap-0.5">
               <BatteryIcon className={cn("w-3.5 h-3.5", batteryColor)} />
               {battery.supported && battery.level !== null && (
@@ -761,6 +752,10 @@ export function SystemTrayPill() {
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
+
+        <TrayStatusPipe />
+        <SystemClock variant="strip" />
+      </div>
     </div>
   );
 }

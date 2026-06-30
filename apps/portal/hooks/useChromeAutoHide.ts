@@ -16,8 +16,8 @@ function isInBottomRevealZone(clientY: number): boolean {
 }
 
 /**
- * Hides the bottom dock on auth surfaces after idle time.
- * The top taskbar remains visible. Reveals when the pointer enters the bottom edge zone.
+ * Hides the bottom agent bar on auth surfaces after idle time.
+ * Reveals when the pointer enters the bottom edge zone.
  */
 export function useChromeAutoHide() {
   const [hidden, setHidden] = useState(false);

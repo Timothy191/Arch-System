@@ -1,4 +1,5 @@
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
+import { resolveSupabaseStudioUrl } from "@repo/supabase";
 import { PRODUCTIVITY_TOOLS } from "~/lib/departments";
 
 interface Tool {
@@ -74,7 +75,7 @@ export const EXTERNAL_TOOLS: ExternalTool[] = [
   {
     name: "supabase",
     displayName: "Supabase Studio",
-    url: "http://localhost:54323",
+    url: resolveSupabaseStudioUrl(),
     description: "Self-hosted Supabase dashboard for database management & migrations",
     icon: "Database",
     color: "violet",
