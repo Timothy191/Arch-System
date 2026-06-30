@@ -1,3 +1,6 @@
 ## 2026-06-30 - Memoize derived Map in HourlyLoadsGrid
 **Learning:** Initializing a derived Map or Set directly in the render body of a component that uses heavy data-bound UI (like RevoGrid) causes downstream hooks and components to treat the reference as new on every render. This triggers "render cascades" and prevents effective memoization of heavy computation.
 **Action:** Always wrap derived Map/Set initializations in `useMemo` with the source data as a dependency to ensure reference stability and prevent unnecessary re-renders of heavy children.
+## 2026-06-30 - Fix CI Dependency and Type Resolution
+**Learning:** Monorepo CI often fails due to build artifact dependencies. Redirecting workspace package exports to source ('src/*.ts') instead of build outputs ('dist/*.js') during development/CI allows 'tsc --noEmit' to resolve types across packages without requiring a sequential build of all dependencies. Additionally, 'glob' version synchronization in 'package.json' overrides is necessary to prevent EOVERRIDE conflicts in strict npm/pnpm environments.
+**Action:** When workspace packages are used primarily for type safety and shared logic, point 'package.json' exports to source files to simplify CI pipelines. Ensure 'glob' and other frequent utility dependencies are aligned in root overrides.

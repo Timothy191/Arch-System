@@ -171,3 +171,21 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - To run validation in CI, first generate types from a production API URL or cached spec file
 - Current workflow: Run dev server → generate types → validate → add JSDoc annotations to uncovered endpoints → repeat
 - **Status Update**: All 28 API routes now have JSDoc annotations (100% coverage achieved). The validation workflow can now focus on deep type equivalence checking rather than coverage gaps.
+
+## 2026-06-30 - Fix CI Type Check & Module Resolution
+
+### Purpose
+Resolve CI failures in 'Lint & Type Check' job where '@repo/contract' was not found during type checking of dependent packages, and fix 'glob' version conflicts.
+
+### Changes Made
+1. **package.json (Root)**:
+   - Synchronized 'glob' version to '>=10.5.0' in both dependencies and overrides to resolve EOVERRIDE errors in CI.
+2. **package.json (Contract)**:
+   - Redirected 'exports', 'main', and 'types' from 'dist/' (build artifacts) to 'src/' (source files).
+   - This ensures that 'tsc --noEmit' in dependent packages (like 'apps/portal' or 'libs/features/departments/ui') can resolve the types directly from source during CI/linting without requiring a full build step first.
+3. **CI Workflow (ci.yml)**:
+   - Added '-y' flag to 'npx wait-on' to resolve exit code 127/non-interactive prompt issues.
+
+### What the Next Agent Should Know
+- Types for '@repo/contract' are now resolved from 'packages/contract/src/index.ts'.
+- This change stabilizes the 'type-check' tasks in the Nx pipeline during CI.

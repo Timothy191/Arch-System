@@ -564,7 +564,7 @@ jobs:
 
       - name: Run A11y Audit
         run: |
-          npx serve storybook-static -l 6006 &
-          npx wait-on http://localhost:6006 --timeout 60000
+          npx -y serve storybook-static -l 6006 &
+          npx -y wait-on http://localhost:6006 --timeout 60000
           pnpm test:a11y --url http://localhost:6006
         working-directory: packages/ui

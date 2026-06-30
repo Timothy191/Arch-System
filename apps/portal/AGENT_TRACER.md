@@ -2566,3 +2566,13 @@ Exposing Prometheus metrics without authentication can leak operational statisti
   - `HourlyLoadsGrid.tsx`: Wrapped `loadsByMachine` Map initialization in `useMemo` with `hourlyLoads` dependency.
   - Added comments explaining the optimization.
 - **Next agent**: Reference stability is now guaranteed for `loadsByMachine`, which stabilizes `source`, `getHourValue`, `getMachineTotal`, and `getMaterialType`.
+
+## 2026-06-30 - CI Stability & pnpm Alignment
+
+- **Purpose**: Resolve CI failures blocking the performance optimization PR.
+- **Changes**:
+  - Root `package.json`: Aligned `glob` version to `>=10.5.0`.
+  - `packages/contract/package.json`: Redirected exports to `src/*.ts` for build-less type checking.
+  - `libs/shared/hooks/package.json`: Added `@types/node` for `process` resolution.
+  - `.github/workflows/*`: Standardized pnpm to `9.15.9`.
+- **Next agent**: CI should now pass for type-checking and dependency installation.
