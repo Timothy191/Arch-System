@@ -134,12 +134,20 @@ export default async function LoginPage() {
             <div className="login-card-body">
               <section className="login-card-intro">
                 <div className="login-card-brand">
-                  <h1 className="login-brand-wordmark" aria-label="Arch-Operational System">
+                  <h1
+                    className="login-brand-wordmark"
+                    aria-label="Arch-Operational System. Powered and Integrated with Agentic AI Capabilities"
+                  >
                     <span className="login-brand-wordmark-visual" aria-hidden="true">
                       <span className="login-brand-logo-a">
                         <Logo className="login-brand-logo-mark" splitTone />
                       </span>
-                      <span className="login-brand-wordmark-tail">Arch-Operational System</span>
+                      <span className="login-brand-wordmark-copy">
+                        <span className="login-brand-wordmark-tail">Arch-Operational System</span>
+                        <span className="login-brand-wordmark-tagline">
+                          Powered &amp; Integrated with Agentic AI Capabilities
+                        </span>
+                      </span>
                     </span>
                   </h1>
                 </div>

@@ -54,8 +54,16 @@ describe("LoginPage Server Component", () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Arch-Operational System" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Arch-Operational System. Powered and Integrated with Agentic AI Capabilities",
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Arch-Operational System")).toBeInTheDocument();
+    expect(
+      screen.getByText("Powered & Integrated with Agentic AI Capabilities"),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
     expect(screen.getAllByText("CLI Agents").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Claude Code").length).toBeGreaterThan(0);

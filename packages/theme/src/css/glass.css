@@ -1805,6 +1805,13 @@
   backdrop-filter: none;
 }
 
+.login-brand-wordmark-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
 .login-brand-wordmark-tail {
   font-size: 1.125rem;
   font-weight: 600;
@@ -1814,6 +1821,15 @@
   user-select: none;
   padding-top: 0.125rem;
   text-shadow: none;
+}
+
+.login-brand-wordmark-tagline {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  user-select: none;
 }
 
 .login-brand-logo-a {
