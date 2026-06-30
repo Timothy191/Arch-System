@@ -1,2 +1,8 @@
-export { GlassShineController } from "./GlassShineController";
-export { triggerShineRandomly } from "./glass-shine-orchestrator";
+/** @deprecated Import from `@10-src/00_core_modules` — shim for legacy paths. */
+export {
+  GlassShineController,
+  triggerShineRandomly,
+  LoginCardHeader,
+  LoginFormProduction,
+  LOGIN_PORTAL_COPY,
+} from "../../00_core_modules";

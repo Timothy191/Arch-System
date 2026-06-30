@@ -8,7 +8,7 @@
 |-------|-------|
 | **Task** | Separate frontend (UI) from background logic (server, data, jobs) |
 | **Branch** | `feat/separate-frontend-backend` (create before first commit) |
-| **Status** | `spec-ready` |
+| **Status** | `phase-a-complete` — audit recorded; Phase B not started |
 
 ## TodoWrite checklist (Phase 2 — complete before production code)
 
@@ -16,10 +16,63 @@
 
 ### Phase A — Boundary map (read-only audit)
 
-- [ ] Inventory `apps/portal`: list `app/api/**`, Server Actions, `createServerSupabaseClient` call sites, client `"use client"` modules
-- [ ] Inventory `libs/features/**` and `packages/*`: classify UI-only vs data-access vs server-only
-- [ ] Document current violations: business logic inside client components, direct DB in route handlers without service layer
-- [ ] Define target layers (names only, no biological metaphors):
+- [x] Inventory `apps/portal`: list `app/api/**`, Server Actions, `createServerSupabaseClient` call sites, client `"use client"` modules
+- [x] Inventory `libs/features/**` and `packages/*`: classify UI-only vs data-access vs server-only
+- [x] Document current violations: business logic inside client components, direct DB in route handlers without service layer
+- [x] Define target layers (names only, no biological metaphors):
+
+#### Phase A inventory (2026-06-30)
+
+**`apps/portal` counts**
+
+| Signal | Count | Notes |
+|--------|------:|-------|
+| `"use client"` modules | 127 | No direct `@repo/supabase/server` / `server-only` imports in client files (grep clean) |
+| `app/api/**/route.ts` | 36 | See route list below |
+| `createServerSupabaseClient` call sites | 66 | Pages, API routes, `lib/*`, Server Actions |
+| `"use server"` modules | 16 | Split across `app/`, `features/`, `lib/` |
+
+**API routes** (`apps/portal/app/api/`): `admin/data/[table]`, `agent/chat`, `agent/config`, `auth/login`, `c66`, `control-room/shift-completeness`, `csp-violations`, `doc`, `export/*` (4), `feedback`, `health/*` (7), `inngest`, `log`, `metrics`, `metrics/prometheus`, `plugins/rust-telemetry`, `printers/*` (3), `search`, `sync/playback`, `telemetry/push`, `tools/status`, `weather`, `webhooks/*` (3).
+
+**Server Actions locations** (should consolidate under `libs/features/*/actions` in Phase B):
+
+- `apps/portal/app/actions.ts`
+- `apps/portal/app/(departments)/*/actions.ts`, `printing.ts`, inline in `print-cards/page.tsx`
+- `apps/portal/features/admin/actions/*`
+- `apps/portal/features/departments/components/engineering/breakdowns/actions.ts` (duplicate of libs)
+- `apps/portal/features/dashboard/services/dashboard-service.ts` (`"use server"`)
+- `apps/portal/lib/shift-closeout.ts` (`"use server"`)
+
+**`libs/features/**` classification**
+
+| Package | Role today | Boundary fit |
+|---------|------------|--------------|
+| `auth/ui`, `auth/data-access` (`use-login`) | UI + hook → API | UI layer OK; hook calls `/api/auth/login` |
+| `auth/utils` | redirect helpers | Shared util — OK |
+| `dashboard/data-access` | `"use server"` + Supabase RPC | Correct layer; **duplicated** in portal |
+| `departments/ui` | React components + **SafetyDashboard RSC fetch** + **breakdowns/actions** | Violations — server code in `ui` |
+| `departments/data-access` | `departments.ts` only | Underused vs portal `lib/` |
+| `hub/ui`, `access-control/ui`, `analytics/data-access` | Mostly UI / forecast | OK |
+
+**`packages/*`**: `supabase/server`, `redis`, `database`, `errors`, `logger` — infrastructure only; no React. Correct.
+
+**`10-src/00_core_modules`**: UI-only (login form, glass chrome) — aligned with target UI layer.
+
+#### Violations (prioritized for Phase B)
+
+| # | Violation | Paths | Severity |
+|---|-----------|-------|----------|
+| V1 | Server Actions + Supabase in `features/*/services` and scattered `app/` | `portal/features/dashboard/services`, `portal/app/actions.ts`, dept `actions.ts` | High |
+| V2 | **Duplicate** dashboard service (portal vs libs) | `apps/portal/features/dashboard/services/` ↔ `libs/features/dashboard/data-access/` | High |
+| V3 | **Duplicate** breakdown actions (portal vs libs) | `portal/features/departments/.../actions.ts` ↔ `libs/.../ui/.../actions.ts` | High |
+| V4 | RSC data fetch inside `libs/features/*/ui` | `libs/features/departments/ui/src/safety/SafetyDashboard.tsx` | Medium |
+| V5 | Server actions in `libs/features/*/ui` | `libs/.../breakdowns/actions.ts` | Medium |
+| V6 | `apps/portal/lib/*` monolith (auth, redis, shift, dept-context, rate-limit) | 15+ files import `@repo/redis` or server Supabase | Medium |
+| V7 | API routes inline DB/export logic without shared service | `export/*`, `admin/data/[table]`, `search` | Medium |
+| V8 | Portal `features/` mirrors `libs/features/` (two trees) | `apps/portal/features/**` vs `libs/features/**` | Structural |
+
+**Clean signals (keep):** zero client-bundle server imports; `use-login` → API only; `10-src` UI-only; infra packages isolated.
+
 
 | Layer | Location | Allowed imports |
 |-------|----------|-----------------|
@@ -76,4 +129,4 @@
 |------|----------|-----------|
 | 2026-06-29 | Frontend/backend separation is next priority over `NN_` renumber | User directive — clarify boundaries before large tree moves |
 | 2026-06-29 | Layers: UI → API/actions → data-access → infrastructure | Matches existing `libs/features` shape; minimal new folders |
-| 2026-06-29 | Login card: top-aligned, symmetric `py-6` margins, reduced `pt-5` | UI polish this session |
+| 2026-06-30 | Login glass branding system — ADR-001 | Brushed silver/gold card, service banner, CLI ticker, shine orchestrator; see `docs/adr/ADR-001-login-glass-branding-system.md` |

@@ -42,6 +42,14 @@ Thumbs.db
 .cursor/
 
 # Agent conversation memory (local summaries from /summarize)
+.ai_content/.memory/.cursor-memory/sessions/*.md
+.ai_content/.memory/.cursor-memory/index.jsonl
+.ai_content/.memory/.cursor-memory/state.json
+.ai_content/.memory/.cursor-memory/.compact-pending
+.ai_content/.memory/.cursor-memory/.compact-staging.md
+.ai_content/.memory/.cursor-memory/.recall-brief.md
+.ai_content/.memory/.cursor-memory/.turn-session.json
+# Legacy paths (pre .ai_content migration)
 .memory/sessions/*.md
 .memory/index.jsonl
 .memory/state.json

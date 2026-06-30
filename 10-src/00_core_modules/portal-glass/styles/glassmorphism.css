@@ -1,6 +1,6 @@
 /**
  * Specular glass shine sweep — login card + primary action surfaces.
- * Source of truth: 10-src/01_Admin (synced into @repo/theme via index.css @import).
+ * Source of truth: 10-src/00_core_modules/portal-glass (synced into @repo/theme via index.css @import).
  */
 
 .glass-shine-target {

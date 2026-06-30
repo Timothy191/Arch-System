@@ -61,13 +61,13 @@ describe("LoginForm", () => {
     employeeId = "PC-12345",
     password = "testpass",
   } = {}) {
-    fireEvent.change(screen.getByPlaceholderText("Example : example@plantcormining.os"), {
+    fireEvent.change(screen.getByPlaceholderText("username@company.com"), {
       target: { value: employeeEmail },
     });
-    fireEvent.change(screen.getByPlaceholderText("Example : Employee Pass Phrase"), {
+    fireEvent.change(screen.getByPlaceholderText("Employee ID"), {
       target: { value: employeeId },
     });
-    fireEvent.change(screen.getByPlaceholderText("Example : Enter the set Password"), {
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
       target: { value: password },
     });
   }
@@ -91,11 +91,11 @@ describe("LoginForm", () => {
   it("renders employee ID and password inputs", () => {
     render(<LoginForm />);
 
-    expect(screen.getByPlaceholderText("Example : example@plantcormining.os")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("username@company.com")).toBeInTheDocument();
     expect(screen.getByLabelText("Employee Email")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Example : Employee Pass Phrase")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Employee ID")).toBeInTheDocument();
     expect(screen.getByLabelText("Employee ID")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Example : Enter the set Password")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
 
     const signInBtn = screen.getByRole("button", { name: /^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe("LoginForm", () => {
 
   it("toggles password visibility when the eye button is clicked", () => {
     render(<LoginForm />);
-    const passwordInput = screen.getByPlaceholderText("Example : Enter the set Password");
+    const passwordInput = screen.getByPlaceholderText("Password");
     const toggleButton = screen.getByRole("button", { name: /show password/i });
 
     expect(passwordInput).toHaveAttribute("type", "password");
@@ -243,7 +243,7 @@ describe("LoginForm", () => {
 
   it("detects Caps Lock key down and up states", () => {
     render(<LoginForm />);
-    const passwordInput = screen.getByPlaceholderText("Example : Enter the set Password");
+    const passwordInput = screen.getByPlaceholderText("Password");
 
     // Press key with CapsLock active
     const keyDownEvent = new KeyboardEvent("keydown", {

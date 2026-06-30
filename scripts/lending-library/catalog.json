@@ -44,7 +44,7 @@
     },
     "auto-recall": {
       "type": "local",
-      "path": ".memory/config/auto-recall.md",
+      "path": ".ai_content/.memory/.cursor-memory/config/auto-recall.md",
       "description": "Auto-recall protocol — turn-start memory brief"
     }
   },

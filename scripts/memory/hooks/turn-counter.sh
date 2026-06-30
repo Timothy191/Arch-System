@@ -3,9 +3,12 @@
 set -euo pipefail
 
 REPO_ROOT="${CURSOR_PROJECT_DIR:-$(pwd)}"
-STATE="$REPO_ROOT/.memory/state.json"
-PENDING="$REPO_ROOT/.memory/.compact-pending"
-mkdir -p "$REPO_ROOT/.memory"
+# shellcheck source=../memory-paths.sh
+source "$REPO_ROOT/scripts/memory/memory-paths.sh"
+
+STATE="$CURSOR_MEMORY_DIR/state.json"
+PENDING="$CURSOR_MEMORY_DIR/.compact-pending"
+mkdir -p "$CURSOR_MEMORY_DIR"
 
 input=$(cat)
 

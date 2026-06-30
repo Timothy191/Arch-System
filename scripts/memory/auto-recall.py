@@ -2,7 +2,7 @@
 """Auto-recall — deterministic memory brief for agent turn start.
 
 Reads active-context, MEMORY.md, learnings, session index, HOW.md, and optional
-user prompt; writes `.memory/.recall-brief.md` for agents to load before acting.
+user prompt; writes `.ai_content/.memory/.cursor-memory/.recall-brief.md`.
 No vector DB — keyword overlap only (workspace search policy).
 """
 
@@ -13,20 +13,33 @@ import json
 import re
 import subprocess
 from datetime import datetime, timezone
+import sys
 from pathlib import Path
-from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "memory"))
+from memory_paths import (  # noqa: E402
+    ACTIVE_CONTEXT_FILE,
+    COMPACT_PENDING_FILE,
+    COMPACT_STAGING_FILE,
+    CONFIG_DIR,
+    CURSOR_MEMORY_REL,
+    CURSOR_MEMORY_ROOT,
+    INDEX_FILE,
+    RECALL_BRIEF_FILE,
+    SESSIONS_DIR,
+    STATE_FILE,
+    TURN_SESSION_FILE,
+    ensure_memory_dirs,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MEMORY_DIR = REPO_ROOT / ".memory"
-BRIEF_FILE = MEMORY_DIR / ".recall-brief.md"
-ACTIVE_CONTEXT = MEMORY_DIR / "active-context.md"
-STATE_FILE = MEMORY_DIR / "state.json"
-INDEX_FILE = MEMORY_DIR / "index.jsonl"
+MEMORY_DIR = CURSOR_MEMORY_ROOT
+BRIEF_FILE = RECALL_BRIEF_FILE
+ACTIVE_CONTEXT = ACTIVE_CONTEXT_FILE
 LEARNINGS = REPO_ROOT / "run" / "agent-learnings.jsonl"
 MEMORY_MD = REPO_ROOT / "MEMORY.md"
 HOW_MD = REPO_ROOT / "HOW.md"
 PROGRESSIVE = REPO_ROOT / "PROGRESSIVE_DISCLOSURE.md"
-SESSIONS_DIR = MEMORY_DIR / "sessions"
 
 STOP_WORDS = frozenset(
     {
@@ -243,7 +256,7 @@ def _search_sessions(query_tokens: list[str], limit: int = 3) -> list[dict[str, 
             {
                 "id": session_id,
                 "topic": str(entry.get("topic", session_id)),
-                "path": f".memory/sessions/{session_id}.md",
+                "path": f"{CURSOR_MEMORY_REL}/sessions/{session_id}.md",
                 "snippet": snippet,
                 "score": str(score),
             }
@@ -364,7 +377,7 @@ def format_markdown(brief: dict[str, Any]) -> str:
             "",
             "## Suggested reads (in order)",
             "",
-            "1. `.memory/active-context.md`",
+            f"1. `{CURSOR_MEMORY_REL}/active-context.md`",
             "2. `HOW.md` (active checklist)",
             "3. `MEMORY.md` (only if fact missing above)",
         ]
@@ -398,7 +411,7 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Print JSON to stdout")
     args = parser.parse_args()
 
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    ensure_memory_dirs()
     brief = build_brief(trigger=args.trigger, prompt=args.prompt)
     markdown = format_markdown(brief)
     BRIEF_FILE.write_text(markdown, encoding="utf-8")

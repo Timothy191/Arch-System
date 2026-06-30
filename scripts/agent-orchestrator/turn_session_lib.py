@@ -5,16 +5,24 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SESSION_FILE = REPO_ROOT / ".memory" / ".turn-session.json"
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "memory"))
+from memory_paths import (  # noqa: E402
+    CURSOR_MEMORY_REL,
+    STATE_FILE,
+    TURN_SESSION_FILE,
+)
+
+SESSION_FILE = TURN_SESSION_FILE
+STATE_JSON = STATE_FILE
 HOW_MD = REPO_ROOT / "HOW.md"
 LEARNINGS = REPO_ROOT / "run" / "agent-learnings.jsonl"
 ACTIVE_FILE = REPO_ROOT / "run" / "lending-library" / "active.json"
-STATE_JSON = REPO_ROOT / ".memory" / "state.json"
 
 CHECK_DONE = re.compile(r"^- \[[xX]\]", re.M)
 CHECK_OPEN = re.compile(r"^- \[ \]", re.M)

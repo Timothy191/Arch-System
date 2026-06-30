@@ -53,7 +53,7 @@
 | Effort tier | `python3 scripts/agent-orchestrator/classify-effort.py "<task>"` |
 | High-tier workflow | `scripts/agent-orchestrator/dynamic-workflow.md` |
 | Pre-ship verify | `bash scripts/agent-orchestrator/verify-gate.sh` |
-| Post-compact recovery | `.memory/config/compaction-recovery.md` |
+| Post-compact recovery | `.ai_content/.memory/.cursor-memory/config/compaction-recovery.md` |
 
 ## Active context (update per task)
 

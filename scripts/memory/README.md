@@ -26,4 +26,4 @@ Restart Cursor after editing `hooks.json`. Verify in **Settings → Hooks** or t
 
 ## `/summarize` wrap-up
 
-Manual `/summarize` runs `.memory/config/wrap-up-protocol.md` before archiving: finish `HOW.md` items, scoped verify, commit, push, prove local ≡ GitHub. Auto-compact hooks do **not** ship.
+Manual `/summarize` runs `.ai_content/.memory/.cursor-memory/config/wrap-up-protocol.md` before archiving: finish `HOW.md` items, scoped verify, commit, push, prove local ≡ GitHub. Auto-compact hooks do **not** ship.

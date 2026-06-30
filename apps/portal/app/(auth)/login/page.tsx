@@ -4,7 +4,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { AlertTriangle } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 import { AgenticAiLogo } from "@repo/ui/AgenticAiLogo";
-import { GlassShineController } from "@10-src/01_Admin/components";
+import { GlassShineController, LoginCardHeader, LoginFormProduction } from "@10-src/00_core_modules";
 import { CliAgentMark } from "@/components/auth/CliAgentMark";
 import { LoginServiceStatusBanner } from "@/components/auth/LoginServiceStatusBanner";
 import {
@@ -153,9 +153,11 @@ export default async function LoginPage() {
                 </div>
               </section>
 
+              <LoginCardHeader />
+
               <section className="login-card-panel login-card-panel--main mt-auto -mx-8 shrink-0 select-none">
                 <div className="login-card-form-region login-card-main-form">
-                  <LoginForm />
+                  <LoginFormProduction />
                 </div>
 
                 <div className="login-card-form-notice-divider" aria-hidden="true" />

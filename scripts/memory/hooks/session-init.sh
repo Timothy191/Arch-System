@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# sessionStart — initialize .memory session state for context compaction
+# sessionStart — initialize cursor memory session state for context compaction
 set -euo pipefail
 
 REPO_ROOT="${CURSOR_PROJECT_DIR:-$(pwd)}"
-STATE="$REPO_ROOT/.memory/state.json"
-mkdir -p "$REPO_ROOT/.memory/sessions"
+# shellcheck source=../memory-paths.sh
+source "$REPO_ROOT/scripts/memory/memory-paths.sh"
+
+STATE="$CURSOR_MEMORY_DIR/state.json"
+mkdir -p "$CURSOR_MEMORY_SESSIONS_DIR"
 
 if [ ! -f "$STATE" ]; then
   cat >"$STATE" <<'EOF'

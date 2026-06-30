@@ -14,13 +14,15 @@ jest.mock("@repo/supabase/server", () => ({
   getUserSafely: jest.fn(),
 }));
 
-jest.mock("@/components/auth/LoginServiceStatusBanner", () => ({
-  LoginServiceStatusBanner: () => <div data-testid="mock-service-banner" />,
+jest.mock("@10-src/00_core_modules", () => ({
+  GlassShineController: () => null,
+  LoginCardHeader: () => <h2>System Authentication</h2>,
+  LoginFormProduction: () => <div data-testid="mock-login-form" />,
+  triggerShineRandomly: jest.fn(),
 }));
 
-// Mock LoginForm
-jest.mock("@/features/auth/components/LoginForm", () => ({
-  LoginForm: () => <div data-testid="mock-login-form" />,
+jest.mock("@/components/auth/LoginServiceStatusBanner", () => ({
+  LoginServiceStatusBanner: () => <div data-testid="mock-service-banner" />,
 }));
 
 jest.mock("next/image", () => ({
@@ -64,6 +66,7 @@ describe("LoginPage Server Component", () => {
     expect(
       screen.getByText("Powered & Integrated with Agentic AI Capabilities"),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "System Authentication" })).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
     expect(screen.getAllByText("CLI Agents").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Claude Code").length).toBeGreaterThan(0);
