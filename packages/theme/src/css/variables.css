@@ -124,9 +124,14 @@
   --brand-gold-text-shine-duration: 12s;
   --brand-logo-shine-sweep-duration: 24s;
   --brand-logo-specular-duration: 30s;
+  --login-brand-logo-float-duration: 6s;
   --brand-silver-shine-wash-duration: 24s;
   --brand-metal-edge-pulse-duration: 13s;
   --login-card-natural-light-duration: 22s;
+  --login-card-gold-shine-sweep-duration: 14s;
+  --login-card-gold-shine-wash-duration: 16s;
+  --login-card-gold-shade-pulse-duration: 11s;
+  --login-card-notice-bump-duration: 7s;
   --brand-gold-border-shine-duration: 26s;
   --chrome-bar-shadow:
     0 1px 0 oklch(100% 0 0deg / 92%),

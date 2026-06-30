@@ -20,7 +20,8 @@
       "@repo/auth/utils": ["../../libs/features/auth/utils/src/index.ts"],
       "@repo/shared/data-access": ["../../libs/shared/data-access/src/index.ts"],
       "@repo/shared/utils": ["../../libs/shared/utils/src/index.ts"],
-      "@repo/shared/hooks": ["../../libs/shared/hooks/src/index.ts"]
+      "@repo/shared/hooks": ["../../libs/shared/hooks/src/index.ts"],
+      "@10-src/*": ["../../10-src/*"]
     }
   },
   "include": [

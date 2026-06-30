@@ -44,8 +44,8 @@
     },
     "auto-recall": {
       "type": "local",
-      "path": ".kilo-memory/.memory/auto-recall-plan.md",
-      "description": "Semantic memory retrieval for context suggestions"
+      "path": ".memory/config/auto-recall.md",
+      "description": "Auto-recall protocol — turn-start memory brief"
     }
   },
   "tools": {
@@ -62,8 +62,8 @@
     },
     "recall-search": {
       "type": "local",
-      "command": "python3 .kilo-memory/scripts/semantic-search.py",
-      "description": "Semantic search over session archives"
+      "command": "python3 scripts/memory/auto-recall.py --json",
+      "description": "Keyword recall over sessions, MEMORY.md, learnings"
     }
   }
 }

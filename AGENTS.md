@@ -13,6 +13,7 @@ Nx + pnpm monorepo: Next.js 15 portal (`apps/portal`), Payload CMS (`apps/cms`),
 
 | Task | Command |
 |------|---------|
+| Onboarding & Verification | Slash command `/init` (Workspace onboarding & health checks) |
 | Full quality gate | `pnpm quality` |
 | Single unit test | `pnpm --filter portal test -- --testPathPatterns=<file>` |
 | E2E tests | `pnpm test:e2e` (needs `:3000` dev server + `/usr/bin/google-chrome`) |

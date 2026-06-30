@@ -72,6 +72,14 @@ const NAV_MENU_ICONS: Record<
 const NAV_BTN_ICON =
   "w-8 h-8 flex items-center justify-center rounded-[4px] text-[var(--text-heading)] opacity-90 hover:bg-black/[0.07] hover:opacity-100 data-[state=open]:bg-black/[0.07] transition-colors select-none outline-none cursor-default";
 
+function TaskbarNavDivider({ className }: { className?: string }) {
+  return (
+    <span className={cn("taskbar-nav-divider", className)} aria-hidden="true">
+      |
+    </span>
+  );
+}
+
 function NavMenuTrigger({ item }: { item: string }) {
   const meta = NAV_MENU_ICONS[item];
   if (!meta) {
@@ -200,6 +208,197 @@ const PRODUCTIVITY_LIST = [
   },
 ] as const;
 
+function renderTaskbarMenuItem(item: string): React.ReactNode {
+  if (item === "Operations") {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <NavMenuTrigger item={item} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className={cn("w-60", DROPDOWN_CONTENT)}>
+          {DEPARTMENTS_LIST.map((dept) => {
+            const Icon = dept.icon;
+            return (
+              <DropdownMenuItem
+                key={dept.name}
+                asChild
+                className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+              >
+                <Link href={`/${dept.name}`} className="w-full flex items-center px-2 py-1.5">
+                  <div
+                    className={cn(
+                      "w-6 h-6 rounded-md flex items-center justify-center mr-2.5 shrink-0",
+                      dept.bgColor,
+                    )}
+                  >
+                    <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
+                  </div>
+                  <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                    {dept.displayName}
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  if (item === "Tools") {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <NavMenuTrigger item={item} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
+          {PRODUCTIVITY_LIST.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <DropdownMenuItem
+                key={tool.name}
+                asChild
+                className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+              >
+                <Link
+                  href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
+                  className="w-full flex items-center px-2 py-1.5 gap-2.5"
+                >
+                  <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
+                  <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                    {tool.displayName}
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+          <DropdownMenuItem
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent("open-split-view", {
+                  detail: { service: "github" },
+                }),
+              );
+            }}
+          >
+            <div className="w-full flex items-center px-2 py-1.5 gap-2.5">
+              <svg
+                className="w-4 h-4 shrink-0 text-dept-drilling fill-current"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                GitHub Workspace
+              </span>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  if (item === "View") {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <NavMenuTrigger item={item} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className={cn("w-48", DROPDOWN_CONTENT)}>
+          <DropdownMenuItem
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+            onClick={() => window.location.reload()}
+          >
+            <RotateCcw className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">Reload</span>
+            <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘R</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
+            onClick={() => {
+              if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+              } else if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+              }
+            }}
+          >
+            <Maximize2 className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">
+              Toggle Fullscreen
+            </span>
+            <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘F</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  if (item === "Help") {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <NavMenuTrigger item={item} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+          >
+            <a
+              href="https://docs.arch.os"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-2.5 px-2 py-1.5"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                Documentation
+              </span>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+          >
+            <a
+              href="https://wiki.arch.os"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-2.5 px-2 py-1.5"
+            >
+              <ScrollText className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">Wiki</span>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
+          >
+            <a href="mailto:support@arch.os" className="w-full flex items-center gap-2.5 px-2 py-1.5">
+              <MailOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+              <span className="text-[13px] font-medium text-[var(--text-heading)]">
+                Contact Support
+              </span>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
+          <DropdownMenuItem className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5">
+            <Info className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+            <span className="text-[13px] font-medium text-[var(--text-heading)]">
+              About Arch Systems
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return <NavMenuTrigger item={item} />;
+}
+
 export function Taskbar({
   menuItems = NAVIGATION_ITEMS,
   centerSlot,
@@ -219,9 +418,10 @@ export function Taskbar({
       }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed inset-x-0 top-0 z-navigation box-border w-full max-w-[100vw] h-10",
-        "flex items-center justify-between gap-2",
-        "pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] sm:px-4 md:px-6 lg:px-8",
+        "portal-layer-chrome fixed top-2 z-navigation box-border h-10 w-auto",
+        "left-[max(0.75rem,env(safe-area-inset-left,0px))] right-[max(0.75rem,env(safe-area-inset-right,0px))]",
+        "flex items-center gap-2",
+        "pl-2 pr-2 sm:pl-3 sm:pr-4",
         "layer-taskbar-brushed rounded-none shadow-window relative overflow-hidden",
         className,
       )}
@@ -381,218 +581,29 @@ export function Taskbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <TaskbarNavDivider className="hidden md:inline" />
+
         {/* ── Taskbar menu items (Operations, View, Help) ── */}
-        <div className="hidden md:flex items-center gap-0.5 ml-1">
-        {menuItems.map((item) => {
-          if (item === "Operations") {
-            return (
-              <DropdownMenu key={item}>
-                <DropdownMenuTrigger asChild>
-                  <NavMenuTrigger item={item} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-60", DROPDOWN_CONTENT)}>
-                  {DEPARTMENTS_LIST.map((dept) => {
-                    const Icon = dept.icon;
-                    return (
-                      <DropdownMenuItem
-                        key={dept.name}
-                        asChild
-                        className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                      >
-                        <Link
-                          href={`/${dept.name}`}
-                          className="w-full flex items-center px-2 py-1.5"
-                        >
-                          <div
-                            className={cn(
-                              "w-6 h-6 rounded-md flex items-center justify-center mr-2.5 shrink-0",
-                              dept.bgColor,
-                            )}
-                          >
-                            <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
-                          </div>
-                          <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                            {dept.displayName}
-                          </span>
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          }
-
-          if (item === "Tools") {
-            return (
-              <DropdownMenu key={item}>
-                <DropdownMenuTrigger asChild>
-                  <NavMenuTrigger item={item} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
-                  {PRODUCTIVITY_LIST.map((tool) => {
-                    const Icon = tool.icon;
-                    return (
-                      <DropdownMenuItem
-                        key={tool.name}
-                        asChild
-                        className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                      >
-                        <Link
-                          href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
-                          className="w-full flex items-center px-2 py-1.5 gap-2.5"
-                        >
-                          <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
-                          <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                            {tool.displayName}
-                          </span>
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                    onClick={() => {
-                      window.dispatchEvent(
-                        new CustomEvent("open-split-view", {
-                          detail: { service: "github" },
-                        }),
-                      );
-                    }}
-                  >
-                    <div className="w-full flex items-center px-2 py-1.5 gap-2.5">
-                      <svg
-                        className="w-4 h-4 shrink-0 text-dept-drilling fill-current"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                      </svg>
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                        GitHub Workspace
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          }
-
-          if (item === "View") {
-            return (
-              <DropdownMenu key={item}>
-                <DropdownMenuTrigger asChild>
-                  <NavMenuTrigger item={item} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-48", DROPDOWN_CONTENT)}>
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
-                    onClick={() => window.location.reload()}
-                  >
-                    <RotateCcw className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                      Reload
-                    </span>
-                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘R</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
-                    onClick={() => {
-                      if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(() => {});
-                      } else if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(() => {});
-                      }
-                    }}
-                  >
-                    <Maximize2 className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                      Toggle Fullscreen
-                    </span>
-                    <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌃⌘F</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          }
-
-          if (item === "Help") {
-            return (
-              <DropdownMenu key={item}>
-                <DropdownMenuTrigger asChild>
-                  <NavMenuTrigger item={item} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
-                  <DropdownMenuItem
-                    asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                  >
-                    <a
-                      href="https://docs.arch.os"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
-                    >
-                      <BookOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                        Documentation
-                      </span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                  >
-                    <a
-                      href="https://wiki.arch.os"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
-                    >
-                      <ScrollText className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                        Wiki
-                      </span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
-                  <DropdownMenuItem
-                    asChild
-                    className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5"
-                  >
-                    <a
-                      href="mailto:support@arch.os"
-                      className="w-full flex items-center gap-2.5 px-2 py-1.5"
-                    >
-                      <MailOpen className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                      <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                        Contact Support
-                      </span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
-                  <DropdownMenuItem className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5">
-                    <Info className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                      About Arch Systems
-                    </span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          }
-
-          return <NavMenuTrigger key={item} item={item} />;
-        })}
+        <div className="hidden md:flex items-center gap-0.5">
+          {menuItems.map((item, index) => (
+            <React.Fragment key={item}>
+              {index > 0 ? <TaskbarNavDivider /> : null}
+              {renderTaskbarMenuItem(item)}
+            </React.Fragment>
+          ))}
         </div>
+
+        {centerSlot ? (
+          <>
+            <TaskbarNavDivider className="hidden sm:inline max-md:inline md:hidden" />
+            <TaskbarNavDivider className="hidden md:inline" />
+            <div className="hidden sm:flex min-w-0 items-center pl-0.5 md:pl-1">{centerSlot}</div>
+          </>
+        ) : null}
       </nav>
 
-      {/* Center: KDE task strip — search / window slot */}
-      <div className="hidden sm:flex min-w-0 flex-1 items-center justify-center px-1">
-        {centerSlot}
-      </div>
-
       {/* Right: system tray slot */}
-      <div className="flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
+      <div className="ml-auto flex items-center gap-1.5 shrink-0 text-[12px] text-[var(--text-secondary)]">
         {rightSlot}
       </div>
     </motion.div>

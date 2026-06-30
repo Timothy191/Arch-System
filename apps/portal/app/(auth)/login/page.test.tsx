@@ -14,9 +14,20 @@ jest.mock("@repo/supabase/server", () => ({
   getUserSafely: jest.fn(),
 }));
 
+jest.mock("@/components/auth/LoginServiceStatusBanner", () => ({
+  LoginServiceStatusBanner: () => <div data-testid="mock-service-banner" />,
+}));
+
 // Mock LoginForm
 jest.mock("@/features/auth/components/LoginForm", () => ({
   LoginForm: () => <div data-testid="mock-login-form" />,
+}));
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: ({ alt, ...props }: { alt: string; src: string }) => (
+    <img alt={alt} {...props} />
+  ),
 }));
 
 // Mock GlassCard
@@ -43,9 +54,6 @@ describe("LoginPage Server Component", () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
-    const heading = screen.getByRole("heading", { level: 2 });
-    expect(heading).toHaveTextContent("Welcome back to Arch");
-    expect(heading).toHaveTextContent("How can I assist you?");
     expect(screen.getByRole("heading", { level: 1, name: "Arch-Operational System" })).toBeInTheDocument();
     expect(screen.getByText("Arch-Operational System")).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();

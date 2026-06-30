@@ -159,11 +159,14 @@ export async function POST(request: NextRequest) {
     async () => {
       try {
         const body = await request.json();
-        const { email, password } = body;
+        const { email, employeeId, password } = body;
 
         // Validate input
-        if (!email || !password) {
-          return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+        if (!email || !employeeId || !password) {
+          return NextResponse.json(
+            { error: "Employee email, employee ID, and password are required" },
+            { status: 400 },
+          );
         }
 
         const supabase = await createServerSupabaseClient();

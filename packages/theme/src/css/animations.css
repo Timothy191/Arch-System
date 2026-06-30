@@ -559,6 +559,30 @@
   }
 }
 
+@keyframes login-brand-logo-float {
+  0%,
+  100% {
+    transform: translateY(-5px);
+  }
+
+  50% {
+    transform: translateY(-11px);
+  }
+}
+
+@keyframes login-brand-logo-shadow-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translateX(-50%) scale(1.02);
+  }
+
+  50% {
+    opacity: 0.36;
+    transform: translateX(-50%) scale(0.84);
+  }
+}
+
 @keyframes brand-logo-specular-glint {
   0%,
   70%,
@@ -627,11 +651,24 @@
 @keyframes login-card-float-idle {
   0%,
   100% {
-    transform: translateY(-12px) translateZ(36px) rotateX(2.2deg);
+    transform: translateY(-10px) translateZ(32px) rotateX(2deg);
   }
 
   50% {
-    transform: translateY(-16px) translateZ(42px) rotateX(1.8deg);
+    transform: translateY(-14px) translateZ(38px) rotateX(1.6deg);
+  }
+}
+
+@keyframes login-card-float-shadow-idle {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translateZ(-48px) scale(0.9, 0.48);
+  }
+
+  50% {
+    opacity: 0.68;
+    transform: translateZ(-48px) scale(0.96, 0.54);
   }
 }
 
@@ -659,19 +696,130 @@
   100% {
     background-position:
       0 0,
-      100% 40%,
-      0% 26%,
+      0 0,
+      102% 8%,
+      -4% 92%,
       0 0,
       0 0;
   }
 
   50% {
     background-position:
-      0 3px,
-      96% 44%,
-      4% 24%,
+      2px 0,
+      0 1px,
+      98% 12%,
+      2% 88%,
       0 0,
       0 0;
+  }
+}
+
+@keyframes login-card-notice-bump {
+  0%,
+  100% {
+    transform: translateY(0) translateZ(0) scale(1);
+    box-shadow:
+      inset 0 2px 4px oklch(52% 0.02 255 / 11%),
+      inset 0 1px 0 oklch(100% 0 0deg / 88%),
+      inset 0 -1px 0 oklch(72% 0.012 255 / 15%),
+      0 2px 6px oklch(0% 0 0deg / 8%);
+  }
+
+  22% {
+    transform: translateY(-2px) translateZ(2px) scale(1.006);
+  }
+
+  50% {
+    transform: translateY(-6px) translateZ(8px) scale(1.018);
+    box-shadow:
+      inset 0 2px 4px oklch(52% 0.02 255 / 8%),
+      inset 0 1px 0 oklch(100% 0 0deg / 92%),
+      inset 0 -1px 0 oklch(72% 0.012 255 / 12%),
+      0 12px 24px oklch(0% 0 0deg / 13%),
+      0 5px 12px oklch(76% 0.14 82 / 16%);
+  }
+
+  78% {
+    transform: translateY(-2px) translateZ(2px) scale(1.006);
+  }
+}
+
+@keyframes login-service-banner-tick {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  14% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  86% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0.92;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes login-service-banner-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes login-card-gold-shine-wash {
+  0%,
+  10% {
+    background-position: -90% 0, 0 0;
+  }
+
+  44% {
+    background-position: 48% 0, 0 0;
+  }
+
+  56% {
+    background-position: 118% 0, 0 0;
+  }
+
+  84%,
+  100% {
+    background-position: 190% 0, 0 0;
+  }
+}
+
+@keyframes login-card-gold-shade-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    filter: brightness(1) saturate(1);
+  }
+
+  50% {
+    opacity: 1;
+    filter: brightness(1.07) saturate(1.05);
+  }
+}
+
+@keyframes login-card-gold-shade-shift {
+  0%,
+  100% {
+    background-position: 0 0, 0 0;
+  }
+
+  50% {
+    background-position: 0 0, 0 -6%;
   }
 }
 
@@ -1061,6 +1209,11 @@
   .animate-marquee-vertical,
   .login-card-watermark-mark,
   .login-card-float-wrapper--top .login-card-container.layer-signin-card,
+  .login-card-float-shadow,
+  .login-card-surface-sheen,
+  .login-card-service-banner__track,
+  .login-card-service-banner__track::before,
+  .login-card-service-banner__dot,
   .login-card-thread-border,
   .login-card-container.layer-signin-card::before,
   .login-card-container.layer-signin-card::after,
@@ -1073,10 +1226,13 @@
   .login-card-border-shine,
   .brand-taskbar-search-wrap::after,
   .login-form-control-border-shine::before,
+  .login-card-notice,
   .login-card-notice::before,
   .login-card-container .liquid-glass-button-signin::before,
   .login-card-footer-os,
+  .login-brand-logo-a,
   .login-brand-logo-a::before,
+  .login-brand-logo-a::after,
   .login-brand-logo-a svg.login-brand-logo-mark,
   .brand-chrome-orb::after,
   .brand-chrome-orb svg,
@@ -1087,6 +1243,9 @@
   .layer-taskbar-brushed:not(.layer-taskbar-kde),
   .layer-taskbar-brushed:not(.layer-taskbar-kde)::before,
   .layer-taskbar-brushed:not(.layer-taskbar-kde)::after,
+  .login-card-container.layer-signin-card,
+  .login-card-container.layer-signin-card::before,
+  .login-card-container.layer-signin-card::after,
   .layer-dock-brushed::before,
   .layer-dock-brushed::after {
     animation: none !important;

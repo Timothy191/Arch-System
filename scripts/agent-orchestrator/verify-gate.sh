@@ -22,8 +22,14 @@ CHANGED="$(git diff --name-only HEAD 2>/dev/null || true)"
 STAGED="$(git diff --cached --name-only 2>/dev/null || true)"
 ALL="$(printf '%s\n%s' "$CHANGED" "$STAGED" | sort -u | grep -v '^$' || true)"
 
+record_verify() {
+  local flag="$1"
+  python3 "$ROOT/scripts/agent-orchestrator/turn-session.py" record verify "$flag" >/dev/null 2>&1 || true
+}
+
 if [[ -z "$ALL" ]]; then
   pass "No file changes — verify gate skipped"
+  record_verify --passed
   exit 0
 fi
 
@@ -94,8 +100,10 @@ fi
 if $FAILED -ne 0; then
   echo ""
   fail "Verify gate FAILED — fix before claiming done"
+  record_verify --failed
   exit 1
 fi
 
 pass "Verify gate passed"
+record_verify --passed
 exit 0

@@ -10,7 +10,7 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import { useLogin } from "@repo/auth/data-access";
 import { isValidPageRedirect } from "@repo/auth/utils";
 
-/** Shared dimensions for Employee ID, Password, and Sign In — equal width/height */
+/** Shared dimensions for login inputs and Sign In — equal width/height */
 const LOGIN_CONTROL =
   "login-form-control h-12 w-full min-h-12 box-border rounded-md px-4";
 
@@ -22,6 +22,7 @@ export function LoginForm() {
   const rawRedirect = searchParams.get("redirect") || "/";
   const redirectTo = isValidPageRedirect(rawRedirect) ? rawRedirect : "/";
 
+  const [employeeEmail, setEmployeeEmail] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,8 +32,10 @@ export function LoginForm() {
   const { login, loading } = useLogin();
 
   useEffect(() => {
-    const emailParam = searchParams.get("email") || searchParams.get("employeeId");
-    if (emailParam) setEmployeeId(emailParam);
+    const emailParam = searchParams.get("email");
+    const employeeIdParam = searchParams.get("employeeId");
+    if (emailParam) setEmployeeEmail(emailParam);
+    if (employeeIdParam) setEmployeeId(employeeIdParam);
   }, [searchParams]);
 
   function handleCapsLockKey(e: React.KeyboardEvent) {
@@ -41,7 +44,7 @@ export function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const result = await login(employeeId, password);
+    const result = await login(employeeEmail, employeeId, password);
     if (result?.success) {
       router.push(redirectTo);
       router.refresh();
@@ -55,30 +58,51 @@ export function LoginForm() {
       <div className="login-form-stack">
         <div className="login-form-field">
           <div className="login-form-label-group">
-            <label htmlFor="email" className="login-form-label">
-              Employee ID / Email
+            <label htmlFor="employee-email" className="login-form-label">
+              Employee Email
             </label>
-            <p id="email-hint" className="login-form-hint">
-              Your employee ID is on your badge.
-            </p>
           </div>
           <div className="login-form-control-wrap login-form-control-border-shine">
             <Input
-              id="email"
-              type="text"
+              id="employee-email"
+              type="email"
               required
               autoFocus
-              minLength={3}
+              minLength={5}
               maxLength={254}
+              disabled={loading}
+              value={employeeEmail}
+              onChange={(e) => setEmployeeEmail(e.target.value)}
+              variant="login"
+              className={INPUT_CLASS}
+              placeholder="Example : example@plantcormining.os"
+              aria-label="Employee Email"
+              autoComplete="email"
+            />
+          </div>
+        </div>
+
+        <div className="login-form-field">
+          <div className="login-form-label-group">
+            <label htmlFor="employee-id" className="login-form-label">
+              Employee ID
+            </label>
+          </div>
+          <div className="login-form-control-wrap login-form-control-border-shine">
+            <Input
+              id="employee-id"
+              type="text"
+              required
+              minLength={3}
+              maxLength={32}
               disabled={loading}
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
               variant="login"
               className={INPUT_CLASS}
-              placeholder="Employee ID or email"
-              aria-label="Employee ID / Email"
+              placeholder="Example : Employee Pass Phrase"
+              aria-label="Employee ID"
               autoComplete="username"
-              aria-describedby="email-hint"
             />
           </div>
         </div>
@@ -103,7 +127,7 @@ export function LoginForm() {
               onKeyUp={handleCapsLockKey}
               variant="login"
               className={`${INPUT_CLASS} pr-10`}
-              placeholder="Enter your password"
+              placeholder="Example : Enter the set Password"
               aria-label="Password"
               autoComplete="current-password"
             />
@@ -131,7 +155,7 @@ export function LoginForm() {
           <AnimatedButton
             type="submit"
             disabled={loading}
-            className={`${LOGIN_CONTROL} liquid-glass-button liquid-glass-button-signin bg-[var(--color-signin-button)] hover:bg-[var(--color-signin-button-hover)] text-white font-semibold relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signin-button)]/60 focus-visible:ring-offset-1 transition-colors`}
+            className={`${LOGIN_CONTROL} liquid-glass-button liquid-glass-button-signin glass-shine-target bg-[var(--color-signin-button)] hover:bg-[var(--color-signin-button-hover)] text-white font-semibold relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signin-button)]/60 focus-visible:ring-offset-1 transition-colors`}
             hoverScale={1}
             tapScale={0.97}
           >

@@ -14,6 +14,7 @@ Persistent memories + **context compaction** so one chat can continue without sp
 | Path | Purpose |
 |------|---------|
 | `active-context.md` | **Continuation brief** — only history agents should load after compact |
+| `.recall-brief.md` | **Auto-recall brief** — keyword hits from MEMORY, sessions, learnings, git (hook-refreshed) |
 | `state.json` | Turn counter, compact threshold, pending flag |
 | `.compact-pending` | Hook signal: auto-compact now (gitignored) |
 | `.compact-staging.md` | Parent distill for background agent (gitignored) |
@@ -27,8 +28,12 @@ Persistent memories + **context compaction** so one chat can continue without sp
 | Event | Script | Role |
 |-------|--------|------|
 | `sessionStart` | `scripts/memory/hooks/session-init.sh` | Init `state.json` |
+| `sessionStart` | `scripts/memory/hooks/auto-recall.sh` | Build `.recall-brief.md` |
 | `beforeSubmitPrompt` | `scripts/memory/hooks/turn-counter.sh` | Count turns → flag at threshold |
+| `beforeSubmitPrompt` | `scripts/memory/hooks/recall-on-prompt.sh` | Refresh recall from user prompt |
 | `preCompact` | `scripts/memory/hooks/pre-compact.sh` | Flag before Cursor native compact |
+
+See `config/auto-recall.md` for the recall protocol.
 
 ## Tune auto-compact
 
@@ -47,4 +52,4 @@ Agents must read `active-context.md` only — not replay archived chat. Use `rg`
 
 ## Privacy
 
-`sessions/*.md`, `index.jsonl`, `state.json`, `.compact-*` are gitignored.
+`sessions/*.md`, `index.jsonl`, `state.json`, `.compact-*`, `.recall-brief.md` are gitignored.

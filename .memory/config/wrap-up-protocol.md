@@ -79,6 +79,17 @@ If something cannot finish (missing credentials, failing CI, ambiguous scope):
 3. Still write `active-context.md` with blockers at top — but session `sync_status` must be `blocked`
 4. Ask user to resolve before treating conversation as closed
 
+## Phase 5 — Turn-close footer (mandatory)
+
+After wrap-up + compact, run:
+
+```bash
+python3 scripts/agent-orchestrator/turn-close-status.py --verify-passed \
+  [--tier high] [--agent ...] [--mcp ...] [--workflow ...]
+```
+
+Append output to the user reply. See `.cursor/rules/summarize-memory.mdc` § Turn close.
+
 ## User reply (after full wrap-up + compact)
 
-≤8 lines: wrap-up result (branch, commit, sync), session path, blockers if any, continue from `active-context.md`.
+≤8 lines: wrap-up result (branch, commit, sync), session path, blockers if any, continue from `active-context.md`, then the **Turn close** footer (Adaptive mode, intelligence gain %, capabilities released).

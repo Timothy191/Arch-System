@@ -145,7 +145,7 @@ export function TaskbarSearch() {
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto w-full min-w-0 max-w-[11.5rem] sm:max-w-[13rem] md:max-w-[15rem] lg:max-w-[16.5rem]"
+      className="relative w-full min-w-0 max-w-[11.5rem] sm:max-w-[13rem] md:max-w-[15rem] lg:max-w-[16.5rem]"
     >
       <form
         className="brand-taskbar-search-wrap w-full"

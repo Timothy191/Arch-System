@@ -132,7 +132,7 @@ const slidingWindowStrategy = new SlidingWindowStrategy();
 async function checkRateLimit(
   identifier: string,
   config: { windowMs: number; maxRequests: number },
-  path: string,
+  _path: string,
 ): Promise<RateLimitResult> {
   let store;
   try {

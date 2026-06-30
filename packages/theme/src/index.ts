@@ -2,7 +2,7 @@
 export * from "./tokens";
 
 // Shared static assets
-export { GLOBAL_BACKGROUND_VIDEO } from "./assets";
+export { GLOBAL_BACKGROUND_VIDEO, GLOBAL_BACKGROUND_VIDEO_WEBM } from "./assets";
 
 // React
 export { ArchThemeProvider, useArchTheme, useTheme } from "./react/theme-provider";

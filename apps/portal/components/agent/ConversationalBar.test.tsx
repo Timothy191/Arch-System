@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { ConversationalBar } from "./ConversationalBar";
 
 jest.mock("@/hooks/useSplitWindow", () => ({
-  useSplitWindow: (selector: (state: { isOpen: boolean }) => unknown) =>
+  useSplitWindow: (selector: (_state: { isOpen: boolean }) => unknown) =>
     selector({ isOpen: false }),
 }));
 

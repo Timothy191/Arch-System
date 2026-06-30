@@ -14,6 +14,19 @@ from .common import (
 from .fetch import fetch_resource
 
 
+def _turn_session_record(action: str, kind: str, resource_id: str) -> None:
+    import subprocess
+
+    script = Path(__file__).resolve().parents[3] / "scripts" / "agent-orchestrator" / "turn-session.py"
+    if not script.exists():
+        return
+    subprocess.run(
+        ["python3", str(script), "record", action, kind, resource_id],
+        check=False,
+        capture_output=True,
+    )
+
+
 def _catalog_entry(kind: str, resource_id: str) -> dict[str, Any] | None:
     catalog = load_catalog()
     section = catalog.get(f"{kind}s", {})
@@ -75,6 +88,7 @@ def checkout(kind: str, resource_id: str) -> dict[str, Any]:
     resources = active.setdefault("resources", [])
     resources.append(record)
     save_active(active)
+    _turn_session_record("checkout", kind, resource_id)
     return record
 
 
@@ -98,4 +112,6 @@ def return_resource(kind: str, resource_id: str) -> bool:
 
     active["resources"] = kept
     save_active(active)
+    if removed:
+        _turn_session_record("return", kind, resource_id)
     return removed

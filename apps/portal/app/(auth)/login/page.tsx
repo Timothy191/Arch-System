@@ -1,25 +1,30 @@
 import { cookies } from "next/headers";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { LoginForm } from "@/features/auth/components/LoginForm";
-import { AlertTriangle, Lock } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 import { AgenticAiLogo } from "@repo/ui/AgenticAiLogo";
+import { GlassShineController } from "@10-src/01_Admin/components";
+import { CliAgentMark } from "@/components/auth/CliAgentMark";
+import { LoginServiceStatusBanner } from "@/components/auth/LoginServiceStatusBanner";
+import {
+  INTEGRATED_CLI_AGENTS,
+  type IntegratedCliAgent,
+} from "@/lib/auth/integrated-cli-agents";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
-/** CLI coding agents integrated with Arch OS agentic workflows */
-const INTEGRATED_CLI_AGENTS = [
-  "Claude Code",
-  "Aider",
-  "Antigravity",
-  "Cursor",
-  "Codex CLI",
-  "Gemini CLI",
-  "Cline",
-  "OpenCode",
-  "Continue",
-  "Amazon Q Developer",
-] as const;
+function CliAgentTickerItem({ agent }: { agent: IntegratedCliAgent }) {
+  return (
+    <span className="login-card-footer-cli-agent">
+      <span className="login-card-footer-cli-bullet" aria-hidden="true">
+        •
+      </span>
+      <CliAgentMark agent={agent} />
+      <span>{agent.name}</span>
+    </span>
+  );
+}
 
 function LoginCardFooterTickerRow({ version }: { version: string }) {
   return (
@@ -50,12 +55,7 @@ function LoginCardFooterTickerRow({ version }: { version: string }) {
         <AgenticAiLogo className="login-card-footer-agentic-icon shrink-0" aria-hidden="true" />
         <span className="login-card-footer-cli-agents-label">CLI Agents</span>
         {INTEGRATED_CLI_AGENTS.map((agent) => (
-          <span key={agent} className="login-card-footer-cli-agent">
-            <span className="login-card-footer-cli-bullet" aria-hidden="true">
-              •
-            </span>
-            {agent}
-          </span>
+          <CliAgentTickerItem key={agent.name} agent={agent} />
         ))}
       </div>
       <span className="login-card-footer-ticker-sep" aria-hidden="true">
@@ -63,9 +63,7 @@ function LoginCardFooterTickerRow({ version }: { version: string }) {
       </span>
       <div className="login-card-footer-meta">
         <span>v{version}</span>
-        <span className="login-card-footer-os uppercase tracking-wider font-medium text-[var(--brand-gold)]">
-          Arch OS
-        </span>
+        <span className="login-card-footer-os">Arch OS</span>
       </div>
     </>
   );
@@ -104,10 +102,12 @@ export default async function LoginPage() {
 
   return (
     <main className="relative w-full flex-1 min-h-0 flex flex-col items-start justify-start py-6 pl-6 pr-8 md:pl-12 md:pr-16 lg:pl-20 lg:pr-32 overflow-y-auto box-border">
-      <div className="login-card-float-wrapper login-card-float-wrapper--top relative z-10 w-[420px] max-w-full shrink-0">
+      <GlassShineController />
+      <div className="login-card-float-wrapper login-card-float-wrapper--top portal-layer-login relative z-[calc(var(--z-primary-card)+1)] w-[380px] max-w-full shrink-0">
+        <div className="login-card-float-shadow" aria-hidden="true" />
         <div
           data-testid="login-card"
-          className="login-card-container layer-signin-card animate-fade-up flex flex-col px-8 pt-6 pb-9 min-h-[36rem] rounded-[var(--radius-xl)]"
+          className="login-card-container layer-signin-card animate-fade-up flex flex-col px-8 pt-6 pb-0 min-h-[36rem] rounded-[var(--radius-xl)]"
         >
           {systemUnavailable ? (
           <div className="space-y-4 text-center">
@@ -128,73 +128,67 @@ export default async function LoginPage() {
           <>
             <div className="login-card-border-shine" aria-hidden="true" />
             <div className="login-card-thread-border" aria-hidden="true" />
+            <div className="login-card-surface-sheen" aria-hidden="true" />
+            <div className="login-card-glass-shine glass-shine-target" aria-hidden="true" />
 
             <div className="login-card-body">
-              <header className="login-card-greeting login-card-greeting--lead">
-                <h2 className="login-card-greeting-title">
-                  <span className="login-card-greeting-line">Welcome back to Arch</span>
-                  <span className="login-card-greeting-line login-card-greeting-sub">
-                    How can I assist you?
-                  </span>
-                </h2>
-              </header>
-
-              <div className="login-card-brand">
-                <h1 className="login-brand-wordmark" aria-label="Arch-Operational System">
-                  <span className="login-brand-wordmark-visual" aria-hidden="true">
-                    <span className="login-brand-logo-a">
-                      <Logo className="login-brand-logo-mark" splitTone />
+              <section className="login-card-intro">
+                <div className="login-card-brand">
+                  <h1 className="login-brand-wordmark" aria-label="Arch-Operational System">
+                    <span className="login-brand-wordmark-visual" aria-hidden="true">
+                      <span className="login-brand-logo-a">
+                        <Logo className="login-brand-logo-mark" splitTone />
+                      </span>
+                      <span className="login-brand-wordmark-tail">Arch-Operational System</span>
                     </span>
-                    <span className="login-brand-wordmark-tail">Arch-Operational System</span>
-                  </span>
-                </h1>
-              </div>
-
-              <div className="login-card-form-region">
-                <LoginForm />
-              </div>
-
-              <div className="login-card-bottom-stack">
-                <div className="login-card-notice shrink-0 flex items-start gap-2.5 select-none">
-                  <svg
-                    className="login-card-notice-icon shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                  <p className="login-card-notice-text">
-                    <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
-                  </p>
+                  </h1>
                 </div>
-                <div className="login-card-secure" aria-label="Secure connection">
-                  <Lock className="w-3 h-3" strokeWidth={1.5} aria-hidden="true" />
-                  <span>Secure</span>
-                </div>
-              </div>
-            </div>
+              </section>
 
-            <div className="login-card-footer login-card-footer-panel shrink-0 -mx-8 select-none">
-              <div
-                className="login-card-footer-ticker-viewport"
-                aria-label={`English (US). CLI agents: ${INTEGRATED_CLI_AGENTS.join(", ")}. Version and Arch OS.`}
-              >
-                <div className="login-card-footer-ticker-track">
-                  <div className="login-card-footer-ticker-row">
-                    <LoginCardFooterTickerRow version={PORTAL_VERSION} />
+              <section className="login-card-panel login-card-panel--main mt-auto -mx-8 shrink-0 select-none">
+                <div className="login-card-form-region login-card-main-form">
+                  <LoginForm />
+                </div>
+
+                <div className="login-card-form-notice-divider" aria-hidden="true" />
+
+                <div className="login-card-footer-notice-block">
+                  <div className="login-card-notice shrink-0 select-none">
+                    <svg
+                      className="login-card-notice-icon shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="16" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <p className="login-card-notice-text">
+                      <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
+                    </p>
                   </div>
-                  <div className="login-card-footer-ticker-row" aria-hidden="true">
-                    <LoginCardFooterTickerRow version={PORTAL_VERSION} />
+                  <LoginServiceStatusBanner />
+                </div>
+
+                <div
+                  className="login-card-footer-ticker-viewport login-card-footer-ticker-band"
+                  aria-label={`English (US). CLI agents: ${INTEGRATED_CLI_AGENTS.map((a) => a.name).join(", ")}. Version and Arch OS.`}
+                >
+                  <div className="login-card-footer-ticker-track">
+                    <div className="login-card-footer-ticker-row">
+                      <LoginCardFooterTickerRow version={PORTAL_VERSION} />
+                    </div>
+                    <div className="login-card-footer-ticker-row" aria-hidden="true">
+                      <LoginCardFooterTickerRow version={PORTAL_VERSION} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </section>
             </div>
           </>
           )}

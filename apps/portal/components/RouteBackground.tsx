@@ -3,8 +3,8 @@
 import { useFocusMode } from "@/hooks/useFocusMode";
 
 /**
- * RouteBackground — flat app canvas beneath all portal content.
- * No video, grain, or decorative layers.
+ * RouteBackground — flat app canvas for hub and non-auth routes.
+ * Auth routes use `AuthAmbientBackground` (decoupled WebM layer in auth layout).
  */
 export function RouteBackground() {
   useFocusMode((s) => s.enabled);

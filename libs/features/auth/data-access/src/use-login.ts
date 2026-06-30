@@ -18,7 +18,7 @@ export function useLogin() {
   const [loading, setLoading] = useState(false);
   const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null);
 
-  const login = async (employeeId: string, password: string) => {
+  const login = async (email: string, employeeId: string, password: string) => {
     setRateLimitCountdown(null);
     setLoading(true);
 
@@ -26,7 +26,7 @@ export function useLogin() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: employeeId, password }),
+        body: JSON.stringify({ email, employeeId, password }),
       });
 
       const data = (await response.json()) as { error?: string };

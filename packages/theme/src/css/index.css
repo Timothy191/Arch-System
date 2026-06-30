@@ -4,6 +4,7 @@
 @import "./variables.css" layer(theme);
 @import "./variables-generated.css" layer(theme);
 @import "./glass.css" layer(theme);
+@import "../../../../10-src/01_Admin/styles/glassmorphism.css" layer(theme);
 @import "./animations.css" layer(theme);
 @import "./transitions.css" layer(theme);
 @import "./focus.css" layer(theme);

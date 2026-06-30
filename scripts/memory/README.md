@@ -16,8 +16,11 @@ Or ensure `.cursor/hooks.json` contains the same `hooks` block as `hooks.json.ex
 | Script | Event |
 |--------|-------|
 | `hooks/session-init.sh` | `sessionStart` |
+| `hooks/auto-recall.sh` | `sessionStart` |
 | `hooks/turn-counter.sh` | `beforeSubmitPrompt` |
+| `hooks/recall-on-prompt.sh` | `beforeSubmitPrompt` |
 | `hooks/pre-compact.sh` | `preCompact` |
+| `auto-recall.py` | Manual / agent CLI — `python3 scripts/memory/auto-recall.py --prompt "..."` |
 
 Restart Cursor after editing `hooks.json`. Verify in **Settings → Hooks** or the Hooks output channel.
 

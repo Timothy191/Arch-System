@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
@@ -23,7 +22,6 @@ import {
   SignalHigh,
   SignalMedium,
   SignalLow,
-  CheckSquare,
   Database,
   HardDrive,
   Zap,
@@ -657,17 +655,6 @@ export function SystemTrayPill() {
 
   return (
     <div className="flex items-center gap-1.5">
-      <Link
-        href="/drilling/tools?tab=tasks"
-        className={cn(
-          "flex items-center justify-center w-[26px] h-[26px] rounded-full brand-chrome-pill",
-          "transition-colors active:scale-[0.97]",
-        )}
-        title="Task Manager"
-      >
-        <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-      </Link>
-
       <div
         className={cn(
           "system-tray-status-cluster flex items-center gap-1 h-[26px] px-1.5 rounded-full",

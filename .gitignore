@@ -47,6 +47,8 @@ Thumbs.db
 .memory/state.json
 .memory/.compact-pending
 .memory/.compact-staging.md
+.memory/.recall-brief.md
+.memory/.turn-session.json
 
 # Misc local artifacts
 .assets-checksum

@@ -1,12 +1,12 @@
 export async function readOpenAiSseStream(
   body: ReadableStream<Uint8Array>,
-  onDelta: (text: string) => void,
+  onDelta: (_text: string) => void,
 ): Promise<void> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
 
-  while (true) {
+  for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
 

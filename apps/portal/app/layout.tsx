@@ -164,7 +164,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <PWAInstallButton />
 
               {/* Global taskbar */}
-              <header role="banner" className="contents" aria-label="Taskbar">
+              <header role="banner" className="portal-layer-chrome contents" aria-label="Taskbar">
                 <Taskbar
                   centerSlot={<TaskbarSearch />}
                   rightSlot={

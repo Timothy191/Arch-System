@@ -34,6 +34,9 @@
 | `PROGRESSIVE_DISCLOSURE.md` | Context slice index |
 | `MEMORY.md` | This file — persistent arch facts |
 | `.memory/` | Session summaries + compaction; `/summarize` = wrap-up (ship/sync) then archive |
+| `.memory/.recall-brief.md` | Auto-recall brief — hooks refresh each session/prompt (`scripts/memory/auto-recall.py`) |
+| `.memory/.turn-session.json` | Per-turn session (tier, git delta, verify) — `turn-session-begin.sh` hook + `turn-close-status.py` |
+| `scripts/agent-orchestrator/turn_session_lib.py` | Session-scoped intelligence gain (no global HOW open-item penalty) |
 | `run/agent-learnings.jsonl` | Ephemeral lessons; promote stable ones here |
 | `.cursor/hooks.json` | Turn counter + `preCompact` → auto-compact flags |
 | `.cursor/rules/*.mdc` | Always-on orchestrator directives |
@@ -41,6 +44,7 @@
 | `.cursor/rules/adaptive-agentic-mode.mdc` | Fetch-use-return orchestrator; lean context by default |
 | `.cursor/rules/frontier-agentic-patterns.mdc` | Cloned patterns from Fable 5, Opus 4.8, GPT-5.5, Grok, Gemini |
 | `scripts/agent-orchestrator/` | Effort classify, verify gate, dynamic workflow template |
+| `scripts/memory/auto-recall.py` | Auto-recall brief → `.memory/.recall-brief.md` (hooks + manual) |
 
 ## Search policy
 
