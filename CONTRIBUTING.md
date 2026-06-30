@@ -19,8 +19,8 @@ Arch-Mk2 (the Plantcor mining operations portal) is an industrial operations pla
 git clone <repo-url> arch-mk2
 cd arch-mk2
 pnpm install                       # installs deps and activates Husky hooks
-cp apps/portal/env/.env.example apps/portal/.env
-# edit apps/portal/.env — fill Supabase keys, Sentry DSN, etc.
+cp 00_applications/portal/env/.env.example 00_applications/portal/.env
+# edit 00_applications/portal/.env — fill Supabase keys, Sentry DSN, etc.
 ```
 
 ### Start local services
@@ -34,7 +34,7 @@ pnpm --filter @repo/database supabase:dev   # local Postgres + Auth on :54321
 ### Run the app
 
 ```bash
-pnpm dev                                # portal on :3000 (uses scripts/dev.sh)
+pnpm dev                                # portal on :3000 (uses 03_operations_automation/dev.sh)
 # or, more explicit:
 pnpm --filter portal dev
 ```
@@ -54,22 +54,22 @@ The monorepo is an **Nx + pnpm workspaces** project (Turbo is a transitive depen
 
 | Path                | Purpose                                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal`       | Next.js 15+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
-| `apps/cms`          | Payload CMS v3 headless content service.                                                                                   |
-| `apps/overview`     | Standalone architecture visualization (React Flow).                                                                        |
-| `apps/ci-observer`  | CI observation helper app.                                                                                                 |
-| `packages/ui`       | Shared Radix + shadcn UI components. `widgets/` for composites.                                                            |
-| `packages/theme`    | OKLCH design tokens + Tailwind preset (single source of truth).                                                            |
-| `packages/supabase` | Browser, server, middleware, read-replica Supabase clients, and auto-generated database types.                             |
-| `packages/database` | SQL migrations (source of truth) — never edit the Supabase copy.                                                           |
-| `packages/redis`    | Redis cache helpers (used by `apps/portal/proxy.ts`).                                                                      |
-| `packages/utils`    | Shared utilities (Inngest, Novu integrations).                                                                             |
-| `packages/errors`   | Domain-specific error classes.                                                                                             |
-| `packages/eval`     | Python/DeepEval AI compliance suite (separate Poetry env, not in `pnpm quality`).                                          |
-| `tools/`            | Build-time scripts: policy compiler, tag applicator, circular-dep detector, MCP servers.                                   |
-| `e2e/`              | Playwright E2E tests (visual snapshots, integration).                                                                      |
+| `00_applications/portal`       | Next.js 15+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
+| `00_applications/cms`          | Payload CMS v3 headless content service.                                                                                   |
+| `00_applications/overview`     | Standalone architecture visualization (React Flow).                                                                        |
+| `00_applications/ci-observer`  | CI observation helper app.                                                                                                 |
+| `01_platform_packages/ui`       | Shared Radix + shadcn UI components. `widgets/` for composites.                                                            |
+| `01_platform_packages/theme`    | OKLCH design tokens + Tailwind preset (single source of truth).                                                            |
+| `01_platform_packages/supabase` | Browser, server, middleware, read-replica Supabase clients, and auto-generated database types.                             |
+| `01_platform_packages/database` | SQL migrations (source of truth) — never edit the Supabase copy.                                                           |
+| `01_platform_packages/redis`    | Redis cache helpers (used by `00_applications/portal/proxy.ts`).                                                                      |
+| `01_platform_packages/utils`    | Shared utilities (Inngest, Novu integrations).                                                                             |
+| `01_platform_packages/errors`   | Domain-specific error classes.                                                                                             |
+| `01_platform_packages/eval`     | Python/DeepEval AI compliance suite (separate Poetry env, not in `pnpm quality`).                                          |
+| `08_developer_tooling/`            | Build-time scripts: policy compiler, tag applicator, circular-dep detector, MCP servers.                                   |
+| `09_end_to_end_verification/`              | Playwright E2E tests (visual snapshots, integration).                                                                      |
 
-Deep dives live in `docs/DOCUMENTATION_INDEX.md` and `MONOREPO.md` — links at the end of this document.
+Deep dives live in `06_technical_documentation/DOCUMENTATION_INDEX.md` and `MONOREPO.md` — links at the end of this document.
 
 ## Quality gates
 
@@ -80,7 +80,7 @@ CI runs every gate on every PR. The order matters — each step is a hard fail.
 | 1     | Dependency version lint       | `pnpm deps:lint` (syncpack)                | ✅          |
 | 2     | Security audit                | `pnpm audit --audit-level=high --prod`     | ✅          |
 | 3     | Dead-code detection           | `pnpm knip`                                | ✅          |
-| 4     | Circular-dependency detection | `node tools/circular-dep-detect.cjs`       | ✅          |
+| 4     | Circular-dependency detection | `node 08_developer_tooling/circular-dep-detect.cjs`       | ✅          |
 | 5     | **Policy SSoT drift**         | `pnpm policy:check`                        | ✅          |
 | 6     | Markdown lint                 | `pnpm md:lint`                             | ✅          |
 | 7     | Secret scan (gitleaks)        | `gitleaks/gitleaks-action@v2`              | ✅          |
@@ -89,7 +89,7 @@ CI runs every gate on every PR. The order matters — each step is a hard fail.
 | 10    | Test with coverage            | `pnpm nx run-many -t test -- --coverage`   | ✅          |
 | 11    | Build                         | `pnpm nx run-many -t build`                | ✅          |
 | 12    | Bundle size check             | `pnpm bundlesize`                          | ✅          |
-| 13    | Lighthouse CI (preview)       | `npx @lhci/cli@0.14.x autorun`             | ✅          |
+| 13    | Lighthouse CI (preview)       | `npx @lh11_continuous_integration/cli@0.14.x autorun`             | ✅          |
 | 14    | Self-healing CI               | `pnpm exec nx fix-ci` (best-effort)        | ⚠️ advisory |
 
 **Local fast lane** (most changes do not need steps 12–14):
@@ -113,8 +113,8 @@ The workspace uses pnpm's `catalog:` indirection and Nx project tags. New packag
 ### 1. Scaffold the package
 
 ```bash
-mkdir -p packages/my-feature
-cd packages/my-feature
+mkdir -p 01_platform_packages/my-feature
+cd 01_platform_packages/my-feature
 pnpm init
 ```
 
@@ -126,23 +126,23 @@ pnpm init
 
 ### 2. Wire it into the workspace
 
-`pnpm-workspace.yaml` already globs `packages/*`; no edit is needed for the package to be discoverable. Add an explicit entry only if the package lives outside the standard layout.
+`pnpm-workspace.yaml` already globs `01_platform_packages/*`; no edit is needed for the package to be discoverable. Add an explicit entry only if the package lives outside the standard layout.
 
 ### 3. Tag the project for the policy compiler
 
 ```bash
-node tools/apply-project-tags.cjs
+node 08_developer_tooling/apply-project-tags.cjs
 ```
 
-This auto-tags every project under `apps/`, `packages/`, and `tools/` with the canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `tools/*`). It writes/updates each `project.json` deterministically — review the diff before committing.
+This auto-tags every project under `00_applications/`, `01_platform_packages/`, and `08_developer_tooling/` with the canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `08_developer_tooling/*`). It writes/updates each `project.json` deterministically — review the diff before committing.
 
 ### 4. Register Nx targets
 
-Add a `project.json` next to `package.json` (the tag script will create one if missing) and declare `build`, `lint`, `type-check`, and (for apps) `test` targets using the workspace executors. Look at `packages/ui/project.json` for a clean reference.
+Add a `project.json` next to `package.json` (the tag script will create one if missing) and declare `build`, `lint`, `type-check`, and (for apps) `test` targets using the workspace executors. Look at `01_platform_packages/ui/project.json` for a clean reference.
 
 ### 5. Declare dependency rules
 
-Open `tools/policy-compiler.cjs` and add a `DEPENDENCY_RULES` entry that describes what your package can and cannot import (see "Adding a new dependency rule" below). Run `pnpm policy:gen` to regenerate `tools/policy/*.json` and the ESLint boundaries config.
+Open `08_developer_tooling/policy-compiler.cjs` and add a `DEPENDENCY_RULES` entry that describes what your package can and cannot import (see "Adding a new dependency rule" below). Run `pnpm policy:gen` to regenerate `08_developer_tooling/policy/*.json` and the ESLint boundaries config.
 
 ### 6. Verify
 
@@ -159,36 +159,36 @@ pnpm quality
 All cross-cutting rules — dependency boundaries, required CI checks, intent capabilities, security patterns — flow from a **Single Source of Truth (SSoT)** into deterministic outputs.
 
 ```
-tools/policy-compiler.cjs       (runtime CJS & Single Source of Truth)
+08_developer_tooling/policy-compiler.cjs       (runtime CJS & Single Source of Truth)
         ↓ generates
-tools/policy/dependency.rules.json
-tools/policy/architecture.rules.json
-tools/policy/security.checks.json
-tools/policy/intent-map.json
-tools/policy/eslint-boundaries.generated.cjs
+08_developer_tooling/policy/dependency.rules.json
+08_developer_tooling/policy/architecture.rules.json
+08_developer_tooling/policy/security.checks.json
+08_developer_tooling/policy/intent-map.json
+08_developer_tooling/policy/eslint-boundaries.generated.cjs
 ```
 
 The compiler has two modes:
 
-- `pnpm policy:gen` — writes outputs to `tools/policy/`.
+- `pnpm policy:gen` — writes outputs to `08_developer_tooling/policy/`.
 - `pnpm policy:check` — verifies outputs are in sync; **exits non-zero on drift**. CI runs this on every PR.
 
 ### Workflow
 
-1. Edit only `tools/policy-compiler.cjs` (the Single Source of Truth).
-2. Run `pnpm policy:gen` locally. Inspect the diff under `tools/policy/`.
-3. Commit `tools/policy-compiler.cjs` and every regenerated JSON/CJS file as a single atomic change.
+1. Edit only `08_developer_tooling/policy-compiler.cjs` (the Single Source of Truth).
+2. Run `pnpm policy:gen` locally. Inspect the diff under `08_developer_tooling/policy/`.
+3. Commit `08_developer_tooling/policy-compiler.cjs` and every regenerated JSON/CJS file as a single atomic change.
 4. Push. The CI drift check will fail if the generated files are out of sync — that is by design.
 
 If the SSoT is wrong (you cannot express your rule), extend the data model in `policy-compiler.cjs` first, regenerate, and only then add a new rule. The compiler is the contract.
 
 ## Adding a new dependency rule
 
-Concrete example: forbid `packages/ui` from importing any of the Supabase client modules, so UI stays presentational.
+Concrete example: forbid `01_platform_packages/ui` from importing any of the Supabase client modules, so UI stays presentational.
 
 ### Step 1 — Express the rule in the SSoT
 
-Edit `tools/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
+Edit `08_developer_tooling/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
 
 ```js
 {
@@ -205,7 +205,7 @@ Edit `tools/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
 pnpm policy:gen
 ```
 
-This writes `tools/policy/dependency.rules.json` and `tools/policy/eslint-boundaries.generated.cjs` (which `@nx/enforce-module-boundaries` consumes).
+This writes `08_developer_tooling/policy/dependency.rules.json` and `08_developer_tooling/policy/eslint-boundaries.generated.cjs` (which `@nx/enforce-module-boundaries` consumes).
 
 ### Step 3 — Verify drift-free
 
@@ -217,11 +217,11 @@ The check must report no drift. If it reports drift, you edited the SSoT but for
 
 ### Step 4 — Confirm the rule actually fires
 
-Add a temporary import in any file under `packages/ui` of `@repo/supabase/client` and run `pnpm nx run-many -t lint`. You should see the rule fire with your `reason` string in the error. Revert the import before committing.
+Add a temporary import in any file under `01_platform_packages/ui` of `@repo/supabase/client` and run `pnpm nx run-many -t lint`. You should see the rule fire with your `reason` string in the error. Revert the import before committing.
 
 ### Step 5 — Commit
 
-Stage `tools/policy-compiler.cjs`, `tools/policy/dependency.rules.json`, and `tools/policy/eslint-boundaries.generated.cjs` together. Use a conventional commit (`feat(policy): forbid ui → supabase imports`).
+Stage `08_developer_tooling/policy-compiler.cjs`, `08_developer_tooling/policy/dependency.rules.json`, and `08_developer_tooling/policy/eslint-boundaries.generated.cjs` together. Use a conventional commit (`feat(policy): forbid ui → supabase imports`).
 
 ## Code conventions
 
@@ -231,11 +231,11 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 - **Named icon imports** — always `import { Drill } from "lucide-react"`. Never `import * as Icons from "lucide-react"`. An unscoped import previously produced a 1.3 MB chunk.
 - **Class merging** — always use `cn()` from `@repo/ui/lib/utils` (`import { cn } from "@repo/ui/lib/utils"`). Never concatenate class strings with template literals.
 - **No raw shadows** — `box-shadow` and Tailwind `shadow-sm/md/lg` are forbidden. Use only the tokenized shadows: `shadow-card`, `shadow-window`, `shadow-diffusion-*`.
-- **No hardcoded colors** — pull from design tokens (`@repo/theme`) or Tailwind tokens built from `packages/theme/tokens.json`. Hardcoded OKLCH/hex values in components are a CI lint failure.
+- **No hardcoded colors** — pull from design tokens (`@repo/theme`) or Tailwind tokens built from `01_platform_packages/theme/tokens.json`. Hardcoded OKLCH/hex values in components are a CI lint failure.
 - **Light theme only** — `data-theme="light"` is hardcoded in the head script. Do not add a dark-mode toggle, color-scheme overrides, or `prefers-color-scheme: dark` media queries. Dark mode does not exist.
 - **Animation discipline** — animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Never animate layout properties. Easing is `cubic-bezier(0.16, 1, 0.3, 1)`.
 - **Glass pattern** — `bg-white/70 backdrop-blur-xl border border-black/[0.08]` is the standard surface.
-- **Icon and path aliases** — `@/*` and `~/*` both resolve to `apps/portal/*`. `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*` are conventional sub-cuts.
+- **Icon and path aliases** — `@/*` and `~/*` both resolve to `00_applications/portal/*`. `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*` are conventional sub-cuts.
 - **Server Actions validate first line** — `createServerSupabaseClient()` from `@repo/supabase/server` and validate the user as line one. See `.claude/rules/auth.md`.
 - **Conventional commits** — enforced by commitlint. Husky `commit-msg` hook will reject non-conforming messages.
 
@@ -246,18 +246,18 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 | Unit (Jest, jsdom, ts-jest) | `pnpm test`                                              | Does not need Supabase.                                                                               |
 | Single file                 | `pnpm --filter portal test -- --testPathPatterns=<file>` | Fast iteration loop.                                                                                  |
 | E2E (Playwright)            | `pnpm test:e2e`                                          | Requires dev server on `:3000` and Chromium at `/usr/bin/google-chrome` (see `playwright.config.ts`). |
-| Visual snapshots            | `e2e/visual/__snapshots__/`                              | Update with `playwright test --update-snapshots`.                                                     |
-| AI compliance               | `packages/eval/`                                         | Python/DeepEval, separate Poetry env, not in `pnpm quality`.                                          |
+| Visual snapshots            | `09_end_to_end_verification/visual/__snapshots__/`                              | Update with `playwright test --update-snapshots`.                                                     |
+| AI compliance               | `01_platform_packages/eval/`                                         | Python/DeepEval, separate Poetry env, not in `pnpm quality`.                                          |
 | Coverage                    | `pnpm nx run-many -t test -- --coverage`                 | Thresholds: 40/30/35/40.                                                                              |
 
 ### Adding a new `@repo/*` import to a portal test
 
-`apps/portal/jest.config.js` uses **explicit** `moduleNameMapper` entries. A new package or subpath import will fail with module-not-found unless you add the mapping. Update the map when introducing new package exports.
+`00_applications/portal/jest.config.js` uses **explicit** `moduleNameMapper` entries. A new package or subpath import will fail with module-not-found unless you add the mapping. Update the map when introducing new package exports.
 
 ### Conventions
 
 - Co-locate unit tests next to source as `*.test.ts(x)`.
-- E2E lives in `e2e/` and is grouped by feature.
+- E2E lives in `09_end_to_end_verification/` and is grouped by feature.
 - Mock at the network boundary (Supabase, Redis), not at the function call.
 
 ## Database migrations
@@ -266,7 +266,7 @@ The **`employees` table is the source of truth** for authorization (role and dep
 
 ### Workflow
 
-1. Add a new file in `packages/database/migrations/` with a zero-padded sequence number: `NNN_description.sql` (e.g. `062_add_equipment_table.sql`). Files are processed in lexical order — gaps are allowed but discouraged.
+1. Add a new file in `01_platform_packages/database/migrations/` with a zero-padded sequence number: `NNN_description.sql` (e.g. `062_add_equipment_table.sql`). Files are processed in lexical order — gaps are allowed but discouraged.
 2. Apply locally:
 
    ```bash
@@ -279,15 +279,15 @@ The **`employees` table is the source of truth** for authorization (role and dep
    pnpm --filter @repo/database supabase:gen
    ```
 
-4. Commit **both** the migration and the updated `packages/supabase/src/database.types.ts` in a single atomic change.
-5. **Never** edit `packages/supabase/supabase/migrations/` directly — that directory is a deploy-time copy produced by the build pipeline. A PreToolUse hook blocks edits there.
+4. Commit **both** the migration and the updated `01_platform_packages/supabase/src/database.types.ts` in a single atomic change.
+5. **Never** edit `01_platform_packages/supabase/supabase/migrations/` directly — that directory is a deploy-time copy produced by the build pipeline. A PreToolUse hook blocks edits there.
 
 ### RLS requirements
 
 - Every new table must have Row-Level Security enabled (`ALTER TABLE … ENABLE ROW LEVEL SECURITY`).
-- The `no-raw-rls-disable` security check (see `tools/policy-compiler.cjs`) will fail CI if any migration disables RLS.
+- The `no-raw-rls-disable` security check (see `08_developer_tooling/policy-compiler.cjs`) will fail CI if any migration disables RLS.
 - Authorization policies should consult `employees.role` and `employees.department_id`, not `auth.uid()` alone.
-- SQL privilege-escalation and index-coverage tests live in `packages/database/tests/`. Add tests for new tables that introduce new RLS roles or new index patterns.
+- SQL privilege-escalation and index-coverage tests live in `01_platform_packages/database/tests/`. Add tests for new tables that introduce new RLS roles or new index patterns.
 
 ### When to stop and ask for confirmation
 
@@ -301,7 +301,7 @@ Run `pnpm install --no-frozen-lockfile` locally, then commit the updated `pnpm-l
 
 ### `pnpm policy:check` reports drift
 
-You (or a previous commit) edited `tools/policy-compiler.cjs` without regenerating. Run `pnpm policy:gen` and commit the output under `tools/policy/`.
+You (or a previous commit) edited `08_developer_tooling/policy-compiler.cjs` without regenerating. Run `pnpm policy:gen` and commit the output under `08_developer_tooling/policy/`.
 
 ### Supabase types are stale after a migration
 
@@ -313,7 +313,7 @@ If the script errors, confirm the local Supabase stack is running (`pnpm --filte
 
 ### Portal Jest cannot resolve `@repo/something`
 
-Add the package to `moduleNameMapper` in `apps/portal/jest.config.js`. Wildcard mappings are not always sufficient for subpath exports — add explicit entries when needed.
+Add the package to `moduleNameMapper` in `00_applications/portal/jest.config.js`. Wildcard mappings are not always sufficient for subpath exports — add explicit entries when needed.
 
 ### Pre-commit hook complains about secrets
 
@@ -325,7 +325,7 @@ Most common cause: a generated file is missing or stale. Run `pnpm policy:gen &&
 
 ### Circular dependency detected
 
-`tools/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `pnpm graph` (Nx) or `madge --circular packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
+`08_developer_tooling/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `pnpm graph` (Nx) or `madge --circular 01_platform_packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
 
 ### Husky hook skipped with `--no-verify`
 
@@ -333,12 +333,12 @@ Most common cause: a generated file is missing or stale. Run `pnpm policy:gen &&
 
 ### Knock-on issues from codegen
 
-After editing `packages/theme/tokens.json`, run `pnpm --filter @repo/theme build` and commit **both** the source tokens and the regenerated `packages/theme/src/tokens/generated.ts`. After editing migrations, run `supabase:gen` and commit the regenerated `database.types.ts`.
+After editing `01_platform_packages/theme/tokens.json`, run `pnpm --filter @repo/theme build` and commit **both** the source tokens and the regenerated `01_platform_packages/theme/src/tokens/generated.ts`. After editing migrations, run `supabase:gen` and commit the regenerated `database.types.ts`.
 
 ## Further reading
 
 - **[MONOREPO.md](MONOREPO.md)** — Monorepo layout, packages, and Nx conventions.
-- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** — Complete documentation index.
+- **[06_technical_documentation/DOCUMENTATION_INDEX.md](06_technical_documentation/DOCUMENTATION_INDEX.md)** — Complete documentation index.
 - **[DESIGN.md](DESIGN.md)** — Color system, typography, components, animation rules.
 - **[PRODUCT.md](PRODUCT.md)** — User personas, product strategy, tone.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** — Deployment guide for all environments.

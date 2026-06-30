@@ -1,6 +1,6 @@
 # WHY.md — Domain Authority
 
-> Modular context root. Full product strategy: `docs/PRODUCT.md`.
+> Modular context root. Full product strategy: `06_technical_documentation/PRODUCT.md`.
 
 ## What we build
 

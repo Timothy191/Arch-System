@@ -20,11 +20,11 @@ Execute in order until nothing remains or a blocker is recorded:
 
 | Step | Action |
 |------|--------|
-| 0 | `python3 scripts/lending-library/purge-staging.py` if orphaned lending-library checkouts |
+| 0 | `python3 03_operations_automation/lending-library/purge-staging.py` if orphaned lending-library checkouts |
 | 1 | Complete all in-scope checklist items in `HOW.md` |
 | 2 | Apply missing edits (migrations + `database.types.ts`, `policy:gen` if policy compiler touched, etc.) |
 | 3 | Run scoped verification on touched packages (see `AGENTS.md`) |
-| 3b | `bash scripts/agent-orchestrator/verify-gate.sh` |
+| 3b | `bash 03_operations_automation/agent-orchestrator/verify-gate.sh` |
 | 4 | Fix failures — do not skip hooks (`--no-verify`) unless user explicitly overrides |
 | 5 | Mark completed items `[x]` in `HOW.md`; set task status when objective is done |
 
@@ -84,7 +84,7 @@ If something cannot finish (missing credentials, failing CI, ambiguous scope):
 After wrap-up + compact, run:
 
 ```bash
-python3 scripts/agent-orchestrator/turn-close-status.py --verify-passed \
+python3 03_operations_automation/agent-orchestrator/turn-close-status.py --verify-passed \
   [--tier high] [--agent ...] [--mcp ...] [--workflow ...]
 ```
 

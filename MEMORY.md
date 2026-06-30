@@ -4,23 +4,29 @@
 
 ## Workspace topology (verified)
 
-| Path | Purpose |
-|------|---------|
-| `apps/portal` | Next.js 15+ App Router — primary operations UI |
-| `apps/cms` | Payload CMS v3 |
-| `apps/overview` | React Flow architecture viz |
-| `packages/*` | `@repo/theme`, `@repo/ui`, `@repo/supabase`, `@repo/database`, etc. |
-| `10-src/00_core_modules/` | Cross-cutting portal shell (auth form, glass styles) |
-| `10-src/01_Admin/` | Admin module shim (re-exports core) |
-| `e2e/` | Playwright; auth state in `e2e/.auth/user.json` |
-| `tools/` | Policy compiler, RLS audit, design audit |
-| `run/` | Runtime logs, local agent learnings (gitignored) |
+Root directories use `NN_descriptive_snake_case` ranked by usage (ADR-003). Lowest prefix = highest traffic.
+
+| Prefix | Path | Purpose |
+|--------|------|---------|
+| 00 | `00_applications/` | Deployable apps: portal, cms, overview |
+| 01 | `01_platform_packages/` | `@repo/*` platform libs (ui, theme, database, supabase, …) |
+| 02 | `02_domain_libraries/` | Feature UI + data-access (`features/*`, `shared/*`) |
+| 03 | `03_operations_automation/` | Dev, deploy, agent orchestration, lending-library |
+| 04 | `04_shared_static_assets/` | Icons/images synced to portal `public/` |
+| 05 | `05_greenfield_application_source/` | Mission-scoped greenfield (`00_core_modules`, `01_Admin`, …) |
+| 06 | `06_technical_documentation/` | ADRs, wiki, product docs |
+| 07 | `07_toolchain_configuration/` | Lint/policy/toolchain config |
+| 08 | `08_developer_tooling/` | Policy compiler, RLS audit, design audit |
+| 09 | `09_end_to_end_verification/` | Playwright; auth state in `.auth/user.json` |
+| 10 | `10_infrastructure_as_code/` | Docker, K8s, compose |
+| 12 | `12_distributed_cache_runtime/` | Local Redis offload stack |
+| — | `run/` | Runtime logs, agent learnings (gitignored) |
 
 ## Non-negotiable conventions
 
 - **Auth source of truth:** `employees` table — not Supabase Auth metadata.
 - **RLS:** Every new table; `pnpm audit:rls` + `policy:check` in CI.
-- **Migrations:** Zero-padded SQL in `packages/database/migrations/`; commit with `database.types.ts`.
+- **Migrations:** Zero-padded SQL in `01_platform_packages/database/migrations/`; commit with `database.types.ts`.
 - **Design:** Light-only macOS glass; OKLCH via `@repo/theme`; `cn()` from `@repo/ui`; no dark mode.
 - **Production realism:** No demo/placeholder data — mining domain terms only; halt for unknown schemas.
 - **Default branch:** `master` (not `main`).
@@ -38,12 +44,12 @@
 | `.ai_content/.memory/.cursor-memory/.recall-brief.md` | Auto-recall brief — hooks refresh each session/prompt |
 | `.ai_content/.memory/.cursor-memory/.turn-session.json` | Per-turn session (tier, git delta, verify) |
 | `.ai_content/.cursor/rules/` | Always-on orchestrator directives (moved from repo `.cursor/rules/`) |
-| `scripts/lending-library/` | Adaptive lending library — `catalog.json`, checkout/return, ephemeral fetch to `run/lending-library/` |
+| `03_operations_automation/lending-library/` | Adaptive lending library — `catalog.json`, checkout/return, ephemeral fetch to `run/lending-library/` |
 | `.cursor/rules/adaptive-agentic-mode.mdc` | Fetch-use-return orchestrator; lean context by default |
 | `.cursor/rules/frontier-agentic-patterns.mdc` | Cloned patterns from Fable 5, Opus 4.8, GPT-5.5, Grok, Gemini |
-| `scripts/agent-orchestrator/` | Effort classify, verify gate, dynamic workflow template |
-| `scripts/memory/auto-recall.py` | Auto-recall brief → `.ai_content/.memory/.cursor-memory/.recall-brief.md` |
-| `scripts/memory/memory_paths.py` | Canonical cursor memory root resolver |
+| `03_operations_automation/agent-orchestrator/` | Effort classify, verify gate, dynamic workflow template |
+| `03_operations_automation/memory/auto-recall.py` | Auto-recall brief → `.ai_content/.memory/.cursor-memory/.recall-brief.md` |
+| `03_operations_automation/memory/memory_paths.py` | Canonical cursor memory root resolver |
 
 ## Search policy
 

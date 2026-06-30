@@ -1,1 +1,1 @@
-docs/SUPPORT.md
+06_technical_documentation/SUPPORT.md

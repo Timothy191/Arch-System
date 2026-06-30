@@ -1,8 +1,9 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "libs/features/*/*"
-  - "libs/shared/*"
+  - "00_applications/*"
+  - "01_platform_packages/*"
+  - "02_domain_libraries/features/*/*"
+  - "02_domain_libraries/shared/*"
+  - "05_greenfield_application_source/*"
 catalog:
   lucide-react: "^1.18.0"
   tailwindcss: "^3.4.17"

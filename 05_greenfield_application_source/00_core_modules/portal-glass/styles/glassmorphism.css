@@ -1,0 +1,78 @@
+/**
+ * Specular glass shine sweep — login card + primary action surfaces.
+ * Source of truth: 05_greenfield_application_source/00_core_modules/portal-glass (synced into @repo/theme via index.css @import).
+ */
+
+.glass-shine-target {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.glass-shine-target::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 55%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  transform: skewX(-25deg);
+  mix-blend-mode: overlay;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(100% 0 0deg / 0%) 18%,
+    oklch(100% 0 0deg / 42%) 42%,
+    oklch(100% 0 0deg / 58%) 50%,
+    oklch(100% 0 0deg / 38%) 58%,
+    oklch(100% 0 0deg / 0%) 82%,
+    transparent 100%
+  );
+  will-change: left;
+}
+
+.glass-shine-target.animate-shine::after {
+  animation: glassSweep 1.5s ease-in-out forwards;
+}
+
+@keyframes glassSweep {
+  from {
+    left: -150%;
+  }
+  to {
+    left: 150%;
+  }
+}
+
+/* Login card — full-surface clip layer (sibling to body content) */
+.login-card-glass-shine.glass-shine-target {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.login-card-container.layer-signin-card > .login-card-glass-shine.glass-shine-target {
+  overflow: hidden;
+}
+
+/* Sign In — reflection above fill, below label */
+.login-card-container .liquid-glass-button-signin.glass-shine-target::after {
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.login-card-container .liquid-glass-button-signin.glass-shine-target > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-shine-target.animate-shine::after {
+    animation: none !important;
+    left: -150%;
+  }
+}

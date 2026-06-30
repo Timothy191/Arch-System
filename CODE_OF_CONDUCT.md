@@ -1,1 +1,1 @@
-docs/CODE_OF_CONDUCT.md
+06_technical_documentation/CODE_OF_CONDUCT.md

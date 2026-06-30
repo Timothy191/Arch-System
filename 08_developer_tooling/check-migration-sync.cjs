@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+
+/**
+ * @fileoverview Checks that 01_platform_packages/database/migrations and
+ * 01_platform_packages/supabase/migrations are in sync.
+ * Usage: node 08_developer_tooling/check-migration-sync.cjs
+ */
+
+const fs = require("node:fs");
+const path = require("node:path");
+
+const ROOT = path.resolve(__dirname, "..");
+const DB_MIGRATIONS = path.join(ROOT, "01_platform_packages", "database", "migrations");
+const SUPABASE_MIGRATIONS = path.join(ROOT, "01_platform_packages", "supabase", "migrations");
+
+function getSqlFiles(dir) {
+  if (!fs.existsSync(dir)) return new Set();
+  return new Set(
+    fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith(".sql"))
+      .sort(),
+  );
+}
+
+function readFile(dir, file) {
+  return fs.readFileSync(path.join(dir, file), "utf-8");
+}
+
+function checkSync() {
+  const dbFiles = getSqlFiles(DB_MIGRATIONS);
+  const supabaseFiles = getSqlFiles(SUPABASE_MIGRATIONS);
+
+  let hasErrors = false;
+
+  const onlyInDb = [...dbFiles].filter((f) => !supabaseFiles.has(f));
+  const onlyInSupabase = [...supabaseFiles].filter((f) => !dbFiles.has(f));
+  const inBoth = [...dbFiles].filter((f) => supabaseFiles.has(f));
+
+  if (onlyInDb.length > 0) {
+    console.error("\n❌ Files in 01_platform_packages/database/migrations but missing from 01_platform_packages/supabase/migrations:");
+    onlyInDb.forEach((f) => console.error(`  - ${f}`));
+    hasErrors = true;
+  }
+
+  if (onlyInSupabase.length > 0) {
+    console.error("\n❌ Files in 01_platform_packages/supabase/migrations but missing from 01_platform_packages/database/migrations:");
+    onlyInSupabase.forEach((f) => console.error(`  - ${f}`));
+    hasErrors = true;
+  }
+
+  let diffCount = 0;
+  for (const file of inBoth) {
+    const dbContent = readFile(DB_MIGRATIONS, file);
+    const supabaseContent = readFile(SUPABASE_MIGRATIONS, file);
+    if (dbContent !== supabaseContent) {
+      console.error(`\n❌ Content mismatch: ${file}`);
+      diffCount++;
+      hasErrors = true;
+    }
+  }
+
+  if (!hasErrors) {
+    console.log("✅ Migration directories are in sync.");
+    process.exit(0);
+  } else {
+    console.error("\n💡 Fix: Run 'pnpm policy:migrations:sync' to copy database migrations to supabase/migrations/");
+    process.exit(1);
+  }
+}
+
+checkSync();

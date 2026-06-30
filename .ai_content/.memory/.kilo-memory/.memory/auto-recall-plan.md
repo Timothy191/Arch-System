@@ -11,7 +11,7 @@ Build automatic memory retrieval that suggests relevant past context when starti
 - Keep backward compatible — vectors are optional
 
 ### 1.2 Embedding Generation
-Create `scripts/memory/generate-embeddings.py`:
+Create `03_operations_automation/memory/generate-embeddings.py`:
 ```python
 # Uses sentence-transformers or cached local model
 # Reads sessions/*.md → generates embeddings → updates index.jsonl
@@ -19,7 +19,7 @@ Create `scripts/memory/generate-embeddings.py`:
 ```
 
 ### 1.3 Semantic Search Engine
-Create `scripts/memory/semantic-search.py`:
+Create `03_operations_automation/memory/semantic-search.py`:
 ```python
 # Inputs: query string
 # Outputs: ranked session matches from index.jsonl
@@ -33,14 +33,14 @@ Add to `.cursor/hooks.json`:
 ```json
 {
   "sessionStart": {
-    "script": "scripts/memory/hooks/auto-recall.sh",
+    "script": "03_operations_automation/memory/hooks/auto-recall.sh",
     "role": "Generate recall suggestions on new chat"
   }
 }
 ```
 
 ### 2.2 Auto-Recall Script
-Create `scripts/memory/hooks/auto-recall.sh`:
+Create `03_operations_automation/memory/hooks/auto-recall.sh`:
 - Reads last 2 commits from user's branch
 - Runs semantic search on recent topics
 - Writes `.memory/.recall-suggestions.md`
@@ -82,12 +82,12 @@ Add skill to catalog:
 
 | Step | File | Action |
 |------|------|--------|
-| 1 | `scripts/memory/generate-embeddings.py` | Basic embedding generation |
-| 2 | `scripts/memory/semantic-search.py` | Search API |
+| 1 | `03_operations_automation/memory/generate-embeddings.py` | Basic embedding generation |
+| 2 | `03_operations_automation/memory/semantic-search.py` | Search API |
 | 3 | `.cursor/hooks.json` | Add sessionStart hook |
-| 4 | `scripts/memory/hooks/auto-recall.sh` | Hook script |
+| 4 | `03_operations_automation/memory/hooks/auto-recall.sh` | Hook script |
 | 5 | `.memory/index-schema.json` | Extended schema |
-| 6 | `scripts/lending-library/catalog.json` | Add auto-recall skill |
+| 6 | `03_operations_automation/lending-library/catalog.json` | Add auto-recall skill |
 
 ## Constraints (from MEMORY.md)
 - No RAG/vector DB scaffolding

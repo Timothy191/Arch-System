@@ -4,40 +4,38 @@
 
 ## Blockers
 
-- **GitHub sync:** `git fetch origin` / `git push` fail without credentials. Commits local on `feat/separate-frontend-backend`.
+- **GitHub sync:** `git fetch origin` / `git push` fail without credentials.
 
 ## Current objective
 
-**Frontend/backend separation** — Phase A audit **complete** (HOW.md). Next: Phase B extract & enforce (start with V2/V3 dedup: dashboard + breakdown actions).
+**Root numbered hierarchy** — completed on `feat/00-numbered-repo-hierarchy` (ADR-003). Resume **frontend/backend Phase B** when ready.
 
 ## Locked decisions
 
-- Agent memory root: `.ai_content/.memory/.cursor-memory/` (`scripts/memory/memory_paths.py`)
-- Login glass + production layout: ADR-001, ADR-002; UI in `10-src/00_core_modules/`
-- Layer stack: UI → API/actions → data-access → infra
-- `NN_` renumber deferred until after split
+- Root layout: `00_applications` … `16_database_reference_artifacts` (usage-ranked)
+- Greenfield source: `05_greenfield_application_source/NN_Module` only (not bare `10-src/`)
+- `@repo/shared/*` packages live in `02_domain_libraries/shared/`; static assets in `04_shared_static_assets/`
+- Agent memory: `.ai_content/.memory/.cursor-memory/`
 
 ## In-flight work
 
-- Branch: `feat/separate-frontend-backend`
-- Unpushed commit pending (wrap-up this turn)
+- Hierarchy migration: legacy dirs removed; `verify-root-hierarchy.py` passes
+- Uncommitted changes on `feat/00-numbered-repo-hierarchy`
 
 ## Next action
 
-1. Phase B: dedupe `dashboard-service` → `libs/features/dashboard/data-access` only
-2. Move `breakdowns/actions` + `SafetyDashboard` fetch to `data-access`
-3. Configure GitHub auth; push branch
+1. Commit hierarchy completion; push when GitHub auth available
+2. `pnpm install` refresh if lockfile drift
+3. Phase B: dedupe dashboard-service (HOW.md V2)
 
 ## Memory pointer
 
-`.ai_content/.memory/.cursor-memory/sessions/2026-06-30-frontend-backend-phase-a.md`
+`.ai_content/.memory/.cursor-memory/sessions/2026-06-30-root-numbered-hierarchy.md`
 
-## Sync (last `/summarize` wrap-up)
+## Sync
 
 | Field | Value |
 |-------|-------|
 | sync_status | blocked |
-| branch | feat/separate-frontend-backend |
-| commit | (this turn) |
-| blockers | GitHub fetch/push auth |
-| verify | portal login tests 10/10 |
+| branch | feat/00-numbered-repo-hierarchy |
+| verify | `verify-root-hierarchy.py` OK |

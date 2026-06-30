@@ -56,7 +56,7 @@
 
 **`packages/*`**: `supabase/server`, `redis`, `database`, `errors`, `logger` — infrastructure only; no React. Correct.
 
-**`10-src/00_core_modules`**: UI-only (login form, glass chrome) — aligned with target UI layer.
+**`05_greenfield_application_source/00_core_modules`**: UI-only (login form, glass chrome) — aligned with target UI layer.
 
 #### Violations (prioritized for Phase B)
 
@@ -103,7 +103,7 @@
 
 ### Deferred (prior objective)
 
-- [ ] Repo `NN_` directory renumber by usage — after frontend/backend split or parallel branch
+- [x] Repo `NN_` directory renumber by usage — ADR-003; `finish-root-hierarchy.py` + verify gate
 
 ## Interfaces & data models
 
@@ -115,7 +115,7 @@
 
 - UI: `@repo/theme` tokens, `cn()`, light glass/brushed brand — no server imports
 - Server: `createServerSupabaseClient()` + employee auth line one; RLS enforced
-- `10-src/` greenfield modules follow same UI vs `data-access` split when migrated
+- `05_greenfield_application_source/` greenfield modules follow same UI vs `data-access` split when migrated
 
 ## Verification checklist
 

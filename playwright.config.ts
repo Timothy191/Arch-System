@@ -4,8 +4,8 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./e2e",
-  snapshotDir: "./e2e/visual/__snapshots__",
+  testDir: "./09_end_to_end_verification",
+  snapshotDir: "./09_end_to_end_verification/visual/__snapshots__",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -39,7 +39,7 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         browserName: "chromium",
         launchOptions: { executablePath: "/usr/bin/google-chrome" },
-        storageState: "e2e/.auth/user.json",
+        storageState: "09_end_to_end_verification/.auth/user.json",
       },
       dependencies: ["setup"],
     },
@@ -49,7 +49,7 @@ export default defineConfig({
         ...devices["Pixel 5"],
         browserName: "chromium",
         launchOptions: { executablePath: "/usr/bin/google-chrome" },
-        storageState: "e2e/.auth/user.json",
+        storageState: "09_end_to_end_verification/.auth/user.json",
       },
       dependencies: ["setup"],
     },
@@ -59,7 +59,7 @@ export default defineConfig({
         ...devices["Galaxy Tab S4"],
         browserName: "chromium",
         launchOptions: { executablePath: "/usr/bin/google-chrome" },
-        storageState: "e2e/.auth/user.json",
+        storageState: "09_end_to_end_verification/.auth/user.json",
       },
       dependencies: ["setup"],
     },

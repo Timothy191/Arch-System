@@ -1,1 +1,1 @@
-docs/DEPLOYMENT.md
+06_technical_documentation/DEPLOYMENT.md

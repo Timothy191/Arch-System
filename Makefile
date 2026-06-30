@@ -139,9 +139,9 @@ ui: ## Open shadcn/ui CLI
 # Cleanup
 clean: ## Clean build artifacts and caches
 	rm -rf node_modules
-	rm -rf apps/*/node_modules
-	rm -rf packages/*/node_modules
-	rm -rf apps/*/.next
+	rm -rf 00_applications/*/node_modules
+	rm -rf 01_platform_packages/*/node_modules
+	rm -rf 00_applications/*/.next
 	rm -rf .nx/cache
 	rm -rf .next
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -150,10 +150,10 @@ clean-cache: ## Clean Nx cache only
 	rm -rf .nx/cache
 
 clean-docker: ## Clean Docker containers and volumes
-	docker-compose -f infra/docker/compose.tools.yml down -v
-	docker-compose -f infra/monitoring/docker-compose.yml down -v
-	docker-compose -f infra/docker/compose.redis.yml down -v
-	docker-compose -f infra/docker/compose.production.yml down -v
+	docker-compose -f 10_infrastructure_as_code/docker/compose.tools.yml down -v
+	docker-compose -f 10_infrastructure_as_code/14_observability_configuration/docker-compose.yml down -v
+	docker-compose -f 10_infrastructure_as_code/docker/compose.redis.yml down -v
+	docker-compose -f 10_infrastructure_as_code/docker/compose.production.yml down -v
 
 # Git hooks
 hooks-install: ## Install git hooks

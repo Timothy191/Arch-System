@@ -13,14 +13,14 @@ Deterministic memory pull at **session start** and **before each user prompt**. 
 
 | Event | Script |
 |-------|--------|
-| `sessionStart` | `scripts/memory/hooks/auto-recall.sh` |
-| `beforeSubmitPrompt` | `scripts/memory/hooks/recall-on-prompt.sh` |
+| `sessionStart` | `03_operations_automation/memory/hooks/auto-recall.sh` |
+| `beforeSubmitPrompt` | `03_operations_automation/memory/hooks/recall-on-prompt.sh` |
 
 ## Manual
 
 ```bash
-python3 scripts/memory/auto-recall.py --trigger manual --prompt "login taskbar border"
-python3 scripts/memory/auto-recall.py --json --prompt "RLS migration"
+python3 03_operations_automation/memory/auto-recall.py --trigger manual --prompt "login taskbar border"
+python3 03_operations_automation/memory/auto-recall.py --json --prompt "RLS migration"
 ```
 
 ## Agent turn start (mandatory)

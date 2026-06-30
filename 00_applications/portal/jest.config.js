@@ -1,0 +1,93 @@
+module.exports = {
+  testEnvironment: "jsdom",
+  forceExit: true,
+  setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
+  transform: {
+    "^.+\\.(t|j)sx?$": [
+      "@swc/jest",
+      {
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: true,
+            decorators: true,
+          },
+          transform: {
+            react: {
+              runtime: "automatic",
+            },
+          },
+        },
+      },
+    ],
+  },
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@/(.*)$": "<rootDir>/$1",
+    "^~/(.*)$": "<rootDir>/$1",
+    "^@05-greenfield/(.*)$": "<rootDir>/../../05_greenfield_application_source/$1",
+    "^@05_greenfield_application_source/(.*)$": "<rootDir>/../../05_greenfield_application_source/$1",
+    "^@repo/contract$": "<rootDir>/../../01_platform_packages/contract/src/index.ts",
+    "^@repo/supabase/(.*)$": "<rootDir>/../../01_platform_packages/supabase/src/$1",
+    "^@repo/supabase$": "<rootDir>/../../01_platform_packages/supabase/src/index.ts",
+    "^@repo/redis$": "<rootDir>/../../01_platform_packages/redis/src/index.ts",
+    "^@repo/redis/(.*)$": "<rootDir>/../../01_platform_packages/redis/src/$1",
+    "^@repo/theme$": "<rootDir>/../../01_platform_packages/theme/src/index.ts",
+    "^@repo/theme/(.*)$": "<rootDir>/../../01_platform_packages/theme/src/$1",
+    "^@repo/ui/lib/(.*)$": "<rootDir>/../../01_platform_packages/ui/src/lib/$1",
+    "^@repo/ui/GlassCard$": "<rootDir>/../../01_platform_packages/ui/src/components/GlassCard.tsx",
+    "^@repo/ui/Pagination$": "<rootDir>/../../01_platform_packages/ui/src/components/ui/pagination.tsx",
+    "^@repo/ui/SecondaryButton$": "<rootDir>/../../01_platform_packages/ui/src/components/SecondaryButton.tsx",
+    "^@repo/ui/AcknowledgeButton$":
+      "<rootDir>/../../01_platform_packages/ui/src/components/AcknowledgeButton.tsx",
+    "^@repo/ui/ShiftToggle$": "<rootDir>/../../01_platform_packages/ui/src/components/ShiftToggle.tsx",
+    "^@repo/ui/Checkbox$": "<rootDir>/../../01_platform_packages/ui/src/components/Checkbox.tsx",
+    "^@repo/ui/Input$": "<rootDir>/../../01_platform_packages/ui/src/components/Input.tsx",
+    "^@repo/ui/FormFields$": "<rootDir>/../../01_platform_packages/ui/src/components/FormFields.tsx",
+    "^@repo/ui/DepartmentLayout$":
+      "<rootDir>/../../01_platform_packages/ui/src/components/DepartmentLayout.tsx",
+    "^@repo/ui/KPI$": "<rootDir>/../../01_platform_packages/ui/src/components/KPI.tsx",
+    "^@repo/ui/PageHeader$": "<rootDir>/../../01_platform_packages/ui/src/components/PageHeader.tsx",
+    "^@repo/ui/Taskbar$": "<rootDir>/../../01_platform_packages/ui/src/components/Taskbar.tsx",
+    "^@repo/ui/MacMenuBar$": "<rootDir>/../../01_platform_packages/ui/src/components/MacMenuBar.tsx",
+    "^@repo/ui/MacTitleBar$": "<rootDir>/../../01_platform_packages/ui/src/components/MacTitleBar.tsx",
+    "^@repo/ui/Logo$": "<rootDir>/../../01_platform_packages/ui/src/components/Logo.tsx",
+    "^@repo/ui/AgenticAiLogo$": "<rootDir>/../../01_platform_packages/ui/src/components/AgenticAiLogo.tsx",
+    "^@repo/utils$": "<rootDir>/../../01_platform_packages/utils/src/index.ts",
+    "^@repo/utils/(.*)$": "<rootDir>/../../01_platform_packages/utils/src/$1",
+    "^@repo/auth/ui$": "<rootDir>/../../02_domain_libraries/features/auth/ui/src/index.ts",
+    "^@repo/auth/data-access$": "<rootDir>/../../02_domain_libraries/features/auth/data-access/src/index.ts",
+    "^@repo/auth/utils$": "<rootDir>/../../02_domain_libraries/features/auth/utils/src/index.ts",
+    "^@repo/shared/data-access$": "<rootDir>/../../02_domain_libraries/shared/data-access/src/index.ts",
+    "^@repo/shared/utils$": "<rootDir>/../../02_domain_libraries/shared/utils/src/index.ts",
+    "^@repo/shared/hooks$": "<rootDir>/../../02_domain_libraries/shared/hooks/src/index.ts",
+    "^@repo/ui/DataGrid$": "<rootDir>/../../01_platform_packages/ui/src/components/ui/data-grid.tsx",
+    "^@repo/ui/AnimatedList$": "<rootDir>/../../01_platform_packages/ui/src/components/ui/animated-list.tsx",
+    "^@repo/ui/EmptyState$": "<rootDir>/../../01_platform_packages/ui/src/components/EmptyState.tsx",
+    "^@repo/ui/Marquee$": "<rootDir>/../../01_platform_packages/ui/src/components/ui/marquee.tsx",
+
+    "^@repo/ui/AnimatedButton$":
+      "<rootDir>/../../01_platform_packages/ui/src/components/ui/animated-button.tsx",
+    "^@repo/ui/(.*)$": "<rootDir>/../../01_platform_packages/ui/src/$1",
+  },
+  collectCoverageFrom: [
+    "lib/**/*.{ts,tsx}",
+    "features/**/*.{ts,tsx}",
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "hooks/**/*.{ts,tsx}",
+    "server/proxy.ts",
+    "!**/*.test.{ts,tsx}",
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+  ],
+  coverageReporters: ["text", "lcov", "html"],
+  coverageThreshold: {
+    global: {
+      lines: 40,
+      branches: 30,
+      functions: 35,
+      statements: 40,
+    },
+  },
+};

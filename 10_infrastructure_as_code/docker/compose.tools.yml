@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7
+    container_name: plantcor-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: plantcor-prometheus
+    restart: unless-stopped
+    ports:
+      - "9092:9090"
+    volumes:
+      - ../../07_toolchain_configuration/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    healthcheck:
+      test:
+        ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  fuxa:
+    image: frangoteam/fuxa:latest
+    container_name: plantcor-fuxa
+    restart: unless-stopped
+    ports:
+      - "1881:1881"
+    volumes:
+      - fuxa_data:/root/.fuxa
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - plantcor-tools
+
+volumes:
+  redis_data:
+  prometheus_data:
+  fuxa_data:
+
+networks:
+  plantcor-tools:
+    driver: bridge

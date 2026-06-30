@@ -20,20 +20,20 @@ Persistent memories + **context compaction** so one chat can continue without sp
 | `.compact-staging.md` | Parent distill for background agent (gitignored) |
 | `sessions/` | Archived summaries |
 | `index.jsonl` | Search index |
-| `config/background-compact-prompt.md` | Background subagent instructions |
-| `config/wrap-up-protocol.md` | `/summarize` ship gate — finish, verify, commit, push, sync |
+| `07_toolchain_configuration/background-compact-prompt.md` | Background subagent instructions |
+| `07_toolchain_configuration/wrap-up-protocol.md` | `/summarize` ship gate — finish, verify, commit, push, sync |
 
 ## Hooks (`.cursor/hooks.json`)
 
 | Event | Script | Role |
 |-------|--------|------|
-| `sessionStart` | `scripts/memory/hooks/session-init.sh` | Init `state.json` |
-| `sessionStart` | `scripts/memory/hooks/auto-recall.sh` | Build `.recall-brief.md` |
-| `beforeSubmitPrompt` | `scripts/memory/hooks/turn-counter.sh` | Count turns → flag at threshold |
-| `beforeSubmitPrompt` | `scripts/memory/hooks/recall-on-prompt.sh` | Refresh recall from user prompt |
-| `preCompact` | `scripts/memory/hooks/pre-compact.sh` | Flag before Cursor native compact |
+| `sessionStart` | `03_operations_automation/memory/hooks/session-init.sh` | Init `state.json` |
+| `sessionStart` | `03_operations_automation/memory/hooks/auto-recall.sh` | Build `.recall-brief.md` |
+| `beforeSubmitPrompt` | `03_operations_automation/memory/hooks/turn-counter.sh` | Count turns → flag at threshold |
+| `beforeSubmitPrompt` | `03_operations_automation/memory/hooks/recall-on-prompt.sh` | Refresh recall from user prompt |
+| `preCompact` | `03_operations_automation/memory/hooks/pre-compact.sh` | Flag before Cursor native compact |
 
-See `config/auto-recall.md` for the recall protocol.
+See `07_toolchain_configuration/auto-recall.md` for the recall protocol.
 
 ## Tune auto-compact
 

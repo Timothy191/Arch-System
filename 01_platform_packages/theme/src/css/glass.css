@@ -1,0 +1,3618 @@
+/**
+ * Arch System — Glass Utility Classes
+ * Modernized Sugar Light aesthetic with smooth transitions
+ */
+
+/* ── Smooth Transition Foundation ── */
+:root {
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --liquid-border-gradient: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(28, 28, 30, 0.15) 75%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  --liquid-border-gradient-hover: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(28, 28, 30, 0.25) 75%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+
+  /* Liquid Glass variables */
+  --liquid-glass-blur: 20px;
+  --liquid-glass-saturate: 160%;
+  --liquid-glass-bg: rgba(255, 255, 255, 0.15);
+  --liquid-glass-border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Context-Aware Glass ── */
+
+.glass,
+.glass-card,
+.glass-premium,
+.glass-input,
+.glass-button,
+.glass-badge,
+.glass-modal,
+.glass-video,
+.glass-dark,
+.glass-macos,
+.layer-telemetry-dock,
+.layer-signin-card {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.glass {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow);
+  color: var(--text-on-glass);
+  transition: all var(--transition-medium);
+}
+
+.glass-hover:hover {
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 24px 30px -5px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+  transition: all var(--transition-fast);
+}
+
+/* ── Glass Components ── */
+
+.glass-card {
+  --glass-surface: rgba(255, 255, 255, 0.08);
+  --glass-surface-hover: rgba(255, 255, 255, 0.15);
+  --glass-border-top-opacity: 0.25;
+  --glass-border-gradient: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, var(--glass-border-top-opacity)),
+    rgba(255, 255, 255, 0.05)
+  );
+
+  position: relative;
+  z-index: 10;
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-card);
+  color: var(--text-on-glass);
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  --glass-surface: rgba(255, 255, 255, 0.85);
+  --glass-border-top-opacity: 0.35;
+
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.glass-card:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .glass-card:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ── Glass Depth Card — volumetric depth for glass surfaces ──────
+   Adds subsurface light-scattering inner shadows and a subtle top-edge
+   highlight that mimics light hitting the top edge of a physical card.
+   Designed to pair with shadow-glass-depth / glass-card. */
+.glass-depth-card {
+  box-shadow:
+    var(--shadow-card),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.03),
+    inset 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.glass-input {
+  position: relative;
+  z-index: 20;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  color: var(--text-on-glass);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-medium),
+    background var(--transition-medium);
+}
+
+.glass-input:focus {
+  border-color: var(--accent-blue);
+  background: var(--glass-surface);
+  box-shadow:
+    0 0 0 2px rgba(28, 28, 30, 0.18),
+    var(--shadow-glow-blue);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.glass-button {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  color: var(--text-on-glass);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-medium);
+}
+
+.glass-button:hover {
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.glass-button:active {
+  transform: scale(0.98) translateY(1px);
+}
+
+.glass-button-accent {
+  background: rgba(28, 28, 30, 0.08);
+  border-color: rgba(28, 28, 30, 0.2);
+  color: var(--accent-blue);
+}
+
+.glass-button-accent:hover {
+  background: rgba(28, 28, 30, 0.15);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.glass-button-danger {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--accent-red);
+}
+
+.glass-button-danger:hover {
+  background: rgba(244, 63, 94, 0.25);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+}
+
+.glass-action-button {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.glass-action-button:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+}
+
+.glass-action-button:active {
+  transform: scale(0.97);
+}
+
+.glass-badge {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  color: var(--text-on-glass);
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.25rem 0.75rem;
+}
+
+.glass-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--glass-border) 20%,
+    var(--glass-border) 80%,
+    transparent
+  );
+}
+
+.glass-modal-overlay {
+  background: rgba(5, 5, 8, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.glass-modal {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-elevated);
+  border-radius: var(--radius-xl);
+  color: var(--text-on-glass);
+}
+
+.glass-nav-item {
+  color: var(--text-muted);
+  border-radius: var(--radius-button);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.glass-nav-item:hover {
+  background: var(--glass-surface);
+  color: var(--text-heading);
+}
+
+.glass-nav-item.active {
+  background: var(--glass-surface-hover);
+  color: var(--accent-blue);
+  border-left: 2px solid var(--accent-blue);
+}
+
+.glass-shine-sweep {
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 60%
+  );
+}
+
+.glass-spinner {
+  border: 2px solid var(--glass-border);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.badge-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-green, #34c759);
+  box-shadow: 0 0 6px rgba(52, 199, 89, 0.6);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Glow Effects ── */
+
+.glow-border {
+  border: 1px solid rgba(28, 28, 30, 0.2);
+  box-shadow: 0 0 12px rgba(28, 28, 30, 0.08);
+}
+
+.glow-border-strong {
+  border: 1px solid rgba(28, 28, 30, 0.35);
+  box-shadow: 0 0 20px rgba(28, 28, 30, 0.15);
+}
+
+/* ── Text Effects ── */
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-subtle {
+  background: linear-gradient(135deg, var(--text-heading), var(--text-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(28, 28, 30, 0.3);
+}
+
+/* ── Liquid Glass (Premium) ── */
+
+.liquid-border {
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--glass-surface), var(--glass-surface)), var(--liquid-border-gradient);
+}
+
+.liquid-border-hover:hover {
+  background-image:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)),
+    var(--liquid-border-gradient-hover);
+}
+
+/* ── Liquid Glass Utility Classes ──
+ * Documented for future maintainers:
+ *
+ * 1. .liquid-glass: Core glass style with 20px blur, 180% saturation, and inner refraction glow.
+ * 2. .liquid-glass-light: Lighter backdrop-blur variant (rgba(255,255,255,0.55)) with 24px blur and 200% saturation.
+ * 3. .liquid-glass-elevated: Elevated variant of liquid-glass featuring a stronger box shadow.
+ * 4. .liquid-glass-pane: Translucent CSS-gradient based pane with dual gradient stroke.
+ * 5. .liquid-glass-pane-rounded: Similar to .liquid-glass-pane but uses background-image gradients for clean border-radius rendering and custom transitions.
+ * 6. .liquid-glass-surface: Translucent panel with explicit 20px border-radius and dual gradient stroke.
+ * 7. .liquid-glass-interactive: Enhances panels with scale transitions, click reactions, and continuous fluid swell animation on hover.
+ * 8. .liquid-glass-input: Morphing border-radius input control with transitions. Custom focus and hover state radiuses.
+ * 9. .liquid-glass-button: Morphing border-radius button control with glow transitions on hover.
+ * 10. .liquid-grain-overlay: SVG-based noise grain overlay animating on steps.
+ */
+
+.liquid-glass {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow), var(--refraction-inner-border);
+  border-radius: var(--radius-card);
+  color: var(--text-on-glass);
+}
+
+.liquid-glass-light {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-shadow), var(--refraction-inner-border);
+  border-radius: var(--radius-card);
+}
+
+.liquid-glass-elevated {
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-elevated), var(--refraction-inner-border);
+  border-radius: var(--radius-card);
+  color: var(--text-on-glass);
+}
+
+.liquid-glass-pane {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.3) 100%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  border: 1.5px solid;
+  border-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(240, 240, 240, 0.15) 50%,
+      rgba(255, 255, 255, 0.45) 100%
+    )
+    1;
+}
+
+.liquid-glass-pane-rounded {
+  border: 1.5px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.3) 100%),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(240, 240, 240, 0.15) 50%,
+      rgba(255, 255, 255, 0.45) 100%
+    );
+  -webkit-backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  transition: border-radius 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
+}
+
+.liquid-glass-surface {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.3) 100%) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.75) 0%,
+        rgba(240, 240, 240, 0.15) 50%,
+        rgba(255, 255, 255, 0.45) 100%
+      )
+      border-box;
+  backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%) contrast(110%);
+  border-radius: 20px;
+}
+
+/* Fluid Interactions & Micro-Inertia Animation */
+.ease-liquid-inertia {
+  transition-timing-function: cubic-bezier(0.25, 1.15, 0.45, 1);
+}
+
+.liquid-glass-interactive {
+  transition: all 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
+  will-change: transform, border-radius, box-shadow;
+}
+
+.liquid-glass-interactive:hover {
+  animation: liquid-swell 6s ease-in-out infinite;
+  transform: scale(1.02);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 24px 48px -8px rgba(0, 0, 0, 0.03),
+    0 48px 96px -12px rgba(0, 0, 0, 0.05);
+}
+
+/* Sub-Element Layout Shifts (staggered micro-parallax) */
+.liquid-glass-interactive .liquid-shift-y {
+  transition: transform 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
+  will-change: transform;
+}
+
+.liquid-glass-interactive:hover .liquid-shift-y {
+  transform: translateY(-2px);
+}
+
+.liquid-glass-interactive .liquid-shift-y-delay {
+  transition: transform 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
+  transition-delay: 50ms;
+  will-change: transform;
+}
+
+.liquid-glass-interactive:hover .liquid-shift-y-delay {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass-interactive,
+  .liquid-glass-interactive:hover,
+  .liquid-glass-interactive .liquid-shift-y,
+  .liquid-glass-interactive:hover .liquid-shift-y,
+  .liquid-glass-interactive .liquid-shift-y-delay,
+  .liquid-glass-interactive:hover .liquid-shift-y-delay,
+  .liquid-glass-pane-rounded,
+  .liquid-glass-interactive:hover .liquid-glass-pane-rounded {
+    transition: none !important;
+    transform: none !important;
+    border-radius: inherit !important;
+  }
+}
+
+.glass-elevated {
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-card-hover);
+  color: var(--text-on-glass);
+}
+
+/* ── Premium Glass — highest-tier surface (Apple / Stripe / Linear aesthetic) ──
+   Matches the exact glassmorphism spec:
+   • Background: linear-gradient(135deg, rgba(255,255,255,0.45) → rgba(255,255,255,0.15))
+   • Backdrop: blur(24px) saturate(180%)
+   • Border: 1px solid rgba(255,255,255,0.6) — bright specular edge
+   • Radius: 16px (smooth squircle)
+   • Shadow: diffusion shadow — near-zero near, soft large spread
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.glass-premium {
+  background:
+    var(--glass-premium-bg) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: var(--glass-premium-backdrop);
+  backdrop-filter: var(--glass-premium-backdrop);
+  border: 1px solid transparent;
+  border-radius: var(--glass-premium-radius);
+  box-shadow: var(--glass-premium-shadow);
+  color: var(--text-on-glass);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-medium),
+    background var(--transition-medium);
+}
+
+.glass-premium:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.28) 100%)
+      padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow: var(--glass-premium-shadow), var(--refraction-inner-border);
+  transform: translateY(-1px);
+}
+
+.glass-premium:active {
+  transform: translateY(0);
+}
+
+/* Electric-blue CTA accent variant */
+.glass-premium-electric {
+  border-color: var(--accent-electric-blue-border);
+  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-electric-blue);
+}
+
+/* Mint positive/active accent variant */
+.glass-premium-mint {
+  border-color: var(--accent-mint-border);
+  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-mint);
+}
+
+/* Amber warning accent variant */
+.glass-premium-amber {
+  border-color: var(--accent-amber-border);
+  box-shadow: var(--glass-premium-shadow), var(--shadow-glow-amber);
+}
+
+/* ── Glass-on-Video — light blurred glass over dark media ──
+   macOS-vibrancy style: white translucent surface over dark video.
+   Use for hub hero cards, overlay panels, sidebars over video.
+   ─────────────────────────────────────────────────────────────────── */
+
+.glass-video {
+  background:
+    var(--glass-video-surface) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: var(--glass-video-backdrop);
+  backdrop-filter: var(--glass-video-backdrop);
+  border: 1px solid transparent;
+  box-shadow: var(--glass-video-shadow), var(--glass-video-sheen);
+  border-radius: var(--glass-video-radius);
+  color: var(--text-on-glass-video);
+  transition:
+    transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-video-hover:hover {
+  background:
+    var(--glass-video-surface-hover) padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow: var(--glass-video-shadow), var(--glass-video-sheen);
+  transform: translateY(-1px);
+}
+
+/* Dark glass — opaque dark panels for data-heavy dashboards */
+
+.glass-dark {
+  background:
+    var(--dark-glass-surface) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid transparent;
+  box-shadow:
+    var(--dark-glass-sheen),
+    0 8px 32px -8px rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-card);
+  color: var(--text-on-dark-glass);
+}
+
+.glass-dark-hover:hover {
+  background:
+    var(--dark-glass-surface-hover) padding-box,
+    var(--glass-border-gradient) border-box;
+  transform: translateY(-1px);
+}
+
+/* ── macOS Glass Utility — Premium Translucency ── */
+
+.glass-macos {
+  background:
+    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-card);
+  color: var(--text-on-glass);
+  transition: all var(--transition-medium);
+}
+
+.glass-macos:hover {
+  background:
+    linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+    var(--glass-border-gradient) border-box;
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ── glass-top-border — standalone top-highlight utility ──────────────────
+   Replaces the inline style: borderTop: "1px solid rgba(255,255,255,0.9)"
+   Usage in React: className="glass-top-border" (no style prop needed).
+   This is the canonical fix for the inline style pattern documented in
+   01_platform_packages/theme/DECISIONS.md #001.
+   ─────────────────────────────────────────────────────────────────────── */
+.glass-top-border {
+  border-top-color: var(--glass-border-top);
+}
+
+/* ── Layer-Telemetry-Dock ──
+   For secondary info panels: system status, weather, support.
+   Softer blur, lower opacity, less saturation to sit behind the primary card.
+   background-clip + will-change + translateZ(0) prevent sub-pixel artifacts
+   on rounded corners. */
+.layer-telemetry-dock {
+  background:
+    rgba(255, 255, 255, 0.4) padding-box,
+    var(--glass-border-gradient) border-box;
+  -webkit-backdrop-filter: blur(12px) saturate(110%);
+  backdrop-filter: blur(12px) saturate(110%);
+  border: 1px solid transparent;
+  box-shadow:
+    0 2px 4px -1px rgba(0, 0, 0, 0.03),
+    0 12px 16px -4px rgba(0, 0, 0, 0.02);
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* ── Layer-Signin-Card ──
+   Premium primary interactive card for the sign-in surface.
+   Dual-Stroke Edge Guard: border + outline for crisp edge definition
+   on glass surfaces. High-diffusion dual-shadow system.
+   Hardware acceleration safeguards applied.
+
+   WebGL Fallback Behavior:
+   When WebGL fails or is unsupported, the login card falls back from
+   .layer-signin-card-webgl to .layer-signin-card. This class supplies
+   a CSS-based linear gradient background (with --liquid-glass-bg surface color)
+   paired with native CSS backdrop-filter blur/saturate effects. This ensures 
+   a high-fidelity glass aesthetic remains visually coherent even without canvas rendering. */
+.layer-signin-card {
+  isolation: isolate;
+  border: 1.5px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, var(--liquid-glass-bg) 0%, rgba(255, 255, 255, 0.08) 100%),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(240, 240, 240, 0.05) 50%,
+      rgba(255, 255, 255, 0.3) 100%
+    );
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.45),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.03),
+    0 10px 20px rgba(0, 0, 0, 0.08);
+  border-radius: var(--liquid-glass-radius-card);
+  will-change: border-radius, transform;
+  transform: translateZ(0);
+  background-size:
+    100% 100%,
+    200% 200%;
+  animation: border-glow-sweep 8s linear infinite;
+  transition:
+    border-radius 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.layer-signin-card:hover {
+  border-radius: var(--liquid-glass-radius-card-hover);
+  transform: scaleX(1.012) scaleY(1.008);
+  box-shadow:
+    inset 0 10px 20px rgba(255, 255, 255, 0.55),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.04),
+    0 20px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Pearlescent border + timed reflect sweep ── */
+.brand-gold-border-shine,
+.login-card-border-shine,
+.login-form-control-border-shine::before,
+.login-card-notice::before,
+.login-card-service-banner__track::before,
+.login-card-footer.login-card-footer-panel::after,
+.login-card-container .liquid-glass-button-signin::before,
+.brand-taskbar-search-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: var(--brand-gold-border-shine-inset, 1px);
+  background-image:
+    linear-gradient(
+      148deg,
+      var(--pearl-rose) 0%,
+      var(--pearl-lavender) 18%,
+      var(--pearl-sky) 38%,
+      var(--pearl-mint) 54%,
+      var(--pearl-champagne) 72%,
+      var(--pearl-lavender) 100%
+    ),
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 34%,
+      oklch(99% 0.05 310 / 90%) 44%,
+      var(--pearl-specular) 50%,
+      oklch(97% 0.06 250 / 86%) 56%,
+      transparent 66%,
+      transparent 100%
+    );
+  background-size: 100% 100%, 340% 100%;
+  animation: pearl-border-reflect var(--pearl-border-reflect-duration) var(--pearl-shine-ease)
+    infinite;
+  animation-delay: var(--brand-gold-border-reflect-delay, 0s);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.login-card-border-shine,
+.brand-gold-border-shine {
+  --brand-gold-border-shine-inset: 1px;
+  z-index: 6;
+}
+
+/* Login card — woven gold thread border + specular shine (enabled) */
+.login-card-container.layer-signin-card > .login-card-border-shine {
+  display: block;
+  clip-path: inset(1px 0 0 0 round var(--radius-xl));
+  z-index: 6;
+  --brand-gold-border-reflect-delay: 1.5s;
+  background-image:
+    linear-gradient(
+      148deg,
+      var(--brand-gold-depth) 0%,
+      var(--brand-gold-border) 14%,
+      var(--brand-gold-highlight) 32%,
+      var(--brand-gold-rim) 50%,
+      var(--brand-gold-edge) 68%,
+      var(--brand-gold-border) 86%,
+      var(--brand-gold-depth) 100%
+    ),
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 32%,
+      oklch(98% 0.16 82 / 92%) 42%,
+      oklch(100% 0.14 82 / 98%) 50%,
+      oklch(96% 0.15 82 / 88%) 58%,
+      transparent 68%,
+      transparent 100%
+    );
+  animation: brand-gold-border-reflect var(--brand-gold-border-shine-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-card-container.layer-signin-card > .login-card-thread-border {
+  display: block;
+  inset: 5px;
+  border: 1px solid var(--brand-gold-border);
+  border-top: none;
+  border-radius: calc(var(--radius-xl) - 4px);
+  background-image:
+    repeating-linear-gradient(
+      52deg,
+      oklch(90% 0.14 82 / 22%) 0,
+      oklch(68% 0.17 82 / 38%) 0.75px,
+      transparent 0.75px,
+      transparent 2.5px
+    ),
+    repeating-linear-gradient(
+      -52deg,
+      oklch(88% 0.15 82 / 18%) 0,
+      oklch(70% 0.16 82 / 34%) 0.75px,
+      transparent 0.75px,
+      transparent 2.5px
+    );
+  background-clip: border-box;
+  box-shadow:
+    inset 0 0 0 0.5px oklch(100% 0 0deg / 48%),
+    inset 1px 0 0 var(--brand-gold-highlight),
+    inset -1px 0 0 var(--brand-gold-highlight),
+    inset 0 -1px 0 var(--brand-gold-depth);
+  animation: login-card-thread-glint var(--brand-gold-border-shine-duration) ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+/* Login card — diagonal gold beam sweep across brushed surface */
+.login-card-surface-sheen {
+  position: absolute;
+  inset: -25% -70%;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    108deg,
+    transparent 0%,
+    transparent 38%,
+    oklch(94% 0.19 82 / 32%) 46%,
+    oklch(99% 0.15 82 / 82%) 50%,
+    oklch(92% 0.17 82 / 36%) 54%,
+    transparent 62%,
+    transparent 100%
+  );
+  animation: brand-gold-shine-sweep var(--login-card-gold-shine-sweep-duration) var(--brand-gold-shine-ease)
+    infinite;
+  animation-delay: 1.5s;
+  will-change: transform, opacity;
+}
+
+.login-card-border-shine {
+  clip-path: inset(1px 0 0 0 round var(--radius-xl));
+}
+
+.login-card-thread-border {
+  position: absolute;
+  inset: 6px;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: calc(var(--radius-xl) - 5px);
+  border: 1px solid var(--brand-gold-border);
+  box-shadow:
+    inset 0 0 0 0.5px oklch(100% 0 0deg / 42%),
+    inset 0 1px 0 var(--brand-gold-highlight),
+    inset 0 -1px 0 var(--brand-gold-depth);
+  animation: login-card-thread-glint var(--brand-gold-border-shine-duration) ease-in-out infinite;
+}
+
+.layer-taskbar-brushed .brand-gold-border-shine {
+  --brand-gold-border-reflect-delay: 3s;
+}
+
+/* ── Login Card Float — 3D raised panel ── */
+.login-card-float-wrapper {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.login-card-float-shadow {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -1.5rem;
+  z-index: 0;
+  height: 2.75rem;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 100% 100% at 50% 0%,
+    oklch(0% 0 0deg / 24%) 0%,
+    oklch(0% 0 0deg / 12%) 42%,
+    transparent 72%
+  );
+  filter: blur(12px);
+  transform: translateZ(-48px) scaleY(0.5);
+  animation: login-card-float-shadow-idle 8s ease-in-out infinite;
+}
+
+.login-card-float-wrapper::after {
+  display: none;
+}
+
+.login-card-float-wrapper--top .login-card-container.layer-signin-card {
+  transform: translateY(-10px) translateZ(32px) rotateX(2deg);
+  transform-style: preserve-3d;
+  animation: login-card-float-idle 8s ease-in-out infinite;
+}
+
+.login-card-float-wrapper--top .login-card-container.layer-signin-card:hover {
+  transform: translateY(-14px) translateZ(38px) rotateX(1.6deg);
+  animation-play-state: paused;
+}
+
+.login-card-container.layer-signin-card {
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  --liquid-glass-blur: 18px;
+  --liquid-glass-saturate: 118%;
+  --liquid-glass-bg: oklch(92% 0.008 255 / 78%);
+  --bg-tertiary: oklch(97.5% 0.004 265);
+  --color-ink: oklch(26% 0.022 265);
+  --color-edge: oklch(58% 0.012 255 / 58%);
+  --text-heading: oklch(26% 0.022 265);
+  --text-body: oklch(32% 0.018 265);
+  --text-secondary: oklch(40% 0.016 265);
+  --text-muted: oklch(50% 0.014 265);
+  --border-emphasis: oklch(76% 0.012 255 / 74%);
+  --login-panel-border: oklch(76% 0.012 255 / 74%);
+  --login-panel-bg: oklch(94% 0.01 255 / 72%);
+  --login-panel-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 oklch(62% 0.014 255 / 28%),
+    inset 0 0 0 1px oklch(100% 0 0deg / 52%),
+    0 2px 6px oklch(0% 0 0deg / 6%);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  will-change: transform;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease;
+}
+
+/* Ambient reflect layers — disabled on flat login card */
+.login-card-ambient {
+  display: none;
+}
+
+.login-card-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-height: 24rem;
+}
+
+.login-card-panel {
+  position: relative;
+  border: 1px solid var(--login-panel-border);
+  border-radius: var(--radius-md);
+  background-color: var(--login-panel-bg);
+  box-shadow: var(--login-panel-shadow);
+}
+
+.login-card-panel--intro,
+.login-card-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.login-card-panel--main.login-card-panel {
+  padding-bottom: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  background-image: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.login-card-main-form {
+  padding: 1.125rem 2rem 0;
+}
+
+.login-card-panel--main .login-card-footer-notice-block {
+  padding: 0 2rem;
+}
+
+.login-card-panel--main .login-card-footer-ticker-viewport {
+  padding-top: 0.5rem;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.login-card-panel--main .login-card-footer-ticker-band {
+  --login-ticker-font-size: 0.6875rem;
+  --login-ticker-icon-size: 0.875rem;
+  --login-ticker-line-height: 1.2;
+  position: relative;
+  margin-top: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  font-size: var(--login-ticker-font-size);
+  line-height: var(--login-ticker-line-height);
+}
+
+/* Soft seam — gold thread highlight above ticker */
+.login-card-panel--main .login-card-footer-ticker-band::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--brand-gold-border) 0%,
+    var(--brand-gold-highlight) 50%,
+    var(--brand-gold-border) 100%
+  );
+  opacity: 0.42;
+}
+
+/* Bottom chin — small lip merged under ticker text */
+.login-card-panel--main .login-card-footer-ticker-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.375rem;
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: linear-gradient(
+    180deg,
+    oklch(84% 0.012 255 / 18%) 0%,
+    oklch(80% 0.014 255 / 42%) 100%
+  );
+  box-shadow: inset 0 1px 0 oklch(100% 0 0deg / 38%);
+}
+
+.login-card-panel--main .login-card-footer-ticker-band .login-card-footer-ticker-track {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 0.625rem;
+}
+
+.login-card-footer-divider,
+.login-card-form-notice-divider {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid oklch(72% 0.16 82 / 32%);
+  box-shadow: inset 0 1px 0 oklch(100% 0 0deg / 42%);
+}
+
+.login-card-form-notice-divider {
+  margin: 1rem 2rem 0.875rem;
+}
+
+/* Faded golden Arch mark — ambient watermark behind card content */
+.login-card-watermark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.login-card-watermark::after {
+  content: "";
+  position: absolute;
+  inset: -25% -55%;
+  z-index: 2;
+  background: linear-gradient(
+    108deg,
+    transparent 0%,
+    transparent 40%,
+    oklch(95% 0.17 82 / 42%) 48%,
+    oklch(99% 0.12 82 / 72%) 50%,
+    oklch(92% 0.15 82 / 38%) 52%,
+    transparent 60%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: brand-gold-shine-sweep var(--brand-gold-shine-sweep-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-card-watermark svg.login-card-watermark-mark {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 21rem;
+  height: 21rem;
+  color: oklch(74% 0.2 82) !important;
+  transform: translate(-50%, -50%);
+  filter: blur(9px);
+  animation: brand-gold-watermark-glint var(--brand-gold-watermark-glint-duration)
+    var(--brand-gold-shine-ease) infinite;
+}
+
+/* Crisp ink on login — no white halo wash on dark text */
+.login-card-container .liquid-text-lift {
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.login-card-container input,
+.login-card-container .liquid-glass-input {
+  color: var(--text-heading) !important;
+  font-weight: 500;
+}
+
+.login-card-container input::placeholder {
+  color: var(--text-muted) !important;
+  font-weight: 400;
+}
+
+.login-card-container.layer-signin-card:hover {
+  border-color: oklch(72% 0.014 255 / 82%);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 14px 26px oklch(0% 0 0deg / 12%),
+    0 28px 52px oklch(0% 0 0deg / 14%),
+    0 42px 84px oklch(52% 0.02 255 / 16%),
+    0 2px 6px oklch(0% 0 0deg / 8%),
+    0 8px 20px oklch(0% 0 0deg / 11%),
+    0 16px 36px oklch(52% 0.02 255 / 12%),
+    inset 0 -1px 0 oklch(62% 0.014 255 / 36%),
+    inset 0 0 0 1px oklch(100% 0 0deg / 58%);
+}
+
+.login-card-container .liquid-glass-input {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: var(--radius-md) !important;
+  transform: none !important;
+  background-color: oklch(99.2% 0.006 255 / 94%) !important;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 20%) 0,
+      oklch(90% 0.01 255 / 8%) 0.5px,
+      transparent 1px,
+      transparent 2.5px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(99.6% 0.004 265 / 98%) 0%,
+      oklch(97.4% 0.008 255 / 95%) 100%
+    ) !important;
+  border: 1px solid var(--brand-gold-border) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(118%);
+  backdrop-filter: blur(8px) saturate(118%);
+  box-shadow:
+    inset 0 2px 5px oklch(52% 0.02 255 / 12%),
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 oklch(72% 0.012 255 / 16%),
+    0 1px 2px oklch(0% 0 0deg / 8%) !important;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease !important;
+}
+
+.login-form-control-border-shine {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-md);
+}
+
+.login-card-container .login-form-control-border-shine::before {
+  --brand-gold-border-shine-inset: 1px;
+  z-index: 2;
+  background-image:
+    linear-gradient(
+      148deg,
+      var(--brand-gold-depth) 0%,
+      var(--brand-gold-border) 14%,
+      var(--brand-gold-highlight) 32%,
+      var(--brand-gold-rim) 50%,
+      var(--brand-gold-edge) 68%,
+      var(--brand-gold-border) 86%,
+      var(--brand-gold-depth) 100%
+    ),
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 32%,
+      oklch(98% 0.16 82 / 88%) 42%,
+      oklch(100% 0.14 82 / 94%) 50%,
+      oklch(96% 0.15 82 / 82%) 58%,
+      transparent 68%,
+      transparent 100%
+    );
+  animation: brand-gold-border-reflect var(--brand-gold-border-shine-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-form-field:has(input:required) .login-form-label::after {
+  content: " *";
+  color: var(--brand-gold-edge);
+  font-weight: 700;
+}
+
+.login-form-control-border-shine:has(.liquid-glass-input:required:placeholder-shown:not(:focus)) {
+  box-shadow: 0 0 0 1px oklch(72% 0.14 82 / 32%);
+}
+
+.login-form-control-border-shine::before {
+  z-index: 2;
+}
+
+.login-form-field:first-of-type .login-form-control-border-shine::before {
+  --brand-gold-border-reflect-delay: 5s;
+}
+
+.login-form-field:nth-of-type(2) .login-form-control-border-shine::before {
+  --brand-gold-border-reflect-delay: 6.5s;
+}
+
+.login-form-field:nth-of-type(3) .login-form-control-border-shine::before {
+  --brand-gold-border-reflect-delay: 8s;
+}
+
+.login-form-control-wrap .liquid-glass-input:hover {
+  transform: none !important;
+  border-radius: var(--radius-md) !important;
+  background-color: oklch(99.8% 0.004 265 / 96%) !important;
+  border-color: var(--brand-gold-border-strong) !important;
+  box-shadow:
+    inset 0 2px 5px oklch(52% 0.02 255 / 10%),
+    inset 0 1px 0 oklch(100% 0 0deg / 90%),
+    inset 0 -1px 0 oklch(72% 0.012 255 / 14%),
+    0 2px 4px oklch(0% 0 0deg / 9%) !important;
+}
+
+.login-card-container .liquid-glass-input:focus,
+.login-card-container .liquid-glass-input:focus-visible {
+  transform: none !important;
+  border-radius: var(--radius-md) !important;
+  background-color: oklch(100% 0.002 265 / 98%) !important;
+  border-color: var(--brand-gold-border-strong) !important;
+  outline: none !important;
+  box-shadow:
+    inset 0 2px 4px oklch(52% 0.02 255 / 8%),
+    inset 0 1px 0 oklch(100% 0 0deg / 92%),
+    0 0 0 2px var(--brand-gold-glow),
+    0 2px 6px oklch(0% 0 0deg / 10%) !important;
+}
+
+.login-form-control-border-shine:focus-within::before {
+  filter: brightness(1.08);
+}
+
+.login-card-container .liquid-glass-button-signin {
+  position: relative;
+  overflow: hidden;
+  color: oklch(99% 0.002 265) !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid oklch(18% 0.01 265 / 88%) !important;
+  box-shadow:
+    0 1px 0 oklch(100% 0 0deg / 16%),
+    0 6px 14px oklch(0% 0 0deg / 24%),
+    inset 0 1px 0 oklch(100% 0 0deg / 14%) !important;
+}
+
+.login-card-container .liquid-glass-button-signin::before {
+  --brand-gold-border-reflect-delay: 11s;
+  --brand-gold-border-shine-inset: 1px;
+  z-index: 2;
+}
+
+.login-card-container .liquid-glass-button-signin:hover {
+  box-shadow:
+    0 2px 0 oklch(100% 0 0deg / 18%),
+    0 8px 18px oklch(0% 0 0deg / 28%),
+    inset 0 1px 0 oklch(100% 0 0deg / 18%) !important;
+  transform: translateY(-1px);
+}
+
+.login-card-bottom-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 0;
+}
+
+.login-card-notice {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  overflow: hidden;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--brand-gold-border);
+  background-color: oklch(99.1% 0.006 255 / 93%);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 18%) 0,
+      oklch(90% 0.01 255 / 7%) 0.5px,
+      transparent 1px,
+      transparent 2.5px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(99.6% 0.004 265 / 97%) 0%,
+      oklch(97.2% 0.008 255 / 94%) 100%
+    );
+  -webkit-backdrop-filter: blur(8px) saturate(118%);
+  backdrop-filter: blur(8px) saturate(118%);
+  box-shadow:
+    inset 0 2px 4px oklch(52% 0.02 255 / 11%),
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 oklch(72% 0.012 255 / 15%),
+    0 2px 6px oklch(0% 0 0deg / 8%);
+  color: var(--text-secondary);
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  animation: login-card-notice-bump var(--login-card-notice-bump-duration) ease-in-out infinite;
+}
+
+.login-card-notice-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+  color: var(--brand-gold-edge);
+}
+
+.login-card-notice-text {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.login-card-notice::before {
+  --brand-gold-border-shine-inset: 1px;
+  --brand-gold-border-reflect-delay: 9s;
+  z-index: 2;
+  background-image:
+    linear-gradient(
+      148deg,
+      var(--brand-gold-depth) 0%,
+      var(--brand-gold-border) 14%,
+      var(--brand-gold-highlight) 32%,
+      var(--brand-gold-rim) 50%,
+      var(--brand-gold-edge) 68%,
+      var(--brand-gold-border) 86%,
+      var(--brand-gold-depth) 100%
+    ),
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 32%,
+      oklch(98% 0.16 82 / 82%) 42%,
+      oklch(100% 0.14 82 / 90%) 50%,
+      oklch(96% 0.15 82 / 76%) 58%,
+      transparent 68%,
+      transparent 100%
+    );
+  animation: brand-gold-border-reflect var(--brand-gold-border-shine-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-card-notice:hover {
+  animation-play-state: paused;
+}
+
+.login-card-notice > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-card-notice strong {
+  color: var(--text-heading);
+  font-weight: 600;
+}
+
+.login-card-service-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0.125rem;
+  margin-left: auto;
+  min-height: 1.375rem;
+  max-width: 100%;
+  user-select: none;
+}
+
+.login-card-service-banner__track {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--brand-gold-border);
+  background-color: oklch(99.1% 0.006 255 / 93%);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 18%) 0,
+      oklch(90% 0.01 255 / 7%) 0.5px,
+      transparent 1px,
+      transparent 2.5px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(99.6% 0.004 265 / 97%) 0%,
+      oklch(97.2% 0.008 255 / 94%) 100%
+    );
+  -webkit-backdrop-filter: blur(8px) saturate(118%);
+  backdrop-filter: blur(8px) saturate(118%);
+  box-shadow:
+    inset 0 2px 4px oklch(52% 0.02 255 / 11%),
+    inset 0 1px 0 oklch(100% 0 0deg / 72%),
+    inset 0 -1px 0 oklch(72% 0.012 255 / 15%),
+    0 1px 3px oklch(0% 0 0deg / 8%);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--text-secondary);
+  animation: login-service-banner-tick 3.5s ease-in-out;
+}
+
+.login-card-service-banner__track::before {
+  --brand-gold-border-shine-inset: 1px;
+  --brand-gold-border-reflect-delay: 6s;
+  z-index: 2;
+  background-image:
+    linear-gradient(
+      148deg,
+      var(--brand-gold-depth) 0%,
+      var(--brand-gold-border) 14%,
+      var(--brand-gold-highlight) 32%,
+      var(--brand-gold-rim) 50%,
+      var(--brand-gold-edge) 68%,
+      var(--brand-gold-border) 86%,
+      var(--brand-gold-depth) 100%
+    ),
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 32%,
+      oklch(98% 0.16 82 / 82%) 42%,
+      oklch(100% 0.14 82 / 90%) 50%,
+      oklch(96% 0.15 82 / 76%) 58%,
+      transparent 68%,
+      transparent 100%
+    );
+  animation: brand-gold-border-reflect var(--brand-gold-border-shine-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-card-service-banner__track > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-card-service-banner__icon {
+  width: 0.6875rem;
+  height: 0.6875rem;
+  flex-shrink: 0;
+}
+
+.login-card-service-banner__service {
+  color: var(--text-heading);
+  letter-spacing: 0.01em;
+}
+
+.login-card-service-banner__sep {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.login-card-service-banner__status {
+  font-weight: 600;
+}
+
+.login-card-service-banner__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+  box-shadow:
+    0 0 0 1px oklch(72% 0.012 255 / 28%),
+    inset 0 1px 1px oklch(100% 0 0deg / 35%);
+}
+
+.login-card-service-banner--ok {
+  color: var(--accent-green);
+}
+
+.login-card-service-banner--ok .login-card-service-banner__status,
+.login-card-service-banner--ok .login-card-service-banner__icon {
+  color: var(--accent-green);
+}
+
+.login-card-service-banner--degraded {
+  color: var(--accent-blue);
+}
+
+.login-card-service-banner--degraded .login-card-service-banner__status,
+.login-card-service-banner--degraded .login-card-service-banner__icon {
+  color: var(--accent-blue);
+}
+
+.login-card-service-banner--unavailable {
+  color: var(--accent-red);
+}
+
+.login-card-service-banner--unavailable .login-card-service-banner__status,
+.login-card-service-banner--unavailable .login-card-service-banner__icon {
+  color: var(--accent-red);
+}
+
+.login-card-service-banner--disabled,
+.login-card-service-banner--loading {
+  color: var(--text-muted);
+}
+
+.login-card-service-banner--disabled .login-card-service-banner__status,
+.login-card-service-banner--disabled .login-card-service-banner__icon,
+.login-card-service-banner--loading .login-card-service-banner__status,
+.login-card-service-banner--loading .login-card-service-banner__icon {
+  color: var(--text-muted);
+}
+
+.login-card-service-banner--ok .login-card-service-banner__dot {
+  animation: login-service-banner-pulse 2.4s ease-in-out infinite;
+}
+
+/* Legacy alias — notice block alignment */
+.login-card-secure {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0.125rem;
+  margin-right: 0.25rem;
+  user-select: none;
+}
+
+/* Login form — equal control width/height (Employee ID, Password, Sign In) */
+.login-form-control {
+  height: 3rem;
+  min-height: 3rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Login card — greeting header */
+.login-card-greeting {
+  margin: 0;
+}
+
+.login-card-greeting--lead {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.login-card-greeting-line:first-child {
+  border-top: none;
+}
+
+.login-card-greeting-title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.login-card-greeting-line {
+  display: block;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  user-select: none;
+}
+
+.login-card-greeting-sub {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.login-card-brand {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.login-card-form-region {
+  min-width: 0;
+}
+
+/* Login form — blends into card; gold flows from ambient layer */
+.login-form-stack {
+  --login-form-gap: 1.25rem;
+  --login-form-gap-tight: 0.625rem;
+  --login-form-text-label: 0.8125rem;
+  --login-form-text-body: 0.75rem;
+  --login-form-text-control: 0.875rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-form-gap);
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.login-form-stack > * {
+  position: relative;
+}
+
+.login-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-form-gap-tight);
+}
+
+.login-form-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-form-gap-tight);
+}
+
+.login-form-label {
+  display: block;
+  font-size: var(--login-form-text-label);
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--text-heading);
+  user-select: none;
+}
+
+.login-form-hint {
+  margin: 0;
+  font-size: var(--login-form-text-body);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.login-form-stack .liquid-glass-input,
+.login-form-stack .login-form-control,
+.login-form-stack .liquid-glass-button-signin {
+  font-size: var(--login-form-text-control);
+  line-height: 1.25;
+}
+
+.login-form-stack input::placeholder {
+  font-size: var(--login-form-text-body);
+  line-height: 1.35;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-style: normal;
+}
+
+.login-form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-form-gap-tight);
+  margin-top: 1rem;
+}
+
+.login-form-meta,
+.login-form-meta .cir-check-label {
+  font-size: var(--login-form-text-body);
+  line-height: 1.35;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 150ms ease;
+}
+
+.login-form-meta:hover,
+.login-form-meta:hover .cir-check-label {
+  color: var(--text-heading);
+}
+
+.login-form-meta-link {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  margin-inline: -0.25rem;
+}
+
+.login-form-meta-link:hover {
+  color: var(--accent-blue);
+}
+
+.login-form-meta-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px oklch(55% 0.15 250 / 50%);
+}
+
+.login-form-footer-row {
+  margin-top: 0;
+}
+
+/* Login card — wordmark: logo as “A” + rch-Operational System */
+.login-brand-wordmark {
+  margin: 0;
+  min-width: 0;
+}
+
+.login-brand-wordmark-visual {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.625rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.login-brand-wordmark-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.login-brand-wordmark-tail {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--text-heading);
+  user-select: none;
+  padding-top: 0.125rem;
+  text-shadow: none;
+}
+
+.login-brand-wordmark-tagline {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.login-brand-logo-a {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 6rem;
+  height: 6rem;
+  margin-right: 0;
+  margin-top: -0.25rem;
+  overflow: visible;
+  isolation: isolate;
+  transform: translateY(-5px);
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 6px 12px oklch(0% 0 0deg / 12%))
+    drop-shadow(0 2px 4px oklch(52% 0.02 255 / 16%));
+  animation: login-brand-logo-float var(--login-brand-logo-float-duration) ease-in-out infinite;
+  will-change: transform;
+}
+
+.login-brand-logo-a::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    108deg,
+    transparent 30%,
+    oklch(100% 0.01 265 / 10%) 40%,
+    oklch(96% 0.06 82 / 42%) 50%,
+    oklch(100% 0.01 265 / 12%) 60%,
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+  animation: brand-logo-light-sweep var(--brand-logo-shine-sweep-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-brand-logo-a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  z-index: 0;
+  width: 68%;
+  height: 16%;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse 100% 100% at 50% 50%,
+    oklch(0% 0 0deg / 32%) 0%,
+    oklch(0% 0 0deg / 14%) 48%,
+    transparent 72%
+  );
+  filter: blur(3px);
+  animation: login-brand-logo-shadow-pulse var(--login-brand-logo-float-duration) ease-in-out infinite;
+}
+
+.login-brand-logo-a svg.login-brand-logo-mark {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  color: oklch(24% 0.012 265);
+  transform: none;
+  filter: drop-shadow(0 1px 1px oklch(52% 0.014 265 / 28%));
+  animation: brand-logo-specular-glint var(--brand-logo-specular-duration) ease-in-out infinite;
+  transition:
+    color 180ms ease,
+    filter 180ms ease;
+}
+
+.login-brand-logo-a svg.login-brand-logo-mark[data-split-tone] {
+  color: transparent;
+  filter:
+    drop-shadow(0 1px 0 oklch(100% 0 0deg / 18%))
+    drop-shadow(0 2px 3px oklch(40% 0.012 265 / 34%));
+}
+
+.login-brand-wordmark:hover .login-brand-logo-a {
+  animation-play-state: paused;
+}
+
+.login-brand-wordmark:hover .login-brand-logo-a::after {
+  animation-play-state: paused;
+}
+
+.login-brand-wordmark:hover .login-brand-logo-a svg.login-brand-logo-mark {
+  color: oklch(16% 0.01 265);
+  animation-play-state: paused;
+}
+
+.login-brand-wordmark:hover .login-brand-logo-a svg.login-brand-logo-mark[data-split-tone] {
+  color: transparent;
+  filter: drop-shadow(0 1px 2px oklch(40% 0.014 265 / 38%)) brightness(0.94);
+}
+
+.login-card-footer.login-card-footer-panel,
+.login-card-panel--main.login-card-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  margin-top: auto;
+  min-height: 3.25rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text-heading);
+}
+
+.login-card-footer.login-card-footer-panel {
+  border: 1px solid oklch(76% 0.012 255 / 74%);
+  border-bottom: none;
+  background-color: oklch(90% 0.01 255 / 64%);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 14%) 0,
+      oklch(84% 0.01 255 / 6%) 0.5px,
+      oklch(98% 0.006 255 / 12%) 1px,
+      transparent 2px,
+      transparent 3px
+    ),
+    linear-gradient(
+      180deg,
+      oklch(96% 0.008 255 / 78%) 0%,
+      oklch(88% 0.012 255 / 68%) 52%,
+      oklch(84% 0.014 255 / 64%) 100%
+    );
+  -webkit-backdrop-filter: blur(12px) saturate(112%);
+  backdrop-filter: blur(12px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 oklch(62% 0.014 255 / 28%),
+    0 -2px 8px oklch(0% 0 0deg / 4%);
+}
+
+.login-card-footer.login-card-footer-panel {
+  padding: 0.875rem 1.5rem 0.875rem;
+  border-top: 1.5px solid oklch(76% 0.016 265 / 92%);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.login-card-footer-notice-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  overflow: visible;
+  padding-bottom: 0.125rem;
+}
+
+.login-card-footer .login-card-notice,
+.login-card-panel--main .login-card-notice {
+  margin: 0;
+}
+
+.login-card-footer .login-card-secure,
+.login-card-panel--main .login-card-secure,
+.login-card-footer .login-card-service-banner,
+.login-card-panel--main .login-card-service-banner {
+  margin-top: 0;
+  margin-right: 0.25rem;
+}
+
+.login-card-footer.login-card-footer-panel::before {
+  display: none;
+}
+
+.login-card-footer-ticker-viewport {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0% 0 0deg) 6%,
+    oklch(0% 0 0deg) 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0% 0 0deg) 6%,
+    oklch(0% 0 0deg) 94%,
+    transparent 100%
+  );
+}
+
+.login-card-footer-ticker-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  min-height: calc(var(--login-ticker-icon-size, 0.875rem) + 0.625rem);
+  animation: login-card-footer-ticker 52s linear infinite;
+}
+
+.login-card-footer-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+.login-card-footer-ticker-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: var(--login-ticker-font-size, 0.6875rem);
+  line-height: var(--login-ticker-line-height, 1.2);
+}
+
+.login-card-footer-ticker-sep {
+  color: var(--brand-gold-border);
+  opacity: 0.8;
+  user-select: none;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@keyframes login-card-footer-ticker {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.login-card-footer.login-card-footer-panel::after {
+  --brand-gold-border-reflect-delay: 14s;
+  inset: 0;
+  height: auto;
+  z-index: 3;
+}
+
+.login-card-footer.login-card-footer-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-card-footer-lang {
+  color: var(--text-heading);
+  font-size: inherit;
+  font-weight: 500;
+  line-height: var(--login-ticker-line-height, 1.2);
+}
+
+.login-card-footer-lang:hover {
+  color: var(--text-body);
+}
+
+.login-card-footer-agentic {
+  display: inline-flex;
+  gap: 0.375rem;
+  align-items: center;
+  color: var(--text-heading);
+}
+
+.login-card-footer-cli-agents {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text-heading);
+}
+
+.login-card-footer-cli-agents-label {
+  margin-left: 0.375rem;
+  margin-right: 0.25rem;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: var(--login-ticker-line-height, 1.2);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.login-card-footer-cli-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: 0.625rem;
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: var(--login-ticker-line-height, 1.2);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.login-card-footer-cli-agent-logo {
+  display: block;
+  flex-shrink: 0;
+  width: var(--login-ticker-icon-size, 0.875rem) !important;
+  height: var(--login-ticker-icon-size, 0.875rem) !important;
+  max-width: var(--login-ticker-icon-size, 0.875rem);
+  max-height: var(--login-ticker-icon-size, 0.875rem);
+  object-fit: contain;
+  color: var(--text-heading);
+}
+
+.login-card-footer-cli-agent-logo--wide {
+  width: auto !important;
+  max-width: 2.75rem;
+  height: var(--login-ticker-icon-size, 0.875rem) !important;
+  max-height: var(--login-ticker-icon-size, 0.875rem);
+}
+
+.login-card-footer-cli-bullet {
+  color: var(--brand-gold-border);
+  font-size: inherit;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.9;
+  user-select: none;
+}
+
+.login-card-footer-chevron {
+  width: var(--login-ticker-icon-size, 0.875rem);
+  height: var(--login-ticker-icon-size, 0.875rem);
+  color: var(--text-heading);
+  opacity: 0.72;
+}
+
+.login-card-footer-agentic-icon {
+  width: var(--login-ticker-icon-size, 0.875rem);
+  height: var(--login-ticker-icon-size, 0.875rem);
+  color: var(--text-heading);
+}
+
+.login-card-footer-agentic-text {
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: var(--login-ticker-line-height, 1.2);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.login-card-footer-os {
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: var(--login-ticker-line-height, 1.2);
+  text-transform: uppercase;
+  color: transparent !important;
+  background-image: linear-gradient(
+    90deg,
+    oklch(64% 0.15 82) 0%,
+    oklch(86% 0.17 82) 42%,
+    oklch(98% 0.15 82) 50%,
+    oklch(86% 0.17 82) 58%,
+    oklch(64% 0.15 82) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: brand-gold-text-shine var(--brand-gold-text-shine-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.login-card-footer-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: var(--login-ticker-line-height, 1.2);
+  color: var(--text-heading);
+}
+
+/* ── Brushed gold/silver chrome — taskbar, dock (login card overrides below) ── */
+.brand-chrome-surface,
+.layer-taskbar-brushed,
+.layer-dock-brushed {
+  --liquid-glass-blur: 6px;
+  --liquid-glass-saturate: 130%;
+  --liquid-glass-bg: oklch(98.8% 0.003 265 / 96%);
+  --text-heading: oklch(26% 0.022 265);
+  --text-secondary: oklch(40% 0.016 265);
+  --text-muted: oklch(50% 0.014 265);
+  --border-emphasis: var(--brand-gold-border);
+  --bg-tertiary: oklch(97.5% 0.004 265);
+}
+
+.brand-chrome-surface,
+.layer-taskbar-brushed,
+.layer-dock-brushed {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--brand-gold-border-strong);
+  background-image:
+    radial-gradient(ellipse 80% 120% at 0% 50%, var(--brand-gold-glow) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 100% at 100% 50%, var(--brand-silver-glow) 0%, transparent 50%),
+    linear-gradient(
+      180deg,
+      oklch(99.4% 0.003 82 / 97%) 0%,
+      oklch(97% 0.006 265 / 94%) 48%,
+      oklch(95.5% 0.008 265 / 92%) 100%
+    ),
+    linear-gradient(
+      90deg,
+      var(--brand-gold-border) 0%,
+      oklch(100% 0 0deg / 28%) 22%,
+      var(--brand-gold-rim) 50%,
+      oklch(100% 0 0deg / 20%) 78%,
+      var(--brand-gold-border) 100%
+    );
+  background-clip: padding-box, padding-box, padding-box, border-box;
+  background-origin: padding-box, padding-box, padding-box, border-box;
+  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(var(--liquid-glass-saturate));
+  box-shadow: var(--chrome-bar-shadow);
+}
+
+/* Taskbar & dock — extra lift and beveled gold rim */
+.layer-taskbar-brushed,
+.layer-dock-brushed {
+  border-width: 1.5px;
+  border-color: var(--brand-gold-border-strong);
+  box-shadow:
+    var(--chrome-bar-shadow),
+    inset 0 0 0 1px var(--brand-gold-rim),
+    inset 0 2px 0 var(--brand-gold-highlight),
+    inset 0 -2px 4px var(--brand-gold-depth);
+}
+
+.layer-taskbar-brushed[data-component="taskbar"] {
+  width: auto;
+}
+
+.taskbar-nav-divider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.375rem;
+  margin-inline: 0.125rem;
+  color: oklch(58% 0.014 255 / 52%);
+  font-size: 0.6875rem;
+  font-weight: 300;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Floating top taskbar + login card — reflective brushed silver chrome */
+.layer-taskbar-brushed:not(.layer-taskbar-kde),
+.login-card-container.layer-signin-card {
+  --liquid-glass-blur: 18px;
+  --liquid-glass-saturate: 118%;
+  overflow: hidden;
+  border-width: 1px;
+  border-color: oklch(76% 0.012 255 / 74%);
+  background-color: oklch(92% 0.008 255 / 78%);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 22%) 0,
+      oklch(84% 0.01 255 / 8%) 0.5px,
+      oklch(98% 0.006 255 / 18%) 1px,
+      oklch(86% 0.012 255 / 6%) 1.5px,
+      transparent 2px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      oklch(100% 0 0deg / 10%) 0,
+      oklch(88% 0.008 255 / 4%) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    radial-gradient(ellipse 95% 180% at 8% -20%, oklch(100% 0 0deg / 72%) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 140% at 96% 108%, oklch(72% 0.014 255 / 28%) 0%, transparent 62%),
+    linear-gradient(
+      180deg,
+      oklch(99.2% 0.006 255 / 88%) 0%,
+      oklch(94% 0.01 255 / 82%) 22%,
+      oklch(88% 0.012 255 / 76%) 52%,
+      oklch(84% 0.014 255 / 72%) 78%,
+      oklch(80% 0.016 255 / 68%) 100%
+    ),
+    linear-gradient(
+      90deg,
+      oklch(68% 0.012 255 / 42%) 0%,
+      oklch(100% 0 0deg / 48%) 12%,
+      var(--brand-silver-rim) 50%,
+      oklch(100% 0 0deg / 42%) 88%,
+      oklch(68% 0.012 255 / 38%) 100%
+    );
+  background-clip: padding-box, padding-box, padding-box, padding-box, padding-box, border-box;
+  background-origin: padding-box, padding-box, padding-box, padding-box, padding-box, border-box;
+  background-size: 3px 100%, 100% 4px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  animation:
+    taskbar-brushed-grain 22s linear infinite,
+    taskbar-silver-edge-breathe var(--brand-metal-edge-pulse-duration) ease-in-out infinite;
+  -webkit-backdrop-filter: blur(18px) saturate(118%) contrast(112%) brightness(1.08);
+  backdrop-filter: blur(18px) saturate(118%) contrast(112%) brightness(1.08);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0deg / 96%),
+    0 2px 6px oklch(0% 0 0deg / 8%),
+    0 8px 20px oklch(0% 0 0deg / 11%),
+    0 16px 36px oklch(52% 0.02 255 / 12%),
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 oklch(62% 0.014 255 / 32%),
+    inset 0 0 0 1px oklch(100% 0 0deg / 52%);
+}
+
+/* Floating taskbar — crisp outer edge vs page background */
+.layer-taskbar-brushed:not(.layer-taskbar-kde) {
+  border: 1.5px solid oklch(56% 0.02 255 / 92%);
+  box-shadow:
+    0 0 0 1px oklch(68% 0.014 255 / 62%),
+    0 1px 0 oklch(100% 0 0deg / 96%),
+    0 2px 6px oklch(0% 0 0deg / 10%),
+    0 8px 20px oklch(0% 0 0deg / 12%),
+    0 16px 36px oklch(52% 0.02 255 / 14%),
+    inset 0 1px 0 oklch(100% 0 0deg / 90%),
+    inset 0 -1px 0 oklch(50% 0.016 255 / 42%),
+    inset 0 0 0 1px oklch(100% 0 0deg / 68%);
+}
+
+.login-card-container.layer-signin-card {
+  box-shadow:
+    0 10px 20px oklch(0% 0 0deg / 10%),
+    0 22px 44px oklch(0% 0 0deg / 12%),
+    0 36px 72px oklch(52% 0.02 255 / 14%),
+    0 2px 6px oklch(0% 0 0deg / 8%),
+    0 8px 20px oklch(0% 0 0deg / 11%),
+    0 16px 36px oklch(52% 0.02 255 / 12%),
+    0 0 0 1px var(--brand-gold-glow),
+    inset 0 -1px 0 oklch(62% 0.014 255 / 32%),
+    inset 0 0 0 1px oklch(100% 0 0deg / 52%);
+  border-width: 1.5px;
+  border-color: var(--brand-gold-border-strong);
+  animation:
+    login-card-brushed-grain 24s ease-in-out infinite,
+    brand-gold-surface-drift var(--brand-gold-radial-drift-duration) ease-in-out infinite,
+    brand-gold-border-breathe var(--brand-gold-rim-pulse-duration) ease-in-out infinite;
+  background-size:
+    3px 100%,
+    100% 4px,
+    120% 120%,
+    120% 120%,
+    100% 100%,
+    100% 100%;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      oklch(100% 0 0deg / 22%) 0,
+      oklch(84% 0.01 255 / 8%) 0.5px,
+      oklch(98% 0.006 255 / 18%) 1px,
+      oklch(86% 0.012 255 / 6%) 1.5px,
+      transparent 2px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      oklch(100% 0 0deg / 10%) 0,
+      oklch(88% 0.008 255 / 4%) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    radial-gradient(ellipse 95% 180% at 8% -20%, oklch(100% 0 0deg / 72%) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 140% at 96% 108%, oklch(72% 0.014 255 / 28%) 0%, transparent 62%),
+    linear-gradient(
+      180deg,
+      oklch(99.2% 0.006 255 / 88%) 0%,
+      oklch(94% 0.01 255 / 82%) 22%,
+      oklch(88% 0.012 255 / 76%) 52%,
+      oklch(84% 0.014 255 / 72%) 78%,
+      oklch(80% 0.016 255 / 68%) 100%
+    ),
+    linear-gradient(
+      90deg,
+      var(--brand-gold-border) 0%,
+      oklch(100% 0 0deg / 48%) 12%,
+      var(--brand-gold-rim) 50%,
+      oklch(100% 0 0deg / 42%) 88%,
+      var(--brand-gold-border) 100%
+    );
+}
+
+/* KDE Plasma — bottom edge panel (flat, full-width) */
+.layer-taskbar-kde.layer-taskbar-brushed {
+  border-width: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--brand-gold-border-strong);
+  background-image: linear-gradient(
+    180deg,
+    oklch(98.8% 0.004 265 / 98%) 0%,
+    oklch(96.2% 0.006 265 / 96%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 72%),
+    0 -1px 0 oklch(0% 0 0deg / 6%),
+    0 -4px 14px oklch(0% 0 0deg / 7%);
+}
+
+.layer-taskbar-kde.layer-taskbar-brushed::before {
+  animation: none;
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0 0deg / 38%) 0%,
+    transparent 42%
+  );
+}
+
+.layer-taskbar-kde.layer-taskbar-brushed::after {
+  inset: 0;
+  box-shadow: inset 0 1px 0 oklch(100% 0 0deg / 45%);
+}
+
+.brand-kde-launcher {
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0.008 82 / 92%) 0%,
+    oklch(96.5% 0.006 265 / 88%) 100%
+  );
+  border: 1px solid var(--brand-gold-border);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 88%),
+    inset 0 -1px 0 var(--brand-gold-depth);
+}
+
+.brand-kde-launcher:hover,
+.brand-kde-launcher[data-state="open"] {
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0.01 82 / 96%) 0%,
+    oklch(95% 0.008 265 / 92%) 100%
+  );
+  border-color: var(--brand-gold-border-strong);
+}
+
+.brand-taskbar-search-kde {
+  border-radius: 4px;
+  min-height: 1.75rem;
+}
+
+.layer-taskbar-brushed::before,
+.layer-dock-brushed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0 0deg / 42%) 0%,
+    var(--brand-gold-glow) 14%,
+    oklch(100% 0 0deg / 8%) 28%,
+    transparent 52%,
+    oklch(0% 0 0deg / 3%) 100%
+  );
+}
+
+.brand-chrome-surface::after,
+.layer-taskbar-brushed::after,
+.layer-dock-brushed::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0deg / 72%),
+    inset 0 1px 0 0 var(--brand-gold-edge);
+}
+
+.layer-taskbar-brushed::before,
+.layer-dock-brushed::before {
+  overflow: hidden;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 38%,
+      oklch(96% 0.18 82 / 40%) 48%,
+      oklch(99% 0.14 82 / 62%) 50%,
+      oklch(94% 0.16 82 / 34%) 52%,
+      transparent 60%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      oklch(100% 0 0deg / 56%) 0%,
+      var(--brand-gold-highlight) 10%,
+      var(--brand-gold-glow) 24%,
+      var(--brand-silver-glow) 38%,
+      transparent 56%,
+      oklch(0% 0 0deg / 6%) 100%
+    );
+  background-size: 280% 100%, 100% 100%;
+  animation: brand-gold-shine-wash var(--brand-gold-shine-wash-duration) var(--brand-gold-shine-ease)
+    infinite;
+}
+
+.layer-taskbar-brushed::after,
+.layer-dock-brushed::after {
+  inset: 2px;
+  animation: brand-gold-rim-pulse var(--brand-gold-rim-pulse-duration) ease-in-out infinite;
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0deg / 82%),
+    inset 0 1px 0 0 var(--brand-gold-highlight),
+    inset 0 -1px 0 0 var(--brand-gold-depth);
+}
+
+.login-card-intro + .login-card-panel--main.login-card-panel,
+.login-card-panel--intro + .login-card-panel--main.login-card-panel {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  background-image: none;
+}
+
+.login-card-container.layer-signin-card::before,
+.login-card-container.layer-signin-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.layer-taskbar-brushed:not(.layer-taskbar-kde)::before,
+.login-card-container.layer-signin-card::before {
+  inset: -2px -40%;
+  width: 180%;
+  opacity: 0.9;
+  mix-blend-mode: overlay;
+  overflow: hidden;
+  background: linear-gradient(
+    102deg,
+    transparent 0%,
+    transparent 36%,
+    oklch(100% 0 0deg / 0%) 42%,
+    oklch(100% 0 0deg / 88%) 50%,
+    oklch(100% 0 0deg / 0%) 58%,
+    transparent 64%,
+    transparent 100%
+  );
+  background-size: 100% 100%;
+  animation: taskbar-silver-mirror-sweep 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.login-card-container.layer-signin-card::before {
+  inset: 0;
+  width: auto;
+  opacity: 1;
+  mix-blend-mode: soft-light;
+  will-change: background-position, opacity, filter;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 40%,
+      oklch(96% 0.2 82 / 42%) 47%,
+      oklch(99% 0.16 82 / 78%) 50%,
+      oklch(94% 0.18 82 / 38%) 53%,
+      transparent 58%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      oklch(100% 0 0deg / 62%) 0%,
+      var(--brand-gold-highlight) 12%,
+      var(--brand-gold-glow) 28%,
+      var(--brand-silver-glow) 42%,
+      transparent 58%,
+      oklch(0% 0 0deg / 8%) 100%
+    );
+  background-size: 240% 100%, 100% 120%;
+  animation:
+    login-card-gold-shine-wash var(--login-card-gold-shine-wash-duration) var(--brand-gold-shine-ease)
+      infinite,
+    login-card-gold-shade-pulse var(--login-card-gold-shade-pulse-duration) ease-in-out infinite,
+    login-card-gold-shade-shift calc(var(--login-card-gold-shade-pulse-duration) * 1.4) ease-in-out
+      infinite;
+}
+
+.layer-taskbar-brushed:not(.layer-taskbar-kde)::after,
+.login-card-container.layer-signin-card::after {
+  animation: none;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0 0deg / 62%) 0%,
+    oklch(100% 0 0deg / 18%) 18%,
+    transparent 42%,
+    oklch(72% 0.01 255 / 12%) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0deg / 78%),
+    inset 0 1px 0 oklch(100% 0 0deg / 92%),
+    inset 0 -1px 0 oklch(58% 0.012 255 / 28%);
+}
+
+.layer-taskbar-brushed:not(.layer-taskbar-kde)::after {
+  box-shadow:
+    inset 0 0 0 1.5px oklch(54% 0.02 255 / 78%),
+    inset 0 1px 0 oklch(100% 0 0deg / 94%),
+    inset 0 -1.5px 0 oklch(46% 0.016 255 / 48%);
+}
+
+.login-card-container.layer-signin-card::after {
+  inset: 2px;
+  animation: brand-gold-rim-pulse var(--brand-gold-rim-pulse-duration) ease-in-out infinite;
+  mix-blend-mode: normal;
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0 0deg / 18%) 0%,
+    transparent 28%,
+    transparent 72%,
+    oklch(0% 0 0deg / 6%) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px oklch(100% 0 0deg / 82%),
+    inset 0 1px 0 0 var(--brand-gold-highlight),
+    inset 0 -1px 0 0 var(--brand-gold-depth);
+  will-change: box-shadow;
+}
+
+.brand-chrome-surface > *,
+.layer-taskbar-brushed > *,
+.layer-dock-brushed > *,
+.login-card-container.layer-signin-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Taskbar/dock inherit shared .brand-chrome-surface rules above */
+
+.brand-chrome-pill {
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0.01 82 / 96%) 0%,
+    oklch(97.5% 0.006 265 / 93%) 55%,
+    oklch(95.5% 0.008 265 / 90%) 100%
+  );
+  border: 1px solid var(--brand-gold-border);
+  box-shadow: var(--chrome-pill-shadow);
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.brand-chrome-pill:hover {
+  background: linear-gradient(
+    180deg,
+    oklch(100% 0.012 82 / 98%) 0%,
+    oklch(97% 0.008 265 / 95%) 55%,
+    oklch(95% 0.01 265 / 92%) 100%
+  );
+  border-color: var(--brand-gold-border-strong);
+  box-shadow: var(--chrome-pill-shadow-hover);
+}
+
+.brand-chrome-pill:active {
+  transform: scale(0.97);
+  box-shadow:
+    inset 0 2px 4px oklch(0% 0 0deg / 12%),
+    inset 0 0 0 1px var(--brand-gold-depth),
+    0 1px 2px oklch(0% 0 0deg / 5%);
+}
+
+/* System tray status cluster — borderless inline strip with pipe separators */
+.system-tray-status-cluster {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  transition: background 150ms ease;
+}
+
+.system-tray-status-cluster:hover {
+  background: oklch(100% 0.008 82 / 42%);
+}
+
+.system-tray-status-cluster:active {
+  transform: scale(0.98);
+  background: oklch(100% 0.01 82 / 55%);
+}
+
+.system-tray-pipe {
+  color: var(--brand-silver-muted);
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.75;
+  user-select: none;
+  padding-inline: 1px;
+}
+
+.brand-chrome-orb {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(
+    145deg,
+    oklch(100% 0.012 82 / 97%) 0%,
+    oklch(97% 0.006 265 / 93%) 48%,
+    oklch(94.5% 0.009 265 / 89%) 100%
+  );
+  border: 1px solid var(--brand-gold-border);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 94%),
+    inset 0 -2px 0 var(--brand-gold-depth),
+    inset 0 -4px 8px oklch(0% 0 0deg / 10%),
+    0 2px 4px oklch(0% 0 0deg / 7%),
+    0 4px 12px oklch(46% 0.1 82 / 16%);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.brand-chrome-orb:hover {
+  border-color: var(--brand-gold-border-strong);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 96%),
+    inset 0 -2px 0 var(--brand-gold-depth),
+    inset 0 -5px 10px oklch(0% 0 0deg / 11%),
+    0 0 0 1px var(--brand-gold-glow),
+    0 4px 10px oklch(0% 0 0deg / 10%),
+    0 8px 20px oklch(46% 0.1 82 / 20%);
+}
+
+.brand-chrome-orb:active {
+  transform: scale(0.95);
+  box-shadow:
+    inset 0 3px 6px oklch(0% 0 0deg / 14%),
+    inset 0 0 0 1px var(--brand-gold-depth),
+    0 1px 2px oklch(0% 0 0deg / 6%);
+}
+
+.brand-chrome-orb::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    108deg,
+    transparent 34%,
+    oklch(100% 0.02 82 / 36%) 50%,
+    transparent 66%
+  );
+  mix-blend-mode: soft-light;
+  animation: brand-logo-light-sweep calc(var(--brand-logo-shine-sweep-duration) * 0.85)
+    var(--brand-gold-shine-ease) infinite;
+  animation-delay: 3s;
+}
+
+.brand-chrome-orb svg {
+  position: relative;
+  z-index: 1;
+  animation: brand-logo-specular-glint var(--brand-logo-specular-duration) ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+.brand-taskbar-search-wrap {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.brand-taskbar-search-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.62;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    108deg,
+    transparent 0%,
+    transparent 42%,
+    oklch(96% 0.02 265 / 28%) 49%,
+    oklch(99% 0.014 265 / 48%) 50%,
+    oklch(92% 0.018 265 / 24%) 51%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 260% 100%;
+  animation: brand-silver-shine-wash var(--brand-silver-shine-wash-duration) var(--brand-gold-shine-ease)
+    infinite;
+  animation-delay: 7s;
+}
+
+.brand-taskbar-search-wrap::after {
+  --brand-gold-border-reflect-delay: 7s;
+  z-index: 2;
+}
+
+.brand-taskbar-search-wrap .brand-taskbar-search {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-taskbar-search {
+  min-height: 1.75rem;
+  max-height: 1.75rem;
+  background-color: oklch(99% 0.012 265 / 22%) !important;
+  background-image: none;
+  border: 1px solid transparent !important;
+  -webkit-backdrop-filter: blur(14px) saturate(165%) contrast(104%);
+  backdrop-filter: blur(14px) saturate(165%) contrast(104%);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 68%),
+    inset 1px 0 0 oklch(100% 0 0deg / 28%),
+    inset 0 -1px 0 oklch(0% 0 0deg / 5%) !important;
+  transition:
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.brand-taskbar-search:hover {
+  background-color: oklch(99% 0.014 265 / 28%) !important;
+  border-color: transparent !important;
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 74%),
+    inset 1px 0 0 oklch(100% 0 0deg / 34%),
+    inset 0 -1px 0 oklch(0% 0 0deg / 6%) !important;
+}
+
+.brand-taskbar-search:focus {
+  border-color: transparent !important;
+  background-color: oklch(99% 0.016 265 / 32%) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 78%),
+    inset 1px 0 0 oklch(100% 0 0deg / 36%),
+    inset 0 -1px 0 oklch(0% 0 0deg / 5%),
+    0 0 0 2px var(--brand-gold-glow) !important;
+  outline: none;
+}
+
+.brand-divider {
+  width: 1px;
+  align-self: center;
+  height: 12px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--brand-silver-rim) 22%,
+    var(--brand-gold-rim) 50%,
+    var(--brand-silver-rim) 78%,
+    transparent 100%
+  );
+  background-size: 100% 240%;
+  animation: brand-silver-edge-travel var(--brand-silver-shine-wash-duration) ease-in-out infinite;
+  box-shadow:
+    0 0 6px var(--brand-gold-glow),
+    0 0 4px var(--brand-silver-glow);
+}
+
+.layer-signin-card-webgl {
+  isolation: isolate;
+  border: 1.5px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(240, 240, 240, 0.05) 50%,
+      rgba(255, 255, 255, 0.3) 100%
+    );
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.45),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.03),
+    0 10px 20px rgba(0, 0, 0, 0.08);
+  border-radius: var(--liquid-glass-radius-card);
+  will-change: border-radius, transform;
+  transform: translateZ(0);
+  background-size:
+    100% 100%,
+    200% 200%;
+  animation: border-glow-sweep 8s linear infinite;
+  transition:
+    border-radius 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.layer-signin-card-webgl:hover {
+  border-radius: var(--liquid-glass-radius-card-hover);
+  transform: scaleX(1.012) scaleY(1.008);
+  box-shadow:
+    inset 0 10px 20px rgba(255, 255, 255, 0.55),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.04),
+    0 20px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Border Sweep Animation ── */
+@keyframes border-glow-sweep {
+  0% {
+    background-position:
+      0% 0%,
+      0% 0%;
+  }
+  50% {
+    background-position:
+      0% 0%,
+      100% 100%;
+  }
+  100% {
+    background-position:
+      0% 0%,
+      0% 0%;
+  }
+}
+
+/* ── Liquid Glass Form Controls ── */
+.liquid-glass-input {
+  border-radius: var(--liquid-glass-radius-input) !important;
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.06) !important;
+  transition:
+    border-radius 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.liquid-glass-input:hover {
+  border-radius: var(--liquid-glass-radius-input-focus) !important;
+  transform: scale(1.015) !important;
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+.liquid-glass-input:focus {
+  border-radius: var(--liquid-glass-radius-input-focus) !important;
+  transform: scale(1.01) !important;
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+  outline: none !important;
+}
+
+.liquid-glass-button {
+  border-radius: var(--liquid-glass-radius-button) !important;
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.45),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.03),
+    0 10px 20px rgba(0, 0, 0, 0.08) !important;
+  transition:
+    border-radius 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.liquid-glass-button:hover {
+  border-radius: var(--liquid-glass-radius-button-hover) !important;
+  box-shadow:
+    inset 0 8px 16px rgba(255, 255, 255, 0.6),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.03),
+    0 10px 20px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(59, 130, 246, 0.45) !important;
+}
+
+.liquid-glass-button:active {
+  transform: scale(0.97) !important;
+}
+
+/* Login sign-in CTA — darker metallic silver; less white inset wash than default glass buttons */
+.liquid-glass-button-signin {
+  background: var(--color-signin-button) !important;
+  border: 1px solid var(--color-signin-button-border) !important;
+  color: oklch(99% 0.002 265) !important;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 14%),
+    inset 0 -2px 0 oklch(0% 0 0deg / 38%),
+    0 1px 0 oklch(0% 0 0deg / 26%),
+    0 4px 8px oklch(0% 0 0deg / 20%) !important;
+}
+
+.liquid-glass-button-signin:hover {
+  background: var(--color-signin-button-hover) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 18%),
+    inset 0 -2px 0 oklch(0% 0 0deg / 44%),
+    0 2px 0 oklch(0% 0 0deg / 30%),
+    0 6px 12px oklch(0% 0 0deg / 24%) !important;
+}
+
+.liquid-glass-button-signin:active {
+  box-shadow:
+    inset 0 2px 4px oklch(0% 0 0deg / 35%),
+    0 1px 3px oklch(0% 0 0deg / 18%) !important;
+}
+
+/* ── Specular SVG Film Grain overlay ── */
+.liquid-grain-overlay {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
+  background-size: 150px 150px;
+  animation: grain-dance 8s steps(10) infinite;
+}
+
+@keyframes grain-dance {
+  0%,
+  100% {
+    background-position: 0 0;
+  }
+  10% {
+    background-position: -5px 10px;
+  }
+  20% {
+    background-position: -10px 5px;
+  }
+  30% {
+    background-position: 4px -9px;
+  }
+  40% {
+    background-position: -8px 2px;
+  }
+  50% {
+    background-position: 11px 8px;
+  }
+  60% {
+    background-position: -3px -11px;
+  }
+  70% {
+    background-position: 9px 4px;
+  }
+  80% {
+    background-position: -6px -7px;
+  }
+  90% {
+    background-position: 2px 12px;
+  }
+}
+
+/* ── High Contrast Text Lift ── */
+.liquid-text-lift {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* ── Reduced Motion Fallback ── */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass-input,
+  .liquid-glass-button,
+  .layer-signin-card,
+  .layer-signin-card-webgl {
+    transform: none !important;
+    border-radius: var(--liquid-glass-radius-card, 16px) !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .login-card-container.layer-signin-card,
+  .login-card-container.layer-signin-card:hover {
+    transform: none !important;
+    animation: none !important;
+    filter: none !important;
+    box-shadow:
+      var(--chrome-bar-shadow),
+      inset 0 0 0 1px oklch(100% 0 0deg / 58%),
+      inset 0 1px 0 oklch(96% 0.014 265 / 52%),
+      inset 0 -2px 4px oklch(52% 0.02 265 / 28%) !important;
+  }
+  .liquid-grain-overlay {
+    animation: none !important;
+  }
+}
+
+/* ── Hairline Border ── */
+
+.border-hairline {
+  border: 1px solid;
+  border-image: var(--glass-border-gradient) 1;
+}
+
+/* ── Data Layouts ── */
+
+.data-section {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(var(--arch4), 0.3);
+}
+
+.divide-subtle > * + * {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Tactile Button ── */
+
+.tactile-button {
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.tactile-button:active {
+  transform: scale(0.98) translateY(1px);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PORTAL LAYER STACK — decoupled background vs chrome vs panels
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.portal-auth-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: inherit;
+}
+
+.portal-layer-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  isolation: isolate;
+  contain: strict;
+}
+
+.portal-layer-bg--static {
+  contain: layout style paint;
+}
+
+.portal-layer-panel {
+  position: relative;
+  z-index: var(--z-primary-card);
+  isolation: isolate;
+}
+
+.portal-layer-chrome {
+  isolation: isolate;
+}
+
+.portal-layer-login {
+  isolation: isolate;
+}
+
+/* Auth ambient — scoped overrides (global hub stays flat) */
+.route-bg-fallback--auth,
+.route-bg-video-container--auth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  z-index: 0;
+}
+
+.route-bg-tint--auth,
+.route-bg-grain--auth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.route-bg-video-container--auth {
+  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
+  overflow: hidden;
+  contain: strict;
+}
+
+.route-bg-video--auth {
+  opacity: 0.76;
+  filter: brightness(0.84) saturate(1.06);
+  transform: translate(-50%, -50%) translateZ(0);
+  backface-visibility: hidden;
+}
+
+.low-perf-fallback .portal-layer-bg .route-bg-video-container--auth {
+  display: none !important;
+}
+
+.low-perf-fallback .portal-layer-bg .route-bg-fallback--auth {
+  display: block !important;
+  background: var(--bg-primary);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ROUTE BACKGROUND — Canonical wave video layer
+   Video source: 04_shared_static_assets/background/white-geometric-waves.3840x2160.mp4
+   Synced to 00_applications/portal/public/background/ via sync-assets.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Video container — fixed to the viewport; gradient base fills any letterboxing */
+.route-bg-video-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100%;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
+}
+
+/* Video element — center-cover scaling so the frame always fills the window */
+.route-bg-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%) translateZ(0);
+  object-fit: cover;
+  object-position: center center;
+  will-change: auto;
+  backface-visibility: hidden;
+  image-rendering: high-quality;
+  image-rendering: -webkit-optimize-contrast;
+  opacity: 0.72;
+  filter: brightness(0.82) saturate(1.05);
+}
+
+/* Tint overlay — always visible (including prefers-reduced-motion).
+   Sits at z-index -9 (one above the video/fallback).
+   No backdrop-blur: browsers cannot blur a composited <video> layer;
+   the property would create an extra compositor pass for no visual gain. */
+.route-bg-tint {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: -9;
+  background: rgba(255, 255, 255, 0.38);
+  pointer-events: none;
+}
+
+@media (width <= 768px) {
+  .route-bg-video {
+    opacity: 0.4;
+  }
+  .route-bg-tint {
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* Ambient Film Grain overlay to eliminate H.264 banding and add crisp texture */
+.route-bg-grain {
+  position: fixed;
+  inset: 0;
+  z-index: -8;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
+  background-size: 140px 140px;
+  opacity: 0.024; /* extremely subtle but prevents gradient banding and feels sharp */
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.focus-mode .route-bg-grain {
+  opacity: 0.042; /* slightly more pronounced film grain against dark colors */
+}
+
+html,
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+/* Semi-transparent wash — focus mode legibility only (blank canvas default) */
+.route-bg-focus-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  background: var(--bg-primary);
+  pointer-events: none;
+}
+
+/* Reduced-motion / low-perf flat fallback — solid app canvas */
+.route-bg-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background: var(--bg-primary);
+  animation: none;
+}
+
+.route-bg-fallback--reserve {
+  display: none;
+}
+
+.low-perf-fallback .route-bg-fallback--reserve {
+  display: block !important;
+}
+
+/* ── Glass Typography & Text Hierarchy ── */
+
+/* Glass Card Title Styling — Bold and high-contrast */
+.glass-card h1,
+.glass-card h2,
+.glass-card h3,
+.glass-card h4,
+.glass-card h5,
+.glass-card h6,
+.glass-card .card-title,
+.glass-card [role="heading"],
+.glass-card p.font-bold,
+.glass-card span.font-bold {
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 700 !important;
+  color: var(--text-heading) !important;
+  letter-spacing: -0.01em;
+}
+
+/* System Label Requirements */
+.system-label,
+.glass-card p.text-xs.uppercase,
+.glass-card span.text-xs.uppercase,
+.glass-card p.uppercase,
+.glass-card span.uppercase {
+  font-family: var(--font-sans), sans-serif;
+  text-transform: uppercase !important;
+  font-size: 10px !important; /* Premium small size */
+  letter-spacing: 0.08em !important; /* Wide letter spacing */
+  color: var(--text-muted) !important; /* Muted color from theme */
+  font-weight: 600 !important; /* Clear font weight */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Volumetric Glass & Liquid Card Fallback for unsupported browsers */
+@supports not (backdrop-filter: blur(12px)) {
+  .glass-depth-card,
+  .liquid-glass,
+  .liquid-glass-light,
+  .layer-taskbar-brushed,
+  .liquid-glass-elevated,
+  .glass-elevated,
+  .glass-card,
+  .liquid-glass-pane,
+  .liquid-glass-pane-rounded,
+  .liquid-glass-surface {
+    background: rgba(255, 255, 255, 0.95) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-image: none !important;
+  }
+  .active-badge-liquid {
+    animation: none !important;
+    box-shadow: var(--shadow-none, none) !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+  }
+}
+
+.active-badge-liquid {
+  color: var(--accent-mint-hover) !important;
+  animation: active-beacon-pulse 6s cubic-bezier(0.25, 1.15, 0.45, 1) infinite;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition: all 0.65s cubic-bezier(0.25, 1.15, 0.45, 1);
+}
+
+.active-badge-liquid .badge-pulse-dot {
+  animation: pulse-glow 6s cubic-bezier(0.25, 1.15, 0.45, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .active-badge-liquid,
+  .active-badge-liquid .badge-pulse-dot {
+    animation: none !important;
+  }
+}
+
+.liquid-sheen-sweep {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-150%) skewX(-15deg);
+  animation: liquid-sheen-sweep-mount 1.6s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
+  will-change: transform;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-sheen-sweep,
+  .liquid-glass-interactive:hover .liquid-sheen-sweep {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
+/* ── Liquid Layer-Stacking Hierarchy (Isolation) ── */
+
+.liquid-stack-context {
+  isolation: isolate;
+  position: relative;
+}
+
+.liquid-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translateZ(0);
+  will-change: transform, opacity, backdrop-filter;
+  backface-visibility: hidden;
+  border-radius: inherit;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .liquid-bg-layer {
+    background: rgba(255, 255, 255, 0.95) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+.liquid-sheen-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.liquid-content-layer {
+  position: relative;
+  z-index: 10;
+}
+
+/* ── Adaptive Performance Fallback ── */
+.low-perf-fallback .liquid-glass-surface,
+.low-perf-fallback .liquid-glass-pane-rounded {
+  background: rgba(255, 255, 255, 0.85) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+.low-perf-fallback .liquid-glass-surface {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  animation: none !important;
+  transform: none !important;
+}
+
+.low-perf-fallback .route-bg-video-container {
+  display: none !important;
+}
+
+.low-perf-fallback .route-bg-fallback--reserve {
+  display: block !important;
+}
+
+.low-perf-fallback .liquid-glass-interactive:hover {
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.low-perf-fallback .liquid-glass-interactive:hover .liquid-shift-y,
+.low-perf-fallback .liquid-glass-interactive:hover .liquid-shift-y-delay {
+  transform: none !important;
+  transition: none !important;
+}
+
+.low-perf-fallback .liquid-sheen-sweep {
+  display: none !important;
+  animation: none !important;
+}
+
+/* Disable scale animations on touch/kiosk viewports to prevent stuttering */
+@media (hover: none), (pointer: coarse) {
+  .liquid-glass-interactive:hover {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .liquid-glass-interactive:hover .liquid-shift-y,
+  .liquid-glass-interactive:hover .liquid-shift-y-delay {
+    transform: none !important;
+    transition: none !important;
+  }
+  .liquid-sheen-sweep {
+    display: none !important;
+    animation: none !important;
+  }
+}
+
+/* Focus-mode: dark theme shifts for liquid glass variants */
+body.focus-mode .liquid-glass,
+body.focus-mode .liquid-glass-light,
+body.focus-mode .layer-taskbar-brushed,
+body.focus-mode .liquid-glass-elevated,
+body.focus-mode .liquid-glass-pane-rounded,
+body.focus-mode .liquid-glass-surface,
+body.focus-mode .layer-signin-card {
+  background:
+    linear-gradient(135deg, rgba(20, 28, 45, 0.55) 0%, rgba(15, 20, 32, 0.4) 100%) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.02) 50%,
+        rgba(255, 255, 255, 0.08) 100%
+      )
+      border-box !important;
+  border-color: transparent !important;
+}
+
+body.focus-mode .layer-signin-card-webgl {
+  background:
+    linear-gradient(135deg, rgba(20, 28, 45, 0.08) 0%, rgba(15, 20, 32, 0.04) 100%) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.02) 50%,
+        rgba(255, 255, 255, 0.08) 100%
+      )
+      border-box !important;
+  border-color: transparent !important;
+}
+
+body.focus-mode .liquid-glass,
+body.focus-mode .liquid-glass-light,
+body.focus-mode .layer-taskbar-brushed,
+body.focus-mode .liquid-glass-elevated,
+body.focus-mode .liquid-glass-pane-rounded,
+body.focus-mode .liquid-glass-surface,
+body.focus-mode .layer-signin-card,
+body.focus-mode .layer-signin-card-webgl,
+body.focus-mode .liquid-glass-input,
+body.focus-mode .liquid-glass-button {
+  transform: none !important;
+}
+
+/* ── Focus mode overlays ──────────────────────────────────────────
+   The global background video stays mounted in both modes. Focus mode
+   only adjusts tint and scrim overlays for legibility. */
+body.focus-mode .route-bg-fallback {
+  background: oklch(18% 0.015 265);
+}
+
+body.focus-mode .route-bg-tint {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body:not(.focus-mode) .route-bg-focus-scrim {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.low-perf-fallback .login-card-container .liquid-glass-pane-rounded {
+  background: rgba(255, 255, 255, 0.15) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
