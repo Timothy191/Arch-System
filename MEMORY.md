@@ -70,3 +70,4 @@ All new data paths (Next.js, FastAPI, Supabase) must support local sync and even
 | 2026-06-30 | Agent memory root moved to `.ai_content/.memory/.cursor-memory/`; hooks/scripts use `memory_paths.py` | user migration |
 | 2026-06-30 | Frontend/backend split: UI → API/actions → data-access → infra; deferred `NN_` renumber | /summarize |
 | 2026-06-29 | Production realism: no foo/bar/Lorem; mining domain terms; halt if schema unknown | mission §3 |
+| 2026-06-30 | Recovering permanently deleted untracked files using git fsck --lost-found to retrieve dangling blobs when a git clean -fd collision occurs | git-recovery |
