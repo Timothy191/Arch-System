@@ -18,6 +18,7 @@
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "@repo/typescript-config": "1.0.0",
     "@types/react": "catalog:react19",
     "typescript": "catalog:"
