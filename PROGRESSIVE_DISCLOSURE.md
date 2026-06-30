@@ -59,6 +59,7 @@
 
 ```
 task: separate frontend (UI) from background logic (API, data-access, infra)
+phase: A complete — violations V1–V8 in HOW.md; next Phase B dedupe
 loaded: [HOW.md, active-context.md, MEMORY.md]
 skip: docs/wiki/**, AGENT_TRACER.md
 ```
