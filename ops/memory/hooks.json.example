@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "scripts/memory/hooks/session-init.sh"
+      },
+      {
+        "command": "scripts/memory/hooks/auto-recall.sh"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "scripts/memory/hooks/turn-counter.sh",
+        "matcher": "UserPromptSubmit"
+      },
+      {
+        "command": "scripts/memory/hooks/recall-on-prompt.sh",
+        "matcher": "UserPromptSubmit"
+      },
+      {
+        "command": "scripts/memory/hooks/turn-session-begin.sh",
+        "matcher": "UserPromptSubmit"
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "scripts/memory/hooks/pre-compact.sh"
+      }
+    ]
+  }
+}

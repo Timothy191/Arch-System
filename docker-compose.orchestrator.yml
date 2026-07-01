@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    volumes:
+      - .:/workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python3", "-c", "import time; print('Orchestrator container running...'); time.sleep(86400)"]

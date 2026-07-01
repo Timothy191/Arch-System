@@ -6,15 +6,37 @@
 
 | Field | Value |
 |-------|-------|
-| **Task** | Separate frontend (UI) from background logic (server, data, jobs) |
-| **Branch** | `feat/separate-frontend-backend` (create before first commit) |
-| **Status** | `phase-a-complete` — audit recorded; Phase B not started |
+| **Task** | Improve and refine the Self-improvement protocol |
+| **Branch** | `feat/self-improvement-protocol` (create before first commit) |
+| **Status** | `in-progress` |
 
 ## TodoWrite checklist (Phase 2 — complete before production code)
 
 > Sequential plan. Mark `[x]` as executed. Do not write production code until this section is filled.
 
-### Phase A — Boundary map (read-only audit)
+### Implementation checklist
+
+- [x] Create branch `feat/self-improvement-protocol`
+- [x] Fix legacy directory paths in `ops/agent-orchestrator/turn_session_lib.py` (`03_operations_automation/memory` -> `ops/memory`)
+- [x] Fix `classify-effort.py` lookup path in `ops/agent-orchestrator/turn_session_lib.py`
+- [x] Refine `self_improvement` metric calculations in `ops/agent-orchestrator/turn_session_lib.py`:
+  - Context-aware `avg_token_input` estimation (18k baseline + prompt characters to tokens)
+  - Realistic task success and confidence metrics linked to verification and outstanding checkouts
+  - Tier-aware intelligence and reasoning levels
+  - Dynamic `benefit_gained` text based on actual turn achievements
+- [x] Implement dynamic completion checks in `ops/agent-orchestrator/turn_session_lib.py` for the 3 Road to Deployment items:
+  - Docker containerization (`Dockerfile.orchestrator` and `docker-compose.orchestrator.yml` existence)
+  - Supabase RLS policies (migration `096_tenant_rls_policies.sql` existence)
+  - Github CI integration (`.github/workflows/graph-templates-ci.yml` existence)
+- [x] Stage and commit the 4 untracked deployment assets to the git branch
+- [x] Run verify gate to ensure clean repository state
+- [x] Verify close status reports all 3 deployment readiness items as completed
+- [x] Verify `turn-close-status.py` runs successfully without module errors
+- [x] Run the codebase verification gate (`ops/agent-orchestrator/verify-gate.sh`)
+- [x] Commit changes using conventional commit formats
+
+### Previous task (deferred)
+
 
 - [x] Inventory `apps/portal`: list `app/api/**`, Server Actions, `createServerSupabaseClient` call sites, client `"use client"` modules
 - [x] Inventory `libs/features/**` and `packages/*`: classify UI-only vs data-access vs server-only
