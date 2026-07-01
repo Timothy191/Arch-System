@@ -57,6 +57,7 @@
     "sonner": "catalog:",
     "swagger-ui-react": "^5.18.2",
     "xstate": "catalog:",
+    "@supabase/supabase-js": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },
@@ -67,6 +68,7 @@
     "@swc/jest": "^0.2.39",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/eslint": "catalog:",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
@@ -83,13 +85,13 @@
   },
   "private": true,
   "scripts": {
-    "build": "node 03_operations_automation/generate-openapi-spec.js && next build",
+    "build": "node ops/generate-openapi-spec.js && next build",
     "build:analyze": "ANALYZE=true next build",
     "dev": "next dev --turbopack --hostname 0.0.0.0",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "start": "next start",
     "test": "jest --passWithNoTests --maxWorkers=50%",
     "type-check": "tsc --noEmit",
-    "generate-openapi-spec": "node 03_operations_automation/generate-openapi-spec.js"
+    "generate-openapi-spec": "node ops/generate-openapi-spec.js"
   }
 }

@@ -1,6 +1,6 @@
 import { GlassCard } from "@repo/ui/GlassCard";
 import { generateDeformationReadings, DEFAULT_MINE_CENTER } from "@/lib/monitoring-api";
-import { SatelliteMonitoringClient } from "@/components/14_observability_configuration/SatelliteMonitoringClient";
+import { SatelliteMonitoringClient } from "@/components/monitoring/SatelliteMonitoringClient";
 
 export default function ControlRoomSatellitePage() {
   const readings = generateDeformationReadings(DEFAULT_MINE_CENTER.lat, DEFAULT_MINE_CENTER.lon);

@@ -15,7 +15,7 @@ import {
 } from "@/lib/monitoring-api";
 
 const LidarLayerPanel = dynamic(
-  () => import("@/components/14_observability_configuration/LidarLayer").then((m) => m.LidarLayerPanel),
+  () => import("@/components/monitoring/LidarLayer").then((m) => m.LidarLayerPanel),
   {
     ssr: false,
     loading: () => (
@@ -25,7 +25,7 @@ const LidarLayerPanel = dynamic(
 );
 
 const COGRasterLayer = dynamic(
-  () => import("@/components/14_observability_configuration/COGRasterLayer").then((m) => m.COGRasterLayer),
+  () => import("@/components/monitoring/COGRasterLayer").then((m) => m.COGRasterLayer),
   {
     ssr: false,
     loading: () => (
@@ -35,7 +35,7 @@ const COGRasterLayer = dynamic(
 );
 
 const KeplerGlMap = dynamic(
-  () => import("@/components/14_observability_configuration/KeplerGlMap").then((m) => m.KeplerGlMap),
+  () => import("@/components/monitoring/KeplerGlMap").then((m) => m.KeplerGlMap),
   {
     ssr: false,
     loading: () => (
@@ -45,7 +45,7 @@ const KeplerGlMap = dynamic(
 );
 
 const MonitoringMap = dynamic(
-  () => import("@/components/14_observability_configuration/MonitoringMap").then((m) => m.MonitoringMap),
+  () => import("@/components/monitoring/MonitoringMap").then((m) => m.MonitoringMap),
   {
     ssr: false,
     loading: () => (

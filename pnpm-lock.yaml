@@ -150,6 +150,12 @@ importers:
       '@swc/core':
         specifier: ^1.15.40
         version: 1.15.40(@swc/helpers@0.5.21)
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.16(@types/node@25.9.3)(esbuild@0.25.12)(jiti@2.7.0)(sass@1.77.4)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
@@ -383,6 +389,9 @@ importers:
       '@repo/dashboard/data-access':
         specifier: workspace:*
         version: link:../../libs/features/dashboard/data-access
+      '@repo/departments/data-access':
+        specifier: workspace:*
+        version: link:../../libs/features/departments/data-access
       '@repo/departments/ui':
         specifier: workspace:*
         version: link:../../libs/features/departments/ui
@@ -425,6 +434,9 @@ importers:
       '@sentry/nextjs':
         specifier: 'catalog:'
         version: 10.58.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.218.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4))(react@19.2.7)(webpack@5.106.2(@swc/core@1.15.40(@swc/helpers@0.5.21))(esbuild@0.27.7)(postcss@8.5.15))
+      '@supabase/supabase-js':
+        specifier: 'catalog:'
+        version: 2.108.2
       '@tremor/react':
         specifier: 'catalog:'
         version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -516,6 +528,9 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@testing-library/user-event':
+        specifier: ^14.5.2
+        version: 14.5.2(@testing-library/dom@10.4.1)
       '@types/eslint':
         specifier: 'catalog:'
         version: 8.56.12
@@ -552,6 +567,390 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 3.4.19(tsx@4.21.0)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/access-control/ui:
+    dependencies:
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../../../pkgs/ui
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/analytics/data-access:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/auth/data-access:
+    dependencies:
+      '@sentry/nextjs':
+        specifier: 'catalog:'
+        version: 10.58.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4))(react@19.2.7)(webpack@5.106.2(@swc/core@1.15.40(@swc/helpers@0.5.21))(esbuild@0.25.12)(postcss@8.5.14))
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/auth/ui:
+    dependencies:
+      '@repo/auth/data-access':
+        specifier: workspace:*
+        version: link:../data-access
+      '@repo/auth/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../../../pkgs/ui
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.18.0(react@19.2.7)
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/auth/utils:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/dashboard/data-access:
+    dependencies:
+      '@repo/errors':
+        specifier: workspace:*
+        version: link:../../../../pkgs/errors
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../../../pkgs/logger
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../../../pkgs/redis
+      '@repo/supabase':
+        specifier: workspace:*
+        version: link:../../../../pkgs/supabase
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/departments/data-access:
+    dependencies:
+      '@repo/errors':
+        specifier: workspace:*
+        version: link:../../../../pkgs/errors
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../../../pkgs/logger
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../../../pkgs/redis
+      '@repo/shared/data-access':
+        specifier: workspace:*
+        version: link:../../../shared/data-access
+      '@repo/supabase':
+        specifier: workspace:*
+        version: link:../../../../pkgs/supabase
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/departments/ui:
+    dependencies:
+      '@repo/contract':
+        specifier: workspace:*
+        version: link:../../../../pkgs/contract
+      '@repo/departments/data-access':
+        specifier: workspace:*
+        version: link:../data-access
+      '@repo/errors':
+        specifier: workspace:*
+        version: link:../../../../pkgs/errors
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../../../pkgs/logger
+      '@repo/rate-limiter':
+        specifier: workspace:*
+        version: link:../../../../pkgs/rate-limiter
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../../../pkgs/redis
+      '@repo/shared/data-access':
+        specifier: workspace:*
+        version: link:../../../shared/data-access
+      '@repo/shared/hooks':
+        specifier: workspace:*
+        version: link:../../../shared/hooks
+      '@repo/supabase':
+        specifier: workspace:*
+        version: link:../../../../pkgs/supabase
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../../../pkgs/ui
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../../../pkgs/utils
+      '@tremor/react':
+        specifier: 'catalog:'
+        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@univerjs/preset-sheets-core':
+        specifier: ^0.23.0
+        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
+      '@univerjs/presets':
+        specifier: ^0.23.0
+        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.18.0(react@19.2.7)
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/features/hub/ui:
+    dependencies:
+      '@repo/departments/data-access':
+        specifier: workspace:*
+        version: link:../../departments/data-access
+      '@repo/theme':
+        specifier: workspace:*
+        version: link:../../../../pkgs/theme
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../../../pkgs/ui
+      '@tremor/react':
+        specifier: 'catalog:'
+        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.18.0(react@19.2.7)
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/shared/data-access:
+    dependencies:
+      '@repo/errors':
+        specifier: workspace:*
+        version: link:../../../pkgs/errors
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../../pkgs/redis
+      '@repo/supabase':
+        specifier: workspace:*
+        version: link:../../../pkgs/supabase
+      next:
+        specifier: ^16.2.6
+        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/shared/hooks:
+    dependencies:
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../pkgs/typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.19.19
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  libs/shared/styles: {}
+
+  libs/shared/utils:
+    dependencies:
+      '@repo/errors':
+        specifier: workspace:*
+        version: link:../../../pkgs/errors
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../../pkgs/redis
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../../pkgs/typescript-config
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.17)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -833,366 +1232,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.19
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/access-control/ui:
-    dependencies:
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../../../pkgs/ui
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-      react-dom:
-        specifier: catalog:react19
-        version: 19.2.7(react@19.2.7)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/analytics/data-access:
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/auth/data-access:
-    dependencies:
-      '@sentry/nextjs':
-        specifier: 'catalog:'
-        version: 10.58.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4))(react@19.2.7)(webpack@5.106.2(@swc/core@1.15.40(@swc/helpers@0.5.21))(esbuild@0.25.12)(postcss@8.5.14))
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-      react-dom:
-        specifier: catalog:react19
-        version: 19.2.7(react@19.2.7)
-      sonner:
-        specifier: 'catalog:'
-        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/auth/ui:
-    dependencies:
-      '@repo/auth/data-access':
-        specifier: workspace:*
-        version: link:../data-access
-      '@repo/auth/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../../../pkgs/ui
-      framer-motion:
-        specifier: 'catalog:'
-        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.18.0(react@19.2.7)
-      next:
-        specifier: ^16.2.6
-        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-      react-dom:
-        specifier: catalog:react19
-        version: 19.2.7(react@19.2.7)
-      sonner:
-        specifier: 'catalog:'
-        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/auth/utils:
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/dashboard/data-access:
-    dependencies:
-      '@repo/errors':
-        specifier: workspace:*
-        version: link:../../../../pkgs/errors
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../../../pkgs/logger
-      '@repo/redis':
-        specifier: workspace:*
-        version: link:../../../../pkgs/redis
-      '@repo/supabase':
-        specifier: workspace:*
-        version: link:../../../../pkgs/supabase
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/departments/data-access:
-    dependencies:
-      '@repo/supabase':
-        specifier: workspace:*
-        version: link:../../../../pkgs/supabase
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/departments/ui:
-    dependencies:
-      '@repo/contract':
-        specifier: workspace:*
-        version: link:../../../../pkgs/contract
-      '@repo/errors':
-        specifier: workspace:*
-        version: link:../../../../pkgs/errors
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../../../pkgs/logger
-      '@repo/rate-limiter':
-        specifier: workspace:*
-        version: link:../../../../pkgs/rate-limiter
-      '@repo/redis':
-        specifier: workspace:*
-        version: link:../../../../pkgs/redis
-      '@repo/shared/data-access':
-        specifier: workspace:*
-        version: link:../../../shared/data-access
-      '@repo/shared/hooks':
-        specifier: workspace:*
-        version: link:../../../shared/hooks
-      '@repo/supabase':
-        specifier: workspace:*
-        version: link:../../../../pkgs/supabase
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../../../pkgs/ui
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../../../pkgs/utils
-      '@tremor/react':
-        specifier: 'catalog:'
-        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@univerjs/preset-sheets-core':
-        specifier: ^0.23.0
-        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
-      '@univerjs/presets':
-        specifier: ^0.23.0
-        version: 0.23.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rxjs@7.8.2)
-      framer-motion:
-        specifier: 'catalog:'
-        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.18.0(react@19.2.7)
-      next:
-        specifier: ^16.2.6
-        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-      react-dom:
-        specifier: catalog:react19
-        version: 19.2.7(react@19.2.7)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/features/hub/ui:
-    dependencies:
-      '@repo/departments/data-access':
-        specifier: workspace:*
-        version: link:../../departments/data-access
-      '@repo/theme':
-        specifier: workspace:*
-        version: link:../../../../pkgs/theme
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../../../pkgs/ui
-      '@tremor/react':
-        specifier: 'catalog:'
-        version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      framer-motion:
-        specifier: 'catalog:'
-        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.18.0(react@19.2.7)
-      next:
-        specifier: ^16.2.6
-        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-      react-dom:
-        specifier: catalog:react19
-        version: 19.2.7(react@19.2.7)
-      sonner:
-        specifier: 'catalog:'
-        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/shared/data-access:
-    dependencies:
-      '@repo/errors':
-        specifier: workspace:*
-        version: link:../../../pkgs/errors
-      '@repo/redis':
-        specifier: workspace:*
-        version: link:../../../pkgs/redis
-      '@repo/supabase':
-        specifier: workspace:*
-        version: link:../../../pkgs/supabase
-      next:
-        specifier: ^16.2.6
-        version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/shared/hooks:
-    dependencies:
-      react:
-        specifier: catalog:react19
-        version: 19.2.7
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  libs/shared/styles: {}
-
-  libs/shared/utils:
-    dependencies:
-      '@repo/errors':
-        specifier: workspace:*
-        version: link:../../../pkgs/errors
-      '@repo/redis':
-        specifier: workspace:*
-        version: link:../../../pkgs/redis
-      zod:
-        specifier: 'catalog:'
-        version: 4.4.3
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../../pkgs/typescript-config
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -20302,6 +20341,10 @@ snapshots:
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.0)':
     dependencies:
       '@testing-library/dom': 10.4.0
+
+  '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.1)':
+    dependencies:
+      '@testing-library/dom': 10.4.1
 
   '@textlint/ast-node-types@15.7.1': {}
 

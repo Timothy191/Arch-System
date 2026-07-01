@@ -49,6 +49,8 @@
     "supabase": "catalog:",
     "swagger-jsdoc": "^6.3.0",
     "syncpack": "^13.0.4",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
     "typescript": "~5.9.2",
     "vite": "^8.0.16"
   },
@@ -109,7 +111,7 @@
     "knip": "knip --config config/tools/knip.json --no-config-hints",
     "knip:fix": "knip --config config/tools/knip.json --fix --no-config-hints",
     "lint": "nx run-many -t lint",
-    "lint:root": "eslint . --max-warnings 0 --ignore-pattern 00_applications --ignore-pattern 01_platform_packages --no-error-on-unmatched-pattern",
+    "lint:root": "eslint . --max-warnings 0 --ignore-pattern apps --ignore-pattern pkgs --no-error-on-unmatched-pattern",
     "lint:styles": "stylelint '**/*.{css,scss}' --ignore-path .gitignore",
     "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "monitor": "bash ops/monitor-hud.sh",

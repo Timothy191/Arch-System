@@ -155,10 +155,8 @@ describe("env validation", () => {
 
   it("reads optional vars as undefined when not set", () => {
     setEnvVar("REDIS_URL", undefined);
-    setEnvVar("OPENAI_API_KEY", undefined);
     resetEnv();
 
     expect(env.REDIS_URL).toBeUndefined();
-    expect(env.OPENAI_API_KEY).toBeUndefined();
   });
 });

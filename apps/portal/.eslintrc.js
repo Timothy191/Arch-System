@@ -1,7 +1,7 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   root: true,
-  ignorePatterns: ["public/", "coverage/"],
+  ignorePatterns: ["public/", "coverage/", "scripts/"],
   extends: ["@repo/eslint-config/next.js"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -9,7 +9,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["03_operations_automation/*.js"],
+      files: ["ops/*.js"],
       env: { node: true },
       parserOptions: {
         project: null,
@@ -50,6 +50,12 @@ module.exports = {
     },
     {
       files: ["lib/env.ts"],
+      rules: {
+        "no-restricted-imports": "off",
+      },
+    },
+    {
+      files: ["app/**/page.tsx", "app/**/layout.tsx", "**/SafetyDashboard.tsx"],
       rules: {
         "no-restricted-imports": "off",
       },

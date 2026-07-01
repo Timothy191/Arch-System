@@ -170,7 +170,7 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
 
 function MachineRow({
   status,
-  departmentSlug,
+  departmentSlug: _departmentSlug,
 }: {
   status: MachineCoverageStatus;
   departmentSlug: string;

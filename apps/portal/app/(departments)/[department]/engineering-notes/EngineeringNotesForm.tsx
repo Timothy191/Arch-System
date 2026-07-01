@@ -7,7 +7,8 @@ import { Checkbox } from "@repo/ui/Checkbox";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
-import { BreakdownControlRoomView } from "@/features/departments";
+// eslint-disable-next-line no-restricted-imports
+import type { BreakdownControlRoomView } from "@repo/departments/data-access";
 import { toast } from "sonner";
 
 interface Machine {

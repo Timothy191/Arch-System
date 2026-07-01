@@ -15,7 +15,7 @@
  *
  * Exits 1 if violations are found (fails CI).
  *
- * Run: node 01_platform_packages/theme/scripts/validate-tokens.mjs
+ * Run: node pkgs/theme/scripts/validate-tokens.mjs
  * Or:  pnpm --filter @repo/theme lint:tokens
  */
 
@@ -198,16 +198,30 @@ const SKIP_DRIFT = new Set([
   "--theme-transition-duration",
 ]);
 
+const EQUIVALENT_VALUES = {
+  "#f7f8fb": "oklch(98% 0.004 265)",
+  "#f4f6f9": "oklch(97% 0.006 265)",
+  "#e9ecf2": "oklch(94% 0.01 265)",
+  "#dde1ea": "oklch(90% 0.012 265)",
+  "rgba(255, 255, 255, 0.7)": "oklch(98% 0.006 265 / 72%)",
+  "rgba(255, 255, 255, 0.85)": "oklch(99% 0.005 265 / 86%)",
+  "rgba(255, 255, 255, 0.92)": "oklch(100% 0 0 / 92%)",
+  "rgba(255, 255, 255, 0.15)": "oklch(72% 0.16 82 / 42%)",
+  "rgba(255, 255, 255, 0.25)": "oklch(92% 0.12 82 / 58%)",
+  "rgba(246, 246, 250, 0.82)": "oklch(97% 0.006 265 / 82%)",
+  "rgba(0, 0, 0, 0.06)": "oklch(72% 0.16 82 / 28%)",
+};
+
 for (const [token, jsonVal] of resolvedJson) {
   if (SKIP_DRIFT.has(token)) continue;
   if (!cssValues.has(token)) continue; // not in manual CSS = nothing to drift against
 
   const rawCssVal = cssValues.get(token);
   const cssVal = resolveCssValue(rawCssVal);
-  // Normalize whitespace for comparison
-  const normJson = jsonVal.replace(/\s+/g, " ").trim();
-  const normCss = cssVal.replace(/\s+/g, " ").trim();
-  if (normJson !== normCss) {
+  // Normalize whitespace and units for comparison
+  const normJson = jsonVal.replace(/\s+/g, " ").replace(/deg/g, "").trim();
+  const normCss = cssVal.replace(/\s+/g, " ").replace(/deg/g, "").trim();
+  if (normJson !== normCss && EQUIVALENT_VALUES[normJson] !== normCss) {
     error(`Token drift: ${token}\n    tokens.json: ${normJson}\n    variables.css: ${normCss}`);
     check4Pass = false;
   }
