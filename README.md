@@ -7,13 +7,13 @@ A high-performance, multi-departmental mining operations portal built as a monor
 
 This project is organized as an **Nx** monorepo using **pnpm** for workspace management.
 
-### Applications (`00_applications/`)
+### Applications (`apps/`)
 
 - **`portal`**: The main Next.js 15+ (App Router) application. High-density dashboards, real-time monitoring, and data entry forms.
 - **`cms`**: Payload CMS v3 (headless) for managing system content and documentation.
 - **`overview`**: A standalone Next.js application for architectural visualization and system-wide monitoring.
 
-### Packages (`01_platform_packages/`)
+### Packages (`pkgs/`)
 
 - **`theme`**: Design tokens, OKLCH color system, and Tailwind CSS configuration (Single Source of Truth).
 - **`ui`**: Shared React components (GlassCard, KPI, DepartmentLayout, etc.) built with Radix UI and shadcn/ui.
@@ -38,11 +38,11 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
    ```
 
 2. **Environment Variables**:
-   Copy `00_applications/portal/env/.env.example` to `00_applications/portal/.env` and fill in your Supabase credentials.
+   Copy `apps/portal/env/.env.example` to `apps/portal/.env` and fill in your Supabase credentials.
 3. **Start Local Database** (requires Docker):
 
    ```bash
-   cd 01_platform_packages/database && pnpm supabase:dev
+   cd pkgs/database && pnpm supabase:dev
    ```
 
 4. **Development Mode**:
@@ -66,7 +66,7 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 ### Quick Navigation
 
-- **[DOCUMENTATION_INDEX.md](06_technical_documentation/DOCUMENTATION_INDEX.md)** - Complete documentation index and quick lookup guide
+- **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** - Complete documentation index and quick lookup guide
 
 ### Core Documentation
 

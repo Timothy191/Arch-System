@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed systemd service file destination path typo from `/etc/10_infrastructure_as_code/systemd/system/` to `/etc/systemd/system/`.
+- Fixed systemd service file destination path typo from `/etc/infra/systemd/system/` to `/etc/systemd/system/`.
 
 ## [1.4.0] - 2026-06-15
 
@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Reorganized project structure for production readiness:
   - Moved runtime files to `run/` directory.
-  - Organized config files into `07_toolchain_configuration/`, `06_technical_documentation/`, and `docker/` subdirectories.
+  - Organized config files into `toolchain/`, `docs/`, and `docker/` subdirectories.
   - Setup ESLint boundary rules and syncpack configs.
 - Integrated `sync-assets-smart` to optimize build-time asset synchronization.
 - Implemented static Row Level Security (RLS) policies auditor tool.

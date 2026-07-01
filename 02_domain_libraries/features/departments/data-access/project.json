@@ -1,6 +1,0 @@
-{
-  "name": "features-departments-data-access",
-  "tags": ["scope:departments", "type:data-access", "scope:feature"],
-  "projectType": "library",
-  "sourceRoot": "02_domain_libraries/features/departments/data-access/src"
-}

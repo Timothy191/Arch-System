@@ -4,10 +4,10 @@ Welcome to the Arch-Systems monorepo. This document outlines the structure, tool
 
 ## Structure
 
-- `00_applications/`: Next.js frontend (`portal`), CMS backend (`cms`), and React Flow architecture visualizer (`overview`).
-- `01_platform_packages/`: Shared libraries such as `@repo/ui`, `@repo/theme`, `@repo/database`, and `@repo/supabase`.
-- `08_developer_tooling/`: Build, analysis, and audit scripts (`policy-compiler.cjs`, `design-audit.cjs`, `enforce-security-checks.cjs`).
-- `03_operations_automation/`: Local dev and deployment utility scripts (e.g. `sync-assets-smart.cjs`, `ensure_reachability.py`).
+- `apps/`: Next.js frontend (`portal`), CMS backend (`cms`), and React Flow architecture visualizer (`overview`).
+- `pkgs/`: Shared libraries such as `@repo/ui`, `@repo/theme`, `@repo/database`, and `@repo/supabase`.
+- `tools/`: Build, analysis, and audit scripts (`policy-compiler.cjs`, `design-audit.cjs`, `enforce-security-checks.cjs`).
+- `ops/`: Local dev and deployment utility scripts (e.g. `sync-assets-smart.cjs`, `ensure_reachability.py`).
 
 ## Nx Targets
 
@@ -15,7 +15,7 @@ The workspace is managed by [Nx](https://nx.dev/). Important targets configured 
 
 - `build`: Builds the project and its dependencies. Cacheable.
 - `test`: Runs the Jest/Vitest unit tests. Cacheable.
-- `lint`: Runs ESLint with boundary rules enforced by `08_developer_tooling/policy-compiler.cjs`. Cacheable.
+- `lint`: Runs ESLint with boundary rules enforced by `tools/policy-compiler.cjs`. Cacheable.
 - `type-check`: Runs the TypeScript compiler without emitting files. Cacheable.
 - `lint:tokens`: Validates design system tokens in `@repo/theme`. Cacheable.
 - `lint:css`: Lints CSS against Stylelint. Cacheable.
@@ -33,5 +33,5 @@ We use static analysis tools to maintain quality and security boundaries:
 
 ## E2E Testing
 
-Playwright tests are located in `09_end_to_end_verification/`.
-The test suite utilizes a global authentication setup (`09_end_to_end_verification/global.setup.ts`) configured via `playwright.config.ts`, which provisions an authenticated state reused across chromium, mobile, and tablet tests.
+Playwright tests are located in `e2e/`.
+The test suite utilizes a global authentication setup (`e2e/global.setup.ts`) configured via `playwright.config.ts`, which provisions an authenticated state reused across chromium, mobile, and tablet tests.

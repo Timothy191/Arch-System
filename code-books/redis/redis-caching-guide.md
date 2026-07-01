@@ -4,7 +4,7 @@
 This workspace utilizes Redis for low-latency offloading, rate limiting, and temporary task queues to support high-performance operations.
 
 *   **Local Caching Port**: `127.0.0.1:6380` (mapped from the monorepo config).
-*   **Source Folder**: `12_distributed_cache_runtime/` holds the configuration, Redis configs, and Docker Compose files.
+*   **Source Folder**: `cache/` holds the configuration, Redis configs, and Docker Compose files.
 
 ---
 

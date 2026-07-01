@@ -1,0 +1,93 @@
+module.exports = {
+  testEnvironment: "jsdom",
+  forceExit: true,
+  setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
+  transform: {
+    "^.+\\.(t|j)sx?$": [
+      "@swc/jest",
+      {
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: true,
+            decorators: true,
+          },
+          transform: {
+            react: {
+              runtime: "automatic",
+            },
+          },
+        },
+      },
+    ],
+  },
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@/(.*)$": "<rootDir>/$1",
+    "^~/(.*)$": "<rootDir>/$1",
+    "^@05-greenfield/(.*)$": "<rootDir>/../../src/$1",
+    "^@src/(.*)$": "<rootDir>/../../src/$1",
+    "^@repo/contract$": "<rootDir>/../../pkgs/contract/src/index.ts",
+    "^@repo/supabase/(.*)$": "<rootDir>/../../pkgs/supabase/src/$1",
+    "^@repo/supabase$": "<rootDir>/../../pkgs/supabase/src/index.ts",
+    "^@repo/redis$": "<rootDir>/../../pkgs/redis/src/index.ts",
+    "^@repo/redis/(.*)$": "<rootDir>/../../pkgs/redis/src/$1",
+    "^@repo/theme$": "<rootDir>/../../pkgs/theme/src/index.ts",
+    "^@repo/theme/(.*)$": "<rootDir>/../../pkgs/theme/src/$1",
+    "^@repo/ui/lib/(.*)$": "<rootDir>/../../pkgs/ui/src/lib/$1",
+    "^@repo/ui/GlassCard$": "<rootDir>/../../pkgs/ui/src/components/GlassCard.tsx",
+    "^@repo/ui/Pagination$": "<rootDir>/../../pkgs/ui/src/components/ui/pagination.tsx",
+    "^@repo/ui/SecondaryButton$": "<rootDir>/../../pkgs/ui/src/components/SecondaryButton.tsx",
+    "^@repo/ui/AcknowledgeButton$":
+      "<rootDir>/../../pkgs/ui/src/components/AcknowledgeButton.tsx",
+    "^@repo/ui/ShiftToggle$": "<rootDir>/../../pkgs/ui/src/components/ShiftToggle.tsx",
+    "^@repo/ui/Checkbox$": "<rootDir>/../../pkgs/ui/src/components/Checkbox.tsx",
+    "^@repo/ui/Input$": "<rootDir>/../../pkgs/ui/src/components/Input.tsx",
+    "^@repo/ui/FormFields$": "<rootDir>/../../pkgs/ui/src/components/FormFields.tsx",
+    "^@repo/ui/DepartmentLayout$":
+      "<rootDir>/../../pkgs/ui/src/components/DepartmentLayout.tsx",
+    "^@repo/ui/KPI$": "<rootDir>/../../pkgs/ui/src/components/KPI.tsx",
+    "^@repo/ui/PageHeader$": "<rootDir>/../../pkgs/ui/src/components/PageHeader.tsx",
+    "^@repo/ui/Taskbar$": "<rootDir>/../../pkgs/ui/src/components/Taskbar.tsx",
+    "^@repo/ui/MacMenuBar$": "<rootDir>/../../pkgs/ui/src/components/MacMenuBar.tsx",
+    "^@repo/ui/MacTitleBar$": "<rootDir>/../../pkgs/ui/src/components/MacTitleBar.tsx",
+    "^@repo/ui/Logo$": "<rootDir>/../../pkgs/ui/src/components/Logo.tsx",
+    "^@repo/ui/AgenticAiLogo$": "<rootDir>/../../pkgs/ui/src/components/AgenticAiLogo.tsx",
+    "^@repo/utils$": "<rootDir>/../../pkgs/utils/src/index.ts",
+    "^@repo/utils/(.*)$": "<rootDir>/../../pkgs/utils/src/$1",
+    "^@repo/auth/ui$": "<rootDir>/../../libs/features/auth/ui/src/index.ts",
+    "^@repo/auth/data-access$": "<rootDir>/../../libs/features/auth/data-access/src/index.ts",
+    "^@repo/auth/utils$": "<rootDir>/../../libs/features/auth/utils/src/index.ts",
+    "^@repo/shared/data-access$": "<rootDir>/../../libs/shared/data-access/src/index.ts",
+    "^@repo/shared/utils$": "<rootDir>/../../libs/shared/utils/src/index.ts",
+    "^@repo/shared/hooks$": "<rootDir>/../../libs/shared/hooks/src/index.ts",
+    "^@repo/ui/DataGrid$": "<rootDir>/../../pkgs/ui/src/components/ui/data-grid.tsx",
+    "^@repo/ui/AnimatedList$": "<rootDir>/../../pkgs/ui/src/components/ui/animated-list.tsx",
+    "^@repo/ui/EmptyState$": "<rootDir>/../../pkgs/ui/src/components/EmptyState.tsx",
+    "^@repo/ui/Marquee$": "<rootDir>/../../pkgs/ui/src/components/ui/marquee.tsx",
+
+    "^@repo/ui/AnimatedButton$":
+      "<rootDir>/../../pkgs/ui/src/components/ui/animated-button.tsx",
+    "^@repo/ui/(.*)$": "<rootDir>/../../pkgs/ui/src/$1",
+  },
+  collectCoverageFrom: [
+    "lib/**/*.{ts,tsx}",
+    "features/**/*.{ts,tsx}",
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "hooks/**/*.{ts,tsx}",
+    "server/proxy.ts",
+    "!**/*.test.{ts,tsx}",
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+  ],
+  coverageReporters: ["text", "lcov", "html"],
+  coverageThreshold: {
+    global: {
+      lines: 40,
+      branches: 30,
+      functions: 35,
+      statements: 40,
+    },
+  },
+};

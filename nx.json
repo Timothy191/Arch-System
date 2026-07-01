@@ -85,7 +85,7 @@
       "parallel": true
     },
     "db:pull": {
-      "outputs": ["{projectRoot}/01_platform_packages/supabase/migrations/**"],
+      "outputs": ["{projectRoot}/pkgs/supabase/migrations/**"],
       "cache": false
     },
     "type-check": {

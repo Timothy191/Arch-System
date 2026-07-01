@@ -12,13 +12,13 @@ if [ ! -d "$REPO_ROOT/node_modules" ]; then
 fi
 
 # Check if .env exists
-if [ ! -f "$REPO_ROOT/00_applications/portal/.env" ]; then
+if [ ! -f "$REPO_ROOT/apps/portal/.env" ]; then
   echo "⚠ .env not found. Copying from env/.env.example..."
-  cp "$REPO_ROOT/00_applications/portal/env/.env.example" "$REPO_ROOT/00_applications/portal/.env"
+  cp "$REPO_ROOT/apps/portal/env/.env.example" "$REPO_ROOT/apps/portal/.env"
 fi
 
 # Set resource limits to prevent system freeze
 export NODE_OPTIONS="--max-old-space-size=2048"
 
 # Run the existing dev script in quick mode (skips Docker/Supabase)
-bash "$REPO_ROOT/03_operations_automation/dev.sh" --quick
+bash "$REPO_ROOT/ops/dev.sh" --quick

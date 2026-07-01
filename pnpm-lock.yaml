@@ -116,10 +116,10 @@ importers:
         version: 1.60.0
       '@repo/eslint-config':
         specifier: workspace:*
-        version: link:01_platform_packages/eslint-config
+        version: link:pkgs/eslint-config
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:01_platform_packages/typescript-config
+        version: link:pkgs/typescript-config
       '@secretlint/secretlint-rule-preset-recommend':
         specifier: 13.0.2
         version: 13.0.2
@@ -220,7 +220,7 @@ importers:
         specifier: ^8.0.16
         version: 8.0.16(@types/node@25.9.3)(esbuild@0.25.12)(jiti@2.7.0)(sass@1.77.4)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
 
-  00_applications/cms:
+  apps/cms:
     dependencies:
       '@payloadcms/db-postgres':
         specifier: ^3.84.1
@@ -246,7 +246,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../01_platform_packages/typescript-config
+        version: link:../../pkgs/typescript-config
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.19
@@ -266,14 +266,14 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  00_applications/overview:
+  apps/overview:
     dependencies:
       '@radix-ui/react-tabs':
         specifier: ^1.1.0
         version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@repo/theme':
         specifier: workspace:*
-        version: link:../../01_platform_packages/theme
+        version: link:../../pkgs/theme
       '@xyflow/react':
         specifier: ^12.6.0
         version: 12.10.2(@types/react@19.2.17)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -327,7 +327,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  00_applications/portal:
+  apps/portal:
     dependencies:
       '@deck.gl/layers':
         specifier: ^9.3.2
@@ -370,58 +370,58 @@ importers:
         version: 4.5.1(react@19.2.7)
       '@repo/auth/data-access':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/auth/data-access
+        version: link:../../libs/features/auth/data-access
       '@repo/auth/ui':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/auth/ui
+        version: link:../../libs/features/auth/ui
       '@repo/auth/utils':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/auth/utils
+        version: link:../../libs/features/auth/utils
       '@repo/contract':
         specifier: workspace:*
-        version: link:../../01_platform_packages/contract
+        version: link:../../pkgs/contract
       '@repo/dashboard/data-access':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/dashboard/data-access
+        version: link:../../libs/features/dashboard/data-access
       '@repo/departments/ui':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/departments/ui
+        version: link:../../libs/features/departments/ui
       '@repo/errors':
         specifier: workspace:*
-        version: link:../../01_platform_packages/errors
+        version: link:../../pkgs/errors
       '@repo/hub/ui':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/hub/ui
+        version: link:../../libs/features/hub/ui
       '@repo/logger':
         specifier: workspace:*
-        version: link:../../01_platform_packages/logger
+        version: link:../../pkgs/logger
       '@repo/rate-limiter':
         specifier: workspace:*
-        version: link:../../01_platform_packages/rate-limiter
+        version: link:../../pkgs/rate-limiter
       '@repo/redis':
         specifier: workspace:*
-        version: link:../../01_platform_packages/redis
+        version: link:../../pkgs/redis
       '@repo/shared/data-access':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/shared/data-access
+        version: link:../../libs/shared/data-access
       '@repo/shared/hooks':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/shared/hooks
+        version: link:../../libs/shared/hooks
       '@repo/shared/utils':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/shared/utils
+        version: link:../../libs/shared/utils
       '@repo/supabase':
         specifier: workspace:*
-        version: link:../../01_platform_packages/supabase
+        version: link:../../pkgs/supabase
       '@repo/theme':
         specifier: workspace:*
-        version: link:../../01_platform_packages/theme
+        version: link:../../pkgs/theme
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../01_platform_packages/ui
+        version: link:../../pkgs/ui
       '@repo/utils':
         specifier: workspace:*
-        version: link:../../01_platform_packages/utils
+        version: link:../../pkgs/utils
       '@sentry/nextjs':
         specifier: 'catalog:'
         version: 10.58.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.218.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4))(react@19.2.7)(webpack@5.106.2(@swc/core@1.15.40(@swc/helpers@0.5.21))(esbuild@0.27.7)(postcss@8.5.15))
@@ -503,7 +503,7 @@ importers:
         version: 16.2.6
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../01_platform_packages/typescript-config
+        version: link:../../pkgs/typescript-config
       '@swc/core':
         specifier: ^1.15.40
         version: 1.15.40(@swc/helpers@0.5.21)
@@ -556,7 +556,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/contract:
+  pkgs/contract:
     dependencies:
       zod:
         specifier: 'catalog:'
@@ -575,15 +575,15 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/database:
+  pkgs/database:
     devDependencies:
       supabase:
         specifier: 'catalog:'
         version: 2.106.0
 
-  01_platform_packages/errors: {}
+  pkgs/errors: {}
 
-  01_platform_packages/eslint-config:
+  pkgs/eslint-config:
     devDependencies:
       eslint:
         specifier: 'catalog:'
@@ -592,7 +592,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/logger:
+  pkgs/logger:
     dependencies:
       pino:
         specifier: ^9.6.0
@@ -611,7 +611,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/rate-limiter:
+  pkgs/rate-limiter:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
@@ -623,7 +623,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/redis:
+  pkgs/redis:
     dependencies:
       redis:
         specifier: ^4.7.0
@@ -639,7 +639,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/supabase:
+  pkgs/supabase:
     dependencies:
       '@opentelemetry/api':
         specifier: ^1.9.1
@@ -670,7 +670,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/theme:
+  pkgs/theme:
     dependencies:
       lucide-react:
         specifier: 'catalog:'
@@ -710,9 +710,9 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/typescript-config: {}
+  pkgs/typescript-config: {}
 
-  01_platform_packages/ui:
+  pkgs/ui:
     dependencies:
       '@formkit/auto-animate':
         specifier: ^0.8.2
@@ -815,7 +815,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  01_platform_packages/utils:
+  pkgs/utils:
     dependencies:
       '@novu/node':
         specifier: ^2.6.6
@@ -837,11 +837,11 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/access-control/ui:
+  libs/features/access-control/ui:
     dependencies:
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/ui
+        version: link:../../../../pkgs/ui
       react:
         specifier: catalog:react19
         version: 19.2.7
@@ -851,7 +851,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -862,11 +862,11 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/analytics/data-access:
+  libs/features/analytics/data-access:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -877,7 +877,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/auth/data-access:
+  libs/features/auth/data-access:
     dependencies:
       '@sentry/nextjs':
         specifier: 'catalog:'
@@ -894,7 +894,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -905,7 +905,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/auth/ui:
+  libs/features/auth/ui:
     dependencies:
       '@repo/auth/data-access':
         specifier: workspace:*
@@ -915,7 +915,7 @@ importers:
         version: link:../utils
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/ui
+        version: link:../../../../pkgs/ui
       framer-motion:
         specifier: 'catalog:'
         version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -937,7 +937,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -948,11 +948,11 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/auth/utils:
+  libs/features/auth/utils:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -963,24 +963,24 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/dashboard/data-access:
+  libs/features/dashboard/data-access:
     dependencies:
       '@repo/errors':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/errors
+        version: link:../../../../pkgs/errors
       '@repo/logger':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/logger
+        version: link:../../../../pkgs/logger
       '@repo/redis':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/redis
+        version: link:../../../../pkgs/redis
       '@repo/supabase':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/supabase
+        version: link:../../../../pkgs/supabase
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -991,15 +991,15 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/departments/data-access:
+  libs/features/departments/data-access:
     dependencies:
       '@repo/supabase':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/supabase
+        version: link:../../../../pkgs/supabase
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1010,23 +1010,23 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/departments/ui:
+  libs/features/departments/ui:
     dependencies:
       '@repo/contract':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/contract
+        version: link:../../../../pkgs/contract
       '@repo/errors':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/errors
+        version: link:../../../../pkgs/errors
       '@repo/logger':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/logger
+        version: link:../../../../pkgs/logger
       '@repo/rate-limiter':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/rate-limiter
+        version: link:../../../../pkgs/rate-limiter
       '@repo/redis':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/redis
+        version: link:../../../../pkgs/redis
       '@repo/shared/data-access':
         specifier: workspace:*
         version: link:../../../shared/data-access
@@ -1035,13 +1035,13 @@ importers:
         version: link:../../../shared/hooks
       '@repo/supabase':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/supabase
+        version: link:../../../../pkgs/supabase
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/ui
+        version: link:../../../../pkgs/ui
       '@repo/utils':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/utils
+        version: link:../../../../pkgs/utils
       '@tremor/react':
         specifier: 'catalog:'
         version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1069,7 +1069,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1080,17 +1080,17 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/features/hub/ui:
+  libs/features/hub/ui:
     dependencies:
       '@repo/departments/data-access':
         specifier: workspace:*
         version: link:../../departments/data-access
       '@repo/theme':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/theme
+        version: link:../../../../pkgs/theme
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/ui
+        version: link:../../../../pkgs/ui
       '@tremor/react':
         specifier: 'catalog:'
         version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1115,7 +1115,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../../01_platform_packages/typescript-config
+        version: link:../../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1126,24 +1126,24 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/shared/data-access:
+  libs/shared/data-access:
     dependencies:
       '@repo/errors':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/errors
+        version: link:../../../pkgs/errors
       '@repo/redis':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/redis
+        version: link:../../../pkgs/redis
       '@repo/supabase':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/supabase
+        version: link:../../../pkgs/supabase
       next:
         specifier: ^16.2.6
         version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/typescript-config
+        version: link:../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1154,7 +1154,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/shared/hooks:
+  libs/shared/hooks:
     dependencies:
       react:
         specifier: catalog:react19
@@ -1162,7 +1162,7 @@ importers:
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/typescript-config
+        version: link:../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1170,23 +1170,23 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  02_domain_libraries/shared/styles: {}
+  libs/shared/styles: {}
 
-  02_domain_libraries/shared/utils:
+  libs/shared/utils:
     dependencies:
       '@repo/errors':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/errors
+        version: link:../../../pkgs/errors
       '@repo/redis':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/redis
+        version: link:../../../pkgs/redis
       zod:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../../../01_platform_packages/typescript-config
+        version: link:../../../pkgs/typescript-config
       '@types/react':
         specifier: catalog:react19
         version: 19.2.17
@@ -1197,17 +1197,17 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  05_greenfield_application_source/00_core_modules:
+  src/00_core_modules:
     dependencies:
       '@repo/auth/data-access':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/auth/data-access
+        version: link:../../libs/features/auth/data-access
       '@repo/auth/utils':
         specifier: workspace:*
-        version: link:../../02_domain_libraries/features/auth/utils
+        version: link:../../libs/features/auth/utils
       '@repo/ui':
         specifier: workspace:*
-        version: link:../../01_platform_packages/ui
+        version: link:../../pkgs/ui
       lucide-react:
         specifier: 'catalog:'
         version: 1.18.0(react@19.2.7)

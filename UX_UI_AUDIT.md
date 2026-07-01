@@ -1,1 +1,1 @@
-06_technical_documentation/reports/UX_UI_AUDIT.md
+docs/reports/UX_UI_AUDIT.md

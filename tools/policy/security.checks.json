@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-06-24T13:48:54.102Z",
+  "checks": [
+    {
+      "id": "no-eval",
+      "rule": "No eval() or Function() constructor",
+      "pattern": "\\beval\\s*\\(|\\bnew\\s+Function\\s*\\(",
+      "paths": ["apps/**/*.{ts,tsx,js,jsx}"],
+      "severity": "error",
+      "enforceAt": ["ci", "local"]
+    },
+    {
+      "id": "no-sql-concat",
+      "rule": "No string-concatenated SQL queries",
+      "pattern": "`\\s*(SELECT|INSERT|UPDATE|DELETE).*\\$\\{",
+      "paths": ["apps/**/*.{ts,tsx}", "pkgs/**/*.{ts,tsx}"],
+      "severity": "error",
+      "enforceAt": ["ci", "local"]
+    },
+    {
+      "id": "no-raw-rls-disable",
+      "rule": "No RLS disabled in migrations",
+      "pattern": "ALTER\\s+TABLE.*DISABLE\\s+ROW\\s+LEVEL\\s+SECURITY",
+      "paths": ["pkgs/database/migrations/**"],
+      "severity": "error",
+      "enforceAt": ["ci"]
+    },
+    {
+      "id": "no-hardcoded-secrets",
+      "rule": "No hardcoded API keys or tokens",
+      "pattern": "(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})",
+      "paths": ["apps/**/*.{ts,tsx,js,jsx}", "pkgs/**/*.{ts,tsx,js,jsx}"],
+      "severity": "error",
+      "enforceAt": ["ci", "local"]
+    },
+    {
+      "id": "no-console-log",
+      "rule": "No console.log statements in production code",
+      "pattern": "console\\.log\\s*\\(",
+      "paths": ["apps/portal/**/*.{ts,tsx}"],
+      "severity": "warning",
+      "enforceAt": ["local"]
+    }
+  ]
+}

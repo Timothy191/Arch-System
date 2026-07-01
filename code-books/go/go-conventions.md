@@ -2,7 +2,7 @@
 
 ## 1. Environment & Setup
 The monorepo uses Go for systems-level scripting, tooling, and low-latency microservices.
-* Go binaries and modules should be structured under the systems or tools directory (e.g. `03_operations_automation/` or `00_applications/`).
+* Go binaries and modules should be structured under the systems or tools directory (e.g. `ops/` or `apps/`).
 
 ---
 

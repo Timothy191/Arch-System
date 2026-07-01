@@ -21,13 +21,13 @@
 | Shared UI | `packages/ui/src` matched component only |
 | DB schema | `rg` → `packages/database/migrations/` |
 
-## Slice: new `05_greenfield_application_source/` module
+## Slice: new `src/` module
 
 | Need | Read |
 |------|------|
 | Module spec | `HOW.md` active task section |
 | Prior learnings | `rg "<topic>" run/agent-learnings.jsonl` |
-| Adjacent code | `rg` / `ast-grep` in `05_greenfield_application_source/<prefix>/` |
+| Adjacent code | `rg` / `ast-grep` in `src/<prefix>/` |
 
 ## Slice: git / PR
 

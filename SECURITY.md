@@ -1,1 +1,1 @@
-06_technical_documentation/SECURITY.md
+docs/SECURITY.md

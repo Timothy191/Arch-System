@@ -46,7 +46,7 @@ CREATE POLICY insert_shift_logs ON shift_logs
 All database modifications (schema changes, RLS policy adjustments, seeds) must be written as migrations.
 
 ### Schema Naming & Lexical Ordering
-* Migrations reside in `01_platform_packages/database/migrations/`.
+* Migrations reside in `pkgs/database/migrations/`.
 * They are named as zero-padded SQL files, e.g., `062_add_shift_logs_table.sql`.
 * They are applied lexically by the migrator.
 
@@ -59,4 +59,4 @@ All database modifications (schema changes, RLS policy adjustments, seeds) must 
 | Run RLS Security Audits | Workspace-wide | `pnpm audit:rls` |
 
 > [!IMPORTANT]
-> When submitting database schema changes, always commit the SQL migration file and the regenerated `01_platform_packages/supabase/src/database.types.ts` type definitions together in a single atomic commit.
+> When submitting database schema changes, always commit the SQL migration file and the regenerated `pkgs/supabase/src/database.types.ts` type definitions together in a single atomic commit.

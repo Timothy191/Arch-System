@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "ignorePatterns": [
+    "pkgs/typescript-config/**",
+    "pkgs/eslint-toolchain/**",
+    "docs/wiki/**",
+    "apps/portal/public/css/fuxa-light-theme.css",
+    "tools/**",
+    "**/node_modules/**"
+  ],
+  "duplicates": {
+    "enabled": false,
+    "minLines": 100000,
+    "minTokens": 100000,
+    "ignore": ["**/database.types.ts", "tools/**", "**/tests/**", "**/*.test.ts", "**/*.test.tsx"]
+  },
+  "rules": {
+    "unused-files": "warn",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "unused-dependencies": "warn",
+    "unused-dev-dependencies": "off",
+    "unlisted-dependencies": "off",
+    "unresolved-imports": "error"
+  }
+}

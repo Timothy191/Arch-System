@@ -1,1 +1,1 @@
-06_technical_documentation/PRODUCT.md
+docs/PRODUCT.md

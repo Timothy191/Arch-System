@@ -1,1 +1,1 @@
-06_technical_documentation/DEPLOYMENT.md
+docs/DEPLOYMENT.md

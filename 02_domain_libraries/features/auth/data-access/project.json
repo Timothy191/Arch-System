@@ -1,6 +1,0 @@
-{
-  "name": "features-auth-data-access",
-  "tags": ["scope:auth", "type:data-access", "scope:feature"],
-  "projectType": "library",
-  "sourceRoot": "02_domain_libraries/features/auth/data-access/src"
-}

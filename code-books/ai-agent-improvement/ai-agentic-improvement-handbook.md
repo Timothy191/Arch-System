@@ -46,7 +46,7 @@ graph TD
 1. **Analyze Friction**: If a shell tool fails, a package script breaks, or a git collision occurs, analyze *why* it happened and note the precise solution/workaround.
 2. **Run Learning Script**:
    ```bash
-   python3 03_operations_automation/lending-library/record-learning.py \
+   python3 ops/lending-library/record-learning.py \
      --topic "<topic-slug>" \
      --summary "<precise-lesson-learned>" \
      --tags "tag1,tag2" \

@@ -56,7 +56,7 @@
 
 **`packages/*`**: `supabase/server`, `redis`, `database`, `errors`, `logger` — infrastructure only; no React. Correct.
 
-**`05_greenfield_application_source/00_core_modules`**: UI-only (login form, glass chrome) — aligned with target UI layer.
+**`src/00_core_modules`**: UI-only (login form, glass chrome) — aligned with target UI layer.
 
 #### Violations (prioritized for Phase B)
 
@@ -115,7 +115,7 @@
 
 - UI: `@repo/theme` tokens, `cn()`, light glass/brushed brand — no server imports
 - Server: `createServerSupabaseClient()` + employee auth line one; RLS enforced
-- `05_greenfield_application_source/` greenfield modules follow same UI vs `data-access` split when migrated
+- `src/` greenfield modules follow same UI vs `data-access` split when migrated
 
 ## Verification checklist
 

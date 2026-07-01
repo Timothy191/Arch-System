@@ -1,0 +1,22 @@
+# Deprecated — use cache/docker-compose.yml (pnpm redis:dev)
+# Kept for backward compatibility with Makefile targets.
+
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7
+    container_name: arch-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  redis_data:

@@ -1,1 +1,1 @@
-06_technical_documentation/DESIGN.md
+docs/DESIGN.md

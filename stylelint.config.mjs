@@ -4,8 +4,8 @@ export default {
   plugins: ["stylelint-declaration-strict-value"],
   ignoreFiles: [
     // Third-party/library CSS with incompatible conventions
-    "00_applications/overview/app/globals.css",
-    "00_applications/portal/public/css/fuxa-light-theme.css",
+    "apps/overview/app/globals.css",
+    "apps/portal/public/css/fuxa-light-theme.css",
   ],
   rules: {
     // Disallow raw color values except for exceptions below
