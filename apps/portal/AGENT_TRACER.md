@@ -2589,3 +2589,22 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Added `wait-on` as a workspace root dev dependency to fix the "Accessibility Audit" job.
 - Re-synchronized the lockfile.
   **Context:** The CI was missing the `wait-on` utility which prevented the a11y tests from starting correctly.
+
+## 2026-07-01 - [Bolt Performance Optimization & CI Maintenance]
+
+### Purpose
+Optimize the `HourlyLoadsGrid` component to prevent unnecessary re-renders of the heavy DataGrid and stabilize the CI environment to ensure PR passage.
+
+### Changes
+- **Performance:** Wrapped `loadsByMachine` Map in `useMemo` in `HourlyLoadsGrid.tsx`. This stabilizes the `source` and `getHourValue` props, preventing the `DataGrid` (RevoGrid) from re-rendering on every parent state change (e.g., shift toggle).
+- **Middleware:** Ensured `middleware.ts` exports the optimized `config` from `server/proxy.ts`, which includes a matcher to exclude static assets and API routes from redundant Supabase auth checks.
+- **CI Maintenance:**
+    - Aligned `pnpm` version to `9.15.9` across all GitHub Actions.
+    - Resolved `glob` dependency conflict by updating to `^13.0.6`.
+    - Added missing devDependencies (`wait-on`, `serve`) to `@repo/ui` for A11y audits.
+    - Added `@types/node` to `libs/shared/hooks` to fix `process.env` type errors.
+    - Restored Trivy security scan `exit-code: 1` to maintain security posture.
+    - Restored `openapi.generated.json` to fix accidental deletions.
+
+### Context
+The `DataGrid` component is approximately 900KB and very expensive to re-render. Memoizing the data mapping logic significantly improves UI responsiveness when toggling filters. CI fixes were required due to pre-existing environment mismatches in the monorepo.

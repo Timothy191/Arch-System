@@ -19,6 +19,43 @@
         "bearerFormat": "JWT",
         "description": "Supabase JWT authentication token"
       }
+    },
+    "schemas": {
+      "ServiceHealth": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "down"]
+          },
+          "latency_ms": {
+            "type": "number"
+          },
+          "last_check": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "down"]
+          },
+          "overall_status": {
+            "type": "string"
+          },
+          "services": {
+            "type": "object"
+          },
+          "last_check": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -914,6 +951,65 @@
               "text/plain": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Unified health check for all services",
+        "description": "Aggregates health status from FUXA, Supabase Realtime, and Redis",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "Services are healthy or degraded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["healthy", "degraded", "down"]
+                    },
+                    "overall_status": {
+                      "type": "string"
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "fuxa": {
+                          "$ref": "#/components/schemas/ServiceHealth"
+                        },
+                        "supabase_realtime": {
+                          "$ref": "#/components/schemas/ServiceHealth"
+                        },
+                        "redis": {
+                          "$ref": "#/components/schemas/ServiceHealth"
+                        }
+                      }
+                    },
+                    "last_check": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "latency_ms": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more critical services are down",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
                 }
               }
             }
