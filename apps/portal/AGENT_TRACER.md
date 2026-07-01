@@ -2560,11 +2560,32 @@ Exposing Prometheus metrics without authentication can leak operational statisti
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
 
 ## 2025-07-01 - Performance Optimization in HourlyLoadsGrid
+
 **Purpose:** Improve component performance by reducing unnecessary re-renders.
-**Changes:** Wrapped  Map creation in  in .
-**Context:** The  Map was being recreated on every render, causing dependent  and  hooks (like  and ) to invalidate, which triggered re-renders of the heavy  component.
+**Changes:** Wrapped Map creation in in .
+**Context:** The Map was being recreated on every render, causing dependent and hooks (like and ) to invalidate, which triggered re-renders of the heavy component.
 
 ## 2025-07-01 - Performance Optimization in HourlyLoadsGrid
+
 **Purpose:** Improve component performance by reducing unnecessary re-renders.
 **Changes:** Wrapped `loadsByMachine` Map creation in `useMemo` in `HourlyLoadsGrid.tsx`.
 **Context:** The `loadsByMachine` Map was being recreated on every render, causing dependent `useCallback` and `useMemo` hooks (like `source` and `getHourValue`) to invalidate, which triggered re-renders of the heavy `DataGrid` component.
+
+## 2025-07-01 - CI Maintenance and Dependency Fixes
+
+**Purpose:** Resolve CI failures related to tool versions and dependency conflicts.
+**Changes:**
+
+- Synchronized pnpm version to 9.15.9 across all workflows.
+- Relaxed `glob` version constraint in `package.json` to `^10.5.0` to resolve `EOVERRIDE` conflict with `reviewdog`.
+- Updated `fail_on_error` to `fail_level` in `reviewdog.yml` to address deprecation warnings.
+  **Context:** The portal's CI was failing due to mismatches between local dev environment and GitHub Actions runners.
+
+## 2025-07-01 - Final CI Alignment
+
+**Purpose:** Ensure all CI dependencies are present and consistent.
+**Changes:**
+
+- Added `wait-on` as a workspace root dev dependency to fix the "Accessibility Audit" job.
+- Re-synchronized the lockfile.
+  **Context:** The CI was missing the `wait-on` utility which prevented the a11y tests from starting correctly.
