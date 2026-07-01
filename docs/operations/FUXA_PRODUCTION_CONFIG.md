@@ -18,7 +18,7 @@ NEXT_PUBLIC_FUXA_URL=https://your-fuxa-production-domain.com
 ### **Current Configuration (Development)**
 
 ```bash
-# apps/portal/.env.example (current)
+# 00_applications/portal/.env.example (current)
 NEXT_PUBLIC_FUXA_URL=http://localhost:1881
 ```
 

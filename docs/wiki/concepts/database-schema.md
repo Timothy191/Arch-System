@@ -262,7 +262,7 @@ CREATE POLICY "table_select_department"
 
 ## Migrations
 
-Migrations live in `pkgs/database/migrations/` as numbered `.sql` files:
+Migrations live in `01_platform_packages/database/migrations/` as numbered `.sql` files:
 
 | Range     | Focus / Features                                                                                                                                                                                 |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

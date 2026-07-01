@@ -2,7 +2,7 @@
 
 > **Status:** Analysis complete — no active `@mui/base` imports remain in the main source.  
 > **Action required:** Minor `@radix-ui/react-slot` version bump in `@repo/ui`.  
-> **Scope:** `apps/portal`, `apps/cms`, `apps/overview`, `pkgs/ui` (main monorepo). `tools/devdocs` is out-of-scope for this readiness check.
+> **Scope:** `00_applications/portal`, `00_applications/cms`, `00_applications/overview`, `01_platform_packages/ui` (main monorepo). `08_developer_tooling/devdocs` is out-of-scope for this readiness check.
 
 ---
 
@@ -12,7 +12,7 @@
 
 ```bash
 cd /home/timothy/Project/Arch-Mk2
-grep -r "from '@mui/base'" --include="*.ts*" apps/ pkgs/
+grep -r "from '@mui/base'" --include="*.ts*" 00_applications/ 01_platform_packages/
 # → No matches
 ```
 
@@ -21,14 +21,14 @@ The only references are in **generated test-coverage HTML** (`coverage/*/Precisi
 
 ### 1.2 How did we get here?
 
-The audit report flagged `@mui/base` in `apps/portal/components/ui/PrecisionInput.tsx`. That file **previously** imported `@mui/base/Unstable_NumberInput`, but it has already been rewritten as a **pure React + Tailwind** custom component. This means the actual migration was performed implicitly before the audit and before this session.
+The audit report flagged `@mui/base` in `00_applications/portal/components/ui/PrecisionInput.tsx`. That file **previously** imported `@mui/base/Unstable_NumberInput`, but it has already been rewritten as a **pure React + Tailwind** custom component. This means the actual migration was performed implicitly before the audit and before this session.
 
 ### 1.3 Remaining MUI in the monorepo
 
 | Location        | Package               | Version  | Notes                                                         |
 | --------------- | --------------------- | -------- | ------------------------------------------------------------- |
-| `tools/devdocs` | `@mui/material`       | `^6.4.0` | React 19 compatible. Not part of the production portal build. |
-| `tools/devdocs` | `@mui/icons-material` | `^6.4.0` | Ico-only; no headless primitives.                             |
+| `08_developer_tooling/devdocs` | `@mui/material`       | `^6.4.0` | React 19 compatible. Not part of the production portal build. |
+| `08_developer_tooling/devdocs` | `@mui/icons-material` | `^6.4.0` | Ico-only; no headless primitives.                             |
 
 **Conclusion:** No production app is shipping MUI Base today. The React 19 readiness concern for `@mui/base` is **already resolved**.
 
@@ -53,7 +53,7 @@ import { Unstable_NumberInput as NumberInput } from "@mui/base";
 
 ### 2.2 What we replaced it with (current)
 
-`apps/portal/components/ui/PrecisionInput.tsx` (98 lines) is now a **self-contained** component using:
+`00_applications/portal/components/ui/PrecisionInput.tsx` (98 lines) is now a **self-contained** component using:
 
 | Concern             | MUI Base approach      | Our replacement                                                                 |
 | ------------------- | ---------------------- | ------------------------------------------------------------------------------- |
@@ -147,7 +147,7 @@ Component has a clear Radix primitive?
 
 | Fact            | Detail                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------- |
-| Location        | `pkgs/ui/package.json`                                                                    |
+| Location        | `01_platform_packages/ui/package.json`                                                                    |
 | Current version | `^1.0.2` (Aug 2023)                                                                           |
 | Latest version  | `^1.1.2` (React 19 compatible)                                                                |
 | Impact          | `@repo/ui` re-exports `Slot` in `src/components/slot.tsx`; shadcn/ui primitives depend on it. |
@@ -169,7 +169,7 @@ All other Radix packages in the monorepo (`react-dialog`, `react-dropdown-menu`,
 If you approve, the change is a **one-line version bump** with zero code changes:
 
 ```diff
-// pkgs/ui/package.json
+// 01_platform_packages/ui/package.json
 - "@radix-ui/react-slot": "^1.0.2",
 + "@radix-ui/react-slot": "^1.1.2",
 ```
@@ -188,7 +188,7 @@ No component refactors are needed because the `Slot` API surface didn't change.
 
 ## 6. DevDocs Tool — Separate (Non-Blocking) Note
 
-`tools/devdocs` uses `@mui/material@^6.4.0`. MUI v6 is **React 19 compatible** ([MUI blog](https://mui.com/blog/mui-v6-is-out/)), so this tool does not block the React 19 upgrade. If you ever want to replace it for consistency, the same Radix or pure-React pattern above applies.
+`08_developer_tooling/devdocs` uses `@mui/material@^6.4.0`. MUI v6 is **React 19 compatible** ([MUI blog](https://mui.com/blog/mui-v6-is-out/)), so this tool does not block the React 19 upgrade. If you ever want to replace it for consistency, the same Radix or pure-React pattern above applies.
 
 ---
 
@@ -197,8 +197,8 @@ No component refactors are needed because the `Slot` API surface didn't change.
 | #   | Task                                                                                                                                             | Effort | Owner              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | ------------------ |
 | 1   | ✅ **@mui/base removal** — Already complete (zero source imports).                                                                               | —      | Done               |
-| 2   | ⬜ **Bump `@radix-ui/react-slot`** in `pkgs/ui/package.json` to `^1.1.2`.                                                                    | 5 min  | Awaiting approval  |
-| 3   | ⬜ **Delete old coverage artifacts** that still reference `@mui/base/Unstable_NumberInput` (`apps/portal/coverage/.../PrecisionInput.tsx.html`). | 1 min  | Low priority       |
+| 2   | ⬜ **Bump `@radix-ui/react-slot`** in `01_platform_packages/ui/package.json` to `^1.1.2`.                                                                    | 5 min  | Awaiting approval  |
+| 3   | ⬜ **Delete old coverage artifacts** that still reference `@mui/base/Unstable_NumberInput` (`00_applications/portal/coverage/.../PrecisionInput.tsx.html`). | 1 min  | Low priority       |
 | 4   | ⬜ **Adopt the PrecisionInput pattern** as the canonical reference for future headless-primitive conversions.                                    | —      | Documentation only |
 
 ---

@@ -184,11 +184,11 @@ The Docker Compose stack includes a full metrics collection and visualization la
 | Prometheus | `9090` | Metrics scraping and alerting |
 | Grafana    | `9091` | Dashboard visualization       |
 
-Both are started automatically via `./ops/deploy.sh local`.
+Both are started automatically via `./03_operations_automation/deploy.sh local`.
 
 ### Prometheus Configuration
 
-`obs/prometheus.yml` defines scrape targets:
+`14_observability_configuration/prometheus.yml` defines scrape targets:
 
 ```yaml
 scrape_configs:
@@ -230,7 +230,7 @@ Pre-configured dashboards:
 
 ### Alerting Rules
 
-Prometheus alert thresholds defined in `obs/prometheus.yml`:
+Prometheus alert thresholds defined in `14_observability_configuration/prometheus.yml`:
 
 | Alert                | Condition                      | Severity |
 | -------------------- | ------------------------------ | -------- |

@@ -7,7 +7,7 @@ version: "3.8"
 #   docker compose -f docker-compose.security.yml run --rm zap-full
 #
 # Or use the convenience script:
-#   ./ops/pentest.sh [target] [--full]
+#   ./03_operations_automation/pentest.sh [target] [--full]
 
 services:
   zap-baseline:

@@ -1,4 +1,4 @@
-import http from "perf/http";
+import http from "15_load_performance_testing/http";
 import { check, sleep } from "k6";
 
 // Stress testing configuration

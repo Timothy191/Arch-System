@@ -294,7 +294,7 @@ Use tools like:
 ### Sample k6 Test
 
 ```javascript
-import http from "perf/http";
+import http from "15_load_performance_testing/http";
 
 export default function () {
   const url = "https://your-domain.com/[department]/hourly-loads";

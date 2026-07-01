@@ -8,10 +8,10 @@
 ### ✅ What's Already Configured
 
 1. **PWA Library**: `@ducanh2912/next-pwa` (v10.2.9) is integrated
-   - Location: `apps/portal/package.json` (line 8)
-   - Config: `apps/portal/next.config.mjs` (lines 161-201)
+   - Location: `00_applications/portal/package.json` (line 8)
+   - Config: `00_applications/portal/next.config.mjs` (lines 161-201)
 
-2. **Web App Manifest**: Complete manifest at `apps/portal/public/manifest.json`
+2. **Web App Manifest**: Complete manifest at `00_applications/portal/public/manifest.json`
    - Name: "Arch-Systems | Arch OS"
    - Short name: "Arch Portal"
    - Display mode: `standalone`
@@ -24,7 +24,7 @@
    - **General pages**: NetworkFirst with 10s timeout (24 hour cache, 100 entries)
    - PWA only enabled in CI/production (saves build time locally)
 
-4. **Offline Detection**: `OfflineBanner` component (`apps/portal/components/OfflineBanner.tsx`)
+4. **Offline Detection**: `OfflineBanner` component (`00_applications/portal/components/OfflineBanner.tsx`)
    - Tracks online/offline state
    - Monitors IndexedDB sync queue (`ArchSyncDB`)
    - Shows pending action count while offline
@@ -123,7 +123,7 @@
 
 ## Phase 5 Plan Assessment (Docker Build Caching)
 
-**Original Plan:** Use `@nx-tools/nx-container` for Docker layer caching
+**Original Plan:** Use `@nx-08_developer_tooling/nx-container` for Docker layer caching
 
 **Assessment:**
 
@@ -163,7 +163,7 @@
    - Validate against `@repo/contract`
 
 3. **Medium-term (Phase 5):**
-   - Evaluate `@nx-tools/nx-container`
+   - Evaluate `@nx-08_developer_tooling/nx-container`
    - Set up layer cache registry
    - Integrate into Nx task graph
 
@@ -266,7 +266,7 @@ Due to Turbopack incompatibility with PWA plugins, a manual service worker appro
    - Validate against `@repo/contract`
 
 3. **Medium-term (Phase 5):**
-   - Evaluate `@nx-tools/nx-container`
+   - Evaluate `@nx-08_developer_tooling/nx-container`
    - Set up layer cache registry
    - Integrate into Nx task graph
 

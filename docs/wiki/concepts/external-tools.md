@@ -14,7 +14,7 @@ The portal embeds external workflow automation and AI tools via iframe cards, wi
 
 ## Configured Tools
 
-Tools are defined in `apps/portal/lib/tools.ts` as the `EXTERNAL_TOOLS` array:
+Tools are defined in `00_applications/portal/lib/tools.ts` as the `EXTERNAL_TOOLS` array:
 
 | Tool    | Default URL             | Description                                 |
 | ------- | ----------------------- | ------------------------------------------- |
@@ -39,7 +39,7 @@ Environment overrides:
 
 ## Health Check API
 
-`GET /api/tools/status` performs HEAD health checks against each tool with a 3-second timeout.
+`GET /api/08_developer_tooling/status` performs HEAD health checks against each tool with a 3-second timeout.
 
 Response format:
 
@@ -107,7 +107,7 @@ Svix uses the dashboard API key configured via `SVIX_API_KEY` in the environment
 
 ## Tools Page
 
-Located at `(departments)/[department]/tools/page.tsx`.
+Located at `(departments)/[department]/08_developer_tooling/page.tsx`.
 
 Renders:
 
@@ -121,9 +121,9 @@ The tools page is shared across all departments but may show department-specific
 
 To add a new embedded tool:
 
-1. Add an entry to `EXTERNAL_TOOLS` in `apps/portal/lib/tools.ts`
-2. The `ToolCard` component and `/api/tools/status` route pick it up automatically
-3. Optionally add a specialized component in `features/departments/components/tools/`
+1. Add an entry to `EXTERNAL_TOOLS` in `00_applications/portal/lib/tools.ts`
+2. The `ToolCard` component and `/api/08_developer_tooling/status` route pick it up automatically
+3. Optionally add a specialized component in `features/departments/components/08_developer_tooling/`
 
 ## Security Considerations
 

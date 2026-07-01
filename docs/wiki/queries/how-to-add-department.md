@@ -6,9 +6,9 @@ type: query
 tags: [how-to, department, onboarding, quick-reference]
 sources:
   [
-    docs/wiki/concepts/department-features.md,
-    docs/wiki/concepts/database-schema.md,
-    docs/wiki/concepts/nx-monorepo.md,
+    06_technical_documentation/wiki/concepts/department-features.md,
+    06_technical_documentation/wiki/concepts/database-schema.md,
+    06_technical_documentation/wiki/concepts/nx-monorepo.md,
   ]
 confidence: high
 ---
@@ -19,7 +19,7 @@ confidence: high
 
 ### 1. Add Department Metadata
 
-Edit `apps/portal/lib/departments.ts`:
+Edit `00_applications/portal/lib/departments.ts`:
 
 ```typescript
 export const DEPARTMENTS: Department[] = [
@@ -54,11 +54,11 @@ export const DEPARTMENT_TABS: Record<string, TabConfig[]> = {
 ### 3. Create Route Folder
 
 ```bash
-mkdir -p apps/portal/app/\(departments\)/environmental/dashboard
-mkdir -p apps/portal/app/\(departments\)/environmental/monitoring
-mkdir -p apps/portal/app/\(departments\)/environmental/compliance
-mkdir -p apps/portal/app/\(departments\)/environmental/reports
-mkdir -p apps/portal/app/\(departments\)/environmental/tools
+mkdir -p 00_applications/portal/app/\(departments\)/environmental/dashboard
+mkdir -p 00_applications/portal/app/\(departments\)/environmental/monitoring
+mkdir -p 00_applications/portal/app/\(departments\)/environmental/compliance
+mkdir -p 00_applications/portal/app/\(departments\)/environmental/reports
+mkdir -p 00_applications/portal/app/\(departments\)/environmental/tools
 ```
 
 ### 4. Create Tab Pages
@@ -66,7 +66,7 @@ mkdir -p apps/portal/app/\(departments\)/environmental/tools
 Each tab needs a `page.tsx`:
 
 ```typescript
-// apps/portal/app/(departments)/environmental/dashboard/page.tsx
+// 00_applications/portal/app/(departments)/environmental/dashboard/page.tsx
 import { getDepartmentContext } from '~/lib/dept-context'
 import { PageHeader } from '@repo/ui/PageHeader'
 
@@ -89,7 +89,7 @@ export default async function EnvironmentalDashboard({ params }: { params: { dep
 
 ### 5. Database Migration
 
-Create `pkgs/database/migrations/XXX_add_environmental_department.sql`:
+Create `01_platform_packages/database/migrations/XXX_add_environmental_department.sql`:
 
 ```sql
 -- Add department to database
@@ -125,7 +125,7 @@ USING (department_id = auth.user_department_id() OR auth.is_admin());
 Deploy:
 
 ```bash
-cd pkgs/database && pnpm supabase:push
+cd 01_platform_packages/database && pnpm supabase:push
 ```
 
 ---

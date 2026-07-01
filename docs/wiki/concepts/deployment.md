@@ -32,7 +32,7 @@ All checks must pass before deployment.
 
 ```bash
 # List pending migrations
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase migration list
 
 # Review migration files
@@ -51,8 +51,8 @@ Verify production `.env`:
 
 ```bash
 # Required variables
-cat apps/portal/.env | grep -E "^NEXT_PUBLIC_SUPABASE_URL|^SUPABASE_SERVICE_KEY"
-cat apps/portal/.env | grep -E "^GROQ_API_KEY|^OPENROUTER_API_KEY"
+cat 00_applications/portal/.env | grep -E "^NEXT_PUBLIC_SUPABASE_URL|^SUPABASE_SERVICE_KEY"
+cat 00_applications/portal/.env | grep -E "^GROQ_API_KEY|^OPENROUTER_API_KEY"
 ```
 
 Required variables:
@@ -86,13 +86,13 @@ pnpm dlx vercel --prod
 **Configuration**:
 
 - Build Command: `cd ../.. && pnpm build`
-- Output Directory: `apps/portal/.next`
+- Output Directory: `00_applications/portal/.next`
 - Install Command: `pnpm install`
 
 ### Method B: Self-Hosted (Docker)
 
 ```dockerfile
-# Dockerfile (add to apps/portal/)
+# Dockerfile (add to 00_applications/portal/)
 FROM node:20-alpine
 WORKDIR /app
 
@@ -101,8 +101,8 @@ RUN npm install -g pnpm@9.12.0
 
 # Copy workspace files
 COPY pnpm-workspace.yaml package.json turbo.json ./
-COPY pkgs/ ./pkgs/
-COPY apps/portal/ ./apps/portal/
+COPY 01_platform_packages/ ./01_platform_packages/
+COPY 00_applications/portal/ ./00_applications/portal/
 
 # Install and build
 RUN pnpm install --frozen-lockfile
@@ -116,8 +116,8 @@ CMD ["pnpm", "--filter", "portal", "start"]
 Build and deploy:
 
 ```bash
-docker build -t arch-systems-portal -f apps/portal/docker/Dockerfile .
-docker run -p 3000:3000 --env-file apps/portal/.env arch-systems-portal
+docker build -t arch-systems-portal -f 00_applications/portal/docker/Dockerfile .
+docker run -p 3000:3000 --env-file 00_applications/portal/.env arch-systems-portal
 ```
 
 ### Method C: Traditional Server (PM2)
@@ -144,7 +144,7 @@ ssh user@server "cd /var/www/arch-systems && pnpm install --prod && pm2 restart 
 supabase db dump --db-url "$PRODUCTION_DB_URL" -f backups/pre-deploy-$(date +%Y%m%d).sql
 
 # 2. Review migrations
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase migration list
 
 # 3. Deploy migrations
@@ -358,7 +358,7 @@ git pull origin master
 docker compose up -d --no-deps --build portal
 
 # Full stack restart (if Docker Compose changed)
-./ops/deploy.sh local
+./03_operations_automation/deploy.sh local
 ```
 
 ### Verify All Services Running

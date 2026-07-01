@@ -5,7 +5,7 @@ updated: 2026-06-03
 type: decision
 status: accepted
 tags: [adr, monorepo, build, decision]
-sources: [nx.json, package.json, docs/wiki/concepts/nx-monorepo.md]
+sources: [nx.json, package.json, 06_technical_documentation/wiki/concepts/nx-monorepo.md]
 confidence: high
 ---
 

@@ -10,7 +10,7 @@ confidence: high
 
 # Portal App Architecture
 
-The portal is a Next.js 15 application using the App Router with React Server Components (RSC) as the default rendering strategy. It sits in `apps/portal/` within the Nx monorepo.
+The portal is a Next.js 15 application using the App Router with React Server Components (RSC) as the default rendering strategy. It sits in `00_applications/portal/` within the Nx monorepo.
 
 ## Tech Stack
 
@@ -51,7 +51,7 @@ app/
 │       ├── machines/
 │       ├── history/
 │       ├── reports/
-│       ├── tools/         # External tools (n8n, Flowise, Univer)
+│       ├── 08_developer_tooling/         # External tools (n8n, Flowise, Univer)
 │       ├── hourly-loads/      # Control room only
 │       ├── machine-operations/# Control room only
 │       ├── operational-delays/# Control room only
@@ -65,7 +65,7 @@ app/
 │       └── highres/           # Satellite monitoring
 ├── admin/               # Admin panel
 ├── api/ai/chat         # AI chat endpoint
-└── api/tools/status    # External tool health checks
+└── api/08_developer_tooling/status    # External tool health checks
 ```
 
 ## Department Route Configuration
@@ -166,8 +166,8 @@ All real-time subscriptions filter by `department_id` to scope data to the user'
 
 | Alias | Maps to                              |
 | ----- | ------------------------------------ |
-| `@/`  | `apps/portal/`                       |
-| `~/`  | `apps/portal/` (Jest and TypeScript) |
+| `@/`  | `00_applications/portal/`                       |
+| `~/`  | `00_applications/portal/` (Jest and TypeScript) |
 
 ## Shared Packages
 
@@ -187,8 +187,8 @@ Department-specific logic lives in `features/departments/components/<dept>/`:
 - `engineering/` — Breakdowns, machine operations
 - `machines/` — Machine management
 - `satellite/` — SAR/InSAR, hyperspectral views
-- `assets/` — Cross-department components
-- `tools/` — External tool embeds, Univer spreadsheet
+- `04_shared_static_assets/` — Cross-department components
+- `08_developer_tooling/` — External tool embeds, Univer spreadsheet
 
 Hub components are in `features/hub/components/`.
 

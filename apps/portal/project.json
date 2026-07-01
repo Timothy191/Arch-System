@@ -1,0 +1,21 @@
+{
+  "name": "portal",
+  "tags": ["scope:app", "scope:app:portal"],
+  "targets": {
+    "sync-assets": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash 03_operations_automation/sync-assets.sh"
+      },
+      "inputs": ["{workspaceRoot}/04_shared_static_assets/**/*", "{workspaceRoot}/03_operations_automation/sync-assets.sh"],
+      "outputs": [
+        "{projectRoot}/public/background",
+        "{projectRoot}/public/error-pages",
+        "{projectRoot}/public/icons",
+        "{projectRoot}/public/images",
+        "{projectRoot}/public/large"
+      ],
+      "cache": true
+    }
+  }
+}

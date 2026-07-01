@@ -4,13 +4,13 @@
 **Estimated Effort:** 1 week  
 **Status:** ✅ SUBSTANTIALLY COMPLETE (Phase 3 + Post Phase 3 sprint)
 
-> Unit tests at 72%+, E2E covering login/navigation/data-entry, visual regression live, k6 load tests configured, DeepEval AI eval suite added. Security pentest scripted via `ops/pentest.sh` (OWASP ZAP).
+> Unit tests at 72%+, E2E covering login/navigation/data-entry, visual regression live, k6 load tests configured, DeepEval AI eval suite added. Security pentest scripted via `03_operations_automation/pentest.sh` (OWASP ZAP).
 
 ---
 
 ## Overview
 
-Phase 3 delivered a working test baseline. A post-Phase 3 sprint added E2E, visual regression, load, DeepEval, and security tooling. The security pentest script (`ops/pentest.sh`) enables on-demand OWASP ZAP scanning.
+Phase 3 delivered a working test baseline. A post-Phase 3 sprint added E2E, visual regression, load, DeepEval, and security tooling. The security pentest script (`03_operations_automation/pentest.sh`) enables on-demand OWASP ZAP scanning.
 
 ---
 
@@ -23,7 +23,7 @@ Phase 3 delivered a working test baseline. A post-Phase 3 sprint added E2E, visu
 | Visual Regression  | ✅ 2 specs                | login.visual.spec, design-system.visual.spec   |
 | Load Testing       | ✅ k6 configured          | login/redirect/ai-chat, ramp 0→40 VUs, p95<2s  |
 | DeepEval (AI)      | ✅ 25 tests               | 12 code-gen + 13 AI service, custom metrics    |
-| Security / Pentest | ✅ Scripted               | `ops/pentest.sh` — OWASP ZAP baseline+full |
+| Security / Pentest | ✅ Scripted               | `03_operations_automation/pentest.sh` — OWASP ZAP baseline+full |
 | Pass Rate          | ~85%                      | 5 failing tests remain (under investigation)   |
 
 Test files: `24` across portal and packages.  
@@ -53,7 +53,7 @@ E2E runner: `pnpm test:e2e` (requires app on `:3000`)
 
 ### E2E Tests — Critical User Flows
 
-Add to `e2e/` directory:
+Add to `09_end_to_end_verification/` directory:
 
 - [ ] **Login flow** (exists — extend)
   - Invalid credentials → error message
@@ -107,19 +107,19 @@ Run with: `pnpm test:e2e`
   - p95 response time < 500ms
   - Error rate < 1%
   - DB p99 < 200ms
-- [ ] Test with production-like data seed (use `pkgs/database/seeds/`)
+- [ ] Test with production-like data seed (use `01_platform_packages/database/seeds/`)
 
 ### Security Penetration Testing
 
-✅ `ops/pentest.sh` created — wraps OWASP ZAP with HTML + JSON reporting.
+✅ `03_operations_automation/pentest.sh` created — wraps OWASP ZAP with HTML + JSON reporting.
 ✅ `docker-compose.security.yml` added — `zap-baseline` and `zap-full` services.
 
 ```bash
 # Baseline passive scan (safe, no state mutation)
-./ops/pentest.sh
+./03_operations_automation/pentest.sh
 
 # Full active scan (use against test env only)
-./ops/pentest.sh --full
+./03_operations_automation/pentest.sh --full
 
 # Or via docker compose
 docker compose -f docker-compose.security.yml run --rm zap-baseline

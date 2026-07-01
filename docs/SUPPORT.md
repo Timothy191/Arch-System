@@ -10,13 +10,13 @@
   Project overview and quick start guide
 - 📖 **[CONTRIBUTING.md](CONTRIBUTING.md)** — Contribution guidelines
 - 📖 **[DESIGN.md](DESIGN.md)** — Design system and component rules
-- 📖 **[Packages Overview](../pkgs/README.md)** —
+- 📖 **[Packages Overview](../01_platform_packages/README.md)** —
   Core monorepo packages explanation
-- 📖 **[Infrastructure Setup](../infra/README.md)** —
+- 📖 **[Infrastructure Setup](../10_infrastructure_as_code/README.md)** —
   Docker, Redis cluster, and systemd configurations
 - 📖 **[Operations & SCADA](operations/supervisor-workflow.md)** —
   Control room operations and supervisor workflows
-- 📖 **[Architecture Diagrams](../apps/portal/public/media/diagrams/)** —
+- 📖 **[Architecture Diagrams](../00_applications/portal/public/media/diagrams/)** —
   Interactive system flows and pipeline diagrams
 
 ### Common Issues
@@ -25,7 +25,7 @@
 
 - Ensure Node.js ≥22 and pnpm 9.15.9 are installed.
 - Run `pnpm install` to install dependencies.
-- Copy `apps/portal/env/.env.example` to `apps/portal/.env` and
+- Copy `00_applications/portal/env/.env.example` to `00_applications/portal/.env` and
   configure environment variables.
 - Start Supabase locally: `pnpm --filter @repo/database supabase:dev`.
 
@@ -47,11 +47,11 @@
 
 - Reset local Supabase database: `pnpm --filter @repo/database supabase:reset`
 - Regenerate TypeScript types: `pnpm --filter @repo/database supabase:gen`
-- Check migration status in `pkgs/database/migrations/`
+- Check migration status in `01_platform_packages/database/migrations/`
 
 #### Control-Room & Operations
 
-- **Dashboard not updating**: Verify the `infra/observability/` stack
+- **Dashboard not updating**: Verify the `10_infrastructure_as_code/observability/` stack
   status (Prometheus, Grafana) and check FUXA configurations/alerts.
 - **Pin reset procedure**: See [Pin Reset Runbook](operations/pin-reset-procedure.md).
 - **Shift closeout**: Refer to [Shift Closeout Runbook](operations/shift-closeout-runbook.md).

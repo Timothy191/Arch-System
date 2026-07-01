@@ -1,6 +1,6 @@
-import http from "perf/http";
+import http from "15_load_performance_testing/http";
 import { check, sleep } from "k6";
-import { Rate, Trend, Counter } from "perf/metrics";
+import { Rate, Trend, Counter } from "15_load_performance_testing/metrics";
 
 export const warmupPasses = new Rate("warmup_passes");
 export const warmupLatency = new Trend("warmup_latency_ms");

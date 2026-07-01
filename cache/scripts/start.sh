@@ -33,7 +33,7 @@ echo "Starting Arch Redis offload stack on 127.0.0.1:${HOST_PORT}..."
 for _ in $(seq 1 30); do
   status=$(docker inspect --format='{{.State.Health.Status}}' arch-redis-offload 2>/dev/null || echo "starting")
   if [ "$status" = "healthy" ]; then
-    echo "Redis offload ready — set REDIS_URL=redis://127.0.0.1:${HOST_PORT} in apps/portal/.env"
+    echo "Redis offload ready — set REDIS_URL=redis://127.0.0.1:${HOST_PORT} in 00_applications/portal/.env"
     exit 0
   fi
   sleep 1

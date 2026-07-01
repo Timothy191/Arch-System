@@ -1,0 +1,6 @@
+{
+  "name": "shared-data-access",
+  "tags": ["scope:package", "scope:shared", "type:data-access", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "02_domain_libraries/shared/data-access/src"
+}

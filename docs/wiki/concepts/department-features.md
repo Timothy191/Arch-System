@@ -131,8 +131,8 @@ Available on the hub page for all authenticated users:
 1. Add department to `DEPARTMENTS` array in `lib/departments.ts`
 2. Add tab configuration for the new department (or use standard tabs)
 3. Create route folder: `app/(departments)/[department]/<new-dept>/`
-4. Write a migration in `pkgs/database/migrations/` to insert the department row
-5. Push migration: `cd pkgs/database && pnpm supabase:push`
+4. Write a migration in `01_platform_packages/database/migrations/` to insert the department row
+5. Push migration: `cd 01_platform_packages/database && pnpm supabase:push`
 6. Verify in Supabase Studio and the portal UI
 
 Related pages: [[portal-app-architecture]], [[database-schema]], [[monitoring-error-tracking]]

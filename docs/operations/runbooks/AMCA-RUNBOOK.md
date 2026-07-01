@@ -22,7 +22,7 @@ curl -X POST http://policy-engine.internal/api/heal/flush -d '{"tags": ["corrupt
 ### 2. Manual Rollback
 
 ```bash
-./ci/ops/rollback.sh
+./11_continuous_integration/03_operations_automation/rollback.sh
 ```
 
 ### 3. Scaling

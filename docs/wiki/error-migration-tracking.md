@@ -356,8 +356,8 @@ describe("validateMachineId", () => {
 ## Resources
 
 - **Error Package**: `@repo/errors` (already in root devDependencies)
-- **Full Analysis**: `docs/wiki/project-stability-analysis.md`
-- **Error Patterns**: `pkgs/errors/src/index.ts`
+- **Full Analysis**: `06_technical_documentation/wiki/project-stability-analysis.md`
+- **Error Patterns**: `01_platform_packages/errors/src/index.ts`
 - **Completion Plan**: `.windsurf/plans/project-completion-roadmap.md`
 
 ---

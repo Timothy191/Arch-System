@@ -14,7 +14,7 @@ Mining operations portal monorepo (Nx + pnpm). Portal `:3000`. Node `>=22`, pnpm
 
 ```bash
 pnpm install
-cp apps/portal/env/.env.example apps/portal/.env
+cp 00_applications/portal/env/.env.example 00_applications/portal/.env
 pnpm --filter @repo/database supabase:dev   # Docker, separate terminal
 pnpm dev                                     # :3000
 pnpm quality                                 # before push
@@ -26,10 +26,10 @@ Bootstrap: `pnpm dev:up --all` (`--quick`, `--tools`, `--cms`, `--overview`).
 
 | Pipeline      | Source                                                 | Generate                                                                      |
 | ------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| Design tokens | `pkgs/theme/src/css/variables.css` + `tokens.json` | `pnpm --filter @repo/theme build` → `generated.ts`, `variables-generated.css` |
-| DB types      | `pkgs/database/migrations/`                        | `supabase:push` → `supabase:gen` → `pkgs/supabase/src/database.types.ts`  |
+| Design tokens | `01_platform_packages/theme/src/css/variables.css` + `tokens.json` | `pnpm --filter @repo/theme build` → `generated.ts`, `variables-generated.css` |
+| DB types      | `01_platform_packages/database/migrations/`                        | `supabase:push` → `supabase:gen` → `01_platform_packages/supabase/src/database.types.ts`  |
 
-Never edit `pkgs/supabase/supabase/migrations/` directly (PreToolUse hook blocks it).
+Never edit `01_platform_packages/supabase/supabase/migrations/` directly (PreToolUse hook blocks it).
 
 ## Domain rules (read on demand)
 
@@ -43,7 +43,7 @@ Never edit `pkgs/supabase/supabase/migrations/` directly (PreToolUse hook blocks
 
 ## Docs map
 
-- [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — navigation
+- [`06_technical_documentation/DOCUMENTATION_INDEX.md`](06_technical_documentation/DOCUMENTATION_INDEX.md) — navigation
 - [`DESIGN.md`](DESIGN.md) · [`AGENTS.md`](AGENTS.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md) · [`SECURITY.md`](SECURITY.md)
 - [`.claude/guides/operational-handbook.md`](.claude/guides/operational-handbook.md) — full commands, workflows, pitfalls, MCP
 

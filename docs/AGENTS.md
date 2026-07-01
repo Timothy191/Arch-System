@@ -21,7 +21,7 @@ Commands: `/spec` (features) · `/fix` (quick bugs) · `/prd` (requirements) —
 
 ## Nx enforcement
 
-Run `node tools/apply-project-tags.cjs` after new projects. Dependency constraints in `nx.json` (`scope:app` → `scope:package`, etc.).
+Run `node 08_developer_tooling/apply-project-tags.cjs` after new projects. Dependency constraints in `nx.json` (`scope:app` → `scope:package`, etc.).
 
 ## Modular rules
 

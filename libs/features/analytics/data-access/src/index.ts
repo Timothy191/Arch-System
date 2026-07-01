@@ -1,0 +1,1 @@
+export { linearForecast } from "./forecast";

@@ -38,7 +38,7 @@ After `supabase:dev`, the CLI outputs database URL and keys. Add these to `.env`
 ## Common Commands
 
 ```bash
-cd pkgs/database
+cd 01_platform_packages/database
 
 pnpm supabase:dev      # Start local Supabase stack
 pnpm supabase:reset    # Reset local DB (wipes data)

@@ -1,4 +1,4 @@
-// GENERATED FROM tools/policy-compiler.cjs — DO NOT EDIT
+// GENERATED FROM 08_developer_tooling/policy-compiler.cjs — DO NOT EDIT
 // Run 'pnpm policy:gen' to regenerate.
 
 module.exports = {

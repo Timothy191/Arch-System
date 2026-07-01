@@ -24,7 +24,7 @@ services:
     ports:
       - "9092:9090"
     volumes:
-      - ../../toolchain/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../../07_toolchain_configuration/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     healthcheck:
       test:

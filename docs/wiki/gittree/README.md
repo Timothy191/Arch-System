@@ -91,7 +91,7 @@ e81342d feat: n8n workflow engine integration with Kiro agents + 10 MCP workflow
 ```
 8ab70fa feat: excavator activity, shift coverage, AI memory layer, Redis cache, UI animations
 2fa2740 chore: add scratch_test.ts with test export
-a634218 docs: add docs/wiki directory
+a634218 docs: add 06_technical_documentation/wiki directory
 ```
 
 ### Documentation & Architecture
@@ -255,7 +255,7 @@ Latest remote state at commit `011a577`:
 * | 9fdf3a6 feat: version-control Kiro agent config + wire 12 hook scripts + Agent Teams pattern
 * | 8ab70fa feat: excavator activity, shift coverage, AI memory layer, Redis cache, UI animations
 * | 2fa2740 chore: add scratch_test.ts with test export
-* | a634218 docs: add docs/wiki directory
+* | a634218 docs: add 06_technical_documentation/wiki directory
 * | 788518c docs: update wiki index, log, and add docs package manifest
 * | 5300825 docs: add remaining wiki query and concept pages
 * | 8c667c0 docs: add wiki query templates

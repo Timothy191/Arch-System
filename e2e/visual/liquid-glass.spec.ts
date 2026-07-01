@@ -13,7 +13,7 @@ test.describe("Visual Regression Smoke Test", () => {
     // await page.waitForSelector('.liquid-glass-bg');
 
     // Take a screenshot and compare against the baseline
-    // The snapshot will be saved to e2e/visual/__snapshots__
+    // The snapshot will be saved to 09_end_to_end_verification/visual/__snapshots__
     await expect(page).toHaveScreenshot("hub-liquid-glass.png", {
       fullPage: true,
     });

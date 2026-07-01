@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining operations portal** built as a full-stack Nx monorepo. Currently configured for **local development and testing** with Docker Compose. All 8 departments, AI orchestration, and monitoring stacks run locally via `./ops/deploy.sh local`. Production deployment via Cockpit is ready when needed.
+Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining operations portal** built as a full-stack Nx monorepo. Currently configured for **local development and testing** with Docker Compose. All 8 departments, AI orchestration, and monitoring stacks run locally via `./03_operations_automation/deploy.sh local`. Production deployment via Cockpit is ready when needed.
 
 ### Project Health Dashboard
 
@@ -134,7 +134,7 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 │  CURRENT SETUP (Development Machine)                                    │
 │  ─────────────────────────────────────                                  │
 │                                                                         │
-│  ✅ Run ./ops/deploy.sh local                                       │
+│  ✅ Run ./03_operations_automation/deploy.sh local                                       │
 │  ✅ All 8 departments operational                                         │
 │  ✅ AI chat with multi-provider failover                                  │
 │  ✅ Real-time monitoring (Prometheus + Grafana)                           │
@@ -153,7 +153,7 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 │       │  │ :9091   │ │ :9090   │ │ :6379   │       │                     │
 │       │  └─────────┘ └─────────┘ └─────────┘       │                     │
 │       │                                             │                     │
-│       │  One command: ./ops/deploy.sh local    │                     │
+│       │  One command: ./03_operations_automation/deploy.sh local    │                     │
 │       └─────────────────────────────────────────────┘                     │
 │                                                                         │
 │  FUTURE: Production deployment via Cockpit when ready                     │
@@ -794,19 +794,19 @@ Tier 3: Database (L3) - PostgreSQL
 │                                                                         │
 │  1. ON-PREMISES SERVER SETUP & COCKPIT    [PRIORITY: CRITICAL] ✅ CODE   │
 │     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━         │
-│     ✅ ops/deploy.sh production — unified stable deploy script      │
+│     ✅ 03_operations_automation/deploy.sh production — unified stable deploy script      │
 │         pre-flight .env check, systemd-aware, n8n webhook notification   │
-│     ✅ ops/deploy.sh production --skip-build — quick update script   │
+│     ✅ 03_operations_automation/deploy.sh production --skip-build — quick update script   │
 │         skip rebuild phase when deploying simple configuration changes   │
 │     ✅ docker-compose.production.yml — production Docker overrides      │
 │         restart:always, resource limits, healthchecks, /opt/arch-systems │
-│     ✅ infra/systemd/arch-systems.service — portal auto-start on server boot  │
+│     ✅ 10_infrastructure_as_code/systemd/arch-systems.service — portal auto-start on server boot  │
 │         SIGTERM graceful shutdown, NoNewPrivileges, journald logging      │
-│     ✅ apps/portal/.env.production.example — production env template    │
+│     ✅ 00_applications/portal/.env.production.example — production env template    │
 │         all keys documented with placeholders and required markers        │
 │     ⬜ Provision physical server (Ubuntu 22.04 / RHEL 9)               │
 │     ⬜ Install Cockpit: sudo apt install cockpit + enable socket         │
-│     ⬜ Install systemd service: sudo cp infra/systemd/arch-systems.service ... │
+│     ⬜ Install systemd service: sudo cp 10_infrastructure_as_code/systemd/arch-systems.service ... │
 │     ⬜ Run deploy.sh production + validate all 8 departments            │
 │     • Estimated: 1-2 days  ✅ Wiki docs: concepts/on-premises-deployment │
 │     Impact: ██████████████████████████████████████████████████  CRITICAL│
@@ -823,7 +823,7 @@ Tier 3: Database (L3) - PostgreSQL
 │         (Playwright snapshot comparison, 2% tolerance)                   │
 │     ✅ Load testing: k6 config + 3 scenarios (login, redirect, AI chat)  │
 │         ramp 0→40 VUs, p95<2s, <1% error rate thresholds                │
-│     ✅ DeepEval eval suite (pkgs/eval) — 12 code-gen tests passing   │
+│     ✅ DeepEval eval suite (01_platform_packages/eval) — 12 code-gen tests passing   │
 │         Custom metrics: DesignSystem, SupabaseImport, RLS, DeptPattern,  │
 │         ShiftCloseout — deepeval v2.6.7 + Python 3.14 compatible         │
 │         AI service tests (13): skip cleanly without OPENAI_API_KEY       │
@@ -911,7 +911,7 @@ Tier 3: Database (L3) - PostgreSQL
 │  ├── ✅ Visual: login.visual.spec + design-system.visual.spec           │
 │  ├── ✅ Load: k6 config + login/redirect/ai-chat scenarios              │
 │  ├── ✅ DeepEval eval suite: 12 code-gen + 13 AI service tests          │
-│  └── ✅ Security pentest — ops/pentest.sh + docker-compose.security │
+│  └── ✅ Security pentest — 03_operations_automation/pentest.sh + docker-compose.security │
 │       ████████████████████████████████████████████████████████████████ │
 │                                                                         │
 │  WEEK 3  ✅ DATABASE OPTIMIZATION COMPLETE                              │

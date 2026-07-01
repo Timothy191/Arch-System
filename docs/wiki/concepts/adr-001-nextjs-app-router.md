@@ -5,7 +5,7 @@ updated: 2026-05-25
 type: decision
 status: accepted
 tags: [adr, architecture, nextjs, decision]
-sources: [docs/wiki/comparisons/react-patterns.md, CLAUDE.md]
+sources: [06_technical_documentation/wiki/comparisons/react-patterns.md, CLAUDE.md]
 confidence: high
 ---
 
@@ -78,7 +78,7 @@ We adopt **Next.js 16 with the App Router**, using **React Server Components (RS
 - RSC → Supabase queries via `createServerSupabaseClient()`
 - Client components marked with `'use client'`
 - Real-time updates isolated to client components (`AlertPanel`, `ScadaPanel`)
-- Path aliases: `@/` and `~/` → `apps/portal/`
+- Path aliases: `@/` and `~/` → `00_applications/portal/`
 
 ## Related
 

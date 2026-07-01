@@ -64,7 +64,7 @@ The portal is desktop-first (control room operators on large screens). Field ope
 
 #### Manifest
 
-Create `apps/portal/public/manifest.json`:
+Create `00_applications/portal/public/manifest.json`:
 
 ```json
 {
@@ -83,7 +83,7 @@ Create `apps/portal/public/manifest.json`:
 }
 ```
 
-Add to `apps/portal/app/layout.tsx`:
+Add to `00_applications/portal/app/layout.tsx`:
 
 ```tsx
 export const metadata = {

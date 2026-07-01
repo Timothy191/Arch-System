@@ -63,16 +63,16 @@ The codebase is organized as an **Nx Monorepo** using **pnpm workspaces** for st
 
 ```
 Arch-System/
-├── apps/
+├── 00_applications/
 │   ├── portal/             # Main Next.js 15 App Router application (port 3000)
 │   ├── cms/                # Headless Payload CMS v3 for system docs (port 3001)
 │   └── overview/           # Standalone Next.js 18 React Flow visualization (port 3002)
-├── pkgs/
+├── 01_platform_packages/
 │   ├── theme/              # Design tokens (OKLCH, CSS variables, Tailwind preset)
 │   ├── ui/                 # Shared UI library (Radix primitives + shadcn/ui components)
 │   ├── supabase/           # Shared Supabase clients, Kysely wrappers, & auto-generated types
 │   ├── database/           # Source of truth SQL migrations (61 sequential migrations)
-│   ├── cache/              # Redis client configurations & caching utilities
+│   ├── 12_distributed_cache_runtime/              # Redis client configurations & caching utilities
 │   ├── utils/              # Common helper functions (formatting, shifts, Inngest client)
 │   ├── errors/             # Standardized domain error classes
 │   ├── rate-limiter/       # Redis and in-memory rate limiting strategies
@@ -84,7 +84,7 @@ Arch-System/
 Previously managed under Turborepo, the monorepo was migrated to **Nx** to:
 
 1. **Stabilize Jest Unit Testing**: Nx partitions Jest caches cleanly, preventing environment leakage across package boundaries.
-2. **Fine-Grained Task Orchestration**: Nx targets depend directly on compile-order pipelines (e.g., `@repo/theme:build` runs token code generation via Style Dictionary, which `@repo/ui:build` consumes, which `apps/portal:build` depends on).
+2. **Fine-Grained Task Orchestration**: Nx targets depend directly on compile-order pipelines (e.g., `@repo/theme:build` runs token code generation via Style Dictionary, which `@repo/ui:build` consumes, which `00_applications/portal:build` depends on).
 3. **Optimized Build Cache**: Nx computes SHA hashes of project source files, dependencies, and environment configurations to skip redundant compilations, saving significant development and CI compile time.
 
 ---
@@ -152,7 +152,7 @@ On-premises deployments target **Rocky Linux / RHEL** architectures.
 
 - **Cockpit**: Installed on the local host to provide web-based system administration, service logs, and container monitoring.
 - **Docker Compose**: Orchestrates target stacks (Portal, CMS, Redis caching, Supabase database, Grafana).
-- **systemd & firewalld**: Managed system services and local port restrictions configured via `./ops/setup-production-environment.sh` to ensure high uptime and security.
+- **systemd & firewalld**: Managed system services and local port restrictions configured via `./03_operations_automation/setup-production-environment.sh` to ensure high uptime and security.
 
 ---
 
@@ -163,5 +163,5 @@ On-premises deployments target **Rocky Linux / RHEL** architectures.
 - **[DESIGN.md](file:///home/timothy/Documents/Arch-System/DESIGN.md)** — Tokens, HSL mapping, and typography.
 - **[PRODUCT.md](file:///home/timothy/Documents/Arch-System/PRODUCT.md)** — User personas and product objectives.
 - **[DEPLOYMENT.md](file:///home/timothy/Documents/Arch-System/DEPLOYMENT.md)** — Local and production deploy instructions.
-- **[nx-monorepo](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/nx-monorepo.md)** — Workspace and build configs.
-- **[supabase-local-dev](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/supabase-local-dev.md)** — Supabase local configuration.
+- **[nx-monorepo](file:///home/timothy/Documents/Arch-System/06_technical_documentation/wiki/concepts/nx-monorepo.md)** — Workspace and build configs.
+- **[supabase-local-dev](file:///home/timothy/Documents/Arch-System/06_technical_documentation/wiki/concepts/supabase-local-dev.md)** — Supabase local configuration.

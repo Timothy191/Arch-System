@@ -25,7 +25,7 @@
 ## 4. Restore Procedure
 
 1. Verify loss of primary infrastructure.
-2. Spin up DR environment via Terraform (`infra/terraform`).
+2. Spin up DR environment via Terraform (`10_infrastructure_as_code/terraform`).
 3. Restore DB from latest full backup + WAL replay.
 4. Update DNS/load balancer to point to DR cluster.
 5. Validate system integrity via smoke tests (`pnpm test:e2e:smoke`).

@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: query
 tags: [troubleshooting, debugging, quick-reference, support]
-sources: [docs/wiki/concepts/troubleshooting.md, docs/wiki/concepts/onboarding.md]
+sources: [06_technical_documentation/wiki/concepts/troubleshooting.md, 06_technical_documentation/wiki/concepts/onboarding.md]
 confidence: high
 ---
 
@@ -42,7 +42,7 @@ pnpm --filter portal test
 pnpm build
 
 # Check Supabase
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase status
 ```
 
@@ -61,7 +61,7 @@ pnpm list react
 # Should show React 19 in portal, React 18 in overview (expected)
 ```
 
-**Fix**: Don't share components between `apps/overview` (React 18) and `apps/portal` (React 19). Use `@repo/ui` instead.
+**Fix**: Don't share components between `00_applications/overview` (React 18) and `00_applications/portal` (React 19). Use `@repo/ui` instead.
 
 ### Issue: "Forbidden class: font-bold" in pre-commit
 
@@ -140,7 +140,7 @@ If still failing, check specific error:
 
 ```bash
 # Verify API keys
-cat apps/portal/.env | grep -E "GROQ|OPENROUTER|TOGETHER"
+cat 00_applications/portal/.env | grep -E "GROQ|OPENROUTER|TOGETHER"
 
 # Test provider
 curl https://api.groq.com/openai/v1/models \
@@ -159,7 +159,7 @@ curl -I http://localhost:5678
 curl -I http://localhost:3000
 
 # Check status endpoint
-curl http://localhost:3000/api/tools/status
+curl http://localhost:3000/api/08_developer_tooling/status
 ```
 
 ---
@@ -200,7 +200,7 @@ curl http://localhost:3000/api/tools/status
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm dev",
-      "cwd": "${workspaceFolder}/apps/portal"
+      "cwd": "${workspaceFolder}/00_applications/portal"
     }
   ]
 }
@@ -266,7 +266,7 @@ pnpm clean  # or: rm -rf **/node_modules **/.nx **/dist **/.next
 pnpm install
 
 # 3. Reset Supabase
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase:reset
 
 # 4. Full deploy local

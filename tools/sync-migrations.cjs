@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview Syncs pkgs/database/migrations to pkgs/supabase/migrations.
- * Usage: node tools/sync-migrations.cjs
+ * @fileoverview Syncs 01_platform_packages/database/migrations to 01_platform_packages/supabase/migrations.
+ * Usage: node 08_developer_tooling/sync-migrations.cjs
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const DB_MIGRATIONS = path.join(ROOT, "pkgs", "database", "migrations");
-const SUPABASE_MIGRATIONS = path.join(ROOT, "pkgs", "supabase", "migrations");
+const DB_MIGRATIONS = path.join(ROOT, "01_platform_packages", "database", "migrations");
+const SUPABASE_MIGRATIONS = path.join(ROOT, "01_platform_packages", "supabase", "migrations");
 
 function getSqlFiles(dir) {
   if (!fs.existsSync(dir)) return [];

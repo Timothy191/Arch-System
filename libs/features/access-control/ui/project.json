@@ -1,0 +1,6 @@
+{
+  "name": "features-access-control-ui",
+  "tags": ["scope:access-control", "type:ui", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "02_domain_libraries/features/access-control/ui/src"
+}

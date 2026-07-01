@@ -8,7 +8,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const WIKI_ROOT = path.resolve(__dirname, "../../docs/wiki");
+const WIKI_ROOT = path.resolve(__dirname, "../../06_technical_documentation/wiki");
 const OUT_FILE = path.resolve(__dirname, "viewer.html");
 
 /* ────────────── helpers ────────────── */

@@ -79,7 +79,7 @@ Use n8n workflows to schedule and generate reports, triggered by time or manuall
   - Step 1: Call portal API `/api/reports/monthly`
   - Step 2: Send PDF via email to management
   - Step 3: Save copy to Supabase Storage
-- [ ] Import workflow JSON to `scratch/` or `tools/n8n-mcp/workflows/`
+- [ ] Import workflow JSON to `scratch/` or `08_developer_tooling/n8n-mcp/workflows/`
 
 ### 3. Trend Analysis & Forecasting
 
@@ -104,7 +104,7 @@ REST endpoints for integration with external ERP or logistics systems:
 
 Use historical machine breakdown data to predict failure probability.
 
-**Tech stack:** Python + scikit-learn or Prophet (in `pkgs/eval/` or new `pkgs/ml/`)
+**Tech stack:** Python + scikit-learn or Prophet (in `01_platform_packages/eval/` or new `01_platform_packages/ml/`)
 
 - [ ] Extract feature set from `machine_hours`, `fuel_logs`, `breakdowns`:
   - Hours since last service
@@ -114,7 +114,7 @@ Use historical machine breakdown data to predict failure probability.
 - [ ] Train XGBoost classifier on labeled breakdown events:
 
   ```python
-  # pkgs/ml/train_maintenance_model.py
+  # 01_platform_packages/ml/train_maintenance_model.py
   import xgboost as xgb
   from sklearn.model_selection import train_test_split
 

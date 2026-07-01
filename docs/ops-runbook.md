@@ -89,8 +89,8 @@ pnpm build
 ### Key Metrics
 
 - **SLO Dashboard**: Check `current_slo_status` view in Supabase
-- **Cost Alerts**: Run `node tools/cost-monitor.mjs --notify`
-- **Anomaly Detection**: Run `node tools/anomaly-detector.mjs --notify`
+- **Cost Alerts**: Run `node 08_developer_tooling/cost-monitor.mjs --notify`
+- **Anomaly Detection**: Run `node 08_developer_tooling/anomaly-detector.mjs --notify`
 
 ### Log Locations
 

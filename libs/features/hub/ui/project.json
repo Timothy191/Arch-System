@@ -1,0 +1,6 @@
+{
+  "name": "features-hub-ui",
+  "tags": ["scope:hub", "type:ui", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "02_domain_libraries/features/hub/ui/src"
+}

@@ -1,18 +1,18 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "ignorePatterns": [
-    "pkgs/typescript-config/**",
-    "pkgs/eslint-toolchain/**",
-    "docs/wiki/**",
-    "apps/portal/public/css/fuxa-light-theme.css",
-    "tools/**",
+    "01_platform_packages/typescript-config/**",
+    "01_platform_packages/eslint-07_toolchain_configuration/**",
+    "06_technical_documentation/wiki/**",
+    "00_applications/portal/public/css/fuxa-light-theme.css",
+    "08_developer_tooling/**",
     "**/node_modules/**"
   ],
   "duplicates": {
     "enabled": false,
     "minLines": 100000,
     "minTokens": 100000,
-    "ignore": ["**/database.types.ts", "tools/**", "**/tests/**", "**/*.test.ts", "**/*.test.tsx"]
+    "ignore": ["**/database.types.ts", "08_developer_tooling/**", "**/tests/**", "**/*.test.ts", "**/*.test.tsx"]
   },
   "rules": {
     "unused-files": "warn",

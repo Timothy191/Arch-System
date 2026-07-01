@@ -125,7 +125,7 @@ All authenticated mutations are logged to `audit_logs`. See [[monitoring-error-t
 
 ## Local Dev RLS
 
-For local development, `ops/local-deploy.sh` disables RLS on all tables after applying migrations:
+For local development, `03_operations_automation/local-deploy.sh` disables RLS on all tables after applying migrations:
 
 ```sql
 DO $$ DECLARE r RECORD;

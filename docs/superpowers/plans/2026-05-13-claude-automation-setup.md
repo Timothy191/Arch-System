@@ -32,9 +32,9 @@ Expected: Contains only `enabledPlugins`.
   },
   "hooks": {
     "PostToolUse:Edit": [
-      "If the edited file is TypeScript or TSX (ends with .ts or .tsx), run `cd apps/portal && npx tsc --noEmit` to verify types. Report any errors.",
-      "If the edited file is under apps/portal/, run `cd apps/portal && npx eslint <file_path> --max-warnings 0` to verify lint. Report any errors.",
-      "If the edited file is under apps/portal/ and is a TSX component, verify it does NOT use `font-bold`, `font-semibold`, `bg-white/5`, `border-white/10`, `text-white/50`, `text-white/70`, `shadow`, `box-shadow`, or direct `clsx`/`twMerge` imports. Report any violations."
+      "If the edited file is TypeScript or TSX (ends with .ts or .tsx), run `cd 00_applications/portal && npx tsc --noEmit` to verify types. Report any errors.",
+      "If the edited file is under 00_applications/portal/, run `cd 00_applications/portal && npx eslint <file_path> --max-warnings 0` to verify lint. Report any errors.",
+      "If the edited file is under 00_applications/portal/ and is a TSX component, verify it does NOT use `font-bold`, `font-semibold`, `bg-white/5`, `border-white/10`, `text-white/50`, `text-white/70`, `shadow`, `box-shadow`, or direct `clsx`/`twMerge` imports. Report any violations."
     ]
   }
 }
@@ -108,7 +108,7 @@ disable-model-invocation: false
 ## Testing
 - Unit tests: Jest with `ts-jest`, files: `<name>.test.ts` or `<name>.test.tsx`
 - Mock `@repo/supabase`, never `@supabase/supabase-js`
-- E2E: Playwright, files: `e2e/<name>.spec.ts`, baseURL `http://localhost:3000`
+- E2E: Playwright, files: `09_end_to_end_verification/<name>.spec.ts`, baseURL `http://localhost:3000`
 ```
 
 - [ ] **Step 3: Verify skill file exists**
@@ -137,7 +137,7 @@ Run: `mkdir -p .claude/agents`
 
 ## Role
 
-You are a strict design-system auditor for the Plantcor OS portal. Your job is to catch visual regressions, forbidden Tailwind classes, and convention violations in any diff touching `apps/portal/**` or `pkgs/ui/**`.
+You are a strict design-system auditor for the Plantcor OS portal. Your job is to catch visual regressions, forbidden Tailwind classes, and convention violations in any diff touching `00_applications/portal/**` or `01_platform_packages/ui/**`.
 
 ## Forbidden Patterns (report each occurrence)
 
@@ -212,7 +212,7 @@ Expected: No output (exit 0).
 
 **Files:**
 
-- Create: `apps/portal/middleware.test.ts`
+- Create: `00_applications/portal/middleware.test.ts`
 
 **Context:** The `normalizeRole` function in `middleware.ts` has no tests. It must handle string roles, empty strings, undefined/null, and non-string values.
 
@@ -251,7 +251,7 @@ describe("normalizeRole", () => {
 
 - [ ] **Step 2: Export `normalizeRole` from middleware.ts**
 
-Modify `apps/portal/middleware.ts` to export the function so it is testable:
+Modify `00_applications/portal/middleware.ts` to export the function so it is testable:
 
 ```typescript
 // Change from:
@@ -262,7 +262,7 @@ export function normalizeRole(role: unknown): string {
 
 - [ ] **Step 3: Run the test and verify it passes**
 
-Run: `cd apps/portal && npx jest middleware.test.ts --no-coverage`
+Run: `cd 00_applications/portal && npx jest middleware.test.ts --no-coverage`
 Expected: 5 tests pass.
 
 ---
@@ -271,7 +271,7 @@ Expected: 5 tests pass.
 
 **Files:**
 
-- Create: `e2e/login.spec.ts`
+- Create: `09_end_to_end_verification/login.spec.ts`
 
 **Context:** There are no E2E tests. The login page at `/login` is the most critical user flow. We need a smoke test that verifies the page renders and has a functional form.
 
@@ -300,12 +300,12 @@ test.describe("login page", () => {
 
 - [ ] **Step 2: Verify test file exists**
 
-Run: `ls -la e2e/login.spec.ts`
+Run: `ls -la 09_end_to_end_verification/login.spec.ts`
 Expected: File exists.
 
 - [ ] **Step 3: Run E2E test (if dev server is available)**
 
-Run: `cd apps/portal && npx playwright test e2e/login.spec.ts --project=chromium`
+Run: `cd 00_applications/portal && npx playwright test 09_end_to_end_verification/login.spec.ts --project=chromium`
 Note: Requires `pnpm dev` running on localhost:3000. If not running, skip and document.
 
 ---
@@ -314,23 +314,23 @@ Note: Requires `pnpm dev` running on localhost:3000. If not running, skip and do
 
 - [ ] **Step 1: Type-check portal**
 
-Run: `cd apps/portal && npx tsc --noEmit`
+Run: `cd 00_applications/portal && npx tsc --noEmit`
 Expected: 0 errors.
 
 - [ ] **Step 2: Lint portal**
 
-Run: `cd apps/portal && npx eslint . --max-warnings 0`
+Run: `cd 00_applications/portal && npx eslint . --max-warnings 0`
 Expected: 0 errors. (Note: pre-existing monorepo ESLint resolution issues may require `--no-verify` on commit, but lint itself should be clean for portal files.)
 
 - [ ] **Step 3: Run Jest tests**
 
-Run: `cd apps/portal && npx jest --no-coverage`
+Run: `cd 00_applications/portal && npx jest --no-coverage`
 Expected: All tests pass (including the new `middleware.test.ts`).
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add .claude/settings.json .claude/skills/project-conventions/SKILL.md .claude/agents/design-system-reviewer.md .mcp.json apps/portal/middleware.test.ts e2e/login.spec.ts apps/portal/middleware.ts
+git add .claude/settings.json .claude/skills/project-conventions/SKILL.md .claude/agents/design-system-reviewer.md .mcp.json 00_applications/portal/middleware.test.ts 09_end_to_end_verification/login.spec.ts 00_applications/portal/middleware.ts
 git commit -m "chore(automation): add Claude quality gates, design-system reviewer, MCP servers, and initial tests
 
 - Add PostToolUse hooks for type-check, lint, and design-system regression guard

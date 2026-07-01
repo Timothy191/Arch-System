@@ -5,7 +5,7 @@ updated: 2026-05-15
 type: decision
 status: accepted
 tags: [adr, react, upgrade, decision]
-sources: [CLAUDE.md, docs/wiki/concepts/portal-app-architecture.md]
+sources: [CLAUDE.md, 06_technical_documentation/wiki/concepts/portal-app-architecture.md]
 confidence: medium
 ---
 
@@ -29,17 +29,17 @@ However, the ecosystem was still adapting. We needed to decide:
 
 - Adopt React 19 early or stay on 18?
 - How to handle package compatibility?
-- What to do about `apps/overview` (React 18)?
+- What to do about `00_applications/overview` (React 18)?
 
 ## Decision
 
-We will **adopt React 19 for the main portal and shared packages**, with **apps/overview remaining on React 18** temporarily.
+We will **adopt React 19 for the main portal and shared packages**, with **00_applications/overview remaining on React 18** temporarily.
 
 ### Implementation Strategy
 
-1. **Portal app** (`apps/portal`) — React 19 via `catalog:react19`
+1. **Portal app** (`00_applications/portal`) — React 19 via `catalog:react19`
 2. **Shared packages** (`@repo/ui`, `@repo/theme`, etc.) — React 19
-3. **Overview app** (`apps/overview`) — React 18 (isolated)
+3. **Overview app** (`00_applications/overview`) — React 18 (isolated)
 4. **No cross-app component sharing** — Prevent version conflicts
 
 ## Consequences
@@ -83,9 +83,9 @@ If critical issues arise:
 3. Fork and patch incompatible packages
 4. Report issues to maintainers
 
-## apps/overview Isolation
+## 00_applications/overview Isolation
 
-`apps/overview` uses React 18 intentionally:
+`00_applications/overview` uses React 18 intentionally:
 
 - Static visualization dashboard
 - No interactivity requirements
@@ -94,7 +94,7 @@ If critical issues arise:
 
 ```typescript
 // DANGER: Never do this
-// apps/overview/components/chart.tsx
+// 00_applications/overview/components/chart.tsx
 export { Chart } from "../../overview/components/chart"; // React 18!
 
 // SAFE: Always do this
@@ -112,7 +112,7 @@ import { Chart } from "@repo/ui"; // React 19 compatible
 ### Future (2025)
 
 - Upgrade `@react-three/fiber` to v9 when released
-- Upgrade `apps/overview` to React 19 when chart library supports
+- Upgrade `00_applications/overview` to React 19 when chart library supports
 - Remove React 18 from monorepo entirely
 
 ## Alternatives Considered
@@ -125,7 +125,7 @@ import { Chart } from "@repo/ui"; // React 19 compatible
 
 ### Upgrade Everything to React 19 (REJECTED)
 
-- `apps/overview` chart library incompatible
+- `00_applications/overview` chart library incompatible
 - Forcing upgrade would break visualizations
 - Isolated approach safer
 

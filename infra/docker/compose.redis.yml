@@ -1,4 +1,4 @@
-# Deprecated — use cache/docker-compose.yml (pnpm redis:dev)
+# Deprecated — use 12_distributed_cache_runtime/docker-compose.yml (pnpm redis:dev)
 # Kept for backward compatibility with Makefile targets.
 
 version: "3.8"

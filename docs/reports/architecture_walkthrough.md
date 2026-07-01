@@ -20,7 +20,7 @@ The Arch-Systems Mining Operations Portal is built as a highly scalable Next.js 
 
 ### ⚡ Caching Tier Breakdown
 
-The caching system operates in a **Write-Through** pattern with two specific layers defined in `@repo/cache/cache`:
+The caching system operates in a **Write-Through** pattern with two specific layers defined in `@repo/12_distributed_cache_runtime/cache`:
 
 | Layer        | Type              | Mechanism                                                      | Latency         | TTL              | Purpose                                                                                   |
 | :----------- | :---------------- | :------------------------------------------------------------- | :-------------- | :--------------- | :---------------------------------------------------------------------------------------- |
@@ -96,4 +96,4 @@ Continuous vigilance is powered by a multi-channel instrumentation pipeline:
 ---
 
 > [!TIP]
-> The source scripts for compiling these images can be found in [generate_map.py](generate_map.py) and [generate_all_maps.py](generate_all_maps.py). Run `python3 docs/reports/generate_all_maps.py` to regenerate all four PNG maps.
+> The source scripts for compiling these images can be found in [generate_map.py](generate_map.py) and [generate_all_maps.py](generate_all_maps.py). Run `python3 06_technical_documentation/reports/generate_all_maps.py` to regenerate all four PNG maps.

@@ -1,6 +1,6 @@
 /**
  * Cost Monitoring Script
- * Usage: node tools/cost-monitor.mjs [--notify]
+ * Usage: node 08_developer_tooling/cost-monitor.mjs [--notify]
  *
  * Monitors cloud service costs against configured budgets
  * Sends alerts when thresholds are exceeded
@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
-const CONFIG_PATH = join(rootDir, "toolchain/cost-monitoring.json");
+const CONFIG_PATH = join(rootDir, "07_toolchain_configuration/cost-monitoring.json");
 
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);

@@ -6,7 +6,7 @@ Purpose: steps to follow when the portal reports "System Unavailable" or auth fa
 
 - Confirm Sentry for recent auth errors: search for "Invalid Refresh Token", "Refresh Token Not Found", or spikes in auth failures.
 - Check Redis status (cache) and Supabase health (auth, db) logs.
-- Look at middleware logs (apps/portal/proxy.ts) for signout events.
+- Look at middleware logs (00_applications/portal/proxy.ts) for signout events.
 
 2. Immediate mitigations
 

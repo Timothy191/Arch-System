@@ -402,7 +402,7 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 
 **Author:** Design Engineering Team  
 **Date:** 2026-05-29  
-**Target:** Monorepo (`pkgs/theme`, `pkgs/ui`, apps consuming these packages)  
+**Target:** Monorepo (`01_platform_packages/theme`, `01_platform_packages/ui`, apps consuming these packages)  
 **Objective:** Elevate the design system from static documentation to a living, enforceable code reality with unified components, rigorous accessibility, and top‑tier quality gates.
 
 ---
@@ -444,7 +444,7 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 ### 1.3 Dependencies
 
 - **Monorepo tooling**: `pnpm` workspaces, Nx.
-- **Theme package build**: `pkgs/theme` must be buildable (`tsup`, `vite`, or custom script).
+- **Theme package build**: `01_platform_packages/theme` must be buildable (`tsup`, `vite`, or custom script).
 - **UI package**: React 18+, Tailwind CSS 3.3+.
 - **Testing**: Vitest + React Testing Library (unit), Playwright/Cypress (E2E), Chromatic/Percy (visual).
 
@@ -459,7 +459,7 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 #### 2.1.1 Locate and Prepare Configuration Files
 
 ```bash
-pkgs/theme/
+01_platform_packages/theme/
 ├── src/
 │   ├── variables.css      # CSS custom properties
 │   ├── preset.ts          # Tailwind preset (extend theme)
@@ -508,7 +508,7 @@ _Note:_ Keep existing variables (like `--color-bg-base`) untouched. Only **add**
 #### 2.1.3 Extend Tailwind Preset in `preset.ts`
 
 ```ts
-// pkgs/theme/src/preset.ts
+// 01_platform_packages/theme/src/preset.ts
 import { Config } from "tailwindcss";
 
 export const preset: Partial<Config> = {
@@ -561,7 +561,7 @@ pnpm --filter @repo/theme codegen # generates TypeScript types for tokens (if co
 
 #### 2.1.5 Token Linting & Quality Gate
 
-Add a linting script in `pkgs/theme/package.json`:
+Add a linting script in `01_platform_packages/theme/package.json`:
 
 ```json
 "lint:tokens": "stylelint src/variables.css --config .stylelintrc.json"
@@ -577,7 +577,7 @@ Run lint and fix automatically if possible.
 
 #### 2.1.6 Verify Consumption
 
-In a consuming app (e.g., `apps/portal`), test new utility classes:
+In a consuming app (e.g., `00_applications/portal`), test new utility classes:
 
 ```tsx
 <div className="bg-hud text-hud-text-primary rounded-xl shadow-lg opacity-focus-dim">HUD Panel</div>
@@ -596,7 +596,7 @@ Ensure styles resolve correctly at compile time.
 ### 3.1 Component Architecture
 
 ```tsx
-// pkgs/ui/src/components/GlassCard/GlassCard.tsx
+// 01_platform_packages/ui/src/components/GlassCard/GlassCard.tsx
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "spotlight" | "glowborder";
@@ -703,8 +703,8 @@ Search monorepo for `<SpotlightCard` and `<GlowBorderCard`:
 #### 3.2.5 Deprecation & Cleanup
 
 ```bash
-git rm pkgs/ui/src/components/SpotlightCard.tsx
-git rm pkgs/ui/src/components/GlowBorderCard.tsx
+git rm 01_platform_packages/ui/src/components/SpotlightCard.tsx
+git rm 01_platform_packages/ui/src/components/GlowBorderCard.tsx
 ```
 
 Update barrel exports (`index.ts`) to remove old components.
@@ -822,7 +822,7 @@ Add to `.github/workflows/ci.yml` (or equivalent):
 
 - Write a migration guide from `SpotlightCard` / `GlowBorderCard` to `GlassCard`.
 - Create a token usage cheat sheet for developers.
-- Add a “Design System” README inside `pkgs/theme`.
+- Add a “Design System” README inside `01_platform_packages/theme`.
 
 ### 5.4 Future‑Proofing
 
@@ -940,7 +940,7 @@ The panels are the functional heart of the hub—transforming the ethereal hero 
 ## GlassCard API
 
 **Component:** `GlassCard`  
-**Path:** `pkgs/ui/src/components/GlassCard.tsx` (or similar)  
+**Path:** `01_platform_packages/ui/src/components/GlassCard.tsx` (or similar)  
 **Role:** The foundational surface primitive for all elevated content in the portal. It enforces a glass‑morphism language through variants, semantic tokens, and strict motion constraints.
 
 ### Variants

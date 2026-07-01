@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: query
 tags: [how-to, deployment, production, quick-reference]
-sources: [docs/wiki/concepts/deployment.md, docs/wiki/concepts/incident-response.md]
+sources: [06_technical_documentation/wiki/concepts/deployment.md, 06_technical_documentation/wiki/concepts/incident-response.md]
 confidence: high
 ---
 
@@ -41,7 +41,7 @@ pnpm --filter portal test
 ### 2. Database Review
 
 ```bash
-cd pkgs/database
+cd 01_platform_packages/database
 
 # See pending migrations
 pnpm supabase migration list
@@ -62,9 +62,9 @@ Verify production `.env`:
 
 ```bash
 # Required
-cat apps/portal/.env | grep NEXT_PUBLIC_SUPABASE_URL
-cat apps/portal/.env | grep SUPABASE_SERVICE_KEY
-cat apps/portal/.env | grep GROQ_API_KEY
+cat 00_applications/portal/.env | grep NEXT_PUBLIC_SUPABASE_URL
+cat 00_applications/portal/.env | grep SUPABASE_SERVICE_KEY
+cat 00_applications/portal/.env | grep GROQ_API_KEY
 
 # Should return values, not empty
 ```
@@ -112,7 +112,7 @@ git push origin feature/my-feature
 
 ```bash
 # If only database changed, no code deploy needed
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase:push
 ```
 
@@ -127,7 +127,7 @@ pnpm supabase:push
 pnpm dlx vercel --target=staging
 
 # Deploy database (if migrations exist)
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase:push
 
 # Run smoke tests
@@ -146,7 +146,7 @@ BASE_URL=https://staging.arch-systems.com pnpm test:e2e
 
 ```bash
 # Backup database before deploy
-cd pkgs/database
+cd 01_platform_packages/database
 supabase db dump --db-url "$PRODUCTION_DB_URL" -f backups/pre-deploy-$(date +%Y%m%d-%H%M).sql
 ```
 
@@ -159,7 +159,7 @@ supabase db dump --db-url "$PRODUCTION_DB_URL" -f backups/pre-deploy-$(date +%Y%
 pnpm dlx vercel --prod
 
 # 2. Deploy database (if needed)
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase:push
 
 # 3. Monitor
@@ -209,13 +209,13 @@ psql "$PRODUCTION_DB_URL" < backups/pre-deploy-YYYYMMDD.sql
 
 ```sql
 -- Create reverse migration
--- pkgs/database/migrations/XXX_reverse_bad_change.sql
+-- 01_platform_packages/database/migrations/XXX_reverse_bad_change.sql
 
 -- Example: Drop a column you just added
 ALTER TABLE machines DROP COLUMN IF EXISTS bad_column;
 
 -- Then push
-cd pkgs/database && pnpm supabase:push
+cd 01_platform_packages/database && pnpm supabase:push
 ```
 
 ---
@@ -397,11 +397,11 @@ git clone <repo-url> /opt/arch-systems
 cd /opt/arch-systems
 
 # Configure environment
-cp apps/portal/.env.example apps/portal/.env
+cp 00_applications/portal/.env.example 00_applications/portal/.env
 # Edit .env with production Supabase keys, AI provider keys
 
 # Launch full stack (identical to local dev)
-./ops/deploy.sh local
+./03_operations_automation/deploy.sh local
 ```
 
 ### Step 3: Verify

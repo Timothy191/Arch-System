@@ -6,9 +6,9 @@ type: query
 tags: [troubleshooting, rls, database, quick-reference]
 sources:
   [
-    docs/wiki/concepts/rls-policy.md,
-    docs/wiki/concepts/troubleshooting.md,
-    docs/wiki/concepts/database-schema.md,
+    06_technical_documentation/wiki/concepts/rls-policy.md,
+    06_technical_documentation/wiki/concepts/troubleshooting.md,
+    06_technical_documentation/wiki/concepts/database-schema.md,
   ]
 confidence: high
 ---
@@ -226,7 +226,7 @@ SELECT * FROM handle_new_user();
 
 ```bash
 # Check production migration status
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase migration list
 
 # Push missing migrations

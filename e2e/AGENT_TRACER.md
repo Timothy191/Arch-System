@@ -6,8 +6,8 @@
 
 **Changes made:**
 
-- Improved error handling in `tools/apply-project-tags.cjs` for robust package.json parsing with try-catch blocks and detailed error messages
-- Added comprehensive inline documentation to `apply-project-tags.cjs` documenting tag vocabulary (scope:app, scope:package, scope:tool, etc.) and tools/ subdirectory handling rationale
+- Improved error handling in `08_developer_tooling/apply-project-tags.cjs` for robust package.json parsing with try-catch blocks and detailed error messages
+- Added comprehensive inline documentation to `apply-project-tags.cjs` documenting tag vocabulary (scope:app, scope:package, scope:tool, etc.) and 08_developer_tooling/ subdirectory handling rationale
 - Added dependency constraints to `nx.json` enforcing architectural rules:
   - Apps can only depend on packages (not other apps)
   - Apps cannot depend on database internals (scope:package:db-internal)
@@ -16,9 +16,9 @@
   - Tools cannot depend on apps or Supabase
   - Packages cannot depend on apps
 - Added tag vocabulary documentation section to `AGENTS.md` explaining the Nx project tagging system and dependency constraints
-- Integrated automatic tag generation into pre-commit hooks via lint-staged - now runs `node tools/apply-project-tags.cjs` whenever project.json files are modified
+- Integrated automatic tag generation into pre-commit hooks via lint-staged - now runs `node 08_developer_tooling/apply-project-tags.cjs` whenever project.json files are modified
 
-**Next agent:** The monorepo now has automatic architectural enforcement through Nx dependency constraints. The tagging system is documented in AGENTS.md under "Nx Project Tags & Architectural Enforcement". When adding new projects, run `node tools/apply-project-tags.cjs` to ensure proper tagging. The pre-commit hook will automatically re-tag projects when project.json files are modified. Dependency violations will be caught by Nx's enforcement rules.
+**Next agent:** The monorepo now has automatic architectural enforcement through Nx dependency constraints. The tagging system is documented in AGENTS.md under "Nx Project Tags & Architectural Enforcement". When adding new projects, run `node 08_developer_tooling/apply-project-tags.cjs` to ensure proper tagging. The pre-commit hook will automatically re-tag projects when project.json files are modified. Dependency violations will be caught by Nx's enforcement rules.
 
 ---
 

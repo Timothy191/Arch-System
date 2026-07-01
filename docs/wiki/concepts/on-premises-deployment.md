@@ -10,7 +10,7 @@
 
 ## Overview
 
-The portal currently runs fully in local development via `./ops/deploy.sh local`. The production deployment target is an **on-premises Linux server** at the mining site — not a cloud provider. This is intentional for network isolation, data sovereignty, and offline resilience in remote mine environments.
+The portal currently runs fully in local development via `./03_operations_automation/deploy.sh local`. The production deployment target is an **on-premises Linux server** at the mining site — not a cloud provider. This is intentional for network isolation, data sovereignty, and offline resilience in remote mine environments.
 
 The deployment script is already production-identical. Moving to production is a matter of provisioning the server, installing prerequisites, and running the same script.
 
@@ -100,11 +100,11 @@ git clone <repo-url> /opt/arch-systems
 cd /opt/arch-systems
 
 # Copy and configure production environment
-cp apps/portal/.env.production.example apps/portal/.env
+cp 00_applications/portal/.env.production.example 00_applications/portal/.env
 # Edit .env: fill in server IP, Supabase keys, AI keys, Redis password
 
 # Deploy
-./ops/deploy.sh production
+./03_operations_automation/deploy.sh production
 ```
 
 - [ ] Verify all containers start: `docker compose ps`
@@ -142,7 +142,7 @@ cp apps/portal/.env.production.example apps/portal/.env
 Developer Machine                  Production Server
 ─────────────────                  ─────────────────
   git push                   →       git pull
-  (or manual copy)                   ./ops/deploy.sh local
+  (or manual copy)                   ./03_operations_automation/deploy.sh local
                                      docker compose up -d
                                      → All services restart
 ```
@@ -150,13 +150,13 @@ Developer Machine                  Production Server
 For quick production updates (git pull + restart without rebuilding):
 
 ```bash
-./ops/deploy.sh production --skip-build
+./03_operations_automation/deploy.sh production --skip-build
 ```
 
 Install as a systemd service for auto-start on boot:
 
 ```bash
-sudo cp infra/systemd/arch-systems.service /etc/systemd/system/
+sudo cp 10_infrastructure_as_code/systemd/arch-systems.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now arch-systems
 # Check status:
@@ -168,7 +168,7 @@ journalctl -u arch-systems -f
 
 ## Environment Variables
 
-Critical production values to configure in `apps/portal/.env`:
+Critical production values to configure in `00_applications/portal/.env`:
 
 ```bash
 # Supabase

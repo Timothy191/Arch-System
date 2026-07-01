@@ -5,13 +5,13 @@ export default {
   lintFormatting: false,
   semverGroups: [
     {
-      packages: ["apps/*"],
+      packages: ["00_applications/*"],
       dependencyTypes: ["prod", "dev"],
       range: "",
       label: "Apps should pin dependencies and devDependencies",
     },
     {
-      packages: ["pkgs/*"],
+      packages: ["01_platform_packages/*"],
       dependencyTypes: ["peer"],
       range: "^",
       label: "Packages should use ^ for peerDependencies",

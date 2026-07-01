@@ -33,15 +33,15 @@
   "ignore": [
     "**/jest.config.*",
     "**/postcss.config.*",
-    "pkgs/contract/scripts/generate-spec-local.js",
-    "pkgs/ui/storybook-static/**"
+    "01_platform_packages/contract/scripts/generate-spec-local.js",
+    "01_platform_packages/ui/storybook-static/**"
   ],
   "workspaces": {
     ".": {
-      "entry": ["ops/**/*.{ts,js}", ".eslintrc.{js,cjs}"],
-      "project": ["ops/**/*.{ts,js}"]
+      "entry": ["03_operations_automation/**/*.{ts,js}", ".eslintrc.{js,cjs}"],
+      "project": ["03_operations_automation/**/*.{ts,js}"]
     },
-    "apps/portal": {
+    "00_applications/portal": {
       "entry": [
         "app/**/layout.tsx",
         "app/**/page.tsx",
@@ -83,30 +83,30 @@
         "lib/feature-flags.ts"
       ]
     },
-    "apps/cms": {
+    "00_applications/cms": {
       "entry": [".eslintrc.{js,cjs}"],
       "project": ["app/**/*.{ts,tsx}"]
     },
-    "apps/overview": {
+    "00_applications/overview": {
       "entry": [".eslintrc.{js,cjs}"],
       "project": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"]
     },
-    "pkgs/theme": {
+    "01_platform_packages/theme": {
       "entry": ["src/tokens/*.ts", "src/react/*.tsx", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.{ts,tsx,css}"],
       "ignore": ["src/tokens/colors.ts", "src/tokens/motion.ts"]
     },
-    "pkgs/database": {
+    "01_platform_packages/database": {
       "entry": [".eslintrc.{js,cjs}"],
       "project": ["migrations/**/*.sql"],
       "ignore": ["supabase/migrations/**"]
     },
-    "pkgs/eslint-config": {
+    "01_platform_packages/eslint-config": {
       "entry": ["*.js"],
       "project": ["*.js"],
       "ignoreDependencies": ["eslint-import-resolver-typescript"]
     },
-    "pkgs/supabase": {
+    "01_platform_packages/supabase": {
       "entry": [
         "src/index.ts",
         "src/server.ts",
@@ -118,20 +118,20 @@
       "project": ["src/**/*.ts"],
       "ignore": ["src/database.types.ts"]
     },
-    "pkgs/errors": {
+    "01_platform_packages/errors": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"]
     },
-    "pkgs/typescript-config": {
+    "01_platform_packages/typescript-config": {
       "entry": ["*.json"],
       "project": ["*.json"],
       "ignoreDependencies": ["next"]
     },
-    "pkgs/utils": {
+    "01_platform_packages/utils": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"]
     },
-    "pkgs/ui": {
+    "01_platform_packages/ui": {
       "entry": ["src/**/*.tsx", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.{ts,tsx,css}"],
       "ignore": [
@@ -141,11 +141,11 @@
         "src/components/WorkflowBuilder.tsx"
       ]
     },
-    "pkgs/redis": {
+    "01_platform_packages/redis": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"]
     },
-    "pkgs/rate-limiter": {
+    "01_platform_packages/rate-limiter": {
       "entry": ["src/index.ts", ".eslintrc.{js,cjs}"],
       "project": ["src/**/*.ts"]
     }

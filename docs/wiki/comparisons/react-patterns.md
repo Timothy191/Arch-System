@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [react, architecture, nextjs, decision]
-sources: [docs/wiki/concepts/portal-app-architecture.md, CLAUDE.md]
+sources: [06_technical_documentation/wiki/concepts/portal-app-architecture.md, CLAUDE.md]
 confidence: high
 ---
 

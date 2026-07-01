@@ -2,20 +2,20 @@
 
 /**
  * @fileoverview Auto-tags Nx projects with scope tags based on directory location.
- * Usage: node tools/apply-project-tags.cjs
+ * Usage: node 08_developer_tooling/apply-project-tags.cjs
  */
 //
 // Tag every Nx project with its scope:* tag based on path.
-// See tools/policy-compiler.cjs for the canonical tag vocabulary.
+// See 08_developer_tooling/policy-compiler.cjs for the canonical tag vocabulary.
 //
 // Tag Vocabulary:
-// - scope:app - All applications in apps/
+// - scope:app - All applications in 00_applications/
 // - scope:app:<name> - Specific app (e.g., scope:app:portal)
-// - scope:package - All packages in pkgs/
+// - scope:package - All packages in 01_platform_packages/
 // - scope:package:<name> - Specific package (e.g., scope:package:ui)
 // - scope:package:db - Database package (architectural significance)
 // - scope:package:db-internal - Database internals (restricted access)
-// - scope:tool - Build-time tools in tools/
+// - scope:tool - Build-time tools in 08_developer_tooling/
 //
 // Tools Subdirectory Handling:
 // Only specific tools subdirectories are tagged as they contain build-time scripts:
@@ -23,10 +23,10 @@
 // - n8n-mcp - n8n MCP server integration
 // - preflight-mcp - Preflight MCP server integration
 // - policy - Policy compilation and enforcement
-// Other tools/ subdirectories are excluded as they may contain transient files or utilities
+// Other 08_developer_tooling/ subdirectories are excluded as they may contain transient files or utilities
 // that don't require Nx project tagging.
 //
-// Usage: node tools/apply-project-tags.cjs
+// Usage: node 08_developer_tooling/apply-project-tags.cjs
 // Run this after adding new projects or when project structure changes.
 //
 
@@ -34,11 +34,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const APPS_DIR = path.join(ROOT, "apps");
-const PACKAGES_DIR = path.join(ROOT, "pkgs");
-const LIBS_FEATURES_DIR = path.join(ROOT, "libs", "features");
-const LIBS_SHARED_DIR = path.join(ROOT, "libs", "shared");
-const TOOLS_DIR = path.join(ROOT, "tools");
+const APPS_DIR = path.join(ROOT, "00_applications");
+const PACKAGES_DIR = path.join(ROOT, "01_platform_packages");
+const LIBS_FEATURES_DIR = path.join(ROOT, "02_domain_libraries", "features");
+const LIBS_SHARED_DIR = path.join(ROOT, "02_domain_libraries", "shared");
+const TOOLS_DIR = path.join(ROOT, "08_developer_tooling");
 
 // Explicitly tagged tools subdirectories (build-time scripts requiring Nx integration)
 const TAGGED_TOOLS = ["wiki-viewer", "preflight-mcp", "policy"];
@@ -52,11 +52,11 @@ const TAGGED_TOOLS = ["wiki-viewer", "preflight-mcp", "policy"];
  */
 function deriveTags(projectName, projectPath) {
   const tags = new Set();
-  if (projectPath.startsWith("apps/")) {
+  if (projectPath.startsWith("00_applications/")) {
     tags.add("scope:app");
     const name = projectName.replace(/^@?[a-z0-9-]*\//, "");
     tags.add("scope:app:" + name);
-  } else if (projectPath.startsWith("pkgs/")) {
+  } else if (projectPath.startsWith("01_platform_packages/")) {
     tags.add("scope:package");
     const name = projectName.replace(/^@?[a-z0-9-]*\//, "");
     tags.add("scope:package:" + name);
@@ -64,12 +64,12 @@ function deriveTags(projectName, projectPath) {
       tags.add("scope:package:db");
       tags.add("scope:package:db-internal");
     }
-  } else if (projectPath.startsWith("libs/features/")) {
+  } else if (projectPath.startsWith("02_domain_libraries/features/")) {
     tags.add("scope:feature");
-  } else if (projectPath.startsWith("libs/shared/")) {
+  } else if (projectPath.startsWith("02_domain_libraries/shared/")) {
     tags.add("scope:package");
     tags.add("scope:feature");
-  } else if (projectPath.startsWith("tools/")) {
+  } else if (projectPath.startsWith("08_developer_tooling/")) {
     tags.add("scope:tool");
   }
   return Array.from(tags);
@@ -114,10 +114,10 @@ function ensureProjectJson(projectName, projectPath) {
 
 const targets = [];
 for (const n of fs.readdirSync(APPS_DIR)) {
-  targets.push({ name: n, p: path.join("apps", n) });
+  targets.push({ name: n, p: path.join("00_applications", n) });
 }
 for (const n of fs.readdirSync(PACKAGES_DIR)) {
-  targets.push({ name: n, p: path.join("pkgs", n) });
+  targets.push({ name: n, p: path.join("01_platform_packages", n) });
 }
 if (fs.existsSync(LIBS_FEATURES_DIR)) {
   for (const feature of fs.readdirSync(LIBS_FEATURES_DIR)) {
@@ -126,7 +126,7 @@ if (fs.existsSync(LIBS_FEATURES_DIR)) {
     for (const layer of fs.readdirSync(featureDir)) {
       const layerDir = path.join(featureDir, layer);
       if (fs.statSync(layerDir).isDirectory()) {
-        targets.push({ name: layer, p: path.join("libs", "features", feature, layer) });
+        targets.push({ name: layer, p: path.join("02_domain_libraries", "features", feature, layer) });
       }
     }
   }
@@ -135,14 +135,14 @@ if (fs.existsSync(LIBS_SHARED_DIR)) {
   for (const n of fs.readdirSync(LIBS_SHARED_DIR)) {
     const sharedDir = path.join(LIBS_SHARED_DIR, n);
     if (fs.statSync(sharedDir).isDirectory()) {
-      targets.push({ name: n, p: path.join("libs", "shared", n) });
+      targets.push({ name: n, p: path.join("02_domain_libraries", "shared", n) });
     }
   }
 }
 if (fs.existsSync(TOOLS_DIR)) {
   for (const n of fs.readdirSync(TOOLS_DIR)) {
     if (TAGGED_TOOLS.includes(n)) {
-      targets.push({ name: n, p: path.join("tools", n) });
+      targets.push({ name: n, p: path.join("08_developer_tooling", n) });
     }
   }
 }

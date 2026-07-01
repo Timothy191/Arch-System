@@ -131,7 +131,7 @@
 
 ### High Priority
 
-1. **On-premises server provisioning** — Deploy to mining site Linux server via `./ops/deploy.sh local`.
+1. **On-premises server provisioning** — Deploy to mining site Linux server via `./03_operations_automation/deploy.sh local`.
 2. **E2E test coverage** — Expand Playwright critical path tests (login, department nav, AI chat, admin).
 3. **Mobile PWA** — Offline queue, service worker, touch-optimized forms.
 
@@ -145,9 +145,9 @@
 
 ## Resources
 
-- **Stability Analysis**: `docs/wiki/project-stability-analysis.md`
-- **Nx Monorepo Structure**: `docs/wiki/concepts/nx-monorepo.md`
-- **AI Service**: `docs/wiki/concepts/ai-service.md`
+- **Stability Analysis**: `06_technical_documentation/wiki/project-stability-analysis.md`
+- **Nx Monorepo Structure**: `06_technical_documentation/wiki/concepts/nx-monorepo.md`
+- **AI Service**: `06_technical_documentation/wiki/concepts/ai-service.md`
 - **Error Package**: `@repo/errors` (ready to use)
 - **Quality Tools**: knip, markdownlint, reviewdog, syncpack (all configured)
 

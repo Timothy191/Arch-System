@@ -5,7 +5,7 @@ updated: 2026-05-15
 type: decision
 status: accepted
 tags: [adr, database, backend, decision]
-sources: [docs/wiki/comparisons/database-backend.md, CLAUDE.md]
+sources: [06_technical_documentation/wiki/comparisons/database-backend.md, CLAUDE.md]
 confidence: high
 ---
 

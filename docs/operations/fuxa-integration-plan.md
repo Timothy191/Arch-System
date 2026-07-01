@@ -55,7 +55,7 @@ fuxa:
 
 ### 2. Portal Embedding
 
-Create `apps/portal/components/control-room/FuxaFrame.tsx`:
+Create `00_applications/portal/components/control-room/FuxaFrame.tsx`:
 
 ```tsx
 "use client";
@@ -119,7 +119,7 @@ FUXA supports MQTT and HTTP APIs. Bridge Supabase Realtime changes:
   that FUXA subscribes to.
 
 - **Option B**: Use FUXA's HTTP API for tag updates. Write a thin bridge service
-  (`apps/portal/app/api/scada/bridge/route.ts`) that forwards Supabase Realtime
+  (`00_applications/portal/app/api/scada/bridge/route.ts`) that forwards Supabase Realtime
   changes to FUXA's REST API.
 
 - **Option C**: Direct Postgres query. FUXA supports ODBC/Postgres connections

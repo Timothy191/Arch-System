@@ -17,7 +17,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
 
 - **Data is Sacred**: All operations must prioritize data integrity and security.
 - **Confirmation Required**: For any data-related change, I must halt execution, explain the potential impact on data, and ask for explicit confirmation before proceeding. This applies to:
-  - Database schema migrations (`pkgs/database`).
+  - Database schema migrations (`01_platform_packages/database`).
   - Data mutation logic (Server Actions, API routes).
   - Changes to authentication or authorization rules (RLS).
 
@@ -82,7 +82,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
 
 ### Performance & Load Testing
 
-- **Peak Validation**: Critical paths (login, dashboard load, telemetry updates) must be validated with load/stress tests (e.g., perf/Artillery) to handle shift-change data bursts.
+- **Peak Validation**: Critical paths (login, dashboard load, telemetry updates) must be validated with load/stress tests (e.g., 15_load_performance_testing/Artillery) to handle shift-change data bursts.
 - **Budgets**: Maintain performance budgets in CI to prevent regression.
 
 ---
@@ -98,7 +98,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
 
 ### Tailwind Configuration
 
-- The preset lives in `pkgs/theme/src/tailwind/preset.ts`.
+- The preset lives in `01_platform_packages/theme/src/tailwind/preset.ts`.
 - Components in the monorepo must import this preset for consistency.
 
 ### Animation Rules

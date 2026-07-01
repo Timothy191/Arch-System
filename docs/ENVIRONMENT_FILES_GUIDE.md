@@ -9,7 +9,7 @@ Arch-Mk2/
 ├── .env.example                        # Root development template
 ├── .env                                # Root actual environment (NEVER commit)
 ├── .env.tools                          # Docker tools template
-├── apps/
+├── 00_applications/
 │   ├── cms/
 │   │   └── .env                        # CMS-specific environment
 │   └── portal/
@@ -17,11 +17,11 @@ Arch-Mk2/
 │       ├── .env                        # Portal actual environment (NEVER commit)
 │       ├── .env.production.example     # Portal production template
 │       └── .env.portal.compose.example # Portal Docker Compose template
-├── tools/
-│   └── devdocs/
+├── 08_developer_tooling/
+│   └── dev06_technical_documentation/
 │       ├── .env.template               # Devdocs tool template
 │       └── .env                        # Devdocs tool actual environment
-└── pkgs/
+└── 01_platform_packages/
     └── eval/
         └── .env                        # Evaluation package environment
 ```
@@ -102,7 +102,7 @@ Arch-Mk2/
 
 ### Application-Specific Environment Files
 
-#### Portal Application (`apps/portal/`)
+#### Portal Application (`00_applications/portal/`)
 
 ##### `.env.example` (2.1KB)
 
@@ -155,7 +155,7 @@ Arch-Mk2/
 - Container-based deployment
 - Understanding Docker environment requirements
 
-#### CMS Application (`apps/cms/`)
+#### CMS Application (`00_applications/cms/`)
 
 ##### `.env` (174B) ⚠️ NEVER COMMIT
 
@@ -171,7 +171,7 @@ Arch-Mk2/
 
 ### Tool-Specific Environment Files
 
-#### Devdocs Tool (`tools/devdocs/`)
+#### Devdocs Tool (`08_developer_tooling/dev06_technical_documentation/`)
 
 ##### `.env.template` (1.1KB)
 
@@ -192,7 +192,7 @@ Arch-Mk2/
 - Running devdocs tool locally
 - Devdocs tool development and debugging
 
-#### Evaluation Package (`pkgs/eval/`)
+#### Evaluation Package (`01_platform_packages/eval/`)
 
 ##### `.env` (348B) ⚠️ NEVER COMMIT
 
@@ -209,7 +209,7 @@ Arch-Mk2/
 ### 1. Local Development (Portal Focus)
 
 ```
-Start → Copy apps/portal/.env.example to apps/portal/.env
+Start → Copy 00_applications/portal/.env.example to 00_applications/portal/.env
      → Fill in Supabase credentials (local: http://127.0.0.1:54321)
      → Add tool URLs if using external tools
      → Set Redis URL for caching
@@ -230,7 +230,7 @@ Start → Copy .env.example to .env
 ### 3. Docker Compose Development
 
 ```
-Start → Use apps/portal/.env.portal.compose.example as template
+Start → Use 00_applications/portal/.env.portal.compose.example as template
      → Configure for containerized deployment
      → Set up networking between containers
      → Configure volume mounts for persistence
@@ -240,7 +240,7 @@ Start → Use apps/portal/.env.portal.compose.example as template
 ### 4. Production Deployment
 
 ```
-Start → Copy apps/portal/.env.production.example to production .env
+Start → Copy 00_applications/portal/.env.production.example to production .env
      → Fill in production Supabase credentials
      → Configure production URLs (not localhost)
      → Set up production Sentry DSN

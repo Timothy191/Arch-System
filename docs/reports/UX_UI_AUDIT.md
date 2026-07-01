@@ -9,7 +9,7 @@
 
 ## 1. Accessibility Baseline Summary
 
-_Source: `pkgs/ui/A11Y_AUDIT.md` (Updated 2026-06-15)_
+_Source: `01_platform_packages/ui/A11Y_AUDIT.md` (Updated 2026-06-15)_
 
 | Category                      | Status        | Notes                                                                              |
 | ----------------------------- | ------------- | ---------------------------------------------------------------------------------- |
@@ -50,7 +50,7 @@ _KPI, GlassCard, StatusBadge, MetricTile, DataGrid, MachineCard, GaugeSimple, Sh
 - **Heuristic compliance:**
   - _Visibility of system status:_ ✅ `StatusBadge` and `KPI` use distinct, semantically-named color variants.
   - _Help users recognize, diagnose, and recover from errors:_ ❓ Not yet fully evaluated – `AlertBanner` and `ActionConfirmDialog` need workflow context.
-  - _Help & documentation:_ ❓ Control-room widgets lack inline help; documentation is maintained separately in `docs/operations/`.
+  - _Help & documentation:_ ❓ Control-room widgets lack inline help; documentation is maintained separately in `06_technical_documentation/operations/`.
 
 ### 2.3 Layout Components
 
@@ -120,7 +120,7 @@ _SidebarNav, HeaderBar, MacTitleBar_
 | 1   | Visibility of system status | Telemetry charts have no “freeze” mode, making anomaly inspection difficult. | Medium   | Add a pause/freeze toggle to live charts.                                 |
 | 2   | Error prevention            | Alarm acknowledgment is a one-click action without undo.                     | High     | Add a confirmation or 2-second “undo” snackbar.                           |
 | 3   | Flexibility & efficiency    | No keyboard shortcuts for runbook navigation.                                | Medium   | Implement arrow keys to advance/retreat through runbook steps.            |
-| 4   | Help & documentation        | No inline tooltips or links to runbooks on industrial widgets.               | Medium   | Add contextual “?” icons linking to `docs/operations/`.                   |
+| 4   | Help & documentation        | No inline tooltips or links to runbooks on industrial widgets.               | Medium   | Add contextual “?” icons linking to `06_technical_documentation/operations/`.                   |
 | 5   | User control & freedom      | Shift closeout notes are not auto-saved, risking data loss.                  | High     | Implement auto-save to local storage or a draft backend.                  |
 | 6   | Consistency & standards     | `GlassCard` blur amounts are inconsistent across pages.                      | Low      | Standardize GlassCard variants (subtle/moderate/intense) in theme tokens. |
 

@@ -6,9 +6,9 @@ type: query
 tags: [how-to, data-fetching, rsc, quick-reference]
 sources:
   [
-    docs/wiki/concepts/portal-app-architecture.md,
-    docs/wiki/concepts/state-management.md,
-    docs/wiki/concepts/ai-service.md,
+    06_technical_documentation/wiki/concepts/portal-app-architecture.md,
+    06_technical_documentation/wiki/concepts/state-management.md,
+    06_technical_documentation/wiki/concepts/ai-service.md,
   ]
 confidence: high
 ---
@@ -43,7 +43,7 @@ Do you need real-time updates?
 **Use for**: Most data fetching, initial page loads, static data
 
 ```typescript
-// apps/portal/app/(departments)/production/dashboard/page.tsx
+// 00_applications/portal/app/(departments)/production/dashboard/page.tsx
 import { createServerSupabaseClient } from '@repo/supabase/server'
 import { getDepartmentContext } from '~/lib/dept-context'
 

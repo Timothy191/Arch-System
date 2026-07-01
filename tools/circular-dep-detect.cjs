@@ -2,17 +2,17 @@
 
 /**
  * @fileoverview Detects circular dependencies within the monorepo packages and apps.
- * Usage: node tools/circular-dep-detect.cjs
+ * Usage: node 08_developer_tooling/circular-dep-detect.cjs
  */
 //
 // Detect circular dependencies in the Nx project graph.
 //
-// Walks apps/*/project.json and pkgs/*/project.json, follows
+// Walks 00_applications/*/project.json and 01_platform_packages/*/project.json, follows
 // workspace:* dependencies, and prints any cycle found. Exits non-zero
 // on cycles (CI gate).
 //
-// Usage: node tools/circular-dep-detect.cjs
-//        pnpm nx run graph:no-cycles (after wiring in tools/nx-plugins/)
+// Usage: node 08_developer_tooling/circular-dep-detect.cjs
+//        pnpm nx run graph:no-cycles (after wiring in 08_developer_tooling/nx-plugins/)
 //
 
 const fs = require("node:fs");
@@ -23,7 +23,7 @@ const ROOT = path.resolve(__dirname, "..");
 /**
  * Reads dependencies of a project and filters workspace dependencies.
  *
- * @param {string} projectPath - The relative path of the project from the root (e.g. 'apps/portal')
+ * @param {string} projectPath - The relative path of the project from the root (e.g. '00_applications/portal')
  * @returns {string[]} An array of package names this project depends on via workspace:*
  */
 function readDeps(projectPath) {
@@ -47,13 +47,13 @@ function readDeps(projectPath) {
  */
 function buildGraph() {
   const graph = new Map();
-  const dirs = ["apps", "pkgs", "libs/features", "libs/shared"];
+  const dirs = ["00_applications", "01_platform_packages", "02_domain_libraries/features", "02_domain_libraries/shared"];
   for (const dir of dirs) {
     const abs = path.join(ROOT, dir);
     if (!fs.existsSync(abs)) continue;
-    if (dir.startsWith("libs/")) {
+    if (dir.startsWith("02_domain_libraries/")) {
       const layer = dir.split("/").pop();
-      const parent = path.join(ROOT, "libs", layer);
+      const parent = path.join(ROOT, "02_domain_libraries", layer);
       for (const group of fs.readdirSync(parent)) {
         const groupDir = path.join(parent, group);
         if (!fs.statSync(groupDir).isDirectory()) continue;
@@ -61,11 +61,11 @@ function buildGraph() {
           for (const layerName of fs.readdirSync(groupDir)) {
             const layerDir = path.join(groupDir, layerName);
             if (!fs.statSync(layerDir).isDirectory()) continue;
-            const projectPath = path.join("libs", "features", group, layerName);
+            const projectPath = path.join("02_domain_libraries", "features", group, layerName);
             registerProject(graph, projectPath);
           }
         } else {
-          const projectPath = path.join("libs", "shared", group);
+          const projectPath = path.join("02_domain_libraries", "shared", group);
           registerProject(graph, projectPath);
         }
       }

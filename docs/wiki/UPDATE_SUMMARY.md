@@ -67,7 +67,7 @@ Implemented the 5 recommended next steps from `project-comprehensive-report.md` 
 ## Wiki Structure (After Refresh)
 
 ```
-docs/wiki/
+06_technical_documentation/wiki/
 ├── index.md                                (131 lines) — Navigation hub
 ├── STATUS.md                               (~330 lines) — Project status + 5 next steps
 ├── UPDATE_SUMMARY.md                       (this file) — Change log
@@ -207,7 +207,7 @@ Total: 59 pages
 ## Wiki Structure (Current)
 
 ```
-docs/wiki/
+06_technical_documentation/wiki/
 ├── index.md                          (109 lines) — Navigation hub
 ├── STATUS.md                         (285 lines) — Project completion report
 ├── log.md                            (219 lines) — Activity log
@@ -306,10 +306,10 @@ Total: 52 pages, 2,546 lines of documentation
 
 ## Files to Review
 
-1. **docs/wiki/STATUS.md** — Read for project completion overview
-2. **docs/wiki/gittree/README.md** — For git history & branch structure
-3. **docs/wiki/SCHEMA_IMPROVEMENTS.md** — For schema completion status
-4. **docs/wiki/log.md** — Latest activity record
+1. **06_technical_documentation/wiki/STATUS.md** — Read for project completion overview
+2. **06_technical_documentation/wiki/gittree/README.md** — For git history & branch structure
+3. **06_technical_documentation/wiki/SCHEMA_IMPROVEMENTS.md** — For schema completion status
+4. **06_technical_documentation/wiki/log.md** — Latest activity record
 
 ---
 
@@ -323,13 +323,13 @@ Total: 52 pages, 2,546 lines of documentation
 
 | File                                              | Change                                                         | Impact                               |
 | ------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------ |
-| `apps/portal/components/SmoothScrollProvider.tsx` | Lenis `duration: 1.2` → `0.6`                                  | Half the scroll animation lag        |
-| `apps/portal/components/SmoothScrollProvider.tsx` | Added `visibilitychange` listener to pause rAF when tab hidden | Saves GPU cycles when not visible    |
-| `pkgs/theme/src/css/glass.css`                | `.glass` blur(16px)→blur(10px), saturate(160%)→saturate(130%)  | ~40% cheaper backdrop-filter         |
-| `pkgs/theme/src/css/glass.css`                | `.glass-card` blur(12px)→blur(10px), 130%→120%                 | Consistent with base glass           |
-| `pkgs/theme/src/css/variables.css`            | `--glass-video-backdrop` blur(24px)→blur(16px)                 | Heaviest variant reduced             |
-| `pkgs/theme/src/css/variables.css`            | `--glass-premium-backdrop` blur(24px)→blur(16px)               | Premium surfaces reduced             |
-| `apps/portal/hooks/useAdaptivePerformance.ts`     | Fallback threshold 45→50 FPS, window 3s→1.5s                   | Degrades sooner, before user notices |
+| `00_applications/portal/components/SmoothScrollProvider.tsx` | Lenis `duration: 1.2` → `0.6`                                  | Half the scroll animation lag        |
+| `00_applications/portal/components/SmoothScrollProvider.tsx` | Added `visibilitychange` listener to pause rAF when tab hidden | Saves GPU cycles when not visible    |
+| `01_platform_packages/theme/src/css/glass.css`                | `.glass` blur(16px)→blur(10px), saturate(160%)→saturate(130%)  | ~40% cheaper backdrop-filter         |
+| `01_platform_packages/theme/src/css/glass.css`                | `.glass-card` blur(12px)→blur(10px), 130%→120%                 | Consistent with base glass           |
+| `01_platform_packages/theme/src/css/variables.css`            | `--glass-video-backdrop` blur(24px)→blur(16px)                 | Heaviest variant reduced             |
+| `01_platform_packages/theme/src/css/variables.css`            | `--glass-premium-backdrop` blur(24px)→blur(16px)               | Premium surfaces reduced             |
+| `00_applications/portal/hooks/useAdaptivePerformance.ts`     | Fallback threshold 45→50 FPS, window 3s→1.5s                   | Degrades sooner, before user notices |
 
 ### Verification
 

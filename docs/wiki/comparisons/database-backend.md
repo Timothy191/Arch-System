@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [database, backend, architecture, decision]
-sources: [docs/wiki/concepts/supabase-local-dev.md, docs/wiki/concepts/rls-policy.md, CLAUDE.md]
+sources: [06_technical_documentation/wiki/concepts/supabase-local-dev.md, 06_technical_documentation/wiki/concepts/rls-policy.md, CLAUDE.md]
 confidence: high
 ---
 
@@ -33,7 +33,7 @@ Selection of backend-as-a-service platform for a mining operations portal requir
 
 The portal uses **Supabase** with:
 
-- **Database**: PostgreSQL 15 with 16 migrations in `pkgs/database/migrations/`
+- **Database**: PostgreSQL 15 with 16 migrations in `01_platform_packages/database/migrations/`
 - **Auth**: GoTrue-based with custom `handle_new_user()` trigger
 - **RLS**: Every table has `ENABLE ROW LEVEL SECURITY` with department-scoped policies
 - **Real-time**: `supabase.channel().on('postgres_changes')` for live dashboards

@@ -8,7 +8,7 @@ sha256: 79f7a3aa18ebbc68062ae9b9ba65650e0a5e8e007f4c95f23dd71cd14eb496b1
 
 Extracted from:
 
-- apps/portal/lib/departments.ts — Department and tab configuration
-- apps/portal/features/departments/components/ — Department-specific components
-- pkgs/database/migrations/ — Department-specific tables
+- 00_applications/portal/lib/departments.ts — Department and tab configuration
+- 00_applications/portal/features/departments/components/ — Department-specific components
+- 01_platform_packages/database/migrations/ — Department-specific tables
 - CLAUDE.md — Department route structure

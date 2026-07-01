@@ -82,7 +82,7 @@
   - [ ] Set `NEXT_PUBLIC_FUXA_URL` in production `.env`
     - **Current Value:** `http://localhost:1881` (dev)
     - **Production Required:** `https://fuxa.production-domain.com` or internal URL
-    - **File:** `apps/portal/.env`
+    - **File:** `00_applications/portal/.env`
   - [ ] Verify FUXA server accessibility from production environment
     - **Test Command:** `curl -I ${NEXT_PUBLIC_FUXA_URL}`
     - **Expected:** HTTP 200 response with proper CORS headers
@@ -113,7 +113,7 @@
   -- If missing: INSERT INTO roles (name) VALUES ('control_room_operator');
   ```
 
-  - **Authentication File:** `apps/portal/proxy.ts` (line 77)
+  - **Authentication File:** `00_applications/portal/proxy.ts` (line 77)
   - **Required Role:** `control_room_operator` for dashboard access
   - **Admin Role:** `admin` for full access
 
@@ -132,7 +132,7 @@
   -- If NOT SET: Use setPin() function in lib/shift-closeout.ts to set PIN
   ```
 
-  - **PIN Set Function:** `apps/portal/lib/shift-closeout.ts` (lines 71-122)
+  - **PIN Set Function:** `00_applications/portal/lib/shift-closeout.ts` (lines 71-122)
   - **Required for:** Shift closeout approval (CloseShiftModal)
   - **Security:** PINs hashed with bcrypt (salt rounds: 10)
 
@@ -153,7 +153,7 @@
   -- Verify: bin_factor should be between 30-50 for typical mining dump trucks
   ```
 
-  - **Migration:** `pkgs/database/migrations/049_control_room_dumpers.sql`
+  - **Migration:** `01_platform_packages/database/migrations/049_control_room_dumpers.sql`
   - **Required Machines:** Dump trucks for hourly loads, dozers for roll-over
   - **Bin Factor:** Critical for BCM calculations (loads × bin_factor = material moved)
 
@@ -166,7 +166,7 @@
   WHERE d.name = 'control-room';
 
   -- Expected: type should match department type enum
-  -- Related: apps/portal/lib/departments.ts (lines 89-103)
+  -- Related: 00_applications/portal/lib/departments.ts (lines 89-103)
   ```
 
 ### **3. Error Handling & Resilience**
@@ -241,7 +241,7 @@
   // Events: "load_change", "auto_save", "cache_update"
   ```
 
-  - **Instrumentation File:** `apps/portal/instrumentation.ts` (already configured)
+  - **Instrumentation File:** `00_applications/portal/instrumentation.ts` (already configured)
   - **Required:** Add custom span attributes for control room operations
   - **Traces:** Enable distributed tracing for shift closeout flow
 
@@ -399,19 +399,19 @@
 
 - [ ] **E2E Tests**
   - [ ] Add E2E test for operator logging machine operation
-    - **File:** `e2e/control-room-machine-operations.spec.ts`
+    - **File:** `09_end_to_end_verification/control-room-machine-operations.spec.ts`
     - **User Journey:** Login → Navigate to Control Room → Click "Log Operation" → Fill form → Submit → Verify in list
     - **Validation:** Data appears in Machine Operations List
   - [ ] Add E2E test for supervisor closing shift
-    - **File:** `e2e/control-room-shift-closeout.spec.ts`
+    - **File:** `09_end_to_end_verification/control-room-shift-closeout.spec.ts`
     - **User Journey:** Login as supervisor → Navigate to Shift Coverage → Click "Close Shift" → Enter PIN → Verify → Close → Verify shift closed
     - **Validation:** Shift status changes to "closed", shift no longer editable
   - [ ] Add E2E test for alert acknowledgment
-    - **File:** `e2e/control-room-alerts.spec.ts`
+    - **File:** `09_end_to_end_verification/control-room-alerts.spec.ts`
     - **User Journey:** Navigate to Control Room → View Alert Panel → Acknowledge alert → Verify acknowledged state
     - **Validation:** Alert shows as acknowledged, unacknowledged count decreases
   - [ ] Add E2E test for SCADA panel interaction
-    - **File:** `e2e/control-room-scada.spec.ts`
+    - **File:** `09_end_to_end_verification/control-room-scada.spec.ts`
     - **User Journey:** Navigate to Control Room → Switch to SCADA Dashboard → Verify iframe loads → Test view toggle
     - **Validation:** SCADA iframe loads, view switch works, degraded mode shows fallback
 
@@ -419,7 +419,7 @@
 
 - [ ] **Operational Runbooks**
   - [ ] Create shift closeout procedure document
-    - **File:** `docs/control-room/shift-closeout-runbook.md`
+    - **File:** `06_technical_documentation/control-room/shift-closeout-runbook.md`
     - **Content:**
       - Prerequisites (all machines reported, supervisor available)
       - Step-by-step closeout process
@@ -428,7 +428,7 @@
       - Post-closeout verification steps
       - Emergency procedures (system unavailable during closeout)
   - [ ] Document PIN reset process for supervisors
-    - **File:** `docs/control-room/pin-reset-procedure.md`
+    - **File:** `06_technical_documentation/control-room/pin-reset-procedure.md`
     - **Content:**
       - How supervisors set initial PIN
       - PIN reset workflow (self-service vs admin)
@@ -436,7 +436,7 @@
       - PIN expiration policy (if applicable)
       - Lost PIN recovery process
   - [ ] Create machine registration guide
-    - **File:** `docs/control-room/machine-registration-guide.md`
+    - **File:** `06_technical_documentation/control-room/machine-registration-guide.md`
     - **Content:**
       - Machine types supported (dump trucks, dozers, excavators)
       - Required fields (name, type, serial_number, bin_factor)
@@ -444,7 +444,7 @@
       - Site assignment process
       - Machine activation/deactivation workflow
   - [ ] Document FUXA integration troubleshooting
-    - **File:** `docs/control-room/fuxa-troubleshooting.md`
+    - **File:** `06_technical_documentation/control-room/fuxa-troubleshooting.md`
     - **Content:**
       - Common FUXA connection issues
       - CORS configuration requirements
@@ -454,7 +454,7 @@
 
 - [ ] **User Guides**
   - [ ] Create operator onboarding guide
-    - **File:** `docs/control-room/operator-onboarding.md`
+    - **File:** `06_technical_documentation/control-room/operator-onboarding.md`
     - **Content:**
       - System overview and navigation
       - Daily workflow (machine operations, hourly loads, delays)
@@ -463,7 +463,7 @@
       - How to report operational delays
       - Understanding shift coverage requirements
   - [ ] Document supervisor approval workflow
-    - **File:** `docs/control-room/supervisor-workflow.md`
+    - **File:** `06_technical_documentation/control-room/supervisor-workflow.md`
     - **Content:**
       - Supervisor responsibilities overview
       - Shift review and approval process
@@ -471,7 +471,7 @@
       - Handling incomplete shifts
       - Override procedures (when applicable)
   - [ ] Create SCADA panel user guide
-    - **File:** `docs/control-room/scada-user-guide.md`
+    - **File:** `06_technical_documentation/control-room/scada-user-guide.md`
     - **Content:**
       - SCADA panel overview and features
       - Machine list view vs SCADA dashboard view
@@ -479,7 +479,7 @@
       - Real-time update expectations
       - Troubleshooting display issues
   - [ ] Document alert response procedures
-    - **File:** `docs/control-room/alert-response-procedures.md`
+    - **File:** `06_technical_documentation/control-room/alert-response-procedures.md`
     - **Content:**
       - Alert types and severity levels
       - Alert acknowledgment workflow
@@ -489,7 +489,7 @@
 
 - [ ] **Technical Documentation**
   - [ ] Document control room architecture
-    - **File:** `docs/control-room/architecture.md`
+    - **File:** `06_technical_documentation/control-room/architecture.md`
     - **Content:**
       - Component architecture diagram
       - Data flow (Supabase → React Components)
@@ -497,7 +497,7 @@
       - Caching strategy (Redis)
       - External dependencies (FUXA)
   - [ ] Create data flow diagrams
-    - **File:** `docs/control-room/data-flows.md`
+    - **File:** `06_technical_documentation/control-room/data-flows.md`
     - **Content:**
       - Machine operations data flow
       - Hourly loads data flow
@@ -505,7 +505,7 @@
       - Real-time update flow
       - Archival data flow
   - [ ] Document caching strategy
-    - **File:** `docs/control-room/caching-strategy.md`
+    - **File:** `06_technical_documentation/control-room/caching-strategy.md`
     - **Content:**
       - Cache keys and TTL values
       - Cache invalidation triggers
@@ -513,7 +513,7 @@
       - Cache hit/miss monitoring
       - Troubleshooting cache issues
   - [ ] Create troubleshooting guide
-    - **File:** `docs/control-room/troubleshooting.md`
+    - **File:** `06_technical_documentation/control-room/troubleshooting.md`
     - **Content:**
       - Common issues and resolutions
       - Dashboard not loading
@@ -531,7 +531,7 @@
 #### **1. Environment Configuration (Priority: CRITICAL)**
 
 - **Task:** Set `NEXT_PUBLIC_FUXA_URL` in production environment
-- **File:** `apps/portal/.env`
+- **File:** `00_applications/portal/.env`
 - **Dependency:** FUXA server must be deployed and accessible
 - **Verification:** Test iframe load in staging environment
 - **Estimated Time:** 1 hour
@@ -568,7 +568,7 @@
 #### **5. Health Checks (Priority: HIGH)**
 
 - **Task:** Add basic health check endpoints
-- **Files:** Create `app/api/health/fuxa/route.ts`, `app/api/health/supabase-realtime/route.ts`, `app/api/health/cache/route.ts`
+- **Files:** Create `app/api/health/fuxa/route.ts`, `app/api/health/supabase-realtime/route.ts`, `app/api/health/12_distributed_cache_runtime/route.ts`
 - **Dependency:** Monitoring infrastructure setup
 - **Verification:** Test endpoints return correct status codes
 - **Estimated Time:** 4-6 hours
@@ -577,7 +577,7 @@
 #### **6. Shift Closeout Runbook (Priority: MEDIUM)**
 
 - **Task:** Create shift closeout operational runbook
-- **File:** `docs/control-room/shift-closeout-runbook.md`
+- **File:** `06_technical_documentation/control-room/shift-closeout-runbook.md`
 - **Dependency:** None (can be done in parallel)
 - **Verification:** Review with operations team, test procedures
 - **Estimated Time:** 2-3 hours
@@ -619,7 +619,7 @@
 #### **4. Operator Onboarding Guide (Priority: MEDIUM)**
 
 - **Task:** Create comprehensive operator onboarding guide
-- **File:** `docs/control-room/operator-onboarding.md`
+- **File:** `06_technical_documentation/control-room/operator-onboarding.md`
 - **Dependency:** None (can be done in parallel)
 - **Verification:** Review with training team, user testing
 - **Estimated Time:** 4-6 hours
@@ -628,7 +628,7 @@
 #### **5. FUXA Troubleshooting (Priority: MEDIUM)**
 
 - **Task:** Document FUXA integration troubleshooting
-- **File:** `docs/control-room/fuxa-troubleshooting.md`
+- **File:** `06_technical_documentation/control-room/fuxa-troubleshooting.md`
 - **Dependency:** FUXA integration stable in production
 - **Verification:** Review with SCADA team, test procedures
 - **Estimated Time:** 3-4 hours
@@ -652,7 +652,7 @@
 #### **2. E2E Tests (Priority: LOW)**
 
 - **Task:** Add E2E tests for critical user flows
-- **Files:** `e2e/control-room-*.spec.ts`
+- **Files:** `09_end_to_end_verification/control-room-*.spec.ts`
 - **Dependency:** Playwright environment configured
 - **Verification:** All E2E scenarios pass in CI/CD
 - **Estimated Time:** 12-16 hours
@@ -714,12 +714,12 @@
 
 ## 🔗 **Related Files**
 
-- **Dashboard:** `apps/portal/app/(departments)/[department]/page.tsx`
-- **Components:** `apps/portal/features/departments/components/control-room/`
-- **API:** `apps/portal/app/api/control-room/shift-completeness/route.ts`
-- **Business Logic:** `apps/portal/lib/shift-closeout.ts`, `apps/portal/lib/shift-completeness.ts`
-- **Database:** `pkgs/database/migrations/046_control_room_archiving.sql`, `049_control_room_dumpers.sql`
-- **Auth:** `apps/portal/proxy.ts` (lines 77, role restrictions)
+- **Dashboard:** `00_applications/portal/app/(departments)/[department]/page.tsx`
+- **Components:** `00_applications/portal/features/departments/components/control-room/`
+- **API:** `00_applications/portal/app/api/control-room/shift-completeness/route.ts`
+- **Business Logic:** `00_applications/portal/lib/shift-closeout.ts`, `00_applications/portal/lib/shift-completeness.ts`
+- **Database:** `01_platform_packages/database/migrations/046_control_room_archiving.sql`, `049_control_room_dumpers.sql`
+- **Auth:** `00_applications/portal/proxy.ts` (lines 77, role restrictions)
 
 ---
 

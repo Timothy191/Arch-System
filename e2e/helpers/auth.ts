@@ -2,7 +2,7 @@ import { Page, BrowserContext } from "@playwright/test";
 import path from "path";
 import fs from "fs";
 
-const AUTH_FILE = path.resolve(process.cwd(), "e2e/.auth/user.json");
+const AUTH_FILE = path.resolve(process.cwd(), "09_end_to_end_verification/.auth/user.json");
 const TEST_EMAIL = process.env.TEST_EMAIL || "admin@plantcor.os";
 const TEST_EMPLOYEE_ID = process.env.TEST_EMPLOYEE_ID || "ADMIN-001";
 const TEST_PASSWORD = process.env.TEST_PASSWORD || "Yugioh@123#";

@@ -212,7 +212,7 @@
 
 | Location       | Content            | Status    |
 | -------------- | ------------------ | --------- |
-| `docs/wiki/`   | Architecture, ADRs | ✅ Good   |
+| `06_technical_documentation/wiki/`   | Architecture, ADRs | ✅ Good   |
 | `DESIGN.md`    | Design system      | ✅ Good   |
 | `AGENTS.md`    | Dev quickstart     | ✅ Good   |
 | `README.md`    | Project overview   | ✅ Good   |
@@ -241,7 +241,7 @@
 
 **Test Configuration**:
 
-- Jest config: `apps/portal/jest.config.js`
+- Jest config: `00_applications/portal/jest.config.js`
 - Coverage collected from: `lib/`, `features/`, `app/`
 - Current threshold: **14% lines** (very low)
 - Coverage reports: text, lcov, html

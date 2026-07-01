@@ -2,7 +2,7 @@ import { test as setup } from "@playwright/test";
 import path from "path";
 import { fillLoginForm, LOGIN_SELECTORS } from "./helpers/auth";
 
-const authFile = path.resolve(process.cwd(), "e2e/.auth/user.json");
+const authFile = path.resolve(process.cwd(), "09_end_to_end_verification/.auth/user.json");
 
 setup("authenticate", async ({ page }) => {
   await page.goto("/login");

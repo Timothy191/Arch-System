@@ -1,5 +1,5 @@
 ---
-source_url: file:///home/timothy/Project/Arch-Mk2/apps/portal/README.md
+source_url: file:///home/timothy/Project/Arch-Mk2/00_applications/portal/README.md
 ingested: 2026-05-14
 sha256: 5ea2ac5e11246f4c71717a02dc1f2fcbbae1b9449ddce32a03eaf59e8b3e4db0
 ---

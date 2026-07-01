@@ -45,18 +45,18 @@ confidence: high
 
 | Type              | Tool                 | Config                       | Status        |
 | ----------------- | -------------------- | ---------------------------- | ------------- |
-| Unit              | Jest 30.x + ts-jest  | `apps/portal/jest.config.js` | ✅ Active     |
+| Unit              | Jest 30.x + ts-jest  | `00_applications/portal/jest.config.js` | ✅ Active     |
 | E2E               | Playwright           | `playwright.config.ts`       | ✅ Active     |
-| Visual Regression | Playwright snapshots | `e2e/visual/`                | ✅ Active     |
+| Visual Regression | Playwright snapshots | `09_end_to_end_verification/visual/`                | ✅ Active     |
 | Load              | k6                   | `load-tests/`                | ✅ Configured |
-| AI Eval           | DeepEval + Python    | `pkgs/eval/`             | ✅ Active     |
-| Security          | OWASP ZAP (scripted) | `ops/pentest.sh`         | ✅ Scripted   |
+| AI Eval           | DeepEval + Python    | `01_platform_packages/eval/`             | ✅ Active     |
+| Security          | OWASP ZAP (scripted) | `03_operations_automation/pentest.sh`         | ✅ Scripted   |
 | Component         | Storybook            | —                            | ❌ Not set up |
 
 ### Unit Tests — 37 Files, 178 Passing
 
 ```
-apps/portal/
+00_applications/portal/
 ├── app/
 │   ├── actions.test.ts
 │   ├── api/ai/chat/route.test.ts
@@ -73,7 +73,7 @@ apps/portal/
 │   ├── departments/components/engineering/breakdowns/ (2 tests)
 │   ├── departments/components/machines/AddMachineForm.test.tsx
 │   ├── departments/components/safety/SafetyIncidentForm.test.tsx
-│   └── departments/components/tools/UniverSheet.test.tsx
+│   └── departments/components/08_developer_tooling/UniverSheet.test.tsx
 └── lib/
     ├── ai/ (8 tests: ai-service, chunking, embeddings, memory, prompts, schemas, serpapi, tools)
     ├── errors/error-logger.test.ts
@@ -118,11 +118,11 @@ collectCoverageFrom: [
 
 | Spec                                      | Tests                  | Coverage                       |
 | ----------------------------------------- | ---------------------- | ------------------------------ |
-| `e2e/login.spec.ts`                       | Login flow             | ✅ Happy path + error state    |
-| `e2e/navigation.spec.ts`                  | 14 tests               | ✅ All 8 departments navigate  |
-| `e2e/data-entry.spec.ts`                  | 11 tests               | ✅ Control Room shift log form |
-| `e2e/visual/login.visual.spec.ts`         | Visual snapshot        | ✅ 2% tolerance                |
-| `e2e/visual/design-system.visual.spec.ts` | Design system snapshot | ✅ 2% tolerance                |
+| `09_end_to_end_verification/login.spec.ts`                       | Login flow             | ✅ Happy path + error state    |
+| `09_end_to_end_verification/navigation.spec.ts`                  | 14 tests               | ✅ All 8 departments navigate  |
+| `09_end_to_end_verification/data-entry.spec.ts`                  | 11 tests               | ✅ Control Room shift log form |
+| `09_end_to_end_verification/visual/login.visual.spec.ts`         | Visual snapshot        | ✅ 2% tolerance                |
+| `09_end_to_end_verification/visual/design-system.visual.spec.ts` | Design system snapshot | ✅ 2% tolerance                |
 
 Run command: `pnpm test:e2e` (app must be running on `:3000`)
 
@@ -138,7 +138,7 @@ Location: `load-tests/`
 
 ### DeepEval AI Tests — 25 Tests
 
-Location: `pkgs/eval/`
+Location: `01_platform_packages/eval/`
 
 | Suite           | Tests | Custom Metrics                                                |
 | --------------- | ----- | ------------------------------------------------------------- |
@@ -149,7 +149,7 @@ Location: `pkgs/eval/`
 
 | Asset                         | Status     | Notes                                |
 | ----------------------------- | ---------- | ------------------------------------ |
-| `ops/pentest.sh`          | ✅ Created | OWASP ZAP baseline + full scan       |
+| `03_operations_automation/pentest.sh`          | ✅ Created | OWASP ZAP baseline + full scan       |
 | `docker-compose.security.yml` | ✅ Created | `zap-baseline` + `zap-full` services |
 | Execution against local       | ⬜ Pending | Manual trigger, Docker required      |
 | Last scan results             | None       | Not yet executed                     |
@@ -198,7 +198,7 @@ Location: `pkgs/eval/`
 | 🟡 P1    | Reach 60% line coverage — add ~200 targeted tests       | ⬜ Pending            | Hit Phase 1 target             |
 | 🟡 P1    | Add E2E test: AI chat send + receive                    | ⬜ Pending            | Critical path coverage         |
 | 🟡 P1    | Add E2E test: Admin panel access control                | ⬜ Pending            | Security smoke test            |
-| 🟡 P1    | Execute OWASP ZAP scan (`./ops/pentest.sh`)         | ⬜ Pending            | Pentest findings               |
+| 🟡 P1    | Execute OWASP ZAP scan (`./03_operations_automation/pentest.sh`)         | ⬜ Pending            | Pentest findings               |
 | 🟢 P2    | Set up Storybook for `@repo/ui`                         | ⬜ Pending            | Component visual tests         |
 | 🟢 P2    | Raise coverage threshold to 60% in jest.config.js       | ⬜ After reaching 60% | CI gate                        |
 | 🟢 P2    | Add E2E to CI pipeline                                  | ⬜ Pending            | Automated regression           |
@@ -220,7 +220,7 @@ Location: `pkgs/eval/`
 | Branch coverage | 31.41%          | 50-60%             | 70%+              | ⚠️ -19% to target |
 | Test file count | 37 unit + 5 E2E | Varies             | —                 | 🟢 Good           |
 | E2E framework   | Playwright      | Cypress/Playwright | Same              | 🟢 On par         |
-| Load testing    | k6              | Often absent       | perf/Gatling        | 🟢 A+             |
+| Load testing    | k6              | Often absent       | 15_load_performance_testing/Gatling        | 🟢 A+             |
 | AI eval         | DeepEval        | Rare               | Emerging practice | 🟢 A+             |
 | Security scan   | ZAP scripted    | Often absent       | OWASP ZAP         | 🟢 A              |
 | Component tests | None            | Storybook ~40%     | Storybook         | 🔴 Missing        |
@@ -264,11 +264,11 @@ pnpm test:e2e -- --grep "login"
 k6 run load-tests/login.js
 
 # AI eval (Python venv + DeepEval)
-cd pkgs/eval && python -m pytest
+cd 01_platform_packages/eval && python -m pytest
 
 # Security pentest (Docker required, app on :3000)
-./ops/pentest.sh
-./ops/pentest.sh --full
+./03_operations_automation/pentest.sh
+./03_operations_automation/pentest.sh --full
 ```
 
 ---
@@ -277,6 +277,6 @@ cd pkgs/eval && python -m pytest
 
 - [`../concepts/testing-qa-strategy.md`](../concepts/testing-qa-strategy.md) — full QA strategy
 - [`../concepts/deepeval-integration.md`](../concepts/deepeval-integration.md) — AI eval details
-- [`../../apps/portal/jest.config.js`](../../apps/portal/jest.config.js) — coverage config
+- [`../../00_applications/portal/jest.config.js`](../../00_applications/portal/jest.config.js) — coverage config
 - [`../../playwright.config.ts`](../../playwright.config.ts) — E2E config
-- [`../../ops/pentest.sh`](../../ops/pentest.sh) — security scan
+- [`../../03_operations_automation/pentest.sh`](../../03_operations_automation/pentest.sh) — security scan

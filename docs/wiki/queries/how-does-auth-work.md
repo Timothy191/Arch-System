@@ -6,9 +6,9 @@ type: query
 tags: [how-to, auth, security, quick-reference]
 sources:
   [
-    docs/wiki/concepts/auth-middleware.md,
-    docs/wiki/concepts/rls-policy.md,
-    docs/wiki/concepts/supabase-local-dev.md,
+    06_technical_documentation/wiki/concepts/auth-middleware.md,
+    06_technical_documentation/wiki/concepts/rls-policy.md,
+    06_technical_documentation/wiki/concepts/supabase-local-dev.md,
   ]
 confidence: high
 ---

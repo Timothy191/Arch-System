@@ -82,7 +82,7 @@ postgres-replica:
 ```
 
 - [x] `docker-compose.replica.yml` added (postgres-replica + postgrest-replica services)
-- [x] `pkgs/supabase/src/read-replica.ts` created with env fallback to primary
+- [x] `01_platform_packages/supabase/src/read-replica.ts` created with env fallback to primary
 - [x] `@repo/supabase/read-replica` export added to package.json
 - [x] Hub page (`app/(hub)/page.tsx`) routed to read replica for dashboard SELECTs
 - [x] Auth check remains on primary client

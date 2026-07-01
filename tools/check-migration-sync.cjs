@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview Checks that pkgs/database/migrations and
- * pkgs/supabase/migrations are in sync.
- * Usage: node tools/check-migration-sync.cjs
+ * @fileoverview Checks that 01_platform_packages/database/migrations and
+ * 01_platform_packages/supabase/migrations are in sync.
+ * Usage: node 08_developer_tooling/check-migration-sync.cjs
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const DB_MIGRATIONS = path.join(ROOT, "pkgs", "database", "migrations");
-const SUPABASE_MIGRATIONS = path.join(ROOT, "pkgs", "supabase", "migrations");
+const DB_MIGRATIONS = path.join(ROOT, "01_platform_packages", "database", "migrations");
+const SUPABASE_MIGRATIONS = path.join(ROOT, "01_platform_packages", "supabase", "migrations");
 
 function getSqlFiles(dir) {
   if (!fs.existsSync(dir)) return new Set();
@@ -38,13 +38,13 @@ function checkSync() {
   const inBoth = [...dbFiles].filter((f) => supabaseFiles.has(f));
 
   if (onlyInDb.length > 0) {
-    console.error("\n❌ Files in pkgs/database/migrations but missing from pkgs/supabase/migrations:");
+    console.error("\n❌ Files in 01_platform_packages/database/migrations but missing from 01_platform_packages/supabase/migrations:");
     onlyInDb.forEach((f) => console.error(`  - ${f}`));
     hasErrors = true;
   }
 
   if (onlyInSupabase.length > 0) {
-    console.error("\n❌ Files in pkgs/supabase/migrations but missing from pkgs/database/migrations:");
+    console.error("\n❌ Files in 01_platform_packages/supabase/migrations but missing from 01_platform_packages/database/migrations:");
     onlyInSupabase.forEach((f) => console.error(`  - ${f}`));
     hasErrors = true;
   }

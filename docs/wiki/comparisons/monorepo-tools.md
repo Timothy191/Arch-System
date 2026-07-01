@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-06-03
 type: comparison
 tags: [architecture, build, decision]
-sources: [nx.json, docs/wiki/concepts/nx-monorepo.md, pnpm-workspace.yaml]
+sources: [nx.json, 06_technical_documentation/wiki/concepts/nx-monorepo.md, pnpm-workspace.yaml]
 confidence: high
 ---
 
@@ -49,7 +49,7 @@ Arch-Systems uses **Nx 22.7.5 + pnpm 9.15.9 workspaces**:
     "codegen": {
       "inputs": [
         "{projectRoot}/src/css/variables.css",
-        "{projectRoot}/ops/generate-tokens.mjs"
+        "{projectRoot}/03_operations_automation/generate-tokens.mjs"
       ],
       "outputs": ["{projectRoot}/src/tokens/generated.ts"],
       "cache": true

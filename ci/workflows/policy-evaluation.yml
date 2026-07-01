@@ -22,6 +22,6 @@ jobs:
       - name: Run policy compiler
         run: pnpm policy:gen
       - name: Check for circular dependencies
-        run: node tools/circular-dep-detect.cjs
+        run: node 08_developer_tooling/circular-dep-detect.cjs
       - name: Validate security checks
         run: pnpm policy:security --ci

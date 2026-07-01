@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [gis, visualization, decision]
-sources: [apps/portal/package.json, CLAUDE.md, apps/portal/lib/monitoring-api.ts]
+sources: [00_applications/portal/package.json, CLAUDE.md, 00_applications/portal/lib/monitoring-api.ts]
 confidence: high
 ---
 

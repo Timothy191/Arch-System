@@ -2,7 +2,7 @@
  * Visual regression tests for design system consistency.
  * Validates dark theme tokens, forbidden classes, and cross-page uniformity.
  *
- * Baseline: npx playwright test e2e/visual --update-snapshots
+ * Baseline: npx playwright test 09_end_to_end_verification/visual --update-snapshots
  */
 
 import { test, expect } from "@playwright/test";

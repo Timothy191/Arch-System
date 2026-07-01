@@ -131,7 +131,7 @@ Once prerequisites are installed, run the script normally:
 
 ```bash
 cd /path/to/Arch-Mk2
-./ops/setup-production-environment.sh
+./03_operations_automation/setup-production-environment.sh
 ```
 
 ### Expected Behavior

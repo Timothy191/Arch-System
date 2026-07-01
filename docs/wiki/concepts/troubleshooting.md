@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: concept
 tags: [troubleshooting, ops, support, how-to]
-sources: [CLAUDE.md, docs/wiki/concepts/nx-monorepo.md]
+sources: [CLAUDE.md, 06_technical_documentation/wiki/concepts/nx-monorepo.md]
 confidence: high
 ---
 
@@ -27,7 +27,7 @@ pnpm --filter portal type-check
 pnpm lint
 
 # Check Supabase status
-cd pkgs/database && pnpm supabase status
+cd 01_platform_packages/database && pnpm supabase status
 ```
 
 ---
@@ -36,12 +36,12 @@ cd pkgs/database && pnpm supabase status
 
 ### Error: "Cannot find module 'react'" or version conflicts
 
-**Cause**: `apps/overview` uses React 18, while `apps/portal` uses React 19. Sharing components between them causes conflicts.
+**Cause**: `00_applications/overview` uses React 18, while `00_applications/portal` uses React 19. Sharing components between them causes conflicts.
 
 **Solution**:
 
 ```bash
-# Never import components from apps/overview into apps/portal
+# Never import components from 00_applications/overview into 00_applications/portal
 # Keep component sharing limited to @repo/ui
 ```
 
@@ -133,7 +133,7 @@ SELECT auth.user_department_id();
 
 ```bash
 # Check proxy logs
-cat apps/portal/proxy.ts | grep -A 5 "redirect"
+cat 00_applications/portal/proxy.ts | grep -A 5 "redirect"
 ```
 
 **Solutions**:
@@ -153,22 +153,22 @@ SELECT full_name, role, department_id FROM employees WHERE auth_id = 'user-uuid'
 
 ### Symptom: "Migration differs from local" or missing tables
 
-**Cause**: `pkgs/database/migrations/` (source of truth) differs from `pkgs/supabase/supabase/migrations/` (deploy copy).
+**Cause**: `01_platform_packages/database/migrations/` (source of truth) differs from `01_platform_packages/supabase/supabase/migrations/` (deploy copy).
 
 **Solution**:
 
 ```bash
 # 1. Reset to clean state
-cd pkgs/database && pnpm supabase:reset
+cd 01_platform_packages/database && pnpm supabase:reset
 
 # 2. Verify migrations exist
-ls pkgs/database/migrations/*.sql
+ls 01_platform_packages/database/migrations/*.sql
 
 # 3. Deploy local (syncs and pushes)
 pnpm deploy:local
 ```
 
-**Prevention**: Always edit migrations in `pkgs/database/migrations/`, never in `pkgs/supabase/`.
+**Prevention**: Always edit migrations in `01_platform_packages/database/migrations/`, never in `01_platform_packages/supabase/`.
 
 ---
 
@@ -184,7 +184,7 @@ pnpm deploy:local
 - NEVER import in `layout.tsx` or global CSS
 
 ```typescript
-// apps/portal/features/departments/components/tools/UniverSheet.tsx
+// 00_applications/portal/features/departments/components/08_developer_tooling/UniverSheet.tsx
 import "@univerjs/preset-sheets-core/lib/index.css"; // Once only here
 ```
 
@@ -229,7 +229,7 @@ pnpm --filter portal build
 
 ```bash
 # Check tool status endpoint
-curl http://localhost:3000/api/tools/status
+curl http://localhost:3000/api/08_developer_tooling/status
 
 # Direct tool check
 curl -I http://localhost:5678  # n8n default
@@ -259,7 +259,7 @@ docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n
 1. Check API keys are set:
 
 ```bash
-grep -E "GROQ_API_KEY|OPENROUTER_API_KEY|TOGETHER_API_KEY" apps/portal/.env
+grep -E "GROQ_API_KEY|OPENROUTER_API_KEY|TOGETHER_API_KEY" 00_applications/portal/.env
 ```
 
 2. Test provider directly:
@@ -278,7 +278,7 @@ curl https://api.groq.com/openai/v1/models \
 
 - Verify keys are valid and not rate-limited
 - Check failover is working (Groq → OpenRouter → Together)
-- Review `apps/portal/lib/ai/ai-service.ts` for error handling
+- Review `00_applications/portal/lib/ai/ai-service.ts` for error handling
 
 ---
 
@@ -305,7 +305,7 @@ pnpm test:e2e
 **Solution**:
 
 ```bash
-cd pkgs/database && pnpm supabase:dev
+cd 01_platform_packages/database && pnpm supabase:dev
 pnpm deploy:local  # Seeds test data
 ```
 

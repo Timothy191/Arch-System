@@ -1,5 +1,5 @@
 ---
-source_url: file:///home/timothy/Project/Arch-Mk2/pkgs/supabase/README.md
+source_url: file:///home/timothy/Project/Arch-Mk2/01_platform_packages/supabase/README.md
 ingested: 2026-05-14
 sha256: 3e87dc6a98c255e7329f54b9f44532248440775b60e46854bb44a83e3d6e40af
 ---

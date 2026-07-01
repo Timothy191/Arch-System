@@ -371,7 +371,7 @@ PROJECT TOTAL              █████████████████�
 ║   🟡 STAGING-ready with minor env config review                      ║
 ║   🟡 PRODUCTION-ready after SSL + PgBouncer + coverage ramp         ║
 ║                                                                      ║
-║   Recommended action: Deploy to local server NOW. Run `./ops/    ║
+║   Recommended action: Deploy to local server NOW. Run `./03_operations_automation/    ║
 ║   deploy.sh local --lightweight` for portal + Supabase only.        ║
 ║   Address test coverage (43% → 70%) as parallel workstream.        ║
 ║                                                                      ║

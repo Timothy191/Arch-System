@@ -1,6 +1,6 @@
 # Arch-Systems — isolated Redis offload stack
 # Start: pnpm redis:dev  |  Stop: pnpm redis:stop
-# Portal link: REDIS_URL=redis://127.0.0.1:6380 in apps/portal/.env
+# Portal link: REDIS_URL=redis://127.0.0.1:6380 in 00_applications/portal/.env
 #
 # Host port 6380 avoids colliding with a system Redis on :6379.
 

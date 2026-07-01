@@ -50,7 +50,7 @@
 - Updated entities/arch-systems.md:
   - Corrected Next.js 14 → 15, React 18 → 19
   - Added @repo/theme, @repo/hooks, @repo/supabase, @repo/utils to structure
-  - Added apps/cms (Payload CMS v3)
+  - Added 00_applications/cms (Payload CMS v3)
   - Added AI SDK, Zustand, version numbers to tech stack
   - Expanded Key Gotchas with React divergence and Tailwind rules
 - Updated concepts/turborepo-monorepo.md:
@@ -111,15 +111,15 @@ Updated index.md: 42 total pages across all categories.
 
 ## [2026-05-15] enhancement | Added VitePress visual wiki renderer
 
-Created VitePress-based documentation site in `docs/` directory:
+Created VitePress-based documentation site in `06_technical_documentation/` directory:
 
 **Files Created**:
 
-- `docs/package.json` - Package manifest with VitePress dependency
-- `docs/wiki/.vitepress/config.mjs` - Site configuration with full navigation
-- `docs/wiki/index.md` - Homepage with quick links
-- `docs/wiki/quick-reference.md` - Task-based quick reference
-- `docs/README.md` - Setup and deployment instructions
+- `06_technical_documentation/package.json` - Package manifest with VitePress dependency
+- `06_technical_documentation/wiki/.vitepress/config.mjs` - Site configuration with full navigation
+- `06_technical_documentation/wiki/index.md` - Homepage with quick links
+- `06_technical_documentation/wiki/quick-reference.md` - Task-based quick reference
+- `06_technical_documentation/README.md` - Setup and deployment instructions
 
 **Features**:
 
@@ -143,7 +143,7 @@ This provides a professional, browsable wiki alternative to the raw markdown fil
 
 ## [2026-05-16] enhancement | Database schema review and improvements
 
-- Enhanced docs/wiki/SCHEMA.md with comprehensive database documentation (528 lines)
+- Enhanced 06_technical_documentation/wiki/SCHEMA.md with comprehensive database documentation (528 lines)
   - Core entities tables with column specifications
   - Operational tables (daily_logs, machine_hours, fuel_logs, production_logs)
   - Control room tables (machine_operations, hourly_loads, excavator_activity)
@@ -153,7 +153,7 @@ This provides a professional, browsable wiki alternative to the raw markdown fil
   - Row Level Security policies and helper functions
   - Index strategy and performance recommendations
 
-- Created docs/wiki/SCHEMA_IMPROVEMENTS.md (238 lines)
+- Created 06_technical_documentation/wiki/SCHEMA_IMPROVEMENTS.md (238 lines)
   - Priority-based improvement plan (Critical, High, Medium, Low)
   - Schema quality scores
   - Implementation phases
@@ -165,7 +165,7 @@ This provides a professional, browsable wiki alternative to the raw markdown fil
   - Created native PostgreSQL enum types (role_type, shift_type, memory_type, etc.)
   - Added constraint for non-negative hourly_loads values
 
-- Updated docs/wiki/concepts/database-schema.md
+- Updated 06_technical_documentation/wiki/concepts/database-schema.md
   - Added migration 008-009-010 references
   - Added schema improvements section
   - Added performance scorecard table
@@ -180,8 +180,8 @@ This provides a professional, browsable wiki alternative to the raw markdown fil
   - entities/access-control-department.md, entities/engineering-department.md
   - entities/control-room-department.md, entities/training-department.md
   - entities/satellite-monitoring-department.md
-- Installed VitePress in docs/ and fixed broken nav links in config.mjs
-- Removed empty raw directories: papers/, tranops/, assets/
+- Installed VitePress in 06_technical_documentation/ and fixed broken nav links in config.mjs
+- Removed empty raw directories: papers/, tran03_operations_automation/, assets/
 - Created \_archive/ directory for superseded pages
 - Expanded 4 thin concept pages with concrete examples and references:
   - concepts/rls-policy.md — Added policy template, helper function bodies, role matrix
@@ -193,7 +193,7 @@ This provides a professional, browsable wiki alternative to the raw markdown fil
 
 ## [2026-05-17] enhancement | Git tree visualization & project graph documentation
 
-Created comprehensive git history and graph theory documentation in docs/wiki/gittree/:
+Created comprehensive git history and graph theory documentation in 06_technical_documentation/wiki/gittree/:
 
 **Files Created**:
 
@@ -391,12 +391,12 @@ New infrastructure committed prior to wiki catch-up:
 ## [2026-05-20] feat | Access logs archival migration, theme token pipeline, deploy tooling (commit `304f0dc`)
 
 - **Migration 033:** `access_logs_weekly_archival` — pg_cron weekly archival job (87 lines)
-- **Style Dictionary pipeline** in `pkgs/theme`:
+- **Style Dictionary pipeline** in `01_platform_packages/theme`:
   - `sd.config.mjs` generating CSS variables and TypeScript tokens
   - `src/tokens/generated-sd.ts` (2567 lines), `variables-generated.css` (160 lines), `tokens-hsl.json`
   - `DECISIONS.md` documenting token architecture choices
-- Deploy script improvements in `ops/deploy.sh`
-- New `ops/generate-db-docs.sh` for automated DB documentation
+- Deploy script improvements in `03_operations_automation/deploy.sh`
+- New `03_operations_automation/generate-db-docs.sh` for automated DB documentation
 
 ## [2026-05-20] feat | Pilot-shell workflow integration + session catch-up (commit `80c02b6`)
 
@@ -458,8 +458,8 @@ New infrastructure committed prior to wiki catch-up:
 
 ## [2026-05-25] fix | ESLint configs for cms/overview, lint errors, turbo env vars (commit `c87f5f0`)
 
-- Added `.eslintrc.js` to `apps/cms` and `apps/overview`
-- Fixed lint errors in `apps/overview` sections (DatabaseSchema, SystemArchitecture, data.ts)
+- Added `.eslintrc.js` to `00_applications/cms` and `00_applications/overview`
+- Fixed lint errors in `00_applications/overview` sections (DatabaseSchema, SystemArchitecture, data.ts)
 - Fixed `access-control` dashboard component lint warnings
 - Fixed `lib/ai/cost-tracker.ts` export alignment
 - Added missing turbo env vars to `turbo.json`
@@ -500,7 +500,7 @@ New infrastructure committed prior to wiki catch-up:
 ## [2026-05-27] chore | Clean build artifacts, fix pre-commit hook, format project (commit `7d0a059`)
 
 - Removed `.next`, `dist`, `.turbo`, `node_modules/.cache` directories from tracking
-- Added `docs/reports/` to `.eslintignore`
+- Added `06_technical_documentation/reports/` to `.eslintignore`
 - Added missing `@secretlint/secretlint-rule-preset-recommend` devDependency
 - Updated `turbo` 2.9.14 → 2.9.15, `lint-staged` 17.0.4 → 17.0.5
 - Ran `pnpm format` across 43 files
@@ -512,17 +512,17 @@ Root-caused and fixed blurry rendering across the entire portal. Three categorie
 
 **Lenis smooth scroll:**
 
-- `apps/portal/components/SmoothScrollProvider.tsx` — Reduced `duration` from 1.2s to 0.6s, halving scroll animation lag
+- `00_applications/portal/components/SmoothScrollProvider.tsx` — Reduced `duration` from 1.2s to 0.6s, halving scroll animation lag
 - Added `visibilitychange` listener to pause `requestAnimationFrame` loop when tab is hidden (saves GPU cycles)
 
 **backdrop-filter blur reduction:**
 
-- `pkgs/theme/src/css/glass.css` — `.glass` base class: 16px→10px blur, saturate 160%→130%; `.glass-card`: 12px→10px blur, 120% saturate
-- `pkgs/theme/src/css/variables.css` — `--glass-video-backdrop`: 24px→16px; `--glass-premium-backdrop`: 24px→16px
+- `01_platform_packages/theme/src/css/glass.css` — `.glass` base class: 16px→10px blur, saturate 160%→130%; `.glass-card`: 12px→10px blur, 120% saturate
+- `01_platform_packages/theme/src/css/variables.css` — `--glass-video-backdrop`: 24px→16px; `--glass-premium-backdrop`: 24px→16px
 
 **Adaptive performance fallback:**
 
-- `apps/portal/hooks/useAdaptivePerformance.ts` — Threshold tightened from 45→50 FPS, detection window from 3s→1.5s so `.low-perf-fallback` disables animations sooner
+- `00_applications/portal/hooks/useAdaptivePerformance.ts` — Threshold tightened from 45→50 FPS, detection window from 3s→1.5s so `.low-perf-fallback` disables animations sooner
 
 **Verification:** 51 test suites / 480 tests pass, lint 0 errors, TypeScript 0 errors.
 
@@ -551,7 +551,7 @@ Documented the migration from Turborepo to Nx build orchestration and the AI ser
 
 ## [2026-06-15] lint | Wiki stale content cleanup
 
-- Deleted 10 auto-generated noise files from `docs/wiki/questions/` and `docs/wiki/archived/`
+- Deleted 10 auto-generated noise files from `06_technical_documentation/wiki/questions/` and `06_technical_documentation/wiki/archived/`
 - Fixed staleness in [[portal-app-architecture]]: Turborepo→Nx, dark theme→light-only, added Zustand
 - Fixed [[STATUS]]: Phase 5.1→5.2, Next.js version contradiction
 - Swept Turborepo→Nx references in 7 files (onboarding, troubleshooting, how-to-deploy-production, security-posture, final-project-readiness, project-comprehensive-report, project-stability-analysis)

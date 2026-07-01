@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [ui, components, decision]
-sources: [apps/portal/package.json, CLAUDE.md]
+sources: [00_applications/portal/package.json, CLAUDE.md]
 confidence: medium
 ---
 

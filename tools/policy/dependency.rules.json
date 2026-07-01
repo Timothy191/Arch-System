@@ -6,7 +6,7 @@
       "sourceTag": "scope:app",
       "targetTag": "scope:package:db-internal",
       "allowed": false,
-      "reason": "apps/* must not import pkgs/database directly; use pkgs/supabase client"
+      "reason": "00_applications/* must not import 01_platform_packages/database directly; use 01_platform_packages/supabase client"
     },
     {
       "sourceTag": "scope:package:ui",
@@ -36,19 +36,19 @@
       "sourceTag": "scope:tool",
       "targetTag": "scope:app",
       "allowed": false,
-      "reason": "tools/* are build-time scripts; cannot import apps/* at runtime"
+      "reason": "08_developer_tooling/* are build-time scripts; cannot import 00_applications/* at runtime"
     },
     {
       "sourceTag": "scope:tool",
       "targetTag": "scope:package:supabase",
       "allowed": false,
-      "reason": "tools/* must not import runtime server/client code"
+      "reason": "08_developer_tooling/* must not import runtime server/client code"
     },
     {
       "sourceTag": "scope:package",
       "targetTag": "scope:app",
       "allowed": false,
-      "reason": "pkgs/* must not depend on apps/* (inversion of dependency)"
+      "reason": "01_platform_packages/* must not depend on 00_applications/* (inversion of dependency)"
     }
   ]
 }

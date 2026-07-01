@@ -8,8 +8,8 @@ sha256: 2435c0a2157c1db1fc5c1532c7b9c66934a64c2bab576201199b1fcc42b77723
 
 Extracted from:
 
-- apps/portal/lib/monitoring-api.ts — Satellite monitoring API
-- apps/portal/sentry.client.config.ts — Browser Sentry config
-- apps/portal/instrumentation.ts — Server/edge Sentry config
-- apps/portal/next.config.mjs — Sentry wrapper config
-- apps/portal/lib/audit.ts — Audit logging helper
+- 00_applications/portal/lib/monitoring-api.ts — Satellite monitoring API
+- 00_applications/portal/sentry.client.config.ts — Browser Sentry config
+- 00_applications/portal/instrumentation.ts — Server/edge Sentry config
+- 00_applications/portal/next.config.mjs — Sentry wrapper config
+- 00_applications/portal/lib/audit.ts — Audit logging helper

@@ -2,7 +2,7 @@
 
 ## Related Documentation
 
-- **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
+- **[DOCUMENTATION_INDEX.md](06_technical_documentation/DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
 - **[DESIGN.md](DESIGN.md)** — Design system, color palette, and component rules
 
 ---

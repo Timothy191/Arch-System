@@ -5,7 +5,7 @@ updated: 2026-06-03
 type: decision
 status: superseded
 tags: [adr, monorepo, build, decision]
-sources: [docs/wiki/comparisons/monorepo-tools.md, turbo.json, CLAUDE.md]
+sources: [06_technical_documentation/wiki/comparisons/monorepo-tools.md, turbo.json, CLAUDE.md]
 confidence: high
 ---
 
@@ -38,7 +38,7 @@ We will use **Turborepo 2.1 with pnpm 9.12.0 workspaces**.
 1. **Turborepo** — Task orchestration and caching
 2. **pnpm workspaces** — Package management and linking
 3. **Workspace catalogs** — Centralized dependency versions
-4. **Path aliases** — `@/` and `~/` → `apps/portal/`
+4. **Path aliases** — `@/` and `~/` → `00_applications/portal/`
 
 ## Consequences
 

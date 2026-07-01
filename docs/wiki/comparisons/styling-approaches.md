@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [css, design, architecture, decision]
-sources: [docs/wiki/concepts/design-system.md, apps/portal/package.json, CLAUDE.md]
+sources: [06_technical_documentation/wiki/concepts/design-system.md, 00_applications/portal/package.json, CLAUDE.md]
 confidence: high
 ---
 

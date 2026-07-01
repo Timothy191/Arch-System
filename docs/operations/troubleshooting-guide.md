@@ -352,7 +352,7 @@ This guide provides troubleshooting procedures for common issues in the Control 
 **Redis Down:**
 
 - Start Redis: `systemctl start redis`
-- Check logs: `/var/log/cache/redis.log`
+- Check logs: `/var/log/12_distributed_cache_runtime/redis.log`
 - Contact Redis administrator
 
 **Connection Issue:**
@@ -510,7 +510,7 @@ This guide provides troubleshooting procedures for common issues in the Control 
 - **Application Logs:** Platform-specific logging
 - **Inngest Logs:** Inngest dashboard
 - **FUXA Logs:** FUXA server logs
-- **Redis Logs:** `/var/log/cache/redis.log`
+- **Redis Logs:** `/var/log/12_distributed_cache_runtime/redis.log`
 
 ### Monitoring
 

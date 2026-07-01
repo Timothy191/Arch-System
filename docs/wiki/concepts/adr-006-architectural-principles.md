@@ -5,8 +5,8 @@ updated: 2026-06-29
 type: decision
 status: accepted
 tags: [adr, architecture, principles, decision]
-sources: [DESIGN.md, AGENTS.md, tools/policy-compiler.cjs,
-  tools/design-audit.cjs, docs/wiki/concepts/adr-004-tailwind-design-system.md]
+sources: [DESIGN.md, AGENTS.md, 08_developer_tooling/policy-compiler.cjs,
+  08_developer_tooling/design-audit.cjs, 06_technical_documentation/wiki/concepts/adr-004-tailwind-design-system.md]
 confidence: high
 ---
 
@@ -107,14 +107,14 @@ enforced by Nx dependency constraints and the policy compiler:
 
 | Directory | Responsibility |
 |-----------|----------------|
-| `libs/features/*/*` | Domain-specific business logic |
-| `libs/shared/*` | Cross-cutting utilities, hooks, shared styles |
-| `pkgs/*` | Infrastructure: UI, theme, DB clients, tooling |
-| `apps/*` | Application shells: portal, CMS, overview |
+| `02_domain_libraries/features/*/*` | Domain-specific business logic |
+| `02_domain_libraries/shared/*` | Cross-cutting utilities, hooks, shared styles |
+| `01_platform_packages/*` | Infrastructure: UI, theme, DB clients, tooling |
+| `00_applications/*` | Application shells: portal, CMS, overview |
 
 UI components (`@repo/ui`) must remain pure and presentational. They
 may not import from `@repo/supabase` or `@repo/database`. Data
-fetching belongs in `libs/features/*` or `apps/*` Server Components.
+fetching belongs in `02_domain_libraries/features/*` or `00_applications/*` Server Components.
 
 **Consequences**:
 
@@ -128,9 +128,9 @@ fetching belongs in `libs/features/*` or `apps/*` Server Components.
 
 **Alternatives Considered**:
 
-- **Layered packages within `pkgs/` only** — Rejected.
-  `libs/features/` enables domain-driven organization without bloating
-  `pkgs/` with business logic.
+- **Layered packages within `01_platform_packages/` only** — Rejected.
+  `02_domain_libraries/features/` enables domain-driven organization without bloating
+  `01_platform_packages/` with business logic.
 - **No enforced boundaries** — Rejected. History showed drift toward
   "kitchen sink" packages and cross-layer imports.
 
@@ -298,5 +298,5 @@ These principles are enforced through:
 - [[adr-002-supabase-backend]] — RLS and multi-tenant data layer
 - [[DESIGN.md]] — Complete design system specification
 - [[AGENTS.md]] — Critical schemas, conventions, and quality gates
-- [[docs/operations/architecture.md]] — System-level architecture
+- [[06_technical_documentation/operations/architecture.md]] — System-level architecture
   overview

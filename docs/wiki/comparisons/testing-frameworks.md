@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: comparison
 tags: [testing, architecture, decision]
-sources: [apps/portal/package.json, pkgs/eval/README.md, CLAUDE.md]
+sources: [00_applications/portal/package.json, 01_platform_packages/eval/README.md, CLAUDE.md]
 confidence: high
 ---
 

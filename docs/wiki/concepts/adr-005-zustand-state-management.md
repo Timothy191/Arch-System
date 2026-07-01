@@ -5,7 +5,7 @@ updated: 2026-05-15
 type: decision
 status: accepted
 tags: [adr, state, react, decision]
-sources: [docs/wiki/comparisons/state-management.md, apps/portal/package.json]
+sources: [06_technical_documentation/wiki/comparisons/state-management.md, 00_applications/portal/package.json]
 confidence: high
 ---
 
@@ -100,7 +100,7 @@ We will use **Zustand 5** for the minimal client state that exists.
 ## Implementation Notes
 
 ```typescript
-// apps/portal/lib/stores/app-store.ts
+// 00_applications/portal/lib/stores/app-store.ts
 import { create } from "zustand";
 
 interface AppState {

@@ -4,7 +4,7 @@ created: 2026-05-14
 updated: 2026-06-03
 type: entity
 tags: [system, application, company]
-sources: [nx.json, pkgs/database/migrations/, package.json]
+sources: [nx.json, 01_platform_packages/database/migrations/, package.json]
 confidence: high
 ---
 
@@ -25,17 +25,17 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 
 ## Monorepo Structure
 
-- `apps/portal/` → Next.js 15 app with App Router, React 19 (main mining portal)
-- `pkgs/ui/` → [[nx-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
-- `pkgs/theme/` → [[design-system|@repo/theme]] — design tokens, Style Dictionary pipeline, Tailwind preset
-- `pkgs/supabase/` → [[supabase-local-dev|@repo/supabase]] — client wrappers (browser, server, middleware, read-replica) and database types
-- `pkgs/database/` → [[database-schema|@repo/database]] — SQL migrations (61 migrations, source of truth)
-- `pkgs/hooks/` → @repo/hooks — useLocalStorage, useDebounce
-- `pkgs/utils/` → @repo/utils — cn(), formatDate(), getCurrentShift(), excel utilities
-- `pkgs/errors/` → @repo/errors — standardized custom error handler classes
-- `pkgs/rate-limiter/` → @repo/rate-limiter — memory & Redis rate limiting strategies
-- `apps/overview/` → Standalone Next.js app for architecture visualization (port 3002)
-- `apps/cms/` → Payload CMS v3 (headless, Postgres-backed)
+- `00_applications/portal/` → Next.js 15 app with App Router, React 19 (main mining portal)
+- `01_platform_packages/ui/` → [[nx-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
+- `01_platform_packages/theme/` → [[design-system|@repo/theme]] — design tokens, Style Dictionary pipeline, Tailwind preset
+- `01_platform_packages/supabase/` → [[supabase-local-dev|@repo/supabase]] — client wrappers (browser, server, middleware, read-replica) and database types
+- `01_platform_packages/database/` → [[database-schema|@repo/database]] — SQL migrations (61 migrations, source of truth)
+- `01_platform_packages/hooks/` → @repo/hooks — useLocalStorage, useDebounce
+- `01_platform_packages/utils/` → @repo/utils — cn(), formatDate(), getCurrentShift(), excel utilities
+- `01_platform_packages/errors/` → @repo/errors — standardized custom error handler classes
+- `01_platform_packages/rate-limiter/` → @repo/rate-limiter — memory & Redis rate limiting strategies
+- `00_applications/overview/` → Standalone Next.js app for architecture visualization (port 3002)
+- `00_applications/cms/` → Payload CMS v3 (headless, Postgres-backed)
 
 ## Key Shared Components
 
@@ -74,9 +74,9 @@ Specialized routes:
 
 - @react-three/fiber v8.x + @react-three/drei v9.x (React 19 compatible)
 - Never commit middleware auth bypass without security review
-- Migration source of truth: `pkgs/database/migrations/`
+- Migration source of truth: `01_platform_packages/database/migrations/`
 - `@univerjs/preset-sheets-core/lib/index.css` import once only in `UniverSheet.tsx` — never in layout.tsx
-- React version divergence: `apps/overview` uses React 18, `apps/portal` uses React 19 — no cross-app component sharing
+- React version divergence: `00_applications/overview` uses React 18, `00_applications/portal` uses React 19 — no cross-app component sharing
 - All Tailwind config originates from `@repo/theme` — never add theme values directly in portal
 
 ## Current Status (Nx Era)

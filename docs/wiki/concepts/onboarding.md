@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: concept
 tags: [onboarding, team, getting-started, docs]
-sources: [CLAUDE.md, docs/wiki/concepts/nx-monorepo.md]
+sources: [CLAUDE.md, 06_technical_documentation/wiki/concepts/nx-monorepo.md]
 confidence: high
 ---
 
@@ -50,7 +50,7 @@ pnpm --filter portal type-check
 
 ```bash
 # 1. Copy environment template
-cp apps/portal/.env.example apps/portal/.env
+cp 00_applications/portal/.env.example 00_applications/portal/.env
 
 # 2. Fill in required variables
 # Ask team lead for:
@@ -59,7 +59,7 @@ cp apps/portal/.env.example apps/portal/.env
 # - Optional: N8N_URL, FLOWISE_URL for tool integration
 
 # 3. Start local Supabase (separate terminal)
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase:dev
 
 # 4. Start the portal
@@ -77,18 +77,18 @@ Spend 30 minutes exploring:
 
 ```
 Arch-Mk2/
-├── apps/
+├── 00_applications/
 │   ├── portal/          ← Main application (where you'll spend 90% of time)
 │   ├── overview/       ← Static architecture visualization
 │   └── cms/            ← Payload CMS for content
-├── pkgs/
+├── 01_platform_packages/
 │   ├── ui/             ← @repo/ui shared components
 │   ├── theme/          ← @repo/theme design tokens
 │   ├── supabase/       ← Supabase client wrappers
 │   ├── database/       ← SQL migrations
 │   ├── types/          ← Shared TypeScript interfaces
 │   └── utils/          ← Helper functions
-└── docs/wiki/               ← This knowledge base
+└── 06_technical_documentation/wiki/               ← This knowledge base
 ```
 
 ### Key Concepts to Understand
@@ -123,11 +123,11 @@ Choose one based on your interests:
 
 | Interest   | Starter Task          | Location                         |
 | ---------- | --------------------- | -------------------------------- |
-| UI/UX      | Add a new KPI variant | `pkgs/ui/src/KPI.tsx`        |
-| Backend    | Add machine hours API | `apps/portal/lib/`               |
-| Full-stack | Add a department tab  | `apps/portal/app/(departments)/` |
+| UI/UX      | Add a new KPI variant | `01_platform_packages/ui/src/KPI.tsx`        |
+| Backend    | Add machine hours API | `00_applications/portal/lib/`               |
+| Full-stack | Add a department tab  | `00_applications/portal/app/(departments)/` |
 | DevOps     | Add a CI check        | `.github/workflows/`             |
-| Docs       | Improve wiki          | `docs/wiki/concepts/`            |
+| Docs       | Improve wiki          | `06_technical_documentation/wiki/concepts/`            |
 
 ### Development Workflow
 
@@ -171,7 +171,7 @@ Before submitting PR:
 Understand how departments work:
 
 1. Read [[department-features]]
-2. Explore `apps/portal/lib/departments.ts`
+2. Explore `00_applications/portal/lib/departments.ts`
 3. Visit all 8 departments in running app
 4. Try adding a test department locally
 
@@ -180,8 +180,8 @@ Understand how departments work:
 Trace through auth:
 
 1. [[auth-middleware]] — How routes are protected
-2. `apps/portal/app/(auth)/login/page.tsx` — Login UI
-3. `apps/portal/proxy.ts` — Route guards
+2. `00_applications/portal/app/(auth)/login/page.tsx` — Login UI
+3. `00_applications/portal/proxy.ts` — Route guards
 4. Sign up → check `employees` table auto-creation
 
 ### Database Patterns
@@ -223,7 +223,7 @@ Bookmark these for daily reference:
 - Daily standup: 9:00 AM UTC
 - Code reviews: Via GitHub PRs
 - Questions: #dev-support Slack channel
-- Wiki updates: Log in `docs/wiki/log.md`
+- Wiki updates: Log in `06_technical_documentation/wiki/log.md`
 
 ---
 

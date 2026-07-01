@@ -23,7 +23,7 @@ cd portal
 pnpm install
 
 # Copy environment variables
-cp apps/portal/.env.example apps/portal/.env
+cp 00_applications/portal/.env.example 00_applications/portal/.env
 cp .env.tools.example .env.tools
 ```
 
@@ -37,7 +37,7 @@ We use Supabase for our database and authentication. Start it locally:
 pnpm --filter @repo/database supabase:dev
 ```
 
-_Note: This will print out your local `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Update your `apps/portal/.env` with these values._
+_Note: This will print out your local `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Update your `00_applications/portal/.env` with these values._
 
 ## 4. Run the Development Server
 

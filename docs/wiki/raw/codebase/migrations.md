@@ -6,7 +6,7 @@ sha256: d0e491545037afaed210632eac5e47345af0191bafe0c915174434f15dd15ed2
 
 # Database Schema Source
 
-Extracted from `pkgs/database/migrations/` (16 migration files):
+Extracted from `01_platform_packages/database/migrations/` (16 migration files):
 
 - 001_initial.sql — Core tables, auth helpers, trigger
 - 002_control_room_tables.sql — Operators, sites, machine_operations, hourly_loads, shift_notes, excavator_activity, dozer_rolls

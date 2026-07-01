@@ -1,0 +1,33 @@
+{
+  "name": "@repo/contract",
+  "description": "API type definitions and validation schemas using Zod for shared TypeScript types across frontend and backend",
+  "version": "1.0.0",
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "openapi-zod-client": "^1.18.3",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./validation": "./src/validation.ts",
+    "./schemas/*": "./src/schemas/*.ts",
+    "./types/*": "./src/types/*.ts"
+  },
+  "main": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .nx",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "openapi:generate": "SPEC_FILE=./openapi.generated.json node 03_operations_automation/generate-openapi-types.js",
+    "openapi:validate": "node 03_operations_automation/validate-contract.js",
+    "generate-zod": "openapi-zod-client openapi.generated.json -o src/generated/schemas.ts",
+    "test:contract:health": "node 03_operations_automation/test-contract-health.js"
+  },
+  "types": "./src/index.ts"
+}

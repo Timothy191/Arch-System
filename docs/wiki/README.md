@@ -7,7 +7,7 @@ For a quick start, check out the [Wiki Index](index.md) or read the comprehensiv
 Structure:
 
 - wiki.config.md — wiki configuration (auto_research settings)
-- docs/wiki/ — markdown pages organized by topic (e.g., concepts/, papers/)
+- 06_technical_documentation/wiki/ — markdown pages organized by topic (e.g., concepts/, papers/)
 - logs/ — human-readable run logs produced by the research loop
 - derived/ — structured run outputs (JSON)
 

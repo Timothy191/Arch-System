@@ -543,11 +543,11 @@ CREATE INDEX idx_machine_ops_dept_date
 
 ## Migration Guidelines
 
-1. **Source of truth**: `pkgs/database/migrations/`
-2. **Deploy copy**: `pkgs/supabase/supabase/migrations/` (auto-synced)
-3. **Run locally**: `cd pkgs/database && pnpm supabase:dev`
-4. **Reset local**: `cd pkgs/database && pnpm supabase:reset`
-5. **Push remote**: `cd pkgs/database && pnpm supabase:push`
+1. **Source of truth**: `01_platform_packages/database/migrations/`
+2. **Deploy copy**: `01_platform_packages/supabase/supabase/migrations/` (auto-synced)
+3. **Run locally**: `cd 01_platform_packages/database && pnpm supabase:dev`
+4. **Reset local**: `cd 01_platform_packages/database && pnpm supabase:reset`
+5. **Push remote**: `cd 01_platform_packages/database && pnpm supabase:push`
 
 ## Data Validation Rules
 

@@ -18,8 +18,8 @@ Nine security and usability improvements were implemented across the Arch System
 
 **Files Modified:**
 
-- `pkgs/supabase/src/client.ts`
-- `pkgs/supabase/src/middleware.ts`
+- `01_platform_packages/supabase/src/client.ts`
+- `01_platform_packages/supabase/src/middleware.ts`
 
 **Changes:**
 
@@ -70,10 +70,10 @@ cookieOptions: {
 
 **Files Modified:**
 
-- `apps/portal/app/api/auth/login/route.ts` (NEW)
-- `apps/portal/lib/api/rate-limit-middleware.ts` (existing)
-- `apps/portal/lib/api/rate-limit-config.ts` (existing)
-- `apps/portal/app/(auth)/login/LoginForm.tsx`
+- `00_applications/portal/app/api/auth/login/route.ts` (NEW)
+- `00_applications/portal/lib/api/rate-limit-middleware.ts` (existing)
+- `00_applications/portal/lib/api/rate-limit-config.ts` (existing)
+- `00_applications/portal/app/(auth)/login/LoginForm.tsx`
 
 **Changes:**
 
@@ -133,7 +133,7 @@ const response = await fetch("/api/auth/login", {
 
 **Files Modified:**
 
-- `apps/portal/proxy.ts`
+- `00_applications/portal/proxy.ts`
 
 **Changes:**
 
@@ -207,7 +207,7 @@ if (isValidRedirect(pathname)) {
 
 **Files Modified:**
 
-- `apps/portal/app/(auth)/login/LoginForm.tsx`
+- `00_applications/portal/app/(auth)/login/LoginForm.tsx`
 
 **Changes:**
 
@@ -247,7 +247,7 @@ if (isValidRedirect(pathname)) {
 
 **Files Modified:**
 
-- `apps/portal/app/(auth)/layout.tsx`
+- `00_applications/portal/app/(auth)/layout.tsx`
 
 **Changes:**
 
@@ -284,7 +284,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
 **Files Modified:**
 
-- `apps/portal/app/(auth)/login/LoginForm.tsx`
+- `00_applications/portal/app/(auth)/login/LoginForm.tsx`
 
 **Changes:**
 
@@ -326,8 +326,8 @@ onClick={() => {
 
 **Files Modified:**
 
-- `apps/portal/app/(auth)/login/page.tsx`
-- `apps/portal/components/RouteBackground.tsx`
+- `00_applications/portal/app/(auth)/login/page.tsx`
+- `00_applications/portal/components/RouteBackground.tsx`
 
 **Changes:**
 
@@ -369,8 +369,8 @@ preload = "none";
 
 **Files Modified:**
 
-- `pkgs/supabase/src/middleware.ts` (already covered in #1)
-- `apps/portal/next.config.mjs`
+- `01_platform_packages/supabase/src/middleware.ts` (already covered in #1)
+- `00_applications/portal/next.config.mjs`
 
 **Changes:**
 
@@ -435,7 +435,7 @@ preload = "none";
 
 **Files Modified:**
 
-- `apps/portal/app/(auth)/login/LoginForm.tsx` (documentation added)
+- `00_applications/portal/app/(auth)/login/LoginForm.tsx` (documentation added)
 
 **Verification Performed:**
 
@@ -548,27 +548,27 @@ All changes were verified to pass:
 
 **Core Auth Files:**
 
-- `pkgs/supabase/src/client.ts`
-- `pkgs/supabase/src/middleware.ts`
+- `01_platform_packages/supabase/src/client.ts`
+- `01_platform_packages/supabase/src/middleware.ts`
 
 **Portal Auth Routes:**
 
-- `apps/portal/app/(auth)/layout.tsx`
-- `apps/portal/app/(auth)/login/LoginForm.tsx`
-- `apps/portal/app/(auth)/login/page.tsx`
+- `00_applications/portal/app/(auth)/layout.tsx`
+- `00_applications/portal/app/(auth)/login/LoginForm.tsx`
+- `00_applications/portal/app/(auth)/login/page.tsx`
 
 **API Routes:**
 
-- `apps/portal/app/api/auth/login/route.ts` (NEW)
+- `00_applications/portal/app/api/auth/login/route.ts` (NEW)
 
 **Middleware & Config:**
 
-- `apps/portal/proxy.ts`
-- `apps/portal/next.config.mjs`
+- `00_applications/portal/proxy.ts`
+- `00_applications/portal/next.config.mjs`
 
 **Components:**
 
-- `apps/portal/components/RouteBackground.tsx`
+- `00_applications/portal/components/RouteBackground.tsx`
 
 **Total Files Modified:** 10 files (1 new)
 

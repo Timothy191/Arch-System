@@ -43,7 +43,7 @@ confidence: high
 
 ### Wiki — 78 Pages
 
-The `docs/wiki/` directory is the primary source of project knowledge.
+The `06_technical_documentation/wiki/` directory is the primary source of project knowledge.
 
 | Section         | Files | Content                                  |
 | --------------- | ----- | ---------------------------------------- |
@@ -103,15 +103,15 @@ The `docs/wiki/` directory is the primary source of project knowledge.
 
 ### Comprehensive Project Report
 
-- `docs/wiki/project-comprehensive-report.md` — **105KB**, 1024+ lines
+- `06_technical_documentation/wiki/project-comprehensive-report.md` — **105KB**, 1024+ lines
 - Covers architecture diagrams, security scorecard, performance dashboard, timeline, milestones
 - Version-tracked (currently v2.5.0)
-- `docs/wiki/project-report-visual.html` — rendered HTML version (43KB)
+- `06_technical_documentation/wiki/project-report-visual.html` — rendered HTML version (43KB)
 
 ### DevDocs Integration
 
-- `docs/wiki/index.md` + `docs/wiki/quick-reference.md` — DevDocs portable documentation
-- `docs/DEVDOCS_SETUP.md` — guide to using DevDocs offline
+- `06_technical_documentation/wiki/index.md` + `06_technical_documentation/wiki/quick-reference.md` — DevDocs portable documentation
+- `06_technical_documentation/DEVDOCS_SETUP.md` — guide to using DevDocs offline
 
 ### Comparison Docs — 10 Technology Comparisons
 
@@ -207,7 +207,7 @@ The remaining **157 source files** have zero JSDoc. For a project this size, inl
 ## Wiki Structure Map
 
 ```
-docs/wiki/
+06_technical_documentation/wiki/
 ├── project-comprehensive-report.md    # Master project report (v2.5.0)
 ├── project-report-visual.html         # HTML render
 ├── project-stability-analysis.md      # Stability deep dive

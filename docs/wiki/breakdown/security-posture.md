@@ -46,7 +46,7 @@ confidence: high
 | JWT tokens         | Supabase Auth with PKCE flow                                | ✅ Active        |
 | Session management | Supabase server-side sessions via `@repo/supabase`          | ✅ Active        |
 | Session refresh    | Automatic token refresh with `createServerSupabaseClient()` | ✅ Active        |
-| Auth proxy         | `apps/portal/proxy.ts` — protects all routes                | ✅ Active        |
+| Auth proxy         | `00_applications/portal/proxy.ts` — protects all routes                | ✅ Active        |
 | Login page         | Video background, secure form, no credential logging        | ✅ Active        |
 | MFA (TOTP)         | Supabase supports it — not yet enabled in UI                | ⚠️ Partial (50%) |
 
@@ -136,7 +136,7 @@ is_active(record) → boolean
 
 | Asset                         | Status                                            |
 | ----------------------------- | ------------------------------------------------- |
-| `ops/pentest.sh`          | ✅ Created — OWASP ZAP baseline + full scan       |
+| `03_operations_automation/pentest.sh`          | ✅ Created — OWASP ZAP baseline + full scan       |
 | `docker-compose.security.yml` | ✅ Created — `zap-baseline` + `zap-full` services |
 | Last executed scan            | ⬜ Not yet run                                    |
 | Report location               | `test-results/pentest/` (generated on run)        |
@@ -155,9 +155,9 @@ is_active(record) → boolean
 ### 🟡 Medium — Backup strategy incomplete (60%)
 
 - Supabase provides automatic point-in-time recovery on hosted plans
-- No manual backup script exists (`ops/backup.sh` missing)
+- No manual backup script exists (`03_operations_automation/backup.sh` missing)
 - For on-premises deployment (Docker Compose), no automated pg_dump schedule configured
-- Fix: add `infra/systemd/backup.timer` + `ops/backup.sh` using `pg_dump`
+- Fix: add `10_infrastructure_as_code/systemd/backup.timer` + `03_operations_automation/backup.sh` using `pg_dump`
 
 ### 🟡 Medium — Dependency vulnerability scanning not automated
 
@@ -175,7 +175,7 @@ is_active(record) → boolean
 ### 🟢 Low — Pentest not yet executed
 
 - Script is ready; requires Docker + running app
-- Manual trigger: `./ops/pentest.sh`
+- Manual trigger: `./03_operations_automation/pentest.sh`
 
 ---
 
@@ -185,7 +185,7 @@ is_active(record) → boolean
 | -------- | -------------------------------------------------------------------------- | ----------- | ------------------------- |
 | 🟡 P1    | Enable MFA enrollment in `/admin` user settings                            | ⬜ Pending  | Closes 50% MFA gap        |
 | 🟡 P1    | Add `pnpm audit --audit-level=moderate` to CI                              | ⬜ Pending  | Automated CVE detection   |
-| 🟡 P1    | Add `ops/backup.sh` + `infra/systemd/backup.timer` for on-prem pg_dump | ⬜ Pending  | Backup coverage           |
+| 🟡 P1    | Add `03_operations_automation/backup.sh` + `10_infrastructure_as_code/systemd/backup.timer` for on-prem pg_dump | ⬜ Pending  | Backup coverage           |
 | 🟡 P1    | Execute OWASP ZAP baseline scan                                            | ⬜ Pending  | Find real vulnerabilities |
 | 🟢 P2    | Add Renovate/Dependabot for automated dep updates                          | ⬜ Pending  | Proactive CVE fixes       |
 | 🟢 P2    | Add CSRF token middleware for `app/api/` non-action routes                 | ⬜ Pending  | Closes 25% CSRF gap       |
@@ -264,6 +264,6 @@ Layer 5: Data Protection
 - [`../concepts/rls-policy.md`](../concepts/rls-policy.md) — RLS patterns reference
 - [`../concepts/incident-response.md`](../concepts/incident-response.md) — security incident playbook
 - [`../concepts/monitoring-error-tracking.md`](../concepts/monitoring-error-tracking.md) — error tracking
-- [`../../ops/pentest.sh`](../../ops/pentest.sh) — OWASP ZAP scan runner
+- [`../../03_operations_automation/pentest.sh`](../../03_operations_automation/pentest.sh) — OWASP ZAP scan runner
 - [`../../docker-compose.security.yml`](../../docker-compose.security.yml) — ZAP compose services
-- [`../../pkgs/database/migrations/012_rls_refinement.sql`](../../pkgs/database/migrations/012_rls_refinement.sql) — RLS policies
+- [`../../01_platform_packages/database/migrations/012_rls_refinement.sql`](../../01_platform_packages/database/migrations/012_rls_refinement.sql) — RLS policies

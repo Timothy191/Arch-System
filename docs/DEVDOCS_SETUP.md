@@ -7,7 +7,7 @@ Tech documentation crawling MCP server for Windsurf/Cascade integration.
 DevDocs provides a completely free, private, UI-based documentation crawling service that can be integrated with Windsurf Cascade via MCP.
 
 **Repository**: <https://github.com/cyberagiinc/DevDocs>  
-**Local Path**: `/home/timothy/Documents/Arch-System/tools/devdocs`
+**Local Path**: `/home/timothy/Documents/Arch-System/08_developer_tooling/devdocs`
 
 ## Features
 
@@ -26,7 +26,7 @@ DevDocs provides a completely free, private, UI-based documentation crawling ser
 
 ```bash
 # Navigate to DevDocs directory
-cd /home/timothy/Documents/Arch-System/tools/devdocs
+cd /home/timothy/Documents/Arch-System/08_developer_tooling/devdocs
 
 # Configure environment
 cp .env.template .env
@@ -111,11 +111,11 @@ DevDocs complements `codebase-memory-mcp`:
 ## Security Notes
 
 - DevDocs runs locally - no data sent to external services
-- crawled content stored in `tools/devdocs/storage/`
+- crawled content stored in `08_developer_tooling/dev06_technical_documentation/storage/`
 - Suitable for proprietary documentation
 
 ## Resources
 
 - Main Repo: <https://github.com/cyberagiinc/DevDocs>
 - Issues: <https://github.com/cyberagiinc/DevDocs/issues>
-- Local Setup: `/home/timothy/Documents/Arch-System/tools/devdocs/`
+- Local Setup: `/home/timothy/Documents/Arch-System/08_developer_tooling/dev06_technical_documentation/`

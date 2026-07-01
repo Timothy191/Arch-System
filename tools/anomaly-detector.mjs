@@ -1,6 +1,6 @@
 /**
  * Anomaly Detection Script
- * Usage: node tools/anomaly-detector.mjs [--notify]
+ * Usage: node 08_developer_tooling/anomaly-detector.mjs [--notify]
  *
  * Detects anomalies in key metrics using statistical methods
  * - Z-score: for normally distributed metrics
@@ -15,7 +15,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
-const CONFIG_PATH = join(rootDir, "toolchain/anomaly-detection.json");
+const CONFIG_PATH = join(rootDir, "07_toolchain_configuration/anomaly-detection.json");
 
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);

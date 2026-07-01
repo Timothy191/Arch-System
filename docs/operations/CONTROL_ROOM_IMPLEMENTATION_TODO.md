@@ -30,7 +30,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 1: Environment Configuration**
 
 - [ ] **TASK-1.1:** Set `NEXT_PUBLIC_FUXA_URL` in production `.env`
-  - **File:** `apps/portal/.env`
+  - **File:** `00_applications/portal/.env`
   - **Current Value:** `http://localhost:1881`
   - **Required:** Production FUXA URL
   - **Time:** 1 hour
@@ -70,7 +70,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 3: Error Handling**
 
 - [ ] **TASK-3.1:** Create ErrorBoundary component
-  - **File:** `apps/portal/components/ErrorBoundary.tsx` (new file)
+  - **File:** `00_applications/portal/components/ErrorBoundary.tsx` (new file)
   - **Features:** Fallback UI, error reporting, retry mechanism
   - **Time:** 3-4 hours
   - **Owner:** Frontend Developer
@@ -78,7 +78,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Acceptance Criteria:** Catches errors, shows fallback, reports to Sentry
 
 - [ ] **TASK-3.2:** Wrap dashboard in ErrorBoundary
-  - **File:** `apps/portal/app/(departments)/[department]/page.tsx`
+  - **File:** `00_applications/portal/app/(departments)/[department]/page.tsx`
   - **Time:** 1 hour
   - **Owner:** Frontend Developer
   - **Acceptance Criteria:** Dashboard errors don't crash entire app
@@ -94,28 +94,28 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 4: Monitoring**
 
 - [ ] **TASK-4.1:** Create FUXA health check endpoint
-  - **File:** `apps/portal/app/api/health/fuxa/route.ts` (new file)
+  - **File:** `00_applications/portal/app/api/health/fuxa/route.ts` (new file)
   - **Checks:** HTTP response, CORS, iframe loadability
   - **Time:** 2 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns health status with latency metric
 
 - [ ] **TASK-4.2:** Create Supabase realtime health check
-  - **File:** `apps/portal/app/api/health/supabase-realtime/route.ts` (new file)
+  - **File:** `00_applications/portal/app/api/health/supabase-realtime/route.ts` (new file)
   - **Checks:** Connection status, subscription count, latency
   - **Time:** 2 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns subscription health metrics
 
 - [ ] **TASK-4.3:** Create Redis health check endpoint
-  - **File:** `apps/portal/app/api/health/cache/route.ts` (new file)
+  - **File:** `00_applications/portal/app/api/health/12_distributed_cache_runtime/route.ts` (new file)
   - **Checks:** Connection status, cache hit rate, memory usage
   - **Time:** 2 hours
   - **Owner:** Backend Developer
   - **Acceptance Criteria:** Returns Redis health metrics
 
 - [ ] **TASK-4.4:** Create unified health check endpoint
-  - **File:** `apps/portal/app/api/health/route.ts` (new file)
+  - **File:** `00_applications/portal/app/api/health/route.ts` (new file)
   - **Features:** Aggregates all health checks
   - **Time:** 1 hour
   - **Owner:** Backend Developer
@@ -124,7 +124,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 5: Documentation**
 
 - [ ] **TASK-5.1:** Create shift closeout runbook
-  - **File:** `docs/control-room/shift-closeout-runbook.md` (new file)
+  - **File:** `06_technical_documentation/control-room/shift-closeout-runbook.md` (new file)
   - **Content:** Step-by-step procedures, error resolution, emergency procedures
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer + Operations Lead
@@ -203,14 +203,14 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 9: Documentation**
 
 - [ ] **TASK-9.1:** Create operator onboarding guide
-  - **File:** `docs/control-room/operator-onboarding.md` (new file)
+  - **File:** `06_technical_documentation/control-room/operator-onboarding.md` (new file)
   - **Content:** System overview, daily workflows, procedures
   - **Time:** 4-6 hours
   - **Owner:** Technical Writer + Training Lead
   - **Acceptance Criteria:** Reviewed by training team, user tested
 
 - [ ] **TASK-9.2:** Create FUXA troubleshooting guide
-  - **File:** `docs/control-room/fuxa-troubleshooting.md` (new file)
+  - **File:** `06_technical_documentation/control-room/fuxa-troubleshooting.md` (new file)
   - **Content:** Common issues, resolution procedures
   - **Time:** 3-4 hours
   - **Owner:** Technical Writer + SCADA Engineer
@@ -251,7 +251,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Acceptance Criteria:** Business logic thoroughly tested
 
 - [ ] **TASK-10.5:** Create machine operations E2E test
-  - **File:** `e2e/control-room-machine-operations.spec.ts` (new file)
+  - **File:** `09_end_to_end_verification/control-room-machine-operations.spec.ts` (new file)
   - **Journey:** Login → Log operation → Verify in list
   - **Time:** 3-4 hours
   - **Owner:** QA Developer
@@ -259,21 +259,21 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Acceptance Criteria:** End-to-end flow passes in CI/CD
 
 - [ ] **TASK-10.6:** Create shift closeout E2E test
-  - **File:** `e2e/control-room-shift-closeout.spec.ts` (new file)
+  - **File:** `09_end_to_end_verification/control-room-shift-closeout.spec.ts` (new file)
   - **Journey:** Login → Close shift → Verify closed
   - **Time:** 3-4 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** Complete shift closeout flow passes
 
 - [ ] **TASK-10.7:** Create alert acknowledgment E2E test
-  - **File:** `e2e/control-room-alerts.spec.ts` (new file)
+  - **File:** `09_end_to_end_verification/control-room-alerts.spec.ts` (new file)
   - **Journey:** View alerts → Acknowledge → Verify
   - **Time:** 2-3 hours
   - **Owner:** QA Developer
   - **Acceptance Criteria:** Alert acknowledgment flow passes
 
 - [ ] **TASK-10.8:** Create SCADA panel E2E test
-  - **File:** `e2e/control-room-scada.spec.ts` (new file)
+  - **File:** `09_end_to_end_verification/control-room-scada.spec.ts` (new file)
   - **Journey:** Load SCADA → Test view toggle → Verify fallback
   - **Time:** 2-3 hours
   - **Owner:** QA Developer
@@ -336,63 +336,63 @@ This document is for **planning and review only**. Do NOT implement any changes 
 ### **Category 13: Documentation Completion**
 
 - [ ] **TASK-13.1:** Create PIN reset procedure doc
-  - **File:** `docs/control-room/pin-reset-procedure.md` (new file)
+  - **File:** `06_technical_documentation/control-room/pin-reset-procedure.md` (new file)
   - **Content:** PIN setup, reset, security requirements
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by security team
 
 - [ ] **TASK-13.2:** Create machine registration guide
-  - **File:** `docs/control-room/machine-registration-guide.md` (new file)
+  - **File:** `06_technical_documentation/control-room/machine-registration-guide.md` (new file)
   - **Content:** Machine types, required fields, procedures
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by operations team
 
 - [ ] **TASK-13.3:** Create supervisor workflow doc
-  - **File:** `docs/control-room/supervisor-workflow.md` (new file)
+  - **File:** `06_technical_documentation/control-room/supervisor-workflow.md` (new file)
   - **Content:** Supervisor responsibilities, approval process
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by supervisors
 
 - [ ] **TASK-13.4:** Create SCADA user guide
-  - **File:** `docs/control-room/scada-user-guide.md` (new file)
+  - **File:** `06_technical_documentation/control-room/scada-user-guide.md` (new file)
   - **Content:** SCADA features, usage, troubleshooting
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by SCADA team
 
 - [ ] **TASK-13.5:** Create alert response procedures
-  - **File:** `docs/control-room/alert-response-procedures.md` (new file)
+  - **File:** `06_technical_documentation/control-room/alert-response-procedures.md` (new file)
   - **Content:** Alert types, response procedures, escalation
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by operations team
 
 - [ ] **TASK-13.6:** Create architecture documentation
-  - **File:** `docs/control-room/architecture.md` (new file)
+  - **File:** `06_technical_documentation/control-room/architecture.md` (new file)
   - **Content:** Component architecture, data flows
   - **Time:** 3-4 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by architecture team
 
 - [ ] **TASK-13.7:** Create data flow diagrams
-  - **File:** `docs/control-room/data-flows.md` (new file)
+  - **File:** `06_technical_documentation/control-room/data-flows.md` (new file)
   - **Content:** Data flow diagrams for all operations
   - **Time:** 3-4 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Diagrams accurate and complete
 
 - [ ] **TASK-13.8:** Create caching strategy doc
-  - **File:** `docs/control-room/caching-strategy.md` (new file)
+  - **File:** `06_technical_documentation/control-room/caching-strategy.md` (new file)
   - **Content:** Cache keys, TTL, invalidation, monitoring
   - **Time:** 2-3 hours
   - **Owner:** Technical Writer
   - **Acceptance Criteria:** Reviewed by performance team
 
 - [ ] **TASK-13.9:** Create troubleshooting guide
-  - **File:** `docs/control-room/troubleshooting.md` (new file)
+  - **File:** `06_technical_documentation/control-room/troubleshooting.md` (new file)
   - **Content:** Common issues, resolution procedures
   - **Time:** 3-4 hours
   - **Owner:** Technical Writer

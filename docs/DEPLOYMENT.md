@@ -4,7 +4,7 @@ Unified deployment system for local development, staging, and production environ
 
 ## Related Documentation
 
-- **[DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
+- **[DOCUMENTATION_INDEX.md](06_technical_documentation/DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
 - **[SECURITY.md](SECURITY.md)** — Security policy and best practices
 
 ---
@@ -13,13 +13,13 @@ Unified deployment system for local development, staging, and production environ
 
 ```bash
 # Local development (full stack)
-./ops/deploy.sh local
+./03_operations_automation/deploy.sh local
 
 # Staging deployment
-./ops/deploy.sh staging
+./03_operations_automation/deploy.sh staging
 
 # Production deployment
-./ops/deploy.sh production
+./03_operations_automation/deploy.sh production
 ```
 
 ---
@@ -40,7 +40,7 @@ The unified `deploy.sh` script handles all deployment scenarios with intelligent
 ### Usage
 
 ```bash
-./ops/deploy.sh [MODE] [OPTIONS]
+./03_operations_automation/deploy.sh [MODE] [OPTIONS]
 
 Modes:
   local       Full stack with local Supabase (development)
@@ -64,7 +64,7 @@ Options:
 ### Start Full Stack
 
 ```bash
-./ops/deploy.sh local
+./03_operations_automation/deploy.sh local
 ```
 
 This starts:
@@ -77,7 +77,7 @@ This starts:
 ### Clean Restart
 
 ```bash
-./ops/deploy.sh local --clean
+./03_operations_automation/deploy.sh local --clean
 ```
 
 Stops all services and performs a fresh start.
@@ -86,7 +86,7 @@ Stops all services and performs a fresh start.
 
 ```bash
 # Skip database initialization if already running
-./ops/deploy.sh local
+./03_operations_automation/deploy.sh local
 ```
 
 The script detects running Supabase and reuses it.
@@ -98,7 +98,7 @@ The script detects running Supabase and reuses it.
 To run this machine as a local server so that other devices (such as employee phones or tablets) connected to the same Wi-Fi/LAN can access the portal:
 
 ```bash
-./ops/deploy-live-local.sh
+./03_operations_automation/deploy-live-local.sh
 ```
 
 ### Key Mechanics
@@ -106,7 +106,7 @@ To run this machine as a local server so that other devices (such as employee ph
 - **Dynamic IP Resolution**: Automatically resolves the primary network interface IP address (e.g., `192.168.1.15`).
 - **Client Configuration Exposure**: Modifies `.env` temporarily to bind client-side services (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_FUXA_URL`) to the host IP instead of loopback.
 - **Port Exposure**: Compiles the Next.js production build and exposes the portal web server on all interfaces (`0.0.0.0:3000`).
-- **Auto-Restore**: Halting the server using `./ops/shutdown.sh` will automatically restore your original local development `.env` configuration.
+- **Auto-Restore**: Halting the server using `./03_operations_automation/shutdown.sh` will automatically restore your original local development `.env` configuration.
 
 ---
 
@@ -114,7 +114,7 @@ To run this machine as a local server so that other devices (such as employee ph
 
 ### Prerequisites
 
-1. Create `.env.staging` in `apps/portal/`:
+1. Create `.env.staging` in `00_applications/portal/`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-staging-project.supabase.co
@@ -125,7 +125,7 @@ SUPABASE_SERVICE_KEY=your-service-key
 2. Deploy:
 
 ```bash
-./ops/deploy.sh staging
+./03_operations_automation/deploy.sh staging
 ```
 
 ### GitHub Actions (Staging)
@@ -146,7 +146,7 @@ Staging auto-deploys on every push to `main`:
 For first-time production setup, use the automated script:
 
 ```bash
-./ops/setup-production-environment.sh
+./03_operations_automation/setup-production-environment.sh
 ```
 
 **Options**:
@@ -168,7 +168,7 @@ The script automates:
 7. Portal build and startup
 8. Health check
 
-**Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](ops/ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
+**Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](03_operations_automation/ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
 
 ### Manual Setup
 
@@ -177,7 +177,7 @@ The script automates:
 1. **Production Environment File**:
 
 ```bash
-cp apps/portal/.env.production.example apps/portal/.env
+cp 00_applications/portal/.env.production.example 00_applications/portal/.env
 # Fill in all required variables
 ```
 
@@ -191,7 +191,7 @@ Required variables:
 2. **Systemd Service** (optional but recommended):
 
 ```bash
-sudo cp ops/arch-systems.service /etc/systemd/system/
+sudo cp 03_operations_automation/arch-systems.service /etc/systemd/system/
 sudo systemctl enable arch-systems
 ```
 
@@ -199,13 +199,13 @@ sudo systemctl enable arch-systems
 
 ```bash
 # Interactive (with confirmation)
-./ops/deploy.sh production
+./03_operations_automation/deploy.sh production
 
 # Non-interactive (CI/CD)
-./ops/deploy.sh production --force
+./03_operations_automation/deploy.sh production --force
 
 # Skip build if already built
-./ops/deploy.sh production --skip-build
+./03_operations_automation/deploy.sh production --skip-build
 ```
 
 ### Production Safety Features
@@ -216,7 +216,7 @@ sudo systemctl enable arch-systems
 
 ```bash
 # Rollback to previous deployment
-./ops/deploy.sh production --rollback
+./03_operations_automation/deploy.sh production --rollback
 ```
 
 ---
@@ -227,7 +227,7 @@ sudo systemctl enable arch-systems
 
 ```bash
 # Run only migrations without full deploy
-./ops/deploy.sh production --migrate-only
+./03_operations_automation/deploy.sh production --migrate-only
 ```
 
 ### Migration Safety
@@ -239,7 +239,7 @@ sudo systemctl enable arch-systems
 ### Manual Migration (if needed)
 
 ```bash
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase migration list    # See pending
 pnpm supabase db push           # Apply to remote
 ```
@@ -251,7 +251,7 @@ pnpm supabase db push           # Apply to remote
 ### Build Production Image
 
 ```bash
-docker build -t arch-systems:latest -f apps/portal/docker/Dockerfile .
+docker build -t arch-systems:latest -f 00_applications/portal/docker/Dockerfile .
 ```
 
 ### Docker Compose (Production)
@@ -321,9 +321,9 @@ github variables set PRODUCTION_URL https://plantcor.os
 tail -f deploy-*.log
 
 # Common fixes
-./ops/deploy.sh local --clean    # Full reset
+./03_operations_automation/deploy.sh local --clean    # Full reset
 pnpm install                         # Fix dependencies
-rm -rf apps/portal/.next             # Clear build cache
+rm -rf 00_applications/portal/.next             # Clear build cache
 ```
 
 ### Database Connection Issues
@@ -337,14 +337,14 @@ pnpx supabase stop
 pnpx supabase start
 
 # Verify environment variables
-grep SUPABASE apps/portal/.env
+grep SUPABASE 00_applications/portal/.env
 ```
 
 ### Rollback Emergency
 
 ```bash
 # Immediate rollback
-./ops/deploy.sh production --rollback
+./03_operations_automation/deploy.sh production --rollback
 
 # Or manually restore backup
 # (Backups stored in .deploy-backups/)

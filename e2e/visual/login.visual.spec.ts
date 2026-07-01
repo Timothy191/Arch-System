@@ -2,8 +2,8 @@
  * Visual regression tests for the login page.
  * Uses Playwright's built-in snapshot comparison.
  *
- * First run (baseline): npx playwright test e2e/visual --update-snapshots
- * Subsequent runs:       npx playwright test e2e/visual
+ * First run (baseline): npx playwright test 09_end_to_end_verification/visual --update-snapshots
+ * Subsequent runs:       npx playwright test 09_end_to_end_verification/visual
  */
 
 import { test, expect } from "@playwright/test";

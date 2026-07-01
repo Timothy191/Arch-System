@@ -1,0 +1,6 @@
+{
+  "name": "features-dashboard-data-access",
+  "tags": ["scope:dashboard", "type:data-access", "scope:feature"],
+  "projectType": "library",
+  "sourceRoot": "02_domain_libraries/features/dashboard/data-access/src"
+}

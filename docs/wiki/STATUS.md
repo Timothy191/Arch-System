@@ -114,7 +114,7 @@
 - [x] Inngest background jobs (sync-playback, report-generation)
 - [x] Novu notification infrastructure
 - [x] QR Access Control dashboard (7 dashboard + 5 access-log components)
-- [x] Style Dictionary token pipeline (`pkgs/theme`)
+- [x] Style Dictionary token pipeline (`01_platform_packages/theme`)
 - [x] Semantic color tokens (success, warning, danger, info)
 - [x] GitHub Actions production deploy pipeline (225-line workflow)
 - [x] Plugin system: Rust telemetry engine, predictive maintenance scaffold
@@ -361,7 +361,7 @@ From `project-comprehensive-report.md` §9 — 5 priority actions:
 
 #### 1. 🟢 On-Premises Server Setup & Cockpit `[HIGH]` — 1–2 days
 
-Provision the mining site server and deploy the full stack via `./ops/deploy.sh local`. The local dev environment is already production-identical.
+Provision the mining site server and deploy the full stack via `./03_operations_automation/deploy.sh local`. The local dev environment is already production-identical.
 
 - [ ] Provision Linux server (Ubuntu 22.04 / RHEL 9) at mining site
 - [ ] Install Cockpit (`port 9090`) for web-based server management

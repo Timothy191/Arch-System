@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: concept
 tags: [incident, ops, production, on-call, emergency]
-sources: [CLAUDE.md, docs/wiki/concepts/deployment.md]
+sources: [CLAUDE.md, 06_technical_documentation/wiki/concepts/deployment.md]
 confidence: high
 ---
 
@@ -162,7 +162,7 @@ WHERE state = 'idle' AND state_change < NOW() - INTERVAL '1 hour';
 **Manual Failover**:
 
 ```typescript
-// In apps/portal/lib/ai/ai-service.ts
+// In 00_applications/portal/lib/ai/ai-service.ts
 // Temporarily switch primary provider
 const providerOrder = ["openrouter", "together", "groq"];
 ```
@@ -280,7 +280,7 @@ pnpm --filter portal build
 pnpm dlx vercel --prod  # Redeploy
 
 # Database (emergency only)
-cd pkgs/database
+cd 01_platform_packages/database
 pnpm supabase stop
 pnpm supabase:dev
 ```

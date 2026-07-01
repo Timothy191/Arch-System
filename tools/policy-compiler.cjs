@@ -2,18 +2,18 @@
 
 /**
  * @fileoverview Compiles architectural and dependency boundary policies into ESLint configurations.
- * Usage: node tools/policy-compiler.cjs [--check]
+ * Usage: node 08_developer_tooling/policy-compiler.cjs [--check]
  */
 /**
  * Policy SSoT Compiler (CommonJS runtime)
  *
  * This compiler is the direct Single Source of Truth (SSoT) for architectural boundaries and rules,
  * generating:
- *   - tools/policy/dependency.rules.json
- *   - tools/policy/architecture.rules.json
- *   - tools/policy/security.checks.json
- *   - tools/policy/intent-map.json
- *   - tools/policy/eslint-boundaries.generated.cjs
+ *   - 08_developer_tooling/policy/dependency.rules.json
+ *   - 08_developer_tooling/policy/architecture.rules.json
+ *   - 08_developer_tooling/policy/security.checks.json
+ *   - 08_developer_tooling/policy/intent-map.json
+ *   - 08_developer_tooling/policy/eslint-boundaries.generated.cjs
  *
  * Run via: pnpm policy:gen
  * Check via: pnpm policy:check (fails if drift detected)
@@ -30,7 +30,7 @@ const DEPENDENCY_RULES = [
     sourceTag: "scope:app",
     targetTag: "scope:package:db-internal",
     allowed: false,
-    reason: "apps/* must not import pkgs/database directly; use pkgs/supabase client",
+    reason: "00_applications/* must not import 01_platform_packages/database directly; use 01_platform_packages/supabase client",
   },
 
   // Forbidden: UI components must remain pure (no data layer)
@@ -61,18 +61,18 @@ const DEPENDENCY_RULES = [
     reason: "Theme must not depend on UI; theme is consumed by UI",
   },
 
-  // Forbidden: tools/* are build-time scripts; cannot import apps/* at runtime
+  // Forbidden: 08_developer_tooling/* are build-time scripts; cannot import 00_applications/* at runtime
   {
     sourceTag: "scope:tool",
     targetTag: "scope:app",
     allowed: false,
-    reason: "tools/* are build-time scripts; cannot import apps/* at runtime",
+    reason: "08_developer_tooling/* are build-time scripts; cannot import 00_applications/* at runtime",
   },
   {
     sourceTag: "scope:tool",
     targetTag: "scope:package:supabase",
     allowed: false,
-    reason: "tools/* must not import runtime server/client code",
+    reason: "08_developer_tooling/* must not import runtime server/client code",
   },
 
   // Allow: apps may import any other package except those forbidden above
@@ -83,7 +83,7 @@ const DEPENDENCY_RULES = [
     sourceTag: "scope:package",
     targetTag: "scope:app",
     allowed: false,
-    reason: "pkgs/* must not depend on apps/* (inversion of dependency)",
+    reason: "01_platform_packages/* must not depend on 00_applications/* (inversion of dependency)",
   },
 ];
 
@@ -144,7 +144,7 @@ const SECURITY_CHECKS = [
     id: "no-eval",
     rule: "No eval() or Function() constructor",
     pattern: "\\beval\\s*\\(|\\bnew\\s+Function\\s*\\(",
-    paths: ["apps/**/*.{ts,tsx,js,jsx}"],
+    paths: ["00_applications/**/*.{ts,tsx,js,jsx}"],
     severity: "error",
     enforceAt: ["ci", "local"],
   },
@@ -152,7 +152,7 @@ const SECURITY_CHECKS = [
     id: "no-sql-concat",
     rule: "No string-concatenated SQL queries",
     pattern: "`\\s*(SELECT|INSERT|UPDATE|DELETE).*\\$\\{",
-    paths: ["apps/**/*.{ts,tsx}", "pkgs/**/*.{ts,tsx}"],
+    paths: ["00_applications/**/*.{ts,tsx}", "01_platform_packages/**/*.{ts,tsx}"],
     severity: "error",
     enforceAt: ["ci", "local"],
   },
@@ -160,7 +160,7 @@ const SECURITY_CHECKS = [
     id: "no-raw-rls-disable",
     rule: "No RLS disabled in migrations",
     pattern: "ALTER\\s+TABLE.*DISABLE\\s+ROW\\s+LEVEL\\s+SECURITY",
-    paths: ["pkgs/database/migrations/**"],
+    paths: ["01_platform_packages/database/migrations/**"],
     severity: "error",
     enforceAt: ["ci"],
   },
@@ -168,7 +168,7 @@ const SECURITY_CHECKS = [
     id: "no-hardcoded-secrets",
     rule: "No hardcoded API keys or tokens",
     pattern: "(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})",
-    paths: ["apps/**/*.{ts,tsx,js,jsx}", "pkgs/**/*.{ts,tsx,js,jsx}"],
+    paths: ["00_applications/**/*.{ts,tsx,js,jsx}", "01_platform_packages/**/*.{ts,tsx,js,jsx}"],
     severity: "error",
     enforceAt: ["ci", "local"],
   },
@@ -176,7 +176,7 @@ const SECURITY_CHECKS = [
     id: "no-console-log",
     rule: "No console.log statements in production code",
     pattern: "console\\.log\\s*\\(",
-    paths: ["apps/portal/**/*.{ts,tsx}"],
+    paths: ["00_applications/portal/**/*.{ts,tsx}"],
     severity: "warning",
     enforceAt: ["local"],
   },
@@ -288,7 +288,7 @@ const depConstraints = DEPENDENCY_RULES.map((r) => {
   };
 });
 
-const eslintContent = `// GENERATED FROM tools/policy-compiler.cjs — DO NOT EDIT
+const eslintContent = `// GENERATED FROM 08_developer_tooling/policy-compiler.cjs — DO NOT EDIT
 // Run 'pnpm policy:gen' to regenerate.
 
 module.exports = {
@@ -333,5 +333,5 @@ if (CHECK_MODE && !allOk) {
 
 if (!CHECK_MODE) {
   console.log(`\n✅ All 5 policy files generated.`);
-  console.log("Next: git add tools/policy/ tools/policy-compiler.cjs package.json and commit.");
+  console.log("Next: git add 08_developer_tooling/policy/ 08_developer_tooling/policy-compiler.cjs package.json and commit.");
 }

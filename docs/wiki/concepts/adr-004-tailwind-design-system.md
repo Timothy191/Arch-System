@@ -6,7 +6,7 @@ type: decision
 status: accepted
 tags: [adr, css, design, decision]
 sources:
-  [docs/wiki/comparisons/styling-approaches.md, docs/wiki/concepts/design-system.md, CLAUDE.md]
+  [06_technical_documentation/wiki/comparisons/styling-approaches.md, 06_technical_documentation/wiki/concepts/design-system.md, CLAUDE.md]
 confidence: high
 ---
 

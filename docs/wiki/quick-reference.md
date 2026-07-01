@@ -25,7 +25,7 @@ pnpm lint                   # Run ESLint
 pnpm --filter portal test   # Run tests
 
 # Supabase
-cd pkgs/database && pnpm supabase:dev    # Start local Supabase
+cd 01_platform_packages/database && pnpm supabase:dev    # Start local Supabase
 pnpm supabase:push                           # Push migrations
 
 # Deployment

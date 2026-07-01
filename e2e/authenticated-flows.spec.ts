@@ -91,8 +91,8 @@ test.describe("Authenticated User Flows", () => {
   test.describe("Feature usage after login", () => {
     test("can access tools page", async ({ page }) => {
       await page.goto("/drilling/tools");
-      await expect(page).toHaveURL(/.*\/drilling\/tools/);
-      await expect(page.getByText(/tools/i)).toBeVisible();
+      await expect(page).toHaveURL(/.*\/drilling\/08_developer_tooling/);
+      await expect(page.getByText(/08_developer_tooling/i)).toBeVisible();
     });
 
     test("can access reports page", async ({ page }) => {
@@ -130,7 +130,7 @@ test.describe("Authenticated User Flows", () => {
 
       // Access tools
       await page.goto("/drilling/tools");
-      await expect(page).toHaveURL(/.*\/drilling\/tools/);
+      await expect(page).toHaveURL(/.*\/drilling\/08_developer_tooling/);
     });
 
     test("control-room workflow", async ({ page }) => {

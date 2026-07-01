@@ -11,6 +11,6 @@ budget_usd: 0.50
 
 # Notes
 
-# This is a project-scoped wiki rooted at `docs/wiki/` in the repository
+# This is a project-scoped wiki rooted at `06_technical_documentation/wiki/` in the repository
 
 # Use `/wiki` commands (via the CLI skill) to seed, index, and run the research loop

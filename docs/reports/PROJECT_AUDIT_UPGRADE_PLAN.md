@@ -5,42 +5,42 @@
 
 ---
 
-## 1. Configuration Audit (`toolchain/`)
+## 1. Configuration Audit (`07_toolchain_configuration/`)
 
-- [x] `toolchain/` directory audited – correctly structured, no redundant files
+- [x] `07_toolchain_configuration/` directory audited – correctly structured, no redundant files
 - [x] Tool invocation paths documented (scripts in `package.json`)
 
 **Result:** No changes needed; clean and industry‑standard.
 
 ---
 
-## 2. Documentation Restructuring (`docs/`)
+## 2. Documentation Restructuring (`06_technical_documentation/`)
 
-- [x] Nested `docs/wiki/wiki/` removed, files merged
+- [x] Nested `06_technical_documentation/wiki/wiki/` removed, files merged
 - [x] Binary assets (videos/images) moved to `public/media/`
-- [x] Diagram generation scripts moved to `ops/docs-generators/`
+- [x] Diagram generation scripts moved to `03_operations_automation/docs-generators/`
 - [x] `runbooks/` and `control-room/` merged into `operations/runbooks/`
 - [x] Scattered root‑level files archived (`archive/`)
 - [x] `DOCUMENTATION_INDEX.md` updated to reflect new layout
 - [ ] Run automated markdown link checker
 
 **New structure:**  
-`docs/operations/`, `docs/wiki/`, `docs/archive/`, `docs/reports/`, assets in `public/media/`.
+`06_technical_documentation/operations/`, `06_technical_documentation/wiki/`, `06_technical_documentation/archive/`, `06_technical_documentation/reports/`, assets in `public/media/`.
 
 ---
 
-## 3. Infrastructure Audit (`infra/`)
+## 3. Infrastructure Audit (`10_infrastructure_as_code/`)
 
-- [x] Audit completed – Compose file scattering, obs/observability overlap, orphaned K8s manifest identified
-- [ ] **Pending:** Add `infra/README.md`
-- [ ] **Optional:** Consolidate Compose files into `infra/docker/`
+- [x] Audit completed – Compose file scattering, 14_observability_configuration/observability overlap, orphaned K8s manifest identified
+- [ ] **Pending:** Add `10_infrastructure_as_code/README.md`
+- [ ] **Optional:** Consolidate Compose files into `10_infrastructure_as_code/docker/`
 - [ ] **Optional:** Reorganize Kubernetes manifests or archive `cache-agent.yaml`
 
 ---
 
-## 4. Packages Audit & Documentation (`pkgs/`)
+## 4. Packages Audit & Documentation (`01_platform_packages/`)
 
-- [x] `pkgs/README.md` created with purpose, consumers, and notes
+- [x] `01_platform_packages/README.md` created with purpose, consumers, and notes
 - [x] All 12 `package.json` files have `description` fields
 - [x] `redis` vs `rate‑limiter` dependency analysis – keep separate
 - [x] Circular dependency check with Knip – clean
@@ -85,7 +85,7 @@
 - [ ] **Phase 2 – Storybook + Chromatic:** Visual regression tests
 - [x] **Phase 3 – PWA with Serwist:** Completed (see below)
 - [ ] **Phase 4 – OpenAPI / Swagger:** API documentation
-- [ ] **Phase 5 – `@nx-tools/nx-container`:** Docker layer caching in Nx
+- [ ] **Phase 5 – `@nx-08_developer_tooling/nx-container`:** Docker layer caching in Nx
 - [ ] **Phase 6 – Open WebUI:** AI operator interface (partially integrated via `dev.sh`)
 
 ---
@@ -125,7 +125,7 @@
 - [ ] Replace placeholder GitHub URLs
 - [ ] Verify all internal links post‑restructure
 - [ ] Archive one‑off scripts (`reorganize.mjs`, `deploy-overview.sh`, `deploy-live-local.sh`, `ensure_reachability.py`, `pentest.sh`)
-- [ ] Add `infra/README.md`
+- [ ] Add `10_infrastructure_as_code/README.md`
 - [ ] Standardize package entry points (low priority)
 
 ---
@@ -136,7 +136,7 @@
 - [ ] **PWA Icon Validation**: Validate presence, resolution formats (PNG), and size constraints (e.g., 72x72 up to 512x512) of all referenced icons in `public/icons/` to guarantee compliant application installations across Android/iOS browsers.
 - [ ] **Service Worker Cache Versioning**: Implement build‑specific service worker versioning using git commit hashes or build timestamps. Prevents user browsers from serving stale cache versions after portal updates.
 - [ ] **`dev.sh` Process & File Cleanup**: Clean temporary files, pid trackers, and ensure rigorous SIGTERM/SIGINT cleanup of Ollama and Open WebUI background processes.
-- [ ] **Supabase RLS Policy Audit**: Perform complete audit of Row Level Security (RLS) policies on all database tables in `pkgs/database` to verify authentication boundaries are enforced.
+- [ ] **Supabase RLS Policy Audit**: Perform complete audit of Row Level Security (RLS) policies on all database tables in `01_platform_packages/database` to verify authentication boundaries are enforced.
 
 ---
 
@@ -144,7 +144,7 @@
 
 ### Config
 
-- [x] `toolchain/` audited
+- [x] `07_toolchain_configuration/` audited
 - [x] Tool paths documented
 
 ### Docs
@@ -160,13 +160,13 @@
 ### Infra
 
 - [x] Audit done
-- [ ] `infra/README.md`
+- [ ] `10_infrastructure_as_code/README.md`
 - [ ] Compose consolidation (optional)
 - [ ] K8s manifest archived (optional)
 
 ### Packages
 
-- [x] `pkgs/README.md` created
+- [x] `01_platform_packages/README.md` created
 - [x] `description` fields added
 - [x] `redis`/`rate‑limiter` separation confirmed
 - [x] Circular deps clean
@@ -231,7 +231,7 @@
 - [ ] Placeholder URLs
 - [ ] Link checker
 - [ ] Script archive
-- [ ] `infra/README.md`
+- [ ] `10_infrastructure_as_code/README.md`
 - [ ] Entry point standardisation (low)
 
 ### Production Hardening

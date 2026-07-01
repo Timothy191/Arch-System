@@ -6,16 +6,16 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### New to the Project?
 
-- **[docs/ONBOARDING.md](./ONBOARDING.md)** - Step-by-step developer onboarding checklist
+- **[06_technical_documentation/ONBOARDING.md](./ONBOARDING.md)** - Step-by-step developer onboarding checklist
 - **[README.md](../README.md)** - Project overview and quick start (5 min read)
 - **[CLAUDE.md](../CLAUDE.md)** - Slim always-on agent index (~2 min read)
 - **[.claude/guides/operational-handbook.md](../.claude/guides/operational-handbook.md)** - Full technical onboarding (archived detail)
-- **[docs/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
+- **[06_technical_documentation/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference
 
-- **[docs/reports/PROJECT_AUDIT_UPGRADE_PLAN.md](./reports/PROJECT_AUDIT_UPGRADE_PLAN.md)** - Full-stack project audit, remote caching optimizations, and upgrade roadmap
-- **[docs/wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
+- **[06_technical_documentation/reports/PROJECT_AUDIT_UPGRADE_PLAN.md](./reports/PROJECT_AUDIT_UPGRADE_PLAN.md)** - Full-stack project audit, remote caching optimizations, and upgrade roadmap
+- **[06_technical_documentation/wiki/index.md](./wiki/index.md)** - Project Wiki Index (Comprehensive catalog of 63 pages across concepts, comparisons, and entities)
 - **[AGENTS.md](AGENTS.md)** - Workflow rules, quality gates, and quick commands
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment guide for all environments
 
@@ -78,12 +78,12 @@ Quick navigation guide for Arch-Systems documentation.
 
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Comprehensive deployment guide
   - Quick start for local, staging, and production
-  - **Automated production setup via `ops/setup-production-environment.sh`**
+  - **Automated production setup via `03_operations_automation/setup-production-environment.sh`**
   - Docker deployment
   - CI/CD with GitHub Actions
   - Troubleshooting and best practices
 
-- **[ops/ROCKY_LINUX_COMPATIBILITY.md](./ops/ROCKY_LINUX_COMPATIBILITY.md)** - Rocky Linux/RHEL compatibility guide
+- **[03_operations_automation/ROCKY_LINUX_COMPATIBILITY.md](./03_operations_automation/ROCKY_LINUX_COMPATIBILITY.md)** - Rocky Linux/RHEL compatibility guide
   - Platform-specific prerequisites and setup instructions
   - Firewall (firewalld) configuration
   - SELinux considerations and policies
@@ -102,7 +102,7 @@ Arch-Mk2/
 ├── GEMINI.md                          # AI conventions
 ├── SECURITY.md                        # Security policy
 ├── DOCUMENTATION_INDEX.md             # This file
-├── docs/
+├── 06_technical_documentation/
 │   ├── archive/                       # Historical checklists, phase plans, and reports
 │   │   ├── LIQUID_GLASS_CHECKLIST.md
 │   │   ├── PHASE3_MUI_BASE_MIGRATION.md
@@ -122,7 +122,7 @@ Arch-Mk2/
 │       └── concepts/
 │           ├── project-overview.md    # Comprehensive system architecture & stack guide
 │           └── overview.md            # Wiki system introduction
-└── ops/
+└── 03_operations_automation/
     └── ROCKY_LINUX_COMPATIBILITY.md   # Rocky Linux/RHEL compatibility guide
 ```
 
@@ -130,19 +130,19 @@ Arch-Mk2/
 
 ### I need to
 
-- **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
-- **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
+- **Understand the system architecture & stack**: Read [06_technical_documentation/wiki/concepts/project-overview.md](./06_technical_documentation/wiki/concepts/project-overview.md)
+- **Browse the complete developer wiki**: Check [06_technical_documentation/wiki/index.md](./06_technical_documentation/wiki/index.md)
 - **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](CLAUDE.md)
 - **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
-- **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./ops/setup-production-environment.sh`
-- **Deploy on Rocky Linux/RHEL**: Read [ops/ROCKY_LINUX_COMPATIBILITY.md](../ops/ROCKY_LINUX_COMPATIBILITY.md)
+- **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./03_operations_automation/setup-production-environment.sh`
+- **Deploy on Rocky Linux/RHEL**: Read [03_operations_automation/ROCKY_LINUX_COMPATIBILITY.md](../03_operations_automation/ROCKY_LINUX_COMPATIBILITY.md)
 - **Design a new component**: Reference [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md)
 - **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
 - **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)
 - **Understand quality gates**: Review [AGENTS.md](AGENTS.md) Quality Gates section
-- **Review historical plans / checklist**: Check [docs/archive/LIQUID_GLASS_CHECKLIST.md](./docs/archive/LIQUID_GLASS_CHECKLIST.md)
-- **Find operational runbooks**: Check [docs/operations/runbooks/](./docs/operations/runbooks/)
+- **Review historical plans / checklist**: Check [06_technical_documentation/archive/LIQUID_GLASS_CHECKLIST.md](./06_technical_documentation/archive/LIQUID_GLASS_CHECKLIST.md)
+- **Find operational runbooks**: Check [06_technical_documentation/operations/runbooks/](./06_technical_documentation/operations/runbooks/)
 
 ## 📝 Documentation Maintenance
 
