@@ -78,10 +78,16 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // PERFORMANCE: Memoize loadsByMachine to stabilize references for dependent hooks
+  // (getHourValue, getMachineTotal, etc.) and prevent unnecessary re-renders of the
+  // heavy DataGrid component when hourlyLoads data hasn't changed.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      map.set(load.machine_id, load);
+    });
+    return map;
+  }, [hourlyLoads]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",

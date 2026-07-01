@@ -50,21 +50,22 @@
     "swagger-jsdoc": "^6.3.0",
     "syncpack": "^13.0.4",
     "typescript": "~5.9.2",
-    "vite": "^8.0.16"
+    "vite": "^8.0.16",
+    "wait-on": "^9.0.10"
   },
   "engines": {
     "node": ">=22"
   },
   "license": "MIT",
   "markdownlint": {
-    "config": "config/.markdownlint.json"
+    "config": "config/tools/.markdownlint.json"
   },
   "overrides": {
     "handlebars": ">=4.7.9",
     "brace-expansion": ">=2.0.2",
     "minimatch": ">=9.0.7",
     "braces": ">=3.0.3",
-    "glob": ">=10.5.0",
+    "glob": "^13.0.6",
     "serialize-javascript": ">=7.0.3",
     "kysely": ">=0.28.17",
     "tmp": ">=0.2.6",
@@ -106,8 +107,8 @@
     "lint": "nx run-many -t lint",
     "lint:root": "eslint . --max-warnings 0 --ignore-pattern apps --ignore-pattern packages --no-error-on-unmatched-pattern",
     "lint:styles": "stylelint '**/*.{css,scss}' --ignore-path .gitignore",
-    "md:fix": "markdownlint \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
-    "md:lint": "markdownlint \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
+    "md:fix": "markdownlint --config config/tools/.markdownlint.json \"**/*.md\" --fix --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
+    "md:lint": "markdownlint --config config/tools/.markdownlint.json \"**/*.md\" --ignore node_modules --ignore '**/node_modules' --ignore '**/.next' --ignore '**/dist'",
     "monitor": "bash scripts/monitor-hud.sh",
     "monitor:bundle": "bash scripts/monitor-bundle-size.sh",
     "monitor:grafana": "docker compose -f docker/docker-compose.monitoring.yml up -d",
