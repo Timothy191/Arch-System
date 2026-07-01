@@ -12,16 +12,6 @@
       "url": "https://mcp.context7.com/mcp",
       "enabled": true
     },
-    "github": {
-      "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
-      "enabled": true
-    },
-    "inngest": {
-      "type": "remote",
-      "url": "http://127.0.0.1:8288/mcp",
-      "enabled": true
-    },
     "memory": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
@@ -65,7 +55,7 @@
         "redis-mcp-server@latest",
         "redis-mcp-server",
         "--url",
-        "redis://localhost:6379/0"
+        "redis://localhost:6380/0"
       ],
       "enabled": true
     }
