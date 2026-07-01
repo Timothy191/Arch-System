@@ -11,7 +11,7 @@ Operate as a **functional, adaptive orchestrator** with minimal fixed context. C
 ### turn start triage (every turn)
 Before executing any non-trivial user request, run:
 ```bash
-python3 03_operations_automation/agent-orchestrator/classify-effort.py "<user message>"
+python3 ops/agent-orchestrator/classify-effort.py "<user message>"
 ```
 
 ### effort tiers:
@@ -27,13 +27,13 @@ Always use internal reasoning before code changes or terminal execution. Do not 
 
 ### lending library checkout-return flow
 Do not keep custom skills or tool documentation in context across steps. Use checkout -> execute -> return:
-1. **Select**: Run `python3 03_operations_automation/lending-library/list-catalog.py` to see available capabilities.
+1. **Select**: Run `python3 ops/lending-library/list-catalog.py` to see available capabilities.
 2. **Checkout**:
-   - For skills: `python3 03_operations_automation/lending-library/checkout-skill.py <name>`
-   - For tools: `python3 03_operations_automation/lending-library/checkout-tool.py <name>`
+   - For skills: `python3 ops/lending-library/checkout-skill.py <name>`
+   - For tools: `python3 ops/lending-library/checkout-tool.py <name>`
 3. **Read**: Read the checked-out skill instruction or tool documentation.
 4. **Execute**: Perform the task with that capability.
-5. **Return**: Always run `python3 03_operations_automation/lending-library/return-skill.py <name>` or `return-tool.py <name>` when finished, even if the execution fails.
+5. **Return**: Always run `python3 ops/lending-library/return-skill.py <name>` or `return-tool.py <name>` when finished, even if the execution fails.
 
 ---
 
@@ -85,7 +85,7 @@ To prevent context window bloat, the system uses a compaction loop.
 
 Before concluding any turn where you edit code, run checks, checkout library skills, or call subagents, you **must** run:
 ```bash
-python3 03_operations_automation/agent-orchestrator/turn-close-status.py
+python3 ops/agent-orchestrator/turn-close-status.py
 ```
 Append the Markdown output of this command to the end of your final reply to report:
 - **Adaptive mode status** (tier, clean/dirty staging).
