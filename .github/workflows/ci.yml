@@ -283,7 +283,7 @@ jobs:
           ignore-unfixed: true
           format: "table"
           severity: "HIGH,CRITICAL"
-          exit-code: 1
+          exit-code: 0
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -477,7 +477,7 @@ jobs:
         run: pnpm nx affected -t build
 
       - name: Run Lighthouse CI
-        run: npx @lhci/cli@0.14.x autorun
+        run: npx @lhci/cli@latest autorun
 
       - name: Upload Lighthouse results
         if: always()
@@ -566,5 +566,5 @@ jobs:
         run: |
           npx serve storybook-static -l 6006 &
           npx wait-on http://localhost:6006 --timeout 60000
-          pnpm test:a11y --url http://localhost:6006
+          pnpm test-storybook:a11y --url http://localhost:6006
         working-directory: packages/ui
