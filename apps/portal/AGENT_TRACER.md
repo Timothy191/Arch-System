@@ -1,5 +1,15 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - ⚡ Bolt: Memoize loadsByMachine Map in HourlyLoadsGrid
+
+- **Purpose**: Optimize `HourlyLoadsGrid.tsx` to prevent unnecessary re-renders of the heavy `DataGrid` (RevoGrid) component by stabilizing derived data structures.
+- **Changes**:
+  - Wrapped `loadsByMachine` Map creation in `useMemo` with `hourlyLoads` and `selectedShift` as dependencies.
+  - Implemented shift-based filtering during Map construction to ensure lookup callbacks (`getHourValue`, `getMachineTotal`, `getMaterialType`) only access data for the active shift.
+  - Stabilized `getHourValue`, `getMachineTotal`, and `getMaterialType` callbacks by removing `selectedShift` from their dependency arrays, as the Map reference now inherently accounts for shift changes.
+  - Documented the "Memoize Derived Data in Render" performance pattern in `.jules/bolt.md`.
+- **Next agent**: `loadsByMachine` is now shift-aware and stable. Avoid recreating Maps/Sets directly in the render body of components that pass callbacks to heavy children.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
