@@ -156,7 +156,6 @@ export function HourlyLoadsGrid({
   }, [
     machines,
     loadsByMachine,
-    selectedShift,
     getHourValue,
     getMachineTotal,
     hasBinFactors,

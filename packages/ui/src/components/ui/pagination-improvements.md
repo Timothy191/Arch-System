@@ -38,11 +38,9 @@
 ### 6. Type Safety
 
 - Replace `(number | string)[]` with a discriminated union:
-
   ```typescript
   type PageItem = { type: "page"; value: number } | { type: "ellipsis" };
   ```
-
 - This prevents accidental misuse of ellipsis as a page number
 
 ### 7. Internationalization (i18n)

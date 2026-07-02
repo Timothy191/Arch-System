@@ -1,44 +1,30 @@
 {
   "name": "@repo/contract",
-  "description": "API type definitions and validation schemas using Zod for shared TypeScript types across frontend and backend",
   "version": "1.0.0",
-  "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
-    "@types/node": "catalog:",
-    "openapi-zod-client": "^1.18.3",
-    "typescript": "catalog:",
-    "@types/node": "catalog:",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./validation": "./src/validation/index.ts"
+  },
+  "dependencies": {
     "zod": "catalog:"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./validation": {
-      "types": "./dist/validation.d.ts",
-      "default": "./dist/validation.js"
-    },
-    "./schemas/*": {
-      "types": "./dist/schemas/*.d.ts",
-      "default": "./dist/schemas/*.js"
-    },
-    "./types/*": {
-      "types": "./dist/types/*.d.ts",
-      "default": "./dist/types/*.js"
-    }
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "openapi-typescript": "^7.13.0",
+    "openapi-zod-client": "^1.13.0",
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
   },
-  "main": "./dist/index.js",
-  "private": true,
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist .nx",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "type-check": "tsc --noEmit",
-    "openapi:generate": "SPEC_FILE=./openapi.generated.json node scripts/generate-openapi-types.js",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "openapi:generate": "node scripts/generate-openapi-types.js",
     "openapi:validate": "node scripts/validate-contract.js",
     "generate-zod": "openapi-zod-client openapi.generated.json -o src/generated/schemas.ts",
-    "test:contract:health": "node scripts/test-contract-health.js"
-  },
-  "types": "./dist/index.d.ts"
+    "test:contract:health": "jest tests/contract-health.test.ts"
+  }
 }

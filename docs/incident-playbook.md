@@ -23,7 +23,6 @@
 1. **Check Docker**: `docker ps` - is Supabase running?
 2. **Check logs**: `docker logs supabase-db`
 3. **Restart if needed**:
-
    ```bash
    pnpm --filter @repo/database supabase:dev
    ```
@@ -47,11 +46,9 @@
 
 1. **Check Supabase Auth status**
 2. **Verify env vars**:
-
    ```bash
    grep SUPABASE .env
    ```
-
 3. **Check RLS policies** not blocking access
 
 ### Post-Incident
@@ -74,7 +71,6 @@
 2. **Check recent deployments**: Any new code?
 3. **Check dependencies**: Any npm package issues?
 4. **Rollback if needed**:
-
    ```bash
    git checkout <previous-commit>
    pnpm build
@@ -92,17 +88,13 @@
 ### Response
 
 1. **Check slow queries**:
-
    ```sql
    SELECT * FROM get_slow_queries(20);
    ```
-
 2. **Check Redis cache**:
-
    ```bash
    redis-cli info stats | grep hit
    ```
-
 3. **Check database connections**
 
 ---
@@ -119,11 +111,9 @@
 1. **Identify affected table(s)**
 2. **Check recent migrations**
 3. **Verify RLS policies**:
-
    ```sql
    SELECT * FROM pg_policies WHERE tablename = 'affected_table';
    ```
-
 4. **Restore from backup** if critical
 
 ---

@@ -43,7 +43,6 @@ jobs:
           filter_mode: added
           fail_on_error: true
           eslint_flags: "--max-warnings 0"
-          npm_config_legacy_peer_deps: true
 
       - name: Prettier Check with Reviewdog
         uses: EPMatt/reviewdog-action-prettier@v1
