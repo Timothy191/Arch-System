@@ -33,7 +33,7 @@
     "bundlesize": "^0.18.1",
     "eslint": "catalog:",
     "eslint-plugin-only-warn": "^1.2.1",
-    "glob": "^13.0.6",
+    "glob": "13.0.6",
     "husky": "^9.1.7",
     "knip": "^5.45.0",
     "lint-staged": "^17.0.7",

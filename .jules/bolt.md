@@ -1,0 +1,3 @@
+## 2025-05-15 - Memoize Derived Data in Render
+**Learning:** Creating new instances of data structures like `Map` or `Set` within the render body, even if they contain the same data, results in new object references on every render. This invalidates downstream `useMemo` and `useCallback` hooks that depend on these objects, leading to unnecessary re-renders of child components, including heavy ones like `DataGrid`.
+**Action:** Always wrap the construction of derived data structures in `useMemo` with appropriate dependencies to stabilize references and maintain the efficiency of the React render tree.

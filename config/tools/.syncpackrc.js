@@ -5,7 +5,7 @@ export default {
   lintFormatting: false,
   semverGroups: [
     {
-      packages: ["apps/*"],
+      packages: ["apps/*", "libs/**"],
       dependencyTypes: ["prod", "dev"],
       range: "",
       label: "Apps should pin dependencies and devDependencies",

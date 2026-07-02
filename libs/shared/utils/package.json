@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@repo/redis": "1.0.0",
-    "@repo/errors": "1.0.0",
-    "zod": "catalog:"
+    "@repo/errors": "1.0.0"
   },
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -20,6 +19,8 @@
     "@repo/typescript-config": "1.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/node": "catalog:",
+    "@types/node": "catalog:"
   }
 }

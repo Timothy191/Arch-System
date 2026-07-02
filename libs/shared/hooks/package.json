@@ -20,6 +20,8 @@
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
     "@types/react": "catalog:react19",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/node": "catalog:",
+    "@types/node": "catalog:"
   }
 }

@@ -67,6 +67,10 @@ export function HourlyLoadsGrid({
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [selectedShift, setSelectedShift] = useState<"day" | "night">(
+    new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
+  );
+
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -78,14 +82,17 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
-
-  const [selectedShift, setSelectedShift] = useState<"day" | "night">(
-    new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
-  );
+  // Memoize the machine lookup map to stabilize downstream hooks (useCallback, useMemo)
+  // Filtering by selectedShift here ensures the Map reference only changes when data or shift changes.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      if (load.shift_type === selectedShift) {
+        map.set(load.machine_id, load);
+      }
+    });
+    return map;
+  }, [hourlyLoads, selectedShift]);
   const [saving, setSaving] = useState(false);
 
   const hourLabels = selectedShift === "day" ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
@@ -93,29 +100,29 @@ export function HourlyLoadsGrid({
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
       const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      if (!load) return 0;
       const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine],
   );
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
       const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      if (!load) return 0;
       return load?.total_loads || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine],
   );
 
   const getMaterialType = useCallback(
     (machineId: string): "Waste" | "Coal" => {
       const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
+      if (!load) return "Waste";
       return load.material_type || "Waste";
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine],
   );
 
   // Check if any machine in this department has a bin_factor set
@@ -149,7 +156,6 @@ export function HourlyLoadsGrid({
   }, [
     machines,
     loadsByMachine,
-    selectedShift,
     getHourValue,
     getMachineTotal,
     hasBinFactors,
