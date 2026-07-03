@@ -19,6 +19,7 @@ export function trackClientMetric(
   const record = () => {
     const duration = performance.now() - startTime;
     metrics.push({ name, duration, attributes, timestamp: Date.now() });
+    // @ts-ignore - node types missing in this package
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
       console.log(`[Client Telemetry] ${name}`, { duration, attributes });
