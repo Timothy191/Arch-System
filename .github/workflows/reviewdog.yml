@@ -39,25 +39,25 @@ jobs:
         uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-check
           filter_mode: added
-          fail_level: true
+          fail_level: error
           eslint_flags: "--max-warnings 0"
 
       - name: Prettier Check with Reviewdog
         uses: EPMatt/reviewdog-action-prettier@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-check
           filter_mode: added
-          fail_level: false
+          fail_level: none
           prettier_flags: '--check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"'
 
       - name: Markdown Lint with Reviewdog
         uses: reviewdog/action-markdownlint@v0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-check
           filter_mode: added
-          fail_level: false
+          fail_level: none
           markdownlint_flags: '--ignore node_modules --ignore "**/node_modules" --ignore "**/.next" --ignore "**/dist"'
