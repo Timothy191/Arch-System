@@ -1,5 +1,14 @@
 # Portal Agent Tracer
 
+## 2026-07-04 - Optimization: Memoize loadsByMachine in HourlyLoadsGrid
+
+- **Purpose**: Prevent unnecessary re-renders of the heavy DataGrid component.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Wrapped `loadsByMachine` Map creation in `useMemo`.
+  - `.github/workflows/`: Updated pnpm version to 9.15.9 to match `package.json`.
+  - `pnpm-lock.yaml`: Synchronized with `libs/features/departments/ui/package.json`.
+- **Next agent**: Dependency stabilization in `HourlyLoadsGrid` is now in place, and CI environment is aligned.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
