@@ -1,5 +1,12 @@
 # Portal Agent Tracer
 
+## 2026-07-04 - Optimization: Memoize loadsByMachine in HourlyLoadsGrid
+
+- **Purpose**: Prevent unnecessary re-renders of the heavy DataGrid component.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Wrapped `loadsByMachine` Map creation in `useMemo`.
+- **Next agent**: Dependency stabilization in `HourlyLoadsGrid` is now in place.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.

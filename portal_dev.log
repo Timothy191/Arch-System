@@ -1,0 +1,47 @@
+[H[J[3J
+  [1m[0;36m    ___    _   _    ___    _   _   ___   _____   ___   ___ [0m
+  [1m[0;36m   / _ \  | | | |  / __|  | | | | / __| |_   _| | _ \ / __|[0m
+  [1m[0;36m  | (_) | | |_| | | (__   | |_| | \__ \   | |   |  _/ \__ ${NC}
+  [1m[0;36m   \___/   \__,_|  \___|   \___/  |___/   |_|   |_|   |___/[0m
+
+  [0;2mLightning Dev — Supabase + HMR[0m
+  [0;2mSat Jul 04 2026  03:58[0m
+
+  [0;33m[1m⚡ Quick mode[0m — skipping Docker/Supabase, starting portal only
+
+
+  [1m[0;35m━━━  Phase 0: Pre-flight  ━━━[0m
+  [0;32m[1m  ✓[0m Temp artifacts [0;2mcleaned[0m
+⚠️  No assets directory found. Skipping sync.
+  [0;33m[1m  ⚠[0m Portal health [0;33mneeds restart[0m
+  [0;32m[1m  ✓[0m Restart [0;2mpreparing fresh start[0m
+  [0;33m[1m  –[0m Stale portal process [0;2mno pid file[0m
+  [0;32m[1m  ✓[0m Port 3000 cleared [0;2malready free[0m
+  [0;33m[1m  –[0m Agent run cache (.kilo) [0;2mnot present[0m
+  [0;33m[1m  –[0m Agent memory cache (.remember) [0;2mnot present[0m
+  [0;33m[1m  –[0m Nx cache [0;2mnot present[0m
+  [0;33m[1m  –[0m Python bytecode [0;2mno __pycache__ directories[0m
+  [0;33m[1m  –[0m Python virtual environment (.venv) [0;2mnot present[0m
+  [0;33m[1m  –[0m Vercel cache (.vercel) [0;2mnot present[0m
+  [0;33m[1m  –[0m Deployment logs directory [0;2mnot present[0m
+  [0;33m[1m  –[0m Next.js portal cache [0;2mnot present[0m
+  [0;33m[1m  –[0m Next.js CMS cache [0;2mnot present[0m
+  [0;33m[1m  –[0m Next.js overview cache [0;2mnot present[0m
+  [0;33m[1m  –[0m Pytest cache [0;2mnot present[0m
+  [0;33m[1m  –[0m Portal log [0;2mnot present[0m
+
+  [1m[0;35m━━━  Phase 1: Environment  ━━━[0m
+  [0;32m[1m  ✓[0m Node.js [0;2mv22.22.1[0m
+  [0;32m[1m  ✓[0m pnpm [0;2m9.15.9[0m
+  [0;33m[1m  –[0m Docker [0;2mquick mode[0m
+  [0;32m[1m  ✓[0m Port 3000 (Next.js portal) [0;2mfree[0m
+  [0;32m[1m  ✓[0m Environment file [0;2mexists[0m
+  [0;32m[1m  ✓[0m Dependencies
+
+  [1m[0;35m━━━  Phase 2: Infrastructure  ━━━[0m
+  [0;33m[1m  –[0m Supabase API [0;2mquick mode[0m
+  [0;33m[1m  –[0m Database [0;2mquick mode[0m
+  [0;33m[1m  –[0m Studio [0;2mquick mode[0m
+
+  [1m[0;35m━━━  Phase 3: Portal  ━━━[0m
+  [0;36m[1m  →[0m Starting Next.js dev server...
