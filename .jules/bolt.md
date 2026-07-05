@@ -1,3 +1,3 @@
-## 2024-05-20 - [Memoization of derived data in HourlyLoadsGrid]
+## 2026-07-05 - [Memoization of derived data in HourlyLoadsGrid]
 **Learning:** Instantiating new data structures (like `new Map()`) or performing array searches (`.some()`) directly in the render body of a component that renders a heavy, virtualized component (`DataGrid`) causes cascading re-renders. This happens because these structures become dependencies for other `useMemo` and `useCallback` hooks, causing them to re-run and return new references.
 **Action:** Always wrap derived data structures and heavy calculations in `useMemo` to stabilize references and prevent unnecessary downstream re-renders, especially when passed to performance-sensitive components like `RevoGrid`.
