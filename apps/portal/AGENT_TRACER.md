@@ -608,6 +608,24 @@ As of implementation date (2026-06-18):
 - **Current bundle size**: 20MB (exceeds 5MB limit, but this is from existing codebase, not lazy loading changes)
 - **Note**: The 20MB bundle size is pre-existing; lazy loading infrastructure will provide benefits when heavy components are more widely adopted
 
+## 2026-07-05: Memoization of derived data in HourlyLoadsGrid
+
+### Purpose
+
+Optimize the `HourlyLoadsGrid` component to prevent unnecessary re-renders of the heavy, virtualized `DataGrid` (RevoGrid) component.
+
+### Changes Made
+
+1. **`apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`**:
+   - Wrapped `loadsByMachine` (a `Map`) in `useMemo` with `hourlyLoads` as a dependency.
+   - Wrapped `hasBinFactors` (a boolean computation) in `useMemo` with `machines` as a dependency.
+   - Added comments explaining how stabilizing these references prevents cascading re-renders.
+
+### What the Next Agent Should Know
+
+- The `DataGrid` component is performance-sensitive. Always memoize any objects, arrays, or maps passed to it as props (directly or indirectly via hooks like `useCallback` or `useMemo`).
+- Refer to `.jules/bolt.md` for the performance journaling of this optimization.
+
 ---
 
 ## 2026-06-20: Control Room Department Gap Analysis and UX Improvements
