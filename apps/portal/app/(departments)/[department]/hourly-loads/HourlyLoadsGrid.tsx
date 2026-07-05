@@ -78,10 +78,15 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // BOLT OPTIMIZATION: Memoize derived data structures to stabilize dependent hooks
+  // This prevents cascading re-renders of the heavy DataGrid component.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      map.set(load.machine_id, load);
+    });
+    return map;
+  }, [hourlyLoads]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
@@ -118,8 +123,11 @@ export function HourlyLoadsGrid({
     [loadsByMachine, selectedShift],
   );
 
-  // Check if any machine in this department has a bin_factor set
-  const hasBinFactors = machines.some((m) => m.bin_factor != null && m.bin_factor > 0);
+  // BOLT OPTIMIZATION: Memoize heavy computations to avoid redundant work on every render
+  const hasBinFactors = useMemo(
+    () => machines.some((m) => m.bin_factor != null && m.bin_factor > 0),
+    [machines],
+  );
 
   // Build RevoGrid source rows (stable reference)
   const source = useMemo(() => {
