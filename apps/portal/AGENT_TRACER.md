@@ -1,3 +1,11 @@
+## 2026-06-25: ⚡ Bolt: Memoize derived data structures in HourlyLoadsGrid
+
+- **Purpose**: Prevent unnecessary re-renders of the heavy DataGrid component in the Hourly Loads view.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Memoized `loadsByMachine` Map to stabilize callback and memo dependencies.
+  - Stabilized `source` and `columns` props for the `DataGrid` component.
+- **Next agent**: Bolt's performance journal is at `.jules/bolt.md`.
+
 # Portal Agent Tracer
 
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
