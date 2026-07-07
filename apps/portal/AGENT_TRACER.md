@@ -2563,9 +2563,20 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 
 **Purpose:** Improve performance and data correctness of the Hourly Loads Grid by optimizing data lookups and stabilizing React hook dependencies.
 **Changes:**
+
 - Memoized the `loadsByMachine` lookup Map using `useMemo` in `HourlyLoadsGrid.tsx`.
 - Implemented a composite key (`:`) in the Map to prevent data for day and night shifts of the same machine from overwriting each other.
 - Optimized lookup functions (`getHourValue`, `getMachineTotal`, `getMaterialType`) and event handlers (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`) to use O(1) Map lookups instead of O(N) array finds.
 - Stabilized `useCallback` hooks by correctly referencing the memoized Map in dependency arrays, reducing unnecessary re-renders of the heavy `DataGrid` component.
 - Verified changes with `pnpm --filter portal lint` and `pnpm --filter portal test` (all 569 tests passed).
 **Next Agent Notes:** The composite key approach is a recommended performance pattern for high-density grids in this monorepo. Use similar memoized Maps for any future grid components that handle multi-dimensional data (e.g., machine + shift, date + department).
+
+## [2026-07-07T04:50:31Z] Fix CI Failures
+
+**Purpose:** Resolve multiple CI issues across linting, type-checking, and accessibility audit.
+**Changes:**
+- Aligned pnpm version to 9.15.9 across all GitHub Action workflows (`reviewdog.yml`, `deploy.yml`, `ci.yml`).
+- Fixed pnpm dependency mismatch in `package.json` by pinning `glob` to 13.0.6 in both devDependencies and overrides.
+- Added `wait-on` as a devDependency to fix "wait-on: not found" error in Accessibility Audit.
+- Added `@types/node` to `@repo/shared/hooks` to resolve "Cannot find name 'process'" type error.
+**Next Agent Notes:** Ensure consistent pnpm versions across the monorepo. Added `wait-on` is required for storybook-based a11y tests.
