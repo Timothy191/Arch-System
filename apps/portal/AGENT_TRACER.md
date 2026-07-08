@@ -1,15 +1,6 @@
 # Portal Agent Tracer
 
-## 2024-07-08: Optimize SystemClock Background Re-renders
-
-- **Purpose**: Reduce main-thread overhead and unnecessary re-renders in the persistent global header clock.
-- **Changes**:
-  - Modified `apps/portal/components/clock/SystemClock.tsx` to condition the 1-second analog clock interval on the popover visibility state (`isOpen`).
-  - Added immediate time synchronization when the popover opens to prevent stale time display.
-- **Next agent**: Background performance of persistent components is improved; follow similar patterns for other popover-based high-frequency updates.
-
-
-## 2024-07-08: Optimize SystemClock Background Re-renders
+## 2026-06-25: Optimize SystemClock Background Re-renders
 
 - **Purpose**: Reduce main-thread overhead and unnecessary re-renders in the persistent global header clock.
 - **Changes**:
@@ -364,4 +355,3 @@ Optimize the portal application to meet Core Web Vitals targets and improve over
 - CommandBar is now client-side only and won't work with JavaScript disabled (acceptable for keyboard shortcut feature)
 - Cache headers follow best practices: static assets long-lived, dynamic routes private/no-store
 - Tree shaking is automatic for packages listed in `optimizePackageImports` (lucide-react, framer-motion, @tremor/react)
-
