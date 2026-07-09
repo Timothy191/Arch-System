@@ -54,6 +54,22 @@ Finalize the frontend architecture implementation plan by organizing component d
 - The new `@/components`, `@/features`, `@/hooks`, and `@/lib` aliases are fully integrated and should be used exclusively over relative imports when importing out of the current feature/module.
 - E2E tests require a proper Chromium installation to run locally, so depend on unit tests (`pnpm test`) and type-checks (`pnpm quality`) when validating in limited environments.
 
+## 2025-05-22: Performance Optimization for HourlyLoadsGrid
+
+### Purpose
+Optimize data lookup performance and rendering stability in the `HourlyLoadsGrid` component to handle high-density data views efficiently.
+
+### Changes Made
+- **Memoized Lookups**: Implemented $O(1)$ Map-based lookups for hourly loads and machines, replacing multiple $O(N)$ `.find()` operations in render and event handlers.
+- **Composite Keys**: Used `${machine_id}:${shift_type}` composite keys in the `loadsByMachine` Map to ensure data integrity across different shifts for the same machine.
+- **Column Stabilization**: Added `machines` and `sites` to the `columns` `useMemo` dependency array to prevent stale closures in RevoGrid cell templates.
+- **Import Optimization**: Memoized `machinesByName` Map to accelerate Excel import processing.
+
+### What the Next Agent Should Know
+- The `loadsByMachine` Map now holds the source of truth for shift-specific lookups.
+- Stale closure issues in RevoGrid often stem from missing dependencies in the column definition memoization.
+- Always prefer composite keys when indexing multi-dimensional data (entity + shift/time) to prevent data loss.
+
 ## 2026-06-24: Integrate List Animations across Portal Feeds
 
 ### Purpose
