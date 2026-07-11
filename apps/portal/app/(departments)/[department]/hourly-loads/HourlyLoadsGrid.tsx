@@ -78,10 +78,15 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // Performance Pattern: Memoize derived data structures to prevent cascading re-renders
+  // and use a composite key to prevent shift data overwriting.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      map.set(`${load.machine_id}:${load.shift_type}`, load);
+    });
+    return map;
+  }, [hourlyLoads]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
@@ -92,8 +97,8 @@ export function HourlyLoadsGrid({
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return 0;
       const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
@@ -102,8 +107,7 @@ export function HourlyLoadsGrid({
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
       return load?.total_loads || 0;
     },
     [loadsByMachine, selectedShift],
@@ -111,15 +115,17 @@ export function HourlyLoadsGrid({
 
   const getMaterialType = useCallback(
     (machineId: string): "Waste" | "Coal" => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
-      return load.material_type || "Waste";
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      return load?.material_type || "Waste";
     },
     [loadsByMachine, selectedShift],
   );
 
   // Check if any machine in this department has a bin_factor set
-  const hasBinFactors = machines.some((m) => m.bin_factor != null && m.bin_factor > 0);
+  const hasBinFactors = useMemo(
+    () => machines.some((m) => m.bin_factor != null && m.bin_factor > 0),
+    [machines],
+  );
 
   // Build RevoGrid source rows (stable reference)
   const source = useMemo(() => {
@@ -173,9 +179,8 @@ export function HourlyLoadsGrid({
         "hourly_loads_update",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            // Performance Pattern: Replace O(N) array search with O(1) Map lookup
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -213,7 +218,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getHourValue],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router, getHourValue],
   );
 
   // Handle toggling material type for a row
@@ -227,9 +232,8 @@ export function HourlyLoadsGrid({
 
       setSaving(true);
       try {
-        const existingLoad = hourlyLoads.find(
-          (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-        );
+        // Performance Pattern: Replace O(N) array search with O(1) Map lookup
+        const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
         if (existingLoad) {
           const { error } = await supabase
@@ -257,7 +261,7 @@ export function HourlyLoadsGrid({
         setSaving(false);
       }
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getMaterialType],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router, getMaterialType],
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -580,9 +584,8 @@ export function HourlyLoadsGrid({
         "hourly_loads_direct_edit",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            // Performance Pattern: Replace O(N) array search with O(1) Map lookup
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -619,7 +622,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router],
   );
 
   const handleExport = async () => {
