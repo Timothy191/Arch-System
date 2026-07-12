@@ -1,5 +1,16 @@
 # Portal Agent Tracer
 
+## 2026-06-25: Optimize HourlyLoadsGrid Data Lookups and Stabilize Renders
+
+- **Purpose**: Improve performance and data integrity in the high-density `HourlyLoadsGrid` component by stabilizing derived data structures and optimizing lookups.
+- **Changes**:
+  - Memoized the `loadsByMachine` Map using `useMemo` with `hourlyLoads` as a dependency to prevent unnecessary re-renders.
+  - Implemented a composite key (`machine_id:shift_type`) in the Map to preserve both day and night shift records for the same machine.
+  - Refactor `getHourValue`, `getMachineTotal`, and `getMaterialType` to perform O(1) lookups using the composite key.
+  - Optimized event handlers (`handleCellChange`, `handleMaterialToggle`, and `handleAfterEdit`) by replacing O(N) `hourlyLoads.find()` operations with O(1) Map lookups.
+  - Updated `useCallback` dependency arrays to include the memoized Map.
+- **Next agent**: The `loadsByMachine` Map is now the stable source of truth for hourly load data lookups within the component. Use the `machine_id:shift_type` composite key pattern for any new data retrieval logic in this view.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.

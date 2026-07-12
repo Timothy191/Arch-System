@@ -12,4 +12,7 @@ export async function middleware(request: NextRequest) {
   return proxy(request);
 }
 
-export const config = proxyConfig;
+export const config = {
+  // Exclude static assets and API routes from middleware.
+  matcher: ["/((?!_next/static|_next/image|api/|favicon.ico).*)"],
+};
