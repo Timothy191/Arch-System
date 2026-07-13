@@ -1,0 +1,3 @@
+## 2025-05-15 - Optimize Hourly Loads Grid Data Mapping
+**Learning:** High-density grids like RevoGrid in `HourlyLoadsGrid.tsx` frequently re-render. Building a lookup map inside the render body is O(N) and creates a new reference on every render, which destabilizes downstream `useMemo` and `useCallback` hooks that depend on it. Additionally, using a simple `machine_id` key can lead to data loss when multiple shifts exist for the same machine.
+**Action:** Always memoize derived lookup maps with `useMemo`. Use composite keys (e.g., `machine_id:shift_type`) to ensure data integrity across shifts. Replace O(N) `.find()` calls in event handlers with O(1) Map lookups for better interaction performance.
