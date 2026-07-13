@@ -2558,3 +2558,11 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2025-05-15 - Hourly Loads Grid Performance Optimization
+**Purpose:** Improve performance of the high-density Hourly Loads Grid by optimizing data mapping and lookups.
+**Changes:**
+- Memoized `loadsByMachine` map using `useMemo` with composite keys (`machine_id:shift_type`).
+- Updated data retrieval functions (`getHourValue`, `getMachineTotal`, `getMaterialType`) to use composite keys.
+- Replaced O(N) `hourlyLoads.find()` with O(1) Map lookups in event handlers (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`).
+**Context:** The component handles large datasets for multiple machines and shifts; memoization reduces re-renders and stabilizes child components.
