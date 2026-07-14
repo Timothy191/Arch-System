@@ -2558,3 +2558,8 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2026-07-14 - Optimize SystemClock
+- Purpose: Reduce background CPU usage by gating high-frequency clock updates.
+- Changes: Added visibility and performance gating to the 1-second interval in SystemClock.tsx.
+- Context: Part of Bolt performance optimizations.
