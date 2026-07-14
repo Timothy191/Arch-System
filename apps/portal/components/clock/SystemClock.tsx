@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
+import { useAdaptivePerformance } from "@/hooks/useAdaptivePerformance";
 
 export function SystemClock() {
+  const [isOpen, setIsOpen] = useState(false);
+  const lowPerf = useAdaptivePerformance();
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
@@ -34,13 +37,20 @@ export function SystemClock() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // Update the analog clock every second, but only when the popover is open
+  // and performance is NOT degraded. This saves CPU cycles when the clock
+  // isn't visible or the system is under heavy load.
   useEffect(() => {
+    if (!isOpen || lowPerf) return;
+
+    // Immediately sync time when opening
+    setTime(new Date());
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen, lowPerf]);
 
   if (!timeStr) return null;
 
@@ -84,7 +94,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
