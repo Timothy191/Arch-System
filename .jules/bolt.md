@@ -1,0 +1,3 @@
+## 2026-07-15 - Memoization of lookup maps in high-density grids
+**Learning:** In components like `HourlyLoadsGrid.tsx` that render hundreds of cells, recreating a lookup Map on every render invalidates `useCallback` and `useMemo` hooks, causing expensive re-renders of the entire grid. Using a composite key (`machineId:shiftType`) is necessary when a single entity can have multiple records in the source data.
+**Action:** Always memoize derived data structures used for rendering or event handlers in high-density components. Use O(1) Map lookups instead of O(N) `.find()` in interactions to maintain responsiveness.
