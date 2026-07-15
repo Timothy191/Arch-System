@@ -2558,3 +2558,26 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2026-06-25: Optimize HourlyLoadsGrid with memoized lookups
+
+### Purpose
+Improve performance and reliability of the `HourlyLoadsGrid` component by memoizing data lookups and using efficient O(1) Map lookups in rendering and event handlers.
+
+### Changes Made
+1. **Memoization of lookup map**: Wrapped `loadsByMachine` Map creation in `useMemo` to prevent unnecessary re-renders of the `DataGrid` component and stabilize dependent callbacks.
+2. **Composite key implementation**: Switched from using `machine_id` as a key to a composite key `:`. This prevents data for different shifts from overwriting each other in the map.
+3. **O(1) Lookup refactoring**:
+   - Updated helper callbacks (`getHourValue`, `getMachineTotal`, `getMaterialType`) to use the composite key for O(1) lookups.
+   - Refactored event handlers (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`) to replace O(N) `hourlyLoads.find()` calls with O(1) Map lookups.
+4. **Dependency stabilization**: Updated all relevant `useCallback` dependency arrays to include `loadsByMachine` instead of the raw `hourlyLoads` array, ensuring stable references while maintaining data freshness.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS ✓
+- `pnpm --filter portal test`: PASS ✓ (569 tests passed, including `hourly-loads-keys.test.ts`)
+- Manual verification: Verified O(1) lookup logic across all sections of the 800-line file.
+
+### What the Next Agent Should Know
+- The `HourlyLoadsGrid` component is a high-density data grid using RevoGrid (via `DataGrid` wrapper). It is sensitive to reference stability in its props (`source`, `columns`).
+- Any new data lookups added to this component should follow the memoized Map pattern using the composite key.
+- The composite key format is strictly `machine_id:shift_type`.
