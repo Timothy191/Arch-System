@@ -78,10 +78,23 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // Memoize lookup maps for performance and stability
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      // Use composite key to prevent day/night shifts from overwriting each other
+      map.set(`${load.machine_id}:${load.shift_type}`, load);
+    });
+    return map;
+  }, [hourlyLoads]);
+
+  const machinesByName = useMemo(() => {
+    const map = new Map<string, Machine>();
+    machines.forEach((m) => {
+      map.set(m.name, m);
+    });
+    return map;
+  }, [machines]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
@@ -92,8 +105,9 @@ export function HourlyLoadsGrid({
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      // Optimized O(1) lookup using composite key
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return 0;
       const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
@@ -102,8 +116,8 @@ export function HourlyLoadsGrid({
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      // Optimized O(1) lookup using composite key
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
       return load?.total_loads || 0;
     },
     [loadsByMachine, selectedShift],
@@ -111,9 +125,9 @@ export function HourlyLoadsGrid({
 
   const getMaterialType = useCallback(
     (machineId: string): "Waste" | "Coal" => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
-      return load.material_type || "Waste";
+      // Optimized O(1) lookup using composite key
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      return load?.material_type || "Waste";
     },
     [loadsByMachine, selectedShift],
   );
@@ -173,9 +187,7 @@ export function HourlyLoadsGrid({
         "hourly_loads_update",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -227,9 +239,7 @@ export function HourlyLoadsGrid({
 
       setSaving(true);
       try {
-        const existingLoad = hourlyLoads.find(
-          (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-        );
+        const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
         if (existingLoad) {
           const { error } = await supabase
@@ -580,9 +590,7 @@ export function HourlyLoadsGrid({
         "hourly_loads_direct_edit",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -655,7 +663,7 @@ export function HourlyLoadsGrid({
 
       for (const row of data) {
         const machineName = row.Machine;
-        const machine = machines.find((m) => m.name === machineName);
+        const machine = machinesByName.get(machineName);
         if (!machine) continue;
 
         const updateData: any = {

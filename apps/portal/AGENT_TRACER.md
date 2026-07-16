@@ -2558,3 +2558,34 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+---
+
+## 2026-07-16: Optimization of HourlyLoadsGrid & Edge Runtime Fix
+
+### Purpose
+Improve performance of high-density dashboard components by reducing unnecessary re-renders and optimizing data lookups from O(N) to O(1). Also fix a critical Edge Runtime crash in the portal middleware.
+
+### Changes Made
+
+1. **`apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`**:
+   - Memoized `loadsByMachine` and `machinesByName` Maps using `useMemo` to stabilize references and prevent cascading re-renders of the heavy `DataGrid` (RevoGrid).
+   - Implemented composite keys (`machine_id:shift_type`) in the lookup Map to ensure day and night shift records for the same machine do not overwrite each other.
+   - Refactored all data accessors (`getHourValue`, `getMachineTotal`, `getMaterialType`) and event handlers (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`, `handleImport`) to use O(1) Map lookups instead of O(N) array searching (`.find()`).
+
+2. **`apps/portal/lib/observability/metrics.ts`**:
+   - Wrapped `prom-client` initialization in an environment check. `prom-client` depends on Node.js APIs like `process.uptime` which are incompatible with the Next.js Edge Runtime used by the middleware.
+   - Implemented a safe fallback that allows the middleware to run without crashing while still providing metrics in standard Node.js environments (like background jobs).
+
+3. **`apps/portal/middleware.ts`**:
+   - Simplified the file by inlining the matcher configuration and removing the redundant export of `proxyConfig`.
+
+### Verification Results
+- `pnpm --filter portal lint`: PASS
+- `pnpm --filter portal test`: PASS (including regression tests for hourly load keys)
+- Frontend Verification: Confirmed portal starts and renders login page after fixing the Edge Runtime crash.
+
+### What the Next Agent Should Know
+- Always memoize derived data structures (like Maps or Sets) in heavy components to prevent `useMemo`/`useCallback` invalidation.
+- When mapping data for the grid, use the composite key pattern `machine_id:shift_type` to maintain data integrity.
+- Avoid importing libraries that depend on Node.js internals in any code path that might be executed by Next.js Middleware (Edge Runtime).
