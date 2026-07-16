@@ -743,9 +743,6 @@ importers:
       '@repo/logger':
         specifier: 1.0.0
         version: link:../../../../packages/logger
-      '@repo/rate-limiter':
-        specifier: 1.0.0
-        version: link:../../../../packages/rate-limiter
       '@repo/redis':
         specifier: 1.0.0
         version: link:../../../../packages/redis
