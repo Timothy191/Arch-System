@@ -2589,3 +2589,18 @@ Improve performance of high-density dashboard components by reducing unnecessary
 - Always memoize derived data structures (like Maps or Sets) in heavy components to prevent `useMemo`/`useCallback` invalidation.
 - When mapping data for the grid, use the composite key pattern `machine_id:shift_type` to maintain data integrity.
 - Avoid importing libraries that depend on Node.js internals in any code path that might be executed by Next.js Middleware (Edge Runtime).
+
+## 2026-07-16: Visibility-gated SystemClock Update Optimization
+
+### Purpose
+Reduce unnecessary background CPU usage by gating high-frequency state updates in the `SystemClock` component.
+
+### Changes Made
+1. **`apps/portal/components/clock/SystemClock.tsx`**:
+   - Added `isOpen` state tracked via `Popover.onOpenChange`.
+   - Gated the 1s interval (analog clock hands and digital seconds) to only run when the popover is open.
+   - Added immediate time synchronization when the popover opens to ensure accuracy.
+
+### Verification Results
+- Component functionality verified via frontend exploration.
+- Logic ensures 10s pill updates remain active while 1s popover updates are deferred.
