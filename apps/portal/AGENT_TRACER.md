@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-26 - Optimize SystemClock re-render frequency
+
+- **Purpose**: Prevent high-frequency (1-second) re-renders in the background when the popover is closed.
+- **Changes**:
+  - `SystemClock.tsx`: Added `isOpen` state to track Popover status. Configured the 1-second interval to only run when `isOpen` is true. Synchronized `time` and `calendarDate` immediately upon opening to prevent visual staleness.
+  - `SystemClock.test.tsx`: Created comprehensive Jest test suite using mock timers to assert proper interval lifecycle and state transitions.
+- **Next Steps**: Continue to observe and optimize high-frequency visibility-gated elements.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.

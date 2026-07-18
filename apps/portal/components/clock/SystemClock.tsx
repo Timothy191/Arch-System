@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 
 export function SystemClock() {
+  const [isOpen, setIsOpen] = useState(false);
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
@@ -34,13 +35,20 @@ export function SystemClock() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // Update the analog clock every second ONLY when the popover is open
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Immediately sync when opened to avoid staleness (up to 10s delay from background updates)
+    const now = new Date();
+    setTime(now);
+    setCalendarDate(now);
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen]);
 
   if (!timeStr) return null;
 
@@ -84,7 +92,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
