@@ -1,6 +1,5 @@
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { SystemClock } from "./SystemClock";
-import userEvent from "@testing-library/user-event";
 
 describe("SystemClock component", () => {
   beforeEach(() => {
@@ -45,17 +44,18 @@ describe("SystemClock component", () => {
     expect(intervals).not.toContain(1000);
   });
 
-  it("starts the 1-second high frequency interval when popover is open, and cleans up when closed", async () => {
+  it("starts the 1-second high frequency interval when popover is open, and cleans up when closed", () => {
     const setIntervalSpy = jest.spyOn(global, "setInterval");
     const clearIntervalSpy = jest.spyOn(global, "clearInterval");
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     render(<SystemClock />);
 
     const trigger = screen.getByRole("button", { name: /system clock/i });
 
-    // Open the popover
-    await user.click(trigger);
+    // Open the popover by firing click
+    act(() => {
+      fireEvent.click(trigger);
+    });
 
     // Let's check intervals. Now there should be a 1000ms interval.
     let intervals = setIntervalSpy.mock.calls.map(call => call[1]);
@@ -66,7 +66,9 @@ describe("SystemClock component", () => {
     const oneSecIntervalId = setIntervalSpy.mock.results[oneSecCallIndex]?.value;
 
     // Close the popover
-    await user.click(trigger);
+    act(() => {
+      fireEvent.click(trigger);
+    });
 
     // Check that clearInterval was called with the 1-second interval ID
     expect(clearIntervalSpy).toHaveBeenCalledWith(oneSecIntervalId);
