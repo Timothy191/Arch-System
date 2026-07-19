@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - Performance: Visibility-Gated SystemClock Timer
+
+- **Purpose**: Optimize `SystemClock` background re-renders by gating the high-frequency 1-second analog clock timer.
+- **Changes**:
+  - `components/clock/SystemClock.tsx`: Track Radix Popover open state using controlled `isOpen` state, conditionally register the 1-second interval only when open, and immediately synchronize time on open to prevent stale visual lag.
+  - `components/clock/SystemClock.test.tsx`: Created new Jest unit tests verifying correct rendering and conditional interval setup.
+- **Next agent**: Background CPU cycles/rendering are significantly reduced for header clocks. Ensure any future high-frequency elements in layouts are similarly gated.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
