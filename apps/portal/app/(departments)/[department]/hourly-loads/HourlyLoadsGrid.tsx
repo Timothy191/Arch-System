@@ -78,10 +78,17 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // Performance Pattern: Memoize derived data structures (like this Map)
+  // to stabilize dependent hooks/props and prevent cascading re-renders of DataGrid (RevoGrid).
+  // Also, use a composite key of machine_id:shift_type to prevent day and night shift records
+  // for the same machine from overwriting each other in the lookup map.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      map.set(`${load.machine_id}:${load.shift_type}`, load);
+    });
+    return map;
+  }, [hourlyLoads]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
@@ -92,8 +99,8 @@ export function HourlyLoadsGrid({
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return 0;
       const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
@@ -102,8 +109,7 @@ export function HourlyLoadsGrid({
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
       return load?.total_loads || 0;
     },
     [loadsByMachine, selectedShift],
@@ -111,9 +117,8 @@ export function HourlyLoadsGrid({
 
   const getMaterialType = useCallback(
     (machineId: string): "Waste" | "Coal" => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
-      return load.material_type || "Waste";
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      return load?.material_type || "Waste";
     },
     [loadsByMachine, selectedShift],
   );
