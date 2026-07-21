@@ -1,5 +1,28 @@
 # Portal Agent Tracer
 
+## 2026-07-21: Optimize high-frequency SystemClock updates
+
+### Purpose
+
+Prevent background re-rendering overhead by conditionally activating the 1-second interval updating the analog clock in the SystemClock popover only when visible, and immediately synchronize state upon popover open to prevent staleness.
+
+### Changes Made
+
+1. **SystemClock optimization** (`apps/portal/components/clock/SystemClock.tsx`):
+   - Track popover open/close visibility via `isOpen` state.
+   - Restructure the 1-second interval `useEffect` to depend on `isOpen` and return early if closed.
+   - Immediately synchronize clock state (`setTime(new Date())`) when `isOpen` becomes true to avoid up to 10s of staleness.
+   - Pass `open={isOpen}` and `onOpenChange={setIsOpen}` to `<Popover.Root>`.
+
+2. **Test suite implementation** (`apps/portal/components/clock/SystemClock.test.tsx`):
+   - Created a comprehensive test suite asserting SAST rendering on the header pill, gating high-frequency intervals, and immediate state synchronization upon opening.
+   - Used robust dynamic timezone-matching with `toLocaleTimeString` to prevent JSDOM test runner timezone mismatch.
+
+### What the Next Agent Should Know
+
+- High-frequency UI updates should always be conditional on visibility.
+- If you notice other background timers or intervals running continuously, follow the same `isOpen`/visibility gating pattern.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
