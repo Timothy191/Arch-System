@@ -1,0 +1,3 @@
+## 2026-06-25 - System Clock Interval Visibility Gating
+**Learning:** High-frequency rendering loops (like a 1-second interval analog/digital clock updates) running globally in UI headers introduce continuous, unnecessary main thread execution. Gating such high-frequency updates on UI visibility (e.g., whether the popup is open) eliminates this overhead. When opening, immediately syncing the state prevents visual staleness or delays before the first interval tick occurs.
+**Action:** Always gate high-frequency (e.g. 1-second or faster) timer intervals on visibility (like Popover `isOpen` state or browser `Document.visibilityState`). Ensure immediate state synchronization upon opening/visibility transitions to maintain a seamless UX.

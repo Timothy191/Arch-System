@@ -8,6 +8,7 @@ export function SystemClock() {
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   // Update clock time string (day + time) every 10 seconds for the header pill
   useEffect(() => {
@@ -34,13 +35,18 @@ export function SystemClock() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // Update the analog clock every second, but ONLY when the Popover is open (performance optimization)
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Immediately sync the state on opening to avoid up to 10s of staleness from slower background intervals
+    setTime(new Date());
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen]);
 
   if (!timeStr) return null;
 
@@ -84,7 +90,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
