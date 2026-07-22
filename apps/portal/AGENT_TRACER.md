@@ -2558,3 +2558,20 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2026-06-25: Optimize System Clock Interval Visibility Gating
+
+### Purpose
+
+Avoid unnecessary background execution and main thread re-rendering in the header `SystemClock` component.
+
+### Changes Made
+
+1. **`SystemClock.tsx`** — Made the Radix Popover a controlled component by introducing an `isOpen` state and passing it to the `open`/`onOpenChange` props.
+2. Modified the 1-second interval `useEffect` to depend on `isOpen` and return early if `isOpen` is false.
+3. Synchronized the `time` state immediately when `isOpen` becomes true to avoid up to 10s of staleness from the slower background 10s interval.
+4. **`SystemClock.test.tsx`** — Wrote a comprehensive test suite validating initial render, timezone compliance (without mocking `Date`), and interval starting/stopping on Popover open/close state transitions.
+
+### What the Next Agent Should Know
+
+- High-frequency intervals (1s or faster) are gated on UI visibility in system components to maintain lightweight dashboard overhead.
