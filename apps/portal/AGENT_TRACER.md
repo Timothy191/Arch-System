@@ -2558,3 +2558,14 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-07-24T03:50:00Z] Phase 5: System Clock Optimization
+
+**Purpose:** Optimize the `SystemClock` component to prevent unnecessary background re-renders and CPU usage.
+**Changes:**
+- Added `isOpen` state to control the `Popover` on the system clock.
+- Gated the high-frequency 1-second interval (used to update the analog/digital clock hands in the Popover) so it only runs when `isOpen` is `true`.
+- Removed `setTime` from the 10-second interval callback to completely avoid redundant component re-renders when the popover is closed.
+- Wrote a comprehensive unit test file `SystemClock.test.tsx` which tests all state changes, mock-dates, the 10-second header interval, and the gated 1-second interval execution.
+**Next Agent Notes:**
+- The popover uses `@radix-ui/react-popover`. Any changes to the layout of the header widgets should ensure the `SystemClock` is kept wrapped under its dynamic loader so that bundle sizes are kept optimized.
