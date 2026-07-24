@@ -5,15 +5,16 @@ import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 
 export function SystemClock() {
+  const [isOpen, setIsOpen] = useState(false);
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
 
-  // Update clock time string (day + time) every 10 seconds for the header pill
+  // Update clock time string (day + time) every 10 seconds for the header pill.
+  // We avoid updating the inner `time` state here to prevent unnecessary render cycles when the popover is closed.
   useEffect(() => {
     function updateClock() {
       const now = new Date();
-      setTime(now);
 
       const timePart = now.toLocaleTimeString("en-GB", {
         timeZone: "Africa/Johannesburg",
@@ -34,13 +35,19 @@ export function SystemClock() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // Update the analog clock every second (independent of the pill updates), ONLY when the popover is open.
+  // This reduces background re-renders of the global clock and layout computations by 90% when out of view.
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Immediately sync to avoid up to 1 second of stale time hands upon opening
+    setTime(new Date());
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen]);
 
   if (!timeStr) return null;
 
@@ -84,7 +91,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
