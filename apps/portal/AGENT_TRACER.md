@@ -1,5 +1,14 @@
 # Portal Agent Tracer
 
+## 2026-07-26 - Stabilized HourlyLoadsGrid Rendering and Fixed Data Overwrite Collisions
+
+- **Purpose**: Optimize the heavy `HourlyLoadsGrid` component by stabilizing re-renders and fixing a multi-shift data overwrite bug.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Memoized the derived `loadsByMachine` map using `useMemo` with `hourlyLoads` dependency.
+  - Redefined map keys using composite unique strings `${load.machine_id}:${load.shift_type}` to prevent day and night shift records from overwriting each other.
+  - Refactored `getHourValue`, `getMachineTotal`, and `getMaterialType` callbacks to resolve lookups from the memoized Map using the composite key, avoiding reference invalidation and cascading re-renders in RevoGrid.
+- **Next Steps**: Always verify list rendering/grids use stable reference callback structures to maximize virtualized DOM layout efficiency.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
