@@ -78,10 +78,24 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
+  // Memoize loads map to stabilize reference and prevent cascading re-renders
+  // Use composite key 'machine_id:shift_type' per grid component regression guidelines
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, HourlyLoad>();
+    hourlyLoads.forEach((load) => {
+      map.set(`${load.machine_id}:${load.shift_type}`, load);
+    });
+    return map;
+  }, [hourlyLoads]);
+
+  // Memoize machines by name map for O(1) lookups during Excel import
+  const machinesByName = useMemo(() => {
+    const map = new Map<string, Machine>();
+    machines.forEach((m) => {
+      map.set(m.name, m);
+    });
+    return map;
+  }, [machines]);
 
   const [selectedShift, setSelectedShift] = useState<"day" | "night">(
     new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
@@ -92,8 +106,8 @@ export function HourlyLoadsGrid({
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return 0;
       const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
@@ -102,17 +116,17 @@ export function HourlyLoadsGrid({
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
-      return load?.total_loads || 0;
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return 0;
+      return load.total_loads || 0;
     },
     [loadsByMachine, selectedShift],
   );
 
   const getMaterialType = useCallback(
     (machineId: string): "Waste" | "Coal" => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
+      const load = loadsByMachine.get(`${machineId}:${selectedShift}`);
+      if (!load) return "Waste";
       return load.material_type || "Waste";
     },
     [loadsByMachine, selectedShift],
@@ -173,9 +187,7 @@ export function HourlyLoadsGrid({
         "hourly_loads_update",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -213,7 +225,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getHourValue],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router, getHourValue],
   );
 
   // Handle toggling material type for a row
@@ -227,9 +239,7 @@ export function HourlyLoadsGrid({
 
       setSaving(true);
       try {
-        const existingLoad = hourlyLoads.find(
-          (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-        );
+        const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
         if (existingLoad) {
           const { error } = await supabase
@@ -257,7 +267,7 @@ export function HourlyLoadsGrid({
         setSaving(false);
       }
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getMaterialType],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router, getMaterialType],
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -580,9 +590,7 @@ export function HourlyLoadsGrid({
         "hourly_loads_direct_edit",
         async () => {
           try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+            const existingLoad = loadsByMachine.get(`${machine.id}:${selectedShift}`);
 
             if (existingLoad) {
               const { error } = await supabase
@@ -619,7 +627,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router],
+    [machines, loadsByMachine, selectedShift, departmentId, today, supabase, router],
   );
 
   const handleExport = async () => {
@@ -655,7 +663,7 @@ export function HourlyLoadsGrid({
 
       for (const row of data) {
         const machineName = row.Machine;
-        const machine = machines.find((m) => m.name === machineName);
+        const machine = machinesByName.get(machineName);
         if (!machine) continue;
 
         const updateData: any = {

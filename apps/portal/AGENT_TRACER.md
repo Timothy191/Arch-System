@@ -1,5 +1,15 @@
 # Portal Agent Tracer
 
+## 2026-07-27 - HourlyLoadsGrid High-Density Performance Optimization
+
+- **Purpose**: Resolve cascading re-renders of the heavy DataGrid (RevoGrid) and optimize lookup overhead for cells, toggles, and Excel imports.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Wrapped `loadsByMachine` instantiation in `useMemo` to stabilize the reference and prevent dependent `useCallback` hooks from recreating on every render, resolving cascading re-renders.
+  - Used composite key `machine_id:shift_type` for Map mapping to prevent day and night shift records from overwriting each other.
+  - Refactored lookups (`getHourValue`, `getMachineTotal`, `getMaterialType`) and interaction callbacks (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`) to use Map-based lookups, dropping lookup complexity from $O(N)$ to $O(1)$.
+  - Added a memoized `machinesByName` Map using `useMemo` and used it in `handleImport` to eliminate the nested linear array search, dropping spreadsheet row processing from $O(R \times M)$ to $O(R + M)$.
+- **Next Steps**: Continue to monitor heavy data-grid render profiles.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
