@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 
 export function SystemClock() {
+  const [isOpen, setIsOpen] = useState(false);
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
@@ -13,7 +14,12 @@ export function SystemClock() {
   useEffect(() => {
     function updateClock() {
       const now = new Date();
-      setTime(now);
+
+      // PERFORMANCE OPTIMIZATION: Only update background 'time' state if popover is NOT open.
+      // If open, high-frequency 1s ticker takes over, avoiding duplicate updates.
+      if (!isOpen) {
+        setTime(now);
+      }
 
       const timePart = now.toLocaleTimeString("en-GB", {
         timeZone: "Africa/Johannesburg",
@@ -32,15 +38,22 @@ export function SystemClock() {
     updateClock();
     const interval = setInterval(updateClock, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isOpen]);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // PERFORMANCE OPTIMIZATION: High-frequency (1s) ticker for analog clock & calendar is active
+  // ONLY when the popover dropdown is open, reducing background state updates and CPU overhead.
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Immediately sync state on open to prevent up to 10s of staleness
+    setTime(new Date());
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
+
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen]);
 
   if (!timeStr) return null;
 
@@ -84,7 +97,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
