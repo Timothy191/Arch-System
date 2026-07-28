@@ -1,5 +1,18 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - SystemClock High-Frequency Background Interval Optimization
+
+- **Purpose**: Optimize client-side `SystemClock` background execution to reduce idle CPU overhead and unnecessary re-renders.
+- **Changes**:
+  - `apps/portal/components/clock/SystemClock.tsx`:
+    - Track popover open state using local state `isOpen`.
+    - Made the high-frequency 1s interval active ONLY when the popover is open.
+    - Synchronize state immediately on open to prevent any staleness.
+    - Suppress background updates to the `time` state during the 10-second pill sync if the popover is open, ensuring single-source-of-truth updates.
+  - `apps/portal/components/clock/SystemClock.test.tsx`:
+    - Added a new Jest unit test suite covering rendering, 10s background sync, 1s high-frequency tick conditional activation, and interval cleanup on unmount/close.
+- **Next Steps / Next Agent**: Keep high-frequency animations and interval-based components conditionally activated based on UI visibility or parent container active state to maintain high-perf rendering budgets.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
