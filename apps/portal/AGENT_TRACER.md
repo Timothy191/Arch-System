@@ -1,14 +1,5 @@
 # Portal Agent Tracer
 
-## 2026-06-25 - SystemClock Performance Optimization (Gated Interval)
-
-- **Purpose**: Optimize CPU and render cycles of the global `SystemClock` component.
-- **Changes**:
-  - Gated the high-frequency 1-second interval update for the analog clock using the `isOpen` state of the `Popover.Root`.
-  - Added immediate state synchronization to update the analog clock time directly upon opening the popover.
-  - Added a comprehensive test suite `SystemClock.test.tsx` verifying render updates, 10s interval, and 1s visibility-gated interval.
-- **Next steps**: Watch for any layout changes in `SystemClock`.
-
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
