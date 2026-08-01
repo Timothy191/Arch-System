@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-26 - Performance: HourlyLoadsGrid Performance Optimization
+
+- **Purpose**: Optimize high-density loading operations in HourlyLoadsGrid.tsx to prevent cascading re-renders, improve lookup time-complexity, and resolve day/night shift data overwriting.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Memoized `loadsByMachine` map using `useMemo` with a composite key `${load.machine_id}:${load.shift_type}` to avoid recreation on every render, stabilize dependent callback references (`getHourValue`, `getMachineTotal`, `getMaterialType`), and prevent shift data collision.
+  - `HourlyLoadsGrid.tsx`: Replaced O(N) array traversals (`hourlyLoads.find(...)`) in `handleCellChange` and `handleMaterialToggle` with O(1) Map lookups from `loadsByMachine`.
+- **Next agent**: `HourlyLoadsGrid.tsx` rendering is now stable and performant. Keep Map lookup key as `${machine_id}:${shift_type}` when interacting with the grid context.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
