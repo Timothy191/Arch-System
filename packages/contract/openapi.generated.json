@@ -19,43 +19,6 @@
         "bearerFormat": "JWT",
         "description": "Supabase JWT authentication token"
       }
-    },
-    "schemas": {
-      "ServiceHealth": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": ["healthy", "degraded", "down"]
-          },
-          "latency_ms": {
-            "type": "number"
-          },
-          "last_check": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "HealthResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": ["healthy", "degraded", "down"]
-          },
-          "overall_status": {
-            "type": "string"
-          },
-          "services": {
-            "type": "object"
-          },
-          "last_check": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      }
     }
   },
   "security": [
@@ -68,7 +31,9 @@
       "get": {
         "summary": "List webhook endpoints",
         "description": "Retrieve all webhook endpoints. Admins can see all webhooks, supervisors only see webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -149,7 +114,9 @@
       "post": {
         "summary": "Create webhook endpoint",
         "description": "Create a new webhook endpoint for receiving event notifications. Non-admins can only create webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -161,7 +128,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["url", "event_types"],
+                "required": [
+                  "url",
+                  "event_types"
+                ],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -241,7 +211,9 @@
       "put": {
         "summary": "Update webhook endpoint",
         "description": "Update an existing webhook endpoint. All fields are optional - only provided fields will be updated. Non-admins can only update webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -344,7 +316,9 @@
       "delete": {
         "summary": "Delete webhook endpoint",
         "description": "Soft delete a webhook endpoint (sets deleted_at timestamp). Non-admins can only delete webhooks for their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -399,7 +373,9 @@
       "get": {
         "summary": "Get webhook delivery logs",
         "description": "Retrieve delivery logs for a specific webhook endpoint. Returns the last 50 log entries in reverse chronological order. Non-admins can only view logs for webhooks in their department.",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -440,7 +416,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["success", "failed", "retrying"]
+                            "enum": [
+                              "success",
+                              "failed",
+                              "retrying"
+                            ]
                           },
                           "response_status": {
                             "type": "number",
@@ -484,7 +464,9 @@
       "get": {
         "summary": "Current weather conditions",
         "description": "Returns current weather data for the mining site location. Data is not cached to ensure freshness.",
-        "tags": ["Weather"],
+        "tags": [
+          "Weather"
+        ],
         "responses": {
           "200": {
             "description": "Weather data",
@@ -538,7 +520,9 @@
       "get": {
         "summary": "External tools health status",
         "description": "Returns the health status and response times of all configured external tools. Results are cached for 60 seconds. Requires authentication.",
-        "tags": ["Tools"],
+        "tags": [
+          "Tools"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -577,7 +561,11 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["online", "offline", "unknown"]
+                            "enum": [
+                              "online",
+                              "offline",
+                              "unknown"
+                            ]
                           },
                           "responseTime": {
                             "type": "number"
@@ -612,7 +600,9 @@
       "post": {
         "summary": "Push telemetry data to SCADA",
         "description": "Forward machine telemetry to FUXA SCADA server with two-level caching (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates. Deduplicates unchanged values.",
-        "tags": ["Telemetry"],
+        "tags": [
+          "Telemetry"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -622,11 +612,16 @@
                   {
                     "type": "object",
                     "description": "Supabase webhook payload (auto-detected)",
-                    "required": ["table", "record"],
+                    "required": [
+                      "table",
+                      "record"
+                    ],
                     "properties": {
                       "table": {
                         "type": "string",
-                        "enum": ["machine_telemetry"]
+                        "enum": [
+                          "machine_telemetry"
+                        ]
                       },
                       "record": {
                         "type": "object",
@@ -659,7 +654,10 @@
                   {
                     "type": "object",
                     "description": "Direct tag update",
-                    "required": ["name", "value"],
+                    "required": [
+                      "name",
+                      "value"
+                    ],
                     "properties": {
                       "name": {
                         "type": "string",
@@ -740,7 +738,9 @@
       "post": {
         "summary": "Queue sync playback event",
         "description": "Queue a sync playback event via Inngest for offline-first data synchronization. Uses idempotency keys to prevent duplicate processing.",
-        "tags": ["Sync"],
+        "tags": [
+          "Sync"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -752,7 +752,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["idempotencyKey", "actionType", "payload", "departmentId"],
+                "required": [
+                  "idempotencyKey",
+                  "actionType",
+                  "payload",
+                  "departmentId"
+                ],
                 "properties": {
                   "idempotencyKey": {
                     "type": "string",
@@ -813,7 +818,10 @@
       "post": {
         "summary": "Rust telemetry engine for predictive maintenance",
         "description": "Calculates wear index and remaining useful life (RUL) for drilling equipment using either native Rust engine or JavaScript fallback. Requires authentication and rate limiting.",
-        "tags": ["Plugins", "Telemetry"],
+        "tags": [
+          "Plugins",
+          "Telemetry"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -866,7 +874,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["critical", "warning", "optimal"]
+                      "enum": [
+                        "critical",
+                        "warning",
+                        "optimal"
+                      ]
                     },
                     "isNative": {
                       "type": "boolean",
@@ -902,7 +914,9 @@
       "get": {
         "summary": "Portal metrics (Prometheus format)",
         "description": "Exposes Prometheus-compatible metrics including cache performance, Inngest job executions, and database query statistics. For use with Prometheus or Grafana.",
-        "tags": ["Metrics"],
+        "tags": [
+          "Metrics"
+        ],
         "responses": {
           "200": {
             "description": "Prometheus metrics in text format",
@@ -922,7 +936,9 @@
       "get": {
         "summary": "Prometheus metrics endpoint",
         "description": "Exposes Prometheus-compatible metrics for Control Room operations. This endpoint can be scraped by Prometheus server or Grafana for monitoring and alerting.",
-        "tags": ["Metrics"],
+        "tags": [
+          "Metrics"
+        ],
         "responses": {
           "200": {
             "description": "Prometheus metrics in text format",
@@ -958,70 +974,13 @@
         }
       }
     },
-    "/api/health": {
-      "get": {
-        "summary": "Unified health check for all services",
-        "description": "Aggregates health status from FUXA, Supabase Realtime, and Redis",
-        "tags": ["Health"],
-        "responses": {
-          "200": {
-            "description": "Services are healthy or degraded",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["healthy", "degraded", "down"]
-                    },
-                    "overall_status": {
-                      "type": "string"
-                    },
-                    "services": {
-                      "type": "object",
-                      "properties": {
-                        "fuxa": {
-                          "$ref": "#/components/schemas/ServiceHealth"
-                        },
-                        "supabase_realtime": {
-                          "$ref": "#/components/schemas/ServiceHealth"
-                        },
-                        "redis": {
-                          "$ref": "#/components/schemas/ServiceHealth"
-                        }
-                      }
-                    },
-                    "last_check": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "latency_ms": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "One or more critical services are down",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/health/fuxa": {
       "get": {
         "summary": "FUXA SCADA health check",
         "description": "Monitors FUXA SCADA server connectivity and response latency. Critical for production monitoring of telemetry integration.",
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "responses": {
           "200": {
             "description": "FUXA health status",
@@ -1032,7 +991,11 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["healthy", "degraded", "down"]
+                      "enum": [
+                        "healthy",
+                        "degraded",
+                        "down"
+                      ]
                     },
                     "latency_ms": {
                       "type": "integer",
@@ -1073,7 +1036,9 @@
       "get": {
         "summary": "Cache health check",
         "description": "Returns cache statistics including hit rate, hits, misses, and Redis connection status. Monitors the performance of the caching layer used for department slug resolution.",
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "responses": {
           "200": {
             "description": "Cache health status",
@@ -1084,7 +1049,10 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": ["healthy", "degraded"]
+                      "enum": [
+                        "healthy",
+                        "degraded"
+                      ]
                     },
                     "hitRate": {
                       "type": "number",
@@ -1115,7 +1083,9 @@
       "get": {
         "summary": "Export safety incidents",
         "description": "Export safety incident records with month-based filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1241,7 +1211,9 @@
       "get": {
         "summary": "Export production logs",
         "description": "Export production data (coal and waste tonnage) with date range filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1373,7 +1345,9 @@
       "get": {
         "summary": "Export machines",
         "description": "Export machine registry data with optional department filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1490,7 +1464,9 @@
       "get": {
         "summary": "Export fuel logs",
         "description": "Export fuel consumption logs with date range filtering. Supports JSON and CSV formats (set Accept header to text/csv for CSV).",
-        "tags": ["Export"],
+        "tags": [
+          "Export"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1628,7 +1604,9 @@
       "get": {
         "summary": "OpenAPI specification",
         "description": "Returns the OpenAPI 3.0 specification for all API routes. Requires authentication with admin or engineering role.",
-        "tags": ["Documentation"],
+        "tags": [
+          "Documentation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1682,7 +1660,10 @@
       "post": {
         "summary": "Content Security Policy violation reporting",
         "description": "Browsers POST CSP violations here when the policy includes a report-uri or report-to directive. Logs violations for monitoring before enforcing strict CSP. Always returns 204 No Content per CSP spec.",
-        "tags": ["Security", "CSP"],
+        "tags": [
+          "Security",
+          "CSP"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1746,7 +1727,9 @@
       "get": {
         "summary": "Get shift completeness metrics",
         "description": "Returns completeness metrics for a specific department, date, and shift. Requires authentication.",
-        "tags": ["Control Room"],
+        "tags": [
+          "Control Room"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1787,7 +1770,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "enum": ["day", "night"]
+              "enum": [
+                "day",
+                "night"
+              ]
             },
             "description": "Shift type"
           }
@@ -1840,7 +1826,9 @@
       "post": {
         "summary": "Badge scanner validation endpoint",
         "description": "Validates badge QR codes from C66 hardware scanners. Checks badge status, personnel/visitor authorization, and logs access events. Requires scanner API token authentication.",
-        "tags": ["Access Control"],
+        "tags": [
+          "Access Control"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1861,7 +1849,11 @@
             "description": "Scanner source identifier",
             "schema": {
               "type": "string",
-              "enum": ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"]
+              "enum": [
+                "C66-HARDWARE",
+                "C66-SCANNER",
+                "GATE-TERMINAL"
+              ]
             }
           }
         ],
@@ -1871,7 +1863,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["code"],
+                "required": [
+                  "code"
+                ],
                 "properties": {
                   "code": {
                     "type": "string",
@@ -2025,14 +2019,19 @@
       "post": {
         "summary": "Authenticate user with email and password",
         "description": "Authenticates a user using Supabase auth with rate limiting and CSRF protection",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -2152,7 +2151,9 @@
       "get": {
         "summary": "Query admin data tables",
         "description": "Query operational tables (machines, daily_logs, breakdowns, safety_incidents, etc.) with pagination. Admin-only access.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2240,7 +2241,9 @@
       "post": {
         "summary": "Insert into admin data tables",
         "description": "Insert records into operational tables. Admin-only access with rate limiting for machine status updates.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2307,7 +2310,9 @@
       "put": {
         "summary": "Update admin data tables",
         "description": "Update records in operational tables. Admin-only access with rate limiting for machine status updates.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2374,7 +2379,9 @@
       "delete": {
         "summary": "Delete from admin data tables",
         "description": "Delete records from operational tables. Admin-only access.",
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "security": [
           {
             "bearerAuth": []
