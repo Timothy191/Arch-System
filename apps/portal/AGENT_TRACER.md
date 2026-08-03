@@ -2558,3 +2558,14 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-08-03T03:45:00Z] Performance & Turbopack Optimization
+
+**Purpose:** Fix Turbopack Next.js compilation issues and optimize the core HourlyLoadsGrid lookup map performance.
+**Changes:**
+
+- **Fixed middleware statically exported config**: Changed `apps/portal/middleware.ts` to statically export its config matcher. Next.js Turbopack compiler requires static config object declarations to compile successfully.
+- **Memoized lookup map in HourlyLoadsGrid.tsx**: Memoized `loadsByMachine` map creation using `useMemo` so that the Map object is not recreated on every single render. This stabilizes dependent `useCallback` hooks like `getHourValue`, `getMachineTotal`, and `getMaterialType`, preventing cascading re-renders of the grid cells.
+- **Composite Key for shift isolation**: Modified map lookups to use composite keys in the form of `${machine_id}:${shift_type}` to prevent day and night shift records for the same machine from overwriting each other in the lookup map.
+- **Verified stability**: Ran full Jest unit test suites and `type-check` to confirm 100% correct, zero-regression behavior.
+  **Next Agent Notes:** Keep using `useMemo` for any on-the-fly derived lookup tables in heavy list/grid components.
