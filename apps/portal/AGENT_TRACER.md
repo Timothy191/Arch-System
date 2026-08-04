@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - Performance: Gate SystemClock 1s Interval on Popover Visibility
+
+- **Purpose**: Prevent unnecessary high-frequency background re-renders caused by the 1-second analog clock timer inside `SystemClock.tsx` when the Popover is closed.
+- **Changes**:
+  - `apps/portal/components/clock/SystemClock.tsx`: Introduced local `isOpen` state. Gated the 1-second analog clock interval so it only registers when `isOpen` is true. Synchronized the time state immediately upon opening to prevent visual lag or staleness.
+  - `apps/portal/components/clock/SystemClock.test.tsx`: Added a new comprehensive test suite verifying the initial render, Popover open/close gating, and calendar navigation.
+- **Next agent**: The system clock is fully optimized under the hood with zero layout changes. All tests pass with zero warnings.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
