@@ -1,5 +1,14 @@
 # Portal Agent Tracer
 
+## 2026-08-05 - ⚡ Bolt Performance Optimization: Hourly Loads Grid Memoization
+
+- **Purpose**: Optimize rendering and action performance of the Hourly Loads grid table.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Memoized the `loadsByMachine` map creation with `useMemo` using a composite key (`machine_id:shift_type`) to prevent map recreation on every render.
+  - Optimized map retrievals in `getHourValue`, `getMachineTotal`, and `getMaterialType` callbacks.
+  - Replaced O(N) array search `.find` in the `handleCellChange`, `handleMaterialToggle`, and `handleAfterEdit` handlers with O(1) lookups via the memoized composite-keyed Map.
+- **Next agent**: Performance characteristics and shift collision bugs in the grid table are now fully optimized and resolved.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
