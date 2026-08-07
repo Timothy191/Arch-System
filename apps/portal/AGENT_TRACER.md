@@ -1,22 +1,5 @@
 # Portal Agent Tracer
 
-## 2026-06-25: Optimize HourlyLoadsGrid high-density rendering performance
-
-### Purpose
-
-Optimize rendering stability and database query efficiency for the primary high-density `HourlyLoadsGrid.tsx` component.
-
-### Changes Made
-
-1. **Memoized Maps** — Wrapped derived `loadsByMachine` map with `useMemo` using a composite key of `machine_id:shift_type` (resolving silent shift data overwrites).
-2. **Data Import Map** — Memoized `machinesByName` Map, transforming row-by-row Excel import matching complexity from $O(R \times M)$ to $O(R + M)$.
-3. **Lookup Performance** — Replaced linear `.find()` operations in interactive event handlers (`handleCellChange`, `handleMaterialToggle`, `handleAfterEdit`) with $O(1)$ Map lookups.
-4. **Grid Columns Dependency** — Added missing `machines` and `sites` dependencies to the `columns` hook array to prevent stale closure rendering bugs.
-
-### What the Next Agent Should Know
-
-- Do not instantiate new Map/Set instances inside the render body of heavy grid components to avoid breaking child reference check stability.
-
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
