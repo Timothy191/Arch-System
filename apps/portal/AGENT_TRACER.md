@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-08-08 - Bolt Optimization: Memoized Shift Loads Grid & Static Middleware Config
+
+- **Purpose**: Maximize UI render performance on high-density shift loads grid and satisfy Edge Runtime static analysis constraints.
+- **Changes**:
+  - `HourlyLoadsGrid.tsx`: Memoized `loadsByMachine` using a composite key `machine_id:shift_type` to stabilize reference and prevent shift-data overwriting. Refactored event handlers (`handleCellChange`, `handleMaterialToggle`, and `handleAfterEdit`) to query the memoized Map with O(1) complexity instead of scanning arrays via `.find()`.
+  - `middleware.ts`: Exported static config object literal directly to comply with Next.js Edge Runtime Turbopack static compilation requirements.
+- **Next agent**: Grids and Edge compilations are fully optimized and pass all quality gates.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
