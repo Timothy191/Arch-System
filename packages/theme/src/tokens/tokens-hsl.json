@@ -14,9 +14,7 @@
     },
     "name": "arch0",
     "attributes": {},
-    "path": [
-      "arch0"
-    ]
+    "path": ["arch0"]
   },
   "arch1": {
     "key": "{arch1}",
@@ -33,9 +31,7 @@
     },
     "name": "arch1",
     "attributes": {},
-    "path": [
-      "arch1"
-    ]
+    "path": ["arch1"]
   },
   "arch2": {
     "key": "{arch2}",
@@ -52,9 +48,7 @@
     },
     "name": "arch2",
     "attributes": {},
-    "path": [
-      "arch2"
-    ]
+    "path": ["arch2"]
   },
   "arch3": {
     "key": "{arch3}",
@@ -71,9 +65,7 @@
     },
     "name": "arch3",
     "attributes": {},
-    "path": [
-      "arch3"
-    ]
+    "path": ["arch3"]
   },
   "arch4": {
     "key": "{arch4}",
@@ -90,9 +82,7 @@
     },
     "name": "arch4",
     "attributes": {},
-    "path": [
-      "arch4"
-    ]
+    "path": ["arch4"]
   },
   "arch5": {
     "key": "{arch5}",
@@ -109,9 +99,7 @@
     },
     "name": "arch5",
     "attributes": {},
-    "path": [
-      "arch5"
-    ]
+    "path": ["arch5"]
   },
   "arch6": {
     "key": "{arch6}",
@@ -128,9 +116,7 @@
     },
     "name": "arch6",
     "attributes": {},
-    "path": [
-      "arch6"
-    ]
+    "path": ["arch6"]
   },
   "arch7": {
     "key": "{arch7}",
@@ -147,9 +133,7 @@
     },
     "name": "arch7",
     "attributes": {},
-    "path": [
-      "arch7"
-    ]
+    "path": ["arch7"]
   },
   "arch8": {
     "key": "{arch8}",
@@ -166,9 +150,7 @@
     },
     "name": "arch8",
     "attributes": {},
-    "path": [
-      "arch8"
-    ]
+    "path": ["arch8"]
   },
   "arch9": {
     "key": "{arch9}",
@@ -185,9 +167,7 @@
     },
     "name": "arch9",
     "attributes": {},
-    "path": [
-      "arch9"
-    ]
+    "path": ["arch9"]
   },
   "arch10": {
     "key": "{arch10}",
@@ -204,9 +184,7 @@
     },
     "name": "arch10",
     "attributes": {},
-    "path": [
-      "arch10"
-    ]
+    "path": ["arch10"]
   },
   "arch11": {
     "key": "{arch11}",
@@ -223,9 +201,7 @@
     },
     "name": "arch11",
     "attributes": {},
-    "path": [
-      "arch11"
-    ]
+    "path": ["arch11"]
   },
   "arch12": {
     "key": "{arch12}",
@@ -242,9 +218,7 @@
     },
     "name": "arch12",
     "attributes": {},
-    "path": [
-      "arch12"
-    ]
+    "path": ["arch12"]
   },
   "arch13": {
     "key": "{arch13}",
@@ -261,9 +235,7 @@
     },
     "name": "arch13",
     "attributes": {},
-    "path": [
-      "arch13"
-    ]
+    "path": ["arch13"]
   },
   "arch14": {
     "key": "{arch14}",
@@ -280,9 +252,7 @@
     },
     "name": "arch14",
     "attributes": {},
-    "path": [
-      "arch14"
-    ]
+    "path": ["arch14"]
   },
   "arch15": {
     "key": "{arch15}",
@@ -299,9 +269,7 @@
     },
     "name": "arch15",
     "attributes": {},
-    "path": [
-      "arch15"
-    ]
+    "path": ["arch15"]
   },
   "mac-red": {
     "key": "{mac-red}",
@@ -316,9 +284,7 @@
     },
     "name": "mac-red",
     "attributes": {},
-    "path": [
-      "mac-red"
-    ]
+    "path": ["mac-red"]
   },
   "mac-yellow": {
     "key": "{mac-yellow}",
@@ -333,9 +299,7 @@
     },
     "name": "mac-yellow",
     "attributes": {},
-    "path": [
-      "mac-yellow"
-    ]
+    "path": ["mac-yellow"]
   },
   "mac-green": {
     "key": "{mac-green}",
@@ -350,9 +314,7 @@
     },
     "name": "mac-green",
     "attributes": {},
-    "path": [
-      "mac-green"
-    ]
+    "path": ["mac-green"]
   },
   "mac-menu-bar-height": {
     "key": "{mac-menu-bar-height}",
@@ -367,9 +329,7 @@
     },
     "name": "mac-menu-bar-height",
     "attributes": {},
-    "path": [
-      "mac-menu-bar-height"
-    ]
+    "path": ["mac-menu-bar-height"]
   },
   "bg": {
     "primary": {
@@ -385,10 +345,7 @@
       },
       "name": "primary",
       "attributes": {},
-      "path": [
-        "bg",
-        "primary"
-      ]
+      "path": ["bg", "primary"]
     },
     "secondary": {
       "key": "{bg.secondary}",
@@ -403,10 +360,7 @@
       },
       "name": "secondary",
       "attributes": {},
-      "path": [
-        "bg",
-        "secondary"
-      ]
+      "path": ["bg", "secondary"]
     },
     "tertiary": {
       "key": "{bg.tertiary}",
@@ -421,10 +375,7 @@
       },
       "name": "tertiary",
       "attributes": {},
-      "path": [
-        "bg",
-        "tertiary"
-      ]
+      "path": ["bg", "tertiary"]
     }
   },
   "border": {
@@ -440,9 +391,7 @@
     },
     "name": "border",
     "attributes": {},
-    "path": [
-      "border"
-    ]
+    "path": ["border"]
   },
   "border-subtle": {
     "key": "{border-subtle}",
@@ -457,9 +406,7 @@
     },
     "name": "border-subtle",
     "attributes": {},
-    "path": [
-      "border-subtle"
-    ]
+    "path": ["border-subtle"]
   },
   "border-default": {
     "key": "{border-default}",
@@ -474,9 +421,7 @@
     },
     "name": "border-default",
     "attributes": {},
-    "path": [
-      "border-default"
-    ]
+    "path": ["border-default"]
   },
   "border-emphasis": {
     "key": "{border-emphasis}",
@@ -491,9 +436,7 @@
     },
     "name": "border-emphasis",
     "attributes": {},
-    "path": [
-      "border-emphasis"
-    ]
+    "path": ["border-emphasis"]
   },
   "text": {
     "muted": {
@@ -509,10 +452,7 @@
       },
       "name": "muted",
       "attributes": {},
-      "path": [
-        "text",
-        "muted"
-      ]
+      "path": ["text", "muted"]
     },
     "secondary": {
       "key": "{text.secondary}",
@@ -527,10 +467,7 @@
       },
       "name": "secondary",
       "attributes": {},
-      "path": [
-        "text",
-        "secondary"
-      ]
+      "path": ["text", "secondary"]
     },
     "body": {
       "key": "{text.body}",
@@ -545,10 +482,7 @@
       },
       "name": "body",
       "attributes": {},
-      "path": [
-        "text",
-        "body"
-      ]
+      "path": ["text", "body"]
     },
     "primary": {
       "key": "{text.primary}",
@@ -563,10 +497,7 @@
       },
       "name": "primary",
       "attributes": {},
-      "path": [
-        "text",
-        "primary"
-      ]
+      "path": ["text", "primary"]
     },
     "heading": {
       "key": "{text.heading}",
@@ -581,10 +512,7 @@
       },
       "name": "heading",
       "attributes": {},
-      "path": [
-        "text",
-        "heading"
-      ]
+      "path": ["text", "heading"]
     }
   },
   "accent-red": {
@@ -600,9 +528,7 @@
     },
     "name": "accent-red",
     "attributes": {},
-    "path": [
-      "accent-red"
-    ]
+    "path": ["accent-red"]
   },
   "accent-charcoal": {
     "key": "{accent-charcoal}",
@@ -619,9 +545,7 @@
     },
     "name": "accent-charcoal",
     "attributes": {},
-    "path": [
-      "accent-charcoal"
-    ]
+    "path": ["accent-charcoal"]
   },
   "accent-blue": {
     "key": "{accent-blue}",
@@ -638,9 +562,7 @@
     },
     "name": "accent-blue",
     "attributes": {},
-    "path": [
-      "accent-blue"
-    ]
+    "path": ["accent-blue"]
   },
   "accent-green": {
     "key": "{accent-green}",
@@ -655,9 +577,7 @@
     },
     "name": "accent-green",
     "attributes": {},
-    "path": [
-      "accent-green"
-    ]
+    "path": ["accent-green"]
   },
   "accent-alert": {
     "key": "{accent-alert}",
@@ -672,9 +592,7 @@
     },
     "name": "accent-alert",
     "attributes": {},
-    "path": [
-      "accent-alert"
-    ]
+    "path": ["accent-alert"]
   },
   "accent-cyan": {
     "key": "{accent-cyan}",
@@ -689,9 +607,7 @@
     },
     "name": "accent-cyan",
     "attributes": {},
-    "path": [
-      "accent-cyan"
-    ]
+    "path": ["accent-cyan"]
   },
   "accent-emerald": {
     "key": "{accent-emerald}",
@@ -706,9 +622,7 @@
     },
     "name": "accent-emerald",
     "attributes": {},
-    "path": [
-      "accent-emerald"
-    ]
+    "path": ["accent-emerald"]
   },
   "accent-indigo": {
     "key": "{accent-indigo}",
@@ -723,9 +637,7 @@
     },
     "name": "accent-indigo",
     "attributes": {},
-    "path": [
-      "accent-indigo"
-    ]
+    "path": ["accent-indigo"]
   },
   "accent-violet": {
     "key": "{accent-violet}",
@@ -740,9 +652,7 @@
     },
     "name": "accent-violet",
     "attributes": {},
-    "path": [
-      "accent-violet"
-    ]
+    "path": ["accent-violet"]
   },
   "success": {
     "key": "{success}",
@@ -757,9 +667,7 @@
     },
     "name": "success",
     "attributes": {},
-    "path": [
-      "success"
-    ]
+    "path": ["success"]
   },
   "success-foreground": {
     "key": "{success-foreground}",
@@ -774,9 +682,7 @@
     },
     "name": "success-foreground",
     "attributes": {},
-    "path": [
-      "success-foreground"
-    ]
+    "path": ["success-foreground"]
   },
   "warning": {
     "key": "{warning}",
@@ -791,9 +697,7 @@
     },
     "name": "warning",
     "attributes": {},
-    "path": [
-      "warning"
-    ]
+    "path": ["warning"]
   },
   "warning-foreground": {
     "key": "{warning-foreground}",
@@ -808,9 +712,7 @@
     },
     "name": "warning-foreground",
     "attributes": {},
-    "path": [
-      "warning-foreground"
-    ]
+    "path": ["warning-foreground"]
   },
   "danger": {
     "key": "{danger}",
@@ -825,9 +727,7 @@
     },
     "name": "danger",
     "attributes": {},
-    "path": [
-      "danger"
-    ]
+    "path": ["danger"]
   },
   "danger-foreground": {
     "key": "{danger-foreground}",
@@ -842,9 +742,7 @@
     },
     "name": "danger-foreground",
     "attributes": {},
-    "path": [
-      "danger-foreground"
-    ]
+    "path": ["danger-foreground"]
   },
   "info": {
     "key": "{info}",
@@ -859,9 +757,7 @@
     },
     "name": "info",
     "attributes": {},
-    "path": [
-      "info"
-    ]
+    "path": ["info"]
   },
   "info-foreground": {
     "key": "{info-foreground}",
@@ -876,9 +772,7 @@
     },
     "name": "info-foreground",
     "attributes": {},
-    "path": [
-      "info-foreground"
-    ]
+    "path": ["info-foreground"]
   },
   "glass": {
     "surface": {
@@ -894,10 +788,7 @@
       },
       "name": "surface",
       "attributes": {},
-      "path": [
-        "glass",
-        "surface"
-      ]
+      "path": ["glass", "surface"]
     },
     "surface-hover": {
       "key": "{glass.surface-hover}",
@@ -912,10 +803,7 @@
       },
       "name": "surface-hover",
       "attributes": {},
-      "path": [
-        "glass",
-        "surface-hover"
-      ]
+      "path": ["glass", "surface-hover"]
     },
     "surface-strong": {
       "key": "{glass.surface-strong}",
@@ -930,10 +818,7 @@
       },
       "name": "surface-strong",
       "attributes": {},
-      "path": [
-        "glass",
-        "surface-strong"
-      ]
+      "path": ["glass", "surface-strong"]
     },
     "border": {
       "key": "{glass.border}",
@@ -948,10 +833,7 @@
       },
       "name": "border",
       "attributes": {},
-      "path": [
-        "glass",
-        "border"
-      ]
+      "path": ["glass", "border"]
     },
     "border-top": {
       "key": "{glass.border-top}",
@@ -966,10 +848,7 @@
       },
       "name": "border-top",
       "attributes": {},
-      "path": [
-        "glass",
-        "border-top"
-      ]
+      "path": ["glass", "border-top"]
     },
     "border-gradient": {
       "key": "{glass.border-gradient}",
@@ -984,10 +863,7 @@
       },
       "name": "border-gradient",
       "attributes": {},
-      "path": [
-        "glass",
-        "border-gradient"
-      ]
+      "path": ["glass", "border-gradient"]
     },
     "text": {
       "key": "{glass.text}",
@@ -1002,10 +878,7 @@
       },
       "name": "text",
       "attributes": {},
-      "path": [
-        "glass",
-        "text"
-      ]
+      "path": ["glass", "text"]
     },
     "text-muted": {
       "key": "{glass.text-muted}",
@@ -1020,10 +893,7 @@
       },
       "name": "text-muted",
       "attributes": {},
-      "path": [
-        "glass",
-        "text-muted"
-      ]
+      "path": ["glass", "text-muted"]
     },
     "vibrancy": {
       "key": "{glass.vibrancy}",
@@ -1038,10 +908,7 @@
       },
       "name": "vibrancy",
       "attributes": {},
-      "path": [
-        "glass",
-        "vibrancy"
-      ]
+      "path": ["glass", "vibrancy"]
     },
     "shadow": {
       "key": "{glass.shadow}",
@@ -1056,10 +923,7 @@
       },
       "name": "shadow",
       "attributes": {},
-      "path": [
-        "glass",
-        "shadow"
-      ]
+      "path": ["glass", "shadow"]
     }
   },
   "text-on-glass": {
@@ -1075,9 +939,7 @@
     },
     "name": "text-on-glass",
     "attributes": {},
-    "path": [
-      "text-on-glass"
-    ]
+    "path": ["text-on-glass"]
   },
   "text-on-glass-muted": {
     "key": "{text-on-glass-muted}",
@@ -1092,9 +954,7 @@
     },
     "name": "text-on-glass-muted",
     "attributes": {},
-    "path": [
-      "text-on-glass-muted"
-    ]
+    "path": ["text-on-glass-muted"]
   },
   "vibrancy": {
     "surface": {
@@ -1110,10 +970,7 @@
       },
       "name": "surface",
       "attributes": {},
-      "path": [
-        "vibrancy",
-        "surface"
-      ]
+      "path": ["vibrancy", "surface"]
     },
     "border": {
       "key": "{vibrancy.border}",
@@ -1128,10 +985,7 @@
       },
       "name": "border",
       "attributes": {},
-      "path": [
-        "vibrancy",
-        "border"
-      ]
+      "path": ["vibrancy", "border"]
     }
   },
   "overlay-dim": {
@@ -1147,9 +1001,7 @@
     },
     "name": "overlay-dim",
     "attributes": {},
-    "path": [
-      "overlay-dim"
-    ]
+    "path": ["overlay-dim"]
   },
   "overlay-subtle": {
     "key": "{overlay-subtle}",
@@ -1164,9 +1016,7 @@
     },
     "name": "overlay-subtle",
     "attributes": {},
-    "path": [
-      "overlay-subtle"
-    ]
+    "path": ["overlay-subtle"]
   },
   "overlay-medium": {
     "key": "{overlay-medium}",
@@ -1181,9 +1031,7 @@
     },
     "name": "overlay-medium",
     "attributes": {},
-    "path": [
-      "overlay-medium"
-    ]
+    "path": ["overlay-medium"]
   },
   "background": {
     "key": "{background}",
@@ -1198,9 +1046,7 @@
     },
     "name": "background",
     "attributes": {},
-    "path": [
-      "background"
-    ]
+    "path": ["background"]
   },
   "foreground": {
     "key": "{foreground}",
@@ -1215,9 +1061,7 @@
     },
     "name": "foreground",
     "attributes": {},
-    "path": [
-      "foreground"
-    ]
+    "path": ["foreground"]
   },
   "card": {
     "key": "{card}",
@@ -1232,9 +1076,7 @@
     },
     "name": "card",
     "attributes": {},
-    "path": [
-      "card"
-    ]
+    "path": ["card"]
   },
   "card-foreground": {
     "key": "{card-foreground}",
@@ -1249,9 +1091,7 @@
     },
     "name": "card-foreground",
     "attributes": {},
-    "path": [
-      "card-foreground"
-    ]
+    "path": ["card-foreground"]
   },
   "popover": {
     "key": "{popover}",
@@ -1266,9 +1106,7 @@
     },
     "name": "popover",
     "attributes": {},
-    "path": [
-      "popover"
-    ]
+    "path": ["popover"]
   },
   "popover-foreground": {
     "key": "{popover-foreground}",
@@ -1283,9 +1121,7 @@
     },
     "name": "popover-foreground",
     "attributes": {},
-    "path": [
-      "popover-foreground"
-    ]
+    "path": ["popover-foreground"]
   },
   "primary": {
     "key": "{primary}",
@@ -1300,9 +1136,7 @@
     },
     "name": "primary",
     "attributes": {},
-    "path": [
-      "primary"
-    ]
+    "path": ["primary"]
   },
   "primary-foreground": {
     "key": "{primary-foreground}",
@@ -1317,9 +1151,7 @@
     },
     "name": "primary-foreground",
     "attributes": {},
-    "path": [
-      "primary-foreground"
-    ]
+    "path": ["primary-foreground"]
   },
   "secondary": {
     "key": "{secondary}",
@@ -1334,9 +1166,7 @@
     },
     "name": "secondary",
     "attributes": {},
-    "path": [
-      "secondary"
-    ]
+    "path": ["secondary"]
   },
   "secondary-foreground": {
     "key": "{secondary-foreground}",
@@ -1351,9 +1181,7 @@
     },
     "name": "secondary-foreground",
     "attributes": {},
-    "path": [
-      "secondary-foreground"
-    ]
+    "path": ["secondary-foreground"]
   },
   "muted": {
     "key": "{muted}",
@@ -1368,9 +1196,7 @@
     },
     "name": "muted",
     "attributes": {},
-    "path": [
-      "muted"
-    ]
+    "path": ["muted"]
   },
   "muted-foreground": {
     "key": "{muted-foreground}",
@@ -1385,9 +1211,7 @@
     },
     "name": "muted-foreground",
     "attributes": {},
-    "path": [
-      "muted-foreground"
-    ]
+    "path": ["muted-foreground"]
   },
   "accent": {
     "key": "{accent}",
@@ -1402,9 +1226,7 @@
     },
     "name": "accent",
     "attributes": {},
-    "path": [
-      "accent"
-    ]
+    "path": ["accent"]
   },
   "accent-foreground": {
     "key": "{accent-foreground}",
@@ -1419,9 +1241,7 @@
     },
     "name": "accent-foreground",
     "attributes": {},
-    "path": [
-      "accent-foreground"
-    ]
+    "path": ["accent-foreground"]
   },
   "destructive": {
     "key": "{destructive}",
@@ -1436,9 +1256,7 @@
     },
     "name": "destructive",
     "attributes": {},
-    "path": [
-      "destructive"
-    ]
+    "path": ["destructive"]
   },
   "destructive-foreground": {
     "key": "{destructive-foreground}",
@@ -1453,9 +1271,7 @@
     },
     "name": "destructive-foreground",
     "attributes": {},
-    "path": [
-      "destructive-foreground"
-    ]
+    "path": ["destructive-foreground"]
   },
   "input": {
     "key": "{input}",
@@ -1470,9 +1286,7 @@
     },
     "name": "input",
     "attributes": {},
-    "path": [
-      "input"
-    ]
+    "path": ["input"]
   },
   "ring": {
     "key": "{ring}",
@@ -1487,9 +1301,7 @@
     },
     "name": "ring",
     "attributes": {},
-    "path": [
-      "ring"
-    ]
+    "path": ["ring"]
   },
   "radius": {
     "key": "{radius}",
@@ -1504,9 +1316,7 @@
     },
     "name": "radius",
     "attributes": {},
-    "path": [
-      "radius"
-    ]
+    "path": ["radius"]
   },
   "chart-1": {
     "key": "{chart-1}",
@@ -1521,9 +1331,7 @@
     },
     "name": "chart-1",
     "attributes": {},
-    "path": [
-      "chart-1"
-    ]
+    "path": ["chart-1"]
   },
   "chart-2": {
     "key": "{chart-2}",
@@ -1538,9 +1346,7 @@
     },
     "name": "chart-2",
     "attributes": {},
-    "path": [
-      "chart-2"
-    ]
+    "path": ["chart-2"]
   },
   "chart-3": {
     "key": "{chart-3}",
@@ -1555,9 +1361,7 @@
     },
     "name": "chart-3",
     "attributes": {},
-    "path": [
-      "chart-3"
-    ]
+    "path": ["chart-3"]
   },
   "chart-4": {
     "key": "{chart-4}",
@@ -1572,9 +1376,7 @@
     },
     "name": "chart-4",
     "attributes": {},
-    "path": [
-      "chart-4"
-    ]
+    "path": ["chart-4"]
   },
   "chart-5": {
     "key": "{chart-5}",
@@ -1589,9 +1391,7 @@
     },
     "name": "chart-5",
     "attributes": {},
-    "path": [
-      "chart-5"
-    ]
+    "path": ["chart-5"]
   },
   "tremor": {
     "brand": {
@@ -1608,11 +1408,7 @@
         },
         "name": "faint",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "faint"
-        ]
+        "path": ["tremor", "brand", "faint"]
       },
       "muted": {
         "key": "{tremor.brand.muted}",
@@ -1627,11 +1423,7 @@
         },
         "name": "muted",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "muted"
-        ]
+        "path": ["tremor", "brand", "muted"]
       },
       "subtle": {
         "key": "{tremor.brand.subtle}",
@@ -1646,11 +1438,7 @@
         },
         "name": "subtle",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "subtle"
-        ]
+        "path": ["tremor", "brand", "subtle"]
       },
       "default": {
         "key": "{tremor.brand.default}",
@@ -1665,11 +1453,7 @@
         },
         "name": "default",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "default"
-        ]
+        "path": ["tremor", "brand", "default"]
       },
       "emphasis": {
         "key": "{tremor.brand.emphasis}",
@@ -1684,11 +1468,7 @@
         },
         "name": "emphasis",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "emphasis"
-        ]
+        "path": ["tremor", "brand", "emphasis"]
       },
       "inverted": {
         "key": "{tremor.brand.inverted}",
@@ -1703,11 +1483,7 @@
         },
         "name": "inverted",
         "attributes": {},
-        "path": [
-          "tremor",
-          "brand",
-          "inverted"
-        ]
+        "path": ["tremor", "brand", "inverted"]
       }
     },
     "background": {
@@ -1724,11 +1500,7 @@
         },
         "name": "muted",
         "attributes": {},
-        "path": [
-          "tremor",
-          "background",
-          "muted"
-        ]
+        "path": ["tremor", "background", "muted"]
       },
       "subtle": {
         "key": "{tremor.background.subtle}",
@@ -1743,11 +1515,7 @@
         },
         "name": "subtle",
         "attributes": {},
-        "path": [
-          "tremor",
-          "background",
-          "subtle"
-        ]
+        "path": ["tremor", "background", "subtle"]
       },
       "default": {
         "key": "{tremor.background.default}",
@@ -1762,11 +1530,7 @@
         },
         "name": "default",
         "attributes": {},
-        "path": [
-          "tremor",
-          "background",
-          "default"
-        ]
+        "path": ["tremor", "background", "default"]
       },
       "emphasis": {
         "key": "{tremor.background.emphasis}",
@@ -1781,11 +1545,7 @@
         },
         "name": "emphasis",
         "attributes": {},
-        "path": [
-          "tremor",
-          "background",
-          "emphasis"
-        ]
+        "path": ["tremor", "background", "emphasis"]
       }
     },
     "border": {
@@ -1802,11 +1562,7 @@
         },
         "name": "default",
         "attributes": {},
-        "path": [
-          "tremor",
-          "border",
-          "default"
-        ]
+        "path": ["tremor", "border", "default"]
       }
     },
     "ring": {
@@ -1823,11 +1579,7 @@
         },
         "name": "default",
         "attributes": {},
-        "path": [
-          "tremor",
-          "ring",
-          "default"
-        ]
+        "path": ["tremor", "ring", "default"]
       }
     },
     "content": {
@@ -1844,11 +1596,7 @@
         },
         "name": "subtle",
         "attributes": {},
-        "path": [
-          "tremor",
-          "content",
-          "subtle"
-        ]
+        "path": ["tremor", "content", "subtle"]
       },
       "default": {
         "key": "{tremor.content.default}",
@@ -1863,11 +1611,7 @@
         },
         "name": "default",
         "attributes": {},
-        "path": [
-          "tremor",
-          "content",
-          "default"
-        ]
+        "path": ["tremor", "content", "default"]
       },
       "emphasis": {
         "key": "{tremor.content.emphasis}",
@@ -1882,11 +1626,7 @@
         },
         "name": "emphasis",
         "attributes": {},
-        "path": [
-          "tremor",
-          "content",
-          "emphasis"
-        ]
+        "path": ["tremor", "content", "emphasis"]
       },
       "strong": {
         "key": "{tremor.content.strong}",
@@ -1901,11 +1641,7 @@
         },
         "name": "strong",
         "attributes": {},
-        "path": [
-          "tremor",
-          "content",
-          "strong"
-        ]
+        "path": ["tremor", "content", "strong"]
       },
       "inverted": {
         "key": "{tremor.content.inverted}",
@@ -1920,11 +1656,7 @@
         },
         "name": "inverted",
         "attributes": {},
-        "path": [
-          "tremor",
-          "content",
-          "inverted"
-        ]
+        "path": ["tremor", "content", "inverted"]
       }
     }
   },
@@ -1941,9 +1673,7 @@
     },
     "name": "shadow-card",
     "attributes": {},
-    "path": [
-      "shadow-card"
-    ]
+    "path": ["shadow-card"]
   },
   "shadow-card-hover": {
     "key": "{shadow-card-hover}",
@@ -1958,9 +1688,7 @@
     },
     "name": "shadow-card-hover",
     "attributes": {},
-    "path": [
-      "shadow-card-hover"
-    ]
+    "path": ["shadow-card-hover"]
   },
   "shadow-elevated": {
     "key": "{shadow-elevated}",
@@ -1975,9 +1703,7 @@
     },
     "name": "shadow-elevated",
     "attributes": {},
-    "path": [
-      "shadow-elevated"
-    ]
+    "path": ["shadow-elevated"]
   },
   "shadow-glow-blue": {
     "key": "{shadow-glow-blue}",
@@ -1992,9 +1718,7 @@
     },
     "name": "shadow-glow-blue",
     "attributes": {},
-    "path": [
-      "shadow-glow-blue"
-    ]
+    "path": ["shadow-glow-blue"]
   },
   "shadow-glow-primary": {
     "key": "{shadow-glow-primary}",
@@ -2009,9 +1733,7 @@
     },
     "name": "shadow-glow-primary",
     "attributes": {},
-    "path": [
-      "shadow-glow-primary"
-    ]
+    "path": ["shadow-glow-primary"]
   },
   "shadow-glow-electric": {
     "key": "{shadow-glow-electric}",
@@ -2026,9 +1748,7 @@
     },
     "name": "shadow-glow-electric",
     "attributes": {},
-    "path": [
-      "shadow-glow-electric"
-    ]
+    "path": ["shadow-glow-electric"]
   },
   "shadow-window": {
     "key": "{shadow-window}",
@@ -2043,9 +1763,7 @@
     },
     "name": "shadow-window",
     "attributes": {},
-    "path": [
-      "shadow-window"
-    ]
+    "path": ["shadow-window"]
   },
   "shadow-diffusion-sm": {
     "key": "{shadow-diffusion-sm}",
@@ -2060,9 +1778,7 @@
     },
     "name": "shadow-diffusion-sm",
     "attributes": {},
-    "path": [
-      "shadow-diffusion-sm"
-    ]
+    "path": ["shadow-diffusion-sm"]
   },
   "shadow-diffusion-md": {
     "key": "{shadow-diffusion-md}",
@@ -2077,9 +1793,7 @@
     },
     "name": "shadow-diffusion-md",
     "attributes": {},
-    "path": [
-      "shadow-diffusion-md"
-    ]
+    "path": ["shadow-diffusion-md"]
   },
   "shadow-diffusion-lg": {
     "key": "{shadow-diffusion-lg}",
@@ -2094,9 +1808,7 @@
     },
     "name": "shadow-diffusion-lg",
     "attributes": {},
-    "path": [
-      "shadow-diffusion-lg"
-    ]
+    "path": ["shadow-diffusion-lg"]
   },
   "shadow-diffusion-xl": {
     "key": "{shadow-diffusion-xl}",
@@ -2111,9 +1823,7 @@
     },
     "name": "shadow-diffusion-xl",
     "attributes": {},
-    "path": [
-      "shadow-diffusion-xl"
-    ]
+    "path": ["shadow-diffusion-xl"]
   },
   "refraction": {
     "inner-border": {
@@ -2129,10 +1839,7 @@
       },
       "name": "inner-border",
       "attributes": {},
-      "path": [
-        "refraction",
-        "inner-border"
-      ]
+      "path": ["refraction", "inner-border"]
     },
     "inner-shadow": {
       "key": "{refraction.inner-shadow}",
@@ -2147,10 +1854,7 @@
       },
       "name": "inner-shadow",
       "attributes": {},
-      "path": [
-        "refraction",
-        "inner-shadow"
-      ]
+      "path": ["refraction", "inner-shadow"]
     },
     "edge-light": {
       "key": "{refraction.edge-light}",
@@ -2165,10 +1869,7 @@
       },
       "name": "edge-light",
       "attributes": {},
-      "path": [
-        "refraction",
-        "edge-light"
-      ]
+      "path": ["refraction", "edge-light"]
     }
   },
   "wave": {
@@ -2185,10 +1886,7 @@
       },
       "name": "intensity",
       "attributes": {},
-      "path": [
-        "wave",
-        "intensity"
-      ]
+      "path": ["wave", "intensity"]
     },
     "speed-mult": {
       "key": "{wave.speed-mult}",
@@ -2203,10 +1901,7 @@
       },
       "name": "speed-mult",
       "attributes": {},
-      "path": [
-        "wave",
-        "speed-mult"
-      ]
+      "path": ["wave", "speed-mult"]
     },
     "ampl-scale": {
       "key": "{wave.ampl-scale}",
@@ -2221,10 +1916,7 @@
       },
       "name": "ampl-scale",
       "attributes": {},
-      "path": [
-        "wave",
-        "ampl-scale"
-      ]
+      "path": ["wave", "ampl-scale"]
     },
     "opacity": {
       "key": "{wave.opacity}",
@@ -2239,10 +1931,7 @@
       },
       "name": "opacity",
       "attributes": {},
-      "path": [
-        "wave",
-        "opacity"
-      ]
+      "path": ["wave", "opacity"]
     }
   },
   "radius-sm": {
@@ -2258,9 +1947,7 @@
     },
     "name": "radius-sm",
     "attributes": {},
-    "path": [
-      "radius-sm"
-    ]
+    "path": ["radius-sm"]
   },
   "radius-md": {
     "key": "{radius-md}",
@@ -2275,9 +1962,7 @@
     },
     "name": "radius-md",
     "attributes": {},
-    "path": [
-      "radius-md"
-    ]
+    "path": ["radius-md"]
   },
   "radius-lg": {
     "key": "{radius-lg}",
@@ -2292,9 +1977,7 @@
     },
     "name": "radius-lg",
     "attributes": {},
-    "path": [
-      "radius-lg"
-    ]
+    "path": ["radius-lg"]
   },
   "radius-xl": {
     "key": "{radius-xl}",
@@ -2309,9 +1992,7 @@
     },
     "name": "radius-xl",
     "attributes": {},
-    "path": [
-      "radius-xl"
-    ]
+    "path": ["radius-xl"]
   },
   "radius-card": {
     "key": "{radius-card}",
@@ -2326,9 +2007,7 @@
     },
     "name": "radius-card",
     "attributes": {},
-    "path": [
-      "radius-card"
-    ]
+    "path": ["radius-card"]
   },
   "radius-button": {
     "key": "{radius-button}",
@@ -2343,9 +2022,7 @@
     },
     "name": "radius-button",
     "attributes": {},
-    "path": [
-      "radius-button"
-    ]
+    "path": ["radius-button"]
   },
   "radius-full": {
     "key": "{radius-full}",
@@ -2360,9 +2037,7 @@
     },
     "name": "radius-full",
     "attributes": {},
-    "path": [
-      "radius-full"
-    ]
+    "path": ["radius-full"]
   },
   "motion": {
     "duration": {
@@ -2379,11 +2054,7 @@
         },
         "name": "instant",
         "attributes": {},
-        "path": [
-          "motion",
-          "duration",
-          "instant"
-        ]
+        "path": ["motion", "duration", "instant"]
       },
       "fast": {
         "key": "{motion.duration.fast}",
@@ -2398,11 +2069,7 @@
         },
         "name": "fast",
         "attributes": {},
-        "path": [
-          "motion",
-          "duration",
-          "fast"
-        ]
+        "path": ["motion", "duration", "fast"]
       },
       "normal": {
         "key": "{motion.duration.normal}",
@@ -2417,11 +2084,7 @@
         },
         "name": "normal",
         "attributes": {},
-        "path": [
-          "motion",
-          "duration",
-          "normal"
-        ]
+        "path": ["motion", "duration", "normal"]
       },
       "slow": {
         "key": "{motion.duration.slow}",
@@ -2436,11 +2099,7 @@
         },
         "name": "slow",
         "attributes": {},
-        "path": [
-          "motion",
-          "duration",
-          "slow"
-        ]
+        "path": ["motion", "duration", "slow"]
       },
       "emphasis": {
         "key": "{motion.duration.emphasis}",
@@ -2455,11 +2114,7 @@
         },
         "name": "emphasis",
         "attributes": {},
-        "path": [
-          "motion",
-          "duration",
-          "emphasis"
-        ]
+        "path": ["motion", "duration", "emphasis"]
       }
     },
     "easing": {
@@ -2476,11 +2131,7 @@
         },
         "name": "ease",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "ease"
-        ]
+        "path": ["motion", "easing", "ease"]
       },
       "ease-out": {
         "key": "{motion.easing.ease-out}",
@@ -2495,11 +2146,7 @@
         },
         "name": "ease-out",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "ease-out"
-        ]
+        "path": ["motion", "easing", "ease-out"]
       },
       "ease-in": {
         "key": "{motion.easing.ease-in}",
@@ -2514,11 +2161,7 @@
         },
         "name": "ease-in",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "ease-in"
-        ]
+        "path": ["motion", "easing", "ease-in"]
       },
       "ease-in-out": {
         "key": "{motion.easing.ease-in-out}",
@@ -2533,11 +2176,7 @@
         },
         "name": "ease-in-out",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "ease-in-out"
-        ]
+        "path": ["motion", "easing", "ease-in-out"]
       },
       "spring": {
         "key": "{motion.easing.spring}",
@@ -2552,11 +2191,7 @@
         },
         "name": "spring",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "spring"
-        ]
+        "path": ["motion", "easing", "spring"]
       },
       "bounce": {
         "key": "{motion.easing.bounce}",
@@ -2571,11 +2206,7 @@
         },
         "name": "bounce",
         "attributes": {},
-        "path": [
-          "motion",
-          "easing",
-          "bounce"
-        ]
+        "path": ["motion", "easing", "bounce"]
       }
     }
   },
@@ -2592,8 +2223,6 @@
     },
     "name": "theme-transition-duration",
     "attributes": {},
-    "path": [
-      "theme-transition-duration"
-    ]
+    "path": ["theme-transition-duration"]
   }
 }
