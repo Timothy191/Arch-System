@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-08-09 - Performance Optimization: System Clock Background Interval Gating
+
+- **Purpose**: Optimize SystemClock by only running high-frequency 1s intervals when the Popover is visible.
+- **Changes**:
+  - Gated the 1-second background interval in `SystemClock.tsx` to only run when `isOpen` is true.
+  - Added full unit test coverage in `SystemClock.test.tsx` to verify interval management, initial state, and popover visibility toggle.
+- **Next Steps**: Continue to find other background timer loops that can be visibility-gated to save client-side CPU cycles.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
