@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-26 - Performance: Optimize SystemClock interval gating and re-renders
+
+- **Purpose**: Conditionally gate high-frequency 1s analog clock interval on Popover visibility to prevent main-thread re-render overhead.
+- **Changes**:
+  - `components/clock/SystemClock.tsx`: Track Popover open status via controlled state `isOpen` on `<Popover.Root>`. Only register the 1s high-frequency clock interval when `isOpen` is true. Immediately synchronize states on popover open to ensure zero visual staleness.
+  - `components/clock/SystemClock.test.tsx`: Created a comprehensive Jest test suite verifying initial state, calendar navigation, and conditional gating/clearing of the 1-second interval based on popover visibility.
+- **Next steps**: Run `pnpm --filter portal test -- SystemClock.test.tsx` to verify correct behavior.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
