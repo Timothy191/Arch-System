@@ -8,6 +8,8 @@ export function SystemClock() {
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  // Performance optimization: track Popover visibility to gate high-frequency 1s clock updates
+  const [isOpen, setIsOpen] = useState(false);
 
   // Update clock time string (day + time) every 10 seconds for the header pill
   useEffect(() => {
@@ -34,13 +36,21 @@ export function SystemClock() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
+  // Performance optimization: Gate high-frequency 1-second interval on Popover visibility.
+  // This prevents unnecessary main-thread rendering cycles when the clock is closed.
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Immediately synchronize the time states to prevent up to 10s of staleness from 10s pill updates
+    const now = new Date();
+    setTime(now);
+    setCalendarDate(now);
+
     const secondInterval = setInterval(() => {
       setTime(new Date());
     }, 1000);
     return () => clearInterval(secondInterval);
-  }, []);
+  }, [isOpen]);
 
   if (!timeStr) return null;
 
@@ -84,7 +94,7 @@ export function SystemClock() {
   const secondDeg = (seconds / 60) * 360;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
