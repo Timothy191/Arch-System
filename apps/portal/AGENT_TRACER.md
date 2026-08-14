@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-06-25 - SystemClock Performance Optimization (Interval Gating)
+
+- **Purpose**: Prevent unnecessary background re-renders of the application's header by gating the 1-second clock tick interval.
+- **Changes**:
+  - `apps/portal/components/clock/SystemClock.tsx`: Added state-controlled `isOpen` popover state, and gated the high-frequency 1s analog clock interval to only run when the Popover is open. Immediately synchronizes time on open to prevent visual staleness.
+  - `apps/portal/components/clock/SystemClock.test.tsx`: Added a complete, robust Jest unit test suite covering initial rendering, state-gated high-frequency interval registration/cleanup, calendar month/year navigation, and dynamic 1-second ticks wrapped in `act()`.
+- **Next agent**: The system clock is now fully optimized and tested; 1s ticks only consume CPU when the clock popover is actually visible.
+
 ## 2026-06-25 - Follow-up: metrics imports, Outfit font, observability paths
 
 - **Purpose**: Fix broken `@repo/shared/data-accessmetrics` imports; load Outfit via next/font.
