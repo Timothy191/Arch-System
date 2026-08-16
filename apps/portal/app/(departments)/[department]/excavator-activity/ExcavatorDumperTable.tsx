@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 const MATERIAL_TYPES = ["Overburden", "Coal", "Waste", "Partings", "Soil", "Other"];
@@ -48,6 +49,24 @@ export function ExcavatorDumperTable({
   onAssignmentsChange,
   errors,
 }: ExcavatorDumperTableProps) {
+  // Performance optimization: Pre-index siteDumpers by ID into a Map to eliminate O(N) linear array searches on dumper change
+  const dumpersById = useMemo(() => {
+    const map = new Map<string, DumperMachine>();
+    for (const dumper of siteDumpers) {
+      map.set(dumper.id, dumper);
+    }
+    return map;
+  }, [siteDumpers]);
+
+  // Performance optimization: Pre-index todayDumperLoads by machine_id + shift_type composite key into a Map for O(1) load lookups
+  const dumperLoadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const load of todayDumperLoads) {
+      map.set(`${load.machine_id}:${load.shift_type}`, load.total_loads);
+    }
+    return map;
+  }, [todayDumperLoads]);
+
   const handleAddRow = () => {
     onAssignmentsChange([
       ...assignments,
@@ -66,14 +85,11 @@ export function ExcavatorDumperTable({
   };
 
   const handleDumperChange = (index: number, dumperId: string) => {
-    const dumper = siteDumpers.find((d) => d.id === dumperId);
+    const dumper = dumpersById.get(dumperId);
     const binFactor = dumper?.bin_factor || 0;
 
-    // Look up total loads from hourly_loads for this dumper + shift
-    const loadEntry = todayDumperLoads.find(
-      (l) => l.machine_id === dumperId && l.shift_type === shiftType,
-    );
-    const loads = loadEntry?.total_loads || 0;
+    // Look up total loads from hourly_loads for this dumper + shift using O(1) Map lookup
+    const loads = dumperLoadsByMachine.get(`${dumperId}:${shiftType}`) || 0;
     const bcm = loads * binFactor;
 
     const updated = [...assignments];
