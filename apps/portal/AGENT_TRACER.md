@@ -2558,3 +2558,12 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-08-16T00:00:00Z] Performance Optimization: ExcavatorDumperTable Lookup Maps
+
+**Purpose:** Optimize dumper equipment and hourly load lookups in `ExcavatorDumperTable.tsx` to O(1) performance using memoized `Map` structures.
+**Changes:**
+- Pre-indexed `siteDumpers` by ID and `todayDumperLoads` by composite key `dumperId:shiftType` using `useMemo`.
+- Replaced linear `.find()` searches in `handleDumperChange` with O(1) Map `.get()` calls.
+- Added Jest unit tests in `ExcavatorDumperTable.test.tsx` verifying component render states, row management, and O(1) load/BCM calculations.
+**Next Agent Notes:** `ExcavatorDumperTable` is used inside `ExcavatorActivityForm.tsx`.

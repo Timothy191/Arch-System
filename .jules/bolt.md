@@ -1,0 +1,3 @@
+## 2025-05-18 - Avoid Pre-indexing Map Objects on Render for Low-Frequency Event Handlers
+**Learning:** Pre-indexing array items into Map objects during component renders (using `useMemo`) to optimize user click/change event handlers can be counter-productive when the event occurs infrequently. Rebuilding Map data structures on render allocates memory and string keys unnecessarily on hot render paths, while array `.find()` in low-frequency event handlers is imperceptible for typical array sizes.
+**Action:** Only pre-index data structures into Maps when the lookups occur repeatedly during component render iterations (e.g., inside `.map()` loops or heavy grid render cycles), rather than in rare user interaction handlers.
