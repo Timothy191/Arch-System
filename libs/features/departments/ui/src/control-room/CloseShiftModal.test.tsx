@@ -1,7 +1,7 @@
 // AGENT-TRACE: CloseShiftModal test covering full shift closeout workflow states (validating -> has_errors -> pin_entry -> verifying -> verified -> submitting -> success -> api_error).
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { CloseShiftModal } from "./CloseShiftModal";
-import { verifyPin, closeShift } from "~/lib/shift-closeout";
+import { verifyPin, closeShift } from "@/lib/shift-closeout";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -9,7 +9,7 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("~/lib/shift-closeout", () => ({
+jest.mock("@/lib/shift-closeout", () => ({
   verifyPin: jest.fn(),
   closeShift: jest.fn(),
 }));

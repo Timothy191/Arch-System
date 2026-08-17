@@ -53,6 +53,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+certs/
 
 # Runtime artifacts
 .frontend.pid

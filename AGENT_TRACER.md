@@ -1,5 +1,14 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Normalize CloseShiftModal import paths & ensure certs directory resolution
+
+- **Purpose**: Resolve potential "No such file/directory" errors and normalize import resolution across workspace libraries.
+- **Changes**:
+  1. `libs/features/departments/ui/src/control-room/CloseShiftModal.test.tsx`: normalized `~/lib/shift-closeout` to canonical `@/lib/shift-closeout` matching `CloseShiftModal.tsx` and tsconfig path aliases.
+  2. `config/generate-certs.sh`: resolved `$REPO_ROOT/certs` output path explicitly to ensure cert creation never fails regardless of invocation working directory.
+  3. `.gitignore`: added `certs/` to ignore local development certificate artifacts.
+- **Verification**: Verified with `pnpm --filter @repo/departments/ui test` (10/10 suites, 63/63 tests passed) and `pnpm type-check` across all 25 projects in monorepo.
+
 ## 2026-08-17: Fix dev.sh environment variable loading & auth check paths
 
 - **Purpose**: Fix `scripts/dev.sh` looking for `SUPABASE_URL`, `REDIS_URL`, and `SUPABASE_ANON_KEY` in relative paths or root `.env` instead of canonical `$REPO_ROOT/apps/portal/.env`.
