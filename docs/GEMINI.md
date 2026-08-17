@@ -50,6 +50,37 @@ Industrial operations portal built for high-scale vigilance and operational prec
 - **Workflow Traces**: All agents MUST update the `AGENT_TRACER.md` file in the root of the package/app they are modifying. You must log a timestamp, your purpose, the changes made, and what the next agent should know.
 - **Context Breadcrumbs**: When implementing complex architectural logic, agents MUST leave inline `// AGENT-TRACE: <explanation>` or `/* AGENT-TRACE: ... */` comments. This ensures future AI agents understand the implicit business rules or domain context immediately upon reading the file.
 
+### Mandatory Response Summary, Token Metrics & Next Steps Protocol (MANDATORY RULE)
+
+All AI agents MUST conclude every response with the following standardized sections:
+
+1. **Summary of Actions Taken**: A concise summary of changes made, files modified, and issues resolved.
+2. **Token Efficiency & Usage**:
+   - **Tokens Used**: Approximate/tracked tokens used in the turn.
+   - **Tokens Cached**: Tokens read from cache / prefix context.
+   - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
+3. **Suggested Next Steps (3 options)**:
+   - **Option 1**: Immediate operational or functional next step.
+   - **Option 2**: Verification, test suite, or quality gate next step.
+   - **Option 3**: Architecture, hardening, or performance optimization next step.
+
+### Token Conservation & High-Efficiency Context Engineering (MANDATORY RULE)
+
+All AI agents MUST enforce maximum token efficiency across all operations without sacrificing code completeness, rigor, or output quality:
+
+1. **Targeted Slicing Over Bulk Ingestion**:
+   - Never view entire multi-hundred-line files when localized sections suffice. Always specify bounded `StartLine` and `EndLine` parameters to read only relevant function/component spans.
+2. **Grep & Regex-First Navigation**:
+   - Discover symbols, call sites, and contracts using `grep_search` with targeted `Includes` globs instead of brute-force directory traversals.
+3. **Precision Non-Destructive Edits**:
+   - Always use `replace_file_content` targeting the exact contiguous lines being modified. Never rewrite entire files to make localized changes.
+4. **Context Window & Terminal Log Hygiene**:
+   - Truncate and filter verbose shell commands, bundle logs, and build artifacts. Never stream large binaries, lockfiles, or huge `.next` outputs into context.
+5. **Subagent Delegation for Broad Exploration**:
+   - Delegate wide multi-file research tasks and exploratory grep loops to scoped subagents so the primary agent's context remains clean and cache-dense.
+6. **Zero Fluff & Prefix Cache Preservation**:
+   - Eliminate conversational fluff, repetitive self-narration, and unnecessary code echo. Maintain deterministic context structures to maximize prefix cache hit ratios.
+
 ---
 
 ## 🛡️ Outer Loop: Production Hardening

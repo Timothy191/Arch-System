@@ -6,7 +6,7 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
     console.log("Request Failed:", req.url(), req.failure()?.errorText),
   );
   page.on("response", (res) => {
-    if (res.url().includes("mp4") || res.status() >= 400) {
+    if (res.url().includes("webm") || res.url().includes("mp4") || res.status() >= 400) {
       console.log("Response:", res.url(), res.status(), res.statusText());
     }
   });
@@ -52,7 +52,7 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   });
 
   console.log("Video State:", videoState);
-  expect(videoState.src).toContain("light-mode.mp4");
+  expect(videoState.src).toContain("837668e02b8cc6414cd7a78c19d1746c.webm");
 
   // 4. (Optional) Full‑page screenshot for visual comparison
   await expect(page).toHaveScreenshot("light-glass-background.png", {

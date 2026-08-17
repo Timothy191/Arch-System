@@ -12,11 +12,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/secret-scan.js\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/secret-scan.js\""
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/catalog-guard.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/catalog-guard.cjs\""
           },
           {
             "type": "command",
@@ -28,7 +28,7 @@
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/rls-prompt.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/rls-prompt.cjs\""
           }
         ]
       }
@@ -56,25 +56,25 @@
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/tracing-check-reminder.cjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/tracing-check-reminder.cjs\"",
             "statusMessage": "Tracing reminder...",
             "async": true
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/portal-test-on-edit.cjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/portal-test-on-edit.cjs\"",
             "statusMessage": "Running portal test...",
             "async": true
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/track-package-edits.cjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/track-package-edits.cjs\"",
             "statusMessage": "Tracking package edits...",
             "async": true
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/suggest-skills-on-edit.cjs\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/suggest-skills-on-edit.cjs\"",
             "statusMessage": "Checking skill triggers...",
             "async": true
           }
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/learn-capture.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/learn-capture.cjs\""
           },
           {
             "type": "command",
@@ -95,11 +95,11 @@
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/agent-tracer-enforce.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/agent-tracer-enforce.cjs\""
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/knip-on-stop.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/knip-on-stop.cjs\""
           }
         ]
       }
@@ -110,11 +110,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/tracing-reminder.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/tracing-reminder.cjs\""
           },
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/session-start.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/session-start.cjs\""
           }
         ]
       },
@@ -133,7 +133,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/pre-compact.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/pre-compact.cjs\""
           }
         ]
       }
@@ -144,7 +144,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/post-compact.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/post-compact.cjs\""
           }
         ]
       }
@@ -155,7 +155,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/timothy/Documents/Arch-System/.claude/hooks/scripts/file-changed.cjs\""
+            "command": "node \"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/scripts/file-changed.cjs\""
           }
         ]
       }

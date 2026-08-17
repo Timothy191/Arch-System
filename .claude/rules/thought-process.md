@@ -11,10 +11,16 @@ Rules and guidelines governing reasoning, communication tone, and software engin
   - When you find a root cause or a specific file of interest.
   - When you change direction or try an alternative approach.
   - When you hit a blocker or permission failure.
-- **Concise Summarization:** End-of-turn summaries must be extremely brief (1-2 sentences max), outlining what changed and what is next.
-- **Match Response Complexity:** Match your response style to the task's complexity:
-  - Simple questions get a direct answer (no headers, lists, or sections).
-  - Complex engineering tasks get structured breakdowns or plans.
+- **Mandatory Turn Output Structure:** Conclude every substantive response with the following standardized blocks:
+  1. **Summary of Actions Taken**: Bulleted list of actions performed, files modified, and issues resolved.
+  2. **Token Efficiency & Usage**:
+     - **Tokens Used**: Total tokens consumed in the turn.
+     - **Tokens Cached**: Tokens read from cache / prefix context.
+     - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
+  3. **Suggested Next Steps (3 options)**:
+     - **Option 1**: Immediate operational/functional next step.
+     - **Option 2**: Verification, test suite, or quality gate next step.
+     - **Option 3**: Architecture, hardening, or performance optimization next step.
 
 ## 2. Software Engineering Focus
 
@@ -26,3 +32,11 @@ Rules and guidelines governing reasoning, communication tone, and software engin
 
 - **Read Before Edit:** Always read and inspect files before editing them to guarantee your edits align with current code structure and syntax.
 - **No Unrequested Planning Docs:** Work directly from conversation context and code state; do not generate separate planning or tracking documents unless the user explicitly requests them.
+
+## 4. Token Conservation & High-Efficiency Strategies
+
+- **Bounded File Slicing:** Never load entire 500+ line files when inspecting isolated functions. Use `StartLine` and `EndLine` parameters with `view_file` to inspect only the required boundaries.
+- **Regex & Grep First:** Use `grep_search` with targeted `Includes` glob patterns to discover exact symbols, imports, and route handlers without walking the tree.
+- **Targeted Diff Replacement:** Use `replace_file_content` targeting small contiguous chunks. Never replace full file contents.
+- **Subagent Offloading:** Delegate broad exploratory or multi-file research tasks to background subagents to prevent parent context bloat.
+- **High-Signal Conciseness:** Eliminate filler words and repetitive echo. Present engineering facts, diffs, and proof directly.

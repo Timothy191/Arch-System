@@ -2,8 +2,15 @@
 /** @type {import("syncpack").RcFile} */
 export default {
   $schema: "https://unpkg.com/syncpack@13.0.0/dist/schema.json",
+  dependencyTypes: ["!local"],
   lintFormatting: false,
   semverGroups: [
+    {
+      packages: ["**"],
+      specifierTypes: ["unsupported"],
+      isIgnored: true,
+      label: "Ignore unsupported specifiers for semver ranges",
+    },
     {
       packages: ["apps/*"],
       dependencyTypes: ["prod", "dev"],

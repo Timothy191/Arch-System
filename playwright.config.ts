@@ -1,4 +1,25 @@
 import { defineConfig, devices } from "@playwright/test";
+import { existsSync } from "node:fs";
+
+/**
+ * Resolve a Chrome/Chromium executable across environments.
+ * Priority: explicit GOOGLE_CHROME_SHIM path → system chrome → playwright's bundled chromium.
+ */
+function resolveChromeExecutable(): string | undefined {
+  const candidates = [
+    process.env.GOOGLE_CHROME_SHIM,
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/opt/google/chrome/chrome",
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+  ].filter(Boolean) as string[];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
+
+const chromeExecutable = resolveChromeExecutable();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -38,7 +59,7 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         browserName: "chromium",
-        launchOptions: { executablePath: "/usr/bin/google-chrome" },
+        launchOptions: chromeExecutable ? { executablePath: chromeExecutable } : undefined,
         storageState: "e2e/.auth/user.json",
       },
       dependencies: ["setup"],
@@ -48,7 +69,7 @@ export default defineConfig({
       use: {
         ...devices["Pixel 5"],
         browserName: "chromium",
-        launchOptions: { executablePath: "/usr/bin/google-chrome" },
+        launchOptions: chromeExecutable ? { executablePath: chromeExecutable } : undefined,
         storageState: "e2e/.auth/user.json",
       },
       dependencies: ["setup"],
@@ -58,7 +79,7 @@ export default defineConfig({
       use: {
         ...devices["Galaxy Tab S4"],
         browserName: "chromium",
-        launchOptions: { executablePath: "/usr/bin/google-chrome" },
+        launchOptions: chromeExecutable ? { executablePath: chromeExecutable } : undefined,
         storageState: "e2e/.auth/user.json",
       },
       dependencies: ["setup"],
@@ -66,7 +87,7 @@ export default defineConfig({
     // We only support chromium locally as per requirements, but defining mobile sizes
   ],
   webServer: {
-    command: "pnpm --filter portal start",
+    command: "pnpm --filter portal dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
