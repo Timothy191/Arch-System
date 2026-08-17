@@ -22,6 +22,11 @@
       "url": "http://127.0.0.1:8288/mcp",
       "enabled": true
     },
+    "knowledge-rail": {
+      "type": "local",
+      "command": ["/home/tim/.local/bin/knowledge-rail"],
+      "enabled": true
+    },
     "memory": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
@@ -67,6 +72,11 @@
         "--url",
         "redis://localhost:6379/0"
       ],
+      "enabled": true
+    },
+    "slim-tools": {
+      "type": "remote",
+      "url": "https://slim.tools/mcp",
       "enabled": true
     }
   }
