@@ -1,5 +1,13 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Codegen Prettier post-hooks integrated
+
+- **Purpose**: Permanently eliminate formatting drift across code generation pipelines (`openapi.generated.json`, `variables-generated.css`, `generated-sd.ts`, `tokens-hsl.json`).
+- **Changes**:
+  1. `apps/portal/scripts/generate-openapi-spec.js`: added Prettier post-formatter using project configuration.
+  2. `packages/theme/sd.config.mjs`: added post-build Prettier formatting pass across all Style Dictionary output files.
+- **Verification**: Verified running `pnpm --filter @repo/theme codegen` and `node apps/portal/scripts/generate-openapi-spec.js` executes cleanly with 0 git diff on generated artifacts.
+
 ## 2026-08-17: Inspect formatting drift in generated codegen outputs
 
 - **Purpose**: Resolve working-tree drift in 4 committed generated files (`openapi.generated.json`, `tokens-hsl.json`, `generated-sd.ts`, `variables-generated.css`).

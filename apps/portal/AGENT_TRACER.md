@@ -1,5 +1,12 @@
 # Portal Agent Tracer
 
+## 2026-08-17 - OpenAPI Spec Generator Prettier Post-Hook
+
+- **Purpose**: Prevent cosmetic formatting drift when generating `packages/contract/openapi.generated.json`.
+- **Changes**:
+  1. `scripts/generate-openapi-spec.js`: integrated Prettier post-formatting using resolved project config so the generated spec matches committed canonical formatting with zero working tree drift.
+- **Verification**: Verified running `node apps/portal/scripts/generate-openapi-spec.js` leaves 0 git diff on `openapi.generated.json`.
+
 ## 2026-08-17 - Department navigation: Routes, Link semantics, Transition UI, History, E2E
 
 - **Purpose**: Fix 5 department navigation areas: explicit route mappings, proper client-side `<Link>` routing, transition UI feedback, Zustand department history tracking, and E2E navigation test suite.

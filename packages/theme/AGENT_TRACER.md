@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/theme
 
+## 2026-08-17 - Style Dictionary Prettier Post-Hook
+
+- **Purpose**: Prevent cosmetic formatting drift across generated theme files (`variables-generated.css`, `generated-sd.ts`, `tokens-hsl.json`).
+- **Changes**:
+  - `sd.config.mjs`: Added Prettier post-formatting loop targeting all output destinations after `sd.buildAllPlatforms()`.
+- **Verification**: Verified running `pnpm --filter @repo/theme codegen` runs cleanly with 0 git diff against canonical HEAD.
+
 ## 2026-06-25 - Follow-up alignment (codegen HSL, accent-charcoal, theme provider)
 
 - **Purpose**: Complete alignment audit follow-ups — auto HSL sync, canonical accent naming, remove next-themes, Outfit font.
