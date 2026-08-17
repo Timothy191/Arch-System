@@ -3,8 +3,10 @@
   "description": "Shared Agent Coordination engine and specialists using MCP and OpenAI/Together APIs",
   "version": "1.0.0",
   "dependencies": {
-    "p-limit": "^5.0.0",
-    "openai": "^4.82.0"
+    "@supabase/server": "^1.4.1",
+    "@supabase/supabase-js": "^2.112.3",
+    "openai": "^4.82.0",
+    "p-limit": "^5.0.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",

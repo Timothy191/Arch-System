@@ -64,7 +64,7 @@
     "brace-expansion": ">=2.0.2",
     "minimatch": ">=9.0.7",
     "braces": ">=3.0.3",
-    "glob": ">=13.0.6",
+    "glob": "^13.0.6",
     "serialize-javascript": ">=7.0.3",
     "kysely": ">=0.28.17",
     "tmp": ">=0.2.6",
