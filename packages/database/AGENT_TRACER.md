@@ -196,3 +196,57 @@ Implement controlled data sharing from Engineering Department to Control Room De
 **What the next agent should know:**
 
 - All database migrations are sequential. Sequence numbers above `085` represent newly renumbered migration steps to prevent conflicts with intermediate numbers.
+
+## [2026-08-15T10:30:00Z] Resolving Unindexed Foreign Keys
+
+**Purpose:** Add missing covering indexes for 14 foreign key constraints flagged by Supabase Database Linter report to optimize query performance and join evaluation.
+
+**Changes:**
+
+- Created migration `095_add_unindexed_foreign_key_indexes.sql`:
+  - `breakdowns`: `completed_by`, `created_by`
+  - `employees`: `auth_id`
+  - `excavator_activity`: `block_mined_id`
+  - `fuel_logs`: `daily_log_id`, `machine_id`
+  - `generated_reports`: `generated_by`
+  - `machine_hours`: `daily_log_id`, `machine_id`
+  - `machine_operations`: `created_by`
+  - `production_logs`: `daily_log_id`
+  - `safety_incidents`: `reviewed_by`
+  - `user_feedback`: `assigned_to`, `user_id`
+- Retained existing B-tree & HNSW vector indexes flagged as unused in dev/staging (`idx_scan = 0`) to preserve production search & performance capabilities.
+
+**What the next agent should know:**
+
+- All 14 unindexed FK constraints reported by Supabase linter now have explicit B-tree indexes created with `IF NOT EXISTS`.
+
+## [2026-08-15T11:05:00Z] Security Hardening & Linter Remediation
+
+**Purpose:** Harden PostgreSQL database functions, schema placement, and RLS policies based on Supabase Database Linter security warnings.
+
+**Changes:**
+
+- Created migration `094_security_linter_hardening.sql`:
+  - Enforced fixed `search_path = public, pg_temp` on functions (`update_updated_at_column`, `process_audit_log`, `is_active`, `is_admin`, `has_department_access`, `user_department_id`, `handle_new_user`, feedback and AI memory RPCs).
+  - Relocated `vector` extension from `public` to `extensions` schema.
+  - Hardened RLS `WITH CHECK` clauses on `audit_logs`, `user_feedback`, and `quick_feedback` to prevent unrestricted bypass.
+  - Revoked public/anonymous execution permissions on internal `SECURITY DEFINER` trigger functions and sensitive RPCs.
+
+**What the next agent should know:**
+
+- `vector` extension functions and types are now cleanly referenced via the `extensions` schema.
+- Public/anon direct RPC execution of sensitive definer functions is revoked; authenticated and service roles retain proper access.
+
+## [2026-08-15T11:40:00Z] RLS InitPlan Optimization & Duplicate Index Cleanup
+
+**Purpose:** Optimize 38 row-level security policies across all core tables using single-evaluation `(SELECT ...)` InitPlans to eliminate per-row re-evaluation of auth/helper functions, and drop duplicate unique index on `delay_categories`.
+
+**Changes:**
+
+- Created migration `095_optimize_rls_initplan_and_indexes.sql`:
+  - Dropped duplicate index `public.delay_categories_name_unique` (keeping `delay_categories_name_key`).
+  - Replaced bare `auth.uid()`, `is_admin()`, and `has_department_access()` with `(SELECT auth.uid())`, `(SELECT public.is_admin())`, and `(SELECT public.has_department_access(...))` on tables: `employees`, `machines`, `operators`, `sites`, `daily_logs`, `machine_hours`, `fuel_logs`, `production_logs`, `machine_operations`, `delay_categories`, `report_templates`, `generated_reports`, `excavator_activity`, `dozer_rolls`, `hourly_loads`, `engineering_notes`, `operational_delays`, `breakdowns`, `safety_incident_categories`, `safety_incidents`, `mine_blocks`, `excavator_dumper_assignments`, `memory_embeddings`.
+
+**What the next agent should know:**
+
+- All RLS policies now evaluate session variables and helper functions once per statement (InitPlan) rather than per row.

@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/supabase
 
+## 2026-08-15 - Hosted Supabase dev setup: disable LAN URL hostname rewrite
+
+- **Purpose**: Support hosted/cloud Supabase (project ref `mrwhtxbhrzyttlsyuofc`) for dev without breaking the LAN on-prem deployment.
+- **Changes**:
+  - `src/client.ts`: the browser enablement hostname-rewrite now runs only for non-HTTPS (LAN) Supabase URLs. Hosted/cloud Supabase is always `https://<ref>.supabase.co`, and rewriting that to the window hostname redirected every client call to the portal itself (this was breaking auth/data on hosted even from `localhost:3000`). LAN URLs (`http://<ip>:54321`) still rewrite as before.
+- **Files touched**: `src/client.ts`.
+- **Status**: Type-check pending; quality gate will not run (Docker not installed at time of change), verified via targeted pnpm type-check.
+- **Next agent**: Env var consumers standardized on `*_ANON_KEY` (publishable key value maps into `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_ANON_KEY`); `SUPABASE_SERVICE_KEY` still required for `createServiceRoleClient()` callers (admin/data, c66, shift-integrity, warmup, hourly-loads).
+
 ## 2026-06-17 - Quality Gate Fix: Database Types Stub
 
 - **Purpose**: Fix empty `database.types.ts` causing TypeScript compilation failures in quality gate.
