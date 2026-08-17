@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/supabase
 
+## 2026-08-17 - Synchronize Database Types from Remote Supabase (mrwhtxbhrzyttlsyuofc)
+
+- **Purpose**: Synchronize `src/database.types.ts` directly from the active remote Supabase project `mrwhtxbhrzyttlsyuofc`.
+- **Changes**:
+  - Ran `supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc` and updated `src/database.types.ts`.
+  - Verified TypeScript compilation across all 25 monorepo projects.
+- **Files touched**: `src/database.types.ts`, `AGENT_TRACER.md`.
+- **Status**: Type-check passes across all packages (25/25 projects).
+- **Next agent**: Types are fully synced with the remote PostgreSQL schema on project `mrwhtxbhrzyttlsyuofc`.
+
 ## 2026-08-15 - Hosted Supabase dev setup: disable LAN URL hostname rewrite
 
 - **Purpose**: Support hosted/cloud Supabase (project ref `mrwhtxbhrzyttlsyuofc`) for dev without breaking the LAN on-prem deployment.
