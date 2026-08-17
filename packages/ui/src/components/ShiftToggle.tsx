@@ -33,7 +33,5 @@ export function ShiftToggle({ value, onChange, name = "shift-toggle" }: ShiftTog
   );
 }
 
-export function getCurrentShift(): "day" | "night" {
-  const hour = new Date().getHours();
-  return hour >= 6 && hour < 18 ? "day" : "night";
-}
+// AGENT-TRACE: getCurrentShift was consolidated into @repo/utils (timezone-aware,
+// Africa/Johannesburg default). Import it from "@repo/utils" instead of here.

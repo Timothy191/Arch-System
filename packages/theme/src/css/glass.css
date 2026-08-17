@@ -1163,17 +1163,6 @@ body.focus-mode .route-bg-grain {
   );
 }
 
-/* Reduced-motion flat fallback.
-   Sits at z-index: -10 — same layer as the video it replaces.
-   Always rendered but only visible via `motion-reduce:block hidden`
-   utilities on the element itself. */
-.route-bg-fallback {
-  position: fixed;
-  inset: 0;
-  z-index: -10;
-  background: linear-gradient(135deg, #f4f4f7, #e8ecf4);
-}
-
 /* ── Glass Typography & Text Hierarchy ── */
 
 /* Glass Card Title Styling — Bold and high-contrast */
@@ -1325,8 +1314,19 @@ body.focus-mode .route-bg-grain {
   transform: none !important;
 }
 
-.low-perf-fallback .route-bg-video-container {
+.low-perf-fallback .route-bg-video-container,
+.low-perf-fallback .route-bg-focus-video-container {
   display: none !important;
+}
+
+/* Static gradient fallback — hidden by default. The CSS rule above
+   hides the video; this one shows a lightweight replacement. */
+.route-bg-fallback {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background: var(--canvas-gradient, linear-gradient(135deg, #f4f4f7, #e8ecf4));
 }
 
 .low-perf-fallback .route-bg-fallback {
