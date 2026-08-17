@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { getCurrentShift } from "@repo/utils";
 import { useRouter } from "next/navigation";
 import { revalidateRSC } from "@repo/shared/data-access";
 
@@ -46,11 +47,6 @@ export function SafetyIncidentForm({
 }: SafetyIncidentFormProps) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
-
-  const getCurrentShift = (): "day" | "night" => {
-    const hour = new Date().getHours();
-    return hour >= 6 && hour < 18 ? "day" : "night";
-  };
 
   const [formData, setFormData] = useState({
     incidentType: "",

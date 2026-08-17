@@ -7,11 +7,7 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "dependencies": {
-    "@repo/ui": "1.0.0",
-    "react": "catalog:react19",
-    "react-dom": "catalog:react19"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "^19",
     "react-dom": "^19"
@@ -21,9 +17,6 @@
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
     "typescript": "catalog:"
   }
 }

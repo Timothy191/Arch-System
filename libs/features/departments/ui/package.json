@@ -11,10 +11,7 @@
     "@repo/contract": "1.0.0",
     "@repo/errors": "1.0.0",
     "@repo/logger": "1.0.0",
-    "@repo/rate-limiter": "1.0.0",
     "@repo/redis": "1.0.0",
-    "@repo/shared/data-access": "1.0.0",
-    "@repo/shared/hooks": "1.0.0",
     "@repo/supabase": "1.0.0",
     "@repo/ui": "1.0.0",
     "@repo/utils": "1.0.0",
@@ -33,12 +30,17 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "test": "jest --config jest.config.js --passWithNoTests --maxWorkers=50%"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.2.0",
     "typescript": "catalog:"
   }
 }

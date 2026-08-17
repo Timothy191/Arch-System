@@ -11,5 +11,9 @@ module.exports = {
         "no-redeclare": "off",
       },
     },
+    {
+      files: ["jest.config.js"],
+      env: { node: true },
+    },
   ],
 };

@@ -7,17 +7,12 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "dependencies": {
-    "@repo/supabase": "1.0.0"
-  },
+  "dependencies": {},
   "scripts": {
     "type-check": "tsc --noEmit",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
     "typescript": "catalog:"
   }
 }

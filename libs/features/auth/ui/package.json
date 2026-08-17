@@ -9,8 +9,6 @@
   },
   "dependencies": {
     "@repo/ui": "1.0.0",
-    "@repo/auth/data-access": "1.0.0",
-    "@repo/auth/utils": "1.0.0",
     "lucide-react": "catalog:",
     "framer-motion": "catalog:",
     "sonner": "catalog:",
@@ -28,7 +26,6 @@
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "1.0.0",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
     "typescript": "catalog:"
