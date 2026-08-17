@@ -20,7 +20,7 @@ const { readdirSync, statSync, readFileSync, writeFileSync, existsSync } = requi
 const path = require("path");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
-const ASSETS_DIR = path.join(REPO_ROOT, "assets");
+const ASSETS_DIR = path.join(REPO_ROOT, "apps", "portal", "assets");
 const CHECKSUM_FILE = path.join(REPO_ROOT, ".assets-checksum");
 const SYNC_SCRIPT = path.join(__dirname, "sync-assets.sh");
 

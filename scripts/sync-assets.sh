@@ -17,7 +17,7 @@ TARGETS=(
 # Asset subdirectories to sync (these will be removed and recreated)
 ASSET_DIRS=("background" "error-pages" "large")
 
-echo "  → Synchronizing global assets from root assets/..."
+echo "  → Synchronizing global assets from apps/portal/assets/..."
 
 if [ ! -d "$REPO_ROOT/apps/portal/assets" ]; then
   echo "  ✗ Error: apps/portal/assets/ directory not found."
@@ -47,4 +47,4 @@ for TARGET in "${TARGETS[@]}"; do
 done
 
 echo "  ✓ Asset synchronization complete!"
-echo "  → Root assets/ at $REPO_ROOT/assets is now the single source of truth"
+echo "  → Root assets/ at $REPO_ROOT/apps/portal/assets is now the single source of truth"

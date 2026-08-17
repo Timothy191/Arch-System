@@ -3,6 +3,11 @@ set -euo pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Prevent infinite hangs when probing health endpoints
+curl() {
+  command curl --max-time 3 "$@"
+}
+
 # ──────────────────────────────────────────────────────────
 # Arch-Systems — Lightning Dev Script v3
 # Starts Supabase + Next.js HMR, runs 4-phase health check,
@@ -274,6 +279,7 @@ QUICK_MODE=false
 START_CMS=false
 START_OVERVIEW=false
 RUN_E2E=false
+STRICT_MODE=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --force|-f) FORCE_KILL=true; shift ;;
@@ -283,6 +289,7 @@ while [ $# -gt 0 ]; do
     --overview) START_OVERVIEW=true; shift ;;
     --e2e)      RUN_E2E=true; shift ;;
     --all)      START_CMS=true; START_OVERVIEW=true; shift ;;
+    --strict)   STRICT_MODE=true; shift ;;
     *) shift ;;
   esac
 done
@@ -531,7 +538,10 @@ else
   check "Environment file" "pass" "exists"
 fi
 
-if [ -d "$REPO_ROOT/node_modules" ]; then
+if [ "$STRICT_MODE" = "true" ]; then
+  echo -e "  ${INFO} Strict Mode: Running pnpm install..."
+  pnpm install --prefer-offline > /dev/null 2>&1 && check "Dependencies" "pass" "synced (strict)" || { check "Dependencies" "fail"; env_pass=false; }
+elif [ -d "$REPO_ROOT/node_modules" ]; then
   check "Dependencies" "pass"
 else
   echo -e "  ${INFO} Installing dependencies..."
@@ -539,6 +549,16 @@ else
 fi
 
 [ "$env_pass" = false ] && { echo -e "\n  ${RED}Environment checks failed. Aborting.${NC}\n"; exit 1; }
+
+# ── Phase 1.5: Quality Gates (Strict Mode Only) ──────────
+if [ "$STRICT_MODE" = "true" ]; then
+  phase "1.5" "Quality Gates"
+  echo -e "  ${INFO} Running format checks..."
+  pnpm format:check > /dev/null 2>&1 && check "Formatting" "pass" || { check "Formatting" "fail"; exit 1; }
+  
+  echo -e "  ${INFO} Running quality gates (this may take a while)..."
+  pnpm quality > "$REPO_ROOT/run/quality.log" 2>&1 && check "Quality Gates" "pass" || { check "Quality Gates" "fail"; echo -e "\n  ${RED}Quality checks failed. See run/quality.log${NC}\n"; exit 1; }
+fi
 
 # ── Phase 2: Infrastructure (Supabase) ───────────────────
 if [ "$QUICK_MODE" = "true" ]; then
@@ -702,7 +722,7 @@ start_extra_app() {
   cd "$REPO_ROOT"
   local ready=false
   for i in $(seq 1 60); do
-    if curl -fs "http://localhost:$port" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
+    if curl -s "http://localhost:$port" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -qE "200|307|308|401|404"; then
       ready=true
       break
     fi
