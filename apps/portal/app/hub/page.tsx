@@ -16,7 +16,7 @@ import {
 import type { AlertEvent } from "@/features/hub";
 import type { TrendDataPoint } from "@/features/hub";
 import { getTools } from "@/lib/tools";
-import { DEPARTMENTS } from "~/lib/departments";
+import { DEPARTMENTS } from "@repo/departments/data-access";
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
   Shield,

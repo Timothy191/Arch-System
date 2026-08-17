@@ -1,5 +1,5 @@
 import { DepartmentLayout } from "@repo/ui/DepartmentLayout";
-import { DEPARTMENTS, getDepartmentTabs } from "~/lib/departments";
+import { DEPARTMENTS, getDepartmentTabs } from "@repo/departments/data-access";
 import { notFound } from "next/navigation";
 import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";

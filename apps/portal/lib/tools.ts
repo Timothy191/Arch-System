@@ -1,5 +1,5 @@
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { PRODUCTIVITY_TOOLS } from "~/lib/departments";
+import { PRODUCTIVITY_TOOLS } from "@repo/departments/data-access";
 
 interface Tool {
   id: string;

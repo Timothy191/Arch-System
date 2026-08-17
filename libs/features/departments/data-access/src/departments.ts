@@ -6,6 +6,8 @@ export interface QuickAction {
 export interface Department {
   name: string;
   displayName: string;
+  /** Root URL path segment for this department (e.g. `/drilling`) */
+  route: string;
   icon: string;
   description: string;
   color: string;
@@ -24,6 +26,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "drilling",
     displayName: "Drilling",
+    route: "/drilling",
     icon: "Drill",
     description: "Drill rig operations & bit depth telemetry",
     color: "blue",
@@ -40,6 +43,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "production",
     displayName: "Production",
+    route: "/production",
     icon: "Factory",
     description: "Coal yield, tonnage & extraction tracking",
     color: "emerald",
@@ -56,6 +60,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "access-control",
     displayName: "Access Control",
+    route: "/access-control",
     icon: "ShieldCheck",
     description: "Site access, badging & security",
     color: "blue",
@@ -72,6 +77,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "access-card-actions",
     displayName: "Access Card Actions",
+    route: "/access-card-actions",
     icon: "CreditCard",
     description: "Manage printed badges, print cards & QR generation",
     color: "blue",
@@ -88,6 +94,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "engineering",
     displayName: "Engineering",
+    route: "/engineering",
     icon: "Wrench",
     description: "Equipment specs, maintenance & CAD",
     color: "violet",
@@ -104,6 +111,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "control-room",
     displayName: "Control Room",
+    route: "/control-room",
     icon: "Monitor",
     description: "SCADA systems & real-time monitoring",
     color: "red",
@@ -120,6 +128,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "safety",
     displayName: "Safety",
+    route: "/safety",
     icon: "HardHat",
     description: "Incident logs, compliance & inspections",
     color: "blue",
@@ -136,6 +145,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "training",
     displayName: "Training",
+    route: "/training",
     icon: "GraduationCap",
     description: "LMS, certifications & competency tracking",
     color: "cyan",
@@ -152,6 +162,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "satellite-monitoring",
     displayName: "Satellite Monitoring",
+    route: "/satellite-monitoring",
     icon: "Satellite",
     description: "SAR/InSAR, hyperspectral & high-resolution imagery",
     color: "indigo",
@@ -168,6 +179,7 @@ export const DEPARTMENTS: Department[] = [
   {
     name: "admin",
     displayName: "Admin",
+    route: "/admin",
     icon: "ShieldCheck",
     description: "Personnel management, shift oversight & quotas",
     color: "violet",
@@ -335,3 +347,24 @@ export function getDepartmentTabs(departmentName: string) {
   }
   return DEPARTMENT_TABS;
 }
+
+/**
+ * Resolve the root route for a department by name or throw if unknown.
+ */
+export function getDepartmentRoute(departmentName: string): string {
+  const dept = DEPARTMENTS.find((d) => d.name === departmentName);
+  if (!dept) throw new Error(`Unknown department: ${departmentName}`);
+  return dept.route;
+}
+
+/**
+ * Build a department sub-route path. e.g. getDepartmentSubRoute("drilling", "machines") -> "/drilling/machines"
+ */
+export function getDepartmentSubRoute(departmentName: string, tab: string): string {
+  return `${getDepartmentRoute(departmentName)}/${tab}`;
+}
+
+/**
+ * Type-safe list of all valid department slugs for route validation.
+ */
+export const DEPARTMENT_SLUGS = DEPARTMENTS.map((d) => d.name) as readonly string[];

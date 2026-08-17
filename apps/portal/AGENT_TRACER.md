@@ -1,5 +1,16 @@
 # Portal Agent Tracer
 
+## 2026-08-17 - Department navigation: Routes, Link semantics, Transition UI, History, E2E
+
+- **Purpose**: Fix 5 department navigation areas: explicit route mappings, proper client-side `<Link>` routing, transition UI feedback, Zustand department history tracking, and E2E navigation test suite.
+- **Changes**:
+  1. `lib/departments.ts`: added `route: "/<name>"` to each department, `getDepartmentRoute()`, `getDepartmentSubRoute()`, `DEPARTMENT_SLUGS`.
+  2. `features/hub/components/DepartmentCard.tsx`: transformed card into an accessible stretched `<Link>` with `prefetch={true}`, `useTransition` loading spinner overlay, and `z-20` action pill isolation.
+  3. `hooks/useNavigationState.ts`: added `previousDepartment` and bounded `departmentHistory` (max 20) with unit tests in `hooks/useNavigationState.test.ts`.
+  4. `tsconfig.json`: added path mappings for `@repo/departments/ui`, `@repo/departments/data-access`, `@repo/hub/ui` and friends.
+  5. `e2e/department-navigation.spec.ts`: comprehensive E2E test suite covering card navigation, sub-route pills, tab switches, back/forward history, and keyboard link activation.
+- **Result**: `pnpm quality` green (all 9 gates pass), 91 Jest suites / 710 tests passing with coverage.
+
 ## 2026-08-17 - In-flight work committed; quality gate green end-to-end
 
 - **Purpose**: Land the uncommitted portal work in logical commits and make `pnpm quality` exit 0.

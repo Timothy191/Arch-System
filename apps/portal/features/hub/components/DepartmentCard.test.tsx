@@ -1,12 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DepartmentCard } from "./DepartmentCard";
-import { useRouter } from "next/navigation";
-import type { Department } from "~/lib/departments";
-
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
+import type { Department } from "@repo/departments/data-access";
 
 // Mock Sparkline to avoid rendering complexity
 jest.mock("./Sparkline", () => ({
@@ -16,6 +11,7 @@ jest.mock("./Sparkline", () => ({
 const mockDepartment: Department = {
   name: "drilling",
   displayName: "Drilling Operations",
+  route: "/drilling",
   description: "Core drilling operations telemetry and systems control.",
   icon: "Drill",
   color: "emerald",
@@ -34,14 +30,9 @@ const mockDepartment: Department = {
 };
 
 describe("DepartmentCard", () => {
-  let mockPush: jest.Mock;
-
   beforeEach(() => {
+    localStorage.clear();
     jest.clearAllMocks();
-    mockPush = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: mockPush,
-    });
   });
 
   it("renders department information correctly", () => {
@@ -54,39 +45,46 @@ describe("DepartmentCard", () => {
     expect(screen.getByText("Daily Logs")).toBeInTheDocument();
   });
 
-  it("triggers router push on click", () => {
+  it("renders a semantic Link targeting the department route", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
-    expect(card).toBeInTheDocument();
-    if (card) {
-      fireEvent.click(card);
-    }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+    const link = screen.getByTestId("dept-link-drilling");
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/drilling");
+    expect(link).toHaveAttribute("aria-label", "Open Drilling Operations department");
   });
 
-  it("triggers router push on Enter keydown", () => {
-    render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
-    expect(card).toBeInTheDocument();
-    if (card) {
-      fireEvent.keyDown(card, { key: "Enter" });
-    }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+  it("falls back to /<name> if route is missing", () => {
+    const deptWithoutRoute = { ...mockDepartment, route: undefined as unknown as string };
+    render(<DepartmentCard department={deptWithoutRoute} index={0} />);
+    const link = screen.getByTestId("dept-link-drilling");
+    expect(link).toHaveAttribute("href", "/drilling");
   });
 
-  it("triggers router push on Space keydown", () => {
+  it("renders quick-action links with correct hrefs", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
-    expect(card).toBeInTheDocument();
-    if (card) {
-      fireEvent.keyDown(card, { key: " " });
-    }
-    expect(mockPush).toHaveBeenCalledWith("/drilling");
+    const dailyLogAction = screen.getByTestId("dept-action-daily-logs");
+    expect(dailyLogAction).toBeInTheDocument();
+    expect(dailyLogAction).toHaveAttribute("href", "/drilling/daily-log");
+
+    const telemetryAction = screen.getByTestId("dept-action-telemetry");
+    expect(telemetryAction).toBeInTheDocument();
+    expect(telemetryAction).toHaveAttribute("href", "/drilling/machine-telemetry");
   });
 
-  it("applies tabIndex=0 to the outer interactive wrapper", () => {
+  it("toggles pin status in localStorage on pin click", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
-    const card = screen.getByText("Drilling Operations").closest(".interactive-element");
-    expect(card).toHaveAttribute("tabIndex", "0");
+    const pinBtn = screen.getByTitle("Pin department");
+    expect(pinBtn).toBeInTheDocument();
+
+    fireEvent.click(pinBtn);
+    expect(localStorage.getItem("pinned_dept_drilling")).toBe("true");
+
+    fireEvent.click(pinBtn);
+    expect(localStorage.getItem("pinned_dept_drilling")).toBe("false");
+  });
+
+  it("renders outer card with test id", () => {
+    render(<DepartmentCard department={mockDepartment} index={0} />);
+    expect(screen.getByTestId("dept-card-drilling")).toBeInTheDocument();
   });
 });

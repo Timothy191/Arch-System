@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { cacheGet, cacheSet } from "@repo/redis/cache";
-import { DEPARTMENTS } from "./departments";
+import { DEPARTMENTS } from "@repo/departments/data-access";
 import { notFound } from "next/navigation";
 import { getOperationalToday } from "@repo/utils";
 

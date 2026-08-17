@@ -7,6 +7,8 @@ describe("useNavigationState", () => {
       activeSection: "function",
       hoveredElement: null,
       activeDepartment: null,
+      previousDepartment: null,
+      departmentHistory: [],
     });
   });
 
@@ -16,6 +18,8 @@ describe("useNavigationState", () => {
       activeSection: "function",
       hoveredElement: null,
       activeDepartment: null,
+      previousDepartment: null,
+      departmentHistory: [],
     });
   });
 
@@ -38,8 +42,36 @@ describe("useNavigationState", () => {
     expect(useNavigationState.getState().hoveredElement).toBeNull();
   });
 
-  it("setActiveDepartment stores the department", () => {
+  it("setActiveDepartment stores the department, previousDepartment, and updates history", () => {
     useNavigationState.getState().setActiveDepartment("control-room");
     expect(useNavigationState.getState().activeDepartment).toBe("control-room");
+    expect(useNavigationState.getState().previousDepartment).toBeNull();
+    expect(useNavigationState.getState().departmentHistory).toEqual(["control-room"]);
+
+    // Transition to another department
+    useNavigationState.getState().setActiveDepartment("drilling");
+    expect(useNavigationState.getState().activeDepartment).toBe("drilling");
+    expect(useNavigationState.getState().previousDepartment).toBe("control-room");
+    expect(useNavigationState.getState().departmentHistory).toEqual(["control-room", "drilling"]);
+
+    // Setting same department does not duplicate history
+    useNavigationState.getState().setActiveDepartment("drilling");
+    expect(useNavigationState.getState().departmentHistory).toEqual(["control-room", "drilling"]);
+
+    // Clearing active department updates active but retains previous and history
+    useNavigationState.getState().setActiveDepartment(null);
+    expect(useNavigationState.getState().activeDepartment).toBeNull();
+    expect(useNavigationState.getState().previousDepartment).toBe("drilling");
+    expect(useNavigationState.getState().departmentHistory).toEqual(["control-room", "drilling"]);
+  });
+
+  it("caps departmentHistory at 20 items", () => {
+    for (let i = 0; i < 25; i++) {
+      useNavigationState.getState().setActiveDepartment(`dept-${i}`);
+    }
+    const history = useNavigationState.getState().departmentHistory;
+    expect(history.length).toBe(20);
+    expect(history[0]).toBe("dept-5");
+    expect(history[19]).toBe("dept-24");
   });
 });

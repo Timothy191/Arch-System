@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, type ComponentType } from "react";
+import { useState, useEffect, useTransition, type ComponentType } from "react";
 import {
   ArrowUpRight,
   Bookmark,
@@ -11,6 +10,7 @@ import {
   FileText,
   HardHat,
   GraduationCap,
+  Loader2,
   Monitor,
   Pickaxe,
   Satellite,
@@ -75,7 +75,7 @@ interface DepartmentCardProps {
 }
 
 export function DepartmentCard({ department, index }: DepartmentCardProps) {
-  const router = useRouter();
+  const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
 
   useEffect(() => {
@@ -85,6 +85,7 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
 
   const togglePin = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     const nextState = !isPinned;
     localStorage.setItem(`pinned_dept_${department.name}`, String(nextState));
     setIsPinned(nextState);
@@ -101,6 +102,8 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
     text: "text-arch-text-primary",
   };
 
+  const route = department.route || `/${department.name}`;
+
   return (
     <div
       style={
@@ -112,24 +115,49 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
       className={cn("h-full", department.gridSpan)}
     >
       <div
-        onClick={() => router.push(`/${department.name}`)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            router.push(`/${department.name}`);
-          }
-        }}
-        tabIndex={0}
-        className="uiverse-card group outline-none h-full interactive-element"
+        className="uiverse-card group outline-none h-full interactive-element relative"
+        data-testid={`dept-card-${department.name}`}
       >
+        {/* Navigation Loading Overlay */}
+        {isNavigating && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-arch-surface-primary/75 backdrop-blur-sm rounded-[24px] z-30 transition-all animate-fade-in"
+            data-testid={`dept-loading-${department.name}`}
+            aria-live="polite"
+          >
+            <Loader2 className="w-6 h-6 animate-spin text-arch-accent-blue" />
+            <span className="text-xs font-medium text-arch-text-secondary">Loading...</span>
+          </div>
+        )}
+
+        {/* Stretched client-side Link covering the entire card */}
+        <Link
+          href={route}
+          prefetch={true}
+          onClick={() => {
+            startTransition(() => {});
+          }}
+          className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[24px]"
+          aria-label={`Open ${department.displayName} department`}
+          data-testid={`dept-link-${department.name}`}
+        />
+
         {/* Banner area */}
-        <div className={cn("uiverse-card-banner", `uiverse-card-banner-${department.name}`)}>
+        <div
+          className={cn(
+            "uiverse-card-banner relative z-10 pointer-events-none",
+            `uiverse-card-banner-${department.name}`,
+          )}
+        >
           {/* Save/Pin Button */}
           <button
             type="button"
             onClick={togglePin}
-            className="uiverse-card-pin hover:scale-110 active:scale-95"
+            className="uiverse-card-pin hover:scale-110 active:scale-95 pointer-events-auto relative z-20"
             title={isPinned ? "Unpin department" : "Pin department"}
+            aria-label={
+              isPinned ? `Unpin ${department.displayName}` : `Pin ${department.displayName}`
+            }
           >
             <Bookmark
               className={cn(
@@ -148,7 +176,7 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
         </div>
 
         {/* Card Body */}
-        <div className="uiverse-card-body">
+        <div className="uiverse-card-body relative z-10 pointer-events-none">
           <div className="space-y-2">
             <div className="uiverse-card-title-row">
               <h3 className="uiverse-card-title">{department.displayName}</h3>
@@ -171,13 +199,14 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
             <p className="uiverse-card-subtitle">{department.description}</p>
 
             {department.actions && department.actions.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1.5">
+              <div className="flex flex-wrap items-center gap-2 pt-1.5 pointer-events-auto">
                 {department.actions.map((action) => (
                   <Link
                     key={action.label}
                     href={action.href}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 h-5.5 rounded-full glass-action-button text-[10px] font-medium transition-all interactive-element"
+                    className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 h-5.5 rounded-full glass-action-button text-[10px] font-medium transition-all interactive-element relative z-20"
+                    data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <FileText className="w-2.5 h-2.5 shrink-0" />
                     <span>{action.label}</span>

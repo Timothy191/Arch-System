@@ -1,5 +1,17 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Department navigation fixes (Routes, Link semantics, Transition UI, History, E2E)
+
+- **Purpose**: Fix department navigation across the portal: define explicit routes & typed helpers, replace `onClick`+`router.push` in `DepartmentCard` with accessible semantic `<Link>` + stretched-link pattern, provide `useTransition` loading feedback, track `previousDepartment` and bounded `departmentHistory` in Zustand, and add full E2E & unit test coverage.
+- **Changes Made**:
+  1. `apps/portal/lib/departments.ts` & `libs/features/departments/data-access/src/departments.ts`: added `route: "/<name>"` to all 10 departments, plus typed helper functions `getDepartmentRoute()`, `getDepartmentSubRoute()`, and `DEPARTMENT_SLUGS`.
+  2. `apps/portal/features/hub/components/DepartmentCard.tsx` & `libs/features/hub/ui/src/DepartmentCard.tsx`: updated to use `<Link>` with `prefetch={true}`, `useTransition` loading spinner overlay, and accessible stretched-link layout with `z-20` action pill isolation.
+  3. `apps/portal/hooks/useNavigationState.ts`: added `previousDepartment` and `departmentHistory` (max 20 items) to Zustand navigation store.
+  4. `apps/portal/hooks/useNavigationState.test.ts` & `apps/portal/lib/departments.test.ts`: added 100% coverage unit tests for new store state and route helpers.
+  5. `apps/portal/features/hub/components/DepartmentCard.test.tsx` & `libs/features/hub/ui/src/DepartmentCard.test.tsx`: updated unit tests for semantic Link routing and pin toggling.
+  6. `e2e/department-navigation.spec.ts`: added E2E suite covering Hub card clicks, sub-route pills, back/forward history navigation, keyboard activation, and tab navigation.
+- **Verification**: `pnpm quality` exits 0 (all 9 gates green), 91 Jest test suites / 710 tests passing with coverage.
+
 ## 2026-08-17: In-flight work triaged into 10 logical commits; branch clean
 
 - **Purpose**: Get the branch to a clean, committed state and make `pnpm quality` green end-to-end.
