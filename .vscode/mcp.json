@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "slim-tools": {
+      "type": "http",
+      "url": "https://slim.tools/mcp"
+    }
+  }
+}

@@ -1,5 +1,14 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Register slim-tools MCP (<https://slim.tools/mcp>)
+
+- **Purpose**: Register the remote `slim-tools` MCP server (`https://slim.tools/mcp`, HTTP/streamable transport) across the client registries that were missing it.
+- **Changes**:
+  1. `~/.cline/data/settings/cline_mcp_settings.json` — added `slim-tools` (`type: http`, `url`) to Cline's `mcpServers`.
+  2. `.vscode/mcp.json` — created VS Code workspace MCP config with the user-specified `{ "servers": { "slim-tools": { "type": "http", "url": "https://slim.tools/mcp" } } }` schema.
+  - Already present (no change needed): `opencode.json` (`type: remote`) and `config/tools/mcp.json` (`type: http`).
+- **Verification**: Both edited files re-parsed as valid JSON via `python3 -m json.tool`. No restart of the running Cline session is required for tool registration to take effect; VS Code may need the `mcp.json` workspace file to be (re)loaded.
+
 ## 2026-08-17: Add & verify KnowledgeRail MCP (io.github.Deviank88/knowledge-rail v2.0.3)
 
 - **Purpose**: Test and register `knowledge-rail` v2.0.3 — persistent, evidence-backed project knowledge + task context for coding agents — across every MCP client registry on this system.
