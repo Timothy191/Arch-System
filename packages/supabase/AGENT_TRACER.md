@@ -1,5 +1,12 @@
 # Agent Tracer - @repo/supabase
 
+## 2026-08-17 - Fix seed.sql Machine Lookup for Fleet Migration Compatibility
+
+- **Purpose**: Prevent `null value in column "machine_id" of relation "hourly_loads"` error during `supabase start` / `seed.sql` execution following fleet table migration 051.
+- **Changes**:
+  - `seed.sql`: Updated machine lookup to query active fleet dump trucks (`DT12`/`DT13`) instead of legacy deleted machine names (`GEN-A`/`GEN-B`), with explicit null-guards on all relation inserts.
+  - Registered canonical user launcher for Supabase CLI in `~/.local/bin/supabase` (v2.106.0).
+
 ## 2026-08-17 - Synchronize Database Types from Remote Supabase (mrwhtxbhrzyttlsyuofc)
 
 - **Purpose**: Synchronize `src/database.types.ts` directly from the active remote Supabase project `mrwhtxbhrzyttlsyuofc`.

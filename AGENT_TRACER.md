@@ -1,5 +1,14 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Fix seed.sql fleet machine constraints & register ~/.local/bin/supabase
+
+- **Purpose**: Prevent NOT NULL constraint violation on `hourly_loads.machine_id` during `supabase start` seed execution; establish canonical XDG launcher for Supabase CLI.
+- **Changes**:
+  1. `packages/supabase/seed.sql`: resilient machine lookup targeting active fleet units (`DT12`/`DT13`) with null-guards.
+  2. `~/.local/bin/supabase`: created standalone CLI launcher executable (`755`) mapped to workspace Supabase binary.
+  3. `apps/portal/.env`: added Langfuse observability configuration keys.
+- **Verification**: Verified `supabase --version` returns `2.106.0` from `~/.local/bin/supabase`.
+
 ## 2026-08-17: Normalize CloseShiftModal import paths & ensure certs directory resolution
 
 - **Purpose**: Resolve potential "No such file/directory" errors and normalize import resolution across workspace libraries.
