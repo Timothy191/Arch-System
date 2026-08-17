@@ -1,5 +1,11 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Inspect formatting drift in generated codegen outputs
+
+- **Purpose**: Resolve working-tree drift in 4 committed generated files (`openapi.generated.json`, `tokens-hsl.json`, `generated-sd.ts`, `variables-generated.css`).
+- **Verification**: Drift confirmed **100% formatting-only** — deep normalization proved semantic identity (JSON deep-equal, TS module object deep-equal, CSS whitespace-stripped equal). No API, token, or semantic changes.
+- **Resolution**: Reverted the working-tree drift to keep the repository pristine. HEAD is the committed canonical state and passes `pnpm format:check` / codegen lint gates (verified green in the quality run).
+
 ## 2026-08-17: Register slim-tools MCP (<https://slim.tools/mcp>)
 
 - **Purpose**: Register the remote `slim-tools` MCP server (`https://slim.tools/mcp`, HTTP/streamable transport) across the client registries that were missing it.
