@@ -5,7 +5,7 @@
 ## Contract (non‑negotiable)
 
 - Read affected package `AGENT_TRACER.md` before editing; update it after every change.
-- Conclude every turn/response with: Summary of Actions Taken, Token Metrics (Tokens Used, Tokens Cached, Tokens Saved), and Suggested Next Steps (3 options).
+- Conclude every turn/response with: Summary of Actions Taken, Token Metrics (Tokens Used, Tokens Cached, Tokens Reused from cached, Tokens Saved), and Suggested Next Steps (3 options).
 - Apply token-saving strategies: bounded file slicing (`StartLine`/`EndLine`), `grep_search` symbol lookup, and surgical contiguous diffs.
 - Run `pnpm quality` before marking work complete.
 - Delegate multi-file exploration to subagents; scope prompts with paths.

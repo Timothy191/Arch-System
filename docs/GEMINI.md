@@ -58,6 +58,7 @@ All AI agents MUST conclude every response with the following standardized secti
 2. **Token Efficiency & Usage**:
    - **Tokens Used**: Approximate/tracked tokens used in the turn.
    - **Tokens Cached**: Tokens read from cache / prefix context.
+   - **Tokens Reused from cached**: Tokens reused across prompt turns via system prompt prefix caching.
    - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
 3. **Suggested Next Steps (3 options)**:
    - **Option 1**: Immediate operational or functional next step.
@@ -80,6 +81,8 @@ All AI agents MUST enforce maximum token efficiency across all operations withou
    - Delegate wide multi-file research tasks and exploratory grep loops to scoped subagents so the primary agent's context remains clean and cache-dense.
 6. **Zero Fluff & Prefix Cache Preservation**:
    - Eliminate conversational fluff, repetitive self-narration, and unnecessary code echo. Maintain deterministic context structures to maximize prefix cache hit ratios.
+7. **Cache Reuse Optimization**:
+   - Prefer reusing established prompt prefixes and context blocks over re-ingesting duplicate file states across turns to ensure maximum token reuse from cache.
 
 ---
 
