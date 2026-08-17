@@ -2558,3 +2558,24 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+---
+
+## 2026-06-25: Optimize `useSystemMetrics` Hook State Updates
+
+### Purpose
+
+Optimize state updates in `useSystemMetrics` to preserve referential stability and prevent redundant state updates on unchanged values, reducing unnecessary re-renders in consumer components (`LiveMetricsTicker`, `ViewportBoundaries`, etc.).
+
+### Changes Made
+
+1. **`apps/portal/hooks/useSystemMetrics.ts`**:
+   - Preserved `currentShift` object reference if values (`shift`, `start`, `end`, `label`) haven't changed across ticks.
+   - Bailed out of `setMetrics` state updates if both `serverTimeSAST` and `currentShift` remain unchanged.
+   - Bailed out of `websocketLatency` updates if the newly calculated latency matches the previous value.
+   - Added explanatory comments detailing the performance optimization logic.
+
+### Verification
+
+- `pnpm --filter portal test -- useSystemMetrics.test.ts LiveMetricsTicker.test.tsx ViewportBoundaries.test.tsx`: PASS (3 test suites passed, 8 tests passed)
+- `pnpm --filter portal type-check`: PASS

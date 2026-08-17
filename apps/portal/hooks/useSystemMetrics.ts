@@ -61,13 +61,29 @@ export function useSystemMetrics(): SystemMetrics {
         minute: "2-digit",
         second: "2-digit",
       });
-      const currentShift = getThreeShift(now);
+      const newShift = getThreeShift(now);
 
-      setMetrics((prev) => ({
-        ...prev,
-        serverTimeSAST,
-        currentShift,
-      }));
+      setMetrics((prev) => {
+        // Performance optimization: preserve currentShift object reference if values haven't changed
+        // to prevent allocating new objects every second and maintain referential stability for consumers.
+        const currentShift =
+          prev.currentShift.shift === newShift.shift &&
+          prev.currentShift.start === newShift.start &&
+          prev.currentShift.end === newShift.end &&
+          prev.currentShift.label === newShift.label
+            ? prev.currentShift
+            : newShift;
+
+        if (prev.serverTimeSAST === serverTimeSAST && prev.currentShift === currentShift) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          serverTimeSAST,
+          currentShift,
+        };
+      });
     }, 1000);
 
     // Simulate websocket latency update every 3 seconds
@@ -77,10 +93,16 @@ export function useSystemMetrics(): SystemMetrics {
       const spike = Math.random() > 0.95 ? Math.floor(Math.random() * 45) : 0; // 5% chance of spike
       const newLatency = base + jitter + spike;
 
-      setMetrics((prev) => ({
-        ...prev,
-        websocketLatency: newLatency,
-      }));
+      setMetrics((prev) => {
+        // Performance optimization: skip state update if latency value hasn't changed.
+        if (prev.websocketLatency === newLatency) {
+          return prev;
+        }
+        return {
+          ...prev,
+          websocketLatency: newLatency,
+        };
+      });
     };
 
     updateLatency();
