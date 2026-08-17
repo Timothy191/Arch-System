@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createMiddlewareClient } from "@repo/supabase/middleware";
 import { cacheGet, cacheSet, cacheEvictL1ByPrefix } from "@repo/redis/cache";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
 /**
  * Server-side redirect validation with canonicalization and allowlist
@@ -75,11 +75,11 @@ const DEPARTMENT_ROUTES = [
 ];
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
-  "access-control": ["access_control", "admin"],
-  "control-room": ["control_room_operator", "admin"],
+  "access-control": ["access_control", "admin", "supervisor", "operator"],
+  "control-room": ["control_room_operator", "admin", "supervisor", "operator"],
   tools: ["admin", "supervisor"],
   admin: ["admin"],
-  "access-card-actions": ["access_control", "admin"],
+  "access-card-actions": ["access_control", "admin", "supervisor", "operator"],
 };
 
 export function normalizeRole(role: unknown): string {

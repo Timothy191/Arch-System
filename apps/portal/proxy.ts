@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { proxy, config as proxyConfig } from "./server/proxy";
+import { proxy as handleProxy } from "./server/proxy";
 
 /**
  * Next.js edge middleware — delegates to server/proxy.ts for:
@@ -8,8 +8,13 @@ import { proxy, config as proxyConfig } from "./server/proxy";
  * - Redis-cached department slug → UUID resolution
  * - API exemptions (/api/c66, /api/health, /api/metrics)
  */
-export async function middleware(request: NextRequest) {
-  return proxy(request);
+export async function proxy(request: NextRequest) {
+  return handleProxy(request);
 }
 
-export const config = proxyConfig;
+export default proxy;
+
+export const config = {
+  // Exclude static assets and API routes from middleware.
+  matcher: ["/((?!_next/static|_next/image|api/|favicon.ico).*)"],
+};
