@@ -5,6 +5,7 @@ import { GlassCard } from "@repo/ui/GlassCard";
 import { useAutoSave } from "@repo/ui/hooks/useAutoSave";
 import { Checkbox } from "@repo/ui/Checkbox";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { getCurrentShift } from "@repo/utils";
 import { useRouter } from "next/navigation";
 import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { speculativeEmbedShiftLog } from "@/app/actions";
@@ -56,11 +57,6 @@ function matchMachineId(machines: Machine[], machineName: string | null): string
       needle.includes(m.name.toLowerCase()),
   );
   return match?.id ?? "";
-}
-
-function getCurrentShift(): "day" | "night" {
-  const hour = new Date().getHours();
-  return hour >= 6 && hour < 18 ? "day" : "night";
 }
 
 export function EngineeringNotesForm({

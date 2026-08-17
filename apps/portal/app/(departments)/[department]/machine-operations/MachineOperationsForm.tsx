@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { getCurrentShift } from "@repo/utils";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { DelayEntriesForm } from "./DelayEntriesForm";
@@ -58,12 +59,6 @@ export function MachineOperationsForm({
 }: MachineOperationsFormProps) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
-
-  // Determine current shift based on time
-  const getCurrentShift = (): "day" | "night" => {
-    const hour = new Date().getHours();
-    return hour >= 6 && hour < 18 ? "day" : "night";
-  };
 
   // Get default start time (now, rounded to nearest 15 min)
   const getDefaultStartTime = () => {

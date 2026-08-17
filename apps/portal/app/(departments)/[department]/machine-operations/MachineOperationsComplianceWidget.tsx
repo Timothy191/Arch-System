@@ -3,17 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { getCurrentShift } from "@repo/utils";
 import { CheckCircle2, XCircle, ShieldOff, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import type { ShiftCompleteness, MachineCoverageStatus } from "@/lib/shift-completeness";
 
 interface Props {
   departmentId: string;
   departmentSlug: string;
-}
-
-function getCurrentShift(): "day" | "night" {
-  const h = new Date().getHours();
-  return h >= 6 && h < 18 ? "day" : "night";
 }
 
 function todayDate(): string {
