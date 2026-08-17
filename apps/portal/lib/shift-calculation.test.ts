@@ -1,4 +1,4 @@
-import { getThreeShift } from "@repo/utils";
+import { formatDate, getCurrentShift, getOperationalToday, getThreeShift } from "@repo/utils";
 
 describe("getThreeShift utility", () => {
   it("should classify Shift A (06:00 - 14:00) correctly", () => {
@@ -48,5 +48,51 @@ describe("getThreeShift utility", () => {
     const date = new Date("2026-06-02T08:00:00Z");
     const result = getThreeShift(date, "UTC");
     expect(result.shift).toBe("A");
+  });
+});
+
+describe("formatDate utility", () => {
+  it("formats a YYYY-MM-DD string as the same calendar day in any local timezone", () => {
+    // Regression: new Date("2026-01-01") is UTC midnight, which rendered the
+    // previous day in local timezones west of UTC. Local-midnight parsing keeps
+    // the date stable regardless of host timezone.
+    expect(formatDate("2026-01-01")).toContain("January");
+    expect(formatDate("2026-01-01")).toContain("1");
+    expect(formatDate("2026-12-31")).toContain("December");
+    expect(formatDate("2026-12-31")).toContain("31");
+  });
+
+  it("formats the same date in a given IANA timezone", () => {
+    expect(formatDate("2026-01-01", "Africa/Johannesburg")).toContain("January");
+    expect(formatDate("2026-06-15", "America/New_York")).toContain("June");
+  });
+});
+
+describe("getCurrentShift utility", () => {
+  it("classifies day shift (06:00-18:00 SAST)", () => {
+    // 08:00 SAST = 06:00 UTC
+    expect(getCurrentShift(new Date("2026-06-02T06:00:00Z"))).toBe("day");
+  });
+
+  it("classifies night shift outside day hours", () => {
+    // 02:00 SAST = 00:00 UTC
+    expect(getCurrentShift(new Date("2026-06-02T00:00:00Z"))).toBe("night");
+    // 20:00 SAST = 18:00 UTC
+    expect(getCurrentShift(new Date("2026-06-02T18:00:00Z"))).toBe("night");
+  });
+
+  it("honors a custom timezone", () => {
+    // 17:00 UTC is day (17 < 18) in UTC but 19:00 SAST = night
+    const date = new Date("2026-06-02T17:00:00Z");
+    expect(getCurrentShift(date, "UTC")).toBe("day");
+    expect(getCurrentShift(date, "Africa/Johannesburg")).toBe("night");
+  });
+});
+
+describe("getOperationalToday utility", () => {
+  it("returns YYYY-MM-DD for the given timezone", () => {
+    // 2026-06-02 22:00 UTC is 2026-06-03 00:00 SAST
+    const today = getOperationalToday("UTC");
+    expect(today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

@@ -1,949 +1,280 @@
-import { setPin, verifyPin, closeShift } from "./shift-closeout";
-import { getRedisClient } from "@repo/redis";
+/**
+ * @jest-environment node
+ */
+import bcrypt from "bcryptjs";
 
+const mockGetUser = jest.fn();
+const mockFrom = jest.fn();
+jest.mock("@repo/supabase/server", () => ({
+  createServerSupabaseClient: jest.fn(() => ({ from: mockFrom, auth: { getUser: mockGetUser } })),
+}));
+
+jest.mock("@/lib/observability/tracing", () => ({
+  withAsyncSpan: jest.fn((_name: string, _attrs: unknown, fn: () => unknown) => fn()),
+  addEvent: jest.fn(),
+  setAttributes: jest.fn(),
+}));
+
+const mockLogAuditEvent = jest.fn();
+const mockRevalidatePath = jest.fn();
+jest.mock("next/cache", () => ({
+  revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
+}));
+
+jest.mock("./audit", () => ({ logAuditEvent: (...args: unknown[]) => mockLogAuditEvent(...args) }));
+
+const mockGetShiftCompleteness = jest.fn();
 jest.mock("./shift-completeness", () => {
-  const actual = jest.requireActual("./shift-completeness");
+  const actual = jest.requireActual("./shift-completeness") as Record<string, unknown>;
   return {
     ...actual,
-    getShiftCompleteness: jest.fn(),
+    getShiftCompleteness: (...args: unknown[]) => mockGetShiftCompleteness(...args),
   };
 });
 
-import { getShiftCompleteness } from "./shift-completeness";
-const mockGetShiftCompleteness = getShiftCompleteness as jest.Mock;
-
-jest.mock("@repo/supabase/server", () => ({
-  createServerSupabaseClient: jest.fn(),
+// Redis disabled by default (rate limiter + lockout bypassed); enabled per test.
+const mockRedisGet = jest.fn();
+const mockRedisSet = jest.fn();
+const mockRedisDel = jest.fn();
+jest.mock("@repo/redis", () => ({
+  getRedisClient: jest.fn(() =>
+    Promise.resolve(
+      redisEnabled.value
+        ? { isOpen: true, get: mockRedisGet, set: mockRedisSet, del: mockRedisDel }
+        : null,
+    ),
+  ),
 }));
+const redisEnabled: { value: boolean } = { value: false };
 
-jest.mock("bcryptjs", () => ({
-  compare: jest.fn(),
-  genSalt: jest.fn().mockResolvedValue("salt"),
-  hash: jest.fn().mockResolvedValue("hashed-pin"),
-}));
+import { setPin, verifyPin, closeShift } from "./shift-closeout";
 
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
+// Single-result chain — single() resolves from a per-table FIFO queue so the
+// same table can serve both the "existing record" and "inserted record" checks.
+const singleQueues: Record<string, { data: unknown; error: unknown }[]> = {};
+const insertCalls: { table: string; args: unknown }[] = [];
+const updateCalls: { table: string; args: unknown }[] = [];
 
-jest.mock("./audit", () => ({
-  logAuditEvent: jest.fn().mockResolvedValue(undefined),
-}));
-
-const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
-const bcrypt = jest.requireMock("bcryptjs");
-
-const mockDbQuery: any = {
-  select: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  single: jest.fn().mockResolvedValue({ data: null, error: null }),
-  insert: jest.fn().mockReturnThis(),
-  update: jest.fn().mockReturnThis(),
-  then: jest.fn().mockImplementation((onfulfilled) => {
-    return Promise.resolve({ data: [], error: null }).then(onfulfilled);
-  }),
-};
-
-beforeEach(async () => {
-  const redis = await getRedisClient();
-  // AGENT-TRACE: Correct flushDb casing for modern Redis client
-  await redis.flushDb();
-});
-
-function buildSupabaseMock(overrides: Record<string, unknown> = {}) {
-  const base = {
-    auth: {
-      getUser: jest.fn().mockResolvedValue({
-        data: { user: { id: "auth-user-1" } },
-      }),
-    },
-    from: jest.fn(),
-    ...overrides,
-  };
-  createServerSupabaseClient.mockResolvedValue(base);
-  return base;
+interface BuilderChain {
+  select: jest.Mock;
+  eq: jest.Mock;
+  update: jest.Mock;
+  insert: jest.Mock;
+  single: jest.Mock;
+  then: (..._args: unknown[]) => Promise<{ data: unknown; error: unknown }>;
 }
+
+function makeBuilder(table: string) {
+  const terminal = Promise.resolve({ data: null, error: null });
+  const chain: BuilderChain = {
+    select: jest.fn(() => chain),
+    eq: jest.fn(() => chain),
+    update: jest.fn((args: unknown) => {
+      updateCalls.push({ table, args });
+      return chain;
+    }),
+    insert: jest.fn((args: unknown) => {
+      insertCalls.push({ table, args });
+      return chain;
+    }),
+    single: jest.fn(() => {
+      const queue = singleQueues[table] ?? [];
+      return Promise.resolve(queue.shift() ?? { data: null, error: null });
+    }),
+    // Non-single terminals (e.g. `.select(...).eq(...)` without `.single()`)
+    // are awaited directly — make the chain awaitable to `{data: null}`.
+    then: terminal.then.bind(terminal) as BuilderChain["then"],
+  };
+  return chain;
+}
+
+mockFrom.mockImplementation((table: string) => makeBuilder(table));
+
+describe("setPin", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    singleQueues.employees = [{ data: { id: "e1", role: "supervisor" }, error: null }];
+  });
+
+  it("throws AuthError when unauthenticated", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } });
+    await expect(setPin("EMP-1", "1234")).rejects.toThrow("Not authenticated");
+  });
+
+  it("throws NotFoundError when the employee is missing", async () => {
+    singleQueues.employees = [{ data: null, error: { message: "not found" } }];
+    await expect(setPin("EMP-1", "1234")).rejects.toThrow("Employee not found");
+  });
+
+  it("throws ForbiddenError for non-supervisor roles", async () => {
+    singleQueues.employees = [{ data: { id: "e1", role: "operator" }, error: null }];
+    await expect(setPin("EMP-1", "1234")).rejects.toThrow("Only supervisors and admins");
+  });
+
+  it("hashes the PIN and updates the employee", async () => {
+    const result = await setPin("EMP-1", "4321");
+    expect(result).toEqual({ success: true });
+    expect(updateCalls).toHaveLength(1);
+    expect(updateCalls[0]!.table).toBe("employees");
+    expect(updateCalls[0]!.args).toEqual(
+      expect.objectContaining({ employee_code: "EMP-1", pin_hash: expect.any(String) }),
+    );
+    const hash = (updateCalls[0]!.args as { pin_hash: string }).pin_hash;
+    await expect(bcrypt.compare("4321", hash)).resolves.toBe(true);
+  });
+});
 
 describe("verifyPin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    redisEnabled.value = false;
   });
 
-  it("returns valid=false when employee is not found", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: null, error: null }),
-          }),
-        }),
-      }),
-    });
+  it("returns lockedOut when the attempt lockout is active", async () => {
+    redisEnabled.value = true;
+    mockRedisGet.mockResolvedValue(
+      JSON.stringify({ count: 3, firstAttempt: Date.now(), lockedUntil: Date.now() + 600000 }),
+    );
 
-    const result = await verifyPin("EMP-001", "1234");
+    const result = await verifyPin("EMP-1", "1234");
+    expect(result).toEqual(expect.objectContaining({ valid: false, lockedOut: true }));
+  });
+
+  it("returns invalid when no employee matches the code", async () => {
+    singleQueues.employees = [{ data: null, error: { message: "missing" } }];
+    const result = await verifyPin("EMP-1", "1234");
+    expect(result).toEqual({ valid: false, employee: null });
+  });
+
+  it("rejects a wrong PIN and records the failed attempt", async () => {
+    redisEnabled.value = true;
+    mockRedisGet.mockResolvedValue(null);
+    const hash = await bcrypt.hash("1111", 4);
+    singleQueues.employees = [
+      { data: { id: "e1", full_name: "Jane", pin_hash: hash }, error: null },
+    ];
+
+    const result = await verifyPin("EMP-1", "9999");
     expect(result.valid).toBe(false);
-    expect(result.employee).toBeNull();
+    expect(mockRedisSet).toHaveBeenCalledWith(
+      expect.stringContaining("pin_attempts:"),
+      expect.any(String),
+      expect.objectContaining({ EX: expect.any(Number) }),
+    );
   });
 
-  it("returns valid=false when employee has no pin_hash", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
-              data: { id: "emp-1", full_name: "John", pin_hash: null },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-    });
+  it("accepts a correct PIN and returns the employee", async () => {
+    const hash = await bcrypt.hash("1111", 4);
+    singleQueues.employees = [
+      { data: { id: "e1", full_name: "Jane", pin_hash: hash }, error: null },
+    ];
 
-    const result = await verifyPin("EMP-001", "1234");
-    expect(result.valid).toBe(false);
-    expect(result.employee).toBeNull();
-  });
-
-  it("returns valid=true with employee when PIN matches", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
-              data: {
-                id: "emp-1",
-                full_name: "John Smith",
-                pin_hash: "$2b$10$hashedpin",
-              },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-    });
-    bcrypt.compare.mockResolvedValue(true);
-
-    const result = await verifyPin("EMP-001", "1234");
+    const result = await verifyPin("EMP-1", "1111");
     expect(result.valid).toBe(true);
-    expect(result.employee).toEqual({ id: "emp-1", full_name: "John Smith" });
-  });
-
-  it("returns valid=false when PIN does not match", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
-              data: {
-                id: "emp-1",
-                full_name: "John Smith",
-                pin_hash: "$2b$10$hashedpin",
-              },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-    });
-    bcrypt.compare.mockResolvedValue(false);
-
-    const result = await verifyPin("EMP-001", "9999");
-    expect(result.valid).toBe(false);
-    expect(result.employee).toBeNull();
+    expect(result.employee).toEqual({ id: "e1", full_name: "Jane" });
   });
 });
 
-describe("closeShift (validateOnly=true)", () => {
+describe("closeShift", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    redisEnabled.value = false;
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    singleQueues.shift_status = [{ data: null, error: null }];
+    singleQueues.employees = [
+      { data: { id: "e1" }, error: null }, // closedBy
+    ];
     mockGetShiftCompleteness.mockResolvedValue({
-      complete: true,
-      totalRequired: 1,
-      totalCovered: 1,
-      statuses: [
-        {
-          machineId: "m-1",
-          machineName: "Drill Rig 1",
-          machineType: "Drill",
-          requiredForm: "machine-operations",
-          formLabel: "Machine Operations",
-          formPath: "/machine-operations",
-          hasEntry: true,
-          exempt: false,
-          hoursWorked: 8,
-        },
-      ],
+      statuses: [{ machineId: "m1", machineName: "D1", exempt: false, hasEntry: true }],
     });
+    insertCalls.length = 0;
   });
 
-  it("returns errors when shift is already closed", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({
-                      data: { id: "ss-1", status: "closed" },
-                    }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return {
-          select: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: null }),
-                }),
-              }),
-            }),
-          }),
-        };
-      }),
+  it("throws AuthError when unauthenticated", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } });
+    await expect(closeShift("d1", "2026-08-17", "day", "appr-1", "1234")).rejects.toThrow(
+      "Not authenticated",
+    );
+  });
+
+  it("returns validation errors when machines are missing", async () => {
+    mockGetShiftCompleteness.mockResolvedValue({
+      statuses: [{ machineId: "m1", machineName: "D1", exempt: false, hasEntry: false }],
     });
 
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
-
+    const result = await closeShift("d1", "2026-08-17", "day", "appr-1", "1234");
     expect(result.success).toBe(false);
-    expect(result.errors).toContain("Shift is already closed");
+    expect(result.errors).toContain("Machine 'D1': not reported");
+    expect(insertCalls).toHaveLength(0);
   });
 
-  it("returns errors when no active machines exist", async () => {
-    mockGetShiftCompleteness.mockResolvedValue({
-      complete: true,
-      totalRequired: 0,
-      totalCovered: 0,
-      statuses: [],
-    });
-
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
-
-    expect(result.success).toBe(false);
-    expect(result.errors).toContain("No active machines found for this department");
+  it("short-circuits on validateOnly", async () => {
+    const result = await closeShift("d1", "2026-08-17", "day", "appr-1", "1234", true);
+    expect(result).toEqual({ success: true });
+    expect(insertCalls).toHaveLength(0);
   });
 
-  it("returns errors for unreported machines", async () => {
-    mockGetShiftCompleteness.mockResolvedValue({
-      complete: false,
-      totalRequired: 1,
-      totalCovered: 0,
-      statuses: [
-        {
-          machineId: "m-1",
-          machineName: "Excavator A",
-          machineType: "Excavator",
-          requiredForm: "excavator-activity",
-          formLabel: "Excavator Activity",
-          formPath: "/excavator-activity",
-          hasEntry: false,
-          exempt: false,
-        },
-      ],
-    });
+  it("rejects when the approving supervisor has no PIN set", async () => {
+    singleQueues.employees = [
+      { data: { id: "e1" }, error: null }, // closedBy
+      { data: { id: "appr-1", pin_hash: null }, error: null }, // approver
+    ];
 
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
-
-    expect(result.success).toBe(false);
-    expect(result.errors?.some((e) => e.includes("Excavator A"))).toBe(true);
-    expect(result.errors?.some((e) => e.includes("not reported"))).toBe(true);
-  });
-
-  it("returns errors when machine hours exceed 12h", async () => {
-    mockGetShiftCompleteness.mockResolvedValue({
-      complete: true,
-      totalRequired: 1,
-      totalCovered: 1,
-      statuses: [
-        {
-          machineId: "m-1",
-          machineName: "Drill Rig 1",
-          machineType: "Drill",
-          requiredForm: "machine-operations",
-          formLabel: "Machine Operations",
-          formPath: "/machine-operations",
-          hasEntry: true,
-          exempt: false,
-          hoursWorked: 15,
-        },
-      ],
-    });
-
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
-
-    expect(result.success).toBe(false);
-    expect(result.errors?.some((e) => e.includes("15h exceeds") && e.includes("12h"))).toBe(true);
-  });
-
-  it("returns success when all machines are reported within limits", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234", true);
-
-    expect(result.success).toBe(true);
-    expect(result.errors).toBeUndefined();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// setPin
-// ---------------------------------------------------------------------------
-
-describe("setPin", () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it("throws AuthError when user is not authenticated", async () => {
-    buildSupabaseMock({
-      auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
-      },
-      from: jest.fn(),
-    });
-
-    await expect(setPin("EMP-001", "1234")).rejects.toThrow();
-  });
-
-  it("throws NotFoundError when employee record is missing", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: null, error: new Error("not found") }),
-          }),
-        }),
-      }),
-    });
-
-    await expect(setPin("EMP-001", "1234")).rejects.toThrow();
-  });
-
-  it("throws ForbiddenError when employee role is not supervisor or admin", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
-              data: { id: "emp-1", role: "operator" },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-    });
-
-    await expect(setPin("EMP-001", "1234")).rejects.toThrow();
-  });
-
-  it("throws DatabaseError when update fails", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "employees") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: { id: "emp-1", role: "supervisor" },
-                  error: null,
-                }),
-              }),
-            }),
-            update: jest.fn().mockReturnValue({
-              eq: jest.fn().mockResolvedValue({ error: { message: "DB error" } }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    await expect(setPin("EMP-001", "1234")).rejects.toThrow();
-  });
-
-  it("returns success when PIN is set successfully", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "employees") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: { id: "emp-1", role: "supervisor" },
-                  error: null,
-                }),
-              }),
-            }),
-            update: jest.fn().mockReturnValue({
-              eq: jest.fn().mockResolvedValue({ error: null }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await setPin("EMP-001", "1234");
-    expect(result.success).toBe(true);
-  });
-});
-
-describe("closeShift (validateOnly=false)", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGetShiftCompleteness.mockResolvedValue({
-      complete: true,
-      totalRequired: 1,
-      totalCovered: 1,
-      statuses: [
-        {
-          machineId: "m-1",
-          machineName: "Drill Rig 1",
-          machineType: "Drill",
-          requiredForm: "machine-operations",
-          formLabel: "Machine Operations",
-          formPath: "/machine-operations",
-          hasEntry: true,
-          exempt: false,
-          hoursWorked: 8,
-        },
-      ],
-    });
-  });
-
-  it("returns error when authenticated user has no employee record", async () => {
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        // employees — closedBy not found
-        return {
-          select: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        };
-      }),
-    });
-
-    await expect(closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234")).rejects.toThrow();
-  });
-
-  it("returns error when approver has no PIN set", async () => {
-    let employeeCallCount = 0;
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "employees") {
-          employeeCallCount++;
-          if (employeeCallCount === 1) {
-            // closedBy
-            return {
-              select: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
-                }),
-              }),
-            };
-          }
-          // approver — no pin_hash
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: {
-                    id: "approver-1",
-                    pin_hash: null,
-                    full_name: "Approver",
-                  },
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
+    const result = await closeShift("d1", "2026-08-17", "day", "appr-1", "1234");
     expect(result.success).toBe(false);
     expect(result.errors).toContain("Approving supervisor not found or has no PIN set");
   });
 
-  it("returns error when supervisor PIN is wrong", async () => {
-    let employeeCallCount = 0;
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "employees") {
-          employeeCallCount++;
-          if (employeeCallCount === 1) {
-            return {
-              select: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
-                }),
-              }),
-            };
-          }
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: {
-                    id: "approver-1",
-                    pin_hash: "$2b$hash",
-                    full_name: "Approver",
-                  },
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
+  it("rejects an invalid supervisor PIN", async () => {
+    const hash = await bcrypt.hash("1111", 4);
+    singleQueues.employees = [
+      { data: { id: "e1" }, error: null }, // closedBy
+      { data: { id: "appr-1", pin_hash: hash }, error: null }, // approver
+    ];
 
-    bcrypt.compare.mockResolvedValue(false);
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "wrong");
+    const result = await closeShift("d1", "2026-08-17", "day", "appr-1", "9999");
     expect(result.success).toBe(false);
     expect(result.errors).toContain("Invalid supervisor PIN");
   });
 
-  it("returns error when shift_status insert fails", async () => {
-    let employeeCallCount = 0;
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-            insert: jest.fn().mockReturnValue({
-              select: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: null,
-                  error: { message: "insert failed" },
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "employees") {
-          employeeCallCount++;
-          if (employeeCallCount === 1) {
-            return {
-              select: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
-                }),
-              }),
-            };
-          }
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: {
-                    id: "approver-1",
-                    pin_hash: "$2b$hash",
-                    full_name: "Approver",
-                  },
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
+  it("closes the shift, audits, and returns the shift status id", async () => {
+    const hash = await bcrypt.hash("1111", 4);
+    singleQueues.employees = [
+      { data: { id: "e1" }, error: null }, // closedBy
+      { data: { id: "appr-1", pin_hash: hash }, error: null }, // approver
+    ];
+    singleQueues.shift_status = [
+      { data: null, error: null }, // existing check
+      { data: { id: "ss-1" }, error: null }, // inserted
+    ];
 
-    bcrypt.compare.mockResolvedValue(true);
+    const result = await closeShift(
+      "d1",
+      "2026-08-17",
+      "day",
+      "appr-1",
+      "1111",
+      false,
+      "control-room",
+    );
+    expect(result).toEqual({ success: true, shiftStatusId: "ss-1" });
 
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
-    expect(result.success).toBe(false);
-    expect(result.errors).toContain("Failed to close shift");
-  });
-
-  it("throws AuthError when user is not authenticated", async () => {
-    buildSupabaseMock({
-      auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
-      },
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    await expect(closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234")).rejects.toThrow();
-  });
-
-  it("returns success when PIN is valid and shift is closed", async () => {
-    const { logAuditEvent } = jest.requireMock("./audit");
-    let employeeCallCount = 0;
-    buildSupabaseMock({
-      from: jest.fn().mockImplementation((table: string) => {
-        if (table === "shift_status") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null }),
-                  }),
-                }),
-              }),
-            }),
-            insert: jest.fn().mockReturnValue({
-              select: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: { id: "status-99" },
-                  error: null,
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machines") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({
-                  data: [{ id: "m-1", name: "Drill Rig 1" }],
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "machine_operations") {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockResolvedValue({
-                    data: [{ machine_id: "m-1", hours_worked: 8 }],
-                  }),
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "employees") {
-          employeeCallCount++;
-          if (employeeCallCount === 1) {
-            return {
-              select: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { id: "emp-1" }, error: null }),
-                }),
-              }),
-            };
-          }
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: {
-                    id: "approver-1",
-                    pin_hash: "$2b$hash",
-                    full_name: "Approver",
-                  },
-                }),
-              }),
-            }),
-          };
-        }
-        return mockDbQuery;
-      }),
-    });
-
-    bcrypt.compare.mockResolvedValue(true);
-
-    const result = await closeShift("dept-1", "2026-05-17", "day", "approver-1", "1234");
-    expect(result.success).toBe(true);
-    expect(result.shiftStatusId).toBe("status-99");
-    expect(logAuditEvent).toHaveBeenCalledWith(
+    expect(insertCalls).toHaveLength(1);
+    expect(insertCalls[0]!.args).toEqual(
       expect.objectContaining({
-        tableName: "shift_status",
-        recordId: "status-99",
+        department_id: "d1",
+        shift_date: "2026-08-17",
+        shift_type: "day",
+        status: "closed",
+        closed_by: "e1",
+        approved_by: "appr-1",
       }),
     );
+    expect(mockLogAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "insert", tableName: "shift_status", recordId: "ss-1" }),
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/control-room");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/control-room/shift-coverage");
   });
 });

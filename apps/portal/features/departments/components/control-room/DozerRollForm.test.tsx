@@ -43,6 +43,9 @@ jest.mock("@repo/ui/ShiftToggle", () => ({
       </button>
     </div>
   ),
+}));
+
+jest.mock("@repo/utils", () => ({
   getCurrentShift: () => "day",
 }));
 

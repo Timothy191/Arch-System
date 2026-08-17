@@ -6,7 +6,7 @@ import {
   recordJobExecution,
   recordDbQuery,
   clearObservabilityMetrics,
-} from "@/lib/observability/metrics";
+} from "@/lib/observability/simple-metrics";
 
 // Mock @repo/redis stats
 jest.mock("@repo/redis", () => ({

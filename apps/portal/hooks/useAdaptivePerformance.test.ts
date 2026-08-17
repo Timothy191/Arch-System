@@ -11,6 +11,7 @@ describe("useAdaptivePerformance", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
     rafCallback = null;
     jest.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
       rafCallback = cb as any;
@@ -20,6 +21,7 @@ describe("useAdaptivePerformance", () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -35,25 +37,25 @@ describe("useAdaptivePerformance", () => {
     expect(result.current).toBe(true);
   });
 
-  it("signals low performance if FPS drops below 50 for 1.5 seconds", () => {
+  it("signals low performance if FPS drops below 30 after warm-up", () => {
     (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
 
-    // Simulate 1.5 seconds of slow frames (e.g. 30ms interval = ~33 FPS)
+    // Simulate slow frames: 50ms interval = ~20 FPS (well below 30 threshold)
     act(() => {
       let time = 100;
       // Trigger initial rAF frame
       if (rafCallback) rafCallback(time);
 
-      // Advance past the 2.5s warm-up period
-      time += 2500;
+      // Advance past the 5s warm-up period
+      time += 5000;
       if (rafCallback) rafCallback(time);
 
-      // Simulate 1.6 seconds of frames every 30ms (~53 frames)
-      for (let i = 0; i < 55; i++) {
-        time += 30;
+      // Simulate 2.1 seconds of frames every 50ms (~42 frames at 20 FPS)
+      for (let i = 0; i < 45; i++) {
+        time += 50;
         if (rafCallback) rafCallback(time);
       }
     });
@@ -67,17 +69,74 @@ describe("useAdaptivePerformance", () => {
 
     expect(result.current).toBe(false);
 
-    // Simulate 3 seconds of fast frames (16.6ms interval = 60 FPS)
+    // Simulate frames through warm-up and measurement at 60 FPS (16.6ms)
     act(() => {
       let time = 100;
       if (rafCallback) rafCallback(time);
 
+      // Past warm-up
+      time += 5000;
+      if (rafCallback) rafCallback(time);
+
+      // 3 seconds of 60 FPS frames
       for (let i = 0; i < 200; i++) {
         time += 16.6;
         if (rafCallback) rafCallback(time);
       }
     });
 
+    expect(result.current).toBe(false);
+  });
+
+  it("does not trigger fallback at 40 FPS (above 30 threshold)", () => {
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
+    const { result } = renderHook(() => useAdaptivePerformance());
+
+    expect(result.current).toBe(false);
+
+    // Simulate 25ms interval = 40 FPS (above 30 threshold, should NOT degrade)
+    act(() => {
+      let time = 100;
+      if (rafCallback) rafCallback(time);
+
+      time += 5000;
+      if (rafCallback) rafCallback(time);
+
+      for (let i = 0; i < 120; i++) {
+        time += 25;
+        if (rafCallback) rafCallback(time);
+      }
+    });
+
+    expect(result.current).toBe(false);
+  });
+
+  it("recovers after degradation when performance improves", () => {
+    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
+    const { result } = renderHook(() => useAdaptivePerformance());
+
+    // First: degrade with slow frames
+    act(() => {
+      let time = 100;
+      if (rafCallback) rafCallback(time);
+
+      time += 5000;
+      if (rafCallback) rafCallback(time);
+
+      for (let i = 0; i < 45; i++) {
+        time += 50;
+        if (rafCallback) rafCallback(time);
+      }
+    });
+
+    expect(result.current).toBe(true);
+
+    // Advance the recovery timer (10 seconds)
+    act(() => {
+      jest.advanceTimersByTime(10_000);
+    });
+
+    // After recovery timer fires, lowPerf should reset to false
     expect(result.current).toBe(false);
   });
 });
