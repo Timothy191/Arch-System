@@ -16,7 +16,7 @@
  *               description: Prometheus metrics exposition format
  */
 import { getCacheStats } from "@repo/redis";
-import { getObservabilityMetrics } from "@/lib/observability/metrics";
+import { getObservabilityMetrics } from "@/lib/observability/simple-metrics";
 
 export const dynamic = "force-dynamic";
 

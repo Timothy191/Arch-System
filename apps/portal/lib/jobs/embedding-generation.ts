@@ -1,7 +1,7 @@
 import { inngest, aiGenerateEmbeddingEvent } from "@repo/utils/inngest";
 import { generateEmbedding, batchGenerateEmbeddings } from "@/lib/ai/embeddings";
 import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 import type { InngestFunction } from "inngest";
 
 export const generateEmbeddingFn: InngestFunction.Any = inngest.createFunction(

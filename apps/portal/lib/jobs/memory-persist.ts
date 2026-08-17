@@ -1,7 +1,7 @@
 import { inngest, aiMemoryPersistEvent } from "@repo/utils/inngest";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 import type { InngestFunction } from "inngest";
 
 /**

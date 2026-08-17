@@ -23,20 +23,8 @@ export function HeroBackground() {
       className="absolute inset-0 pointer-events-none overflow-hidden isolate"
       aria-hidden="true"
     >
-      {/* Light ambient base */}
-      <div className="absolute inset-0 bg-arch-surface-primary" />
-
-      {/* Video Background (hidden if prefers reduced motion) */}
-      {!prefersReducedMotion && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover mix-blend-normal opacity-90 transition-opacity duration-1000"
-          src="/background/light-mode/light mode.mp4"
-        />
-      )}
+      {/* Soft glass overlay to let the global RouteBackground shine through */}
+      <div className="absolute inset-0 bg-white/5 mix-blend-overlay" />
 
       {/* Ambient Film Grain Overlay */}
       <div className="absolute inset-0 route-bg-grain opacity-40 mix-blend-overlay" />

@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { ShiftToggle, getCurrentShift } from "@repo/ui/ShiftToggle";
+import { ShiftToggle } from "@repo/ui/ShiftToggle";
+import { getCurrentShift } from "@repo/utils";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Plus, X, Equal, Calculator } from "lucide-react";

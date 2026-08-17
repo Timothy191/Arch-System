@@ -1,7 +1,7 @@
 import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
 /**
  * Orphaned Record Detection Job

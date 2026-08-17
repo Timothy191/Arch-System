@@ -2,7 +2,7 @@ import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { getShiftCompleteness } from "@/lib/shift-completeness";
 import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
 /**
  * Shift Completeness Check Job

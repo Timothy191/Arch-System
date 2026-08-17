@@ -1,7 +1,7 @@
 import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/metrics";
+import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
 /**
  * Shift Integrity Report Job
@@ -14,6 +14,50 @@ import { recordJobExecution } from "@/lib/observability/metrics";
  */
 
 import { InngestFunction } from "inngest";
+
+/**
+ * Operational timezone for the mine. All shift windows are defined in SAST.
+ */
+const OPERATIONAL_TIMEZONE = "Africa/Johannesburg";
+
+/**
+ * Adds `days` days to a YYYY-MM-DD string (calendar arithmetic in UTC, which is
+ * safe for date-only values).
+ */
+export function addDays(dateStr: string, days: number): string {
+  const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + days));
+  return next.toISOString().split("T")[0]!;
+}
+
+/**
+ * Returns the UTC instant corresponding to `HH:MM` on `dateStr` (YYYY-MM-DD)
+ * in the operational timezone, using the Intl offset technique. This keeps the
+ * "closed on time" window deterministic regardless of the server's own timezone
+ * (previously `setHours` used server-local time, which shifted the window by
+ * the host offset — a real bug for any host not on UTC).
+ */
+export function timeAtOperationalZone(
+  dateStr: string,
+  time: string,
+  timeZone: string = OPERATIONAL_TIMEZONE,
+): Date {
+  const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
+  const [hour = 0, minute = 0] = time.split(":").map(Number);
+  const utcGuess = Date.UTC(year, month - 1, day, hour, minute);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    hour12: false,
+    hourCycle: "h23",
+  });
+  const zoneHour = Number(
+    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value,
+  );
+  const utcHour = new Date(utcGuess).getUTCHours();
+  // Shift the guess by the zone's offset so the result is `time` in that zone.
+  return new Date(utcGuess - (zoneHour - utcHour) * 3600000);
+}
 
 export const shiftIntegrityReportFn: InngestFunction.Any = inngest.createFunction(
   {
@@ -48,15 +92,16 @@ export const shiftIntegrityReportFn: InngestFunction.Any = inngest.createFunctio
       const totalShifts = shiftStatuses?.length || 0;
       const closedShifts = shiftStatuses?.filter((s) => s.status === "closed") || [];
       const shiftsClosedOnTime = closedShifts.filter((s) => {
-        // AGENT-TRACE: Consider shift closed "on time" if closed within 2 hours of shift end
-        const shiftDate = new Date(s.shift_date);
+        // AGENT-TRACE: Consider shift closed "on time" if closed within 2 hours of
+        // shift end, evaluated in the operational timezone (SAST):
+        //   Day shift ends 18:00 (+2h grace = 20:00 SAST same day)
+        //   Night shift ends 06:00 the NEXT day (+2h grace = 08:00 SAST next day)
         const shiftType = s.shift_type;
-        const expectedEndTime =
-          shiftType === "day"
-            ? new Date(shiftDate.setHours(20, 0, 0, 0)) // Day shift ends at 18:00, +2h grace
-            : new Date(shiftDate.setHours(8, 0, 0, 0)); // Night shift ends at 06:00, +2h grace
+        const graceTime = shiftType === "day" ? "20:00" : "08:00";
+        const graceDate = shiftType === "night" ? addDays(s.shift_date, 1) : s.shift_date;
+        const expectedEndTime = timeAtOperationalZone(graceDate, graceTime);
         const closedAt = new Date(s.closed_at);
-        return closedAt <= expectedEndTime;
+        return !Number.isNaN(closedAt.getTime()) && closedAt <= expectedEndTime;
       });
 
       const onTimeCloseRate = totalShifts > 0 ? (shiftsClosedOnTime.length / totalShifts) * 100 : 0;

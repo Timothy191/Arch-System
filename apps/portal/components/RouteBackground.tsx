@@ -11,8 +11,7 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  * improved performance and accessibility features.
  *
  * Layer stack (back → front, all z-index: -10 to -9):
- *   -10  │ <video>          – background/light-mode/light mode.mp4 (light mode, ambient loop)
- *   -10  │ <video>          – background/focused-mode/focused mode.mp4 (focus mode, ambient loop)
+ *   -10  │ <video>          – /background/837668e02b8cc6414cd7a78c19d1746c.webm (ambient loop)
  *   -10  │ <img> (poster)   – poster image while video loads (fallback)
  *    -9  │ tint overlay     – bg-white/55 glass wash (always visible)
  *
@@ -20,7 +19,10 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  *  • Lazy loading with preload="none" prevents eager resource fetch
  *  • Poster images shown during video load prevent blank screens
  *  • Videos only start loading when document is visible (Intersection Observer)
- *  • Both videos ALWAYS mounted to keep decoder warm for instant mode switching
+ *  • A single <video> element is shared between light and focus mode — the
+ *    className is swapped when focus mode toggles, so only ONE 22 MB webm is
+ *    ever downloaded (previously two identical videos were both loaded,
+ *    doubling video bandwidth on every page load).
  *
  * Accessibility features:
  *  • Respects prefers-reduced-motion via reduced-motion state
@@ -41,13 +43,11 @@ export function RouteBackground() {
   // Subscribe to keep the component re-rendering on toggle. The actual
   // visibility is controlled via the `data-bg-mode` attribute on <html>,
   // set by useFocusMode — see glass.css `.route-bg-focus-video` rules.
-  useFocusMode((s) => s.enabled);
+  const focusModeEnabled = useFocusMode((s) => s.enabled);
 
-  const lightVideoRef = useRef<HTMLVideoElement>(null);
-  const focusVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [lightVideoLoaded, setLightVideoLoaded] = useState(false);
-  const [focusVideoLoaded, setFocusVideoLoaded] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Check for reduced motion preference
@@ -63,20 +63,26 @@ export function RouteBackground() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Lazy load videos when they come into viewport
+  // Lazy load the shared video when it comes into viewport
   useEffect(() => {
     if (prefersReducedMotion) {
       // Don't load videos if user prefers reduced motion
       return;
     }
 
+    const video = videoRef.current;
+    if (!video) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const video = entry.target as HTMLVideoElement;
-            // Start loading the video when in viewport
+            // Start loading and playing the video when in viewport
             video.load();
+            // Browsers require an explicit play() call when using preload="none"
+            video.play().catch(() => {
+              // Ignore autoplay preventions
+            });
             observer.unobserve(video);
           }
         });
@@ -84,31 +90,28 @@ export function RouteBackground() {
       { threshold: 0.1 },
     );
 
-    if (lightVideoRef.current) observer.observe(lightVideoRef.current);
-    if (focusVideoRef.current) observer.observe(focusVideoRef.current);
+    observer.observe(video);
 
     return () => {
-      if (lightVideoRef.current) observer.unobserve(lightVideoRef.current);
-      if (focusVideoRef.current) observer.unobserve(focusVideoRef.current);
+      observer.unobserve(video);
     };
   }, [prefersReducedMotion]);
 
-  // Track video load states
+  // Track video load state
   useEffect(() => {
-    const lightVideo = lightVideoRef.current;
-    const focusVideo = focusVideoRef.current;
+    const video = videoRef.current;
+    if (!video) return;
 
-    const handleLightCanPlay = () => setLightVideoLoaded(true);
-    const handleFocusCanPlay = () => setFocusVideoLoaded(true);
+    const handleCanPlay = () => setVideoLoaded(true);
 
-    if (lightVideo) lightVideo.addEventListener("canplay", handleLightCanPlay);
-    if (focusVideo) focusVideo.addEventListener("canplay", handleFocusCanPlay);
-
-    return () => {
-      if (lightVideo) lightVideo.removeEventListener("canplay", handleLightCanPlay);
-      if (focusVideo) focusVideo.removeEventListener("canplay", handleFocusCanPlay);
-    };
+    video.addEventListener("canplay", handleCanPlay);
+    return () => video.removeEventListener("canplay", handleCanPlay);
   }, []);
+
+  const containerClass = focusModeEnabled
+    ? "route-bg-focus-video-container"
+    : "route-bg-video-container";
+  const videoClass = focusModeEnabled ? "route-bg-focus-video" : "route-bg-video";
 
   return (
     <>
@@ -119,10 +122,13 @@ export function RouteBackground() {
         </div>
       ) : (
         <>
-          {/* ── Light mode: loop the user's video background (lazy-loaded) ── */}
-          <div className="route-bg-video-container" aria-hidden="true">
+          {/* ── Single ambient video — shared between light and focus mode.
+               The className swap on the same element keeps the decoder warm
+               (no re-fetch/re-decode on toggle) while only ever downloading
+               one copy of the webm. ── */}
+          <div className={containerClass} aria-hidden="true">
             <video
-              ref={lightVideoRef}
+              ref={videoRef}
               id="route-bg-light-video"
               autoPlay
               muted
@@ -130,38 +136,25 @@ export function RouteBackground() {
               playsInline
               preload="none"
               poster="/auth-bg-poster.jpg"
-              className="route-bg-video"
+              className={videoClass}
             >
-              {/* AGENT-TRACE: Global light-mode background video relocated to a subfolder to match monorepo asset organization standard */}
-              <source src="/background/light-mode/light-mode.mp4" type="video/mp4" />
+              {/* AGENT-TRACE: Global background video */}
+              <source src="/background/837668e02b8cc6414cd7a78c19d1746c.webm" type="video/webm" />
               Your browser does not support the video tag.
             </video>
           </div>
 
-          {/* ── Focus mode: full-screen atmospheric video (lazy-loaded) ── */}
-          <div className="route-bg-focus-video-container" aria-hidden="true">
-            <video
-              ref={focusVideoRef}
-              id="route-bg-focus-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="none"
-              poster="/auth-bg-poster.jpg"
-              className="route-bg-focus-video"
-            >
-              <source src="/background/focused-mode/focused-mode.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-
-          {/* ── Poster fallback overlay — shown until videos load ── */}
-          {!lightVideoLoaded && !focusVideoLoaded && (
+          {/* ── Poster fallback overlay — shown until the video loads ── */}
+          {!videoLoaded && (
             <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
               <Image src="/auth-bg-poster.jpg" alt="" fill priority className="object-cover" />
             </div>
           )}
+
+          {/* ── Static gradient fallback — hidden by default, shown by
+               .low-perf-fallback when video containers are display:none.
+               Uses the same canvas-gradient token as route-bg-canvas. ── */}
+          <div className="route-bg-fallback" aria-hidden="true" />
         </>
       )}
 
