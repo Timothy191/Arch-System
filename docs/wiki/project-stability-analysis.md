@@ -166,13 +166,14 @@
 - ⏳ Create error logging middleware
 
 **Top Files to Migrate**:
-| File | Error Count | Priority |
-|------|-------------|----------|
-| `lib/ai/serpapi.ts` | 12 | Medium |
-| `features/departments/components/engineering/breakdowns/actions.ts` | 8 | High |
-| `lib/ai/embeddings.ts` | 6 | Medium |
-| `lib/shift-closeout.ts` | 6 | High |
-| `lib/plugins/orchestrator.ts` | 3 | Low |
+
+| File                                                                | Error Count | Priority |
+| ------------------------------------------------------------------- | ----------- | -------- |
+| `lib/ai/serpapi.ts`                                                 | 12          | Medium   |
+| `features/departments/components/engineering/breakdowns/actions.ts` | 8           | High     |
+| `lib/ai/embeddings.ts`                                              | 6           | Medium   |
+| `lib/shift-closeout.ts`                                             | 6           | High     |
+| `lib/plugins/orchestrator.ts`                                       | 3           | Low      |
 
 **Detailed Plan**: [project-completion-roadmap.md](../.windsurf/plans/project-completion-roadmap.md)
 

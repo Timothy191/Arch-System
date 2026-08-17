@@ -1,5 +1,21 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Add & verify KnowledgeRail MCP (io.github.Deviank88/knowledge-rail v2.0.3)
+
+- **Purpose**: Test and register `knowledge-rail` v2.0.3 — persistent, evidence-backed project knowledge + task context for coding agents — across every MCP client registry on this system.
+- **Verification**: Confirmed via MCP 2.0 `initialize` handshake (protocol `2025-06-18`) and `tools/list` → 8 domain tools (`knowledge_context`, `knowledge_page`, `knowledge_files`, `knowledge_ingest`, `knowledge_code`, `knowledge_document_context`, `knowledge_document`, `knowledge_admin`). End-to-end smoke: `knowledge_admin action=init` bootstrapped a `wiki/` workspace (index.md/log.md/SCHEMA.md) and `knowledge_context mode=task` ran evidence retrieval returning structured state + gaps.
+- **Install (XDG-compliant; avoids repo `package.json` `overrides` breaking `npx`/`pnpm dlx`)**: The repo's `overrides` pin `glob >=13.0.6`, which triggers npm `EOVERRIDE` whenever `npx knowledge-rail` / `pnpm dlx knowledge-rail` is launched from the repo root (exactly how project-scoped MCP servers run). Fixed by a self-contained install at `~/.local/lib/knowledge-rail` with a `755` symlink `~/.local/bin/knowledge-rail` (v2.0.3) — verified running the binary directly from the repo cwd. All registries reference the absolute binary path.
+- **Changes**:
+  1. `~/.cline/data/settings/cline_mcp_settings.json` — added `knowledge-rail` (Cline).
+  2. `opencode.json` — added `knowledge-rail` (`type: local`, git-tracked).
+  3. `config/tools/mcp.json` — added `knowledge-rail` (git-tracked).
+  4. `~/.gemini/config/mcp_config.json` — normalized existing entry from `pnpm dlx knowledge-rail@2.0.3` to binary path.
+  5. `~/.local/share/deepagents/.mcp.json` — added `knowledge-rail` (`type: stdio`).
+  6. `.agents/mcp_config.json` (gitignored, machine-local) — normalized from `pnpm dlx` to binary path.
+  7. Workspace `Arch-System` registered as `ws_s-8S6ZsGTKOBy_kq` (read/write). Cleaned up transient test workspaces (`tmp`, `kr-test-ws`, `kr-smoke`) from the registry (`~/.local/state/knowledge-rail/workspaces.json`).
+  - All five JSON registries re-validated as parseable JSON with correct per-client schema.
+- **What the Next Agent Should Know**: `~/.local/bin/knowledge-rail` is the canonical launcher (never invoke via `npx`/`pnpm dlx` from this repo — EOVERRIDE). The Arch-System `wiki/` has **not** been bootstrapped inside the repo (only in `/tmp` test dirs) to avoid polluting the repo before confirmation; run `knowledge_admin action=init` (or just call `knowledge_context`) once to materialize the workspace wiki.
+
 ## 2026-08-17: Department navigation fixes (Routes, Link semantics, Transition UI, History, E2E)
 
 - **Purpose**: Fix department navigation across the portal: define explicit routes & typed helpers, replace `onClick`+`router.push` in `DepartmentCard` with accessible semantic `<Link>` + stretched-link pattern, provide `useTransition` loading feedback, track `previousDepartment` and bounded `departmentHistory` in Zustand, and add full E2E & unit test coverage.
@@ -604,3 +620,84 @@ Document the strategic roadmap and action plan for long-term health and efficien
 ### What the Next Agent Should Know
 
 - The operational roadmap is fully documented under `docs/reports/continuous_improvement_operational_excellence.md` for reference during the implementation phase of these enhancements.
+
+## 2026-08-17T10:14:40Z - Fix Asset Sync Paths
+
+- **Purpose**: Fix the "No assets directory found" error during pre-flight.
+- **Changes**: Updated `scripts/sync-assets-smart.cjs` and `scripts/sync-assets.sh` to reference `apps/portal/assets` instead of the root `assets` directory.
+- **Next Agent Context**: The sync script now correctly pulls from `apps/portal/assets`. Ensure this matches any future structural changes to asset locations.
+
+## 2026-08-17T10:19:50Z - Fix dev.sh infinite hang
+
+- **Purpose**: Prevent `pnpm dev` from hanging indefinitely during health checks.
+- **Changes**: Added a wrapper function for `curl` at the top of `scripts/dev.sh` that applies `--max-time 3` to all invocations.
+- **Next Agent Context**: Health check queries to unresponsive services will now timeout after 3 seconds instead of hanging the dev script permanently.
+
+## 2026-08-17T10:34:10Z - Fix dev.sh Phase 3b hang
+
+- **Purpose**: Prevent `pnpm dev` from getting stuck in Phase 3b when starting CMS or other extra apps.
+- **Changes**: Modified `start_extra_app` in `scripts/dev.sh` to remove the `curl -f` flag and accept `404` and redirect HTTP status codes as valid indicators that the server is up.
+- **Next Agent Context**: The CMS app returns 404 on its root `/` path (it serves `/admin` instead), which previously caused the health check to loop for 5 minutes waiting for a `200`. It now correctly registers as running.
+
+## 2026-08-17T10:41:20Z - Add --strict flag to dev.sh
+
+- **Purpose**: Added a way to force quality gates (`pnpm format:check`, `pnpm quality`) and dependency installation (`pnpm install --prefer-offline`) before starting the dev server.
+- **Changes**:
+  - Added `--strict` argument parsing setting `STRICT_MODE=true` in `scripts/dev.sh`.
+  - Added "Phase 1.5: Quality Gates" that executes these checks and aborts if they fail.
+- **Next Agent Context**: The strict mode is opt-in (`--strict`). Without it, `pnpm dev` remains fast (Lightning Dev). If a user complains about `dev.sh` failing on "Quality Gates", advise them that their code has lint/type errors.
+
+## 2026-08-17T11:00:30Z - Configured Agent Storage & Updated .env Credentials
+
+- **Purpose**: Configure isolated Supabase storage for AGY agent memory/tokens and synchronize `.env` application passwords.
+- **Changes**:
+  - Saved external agent memory configuration to `~/.config/antigravity/agent-memory-storage.env` and `~/.gemini/config/agent_memory_store.json`.
+  - Updated `DATABASE_URL` in `apps/cms/.env` with the URL-encoded database password.
+  - Synchronized `N8N_PASSWORD` and `FLOWISE_PASSWORD` in `apps/portal/.env`.
+- **Next Agent Context**: Monorepo `.env` files now have valid connection strings and passwords. External memory storage for AGY/agent caching is persistently mapped to project `fjcfkrbbfzizrxclgkhq`.
+
+## 2026-08-17T11:11:00Z - Executed Quality Gates & Initialized Agent Storage
+
+- **Purpose**: Ran full workspace format & quality validation gate (`pnpm quality`), and initialized storage verification for agent tokens/memories.
+- **Changes**:
+  - Auto-formatted code styling across workspace using Prettier (`pnpm format`).
+  - Successfully executed full quality suite (`pnpm quality`): 26 projects linted, type-checked, unit tested, stylelinted, syncpack-validated, Knip-checked, security audited, RLS audited, and design token audited. 100% passed (exit code 0).
+  - Verified agent Supabase project `fjcfkrbbfzizrxclgkhq` connectivity via JS client and verified CLI configuration.
+- **Next Agent Context**: Full quality gate is passing green. Storage configuration for agent memories and token caching is established in `~/.config/antigravity/` and `~/.gemini/config/`.
+
+## 2026-08-17T11:18:30Z - Installed Agent Memory Migration, Skills, and Passed Quality Gates
+
+- **Purpose**: Implemented agent memory schema migration, installed `supabase-server` skill and `@supabase/server` client, and verified 100% quality gate compliance.
+- **Changes**:
+  - Configured full project credentials in `~/.config/antigravity/agent-memory-storage.env` and `~/.gemini/config/agent_memory_store.json`.
+  - Created migration `20260817000000_agent_memory_schema.sql` defining `agent_memories`, `token_metrics`, `context_snapshots`, `agent_trace_logs` with vector embeddings and RLS.
+  - Installed `supabase-server` skill in `.agents/skills/supabase-server` and `~/.gemini/config/skills/supabase-server`.
+  - Added `AgentMemoryStore` adapter in `packages/agents/src/memory.ts` and exported it from `@repo/agents`.
+  - Executed full `pnpm quality` gate: 100% passed (26 projects, lint, type-check, test, tokens, css, knip, security, RLS, design).
+- **Next Agent Context**: Agent memory storage client is ready to use via `@repo/agents` and migration files are prepared in `~/.config/antigravity/agent-memory/supabase/migrations/`.
+
+## 2026-08-17T11:20:40Z - Researched and Configured KnowledgeRail MCP Server
+
+- **Purpose**: Researched, verified, and configured `io.github.Deviank88/knowledge-rail` (v2.0.3) MCP server for persistent, evidence-backed project knowledge.
+- **Changes**:
+  - Researched npm package `knowledge-rail` (v2.0.3) with stdio transport.
+  - Added `knowledge-rail` configuration to global `~/.gemini/config/mcp_config.json` and workspace `.agents/mcp_config.json`.
+  - Registered workspace `Arch-System` with KnowledgeRail (`ws_s-8S6ZsGTKOBy_kq`).
+- **Next Agent Context**: `knowledge-rail` MCP server is active, configured for stdio transport via `pnpm dlx knowledge-rail@2.0.3`, and workspace `Arch-System` is linked.
+
+## 2026-08-17T11:30:00Z - Verified KnowledgeRail, Multi-App Dev Startup, and Quality Gate Pass
+
+- **Purpose**: Verified KnowledgeRail workspace registration, executed multi-app dev environment (`pnpm dev --all --quick`), and completed full quality gate verification (`pnpm quality`).
+- **Changes**:
+  - Registered workspace with KnowledgeRail (`ws_s-8S6ZsGTKOBy_kq`).
+  - Booted multi-app stack (Portal on :3000, CMS on :3001, Overview on :3002).
+  - Cleanly formatted UI component files with Prettier.
+  - Full `pnpm quality` gate 100% passed across all 26 packages and applications.
+- **Next Agent Context**: Multi-app dev stack is verified and running, KnowledgeRail is configured, and all quality checks are passing green.
+
+## 2026-08-17T11:32:10Z - Removed Cloudflare MCP Servers
+
+- **Purpose**: Removed Cloudflare MCP servers from configuration per user directive.
+- **Changes**:
+  - Removed `cloudflare`, `cloudflare-docs`, `cloudflare-bindings`, `cloudflare-builds`, and `cloudflare-observability` from `~/.gemini/config/mcp_config.json`.
+- **Next Agent Context**: Global MCP configuration is streamlined to active tooling (`deepwiki`, `next-devtools`, `slim-tools`, `supabase`, `sequential-thinking`, `chrome-devtools-mcp`, and `knowledge-rail`).
