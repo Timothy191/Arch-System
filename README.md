@@ -64,10 +64,6 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 ## 📖 Documentation
 
-### Quick Navigation
-
-- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Complete documentation index and quick lookup guide
-
 ### Core Documentation
 
 - **[CLAUDE.md](CLAUDE.md)**: Authoritative technical guide and conventions.
@@ -79,11 +75,8 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 - **[AGENTS.md](AGENTS.md)**: Development workflow, quality gates, and agent contracts
 - **[DEPLOYMENT.md](DEPLOYMENT.md)**: Deployment guide for all environments
 - **[GEMINI.md](GEMINI.md)**: AI-specific development conventions
-- **[LIQUID_GLASS_CHECKLIST.md](LIQUID_GLASS_CHECKLIST.md)**: UI implementation checklist
 - **[SECURITY.md](SECURITY.md)**: Security policy and vulnerability reporting
 
 ---
 
 _Built for industrial-scale vigilance and operational precision._
-
-# Arch-System
