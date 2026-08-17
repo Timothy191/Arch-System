@@ -1,5 +1,12 @@
 # Portal Agent Tracer
 
+## 2026-08-17 - In-flight work committed; quality gate green end-to-end
+
+- **Purpose**: Land the uncommitted portal work in logical commits and make `pnpm quality` exit 0.
+- **Fixed for quality gate**: restored `BreakdownMetrics`/`MACHINE_TYPES`/`BreakdownControlRoomView` exports in `features/departments/components/engineering/breakdowns/types.ts` (de-export broke portal type-check); removed stray `;` in `lib/audit.ts`; formatted `lib/weather-api.ts`. Portal lint + type-check + all 87 suites green.
+- **Portal commits**: hub flattened out of `(hub)` route group + `middleware.ts` → `proxy.ts` (Next 16) · perf/observability/jobs (single background video, AI chunk deferral, `simple-metrics.ts`, shift-integrity TZ fix) · 28 test suites (analytics, hub, hooks, jobs, reports, tools) with raised jest coverage threshold · shift-form consolidation onto `@repo/utils`.
+- **Next agent**: coverage gap remains in `app/(departments)/[department]/**` page trees; dev server on :3000 serves `/login` → dashboard flow.
+
 ## 2026-08-17 - Analytics component tests, getCurrentShift consolidation, pnpm quality green
 
 - **Purpose**: Cover `features/analytics/components`, consolidate duplicated `getCurrentShift` implementations onto `@repo/utils`, and make `pnpm quality` pass end-to-end.

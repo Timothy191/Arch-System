@@ -1,5 +1,13 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: In-flight work triaged into 10 logical commits; branch clean
+
+- **Purpose**: Get the branch to a clean, committed state and make `pnpm quality` green end-to-end.
+- **Quality fixes**: restored exports in `apps/portal/features/departments/components/engineering/breakdowns/types.ts` (over-aggressive de-export broke portal type-check), fixed `no-extra-semi` in `lib/audit.ts`, prettier-formatted `lib/weather-api.ts` + `README.md`. `pnpm quality` now exits 0 across all gates.
+- **Cleanup**: deleted root junk (`cloudflared-0.7.3.tgz`, `playwright-report/`, `storybook/`, `supabase/`, `system-wiki/`, `agentic-system-wiki/`, `.supabase/`) and added gitignore rules for them plus `e2e/.auth/` (contains a real session cookie — never commit). Untracked `.claude/settings.local.json` (machine-specific). Removed all Cloudflare content (`cloudflare-workers/`, `apps/cloudflare-workflows/`) per user request; pruned wrangler from `pnpm-lock.yaml`.
+- **Commits (10)**: e635ca7 hygiene/purge · 54dfb40 tooling+agent contracts · d0fdd9b migrations+seeds · 9879a2c theme/utils/supabase · de020ad feature-lib jest+forms · f13f43e hub route group flatten + proxy.ts · 21be819 portal perf/observability/jobs · 4dbe132 28 portal test suites · 0793f78 shift-form consolidation · 858b8be docs+lockfile prune.
+- **Next agent**: branch is clean and 11 commits ahead of origin/main — review, then push when ready. Cloudflare dirs are gone from both disk and lockfile.
+
 ## 2026-08-17: Analytics tests, getCurrentShift consolidation, pnpm quality green end-to-end
 
 - Added 4 test suites for `apps/portal/features/analytics/components` (ExportButton, PDFDownloadButton, ProductionTrendChart, ReportTemplate).
