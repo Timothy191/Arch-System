@@ -32,6 +32,9 @@ PASS="${GREEN}${BOLD}  ✓${NC}"
 FAIL="${RED}${BOLD}  ✗${NC}"
 SKIP="${YELLOW}${BOLD}  –${NC}"
 INFO="${CYAN}${BOLD}  →${NC}"
+SUPABASE_URL=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+SUPABASE_ANON_KEY=$(grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 
 # ── Helpers ──────────────────────────────────────────────
 phase() {
@@ -107,6 +110,11 @@ open_browser() {
   if command -v google-chrome > /dev/null 2>&1; then
     google-chrome --new-window "$login_url" 2>/dev/null &
   elif command -v chromium > /dev/null 2>&1; then
+n  # Show online service URLs sourced from .env
+  echo -e "  ${INFO} Supabase URL: ${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co}"
+  echo -e "  ${INFO} Redis URL:    ${REDIS_URL:-redis://default:ri1q1GmcoTqGXITwNoNnwRJPYXCyEYE4@activity-brake-chipper-30470.db.redis.io:18471}"
+  echo
+
     chromium --new-window "$login_url" 2>/dev/null &
   elif command -v firefox > /dev/null 2>&1; then
     firefox --new-window "$login_url" 2>/dev/null &
@@ -778,10 +786,10 @@ fi
 # 4d. Supabase RLS / anon key check
 if [ "$QUICK_MODE" = "true" ]; then
   check "Auth config" "skip" "quick mode"
-elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
+elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/apps/portal/.env" 2>/dev/null || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
   check "Auth config" "pass" "anon key present"
 else
-  check "Auth config" "warn" "no SUPABASE_ANON_KEY in .env"
+  check "Auth config" "warn" "no SUPABASE_ANON_KEY in apps/portal/.env or .env"
 fi
 
 # 4e. Static assets accessible

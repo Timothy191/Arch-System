@@ -1,5 +1,12 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-17: Fix dev.sh environment variable loading & auth check paths
+
+- **Purpose**: Fix `scripts/dev.sh` looking for `SUPABASE_URL`, `REDIS_URL`, and `SUPABASE_ANON_KEY` in relative paths or root `.env` instead of canonical `$REPO_ROOT/apps/portal/.env`.
+- **Changes**:
+  1. `scripts/dev.sh`: resolved env loading paths using `$REPO_ROOT/apps/portal/.env`, extracted `SUPABASE_ANON_KEY`, and added fallback checks for auth config validation.
+- **Verification**: Verified syntax with `bash -n scripts/dev.sh`.
+
 ## 2026-08-17: Codegen Prettier post-hooks integrated
 
 - **Purpose**: Permanently eliminate formatting drift across code generation pipelines (`openapi.generated.json`, `variables-generated.css`, `generated-sd.ts`, `tokens-hsl.json`).
