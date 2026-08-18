@@ -50,12 +50,17 @@ ALTER TABLE memory_embeddings ALTER COLUMN memory_type TYPE memory_type USING me
 ALTER TABLE memory_embeddings ALTER COLUMN memory_type SET DEFAULT 'episodic'::memory_type;
 
 -- Shift Status
-ALTER TABLE shift_status DROP CONSTRAINT IF EXISTS shift_status_shift_type_check;
-ALTER TABLE shift_status DROP CONSTRAINT IF EXISTS shift_status_status_check;
-ALTER TABLE shift_status ALTER COLUMN status DROP DEFAULT;
-ALTER TABLE shift_status ALTER COLUMN shift_type TYPE shift_type USING shift_type::shift_type;
-ALTER TABLE shift_status ALTER COLUMN status TYPE shift_status_type USING status::shift_status_type;
-ALTER TABLE shift_status ALTER COLUMN status SET DEFAULT 'open'::shift_status_type;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'shift_status') THEN
+    ALTER TABLE shift_status DROP CONSTRAINT IF EXISTS shift_status_shift_type_check;
+    ALTER TABLE shift_status DROP CONSTRAINT IF EXISTS shift_status_status_check;
+    ALTER TABLE shift_status ALTER COLUMN status DROP DEFAULT;
+    ALTER TABLE shift_status ALTER COLUMN shift_type TYPE shift_type USING shift_type::shift_type;
+    ALTER TABLE shift_status ALTER COLUMN status TYPE shift_status_type USING status::shift_status_type;
+    ALTER TABLE shift_status ALTER COLUMN status SET DEFAULT 'open'::shift_status_type;
+  END IF;
+END $$;
 
 -- 3. Add Soft Delete to Missing Tables
 ALTER TABLE report_templates ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
