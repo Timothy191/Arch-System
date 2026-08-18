@@ -158,44 +158,43 @@ Dashboards and detailed metrics views are structured using a responsive 12-colum
 
 All interactive elements must support and visually manifest this complete state list:
 
-| Component            | Default                        | Hover                       | Active/Pressed           | Focus-Visible                                  | Disabled                                  |
-| :------------------- | :----------------------------- | :-------------------------- | :----------------------- | :--------------------------------------------- | :---------------------------------------- |
-| **Primary Button**   | `color-accent` bg, white text  | `color-accent-hover` bg     | `scale-[0.97]` transform | `0 0 0 3px oklch(25% 0.005 250 / 0.5)` outline | `opacity-disabled` (0.38), no events      |
-| **Secondary Button** | `color-bg-elevated` bg, border | `bg-hover` bg               | `scale-[0.97]` transform | `0 0 0 3px oklch(25% 0.005 250 / 0.5)` outline | `opacity-disabled` (0.38), no events      |
-| **Form Input**       | `color-bg-sunken`, border      | Inset border color changes  | No scale change          | `color-border-focus` border outline            | `opacity-disabled`, `pointer-events-none` |
-| **Checkbox/Radio**   | `color-bg-sunken` border       | Accent subtle bg hover      | Standard active click    | `0 0 0 3px oklch(60% 0.15 250 / 0.5)` ring     | `opacity-disabled` (0.38), grey fill      |
-| **Select Menu**      | `color-bg-sunken` border       | Subtle background highlight | Open state active        | Focus border indicator                         | Inactive menu option, greyed text         |
+| Component            | Default                                                            | Hover                                      | Active/Pressed           | Focus-Visible                                                   | Disabled                                  |
+| :------------------- | :----------------------------------------------------------------- | :----------------------------------------- | :----------------------- | :-------------------------------------------------------------- | :---------------------------------------- |
+| **Primary Button**   | `color-accent` bg, white text                                      | `color-accent-hover` bg                    | `scale-[0.97]` transform | `0 0 0 3px oklch(25% 0.005 250 / 0.5)` outline                  | `opacity-disabled` (0.38), no events      |
+| **Secondary Button** | `color-bg-elevated` bg, border                                     | `bg-hover` bg                              | `scale-[0.97]` transform | `0 0 0 3px oklch(25% 0.005 250 / 0.5)` outline                  | `opacity-disabled` (0.38), no events      |
+| **Form Input**       | `bg-white/60 backdrop-blur-md`, subtle specular rim, high-contrast | `bg-white/70`, border lightens             | No scale change          | `bg-white/80`, `ring-2 ring-[var(--accent-blue)]/20` focus ring | `opacity-disabled`, `pointer-events-none` |
+| **Checkbox/Radio**   | `color-bg-sunken` border                                           | Accent subtle bg hover                     | Standard active click    | `0 0 0 3px oklch(60% 0.15 250 / 0.5)` ring                      | `opacity-disabled` (0.38), grey fill      |
+| **Select Menu**      | `bg-white/60 backdrop-blur-md`, subtle specular rim                | `bg-white/70`, subtle background highlight | Open state active        | Focus border indicator                                          | Inactive menu option, greyed text         |
 
 ---
 
 ## Interactive Card System
 
-Glass cards serve as the foundational boundaries of the application layout. They exist in four variants, governed by strict usage criteria:
+Glass cards serve as the foundational boundaries of the application layout. They combine frosted translucent panels (`backdrop-blur-2xl`, `backdrop-saturate-[1.35]`), subtle rim lights, and soft ambient diffusion shadows to create tactile depth without visual clutter:
 
 ### Card Variants Matrix
 
-| Variant                | Spacing/Padding                        | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
-| :--------------------- | :------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
-| **Standard GlassCard** | `md` (16px), radius `radius-lg` (8px)  | Background shift to `bg-hover` (`150ms` duration).                 | None on layout; standard hover fade.                                      | Default container. Used for standard lists, charts, and metrics grouping.                |
-| **SpotlightCard**      | `md` (16px), radius `radius-lg` (8px)  | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
-| **GlowBorderCard**     | `md` (16px), radius `radius-lg` (8px)  | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
-| **MacOSPanelCard**     | `lg` (24px), radius `radius-xl` (12px) | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
+| Variant                | Spacing/Padding                        | Surface & Lighting                                                            | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
+| :--------------------- | :------------------------------------- | :---------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **Standard GlassCard** | `md` (16px), radius `radius-lg` (8px)  | `bg-white/75 backdrop-blur-2xl`, cool gradient border, top specular rim       | Background shift to `bg-white/82`, top rim strengthens (150ms).    | None on layout; standard hover elevation.                                 | Default container. Used for standard lists, charts, and metrics grouping.                |
+| **SpotlightCard**      | `md` (16px), radius `radius-lg` (8px)  | Frosted base with radial gradient specular sheen following cursor position    | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
+| **GlowBorderCard**     | `md` (16px), radius `radius-lg` (8px)  | Frosted panel with animated cool chromatic gradient perimeter                 | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
+| **MacOSPanelCard**     | `lg` (24px), radius `radius-xl` (12px) | Heavy frosted panel (`bg-white/75 backdrop-blur-2xl`), dual-layer depth stack | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
 
-### MacOSPanel Variant Specifications
+### Frosted Glass Architecture & Specular Lighting Tokens
 
-**Visual Tokens**:
-
-- **Background**: Extra-frosted glass via `bg-white/75 backdrop-blur-2xl` (light) or `bg-black/60 backdrop-blur-2xl` (dark).
-- **Border**: Inner rim light: `border border-white/60` (light) / `border-white/10` (dark).
-- **Corner radius**: `rounded-xl` (12px) or `rounded-2xl` (16px) depending on container scale.
-- **Static shadow stack**: Two-layer soft shadow for ambient occlusion:  
-  `0 2px 8px rgba(0,0,0,0.04), 0 8px 30px rgba(0,0,0,0.06)`
-
-**Interactive Motion (250ms ease-out-expo)**:
-
-- **Hover lift**: Micro-transform with `translateZ(2px)` and slight `rotateX`/`rotateY` driven by cursor position (parallax effect).
-- **Shadow expansion**: The deeper shadow stretches to `0 12px 40px rgba(0,0,0,0.08)`, visibly detaching the panel.
-- **Dark-mode adaptation**: Shadows become subtle glows (`box-shadow` with white/0.05) to maintain edge definition on black backgrounds.
+1. **Frosted Panel Surfaces**:
+   - Background: `rgba(255, 255, 255, 0.75)` with `backdrop-filter: blur(20px) saturate(140%)`
+   - Top Specular Highlight: `inset 0 1px 0 0 rgba(255, 255, 255, 0.8)`
+   - Subtle Border Gradient: `linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.2) 40%, rgba(180, 195, 220, 0.15) 100%)`
+2. **Volumetric Ambient Occlusion**:
+   - `shadow-glass-depth`: `0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03)`
+   - `shadow-glass-depth-hover`: `0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04)`
+3. **Negative Directives (Enforced)**:
+   - Zero low-contrast text: High-contrast headings and body text strictly preserved (WCAG AAA/AA).
+   - Zero harsh black shadows: Soft multi-layered diffusion only.
+   - Zero neon saturation: Palette restricted to tinted cool neutrals and industrial accents ≤ 10%.
+   - Zero layout clutter: Minimalist compositions and high-density industrial alignment.
 
 ### Card Variant Decision Flowchart
 

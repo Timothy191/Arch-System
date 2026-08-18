@@ -75,13 +75,14 @@
 /* ── Glass Components ── */
 
 .glass-card {
-  --glass-surface: rgba(255, 255, 255, 0.08);
-  --glass-surface-hover: rgba(255, 255, 255, 0.15);
-  --glass-border-top-opacity: 0.25;
+  --glass-surface: rgba(255, 255, 255, 0.72);
+  --glass-surface-hover: rgba(255, 255, 255, 0.85);
+  --glass-border-top-opacity: 0.55;
   --glass-border-gradient: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, var(--glass-border-top-opacity)),
-    rgba(255, 255, 255, 0.05)
+    135deg,
+    rgba(255, 255, 255, var(--glass-border-top-opacity)) 0%,
+    rgba(255, 255, 255, 0.2) 40%,
+    rgba(180, 195, 220, 0.15) 100%
   );
 
   position: relative;
@@ -89,10 +90,13 @@
   background:
     linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
     var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid transparent;
-  box-shadow: var(--glass-shadow);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    0 4px 20px -2px rgba(15, 23, 42, 0.05),
+    0 2px 6px -1px rgba(0, 0, 0, 0.03);
   border-radius: var(--radius-card);
   color: var(--text-on-glass);
   transition:
@@ -102,13 +106,16 @@
 }
 
 .glass-card:hover {
-  --glass-surface: rgba(255, 255, 255, 0.85);
-  --glass-border-top-opacity: 0.35;
+  --glass-surface: rgba(255, 255, 255, 0.82);
+  --glass-border-top-opacity: 0.7;
 
   background:
     linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
     var(--glass-border-gradient) border-box;
-  box-shadow: var(--shadow-card-hover);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
+    0 10px 30px -4px rgba(15, 23, 42, 0.08),
+    0 4px 12px -2px rgba(0, 0, 0, 0.04);
   transform: translateY(-2px);
 }
 
@@ -131,23 +138,26 @@
 .glass-depth-card {
   box-shadow:
     var(--shadow-card),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.85),
     inset 0 -0.5px 0 rgba(0, 0, 0, 0.03),
-    inset 0 2px 8px rgba(0, 0, 0, 0.02);
+    0 8px 24px -4px rgba(15, 23, 42, 0.06);
 }
 
 .glass-input {
   position: relative;
   z-index: 20;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
   background:
-    linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
-    var(--glass-border-gradient) border-box;
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  backdrop-filter: blur(12px) saturate(150%);
+    linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.5)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(28, 28, 30, 0.12) 100%) border-box;
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid transparent;
   border-radius: var(--radius-button);
-  color: var(--text-on-glass);
+  color: var(--text-heading, #1d1d1f);
+  box-shadow:
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    inset 0 -0.5px 0 0 rgba(255, 255, 255, 0.8);
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-medium),
@@ -155,11 +165,14 @@
 }
 
 .glass-input:focus {
-  border-color: var(--accent-blue);
-  background: var(--glass-surface);
+  border-color: var(--accent-blue, #1c1c1e);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.75)) padding-box,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(28, 28, 30, 0.3) 100%) border-box;
   box-shadow:
-    0 0 0 2px rgba(28, 28, 30, 0.18),
-    var(--shadow-glow-blue);
+    0 0 0 2px rgba(28, 28, 30, 0.12),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+    0 4px 12px -2px rgba(15, 23, 42, 0.08);
   outline: none;
   transition: all var(--transition-fast);
 }

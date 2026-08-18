@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS delay_categories (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure columns exist if table already existed
+ALTER TABLE delay_categories ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE delay_categories ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE delay_categories ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 -- Seed initial delay categories
 INSERT INTO delay_categories (name, description) VALUES
   ('External', 'Delays caused by external factors beyond operational control'),

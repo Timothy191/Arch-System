@@ -8,6 +8,10 @@
 --                 based on WHERE clauses (constraint exclusion)
 --              2. Automatic archiving of old partitions to separate tables
 --              3. Reduced query time for date-range filtered queries
+--
+-- Security Note: This migration does not create new tables - only functions
+-- and an archive schema. RLS is not applicable to schemas or functions.
+-- Table security is handled by existing table-level RLS policies.
 -- ============================================
 
 -- ============================================

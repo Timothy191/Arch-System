@@ -3,7 +3,9 @@
   "description": "Shared Radix/shadcn UI components including glass cards, animated components, data grids, and workflow builders",
   "version": "1.0.0",
   "dependencies": {
+    "@base-ui/react": "^1.7.0",
     "@formkit/auto-animate": "^0.8.2",
+    "@liqui-design/glass": "^0.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-scroll-area": "^1.2.10",
@@ -81,15 +83,16 @@
     "./TelemetryChart": "./src/components/ui/telemetry-chart.tsx",
     "./FreezeToggle": "./src/components/ui/freeze-toggle.tsx",
     "./Pagination": "./src/components/ui/pagination.tsx",
+    "./LiquiButton": "./src/components/ui/liqui-button.tsx",
     "./hooks/useAutoSave": "./src/hooks/useAutoSave.ts",
     "./nodes/PluginNode": "./src/components/nodes/PluginNode.tsx",
     "./nodes/TriggerNode": "./src/components/nodes/TriggerNode.tsx",
     "./edges/FlowEdge": "./src/components/edges/FlowEdge.tsx"
   },
   "peerDependencies": {
+    "next": "^16.2.6",
     "react": "^19",
-    "react-dom": "^19",
-    "next": "^16.2.6"
+    "react-dom": "^19"
   },
   "private": true,
   "scripts": {

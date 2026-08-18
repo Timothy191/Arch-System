@@ -1,5 +1,16 @@
 # Agent Tracer - @repo/theme
 
+## 2026-08-18 - Liqui Design Token Integration
+
+- **Purpose**: Add liqui design system CSS variables to support liquid-glass components without disrupting existing theme structure.
+- **Changes**:
+  - `src/css/variables.css`: Added liqui design tokens section with light mode variables (--lq-radius, --lq-text, --lq-text-dim, --lq-tint, --lq-tint-deep, --lq-rim-hi, --lq-rim-lo, --lq-highlight, --lq-accent, --lq-danger, --lq-danger-text, --lq-scrim).
+  - Included commented dark mode liqui tokens for future reference (system is currently light-only).
+  - Integrated tokens into existing theme structure under "LIQUI DESIGN TOKENS" section.
+  - Ran theme build to regenerate CSS variables and TypeScript token maps.
+- **Status**: Integration complete, liqui tokens available for use in components.
+- **Next Steps**: Components can now reference liqui design tokens for glass effects and component styling.
+
 ## 2026-08-17 - Style Dictionary Prettier Post-Hook
 
 - **Purpose**: Prevent cosmetic formatting drift across generated theme files (`variables-generated.css`, `generated-sd.ts`, `tokens-hsl.json`).

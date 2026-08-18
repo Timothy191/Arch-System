@@ -67,7 +67,7 @@ enabled = true
 # Port to use for Supabase Studio.
 port = 54323
 # External URL of the API server that frontend connects to.
-api_url = "http://192.168.0.50"
+api_url = "http://192.168.0.195"
 # OpenAI API Key to use for Supabase AI in the Supabase Studio.
 # Removed: AI features now run on local Ollama; no external key needed.
 # openai_api_key = "env(OPENAI_API_KEY)"

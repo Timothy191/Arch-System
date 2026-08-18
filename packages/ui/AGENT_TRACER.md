@@ -1,5 +1,18 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-18 - Liqui Design Integration
+
+- **Purpose**: Integrate liqui liquid-glass components into the existing design system without disrupting current theme tokens.
+- **Changes**:
+  - `components.json`: Added `@liqui-design` registry pointing to `https://liqui.design/r/{name}.json` for shadcn CLI component installation.
+  - `package.json`: Added `@liqui-design/glass@^0.2.2` dependency and `@base-ui/react@^1.7.0` (required by liqui components).
+  - `package.json`: Registered `./LiquiButton` export for the new liqui button component.
+  - `liqui-button.tsx`: Created new liqui-compatible button component using Base UI primitives and LiquiGlass surface with glass/accent/danger variants.
+  - `packages/theme/src/css/variables.css`: Added liqui design tokens (--lq-radius, --lq-text, --lq-tint, --lq-accent, etc.) integrated into existing theme structure.
+  - Theme build: Ran `pnpm --filter @repo/theme build` to regenerate CSS variables with new liqui tokens.
+- **Status**: Integration complete, type-check passes for both @repo/ui and portal packages.
+- **Next Steps**: Users can now import and use `LiquiButton` from `@repo/ui/LiquiButton` and install additional liqui components via `npx shadcn@latest add @liqui-design/<component>`.
+
 ## 2026-06-25 - Design system shadow token compliance
 
 - **Purpose**: Remove forbidden Tailwind `shadow-*` utilities per DESIGN.md / design-system rules.

@@ -1,5 +1,13 @@
 # Portal Agent Tracer
 
+## 2026-08-18: DepartmentCard Quick Actions Micro-Animations & Styling Enhancement
+
+- **Purpose**: Enhance `DepartmentCard.tsx` quick action pills with dynamic micro-animations, active glow feedback, and smooth icon transitions.
+- **Changes**:
+  1. `apps/portal/features/hub/components/DepartmentCard.tsx`: updated action pill styling with hover scale micro-animations (`hover:scale-105`), active click compression (`active:scale-95`), accent border highlights (`hover:border-arch-accent-blue/40`), and directional arrow translations (`group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5`).
+- **Verification**: Ran Jest tests for `DepartmentCard.test.tsx` and verified 0 regressions.
+- **What the Next Agent Should Know**: Quick actions within DepartmentCard now adhere to modern micro-animation standards specified in `@repo/theme`.
+
 ## 2026-08-18: Control Room Frontend & Backend Audit
 
 - **Purpose**: Audit the Control Room frontend and backend systems, analyze implementation status against `docs/operations/CONTROL_ROOM_IMPLEMENTATION_TODO.md` and transition readiness for the Engineering Department.

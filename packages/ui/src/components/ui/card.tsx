@@ -7,9 +7,9 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        "isolate relative m-4 rounded-lg border border-black/[0.08] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.3] text-card-foreground shadow-glass-depth glass-depth-card glass-shimmer",
-        "transition-all duration-300 ease-glass hover:scale-[1.01] hover:shadow-glass-depth-hover active:scale-[0.995] active:shadow-glass-depth-active",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+        "isolate relative rounded-xl border border-white/50 bg-white/75 backdrop-blur-2xl backdrop-saturate-[1.35] text-card-foreground shadow-glass-depth glass-depth-card",
+        "transition-all duration-300 ease-glass hover:scale-[1.008] hover:shadow-glass-depth-hover hover:border-white/70 active:scale-[0.995] active:shadow-glass-depth-active",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
         "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100",
         className,
       )}

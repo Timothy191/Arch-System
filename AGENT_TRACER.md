@@ -920,3 +920,25 @@ Document the strategic roadmap and action plan for long-term health and efficien
   - Reloaded user systemd daemon and restarted `mpvpaper.service`.
   - Ran `pnpm quality` to ensure all workspace checks pass 100% green.
 - **Next Agent Context**: Wallpaper service is active and utilizing hardware accelerated decoding. Load average is normalized, and all project quality checks are 100% green.
+
+## 2026-08-18T09:16:00Z - Resolved MCP Server Startup Configuration & Quality Gate Pass
+
+- **Purpose**: Resolve initialization errors for `knowledge-rail`, `google-cloud-quotas`, and `inngest` MCP servers and verify workspace gates.
+- **Changes**:
+  - Configured `--root /home/tim/Documents/Arch-System` argument for `knowledge-rail` in both workspace `.agents/mcp_config.json` and global `~/.gemini/config/mcp_config.json`.
+  - Removed `google-cloud-quotas` from global `~/.gemini/config/mcp_config.json`.
+  - Removed `inngest` from global `~/.gemini/config/mcp_config.json` and workspace `.agents/mcp_config.json`.
+  - Ran `pnpm quality` to verify all workspace lint, type, test, knip, syncpack, policy, and RLS security checks pass 100% green (exit code 0).
+- **Next Agent Context**: MCP configurations are cleaned up and `knowledge-rail` is bound to the workspace root. All workspace quality gates are fully green.
+
+## 2026-08-18T09:35:00Z - Applied Global Frosted Glassmorphism Design System to Cards & Forms
+
+- **Purpose**: Globally apply refined frosted glass panels, soft glossy textures, subtle cool gradient borders, and ambient lighting to cards and form inputs, updating design tokens and living documentation.
+- **Changes**:
+  - Extended `glassVariants` in `packages/theme/src/tokens/glass.ts` with `glossy`, saturation dials, and specular sheen.
+  - Refined `.glass-card`, `.glass-depth-card`, and `.glass-input` in `packages/theme/src/css/glass.css`.
+  - Updated `<Card />`, `<Input />`, and `FormFields.tsx` in `packages/ui` to adopt frosted translucency and specular rim highlights.
+  - Fixed `shadow-xs` violation in `apps/portal/features/hub/components/DepartmentCard.tsx` to `shadow-sm`.
+  - Synchronized `docs/DESIGN.md` and created living documentation in `system-wiki/design-system-glass-tokens.md` and `agentic-system-wiki/mcp-environment-state.md`.
+  - Verified `pnpm quality` passes 100% green across all 32 workspace projects.
+- **Next Agent Context**: Frosted glass tokens, cards, and form inputs are active, documented, and verified.
