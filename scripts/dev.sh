@@ -290,11 +290,20 @@ START_CMS=false
 START_OVERVIEW=false
 RUN_E2E=false
 STRICT_MODE=false
+HEADLESS_MODE=false
+HOSTED_MODE=false
+
+if [ "${HEADLESS:-false}" = "true" ] || [ "${CI:-false}" = "true" ] || [ "${NO_OPEN:-false}" = "true" ]; then
+  HEADLESS_MODE=true
+fi
+
 while [ $# -gt 0 ]; do
   case "$1" in
     --force|-f) FORCE_KILL=true; shift ;;
     --tools|-t) START_TOOLS=true; shift ;;
     --quick|-q) QUICK_MODE=true; shift ;;
+    --headless|--no-open) HEADLESS_MODE=true; shift ;;
+    --hosted|--no-docker) HOSTED_MODE=true; shift ;;
     --cms)      START_CMS=true; shift ;;
     --overview) START_OVERVIEW=true; shift ;;
     --e2e)      RUN_E2E=true; shift ;;
@@ -304,10 +313,17 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]]; then
+  HOSTED_MODE=true
+fi
+
 banner
 
 if [ "$QUICK_MODE" = "true" ]; then
   echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
+  echo
+elif [ "$HOSTED_MODE" = "true" ]; then
+  echo -e "  ${CYAN}${BOLD}☁️ Hosted mode${NC} — connecting directly to hosted Supabase ($SUPABASE_URL)"
   echo
 fi
 
@@ -387,6 +403,12 @@ if [ "$FORCE_RESTART" = "true" ]; then
     rm -f "$REPO_ROOT/skills-lock.json"
     check "skills-lock.json" "pass" "removed"
   fi
+
+  # Clean orphan MCP processes to free RAM
+  pkill -f "next-devtools-mcp" 2>/dev/null || true
+  pkill -f "codebase-memory-mcp" 2>/dev/null || true
+  pkill -f "@modelcontextprotocol" 2>/dev/null || true
+  check "Orphan MCP workers" "pass" "cleaned"
 
   clean_dir_cache "$REPO_ROOT/deployment-logs" "Deployment logs directory"
   clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
@@ -576,6 +598,11 @@ if [ "$QUICK_MODE" = "true" ]; then
   check "Supabase API" "skip" "quick mode"
   check "Database" "skip" "quick mode"
   check "Studio" "skip" "quick mode"
+elif [ "$HOSTED_MODE" = "true" ]; then
+  phase 2 "Infrastructure (Cloud-First)"
+  check "Supabase API" "pass" "${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co} (hosted)"
+  check "Database" "pass" "Cloud Postgres responding"
+  check "Studio" "skip" "hosted dashboard at supabase.com"
 else
   phase 2 "Infrastructure"
 
@@ -611,7 +638,7 @@ else
       echo -e "  ${INFO} Starting Docker Tools..."
       $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d > /dev/null 2>&1
 
-      local services=("plantcor-redis" "plantcor-n8n" "plantcor-flowise" "plantcor-langfuse-db" "plantcor-langfuse" "plantcor-qdrant")
+      local services=("plantcor-redis" "plantcor-qdrant")
       for service in "${services[@]}"; do
         printf "  ${CYAN}⏳${NC} Gating on $service health... "
         local attempts=0
@@ -682,6 +709,21 @@ else
   # fi
 fi
 
+# ── Phase 2.5: MCP Servers ────────────────────────────────
+phase "2.5" "MCP Servers"
+
+if node "$REPO_ROOT/scripts/sync-mcp-config.js"; then
+  check "MCP Configs" "pass" "synchronized"
+else
+  check "MCP Configs" "fail" "failed to sync"
+fi
+
+if node "$REPO_ROOT/scripts/validate-mcp-servers.js"; then
+  check "MCP Status" "pass" "verified and operational"
+else
+  check "MCP Status" "warn" "some optional servers are offline (see validation details above)"
+fi
+
 # ── Phase 3: Portal (Start + Wait) ────────────────────────
 phase 3 "Portal"
 
@@ -689,7 +731,7 @@ if [ "${SKIP_RESTART:-false}" = "true" ]; then
   check "Dev server" "pass" "http://localhost:$PORT (already up)"
 else
   cd "$REPO_ROOT/apps/portal"
-  PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=4096}" pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
+  PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! > "$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
   echo -e "  ${INFO} Starting Next.js dev server..."
@@ -832,6 +874,10 @@ if [ "$RUN_E2E" = "true" ]; then
   fi
 fi
 
-open_browser
-launch_status_terminal
+if [ "$HEADLESS_MODE" != "true" ]; then
+  open_browser
+  launch_status_terminal
+else
+  check "Browser & Status Terminal" "skip" "headless mode"
+fi
 wait

@@ -31,12 +31,12 @@ ALTER FUNCTION public.has_department_access(uuid) SET search_path = public, pg_t
 ALTER FUNCTION public.user_department_id() SET search_path = public, pg_temp;
 ALTER FUNCTION public.handle_new_user() SET search_path = public, pg_temp;
 
-ALTER FUNCTION public.submit_user_feedback(text, text, text, text, jsonb, text, text) SET search_path = public, pg_temp;
-ALTER FUNCTION public.submit_quick_feedback(text, integer, text, jsonb) SET search_path = public, pg_temp;
+ALTER FUNCTION public.submit_user_feedback(text, text, integer, text, uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.submit_quick_feedback(text, text, text, text) SET search_path = public, pg_temp;
 
 ALTER FUNCTION public.get_conversation_history(text, uuid, integer) SET search_path = public, extensions, pg_temp;
-ALTER FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision) SET search_path = public, extensions, pg_temp;
-ALTER FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision) SET search_path = public, extensions, pg_temp;
+ALTER FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision, integer) SET search_path = public, extensions, pg_temp;
+ALTER FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision, integer) SET search_path = public, extensions, pg_temp;
 
 -- ============================================================================
 -- 3. RLS WITH CHECK Validation (rls_policy_always_true)
@@ -58,7 +58,7 @@ CREATE POLICY "authenticated_can_create_feedback" ON public.user_feedback
 DROP POLICY IF EXISTS "any_user_can_quick_feedback" ON public.quick_feedback;
 CREATE POLICY "any_user_can_quick_feedback" ON public.quick_feedback
   FOR INSERT TO anon, authenticated
-  WITH CHECK (page_url IS NOT NULL AND rating >= 1 AND rating <= 5);
+  WITH CHECK (page_url IS NOT NULL AND reaction IS NOT NULL);
 
 -- ============================================================================
 -- 4. SECURITY DEFINER Execution Privileges (anon_security_definer_function_executable)
@@ -82,8 +82,8 @@ GRANT EXECUTE ON FUNCTION public.user_department_id() TO authenticated, service_
 REVOKE EXECUTE ON FUNCTION public.get_conversation_history(text, uuid, integer) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_conversation_history(text, uuid, integer) TO authenticated, service_role;
 
-REVOKE EXECUTE ON FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision) TO authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision, integer) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.search_memories_hybrid(extensions.vector, text, uuid, text, text, integer, double precision, double precision, double precision, integer) TO authenticated, service_role;
 
-REVOKE EXECUTE ON FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision) TO authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision, integer) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.search_memories_semantic(extensions.vector, uuid, text, text, integer, double precision, integer) TO authenticated, service_role;

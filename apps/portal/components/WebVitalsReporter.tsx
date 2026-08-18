@@ -9,6 +9,7 @@ interface Metric {
   delta: number;
   id?: string;
   label?: string;
+  attribution?: Record<string, unknown>;
 }
 
 /**
@@ -17,7 +18,7 @@ interface Metric {
  * Reports Core Web Vitals (LCP, CLS, FCP, TTFB, INP) in production.
  * Data is collected and made available via:
  *   - `data-web-vital-*` attributes on <body> for scraping by monitoring
- *   - `sessionStorage` for single-session aggregation
+ *   - `sessionStorage` for single-session aggregation with experimental attribution
  *   - Console logging in development
  *
  * This is intentionally lightweight — no external dependencies, no backend
@@ -26,13 +27,14 @@ interface Metric {
  */
 export function WebVitalsReporter() {
   useReportWebVitals((metric: Metric) => {
-    // Dev-mode logging
+    // Dev-mode logging with experimental attribution data
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
       console.debug(`[Web Vitals] ${metric.name}:`, {
         value: metric.value,
         rating: metric.rating,
         delta: metric.delta,
+        attribution: metric.attribution,
       });
       return;
     }
@@ -45,12 +47,20 @@ export function WebVitalsReporter() {
       // Silently ignore — attribute setting is non-critical
     }
 
-    // Accumulate in sessionStorage for per-session aggregation
+    // Accumulate in sessionStorage for per-session aggregation with attribution
     try {
       const key = `wv:${metric.name}`;
       const raw = sessionStorage.getItem(key);
-      const entries: Array<{ value: number; rating: string }> = raw ? JSON.parse(raw) : [];
-      entries.push({ value: metric.value, rating: metric.rating });
+      const entries: Array<{
+        value: number;
+        rating: string;
+        attribution?: Record<string, unknown>;
+      }> = raw ? JSON.parse(raw) : [];
+      entries.push({
+        value: metric.value,
+        rating: metric.rating,
+        attribution: metric.attribution,
+      });
       // Keep only last 50 entries per metric
       if (entries.length > 50) entries.shift();
       sessionStorage.setItem(key, JSON.stringify(entries));

@@ -192,9 +192,9 @@ check_firewall() {
       warn "  5678/tcp (n8n)"
       warn "  6333/tcp (Qdrant)"
       warn "  8123/tcp (ClickHouse)"
-      warn "  9090/tcp (Prometheus)"
-      warn "  3001/tcp (Grafana)"
-      warn "  8080/tcp (cAdvisor)"
+      warn "  9093/tcp (Prometheus)"
+      warn "  9091/tcp (Grafana)"
+      warn "  8082/tcp (cAdvisor)"
       info "Run: sudo firewall-cmd --permanent --add-port=3000/tcp && sudo firewall-cmd --reload"
     else
       success "firewalld installed but not running"
@@ -617,7 +617,7 @@ setup_monitoring() {
 
   success "Monitoring stack started"
   info "Services include: Prometheus, Grafana, cAdvisor"
-  info "Grafana will be available at http://localhost:3001 (default)"
+  info "Grafana will be available at http://localhost:9091 (default)"
   info "To view logs: docker-compose -f $monitoring_file logs -f"
   info "To stop: docker-compose -f $monitoring_file down"
 }
@@ -706,9 +706,9 @@ print_summary() {
 
   if [ "$SKIP_MONITORING" = false ]; then
     echo -e "${BOLD}Monitoring Stack:${NC}"
-    echo -e "  • Prometheus: ${GREEN}Running${NC} (http://localhost:9090)"
-    echo -e "  • Grafana: ${GREEN}Running${NC} (http://localhost:3001)"
-    echo -e "  • cAdvisor: ${GREEN}Running${NC} (http://localhost:8080)"
+    echo -e "  • Prometheus: ${GREEN}Running${NC} (http://localhost:9093)"
+    echo -e "  • Grafana: ${GREEN}Running${NC} (http://localhost:9091)"
+    echo -e "  • cAdvisor: ${GREEN}Running${NC} (http://localhost:8082)"
     echo
   fi
 
@@ -719,7 +719,7 @@ print_summary() {
 
   echo -e "\nLocal services recommendations:"
   echo -e "  • Flowise, Supabase, n8n, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
-  echo -e "  • Open required ports (3000, 3001, 5678, 5243, 6333, 8123, 9090, 3001) in your firewall for internal access."
+  echo -e "  • Open required ports (3000, 3001, 5678, 6333, 8123, 9091, 9093, 8082) in your firewall for internal access."
   echo -e "  • Confirm .env.tools has correct credentials for services (N8N, FLOWISE, REDIS_PASSWORD)."
   echo -e "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."
   echo

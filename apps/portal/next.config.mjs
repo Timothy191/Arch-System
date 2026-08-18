@@ -22,7 +22,7 @@ const nextConfig = {
     // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled
     root: workspaceRoot,
   },
-  output: enableHeavyPlugins ? "standalone" : undefined,
+  output: "standalone",
   env: {
     PORTAL_VERSION,
   },
@@ -78,8 +78,28 @@ const nextConfig = {
     return config;
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "@tremor/react"],
+    // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "@tremor/react",
+      "@xyflow/react",
+      "clsx",
+      "tailwind-merge",
+      "date-fns",
+      "recharts",
+      "sonner",
+      "@ai-sdk/react",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-popover",
+    ],
+    // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
     inlineCss: true,
+    // AGENT-TRACE: Injects detailed attribution info (elements, network events) into useReportWebVitals
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
   },
   async headers() {

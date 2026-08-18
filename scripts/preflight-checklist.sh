@@ -146,9 +146,8 @@ check_port "$PORT"        "Portal"
 check_port 54321          "Supabase API"
 check_port 54322          "Supabase DB"
 check_port 6379           "Redis"
-check_port 5678           "n8n"
-check_port 3001           "Flowise"
-check_port 3002           "Langfuse"
+
+
 check_port 6333           "Qdrant"
 check_port 9091           "Grafana"
 check_port 9092           "Prometheus"
@@ -195,9 +194,8 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   }
 
   check_container "plantcor-redis"
-  check_container "plantcor-n8n"
-  check_container "plantcor-flowise"
-  check_container "plantcor-langfuse"
+
+
   check_container "plantcor-qdrant"
   check_container "plantcor-prometheus"
   check_container "plantcor-fuxa"
@@ -320,6 +318,23 @@ for target in "${CLEAN_TARGETS[@]}"; do
 done
 
 [ ${#CLEAN_TARGETS[@]} -eq 0 ] && check_pass "No stale caches"
+
+# ═══════════════════════════════════════════════════════════
+# 11. MCP SERVERS
+# ═══════════════════════════════════════════════════════════
+header "11. MCP Servers"
+
+if node "$REPO_ROOT/scripts/sync-mcp-config.js" >/dev/null 2>&1; then
+  check_pass "MCP configurations synchronized (.mcp.json, .agents/mcp_config.json, .vscode/mcp.json)"
+else
+  check_fail "Failed to synchronize MCP configurations"
+fi
+
+if node "$REPO_ROOT/scripts/validate-mcp-servers.js"; then
+  check_pass "All critical MCP servers verified and operational"
+else
+  check_fail "One or more MCP servers are offline or misconfigured"
+fi
 
 # ═══════════════════════════════════════════════════════════
 # SUMMARY

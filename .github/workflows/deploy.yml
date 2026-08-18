@@ -45,7 +45,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
@@ -84,7 +84,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:
@@ -116,14 +116,41 @@ jobs:
             git pull origin main
             ./scripts/deploy.sh staging --force
 
+      # Option 3: Staging Compose Stack Simulation Smoke Test
+      - name: Staging Compose Simulation Smoke Test
+        if: vars.DEPLOY_TARGET == 'docker' || vars.DEPLOY_TARGET == 'staging-compose' || vars.DEPLOY_TARGET == ''
+        run: |
+          ./scripts/staging-local.sh start
+          # Poll reverse proxy and portal endpoints
+          for i in $(seq 1 20); do
+            if curl -s http://localhost:8080/healthz > /dev/null && curl -sk https://localhost:8443/healthz > /dev/null; then
+              echo "Staging reverse proxy is responsive on ports 8080/8443"
+              break
+            fi
+            sleep 2
+          done
+          # Validate reverse proxy and SSL endpoints
+          curl -f http://localhost:8080/healthz || exit 1
+          curl -k -f https://localhost:8443/healthz || exit 1
+          ./scripts/staging-local.sh status
+        env:
+          DOCKER_BUILDKIT: 1
+          COMPOSE_DOCKER_CLI_BUILD: 1
+
+      - name: Teardown Staging Compose Stack
+        if: always()
+        run: |
+          ./scripts/staging-local.sh stop || true
+
       - name: Health Check
+        if: vars.STAGING_URL != ''
         run: |
           sleep 10
           curl -f ${{ vars.STAGING_URL }}/api/health || exit 1
 
       - name: Output URL
         id: deploy
-        run: echo "url=${{ vars.STAGING_URL }}" >> $GITHUB_OUTPUT
+        run: echo "url=${{ vars.STAGING_URL || 'http://localhost:8080' }}" >> $GITHUB_OUTPUT
 
   # ── Deploy to Production ──────────────────────────────────
   deploy-production:
@@ -141,7 +168,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9.15.9
 
       - uses: actions/setup-node@v4
         with:

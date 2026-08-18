@@ -1,3 +1,17 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+try {
+  const nextEnv = require("@next/env");
+  if (nextEnv && !nextEnv.default) {
+    Object.defineProperty(nextEnv, "default", {
+      value: nextEnv,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+} catch (e) {}
+
 import { getPayload } from "payload";
 import config from "../payload.config";
 

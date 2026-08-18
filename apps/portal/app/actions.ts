@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import { inngest, aiGenerateEmbeddingEvent } from "@repo/utils/inngest";
 import { logError } from "@/lib/errors/error-logger";
+import { monthlyReportInputSchema } from "@repo/contract";
+
+export const MonthlyReportInputSchema = monthlyReportInputSchema;
 
 export async function logout() {
   const supabase = await createServerSupabaseClient();
@@ -58,7 +61,7 @@ export async function revalidateRSC(tags: string[]) {
   return { success: true };
 }
 
-export async function generateMonthlyReport(reportData: any, departmentId?: string) {
+export async function generateMonthlyReport(rawReportData: unknown, departmentId?: string) {
   // Validate that the user is authenticated (Always validate the user at the top)
   const supabase = await createServerSupabaseClient();
   const {
@@ -68,6 +71,9 @@ export async function generateMonthlyReport(reportData: any, departmentId?: stri
   if (!user) {
     throw new Error("Unauthorized");
   }
+
+  // AGENT-TRACE: Enforce strict runtime schema validation via @repo/contract
+  const reportData = monthlyReportInputSchema.parse(rawReportData);
 
   // Validate user role is admin or manager
   const { data: employee } = await supabase

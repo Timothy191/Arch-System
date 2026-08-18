@@ -20,6 +20,13 @@ const ControlRoomActivityFeed = dynamic(
   },
 );
 
+const ControlRoomChecklistWidget = dynamic(
+  () => import("@/features/departments").then((mod) => mod.ControlRoomChecklistWidget),
+  {
+    loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+  },
+);
+
 const WeatherWidget = dynamic(
   () => import("@/components/weather/WeatherWidget").then((mod) => mod.WeatherWidget),
   {
@@ -45,16 +52,7 @@ const SatelliteMonitoringDashboard = dynamic(
   },
 );
 
-const SafetyDashboard = dynamic(
-  () => import("@/features/departments").then((mod) => mod.SafetyDashboard),
-  {
-    loading: () => (
-      <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="w-8 h-8 border-2 border-[var(--accent-green)]/20 border-t-[var(--accent-green)] rounded-full animate-spin" />
-      </div>
-    ),
-  },
-);
+import { SafetyDashboard } from "~/features/departments/components/safety/SafetyDashboard";
 
 export default async function DepartmentDashboard({
   params,
@@ -72,7 +70,17 @@ export default async function DepartmentDashboard({
   }
 
   if (dept.type === "safety") {
-    return <SafetyDashboard deptId={deptId} />;
+    return (
+      <Suspense
+        fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
+            <div className="w-8 h-8 border-2 border-[var(--accent-green)]/20 border-t-[var(--accent-green)] rounded-full animate-spin" />
+          </div>
+        }
+      >
+        <SafetyDashboard deptId={deptId} />
+      </Suspense>
+    );
   }
 
   const isControlRoom = dept.type === "control_room";
@@ -144,6 +152,18 @@ export default async function DepartmentDashboard({
               fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
             >
               <ShiftCoverageSection deptId={deptId} deptSlug={deptSlug} today={today} />
+            </Suspense>
+
+            {/* Control Room Shift Checklist & Operational KPIs */}
+            <Suspense
+              fallback={<div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
+            >
+              <ControlRoomChecklistWidget
+                departmentId={deptId}
+                departmentSlug={deptSlug}
+                date={today}
+                shift={getCurrentShift()}
+              />
             </Suspense>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

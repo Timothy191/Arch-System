@@ -1,10 +1,71 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "skillListingMaxDescChars": 2048,
+  "skillListingBudgetFraction": 0.05,
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
   },
-  "skillListingMaxDescChars": 2048,
-  "skillListingBudgetFraction": 0.05,
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch)",
+      "Bash(git remote)",
+      "Bash(ls *)",
+      "Bash(pnpm quality)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm type-check)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test:e2e)",
+      "Bash(pnpm format:check)",
+      "Bash(pnpm format)",
+      "Bash(pnpm build)",
+      "Bash(pnpm --filter *)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm knip)",
+      "Bash(pnpm knip:fix)",
+      "Bash(pnpm deps:check)",
+      "Bash(pnpm deps:fix)",
+      "Bash(pnpm deps:lint)",
+      "Bash(pnpm md:lint)",
+      "Bash(pnpm md:fix)",
+      "Bash(pnpm db:docs)",
+      "Bash(pnpm --filter @repo/database *)",
+      "Bash(pnpm deploy:local)",
+      "Bash(pnpm deploy:staging)",
+      "Bash(pnpm deploy:production)",
+      "Bash(pnpm deploy:rollback)",
+      "Bash(pnpm fresh-start)",
+      "Bash(pnpm shutdown)",
+      "Bash(pnpm monitor*)",
+      "Bash(./scripts/*)",
+      "mcp__codebase-memory__list_projects",
+      "mcp__codebase-memory__index_status",
+      "mcp__codebase-memory__check_index_coverage",
+      "mcp__codebase-memory__search_graph",
+      "mcp__codebase-memory__search_code",
+      "mcp__codebase-memory__get_code_snippet",
+      "mcp__codebase-memory__get_architecture",
+      "mcp__codebase-memory__get_graph_schema",
+      "mcp__codebase-memory__query_graph",
+      "mcp__codebase-memory__trace_path",
+      "mcp__codebase-memory__detect_changes",
+      "mcp__knowledge-rail__knowledge_context",
+      "mcp__knowledge-rail__knowledge_document_context",
+      "mcp__nx-mcp__nx_docs",
+      "mcp__nx-mcp__nx_current_running_tasks_details",
+      "mcp__nx-mcp__nx_current_running_task_output",
+      "mcp__nx-mcp__nx_visualize_graph"
+    ],
+    "deny": [
+      "Bash(git push --force)",
+      "Bash(git reset --hard *)",
+      "Bash(git checkout .)",
+      "Bash(rm -rf *)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -180,8 +241,16 @@
     "linear@claude-plugins-official": false,
     "remember@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
-    "qodo-skills@claude-plugins-official": true,
-    "nx@nx-claude-plugins": true
+    "nx@nx-claude-plugins": true,
+    "qodo@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "nx-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "nrwl/nx-ai-agents-config"
+      }
+    }
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
@@ -193,62 +262,10 @@
   "showTurnDuration": true,
   "terminalProgressBarEnabled": true,
   "todoFeatureEnabled": true,
-  "permissions": {
-    "allow": [
-      "Bash(git status)",
-      "Bash(git log *)",
-      "Bash(git diff *)",
-      "Bash(git show *)",
-      "Bash(git branch)",
-      "Bash(git remote)",
-      "Bash(ls *)",
-      "Bash(pnpm quality)",
-      "Bash(pnpm lint)",
-      "Bash(pnpm type-check)",
-      "Bash(pnpm test)",
-      "Bash(pnpm test:e2e)",
-      "Bash(pnpm format:check)",
-      "Bash(pnpm format)",
-      "Bash(pnpm build)",
-      "Bash(pnpm --filter *)",
-      "Bash(pnpm dev)",
-      "Bash(pnpm knip)",
-      "Bash(pnpm knip:fix)",
-      "Bash(pnpm deps:check)",
-      "Bash(pnpm deps:fix)",
-      "Bash(pnpm deps:lint)",
-      "Bash(pnpm md:lint)",
-      "Bash(pnpm md:fix)",
-      "Bash(pnpm db:docs)",
-      "Bash(pnpm --filter @repo/database *)",
-      "Bash(pnpm deploy:local)",
-      "Bash(pnpm deploy:staging)",
-      "Bash(pnpm deploy:production)",
-      "Bash(pnpm deploy:rollback)",
-      "Bash(pnpm fresh-start)",
-      "Bash(pnpm shutdown)",
-      "Bash(pnpm monitor*)",
-      "Bash(./scripts/*)"
-    ],
-    "deny": [
-      "Bash(git push --force)",
-      "Bash(git reset --hard *)",
-      "Bash(git checkout .)",
-      "Bash(rm -rf *)"
-    ]
-  },
   "mcpServers": {
     "reporecall": {
       "command": "npx",
       "args": ["-y", "@proofofwork-agency/reporecall", "mcp"]
-    }
-  },
-  "extraKnownMarketplaces": {
-    "nx-claude-plugins": {
-      "source": {
-        "source": "github",
-        "repo": "nrwl/nx-ai-agents-config"
-      }
     }
   }
 }

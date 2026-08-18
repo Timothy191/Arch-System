@@ -7,7 +7,7 @@
 -- ============================================================================
 -- 1. Drop Duplicate Index on delay_categories
 -- ============================================================================
-DROP INDEX IF EXISTS public.delay_categories_name_unique;
+ALTER TABLE public.delay_categories DROP CONSTRAINT IF EXISTS delay_categories_name_unique;
 
 -- ============================================================================
 -- 2. employees RLS Policies Optimization
@@ -97,50 +97,51 @@ CREATE POLICY "daily_logs_update_creator_or_admin" ON public.daily_logs
 DROP POLICY IF EXISTS "machine_hours_select_department" ON public.machine_hours;
 CREATE POLICY "machine_hours_select_department" ON public.machine_hours
   FOR SELECT TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "machine_hours_insert_department" ON public.machine_hours;
 CREATE POLICY "machine_hours_insert_department" ON public.machine_hours
   FOR INSERT TO authenticated
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "machine_hours_update_department" ON public.machine_hours;
 CREATE POLICY "machine_hours_update_department" ON public.machine_hours
   FOR UPDATE TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) )
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) )
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "fuel_logs_select_department" ON public.fuel_logs;
 CREATE POLICY "fuel_logs_select_department" ON public.fuel_logs
   FOR SELECT TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "fuel_logs_insert_department" ON public.fuel_logs;
 CREATE POLICY "fuel_logs_insert_department" ON public.fuel_logs
   FOR INSERT TO authenticated
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "fuel_logs_update_department" ON public.fuel_logs;
 CREATE POLICY "fuel_logs_update_department" ON public.fuel_logs
   FOR UPDATE TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) )
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) )
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "production_logs_select_department" ON public.production_logs;
 CREATE POLICY "production_logs_select_department" ON public.production_logs
   FOR SELECT TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "production_logs_insert_department" ON public.production_logs;
 CREATE POLICY "production_logs_insert_department" ON public.production_logs
   FOR INSERT TO authenticated
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
 
 DROP POLICY IF EXISTS "production_logs_update_department" ON public.production_logs;
 CREATE POLICY "production_logs_update_department" ON public.production_logs
   FOR UPDATE TO authenticated
-  USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) )
-  WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+  USING ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) )
+  WITH CHECK ( (SELECT public.has_department_access((SELECT dl.department_id FROM public.daily_logs dl WHERE dl.id = daily_log_id))) OR (SELECT public.is_admin()) );
+
 
 -- ============================================================================
 -- 7. machine_operations RLS Policies Optimization
@@ -229,21 +230,22 @@ CREATE POLICY "engineering_notes_update_department" ON public.engineering_notes
   USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) )
   WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
 
-DROP POLICY IF EXISTS "operational_delays_select_department" ON public.operational_delays;
-CREATE POLICY "operational_delays_select_department" ON public.operational_delays
+DROP POLICY IF EXISTS "operational_delays_select_department" ON public.operational_delays_deprecated_20250115;
+CREATE POLICY "operational_delays_select_department" ON public.operational_delays_deprecated_20250115
   FOR SELECT TO authenticated
   USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
 
-DROP POLICY IF EXISTS "operational_delays_insert_department" ON public.operational_delays;
-CREATE POLICY "operational_delays_insert_department" ON public.operational_delays
+DROP POLICY IF EXISTS "operational_delays_insert_department" ON public.operational_delays_deprecated_20250115;
+CREATE POLICY "operational_delays_insert_department" ON public.operational_delays_deprecated_20250115
   FOR INSERT TO authenticated
   WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
 
-DROP POLICY IF EXISTS "operational_delays_update_department" ON public.operational_delays;
-CREATE POLICY "operational_delays_update_department" ON public.operational_delays
+DROP POLICY IF EXISTS "operational_delays_update_department" ON public.operational_delays_deprecated_20250115;
+CREATE POLICY "operational_delays_update_department" ON public.operational_delays_deprecated_20250115
   FOR UPDATE TO authenticated
   USING ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) )
   WITH CHECK ( (SELECT public.has_department_access(department_id)) OR (SELECT public.is_admin()) );
+
 
 -- ============================================================================
 -- 11. breakdowns RLS Policies Optimization
@@ -321,23 +323,23 @@ CREATE POLICY "mine_blocks_delete_admin_supervisor" ON public.mine_blocks
 DROP POLICY IF EXISTS "excavator_dumper_assignments_select_department" ON public.excavator_dumper_assignments;
 CREATE POLICY "excavator_dumper_assignments_select_department" ON public.excavator_dumper_assignments
   FOR SELECT TO authenticated
-  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = activity_id))) );
+  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = excavator_activity_id))) );
 
 DROP POLICY IF EXISTS "excavator_dumper_assignments_insert_department" ON public.excavator_dumper_assignments;
 CREATE POLICY "excavator_dumper_assignments_insert_department" ON public.excavator_dumper_assignments
   FOR INSERT TO authenticated
-  WITH CHECK ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = activity_id))) );
+  WITH CHECK ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = excavator_activity_id))) );
 
 DROP POLICY IF EXISTS "excavator_dumper_assignments_update_department" ON public.excavator_dumper_assignments;
 CREATE POLICY "excavator_dumper_assignments_update_department" ON public.excavator_dumper_assignments
   FOR UPDATE TO authenticated
-  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = activity_id))) )
-  WITH CHECK ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = activity_id))) );
+  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = excavator_activity_id))) )
+  WITH CHECK ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = excavator_activity_id))) );
 
 DROP POLICY IF EXISTS "excavator_dumper_assignments_delete_department" ON public.excavator_dumper_assignments;
 CREATE POLICY "excavator_dumper_assignments_delete_department" ON public.excavator_dumper_assignments
   FOR DELETE TO authenticated
-  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = activity_id))) );
+  USING ( (SELECT public.is_admin()) OR (SELECT public.has_department_access((SELECT department_id FROM public.excavator_activity WHERE id = excavator_activity_id))) );
 
 -- ============================================================================
 -- 14. memory_embeddings RLS Policies Optimization

@@ -145,8 +145,6 @@
       }
     }
   ],
-  "defaultBase": "master",
-  "analytics": true,
   "dependencyConstraints": [
     {
       "sourceTag": "scope:app",

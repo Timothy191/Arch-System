@@ -3,12 +3,12 @@ version: "3.8"
 services:
   prometheus:
     image: prom/prometheus:v2.52.0
-    container_name: plantcor-prometheus
+    container_name: plantcor-monitor-prometheus
     restart: unless-stopped
     ports:
       - "9093:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
       - plantcor-monitoring

@@ -15,3 +15,15 @@ export const adminDataUpdateSchema = z.object({
 export const adminDataDeleteSchema = z.object({
   id: z.string().min(1, "Record id is required"),
 });
+
+export const adminAddSiteSchema = z.object({
+  name: z.string().min(1, "Site name is required"),
+  site_code: z.string().min(1, "Site code is required"),
+  active: z.boolean().optional().default(true),
+});
+
+export const adminUpdateSiteSchema = z.object({
+  name: z.string().min(1, "Site name cannot be empty").optional(),
+  site_code: z.string().min(1, "Site code cannot be empty").optional(),
+  active: z.boolean().optional(),
+});

@@ -2,8 +2,14 @@
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
+import { updateMachineSiteSchema } from "@repo/contract";
+
+export const UpdateMachineSiteSchema = updateMachineSiteSchema;
 
 export async function updateMachineSite(machineId: string, siteId: string | null) {
+  // AGENT-TRACE: Validate input parameters with @repo/contract schema
+  const validated = updateMachineSiteSchema.parse({ machineId, siteId });
+
   // Always validate the user at the top
   const supabase = await createServerSupabaseClient();
   const {
@@ -29,8 +35,8 @@ export async function updateMachineSite(machineId: string, siteId: string | null
   const serviceClient = createServiceRoleClient();
   const { error } = await serviceClient
     .from("machines")
-    .update({ site_id: siteId })
-    .eq("id", machineId);
+    .update({ site_id: validated.siteId })
+    .eq("id", validated.machineId);
 
   if (error) {
     throw error;

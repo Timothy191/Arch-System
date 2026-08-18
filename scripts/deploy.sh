@@ -381,15 +381,37 @@ validate_prerequisites() {
   log "Checking environment files..."
   case "$DEPLOY_MODE" in
     production)
-      if [ ! -f "$PORTAL_DIR/.env" ]; then
-        collect_error "Production .env not found at $PORTAL_DIR/.env"
+      if [ -x "$REPO_ROOT/scripts/verify-prod-env.sh" ]; then
+        log "Running comprehensive production pre-flight verification script..."
+        local prod_env_file=""
+        if [ -f "$REPO_ROOT/.env.production" ]; then
+          prod_env_file="$REPO_ROOT/.env.production"
+        elif [ -f "$PORTAL_DIR/.env.production" ]; then
+          prod_env_file="$PORTAL_DIR/.env.production"
+        elif [ -f "$PORTAL_DIR/.env" ]; then
+          prod_env_file="$PORTAL_DIR/.env"
+        elif [ -f "$REPO_ROOT/.env" ]; then
+          prod_env_file="$REPO_ROOT/.env"
+        fi
+
+        if [ -n "$prod_env_file" ]; then
+          if ! "$REPO_ROOT/scripts/verify-prod-env.sh" "$prod_env_file"; then
+            collect_error "Production pre-flight verification failed (see output above)"
+          fi
+        else
+          collect_error "Production environment file (.env.production or .env) not found"
+        fi
       else
-        local supa_url
-        supa_url=$(grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$PORTAL_DIR/.env" | cut -d= -f2- | tr -d '"' || true)
-        if [ -z "$supa_url" ]; then
-          collect_error "NEXT_PUBLIC_SUPABASE_URL not set in .env"
-        elif [[ "$supa_url" == *localhost* ]] || [[ "$supa_url" == *127.0.0.1* ]]; then
-          collect_error "Production requires non-localhost Supabase URL"
+        if [ ! -f "$PORTAL_DIR/.env" ]; then
+          collect_error "Production .env not found at $PORTAL_DIR/.env"
+        else
+          local supa_url
+          supa_url=$(grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$PORTAL_DIR/.env" | cut -d= -f2- | tr -d '"' || true)
+          if [ -z "$supa_url" ]; then
+            collect_error "NEXT_PUBLIC_SUPABASE_URL not set in .env"
+          elif [[ "$supa_url" == *localhost* ]] || [[ "$supa_url" == *127.0.0.1* ]]; then
+            collect_error "Production requires non-localhost Supabase URL"
+          fi
         fi
       fi
       ;;
@@ -965,7 +987,7 @@ if docker ps --format '{{.Names}}' 2>/dev/null | grep -q flowise; then
 fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q prometheus; then
-  echo -e "  🟢 Prometheus: http://localhost:9090"
+  echo -e "  🟢 Prometheus: http://localhost:9093"
 fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q grafana; then

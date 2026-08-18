@@ -6,9 +6,15 @@ import { revalidatePath } from "next/cache";
 import { logAuditEvent } from "@/lib/audit";
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
+import { createBreakdownSchema, bookOutSchema, directCheckoutSchema } from "@repo/contract";
 import type { CreateBreakdownInput, BookOutInput, DirectCheckoutInput } from "./types";
 
-export async function createBreakdown(departmentId: string, input: CreateBreakdownInput) {
+export const CreateBreakdownSchema = createBreakdownSchema;
+export const BookOutSchema = bookOutSchema;
+export const DirectCheckoutSchema = directCheckoutSchema;
+
+export async function createBreakdown(departmentId: string, rawInput: CreateBreakdownInput) {
+  const input = createBreakdownSchema.parse(rawInput);
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -54,16 +60,17 @@ export async function createBreakdown(departmentId: string, input: CreateBreakdo
   return { success: true };
 }
 
-export async function bookOutBreakdown(breakdownId: string, input: BookOutInput) {
+export async function bookOutBreakdown(breakdownId: string, rawInput: BookOutInput) {
+  const input = BookOutSchema.parse(rawInput);
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    logError(new Error("Unauthorized"), { context: "createBreakdown" });
+    logError(new Error("Unauthorized"), { context: "bookOutBreakdown" });
     throw new AuthError("Unauthorized", {
-      context: { action: "createBreakdown" },
+      context: { action: "bookOutBreakdown" },
     });
   }
 
@@ -111,16 +118,17 @@ export async function bookOutBreakdown(breakdownId: string, input: BookOutInput)
   return { success: true };
 }
 
-export async function directCheckout(departmentId: string, input: DirectCheckoutInput) {
+export async function directCheckout(departmentId: string, rawInput: DirectCheckoutInput) {
+  const input = DirectCheckoutSchema.parse(rawInput);
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    logError(new Error("Unauthorized"), { context: "bookOutBreakdown" });
+    logError(new Error("Unauthorized"), { context: "directCheckout" });
     throw new AuthError("Unauthorized", {
-      context: { action: "bookOutBreakdown" },
+      context: { action: "directCheckout" },
     });
   }
 

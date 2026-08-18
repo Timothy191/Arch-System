@@ -26,7 +26,12 @@ describe("updateMachineSite", () => {
       },
     });
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow("Unauthorized");
+    await expect(
+      updateMachineSite(
+        "12345678-1234-4234-8234-1234567890ab",
+        "87654321-4321-4321-8321-ba0987654321",
+      ),
+    ).rejects.toThrow("Unauthorized");
   });
 
   it("throws Error('Unauthorized') when employee record is missing", async () => {
@@ -43,7 +48,12 @@ describe("updateMachineSite", () => {
       }),
     });
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow("Unauthorized");
+    await expect(
+      updateMachineSite(
+        "12345678-1234-4234-8234-1234567890ab",
+        "87654321-4321-4321-8321-ba0987654321",
+      ),
+    ).rejects.toThrow("Unauthorized");
   });
 
   it("calls service role client to update machine site_id when authorized", async () => {
@@ -74,11 +84,14 @@ describe("updateMachineSite", () => {
     };
     createServiceRoleClient.mockReturnValue(mockService);
 
-    const result = await updateMachineSite("machine-1", "site-1");
+    const result = await updateMachineSite(
+      "12345678-1234-4234-8234-1234567890ab",
+      "87654321-4321-4321-8321-ba0987654321",
+    );
 
     expect(result).toEqual({ success: true });
     expect(mockService.from).toHaveBeenCalledWith("machines");
-    expect(mockUpdate).toHaveBeenCalledWith({ site_id: "site-1" });
+    expect(mockUpdate).toHaveBeenCalledWith({ site_id: "87654321-4321-4321-8321-ba0987654321" });
   });
 
   it("throws error when database update fails", async () => {
@@ -110,6 +123,11 @@ describe("updateMachineSite", () => {
     };
     createServiceRoleClient.mockReturnValue(mockService);
 
-    await expect(updateMachineSite("machine-1", "site-1")).rejects.toThrow(dbError);
+    await expect(
+      updateMachineSite(
+        "12345678-1234-4234-8234-1234567890ab",
+        "87654321-4321-4321-8321-ba0987654321",
+      ),
+    ).rejects.toThrow(dbError);
   });
 });

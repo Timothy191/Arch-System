@@ -11,3 +11,5 @@ export const processImportEvent = "imports/process";
 export const aiSummarizeEvent = "ai/summarize";
 export const aiGenerateEmbeddingEvent = "ai/generate-embedding";
 export const aiMemoryPersistEvent = "ai/memory-persist";
+export const shiftRolloverNotificationEvent = "notifications/shift-rollover";
+export const dailyPdfReportEvent = "reports/daily-pdf";

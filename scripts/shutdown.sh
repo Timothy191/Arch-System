@@ -74,6 +74,12 @@ if [ -n "$PIDS" ]; then
   echo "$PIDS" | xargs kill -15 2>/dev/null || true
 fi
 
+# Clean orphan MCP processes
+log "Terminating orphan MCP server processes..."
+pkill -f "next-devtools-mcp" 2>/dev/null || true
+pkill -f "codebase-memory-mcp" 2>/dev/null || true
+pkill -f "@modelcontextprotocol" 2>/dev/null || true
+
 # Restore local env from backup if present (from live local network deployment)
 ENV_FILE="$REPO_ROOT/apps/portal/.env"
 ENV_BAK="$REPO_ROOT/apps/portal/.env.bak"
@@ -86,7 +92,7 @@ fi
 # ── Step 2: Stop Observability Stack ──────────────────────
 if [ -f "$MONITOR_COMPOSE" ]; then
   log "Stopping Prometheus, Grafana, and cAdvisor (preserving volumes)..."
-  if docker ps --format '{{.Names}}' | grep -E "(plantcor-prometheus|plantcor-grafana|plantcor-cadvisor)" > /dev/null 2>&1; then
+  if docker ps --format '{{.Names}}' | grep -E "(plantcor-monitor-prometheus|plantcor-grafana|plantcor-cadvisor)" > /dev/null 2>&1; then
     $COMPOSE_CMD -f "$MONITOR_COMPOSE" stop || true
     log "Observability stack suspended."
   else

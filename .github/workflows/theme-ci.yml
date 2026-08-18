@@ -19,9 +19,6 @@ concurrency:
 jobs:
   build-and-lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/theme
     steps:
       - uses: actions/checkout@v4
 
@@ -38,10 +35,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme
-        run: pnpm build
+        run: pnpm --filter @repo/theme build
 
       - name: Token drift check
-        run: pnpm lint:tokens
+        run: pnpm --filter @repo/theme lint:tokens
 
       # This step ensures the build output is deterministic and committed
       - name: Verify no uncommitted build artifacts
@@ -55,9 +52,6 @@ jobs:
   visual-smoke:
     needs: build-and-lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/portal
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -71,7 +65,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Build portal
-        run: pnpm build
+        run: pnpm --filter portal build
 
       - name: Run visual smoke tests
         run: pnpm test:e2e:visual

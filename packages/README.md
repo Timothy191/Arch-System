@@ -82,7 +82,7 @@ This package is **intentionally separate**:
 ### Tooling Package Placement
 
 - `@repo/eslint-config` and `@repo/typescript-config` are in the flat packages structure
-- If more tooling packages are added (e.g., jest-config, pretttier-config), consider grouping them under a `tooling/` or `config/` directory
+- If more tooling packages are added (e.g., jest-config, prettier-config), consider grouping them under a `tooling/` or `config/` directory
 
 ## Adding a New Package
 

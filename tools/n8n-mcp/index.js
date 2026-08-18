@@ -4,7 +4,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 const N8N_URL = process.env.N8N_URL || "http://localhost:5678";
-const N8N_EMAIL = process.env.N8N_EMAIL;
+// AGENT-TRACE: Accepts N8N_USER as an alias for N8N_EMAIL to support portal environment templates
+const N8N_EMAIL = process.env.N8N_EMAIL || process.env.N8N_USER;
 const N8N_PASSWORD = process.env.N8N_PASSWORD;
 const N8N_FETCH_TIMEOUT = parseInt(process.env.N8N_FETCH_TIMEOUT || "30000", 10);
 const COOKIE_MARGIN_MS = 5 * 60 * 1000;

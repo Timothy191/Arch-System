@@ -48,3 +48,47 @@ export const dozerRollSchema = z.object({
     .max(24, "Hours operated cannot exceed 24"),
   area: z.number().min(0, "Area must be positive"),
 });
+
+export const createBreakdownSchema = z.object({
+  fleet_id: z.string().min(1, "Fleet ID is required"),
+  machine_name: z.string().optional(),
+  machine_type: z.string().min(1, "Machine type is required"),
+  date_in: z.string().min(1, "Date in is required"),
+  time_in: z.string().min(1, "Time in is required"),
+  reason: z.string().min(1, "Reason is required"),
+});
+
+export const bookOutSchema = z.object({
+  date_out: z.string().min(1, "Date out is required"),
+  time_out: z.string().min(1, "Time out is required"),
+  repair_notes: z.string().optional(),
+});
+
+export const directCheckoutSchema = z.object({
+  fleet_id: z.string().min(1, "Fleet ID is required"),
+  machine_type: z.string().min(1, "Machine type is required"),
+  date_out: z.string().min(1, "Date out is required"),
+  time_out: z.string().min(1, "Time out is required"),
+  reason: z.string().min(1, "Reason is required"),
+  repair_notes: z.string().optional(),
+});
+
+export const monthlyReportInputSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().optional().default(""),
+  kpis: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .default([]),
+  tableHeaders: z.array(z.string()).default([]),
+  tableRows: z.array(z.array(z.string())).default([]),
+});
+
+export const updateMachineSiteSchema = z.object({
+  machineId: z.string().uuid("Invalid machine ID format"),
+  siteId: z.string().uuid("Invalid site ID format").nullable(),
+});

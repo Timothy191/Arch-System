@@ -1,6 +1,7 @@
 export * from "./control-room/AlertPanel";
 export * from "./control-room/CloseShiftModal";
 export * from "./control-room/ControlRoomActivityFeed";
+export * from "./control-room/ControlRoomChecklistWidget";
 export * from "./control-room/DozerRollForm";
 export * from "./control-room/FuxaFrame";
 export * from "./control-room/MachineControl";
@@ -16,7 +17,6 @@ export * from "./engineering/breakdowns/types";
 export * from "./engineering/breakdowns/actions";
 export type { SafetyChartsProps } from "./safety/SafetyCharts";
 export { SafetyCharts } from "./safety/SafetyChartsWrapper";
-export * from "./safety/SafetyDashboard";
 export * from "./safety/SafetyIncidentForm";
 export * from "./safety/SafetyIncidentsList";
 export * from "./satellite/SatelliteMonitoringDashboard";

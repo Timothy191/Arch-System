@@ -1,5 +1,22 @@
 # Agent Tracer - Overview App
 
+## 2026-08-18 - Direct Server Actions -> Supabase RLS Zero-Proxy Documentation
+
+- **Purpose**: Document the direct Server Actions $\rightarrow$ Supabase RLS flow in the Backend Connections React Flow canvas, highlighting zero-middleman latency and strict Zod runtime validation.
+- **Changes**:
+  - `lib/data.ts`: updated `server-actions` service specs (direct session claims, strict Zod validation) and `conn-actions-db` connection specs (`Server RPC ──► Postgres / RLS`).
+  - `app/sections/BackendArchitecture.tsx`: added dedicated visual architecture callout banner in the inspector drawer when `server-actions` or `supabase-db` is selected, emphasizing the zero-middleman proxy benefits over classical NestJS architectures.
+- **Verification**: Ran `pnpm --filter arch-systems-overview type-check`, `lint`, and verified dev server at `http://localhost:3002`.
+
+## 2026-08-18 - SCADA Live Telemetry Tags & OPC-UA/Modbus Inspector Stream
+
+- **Purpose**: Add simulated real-time SCADA telemetry tags (OPC-UA polling rates, Modbus register counts, live tag matrix with jitter) to the SCADA node inspector in the React Flow Backend Connections canvas.
+- **Changes**:
+  - `lib/data.ts`: added `ScadaTelemetryTag` and `ScadaMetrics` interfaces, enriched `fuxa-scada` with 10Hz OPC-UA polling, 1,284 Modbus holding registers across 16 PLC drops, 42.8 KB/s throughput, and 8 heavy machinery telemetry tags (excavator payload, hydraulic pressure, drill penetration rate, hole depth, truck incline grade, conveyor belt speed & bearing temperature, substation bus voltage).
+  - `app/sections/BackendArchitecture.tsx`: integrated `ScadaTelemetryInspector` with live heartbeat streaming status, live numeric jitter simulation hook (1.4s cycle), protocol filter pills (`All`, `OPC-UA`, `Modbus-TCP`), tag search input, and animated live value badges. Also added live SCADA status badge to `ServiceNode` on the visual canvas.
+- **Verification**: Ran `pnpm --filter arch-systems-overview type-check`, `lint`, and `build` (100% pass), launched dev server on port 3002 (`http://localhost:3002`).
+- **Next Steps**: Test interactive node inspector and flow filtering live in browser at `http://localhost:3002`.
+
 ## 2026-08-18 - Backend Architecture & Connections Flow Diagram Addition
 
 - **Purpose**: Implement interactive Backend Connections flow diagram (`BackendArchitecture.tsx`) in `apps/overview` using `@xyflow/react`.

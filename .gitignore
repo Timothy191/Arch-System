@@ -202,3 +202,6 @@ e2e/.auth/
 /agentic-system-wiki/
 /storybook/
 /supabase/
+
+# Compound Engineering local scratch space
+.context/compound-engineering/

@@ -172,54 +172,177 @@ The script automates:
 
 **Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](scripts/ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
 
-### Manual Setup
+### Self-Hosted Production Setup (with Cloud Supabase)
 
-#### Prerequisites
+In a self-hosted architecture, Next.js 16 (`apps/portal`) and background services run on your dedicated Linux host (Ubuntu, Arch, Rocky/RHEL) while Supabase serves as the managed cloud backend (Database, Auth, Storage, Realtime).
 
-1. **Production Environment File**:
+#### 1. Environment Configuration
+
+Create a dedicated production environment file on the server:
 
 ```bash
-cp apps/portal/.env.production.example apps/portal/.env
-# Fill in all required variables
+cp apps/portal/env/.env.production.example .env.production
+chmod 600 .env.production
 ```
 
-Required variables:
+Key environment variables:
 
-- `NEXT_PUBLIC_SUPABASE_URL` (non-localhost)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_KEY`
-- `GROQ_API_KEY` (or other AI provider)
+- `NEXT_PUBLIC_SUPABASE_URL`: Managed Supabase project URL (`https://<project-ref>.supabase.co`)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon/public API key
+- `SUPABASE_SERVICE_KEY`: Supabase service role secret (server-side only)
+- `DATABASE_URL` / `DATABASE_POOLER_URL`: PostgreSQL connection string (Transaction pooler on port 6543 / 5432)
+- `REDIS_URL`: Redis caching and rate-limiting instance
+- `NODE_ENV`: `production`
+- `PORT`: `3000`
 
-2. **Systemd Service** (optional but recommended):
+#### 2. Standalone Build & Asset Sync Workflow
+
+Next.js 16 is configured with `output: 'standalone'` in `apps/portal/next.config.mjs`. This generates a self-contained Node.js server artifact containing only required `node_modules` dependencies at `apps/portal/.next/standalone`.
 
 ```bash
-sudo cp scripts/arch-systems.service /etc/systemd/system/
-sudo systemctl enable arch-systems
+# 1. Install dependencies with lockfile integrity
+pnpm install --frozen-lockfile
+
+# 2. Build portal package with standalone output
+pnpm --filter portal build
+
+# 3. Sync static and public assets into standalone bundle
+cp -r apps/portal/public apps/portal/.next/standalone/apps/portal/public
+cp -r apps/portal/.next/static apps/portal/.next/standalone/apps/portal/.next/static
 ```
 
-### Deploy to Production
+#### 3. Pre-Flight Verification
+
+Validate your production environment and build integrity before starting the service:
 
 ```bash
-# Interactive (with confirmation)
+./scripts/verify-prod-env.sh .env.production
+```
+
+This automates:
+
+- Validation of Supabase URL, anon key, and service role key.
+- Node.js runtime version check (`>= 20`).
+- Verification of standalone entrypoint (`server.js`) and synced static assets (`.next/static`, `public/`).
+
+#### 4. Production Systemd Service Unit
+
+Create `/etc/systemd/system/arch-system.service`:
+
+```ini
+[Unit]
+Description=Arch-Systems Portal (Next.js 16 Standalone Production)
+After=network.target remote-fs.target
+Documentation=https://github.com/Timothy191/Arch-System
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/var/www/arch-system
+ExecStart=/usr/bin/node /var/www/arch-system/apps/portal/.next/standalone/apps/portal/server.js
+Restart=always
+RestartSec=5s
+Environment=NODE_ENV=production
+Environment=PORT=3000
+EnvironmentFile=/var/www/arch-system/.env.production
+LimitNOFILE=65535
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arch-system
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable arch-system
+sudo systemctl start arch-system
+sudo systemctl status arch-system
+```
+
+#### 5. Nginx Reverse Proxy & SSL
+
+Create `/etc/nginx/sites-available/arch-system`:
+
+```nginx
+server {
+    listen 80;
+    server_name portal.yourcompany.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name portal.yourcompany.com;
+
+    ssl_certificate /etc/letsencrypt/live/portal.yourcompany.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/portal.yourcompany.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Static asset caching
+    location /_next/static/ {
+        alias /var/www/arch-system/apps/portal/.next/static/;
+        expires 365d;
+        access_log off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location /public/ {
+        alias /var/www/arch-system/apps/portal/public/;
+        expires 30d;
+        access_log off;
+    }
+
+    # Proxy to standalone Next.js server
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_connect_timeout 60s;
+    }
+}
+```
+
+Enable and reload Nginx:
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/arch-system /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### 6. Automated Deploy Script
+
+For routine production releases:
+
+```bash
+# Interactive deployment
 ./scripts/deploy.sh production
 
 # Non-interactive (CI/CD)
 ./scripts/deploy.sh production --force
 
-# Skip build if already built
-./scripts/deploy.sh production --skip-build
+# Rollback to previous deployment if needed
+./scripts/deploy.sh production --rollback
 ```
 
 ### Production Safety Features
 
 1. **Automatic Backup**: Creates rollback point before deployment
-2. **Health Checks**: Verifies all services before marking complete
-3. **Rollback**: One-command rollback if issues detected
-
-```bash
-# Rollback to previous deployment
-./scripts/deploy.sh production --rollback
-```
+2. **Health Checks**: Verifies all services before marking complete (`curl http://127.0.0.1:3000/api/health`)
+3. **Rollback**: One-command rollback if issues detected (`./scripts/deploy.sh production --rollback`)
 
 ---
 

@@ -83,7 +83,7 @@ Quick navigation guide for Arch-Systems documentation.
   - CI/CD with GitHub Actions
   - Troubleshooting and best practices
 
-- **[scripts/ROCKY_LINUX_COMPATIBILITY.md](./scripts/ROCKY_LINUX_COMPATIBILITY.md)** - Rocky Linux/RHEL compatibility guide
+- **[ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)** - Rocky Linux/RHEL compatibility guide
   - Platform-specific prerequisites and setup instructions
   - Firewall (firewalld) configuration
   - SELinux considerations and policies
@@ -136,7 +136,7 @@ Arch-Mk2/
 - **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
-- **Deploy on Rocky Linux/RHEL**: Read [scripts/ROCKY_LINUX_COMPATIBILITY.md](../scripts/ROCKY_LINUX_COMPATIBILITY.md)
+- **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)
 - **Design a new component**: Reference [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md)
 - **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
 - **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)

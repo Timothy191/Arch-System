@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -16,7 +16,13 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { BACKEND_SERVICES, BACKEND_CONNECTIONS, type BackendService } from "@/lib/data";
+import {
+  BACKEND_SERVICES,
+  BACKEND_CONNECTIONS,
+  type BackendService,
+  type ScadaMetrics,
+  type ScadaTelemetryTag,
+} from "@/lib/data";
 import {
   Server,
   Database,
@@ -32,6 +38,12 @@ import {
   Radio,
   Workflow,
   Sparkles,
+  Gauge,
+  Zap,
+  Search,
+  Play,
+  Pause,
+  SlidersHorizontal,
 } from "lucide-react";
 
 // Category Icons & Color Mapping
@@ -105,7 +117,7 @@ function ServiceNode({
       </div>
 
       {/* Node Meta / Badges */}
-      <div className="px-3.5 pb-3 pt-1 border-t border-[#262626] bg-[#141414] flex flex-wrap items-center justify-between gap-1.5 text-[10px]">
+      <div className="px-3.5 pb-2.5 pt-1 border-t border-[#262626] bg-[#141414] flex flex-wrap items-center justify-between gap-1.5 text-[10px]">
         <div className="flex items-center gap-1 text-[#b4b4b4] font-mono">
           <Activity className="w-3 h-3 text-[#3ecf8e]" />
           <span>{data.sla.split(" ")[0]}</span>
@@ -121,6 +133,19 @@ function ServiceNode({
           ))}
         </div>
       </div>
+
+      {/* SCADA Telemetry Badge on Node */}
+      {data.scadaMetrics && (
+        <div className="px-3 py-1.5 bg-[#082f3a]/90 border-t border-[#0e4857] flex items-center justify-between text-[10px] text-[#22d3ee] font-mono">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] animate-pulse" />
+            <span>{data.scadaMetrics.opcUaPollingRateHz}Hz OPC-UA</span>
+          </div>
+          <span className="text-[#a5f3fc]">
+            {data.scadaMetrics.modbusRegisterCount.toLocaleString()} Modbus Regs
+          </span>
+        </div>
+      )}
 
       <Handle
         type="source"
@@ -141,12 +166,281 @@ const nodeTypes = {
   service: ServiceNode,
 };
 
+// AGENT-TRACE: Helper function to compute realistic live telemetry value jitter
+function getLiveTagValue(
+  tag: ScadaTelemetryTag,
+  tick: number,
+  isLive: boolean,
+  index: number,
+): string {
+  if (typeof tag.baseValue === "boolean") {
+    return tag.baseValue ? "TRIGGERED (ALARM)" : "NORMAL (OK)";
+  }
+  if (!isLive || !tag.variance) {
+    return `${tag.baseValue} ${tag.unit || ""}`;
+  }
+  const jitter = Math.sin(tick * 0.8 + index * 1.7) * tag.variance;
+  const currentVal = tag.baseValue + jitter;
+  if (tag.dataType === "INT16" || tag.dataType === "UINT32") {
+    return `${Math.round(currentVal).toLocaleString()} ${tag.unit || ""}`;
+  }
+  return `${currentVal.toFixed(1)} ${tag.unit || ""}`;
+}
+
+// SCADA Telemetry Inspector Component
+function ScadaTelemetryInspector({
+  metrics,
+  tick,
+  isLive,
+  onToggleLive,
+}: {
+  metrics: ScadaMetrics;
+  tick: number;
+  isLive: boolean;
+  onToggleLive: () => void;
+}) {
+  const [filterProto, setFilterProto] = useState<"all" | "OPC-UA" | "Modbus-TCP">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredTags = useMemo(() => {
+    return metrics.tags.filter((tag) => {
+      const matchProto = filterProto === "all" || tag.sourceProtocol === filterProto;
+      const q = searchQuery.toLowerCase();
+      const matchSearch =
+        searchQuery === "" ||
+        tag.name.toLowerCase().includes(q) ||
+        tag.equipment.toLowerCase().includes(q) ||
+        (tag.registerAddress && tag.registerAddress.toLowerCase().includes(q)) ||
+        (tag.nodeId && tag.nodeId.toLowerCase().includes(q));
+      return matchProto && matchSearch;
+    });
+  }, [metrics.tags, filterProto, searchQuery]);
+
+  return (
+    <div className="bg-[#171717] border border-[#06b6d4]/40 rounded-2xl p-5 shadow-xl space-y-4">
+      {/* Telemetry Stream Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#2a2a2a]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#06b6d4]/10 text-[#06b6d4] flex items-center justify-center border border-[#06b6d4]/30">
+            <Gauge className="w-4 h-4" />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-[#fafafa] flex items-center gap-2">
+              SCADA Live Telemetry Stream
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#06b6d4]/15 text-[#22d3ee] border border-[#06b6d4]/30">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${isLive ? "bg-[#06b6d4] animate-ping" : "bg-[#71717a]"}`}
+                />
+                {isLive ? "LIVE STREAM" : "PAUSED"}
+              </span>
+            </h4>
+            <p className="text-[11px] text-[#898989] font-mono">
+              FUXA Gateway • 16 PLC drops • 12.8k tags/s
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={onToggleLive}
+          title={isLive ? "Pause live simulation" : "Resume live simulation"}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#242424] hover:bg-[#303030] text-[#fafafa] text-xs font-mono border border-[#383838] transition-colors"
+        >
+          {isLive ? (
+            <>
+              <Pause className="w-3.5 h-3.5 text-[#f59e0b]" />
+              <span className="hidden sm:inline">Pause</span>
+            </>
+          ) : (
+            <>
+              <Play className="w-3.5 h-3.5 text-[#3ecf8e]" />
+              <span className="hidden sm:inline">Resume</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Protocol Health & Polling Rates */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {/* OPC-UA Polling Card */}
+        <div className="bg-[#121212] border border-[#262626] p-2.5 rounded-xl">
+          <div className="flex items-center justify-between text-[11px] text-[#898989] mb-1">
+            <span className="flex items-center gap-1 font-mono">
+              <Zap className="w-3 h-3 text-[#06b6d4]" />
+              OPC-UA Rate
+            </span>
+            <span className="text-[9px] px-1 rounded bg-[#06b6d4]/20 text-[#22d3ee] font-mono">
+              Active
+            </span>
+          </div>
+          <div className="text-sm font-semibold font-mono text-[#fafafa]">
+            {metrics.opcUaPollingRateHz}.0 Hz
+          </div>
+          <div className="text-[10px] text-[#898989] font-mono mt-0.5">
+            100ms • ±{metrics.opcUaJitterMs}ms jitter
+          </div>
+        </div>
+
+        {/* Modbus Register Count Card */}
+        <div className="bg-[#121212] border border-[#262626] p-2.5 rounded-xl">
+          <div className="flex items-center justify-between text-[11px] text-[#898989] mb-1">
+            <span className="flex items-center gap-1 font-mono">
+              <SlidersHorizontal className="w-3 h-3 text-[#f59e0b]" />
+              Modbus Regs
+            </span>
+            <span className="text-[9px] px-1 rounded bg-[#f59e0b]/20 text-[#fbbf24] font-mono">
+              Port 502
+            </span>
+          </div>
+          <div className="text-sm font-semibold font-mono text-[#fafafa]">
+            {metrics.modbusRegisterCount.toLocaleString()}
+          </div>
+          <div className="text-[10px] text-[#898989] font-mono mt-0.5">
+            {metrics.modbusActiveNodes} Drops • 0 CRC drops
+          </div>
+        </div>
+
+        {/* Throughput Card */}
+        <div className="bg-[#121212] border border-[#262626] p-2.5 rounded-xl">
+          <div className="flex items-center justify-between text-[11px] text-[#898989] mb-1">
+            <span className="flex items-center gap-1 font-mono">
+              <Activity className="w-3 h-3 text-[#3ecf8e]" />
+              Throughput
+            </span>
+            <span className="text-[9px] px-1 rounded bg-[#3ecf8e]/20 text-[#3ecf8e] font-mono">
+              TCP Buffer
+            </span>
+          </div>
+          <div className="text-sm font-semibold font-mono text-[#fafafa]">
+            {metrics.throughputKbps} KB/s
+          </div>
+          <div className="text-[10px] text-[#898989] font-mono mt-0.5">
+            {metrics.activeSubscriptions} Active Subs
+          </div>
+        </div>
+      </div>
+
+      {/* Tag Search & Filter Controls */}
+      <div className="space-y-2 pt-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+          {/* Protocol Filter Pills */}
+          <div className="flex items-center gap-1 bg-[#121212] p-1 rounded-lg border border-[#262626]">
+            {(
+              [
+                { id: "all", label: `All (${metrics.tags.length})` },
+                { id: "OPC-UA", label: "OPC-UA" },
+                { id: "Modbus-TCP", label: "Modbus-TCP" },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setFilterProto(item.id)}
+                className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
+                  filterProto === item.id
+                    ? "bg-[#242424] text-[#06b6d4] font-medium border border-[#06b6d4]/30"
+                    : "text-[#898989] hover:text-[#fafafa]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search Input */}
+          <div className="relative flex-1 sm:max-w-[180px]">
+            <Search className="w-3 h-3 text-[#71717a] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tag/equip..."
+              className="w-full bg-[#121212] border border-[#262626] rounded-lg pl-7 pr-2 py-1 text-[11px] text-[#fafafa] placeholder-[#71717a] focus:outline-none focus:border-[#06b6d4]"
+            />
+          </div>
+        </div>
+
+        {/* Live Tags Matrix */}
+        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+          {filteredTags.length === 0 ? (
+            <div className="text-center py-6 text-xs text-[#71717a] font-mono">
+              No matching SCADA telemetry tags found
+            </div>
+          ) : (
+            filteredTags.map((tag, idx) => {
+              const liveValue = getLiveTagValue(tag, tick, isLive, idx);
+              const isOpc = tag.sourceProtocol === "OPC-UA";
+
+              return (
+                <div
+                  key={tag.tagId}
+                  className="bg-[#121212] border border-[#262626] hover:border-[#383838] p-2.5 rounded-xl transition-all"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-medium border ${
+                            isOpc
+                              ? "bg-[#06b6d4]/10 text-[#22d3ee] border-[#06b6d4]/30"
+                              : "bg-[#f59e0b]/10 text-[#fbbf24] border-[#f59e0b]/30"
+                          }`}
+                        >
+                          {tag.sourceProtocol}
+                        </span>
+                        <span className="text-xs font-semibold text-[#fafafa] font-mono">
+                          {tag.name}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-[#898989] mt-0.5">{tag.equipment}</div>
+                    </div>
+
+                    {/* Live Stream Value Display */}
+                    <div className="text-right">
+                      <div className="text-xs font-bold font-mono text-[#3ecf8e] bg-[#3ecf8e]/10 border border-[#3ecf8e]/30 px-2 py-0.5 rounded-md shadow-sm">
+                        {liveValue}
+                      </div>
+                      <div className="text-[9px] text-[#71717a] font-mono mt-0.5">
+                        {tag.dataType} • {tag.pollingRateHz}Hz
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9px] font-mono text-[#71717a] mt-2 pt-1.5 border-t border-[#1e1e1e]">
+                    <span className="truncate max-w-[200px]">
+                      {tag.nodeId || tag.registerAddress}
+                    </span>
+                    <span className="text-[#3ecf8e] flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-[#3ecf8e]" />
+                      {tag.quality}
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type FilterMode = "all" | "data" | "realtime" | "observability" | "cache";
 
 export default function BackendArchitecture() {
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>("supabase-db");
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>("fuxa-scada");
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+
+  // AGENT-TRACE: Live Telemetry Simulation Engine state
+  const [telemetryTick, setTelemetryTick] = useState(0);
+  const [isLiveTelemetryStreaming, setIsLiveTelemetryStreaming] = useState(true);
+
+  useEffect(() => {
+    if (!isLiveTelemetryStreaming) return;
+    const interval = setInterval(() => {
+      setTelemetryTick((t) => (t + 1) % 100000);
+    }, 1400);
+    return () => clearInterval(interval);
+  }, [isLiveTelemetryStreaming]);
 
   // Filtered Services & Connections
   const activeServiceIds = useMemo(() => {
@@ -257,7 +551,7 @@ export default function BackendArchitecture() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Sync selection/dimming updates when filter or selection changes
-  useMemo(() => {
+  useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
@@ -353,7 +647,7 @@ export default function BackendArchitecture() {
       {/* Main Diagram & Detail Inspector Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* React Flow Interactive Canvas */}
-        <div className="xl:col-span-8 bg-[#121212] border border-[#2a2a2a] rounded-2xl h-[720px] relative overflow-hidden shadow-2xl">
+        <div className="xl:col-span-8 bg-[#121212] border border-[#2a2a2a] rounded-2xl h-[760px] relative overflow-hidden shadow-2xl">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -422,6 +716,45 @@ export default function BackendArchitecture() {
 
         {/* Selected Service Detail Drawer / Inspector */}
         <div className="xl:col-span-4 flex flex-col gap-4">
+          {/* Direct Server Actions -> Supabase RLS Callout Banner */}
+          {(activeService.id === "server-actions" ||
+            activeService.id === "supabase-db" ||
+            activeConnection?.id === "conn-actions-db") && (
+            <div className="bg-[#0f281e] border border-[#3ecf8e]/40 rounded-2xl p-4 shadow-lg text-xs space-y-2">
+              <div className="flex items-center gap-2 text-[#3ecf8e] font-semibold">
+                <Sparkles className="w-4 h-4" />
+                Direct Server Actions ──► Supabase RLS Architecture
+              </div>
+              <p className="text-[#a7f3d0] leading-relaxed text-[11px]">
+                Mutations bypass middleman proxies (e.g. NestJS/Express). Next.js Server Actions
+                validate strict Zod schemas and pass authenticated user session claims directly to
+                PostgreSQL, where 95+ Row-Level Security policies are enforced natively at &lt;10ms
+                p95 latency.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] font-mono">
+                <span className="px-2 py-0.5 rounded bg-[#134e38] text-[#6ee7b7] border border-[#3ecf8e]/40">
+                  Strict Zod Validation
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#134e38] text-[#6ee7b7] border border-[#3ecf8e]/40">
+                  95 RLS Policies
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#134e38] text-[#6ee7b7] border border-[#3ecf8e]/40">
+                  Zero-Proxy Flow
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* If the active service has live SCADA metrics, show the dedicated live SCADA inspector first! */}
+          {activeService.scadaMetrics && (
+            <ScadaTelemetryInspector
+              metrics={activeService.scadaMetrics}
+              tick={telemetryTick}
+              isLive={isLiveTelemetryStreaming}
+              onToggleLive={() => setIsLiveTelemetryStreaming((prev) => !prev)}
+            />
+          )}
+
           {/* Active Node Detail Card */}
           <div className="bg-[#171717] border border-[#363636] rounded-2xl p-5 shadow-xl">
             <div className="flex items-start justify-between gap-3 pb-4 border-b border-[#2a2a2a]">

@@ -1,5 +1,13 @@
 # Contract Package Agent Tracer
 
+## 2026-08-18: Form Types and Schema Barrel Export Consolidation
+
+- **Purpose**: Export missing derived types (`CreateBreakdownInput`, `BookOutInput`, `DirectCheckoutInput`, `MonthlyReportInput`, `UpdateMachineSiteInput`) from the contract package, aligning index type exports with their schema counterparts in `form.schema.ts`.
+- **Changes**:
+  - `packages/contract/src/types/form.types.ts`: Defined derived Zod types.
+  - `packages/contract/src/index.ts`: Exported new derived types.
+- **Verification**: `pnpm quality` and `pnpm type-check` pass successfully across all workspace projects.
+
 ## 2026-08-18: Export Drilling Contract Types and Schemas
 
 - **Purpose**: Fix type-check compilation errors in the portal where `drillingDailyLogSchema` and `DrillingDailyLogFormValues` were imported from `@repo/contract` but not exported by its index barrel.

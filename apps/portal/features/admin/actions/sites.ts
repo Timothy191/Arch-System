@@ -3,6 +3,10 @@
 import { cacheInvalidateTags } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
+import { adminAddSiteSchema, adminUpdateSiteSchema } from "@repo/contract";
+
+export const AdminAddSiteSchema = adminAddSiteSchema;
+export const AdminUpdateSiteSchema = adminUpdateSiteSchema;
 
 async function assertAdmin() {
   const supabase = await createServerSupabaseClient();
@@ -24,7 +28,17 @@ async function assertAdmin() {
   return { supabase, employee };
 }
 
-export async function adminAddSite(data: { name: string; site_code: string; active?: boolean }) {
+export async function adminAddSite(rawInput: {
+  name: string;
+  site_code: string;
+  active?: boolean;
+}) {
+  const parseResult = adminAddSiteSchema.safeParse(rawInput);
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0]?.message || "Invalid site data" };
+  }
+  const data = parseResult.data;
+
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };
 
@@ -32,8 +46,6 @@ export async function adminAddSite(data: { name: string; site_code: string; acti
 
   const name = data.name.trim();
   const siteCode = data.site_code.trim().toUpperCase();
-  if (!name) return { error: "Site name is required." };
-  if (!siteCode) return { error: "Site code is required." };
 
   const { error } = await supabase.from("sites").insert({
     name,
@@ -50,12 +62,18 @@ export async function adminAddSite(data: { name: string; site_code: string; acti
 
 export async function adminUpdateSite(
   id: string,
-  data: {
+  rawInput: {
     name?: string;
     site_code?: string;
     active?: boolean;
   },
 ) {
+  const parseResult = adminUpdateSiteSchema.safeParse(rawInput);
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0]?.message || "Invalid site data" };
+  }
+  const data = parseResult.data;
+
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };
 

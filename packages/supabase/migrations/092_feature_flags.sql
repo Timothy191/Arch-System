@@ -54,10 +54,11 @@ CREATE POLICY "authenticated_can_read_flags"
   ON feature_flags FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "service_can_log_exposures"
-  ON feature_flag_exposures FOR INSERT TO service_role USING (true) WITH CHECK (true);
+  ON feature_flag_exposures FOR INSERT TO service_role WITH CHECK (true);
 
 CREATE POLICY "service_can_log_results"
-  ON ab_test_results FOR INSERT TO service_role USING (true) WITH CHECK (true);
+  ON ab_test_results FOR INSERT TO service_role WITH CHECK (true);
+
 
 CREATE POLICY "service_can_read_analytics"
   ON ab_test_results FOR SELECT TO service_role USING (true);

@@ -16,7 +16,7 @@ Environment=NODE_ENV=production
 Environment=PORT=3000
 
 # Start the Next.js production server
-ExecStart=/usr/bin/node_modules/.bin/next start -p 3000
+ExecStart=/usr/bin/node /opt/arch-systems/apps/portal/node_modules/next/dist/bin/next start -p 3000
 # Alternatively, if pnpm is on PATH:
 # ExecStart=/usr/local/bin/pnpm start
 

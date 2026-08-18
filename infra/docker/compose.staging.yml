@@ -1,0 +1,90 @@
+version: "3.8"
+
+# ==============================================================================
+# Arch-Systems Portal — Production Staging Simulation Compose Definition
+# ==============================================================================
+# Simulates the self-hosted Linux server topology (Standalone Next.js 16
+# Portal + Nginx SSL/Proxy + Redis cache) locally before live server deployment.
+#
+# Usage:
+#   docker compose -f infra/docker/compose.staging.yml up --build -d
+# ==============================================================================
+
+services:
+  portal:
+    build:
+      context: ../../
+      dockerfile: apps/portal/docker/Dockerfile
+      args:
+        - NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+    container_name: arch-portal-staging
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - ../../.env.production
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/api/health', (r) => { if (r.statusCode !== 200) process.exit(1); }).on('error', () => process.exit(1));",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - staging-net
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: arch-nginx-staging
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ../../config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../certs:/etc/nginx/certs:ro
+      - nginx-cache:/var/cache/nginx
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - staging-net
+    depends_on:
+      portal:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: arch-redis-staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - staging-net
+
+networks:
+  staging-net:
+    driver: bridge
+
+volumes:
+  nginx-cache:
+  redis-data:

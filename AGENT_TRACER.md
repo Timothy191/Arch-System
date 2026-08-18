@@ -1,5 +1,143 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-18T14:45:00Z - Staging Compose Simulation Launch & GitHub Actions Smoke Test Integration
+
+- **Purpose**: Test and launch containerized staging simulation locally (`./scripts/staging-local.sh start`), optimize Dockerfile and `.dockerignore` for fast BuildKit builds, configure staging environment variables, and add automated GitHub Actions staging simulation smoke test step in `.github/workflows/deploy.yml`.
+- **Changes**:
+  - `apps/portal/docker/Dockerfile`: Streamlined `pruner` stage by removing unused `python3 make g++` toolchains, reducing build context overhead and speeding up turbo prune stage.
+  - `.dockerignore`: Added `**/node_modules` pattern to avoid copying workspace package `node_modules` into the Docker build context.
+  - `infra/docker/compose.staging.yml`: Configured default build args (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) for portal service.
+  - `scripts/staging-local.sh`: Exported `DOCKER_BUILDKIT=1` and `COMPOSE_DOCKER_CLI_BUILD=1`.
+  - `.env.production`: Configured staging simulation values passing `./scripts/verify-prod-env.sh` pre-flight checks (0 critical errors).
+  - `.github/workflows/deploy.yml`: Integrated automated `Staging Compose Simulation Smoke Test` and cleanup steps in the `deploy-staging` job.
+- **Verification**: Verified pre-flight validation (`./scripts/verify-prod-env.sh .env.production` passes with 0 critical errors), docker-buildx verified, staging container build executing.
+- **What the Next Agent Should Know**: The staging stack consists of standalone Next.js 16 portal on port 3000, Nginx SSL reverse proxy on ports 8080/8443, and Redis on port 6379, managed via `./scripts/staging-local.sh [start|stop|restart|status|logs]`.
+
+## 2026-08-18 - cSpell CI Integration & Monorepo Dictionary Extension
+
+- **Purpose**: Integrate cspell into the CI quality chain and extend the domain vocabulary dictionary across the monorepo (apps/, packages/, libs/, docs/).
+- **Changes**:
+  - `pnpm-workspace.yaml`: Added `cspell: ^10.0.1` to the pnpm catalog (consistent with `eslint`/`prettier`).
+  - `package.json`: Added `cspell: catalog:` devDependency; added `lint:spelling` script scanning `apps/**`, `packages/**`, `libs/**`, `docs/**` code+markdown; wired `pnpm lint:spelling` into the `quality` chain (after `lint:styles`).
+  - `cspell.json`: Restructured to reference external `project-words.txt` dictionary via `dictionaryDefinitions`; added `ignorePaths` for build artifacts and `**/AGENT_TRACER.md` (agent logs); added `ignoreRegExpList` for Supabase publishable-key tokens.
+  - `project-words.txt` (new): 316 project domain terms — SCADA/FUXA, satellite/NDVI/SWIR, mining safety (MHSAC, LOTO), British-English spellings, tool/product names (payloadcms, pgbouncer, postgrest, qdrant, reviewdog).
+  - `packages/README.md`: Fixed `pretttier-config` → `prettier-config` typo surfaced by the scan.
+- **Verification**: `pnpm lint:spelling` → 838 files, 0 issues (initial unchecked scan reported 1956 issues / 359 unique words repo-wide). `pnpm quality` passes all gates including the new spelling gate.
+- **What the Next Agent Should Know**: Add new domain terms to `project-words.txt` (one per line, lowercase, sorted via `sort`). `**/AGENT_TRACER.md` is intentionally excluded from spell-checking (agent logs contain names/hashes/tokens). cspell runs via `pnpm lint:spelling` and is installed through the pnpm catalog (`cspell: ^10.0.1`).
+
+## 2026-08-18 - cSpell Configuration: Domain Vocabulary Dictionary
+
+- **Purpose**: Fix `[cSpell Information] "Fuxa": Unknown word` errors reported by the VS Code `code-spell-checker` extension in `libs/features/departments/ui/src/index.ts` by establishing a workspace-root cSpell configuration.
+- **Changes**:
+  - `cspell.json`: Created workspace-root cSpell configuration registering 34 domain-specific terms (FUXA SCADA, Supabase, hyperspectral/NDVI/SWIR satellite imaging, Univer sheets, British-English mining terms) as known words, plus standard `ignorePaths` (`node_modules/**`, `dist/**`, `.next/**`, `.nx/**`, `coverage/**`, `*.min.js`, `*.min.css`, `tmp/**`, `*.tsbuildinfo`, `*.lock`, `.prisma/**`).
+- **Verification**: `cspell@10` scans report 0 issues across `libs/features/departments/ui/src/` (45 files) — previously 34 unique unknown words, including `Fuxa`, `Hyperspectral`, `Univer` in `index.ts` and 13 occurrences of `Fuxa`/`fuxa`/`FUXA` in `FuxaFrame.tsx`.
+- **What the Next Agent Should Know**: The cSpell dictionary is centralized at the workspace root; add new domain terms to `cspell.json` → `words` (lowercase; cSpell matching is case-insensitive) instead of inline `// cspell:ignore` comments. cspell CLI is invoked via `npx cspell` (not yet a devDependency).
+
+## 2026-08-18T14:18:00Z - Pre-Flight Integration, Staging Simulation & Quality Gate Verification
+
+- **Purpose**: Add multi-task `&&` delimiter rule, integrate `verify-prod-env.sh` into `scripts/deploy.sh`, establish Docker Compose staging topology simulation (`infra/docker/compose.staging.yml`), and run full `pnpm quality` verification.
+- **Changes**:
+  - `.agents/rules/task-parsing.md`: Added rule establishing `&&` as a multi-task sequential instruction delimiter.
+  - `scripts/deploy.sh`: Integrated `./scripts/verify-prod-env.sh` into the production mode pre-flight validation phase.
+  - `infra/docker/compose.staging.yml` & `scripts/staging-local.sh`: Created containerized staging environment simulating production Linux systemd + Nginx SSL reverse proxy + standalone Next.js 16 portal + Redis.
+- **Verification**:
+  - Executed `pnpm quality` across all 57 workspace targets, root lint, stylelint, syncpack, knip, policy security, RLS audit (78/78 tables protected), and design audit (378 files scanned) — 100% green (exit code 0).
+- **What the Next Agent Should Know**: The production deployment workflow is end-to-end verified and all quality gates pass without warnings.
+
+## 2026-08-18T14:11:00Z - Pre-Flight Verification Script & Self-Hosted Deployment Guide
+
+- **Purpose**: Create production pre-flight validation script (`scripts/verify-prod-env.sh`) and document full self-hosted standalone workflow and systemd service in `docs/DEPLOYMENT.md`.
+- **Changes**:
+  - `scripts/verify-prod-env.sh`: Created production pre-flight validation tool verifying `.env.production` keys, Node.js toolchain, and standalone Next.js build bundle.
+  - `docs/DEPLOYMENT.md`: Documented Self-Hosted Production Setup with Cloud Supabase, standalone build workflow, systemd service unit, and Nginx reverse proxy configuration.
+- **Verification**: Executed `./scripts/verify-prod-env.sh` and verified all checks pass (exit code 0).
+- **What the Next Agent Should Know**: Pre-flight checks can be run anytime using `./scripts/verify-prod-env.sh`.
+
+## 2026-08-18T14:08:00Z - Next.js 16 Standalone Build & Client Barrel RSC Decoupling
+
+- **Purpose**: Configure Next.js standalone output for self-hosted deployment, resolve RSC `next/headers` client barrel bundling in `@repo/departments/ui`, and verify standalone server runtime locally.
+- **Changes**:
+  - `apps/portal/next.config.mjs`: Enabled `output: "standalone"` unconditionally.
+  - `libs/features/departments/ui/src/index.ts`: Removed `export * from "./safety/SafetyDashboard"` from client barrel.
+  - `apps/portal/app/(departments)/[department]/page.tsx`: Imported `SafetyDashboard` directly as a Server Component wrapped in Suspense.
+- **Verification**: `pnpm --filter portal build` generated standalone output in `.next/standalone/apps/portal/server.js`. Local standalone test on port 3099 returned HTTP 200 on `/login` and `/api/health`. All 97 Jest test suites (726 tests) passed.
+- **What the Next Agent Should Know**: Next.js standalone artifact is production-ready and executable at `node apps/portal/.next/standalone/apps/portal/server.js`.
+
+## 2026-08-18T13:00:00Z - Implemented Control Room Shift Checklist & KPI Reporting
+
+- **Purpose**: Implement Option 1: add Control Room operational shift checklist widget, bind KPIs to wiki SLA specifications, and provide operator shift handover logging in the portal.
+- **Changes**:
+  - `packages/contract/src/schemas/control-room.schema.ts` & `types/control-room.types.ts`: added Zod schemas and TypeScript types for `controlRoomChecklistSchema`, `controlRoomChecklistItemSchema`, and `controlRoomShiftReportSchema`.
+  - `libs/features/departments/ui/src/control-room/ControlRoomChecklistWidget.tsx`: built interactive GlassCard widget with live KPI metrics (<60s alarm, <30s ack, ≥99.9% uptime, 0 missed SLA), category tabs (Daily, Weekly, Monthly, Incident, Compliance), interactive check items with completion timestamps, and operator handover logging.
+  - `libs/features/departments/ui/src/control-room/ControlRoomChecklistWidget.test.tsx`: added unit test suite verifying rendering, tab switching, checkbox toggles, and report submissions.
+  - `apps/portal/app/(departments)/[department]/page.tsx`: dynamically mounted `ControlRoomChecklistWidget` in the Control Room dashboard.
+- **Verification**:
+  - `pnpm --filter @repo/contract build` passed (0 TS errors).
+  - `pnpm --filter @repo/departments/ui test` passed (11 suites, 67 tests passing).
+  - `pnpm --filter portal type-check` and `pnpm --filter @repo/departments/ui type-check` passed (0 TS errors).
+  - `pnpm --filter portal lint` and `pnpm --filter @repo/departments/ui lint` passed (0 warnings).
+- **What the Next Agent Should Know**: The Control Room dashboard (`/[department]` for `control-room`) now features full operational checklist tracking and KPI reporting.
+
+## 2026-08-18T12:53:00Z - Added Control Room Department System Wiki Documentation
+
+- **Purpose**: Document the full Control Room Department operational report, system integration architecture, roles, SOPs, KPIs, and operational checklists.
+- **Changes**:
+  - Created `system-wiki/control-room-department.md` adhering to Rule 10 living system documentation standards.
+- **Verification**: Verified markdown formatting and structure.
+- **What the Next Agent Should Know**: Control Room department specification and operational checklists are established in `system-wiki/control-room-department.md`.
+
+## 2026-08-18T12:50:00Z - Pruned Unrequired MCP Servers
+
+- **Purpose**: Remove unused and unrequired MCP servers (`cloudrun`, `deepwiki`, and `slim-tools`) across global and local MCP configurations.
+- **Changes**:
+  - Removed `cloudrun` (GCP Cloud Run not in project stack) and `deepwiki` from `~/.gemini/config/mcp_config.json`.
+  - Removed `slim-tools` (unused/auth 401 endpoint) from `~/.gemini/antigravity/mcp_config.json`.
+  - Maintained the core toolset required for Arch-System (`codebase-memory`, `context7`, `github`, `next-devtools`, `sequential-thinking`, `chrome-devtools-mcp`, `knowledge-rail`, `memory`, `npm-mcp`, `nx-mcp`, `playwright`, `postgres`, `redis`, `supabase`).
+- **Verification**: Validated JSON syntax via `python3 -m json.tool` on all configuration paths.
+- **What the Next Agent Should Know**: The active MCP server list strictly matches the Plantcor/Arch-System tech stack.
+
+## 2026-08-18T12:48:00Z - Removed Unused MCP Servers
+
+- **Purpose**: Clean up unused MCP server definitions (`mobbin` and `genkit-mcp-server`) from global MCP configuration.
+- **Changes**:
+  - Removed `mobbin` and `genkit-mcp-server` entries from `~/.gemini/config/mcp_config.json`.
+- **Verification**: Verified JSON validation via `python3 -m json.tool`.
+- **What the Next Agent Should Know**: The global MCP tool configuration now only contains active runtime servers.
+
+## 2026-08-18T12:40:00Z - Resolved MCP Settings Schema Error
+
+- **Purpose**: Fix "MCP settings schema error — no servers were loaded" by correcting invalid schemas across global, IDE, and workspace MCP configuration files.
+- **Changes**:
+  - Cleaned `~/.gemini/config/mcp_config.json`: Removed invalid `$typeName: "exa.cascade_plugins_pb.CascadePluginCommandTemplate"` properties and normalized remote endpoints to use `"serverUrl"`.
+  - Fixed `~/.gemini/antigravity/mcp_config.json`: Updated `slim-tools` to use standard `"serverUrl"`.
+  - Fixed `.agents/mcp_config.json`: Changed `context7` property from `"url"` to `"serverUrl"`.
+- **Verification**: Verified JSON syntax validation with `python3 -m json.tool` across all 3 config paths.
+- **What the Next Agent Should Know**: MCP configurations strictly adhere to Antigravity schema: local servers require `command` (+ optional `args`, `env`), remote SSE servers require `serverUrl`. Do not inject external protobuf `$typeName` fields.
+
+## 2026-08-18T12:22:00Z - Updated `.github/copilot-instructions.md`
+
+- **Purpose**: Refresh Copilot instructions with the actual Nx/pnpm workflow, per-project commands, detailed quality gate, policy SSoT, RLS rules, agent tracing, and authoritative doc references.
+- **Changes**:
+  - Rewrote section 1 with a command table (including `pnpm dev:minimal`, `pnpm dev:up`, per-project `build/lint/type-check`, E2E visual, Storybook).
+  - Documented the exact `pnpm quality` sequence and Jest coverage thresholds.
+  - Expanded section 2 to include `apps/ci-observer`, all packages, policy compiler SSoT, dependency constraints, and codegen pipelines.
+  - Restructured section 3 into sub-sections: package management, portal routing, design system, TypeScript style, tests, database/RLS, agent tracing, Git.
+  - Updated sections 4–5 to reference `CONTRIBUTING.md`, `DESIGN.md`, `SECURITY.md`, and `.claude/rules/`.
+- **Verification**: Reviewed `.github/copilot-instructions.md` for markdown consistency.
+- **What the Next Agent Should Know**: The Copilot instruction file now reflects the full current quality gate and repository conventions. No functional code was changed.
+
+## 2026-08-18: Payload CMS Setup, Schema Isolation & Type Generation
+
+- **Purpose**: Resolve Node.js v26.7.0 ESM/CJS interop issues during env loading, isolate Payload CMS tables inside a dedicated database schema to bypass Drizzle Kit composite key introspection bugs, and generate the TypeScript types.
+- **Changes**:
+  1. `apps/cms/payload.config.ts`: configured the `postgresAdapter` to use `schemaName: "payload"` to cleanly isolate all Payload internal tables from the public schema.
+  2. `apps/cms/scripts/setup.ts`: added a fallback polyfill for `@next/env` default import failure on Node 26+.
+  3. Patched `@payloadcms/next/dist/bin/loadEnv.js` in node_modules to use a namespace import for `@next/env` instead of default imports.
+  4. Generated typescript definitions for collections/globals (`apps/cms/payload-types.ts`).
+  5. Successfully ran the setup bootstrap script to seed the admin user (`admin@plantcor.com`) and default departments (`drilling`, `production`, `control-room`) in the local Supabase/PostgreSQL database under the `payload` schema.
+- **Verification**: `pnpm --filter cms type-check`, `lint`, and `build` passed with zero errors. All CMS setup bootstrap and type generation succeeded.
+- **What the Next Agent Should Know**: Payload CMS tables are fully migrated, seeded, and isolated in the `payload` schema. The types are saved under `apps/cms/payload-types.ts`.
+
 ## 2026-08-18: Backend Connections Flow Diagram in Overview App
 
 - **Purpose**: Add interactive Backend Connections & Data Flow diagram (`BackendArchitecture.tsx`) in `apps/overview` using React Flow (`@xyflow/react`).

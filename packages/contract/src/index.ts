@@ -9,6 +9,7 @@
 // Re-exported Zod types (so consumers don't import "zod" directly)
 // ---------------------------------------------------------------------------
 
+export { z } from "zod";
 export type { ZodSchema, ZodError } from "zod";
 
 // ---------------------------------------------------------------------------
@@ -38,7 +39,12 @@ export { telemetryPushSchema } from "./schemas/telemetry.schema.js";
 
 export { syncPlaybackSchema } from "./schemas/sync.schema.js";
 
-export { shiftCompletenessSchema } from "./schemas/control-room.schema.js";
+export {
+  shiftCompletenessSchema,
+  controlRoomChecklistItemSchema,
+  controlRoomChecklistSchema,
+  controlRoomShiftReportSchema,
+} from "./schemas/control-room.schema.js";
 
 export {
   aiChatSchema,
@@ -53,9 +59,20 @@ export {
   adminDataQuerySchema,
   adminDataUpdateSchema,
   adminDataDeleteSchema,
+  adminAddSiteSchema,
+  adminUpdateSiteSchema,
 } from "./schemas/admin.schema.js";
 
-export { dailyLogSchema, drillingDailyLogSchema, dozerRollSchema } from "./schemas/form.schema.js";
+export {
+  dailyLogSchema,
+  drillingDailyLogSchema,
+  dozerRollSchema,
+  createBreakdownSchema,
+  bookOutSchema,
+  directCheckoutSchema,
+  monthlyReportInputSchema,
+  updateMachineSiteSchema,
+} from "./schemas/form.schema.js";
 
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from "./schemas/access-card.schema.js";
 
@@ -75,7 +92,12 @@ export type { TelemetryPushInput } from "./types/telemetry.types.js";
 
 export type { SyncPlaybackInput } from "./types/sync.types.js";
 
-export type { ShiftCompletenessInput } from "./types/control-room.types.js";
+export type {
+  ShiftCompletenessInput,
+  ControlRoomChecklistItem,
+  ControlRoomChecklistInput,
+  ControlRoomShiftReportInput,
+} from "./types/control-room.types.js";
 
 export type {
   AiChatInput,
@@ -96,6 +118,11 @@ export type {
   DailyLogFormValues,
   DrillingDailyLogFormValues,
   DozerRollFormValues,
+  CreateBreakdownInput,
+  BookOutInput,
+  DirectCheckoutInput,
+  MonthlyReportInput,
+  UpdateMachineSiteInput,
 } from "./types/form.types.js";
 
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from "./types/access-card.types.js";

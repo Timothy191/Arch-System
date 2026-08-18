@@ -1,5 +1,25 @@
 # Database Agent Tracer
 
+## 2026-08-18: Control Room Shift Reports Table
+
+### Purpose
+
+Back the ControlRoomChecklistWidget submit path with a persistent store so operator shift closeout reports (KPIs, checklist state, supervisor signature) survive reloads and are auditable.
+
+### Changes Made
+
+1. **Migration 096 `control_room_shift_reports`**:
+   - Columns mirror `@repo/contract` `controlRoomShiftReportSchema` (alarm/incident response seconds, uptime %, missed incidents, notes, operator name, checklist counts) plus `checklist_items JSONB`, `supervisor_signature`, `created_by`, timestamps.
+   - `UNIQUE (department_id, report_date, shift_type)` — one report per dept/date/shift; upsert-friendly.
+   - RLS enabled with department-scoped SELECT/INSERT/UPDATE policies using `public.is_admin()` / `public.has_department_access()` (InitPlan pattern from 095).
+   - `updated_at` trigger via `public.set_updated_at()`.
+   - Mirrored to `packages/supabase/migrations/` (parity verified, `audit:rls` 0 critical).
+
+### Status
+
+- **Persistence**: Shift reports now have a first-class table with RLS and department isolation.
+- **Next**: Server actions (`submitShiftReport` / `getShiftReport`) + widget wiring.
+
 ## 2026-06-16: Operational Immutability & Partitioned FK Fix
 
 ### Purpose

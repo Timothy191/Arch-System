@@ -61,9 +61,9 @@ export async function bookOutBreakdown(breakdownId: string, input: BookOutInput)
   } = await supabase.auth.getUser();
 
   if (!user) {
-    serverLogger.error({ err: new Error("Unauthorized"), context: "createBreakdown" });
+    serverLogger.error({ err: new Error("Unauthorized"), context: "bookOutBreakdown" });
     throw new AuthError("Unauthorized", {
-      context: { action: "createBreakdown" },
+      context: { action: "bookOutBreakdown" },
     });
   }
 
@@ -118,9 +118,9 @@ export async function directCheckout(departmentId: string, input: DirectCheckout
   } = await supabase.auth.getUser();
 
   if (!user) {
-    serverLogger.error({ err: new Error("Unauthorized"), context: "bookOutBreakdown" });
+    serverLogger.error({ err: new Error("Unauthorized"), context: "directCheckout" });
     throw new AuthError("Unauthorized", {
-      context: { action: "bookOutBreakdown" },
+      context: { action: "directCheckout" },
     });
   }
 

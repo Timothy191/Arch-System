@@ -192,7 +192,7 @@ test.describe("full login and reset password flows", () => {
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login
     try {
-      await expect(page).toHaveURL("http://localhost:3000/", { timeout: 5000 });
+      await expect(page).toHaveURL(/.*\/hub|http:\/\/localhost:3000\/?/, { timeout: 5000 });
     } catch {
       // Accept staying on /login in unseeded dev environments
       await expect(page).toHaveURL(/.*\/login.*/);
