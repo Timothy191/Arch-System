@@ -2,7 +2,7 @@
 
 import { useState, Suspense, lazy } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Network, Building2, Layers, Database, Server } from "lucide-react";
+import { Network, Building2, Layers, Database, Server, BookOpen, Activity } from "lucide-react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
@@ -10,6 +10,8 @@ const BackendArchitecture = lazy(() => import("./sections/BackendArchitecture"))
 const DepartmentBreakdown = lazy(() => import("./sections/DepartmentBreakdown"));
 const TechStack = lazy(() => import("./sections/TechStack"));
 const DatabaseSchema = lazy(() => import("./sections/DatabaseSchema"));
+const DocumentationMaps = lazy(() => import("./sections/DocumentationMaps"));
+const AgenticMonitor = lazy(() => import("./sections/AgenticMonitor"));
 
 // Loading fallback
 function SectionLoader() {
@@ -98,6 +100,22 @@ export default function OverviewPage() {
               <span className="hidden sm:inline">Database Schema</span>
               <span className="sm:hidden">Database</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="docs"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Docs & Maps</span>
+              <span className="sm:hidden">Docs</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="agentic"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+            >
+              <Activity className="w-4 h-4" />
+              <span className="hidden sm:inline">Agentic Monitor (ZAR)</span>
+              <span className="sm:hidden">Monitor</span>
+            </TabsTrigger>
           </TabsList>
 
           <div className="mt-6">
@@ -128,6 +146,18 @@ export default function OverviewPage() {
             <TabsContent value="database" className="m-0">
               <Suspense fallback={<SectionLoader />}>
                 <DatabaseSchema />
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="docs" className="m-0">
+              <Suspense fallback={<SectionLoader />}>
+                <DocumentationMaps />
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="agentic" className="m-0">
+              <Suspense fallback={<SectionLoader />}>
+                <AgenticMonitor />
               </Suspense>
             </TabsContent>
           </div>

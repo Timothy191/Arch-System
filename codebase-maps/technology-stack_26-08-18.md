@@ -7,6 +7,129 @@
 
 This map details the complete technology stack across the entire system, including frontend, backend, infrastructure, development tools, and third-party services.
 
+## Visual Overview
+
+### Technology Stack Layers
+
+```mermaid
+graph TB
+    subgraph USER[User Interface Layer]
+        UI[UI Components<br/>Radix UI, @repo/ui]
+        FORMS[Forms & Validation<br/>React Hook Form, Zod]
+        STATE[State Management<br/>Zustand, XState]
+        CHARTS[Data Visualization<br/>Recharts, Tremor]
+        MAPS[Maps & GIS<br/>Deck.gl, MapLibre]
+    end
+
+    subgraph FRONTEND[Frontend Framework]
+        NEXT[Next.js 16.2.6<br/>App Router]
+        REACT[React 19]
+        TS[TypeScript 5.9.2]
+        SWC[SWC Transpiler]
+    end
+
+    subgraph BACKEND[Backend Services]
+        API[API Routes<br/>Server Actions]
+        SUPABASE[Supabase<br/>PostgreSQL]
+        REDIS[Redis Cache]
+        CMS[Payload CMS v3]
+        INNGEST[Inngest Workflows]
+    end
+
+    subgraph INFRA[Infrastructure]
+        NX[Nx 22.7.5<br/>Monorepo]
+        TURBO[Turbopack<br/>Dev Server]
+        DOCKER[Docker<br/>Containers]
+        VERCEL[Vercel<br/>Deployment]
+        OBS[Observability<br/>OpenTelemetry, Sentry]
+    end
+
+    subgraph DEVTOOLS[Development Tools]
+        LINT[ESLint, Prettier<br/>Stylelint]
+        TEST[Jest, Playwright<br/>Testing Library]
+        GIT[Husky, Commitlint<br/>Lint-staged]
+        QUALITY[Knip, Syncpack<br/>TypeScript]
+    end
+
+    USER --> NEXT
+    NEXT --> API
+    API --> SUPABASE
+    API --> REDIS
+    API --> CMS
+    API --> INNGEST
+
+    NX --> NEXT
+    NX --> API
+    TURBO --> NEXT
+    DOCKER --> BACKEND
+    VERCEL --> FRONTEND
+    OBS --> FRONTEND
+    OBS --> BACKEND
+
+    LINT --> FRONTEND
+    LINT --> BACKEND
+    TEST --> FRONTEND
+    TEST --> BACKEND
+    GIT --> INFRA
+    QUALITY --> FRONTEND
+    QUALITY --> BACKEND
+
+    style USER fill:#e1f5ff
+    style FRONTEND fill:#fff4e1
+    style BACKEND fill:#e8f5e9
+    style INFRA fill:#f3e5f5
+    style DEVTOOLS fill:#ffebee
+```
+
+### Technology Stack Distribution
+
+```mermaid
+pie title Technology Stack Distribution
+    "Frontend" : 35
+    "Backend" : 25
+    "Infrastructure" : 20
+    "Development Tools" : 15
+    "Third-Party Services" : 5
+```
+
+### Architecture Overview
+
+```mermaid
+graph LR
+    CLIENT[Client Browser] --> NEXT[Next.js App]
+    NEXT --> API[API Routes]
+    NEXT --> SSR[Server Components]
+
+    API --> SUPABASE[Supabase]
+    API --> REDIS[Redis]
+    API --> INNGEST[Inngest]
+
+    SSR --> SUPABASE
+    SSR --> REDIS
+
+    SUPABASE --> POSTGRES[PostgreSQL]
+    REDIS --> CACHE[Cache Layer]
+
+    INNGEST --> WEBHOOKS[External Webhooks]
+
+    NEXT --> SENTRY[Sentry]
+    API --> SENTRY
+    SUPABASE --> TELEMETRY[OpenTelemetry]
+
+    style CLIENT fill:#e1f5ff
+    style NEXT fill:#fff4e1
+    style API fill:#e8f5e9
+    style SSR fill:#f3e5f5
+    style SUPABASE fill:#ffebee
+    style REDIS fill:#fdcb6e
+    style INNGEST fill:#a29bfe
+    style POSTGRES fill:#ff6b6b
+    style CACHE fill:#4ecdc4
+    style WEBHOOKS fill:#45b7d1
+    style SENTRY fill:#96ceb4
+    style TELEMETRY fill:#ffeaa7
+```
+
 ---
 
 ## 1. Core Platform
@@ -164,6 +287,26 @@ This map details the complete technology stack across the entire system, includi
 
 ## 5. Development Tools
 
+### Development Toolchain
+
+```mermaid
+graph TD
+    CODE[Code Editor] --> LINT[Linting<br/>ESLint, Prettier, Stylelint]
+    LINT --> TEST[Testing<br/>Jest, Playwright]
+    TEST --> BUILD[Build Tools<br/>Nx, Vite, SWC]
+    BUILD --> QUALITY[Code Quality<br/>Knip, Syncpack]
+    QUALITY --> GIT[Git Hooks<br/>Husky, Commitlint]
+    GIT --> DEPLOY[Deployment<br/>Vercel, Docker]
+
+    style CODE fill:#e1f5ff
+    style LINT fill:#fff4e1
+    style TEST fill:#e8f5e9
+    style BUILD fill:#f3e5f5
+    style QUALITY fill:#ffebee
+    style GIT fill:#fdcb6e
+    style DEPLOY fill:#a29bfe
+```
+
 ### Build Tools
 
 - **Nx:** 22.7.5 (monorepo orchestration)
@@ -212,6 +355,36 @@ This map details the complete technology stack across the entire system, includi
 ---
 
 ## 6. Third-Party Integrations
+
+### Integration Architecture
+
+```mermaid
+graph TD
+    PORTAL[Portal App] --> SCADA[FUXA SCADA]
+    PORTAL --> HARDWARE[C66 Scanner]
+    PORTAL --> N8N[n8n Workflows]
+    PORTAL --> FLOWISE[Flowise AI]
+    PORTAL --> WEATHER[Weather API]
+    PORTAL --> WEBHOOKS[Webhooks]
+
+    SCADA --> TELEMETRY[/api/telemetry/push]
+    HARDWARE --> C66[/api/c66]
+
+    WEBHOOKS --> SVIX[Svix Service]
+    WEBHOOKS --> CUSTOM[Custom Webhooks]
+
+    style PORTAL fill:#e1f5ff
+    style SCADA fill:#fff4e1
+    style HARDWARE fill:#e8f5e9
+    style N8N fill:#f3e5f5
+    style FLOWISE fill:#ffebee
+    style WEATHER fill:#fdcb6e
+    style WEBHOOKS fill:#a29bfe
+    style TELEMETRY fill:#4ecdc4
+    style C66 fill:#45b7d1
+    style SVIX fill:#96ceb4
+    style CUSTOM fill:#ffeaa7
+```
 
 ### SCADA Integration
 

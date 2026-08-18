@@ -7,6 +7,89 @@
 
 This map details the complete route structure, feature organization, and authentication flow for the portal application.
 
+## Visual Overview
+
+### Route Structure Overview
+
+```mermaid
+graph TD
+    ROOT[/] --> HUB[/hub]
+    ROOT --> AUTH[(auth)]
+    ROOT --> DEPT[(departments)]
+    ROOT --> DOCS[docs]
+    ROOT --> ADMIN[/admin]
+    ROOT --> OFFLINE[/offline]
+    ROOT --> PRIVACY[/privacy]
+
+    AUTH --> LOGIN[/login]
+    AUTH --> RESET[/reset-password]
+    AUTH --> UPDATE[/update-password]
+
+    DEPT --> DYNAMIC[[department]]
+    DEPT --> ACCESS[/access-control]
+    DEPT --> CARD[/access-card-actions]
+    DEPT --> DRILL[/drilling]
+    DEPT --> TRAIN[/training]
+    DEPT --> ENG[/engineering]
+
+    DYNAMIC --> DASH[dashboard]
+    DYNAMIC --> LOG[daily-log]
+    DYNAMIC --> MACH[machines]
+    DYNAMIC --> HIST[history]
+    DYNAMIC --> REP[reports]
+    DYNAMIC --> TOOLS[tools]
+
+    DOCS --> API[/docs/api]
+
+    style ROOT fill:#e1f5ff
+    style HUB fill:#fff4e1
+    style AUTH fill:#e8f5e9
+    style DEPT fill:#f3e5f5
+    style DOCS fill:#ffebee
+    style ADMIN fill:#fdcb6e
+    style OFFLINE fill:#dfe6e9
+    style PRIVACY fill:#dfe6e9
+```
+
+### Route Distribution by Group
+
+```mermaid
+pie title Route Distribution by Group
+    "Departments" : 40
+    "API Routes" : 35
+    "Authentication" : 10
+    "Hub & Admin" : 10
+    "Documentation" : 5
+```
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Middleware
+    participant Redis
+    participant Supabase
+    participant Portal
+
+    User->>Middleware: Request
+    Middleware->>Middleware: Check auth-exempt routes
+    alt Auth-Exempt Route
+        Middleware->>Portal: Allow access
+    else Protected Route
+        Middleware->>Redis: Check department cache
+        alt Cache Hit
+            Redis-->>Middleware: Department UUID
+        else Cache Miss
+            Middleware->>Supabase: Fetch department
+            Supabase-->>Middleware: Department UUID
+            Middleware->>Redis: Cache department
+        end
+        Middleware->>Middleware: Validate role access
+        Middleware->>Portal: Allow/Deny access
+    end
+```
+
 ## 1. Authentication & Middleware Flow
 
 ### Custom Proxy Middleware
@@ -33,13 +116,45 @@ This map details the complete route structure, feature organization, and authent
 
 **Role-Based Access Control:**
 
-```
-RESTRICTED_ROUTES:
-├── access-control: access_control, admin, supervisor, operator
-├── control-room: control_room_operator, admin, supervisor, operator
-├── tools: admin, supervisor
-├── admin: admin
-└── access-card-actions: access_control, admin, supervisor, operator
+```mermaid
+graph TD
+    ADMIN[admin<br/>Full Access]
+    SUPERVISOR[supervisor<br/>Dept Management]
+    OPERATOR[operator<br/>Operations]
+    ACCESS_CTRL[access_control<br/>Security]
+    CTRL_ROOM[control_room_operator<br/>SCADA]
+
+    ADMIN -->|Can Access| ACCESS[access-control]
+    ADMIN -->|Can Access| CTRL[control-room]
+    ADMIN -->|Can Access| TOOLS[tools]
+    ADMIN -->|Can Access| ADMIN_ROUTE[admin]
+    ADMIN -->|Can Access| CARD[access-card-actions]
+
+    SUPERVISOR -->|Can Access| ACCESS
+    SUPERVISOR -->|Can Access| CTRL
+    SUPERVISOR -->|Can Access| TOOLS
+    SUPERVISOR -->|Can Access| CARD
+
+    OPERATOR -->|Can Access| ACCESS
+    OPERATOR -->|Can Access| CTRL
+    OPERATOR -->|Can Access| CARD
+
+    ACCESS_CTRL -->|Can Access| ACCESS
+    ACCESS_CTRL -->|Can Access| CARD
+
+    CTRL_ROOM -->|Can Access| CTRL
+    CTRL_ROOM -->|Can Access| CARD
+
+    style ADMIN fill:#ff6b6b
+    style SUPERVISOR fill:#4ecdc4
+    style OPERATOR fill:#45b7d1
+    style ACCESS_CTRL fill:#fd79a8
+    style CTRL_ROOM fill:#a29bfe
+    style ACCESS fill:#ffeaa7
+    style CTRL fill:#81ecec
+    style TOOLS fill:#74b9ff
+    style ADMIN_ROUTE fill:#ff6b6b
+    style CARD fill:#00cec9
 ```
 
 **Security Features:**
@@ -83,60 +198,98 @@ RESTRICTED_ROUTES:
 
 **Standard Department Routes** (drilling, production, engineering, safety, training):
 
-```
-/[department]
-├── /                    - Dashboard (main page)
-├── /daily-log          - Daily shift log
-├── /machines           - Machine inventory
-├── /history            - Historical data
-├── /reports            - Reports
-└── /tools              - Tools (admin/supervisor only)
+```mermaid
+graph TD
+    DEPT[[department]] --> DASH[dashboard]
+    DEPT --> LOG[daily-log]
+    DEPT --> MACH[machines]
+    DEPT --> HIST[history]
+    DEPT --> REP[reports]
+    DEPT --> TOOLS[tools<br/>Admin/Supervisor]
+
+    style DEPT fill:#f3e5f5
+    style DASH fill:#e1f5ff
+    style LOG fill:#fff4e1
+    style MACH fill:#e8f5e9
+    style HIST fill:#ffebee
+    style REP fill:#fdcb6e
+    style TOOLS fill:#a29bfe
 ```
 
 **Control Room Specific Routes** (`/control-room`):
 
-```
-/control-room
-├── /dashboard              - Main dashboard
-├── /hourly-loads           - Hourly load tracking
-├── /machine-operations     - Machine operations with delay entries
-├── /engineering-notes      - Engineering notes
-├── /excavator-activity     - Excavator activity tracking
-└── /reports                - Reports
+```mermaid
+graph TD
+    CR[control-room] --> CR_DASH[dashboard]
+    CR --> CR_LOAD[hourly-loads]
+    CR --> CR_OPS[machine-operations]
+    CR --> CR_NOTES[engineering-notes]
+    CR --> CR_EXCAV[excavator-activity]
+    CR --> CR_REP[reports]
+
+    style CR fill:#ff6b6b
+    style CR_DASH fill:#e1f5ff
+    style CR_LOAD fill:#fff4e1
+    style CR_OPS fill:#e8f5e9
+    style CR_NOTES fill:#f3e5f5
+    style CR_EXCAV fill:#ffebee
+    style CR_REP fill:#fdcb6e
 ```
 
 **Engineering Specific Routes** (`/engineering`):
 
-```
-/engineering
-├── /dashboard              - Main dashboard
-├── /breakdowns             - Equipment breakdowns
-├── /tire-management        - Tire tracking
-├── /daily-log              - Daily log
-├── /machines               - Machines
-├── /history                - History
-├── /reports                - Reports
-└── /tools                  - Tools
+```mermaid
+graph TD
+    ENG[engineering] --> ENG_DASH[dashboard]
+    ENG --> ENG_BREAK[breakdowns]
+    ENG --> ENG_TIRE[tire-management]
+    ENG --> ENG_LOG[daily-log]
+    ENG --> ENG_MACH[machines]
+    ENG --> ENG_HIST[history]
+    ENG --> ENG_REP[reports]
+    ENG --> ENG_TOOLS[tools]
+
+    style ENG fill:#4ecdc4
+    style ENG_DASH fill:#e1f5ff
+    style ENG_BREAK fill:#ffebee
+    style ENG_TIRE fill:#fff4e1
+    style ENG_LOG fill:#e8f5e9
+    style ENG_MACH fill:#f3e5f5
+    style ENG_HIST fill:#fdcb6e
+    style ENG_REP fill:#a29bfe
+    style ENG_TOOLS fill:#74b9ff
 ```
 
 **Satellite Monitoring Specific Routes** (`/satellite-monitoring`):
 
-```
-/satellite-monitoring
-├── /dashboard              - Overview
-├── /sar                    - SAR/InSAR imagery
-├── /hyperspectral          - Hyperspectral data
-└── /highres                - High-resolution imagery
+```mermaid
+graph TD
+    SAT[satellite-monitoring] --> SAT_DASH[dashboard]
+    SAT --> SAT_SAR[sar<br/>SAR/InSAR]
+    SAT --> SAT_HYPER[hyperspectral]
+    SAT --> SAT_HIGH[highres]
+
+    style SAT fill:#fd79a8
+    style SAT_DASH fill:#e1f5ff
+    style SAT_SAR fill:#fff4e1
+    style SAT_HYPER fill:#e8f5e9
+    style SAT_HIGH fill:#f3e5f5
 ```
 
 **Drilling Specific Routes** (`/drilling`):
 
-```
-/drilling
-├── /dashboard              - Main dashboard
-├── /drilling-operations    - Drilling operations log
-├── /machine-telemetry      - Machine telemetry
-└── /reports                - Reports
+```mermaid
+graph TD
+    DRILL[drilling] --> DRILL_DASH[dashboard]
+    DRILL --> DRILL_OPS[drilling-operations]
+    DRILL --> DRILL_TELEM[machine-telemetry]
+    DRILL --> DRILL_REP[reports]
+
+    style DRILL fill:#a29bfe
+    style DRILL_DASH fill:#e1f5ff
+    style DRILL_OPS fill:#fff4e1
+    style DRILL_TELEM fill:#e8f5e9
+    style DRILL_REP fill:#fdcb6e
 ```
 
 **Additional Department Pages:**

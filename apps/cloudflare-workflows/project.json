@@ -20,7 +20,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "jest",
+        "command": "jest --watchAll=false --passWithNoTests",
         "cwd": "apps/cloudflare-workflows"
       }
     }

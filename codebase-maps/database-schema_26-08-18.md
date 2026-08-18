@@ -7,6 +7,114 @@
 
 This map details the complete database architecture, including all tables, relationships, RLS policies, and security rules for the PostgreSQL/Supabase database.
 
+## Visual Overview
+
+### Table Distribution by Domain
+
+```mermaid
+pie title Database Tables by Domain
+    "Identity & Access" : 5
+    "Access Control" : 4
+    "Fleet & Equipment" : 5
+    "Control Room" : 6
+    "Delay Management" : 2
+    "Engineering & Safety" : 6
+    "Drill Operations" : 3
+    "Daily Logs & Production" : 5
+    "Documents & Reporting" : 5
+    "AI & Vector Search" : 3
+    "Webhooks & Integration" : 2
+    "Audit & Monitoring" : 6
+    "Card Printing" : 4
+    "Data Integrity" : 4
+```
+
+### Database Architecture Overview
+
+```mermaid
+graph TD
+    subgraph CORE[Core System]
+        DEPT[departments]
+        EMP[employees]
+        ROLES[roles]
+    end
+
+    subgraph ACCESS[Access Control]
+        PERS[personnel]
+        VIS[visitors]
+        BADGES[badges]
+        LOGS[access_logs]
+    end
+
+    subgraph FLEET[Fleet & Equipment]
+        MACH[machines]
+        FLEET[fleet]
+        EQUIP[equipment]
+        TIRES[tires]
+        TIRE_INS[tire_inspections]
+    end
+
+    subgraph OPS[Operations]
+        MACH_OPS[machine_operations]
+        HOURLY[hourly_loads]
+        EXCAV[excavator_activity]
+        DOZER[dozer_rolls]
+        DELAY[delay_entries]
+    end
+
+    subgraph ENG_SAF[Engineering & Safety]
+        BREAK[breakdowns]
+        ENG_NOTES[engineering_notes]
+        SAF_INC[safety_incidents]
+    end
+
+    subgraph PROD[Production]
+        DAILY[daily_logs]
+        MACH_HRS[machine_hours]
+        FUEL[fuel_logs]
+        PROD[production_logs]
+    end
+
+    EMP --> DEPT
+    PERS --> DEPT
+    VIS --> PERS
+    BADGES --> PERS
+    BADGES --> VIS
+    BADGES --> FLEET
+    BADGES --> EQUIP
+    LOGS --> BADGES
+
+    MACH --> DEPT
+    FLEET --> DEPT
+    EQUIP --> DEPT
+    TIRES --> MACH
+    TIRE_INS --> TIRES
+
+    MACH_OPS --> MACH
+    MACH_OPS --> DEPT
+    HOURLY --> MACH
+    EXCAV --> MACH
+    DOZER --> MACH
+    DELAY --> MACH_OPS
+
+    BREAK --> FLEET
+    BREAK --> DEPT
+    ENG_NOTES --> MACH
+    SAF_INC --> DEPT
+
+    DAILY --> DEPT
+    MACH_HRS --> MACH
+    FUEL --> MACH
+    PROD --> DAILY
+
+    style CORE fill:#e1f5ff
+    style ACCESS fill:#fff4e1
+    style FLEET fill:#e8f5e9
+    style OPS fill:#f3e5f5
+    style ENG_SAF fill:#ffebee
+    style PROD fill:#fdcb6e
+```
+
 ---
 
 ## 1. Core Tables by Domain
@@ -266,6 +374,28 @@ This map details the complete database architecture, including all tables, relat
 
 ### Daily Logs & Production
 
+#### Daily Log Hierarchy
+
+```mermaid
+graph TD
+    DAILY[daily_logs] --> MACH_HRS[machine_hours]
+    DAILY --> FUEL[fuel_logs]
+    DAILY --> PROD[production_logs]
+
+    MACH_HRS --> MACH[machines]
+    FUEL --> MACH
+    PROD --> DAILY
+
+    DAILY --> DEPT[departments]
+
+    style DAILY fill:#e1f5ff
+    style MACH_HRS fill:#fff4e1
+    style FUEL fill:#e8f5e9
+    style PROD fill:#f3e5f5
+    style MACH fill:#ffebee
+    style DEPT fill:#fdcb6e
+```
+
 #### daily_logs
 
 **Migration:** 001_initial.sql
@@ -435,6 +565,28 @@ This map details the complete database architecture, including all tables, relat
 
 ### Card Printing Infrastructure
 
+#### Card Printing Flow
+
+```mermaid
+graph TD
+    PRINTERS[card_printers] --> JOBS[print_jobs]
+    TEMPLATES[card_templates] --> JOBS
+    PERS[personnel] --> JOBS
+
+    JOBS --> CARDS[issued_cards]
+    PERS --> CARDS
+
+    JOBS -->|uses| PRINTERS
+    JOBS -->|uses| TEMPLATES
+    JOBS -->|for| PERS
+
+    style PRINTERS fill:#e1f5ff
+    style TEMPLATES fill:#fff4e1
+    style PERS fill:#e8f5e9
+    style JOBS fill:#f3e5f5
+    style CARDS fill:#ffebee
+```
+
 #### card_printers
 
 **Migration:** 076_card_printing_infrastructure.sql
@@ -505,53 +657,113 @@ This map details the complete database architecture, including all tables, relat
 
 ### Department-Centric Architecture
 
-```
-departments (center)
-├── employees (auth_id → auth.users)
-├── machines
-├── personnel
-├── fleet
-├── equipment
-├── daily_logs
-├── machine_operations
-├── excavator_activity
-├── dozer_rolls
-├── safety_incidents
-├── breakdowns
-├── engineering_notes
-├── documents
-└── All operational tables
+```mermaid
+graph TD
+    DEPT[departments<br/>Center of Architecture] --> EMP[employees]
+    DEPT --> MACH[machines]
+    DEPT --> PERS[personnel]
+    DEPT --> FLEET[fleet]
+    DEPT --> EQUIP[equipment]
+    DEPT --> DAILY[daily_logs]
+    DEPT --> MACH_OPS[machine_operations]
+    DEPT --> EXCAV[excavator_activity]
+    DEPT --> DOZER[dozer_rolls]
+    DEPT --> SAF_INC[safety_incidents]
+    DEPT --> BREAK[breakdowns]
+    DEPT --> ENG_NOTES[engineering_notes]
+    DEPT --> DOCS[documents]
+
+    EMP --> AUTH[auth.users]
+
+    style DEPT fill:#ff6b6b
+    style EMP fill:#4ecdc4
+    style MACH fill:#45b7d1
+    style PERS fill:#96ceb4
+    style FLEET fill:#ffeaa7
+    style EQUIP fill:#dfe6e9
+    style DAILY fill:#fd79a8
+    style MACH_OPS fill:#a29bfe
+    style EXCAV fill:#00cec9
+    style DOZER fill:#81ecec
+    style SAF_INC fill:#74b9ff
+    style BREAK fill:#ff6b6b
+    style ENG_NOTES fill:#fdcb6e
+    style DOCS fill:#e17055
+    style AUTH fill:#6c5ce7
 ```
 
 ### Machine Hierarchy
 
-```
-machines
-├── machine_operations → operators, sites
-│   └── delay_entries → delay_categories
-├── hourly_loads
-├── excavator_activity
-├── dozer_rolls
-├── tires → tire_inspections
-└── machine_telemetry → machine_telemetry_archive
+```mermaid
+graph TD
+    MACH[machines] --> MACH_OPS[machine_operations]
+    MACH --> HOURLY[hourly_loads]
+    MACH --> EXCAV[excavator_activity]
+    MACH --> DOZER[dozer_rolls]
+    MACH --> TIRES[tires]
+    MACH --> TELEM[machine_telemetry]
+
+    MACH_OPS --> OPER[operators]
+    MACH_OPS --> SITES[sites]
+    MACH_OPS --> DELAY[delay_entries]
+
+    DELAY --> DELAY_CAT[delay_categories]
+
+    TIRES --> TIRE_INS[tire_inspections]
+
+    TELEM --> TELEM_ARCH[machine_telemetry_archive]
+
+    style MACH fill:#ff6b6b
+    style MACH_OPS fill:#4ecdc4
+    style HOURLY fill:#45b7d1
+    style EXCAV fill:#96ceb4
+    style DOZER fill:#ffeaa7
+    style TIRES fill:#dfe6e9
+    style TELEM fill:#fd79a8
+    style OPER fill:#a29bfe
+    style SITES fill:#00cec9
+    style DELAY fill:#81ecec
+    style DELAY_CAT fill:#74b9ff
+    style TIRE_INS fill:#ff6b6b
+    style TELEM_ARCH fill:#e17055
 ```
 
 ### Daily Log Hierarchy
 
-```
-daily_logs
-├── machine_hours
-├── fuel_logs
-└── production_logs
+```mermaid
+graph TD
+    DAILY[daily_logs] --> MACH_HRS[machine_hours]
+    DAILY --> FUEL[fuel_logs]
+    DAILY --> PROD[production_logs]
+
+    MACH_HRS --> MACH[machines]
+    FUEL --> MACH
+    PROD --> DAILY
+
+    style DAILY fill:#ff6b6b
+    style MACH_HRS fill:#4ecdc4
+    style FUEL fill:#45b7d1
+    style PROD fill:#96ceb4
+    style MACH fill:#ffeaa7
 ```
 
 ### Access Control Flow
 
-```
-auth.users
-└── employees
-    ├── accessible_departments[] (cross-department access)
-    └── role → RLS policies
+```mermaid
+graph TD
+    AUTH[auth.users] --> EMP[employees]
+    EMP -->|has| DEPT[departments]
+    EMP -->|has role| ROLE[roles]
+    EMP -->|accessible_departments[]| CROSS[Cross-department access]
+
+    ROLE --> RLS[RLS Policies]
+
+    style AUTH fill:#ff6b6b
+    style EMP fill:#4ecdc4
+    style DEPT fill:#45b7d1
+    style ROLE fill:#96ceb4
+    style CROSS fill:#ffeaa7
+    style RLS fill:#dfe6e9
 ```
 
 ### Document Versioning

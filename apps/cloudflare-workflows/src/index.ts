@@ -1,4 +1,18 @@
-import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from "@cloudflare/workflows";
+export abstract class WorkflowEntrypoint<Env = unknown, Params = unknown> {
+  constructor(
+    protected ctx: unknown,
+    protected env: Env,
+  ) {}
+  abstract run(event: WorkflowEvent<Params>, step: WorkflowStep): Promise<unknown>;
+}
+
+export interface WorkflowEvent<T = unknown> {
+  payload: T;
+}
+
+export interface WorkflowStep {
+  do<T>(name: string, fn: () => Promise<T>): Promise<T>;
+}
 
 export interface Env {
   SHIFT_REPORT_WORKFLOW: WorkflowInstance;

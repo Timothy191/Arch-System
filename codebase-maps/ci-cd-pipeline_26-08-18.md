@@ -7,6 +7,88 @@
 
 This map details the complete CI/CD pipeline architecture, including workflow stages, jobs, deployment strategies, and environments.
 
+## Visual Overview
+
+### Workflow Distribution
+
+```mermaid
+pie title CI/CD Workflows
+    "Main CI" : 12
+    "Deployment" : 25
+    "Release" : 12
+    "Code Review" : 12
+    "Theme CI" : 12
+    "Security" : 12
+    "AI Review" : 12
+    "Canary" : 12
+```
+
+### CI/CD Pipeline Overview
+
+```mermaid
+graph TD
+    DEV[Developer Push] --> CI[Main CI Pipeline]
+    CI --> QUALITY[Quality Gates]
+    QUALITY --> STAGING[Staging Deploy]
+    STAGING --> PROD[Production Deploy]
+    PROD --> CANARY[Canary Deploy]
+
+    CI --> THEMER[Theme CI]
+    CI --> SECURITY[Security Scans]
+    CI --> REVIEW[Code Review]
+
+    QUALITY --> RELEASE[Release Pipeline]
+
+    style DEV fill:#e1f5ff
+    style CI fill:#fff4e1
+    style QUALITY fill:#e8f5e9
+    style STAGING fill:#f3e5f5
+    style PROD fill:#ffebee
+    style CANARY fill:#fdcb6e
+    style THEMER fill:#a29bfe
+    style SECURITY fill:#4ecdc4
+    style REVIEW fill:#45b7d1
+    style RELEASE fill:#96ceb4
+```
+
+### Trigger Flow
+
+```mermaid
+graph LR
+    PUSH[Push to main] --> CI_MAIN[ci.yml]
+    PUSH --> DEPLOY[deploy.yml]
+    PUSH --> RELEASE[release.yml]
+
+    PR[Pull Request] --> CI_MAIN
+    PR --> REVIEW[reviewdog.yml]
+    PR --> OPENCODE[opencode.yml]
+
+    TAG[Tag v*] --> DEPLOY
+    TAG --> RELEASE
+
+    THEME[Theme Changes] --> THEME_CI[theme-ci.yml]
+
+    STAGING[Staging Push] --> DAST[dast.yml]
+
+    MANUAL[Manual Trigger] --> CANARY[deploy-canary.yml]
+    MANUAL --> DEPLOY
+
+    style PUSH fill:#e1f5ff
+    style PR fill:#fff4e1
+    style TAG fill:#e8f5e9
+    style THEME fill:#f3e5f5
+    style STAGING fill:#ffebee
+    style MANUAL fill:#fdcb6e
+    style CI_MAIN fill:#a29bfe
+    style DEPLOY fill:#4ecdc4
+    style RELEASE fill:#45b7d1
+    style REVIEW fill:#96ceb4
+    style OPENCODE fill:#ffeaa7
+    style THEME_CI fill:#ff6b6b
+    style DAST fill:#fd79a8
+    style CANARY fill:#00cec9
+```
+
 ---
 
 ## 1. Workflow Files and Purposes
@@ -28,50 +110,110 @@ This map details the complete CI/CD pipeline architecture, including workflow st
 
 ### Main CI Pipeline (ci.yml)
 
-```
-Stage 1: Parallel Static Checks (no dependencies)
-├── deps-lint (Dependency version consistency)
-├── security-audit (npm audit + gitleaks secret scan)
-├── knip (Dead code detection)
-├── policy-check (Policy compliance)
-├── md-lint (Markdown linting)
-├── lint-type-check (ESLint + TypeScript)
-└── token-css-lint (Design tokens + CSS linting)
+```mermaid
+graph TD
+    subgraph STAGE1[Stage 1: Parallel Static Checks]
+        DEPS[deps-lint]
+        SEC[security-audit]
+        KNIP[knip]
+        POLICY[policy-check]
+        MD[md-lint]
+        LINT[lint-type-check]
+        TOKEN[token-css-lint]
+    end
 
-Stage 2: Build (depends on lint-type-check, token-css-lint)
-└── build (CodeQL analysis, Trivy, SBOM, DeepEval, Terraform lint, build)
+    subgraph STAGE2[Stage 2: Build]
+        BUILD[build<br/>CodeQL, Trivy, SBOM]
+    end
 
-Stage 3: Parallel Quality Checks (depends on build)
-├── test (Unit tests with coverage)
-├── e2e (Playwright E2E tests)
-├── lighthouse (Performance audit)
-└── a11y (Accessibility audit via Storybook)
+    subgraph STAGE3[Stage 3: Quality Checks]
+        TEST[test]
+        E2E[e2e]
+        LH[lighthouse]
+        A11Y[a11y]
+    end
 
-Stage 4: Self-Healing (runs after all jobs, always)
-└── self-healing (Nx fix-ci for auto-fixable issues)
+    subgraph STAGE4[Stage 4: Self-Healing]
+        HEAL[self-healing]
+    end
+
+    LINT --> BUILD
+    TOKEN --> BUILD
+    BUILD --> TEST
+    BUILD --> E2E
+    BUILD --> LH
+    BUILD --> A11Y
+
+    TEST --> HEAL
+    E2E --> HEAL
+    LH --> HEAL
+    A11Y --> HEAL
+
+    style STAGE1 fill:#e1f5ff
+    style STAGE2 fill:#fff4e1
+    style STAGE3 fill:#e8f5e9
+    style STAGE4 fill:#f3e5f5
+    style DEPS fill:#ffebee
+    style SEC fill:#fdcb6e
+    style KNIP fill:#a29bfe
+    style POLICY fill:#4ecdc4
+    style MD fill:#45b7d1
+    style LINT fill:#96ceb4
+    style TOKEN fill:#ffeaa7
+    style BUILD fill:#ff6b6b
+    style TEST fill:#4ecdc4
+    style E2E fill:#45b7d1
+    style LH fill:#96ceb4
+    style A11Y fill:#ffeaa7
+    style HEAL fill:#fd79a8
 ```
 
 ### Deployment Pipeline (deploy.yml)
 
-```
-Stage 1: Quality Gates
-└── quality-check (lint → type-check → test → build)
+```mermaid
+graph TD
+    subgraph STAGE1[Stage 1: Quality Gates]
+        QUALITY[quality-check<br/>lint → type-check → test → build]
+    end
 
-Stage 2: Staging Deployment (depends on quality-check)
-└── deploy-staging (Vercel/SSH/Docker Compose + health checks)
+    subgraph STAGE2[Stage 2: Staging]
+        STAGING[deploy-staging<br/>Vercel/SSH/Docker]
+    end
 
-Stage 3: Production Deployment (depends on quality-check + staging)
-└── deploy-production (Docker Hub push + server deployment + health checks + notifications)
+    subgraph STAGE3[Stage 3: Production]
+        PROD[deploy-production<br/>Docker Hub + Server]
+    end
+
+    QUALITY --> STAGING
+    QUALITY --> PROD
+    STAGING --> PROD
+
+    style STAGE1 fill:#e1f5ff
+    style STAGE2 fill:#fff4e1
+    style STAGE3 fill:#e8f5e9
+    style QUALITY fill:#f3e5f5
+    style STAGING fill:#ffebee
+    style PROD fill:#fdcb6e
 ```
 
 ### Theme CI Pipeline (theme-ci.yml)
 
-```
-Stage 1: Build and Lint
-└── build-and-lint (theme build + token drift check + uncommitted changes verification)
+```mermaid
+graph TD
+    subgraph THEME_STAGE1[Stage 1: Build and Lint]
+        BUILD_LINT[build-and-lint<br/>theme build + token drift]
+    end
 
-Stage 2: Visual Regression (depends on build-and-lint)
-└── visual-smoke (portal build + Playwright visual tests)
+    subgraph THEME_STAGE2[Stage 2: Visual Regression]
+        VISUAL[visual-smoke<br/>portal build + Playwright]
+    end
+
+    BUILD_LINT --> VISUAL
+
+    style THEME_STAGE1 fill:#e1f5ff
+    style THEME_STAGE2 fill:#fff4e1
+    style BUILD_LINT fill:#e8f5e9
+    style VISUAL fill:#f3e5f5
 ```
 
 ---
@@ -130,6 +272,43 @@ Stage 2: Visual Regression (depends on build-and-lint)
 
 ### Deployment Strategies
 
+#### Deployment Strategy Overview
+
+```mermaid
+graph TD
+    CODE[Code Changes] --> QUALITY[Quality Gates]
+    QUALITY --> TARGET{Deploy Target}
+
+    TARGET -->|vercel| VERCEL[Vercel Deployment]
+    TARGET -->|ssh| SSH[SSH Deployment]
+    TARGET -->|docker| DOCKER[Docker Deployment]
+
+    VERCEL --> STAGING_ENV[Staging Environment]
+    VERCEL --> PROD_ENV[Production Environment]
+
+    SSH --> STAGING_ENV
+    SSH --> PROD_ENV
+
+    DOCKER --> DOCKER_STAGING[Docker Compose<br/>Local Staging]
+    DOCKER --> DOCKER_PROD[Docker Hub<br/>+ Server Pull]
+
+    PROD_ENV --> CANARY[Canary Deployment<br/>10% Traffic]
+    CANARY --> FULL[Full Production<br/>100% Traffic]
+
+    style CODE fill:#e1f5ff
+    style QUALITY fill:#fff4e1
+    style TARGET fill:#e8f5e9
+    style VERCEL fill:#f3e5f5
+    style SSH fill:#ffebee
+    style DOCKER fill:#fdcb6e
+    style STAGING_ENV fill:#a29bfe
+    style PROD_ENV fill:#4ecdc4
+    style DOCKER_STAGING fill:#45b7d1
+    style DOCKER_PROD fill:#96ceb4
+    style CANARY fill:#ffeaa7
+    style FULL fill:#ff6b6b
+```
+
 #### 1. Vercel Deployment
 
 - Controlled by `DEPLOY_TARGET=vercel` variable
@@ -159,6 +338,34 @@ Stage 2: Visual Regression (depends on build-and-lint)
 - Auto-promotion to 100% if stable
 
 ### Deployment Safety Features
+
+#### Quality Gates Flow
+
+```mermaid
+graph TD
+    START[Deployment Request] --> LINT[Lint Check]
+    LINT --> TYPECHECK[Type Check]
+    TYPECHECK --> TEST[Test Suite]
+    TEST --> BUILD[Build]
+    BUILD --> HEALTH[Health Check]
+    HEALTH --> DEPLOY_SUCCESS[Deploy Success]
+
+    LINT -->|Fail| BLOCK[Block Deployment]
+    TYPECHECK -->|Fail| BLOCK
+    TEST -->|Fail| BLOCK
+    BUILD -->|Fail| BLOCK
+    HEALTH -->|Fail| ROLLBACK[Rollback]
+
+    style START fill:#e1f5ff
+    style LINT fill:#fff4e1
+    style TYPECHECK fill:#e8f5e9
+    style TEST fill:#f3e5f5
+    style BUILD fill:#ffebee
+    style HEALTH fill:#fdcb6e
+    style DEPLOY_SUCCESS fill:#4ecdc4
+    style BLOCK fill:#ff6b6b
+    style ROLLBACK fill:#a29bfe
+```
 
 - **Concurrency control**: CI cancels in-progress runs; deploy prevents concurrent deploys per environment
 - **Quality gates**: Lint → type-check → test → build must pass before deployment

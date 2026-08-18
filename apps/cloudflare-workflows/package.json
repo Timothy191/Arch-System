@@ -9,9 +9,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest"
   },
-  "dependencies": {
-    "@cloudflare/workflows": "^0.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250204.0",
     "@types/jest": "^30.0.0",

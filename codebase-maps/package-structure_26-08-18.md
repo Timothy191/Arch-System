@@ -7,6 +7,66 @@
 
 This map details the package structure, dependencies, and key technologies across the monorepo.
 
+## Visual Overview
+
+### Package Distribution by Type
+
+```mermaid
+pie title Package Distribution by Type
+    "Applications" : 4
+    "Feature Libraries" : 8
+    "Shared Libraries" : 4
+    "Repository Packages" : 13
+    "Utility Projects" : 1
+```
+
+### Root Package Dependency Categories
+
+```mermaid
+pie title Root Package Dev Dependencies
+    "Build Tools" : 20
+    "Testing" : 15
+    "Linting & Formatting" : 25
+    "Security" : 10
+    "Quality" : 10
+    "Git & Workflow" : 10
+    "Documentation" : 10
+```
+
+### Technology Stack Layers
+
+```mermaid
+graph TD
+    USER[User Interface] --> APP[Applications]
+    APP --> FEAT[Feature Libraries]
+    APP --> SHARED[Shared Libraries]
+    APP --> REPO[Repository Packages]
+
+    FEAT --> REPO
+    FEAT --> SHARED
+    REPO --> SHARED
+
+    SHARED --> BASE[Base Configurations]
+
+    USER --> FRAMEWORK[Framework & Runtime]
+    FRAMEWORK --> BUILD[Build Tools]
+    BUILD --> TEST[Testing]
+    BUILD --> LINT[Linting]
+    BUILD --> SECURITY[Security]
+
+    style USER fill:#e1f5ff
+    style APP fill:#fff4e1
+    style FEAT fill:#e8f5e9
+    style SHARED fill:#f3e5f5
+    style REPO fill:#ffebee
+    style BASE fill:#dfe6e9
+    style FRAMEWORK fill:#fdcb6e
+    style BUILD fill:#a29bfe
+    style TEST fill:#74b9ff
+    style LINT fill:#81ecec
+    style SECURITY fill:#ff6b6b
+```
+
 ## Root Configuration
 
 ### package.json
@@ -60,6 +120,19 @@ Extensive security overrides for vulnerable packages:
 - **API Documentation:** next-swagger-doc, swagger-ui-react
 - **Workflow:** inngest
 - **Security:** bcryptjs, @repo/rate-limiter
+
+**Portal Dependency Breakdown:**
+
+```mermaid
+pie title Portal Dependencies by Category
+    "Framework & Core" : 15
+    "UI Components" : 20
+    "Data & State" : 15
+    "Maps & Visualization" : 15
+    "Forms & Validation" : 10
+    "Observability" : 10
+    "Specialized Libraries" : 15
+```
 
 **Scripts:**
 
@@ -265,6 +338,85 @@ Extensive security overrides for vulnerable packages:
 - **Dependencies:** None
 
 ## Technology Stack Summary
+
+### Technology Stack Architecture
+
+```mermaid
+graph TB
+    subgraph Frontend[Frontend Stack]
+        FE_FRAMEWORK[Next.js 16.2.6<br/>React 19]
+        FE_STYLING[Tailwind CSS<br/>OKLCH Tokens]
+        FE_UI[Radix UI<br/>@repo/ui]
+        FE_STATE[Zustand<br/>XState]
+        FE_FORMS[React Hook Form<br/>Zod]
+        FE_CHARTS[Recharts<br/>Tremor React]
+        FE_MAPS[Deck.gl<br/>MapLibre GL]
+        FE_TEST[Jest<br/>Playwright]
+    end
+
+    subgraph Backend[Backend Stack]
+        BE_DB[PostgreSQL<br/>Supabase]
+        BE_CACHE[Redis]
+        BE_CMS[Payload CMS v3]
+        BE_API[Next.js API<br/>Server Actions]
+        BE_WORKFLOWS[Inngest]
+        BE_AUTH[Supabase Auth<br/>Custom]
+    end
+
+    subgraph Infrastructure[Infrastructure]
+        INF_BUILD[Nx 22.7.5<br/>Turbopack<br/>SWC]
+        INF_PKG[pnpm 9.15.9]
+        INF_CONTAINER[Docker]
+        INF_OBS[OpenTelemetry<br/>Sentry<br/>Prometheus]
+        INF_CICD[GitHub Actions<br/>Nx Cloud]
+        INF_DEPLOY[Vercel<br/>Docker Compose<br/>SSH]
+    end
+
+    subgraph Security[Security Stack]
+        SEC_SCAN[Gitleaks<br/>Secretlint]
+        SEC_AUDIT[npm audit<br/>syncpack]
+        SEC_CONTAINER[Trivy]
+        SEC_SAST[CodeQL]
+        SEC_DAST[OWASP ZAP]
+    end
+
+    subgraph Development[Development Tools]
+        DEV_LINT[ESLint<br/>Prettier<br/>Stylelint]
+        DEV_QUALITY[Knip<br/>TypeScript]
+        DEV_GIT[Husky<br/>Commitlint]
+        DEV_DOCS[Swagger<br/>Storybook]
+    end
+
+    FE_FRAMEWORK --> BE_API
+    BE_API --> BE_DB
+    BE_API --> BE_CACHE
+    BE_API --> BE_WORKFLOWS
+    BE_API --> BE_AUTH
+
+    INF_BUILD --> FE_FRAMEWORK
+    INF_BUILD --> BE_API
+    INF_CICD --> INF_BUILD
+    INF_DEPLOY --> INF_CONTAINER
+
+    SEC_SCAN --> INF_CICD
+    SEC_AUDIT --> INF_CICD
+    SEC_CONTAINER --> INF_DEPLOY
+    SEC_SAST --> INF_CICD
+    SEC_DAST --> INF_DEPLOY
+
+    DEV_LINT --> FE_FRAMEWORK
+    DEV_LINT --> BE_API
+    DEV_QUALITY --> FE_FRAMEWORK
+    DEV_QUALITY --> BE_API
+    DEV_GIT --> INF_CICD
+    DEV_DOCS --> BE_API
+
+    style Frontend fill:#e1f5ff
+    style Backend fill:#e8f5e9
+    style Infrastructure fill:#fff4e1
+    style Security fill:#ffebee
+    style Development fill:#f3e5f5
+```
 
 ### Frontend
 
