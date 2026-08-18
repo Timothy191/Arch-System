@@ -1,5 +1,16 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-18: Backend Connections Flow Diagram in Overview App
+
+- **Purpose**: Add interactive Backend Connections & Data Flow diagram (`BackendArchitecture.tsx`) in `apps/overview` using React Flow (`@xyflow/react`).
+- **Changes**:
+  1. `apps/overview/lib/data.ts`: added `BACKEND_SERVICES` and `BACKEND_CONNECTIONS` data contracts.
+  2. `apps/overview/app/sections/BackendArchitecture.tsx`: built full-featured interactive canvas with custom service nodes, animated wire protocol edges, topology layer legends, flow type filters, and real-time inspector drawer.
+  3. `apps/overview/app/page.tsx`: registered `Backend Connections` tab.
+  4. `apps/overview/AGENT_TRACER.md`: logged overview changes.
+- **Verification**: `pnpm --filter arch-systems-overview type-check`, `lint`, and `build` passed with zero errors.
+- **What the Next Agent Should Know**: The overview app visualizer on port 3002 now contains interactive architecture visualizers for both frontend departmental routes and backend connection topology.
+
 ## 2026-08-18: Nx AI Agent Configuration Update & Outdated Warning Resolution
 
 - **Purpose**: Resolve the Nx "Your AI agent configuration is outdated. Run nx configure-ai-agents to update" warning by configuring OpenAI Codex, Gemini, OpenCode, Claude Code, Copilot, and Cursor.

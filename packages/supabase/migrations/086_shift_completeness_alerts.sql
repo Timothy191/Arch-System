@@ -77,11 +77,14 @@ CREATE POLICY "Department members can read their shift_completeness_alerts"
   FOR SELECT
   TO authenticated
   USING (
-    department_id IN (
-      SELECT d.id FROM departments d
-      JOIN department_members dm ON d.id = dm.department_id
-      JOIN employees e ON dm.employee_id = e.id
+    EXISTS (
+      SELECT 1 FROM employees e
       WHERE e.auth_id = auth.uid()
+        AND (
+          e.department_id = shift_completeness_alerts.department_id
+          OR shift_completeness_alerts.department_id = ANY(e.accessible_departments)
+          OR e.role = 'admin'
+        )
     )
   );
 

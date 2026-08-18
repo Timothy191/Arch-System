@@ -1,5 +1,15 @@
 # Agent Tracer - Overview App
 
+## 2026-08-18 - Backend Architecture & Connections Flow Diagram Addition
+
+- **Purpose**: Implement interactive Backend Connections flow diagram (`BackendArchitecture.tsx`) in `apps/overview` using `@xyflow/react`.
+- **Changes**:
+  - `lib/data.ts`: added `BACKEND_SERVICES` (12 services) and `BACKEND_CONNECTIONS` (12 flow edges) with rich protocols, security, SLAs, and features.
+  - `app/sections/BackendArchitecture.tsx`: built full interactive React Flow canvas with custom nodes, animated edges, topology layers legend, connection filter modes (All Mesh, Core Data, Fast Cache, SCADA/Realtime, AI/OTel), and selected node/edge inspector drawer.
+  - `app/page.tsx`: registered `Backend Connections` (`backend`) tab with lazy-loaded section loader.
+- **Verification**: `pnpm --filter arch-systems-overview type-check`, `lint`, and `build` passed cleanly with 100% static compilation.
+- **Next Steps**: View the interactive diagram locally with `pnpm --filter arch-systems-overview dev` on port 3002.
+
 ## 2026-06-25 - Phase 3 token compliance for overview shell
 
 - **Purpose**: Replace hardcoded overview body background with design token per Phase 3 token integration step.

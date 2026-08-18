@@ -15,8 +15,7 @@ SELECT
     WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 
     ELSE 0 
   END), 0) as old_total_delay_hours
-FROM operational_delays_deprecated_20250115
-WHERE deleted_at IS NULL;
+FROM operational_delays_deprecated_20250115;
 
 -- Calculate total delay hours in new delay_entries table (after migration)
 SELECT 
@@ -40,7 +39,6 @@ FROM (
     ELSE 0 
   END), 0) as total_hours
   FROM operational_delays_deprecated_20250115
-  WHERE deleted_at IS NULL
 ) old,
 (
   SELECT COALESCE(SUM(duration_hours), 0) as total_hours
@@ -60,26 +58,25 @@ SELECT
     WHEN old.delays = new.delays THEN 'PASS'
     ELSE 'FAIL - Category count mismatch'
   END as category_mapping_check
-FROM (SELECT COUNT(*) as delays FROM operational_delays_deprecated_20250115 WHERE category IS NOT NULL) old,
+FROM (SELECT COUNT(*) as delays FROM operational_delays_deprecated_20250115 WHERE delay_category_id IS NOT NULL) old,
      (SELECT COUNT(*) as delays FROM delay_entries WHERE delay_category_id IS NOT NULL) new;
 
 -- Category distribution comparison
 SELECT 'OLD' as system, 
   CASE 
-    WHEN delay_reason LIKE '%External%' OR delay_reason LIKE '%Weather%' OR delay_reason LIKE '%Supplier%' THEN 'External'
-    WHEN delay_reason LIKE '%Production%' OR delay_reason LIKE '%Material%' OR delay_reason LIKE '%Process%' THEN 'Production'
-    WHEN delay_reason LIKE '%Equipment%' OR delay_reason LIKE '%Maintenance%' OR delay_reason LIKE '%Engineering%' THEN 'Engineering'
+    WHEN description LIKE '%External%' OR description LIKE '%Weather%' OR description LIKE '%Supplier%' THEN 'External'
+    WHEN description LIKE '%Production%' OR description LIKE '%Material%' OR description LIKE '%Process%' THEN 'Production'
+    WHEN description LIKE '%Equipment%' OR description LIKE '%Maintenance%' OR description LIKE '%Engineering%' THEN 'Engineering'
     ELSE 'Other'
   END as mapped_category,
   COUNT(*) as count,
   COALESCE(SUM(delay_minutes) / 60.0, 0) as total_hours
 FROM operational_delays_deprecated_20250115
-WHERE deleted_at IS NULL
 GROUP BY 
   CASE 
-    WHEN delay_reason LIKE '%External%' OR delay_reason LIKE '%Weather%' OR delay_reason LIKE '%Supplier%' THEN 'External'
-    WHEN delay_reason LIKE '%Production%' OR delay_reason LIKE '%Material%' OR delay_reason LIKE '%Process%' THEN 'Production'
-    WHEN delay_reason LIKE '%Equipment%' OR delay_reason LIKE '%Maintenance%' OR delay_reason LIKE '%Engineering%' THEN 'Engineering'
+    WHEN description LIKE '%External%' OR description LIKE '%Weather%' OR description LIKE '%Supplier%' THEN 'External'
+    WHEN description LIKE '%Production%' OR description LIKE '%Material%' OR description LIKE '%Process%' THEN 'Production'
+    WHEN description LIKE '%Equipment%' OR description LIKE '%Maintenance%' OR description LIKE '%Engineering%' THEN 'Engineering'
     ELSE 'Other'
   END
 
@@ -112,13 +109,15 @@ SELECT
   END as integrity_check
 FROM machine_operations mo
 LEFT JOIN (
-  SELECT machine_operation_id, COALESCE(SUM(CASE 
-    WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 
+  SELECT mo.id as machine_operation_id, COALESCE(SUM(CASE 
+    WHEN od.delay_minutes IS NOT NULL THEN od.delay_minutes / 60.0 
     ELSE 0 
   END), 0) as total_hours
-  FROM operational_delays_deprecated_20250115
-  WHERE deleted_at IS NULL
-  GROUP BY machine_operation_id
+  FROM operational_delays_deprecated_20250115 od
+  JOIN machine_operations mo ON mo.machine_id = od.affected_machine_id
+    AND mo.shift_date = od.delay_date
+    AND mo.shift_type = od.shift_type
+  GROUP BY mo.id
 ) old ON mo.id = old.machine_operation_id
 LEFT JOIN (
   SELECT machine_operation_id, COALESCE(SUM(duration_hours), 0) as total_hours
@@ -138,10 +137,11 @@ SELECT
   COUNT(*) as unmigrated_count,
   COALESCE(SUM(delay_minutes) / 60.0, 0) as unmigrated_hours
 FROM operational_delays_deprecated_20250115 od
-LEFT JOIN machine_operations mo ON od.machine_operation_id = mo.id
-LEFT JOIN delay_entries de ON od.id = de.old_delay_entry_id -- Assuming we stored the old ID during migration
-WHERE od.deleted_at IS NULL 
-  AND de.id IS NULL;
+LEFT JOIN machine_operations mo ON mo.machine_id = od.affected_machine_id
+  AND mo.shift_date = od.delay_date
+  AND mo.shift_type = od.shift_type
+LEFT JOIN delay_entries de ON de.machine_operation_id = mo.id AND de.description = od.description
+WHERE de.id IS NULL;
 
 -- ============================================
 -- 5. Check for data type and constraint violations
@@ -210,14 +210,14 @@ WHERE deleted_at IS NULL;
 
 SELECT 
   'MIGRATION INTEGRITY SUMMARY' as report_type,
-  (SELECT COUNT(*) FROM operational_delays_deprecated_20250115 WHERE deleted_at IS NULL) as old_record_count,
+  (SELECT COUNT(*) FROM operational_delays_deprecated_20250115) as old_record_count,
   (SELECT COUNT(*) FROM delay_entries WHERE deleted_at IS NULL) as new_record_count,
-  (SELECT COALESCE(SUM(CASE WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 ELSE 0 END), 0) FROM operational_delays_deprecated_20250115 WHERE deleted_at IS NULL) as old_total_hours,
+  (SELECT COALESCE(SUM(CASE WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 ELSE 0 END), 0) FROM operational_delays_deprecated_20250115) as old_total_hours,
   (SELECT COALESCE(SUM(duration_hours), 0) FROM delay_entries WHERE deleted_at IS NULL) as new_total_hours,
   CASE 
-    WHEN (SELECT COUNT(*) FROM operational_delays_deprecated_20250115 WHERE deleted_at IS NULL) = 
+    WHEN (SELECT COUNT(*) FROM operational_delays_deprecated_20250115) = 
          (SELECT COUNT(*) FROM delay_entries WHERE deleted_at IS NULL) 
-    AND ABS((SELECT COALESCE(SUM(CASE WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 ELSE 0 END), 0) FROM operational_delays_deprecated_20250115 WHERE deleted_at IS NULL) - 
+    AND ABS((SELECT COALESCE(SUM(CASE WHEN delay_minutes IS NOT NULL THEN delay_minutes / 60.0 ELSE 0 END), 0) FROM operational_delays_deprecated_20250115) - 
             (SELECT COALESCE(SUM(duration_hours), 0) FROM delay_entries WHERE deleted_at IS NULL)) < 0.1
     THEN 'MIGRATION SUCCESSFUL'
     ELSE 'MIGRATION REQUIRES INVESTIGATION'

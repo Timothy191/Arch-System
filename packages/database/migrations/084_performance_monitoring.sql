@@ -6,21 +6,21 @@
 -- Log queries exceeding 100ms (tunable via log_min_duration_statement)
 
 -- Set log min duration to 100ms (queries taking longer will be logged)
-ALTER SYSTEM SET log_min_duration_statement = 100;
+-- ALTER SYSTEM SET log_min_duration_statement = 100;
 
 -- Log slow checkpoint operations
-ALTER SYSTEM SET log_checkpoints = on;
+-- ALTER SYSTEM SET log_checkpoints = on;
 
 -- Log temporary file usage (helps identify memory issues)
-ALTER SYSTEM SET log_temp_files = 0;
+-- ALTER SYSTEM SET log_temp_files = 0;
 
 -- Log connections/disconnections for audit
-ALTER SYSTEM SET log_connections = on;
-ALTER SYSTEM SET log_disconnections = on;
+-- ALTER SYSTEM SET log_connections = on;
+-- ALTER SYSTEM SET log_disconnections = on;
 
 -- Log duration for statements (separate from slow query log)
-ALTER SYSTEM SET log_duration = off;
-ALTER SYSTEM SET log_statement = 'ddl';
+-- ALTER SYSTEM SET log_duration = off;
+-- ALTER SYSTEM SET log_statement = 'ddl';
 
 -- Create index on pg_stat_statements for analysis (extension must be enabled)
 -- This is managed via Supabase dashboard or migration:

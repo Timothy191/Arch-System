@@ -2,10 +2,11 @@
 
 import { useState, Suspense, lazy } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Network, Building2, Layers, Database } from "lucide-react";
+import { Network, Building2, Layers, Database, Server } from "lucide-react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
+const BackendArchitecture = lazy(() => import("./sections/BackendArchitecture"));
 const DepartmentBreakdown = lazy(() => import("./sections/DepartmentBreakdown"));
 const TechStack = lazy(() => import("./sections/TechStack"));
 const DatabaseSchema = lazy(() => import("./sections/DatabaseSchema"));
@@ -41,9 +42,11 @@ export default function OverviewPage() {
               </p>
             </div>
             <div className="hidden md:flex items-center gap-4 text-xs text-[#898989]">
-              <span>Next.js 14</span>
+              <span>Next.js 16</span>
               <span className="w-1 h-1 rounded-full bg-[#363636]" />
               <span>Supabase</span>
+              <span className="w-1 h-1 rounded-full bg-[#363636]" />
+              <span>Redis Cluster</span>
               <span className="w-1 h-1 rounded-full bg-[#363636]" />
               <span>7 Departments</span>
             </div>
@@ -62,6 +65,14 @@ export default function OverviewPage() {
               <Network className="w-4 h-4" />
               <span className="hidden sm:inline">System Architecture</span>
               <span className="sm:hidden">Architecture</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="backend"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+            >
+              <Server className="w-4 h-4" />
+              <span className="hidden sm:inline">Backend Connections</span>
+              <span className="sm:hidden">Backend Flow</span>
             </TabsTrigger>
             <TabsTrigger
               value="departments"
@@ -93,6 +104,12 @@ export default function OverviewPage() {
             <TabsContent value="architecture" className="m-0">
               <Suspense fallback={<SectionLoader />}>
                 <SystemArchitecture />
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="backend" className="m-0">
+              <Suspense fallback={<SectionLoader />}>
+                <BackendArchitecture />
               </Suspense>
             </TabsContent>
 

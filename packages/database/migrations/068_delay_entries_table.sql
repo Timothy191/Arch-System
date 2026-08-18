@@ -31,11 +31,13 @@ ON CONFLICT (name) DO NOTHING;
 
 ALTER TABLE delay_categories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "delay_categories_select_all" ON delay_categories;
 CREATE POLICY "delay_categories_select_all"
   ON delay_categories FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "delay_categories_insert_admin" ON delay_categories;
 CREATE POLICY "delay_categories_insert_admin"
   ON delay_categories FOR INSERT
   TO authenticated
@@ -77,26 +79,7 @@ CREATE TABLE IF NOT EXISTS delay_entries (
   deleted_reason TEXT,
   created_by UUID REFERENCES employees(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-  -- Ensure delay times are within the operation's time window (when end time is provided)
-  CONSTRAINT delay_operation_time_alignment CHECK (
-    delay_end_time IS NULL OR (
-      delay_start_time >= (
-        SELECT mo.shift_date::date + mo.start_time
-        FROM machine_operations mo
-        WHERE mo.id = machine_operation_id
-      )
-      AND delay_end_time <= COALESCE(
-        (SELECT mo.shift_date::date + mo.end_time
-         FROM machine_operations mo
-         WHERE mo.id = machine_operation_id),
-        (SELECT mo.shift_date::date + mo.start_time + INTERVAL '12 hours'
-         FROM machine_operations mo
-         WHERE mo.id = machine_operation_id)
-      )
-    )
-  )
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for performance
@@ -199,8 +182,8 @@ CREATE POLICY "delay_entries_insert_operator"
           )
         )
     )
-    AND NEW.status = 'draft'
-    AND NEW.deleted_at IS NULL
+    AND status = 'draft'
+    AND deleted_at IS NULL
   );
 
 CREATE POLICY "delay_entries_update_draft"
@@ -222,8 +205,10 @@ CREATE POLICY "delay_entries_update_draft"
           )
         )
     )
-    AND OLD.status = 'draft'
-    AND NEW.status = 'draft'
+    AND status = 'draft'
+  )
+  WITH CHECK (
+    status = 'draft'
   );
 
 CREATE POLICY "delay_entries_delete_draft"
@@ -244,7 +229,7 @@ CREATE POLICY "delay_entries_delete_draft"
           )
         )
     )
-    AND OLD.status = 'draft'
+    AND status = 'draft'
   );
 
 -- AGENT-TRACE: Policy for soft delete operations (supervisors and admins)
@@ -258,11 +243,11 @@ CREATE POLICY "delay_entries_soft_delete"
       WHERE e.auth_id = auth.uid()
         AND (e.role = 'admin' OR e.role = 'supervisor')
     )
-    AND OLD.deleted_at IS NULL
+    AND deleted_at IS NULL
   )
   WITH CHECK (
-    NEW.deleted_at IS NOT NULL
-    AND NEW.deleted_by IS NOT NULL
+    deleted_at IS NOT NULL
+    AND deleted_by = (SELECT id FROM employees WHERE auth_id = auth.uid())
   );
 
 -- Special policy for commit/uncommit operations (supervisors only)
@@ -281,9 +266,11 @@ CREATE POLICY "delay_entries_commit_supervisor"
           OR e.role = 'supervisor'
         )
     )
-    AND OLD.status = 'draft'
-    AND NEW.status = 'committed'
-    AND NEW.committed_by = e.id
+    AND status = 'draft'
+  )
+  WITH CHECK (
+    status = 'committed'
+    AND committed_by = (SELECT id FROM employees WHERE auth_id = auth.uid())
   );
 
 CREATE POLICY "delay_entries_uncommit_supervisor"
@@ -301,11 +288,14 @@ CREATE POLICY "delay_entries_uncommit_supervisor"
           OR e.role = 'supervisor'
         )
     )
-    AND OLD.status = 'committed'
-    AND NEW.status = 'draft'
-    AND NEW.uncommitted_by = e.id
-    AND NEW.uncommit_reason IS NOT NULL
+    AND status = 'committed'
+  )
+  WITH CHECK (
+    status = 'draft'
+    AND uncommitted_by = (SELECT id FROM employees WHERE auth_id = auth.uid())
+    AND uncommit_reason IS NOT NULL
   );
+
 
 -- ============================================
 -- 5. Create delay_entries_archive table
@@ -351,6 +341,33 @@ CREATE TRIGGER trigger_update_delay_categories_updated_at
   BEFORE UPDATE ON delay_categories
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- ============================================
+-- 6.5. Validate delay entry times
+-- ============================================
+CREATE OR REPLACE FUNCTION validate_delay_entry_time()
+RETURNS TRIGGER AS $$
+DECLARE
+  mo_start TIMESTAMPTZ;
+  mo_end TIMESTAMPTZ;
+BEGIN
+  IF NEW.delay_end_time IS NOT NULL THEN
+    SELECT mo.shift_date::date + mo.start_time,
+           COALESCE(mo.shift_date::date + mo.end_time, mo.shift_date::date + mo.start_time + INTERVAL '12 hours')
+    INTO mo_start, mo_end
+    FROM machine_operations mo
+    WHERE mo.id = NEW.machine_operation_id;
+
+    IF NEW.delay_start_time < mo_start OR NEW.delay_end_time > mo_end THEN
+      RAISE EXCEPTION 'Delay times must be within the operation''s time window';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_validate_delay_entry_time
+  BEFORE INSERT OR UPDATE ON delay_entries
+  FOR EACH ROW EXECUTE FUNCTION validate_delay_entry_time();
 -- ============================================
 -- 7. Add helpful comments
 -- ============================================
