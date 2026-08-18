@@ -14,9 +14,17 @@ export interface WorkflowStep {
   do<T>(name: string, fn: () => Promise<T>): Promise<T>;
 }
 
+export interface R2Bucket {
+  put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown>;
+}
+
+export interface WorkflowInstance {
+  create(options: { id: string; params: unknown }): Promise<{ id: string }>;
+}
+
 export interface Env {
   SHIFT_REPORT_WORKFLOW: WorkflowInstance;
-  SPATIAL_TELEMETRY_BUCKET: R2Bucket;
+  SPATIAL_TELEMETRY_BUCKET?: R2Bucket;
   FUXA_SCADA_URL: string;
   ENVIRONMENT: string;
 }
