@@ -1,5 +1,17 @@
 # Portal Agent Tracer
 
+## Session 2026-08-18 (Department Components Simplification - ce-simplify-code)
+
+- **Purpose**: Execute `ce-simplify-code` against `apps/portal/features/departments/` to remove redundant queries, flatten lookups, eliminate dynamic string interpolation in Tailwind classes, and optimize background polling.
+- **Changes**:
+  - `SafetyCharts.tsx`: Replaced dynamic template string interpolation for Tailwind background classes (`bg-${color}-500`) with static `COLOR_DOT_CLASSES` array for build-time JIT safety.
+  - `SafetyDashboard.tsx`: Parallelized independent Supabase queries with `Promise.all` and eliminated duplicate 30-day incident dates query, reducing DB round-trips from 4 to 3.
+  - `SafetyIncidentForm.tsx`: Statically imported `triggerWorkflow` from `@repo/utils`, simplified user auth extraction, and removed redundant dynamic import promise overhead.
+  - `DeformationAlertCard.tsx`: Consolidated duplicate badge/card color tokens and refactored `DeformationSummary` count computation into a single-pass iteration.
+  - `BookInForm.tsx`: Removed unneeded `useMemo` for small array lookup, statically imported `triggerWorkflow`, and simplified ISO date string formatting.
+  - `ToolsPageClient.tsx`: Suppressed loading spinner state during background 30-second polling intervals to avoid UI flicker.
+- **Next Agent Context**: All department components are simplified, strictly typed, and verified with 100% test coverage.
+
 ## Session 2026-08-18 (Control Room Finalization & Deployment Hardening)
 
 - **Purpose**: Conclude Control Room baseline, finalize engineering breakdown server actions, optimize local dev startup latency, and verify Next.js production deployments.

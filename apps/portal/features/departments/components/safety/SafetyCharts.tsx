@@ -14,6 +14,16 @@ export interface SafetyChartsProps {
   }[];
 }
 
+const CHART_COLORS: Color[] = ["emerald", "blue", "rose", "cyan", "indigo"];
+const COLOR_DOT_CLASSES = [
+  "bg-emerald-500",
+  "bg-blue-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+  "bg-indigo-500",
+];
+
+// AGENT-TRACE: Static class map replaces dynamic template literals for Tailwind JIT compilation safety
 export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -45,7 +55,7 @@ export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps)
           data={distributionData}
           category="value"
           index="name"
-          colors={["emerald", "blue", "rose", "cyan", "indigo"] as Color[]}
+          colors={CHART_COLORS}
           variant="donut"
           showAnimation={true}
         />
@@ -53,7 +63,7 @@ export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps)
           {distributionData.map((item, idx) => (
             <div key={idx} className="flex items-center gap-1.5">
               <div
-                className={`w-2 h-2 rounded-full bg-${["emerald", "blue", "rose", "cyan", "indigo"][idx % 5]}-500`}
+                className={`w-2 h-2 rounded-full ${COLOR_DOT_CLASSES[idx % COLOR_DOT_CLASSES.length]}`}
               />
               <span className="text-[var(--text-secondary)] text-[10px] uppercase tracking-wider">
                 {item.name}

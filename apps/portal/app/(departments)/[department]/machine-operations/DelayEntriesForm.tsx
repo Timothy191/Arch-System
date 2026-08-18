@@ -538,7 +538,7 @@ export function DelayEntriesForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
                       {/* Category */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
+                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
                           Category <span className="text-accent-red">*</span>
                           <span title="Select the type of delay: External, Production, or Engineering">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />
@@ -565,7 +565,7 @@ export function DelayEntriesForm({
 
                       {/* Start Time */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
+                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
                           Start Time <span className="text-accent-red">*</span>
                           <span title="When the delay began. Displayed in local time, stored in UTC.">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />
@@ -592,7 +592,7 @@ export function DelayEntriesForm({
 
                       {/* End Time */}
                       <div className="space-y-1">
-                        <label className="text-[var(--text-secondary)] text-xs block flex items-center gap-1">
+                        <label className="text-[var(--text-secondary)] text-xs flex items-center gap-1">
                           End Time <span className="text-accent-red">*</span>
                           <span title="When the delay ended. Duration is auto-calculated from start time.">
                             <HelpCircle size={12} className="text-[var(--text-muted)]" />

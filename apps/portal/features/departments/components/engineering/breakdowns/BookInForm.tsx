@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition } from "react";
 import { ClipboardPlus, ClipboardList, Clock, CalendarDays } from "lucide-react";
+import { triggerWorkflow } from "@repo/utils";
 import { createBreakdown } from "./actions";
 import type { Breakdown, Machine } from "./types";
 
@@ -19,14 +20,11 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
   } | null>(null);
 
   const [selectedMachineId, setSelectedMachineId] = useState("");
-  const [dateIn, setDateIn] = useState(new Date().toISOString().split("T")[0] ?? "");
+  const [dateIn, setDateIn] = useState(new Date().toISOString().slice(0, 10));
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
   const [reason, setReason] = useState("");
 
-  const selectedMachine = useMemo(
-    () => machines.find((m) => m.id === selectedMachineId),
-    [machines, selectedMachineId],
-  );
+  const selectedMachine = machines.find((m) => m.id === selectedMachineId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,18 +58,16 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         });
 
         // Trigger n8n workflow for breakdown alert
-        import("@repo/utils").then(({ triggerWorkflow }) => {
-          triggerWorkflow("machine-breakdown", {
-            department_id: departmentId,
-            fleet_id: selectedMachine.serial_number || selectedMachine.id,
-            machine_type: selectedMachine.machine_type,
-            reason,
-            status: "active",
-          });
+        triggerWorkflow("machine-breakdown", {
+          department_id: departmentId,
+          fleet_id: selectedMachine.serial_number || selectedMachine.id,
+          machine_type: selectedMachine.machine_type,
+          reason,
+          status: "active",
         });
 
         setSelectedMachineId("");
-        setDateIn(new Date().toISOString().split("T")[0] ?? "");
+        setDateIn(new Date().toISOString().slice(0, 10));
         setTimeIn(new Date().toTimeString().slice(0, 5));
         setReason("");
       } catch (err) {

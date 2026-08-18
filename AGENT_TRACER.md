@@ -1,5 +1,19 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-18T19:27:00Z - Cloudflare Agent Setup & MCP Server Configuration
+
+- **Purpose**: Fetch official Cloudflare agent setup instructions from `https://developers.cloudflare.com/agent-setup/prompt.md` and execute skill installation, MCP server configuration, and Cloudflare workflow/Wrangler verification across agent environments.
+- **Changes**:
+  - `~/.agents/skills/`: Installed 13 official Cloudflare skills (`agents-sdk`, `cloudflare`, `cloudflare-email-service`, `cloudflare-one`, `cloudflare-one-migrations`, `durable-objects`, `sandbox-migrate-to-next`, `sandbox-next`, `sandbox-stable`, `turnstile-spin`, `web-perf`, `workers-best-practices`, `wrangler`) globally via `npx -y skills add cloudflare/skills --skill '*' --yes --global`.
+  - `claude`: Installed `cloudflare/skills` marketplace skills and `cloudflare@cloudflare` plugin via `claude plugin marketplace add cloudflare/skills` and `claude plugin install cloudflare@cloudflare`.
+  - `~/.config/opencode/opencode.jsonc` & `opencode.json`: Registered remote Cloudflare MCP servers (`cloudflare`, `cloudflare-docs`, `cloudflare-bindings`, `cloudflare-builds`, `cloudflare-observability`).
+  - `.vscode/mcp.json`: Registered remote Cloudflare HTTP MCP servers (`cloudflare`, `cloudflare-docs`, `cloudflare-bindings`, `cloudflare-builds`, `cloudflare-observability`).
+- **Verification**:
+  - Verified global skills installed to `~/.agents/skills/`, claude plugin installation confirmed, opencode and vscode JSON configs updated and validated.
+  - Executed Wrangler CLI test (`wrangler --version` -> `⛅️ wrangler 4.111.0`).
+  - Executed Cloudflare Workflows developer docs retrieval and verified documentation parsing.
+- **What the Next Agent Should Know**: The Cloudflare skills, MCP servers, and Wrangler CLI environments are verified and operational.
+
 ## 2026-08-18T14:45:00Z - Staging Compose Simulation Launch & GitHub Actions Smoke Test Integration
 
 - **Purpose**: Test and launch containerized staging simulation locally (`./scripts/staging-local.sh start`), optimize Dockerfile and `.dockerignore` for fast BuildKit builds, configure staging environment variables, and add automated GitHub Actions staging simulation smoke test step in `.github/workflows/deploy.yml`.

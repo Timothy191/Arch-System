@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { getCurrentShift } from "@repo/utils";
+import { getCurrentShift, triggerWorkflow } from "@repo/utils";
 import { useRouter } from "next/navigation";
 import { revalidateRSC } from "@/app/actions";
 
@@ -81,11 +81,15 @@ export function SafetyIncidentForm({
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().slice(0, 10);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { data: employee } = await supabase
         .from("employees")
         .select("id")
-        .eq("auth_id", (await supabase.auth.getUser()).data.user?.id)
+        .eq("auth_id", user?.id)
         .single();
 
       const { error } = await supabase.from("safety_incidents").insert({
@@ -110,14 +114,12 @@ export function SafetyIncidentForm({
       revalidateRSC(["table:safety_incidents"]).catch(() => {});
 
       // Trigger n8n workflow for safety alert
-      import("@repo/utils").then(({ triggerWorkflow }) => {
-        triggerWorkflow("safety-incident", {
-          department_id: departmentId,
-          severity_id: formData.severityId,
-          reported_by: employee?.id,
-          incident_date: today,
-          description: formData.description,
-        });
+      triggerWorkflow("safety-incident", {
+        department_id: departmentId,
+        severity_id: formData.severityId,
+        reported_by: employee?.id,
+        incident_date: today,
+        description: formData.description,
       });
 
       setFormData({

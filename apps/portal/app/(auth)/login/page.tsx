@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
-import { AlertTriangle, Lock } from "lucide-react";
+import { AlertTriangle, Lock, AlertCircle, ChevronDown } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
@@ -91,11 +91,9 @@ export default async function LoginPage() {
             <div className="px-8 py-10 flex-1 flex flex-col justify-center space-y-8">
               {/* Header Bar */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 select-none">
-                  <span className="text-xs font-medium text-[var(--accent-blue)]">
-                    Welcome Back
-                  </span>
-                </div>
+                <span className="text-xs font-medium text-[var(--accent-blue)] select-none">
+                  Welcome Back
+                </span>
                 <div className="flex items-center gap-1.5 text-[10px] text-arch-accent-green">
                   <Lock className="w-3 h-3" strokeWidth={1.5} />
                   <span>Secure</span>
@@ -117,19 +115,10 @@ export default async function LoginPage() {
 
               {/* Contextual System Notice */}
               <div className="px-3.5 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--overlay-dim)] text-[11px] text-[var(--text-secondary)] leading-relaxed flex items-start gap-2.5 select-none">
-                <svg
+                <AlertCircle
                   className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 mt-0.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
+                  strokeWidth={2}
+                />
                 <span>
                   <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
                 </span>
@@ -144,17 +133,7 @@ export default async function LoginPage() {
                 aria-label="Select Language"
               >
                 <span>English (US)</span>
-                <svg
-                  className="w-2.5 h-2.5 opacity-60"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
+                <ChevronDown className="w-2.5 h-2.5 opacity-60" strokeWidth={2.5} />
               </button>
               <div className="flex items-center gap-3">
                 <span>v{PORTAL_VERSION}</span>

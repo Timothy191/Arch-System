@@ -31,8 +31,8 @@ export default function ToolsPageClient({ departmentName, initialTools }: ToolsP
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function refreshStatus() {
-      setLoading(true);
+    async function refreshStatus(showLoading = false) {
+      if (showLoading) setLoading(true);
       try {
         const response = await fetch("/api/tools/status", {
           cache: "no-store",
@@ -44,12 +44,12 @@ export default function ToolsPageClient({ departmentName, initialTools }: ToolsP
       } catch {
         // Keep initial tools on error
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
     }
 
-    refreshStatus();
-    const interval = setInterval(refreshStatus, 30000);
+    refreshStatus(false);
+    const interval = setInterval(() => refreshStatus(false), 30000);
     return () => clearInterval(interval);
   }, []);
 

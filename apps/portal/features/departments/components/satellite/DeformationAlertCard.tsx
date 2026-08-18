@@ -7,6 +7,14 @@ interface DeformationAlertCardProps {
   onClick?: (_reading: DeformationReading) => void;
 }
 
+const BLUE_LEVEL_STYLE = {
+  bg: "bg-accent-blue/10",
+  border: "border-accent-blue/30",
+  text: "text-accent-blue",
+  badge: "bg-accent-blue/20 text-accent-blue",
+  dot: "bg-accent-blue",
+};
+
 const LEVEL_CONFIG = {
   stable: {
     bg: "bg-accent-green/10",
@@ -17,19 +25,11 @@ const LEVEL_CONFIG = {
     label: "Stable",
   },
   minor: {
-    bg: "bg-accent-blue/10",
-    border: "border-accent-blue/30",
-    text: "text-accent-blue",
-    badge: "bg-accent-blue/20 text-accent-blue",
-    dot: "bg-accent-blue",
+    ...BLUE_LEVEL_STYLE,
     label: "Minor Shift",
   },
   moderate: {
-    bg: "bg-accent-blue/10",
-    border: "border-accent-blue/30",
-    text: "text-accent-blue",
-    badge: "bg-accent-blue/20 text-accent-blue",
-    dot: "bg-accent-blue",
+    ...BLUE_LEVEL_STYLE,
     label: "Moderate",
   },
   critical: {
@@ -103,13 +103,20 @@ interface DeformationSummaryProps {
   onReadingClick?: (_reading: DeformationReading) => void;
 }
 
+const LEVEL_SORT_ORDER: Record<string, number> = { critical: 0, moderate: 1, minor: 2, stable: 3 };
+
 export function DeformationSummary({ readings, onReadingClick }: DeformationSummaryProps) {
-  const criticalCount = readings.filter((r) => r.level === "critical").length;
-  const moderateCount = readings.filter((r) => r.level === "moderate").length;
-  const sortedReadings = [...readings].sort((a, b) => {
-    const order = { critical: 0, moderate: 1, minor: 2, stable: 3 };
-    return order[a.level] - order[b.level];
+  let criticalCount = 0;
+  let moderateCount = 0;
+
+  readings.forEach((r) => {
+    if (r.level === "critical") criticalCount++;
+    else if (r.level === "moderate") moderateCount++;
   });
+
+  const sortedReadings = [...readings].sort(
+    (a, b) => LEVEL_SORT_ORDER[a.level]! - LEVEL_SORT_ORDER[b.level]!,
+  );
 
   return (
     <div className="space-y-3">
