@@ -1,5 +1,93 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-18: Database Migrations Sync, Control Room Component Refactoring & Quality Verification
+
+- **Purpose**: Commit pending database migrations (067-095), update `@repo/contract` form schemas, migrate Control Room components to `@repo/departments/ui`, and verify full quality gate (`pnpm quality`).
+- **Changes**:
+  1. Staged and verified migrations `067_cache_events.sql` through `095_optimize_rls_initplan_and_indexes.sql` in `packages/supabase/migrations/`.
+  2. Relocated Control Room components from `apps/portal` to `libs/features/departments/ui/src/control-room/`.
+  3. Extended `@repo/contract` form schemas/types and updated workspace Nx dependencies.
+  4. Successfully executed full workspace quality gate (`pnpm quality` passed cleanly).
+- **Verification**: `pnpm quality` returned exit code 0 across syncpack, knip, security policy compilation, RLS audit, and design compliance checks.
+- **What the Next Agent Should Know**: The repository state is cleanly validated and ready for deployment or further feature work.
+
+## 2026-08-18: FUXA Production Configuration, Supabase Migration Sync & Cache Fallback
+
+- **Purpose**: Configure production `NEXT_PUBLIC_FUXA_URL`, synchronize migrations 050–095 to `packages/supabase/migrations`, execute database role verification, and implement robust offline/online network-resilient cache fallback inside `FuxaFrame.tsx`.
+- **Changes**:
+  1. `apps/portal/.env`: configured `NEXT_PUBLIC_FUXA_URL=https://fuxa.production-mining.com`.
+  2. `packages/supabase/migrations/`: synced migrations 050 through 095 from `packages/database/migrations/` (total 95 migrations now aligned).
+  3. `libs/features/departments/ui/src/control-room/FuxaFrame.tsx`: added strong typing (`CachedMachineStatus`, `CachedScadaData`), window `online`/`offline` network event listeners, and resilient fallback state preservation.
+  4. Database check: verified role and schema migration setup against running Supabase instance.
+- **Verification**: All 10 test suites / 63 tests in `features-departments-ui` pass cleanly; `pnpm quality` run initiated.
+- **What the Next Agent Should Know**: Migration schemas across `@repo/database` and `@repo/supabase` are now in 1:1 parity (95/95 migrations). FUXA fallback is resilient against dropped network connections.
+
+- **Verification**: `pnpm quality` exit code definitively 0 via pipefail; login page HTTP 200 confirmed; health API reports DB + Redis connected.
+- **What the Next Agent Should Know**: Dev server is running in the background (terminal 4) on `http://localhost:3000`; logs are teed to `run/portal.log`. Pre-existing Jest warnings (act, openHandles) and peer-dependency informational messages (Vite esbuild 0.25 vs ^0.27, Storybook Vite 4–6 vs 8, Zod 4 vs ^3.23.8, React 18 vs 19 in `@tremor/react`/`swagger-ui-react`) are intentional and do not block the quality gate — root `package.json` `overrides` stabilizes transitive deps.
+
+## 2026-08-18: Workspace initialization (/init) — runtime, deps, env, tags, quality baseline
+
+- **Purpose**: Execute `/init` on a fresh session — verify runtime prerequisites, sync dependency lockfile, materialize env files from templates, apply Nx architectural tags, and smoke-test quality gates.
+- **Changes**:
+  1. **Runtime verified**: Node.js `v26.7.0` (≥22 ✓), pnpm `9.15.9` (exact pinned match ✓), 32 workspace projects in scope.
+  2. **Dependencies**: Ran `pnpm install` (was `--frozen-lockfile` blocked by drift in `packages/contract/package.json` — Jest + `@types/jest` added; lockfile re-synced cleanly, 2966 packages resolved, husky prepare hook ran OK).
+  3. **Env files**: Copied templates to working locations — root `.env` (from `.env.example`) and `apps/portal/.env` (from `apps/portal/env/.env.example`). Supabase/Redis/Sentry/Novu/Inngest placeholders present; service keys in portal `.env` already populated from example.
+  4. **Nx project tags**: Re-ran `node tools/apply-project-tags.cjs` — 31 `project.json` files written, 3 skipped; tags applied: `scope:app*`, `scope:package*`, `scope:feature`, `scope:shared`, `type:*`, `scope:db-internal` for database internals.
+  5. **Quality baseline smoke tests** (all PASS, exit 0):
+     - `pnpm format:check` — Prettier, 0 formatting drift across TS/TSX/MD.
+     - `pnpm lint:root` — ESLint on root configs, 0 warnings/errors.
+     - `pnpm deps:lint` — syncpack, 184 single-version groups valid, 51 React 19 peer ranges intentionally ignored, 89 pnpm `catalog:` specifiers intentionally ignored.
+     - `pnpm nx show projects` — all 32 workspace projects registered (3 apps: portal, cms, arch-systems-overview; 17 packages; 11 libs; scripts-seeds, n8n-mcp-server).
+- **Verification**: All 5 smoke-test gates exit 0; `pnpm-lock.yaml` re-synced without conflicts; `.env` / `apps/portal/.env` present and non-empty; node_modules `3.0G`.
+- **What the Next Agent Should Know**: Full type-check / lint / test suites (`pnpm type-check`, `pnpm lint`, `pnpm test`, `pnpm quality`) were **not** run end-to-end (type-check was skipped due to long runtime). To fully validate the environment, run `pnpm quality` next. Supabase local dev stack (`pnpm --filter @repo/database supabase:dev`) and Redis must both be running for portal `:3000` to fully boot; the env templates default to `127.0.0.1:54321` (Supabase) and `redis://localhost:6379` (Redis).
+
+## 2026-08-17: Full MCP registry audit & sync across all clients
+
+- **Purpose**: Resolve drift between MCP server registries — `config/tools/mcp.json` had only 4 of 13 servers, `.vscode/mcp.json` and `.agents/mcp_config.json` were missing entirely, and Cline/Gemini were missing most core servers.
+- **Changes**:
+  1. `config/tools/mcp.json` — synced to match all 13 servers from `opencode.json` (was missing codebase-memory, context7, inngest, memory, next-devtools, npm-mcp, nx-mcp, postgres, redis; also fixed github from docker to npx, pinned playwright version).
+  2. `.vscode/mcp.json` — recreated with all 13 servers.
+  3. `.agents/mcp_config.json` — recreated with all 13 servers.
+  4. `~/.cline/data/settings/cline_mcp_settings.json` — added 9 missing servers (codebase-memory, github, inngest, next-devtools, npm-mcp, nx-mcp, playwright, postgres, redis); preserved existing sequential-thinking, memory, context7, knowledge-rail, slim-tools.
+  5. `~/.gemini/config/mcp_config.json` — added 10 missing servers (codebase-memory, context7, github, inngest, memory, npm-mcp, nx-mcp, playwright, postgres, redis); preserved existing deepwiki, sequential-thinking, chrome-devtools-mcp, cloudrun, mobbin, genkit-mcp-server, google-cloud-quotas; pinned next-devtools to @0.3.10 (was @latest).
+- **Verification**: All 5 edited JSON files validated via `python3 -m json.tool` — 0 parse errors.
+- **Note**: `~/.local/share/deepagents/.mcp.json` (3 servers: docs-langchain, reference-langchain, knowledge-rail) was left as-is — DeepAgents has its own server ecosystem. `~/.gemini/settings.json` (nx-mcp only) was left as-is.
+
+## 2026-08-17: Setup Compound Engineering plugin (v3.22.1) from EveryInc
+
+- **Purpose**: Install the Compound Engineering agent skills plugin into the local dev environment for the available agent CLIs (OpenCode, Cline) and provision ready-to-use manifests for agents not yet installed (Claude Code, Codex, Cursor, Kimi, Devin, Grok).
+- **Changes**:
+  1. `.agent-plugins/compound-engineering/`: shallow-cloned `github.com/EveryInc/compound-engineering-plugin` (v3.22.1) into a workspace-local, XDG-friendly agent-plugin root; ran `bun install` for the plugin's own dependencies.
+  2. OpenCode: ran `bun run src/index.ts install compound-engineering --to opencode` → wrote 33 skills + 33 commands to `~/.config/opencode/` with manageability manifest at `compound-engineering/install-manifest.json`; merged into `opencode.json` (permissions kept at `none` per plugin ADR-003 to avoid polluting user config).
+  3. Cline: ran `.cline/scripts/install-skills.sh --global` → symlinked 25 non-manual CE skills into `~/.cline/skills/` (manual-only skills `ce-dogfood`/`ce-polish`/`ce-setup`/`ce-product-pulse`/`ce-promote`/`ce-retune`/`ce-sweep`/`ce-test-xcode` omitted by default; existing user-managed symlinks preserved).
+  4. Codex: ran `bun run src/index.ts convert . --to codex --include-skills` → generated agent/skill bundles in `~/.codex/` (ready for when Codex CLI is installed).
+  5. Workspace manifests: created `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `.kimi-plugin/plugin.json` referencing the canonical CE plugin metadata (picked up natively by those CLIs when installed).
+  6. RCA fix: 3 upstream skills (`ce-product-pulse`, `ce-proof`, `ce-sweep`) had invalid `allowed-tools:` frontmatter using YAML list syntax; corrected to space-separated string per the agent-skills schema (`skill.schema.yaml`), then re-validated: all 29 skills PASS (`node ~/.cline/skills-tools/validate-skill.mjs --recursive skills` exits 0).
+- **Verification**: OpenCode config dir shows 33 skills + 33 commands; Cline `~/.cline/skills/` has 24 CE skill symlinks; full skill validator run exits 0 with no FAILs; 5 pre-existing workspace file modifications confirmed unrelated to this task.
+
+## 2026-08-17: Fix dev.sh loopback port detection & verify full local dev stack
+
+- **Purpose**: Ensure `scripts/dev.sh` recognizes container-mapped loopback ports (`127.0.0.1:port`) and verify end-to-end local dev stack.
+- **Changes**:
+  1. `scripts/dev.sh`: updated `check_and_fix_port` regex to include `127.0.0.1` alongside `0.0.0.0`, `[::]`, and `localhost`.
+- **Verification**: Verified `http://localhost:3000/login` returns HTTP 200 and `http://127.0.0.1:54321/rest/v1/` returns HTTP 200.
+
+## 2026-08-17: Verify live Langfuse US Cloud trace delivery & quality pass
+
+- **Purpose**: Verify live multi-agent trace delivery against Langfuse US Cloud dashboard and ensure monorepo quality gate passes end-to-end.
+- **Changes**:
+  1. `scripts/test-langfuse-tracing.mjs`: added sample multi-agent trace script with nested spans, specialist generations, and synthesis tracking.
+  2. `package.json` / `pnpm-lock.yaml`: pinned `langfuse` devDependency at root.
+- **Verification**: Verified live trace generation and delivery to Langfuse US Cloud (Trace ID: `65cd83cb-3f11-4678-829d-da5eac49a598`); `pnpm quality` exited 0 with all checks green.
+
+## 2026-08-17: Install Langfuse Agent Skill & instrument agent workflows
+
+- **Purpose**: Install canonical Langfuse Agent Skill from `github.com/langfuse/skills` and instrument application subagents with Langfuse tracing.
+- **Changes**:
+  1. `.agents/skills/langfuse/`: installed complete Langfuse skill (SKILL.md, references for instrumentation, CLI, evaluation, error analysis).
+  2. `packages/agents`: added `langfuse` SDK, created `src/langfuse.ts` client singleton, and instrumented `SubagentCoordinator` with trace/generation lifecycle tracking.
+- **Verification**: Verified `pnpm --filter @repo/agents type-check` compiles with 0 errors.
+
 ## 2026-08-17: Fix seed.sql fleet machine constraints & register ~/.local/bin/supabase
 
 - **Purpose**: Prevent NOT NULL constraint violation on `hourly_loads.machine_id` during `supabase start` seed execution; establish canonical XDG launcher for Supabase CLI.
@@ -757,3 +845,78 @@ Document the strategic roadmap and action plan for long-term health and efficien
   - Validated 34 `package.json` files across applications, libraries, packages, and tooling with 100% JSON parse validity.
   - Confirmed `syncpack` configuration in `package.json` is valid and mapped to `config/tools/.syncpackrc.js`.
 - **Next Agent Context**: Working tree is clean. Push pending commits with `git push origin main`.
+
+## 2026-08-18T04:15:00Z - Resolved MCP Server Errors & Restored Port 8288
+
+- **Purpose**: Resolved connection/authentication errors on `slim-tools` and `inngest` MCP servers.
+- **Changes**:
+  - Disabled `slim-tools` server (which was throwing 401 errors due to lack of Bearer token) across local workspace and global configs:
+    - Set `"enabled": false` in `opencode.json`.
+    - Removed `"slim-tools"` from `.vscode/mcp.json`, `.agents/mcp_config.json`, and `config/tools/mcp.json`.
+    - Set `"disabled": true` in `~/.cline/data/settings/cline_mcp_settings.json`.
+    - Removed `"slim-tools"` from `~/.gemini/config/mcp_config.json`.
+  - Installed Inngest CLI Go binary to compliant path `/home/tim/.local/bin/inngest` and configured it.
+  - Updated `scripts/inngest-dev.sh` to include `/home/tim/.local/bin` in its PATH and to `disown` the nohup background process.
+  - Spawned persistent background daemon for Inngest dev server on port 8288.
+- **Next Agent Context**: All configured MCP server errors are resolved. Port 8288 is active and the Inngest `/mcp` HTTP endpoint is responding correctly. `slim-tools` is disabled.
+
+## 2026-08-18T06:37:00Z - Fixed Zod Schema Types, Next.js Dev CSP, & Inngest Env
+
+- **Purpose**: Fix build type-check blocks in `@repo/contract` and resolve runtime CSP/Inngest errors in Next.js.
+- **Changes**:
+  - Aligned Zod schema in `packages/contract/src/schemas/form.schema.ts` with Zod 4 syntax by replacing `invalid_type_error` with `message` in `z.number()`.
+  - Rebuilt `@repo/contract` to update types under `dist/` so that `apps/portal` imports them successfully.
+  - Added `'unsafe-eval'` to local development `Content-Security-Policy-Report-Only` header in `next.config.mjs` to allow Turbopack HMR scripts.
+  - Added `INNGEST_DEV=1` to `apps/portal/.env` to configure the Inngest serve handler for local development (rather than cloud mode).
+  - Started Next.js dev server with `pnpm dev --quick` as a daemon process on port 3000.
+- **Next Agent Context**: Codebase type-check and lint checks are 100% green. Dev server and Inngest API are fully active and reachable.
+
+## 2026-08-18T06:46:00Z - Deduplicated DozerRollForm Component
+
+- **Purpose**: Clean up duplicate implementations of the `DozerRollForm` component in the codebase.
+- **Changes**:
+  - Updated `apps/portal/app/(departments)/[department]/roll-over/page.tsx` to import the component from the shared `@repo/departments/ui` package.
+  - Added `@repo/departments/ui` to the dependencies list in `apps/portal/package.json`.
+  - Deleted duplicate files `DozerRollForm.tsx` and `DozerRollForm.test.tsx` from `apps/portal/features/departments/components/control-room/`.
+  - Ran `pnpm install` and ran `pnpm quality` to ensure package integrity and build success.
+- **Next Agent Context**: Code base is cleanly deduplicated and workspace validation checks are fully green.
+
+## 2026-08-18T07:10:00Z - Contract Export Tests, Control Room Cleanup & Storybook
+
+- **Purpose**: Add unit tests for `@repo/contract` exports, consolidate remaining duplicate control-room files into `@repo/departments/ui`, and create Storybook documentation.
+- **Changes**:
+  - Added `packages/contract/src/index.test.ts` testing `drillingDailyLogSchema`, `DrillingDailyLogFormValues`, `dailyLogSchema`, `dozerRollSchema`, and `DozerRollFormValues`.
+  - Configured `packages/contract/jest.config.js` and updated package test script.
+  - Re-routed `ShiftCoverageClient.tsx` to import `CloseShiftModal` from `@repo/departments/ui`.
+  - Deleted redundant directory `apps/portal/features/departments/components/control-room/`.
+  - Created `libs/features/departments/ui/src/control-room/DozerRollForm.stories.tsx`.
+  - Verified `pnpm quality` passes 100% green across all 32 workspace projects.
+- **Next Agent Context**: All unit tests, contract exports, and component consolidations are verified and green.
+
+## 2026-08-18T07:15:00Z - Resolved CSP Connect-Src Header Violations
+
+- **Purpose**: Resolve `connect-src` CSP violation warnings thrown by browser fetches to local dev ports, Langfuse, and R2 storage.
+- **Changes**:
+  - Updated `connect-src` in `apps/portal/next.config.mjs` to permit `http://localhost:*`, `ws://localhost:*`, `http://127.0.0.1:*`, `ws://127.0.0.1:*`, `https://us.cloud.langfuse.com`, and `https://*.r2.cloudflarestorage.com`.
+  - Verified `pnpm quality` passes 100% green with exit code 0 across all 32 workspace projects.
+- **Next Agent Context**: CSP headers are fully configured for local development and production. Workspace quality checks are 100% green.
+
+## 2026-08-18T07:21:00Z - Configured macOS 27 Golden Background Wallpaper
+
+- **Purpose**: Set `/home/tim/Documents/Arch-System/apps/portal/assets/background/macos-27-golden-4480x3088-26626.png` as the default full-screen wallpaper background across all portal pages.
+- **Changes**:
+  - Synced asset via `scripts/sync-assets.sh` into `apps/portal/public/background/macos-27-golden-4480x3088-26626.png`.
+  - Updated `apps/portal/components/RouteBackground.tsx` to render the image in full-bleed viewport cover mode behind the glass legibility tint.
+  - Updated `packages/theme/src/css/glass.css` `.route-bg-focus` rule.
+  - Verified `pnpm quality` passes 100% green with exit code 0 across all 32 workspace projects.
+- **Next Agent Context**: Global wallpaper is applied and verified. All quality checks pass 100% green.
+
+## 2026-08-18T08:29:00Z - Configured Hardware-Accelerated Decoding for Wallpaper Service & Ran Workspace Verification
+
+- **Purpose**: Set hardware-accelerated video decoding (`--hwdec=auto`) in `mpvpaper` user systemd configuration to reduce CPU usage and verified workspace health via `pnpm quality`.
+- **Changes**:
+  - Modified `/home/tim/.config/systemd/user/mpvpaper.service` to append `hwdec=auto` to the `mpvpaper` arguments.
+  - Formatted `AGENT_TRACER.md` with Prettier to resolve a formatting check warning.
+  - Reloaded user systemd daemon and restarted `mpvpaper.service`.
+  - Ran `pnpm quality` to ensure all workspace checks pass 100% green.
+- **Next Agent Context**: Wallpaper service is active and utilizing hardware accelerated decoding. Load average is normalized, and all project quality checks are 100% green.

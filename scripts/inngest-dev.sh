@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/bin:$PATH"
+
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORT="${PORT:-8288}"
 SDK_URL="${SDK_URL:-http://localhost:3000/api/inngest}"
@@ -16,6 +18,7 @@ fi
 echo "Starting Inngest dev server on port $PORT..."
 nohup inngest dev -u "$SDK_URL" > "$LOG_FILE" 2>&1 &
 PID=$!
+disown "$PID"
 echo "$PID" > "$REPO_ROOT/run/.inngest.pid"
 
 for i in $(seq 1 15); do

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 // eslint-disable-next-line no-restricted-imports
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,12 @@ import { ShiftToggle } from "@repo/ui/ShiftToggle";
 import { toast } from "sonner";
 import { logError } from "@/lib/errors/error-logger";
 import { speculativeEmbedShiftLog, revalidateRSC } from "@/app/actions";
-import { dailyLogSchema, type DailyLogFormValues } from "@repo/contract";
+import {
+  dailyLogSchema,
+  drillingDailyLogSchema,
+  type DailyLogFormValues,
+  type DrillingDailyLogFormValues,
+} from "@repo/contract";
 import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
 interface Machine {
@@ -26,7 +31,11 @@ interface DailyLogFormProps {
   machines: Machine[];
 }
 
-export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
+type UnifiedFormValues = DailyLogFormValues & Partial<DrillingDailyLogFormValues>;
+
+export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLogFormProps) {
+  const isDrilling = departmentSlug === "drilling";
+
   const {
     register,
     handleSubmit,
@@ -34,11 +43,22 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
     reset,
     watch,
     setValue,
-  } = useForm<DailyLogFormValues>({
-    resolver: zodResolver(dailyLogSchema),
+  } = useForm<UnifiedFormValues>({
+    resolver: zodResolver(isDrilling ? drillingDailyLogSchema : dailyLogSchema),
     defaultValues: {
       shift: "day" as const,
       notes: "",
+      ...(isDrilling
+        ? {
+            holesDrilled: 0,
+            totalDepthMeters: 0,
+            penetrationRate: 0,
+            bitWearPercentage: 0,
+            delayCategory: "none" as const,
+            delayMinutes: 0,
+            drillPatternId: "",
+          }
+        : {}),
     },
   });
 
@@ -46,18 +66,32 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const shiftValue = watch("shift");
+  const holesDrilled = watch("holesDrilled") || 0;
+  const totalDepthMeters = watch("totalDepthMeters") || 0;
 
-  async function onSubmit(data: DailyLogFormValues) {
+  const averageDepth = useMemo(() => {
+    if (!holesDrilled || holesDrilled <= 0) return 0;
+    return Number((totalDepthMeters / holesDrilled).toFixed(1));
+  }, [holesDrilled, totalDepthMeters]);
+
+  async function onSubmit(data: UnifiedFormValues) {
     setStatus("submitting");
 
     const supabase = createBrowserSupabaseClient();
     const today = new Date().toISOString().split("T")[0];
 
+    // Format consolidated notes for cross-system searchability
+    let finalNotes = data.notes || "";
+    if (isDrilling) {
+      const summaryPrefix = `[Drilling Operations] Holes: ${data.holesDrilled || 0} | Total Depth: ${data.totalDepthMeters || 0}m (Avg: ${averageDepth}m/hole) | Penetration: ${data.penetrationRate || 0}m/h | Bit Wear: ${data.bitWearPercentage || 0}% | Delay: ${data.delayCategory || "none"} (${data.delayMinutes || 0} min)`;
+      finalNotes = finalNotes.trim() ? `${summaryPrefix}\n\nNotes:\n${finalNotes}` : summaryPrefix;
+    }
+
     const { error } = await supabase.from("daily_logs").insert({
       department_id: departmentId,
       log_date: today,
       shift: data.shift,
-      notes: data.notes === "" ? null : data.notes,
+      notes: finalNotes === "" ? null : finalNotes,
     });
 
     if (error) {
@@ -75,8 +109,8 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       });
 
       // Speculatively generate embedding for the notes in background
-      if (data.notes && data.notes.trim() !== "") {
-        speculativeEmbedShiftLog(data.notes).catch((err) => {
+      if (finalNotes && finalNotes.trim() !== "") {
+        speculativeEmbedShiftLog(finalNotes).catch((err) => {
           logError(err instanceof Error ? err : new Error(String(err)));
         });
       }
@@ -85,6 +119,17 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       reset({
         shift: "day",
         notes: "",
+        ...(isDrilling
+          ? {
+              holesDrilled: 0,
+              totalDepthMeters: 0,
+              penetrationRate: 0,
+              bitWearPercentage: 0,
+              delayCategory: "none",
+              delayMinutes: 0,
+              drillPatternId: "",
+            }
+          : {}),
       });
     }
   }
@@ -99,24 +144,191 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
         <ShiftToggle
           value={shiftValue}
           onChange={(value) => {
-            // Update the form value when shift changes
             setValue("shift", value);
           }}
           name="shift"
         />
       </div>
 
+      {/* Drilling-Specific Operational Metrics */}
+      {isDrilling && (
+        <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+              Drilling Shift Performance Metrics
+            </h3>
+            {averageDepth > 0 && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium">
+                Avg: {averageDepth} m / hole
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-holes"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Holes Drilled
+              </label>
+              <input
+                id="drilling-holes"
+                type="number"
+                {...register("holesDrilled", { valueAsNumber: true })}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                  errors.holesDrilled && "border-accent-red",
+                )}
+                placeholder="0"
+              />
+              {errors.holesDrilled && (
+                <p className="text-accent-red text-xs mt-0.5">{errors.holesDrilled.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-depth"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Total Depth (meters)
+              </label>
+              <input
+                id="drilling-depth"
+                type="number"
+                step="0.1"
+                {...register("totalDepthMeters", { valueAsNumber: true })}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                  errors.totalDepthMeters && "border-accent-red",
+                )}
+                placeholder="0.0"
+              />
+              {errors.totalDepthMeters && (
+                <p className="text-accent-red text-xs mt-0.5">{errors.totalDepthMeters.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-rate"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Penetration Rate (m/h)
+              </label>
+              <input
+                id="drilling-rate"
+                type="number"
+                step="0.1"
+                {...register("penetrationRate", { valueAsNumber: true })}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                  errors.penetrationRate && "border-accent-red",
+                )}
+                placeholder="0.0"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-wear"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Bit Wear (%)
+              </label>
+              <input
+                id="drilling-wear"
+                type="number"
+                min="0"
+                max="100"
+                {...register("bitWearPercentage", { valueAsNumber: true })}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                  errors.bitWearPercentage && "border-accent-red",
+                )}
+                placeholder="0"
+              />
+              {errors.bitWearPercentage && (
+                <p className="text-accent-red text-xs mt-0.5">{errors.bitWearPercentage.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[var(--border-default)]">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-pattern"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Drill Pattern ID
+              </label>
+              <input
+                id="drilling-pattern"
+                type="text"
+                {...register("drillPatternId")}
+                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+                placeholder="e.g. PAT-2026-B4"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-delay-cat"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Delay Category
+              </label>
+              <select
+                id="drilling-delay-cat"
+                {...register("delayCategory")}
+                className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
+              >
+                <option value="none">None (Zero Delay)</option>
+                <option value="bit_replacement">Bit Replacement</option>
+                <option value="rod_jam">Rod Jam / Recovery</option>
+                <option value="collar_setup">Collar Setup</option>
+                <option value="mechanical_breakdown">Mechanical Breakdown</option>
+                <option value="weather">Adverse Weather</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="drilling-delay-min"
+                className="block text-xs text-[var(--text-muted)] font-medium"
+              >
+                Delay Duration (min)
+              </label>
+              <input
+                id="drilling-delay-min"
+                type="number"
+                {...register("delayMinutes", { valueAsNumber: true })}
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                  errors.delayMinutes && "border-accent-red",
+                )}
+                placeholder="0"
+              />
+              {errors.delayMinutes && (
+                <p className="text-accent-red text-xs mt-0.5">{errors.delayMinutes.message}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Machines list (read-only reference) */}
       {machines.length > 0 && (
         <div className="space-y-2">
-          <label className="block text-sm text-[var(--text-muted)]">Machines</label>
+          <label className="block text-sm text-[var(--text-muted)]">Active Rigs & Equipment</label>
           <div className="flex flex-wrap gap-2">
             {machines.map((m) => (
               <span
                 key={m.id}
                 className="px-3 py-1 rounded-full text-xs bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-default)]"
               >
-                {m.name}
+                {m.name} ({m.machine_type})
               </span>
             ))}
           </div>
@@ -126,7 +338,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
       {/* Notes */}
       <div className="space-y-2">
         <label htmlFor="daily-log-notes" className="block text-sm text-[var(--text-muted)]">
-          Notes
+          Observations & Shift Handover Notes
         </label>
         <textarea
           id="daily-log-notes"
@@ -136,7 +348,7 @@ export function DailyLogForm({ departmentId, machines }: DailyLogFormProps) {
             "w-full px-4 py-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none",
             errors.notes && "border-accent-red",
           )}
-          placeholder="Enter any observations or issues..."
+          placeholder="Enter any stratum notes, bit wear observations, or safety handovers..."
           aria-label="Daily log notes"
           aria-invalid={errors.notes ? "true" : "false"}
           aria-describedby={errors.notes ? "daily-log-notes-error" : undefined}

@@ -12,7 +12,7 @@ import {
   XCircle,
   AlertTriangle,
 } from "lucide-react";
-import { CloseShiftModal } from "~/features/departments/components/control-room/CloseShiftModal";
+import { CloseShiftModal } from "@repo/departments/ui";
 
 interface ShiftCoverageClientProps {
   departmentId: string;

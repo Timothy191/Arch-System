@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
+    "jest": "^30.0.0",
     "openapi-zod-client": "^1.18.3",
     "typescript": "catalog:",
     "zod": "catalog:"
@@ -34,6 +36,7 @@
     "clean": "rm -rf dist .nx",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "type-check": "tsc --noEmit",
+    "test": "jest --passWithNoTests",
     "openapi:generate": "SPEC_FILE=./openapi.generated.json node scripts/generate-openapi-types.js",
     "openapi:validate": "node scripts/validate-contract.js",
     "generate-zod": "openapi-zod-client openapi.generated.json -o src/generated/schemas.ts",

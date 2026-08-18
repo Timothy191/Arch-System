@@ -77,7 +77,7 @@
     "slim-tools": {
       "type": "remote",
       "url": "https://slim.tools/mcp",
-      "enabled": true
+      "enabled": false
     }
   }
 }

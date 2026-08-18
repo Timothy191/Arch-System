@@ -18,6 +18,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "@repo/contract": "1.0.0",
     "@repo/departments/data-access": "1.0.0",
+    "@repo/departments/ui": "1.0.0",
     "@repo/errors": "1.0.0",
     "@repo/logger": "1.0.0",
     "@repo/rate-limiter": "1.0.0",

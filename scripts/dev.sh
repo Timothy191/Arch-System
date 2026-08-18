@@ -9,9 +9,10 @@ curl() {
 }
 
 # ──────────────────────────────────────────────────────────
-# Arch-Systems — Lightning Dev Script v3
-# Starts Supabase + Next.js HMR, runs 4-phase health check,
-# then opens browser to login page.
+# Arch-Systems — Lightning Dev Script v4 (Cloud-First, No Docker)
+# Connects to hosted Supabase + optional Redis, starts Next.js HMR,
+# runs 4-phase health check, then opens browser to login page.
+# DOCKER / LOCAL SUPABASE REQUIREMENT REMOVED — all infra is SaaS.
 # ──────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -99,7 +100,7 @@ banner() {
   echo -e "  ${BOLD}${CYAN}  | (_) | | |_| | | (__   | |_| | \__ \   | |   |  _/ \__ \${NC}"
   echo -e "  ${BOLD}${CYAN}   \___/   \__,_|  \___|   \___/  |___/   |_|   |_|   |___/${NC}"
   echo
-  echo -e "  ${DIM}Lightning Dev — Supabase + HMR${NC}"
+  echo -e "  ${DIM}Cloud-First Dev — Hosted Supabase + HMR (No Docker Required)${NC}"
   echo -e "  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC}"
   echo
 }
@@ -110,10 +111,10 @@ open_browser() {
   if command -v google-chrome > /dev/null 2>&1; then
     google-chrome --new-window "$login_url" 2>/dev/null &
   elif command -v chromium > /dev/null 2>&1; then
-n  # Show online service URLs sourced from .env
-  echo -e "  ${INFO} Supabase URL: ${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co}"
-  echo -e "  ${INFO} Redis URL:    ${REDIS_URL:-redis://default:ri1q1GmcoTqGXITwNoNnwRJPYXCyEYE4@activity-brake-chipper-30470.db.redis.io:18471}"
-  echo
+    # Show online service URLs sourced from .env
+    echo -e "  ${INFO} Supabase URL: ${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co} (hosted/cloud)"
+    echo -e "  ${INFO} Redis URL:    ${REDIS_URL:-memory (no REDIS_URL set — using in-memory fallback)}"
+    echo
 
     chromium --new-window "$login_url" 2>/dev/null &
   elif command -v firefox > /dev/null 2>&1; then
@@ -153,14 +154,15 @@ pstat="\033[0;31mOFFLINE\033[0m"
 curl -fs http://localhost:PORT_PLACEHOLDER > /dev/null 2>&1 && pstat="\033[0;32mRUNNING\033[0m"
 echo -e "  Portal      $pstat    http://localhost:PORT_PLACEHOLDER"
 
-sstat="\033[0;31mOFFLINE\033[0m"
-curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1 && sstat="\033[0;32mRUNNING\033[0m"
-echo -e "  Supabase    $sstat    http://localhost:54321"
+sstat="\033[0;36mHOSTED\033[0m"
+echo -e "  Supabase    $sstat    (cloud — no local Docker required)"
 
 echo ""
-echo -e "\033[1mDocker:\033[0m"
+echo -e "\033[1mInfrastructure:\033[0m"
 echo "────────────────────────────────────────────────────────────────"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "  Docker not available"
+echo "  Supabase:  CLOUD (no Docker required)  — configured via .env"
+echo "  Redis:     ${REDIS_URL:-in-memory fallback (no REDIS_URL set)}"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | head -5 || echo "  (Docker not running — not required)"
 
 echo ""
 echo -e "\033[1mRecent Logs:\033[0m"
@@ -450,7 +452,7 @@ check_and_fix_port() {
   local port="$1" name="$2" service="$3"
   if ss -tlnH | grep -q -E ":$port "; then
     # If the port is mapped by a running Docker container, it's fine
-    if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q -E "(0\.0\.0\.0|\[::\]|localhost):$port->"; then
+    if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q -E "(0\.0\.0\.0|\[::\]|localhost|127\.0\.0\.1):$port->"; then
       return 0
     fi
 
@@ -472,7 +474,7 @@ check_and_fix_port() {
       env_pass=false
       return 0
     fi
-    
+
     # Prompt before killing unless FORCE_KILL is set
     if [ "$FORCE_KILL" = "true" ]; then
       echo -e "  ${INFO} Force-clearing port $port ($name) PID $pid ($proc)..."
@@ -563,7 +565,7 @@ if [ "$STRICT_MODE" = "true" ]; then
   phase "1.5" "Quality Gates"
   echo -e "  ${INFO} Running format checks..."
   pnpm format:check > /dev/null 2>&1 && check "Formatting" "pass" || { check "Formatting" "fail"; exit 1; }
-  
+
   echo -e "  ${INFO} Running quality gates (this may take a while)..."
   pnpm quality > "$REPO_ROOT/run/quality.log" 2>&1 && check "Quality Gates" "pass" || { check "Quality Gates" "fail"; echo -e "\n  ${RED}Quality checks failed. See run/quality.log${NC}\n"; exit 1; }
 fi

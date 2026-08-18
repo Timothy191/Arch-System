@@ -1,8 +1,62 @@
 {
   "servers": {
-    "slim-tools": {
+    "codebase-memory": {
+      "command": "npx",
+      "args": ["-y", "codebase-memory-mcp"]
+    },
+    "context7": {
       "type": "http",
-      "url": "https://slim.tools/mcp"
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "inngest": {
+      "type": "http",
+      "url": "http://127.0.0.1:8288/mcp"
+    },
+    "knowledge-rail": {
+      "command": "/home/tim/.local/bin/knowledge-rail",
+      "args": []
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@0.3.10"]
+    },
+    "npm-mcp": {
+      "command": "npx",
+      "args": ["-y", "@mikusnuz/npm-mcp"]
+    },
+    "nx-mcp": {
+      "command": "npx",
+      "args": ["nx", "mcp"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.76"]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:54322/postgres"
+      ]
+    },
+    "redis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "redis-mcp-server@latest",
+        "redis-mcp-server",
+        "--url",
+        "redis://localhost:6379/0"
+      ]
     }
   }
 }

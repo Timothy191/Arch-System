@@ -1055,7 +1055,7 @@ body.focus-mode .route-bg-grain {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background-image: url("/auth-bg-poster.jpg");
+  background-image: url("/background/macos-27-golden-4480x3088-26626.png");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

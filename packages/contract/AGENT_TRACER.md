@@ -1,5 +1,17 @@
 # Contract Package Agent Tracer
 
+## 2026-08-18: Export Drilling Contract Types and Schemas
+
+- **Purpose**: Fix type-check compilation errors in the portal where `drillingDailyLogSchema` and `DrillingDailyLogFormValues` were imported from `@repo/contract` but not exported by its index barrel.
+- **Changes**:
+  - `packages/contract/src/index.ts`: Exported `drillingDailyLogSchema` and `DrillingDailyLogFormValues`.
+- **Additional Cleanup & Verification**:
+  - Added `packages/contract/src/index.test.ts` to explicitly validate accessibility of `drillingDailyLogSchema`, `DrillingDailyLogFormValues`, `dailyLogSchema`, `dozerRollSchema`, and `DozerRollFormValues`.
+  - Added `packages/contract/jest.config.js` and updated package test script.
+  - Removed duplicate `DozerRollForm.tsx` and all redundant control-room components from `apps/portal/features/departments/components/control-room/`.
+  - Updated `apps/portal` to import control room components from `@repo/departments/ui`.
+- **Verification**: `pnpm quality` and `pnpm test` pass 100% green.
+
 ## 2026-06-16: Offline Contract Validation with Static OpenAPI Spec
 
 ### Purpose

@@ -55,7 +55,7 @@ export {
   adminDataDeleteSchema,
 } from "./schemas/admin.schema.js";
 
-export { dailyLogSchema, dozerRollSchema } from "./schemas/form.schema.js";
+export { dailyLogSchema, drillingDailyLogSchema, dozerRollSchema } from "./schemas/form.schema.js";
 
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from "./schemas/access-card.schema.js";
 
@@ -92,6 +92,10 @@ export type {
   AdminDataDeleteInput,
 } from "./types/admin.types.js";
 
-export type { DailyLogFormValues, DozerRollFormValues } from "./types/form.types.js";
+export type {
+  DailyLogFormValues,
+  DrillingDailyLogFormValues,
+  DozerRollFormValues,
+} from "./types/form.types.js";
 
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from "./types/access-card.types.js";

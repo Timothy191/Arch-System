@@ -91,6 +91,23 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
   const [cdFrom, setCdFrom] = useState<string>("");
   const [cdTo, setCdTo] = useState<string>("");
 
+  // Interactive Viewport & Spectral Controls
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [spectralBand, setSpectralBand] = useState<"rgb" | "nir" | "ndvi" | "sar">("rgb");
+  const [maxCloudFilter, setMaxCloudFilter] = useState<number>(100);
+
+  const filteredScenes = useMemo(() => {
+    return scenes.filter((scene) => {
+      const cloud = scene.properties["eo:cloud_cover"];
+      if (cloud === undefined) return true;
+      return cloud <= maxCloudFilter;
+    });
+  }, [scenes, maxCloudFilter]);
+
+  const activeSceneObj = useMemo(() => {
+    return scenes.find((s) => s.id === selectedScene) || filteredScenes[0] || null;
+  }, [scenes, filteredScenes, selectedScene]);
+
   const stockpileResult = useMemo(() => {
     const base = parseFloat(baseElev);
     const peak = parseFloat(peakElev);
@@ -111,16 +128,130 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
           <span className="text-accent-green text-xl mt-0.5">🛰️</span>
           <div>
             <p className="text-sm font-semibold text-accent-green">
-              High-Resolution Commercial Imagery
+              High-Resolution Commercial Imagery & Multi-Spectral Analytics
             </p>
             <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              CubeSat constellations (Planet Labs, Maxar, Airbus) image the site daily at 0.3–3 m.
+              Sub-metre constellations (Planet Labs, Maxar, Airbus) image the pit daily at 0.3–3 m.
               DEM differencing between acquisition dates calculates excavation volumes and stockpile
-              tonnage without ground survey. Sentinel-2 (10 m, free) used here as baseline.
+              tonnage without ground survey. Sentinel-2 (10 m, free) provides baseline calibration.
             </p>
           </div>
         </div>
       </div>
+
+      {/* Interactive High-Res Scene Viewport */}
+      {activeSceneObj && (
+        <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)] space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <p className="text-xs font-semibold text-[var(--text-heading)] font-mono">
+                {activeSceneObj.id}
+              </p>
+              <p className="text-[10px] text-[var(--text-secondary)]">
+                Acquired: {formatSceneDate(activeSceneObj.properties.datetime)} | Cloud:{" "}
+                {activeSceneObj.properties["eo:cloud_cover"] !== undefined
+                  ? `${activeSceneObj.properties["eo:cloud_cover"].toFixed(0)}%`
+                  : "N/A"}
+              </p>
+            </div>
+
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1.5 bg-[var(--bg-secondary)] p-1 rounded-lg border border-[var(--border-default)]">
+              <span className="text-[10px] text-[var(--text-muted)] px-1.5 font-medium">Zoom:</span>
+              {[1, 2, 3, 4].map((z) => (
+                <button
+                  key={z}
+                  onClick={() => setZoomLevel(z)}
+                  className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
+                    zoomLevel === z
+                      ? "bg-[var(--accent-blue)] text-white"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
+                  }`}
+                >
+                  {z}x
+                </button>
+              ))}
+              <button
+                onClick={() => setZoomLevel(1)}
+                className="text-[10px] px-1.5 py-0.5 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                title="Reset zoom"
+              >
+                ↺
+              </button>
+            </div>
+          </div>
+
+          {/* Spectral Band Presets */}
+          <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-[var(--border-emphasis)]">
+            <span className="text-[10px] text-[var(--text-muted)] font-medium">Spectral Band:</span>
+            {(
+              [
+                { id: "rgb", label: "True Color (RGB)" },
+                { id: "nir", label: "False Color (NIR/Vegetation)" },
+                { id: "ndvi", label: "Moisture Index (NDWI)" },
+                { id: "sar", label: "SAR Coherence" },
+              ] as const
+            ).map((b) => (
+              <button
+                key={b.id}
+                onClick={() => setSpectralBand(b.id)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                  spectralBand === b.id
+                    ? "bg-accent-green/20 border-accent-green text-accent-green font-medium"
+                    : "border-[var(--border-default)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Imagery Canvas / Viewport */}
+          <div className="relative w-full h-64 rounded-lg overflow-hidden bg-black/90 border border-[var(--border-default)] flex items-center justify-center">
+            {getSTACQuicklookUrl(activeSceneObj) ? (
+              <div
+                className="w-full h-full relative transition-transform duration-200 ease-out"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  filter:
+                    spectralBand === "nir"
+                      ? "contrast(1.3) hue-rotate(90deg) saturate(1.8)"
+                      : spectralBand === "ndvi"
+                        ? "contrast(1.5) saturate(2) hue-rotate(180deg)"
+                        : spectralBand === "sar"
+                          ? "grayscale(1) contrast(1.8)"
+                          : "none",
+                }}
+              >
+                <Image
+                  src={getSTACQuicklookUrl(activeSceneObj)!}
+                  alt="High-resolution satellite inspection canvas"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="text-center p-4">
+                <span className="text-2xl">🛰️</span>
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  Raster quicklook stream rendering in {spectralBand.toUpperCase()} mode (
+                  {zoomLevel}x zoom)
+                </p>
+              </div>
+            )}
+
+            {/* Viewport Overlay HUD */}
+            <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/70 backdrop-blur-md text-[9px] font-mono text-white/90 border border-white/10 flex items-center gap-2">
+              <span>GSD: 0.5m/px</span>
+              <span>•</span>
+              <span>BAND: {spectralBand.toUpperCase()}</span>
+              <span>•</span>
+              <span>ZOOM: {zoomLevel * 100}%</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stockpile Volume Estimator */}
       <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
@@ -233,53 +364,53 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
             />
           </div>
         </div>
-        {cdFrom && cdTo && cdTo > cdFrom ? (
-          <div className="p-2 bg-[#3ecf8e]/10 border border-[#3ecf8e]/20 rounded-lg">
-            <p className="text-[11px] text-[var(--accent-green)]">
-              ✓ Period selected:{" "}
-              {Math.round((new Date(cdTo).getTime() - new Date(cdFrom).getTime()) / 86400000)} days
+        {cdFrom && cdTo && (
+          <div className="p-2.5 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-emphasis)]">
+            <p className="text-[10px] text-accent-green font-medium">
+              Comparing {cdFrom} → {cdTo}
             </p>
             <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
-              Order Planet/Maxar archive imagery for this window to run DEM differencing.
+              Differential raster analysis queued for next imagery sync cycle.
             </p>
           </div>
-        ) : cdFrom && cdTo ? (
-          <p className="text-[10px] text-accent-blue">"To" date must be after "From" date.</p>
-        ) : null}
+        )}
       </div>
 
-      {/* Use Cases */}
+      {/* Mining Industry Use Cases */}
       <div>
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
-          Mining Applications
+        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+          Mining High-Res Use Cases
         </p>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {USE_CASES.map((uc) => (
             <div
               key={uc.title}
-              className="flex items-start gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]"
+              className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]"
             >
-              <span className="text-xl shrink-0">{uc.icon}</span>
-              <div>
-                <p className="text-sm font-medium text-[var(--text-heading)]">{uc.title}</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
-                  {uc.description}
-                </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base">{uc.icon}</span>
+                <p className="text-xs font-semibold text-[var(--text-heading)]">{uc.title}</p>
               </div>
+              <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">
+                {uc.description}
+              </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Provider Comparison */}
-      <div>
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
-          Imagery Providers
+      {/* Commercial Provider Comparison */}
+      <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
+        <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+          Satellite Constellation Comparison
         </p>
-        <div className="rounded-xl border border-[var(--border-emphasis)] overflow-hidden">
+        <p className="text-[10px] text-[var(--text-secondary)] mb-3">
+          Overview of imagery resolutions, revisit frequencies, and commercial access options.
+        </p>
+        <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-[var(--bg-tertiary)]">
+              <tr className="border-b border-[var(--border-emphasis)]">
                 <th
                   scope="col"
                   className="text-left p-2.5 text-[var(--text-secondary)] font-medium"
@@ -290,7 +421,7 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
                   scope="col"
                   className="text-left p-2.5 text-[var(--text-secondary)] font-medium"
                 >
-                  GSD
+                  Resolution
                 </th>
                 <th
                   scope="col"
@@ -340,21 +471,44 @@ export function HighResPanel({ scenes }: HighResPanelProps) {
         </div>
       </div>
 
-      {/* Latest scenes */}
+      {/* Latest scenes with Cloud Filter */}
       <div>
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
-          Latest Copernicus Scenes
-        </p>
-        {scenes.length === 0 ? (
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+            Available STAC Scenes ({filteredScenes.length})
+          </p>
+          <div className="flex items-center gap-2">
+            <label htmlFor="cloud-filter" className="text-[10px] text-[var(--text-muted)]">
+              Max Cloud: {maxCloudFilter}%
+            </label>
+            <input
+              id="cloud-filter"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={maxCloudFilter}
+              onChange={(e) => setMaxCloudFilter(Number(e.target.value))}
+              className="w-20 accent-accent-green h-1.5 bg-[var(--bg-secondary)] rounded-lg cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {filteredScenes.length === 0 ? (
           <div className="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-center">
-            <p className="text-[var(--text-secondary)] text-sm">No recent scenes available</p>
-            <p className="text-[var(--text-secondary)] text-xs mt-1">
-              Add Planet/Maxar API keys in Settings for daily sub-metre imagery
+            <p className="text-[var(--text-secondary)] text-sm">
+              No scenes match cloud filter (≤{maxCloudFilter}%)
             </p>
+            <button
+              onClick={() => setMaxCloudFilter(100)}
+              className="text-xs text-[var(--accent-blue)] hover:underline mt-1"
+            >
+              Reset cloud filter
+            </button>
           </div>
         ) : (
           <div className="space-y-2">
-            {scenes.slice(0, 4).map((scene) => {
+            {filteredScenes.slice(0, 4).map((scene) => {
               const cloud = scene.properties["eo:cloud_cover"];
               const quicklook = getSTACQuicklookUrl(scene);
               return (

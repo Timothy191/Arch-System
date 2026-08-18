@@ -28,6 +28,9 @@ apps/*/.next/
 .claude/hooks/scripts/db/
 .claude/hooks/scripts/search/
 .agents/
+# Vendored agent plugin checkouts (e.g. compound-engineering) — not project source
+.agent-plugins/
+
 # .kiro/ agent config — tracked except local overrides and runtime data
 .kiro/settings.local.json
 .kiro/worktrees/

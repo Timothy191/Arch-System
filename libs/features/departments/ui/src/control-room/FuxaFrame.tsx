@@ -11,9 +11,17 @@ interface FuxaFrameProps {
 
 type ConnectionStatus = "connected" | "degraded" | "offline" | "connecting";
 
-interface CachedScadaData {
-  machines: any[];
+export interface CachedMachineStatus {
+  id?: string;
+  name?: string;
+  machine_type?: string;
+  active?: boolean;
+}
+
+export interface CachedScadaData {
+  machines: CachedMachineStatus[];
   timestamp: number;
+  lastUrl?: string;
 }
 
 const CACHE_KEY_PREFIX = "scada:fuxa:";
@@ -39,7 +47,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     ? `${CACHE_KEY_PREFIX}${departmentId}`
     : `${CACHE_KEY_PREFIX}default`;
 
-  // Load cached data on mount
+  // Load cached data on mount and listen for network changes
   useEffect(() => {
     try {
       const cached = localStorage.getItem(cacheKey);
@@ -55,23 +63,44 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     } catch {
       // Cache read error, ignore
     }
+
+    const handleOnline = () => {
+      setConnectionStatus("connecting");
+      setLoading(true);
+      setError(false);
+      setShowFallback(false);
+      setKey((k) => k + 1);
+    };
+
+    const handleOffline = () => {
+      setError(true);
+      setConnectionStatus("offline");
+      setShowFallback(true);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, [cacheKey]);
 
   // Save successful load to cache
   const saveToCache = useCallback(() => {
     try {
-      // In a real implementation, you would fetch actual machine data here
-      // For now, we cache the successful load timestamp
       const data: CachedScadaData = {
-        machines: [],
+        machines: cachedData?.machines || [],
         timestamp: Date.now(),
+        lastUrl: src,
       };
       localStorage.setItem(cacheKey, JSON.stringify(data));
       setCachedData(data);
     } catch {
       // Cache write error, ignore
     }
-  }, [cacheKey]);
+  }, [cacheKey, src, cachedData?.machines]);
 
   // Automatic retry with exponential backoff
   useEffect(() => {
