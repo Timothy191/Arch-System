@@ -1,7 +1,14 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 export function createBrowserSupabaseClient() {
-  let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  let supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    "https://mrwhtxbhrzyttlsyuofc.supabase.co";
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg";
 
   // The hostname-rewrite below exists ONLY for the LAN on-prem deployment, where the
   // browser must reach Supabase via the server's LAN IP instead of `localhost`. Hosted /

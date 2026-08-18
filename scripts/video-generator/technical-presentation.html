@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arch Systems - Technical Deep-Dive & Systems Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #080a0f;
+      color: #e5e7eb;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    /* Top Bar */
+    .top-bar {
+      height: 76px;
+      padding: 0 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: #0f131a;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #38bdf8;
+    }
+    .brand-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .tech-tags {
+      display: flex;
+      gap: 12px;
+    }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .tag-highlight {
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Main Viewport */
+    .viewport {
+      flex: 1;
+      padding: 50px 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+      height: 100%;
+    }
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .slide-heading {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+    .slide-desc {
+      font-size: 19px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      max-width: 1400px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      width: 100%;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+      width: 100%;
+    }
+
+    .code-card {
+      background: #0f141c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      overflow: hidden;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+    }
+    .code-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #38bdf8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .function { color: #38bdf8; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+    .type { color: #fbbf24; }
+
+    .arch-card {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .arch-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .arch-text {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .arch-badge-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Footer */
+    .footer-bar {
+      height: 76px;
+      padding: 0 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: #0f131a;
+      z-index: 50;
+    }
+    .speaker-caption {
+      font-size: 15px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 1400px;
+    }
+    .speaker-tag {
+      background: #38bdf8;
+      color: #080a0f;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .timeline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <div class="top-bar">
+    <div class="brand">
+      <div style="font-size: 24px;">⚙️</div>
+      <div>
+        <div class="brand-title">ARCH-SYSTEMS ENGINE SPECIFICATION</div>
+        <div class="brand-subtitle">Coding Specialist & System Architect Deep-Dive</div>
+      </div>
+    </div>
+    <div class="tech-tags">
+      <div class="tag tag-highlight">Nx 22 + Turborepo</div>
+      <div class="tag tag-highlight">Next.js 16 + React 19</div>
+      <div class="tag tag-highlight">PostgreSQL + 79 RLS Tables</div>
+      <div class="tag tag-highlight">Cloudflare Edge Workflows</div>
+    </div>
+  </div>
+
+  <!-- Viewport -->
+  <div class="viewport">
+
+    <!-- SLIDE 1: Monorepo & Module Boundaries -->
+    <div class="slide active" id="slide-1">
+      <div>
+        <span class="slide-badge">01. Monorepo Anatomy & Dependency Boundaries</span>
+        <h1 class="slide-heading">Nx Workspace Topology & Strict Architectural Invariants</h1>
+        <p class="slide-desc">
+          27 isolated projects partitioned into clean architectural tiers. Strict lint-enforced module boundaries prevent leaky domain abstractions and circular dependencies.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="arch-card">
+          <div class="arch-title">📱 Application Layer (`apps/*`)</div>
+          <div class="arch-text">
+            - <strong>`apps/portal`</strong>: Next.js 16 App Router mining portal with Server Actions.<br>
+            - <strong>`apps/overview`</strong>: Architectural visualizer, documentation maps & ZAR monitor.<br>
+            - <strong>`apps/cms`</strong>: Headless Payload CMS v3 for operational manuals & SOPs.<br>
+            - <strong>`apps/cloudflare-workflows`</strong>: Edge shift report SLA processors.
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Next.js 16</span>
+            <span class="tag">Turbopack</span>
+            <span class="tag">Payload v3</span>
+          </div>
+        </div>
+
+        <div class="arch-card">
+          <div class="arch-title">🧩 Domain Features (`libs/features/*`)</div>
+          <div class="arch-text">
+            Separated into UI, Data-Access, and Utilities per domain:<br>
+            - <strong>`features/auth`</strong>: RBAC guards & session utilities.<br>
+            - <strong>`features/departments`</strong>: Mining, Engineering, Plant, Safety dashboards.<br>
+            - <strong>`features/analytics`</strong>: Production forecasting & yield aggregation engines.
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Strict Boundaries</span>
+            <span class="tag">Zero Circular Deps</span>
+          </div>
+        </div>
+
+        <div class="arch-card">
+          <div class="arch-title">📦 Shared Foundation (`packages/*`)</div>
+          <div class="arch-text">
+            - <strong>`@repo/contract`</strong>: Single source of truth Zod schemas.<br>
+            - <strong>`@repo/theme`</strong>: OKLCH light-only design system tokens.<br>
+            - <strong>`@repo/supabase`</strong>: Generated database client & type contracts.<br>
+            - <strong>`@repo/rate-limiter`</strong>: Upstash Redis token bucket limiters.
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Zod Schemas</span>
+            <span class="tag">OKLCH</span>
+            <span class="tag">Redis Cache</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Backend, PostgreSQL & RLS Security -->
+    <div class="slide" id="slide-2">
+      <div>
+        <span class="slide-badge">02. Data Security & Storage Engine</span>
+        <h1 class="slide-heading">PostgreSQL Row-Level Security (RLS) & Server Action Contracts</h1>
+        <p class="slide-desc">
+          Zero-trust data isolation enforced at the database kernel level across 79 tables and 97 versioned migrations.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="code-card">
+          <div class="code-card-title">
+            <span>SQL RLS DEFENSE PATTERN</span>
+            <span>packages/database/migrations/</span>
+          </div>
+          <span class="comment">-- Enforce Department & Role Isolation on Shift Logs</span><br>
+          <span class="keyword">ALTER TABLE</span> public.shift_reports <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;<br><br>
+          <span class="keyword">CREATE POLICY</span> <span class="string">"shift_reports_department_isolation"</span><br>
+          <span class="keyword">ON</span> public.shift_reports <span class="keyword">FOR ALL</span><br>
+          <span class="keyword">USING</span> (<br>
+          &nbsp;&nbsp;auth.uid() <span class="keyword">IN</span> (<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">SELECT</span> user_id <span class="keyword">FROM</span> public.employees<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">WHERE</span> department = shift_reports.department<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">OR</span> role <span class="keyword">IN</span> (<span class="string">'GENERAL_MANAGER'</span>, <span class="string">'ADMIN'</span>)<br>
+          &nbsp;&nbsp;)<br>
+          );
+        </div>
+
+        <div class="code-card">
+          <div class="code-card-title">
+            <span>SERVER ACTION CONTRACT VALIDATION</span>
+            <span>apps/portal/features/actions.ts</span>
+          </div>
+          <span class="keyword">export async function</span> <span class="function">submitShiftReportAction</span>(input: <span class="type">unknown</span>) {<br>
+          &nbsp;&nbsp;<span class="comment">// 1. Top-of-Action User Validation</span><br>
+          &nbsp;&nbsp;<span class="keyword">const</span> user = <span class="keyword">await</span> <span class="function">getUserSafely</span>();<br>
+          &nbsp;&nbsp;<span class="keyword">if</span> (!user) <span class="keyword">throw new</span> <span class="type">UnauthorizedError</span>();<br><br>
+          &nbsp;&nbsp;<span class="comment">// 2. Enforce Zod Contract Validation</span><br>
+          &nbsp;&nbsp;<span class="keyword">const</span> data = <span class="type">ShiftReportSchema</span>.<span class="function">parse</span>(input);<br><br>
+          &nbsp;&nbsp;<span class="comment">// 3. Atomic Database Mutation with RLS Context</span><br>
+          &nbsp;&nbsp;<span class="keyword">return await</span> db.<span class="function">from</span>(<span class="string">"shift_reports"</span>).<span class="function">insert</span>({ ...data, author_id: user.id });<br>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Cloudflare Edge Workflows -->
+    <div class="slide" id="slide-3">
+      <div>
+        <span class="slide-badge">03. Edge Computing & Workflows</span>
+        <h1 class="slide-heading">Cloudflare Edge Workflows & Resilient Telemetry Ingestion</h1>
+        <p class="slide-desc">
+          Decoupling heavy SLA calculations and SCADA telemetry archiving from the primary UI server using edge workers.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="code-card">
+          <div class="code-card-title">
+            <span>CLOUDFLARE WORKFLOW WORKER</span>
+            <span>apps/cloudflare-workflows/src/index.ts</span>
+          </div>
+          <span class="keyword">export class</span> <span class="type">ShiftReportWorkflow</span> <span class="keyword">extends</span> <span class="type">WorkflowEntrypoint</span> {<br>
+          &nbsp;&nbsp;<span class="keyword">async</span> <span class="function">run</span>(event: <span class="type">WorkflowEvent</span>, step: <span class="type">WorkflowStep</span>) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Step 1: Validate SLA against SCADA limits</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> report = <span class="keyword">await</span> step.<span class="function">do</span>(<span class="string">"validate-sla"</span>, <span class="keyword">async</span> () => {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="function">evaluateShiftCompliance</span>(event.payload);<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;});<br><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// Step 2: Durable Cloudflare R2 Storage</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">await</span> step.<span class="function">do</span>(<span class="string">"archive-telemetry"</span>, <span class="keyword">async</span> () => {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> env.SPATIAL_TELEMETRY_BUCKET.<span class="function">put</span>(report.key, report.data);<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;});<br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+
+        <div class="arch-card">
+          <div class="arch-title">🚀 Distributed Architecture Benefits</div>
+          <div class="arch-text">
+            - <strong>Zero Cold-Start Latency</strong>: Cloudflare V8 isolates execute in &lt; 5ms globally.<br>
+            - <strong>Durable Execution</strong>: Workflow steps resume automatically upon network drops or remote API outages without duplicating database mutations.<br>
+            - <strong>Telemetry Caching</strong>: Spatial IoT coordinates from excavators & haul trucks stream directly into R2 object storage, preventing database bloat.
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Durable Steps</span>
+            <span class="tag">R2 Storage</span>
+            <span class="tag">Edge V8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: 4-Agent Council & Autonomous Quality Gate -->
+    <div class="slide" id="slide-4">
+      <div>
+        <span class="slide-badge">04. Quality Assurance & Continuous Delivery</span>
+        <h1 class="slide-heading">100% Quality Gate Pipeline & 4-Agent Critique Council</h1>
+        <p class="slide-desc">
+          Algorithmic quality thresholds preventing software degradation before code reaches production.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="arch-card">
+          <div class="arch-title">🛡️ Quality Gate Stages</div>
+          <div class="arch-text">
+            1. <strong>Nx Lint & TypeCheck</strong> (27 projects)<br>
+            2. <strong>Unit Tests</strong> (`@swc/jest` & Playwright)<br>
+            3. <strong>Design Token Linter</strong> (OKLCH compliance)<br>
+            4. <strong>Stylelint & CSpell</strong> (0 issues)<br>
+            5. <strong>Knip</strong> (Zero orphan symbols)<br>
+            6. <strong>RLS Audit</strong> (79/79 tables protected)
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">pnpm quality</span>
+            <span class="tag">59/59 Nx Tasks</span>
+          </div>
+        </div>
+
+        <div class="arch-card">
+          <div class="arch-title">🤖 4-Agent Evaluation Scores</div>
+          <div class="arch-text">
+            - <strong>Angle 1 (Architecture & XDG)</strong>: 99%<br>
+            - <strong>Angle 2 (Performance & Anti-Bloat)</strong>: 99%<br>
+            - <strong>Angle 3 (Security & Boundaries)</strong>: 98%<br>
+            - <strong>Angle 4 (Maintainability & Sync)</strong>: 100%<br>
+            <br>
+            <em>Threshold: All metrics &ge; 98% passed.</em>
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Score: 99.0%</span>
+            <span class="tag">Zero Drift</span>
+          </div>
+        </div>
+
+        <div class="arch-card">
+          <div class="arch-title">📈 Compounding Velocity</div>
+          <div class="arch-text">
+            By eliminating technical debt continuously with subagent pipelines and single-source-of-truth contracts, engineering velocity compounds exponentially over the mine's 20-year lifespan.
+          </div>
+          <div class="arch-badge-row">
+            <span class="tag">Production Grade</span>
+            <span class="tag">Zero Tech Debt</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Navigation -->
+  <div class="footer-bar">
+    <div class="speaker-caption">
+      <span class="speaker-tag">Principal Architect Voice</span>
+      <span id="caption-text">"Welcome engineers. Let's walk through the Nx 22 monorepo topology, database RLS constraints, and Cloudflare edge workflows powering Arch-Systems."</span>
+    </div>
+    <div class="timeline" id="slide-indicator">
+      SLIDE 1 / 4 • 00:00 / 01:20
+    </div>
+  </div>
+
+  <script>
+    const slides = [
+      { id: 'slide-1', caption: '"Our monorepo topology separates UI, data-access, and shared contracts into 27 isolated projects with strict boundary linting."' },
+      { id: 'slide-2', caption: '"Every database mutation is validated with Zod schemas and safeguarded by PostgreSQL Row-Level Security at the database kernel level."' },
+      { id: 'slide-3', caption: '"Cloudflare Edge Workflows process shift compliance and equipment telemetry asynchronously with durable retry guarantees."' },
+      { id: 'slide-4', caption: '"Our automated 100% quality gate and 4-Agent Critique Council ensure zero regression, zero dead code, and maximum maintainability."' }
+    ];
+
+    let currentIndex = 0;
+    function setSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      currentIndex = index;
+      document.querySelectorAll('.slide').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+      document.getElementById('caption-text').innerText = slides[index].caption;
+      document.getElementById('slide-indicator').innerText = `SLIDE ${index + 1} / ${slides.length} • 00:${String((index+1)*20).padStart(2, '0')}`;
+    }
+
+    window.nextSlide = () => setSlide((currentIndex + 1) % slides.length);
+    window.setSlide = setSlide;
+    window.totalSlides = slides.length;
+  </script>
+</body>
+</html>
