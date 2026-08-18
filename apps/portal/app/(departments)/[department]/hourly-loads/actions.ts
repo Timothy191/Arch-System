@@ -4,8 +4,6 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { updateMachineSiteSchema } from "@repo/contract";
 
-export const UpdateMachineSiteSchema = updateMachineSiteSchema;
-
 export async function updateMachineSite(machineId: string, siteId: string | null) {
   // AGENT-TRACE: Validate input parameters with @repo/contract schema
   const validated = updateMachineSiteSchema.parse({ machineId, siteId });

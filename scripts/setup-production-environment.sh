@@ -37,9 +37,9 @@ ENV_TARGET="$PORTAL_DIR/.env"
 detect_os() {
   if [ -f /etc/os-release ]; then
     . /etc/os-release
-    OS="$ID"
-    OS_VERSION="$VERSION_ID"
-    OS_NAME="$PRETTY_NAME"
+    OS="${ID:-unknown}"
+    OS_VERSION="${VERSION_ID:-unknown}"
+    OS_NAME="${PRETTY_NAME:-Unknown OS}"
   else
     OS="unknown"
     OS_VERSION="unknown"

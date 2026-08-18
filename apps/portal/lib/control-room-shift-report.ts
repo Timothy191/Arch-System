@@ -15,7 +15,7 @@ const shiftReportLookupSchema = controlRoomShiftReportSchema.pick({
   shift: true,
 });
 
-export interface ShiftReportRecord {
+interface ShiftReportRecord {
   id: string;
   departmentId: string;
   date: string;

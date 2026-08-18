@@ -9,10 +9,8 @@ import { logError } from "@/lib/errors/error-logger";
 import { createBreakdownSchema, bookOutSchema, directCheckoutSchema } from "@repo/contract";
 import type { CreateBreakdownInput, BookOutInput, DirectCheckoutInput } from "./types";
 
-export const CreateBreakdownSchema = createBreakdownSchema;
-export const BookOutSchema = bookOutSchema;
-export const DirectCheckoutSchema = directCheckoutSchema;
-
+const BookOutSchema = bookOutSchema;
+const DirectCheckoutSchema = directCheckoutSchema;
 export async function createBreakdown(departmentId: string, rawInput: CreateBreakdownInput) {
   const input = createBreakdownSchema.parse(rawInput);
   const supabase = await createServerSupabaseClient();

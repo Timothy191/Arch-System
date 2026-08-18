@@ -5,9 +5,6 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
 import { adminAddSiteSchema, adminUpdateSiteSchema } from "@repo/contract";
 
-export const AdminAddSiteSchema = adminAddSiteSchema;
-export const AdminUpdateSiteSchema = adminUpdateSiteSchema;
-
 async function assertAdmin() {
   const supabase = await createServerSupabaseClient();
   const {

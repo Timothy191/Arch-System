@@ -579,7 +579,7 @@ export interface BackendService {
   scadaMetrics?: ScadaMetrics;
 }
 
-export interface BackendConnection {
+interface BackendConnection {
   id: string;
   source: string;
   target: string;

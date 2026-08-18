@@ -7,8 +7,6 @@ import { inngest, aiGenerateEmbeddingEvent } from "@repo/utils/inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { monthlyReportInputSchema } from "@repo/contract";
 
-export const MonthlyReportInputSchema = monthlyReportInputSchema;
-
 export async function logout() {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut();
