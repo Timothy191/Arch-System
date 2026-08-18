@@ -30,6 +30,17 @@ Quick navigation guide for Arch-Systems documentation.
 
 - **[AGENTS.md](AGENTS.md)** - Slim agent contract index (tracing, phases, Nx tags; links to rules)
 
+### Architecture & Visualization
+
+- **[codebase-maps/README.md](../codebase-maps/README.md)** - Codebase visualization maps
+  - Project dependencies map with dependency graphs
+  - Package structure overview
+  - Route/feature architecture mapping
+  - Database schema documentation with ER diagrams
+  - Technology stack overview
+  - CI/CD pipeline visualization
+  - All maps include Mermaid diagrams for visual representation
+
 ### AI Development
 
 - **[GEMINI.md](./GEMINI.md)** - AI-specific development conventions
@@ -132,8 +143,9 @@ Arch-Mk2/
 
 - **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
 - **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
+- **Visualize the codebase structure**: Explore [codebase-maps/README.md](../codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
 - **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section
+- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section or view [codebase-maps](../codebase-maps/)
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)

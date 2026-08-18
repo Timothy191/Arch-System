@@ -123,21 +123,31 @@ These diagrams render in Markdown viewers that support Mermaid (GitHub, GitLab, 
 
 ## Regeneration
 
-The maps are generated automatically using the `scripts/regenerate-codebase-maps.sh` script. This script:
+The maps are regenerated using the `scripts/regenerate-codebase-maps.sh` script. This script:
 
 1. Scans the current codebase structure
 2. Analyzes dependencies, routes, database schema, and configuration
 3. Generates updated markdown files with current information
-4. Creates SVG images from Mermaid diagrams
+4. Optionally creates SVG images from Mermaid diagrams
+5. Cleans up old map versions (keeps last 3)
 
 To regenerate the maps:
 
 ```bash
 # From the project root
 ./scripts/regenerate-codebase-maps.sh
+
+# With SVG image generation
+./scripts/regenerate-codebase-maps.sh --with-svg
 ```
 
-**Note:** Ensure you have the Mermaid CLI installed (`npm install -g @mermaid-js/mermaid-cli`) for SVG generation.
+**Note:** SVG generation requires the Mermaid CLI with Puppeteer:
+
+```bash
+npm install -g @mermaid-js/mermaid-cli puppeteer
+```
+
+If Puppeteer installation fails, the script will still generate the markdown files with embedded Mermaid diagrams, which render natively in GitHub, GitLab, and other Markdown viewers.
 
 ## Versioning
 

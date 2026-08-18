@@ -1,5 +1,52 @@
 # Scripts Agent Tracer
 
+## 2026-08-18: Added Codebase Maps Regeneration Script
+
+### Purpose
+
+Automate the regeneration of codebase visualization maps with date updates, version management, and optional SVG generation from Mermaid diagrams.
+
+### Changes Made
+
+1. **`scripts/regenerate-codebase-maps.sh`** (Created):
+   - Created script to regenerate all codebase maps with current date stamps
+   - Supports `--with-svg` flag for SVG image generation from Mermaid diagrams
+   - Supports `--full` flag placeholder for future full regeneration with subagent capability
+   - Automatically cleans up old map versions (keeps last 3)
+   - Provides comprehensive help documentation
+
+2. **`codebase-maps/README.md`** (Created):
+   - Created comprehensive documentation for the codebase maps directory
+   - Documented all 6 available maps with descriptions and use cases
+   - Added visualization section explaining Mermaid diagram types
+   - Added regeneration instructions and troubleshooting guide
+   - Integrated with main documentation index
+
+3. **`codebase-maps/generate-svg.sh`** (Created):
+   - Created script to extract Mermaid diagrams from markdown files
+   - Converts Mermaid code to SVG using mmdc CLI
+   - Includes graceful fallback when Mermaid CLI is not available
+   - Handles errors and provides warnings for failed conversions
+
+4. **`docs/DOCUMENTATION_INDEX.md`** (Updated):
+   - Added "Architecture & Visualization" section with link to codebase maps
+   - Added codebase maps to "Quick Lookup" section for easy navigation
+   - Positioned maps as a resource for understanding system architecture
+
+### Verification
+
+- Ran `./scripts/regenerate-codebase-maps.sh --help` successfully displays usage information
+- Verified script correctly handles date updates and version management
+- Confirmed SVG generation script gracefully handles missing Mermaid CLI
+- Verified documentation links in DOCUMENTATION_INDEX.md are correct
+
+### What the Next Agent Should Know
+
+- Run `./scripts/regenerate-codebase-maps.sh` to update map dates and manage versions
+- Run `./scripts/regenerate-codebase-maps.sh --with-svg` to also generate SVG images (requires Mermaid CLI with Puppeteer)
+- The script currently performs partial regeneration (date updates). Full content regeneration requires Devin CLI with subagent capability.
+- SVG generation is optional - the markdown files with embedded Mermaid diagrams render natively in GitHub/GitLab
+
 ## 2026-08-18: Headless Dev Mode, Hosted Supabase Support & MCP Server Pruning
 
 ### Purpose
