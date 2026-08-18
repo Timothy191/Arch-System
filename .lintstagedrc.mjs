@@ -73,7 +73,8 @@ export default {
           part === "scratch" ||
           part === "docs" ||
           part === "e2e" ||
-          part === "k6",
+          part === "k6" ||
+          part === "cloudflare-workflows",
       );
       return !isIgnored;
     });
@@ -81,7 +82,9 @@ export default {
     // Process in chunks of 20 to keep memory low
     const commands = [];
     for (const batch of chunk(filtered, 20)) {
-      commands.push(`eslint --fix --max-warnings 0 ${batch.join(" ")}`);
+      commands.push(
+        `eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern ${batch.join(" ")}`,
+      );
       commands.push(`prettier --write ${batch.join(" ")}`);
     }
     return commands;
