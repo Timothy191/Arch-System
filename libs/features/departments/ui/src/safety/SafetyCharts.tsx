@@ -14,6 +14,14 @@ export interface SafetyChartsProps {
   }[];
 }
 
+const DISTRIBUTION_CLASSES = [
+  "bg-emerald-500",
+  "bg-blue-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+  "bg-indigo-500",
+] as const;
+
 export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -53,7 +61,7 @@ export function SafetyCharts({ trendData, distributionData }: SafetyChartsProps)
           {distributionData.map((item, idx) => (
             <div key={idx} className="flex items-center gap-1.5">
               <div
-                className={`w-2 h-2 rounded-full bg-${["emerald", "blue", "rose", "cyan", "indigo"][idx % 5]}-500`}
+                className={`w-2 h-2 rounded-full ${DISTRIBUTION_CLASSES[idx % DISTRIBUTION_CLASSES.length]}`}
               />
               <span className="text-[var(--text-secondary)] text-[10px] uppercase tracking-wider">
                 {item.name}

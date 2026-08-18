@@ -319,33 +319,25 @@ export const TRAINING_TABS = [
   { name: "reports", label: "Reports", icon: "FileText" },
 ] as const;
 
+const DEPARTMENT_TABS_MAP: Record<
+  string,
+  readonly { name: string; label: string; icon: string }[]
+> = {
+  "control-room": CONTROL_ROOM_TABS,
+  "access-control": ACCESS_CONTROL_TABS,
+  "access-card-actions": ACCESS_CARD_ACTIONS_TABS,
+  "satellite-monitoring": SATELLITE_MONITORING_TABS,
+  engineering: ENGINEERING_TABS,
+  drilling: DRILLING_TABS,
+  training: TRAINING_TABS,
+};
+
 /**
  * Get tabs for a specific department
- * Control Room gets specialized tabs, others get standard tabs
+ * AGENT-TRACE: Constant-time O(1) tab map lookup replacing 8-branch conditional ladder
  */
 export function getDepartmentTabs(departmentName: string) {
-  if (departmentName === "control-room") {
-    return CONTROL_ROOM_TABS;
-  }
-  if (departmentName === "access-control") {
-    return ACCESS_CONTROL_TABS;
-  }
-  if (departmentName === "access-card-actions") {
-    return ACCESS_CARD_ACTIONS_TABS;
-  }
-  if (departmentName === "satellite-monitoring") {
-    return SATELLITE_MONITORING_TABS;
-  }
-  if (departmentName === "engineering") {
-    return ENGINEERING_TABS;
-  }
-  if (departmentName === "drilling") {
-    return DRILLING_TABS;
-  }
-  if (departmentName === "training") {
-    return TRAINING_TABS;
-  }
-  return DEPARTMENT_TABS;
+  return DEPARTMENT_TABS_MAP[departmentName] ?? DEPARTMENT_TABS;
 }
 
 /**

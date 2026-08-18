@@ -41,14 +41,17 @@ export async function createBreakdown(departmentId: string, input: CreateBreakdo
     });
   }
 
-  await logAuditEvent({
-    action: "insert",
-    tableName: "breakdowns",
-    newData: { fleet_id: input.fleet_id.toUpperCase(), reason: input.reason },
-    departmentId,
-  });
+  // AGENT-TRACE: Concurrently execute audit logging and cache tag invalidation
+  await Promise.all([
+    logAuditEvent({
+      action: "insert",
+      tableName: "breakdowns",
+      newData: { fleet_id: input.fleet_id.toUpperCase(), reason: input.reason },
+      departmentId,
+    }),
+    cacheInvalidateTags(["table:breakdowns"]),
+  ]);
 
-  await cacheInvalidateTags(["table:breakdowns"]);
   revalidatePath("/engineering/breakdowns");
   revalidatePath("/control-room/engineering-notes");
   return { success: true };
@@ -92,20 +95,22 @@ export async function bookOutBreakdown(breakdownId: string, input: BookOutInput)
     });
   }
 
-  await logAuditEvent({
-    action: "update",
-    tableName: "breakdowns",
-    recordId: breakdownId,
-    oldData: before ?? undefined,
-    newData: {
-      status: "completed",
-      date_out: input.date_out,
-      time_out: input.time_out,
-      repair_notes: input.repair_notes || null,
-    },
-  });
+  await Promise.all([
+    logAuditEvent({
+      action: "update",
+      tableName: "breakdowns",
+      recordId: breakdownId,
+      oldData: before ?? undefined,
+      newData: {
+        status: "completed",
+        date_out: input.date_out,
+        time_out: input.time_out,
+        repair_notes: input.repair_notes || null,
+      },
+    }),
+    cacheInvalidateTags(["table:breakdowns"]),
+  ]);
 
-  await cacheInvalidateTags(["table:breakdowns"]);
   revalidatePath("/engineering/breakdowns");
   revalidatePath("/control-room/engineering-notes");
   return { success: true };
@@ -148,18 +153,20 @@ export async function directCheckout(departmentId: string, input: DirectCheckout
     });
   }
 
-  await logAuditEvent({
-    action: "insert",
-    tableName: "breakdowns",
-    newData: {
-      fleet_id: input.fleet_id.toUpperCase(),
-      reason: input.reason,
-      status: "completed",
-    },
-    departmentId,
-  });
+  await Promise.all([
+    logAuditEvent({
+      action: "insert",
+      tableName: "breakdowns",
+      newData: {
+        fleet_id: input.fleet_id.toUpperCase(),
+        reason: input.reason,
+        status: "completed",
+      },
+      departmentId,
+    }),
+    cacheInvalidateTags(["table:breakdowns"]),
+  ]);
 
-  await cacheInvalidateTags(["table:breakdowns"]);
   revalidatePath("/engineering/breakdowns");
   revalidatePath("/control-room/engineering-notes");
   return { success: true };
@@ -197,15 +204,17 @@ export async function softDeleteBreakdown(breakdownId: string) {
     });
   }
 
-  await logAuditEvent({
-    action: "delete",
-    tableName: "breakdowns",
-    recordId: breakdownId,
-    oldData: before ?? undefined,
-    newData: { deleted_at: new Date().toISOString() },
-  });
+  await Promise.all([
+    logAuditEvent({
+      action: "delete",
+      tableName: "breakdowns",
+      recordId: breakdownId,
+      oldData: before ?? undefined,
+      newData: { deleted_at: new Date().toISOString() },
+    }),
+    cacheInvalidateTags(["table:breakdowns"]),
+  ]);
 
-  await cacheInvalidateTags(["table:breakdowns"]);
   revalidatePath("/engineering/breakdowns");
   revalidatePath("/control-room/engineering-notes");
   return { success: true };

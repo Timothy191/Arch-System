@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Play, Info, ArrowUpRight } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
@@ -27,46 +27,58 @@ export function HeroRotator({
 }: HeroRotatorProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const panels = [
-    {
-      id: "default",
-      title: defaultTitle,
-      description: defaultDescription,
-      primary: {
-        href: primaryHref,
-        label: primaryLabel,
-        icon: <Play className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />,
+  // AGENT-TRACE: Memoize panels array to avoid allocating objects and JSX elements every render
+  const panels = useMemo(
+    () => [
+      {
+        id: "default",
+        title: defaultTitle,
+        description: defaultDescription,
+        primary: {
+          href: primaryHref,
+          label: primaryLabel,
+          icon: <Play className="w-4 h-4 fill-current shrink-0" aria-hidden="true" />,
+        },
+        secondary: {
+          href: secondaryHref,
+          label: secondaryLabel,
+          icon: <Info className="w-4 h-4 shrink-0" aria-hidden="true" />,
+        },
       },
-      secondary: {
-        href: secondaryHref,
-        label: secondaryLabel,
-        icon: <Info className="w-4 h-4 shrink-0" aria-hidden="true" />,
-      },
-    },
-    ...departments.map((dept) => ({
-      id: dept.name,
-      title: dept.displayName,
-      description: dept.description,
-      primary: dept.actions?.[0]
-        ? {
-            href: dept.actions[0].href,
-            label: dept.actions[0].label,
-            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
-          }
-        : {
-            href: `/${dept.name}`,
-            label: `Go to ${dept.displayName}`,
-            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
-          },
-      secondary: dept.actions?.[1]
-        ? {
-            href: dept.actions[1].href,
-            label: dept.actions[1].label,
-            icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
-          }
-        : null,
-    })),
-  ];
+      ...departments.map((dept) => ({
+        id: dept.name,
+        title: dept.displayName,
+        description: dept.description,
+        primary: dept.actions?.[0]
+          ? {
+              href: dept.actions[0].href,
+              label: dept.actions[0].label,
+              icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
+            }
+          : {
+              href: `/${dept.name}`,
+              label: `Go to ${dept.displayName}`,
+              icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
+            },
+        secondary: dept.actions?.[1]
+          ? {
+              href: dept.actions[1].href,
+              label: dept.actions[1].label,
+              icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
+            }
+          : null,
+      })),
+    ],
+    [
+      defaultTitle,
+      defaultDescription,
+      primaryHref,
+      primaryLabel,
+      secondaryHref,
+      secondaryLabel,
+      departments,
+    ],
+  );
 
   useEffect(() => {
     if (panels.length <= 1) return;
