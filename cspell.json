@@ -23,5 +23,5 @@
     "**/AGENT_TRACER.md"
   ],
   "ignoreRegExpList": ["sb_publishable_[A-Za-z0-9_]+"],
-  "words": ["fuxa", "supabase", "opencode", "autoplay"]
+  "words": ["fuxa", "supabase", "opencode", "autoplay", "telematics", "cicd"]
 }
