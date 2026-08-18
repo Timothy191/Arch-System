@@ -4,19 +4,19 @@ import { useState } from "react";
 import {
   Activity,
   Coins,
-  Cpu,
   Clock,
   Bug,
   Zap,
   Terminal,
   RefreshCw,
-  ShieldCheck,
   BarChart3,
+  Bot,
 } from "lucide-react";
 
 interface AgentTaskLog {
   id: string;
   timestamp: string;
+  agent: string;
   role: string;
   action: string;
   tokensUsed: number;
@@ -38,6 +38,99 @@ interface MilestoneSpend {
   commits: number;
   bugsFixed: number;
 }
+
+interface AgentBreakdown {
+  id: string;
+  name: string;
+  category: string;
+  tokensSpent: string;
+  tokensCached: string;
+  zarCost: number;
+  usdCost: number;
+  percentage: number;
+  color: string;
+  model: string;
+  pricingNote: string;
+  description: string;
+}
+
+const AGENT_SYSTEM_BREAKDOWN: AgentBreakdown[] = [
+  {
+    id: "claude-code",
+    name: "Claude Code",
+    category: "Primary Orchestrator & Multi-File Architecture",
+    tokensSpent: "8.47M",
+    tokensCached: "28.50M",
+    zarCost: 2220.0,
+    usdCost: 119.87,
+    percentage: 46.0,
+    color: "#f59e0b", // Amber/Orange
+    model: "Claude 3.7 Sonnet / Claude 3.5 Sonnet",
+    pricingNote: "$3.00/M in (R55.56) • $0.30/M cache read (R5.56) • $15.00/M out (R277.80)",
+    description:
+      "Orchestrates multi-file refactoring, agentic subagent dispatch, quality gates, and code-review passes with 90% prompt caching discounts.",
+  },
+  {
+    id: "antigravity",
+    name: "Google Antigravity (AGY 2.0)",
+    category: "Cognitive Architecture & 4-Agent Critique Council",
+    tokensSpent: "5.16M",
+    tokensCached: "16.20M",
+    zarCost: 1351.0,
+    usdCost: 72.95,
+    percentage: 28.0,
+    color: "#3ecf8e", // Supabase Emerald
+    model: "Gemini 2.5 Pro / Flash & AGY Subagents",
+    pricingNote: "High prefix cache hit ratio (86.4%) with surgical line slicing",
+    description:
+      "Deep reasoning engine, first-principles systems validation, 4-agent critique council audits, and automated Playwright video generation.",
+  },
+  {
+    id: "copilot",
+    name: "GitHub Copilot / LSP",
+    category: "Inline Code Completion & Language Server",
+    tokensSpent: "2.21M",
+    tokensCached: "4.10M",
+    zarCost: 580.0,
+    usdCost: 31.32,
+    percentage: 12.0,
+    color: "#38bdf8", // Sky Blue
+    model: "Copilot GPT-4o / Claude 3.5 Sonnet Inline",
+    pricingNote: "Flat subscription allocation & low-latency IDE streaming",
+    description:
+      "Real-time tab completions, TypeScript interface expansion, inline docstring generation, and syntax scaffolding.",
+  },
+  {
+    id: "ollama",
+    name: "Ollama (Local / Self-Hosted)",
+    category: "Edge Computing & Local Offline Models",
+    tokensSpent: "1.66M",
+    tokensCached: "0.00M",
+    zarCost: 0.0,
+    usdCost: 0.0,
+    percentage: 9.0,
+    color: "#a855f7", // Purple
+    model: "DeepSeek-Coder 33B / Llama 3 8B (Local)",
+    pricingNote: "100% Free / Self-Hosted on Local Mining Edge Hardware",
+    description:
+      "Zero API cost offline processing, SCADA protocol translation testing, edge sensor simulation, and local embeddings.",
+  },
+  {
+    id: "subagents",
+    name: "Devin / Cursor / OpenCode",
+    category: "Autonomous Specialized Runners & Tools",
+    tokensSpent: "0.92M",
+    tokensCached: "6.00M",
+    zarCost: 674.6,
+    usdCost: 36.42,
+    percentage: 5.0,
+    color: "#f43f5e", // Rose
+    model: "Claude 3.5 Haiku / Sonnet Dedicated",
+    pricingNote: "Scoped branch work & targeted dead-code pruning loops",
+    description:
+      "Autonomous task-specific runner pipelines for dead code pruning (Knip), database migration validation, and cspell dictionary maintenance.",
+  },
+];
 
 const PROJECT_MILESTONES: MilestoneSpend[] = [
   {
@@ -106,6 +199,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-001",
     timestamp: "17:13 - 17:14",
+    agent: "Claude Code",
     role: "Production Environment Engineer",
     action: "Refactor setup-production-environment.sh & .env templates",
     tokensUsed: 3100,
@@ -118,7 +212,8 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-002",
     timestamp: "17:15 - 17:18",
-    role: "Dead-Code Pruner (Knip Phase 1)",
+    agent: "Subagent (Knip)",
+    role: "Dead-Code Pruner",
     action: "Automated Dead Code Removal & Spelling Dictionary Fix",
     tokensUsed: 2700,
     tokensCached: 52000,
@@ -130,6 +225,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-003",
     timestamp: "17:22 - 17:33",
+    agent: "Claude Code",
     role: "Subagent 316790df (Portal Simplifier)",
     action: "Flatten Component Trees in apps/portal/app/",
     tokensUsed: 18125,
@@ -142,6 +238,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-004",
     timestamp: "17:25 - 17:34",
+    agent: "Claude Code",
     role: "Subagent a1d857e2 (Departments Simplifier)",
     action: "Optimize apps/portal/features/departments/",
     tokensUsed: 14500,
@@ -154,6 +251,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-005",
     timestamp: "17:38 - 17:45",
+    agent: "Claude Code",
     role: "Subagent 39003d21 (Libs Features Engine)",
     action: "Refactor libs/features/ query paths & tab lookups",
     tokensUsed: 18500,
@@ -166,6 +264,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-006",
     timestamp: "17:54 - 18:01",
+    agent: "Antigravity",
     role: "System Integration Engineer",
     action: "Integrate Cloudflare Workflows & Zero-Trust Infra",
     tokensUsed: 4200,
@@ -178,6 +277,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
   {
     id: "TASK-007",
     timestamp: "18:18 - 18:25",
+    agent: "Antigravity",
     role: "Architecture Media Producer",
     action: "Automated HD Video Walkthrough Generation (Playwright + FFmpeg)",
     tokensUsed: 6400,
@@ -191,6 +291,7 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
 
 export default function AgenticMonitor() {
   const [scope, setScope] = useState<"all-time" | "session">("all-time");
+  const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [exchangeRate] = useState<number>(18.52); // USD to ZAR
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -233,6 +334,11 @@ export default function AgenticMonitor() {
     setTimeout(() => setRefreshing(false), 500);
   };
 
+  const filteredFeed =
+    selectedAgent === "all"
+      ? AGENT_TASK_FEED
+      : AGENT_TASK_FEED.filter((t) => t.agent.toLowerCase().includes(selectedAgent.toLowerCase()));
+
   return (
     <div className="space-y-6">
       {/* Top Banner & Scope Selector */}
@@ -242,13 +348,13 @@ export default function AgenticMonitor() {
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-[#3ecf8e]" />
               <h2 className="text-lg font-semibold text-[#fafafa]">
-                Agentic Coding System Monitor & Expenditure Tracker
+                Multi-Agent Coding System Monitor & Expenditure Tracker
               </h2>
             </div>
             <p className="text-xs text-[#898989] mt-1">
-              Real-time telemetry and financial audit tracking token expenditures in South African
-              Rands (ZAR), cache efficiency, and engineering velocity from Project Day 1 (Jun 15,
-              2026) to Today.
+              Comprehensive telemetry calculating token economics, prompt caching discounts (Claude
+              Code, Antigravity, Copilot, Ollama), and real-time ZAR cost trajectories from Project
+              Day 1 (Jun 15, 2026) to Today.
             </p>
           </div>
 
@@ -263,7 +369,7 @@ export default function AgenticMonitor() {
                     : "text-[#898989] hover:text-[#fafafa]"
                 }`}
               >
-                All-Time Spend (Day 1 – Today)
+                All-Time Project Spend (Day 1 – Today)
               </button>
               <button
                 onClick={() => setScope("session")}
@@ -287,7 +393,8 @@ export default function AgenticMonitor() {
               Live Telemetry
             </button>
             <span className="px-3 py-1 bg-[#3ecf8e]/10 border border-[#3ecf8e]/30 rounded-full text-xs font-mono text-[#3ecf8e] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse" /> System Optimal
+              <span className="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse" /> Multi-Agent
+              Synced
             </span>
           </div>
         </div>
@@ -326,7 +433,7 @@ export default function AgenticMonitor() {
         {/* Metric 2: Token Volume & Cache Hit Rate */}
         <div className="bg-[#171717] border border-[#363636] rounded-xl p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#898989] font-medium">Cache Reuse Ratio</span>
+            <span className="text-xs text-[#898989] font-medium">Claude &amp; AGY Cache Ratio</span>
             <div className="p-2 bg-[#3ecf8e]/10 rounded-lg text-[#3ecf8e]">
               <Zap className="w-4 h-4" />
             </div>
@@ -338,7 +445,7 @@ export default function AgenticMonitor() {
             <p className="text-[11px] text-[#898989] mt-1">
               {(currentMetrics.tokensReused / 1000000).toFixed(2)}M /{" "}
               {((currentMetrics.tokensUsed + currentMetrics.tokensReused) / 1000000).toFixed(2)}M
-              cached prefix hits
+              cached prefix reads
             </p>
           </div>
           <div className="mt-3 pt-3 border-t border-[#242424] flex items-center justify-between text-[11px]">
@@ -378,7 +485,9 @@ export default function AgenticMonitor() {
         {/* Metric 4: Quality & Bugs Fixed */}
         <div className="bg-[#171717] border border-[#363636] rounded-xl p-5 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#898989] font-medium">Bugs & Regressions Resolved</span>
+            <span className="text-xs text-[#898989] font-medium">
+              Bugs &amp; Regressions Resolved
+            </span>
             <div className="p-2 bg-[#3ecf8e]/10 rounded-lg text-[#3ecf8e]">
               <Bug className="w-4 h-4" />
             </div>
@@ -398,13 +507,165 @@ export default function AgenticMonitor() {
         </div>
       </div>
 
-      {/* Lifetime Project Spend Trajectory by Milestone */}
-      <div className="bg-[#171717] border border-[#363636] rounded-xl p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#242424] pb-4 mb-5">
+      {/* MULTI-AGENT WORKLOAD & EXPENDITURE BREAKDOWN (Claude Code, Antigravity, Copilot, Ollama, Subagents) */}
+      <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#242424] pb-4">
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-[#3ecf8e]" />
+            <h3 className="text-sm font-semibold text-[#fafafa]">
+              Multi-Agent Coding System Distribution &amp; Token Share
+            </h3>
+          </div>
+          <span className="text-xs font-mono text-[#898989]">5 Agent Architectures Integrated</span>
+        </div>
+
+        {/* Stacked Visual Bar Chart */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-[#898989] font-mono">
+            <span>Agent Workload Distribution (%)</span>
+            <span>Total: 18.42M Tokens Spent</span>
+          </div>
+          <div className="h-4 w-full bg-[#242424] rounded-full flex overflow-hidden p-0.5 gap-0.5">
+            {AGENT_SYSTEM_BREAKDOWN.map((agent) => (
+              <div
+                key={agent.id}
+                style={{ width: `${agent.percentage}%`, backgroundColor: agent.color }}
+                className="h-full rounded-sm transition-all duration-500 relative group cursor-pointer"
+                title={`${agent.name}: ${agent.percentage}% (R ${agent.zarCost.toFixed(2)})`}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-4 pt-1 text-xs">
+            {AGENT_SYSTEM_BREAKDOWN.map((agent) => (
+              <button
+                key={agent.id}
+                onClick={() => setSelectedAgent(selectedAgent === agent.id ? "all" : agent.id)}
+                className={`flex items-center gap-1.5 font-mono px-2 py-0.5 rounded border transition-colors ${
+                  selectedAgent === agent.id
+                    ? "border-[#3ecf8e] bg-[#242424] text-[#fafafa]"
+                    : "border-transparent text-[#b4b4b4] hover:text-[#fafafa]"
+                }`}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: agent.color }}
+                />
+                <span>
+                  {agent.name} ({agent.percentage}%)
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Agent Grid Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+          {AGENT_SYSTEM_BREAKDOWN.map((agent) => (
+            <div
+              key={agent.id}
+              className={`p-4 rounded-xl border transition-all ${
+                selectedAgent === agent.id || selectedAgent === "all"
+                  ? "bg-[#202020] border-[#363636]"
+                  : "bg-[#171717] border-[#242424] opacity-50"
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: agent.color }}
+                    />
+                    <h4 className="text-xs font-bold text-[#fafafa] font-mono">{agent.name}</h4>
+                  </div>
+                  <div className="text-[11px] text-[#898989] mt-0.5">{agent.category}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-bold font-mono text-[#3ecf8e]">
+                    R {agent.zarCost.toFixed(2)}
+                  </div>
+                  <div className="text-[10px] text-[#898989] font-mono">
+                    ${agent.usdCost.toFixed(2)} USD
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-[#b4b4b4] mt-3 line-clamp-2 leading-relaxed">
+                {agent.description}
+              </p>
+
+              <div className="mt-3 pt-2.5 border-t border-[#2c2c2c] flex items-center justify-between text-[10px] font-mono text-[#898989]">
+                <span>
+                  Tokens: <strong className="text-[#fafafa]">{agent.tokensSpent}</strong>
+                </span>
+                <span>
+                  Cache: <strong className="text-[#3ecf8e]">{agent.tokensCached}</strong>
+                </span>
+                <span className="text-[#3ecf8e] font-semibold">{agent.percentage}% Share</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CLAUDE CODE PRICING & TOKEN ECONOMIC CALCULATIONS MATRIX */}
+      <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-[#242424] pb-3">
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-[#f59e0b]" />
+            <h3 className="text-sm font-semibold text-[#fafafa]">
+              Claude Code &amp; Anthropic Token Pricing Rate Card (ZAR Conversion @ R18.52/USD)
+            </h3>
+          </div>
+          <span className="text-xs font-mono text-[#3ecf8e]">Anthropic Tier 4 Rates</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+          <div className="p-3.5 rounded-lg bg-[#202020] border border-[#2c2c2c]">
+            <div className="text-[#898989] text-[11px]">Standard Input Tokens</div>
+            <div className="text-base font-bold text-[#fafafa] mt-1">
+              R 55.56 <span className="text-[10px] text-[#898989]">/ 1M</span>
+            </div>
+            <div className="text-[10px] text-[#38bdf8] mt-1">$3.00 USD / 1M tokens</div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-[#202020] border border-[#2c2c2c]">
+            <div className="text-[#898989] text-[11px]">Prompt Cache Write</div>
+            <div className="text-base font-bold text-[#fafafa] mt-1">
+              R 69.45 <span className="text-[10px] text-[#898989]">/ 1M</span>
+            </div>
+            <div className="text-[10px] text-[#f59e0b] mt-1">$3.75 USD / 1M tokens (5m TTL)</div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-[#202020] border border-[#3ecf8e]/30 bg-[#3ecf8e]/5">
+            <div className="text-[#3ecf8e] text-[11px] font-semibold">
+              Prompt Cache Read (90% Off)
+            </div>
+            <div className="text-base font-bold text-[#3ecf8e] mt-1">
+              R 5.56 <span className="text-[10px] text-[#898989]">/ 1M</span>
+            </div>
+            <div className="text-[10px] text-[#3ecf8e] mt-1">
+              $0.30 USD / 1M tokens (90% Savings)
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-lg bg-[#202020] border border-[#2c2c2c]">
+            <div className="text-[#898989] text-[11px]">Output Generation</div>
+            <div className="text-base font-bold text-[#fafafa] mt-1">
+              R 277.80 <span className="text-[10px] text-[#898989]">/ 1M</span>
+            </div>
+            <div className="text-[10px] text-[#f43f5e] mt-1">$15.00 USD / 1M tokens</div>
+          </div>
+        </div>
+      </div>
+
+      {/* VISUAL HISTOGRAM: Weekly Spend & Token Volume Trajectory */}
+      <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#242424] pb-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-[#3ecf8e]" />
             <h3 className="text-sm font-semibold text-[#fafafa]">
-              Lifetime Project Expenditure & Milestone Trajectory (Day 1 – Today)
+              Weekly Project Expenditure &amp; Token Volume Graph (Day 1 – Today)
             </h3>
           </div>
           <span className="text-xs font-mono text-[#898989]">
@@ -413,7 +674,40 @@ export default function AgenticMonitor() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Visual Bar Chart Graph */}
+        <div className="pt-4 pb-2">
+          <div className="grid grid-cols-5 gap-3 sm:gap-6 items-end h-44 border-b border-[#2c2c2c] px-2 pb-2">
+            {PROJECT_MILESTONES.map((m, idx) => {
+              const maxZar = 1300;
+              const heightPct = Math.round((m.zarCost / maxZar) * 100);
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col items-center gap-2 h-full justify-end group"
+                >
+                  <div className="text-[10px] font-mono font-semibold text-[#3ecf8e] group-hover:scale-110 transition-transform">
+                    R {m.zarCost.toFixed(0)}
+                  </div>
+                  <div className="w-full max-w-[50px] bg-[#242424] rounded-t-lg overflow-hidden flex flex-col justify-end h-32 relative">
+                    <div
+                      style={{ height: `${heightPct}%` }}
+                      className="w-full bg-gradient-to-t from-[#059669] to-[#3ecf8e] rounded-t-lg transition-all duration-500 group-hover:brightness-125"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[11px] font-mono font-medium text-[#fafafa]">
+                      {m.period}
+                    </div>
+                    <div className="text-[9px] text-[#898989] font-mono">{m.tokensUsed} tok</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Data Table */}
+        <div className="overflow-x-auto pt-2">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#242424] text-[#898989] font-mono">
@@ -460,160 +754,25 @@ export default function AgenticMonitor() {
         </div>
       </div>
 
-      {/* Detailed Token & Resource Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Token Balance Card */}
-        <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#242424] pb-3">
-            <h3 className="text-sm font-semibold text-[#fafafa] flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-[#3ecf8e]" /> Token Balance & Flow (
-              {scope === "all-time" ? "Lifetime" : "Session"})
-            </h3>
-            <span className="text-[10px] font-mono text-[#898989]">
-              Total Processed: {(currentMetrics.tokensUsed / 1000000).toFixed(2)}M
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-xs text-[#b4b4b4] mb-1">
-                <span>Active Tokens Spent (Input/Output)</span>
-                <span className="font-mono text-[#fafafa]">
-                  {currentMetrics.tokensUsed.toLocaleString()}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-[#242424] rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 rounded-full" style={{ width: "24%" }} />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs text-[#b4b4b4] mb-1">
-                <span>Tokens Read from System Cache</span>
-                <span className="font-mono text-[#3ecf8e]">
-                  {currentMetrics.tokensCached.toLocaleString()}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-[#242424] rounded-full overflow-hidden">
-                <div className="h-full bg-[#3ecf8e] rounded-full" style={{ width: "85%" }} />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs text-[#b4b4b4] mb-1">
-                <span>Tokens Reused across Turns</span>
-                <span className="font-mono text-emerald-400">
-                  {currentMetrics.tokensReused.toLocaleString()}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-[#242424] rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-400 rounded-full" style={{ width: "79%" }} />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs text-[#b4b4b4] mb-1">
-                <span>Tokens Saved (Prefix Caching & Targeted Diffs)</span>
-                <span className="font-mono text-cyan-400">
-                  +{currentMetrics.tokensSaved.toLocaleString()}
-                </span>
-              </div>
-              <div className="w-full h-2 bg-[#242424] rounded-full overflow-hidden">
-                <div className="h-full bg-cyan-400 rounded-full" style={{ width: "65%" }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Real-World Cost Model Card (ZAR) */}
-        <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#242424] pb-3">
-            <h3 className="text-sm font-semibold text-[#fafafa] flex items-center gap-2">
-              <Coins className="w-4 h-4 text-[#3ecf8e]" /> ZAR Cost Modeling Engine
-            </h3>
-            <span className="text-[10px] font-mono text-[#3ecf8e]">Live 1 USD = R18.52</span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#242424]">
-              <span className="text-[#b4b4b4]">Standard Input Rate (R55.56 / 1M)</span>
-              <span className="font-mono text-[#fafafa]">
-                R {((currentMetrics.tokensUsed * 0.45 * 55.56) / 1000000).toFixed(2)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#242424]">
-              <span className="text-[#b4b4b4]">Cached Input Rate (R5.55 / 1M)</span>
-              <span className="font-mono text-[#3ecf8e]">
-                R {((currentMetrics.tokensCached * 5.55) / 1000000).toFixed(2)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#242424]">
-              <span className="text-[#b4b4b4]">Output Generation Rate (R277.80 / 1M)</span>
-              <span className="font-mono text-[#fafafa]">
-                R {((currentMetrics.tokensUsed * 0.55 * 277.8) / 1000000).toFixed(2)}
-              </span>
-            </div>
-            <div className="pt-2 border-t border-[#363636] flex items-center justify-between text-xs font-semibold">
-              <span className="text-[#fafafa]">
-                Total {scope === "all-time" ? "Lifetime" : "Session"} Investment
-              </span>
-              <span className="text-[#3ecf8e] font-mono text-sm">
-                R {currentMetrics.zarCost.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Multi-Perspective Scoring Card */}
-        <div className="bg-[#171717] border border-[#363636] rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#242424] pb-3">
-            <h3 className="text-sm font-semibold text-[#fafafa] flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#3ecf8e]" /> 4-Agent Council Certification
-            </h3>
-            <span className="text-[10px] font-mono text-[#3ecf8e]">Threshold &gt;= 98%</span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[#b4b4b4]">Angle 1: Architecture &amp; XDG</span>
-              <span className="font-mono text-[#3ecf8e] font-semibold">100% (Pass)</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[#b4b4b4]">Angle 2: Anti-Bloat &amp; Performance</span>
-              <span className="font-mono text-[#3ecf8e] font-semibold">99.4% (Pass)</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[#b4b4b4]">Angle 3: Security &amp; RLS Boundaries</span>
-              <span className="font-mono text-[#3ecf8e] font-semibold">100% (Pass)</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[#b4b4b4]">Angle 4: Maintainability &amp; Typing</span>
-              <span className="font-mono text-[#3ecf8e] font-semibold">98.8% (Pass)</span>
-            </div>
-            <div className="pt-2 border-t border-[#363636] flex items-center justify-between">
-              <span className="text-[#898989]">Aggregate Project Score</span>
-              <span className="text-[#3ecf8e] font-mono font-bold text-sm">99.5%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Chronological Task Audit Feed */}
       <div className="bg-[#171717] border border-[#363636] rounded-xl p-6">
         <div className="flex items-center justify-between border-b border-[#242424] pb-4 mb-4">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-[#3ecf8e]" />
             <h3 className="text-sm font-semibold text-[#fafafa]">
-              Chronological Task &amp; Pipeline Execution Feed
+              Chronological Multi-Agent Pipeline Execution Feed
             </h3>
           </div>
-          <span className="text-xs font-mono text-[#898989]">
-            {AGENT_TASK_FEED.length} Actions Tracked
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-[#898989]">
+              Filter: <strong className="text-[#3ecf8e]">{selectedAgent.toUpperCase()}</strong> (
+              {filteredFeed.length} items)
+            </span>
+          </div>
         </div>
 
         <div className="space-y-3">
-          {AGENT_TASK_FEED.map((task) => (
+          {filteredFeed.map((task) => (
             <div
               key={task.id}
               className="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] hover:border-[#3ecf8e]/40 transition-colors"
@@ -622,6 +781,9 @@ export default function AgenticMonitor() {
                 <div className="flex items-center gap-2.5">
                   <span className="px-2 py-0.5 rounded bg-[#2c2c2c] text-[11px] font-mono text-[#3ecf8e] font-medium">
                     {task.id}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-[#242424] text-[10px] font-mono text-[#f59e0b] border border-[#f59e0b]/20">
+                    {task.agent}
                   </span>
                   <span className="text-xs font-semibold text-[#fafafa]">{task.role}</span>
                   <span className="text-[11px] text-[#898989] font-mono">({task.timestamp})</span>
