@@ -2704,6 +2704,25 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Confirmed `access-card-actions` is registered in `DEPARTMENTS` so it appears on the hub.
   **Next Agent Notes:** The `CardActionsTab.tsx` is currently using `MOCK_EMPLOYEE` data. In the backend integration phase, it needs to be wired to the Supabase data using the new `EmployeesRow` fields.
 
+## 2026-08-18: Memoize loadsByMachine lookup map in HourlyLoadsGrid
+
+### Purpose
+
+Optimize performance of `HourlyLoadsGrid.tsx` by memoizing the `loadsByMachine` Map with `useMemo`.
+
+### Changes Made
+
+1. **`apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`**:
+   - Wrapped `loadsByMachine` Map initialization in `useMemo(() => { ... }, [hourlyLoads])`.
+   - Prevented new Map allocations on every render, stabilizing dependent `useCallback` hooks (`getHourValue`, `getMachineTotal`, `getMaterialType`) and `source` `useMemo`.
+
+### Verification
+
+- `pnpm --filter portal test -- hourly-loads-keys.test.ts`: PASS
+- `pnpm lint`: PASS
+
+---
+
 ## [2026-06-24T08:28:00Z] Phase 3 & 4: Backend Printing Integration & Testing
 
 **Purpose:** Integrate printing capability using OS-level print spooling and provide automated test coverage.
