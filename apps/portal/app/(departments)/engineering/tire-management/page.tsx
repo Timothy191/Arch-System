@@ -1,6 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { CircleDot, Plus, Wrench, ClipboardList } from "lucide-react";
+import { TireManagementDashboard } from "@/features/departments";
+import type { TireWithInspections } from "@/features/departments";
+import { createReadReplicaClient } from "@repo/supabase/read-replica";
 
 export const dynamic = "force-dynamic";
 
@@ -9,63 +10,76 @@ export default async function TireManagementPage() {
     department: "engineering",
   });
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Tire Management</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Inspections, wear tracking &amp; replacement scheduling
-          </p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 text-white text-sm font-medium transition-[opacity,transform] hover:scale-[1.02] active:scale-[0.98]">
-          <Plus className="w-4 h-4" />
-          Log Inspection
-        </button>
-      </div>
+  const db = await createReadReplicaClient();
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <CircleDot className="w-4 h-4 text-accent-green" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-              Total Tires
-            </p>
-          </div>
-          <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">—</p>
-        </GlassCard>
+  // Fetch tires with machine names and inspection logs
+  const [{ data: tiresData }, { data: machinesData }, { data: inspectionsData }] =
+    await Promise.all([
+      db
+        .from("tires")
+        .select("*, machines(name, machine_type)")
+        .order("created_at", { ascending: false }),
+      db
+        .from("machines")
+        .select("id, name, machine_type, serial_number")
+        .eq("active", true)
+        .order("name"),
+      db
+        .from("tire_inspections")
+        .select(
+          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at",
+        )
+        .order("inspection_date", { ascending: true }),
+    ]);
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-arch-accent-blue" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-              Due for Service
-            </p>
-          </div>
-          <p className="text-2xl font-bold text-arch-accent-blue mt-2">—</p>
-        </GlassCard>
+  // Group inspections by tire_id
+  const inspectionsByTire = new Map<string, any[]>();
+  for (const insp of inspectionsData || []) {
+    const list = inspectionsByTire.get(insp.tire_id) || [];
+    list.push(insp);
+    inspectionsByTire.set(insp.tire_id, list);
+  }
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-accent-red" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-              Critical Alerts
-            </p>
-          </div>
-          <p className="text-2xl font-bold text-accent-red mt-2">—</p>
-        </GlassCard>
-      </div>
+  // Format tires with latest inspection and history
+  const tires: TireWithInspections[] = (tiresData || []).map((t: any) => {
+    const inspections = inspectionsByTire.get(t.id) || [];
+    const latestInspection = inspections.length > 0 ? inspections[inspections.length - 1] : null;
 
-      <GlassCard className="p-12 text-center">
-        <CircleDot className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)] opacity-30" />
-        <h3 className="text-lg font-semibold text-[var(--text-heading)] mb-2">
-          Tire Management Module
-        </h3>
-        <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-          This module will track tire inspections, tread depth, pressure monitoring, and replacement
-          schedules for the fleet. Database table pending creation.
-        </p>
-      </GlassCard>
-    </div>
-  );
+    return {
+      id: t.id,
+      serial_number: t.serial_number,
+      brand: t.brand,
+      size: t.size,
+      machine_id: t.machine_id,
+      machine_name: t.machines?.name || null,
+      position: t.position,
+      status: t.status,
+      installed_at: t.installed_at,
+      installed_hours: t.installed_hours || 0,
+      removed_at: t.removed_at || null,
+      removed_hours: t.removed_hours || null,
+      scrapped_reason: t.scrapped_reason || null,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+      inspections,
+      latest_inspection: latestInspection
+        ? {
+            tread_depth_mm: Number(latestInspection.tread_depth_mm),
+            pressure_psi: Number(latestInspection.pressure_psi),
+            condition_status: latestInspection.condition_status,
+            inspection_date: latestInspection.inspection_date,
+            notes: latestInspection.notes,
+          }
+        : null,
+    };
+  });
+
+  const machines = (machinesData || []).map((m: any) => ({
+    id: m.id,
+    name: m.name,
+    serial_number: m.serial_number,
+    machine_type: m.machine_type,
+  }));
+
+  return <TireManagementDashboard tires={tires} machines={machines} />;
 }

@@ -1,33 +1,4 @@
-export abstract class WorkflowEntrypoint<Env = unknown, Params = unknown> {
-  constructor(
-    protected ctx: unknown,
-    protected env: Env,
-  ) {}
-  abstract run(event: WorkflowEvent<Params>, step: WorkflowStep): Promise<unknown>;
-}
-
-export interface WorkflowEvent<T = unknown> {
-  payload: T;
-}
-
-export interface WorkflowStep {
-  do<T>(name: string, fn: () => Promise<T>): Promise<T>;
-}
-
-export interface R2Bucket {
-  put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown>;
-}
-
-export interface WorkflowInstance {
-  create(options: { id: string; params: unknown }): Promise<{ id: string }>;
-}
-
-export interface Env {
-  SHIFT_REPORT_WORKFLOW: WorkflowInstance;
-  SPATIAL_TELEMETRY_BUCKET?: R2Bucket;
-  FUXA_SCADA_URL: string;
-  ENVIRONMENT: string;
-}
+import { WorkflowEntrypoint, WorkflowEvent, WorkflowStep } from "cloudflare:workers";
 
 export interface ShiftReportPayload {
   department: string;
@@ -53,24 +24,41 @@ export class ShiftReportWorkflow extends WorkflowEntrypoint<Env, ShiftReportPayl
     // Step 1: Fetch and aggregate SCADA alarm telematics and operator shift closeout state
     const metrics = await step.do("collect-shift-telemetry", async () => {
       // AGENT-TRACE: In production, fetches live telemetry from Supabase/FUXA endpoints
-      return {
+      const collected = {
         department: payload.department || "control-room",
         shiftId: payload.shiftId || `shift-${Date.now()}`,
         operatorId: payload.operatorId || "op-system",
         scadaAlarmsCount: payload.scadaAlarmsCount ?? 12,
         unacknowledgedAlarmsCount: payload.unacknowledgedAlarmsCount ?? 0,
         slaViolationCount: payload.slaViolationCount ?? 0,
-        collectedAt: new Date().toISOString()
+        collectedAt: new Date().toISOString(),
       };
+      console.log(
+        JSON.stringify({
+          message: "shift telemetry collected",
+          department: collected.department,
+          shiftId: collected.shiftId,
+          scadaAlarmsCount: collected.scadaAlarmsCount,
+        }),
+      );
+      return collected;
     });
 
     // Step 2: Audit SLA compliance (<60s response, <30s ack threshold)
     const slaStatus = await step.do("audit-sla-compliance", async () => {
-      const hasSlaViolations = metrics.slaViolationCount > 0 || metrics.unacknowledgedAlarmsCount > 0;
+      const hasSlaViolations =
+        metrics.slaViolationCount > 0 || metrics.unacknowledgedAlarmsCount > 0;
+      console.log(
+        JSON.stringify({
+          message: "sla audit completed",
+          compliant: !hasSlaViolations,
+          requiresEscalation: hasSlaViolations,
+        }),
+      );
       return {
         compliant: !hasSlaViolations,
         requiresEscalation: hasSlaViolations,
-        auditedAt: new Date().toISOString()
+        auditedAt: new Date().toISOString(),
       };
     });
 
@@ -78,11 +66,19 @@ export class ShiftReportWorkflow extends WorkflowEntrypoint<Env, ShiftReportPayl
     let escalationDetails: { id: string; notifiedAt: string } | undefined;
     if (slaStatus.requiresEscalation) {
       escalationDetails = await step.do("trigger-supervisor-escalation", async () => {
-        const escalationId = `esc-${Date.now()}-${metrics.shiftId}`;
-        return {
+        const escalationId = crypto.randomUUID();
+        const result = {
           id: escalationId,
-          notifiedAt: new Date().toISOString()
+          notifiedAt: new Date().toISOString(),
         };
+        console.log(
+          JSON.stringify({
+            message: "supervisor escalation triggered",
+            escalationId: result.id,
+            department: metrics.department,
+          }),
+        );
+        return result;
       });
     }
 
@@ -95,48 +91,83 @@ export class ShiftReportWorkflow extends WorkflowEntrypoint<Env, ShiftReportPayl
           slaStatus,
           escalationDetails,
           environment: this.env.ENVIRONMENT || "production",
-          generatedAt: new Date().toISOString()
+          generatedAt: new Date().toISOString(),
         },
         null,
-        2
+        2,
       );
 
       if (this.env.SPATIAL_TELEMETRY_BUCKET) {
         await this.env.SPATIAL_TELEMETRY_BUCKET.put(reportKey, reportDocument, {
-          httpMetadata: { contentType: "application/json" }
+          httpMetadata: { contentType: "application/json" },
         });
+        console.log(
+          JSON.stringify({
+            message: "spatial archive uploaded",
+            reportKey,
+            binding: "SPATIAL_TELEMETRY_BUCKET",
+          }),
+        );
       }
     });
+
+    console.log(
+      JSON.stringify({
+        message: "workflow completed",
+        status: slaStatus.requiresEscalation ? "ESCALATED" : "COMPLETED",
+        reportKey,
+      }),
+    );
 
     return {
       status: slaStatus.requiresEscalation ? "ESCALATED" : "COMPLETED",
       reportKey,
       escalationId: escalationDetails?.id,
-      processedAt: new Date().toISOString()
+      processedAt: new Date().toISOString(),
     };
   }
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/workflows/shift-report" && request.method === "POST") {
-      const body = (await request.json()) as ShiftReportPayload;
-      const instance = await env.SHIFT_REPORT_WORKFLOW.create({
-        id: `shift-workflow-${Date.now()}`,
-        params: body
-      });
-
-      return new Response(JSON.stringify({ instanceId: instance.id, status: "RUNNING" }), {
-        status: 202,
-        headers: { "Content-Type": "application/json" }
-      });
+    if (url.pathname === "/health") {
+      return Response.json({ status: "ok", service: "arch-systems-workflows" });
     }
 
-    return new Response(JSON.stringify({ status: "ok", service: "arch-systems-workflows" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-};
+    if (url.pathname === "/api/workflows/shift-report" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as ShiftReportPayload;
+        const instance = await env.SHIFT_REPORT_WORKFLOW.create({
+          id: crypto.randomUUID(),
+          params: body,
+        });
+
+        console.log(
+          JSON.stringify({
+            message: "workflow instance created",
+            instanceId: instance.id,
+            department: body.department,
+            shiftId: body.shiftId,
+            path: url.pathname,
+          }),
+        );
+
+        return Response.json({ instanceId: instance.id, status: "RUNNING" }, { status: 202 });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(
+          JSON.stringify({
+            message: "failed to create workflow instance",
+            error: message,
+            path: url.pathname,
+          }),
+        );
+        return Response.json({ error: "Internal server error" }, { status: 500 });
+      }
+    }
+
+    return new Response("Not Found", { status: 404 });
+  },
+} satisfies ExportedHandler<Env>;

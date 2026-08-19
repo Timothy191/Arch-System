@@ -14,8 +14,10 @@ import { speculativeEmbedShiftLog, revalidateRSC } from "@/app/actions";
 import {
   dailyLogSchema,
   drillingDailyLogSchema,
+  productionDailyLogSchema,
   type DailyLogFormValues,
   type DrillingDailyLogFormValues,
+  type ProductionDailyLogFormValues,
 } from "@repo/contract";
 import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
@@ -31,10 +33,19 @@ interface DailyLogFormProps {
   machines: Machine[];
 }
 
-type UnifiedFormValues = DailyLogFormValues & Partial<DrillingDailyLogFormValues>;
+type UnifiedFormValues = DailyLogFormValues &
+  Partial<DrillingDailyLogFormValues> &
+  Partial<ProductionDailyLogFormValues>;
 
 export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLogFormProps) {
   const isDrilling = departmentSlug === "drilling";
+  const isProduction = departmentSlug === "production";
+
+  const schemaResolver = isProduction
+    ? productionDailyLogSchema
+    : isDrilling
+      ? drillingDailyLogSchema
+      : dailyLogSchema;
 
   const {
     register,
@@ -44,7 +55,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     watch,
     setValue,
   } = useForm<UnifiedFormValues>({
-    resolver: zodResolver(isDrilling ? drillingDailyLogSchema : dailyLogSchema),
+    resolver: zodResolver(schemaResolver),
     defaultValues: {
       shift: "day" as const,
       notes: "",
@@ -57,6 +68,12 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
             delayCategory: "none" as const,
             delayMinutes: 0,
             drillPatternId: "",
+          }
+        : {}),
+      ...(isProduction
+        ? {
+            actualCoalTonnes: 0,
+            actualWasteTonnes: 0,
           }
         : {}),
     },
@@ -87,12 +104,16 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       finalNotes = finalNotes.trim() ? `${summaryPrefix}\n\nNotes:\n${finalNotes}` : summaryPrefix;
     }
 
-    const { error } = await supabase.from("daily_logs").insert({
-      department_id: departmentId,
-      log_date: today,
-      shift: data.shift,
-      notes: finalNotes === "" ? null : finalNotes,
-    });
+    const { data: logData, error } = await supabase
+      .from("daily_logs")
+      .insert({
+        department_id: departmentId,
+        log_date: today,
+        shift: data.shift,
+        notes: finalNotes === "" ? null : finalNotes,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       logError(error instanceof Error ? error : new Error(String(error)));
@@ -100,38 +121,59 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
         description: error.message,
       });
       setStatus("error");
-    } else {
-      toast.success("Daily log saved successfully");
+      return;
+    }
 
-      // Revalidate cached RSC data
-      revalidateRSC(["table:daily_logs", "table:production_logs"]).catch((err) => {
-        logError(err instanceof Error ? err : new Error(String(err)));
+    if (isProduction && logData) {
+      const { error: prodError } = await supabase.from("production_logs").insert({
+        daily_log_id: logData.id,
+        coal_tonnes: data.actualCoalTonnes || 0,
+        waste_tonnes: data.actualWasteTonnes || 0,
       });
-
-      // Speculatively generate embedding for the notes in background
-      if (finalNotes && finalNotes.trim() !== "") {
-        speculativeEmbedShiftLog(finalNotes).catch((err) => {
-          logError(err instanceof Error ? err : new Error(String(err)));
+      if (prodError) {
+        logError(prodError instanceof Error ? prodError : new Error(String(prodError)));
+        toast.error("Saved daily log, but failed to save production metrics", {
+          description: prodError.message,
         });
       }
+    }
 
-      setStatus("success");
-      reset({
-        shift: "day",
-        notes: "",
-        ...(isDrilling
-          ? {
-              holesDrilled: 0,
-              totalDepthMeters: 0,
-              penetrationRate: 0,
-              bitWearPercentage: 0,
-              delayCategory: "none",
-              delayMinutes: 0,
-              drillPatternId: "",
-            }
-          : {}),
+    toast.success("Daily log saved successfully");
+
+    // Revalidate cached RSC data
+    revalidateRSC(["table:daily_logs", "table:production_logs"]).catch((err) => {
+      logError(err instanceof Error ? err : new Error(String(err)));
+    });
+
+    // Speculatively generate embedding for the notes in background
+    if (finalNotes && finalNotes.trim() !== "") {
+      speculativeEmbedShiftLog(finalNotes).catch((err) => {
+        logError(err instanceof Error ? err : new Error(String(err)));
       });
     }
+
+    setStatus("success");
+    reset({
+      shift: "day",
+      notes: "",
+      ...(isDrilling
+        ? {
+            holesDrilled: 0,
+            totalDepthMeters: 0,
+            penetrationRate: 0,
+            bitWearPercentage: 0,
+            delayCategory: "none",
+            delayMinutes: 0,
+            drillPatternId: "",
+          }
+        : {}),
+      ...(isProduction
+        ? {
+            actualCoalTonnes: 0,
+            actualWasteTonnes: 0,
+          }
+        : {}),
+    });
   }
 
   return (
@@ -149,6 +191,115 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
           name="shift"
         />
       </div>
+
+      {/* Production-Specific Operational Metrics */}
+      {isProduction && (
+        <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[var(--text-heading)]">
+              Production Shift Metrics
+            </h3>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium">
+              Strip Ratio:{" "}
+              {watch("actualCoalTonnes")
+                ? (
+                    Number(watch("actualWasteTonnes") || 0) / Number(watch("actualCoalTonnes"))
+                  ).toFixed(2)
+                : "0.00"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="block text-xs text-[var(--text-muted)] font-medium">
+                Actual Coal (Tonnes)
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue(
+                      "actualCoalTonnes",
+                      Math.max(0, (Number(watch("actualCoalTonnes")) || 0) - 100),
+                      { shouldDirty: true },
+                    )
+                  }
+                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  {...register("actualCoalTonnes", { valueAsNumber: true })}
+                  className={cn(
+                    "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                    errors.actualCoalTonnes && "border-accent-red",
+                  )}
+                  placeholder="0"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("actualCoalTonnes", (Number(watch("actualCoalTonnes")) || 0) + 100, {
+                      shouldDirty: true,
+                    })
+                  }
+                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                >
+                  +
+                </button>
+              </div>
+              {errors.actualCoalTonnes && (
+                <p className="text-accent-red text-xs mt-1">{errors.actualCoalTonnes.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-xs text-[var(--text-muted)] font-medium">
+                Actual Waste (Tonnes)
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue(
+                      "actualWasteTonnes",
+                      Math.max(0, (Number(watch("actualWasteTonnes")) || 0) - 500),
+                      { shouldDirty: true },
+                    )
+                  }
+                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  {...register("actualWasteTonnes", { valueAsNumber: true })}
+                  className={cn(
+                    "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
+                    errors.actualWasteTonnes && "border-accent-red",
+                  )}
+                  placeholder="0"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setValue("actualWasteTonnes", (Number(watch("actualWasteTonnes")) || 0) + 500, {
+                      shouldDirty: true,
+                    })
+                  }
+                  className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
+                >
+                  +
+                </button>
+              </div>
+              {errors.actualWasteTonnes && (
+                <p className="text-accent-red text-xs mt-1">{errors.actualWasteTonnes.message}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Drilling-Specific Operational Metrics */}
       {isDrilling && (

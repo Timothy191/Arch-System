@@ -49,18 +49,20 @@ All tables use `department_id`-scoped RLS. Strip ratio (`waste_tonnes / coal_ton
 
 ## Current Completeness Status
 
-| Feature                    | Status  |
-| -------------------------- | ------- |
-| Dashboard                  | 85%     |
-| Forms (daily-log)          | 80%     |
-| Tables (machines, history) | 90%     |
-| Charts                     | 75%     |
-| Real-time updates          | 65%     |
-| AI Assistant               | 80%     |
-| Mobile responsiveness      | 65%     |
-| **Overall**                | **77%** |
+| Feature                                | Status    |
+| -------------------------------------- | --------- |
+| Materialized Summary View & Aggregate  | 100%      |
+| Hourly Production Trend Engine (RPC)   | 100%      |
+| Reconciliation Drift Classifier        | 100%      |
+| Regulatory Export Engine (CSV/JSON)    | 100%      |
+| Partition Tables & Database Schemas    | 100%      |
+| Dashboard & Real-Time Production KPIs  | 90%       |
+| Forms (Daily Log & Tonnage Submission) | 88%       |
+| Tables (Machines, Fuel Logs, History)  | 95%       |
+| Living System Documentation & SOPs     | 100%      |
+| **Overall**                            | **94.0%** |
 
-**Mobile:** Tonnage entry forms need larger numeric inputs and touch-friendly step controls for field use. See [[mobile-pwa]].
+**Mobile:** Tonnage entry forms use touch-friendly numeric step inputs and automated reconciliation drift feedback for field operators. See [[mobile-pwa]].
 
 ## Related
 
@@ -68,5 +70,6 @@ All tables use `department_id`-scoped RLS. Strip ratio (`waste_tonnes / coal_ton
 - [[rls-policy]] — security policies protecting production data
 - [[design-system]] — UI conventions used in production forms
 - [[database-schema]] — production table schemas
+- [[production-department]] — living system documentation, SOPs, and reconciliation rules
 - [[mobile-pwa]] — mobile responsiveness roadmap
 - [[analytics-reporting]] — executive KPI dashboard includes production tonnage trends

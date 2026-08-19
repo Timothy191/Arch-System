@@ -228,3 +228,21 @@
   - Removed unused `LifeBuoy` import in `src/components/ui/DropdownMenu.stories.tsx`.
 - **Status**: Lint warnings resolved, pre-commit checks passing.
 - **Next Steps**: None.
+
+## 2026-08-19 - Standardize Liquid Glass effect globally
+
+- **Purpose**: Comply with user request to make all panels, windows, and cards use the Liquid Glass effect with uniform transparency.
+- **Changes**:
+  - `GlassCard.tsx`: Hardcoded `isLiquid = true` for all variants, forcing the refraction SVGs and liquid styling on all GlassCard instances globally.
+  - Standardized liquid background transparency by applying a fixed opacity (`backgroundOpacity ?? 0.08`) across the board instead of relying on individual component overrides.
+  - Consolidated and simplified the classNames logic to inject liquid styling unconditionally.
+- **Status**: Completed. All GlassCards across the workspace now render with the Liquid Glass effect.
+
+## 2026-08-19 - Fix Marquee Animations & Refactor HeroRotator
+
+- **Purpose**: Fix the issue where Marquee cards ("Operational feedback & Department Logs") were static, and transition the HeroRotator to use the moving Marquee banner.
+- **Changes**:
+  - `packages/ui/src/components/ui/marquee.tsx`: Fixed Tailwind v4 `gap-(--gap)` syntax to v3 `gap-[var(--gap)]` so the styling is correctly applied.
+  - `packages/theme/src/tailwind/preset.ts`: Added `marquee` and `marquee-vertical` keyframes and animations directly to the tailwind preset, bypassing the `@theme inline` block from `globals.css` which was being ignored by Tailwind v3.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Refactored from a snappy `setInterval` slider to a continuous `Marquee` component, providing a smooth moving banner for the hero section as requested by the user.
+- **Status**: Completed. All Marquee banners are now smoothly animating.

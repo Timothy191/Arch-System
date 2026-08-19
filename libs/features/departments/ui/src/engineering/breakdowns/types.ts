@@ -84,3 +84,21 @@ export const MACHINE_TYPES = [
   "Water Cart",
   "Compactor",
 ] as const;
+
+export interface ServiceTrigger {
+  id: string;
+  machine_name: string;
+  machine_type: string;
+  trigger_type: "mtbf_threshold" | "failure_frequency" | "service_interval";
+  severity: "high" | "medium" | "low";
+  reason: string;
+  metric_value: string;
+  recommended_action: string;
+}
+
+export interface MTBFDataPoint {
+  category: string;
+  mttrHours: number;
+  mtbfHours: number;
+  failureCount: number;
+}

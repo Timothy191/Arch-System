@@ -60,6 +60,8 @@ const VENDOR_TOKENS = new Set([
   "--radix-toast-swipe-move-y",
   "--radix-toast-swipe-end-x",
   "--radix-toast-swipe-end-y",
+  "--gap",
+  "--duration",
 ]);
 
 // ── 1. Extract all defined CSS tokens ────────────────────────────────────────

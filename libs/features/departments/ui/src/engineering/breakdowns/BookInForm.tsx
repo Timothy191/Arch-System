@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
-import { ClipboardPlus, ClipboardList, Clock, CalendarDays } from "lucide-react";
+import { useState, useTransition, useMemo, useEffect } from "react";
+import {
+  ClipboardPlus,
+  ClipboardList,
+  Clock,
+  CalendarDays,
+  Save,
+  Trash2,
+  Sparkles,
+} from "lucide-react";
 import { createBreakdown } from "./actions";
 import type { Breakdown, Machine } from "./types";
 
@@ -10,6 +18,18 @@ interface BookInFormProps {
   activeBreakdowns: Breakdown[];
   machines: Machine[];
 }
+
+const COMMON_REASONS = [
+  "Hydraulic Hose Leak / Burst",
+  "Engine High Temp / Overheating",
+  "Electrical / Starter Fault",
+  "Track Tension & Link Wear",
+  "Brake System Pressure Drop",
+  "Transmission Slip / Filter Clogged",
+  "Pin & Bushing Excessive Play",
+];
+
+const DRAFT_KEY = "arch_breakdown_bookin_draft";
 
 export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -22,6 +42,52 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
   const [dateIn, setDateIn] = useState(new Date().toISOString().split("T")[0] ?? "");
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
   const [reason, setReason] = useState("");
+  const [hasDraft, setHasDraft] = useState(false);
+
+  // AGENT-TRACE: Restore local drafting cache on mount for field resilience
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.selectedMachineId) setSelectedMachineId(parsed.selectedMachineId);
+        if (parsed.dateIn) setDateIn(parsed.dateIn);
+        if (parsed.timeIn) setTimeIn(parsed.timeIn);
+        if (parsed.reason) setReason(parsed.reason);
+        setHasDraft(true);
+      }
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, []);
+
+  // AGENT-TRACE: Auto-persist field entries into local draft cache
+  useEffect(() => {
+    if (selectedMachineId || reason) {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason }),
+        );
+        setHasDraft(true);
+      } catch {
+        // Storage fail-safe
+      }
+    }
+  }, [selectedMachineId, dateIn, timeIn, reason]);
+
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Storage fail-safe
+    }
+    setSelectedMachineId("");
+    setDateIn(new Date().toISOString().split("T")[0] ?? "");
+    setTimeIn(new Date().toTimeString().slice(0, 5));
+    setReason("");
+    setHasDraft(false);
+  };
 
   const selectedMachine = useMemo(
     () => machines.find((m) => m.id === selectedMachineId),
@@ -59,6 +125,9 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           text: "Machine booked in successfully!",
         });
 
+        // Clear local cache on successful commit
+        clearDraft();
+
         // Trigger n8n workflow for breakdown alert
         import("@repo/utils").then(({ triggerWorkflow }) => {
           triggerWorkflow("machine-breakdown", {
@@ -69,11 +138,6 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             status: "active",
           });
         });
-
-        setSelectedMachineId("");
-        setDateIn(new Date().toISOString().split("T")[0] ?? "");
-        setTimeIn(new Date().toTimeString().slice(0, 5));
-        setReason("");
       } catch (err) {
         setMessage({ type: "error", text: "Failed to book in machine." });
       }
@@ -84,9 +148,29 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Form */}
       <div className="rounded-xl border border-[var(--border-emphasis)] bg-[var(--bg-tertiary)] p-6">
-        <div className="flex items-center gap-3 mb-5">
-          <ClipboardPlus className="w-5 h-5 text-violet-400" />
-          <h3 className="text-lg font-medium text-[var(--text-heading)]">Book In Machine</h3>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <ClipboardPlus className="w-5 h-5 text-violet-400" />
+            <h3 className="text-lg font-medium text-[var(--text-heading)]">Book In Machine</h3>
+          </div>
+
+          {/* Draft status indicator */}
+          {hasDraft && (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/30">
+                <Save className="w-3 h-3" />
+                Draft Cached
+              </span>
+              <button
+                type="button"
+                onClick={clearDraft}
+                title="Clear Draft"
+                className="p-1 rounded text-[var(--text-muted)] hover:text-accent-red hover:bg-accent-red/10 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
         {message && (
@@ -180,17 +264,35 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             </div>
           </div>
 
-          {/* Reason */}
+          {/* Quick Preset Fault Reasons */}
           <div>
-            <label className="block text-sm text-[var(--text-secondary)] mb-1.5">
-              Breakdown Reason
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm text-[var(--text-secondary)]">Breakdown Reason</label>
+              <span className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-violet-400" />
+                Quick presets
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {COMMON_REASONS.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setReason(r)}
+                  className="px-2 py-1 text-[11px] rounded-md bg-[var(--bg-primary)] hover:bg-violet-500/10 hover:border-violet-500/30 border border-[var(--border-emphasis)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all"
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+
             <textarea
               required
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Describe the issue..."
+              placeholder="Describe the issue or select a preset..."
               className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)] text-[var(--text-heading)] text-sm placeholder:text-[#555] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-colors resize-none"
             />
           </div>
@@ -198,7 +300,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           <button
             type="submit"
             disabled={isPending}
-            className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
           >
             {isPending ? "Booking In..." : "Book In Machine"}
           </button>

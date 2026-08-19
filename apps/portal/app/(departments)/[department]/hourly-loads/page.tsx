@@ -1,6 +1,7 @@
 import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { KPIGrid, KPICard } from "@repo/ui/KPI";
 import { PageHeader } from "@repo/ui/PageHeader";
+import { getCurrentShift } from "@repo/utils";
 import { HourlyLoadsGrid } from "./HourlyLoadsGrid";
 
 export default async function HourlyLoadsPage({
@@ -64,6 +65,8 @@ export default async function HourlyLoadsPage({
         machines={machines || []}
         hourlyLoads={hourlyLoads || []}
         sites={sites || []}
+        today={today}
+        initialShift={getCurrentShift()}
       />
 
       <div className="flex items-center gap-6 text-xs text-[var(--text-muted)]">

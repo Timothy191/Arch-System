@@ -20,8 +20,23 @@
     "*.tsbuildinfo",
     "*.lock",
     ".prisma/**",
-    "**/AGENT_TRACER.md"
+    "**/AGENT_TRACER.md",
+    "apps/cloudflare-workflows/worker-configuration.d.ts"
   ],
-  "ignoreRegExpList": ["sb_publishable_[A-Za-z0-9_]+"],
-  "words": ["fuxa", "supabase", "opencode", "autoplay", "telematics", "cicd"]
+  "ignoreRegExpList": [
+    "sb_publishable_[A-Za-z0-9_]+",
+    "sb_anon_[A-Za-z0-9_]+",
+    "sb_service_[A-Za-z0-9_]+",
+    "XVCJ"
+  ],
+  "words": [
+    "fuxa",
+    "supabase",
+    "opencode",
+    "autoplay",
+    "telematics",
+    "cicd",
+    "mtbf",
+    "delamination"
+  ]
 }

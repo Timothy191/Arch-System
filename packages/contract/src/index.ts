@@ -66,6 +66,7 @@ export {
 export {
   dailyLogSchema,
   drillingDailyLogSchema,
+  productionDailyLogSchema,
   dozerRollSchema,
   createBreakdownSchema,
   bookOutSchema,
@@ -75,6 +76,17 @@ export {
 } from "./schemas/form.schema.js";
 
 export { EmployeeProfileUpdateSchema, PrintRequestSchema } from "./schemas/access-card.schema.js";
+
+export {
+  tireStatusSchema,
+  tireConditionSchema,
+  tirePositionSchema,
+  tireSchema,
+  tireInspectionSchema,
+  createTireSchema,
+  logTireInspectionSchema,
+  replaceTireSchema,
+} from "./schemas/tire-management.schema.js";
 
 // ---------------------------------------------------------------------------
 // Derived types (inferred from schemas)
@@ -117,6 +129,7 @@ export type {
 export type {
   DailyLogFormValues,
   DrillingDailyLogFormValues,
+  ProductionDailyLogFormValues,
   DozerRollFormValues,
   CreateBreakdownInput,
   BookOutInput,
@@ -126,3 +139,13 @@ export type {
 } from "./types/form.types.js";
 
 export type { EmployeeProfileUpdateInput, PrintRequestInput } from "./types/access-card.types.js";
+
+export type {
+  Tire,
+  TireInspection,
+  CreateTireInput,
+  LogTireInspectionInput,
+  ReplaceTireInput,
+  TireStatus,
+  TireCondition,
+} from "./types/tire-management.types.js";

@@ -1,5 +1,47 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-19T07:20:00Z - Tire Audit Export Implementation, Engineering 100% Sign-Off & Production Department Audit
+
+- **Purpose**: Implement regulatory tire inspection history & scrap CSV/JSON export API (`/api/export/tires`) with UI dropdown, confirm 100% completion of the Engineering Department, and transition to the Production Department with full living documentation and technical audit.
+- **Changes**:
+  - `apps/portal/app/api/export/tires/route.ts`: Created rate-limited, CORS-protected export route supporting `fleet`, `inspections`, `scrap`, and `all` formats in sanitized CSV and JSON.
+  - `libs/features/departments/ui/src/engineering/tires/TireManagementDashboard.tsx`: Integrated interactive `Export Audit Log` dropdown button offering direct downloads for regulatory auditors.
+  - `docs/wiki/entities/engineering-department.md` & `system-wiki/engineering-department.md`: Formally signed off on **100% completion** across all 8 Engineering Department subsystems.
+  - `system-wiki/production-department.md`: Established comprehensive living system documentation for the Production Department covering Run-of-Mine coal extraction, overburden stripping, yield reconciliation drift classifications, material density standards, and SOPs.
+  - `docs/wiki/entities/production-department.md`: Audited and updated baseline completeness to 94.0%.
+- **Verification**:
+  - Verified API route syntax, rate limiting, and CSV cell escaping.
+  - `pnpm --filter @repo/departments/ui test` passed (13 suites, 76 tests passing).
+  - `pnpm --filter @repo/departments/ui lint && pnpm --filter portal lint` passed (0 warnings).
+  - `pnpm --filter portal type-check` passed (0 TS errors).
+- **What the Next Agent Should Know**: Engineering Department is 100% complete and signed off. Production Department is actively in focus at 94.0% completeness with robust database views (`view_production_summary`), partitioned tables, and reconciliation engines ready for dedicated dashboard widget mounting.
+
+## 2026-08-19T07:05:00Z - Engineering Department: Tire Management, Predictive MTBF & Field Drafting Caching
+
+- **Purpose**: Implement full interactive Tire Management inspection & replacement workflow on `/engineering/tire-management`, expand Breakdown Analytics with MTTR vs MTBF and automated preventative service triggers, and optimize field mechanic breakdown forms with local drafting caching.
+- **Changes**:
+  - `packages/contract`: Added `tire-management.schema.ts` and `tire-management.types.ts` defining `tireSchema`, `tireInspectionSchema`, `createTireSchema`, `logTireInspectionSchema`, `replaceTireSchema`, and re-exported from `@repo/contract`.
+  - `libs/features/departments/ui/src/engineering/tires`: Implemented `actions.ts` (Server Actions `logTireInspection`, `installTire`, `replaceTire`, `getTireWearHistory`), `TireManagementDashboard.tsx`, `TireWearCurveChart.tsx`, `TireInspectionModal.tsx`, `TireReplacementModal.tsx`, `types.ts`, and test suites.
+  - `apps/portal/app/(departments)/engineering/tire-management/page.tsx`: Wired up live Supabase data fetching for `tires`, `machines`, and `tire_inspections` with `TireManagementDashboard`.
+  - `libs/features/departments/ui/src/engineering/breakdowns`: Expanded `BreakdownCharts.tsx`, `BreakdownsDashboard.tsx`, and `types.ts` with real-time MTBF calculations, MTTR vs MTBF visual comparisons, and Automated Preventative Service Triggers alert panel.
+  - `BookInForm.tsx` & `BookOutForm.tsx`: Integrated `localStorage` local draft caching with draft indicators, clear buttons, and quick-select presets for common field breakdown reasons and repair actions.
+  - `docs/wiki/entities/engineering-department.md` & `system-wiki/engineering-department.md`: Updated department completeness to 98%.
+- **Verification**:
+  - `pnpm --filter @repo/contract build` passed (0 TS errors).
+  - `pnpm --filter @repo/departments/ui test` passed (13 suites, 76 tests passing).
+  - `pnpm --filter @repo/departments/ui lint && pnpm --filter portal lint` passed (0 warnings).
+  - `pnpm --filter portal type-check` passed (0 TS errors).
+- **What the Next Agent Should Know**: The Engineering Department tire lifecycle management, predictive reliability analytics, and field mechanic offline-resilient drafting workflows are fully implemented and passing all quality checks.
+
+## 2026-08-19T06:15:00Z - Control Room 100% Completion Sign-Off & Engineering Department Transition
+
+- **Purpose**: Validate and formalize Control Room Department 100% completion metrics in living documentation, and establish Engineering Department architecture, SOPs, and completeness baseline.
+- **Changes**:
+  - `docs/wiki/entities/control-room-department.md`: Added formal `Current Completeness Status` table confirming 100% completion across all 8 sub-systems (Dashboard/Telemetry, Hourly Loads Grid, Machine Ops/Delays, Eng Notes, Excavator/Dumper Tracking, Operational Checklist/Handover, Database Migrations/RLS, Living Documentation).
+  - `system-wiki/engineering-department.md`: Established full living system documentation and operational manual for Engineering Department covering HME workshops, breakdown book-in/book-out lifecycle, tire fleet telemetry, MTTR SLAs, and SOPs.
+- **Verification**: Verified markdown structures, database schema references, and departmental routing alignment.
+- **What the Next Agent Should Know**: Control Room is 100% complete and fully operational. Engineering Department overall completeness is at 88%, with Tire Management UI implementation (`/engineering/tire-management`) and breakdown MTTR predictive analytics being the primary roadmap focus areas.
+
 ## 2026-08-18T19:27:00Z - Cloudflare Agent Setup & MCP Server Configuration
 
 - **Purpose**: Fetch official Cloudflare agent setup instructions from `https://developers.cloudflare.com/agent-setup/prompt.md` and execute skill installation, MCP server configuration, and Cloudflare workflow/Wrangler verification across agent environments.

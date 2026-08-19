@@ -267,7 +267,10 @@ export function GlassCard({
   const isWindow = variant === "window";
   const isSpotlight = variant === "spotlight";
   const isGlowBorder = variant === "glowborder";
-  const isLiquid = variant === "liquid";
+  const isLiquid = true; // User requested Liquid Glass effect globally on all panels/cards
+
+  // Standardize transparency globally
+  const globalBackgroundOpacity = backgroundOpacity ?? 0.08;
 
   const intensityTokens = glassIntensity ? glassVariants[glassIntensity] : null;
 
@@ -443,41 +446,18 @@ export function GlassCard({
       className={cn(
         // Base classes
         "isolate relative overflow-hidden",
-        variant !== "liquid"
-          ? "transition-all duration-300 ease-glass shadow-glass-depth hover:shadow-glass-depth-hover active:shadow-glass-depth-active"
-          : "shadow-glass-depth",
+        "shadow-glass-depth border border-arch-border-subtle", // always apply subtle border
+        "group rounded-card animate-window-open",
+        hover && "liquid-glass-interactive",
 
-        variant !== "liquid" && "glass-card glass-depth-card border border-arch-border-subtle",
+        // Accent colors for hover
+        hover && ACCENT_COLORS[accent],
 
-        // Window & Default share standard glass style
-        (variant === "default" || variant === "window") && [
-          "group/window rounded-card backdrop-saturate-[1.3] animate-window-open",
-          !intensityTokens && "backdrop-blur-xl bg-arch-surface-secondary/80",
-          hover && ACCENT_COLORS[accent],
-        ],
-
-        // Spotlight custom layout style
-        variant === "spotlight" && [
-          "group rounded-card backdrop-saturate-[1.3]",
-          !intensityTokens && "backdrop-blur-xl bg-arch-surface-secondary/80",
-        ],
-
-        // GlowBorder custom layout style
-        variant === "glowborder" && [
-          "backdrop-saturate-[1.3]",
-          !intensityTokens && "backdrop-blur-xl",
-        ],
-
-        // Liquid custom layout style
-        variant === "liquid" && [
-          "group rounded-card animate-window-open",
-          hover && "liquid-glass-interactive",
-        ],
-
+        // Hover focus rings
         hover &&
           onClick &&
           "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
-        (variant === "default" || variant === "liquid") && padding && "p-6",
+        padding && "p-6",
         className,
       )}
       style={
@@ -586,11 +566,7 @@ export function GlassCard({
             className="absolute inset-0 -z-10 rounded-[inherit] liquid-glass-pane-rounded pointer-events-none"
             style={{
               ...backdropStyle,
-              ...(backgroundOpacity !== undefined
-                ? {
-                    backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, ${backgroundOpacity * 1.5}) 0%, rgba(255, 255, 255, ${backgroundOpacity}) 100%), linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 240, 240, 0.15) 50%, rgba(255, 255, 255, 0.45) 100%)`,
-                  }
-                : {}),
+              backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, ${globalBackgroundOpacity * 1.5}) 0%, rgba(255, 255, 255, ${globalBackgroundOpacity}) 100%), linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(240, 240, 240, 0.1) 50%, rgba(255, 255, 255, 0.2) 100%)`,
             }}
           />
           <svg

@@ -261,3 +261,9 @@
   - Added `"glow-mint": "var(--shadow-glow-mint)"` to the `boxShadow` section of `preset.ts`.
   - The CSS variable `--shadow-glow-mint` was already defined in `variables.css` (line 106-107) but lacked a Tailwind utility mapping.
 - **Status**: Completed, type-check passes.
+
+## 2026-08-19 - Fix Token Drift Error in Validation Script
+
+- **Purpose**: Fix the `pnpm lint:tokens` "token drift" error introduced by adding Marquee animation keyframes.
+- **Changes**: Added `--gap` and `--duration` to `VENDOR_TOKENS` ignore list in `packages/theme/scripts/validate-tokens.mjs`. These are dynamic inline CSS variables used for Marquee animations, not global design tokens, and thus should not be flagged when referenced in `preset.ts`.
+- **Status**: Completed. Token validation passing successfully.

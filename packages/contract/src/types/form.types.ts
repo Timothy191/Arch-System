@@ -2,6 +2,7 @@ import type { z } from "zod";
 import type {
   dailyLogSchema,
   drillingDailyLogSchema,
+  productionDailyLogSchema,
   dozerRollSchema,
   createBreakdownSchema,
   bookOutSchema,
@@ -12,6 +13,7 @@ import type {
 
 export type DailyLogFormValues = z.infer<typeof dailyLogSchema>;
 export type DrillingDailyLogFormValues = z.infer<typeof drillingDailyLogSchema>;
+export type ProductionDailyLogFormValues = z.infer<typeof productionDailyLogSchema>;
 export type DozerRollFormValues = z.infer<typeof dozerRollSchema>;
 export type CreateBreakdownInput = z.infer<typeof createBreakdownSchema>;
 export type BookOutInput = z.infer<typeof bookOutSchema>;

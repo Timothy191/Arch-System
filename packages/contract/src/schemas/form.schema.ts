@@ -35,6 +35,21 @@ export const drillingDailyLogSchema = z.object({
   notes: z.string().max(2000, "Notes cannot exceed 2000 characters").optional().or(z.literal("")),
 });
 
+export const productionDailyLogSchema = z.object({
+  shift: z.enum(["day", "night"]),
+  actualCoalTonnes: z
+    .number({ message: "Coal tonnage must be a number" })
+    .min(0, "Tonnage must be ≥ 0")
+    .max(100000, "Unrealistic single-shift tonnage")
+    .default(0),
+  actualWasteTonnes: z
+    .number({ message: "Waste tonnage must be a number" })
+    .min(0, "Tonnage must be ≥ 0")
+    .max(200000, "Unrealistic single-shift tonnage")
+    .default(0),
+  notes: z.string().max(2000, "Notes cannot exceed 2000 characters").optional().or(z.literal("")),
+});
+
 export const dozerRollSchema = z.object({
   departmentId: z.string().uuid("Invalid department ID"),
   machineId: z.string().uuid("Please select a dozer"),

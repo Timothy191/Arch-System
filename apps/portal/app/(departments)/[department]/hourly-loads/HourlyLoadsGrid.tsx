@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { useRouter } from "next/navigation";
 import { exportToExcel, parseExcel } from "@repo/utils/client";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";
 import { Download, Upload } from "lucide-react";
@@ -11,6 +10,16 @@ import { logError } from "@/lib/errors/error-logger";
 import { updateMachineSite } from "./actions";
 import { trackClientMetric } from "@/lib/observability/client-telemetry";
 import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
+import {
+  HOURS_12,
+  HOUR_PROP,
+  loadKey,
+  buildHourlyLoadsMap,
+  sumHourlyTotal,
+  type HourlyShift,
+  type HourlyLoad,
+  type HourlyMaterial,
+} from "./loads-utils";
 
 interface Machine {
   id: string;
@@ -18,27 +27,6 @@ interface Machine {
   machine_type: string;
   bin_factor?: number | null;
   site_id?: string | null;
-  sites?: { name: string }[] | { name: string } | null;
-}
-
-interface HourlyLoad {
-  id: string;
-  machine_id: string;
-  shift_type: "day" | "night";
-  hour_01: number;
-  hour_02: number;
-  hour_03: number;
-  hour_04: number;
-  hour_05: number;
-  hour_06: number;
-  hour_07: number;
-  hour_08: number;
-  hour_09: number;
-  hour_10: number;
-  hour_11: number;
-  hour_12: number;
-  total_loads: number;
-  material_type?: "Waste" | "Coal";
 }
 
 interface HourlyLoadsGridProps {
@@ -46,9 +34,11 @@ interface HourlyLoadsGridProps {
   machines: Machine[];
   hourlyLoads: HourlyLoad[];
   sites: { id: string; name: string; site_code: string }[];
+  /** Operational date (Africa/Johannesburg) from the server — never derive on the client. */
+  today: string;
+  /** Shift active at first render, resolved on the server to avoid UTC drift. */
+  initialShift?: HourlyShift;
 }
-
-const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const DAY_HOUR_LABELS = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"];
 const NIGHT_HOUR_LABELS = ["18", "19", "20", "21", "22", "23", "00", "01", "02", "03", "04", "05"];
@@ -58,10 +48,22 @@ export function HourlyLoadsGrid({
   machines,
   hourlyLoads,
   sites,
+  today,
+  initialShift,
 }: HourlyLoadsGridProps) {
-  const router = useRouter();
   const supabase = createBrowserSupabaseClient();
-  const today = new Date().toISOString().split("T")[0];
+
+  // AGENT-TRACE: The grid owns its load/site state so edits apply optimistically.
+  // No router.refresh() anywhere — each change updates local state instantly and
+  // persists in the background, so the page never reloads between values.
+  const [loadsState, setLoadsState] = useState<HourlyLoad[]>(hourlyLoads);
+  const [siteAssignments, setSiteAssignments] = useState<Record<string, string>>(() =>
+    Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? ""])),
+  );
+  const [selectedShift, setSelectedShift] = useState<HourlyShift>(
+    initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night"),
+  );
+  const [saving, setSaving] = useState(false);
 
   // Track container width for responsive column sizing
   const [containerWidth, setContainerWidth] = useState<number>(0);
@@ -78,23 +80,17 @@ export function HourlyLoadsGrid({
     return () => observer.disconnect();
   }, []);
 
-  const loadsByMachine = new Map<string, HourlyLoad>();
-  hourlyLoads.forEach((load) => {
-    loadsByMachine.set(load.machine_id, load);
-  });
-
-  const [selectedShift, setSelectedShift] = useState<"day" | "night">(
-    new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night",
-  );
-  const [saving, setSaving] = useState(false);
+  // Keyed by `${machine_id}:${shift_type}` so day and night rows for one machine
+  // are separate entries (regression: was keyed by machine_id only, dropping one).
+  const loadsByMachine = useMemo(() => buildHourlyLoadsMap(loadsState), [loadsState]);
 
   const hourLabels = selectedShift === "day" ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
-      const field = `hour_${(hourIndex + 1).toString().padStart(2, "0")}` as keyof HourlyLoad;
+      const load = loadsByMachine.get(loadKey(machineId, selectedShift));
+      if (!load) return 0;
+      const field = HOUR_PROP(hourIndex) as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
     [loadsByMachine, selectedShift],
@@ -102,20 +98,153 @@ export function HourlyLoadsGrid({
 
   const getMachineTotal = useCallback(
     (machineId: string): number => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return 0;
+      const load = loadsByMachine.get(loadKey(machineId, selectedShift));
       return load?.total_loads || 0;
     },
     [loadsByMachine, selectedShift],
   );
 
   const getMaterialType = useCallback(
-    (machineId: string): "Waste" | "Coal" => {
-      const load = loadsByMachine.get(machineId);
-      if (!load || load.shift_type !== selectedShift) return "Waste";
-      return load.material_type || "Waste";
+    (machineId: string): HourlyMaterial => {
+      const load = loadsByMachine.get(loadKey(machineId, selectedShift));
+      return load?.material_type || "Waste";
     },
     [loadsByMachine, selectedShift],
+  );
+
+  /**
+   * Applies a patch to the local row for (machineId, shiftType), creating a
+   * phantom row if none exists yet. Recomputes total from the 12 hours to mirror
+   * the DB's generated column. Existence is checked against `prev` inside the
+   * updater so rapid consecutive edits to a new row never create duplicates.
+   */
+  const applyLoadState = useCallback(
+    (machineId: string, shiftType: HourlyShift, patch: Partial<HourlyLoad>) => {
+      const key = loadKey(machineId, shiftType);
+      setLoadsState((prev) => {
+        const existing = prev.find((load) => loadKey(load.machine_id, load.shift_type) === key);
+        if (existing) {
+          return prev.map((load) => {
+            if (loadKey(load.machine_id, load.shift_type) !== key) return load;
+            const merged = { ...load, ...patch };
+            return { ...merged, total_loads: sumHourlyTotal(merged) };
+          });
+        }
+        const row: HourlyLoad = {
+          id: `local-${machineId}-${shiftType}`,
+          machine_id: machineId,
+          shift_type: shiftType,
+          hour_01: 0,
+          hour_02: 0,
+          hour_03: 0,
+          hour_04: 0,
+          hour_05: 0,
+          hour_06: 0,
+          hour_07: 0,
+          hour_08: 0,
+          hour_09: 0,
+          hour_10: 0,
+          hour_11: 0,
+          hour_12: 0,
+          total_loads: 0,
+          material_type: "Waste",
+          ...patch,
+        };
+        return [...prev, { ...row, total_loads: sumHourlyTotal(row) }];
+      });
+    },
+    [],
+  );
+
+  /**
+   * Persists one machine+shift row. Single idempotent upsert keyed on
+   * (machine_id, load_date, shift_type) — the UNIQUE constraint on the
+   * partitioned table includes the partition key (load_date), so concurrent
+   * inserts for a brand-new row collapse to an update instead of throwing.
+   */
+  const persistLoad = useCallback(
+    async (machineId: string, shiftType: HourlyShift, patch: Partial<HourlyLoad>) => {
+      const { error } = await supabase.from("hourly_loads").upsert(
+        {
+          department_id: departmentId,
+          machine_id: machineId,
+          load_date: today,
+          shift_type: shiftType,
+          ...patch,
+        },
+        { onConflict: "machine_id,load_date,shift_type" },
+      );
+      if (error) throw error;
+    },
+    [supabase, departmentId, today],
+  );
+
+  /**
+   * Rolls a field back to its previous value — but only if it still holds the
+   * value we wrote. A newer user edit wins and is never clobbered. Phantom rows
+   * that end up empty (all zeros, Waste) are dropped rather than persisted.
+   */
+  const revertField = useCallback(
+    (
+      machineId: string,
+      shiftType: HourlyShift,
+      field: string,
+      newValue: number | string,
+      previousValue: number | string,
+    ) => {
+      const key = loadKey(machineId, shiftType);
+      setLoadsState((prev) => {
+        const existing = prev.find((load) => loadKey(load.machine_id, load.shift_type) === key);
+        if (!existing || existing[field as keyof HourlyLoad] !== newValue) return prev;
+        const reverted = {
+          ...existing,
+          [field]: previousValue,
+        } as HourlyLoad;
+        const isEmptyPhantom =
+          existing.id.startsWith("local-") &&
+          sumHourlyTotal(reverted) === 0 &&
+          (reverted.material_type ?? "Waste") === "Waste";
+        if (isEmptyPhantom) {
+          return prev.filter((load) => load !== existing);
+        }
+        reverted.total_loads = sumHourlyTotal(reverted);
+        return prev.map((load) => (load === existing ? reverted : load));
+      });
+    },
+    [],
+  );
+
+  /**
+   * Shared optimistic write path: apply locally, persist in the background,
+   * revert + alert only on failure. Used by all five edit entry points.
+   */
+  const commitLoadChange = useCallback(
+    async (
+      machineId: string,
+      shiftType: HourlyShift,
+      field: string,
+      previousValue: number | string,
+      newValue: number | string,
+      patch: Partial<HourlyLoad>,
+      operation: string,
+      attrs: Record<string, string | number>,
+    ) => {
+      applyLoadState(machineId, shiftType, patch);
+      try {
+        await trackClientMetric(operation, () => persistLoad(machineId, shiftType, patch), {
+          department_id: departmentId,
+          machine_id: machineId,
+          ...attrs,
+        });
+      } catch (err) {
+        logError(err instanceof Error ? err : new Error(String(err)), {
+          context: `hourly_loads_${operation}`,
+        });
+        revertField(machineId, shiftType, field, newValue, previousValue);
+        alert("Failed to save. Please try again.");
+      }
+    },
+    [applyLoadState, persistLoad, revertField, departmentId],
   );
 
   // Check if any machine in this department has a bin_factor set
@@ -126,10 +255,9 @@ export function HourlyLoadsGrid({
     return machines.map((machine) => {
       const totalLoads = getMachineTotal(machine.id);
       const binFactor = machine.bin_factor ?? 0;
-      const sites = machine.sites;
+      const assignedSiteId = siteAssignments[machine.id];
       const siteName =
-        (Array.isArray(sites) ? sites[0]?.name : (sites as { name?: string } | null)?.name) ??
-        "No Site";
+        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
       const row: Record<string, string | number> = {
         machineName: machine.name,
         siteName,
@@ -137,7 +265,7 @@ export function HourlyLoadsGrid({
         materialType: getMaterialType(machine.id),
       };
       HOURS_12.forEach((_, index) => {
-        row[`hour_${(index + 1).toString().padStart(2, "0")}`] = getHourValue(machine.id, index);
+        row[HOUR_PROP(index)] = getHourValue(machine.id, index);
       });
       row.total = totalLoads;
       if (hasBinFactors) {
@@ -148,6 +276,8 @@ export function HourlyLoadsGrid({
     });
   }, [
     machines,
+    sites,
+    siteAssignments,
     loadsByMachine,
     selectedShift,
     getHourValue,
@@ -167,45 +297,15 @@ export function HourlyLoadsGrid({
       const newValue = Math.max(0, Math.min(100, currentValue + delta));
       if (newValue === currentValue) return;
 
-      setSaving(true);
-      // AGENT-TRACE: Client-side telemetry for hourly loads update
-      await trackClientMetric(
+      await commitLoadChange(
+        machine.id,
+        selectedShift,
+        hourProp,
+        currentValue,
+        newValue,
+        { [hourProp]: newValue },
         "hourly_loads_update",
-        async () => {
-          try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
-
-            if (existingLoad) {
-              const { error } = await supabase
-                .from("hourly_loads")
-                .update({ [hourProp]: newValue })
-                .eq("id", existingLoad.id);
-              if (error) throw error;
-            } else {
-              const { error } = await supabase.from("hourly_loads").insert({
-                department_id: departmentId,
-                machine_id: machine.id,
-                load_date: today,
-                shift_type: selectedShift,
-                [hourProp]: newValue,
-              });
-              if (error) throw error;
-            }
-            router.refresh();
-          } catch (err) {
-            logError(err instanceof Error ? err : new Error(String(err)), {
-              context: "hourly_loads_adjust",
-            });
-            alert("Failed to update. Please try again.");
-          } finally {
-            setSaving(false);
-          }
-        },
         {
-          department_id: departmentId,
-          machine_id: machine.id,
           hour_prop: hourProp,
           previous_value: currentValue,
           new_value: newValue,
@@ -213,7 +313,7 @@ export function HourlyLoadsGrid({
         },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getHourValue],
+    [machines, selectedShift, getHourValue, commitLoadChange],
   );
 
   // Handle toggling material type for a row
@@ -225,39 +325,23 @@ export function HourlyLoadsGrid({
       const currentMaterial = getMaterialType(machine.id);
       const newMaterial = currentMaterial === "Waste" ? "Coal" : "Waste";
 
-      setSaving(true);
-      try {
-        const existingLoad = hourlyLoads.find(
-          (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-        );
-
-        if (existingLoad) {
-          const { error } = await supabase
-            .from("hourly_loads")
-            .update({ material_type: newMaterial })
-            .eq("id", existingLoad.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase.from("hourly_loads").insert({
-            department_id: departmentId,
-            machine_id: machine.id,
-            load_date: today,
-            shift_type: selectedShift,
-            material_type: newMaterial,
-          });
-          if (error) throw error;
-        }
-        router.refresh();
-      } catch (err) {
-        logError(err instanceof Error ? err : new Error(String(err)), {
-          context: "hourly_loads_material_toggle",
-        });
-        alert("Failed to update material. Please try again.");
-      } finally {
-        setSaving(false);
-      }
+      await commitLoadChange(
+        machine.id,
+        selectedShift,
+        "material_type",
+        currentMaterial,
+        newMaterial,
+        { material_type: newMaterial },
+        "hourly_loads_material_toggle",
+        {
+          field: "material_type",
+          previous_value: currentMaterial,
+          new_value: newMaterial,
+          operation: "toggle_material",
+        },
+      );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router, getMaterialType],
+    [machines, selectedShift, getMaterialType, commitLoadChange],
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -296,25 +380,30 @@ export function HourlyLoadsGrid({
       if (target.dataset.action !== "select-site") return;
 
       const rowIndex = parseInt(target.dataset.row || "0", 10);
-      const newSiteId = target.value || null;
+      const newSiteId = target.value || "";
 
       const machine = machines[rowIndex];
       if (!machine) return;
 
-      setSaving(true);
+      const previousSiteId = siteAssignments[machine.id] ?? "";
+      if (newSiteId === previousSiteId) return;
+
+      // AGENT-TRACE: Optimistic site reassignment — update the select immediately,
+      // persist via the server action in the background, revert only on failure.
+      setSiteAssignments((prev) => ({ ...prev, [machine.id]: newSiteId }));
       try {
-        await updateMachineSite(machine.id, newSiteId);
-        router.refresh();
+        await updateMachineSite(machine.id, newSiteId || null);
       } catch (err) {
         logError(err instanceof Error ? err : new Error(String(err)), {
           context: "hourly_loads_site_change",
         });
+        setSiteAssignments((prev) =>
+          prev[machine.id] === newSiteId ? { ...prev, [machine.id]: previousSiteId } : prev,
+        );
         alert("Failed to update site. Please try again.");
-      } finally {
-        setSaving(false);
       }
     },
-    [machines, router],
+    [machines, siteAssignments],
   );
 
   // Build RevoGrid columns (stable reference)
@@ -365,8 +454,8 @@ export function HourlyLoadsGrid({
         sortable: false,
         readonly: true,
         cellTemplate: (h: any, { rowIndex }: { rowIndex: number }) => {
-          const currentMachine = machines[rowIndex];
-          const currentSiteId = currentMachine?.site_id ?? "";
+          const machineId = machines[rowIndex]?.id ?? "";
+          const currentSiteId = siteAssignments[machineId] ?? "";
           return h("div", { class: "flex items-center justify-center h-full w-full px-1" }, [
             h(
               "select",
@@ -429,7 +518,7 @@ export function HourlyLoadsGrid({
         },
       },
       ...HOURS_12.map((_, index) => {
-        const hourProp = `hour_${(index + 1).toString().padStart(2, "0")}`;
+        const hourProp = HOUR_PROP(index);
         return {
           prop: hourProp,
           name: `${hourLabels[index]}:00`,
@@ -553,7 +642,7 @@ export function HourlyLoadsGrid({
     }
 
     return cols;
-  }, [hourLabels, hasBinFactors, containerWidth]);
+  }, [hourLabels, hasBinFactors, containerWidth, sites, siteAssignments, machines]);
 
   const handleAfterEdit = useCallback(
     async (e: any) => {
@@ -564,70 +653,42 @@ export function HourlyLoadsGrid({
 
       if (typeof rowIndex !== "number" || !prop?.startsWith("hour_") || val === undefined) return;
 
-      const value = parseInt(String(val), 10) || 0;
-      if (value < 0 || value > 100) {
-        alert("Please enter a value between 0 and 100");
-        router.refresh();
-        return;
-      }
-
       const machine = machines[rowIndex];
       if (!machine) return;
 
-      setSaving(true);
-      // AGENT-TRACE: Client-side telemetry for hourly loads direct edit
-      await trackClientMetric(
-        "hourly_loads_direct_edit",
-        async () => {
-          try {
-            const existingLoad = hourlyLoads.find(
-              (l) => l.machine_id === machine.id && l.shift_type === selectedShift,
-            );
+      const hourIndex = parseInt(prop.split("_")[1] ?? "0", 10) - 1;
+      const currentValue = getHourValue(machine.id, hourIndex);
+      const value = parseInt(String(val), 10) || 0;
 
-            if (existingLoad) {
-              const { error } = await supabase
-                .from("hourly_loads")
-                .update({ [prop]: value })
-                .eq("id", existingLoad.id);
-              if (error) throw error;
-            } else {
-              const { error } = await supabase.from("hourly_loads").insert({
-                department_id: departmentId,
-                machine_id: machine.id,
-                load_date: today,
-                shift_type: selectedShift,
-                [prop]: value,
-              });
-              if (error) throw error;
-            }
-            router.refresh();
-          } catch (err) {
-            logError(err instanceof Error ? err : new Error(String(err)), {
-              context: "hourly_loads_save",
-            });
-            alert("Failed to save. Please try again.");
-          } finally {
-            setSaving(false);
-          }
-        },
-        {
-          department_id: departmentId,
-          machine_id: machine.id,
-          hour_prop: prop,
-          value,
-          operation: "direct_edit",
-        },
+      if (value < 0 || value > 100) {
+        alert("Please enter a value between 0 and 100");
+        // AGENT-TRACE: Push the current value back into local state so RevoGrid
+        // drops the invalid cell (new source reference) instead of a page reload.
+        applyLoadState(machine.id, selectedShift, { [prop]: currentValue });
+        return;
+      }
+
+      if (value === currentValue) return;
+
+      await commitLoadChange(
+        machine.id,
+        selectedShift,
+        prop,
+        currentValue,
+        value,
+        { [prop]: value },
+        "hourly_loads_direct_edit",
+        { hour_prop: prop, value, operation: "direct_edit" },
       );
     },
-    [machines, hourlyLoads, selectedShift, departmentId, today, supabase, router],
+    [machines, selectedShift, getHourValue, applyLoadState, commitLoadChange],
   );
 
   const handleExport = async () => {
     const exportData = machines.map((machine) => {
-      const sites = machine.sites;
+      const assignedSiteId = siteAssignments[machine.id];
       const siteName =
-        (Array.isArray(sites) ? sites[0]?.name : (sites as { name?: string } | null)?.name) ??
-        "No Site";
+        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
       const data: any = {
         Machine: machine.name,
         Site: siteName,
@@ -658,22 +719,17 @@ export function HourlyLoadsGrid({
         const machine = machines.find((m) => m.name === machineName);
         if (!machine) continue;
 
-        const updateData: any = {
-          department_id: departmentId,
-          machine_id: machine.id,
-          load_date: today,
-          shift_type: selectedShift,
-        };
+        const patch: Partial<HourlyLoad> = {};
 
         if (row.Material !== undefined) {
-          updateData.material_type = row.Material === "Coal" ? "Coal" : "Waste";
+          patch.material_type = row.Material === "Coal" ? "Coal" : "Waste";
         }
 
         let hasData = false;
         HOURS_12.forEach((_, index) => {
           const label = `${hourLabels[index]}:00`;
           if (row[label] !== undefined) {
-            updateData[`hour_${(index + 1).toString().padStart(2, "0")}`] =
+            (patch as Record<string, number | string | undefined>)[HOUR_PROP(index)] =
               parseInt(row[label], 10) || 0;
             hasData = true;
           }
@@ -683,20 +739,30 @@ export function HourlyLoadsGrid({
           hasData = true;
         }
 
-        if (hasData) {
-          const { error } = await supabase.from("hourly_loads").upsert(updateData, {
-            onConflict: "machine_id,load_date,shift_type",
-          });
+        if (!hasData) continue;
 
-          if (error)
-            logError(new Error(error.message), {
-              context: "hourly_loads_import",
-              machineName,
-            });
+        // AGENT-TRACE: Optimistic import — apply each row to local state right
+        // away and persist in the background; no full-page refresh mid-import.
+        applyLoadState(machine.id, selectedShift, patch);
+        try {
+          await trackClientMetric(
+            "hourly_loads_import",
+            () => persistLoad(machine.id, selectedShift, patch),
+            {
+              department_id: departmentId,
+              machine_id: machine.id,
+              machine_name: machineName,
+              operation: "import",
+            },
+          );
+        } catch (err) {
+          logError(err instanceof Error ? err : new Error(String(err)), {
+            context: "hourly_loads_import",
+            machineName,
+          });
         }
       }
 
-      router.refresh();
       alert("Import completed successfully!");
     } catch (err) {
       logError(err instanceof Error ? err : new Error(String(err)), {

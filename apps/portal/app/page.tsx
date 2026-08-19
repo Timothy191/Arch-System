@@ -1,7 +1,5 @@
-import { redirect } from "next/navigation";
-
 export default function RootPage() {
-  // Redirect authenticated users to the hub (main dashboard)
-  // Unauthenticated users will be caught by middleware and redirected to /login
-  redirect("/hub");
+  // Empty render - redirection is now handled via next.config.mjs
+  // Fixes Next.js 16+ Turbopack 'RootPage cannot have a negative time stamp' error
+  return null;
 }

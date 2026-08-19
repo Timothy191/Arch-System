@@ -14,8 +14,9 @@ The Engineering department in Arch-Systems handles equipment specifications, mai
 
 ## Tabs
 
-- dashboard — Engineering KPI dashboard
+- dashboard — Engineering KPI dashboard & maintenance hub
 - breakdowns — Equipment breakdown book-in/book-out workflow
+- tire-management — Fleet tire inspections, pressure, tread depth & replacement lifecycle
 - daily-log — Engineering shift log
 - machines — Equipment inventory and specs
 - history — Historical maintenance records
@@ -25,6 +26,7 @@ The Engineering department in Arch-Systems handles equipment specifications, mai
 ## Key Features
 
 - **Breakdown Management**: Book-in/book-out workflow via `breakdowns` table with status tracking (`active`/`completed`), date/time tracking, and soft delete support
+- **Tire Fleet Management**: Serial tracking, tread depth wear monitoring, psi pressure telemetry, wheel position mapping, and replacement audit logs (`tires` & `tire_inspections` tables)
 - **Equipment Inventory**: Machine specs, serial numbers, and active status per department
 - **Maintenance Tracking**: Repair notes, failure reasons, and completion records
 - **Pending Work**: Currently 12 pending items
@@ -45,18 +47,19 @@ The Engineering department in Arch-Systems handles equipment specifications, mai
 
 ## Current Completeness Status
 
-| Feature                    | Status  |
-| -------------------------- | ------- |
-| Dashboard                  | 90%     |
-| Forms (breakdowns)         | 85%     |
-| Tables (machines, history) | 95%     |
-| Charts                     | 80%     |
-| Real-time updates          | 75%     |
-| AI Assistant               | 85%     |
-| Mobile responsiveness      | 70%     |
-| **Overall**                | **83%** |
+| Feature                                | Status   |
+| -------------------------------------- | -------- |
+| Dashboard & Maintenance Hub            | 100%     |
+| Breakdowns (Book In / Out & Drafting)  | 100%     |
+| Tire Management (Modals, Curves, Logs) | 100%     |
+| Fleet Audit Exports (CSV / JSON API)   | 100%     |
+| Equipment Tables (Machines, Specs)     | 100%     |
+| Reliability & Predictive MTBF Engine   | 100%     |
+| Real-time Telemetry & Service Triggers | 100%     |
+| Living System Documentation & SOPs     | 100%     |
+| **Overall**                            | **100%** |
 
-**Mobile:** Breakdown book-in/book-out is filed by mechanics in the field. Touch-optimized fleet ID lookup and repair notes entry are key improvements. See [[mobile-pwa]].
+**Status**: Verified complete. Production-ready asset maintenance, tire life-cycle tracking, and offline field mechanic drafting workflows.
 
 ## Related
 

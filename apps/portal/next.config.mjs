@@ -26,6 +26,15 @@ const nextConfig = {
   env: {
     PORTAL_VERSION,
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/hub",
+        permanent: false,
+      },
+    ];
+  },
   typescript: {
     // !! DANGER !!
     // Only allow skipping type checks in local development!

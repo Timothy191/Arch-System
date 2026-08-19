@@ -53,6 +53,7 @@ const SatelliteMonitoringDashboard = dynamic(
 );
 
 import { SafetyDashboard } from "~/features/departments/components/safety/SafetyDashboard";
+import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
 
 export default async function DepartmentDashboard({
   params,
@@ -79,6 +80,20 @@ export default async function DepartmentDashboard({
         }
       >
         <SafetyDashboard deptId={deptId} />
+      </Suspense>
+    );
+  }
+
+  if (dept.type === "production" || deptSlug === "production") {
+    return (
+      <Suspense
+        fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
+            <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
+          </div>
+        }
+      >
+        <ProductionDashboard deptId={deptId} />
       </Suspense>
     );
   }

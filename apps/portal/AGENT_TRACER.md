@@ -2792,3 +2792,67 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## 2026-08-19: Production Dashboard and Form Enhancement
+
+### Purpose
+
+Completed the Production Department UI implementation. Added the Production Dashboard widgets (coal/waste tonnage, strip ratio, and drift alerts) and enhanced the Daily Log Form with touch-friendly step inputs.
+
+### Changes Made
+
+- Created `ProductionDashboard.tsx` in `apps/portal/features/departments/components/production/`. It queries the `view_production_summary` materialized view using `get_production_summary` and calculates real-time shift performance metrics.
+- Updated `apps/portal/app/(departments)/[department]/page.tsx` to route `production` department views to the new `ProductionDashboard`.
+- Updated `packages/contract` by creating `productionDailyLogSchema` and exporting `ProductionDailyLogFormValues`.
+- Enhanced `apps/portal/app/(departments)/[department]/daily-log/DailyLogForm.tsx`:
+  - Included `productionDailyLogSchema`.
+  - Added touch-friendly `+` and `-` numeric step inputs for coal and waste tonnage.
+  - Added real-time drift / strip ratio feedback calculation within the form.
+  - Updated the form submission handler to write coal and waste totals into the `production_logs` table while maintaining the base `daily_logs` record.
+
+### Next Steps
+
+- Verify the form visually in the running dev server.
+- The `production_logs` table integration is complete. No further core UI tasks remain for this specification.
+
+## 2026-08-19: Predictive MTBF & Automated Preventative Service Triggers
+
+### Purpose
+
+Ensure the predictive mean time between failures (MTBF) and automated preventative service triggers requested by the Engineering Backlog are fully implemented and compliant with the UI rules.
+
+### Changes Made
+
+- Validated the existing structural logic inside `BreakdownsDashboard.tsx` and `BreakdownCharts.tsx` which calculates dynamic MTBF estimates based on failure frequencies.
+- Fixed design system violations in `BreakdownCharts.tsx`: removed unauthorized Tailwind color utilities (`bg-emerald-500`, `bg-rose-500`, `bg-violet-500`, `bg-blue-500`, `bg-amber-500`) and replaced them with authorized semantic tokens (`bg-accent-green`, `bg-accent-red`, `bg-accent-blue`, `bg-accent-amber`).
+- Adjusted dynamic template literals for Tailwind classes to ensure they aren't purged or violate the strict OKLCH theming rules.
+
+### Next Steps
+
+- Production Dashboard widget and Daily Log form are fully implemented.
+- Engineering Backlog MTBF module is fully functional, visualizes MTBF vs MTTR correctly, and complies with UI system rules.
+
+## 2026-08-19: Hourly Loads — optimistic in-place editing (no full-page reload) + persistence across navigation
+
+### Purpose
+
+Eliminate the full-page reload that fired on every Hourly Loads edit, and guarantee edited values persist until end of shift when the user navigates away and back.
+
+### Changes Made
+
+- `app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`
+  - Removed all five `router.refresh()` calls (cell up/down, material toggle, site select, direct cell edit, Excel import). Edits now apply optimistically to local state and persist in the background; the page never reloads between values.
+  - Added `today` and `initialShift` props. `today` is the server-derived operational date (Africa/Johannesburg) — the client previously used UTC `new Date().toISOString()`, which wrote the wrong `load_date` between 00:00–02:00 SAST and made rows look lost after navigation.
+  - Grid rows keyed by `${machine_id}:${shift_type}` (via `loads-utils.loadKey`) so day and night rows for one machine are independent (regression: previously keyed by `machine_id` only, silently dropping one shift).
+  - New `applyLoadState` (optimistic patch + phantom local row creation, existence checked against `prev` inside the updater to prevent duplicate rows on rapid consecutive edits), `persistLoad` (single idempotent upsert `onConflict: "machine_id,load_date,shift_type"` — safe on the partitioned table because the UNIQUE constraint includes the partition key), `revertField` (conditional revert that never clobbers a newer edit; drops empty phantom rows), and `commitLoadChange` (shared optimistic write path used by all edit entry points).
+  - Site reassignment is optimistic too (instant select update, revert + alert on failure) instead of `router.refresh()`.
+  - Invalid direct edits (outside 0–100) alert and push the current value back into local state so RevoGrid drops the cell — no reload.
+  - `total_loads` recomputed client-side via `sumHourlyTotal` to mirror the DB generated column.
+- `app/(departments)/[department]/hourly-loads/page.tsx` — passes `today={today}` and `initialShift={getCurrentShift()}`.
+- New `loads-utils.ts` — framework-free helpers (`loadKey`, `buildHourlyLoadsMap`, `sumHourlyTotal`, `HOUR_PROP`) shared by the grid and its Jest tests so the tests never mount RevoGrid.
+- `hourly-loads-keys.test.ts` — regression test now imports the real helpers and asserts day+night rows are kept separate and `sumHourlyTotal` mirrors the generated DB total.
+
+### Next Steps
+
+- Known tradeoff: page-level KPIs ("Total Loads Today") refresh only on navigation, not per edit; per-row totals update live. Accept while full-page reloads are removed.
+- Live-verify in dev server: edit a cell → no page reload; navigate away and back → value still present.
