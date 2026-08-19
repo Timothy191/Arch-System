@@ -215,7 +215,7 @@ show_results() {
     echo -e "  ${BOLD}CMS:${NC}      ${CYAN}http://localhost:3001${NC}"
   fi
   if [ "$START_OVERVIEW" = "true" ]; then
-    echo -e "  ${BOLD}Overview:${NC}  ${CYAN}http://localhost:3002${NC}"
+    echo -e "  ${BOLD}Overview:${NC}  ${CYAN}http://localhost:${OVERVIEW_PORT:-3003}${NC}"
   fi
   echo -e "  ${BOLD}Redis:${NC}    ${CYAN}redis://localhost:6379${NC}"
   echo -e "  ${BOLD}Studio:${NC}   ${CYAN}http://localhost:54323${NC}"
@@ -795,7 +795,7 @@ fi
 
 if [ "$START_OVERVIEW" = "true" ]; then
   start_extra_app \
-    "overview" "$REPO_ROOT/apps/overview" "3002" \
+    "overview" "$REPO_ROOT/apps/overview" "${OVERVIEW_PORT:-3003}" \
     "$REPO_ROOT/run/overview.log" "$REPO_ROOT/run/.overview.pid" "Overview"
 fi
 
