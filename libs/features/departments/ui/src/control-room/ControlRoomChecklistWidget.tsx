@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
   CheckCircle2,
@@ -281,6 +281,7 @@ export function ControlRoomChecklistWidget({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(!!initialReport);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Live KPI metrics — editable, defaults matching wiki SLAs, restored from an
   // existing report so a revision starts from the last submitted values.
@@ -290,6 +291,99 @@ export function ControlRoomChecklistWidget({
   const [incidentAckSec, setIncidentAckSec] = useState(initialReport?.incidentAckAvgSeconds ?? 18);
   const [systemUptime, setSystemUptime] = useState(initialReport?.systemUptimePercent ?? 99.98);
   const [missedIncidents, setMissedIncidents] = useState(initialReport?.missedIncidentsCount ?? 0);
+
+  // AGENT-TRACE: Auto-save draft persistence to localStorage.
+  // Persists checklist toggles, operator name, notes, signatures, and KPI SLA metrics
+  // so no data is lost when operators switch tabs, switch department modules, or minimize windows.
+  const draftKey = `arch_control_room_draft_${departmentId}_${date}_${shift}`;
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || initialReport) return;
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.items) setItems(parsed.items);
+        if (parsed.operatorName) setOperatorName(parsed.operatorName);
+        if (parsed.summaryNotes !== undefined) setSummaryNotes(parsed.summaryNotes);
+        if (parsed.supervisorSignature !== undefined)
+          setSupervisorSignature(parsed.supervisorSignature);
+        if (parsed.alarmResponseSec !== undefined) setAlarmResponseSec(parsed.alarmResponseSec);
+        if (parsed.incidentAckSec !== undefined) setIncidentAckSec(parsed.incidentAckSec);
+        if (parsed.systemUptime !== undefined) setSystemUptime(parsed.systemUptime);
+        if (parsed.missedIncidents !== undefined) setMissedIncidents(parsed.missedIncidents);
+        setHasRestoredDraft(true);
+      }
+    } catch {
+      // Ignore storage read error
+    }
+  }, [draftKey, initialReport]);
+
+  const saveDraft = useMemo(() => {
+    return () => {
+      if (typeof window === "undefined") return;
+      try {
+        const payload = {
+          items,
+          operatorName,
+          summaryNotes,
+          supervisorSignature,
+          alarmResponseSec,
+          incidentAckSec,
+          systemUptime,
+          missedIncidents,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(draftKey, JSON.stringify(payload));
+      } catch {
+        // Ignore storage write error
+      }
+    };
+  }, [
+    draftKey,
+    items,
+    operatorName,
+    summaryNotes,
+    supervisorSignature,
+    alarmResponseSec,
+    incidentAckSec,
+    systemUptime,
+    missedIncidents,
+  ]);
+
+  const clearDraft = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(draftKey);
+      setHasRestoredDraft(false);
+    } catch {
+      // Ignore cleanup error
+    }
+  };
+
+  // Flush draft to storage on state changes, window blur, tab swap, or page unload
+  useEffect(() => {
+    saveDraft();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        saveDraft();
+      }
+    };
+
+    window.addEventListener("beforeunload", saveDraft);
+    window.addEventListener("pagehide", saveDraft);
+    window.addEventListener("arch:tab-swap", saveDraft);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("beforeunload", saveDraft);
+      window.removeEventListener("pagehide", saveDraft);
+      window.removeEventListener("arch:tab-swap", saveDraft);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [saveDraft]);
 
   // AGENT-TRACE: SLA badges reflect the live editable values so operators see
   // compliance drift as they adjust KPIs before submitting the closeout.
@@ -335,7 +429,23 @@ export function ControlRoomChecklistWidget({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!operatorName.trim()) return;
+    setValidationError(null);
+
+    // Defensive input bounds validation
+    if (!operatorName.trim()) {
+      setValidationError("Operator name is required.");
+      return;
+    }
+
+    if (alarmResponseSec < 0 || incidentAckSec < 0 || missedIncidents < 0) {
+      setValidationError("KPI SLA metrics must be non-negative numbers.");
+      return;
+    }
+
+    if (systemUptime < 0 || systemUptime > 100) {
+      setValidationError("System uptime percentage must be between 0% and 100%.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -360,9 +470,12 @@ export function ControlRoomChecklistWidget({
       if (onSubmitReport) {
         await onSubmitReport(report);
       }
+      clearDraft();
       setSubmitted(true);
-    } catch {
-      // Error handling placeholder
+    } catch (err) {
+      setValidationError(
+        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -408,6 +521,39 @@ export function ControlRoomChecklistWidget({
           </span>
         </div>
       </div>
+
+      {hasRestoredDraft && (
+        <div className="p-3 rounded-xl bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20 text-xs text-[var(--accent-blue)] flex items-center justify-between">
+          <span className="flex items-center gap-2 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-[var(--accent-blue)]" />
+            Auto-restored unsaved shift entries from previous tab session
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              clearDraft();
+              setItems(
+                initialReport?.checklistItems?.length
+                  ? initialReport.checklistItems
+                  : DEFAULT_CHECKLIST_ITEMS,
+              );
+              setOperatorName(initialReport?.operatorName ?? initialOperatorName);
+              setSummaryNotes(initialReport?.summaryNotes ?? "");
+              setSupervisorSignature(initialReport?.supervisorSignature ?? "");
+            }}
+            className="text-[11px] underline hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            Discard Draft
+          </button>
+        </div>
+      )}
+
+      {validationError && (
+        <div className="p-3 rounded-xl bg-accent-red/10 border border-accent-red/20 text-xs text-accent-red flex items-center gap-2">
+          <AlertOctagon className="w-4 h-4 shrink-0" />
+          <span>{validationError}</span>
+        </div>
+      )}
 
       {/* KPI SLA Badges */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

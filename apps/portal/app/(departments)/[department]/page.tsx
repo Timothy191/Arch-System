@@ -84,7 +84,7 @@ export default async function DepartmentDashboard({
     );
   }
 
-  if (dept.type === "production" || deptSlug === "production") {
+  if (deptSlug === "production") {
     return (
       <Suspense
         fallback={

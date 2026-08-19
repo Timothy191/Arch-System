@@ -2856,3 +2856,13 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
 
 - Known tradeoff: page-level KPIs ("Total Loads Today") refresh only on navigation, not per edit; per-row totals update live. Accept while full-page reloads are removed.
 - Live-verify in dev server: edit a cell → no page reload; navigate away and back → value still present.
+
+## 2026-08-19 - Global Tab-Switch Auto-Save & Control Room Hardening
+
+- **Purpose**: Implement auto-save draft persistence across forms and widgets when users switch tabs mid-work, and harden Control Room operations.
+- **Changes**:
+  - `apps/portal/hooks/useFormDraft.ts`: Created production-grade hook for draft persistence to localStorage. Flushes on input changes, `visibilitychange` (tab switch/window minimize), `beforeunload`, `pagehide`, and `arch:tab-swap` events. Tested with unit tests (`useFormDraft.test.ts`).
+  - `ControlRoomChecklistWidget.tsx`: Integrated draft persistence so checklist items, operator name, handover notes, signatures, and KPI SLA metrics are auto-saved on tab switch. Added defensive input bounds validation (non-negative SLA times, 0-100% uptime) and UI feedback banners.
+  - `DozerRollForm.tsx`: Integrated tab-switch auto-save draft persistence.
+  - `DailyLogForm.tsx`: Integrated auto-save draft persistence on tab switch.
+- **Status**: Completed. Verified with unit tests and type-check.

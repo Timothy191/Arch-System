@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 // eslint-disable-next-line no-restricted-imports
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,6 +82,67 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   useUnsavedChangesWarning(isDirty);
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const formValues = watch();
+
+  const draftKey = `arch_daily_log_draft_${departmentId}`;
+
+  // Restore draft on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") {
+          reset(parsed);
+        }
+      }
+    } catch {
+      // Ignore read error
+    }
+  }, [draftKey, reset]);
+
+  // Save draft on tab switch / unload
+  const saveDraft = useMemo(() => {
+    return () => {
+      if (typeof window === "undefined") return;
+      try {
+        if (isDirty) {
+          localStorage.setItem(draftKey, JSON.stringify(formValues));
+        }
+      } catch {
+        // Ignore write error
+      }
+    };
+  }, [draftKey, isDirty, formValues]);
+
+  const clearDraft = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(draftKey);
+    } catch {
+      // Ignore cleanup error
+    }
+  };
+
+  useEffect(() => {
+    saveDraft();
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") saveDraft();
+    };
+    window.addEventListener("beforeunload", saveDraft);
+    window.addEventListener("pagehide", saveDraft);
+    window.addEventListener("arch:tab-swap", saveDraft);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("beforeunload", saveDraft);
+      window.removeEventListener("pagehide", saveDraft);
+      window.removeEventListener("arch:tab-swap", saveDraft);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [saveDraft]);
+
   const shiftValue = watch("shift");
   const holesDrilled = watch("holesDrilled") || 0;
   const totalDepthMeters = watch("totalDepthMeters") || 0;
@@ -153,6 +214,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     }
 
     setStatus("success");
+    clearDraft();
     reset({
       shift: "day",
       notes: "",

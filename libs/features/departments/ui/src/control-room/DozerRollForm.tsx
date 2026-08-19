@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { ShiftToggle } from "@repo/ui/ShiftToggle";
 import { getCurrentShift } from "@repo/utils";
@@ -39,6 +39,93 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const draftKey = `arch_dozer_roll_draft_${departmentId}_${today}`;
+
+  // Restore draft on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.machineId) setMachineId(parsed.machineId);
+        if (parsed.lengthM) setLengthM(parsed.lengthM);
+        if (parsed.widthM) setWidthM(parsed.widthM);
+        if (parsed.bladePasses) setBladePasses(parsed.bladePasses);
+        if (parsed.pushCount) setPushCount(parsed.pushCount);
+        if (parsed.hoursOperated) setHoursOperated(parsed.hoursOperated);
+        if (parsed.shiftType) setShiftType(parsed.shiftType);
+        if (parsed.isOpen) setIsOpen(true);
+      }
+    } catch {
+      // Ignore read error
+    }
+  }, [draftKey]);
+
+  const saveDraft = useMemo(() => {
+    return () => {
+      if (typeof window === "undefined") return;
+      try {
+        if (machineId || lengthM || widthM || bladePasses || pushCount || hoursOperated) {
+          localStorage.setItem(
+            draftKey,
+            JSON.stringify({
+              isOpen,
+              machineId,
+              lengthM,
+              widthM,
+              bladePasses,
+              pushCount,
+              hoursOperated,
+              shiftType,
+            }),
+          );
+        } else {
+          localStorage.removeItem(draftKey);
+        }
+      } catch {
+        // Ignore write error
+      }
+    };
+  }, [
+    draftKey,
+    isOpen,
+    machineId,
+    lengthM,
+    widthM,
+    bladePasses,
+    pushCount,
+    hoursOperated,
+    shiftType,
+  ]);
+
+  const clearDraft = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(draftKey);
+    } catch {
+      // Ignore cleanup error
+    }
+  };
+
+  useEffect(() => {
+    saveDraft();
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") saveDraft();
+    };
+    window.addEventListener("beforeunload", saveDraft);
+    window.addEventListener("pagehide", saveDraft);
+    window.addEventListener("arch:tab-swap", saveDraft);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("beforeunload", saveDraft);
+      window.removeEventListener("pagehide", saveDraft);
+      window.removeEventListener("arch:tab-swap", saveDraft);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [saveDraft]);
+
   const isDirty =
     isOpen && !!(machineId || lengthM || widthM || bladePasses || pushCount || hoursOperated);
 
@@ -75,6 +162,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
     setShiftType(getCurrentShift());
     setError(null);
     setIsOpen(false);
+    clearDraft();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
