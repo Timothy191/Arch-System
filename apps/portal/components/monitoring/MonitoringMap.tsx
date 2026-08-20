@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
@@ -25,6 +25,15 @@ const LEVEL_COLORS: Record<string, string> = {
   moderate: "#3f3f46",
   critical: "#ef4444",
 };
+
+// Pre-converted RGBA tuple lookup to avoid hex parsing string operations on every frame
+const LEVEL_RGBA_COLORS: Record<string, [number, number, number, number]> = {
+  stable: [62, 207, 142, 200],
+  minor: [113, 113, 122, 200],
+  moderate: [63, 63, 70, 200],
+  critical: [239, 68, 68, 200],
+};
+const DEFAULT_RGBA_COLOR: [number, number, number, number] = [62, 207, 142, 200];
 
 const LAYER_OPTIONS: { key: MapLayerKey; label: string }[] = [
   { key: "optical", label: "S2 Optical" },
@@ -58,42 +67,76 @@ export function MonitoringMap({
     setCurrentLayer(activeLayer);
   }, [activeLayer]);
 
-  const layers = [
-    new ScatterplotLayer({
-      id: "deformation-points",
-      data: deformationReadings,
-      getPosition: (d: DeformationReading) => [d.lon, d.lat],
-      getFillColor: (d: DeformationReading) => {
-        const hex = LEVEL_COLORS[d.level] || "#3ecf8e";
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return [r, g, b, 200];
-      },
-      getRadius: (d: DeformationReading) => {
-        return d.level === "critical"
-          ? 100
-          : d.level === "moderate"
-            ? 70
-            : d.level === "minor"
-              ? 50
-              : 30;
-      },
-      pickable: true,
-      onClick: (info: { object?: DeformationReading }) => {
-        if (info.object) {
-          onReadingClick?.(info.object);
-        }
-      },
-      updateTriggers: {
-        getFillColor: [deformationReadings],
-        getRadius: [deformationReadings],
-      },
-    }),
-  ];
+  // Memoize deck.gl layers to prevent layer re-allocation during 60 FPS pan/zoom viewState updates
+  const layers = useMemo(
+    () => [
+      new ScatterplotLayer({
+        id: "deformation-points",
+        data: deformationReadings,
+        getPosition: (d: DeformationReading) => [d.lon, d.lat],
+        getFillColor: (d: DeformationReading) =>
+          LEVEL_RGBA_COLORS[d.level] || DEFAULT_RGBA_COLOR,
+        getRadius: (d: DeformationReading) => {
+          return d.level === "critical"
+            ? 100
+            : d.level === "moderate"
+              ? 70
+              : d.level === "minor"
+                ? 50
+                : 30;
+        },
+        pickable: true,
+        onClick: (info: { object?: DeformationReading }) => {
+          if (info.object) {
+            onReadingClick?.(info.object);
+          }
+        },
+        updateTriggers: {
+          getFillColor: [deformationReadings],
+          getRadius: [deformationReadings],
+        },
+      }),
+    ],
+    [deformationReadings, onReadingClick],
+  );
 
   const tileUrl = MAP_TILE_URLS[currentLayer] ?? MAP_TILE_URLS.optical ?? "";
   const meta = LAYER_META[currentLayer] ?? LAYER_META.optical;
+
+  // Memoize mapStyle object to prevent maplibre style object diffing on every frame
+  const mapStyle = useMemo(
+    () => ({
+      version: 8 as const,
+      sources: {
+        "raster-tiles": {
+          type: "raster" as const,
+          tiles: [tileUrl],
+          tileSize: 256,
+          attribution: meta?.attribution ?? "© EOX IT Services / ESA",
+        },
+      },
+      layers: [
+        {
+          id: "raster-layer",
+          type: "raster" as const,
+          source: "raster-tiles",
+          minzoom: 0,
+          maxzoom: 22,
+        },
+      ],
+    }),
+    [tileUrl, meta?.attribution],
+  );
+
+  const handleViewStateChange = useCallback(
+    (e: { viewState: typeof viewState }) => setViewState(e.viewState),
+    [],
+  );
+
+  const getCursor = useCallback(
+    ({ isHovering }: { isHovering?: boolean }) => (isHovering ? "pointer" : "grab"),
+    [],
+  );
 
   return (
     <div
@@ -102,35 +145,12 @@ export function MonitoringMap({
     >
       <DeckGL
         viewState={viewState}
-        onViewStateChange={
-          ((e: { viewState: typeof viewState }) => setViewState(e.viewState)) as any
-        }
+        onViewStateChange={handleViewStateChange as any}
         controller={true}
         layers={layers}
-        getCursor={({ isHovering }: { isHovering?: boolean }) => (isHovering ? "pointer" : "grab")}
+        getCursor={getCursor}
       >
-        <Map
-          mapStyle={{
-            version: 8,
-            sources: {
-              "raster-tiles": {
-                type: "raster",
-                tiles: [tileUrl],
-                tileSize: 256,
-                attribution: meta?.attribution ?? "© EOX IT Services / ESA",
-              },
-            },
-            layers: [
-              {
-                id: "raster-layer",
-                type: "raster",
-                source: "raster-tiles",
-                minzoom: 0,
-                maxzoom: 22,
-              },
-            ],
-          }}
-        />
+        <Map mapStyle={mapStyle} />
       </DeckGL>
 
       {/* Layer switcher overlay */}
