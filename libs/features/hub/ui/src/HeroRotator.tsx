@@ -1,12 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Play, Info, ArrowUpRight } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import type { Department } from "@repo/departments/data-access";
-import { Marquee } from "@repo/ui/Marquee";
-import { GlassCard } from "@repo/ui/GlassCard";
 
 interface HeroRotatorProps {
   defaultTitle: string;
@@ -27,6 +25,8 @@ export function HeroRotator({
   secondaryLabel,
   departments,
 }: HeroRotatorProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   // AGENT-TRACE: Memoize panels array to avoid allocating objects and JSX elements every render
   const panels = useMemo(
     () => [
@@ -80,33 +80,44 @@ export function HeroRotator({
     ],
   );
 
-  const maskStyle = {
-    maskImage: "linear-gradient(to right, transparent, white 5%, white 95%, transparent)",
-    WebkitMaskImage: "linear-gradient(to right, transparent, white 5%, white 95%, transparent)",
-  };
+  useEffect(() => {
+    if (panels.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev >= panels.length - 1 ? 0 : prev + 1));
+    }, 6000); // Rotate every 6 seconds
+
+    return () => clearInterval(interval);
+  }, [panels.length]);
 
   return (
-    <div className="relative overflow-hidden w-full" style={maskStyle}>
-      <Marquee pauseOnHover className="[--duration:50s] gap-8 py-2">
-        {panels.map((panel) => (
-          <GlassCard
+    <div className="relative overflow-hidden w-full">
+      <div
+        className="flex transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+      >
+        {panels.map((panel, idx) => (
+          <div
             key={panel.id}
-            variant="spotlight"
-            className="w-[450px] shrink-0 p-6 flex flex-col justify-between h-full border border-arch-border-primary hover:border-white/40 transition-all duration-300 bg-arch-surface-tertiary/40"
+            className={cn(
+              "w-full shrink-0 flex flex-col justify-start transition-opacity duration-700",
+              Math.abs(activeIndex - idx) <= 1 ? "opacity-100" : "opacity-0",
+            )}
           >
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-arch-text-primary">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-arch-text-primary text-balance">
                 {panel.title}
               </h1>
-              <p className="text-arch-text-secondary text-sm sm:text-base leading-relaxed line-clamp-3">
+              <p className="text-arch-text-secondary text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-pretty">
                 {panel.description}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 pt-4 mt-auto">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 pt-2 mt-5">
               <Link
                 href={panel.primary.href}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent-blue)] text-white font-medium text-sm shadow-glow-primary transition-all hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80 hover:scale-[1.02] active:scale-[0.97]"
+                data-cta="primary-hero"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-blue)] text-white font-medium text-sm shadow-glow-primary transition-all hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80 hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)] focus-visible:outline-offset-2 min-h-[44px]"
               >
                 {panel.primary.icon}
                 {panel.primary.label}
@@ -114,16 +125,32 @@ export function HeroRotator({
               {panel.secondary && (
                 <Link
                   href={panel.secondary.href}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-arch-surface-tertiary/60 text-arch-text-secondary font-medium text-sm border border-arch-border-subtle hover:bg-arch-surface-secondary hover:text-arch-text-primary hover:border-arch-border-emphasis active:bg-arch-surface-primary transition-all hover:scale-[1.02] active:scale-[0.97]"
+                  data-cta="secondary-hero"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-arch-surface-tertiary/60 text-arch-text-secondary font-medium text-sm border border-arch-border-subtle hover:bg-arch-surface-secondary hover:text-arch-text-primary hover:border-arch-border-emphasis active:bg-arch-surface-primary transition-all hover:scale-[1.02] active:scale-[0.97] backdrop-blur-md focus-visible:outline-2 focus-visible:outline-[var(--text-secondary)] focus-visible:outline-offset-2 min-h-[44px]"
                 >
                   {panel.secondary.icon}
                   {panel.secondary.label}
                 </Link>
               )}
             </div>
-          </GlassCard>
+          </div>
         ))}
-      </Marquee>
+      </div>
+
+      {/* Optional: Indicator dots for the carousel */}
+      {panels.length > 1 && (
+        <div className="absolute bottom-0 right-0 flex gap-2">
+          {panels.map((_, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                idx === activeIndex ? "bg-[var(--accent-blue)] w-4" : "bg-arch-border-emphasis",
+              )}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

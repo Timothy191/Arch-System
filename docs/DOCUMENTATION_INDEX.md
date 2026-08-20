@@ -32,7 +32,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Architecture & Visualization
 
-- **[codebase-maps/README.md](../codebase-maps/README.md)** - Codebase visualization maps
+- **[codebase-maps/README.md](../documentation/04-codebase-maps/README.md)** - Codebase visualization maps
   - Project dependencies map with dependency graphs
   - Package structure overview
   - Route/feature architecture mapping
@@ -40,6 +40,15 @@ Quick navigation guide for Arch-Systems documentation.
   - Technology stack overview
   - CI/CD pipeline visualization
   - All maps include Mermaid diagrams for visual representation
+
+### Audit & Quality Reports
+
+- **[documentation/03-audit-reports/](../documentation/03-audit-reports/)** - Unified audit reports
+  - RLS (Row Level Security) audit reports
+  - Design system compliance reports
+  - Required action items and remediation plans
+  - Versioned audit logs with historical tracking
+  - Latest audit results for immediate review
 
 ### AI Development
 
@@ -113,26 +122,24 @@ Arch-Mk2/
 ├── GEMINI.md                          # AI conventions
 ├── SECURITY.md                        # Security policy
 ├── DOCUMENTATION_INDEX.md             # This file
-├── docs/
+├── documentation/                     # Unified documentation center
+│   ├── README.md                      # Documentation center index
+│   ├── 00-core/                       # Core project documentation
+│   ├── 01-operations/                 # Operational procedures and runbooks
+│   ├── 02-system-wiki/                # System knowledge base
+│   ├── 03-audit-reports/              # Audit reports and RLS analysis
+│   ├── 04-codebase-maps/              # Codebase visualization and maps
+│   ├── 05-wiki/                       # Comprehensive technical wiki
+│   ├── 06-archives/                   # Historical documentation
+│   ├── 07-agentic-systems/            # Agentic system documentation
+│   ├── 08-guides/                     # Operational guides and handbooks
+│   ├── 09-tools/                     # Documentation tools and generators
+│   └── 10-references/                 # Reference materials
+├── docs/                              # Legacy documentation (migrating to documentation/)
 │   ├── archive/                       # Historical checklists, phase plans, and reports
-│   │   ├── LIQUID_GLASS_CHECKLIST.md
-│   │   ├── PHASE3_MUI_BASE_MIGRATION.md
-│   │   └── SECURITY_USABILITY_REPORT.md
 │   ├── operations/                    # Control room procedures, FUXA integrations, and runbooks
-│   │   ├── alert-response-procedures.md
-│   │   ├── caching-strategy.md
-│   │   ├── fuxa-integration-plan.md
-│   │   └── runbooks/
-│   │       ├── AMCA-RUNBOOK.md
-│   │       └── auth-unavailable.md
 │   ├── reports/                       # Project audits and upgrade plans
-│   │   ├── PROJECT_AUDIT_UPGRADE_PLAN.md
-│   │   └── architecture_walkthrough.md
 │   └── wiki/                          # Detailed technical wiki and domain concept docs
-│       ├── index.md                   # Wiki Index page
-│       └── concepts/
-│           ├── project-overview.md    # Comprehensive system architecture & stack guide
-│           └── overview.md            # Wiki system introduction
 └── scripts/
     └── ROCKY_LINUX_COMPATIBILITY.md   # Rocky Linux/RHEL compatibility guide
 ```
@@ -143,9 +150,10 @@ Arch-Mk2/
 
 - **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
 - **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
-- **Visualize the codebase structure**: Explore [codebase-maps/README.md](../codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
+- **Visualize the codebase structure**: Explore [codebase-maps/README.md](../documentation/04-codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
+- **Review audit reports and quality status**: Check [documentation/03-audit-reports/](../documentation/03-audit-reports/) for RLS and design compliance reports
 - **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section or view [codebase-maps](../codebase-maps/)
+- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section or view [codebase-maps](../documentation/04-codebase-maps/)
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)
@@ -155,6 +163,7 @@ Arch-Mk2/
 - **Understand quality gates**: Review [AGENTS.md](AGENTS.md) Quality Gates section
 - **Review historical plans / checklist**: Check [docs/archive/LIQUID_GLASS_CHECKLIST.md](./docs/archive/LIQUID_GLASS_CHECKLIST.md)
 - **Find operational runbooks**: Check [docs/operations/runbooks/](./docs/operations/runbooks/)
+- **Explore unified documentation**: Visit [documentation/README.md](../documentation/README.md) for the new documentation center structure
 
 ## 📝 Documentation Maintenance
 
@@ -162,8 +171,14 @@ Arch-Mk2/
 - Update this index when adding new documentation files
 - Ensure cross-references between documents are maintained
 - Review documentation relevance quarterly
+- **Migration in Progress**: Documentation is being consolidated into the unified `documentation/` directory structure
+  - Phase 1 ✅: Core documentation structure created
+  - Phase 2 ✅: Audit reports migrated to `documentation/03-audit-reports/`
+  - Phase 3 ⏳: Codebase maps migration planned
+  - Phase 4 ⏳: System wiki consolidation planned
+  - Legacy `docs/` directory will remain during migration period
 
 ---
 
-**Last Updated**: 2026-06-15  
+**Last Updated**: 2026-08-20  
 **Maintained by**: Arch-Systems Development Team

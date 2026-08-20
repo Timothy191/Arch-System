@@ -50,6 +50,7 @@ export default async function MachineOperationsPage({
     { data: todayOperations },
     { data: todayLoads },
     { data: _delayCategories },
+    { data: activeBreakdowns },
   ] = await Promise.all([
     supabase
       .from("machines")
@@ -65,7 +66,7 @@ export default async function MachineOperationsPage({
     supabase
       .from("machine_operations")
       .select(
-        "*, machine:machines(name, bin_factor), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))",
+        "*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))",
       )
       .eq("department_id", deptId)
       .eq("shift_date", today)
@@ -80,6 +81,10 @@ export default async function MachineOperationsPage({
       .select("id, name, description")
       .eq("is_active", true)
       .order("name"),
+    supabase
+      .from("breakdowns")
+      .select("id, fleet_id, reason, repair_notes, status, date_in, date_out")
+      .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
 
   // Calculate today's totals
@@ -189,7 +194,11 @@ export default async function MachineOperationsPage({
             </div>
           }
         >
-          <MachineOperationsList operations={todayOperations || []} todayLoads={todayLoads || []} />
+          <MachineOperationsList 
+            operations={todayOperations || []} 
+            todayLoads={todayLoads || []} 
+            activeBreakdowns={activeBreakdowns || []} 
+          />
         </Suspense>
       </div>
     </div>

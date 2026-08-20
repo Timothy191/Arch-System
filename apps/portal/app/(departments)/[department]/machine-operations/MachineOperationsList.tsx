@@ -26,7 +26,7 @@ interface MachineOperation {
   start_time: string;
   end_time: string | null;
   hours_worked: number | null;
-  machine?: { name: string; bin_factor?: number } | null;
+  machine?: { name: string; bin_factor?: number; serial_number?: string | null } | null;
   operator?: { full_name: string } | null;
   site?: { name: string } | null;
   delay_entries?: DelayEntry[];
@@ -38,16 +38,27 @@ interface HourlyLoadSummary {
   total_loads: number;
 }
 
+interface Breakdown {
+  id: string;
+  fleet_id: string;
+  reason: string;
+  repair_notes: string | null;
+  status: string;
+  date_in: string;
+  date_out: string | null;
+}
+
 interface MachineOperationsListProps {
   operations: MachineOperation[];
   todayLoads: HourlyLoadSummary[];
+  activeBreakdowns?: Breakdown[];
 }
 
 function formatTime(timeStr: string) {
   return timeStr.slice(0, 5); // HH:MM format
 }
 
-export function MachineOperationsList({ operations, todayLoads }: MachineOperationsListProps) {
+export function MachineOperationsList({ operations, todayLoads, activeBreakdowns = [] }: MachineOperationsListProps) {
   if (operations.length === 0) {
     return (
       <GlassCard>
@@ -120,7 +131,7 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
                 </h5>
                 <div className="space-y-2">
                   {dayOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
+                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} activeBreakdowns={activeBreakdowns} />
                   ))}
                 </div>
               </div>
@@ -134,7 +145,7 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
                 </h5>
                 <div className="space-y-2">
                   {nightOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
+                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} activeBreakdowns={activeBreakdowns} />
                   ))}
                 </div>
               </div>
@@ -149,9 +160,11 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
 function OperationCard({
   operation,
   todayLoads,
+  activeBreakdowns,
 }: {
   operation: MachineOperation;
   todayLoads: HourlyLoadSummary[];
+  activeBreakdowns: Breakdown[];
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
@@ -165,6 +178,13 @@ function OperationCard({
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
+
+  // AGENT-TRACE: Match breakdown by serial_number or machine_id
+  const machineBreakdown = activeBreakdowns?.find(
+    (b) =>
+      b.fleet_id === operation.machine_id ||
+      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
+  );
 
   // AGENT-TRACE: Calculate delay totals by category and status
   const delayEntries = operation.delay_entries || [];
@@ -199,19 +219,33 @@ function OperationCard({
             {/* Status Indicator */}
             <div
               className={`w-2 h-2 rounded-full ${
-                isComplete
-                  ? "bg-accent-green"
-                  : isInProgress
-                    ? "bg-accent-blue animate-pulse"
-                    : "bg-[var(--text-secondary)]"
+                machineBreakdown?.status === "active"
+                  ? "bg-accent-red animate-pulse"
+                  : isComplete
+                    ? "bg-accent-green"
+                    : isInProgress
+                      ? "bg-accent-blue animate-pulse"
+                      : "bg-[var(--text-secondary)]"
               }`}
             />
 
             {/* Machine & Details */}
             <div>
-              <p className="text-[var(--text-heading)] font-medium">
-                {operation.machine?.name || "Unknown Machine"}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-[var(--text-heading)] font-medium">
+                  {operation.machine?.name || "Unknown Machine"}
+                </p>
+                {machineBreakdown && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                    machineBreakdown.status === 'active' 
+                      ? "bg-accent-red/10 text-accent-red" 
+                      : "bg-accent-green/10 text-accent-green"
+                  }`}>
+                    <AlertCircle size={12} />
+                    {machineBreakdown.status === 'active' ? 'Active Breakdown' : 'Repaired'}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-3 mt-0.5 text-xs text-[var(--text-muted)]">
                 <span>{operation.operator?.full_name || "No Operator"}</span>
                 <span className="text-[var(--border-emphasis)]">|</span>
@@ -245,6 +279,23 @@ function OperationCard({
             </div>
           </div>
         </div>
+
+        {/* Breakdown Summary */}
+        {machineBreakdown && (
+          <div className="pt-2 border-t border-[var(--border-default)]">
+            <div className="flex items-start gap-2 text-xs">
+              <AlertCircle size={14} className={machineBreakdown.status === 'active' ? "text-accent-red mt-0.5 shrink-0" : "text-accent-green mt-0.5 shrink-0"} />
+              <div>
+                <p className={`font-medium ${machineBreakdown.status === 'active' ? 'text-accent-red' : 'text-accent-green'}`}>
+                  Engineering Breakdown: {machineBreakdown.reason}
+                </p>
+                {machineBreakdown.repair_notes && (
+                  <p className="text-[var(--text-muted)] mt-0.5">{machineBreakdown.repair_notes}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Delay Summary */}
         {delayEntries.length > 0 && (
