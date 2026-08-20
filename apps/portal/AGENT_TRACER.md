@@ -1,5 +1,17 @@
 # Portal Agent Tracer
 
+## 2026-08-18 - MonitoringMap Deck.GL & MapLibre Optimization
+
+- **Purpose**: Eliminate frame-drop re-render overhead in `MonitoringMap.tsx` during high-frequency (60 FPS) pan, zoom, and drag interactions.
+- **Changes**:
+  1. `apps/portal/components/monitoring/MonitoringMap.tsx`:
+     - Added static `LEVEL_RGBA_COLORS` map to replace runtime hex string slicing and `parseInt` on every data point per frame.
+     - Memoized deck.gl `layers` with `useMemo` dependent on `[deformationReadings, onReadingClick]` so layer instances are preserved during `viewState` updates.
+     - Memoized `mapStyle` object with `useMemo` dependent on `[tileUrl, meta?.attribution]` to avoid MapLibre style object diffing on every frame.
+     - Memoized event callbacks `handleViewStateChange` and `getCursor` with `useCallback`.
+- **Verification**: Ran `pnpm --filter portal test` (84 test suites / 656 tests passing).
+- **What the Next Agent Should Know**: Interactive map components using Deck.GL and MapLibre re-render on every animation frame during user drag/zoom. Always memoize `layers` and `mapStyle` objects and precompute color tuples to maintain 60 FPS performance.
+
 ## 2026-08-18: DepartmentCard Quick Actions Micro-Animations & Styling Enhancement
 
 - **Purpose**: Enhance `DepartmentCard.tsx` quick action pills with dynamic micro-animations, active glow feedback, and smooth icon transitions.
