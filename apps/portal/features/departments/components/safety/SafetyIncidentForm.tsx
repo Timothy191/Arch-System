@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { getCurrentShift, triggerWorkflow } from "@repo/utils";
+import { getCurrentShift } from "@repo/utils";
+import { inngest, safetyIncidentEvent } from "@repo/utils/inngest";
 import { useRouter } from "next/navigation";
 import { revalidateRSC } from "@/app/actions";
 
@@ -113,14 +114,17 @@ export function SafetyIncidentForm({
       // Revalidate cached RSC data
       revalidateRSC(["table:safety_incidents"]).catch(() => {});
 
-      // Trigger n8n workflow for safety alert
-      triggerWorkflow("safety-incident", {
-        department_id: departmentId,
-        severity_id: formData.severityId,
-        reported_by: employee?.id,
-        incident_date: today,
-        description: formData.description,
-      });
+      // Dispatch Inngest event for safety alert
+      inngest.send({
+        name: safetyIncidentEvent,
+        data: {
+          department_id: departmentId,
+          severity_id: formData.severityId,
+          reported_by: employee?.id,
+          incident_date: today,
+          description: formData.description,
+        },
+      }).catch(() => {});
 
       setFormData({
         incidentType: "",

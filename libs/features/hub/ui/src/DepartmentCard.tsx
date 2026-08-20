@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useTransition, type ComponentType } from "react";
 import {
+  Activity,
   ArrowUpRight,
   Bookmark,
   CreditCard,
@@ -23,6 +24,7 @@ import { Sparkline } from "./Sparkline";
 import { toast } from "sonner";
 
 const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
+  Activity,
   Drill: Pickaxe,
   Factory,
   ShieldCheck,

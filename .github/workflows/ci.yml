@@ -108,6 +108,29 @@ jobs:
       - name: Run Policy Check
         run: pnpm policy:check
 
+  # HTML Meta Tags Check job - runs in parallel
+  html-meta-check:
+    name: HTML Meta Tags Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run HTML Meta Tags Check
+        run: pnpm html:check
+
   # Markdown Lint job - runs in parallel
   md-lint:
     name: Markdown Lint
@@ -497,6 +520,7 @@ jobs:
         security-audit,
         knip,
         policy-check,
+        html-meta-check,
         md-lint,
         lint-type-check,
         token-css-lint,

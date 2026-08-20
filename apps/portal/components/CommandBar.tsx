@@ -22,7 +22,6 @@ import {
   Settings,
   LogOut,
   User,
-  Workflow,
   Bot,
 } from "lucide-react";
 
@@ -130,13 +129,6 @@ const NAV_COMMANDS: CommandItem[] = [
 ];
 
 const TOOLS_COMMANDS: CommandItem[] = [
-  {
-    id: "tool-n8n",
-    label: "n8n",
-    href: `${urls.api}`,
-    category: "Tools",
-    icon: <Workflow className="w-4 h-4" />,
-  },
   {
     id: "tool-flowise",
     label: "Flowise",

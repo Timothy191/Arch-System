@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TURBO_TELEMETRY_DISABLED: 1
+      NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci

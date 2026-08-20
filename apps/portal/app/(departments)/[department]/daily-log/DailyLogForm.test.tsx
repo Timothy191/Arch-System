@@ -14,12 +14,19 @@ jest.mock("sonner", () => ({
   },
 }));
 
+import { toast } from "sonner";
+
 const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
 
 describe("DailyLogForm", () => {
+  const mockSingle = jest.fn().mockResolvedValue({ data: { id: "log-1" }, error: null });
+  const mockSelect = jest.fn().mockReturnValue({ single: mockSingle });
+  const mockInsert = jest.fn().mockReturnValue({ select: mockSelect });
+
   const mockSupabase = {
-    from: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockResolvedValue({ error: null }),
+    from: jest.fn().mockReturnValue({
+      insert: mockInsert,
+    }),
     auth: {
       getUser: jest.fn().mockResolvedValue({ data: { user: { id: "test-user-id" } } }),
     },
@@ -27,6 +34,10 @@ describe("DailyLogForm", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSingle.mockResolvedValue({ data: { id: "log-1" }, error: null });
+    mockSelect.mockReturnValue({ single: mockSingle });
+    mockInsert.mockReturnValue({ select: mockSelect });
+    mockSupabase.from.mockReturnValue({ insert: mockInsert });
     createBrowserSupabaseClient.mockReturnValue(mockSupabase);
   });
 
@@ -60,9 +71,6 @@ describe("DailyLogForm", () => {
   it("submits the form successfully", async () => {
     render(<DailyLogForm {...props} />);
 
-    // Fill out the form (we need to interact with the actual form elements)
-    // Note: This is simplified since we're using react-hook-form
-
     const submitButton = screen.getByRole("button", {
       name: /save daily log/i,
     });
@@ -78,12 +86,12 @@ describe("DailyLogForm", () => {
     // Wait for success
     await waitFor(() => {
       expect(mockSupabase.from).toHaveBeenCalledWith("daily_logs");
-      expect(mockSupabase.from().insert).toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
 
-    // Should show success message
+    // Should show success message via toast
     await waitFor(() => {
-      expect(screen.getByText(/log saved successfully/i)).toBeInTheDocument();
+      expect(toast.success).toHaveBeenCalledWith("Daily log saved successfully");
     });
 
     // Button should be enabled again
@@ -93,7 +101,8 @@ describe("DailyLogForm", () => {
 
   it("handles submission errors", async () => {
     // Mock an error
-    mockSupabase.from().insert.mockResolvedValueOnce({
+    mockSingle.mockResolvedValueOnce({
+      data: null,
       error: { message: "Database error" },
     });
 
@@ -111,12 +120,12 @@ describe("DailyLogForm", () => {
     // Wait for error
     await waitFor(() => {
       expect(mockSupabase.from).toHaveBeenCalledWith("daily_logs");
-      expect(mockSupabase.from().insert).toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
 
-    // Should show error message
+    // Should show error message via toast
     await waitFor(() => {
-      expect(screen.getByText(/failed to save log/i)).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith("Failed to save daily log", expect.anything());
     });
 
     // Button should be enabled again

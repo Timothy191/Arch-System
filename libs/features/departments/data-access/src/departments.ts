@@ -24,6 +24,23 @@ export interface Department {
 
 export const DEPARTMENTS: Department[] = [
   {
+    name: "overview",
+    displayName: "System Overview",
+    route: "/overview",
+    icon: "Activity",
+    description: "System topology, architectural maps & live audit compliance",
+    color: "blue",
+    type: "standard",
+    status: "active",
+    gridSpan: "md:col-span-1 xl:col-span-1",
+    stats: { label: "Score", value: "100%" },
+    trend: [98, 98, 99, 99, 100, 100, 100, 100],
+    actions: [
+      { label: "Overview", href: "/overview" },
+      { label: "Audit Reports", href: "/overview?tab=audit" },
+    ],
+  },
+  {
     name: "drilling",
     displayName: "Drilling",
     route: "/drilling",

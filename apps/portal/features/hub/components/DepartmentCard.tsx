@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useTransition } from "react";
 import {
+  Activity,
   ArrowUpRight,
   Bookmark,
   CreditCard,
@@ -23,6 +25,7 @@ import { Sparkline } from "./Sparkline";
 import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Activity,
   Drill: Pickaxe,
   Factory,
   ShieldCheck,
@@ -75,6 +78,7 @@ interface DepartmentCardProps {
 }
 
 export function DepartmentCard({ department, index }: DepartmentCardProps) {
+  const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
 
@@ -130,12 +134,16 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           </div>
         )}
 
-        {/* Stretched client-side Link covering the entire card */}
+        {/* Stretched client-side Link with proper useTransition */}
         <Link
           href={route}
           prefetch={true}
-          onClick={() => {
-            startTransition(() => {});
+          onClick={(e) => {
+            e.preventDefault();
+            // Use useTransition for smoother navigation with loading state
+            startTransition(() => {
+              router.push(route);
+            });
           }}
           className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[24px]"
           aria-label={`Open ${department.displayName} department`}

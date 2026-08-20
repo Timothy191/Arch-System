@@ -128,15 +128,18 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         // Clear local cache on successful commit
         clearDraft();
 
-        // Trigger n8n workflow for breakdown alert
-        import("@repo/utils").then(({ triggerWorkflow }) => {
-          triggerWorkflow("machine-breakdown", {
-            department_id: departmentId,
-            fleet_id: selectedMachine.serial_number || selectedMachine.id,
-            machine_type: selectedMachine.machine_type,
-            reason,
-            status: "active",
-          });
+        // Dispatch Inngest event for breakdown alert
+        import("@repo/utils/inngest").then(({ inngest, machineBreakdownEvent }) => {
+          inngest.send({
+            name: machineBreakdownEvent,
+            data: {
+              department_id: departmentId,
+              fleet_id: selectedMachine.serial_number || selectedMachine.id,
+              machine_type: selectedMachine.machine_type,
+              reason,
+              status: "active",
+            },
+          }).catch(() => {});
         });
       } catch (err) {
         setMessage({ type: "error", text: "Failed to book in machine." });

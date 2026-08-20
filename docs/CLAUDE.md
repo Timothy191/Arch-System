@@ -53,6 +53,7 @@ Never edit `packages/supabase/supabase/migrations/` directly (PreToolUse hook bl
 - Git: no writes without user permission; never `--no-verify`; no force-push to `master`.
 - Heavy exploration → subagents; compact at task boundaries (~50% context).
 - Reporecall: use injected context first; search only to fill gaps.
+- **Quota extension**: Always apply techniques to maximize daily quota — subagent offloading, targeted file slicing, grep/glob before reads, compact context at boundaries, prompt caching, and high-signal output without filler.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->

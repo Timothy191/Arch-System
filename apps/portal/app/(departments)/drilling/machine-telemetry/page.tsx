@@ -26,6 +26,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import { RealtimeDrillTelemetryStream } from "./RealtimeDrillTelemetryStream";
 
 export const dynamic = "force-dynamic";
 
@@ -248,6 +249,9 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
           <p className="text-2xl font-bold text-accent-red mt-1">{totalAlerts}</p>
         </GlassCard>
       </div>
+
+      {/* Real-time SSE Stream Subscriber */}
+      <RealtimeDrillTelemetryStream />
 
       {/* Monthly Availability & Utilization Summary (auto-built from drill_operations) */}
       <GlassCard className="overflow-hidden p-0">

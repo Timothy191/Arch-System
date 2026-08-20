@@ -1,5 +1,9 @@
 {
   "name": "features-analytics-data-access",
-  "tags": ["scope:analytics", "type:data-access", "scope:feature"],
+  "tags": [
+    "scope:analytics",
+    "type:data-access",
+    "scope:feature"
+  ],
   "projectType": "library"
 }

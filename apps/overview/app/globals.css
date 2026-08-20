@@ -30,7 +30,7 @@
 
   .react-flow__node.selected {
     border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2);
+    box-shadow: 0 0 0 2px var(--border-emphasis);
   }
 
   .react-flow__edge-path {
@@ -76,10 +76,5 @@
 
   .react-flow__attribution {
     display: none;
-  }
-
-  /* Tab active state */
-  [data-state="active"] {
-    color: var(--accent-blue);
   }
 }

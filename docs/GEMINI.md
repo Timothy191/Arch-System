@@ -61,9 +61,12 @@ All AI agents MUST conclude every response with the following standardized secti
    - **Tokens Reused from cached**: Tokens reused across prompt turns via system prompt prefix caching.
    - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
 3. **Suggested Next Steps (3 options)**:
+   - Include `@[path]` references (e.g., `@[apps/portal]`, `@[packages/database]`) to auto-attach workspace directory metadata for instant zero-search inspection.
+   - Embed relevant slash commands (e.g., `/goal`, `/plan`, `/schedule`, `/grill-me`, `/learn`) within recommendations.
    - **Option 1**: Immediate operational or functional next step.
    - **Option 2**: Verification, test suite, or quality gate next step.
    - **Option 3**: Architecture, hardening, or performance optimization next step.
+4. **Tip**: Contextual tips based on past interaction history on how to better prompt the agent, use system prompts/slash commands, or optimize tool execution to improve output quality.
 
 ### Token Conservation & High-Efficiency Context Engineering (MANDATORY RULE)
 

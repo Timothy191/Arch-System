@@ -13,3 +13,5 @@ export const aiGenerateEmbeddingEvent = "ai/generate-embedding";
 export const aiMemoryPersistEvent = "ai/memory-persist";
 export const shiftRolloverNotificationEvent = "notifications/shift-rollover";
 export const dailyPdfReportEvent = "reports/daily-pdf";
+export const machineBreakdownEvent = "engineering/breakdown.logged";
+export const safetyIncidentEvent = "safety/incident.reported";

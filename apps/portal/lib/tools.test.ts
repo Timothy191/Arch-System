@@ -87,12 +87,9 @@ describe("getTools", () => {
 });
 
 describe("EXTERNAL_TOOLS", () => {
-  const originalN8N = process.env.N8N_URL;
   const originalFlowise = process.env.FLOWISE_URL;
 
   afterEach(() => {
-    if (originalN8N === undefined) delete process.env.N8N_URL;
-    else process.env.N8N_URL = originalN8N;
     if (originalFlowise === undefined) delete process.env.FLOWISE_URL;
     else process.env.FLOWISE_URL = originalFlowise;
   });
@@ -108,18 +105,14 @@ describe("EXTERNAL_TOOLS", () => {
   }
 
   it("defaults to local URLs", () => {
-    delete process.env.N8N_URL;
     delete process.env.FLOWISE_URL;
     const tools = loadExternalTools();
-    expect(tools.find((t) => t.name === "n8n")?.url).toBe("http://localhost:5678");
     expect(tools.find((t) => t.name === "flowise")?.url).toBe("http://localhost:3001");
   });
 
   it("honors environment variable overrides", () => {
-    process.env.N8N_URL = "https://n8n.example.com";
     process.env.FLOWISE_URL = "https://flowise.example.com";
     const tools = loadExternalTools();
-    expect(tools.find((t) => t.name === "n8n")?.url).toBe("https://n8n.example.com");
     expect(tools.find((t) => t.name === "flowise")?.url).toBe("https://flowise.example.com");
   });
 });

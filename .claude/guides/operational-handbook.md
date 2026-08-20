@@ -317,7 +317,7 @@ Additional tools:
 | Hook       | Action                                                        |
 | ---------- | ------------------------------------------------------------- |
 | pre-commit | `pnpm lint-staged` (ESLint fix → Prettier write → secretlint) |
-| pre-push   | `pnpm turbo run lint type-check` (filtered to portal)         |
+| pre-push   | `pnpm nx run-many -t lint type-check` (filtered to portal)         |
 | commit-msg | `pnpm commitlint` (conventional commits enforced)             |
 
 ### lint-staged

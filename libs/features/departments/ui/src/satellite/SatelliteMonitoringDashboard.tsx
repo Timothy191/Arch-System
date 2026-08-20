@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { SARLayerPanel } from "./SARLayer";
+import { RealtimeInSARStream } from "./RealtimeInSARStream";
 import { HyperspectralLayer, type SpectralComposite } from "./HyperspectralLayer";
 import { HighResPanel } from "./HighResPanel";
 import { DeformationSummary } from "./DeformationAlertCard";
@@ -284,7 +285,12 @@ export function SatelliteMonitoringDashboard({
           {activeTab === "overview" && (
             <DeformationSummary readings={readings} onReadingClick={setSelectedReading} />
           )}
-          {activeTab === "sar" && <SARLayerPanel scenes={[]} readings={readings} />}
+          {activeTab === "sar" && (
+            <div className="space-y-4">
+              <RealtimeInSARStream />
+              <SARLayerPanel scenes={[]} readings={readings} />
+            </div>
+          )}
           {activeTab === "hyperspectral" && (
             <HyperspectralLayer
               scenes={[]}

@@ -1,6 +1,7 @@
 module.exports = {
   testEnvironment: "jsdom",
   forceExit: true,
+  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
   transform: {
     "^.+\\.(t|j)sx?$": [

@@ -183,15 +183,15 @@ const PROJECT_MILESTONES: MilestoneSpend[] = [
   },
   {
     period: "Week 9 (Current)",
-    dateRange: "Aug 10 – Aug 18, 2026",
-    milestone: "Overview Visualizer, Codebase Maps, Videos & Production Polish",
-    tokensUsed: "2.32M",
-    tokensCached: "6.30M",
-    usdCost: 35.39,
-    zarCost: 655.6,
-    zarSaved: 1560.0,
-    commits: 9,
-    bugsFixed: 9,
+    dateRange: "Aug 10 – Aug 20, 2026",
+    milestone: "Overview Visualizer, Versioned Audits, Codebase Maps Generator & Telemetry",
+    tokensUsed: "2.56M",
+    tokensCached: "7.14M",
+    usdCost: 37.21,
+    zarCost: 689.31,
+    zarSaved: 1624.2,
+    commits: 14,
+    bugsFixed: 12,
   },
 ];
 
@@ -287,6 +287,58 @@ const AGENT_TASK_FEED: AgentTaskLog[] = [
     details:
       "Rendered 1080p Executive Briefing and Technical Deep-Dive video walkthroughs in docs/videos/.",
   },
+  {
+    id: "TASK-008",
+    timestamp: "10:44 - 10:46",
+    agent: "Antigravity",
+    role: "Audit Suite Architect",
+    action: "Audit Suite Restructuring & Versioned Log Generation",
+    tokensUsed: 3950,
+    tokensCached: 28400,
+    zarCost: 0.54,
+    status: "Completed",
+    details:
+      "Created tools/run-audit.cjs orchestrator, outputting versioned log-N(YY-MM-DD) folders containing results.md, required-actions.md, design-report.md, and rls-report.md.",
+  },
+  {
+    id: "TASK-009",
+    timestamp: "10:46 - 10:48",
+    agent: "Antigravity",
+    role: "Portal Dashboard Engineer",
+    action: "System Overview Department Card & Overview Page Route",
+    tokensUsed: 2800,
+    tokensCached: 32200,
+    zarCost: 0.39,
+    status: "Completed",
+    details:
+      "Added System Overview department card to Hub dashboard, built /overview page route in portal, and wired /api/audit endpoints for report viewing.",
+  },
+  {
+    id: "TASK-010",
+    timestamp: "10:52 - 10:54",
+    agent: "Antigravity",
+    role: "Codebase Maps Automation Engineer",
+    action: "Automated Codebase Maps Generator & Manifest Indexer",
+    tokensUsed: 2400,
+    tokensCached: 35800,
+    zarCost: 0.33,
+    status: "Completed",
+    details:
+      "Built tools/generate-codebase-maps.cjs, versioned codebase-maps/log-N(YY-MM-DD)/ folders, manifest.json metadata index, and /api/codebase-maps route.",
+  },
+  {
+    id: "TASK-011",
+    timestamp: "10:55 - 10:57",
+    agent: "Antigravity",
+    role: "Telemetry & Performance Analyst",
+    action: "Monitoring Dashboard Model Telemetry & ZAR Cost Update",
+    tokensUsed: 2100,
+    tokensCached: 38500,
+    zarCost: 0.29,
+    status: "Completed",
+    details:
+      "Updated AgenticMonitor dashboard with latest model metrics (Gemini 3.6 Flash / Claude 3.7), token cache hit ratios, coding time, and ZAR expenditure.",
+  },
 ];
 
 export default function AgenticMonitor() {
@@ -297,34 +349,34 @@ export default function AgenticMonitor() {
 
   // All-Time Project Metrics (Day 1 - Today / 9 Weeks)
   const lifetime = {
-    tokensUsed: 18420000,
-    tokensCached: 54800000,
-    tokensReused: 49200000,
-    tokensSaved: 16500000,
-    usdCost: 260.56,
-    zarCost: 4825.6,
-    zarSaved: 14280.0,
-    codingTime: "142h 15m",
-    totalCommits: 77,
-    bugsFixed: 68,
-    qualityGateRuns: 184,
-    cacheHitRatio: 84.6,
+    tokensUsed: 18665600,
+    tokensCached: 55642000,
+    tokensReused: 49998000,
+    tokensSaved: 16912000,
+    usdCost: 262.38,
+    zarCost: 4859.31,
+    zarSaved: 14344.2,
+    codingTime: "147h 30m",
+    totalCommits: 82,
+    bugsFixed: 71,
+    qualityGateRuns: 191,
+    cacheHitRatio: 85.1,
   };
 
-  // Current Session Metrics
+  // Current Session Metrics (Aug 20, 2026)
   const session = {
-    tokensUsed: 188400,
-    tokensCached: 632500,
-    tokensReused: 591000,
-    tokensSaved: 345000,
-    usdCost: 1.44,
-    zarCost: 26.67,
-    zarSaved: 49.1,
-    codingTime: "4h 42m",
-    totalCommits: 9,
-    bugsFixed: 9,
-    qualityGateRuns: 4,
-    cacheHitRatio: 91.4,
+    tokensUsed: 245600,
+    tokensCached: 842000,
+    tokensReused: 798000,
+    tokensSaved: 412000,
+    usdCost: 1.82,
+    zarCost: 33.71,
+    zarSaved: 64.2,
+    codingTime: "5h 15m",
+    totalCommits: 14,
+    bugsFixed: 12,
+    qualityGateRuns: 7,
+    cacheHitRatio: 92.4,
   };
 
   const currentMetrics = scope === "all-time" ? lifetime : session;

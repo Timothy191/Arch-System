@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, Suspense, lazy } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Network, Building2, Layers, Database, Server, BookOpen, Activity } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
+import { Logo } from "@repo/ui/Logo";
+import { Network, Building2, Layers, Database, Server, BookOpen, ShieldCheck } from "lucide-react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
@@ -12,14 +13,15 @@ const TechStack = lazy(() => import("./sections/TechStack"));
 const DatabaseSchema = lazy(() => import("./sections/DatabaseSchema"));
 const DocumentationMaps = lazy(() => import("./sections/DocumentationMaps"));
 const AgenticMonitor = lazy(() => import("./sections/AgenticMonitor"));
+const AuditReportsSection = lazy(() => import("./sections/AuditReportsSection"));
 
 // Loading fallback
 function SectionLoader() {
   return (
     <div className="flex items-center justify-center h-[calc(100vh-200px)] min-h-[400px]">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-2 border-[#3ecf8e] border-t-transparent rounded-full animate-spin" />
-        <span className="text-[#b4b4b4] text-sm">Loading...</span>
+        <div className="w-8 h-8 border-2 border-[var(--accent-blue)] border-t-transparent rounded-full animate-spin" />
+        <span className="text-[var(--text-secondary)] text-sm">Loading...</span>
       </div>
     </div>
   );
@@ -29,28 +31,38 @@ export default function OverviewPage() {
   const [activeTab, setActiveTab] = useState("architecture");
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f]">
-      {/* Header */}
-      <header className="border-b border-[#363636] bg-[#171717]/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-6 py-4">
+    <main className="min-h-screen bg-[var(--bg-primary)]">
+      {/* Header with Official Arch Systems Branding */}
+      <header className="border-b border-[var(--border-subtle)] bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-card">
+        <div className="max-w-[1600px] mx-auto px-6 py-3.5">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold text-[#fafafa]">
-                Arch Systems
-                <span className="text-[#3ecf8e]"> Overview</span>
-              </h1>
-              <p className="text-xs text-[#898989] mt-0.5">
-                Opencast Coal Mine Business Portal — Visual Documentation
-              </p>
+            <div className="flex items-center gap-3">
+              <Logo className="w-8 h-8 text-[var(--accent-blue)]" />
+              <div>
+                <h1 className="text-lg font-bold tracking-tight text-[var(--text-heading)] flex items-center gap-2">
+                  Arch Systems
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-accent-blue/10 text-[var(--accent-blue)] border border-accent-blue/20">
+                    Overview Portal
+                  </span>
+                </h1>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Opencast Coal Mine Operations Portal — System Architecture & Topology
+                </p>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-4 text-xs text-[#898989]">
-              <span>Next.js 16</span>
-              <span className="w-1 h-1 rounded-full bg-[#363636]" />
-              <span>Supabase</span>
-              <span className="w-1 h-1 rounded-full bg-[#363636]" />
-              <span>Redis Cluster</span>
-              <span className="w-1 h-1 rounded-full bg-[#363636]" />
-              <span>7 Departments</span>
+            <div className="hidden md:flex items-center gap-3 text-xs text-[var(--text-muted)] font-mono">
+              <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                Next.js 16
+              </span>
+              <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                Supabase
+              </span>
+              <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                Redis Cluster
+              </span>
+              <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
+                8 Departments
+              </span>
             </div>
           </div>
         </div>
@@ -59,10 +71,10 @@ export default function OverviewPage() {
       {/* Tabs Navigation */}
       <div className="max-w-[1600px] mx-auto px-6 py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-[#171717] border border-[#363636] p-1 h-auto flex flex-wrap gap-1">
+          <TabsList className="bg-bg-secondary border border-default p-1 h-auto flex flex-wrap gap-1">
             <TabsTrigger
               value="architecture"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <Network className="w-4 h-4" />
               <span className="hidden sm:inline">System Architecture</span>
@@ -70,7 +82,7 @@ export default function OverviewPage() {
             </TabsTrigger>
             <TabsTrigger
               value="backend"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <Server className="w-4 h-4" />
               <span className="hidden sm:inline">Backend Connections</span>
@@ -78,7 +90,7 @@ export default function OverviewPage() {
             </TabsTrigger>
             <TabsTrigger
               value="departments"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <Building2 className="w-4 h-4" />
               <span className="hidden sm:inline">Department Breakdown</span>
@@ -86,7 +98,7 @@ export default function OverviewPage() {
             </TabsTrigger>
             <TabsTrigger
               value="techstack"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <Layers className="w-4 h-4" />
               <span className="hidden sm:inline">Tech Stack</span>
@@ -94,7 +106,7 @@ export default function OverviewPage() {
             </TabsTrigger>
             <TabsTrigger
               value="database"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <Database className="w-4 h-4" />
               <span className="hidden sm:inline">Database Schema</span>
@@ -102,23 +114,29 @@ export default function OverviewPage() {
             </TabsTrigger>
             <TabsTrigger
               value="docs"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Docs & Maps</span>
               <span className="sm:hidden">Docs</span>
             </TabsTrigger>
             <TabsTrigger
-              value="agentic"
-              className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-[#242424] data-[state=active]:text-[#3ecf8e]"
+              value="audit"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
             >
-              <Activity className="w-4 h-4" />
-              <span className="hidden sm:inline">Agentic Monitor (ZAR)</span>
-              <span className="sm:hidden">Monitor</span>
+              <ShieldCheck className="w-4 h-4" />
+              <span className="hidden sm:inline">Audit & Compliance</span>
+              <span className="sm:hidden">Audit</span>
             </TabsTrigger>
           </TabsList>
 
           <div className="mt-6">
+            <TabsContent value="audit" className="m-0">
+              <Suspense fallback={<SectionLoader />}>
+                <AuditReportsSection />
+              </Suspense>
+            </TabsContent>
+
             <TabsContent value="architecture" className="m-0">
               <Suspense fallback={<SectionLoader />}>
                 <SystemArchitecture />
@@ -165,15 +183,15 @@ export default function OverviewPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-[#363636] mt-12">
+      <footer className="border-t border-default mt-12">
         <div className="max-w-[1600px] mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#898989]">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-text-muted">
             <div>
               Arch Systems — Multi-departmental business portal for opencast coal mine operations
             </div>
             <div className="flex items-center gap-4">
               <span>Built with Next.js 14 + Supabase</span>
-              <span className="text-[#3ecf8e]">Visualizer v1.0</span>
+              <span className="text-accent-green">Visualizer v1.0</span>
             </div>
           </div>
         </div>

@@ -20,8 +20,7 @@
     "*.tsbuildinfo",
     "*.lock",
     ".prisma/**",
-    "**/AGENT_TRACER.md",
-    "apps/cloudflare-workflows/worker-configuration.d.ts"
+    "**/AGENT_TRACER.md"
   ],
   "ignoreRegExpList": [
     "sb_publishable_[A-Za-z0-9_]+",
@@ -37,6 +36,9 @@
     "telematics",
     "cicd",
     "mtbf",
-    "delamination"
+    "delamination",
+    "insar",
+    "highwall",
+    "upserts"
   ]
 }

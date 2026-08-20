@@ -64,6 +64,13 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 ## 📖 Documentation
 
+### Unified Documentation Center
+
+- **[documentation/README.md](documentation/README.md)**: New unified documentation center with consolidated structure
+  - **[documentation/03-audit-reports/](documentation/03-audit-reports/)**: Audit reports, RLS analysis, and quality compliance
+  - **[documentation/04-codebase-maps/](documentation/04-codebase-maps/)**: Codebase visualization and architecture maps
+  - **[documentation/05-wiki/](documentation/05-wiki/)**: Comprehensive technical wiki and knowledge base
+
 ### Core Documentation
 
 - **[CLAUDE.md](CLAUDE.md)**: Authoritative technical guide and conventions.
@@ -76,6 +83,7 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 - **[DEPLOYMENT.md](DEPLOYMENT.md)**: Deployment guide for all environments
 - **[GEMINI.md](GEMINI.md)**: AI-specific development conventions
 - **[SECURITY.md](SECURITY.md)**: Security policy and vulnerability reporting
+- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Comprehensive documentation index (legacy during migration)
 
 ---
 

@@ -226,68 +226,68 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_dept_created
 
 -- Delay categories: UPDATE/DELETE for admin
 DROP POLICY IF EXISTS "delay_categories_update_admin" ON delay_categories;
-CREATE POLICY "delay_categories_update_admin"
-  ON delay_categories FOR UPDATE
+DROP POLICY IF EXISTS "delay_categories_update_admin" ON delay_categories;
+CREATE POLICY "delay_categories_update_admin" ON delay_categories FOR UPDATE
   TO authenticated
   USING (public.is_admin());
 
 DROP POLICY IF EXISTS "delay_categories_delete_admin" ON delay_categories;
-CREATE POLICY "delay_categories_delete_admin"
-  ON delay_categories FOR DELETE
+DROP POLICY IF EXISTS "delay_categories_delete_admin" ON delay_categories;
+CREATE POLICY "delay_categories_delete_admin" ON delay_categories FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Report templates: UPDATE/DELETE for admin
 DROP POLICY IF EXISTS "report_templates_update_admin" ON report_templates;
-CREATE POLICY "report_templates_update_admin"
-  ON report_templates FOR UPDATE
+DROP POLICY IF EXISTS "report_templates_update_admin" ON report_templates;
+CREATE POLICY "report_templates_update_admin" ON report_templates FOR UPDATE
   TO authenticated
   USING (public.is_admin());
 
 DROP POLICY IF EXISTS "report_templates_delete_admin" ON report_templates;
-CREATE POLICY "report_templates_delete_admin"
-  ON report_templates FOR DELETE
+DROP POLICY IF EXISTS "report_templates_delete_admin" ON report_templates;
+CREATE POLICY "report_templates_delete_admin" ON report_templates FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Safety severities: INSERT/UPDATE/DELETE for admin
 DROP POLICY IF EXISTS "safety_severities_insert_admin" ON safety_severities;
-CREATE POLICY "safety_severities_insert_admin"
-  ON safety_severities FOR INSERT
+DROP POLICY IF EXISTS "safety_severities_insert_admin" ON safety_severities;
+CREATE POLICY "safety_severities_insert_admin" ON safety_severities FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "safety_severities_update_admin" ON safety_severities;
-CREATE POLICY "safety_severities_update_admin"
-  ON safety_severities FOR UPDATE
+DROP POLICY IF EXISTS "safety_severities_update_admin" ON safety_severities;
+CREATE POLICY "safety_severities_update_admin" ON safety_severities FOR UPDATE
   TO authenticated
   USING (public.is_admin());
 
 DROP POLICY IF EXISTS "safety_severities_delete_admin" ON safety_severities;
-CREATE POLICY "safety_severities_delete_admin"
-  ON safety_severities FOR DELETE
+DROP POLICY IF EXISTS "safety_severities_delete_admin" ON safety_severities;
+CREATE POLICY "safety_severities_delete_admin" ON safety_severities FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Safety incident categories: UPDATE/DELETE for admin/supervisor
 DROP POLICY IF EXISTS "safety_incident_categories_update_admin" ON safety_incident_categories;
-CREATE POLICY "safety_incident_categories_update_admin"
-  ON safety_incident_categories FOR UPDATE
+DROP POLICY IF EXISTS "safety_incident_categories_update_admin" ON safety_incident_categories;
+CREATE POLICY "safety_incident_categories_update_admin" ON safety_incident_categories FOR UPDATE
   TO authenticated
   USING (public.is_admin() OR EXISTS (
     SELECT 1 FROM employees e WHERE e.auth_id = auth.uid() AND e.role = 'supervisor'
   ));
 
 DROP POLICY IF EXISTS "safety_incident_categories_delete_admin" ON safety_incident_categories;
-CREATE POLICY "safety_incident_categories_delete_admin"
-  ON safety_incident_categories FOR DELETE
+DROP POLICY IF EXISTS "safety_incident_categories_delete_admin" ON safety_incident_categories;
+CREATE POLICY "safety_incident_categories_delete_admin" ON safety_incident_categories FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Mine blocks: DELETE for admin/supervisor
 DROP POLICY IF EXISTS "mine_blocks_delete_admin_supervisor" ON mine_blocks;
-CREATE POLICY "mine_blocks_delete_admin_supervisor"
-  ON mine_blocks FOR DELETE
+DROP POLICY IF EXISTS "mine_blocks_delete_admin_supervisor" ON mine_blocks;
+CREATE POLICY "mine_blocks_delete_admin_supervisor" ON mine_blocks FOR DELETE
   TO authenticated
   USING (public.is_admin() OR EXISTS (
     SELECT 1 FROM employees e WHERE e.auth_id = auth.uid() AND e.role = 'supervisor'
@@ -295,8 +295,8 @@ CREATE POLICY "mine_blocks_delete_admin_supervisor"
 
 -- Daily logs: UPDATE/DELETE for creator or admin
 DROP POLICY IF EXISTS "daily_logs_update_creator_or_admin" ON daily_logs;
-CREATE POLICY "daily_logs_update_creator_or_admin"
-  ON daily_logs FOR UPDATE
+DROP POLICY IF EXISTS "daily_logs_update_creator_or_admin" ON daily_logs;
+CREATE POLICY "daily_logs_update_creator_or_admin" ON daily_logs FOR UPDATE
   TO authenticated
   USING (
     EXISTS (
@@ -307,14 +307,14 @@ CREATE POLICY "daily_logs_update_creator_or_admin"
   );
 
 DROP POLICY IF EXISTS "daily_logs_delete_admin" ON daily_logs;
-CREATE POLICY "daily_logs_delete_admin"
-  ON daily_logs FOR DELETE
+DROP POLICY IF EXISTS "daily_logs_delete_admin" ON daily_logs;
+CREATE POLICY "daily_logs_delete_admin" ON daily_logs FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Machine hours: UPDATE/DELETE through parent daily_log
-CREATE POLICY "machine_hours_update_department"
-  ON machine_hours FOR UPDATE
+DROP POLICY IF EXISTS "machine_hours_update_department" ON machine_hours;
+CREATE POLICY "machine_hours_update_department" ON machine_hours FOR UPDATE
   TO authenticated
   USING (
     EXISTS (
@@ -325,14 +325,14 @@ CREATE POLICY "machine_hours_update_department"
     )
   );
 
-CREATE POLICY "machine_hours_delete_admin"
-  ON machine_hours FOR DELETE
+DROP POLICY IF EXISTS "machine_hours_delete_admin" ON machine_hours;
+CREATE POLICY "machine_hours_delete_admin" ON machine_hours FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Fuel logs: UPDATE/DELETE through parent daily_log
-CREATE POLICY "fuel_logs_update_department"
-  ON fuel_logs FOR UPDATE
+DROP POLICY IF EXISTS "fuel_logs_update_department" ON fuel_logs;
+CREATE POLICY "fuel_logs_update_department" ON fuel_logs FOR UPDATE
   TO authenticated
   USING (
     EXISTS (
@@ -343,14 +343,14 @@ CREATE POLICY "fuel_logs_update_department"
     )
   );
 
-CREATE POLICY "fuel_logs_delete_admin"
-  ON fuel_logs FOR DELETE
+DROP POLICY IF EXISTS "fuel_logs_delete_admin" ON fuel_logs;
+CREATE POLICY "fuel_logs_delete_admin" ON fuel_logs FOR DELETE
   TO authenticated
   USING (public.is_admin());
 
 -- Production logs: UPDATE/DELETE through parent daily_log
-CREATE POLICY "production_logs_update_department"
-  ON production_logs FOR UPDATE
+DROP POLICY IF EXISTS "production_logs_update_department" ON production_logs;
+CREATE POLICY "production_logs_update_department" ON production_logs FOR UPDATE
   TO authenticated
   USING (
     EXISTS (
@@ -361,8 +361,8 @@ CREATE POLICY "production_logs_update_department"
     )
   );
 
-CREATE POLICY "production_logs_delete_admin"
-  ON production_logs FOR DELETE
+DROP POLICY IF EXISTS "production_logs_delete_admin" ON production_logs;
+CREATE POLICY "production_logs_delete_admin" ON production_logs FOR DELETE
   TO authenticated
   USING (public.is_admin());
 

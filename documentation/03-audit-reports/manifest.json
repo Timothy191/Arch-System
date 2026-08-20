@@ -1,0 +1,38 @@
+[
+  {
+    "id": "log-3(26-08-20)",
+    "logNumber": 3,
+    "folderName": "log-3(26-08-20)",
+    "folderDate": "26-08-20",
+    "isoDate": "2026-08-20T10:37:08.061Z",
+    "displayDate": "8/20/2026, 10:37:08 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  },
+  {
+    "id": "log-2(26-08-20)",
+    "logNumber": 2,
+    "folderName": "log-2(26-08-20)",
+    "folderDate": "26-08-20",
+    "isoDate": "2026-08-20T09:58:04.464Z",
+    "displayDate": "8/20/2026, 9:58:04 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  },
+  {
+    "id": "log-1(26-08-20)",
+    "logNumber": 1,
+    "folderName": "log-1(26-08-20)",
+    "folderDate": "26-08-20",
+    "isoDate": "2026-08-20T09:45:17.038Z",
+    "displayDate": "8/20/2026, 9:45:17 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  }
+]

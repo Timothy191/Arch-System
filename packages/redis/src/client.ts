@@ -61,6 +61,16 @@ export async function closeRedis(): Promise<void> {
   if (client?.isOpen) {
     await client.quit();
     client = null;
+    connecting = null;
   }
-  connecting = null;
+}
+
+/**
+ * Create a new duplicate Redis client specifically for Pub/Sub subscriptions.
+ */
+export async function createRedisSubscriber(): Promise<RedisClientType> {
+  const baseClient = await getRedisClient();
+  const sub = baseClient.duplicate();
+  await sub.connect();
+  return sub;
 }

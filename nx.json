@@ -130,7 +130,8 @@
       }
     }
   },
-  "defaultBase": "master",
+  "nxCloudAccessToken": "NDllODNmNDYtZjkzYS00ZTYyLTkxNjUtNTYwODUwY2Q1OGM2fHJlYWQtd3JpdGU=",
+  "defaultBase": "main",
   "analytics": true,
   "plugins": [
     {
@@ -182,5 +183,6 @@
       "sourceTag": "scope:package",
       "notDependOnLibsWithTags": ["scope:app"]
     }
-  ]
+  ],
+  "nxCloudId": "6a86c7aa30436118802a8634"
 }

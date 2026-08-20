@@ -1,4 +1,7 @@
 {
   "name": "@repo/ui",
-  "tags": ["scope:package", "scope:package:ui"]
+  "tags": [
+    "scope:package",
+    "scope:package:ui"
+  ]
 }

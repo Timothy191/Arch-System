@@ -390,7 +390,16 @@ export function GlassCard({
         const imageData = new ImageData(data, canvasWidth, canvasHeight);
         ctx.putImageData(imageData, 0, 0);
 
-        feImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", canvas.toDataURL());
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const prevUrl = feImage.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+          if (prevUrl && prevUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(prevUrl);
+          }
+          feImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", url);
+        }, "image/png");
+
         feImage.setAttribute("width", `${finalWidth}`);
         feImage.setAttribute("height", `${finalHeight}`);
 

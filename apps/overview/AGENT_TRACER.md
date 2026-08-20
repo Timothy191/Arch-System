@@ -1,5 +1,21 @@
 # Agent Tracer - Overview App
 
+## 2026-08-20 - HTML Meta Tags Performance Optimization
+
+- **Purpose**: Fix Chrome DevTools "Character Encoding" performance insight by adding required `<meta charset="UTF-8">` declaration and viewport export to prevent browser re-parsing latency.
+- **Changes**:
+  - `app/layout.tsx`: Added `<meta charSet="UTF-8" />` in `<head>` and `export const viewport: Viewport` with responsive scaling settings (width, initialScale, min/max scale, userScalable).
+- **Verification**: `node tools/check-html-meta-tags.cjs` passes with 0 errors. All required HTML meta tags present.
+- **Performance Impact**: Eliminates browser character encoding guesswork and ensures proper mobile viewport handling.
+
+## 2026-08-20 - Arch Systems Theme & Branding Alignment
+
+- **Purpose**: Align `apps/overview` design tokens, UI components, and header branding with `apps/portal` and `@repo/theme`.
+- **Changes**:
+  - `components/ui/card.tsx`, `components/ui/badge.tsx`, `components/ui/tabs.tsx`: Replaced hardcoded dark mode hex colors (`#171717`, `#363636`, `#b4b4b4`) with `@repo/theme` OKLCH design system tokens and glass surfaces (`bg-white/75`, `backdrop-blur-xl`, `border-[var(--border-subtle)]`, `shadow-card`).
+  - `app/page.tsx`: Integrated official `Logo` vector component (`@repo/ui/Logo`), macOS Sonoma glass titlebar header (`bg-white/70 backdrop-blur-xl border-b border-[var(--border-subtle)] shadow-card`), and official Arch Systems branding badges.
+- **Verification**: `pnpm --filter arch-systems-overview type-check` and `lint` passed with 0 errors/warnings.
+
 ## 2026-08-18 - Direct Server Actions -> Supabase RLS Zero-Proxy Documentation
 
 - **Purpose**: Document the direct Server Actions $\rightarrow$ Supabase RLS flow in the Backend Connections React Flow canvas, highlighting zero-middleman latency and strict Zod runtime validation.

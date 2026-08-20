@@ -15,7 +15,7 @@
  *   4. Safe animations constraint (no animating layout properties: width, height, top, bottom, left, right, margin, padding)
  *
  * Usage: node tools/design-audit.cjs
- * Output: .audit/design-report.md
+ * Output: documentation/03-audit-reports/design-report.md
  * Exit Code: 0 on clean run, 1 if critical violations found (CI gate).
  */
 
@@ -23,7 +23,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const REPORT_DIR = path.join(ROOT, ".audit");
+const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
 const REPORT_PATH = path.join(REPORT_DIR, "design-report.md");
 
 const TARGET_DIRS = [

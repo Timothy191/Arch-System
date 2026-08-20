@@ -1,4 +1,7 @@
 {
   "name": "cms",
-  "tags": ["scope:app", "scope:app:cms"]
+  "tags": [
+    "scope:app",
+    "scope:app:cms"
+  ]
 }

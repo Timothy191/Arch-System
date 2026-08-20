@@ -2,16 +2,13 @@
   "name": "arch-systems-overview",
   "version": "1.0.0",
   "dependencies": {
-    "@radix-ui/react-tabs": "^1.1.0",
     "@repo/theme": "1.0.0",
+    "@repo/ui": "1.0.0",
     "@xyflow/react": "^12.6.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
     "lucide-react": "catalog:",
     "next": "^16.2.6",
     "react": "catalog:react19",
-    "react-dom": "catalog:react19",
-    "tailwind-merge": "^2.5.4"
+    "react-dom": "catalog:react19"
   },
   "devDependencies": {
     "@types/node": "catalog:",
@@ -27,9 +24,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev -p ${OVERVIEW_PORT:-3003}",
+    "dev": "next dev -p 3003",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "start": "next start -p ${OVERVIEW_PORT:-3003}",
+    "start": "next start -p 3003",
     "type-check": "tsc --noEmit"
   }
 }

@@ -181,7 +181,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       </aside>
 
       {/* Main content area */}
-      <main className="flex-1 overflow-auto bg-white/40 backdrop-blur-sm p-6">
+      <main className="flex-1 overflow-auto p-6">
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}

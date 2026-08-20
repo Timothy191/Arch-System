@@ -15,6 +15,7 @@
     "lint": "echo 'No lintable files in @repo/database'",
     "supabase:dev": "python3 ../../scripts/ensure_reachability.py && pnpx supabase start",
     "supabase:gen": "pnpx supabase gen types typescript --local > ../supabase/src/database.types.ts",
+    "supabase:gen:cloud": "pnpx supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc > ../supabase/src/database.types.ts",
     "supabase:push": "pnpx supabase db push",
     "supabase:reset": "pnpx supabase db reset",
     "test:migration-rollback": "node tests/migration-rollback-safety.mjs",

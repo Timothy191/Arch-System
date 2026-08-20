@@ -77,15 +77,6 @@ export async function getTools(): Promise<Tool[]> {
  */
 export const EXTERNAL_TOOLS: ExternalTool[] = [
   {
-    name: "n8n",
-    displayName: "n8n",
-    url: process.env.N8N_URL ?? "http://localhost:5678",
-    description:
-      "Workflow automation and integration platform — build no-code automations with 400+ integrations",
-    icon: "Workflow",
-    color: "#ff6d5a",
-  },
-  {
     name: "flowise",
     displayName: "Flowise",
     url: process.env.FLOWISE_URL ?? "http://localhost:3001",

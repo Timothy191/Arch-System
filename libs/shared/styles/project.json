@@ -1,6 +1,11 @@
 {
   "name": "shared-styles",
-  "tags": ["scope:package", "scope:shared", "type:styles", "scope:feature"],
+  "tags": [
+    "scope:package",
+    "scope:shared",
+    "type:styles",
+    "scope:feature"
+  ],
   "projectType": "library",
   "sourceRoot": "libs/shared/styles/src"
 }

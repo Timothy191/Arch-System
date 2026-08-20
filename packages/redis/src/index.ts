@@ -1,4 +1,4 @@
-export { getRedisClient, closeRedis } from "./client";
+export { getRedisClient, createRedisSubscriber, closeRedis } from "./client";
 export {
   cacheGet,
   cacheGetWithStats,

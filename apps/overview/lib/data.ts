@@ -427,7 +427,7 @@ export const TECH_STACK = [
         version: "",
         description: "Package manager with workspaces",
       },
-      { name: "Turborepo", version: "", description: "Monorepo build system" },
+      { name: "Nx 22", version: "22.7.5", description: "Monorepo build system & task graph" },
       {
         name: "Docker",
         version: "",

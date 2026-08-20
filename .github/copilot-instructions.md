@@ -55,7 +55,7 @@ Run `pnpm quality` before proposing a merge.
 
 ## 2) High-level architecture
 
-- **Monorepo**: pnpm workspaces + Nx 22 (`nx run-many` is the entry point; `turbo.json`/`nx.json` orchestrate the pipeline).
+- **Monorepo**: pnpm workspaces + Nx 22 (`nx run-many` is the entry point; `nx.json` orchestrates the pipeline).
 - **Apps**:
   - `apps/portal` — Next.js 15+ (App Router), React 19. Server Actions and API routes co-located with features. `:3000`.
   - `apps/cms` — Payload CMS v3 (headless content service).

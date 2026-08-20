@@ -1,4 +1,7 @@
 {
   "name": "@repo/errors",
-  "tags": ["scope:package", "scope:package:errors"]
+  "tags": [
+    "scope:package",
+    "scope:package:errors"
+  ]
 }

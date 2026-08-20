@@ -99,10 +99,7 @@ export function HeroRotator({
         {panels.map((panel, idx) => (
           <div
             key={panel.id}
-            className={cn(
-              "w-full shrink-0 flex flex-col justify-start transition-opacity duration-700",
-              Math.abs(activeIndex - idx) <= 1 ? "opacity-100" : "opacity-0",
-            )}
+            className="w-full shrink-0 flex flex-col justify-start"
           >
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-arch-text-primary text-balance">

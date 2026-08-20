@@ -162,6 +162,7 @@ audit_report.md
 cleanup-backup/
 metadata.json
 .audit/
+documentation/03-audit-reports/logs/
 
 # Submodules (tools/devdocs not properly configured)
 tools/devdocs

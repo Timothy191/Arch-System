@@ -73,8 +73,7 @@ export default {
           part === "scratch" ||
           part === "docs" ||
           part === "e2e" ||
-          part === "k6" ||
-          part === "cloudflare-workflows",
+          part === "k6",
       );
       return !isIgnored;
     });

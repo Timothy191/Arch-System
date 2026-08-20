@@ -1,4 +1,7 @@
 {
   "name": "@repo/contract",
-  "tags": ["scope:package", "scope:package:contract"]
+  "tags": [
+    "scope:package",
+    "scope:package:contract"
+  ]
 }

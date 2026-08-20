@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 import type { Metadata } from "next";
+import { prewarmDepartmentCache } from "@/lib/prewarm-cache";
 
 export async function generateMetadata({ params }: { params: Promise<any> }): Promise<Metadata> {
   const { department } = await params;
@@ -25,6 +26,12 @@ export default async function DepartmentRootLayout({
   if (!dept) notFound();
 
   const tabs = getDepartmentTabs(department);
+
+  // Pre-warm department cache in background (non-blocking)
+  // This eliminates cache miss latency on first visit
+  prewarmDepartmentCache().catch(() => {
+    // Silently ignore cache prewarm failures - cache will be populated on-demand
+  });
 
   return (
     <>

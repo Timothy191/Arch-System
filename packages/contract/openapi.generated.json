@@ -571,6 +571,91 @@
         }
       }
     },
+    "/api/telemetry/satellite/insar": {
+      "post": {
+        "summary": "Ingest InSAR GeoTIFF Deformation Telemetry",
+        "description": "Ingests spatial slope displacement metrics from Sentinel-1 / TerraSAR-X GeoTIFF rasters into PostGIS database, Redis cache, and streams live to SAR dashboards.",
+        "tags": ["Telemetry"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "department_id",
+                  "satellite_name",
+                  "acquisition_date",
+                  "reference_date",
+                  "location_name",
+                  "latitude",
+                  "longitude",
+                  "displacement_mm",
+                  "coherence_index"
+                ],
+                "properties": {
+                  "department_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "satellite_name": {
+                    "type": "string",
+                    "enum": ["Sentinel-1", "TerraSAR-X", "Capella", "PAZ"]
+                  },
+                  "acquisition_date": {
+                    "type": "string"
+                  },
+                  "reference_date": {
+                    "type": "string"
+                  },
+                  "location_name": {
+                    "type": "string"
+                  },
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  },
+                  "displacement_mm": {
+                    "type": "number"
+                  },
+                  "coherence_index": {
+                    "type": "number"
+                  },
+                  "cog_url": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deformation point ingested and evaluated"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "500": {
+            "description": "Ingestion error"
+          }
+        }
+      }
+    },
+    "/api/telemetry/satellite/insar/stream": {
+      "get": {
+        "summary": "Real-Time InSAR Deformation Telemetry SSE Stream",
+        "description": "Server-Sent Events (SSE) stream subscribing to Redis pub/sub channel `satellite:insar:stream` for live GeoTIFF deformation point updates.",
+        "tags": ["Telemetry"],
+        "responses": {
+          "200": {
+            "description": "SSE event stream initialized"
+          }
+        }
+      }
+    },
     "/api/telemetry/push": {
       "post": {
         "summary": "Push telemetry data to SCADA",
@@ -695,6 +780,90 @@
           },
           "500": {
             "description": "Internal server error or SCADA unreachable"
+          }
+        }
+      }
+    },
+    "/api/telemetry/drilling": {
+      "post": {
+        "summary": "Ingest drill rig telemetry data",
+        "description": "Ingests real-time IoT metrics from drill rigs (penetration rate, pull-down force, bit depth, RPM) into database and Redis, forwarding updates to SCADA FUXA.",
+        "tags": ["Telemetry"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["machine_id"],
+                "properties": {
+                  "machine_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "engine_rpm": {
+                    "type": "number"
+                  },
+                  "engine_temp": {
+                    "type": "number"
+                  },
+                  "hydraulic_pressure": {
+                    "type": "number"
+                  },
+                  "vibration_level": {
+                    "type": "number"
+                  },
+                  "fuel_level": {
+                    "type": "number"
+                  },
+                  "bit_depth": {
+                    "type": "number"
+                  },
+                  "penetration_rate": {
+                    "type": "number"
+                  },
+                  "pull_down_force": {
+                    "type": "number"
+                  },
+                  "rotary_speed": {
+                    "type": "number"
+                  },
+                  "timestamp": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Telemetry successfully ingested and synchronized"
+          },
+          "400": {
+            "description": "Invalid telemetry payload"
+          },
+          "500": {
+            "description": "Server ingestion error"
+          }
+        }
+      }
+    },
+    "/api/telemetry/drilling/stream": {
+      "get": {
+        "summary": "Real-Time Drill Rig Telemetry SSE Stream",
+        "description": "Server-Sent Events (SSE) endpoint subscribing to Redis pub/sub channel `drilling:telemetry:stream` to stream live rig telemetry updates.",
+        "tags": ["Telemetry"],
+        "responses": {
+          "200": {
+            "description": "SSE event stream initialized",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -1011,6 +1180,45 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/export/tires": {
+      "get": {
+        "summary": "Export fleet tire inspection history and scrap logs",
+        "description": "Export fleet tire inspection data, wear profiles, and decommissioning/scrap logs for regulatory and maintenance audits.",
+        "tags": ["Export"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": ["fleet", "inspections", "scrap", "all"],
+              "default": "all"
+            },
+            "description": "Type of export dataset"
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": ["json", "csv"],
+              "default": "csv"
+            },
+            "description": "Export format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export data (CSV or JSON)"
           }
         }
       }
@@ -1736,6 +1944,18 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/control-room/scada-status": {
+      "get": {
+        "summary": "Retrieve SCADA & Redis Degraded Status",
+        "description": "Returns SCADA server health, Redis fallback telemetry cache status, and active tag metadata for Control Room resilience.",
+        "tags": ["Control Room"],
+        "responses": {
+          "200": {
+            "description": "SCADA status and cached telemetry retrieved"
           }
         }
       }

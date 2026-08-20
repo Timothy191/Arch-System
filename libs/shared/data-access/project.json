@@ -1,6 +1,11 @@
 {
   "name": "shared-data-access",
-  "tags": ["scope:package", "scope:shared", "type:data-access", "scope:feature"],
+  "tags": [
+    "scope:package",
+    "scope:shared",
+    "type:data-access",
+    "scope:feature"
+  ],
   "projectType": "library",
   "sourceRoot": "libs/shared/data-access/src"
 }

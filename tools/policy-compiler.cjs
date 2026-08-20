@@ -21,6 +21,17 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { execSync } = require("node:child_process");
+
+// Automatically apply Nx project tags based on directory paths before policy checks
+try {
+  const applyTagsScript = path.join(__dirname, "apply-project-tags.cjs");
+  if (fs.existsSync(applyTagsScript)) {
+    execSync(`node "${applyTagsScript}"`, { stdio: "inherit" });
+  }
+} catch (tagErr) {
+  console.warn("⚠️ Warning: Failed to auto-apply project tags:", tagErr.message);
+}
 
 const POLICY_VERSION = "1.0.0";
 

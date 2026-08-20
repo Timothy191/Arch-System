@@ -49,9 +49,6 @@ const envSchema = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 
   // ── External services (optional) ───────────────────────────────────
-  N8N_URL: z.string().url().optional(),
-  N8N_USER: z.string().optional(),
-  N8N_PASSWORD: z.string().optional(),
   FLOWISE_URL: z.string().url().optional(),
   NEXT_PUBLIC_FUXA_URL: z.string().url().optional(),
   NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: z.string().optional(),
@@ -129,9 +126,6 @@ function parseEnv(): EnvVars {
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
-    N8N_URL: process.env.N8N_URL,
-    N8N_USER: process.env.N8N_USER,
-    N8N_PASSWORD: process.env.N8N_PASSWORD,
     FLOWISE_URL: process.env.FLOWISE_URL,
     NEXT_PUBLIC_FUXA_URL: process.env.NEXT_PUBLIC_FUXA_URL,
     NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID: process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID,

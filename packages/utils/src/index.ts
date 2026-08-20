@@ -56,7 +56,7 @@ function midnightInTimeZone(dateStr: string, timeZone: string): Date {
  * Returns the current shift (day/night) based on the hour in the mine's
  * operational timezone. Accepts a Date for deterministic testing.
  */
-export * from "./n8n";
+
 export * from "./analytics";
 export function getCurrentShift(
   date: Date = new Date(),

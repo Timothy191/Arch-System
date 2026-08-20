@@ -44,6 +44,7 @@
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
+    "./components/ui/*": "./src/components/ui/*.tsx",
     "./components/*": "./src/components/*.tsx",
     "./Logo": "./src/components/Logo.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",

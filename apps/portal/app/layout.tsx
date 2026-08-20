@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import "@repo/ui/globals.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
@@ -13,6 +14,7 @@ import { PWAInstallButton } from "@/components/PWAInstallButton";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
+import { LCPObserver } from "@/components/LCPObserver";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import { CookieConsent } from "@repo/ui/CookieConsent";
@@ -98,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
       <head>
+        <meta charSet="UTF-8" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -135,7 +138,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       { not: { href_matches: "/_next/*" } },
                     ],
                   },
-                  eagerness: "moderate",
+                  eagerness: "eager", // Prerender on hover (not just moderate)
                 },
               ],
             }),
@@ -181,6 +184,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
               {/* Content wrapper with main landmark */}
               <main id="main-content" role="main" className="relative z-primary-card pt-16">
+                <Suspense fallback={null}>
+                  <LCPObserver />
+                </Suspense>
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
 

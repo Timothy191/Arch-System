@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { ReactQueryProvider } from "./ReactQueryProvider";
 
 const SmoothScrollProvider = dynamic(
   () => import("@/components/SmoothScrollProvider").then((mod) => mod.SmoothScrollProvider),
@@ -44,5 +45,9 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  return <SmoothScrollProvider>{children}</SmoothScrollProvider>;
+  return (
+    <ReactQueryProvider>
+      <SmoothScrollProvider>{children}</SmoothScrollProvider>
+    </ReactQueryProvider>
+  );
 }

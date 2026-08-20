@@ -1,7 +1,6 @@
 "use client";
 
 import { Marquee } from "@repo/ui/Marquee";
-import { GlassCard } from "@repo/ui/GlassCard";
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors
 const REVIEWS = [
@@ -80,7 +79,7 @@ interface ReviewCardProps {
 function ReviewCard({ img, name, username, body }: ReviewCardProps) {
   return (
     <div className="w-[300px] shrink-0">
-      <GlassCard className="h-full bg-arch-surface-tertiary/40 border border-arch-border-primary hover:border-white/40 transition-all duration-300">
+      <div className="h-full rounded-2xl bg-white/70 border border-black/[0.08] hover:border-black/20 transition-all duration-300">
         <div className="p-4 flex flex-col justify-between h-full select-none">
           <div className="flex flex-row items-center gap-3">
             <img
@@ -99,7 +98,7 @@ function ReviewCard({ img, name, username, body }: ReviewCardProps) {
             "{body}"
           </blockquote>
         </div>
-      </GlassCard>
+      </div>
     </div>
   );
 }

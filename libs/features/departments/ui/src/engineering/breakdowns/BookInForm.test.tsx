@@ -6,8 +6,9 @@ jest.mock("./actions", () => ({
   createBreakdown: jest.fn(),
 }));
 
-jest.mock("@repo/utils", () => ({
-  triggerWorkflow: jest.fn(),
+jest.mock("@repo/utils/inngest", () => ({
+  inngest: { send: jest.fn().mockResolvedValue({ ids: ["test-id"] }) },
+  machineBreakdownEvent: "engineering/breakdown.logged",
 }));
 
 const { createBreakdown } = jest.requireMock("./actions");

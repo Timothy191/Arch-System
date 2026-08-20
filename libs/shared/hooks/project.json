@@ -1,6 +1,10 @@
 {
   "name": "shared-hooks",
-  "tags": ["scope:feature", "scope:package", "type:hooks"],
+  "tags": [
+    "scope:feature",
+    "scope:package",
+    "type:hooks"
+  ],
   "projectType": "library",
   "sourceRoot": "libs/shared/hooks/src"
 }

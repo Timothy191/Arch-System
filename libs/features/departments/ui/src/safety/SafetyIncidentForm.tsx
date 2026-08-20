@@ -109,15 +109,18 @@ export function SafetyIncidentForm({
       // Revalidate cached RSC data
       revalidateRSC(["table:safety_incidents"]).catch(() => {});
 
-      // Trigger n8n workflow for safety alert
-      import("@repo/utils").then(({ triggerWorkflow }) => {
-        triggerWorkflow("safety-incident", {
-          department_id: departmentId,
-          severity_id: formData.severityId,
-          reported_by: employee?.id,
-          incident_date: today,
-          description: formData.description,
-        });
+      // Dispatch Inngest event for safety alert
+      import("@repo/utils/inngest").then(({ inngest, safetyIncidentEvent }) => {
+        inngest.send({
+          name: safetyIncidentEvent,
+          data: {
+            department_id: departmentId,
+            severity_id: formData.severityId,
+            reported_by: employee?.id,
+            incident_date: today,
+            description: formData.description,
+          },
+        }).catch(() => {});
       });
 
       setFormData({

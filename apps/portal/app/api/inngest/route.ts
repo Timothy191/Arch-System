@@ -9,6 +9,8 @@ import { orphanedRecordDetectionFn } from "@/lib/jobs/orphaned-record-detection"
 import { shiftIntegrityReportFn } from "@/lib/reports/shift-integrity";
 import { shiftRolloverNotificationFn } from "@/lib/jobs/shift-rollover-notification";
 import { dailyPdfReportGenerationFn } from "@/lib/jobs/daily-pdf-report-generation";
+import { machineBreakdownNotificationFn } from "@/lib/jobs/machine-breakdown-notification";
+import { safetyIncidentNotificationFn } from "@/lib/jobs/safety-incident-notification";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -22,5 +24,7 @@ export const { GET, POST, PUT } = serve({
     shiftIntegrityReportFn,
     shiftRolloverNotificationFn,
     dailyPdfReportGenerationFn,
+    machineBreakdownNotificationFn,
+    safetyIncidentNotificationFn,
   ],
 });

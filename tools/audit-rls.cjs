@@ -16,7 +16,7 @@
 //                   employees for department isolation when the table has
 //                   a department_id column
 //
-// Output: a markdown report at .audit/rls-report.md
+// Output: a markdown report at documentation/03-audit-reports/rls-report.md
 // Exit code: 0 if no CRITICAL findings, 1 otherwise (CI gate).
 //
 // Usage: node tools/audit-rls.cjs
@@ -31,7 +31,7 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 const MIGRATIONS_DIR = path.join(ROOT, "packages", "database", "migrations");
-const REPORT_DIR = path.join(ROOT, ".audit");
+const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
 const REPORT_PATH = path.join(REPORT_DIR, "rls-report.md");
 
 // Tables that legitimately do not need department-scoped SELECT policies.

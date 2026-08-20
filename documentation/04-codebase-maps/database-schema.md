@@ -14,6 +14,7 @@
 ---
 
 ## 🛡️ Security & Row Level Security (RLS) Mandates
+
 * **Source of Truth**: `packages/database/migrations/` contains all numbered SQL migrations.
 * **100% RLS Enforcement**: Every table has active RLS policy enabled.
 * **Department Isolation**: Multi-tenant separation enforced via `auth.uid()` and `accessible_departments` mapping.

@@ -172,13 +172,6 @@ const PRODUCTIVITY_LIST = [
 const urls = getServiceUrls();
 const EXTERNAL_LIST = [
   {
-    name: "n8n",
-    displayName: "n8n Workflows",
-    icon: Workflow,
-    url: urls.api,
-    colorClass: "text-[#ea4b2a]",
-  },
-  {
     name: "flowise",
     displayName: "Flowise AI",
     icon: Bot,

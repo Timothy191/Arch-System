@@ -112,6 +112,7 @@ function openForm() {
 describe("DozerRollForm", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    localStorage.clear();
   });
 
   // ── 1. Closed state ────────────────────────────────────────────────────

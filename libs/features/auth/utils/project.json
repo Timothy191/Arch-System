@@ -1,6 +1,10 @@
 {
   "name": "features-auth-utils",
-  "tags": ["scope:auth", "type:util", "scope:feature"],
+  "tags": [
+    "scope:auth",
+    "type:util",
+    "scope:feature"
+  ],
   "projectType": "library",
   "sourceRoot": "libs/features/auth/utils/src"
 }

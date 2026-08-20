@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import {
   Table,
   TableBody,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 import { Check, Loader2, Sun, Moon, AlertCircle } from "lucide-react";
 import { getOperationalToday } from "@repo/utils";
+import { upsertDrillOperationAction } from "./actions";
 
 type Shift = "day" | "night";
 
@@ -69,7 +69,6 @@ function fmt(n: number | null | undefined, digits = 2): string {
 
 export function DrillingOperationsTable({ departmentId, drills, operators, initialOps }: Props) {
   const router = useRouter();
-  const supabase = createBrowserSupabaseClient();
 
   // Local working copy: keyed by `${machine_id}:${shift_type}`
   const [rows, setRows] = useState<Record<string, DrillOpRow>>(() => {
@@ -164,31 +163,25 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
         }
       }
 
-      const { data, error } = await supabase
-        .from("drill_operations")
-        .upsert(payload, {
-          onConflict: "machine_id,operation_date,shift_type",
-        })
-        .select()
-        .single();
+      const res = await upsertDrillOperationAction(payload as any);
 
-      if (error) {
+      if (!res.success || !res.data) {
         setErrors((e) => ({
           ...e,
-          [key]: error.message || "Save failed",
+          [key]: res.error || "Save failed",
         }));
         return null;
       }
-      if (data) {
-        setRows((r) => ({ ...r, [key]: data as DrillOpRow }));
-        setErrors((e) => {
-          const { [key]: _, ...rest } = e;
-          return rest;
-        });
-      }
-      return (data as DrillOpRow) ?? null;
+
+      const data = res.data as DrillOpRow;
+      setRows((r) => ({ ...r, [key]: data }));
+      setErrors((e) => {
+        const { [key]: _, ...rest } = e;
+        return rest;
+      });
+      return data;
     },
-    [departmentId, rows, supabase],
+    [departmentId, rows],
   );
 
   async function commitField(machineId: string, shift: Shift, field: keyof DrillOpRow) {

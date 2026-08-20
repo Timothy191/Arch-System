@@ -47,6 +47,16 @@ export {
 } from "./schemas/control-room.schema.js";
 
 export {
+  drillOperationSchema,
+  drillTelemetryIngestSchema,
+} from "./schemas/drill.schema.js";
+
+export {
+  insarGeoTIFFUploadSchema,
+  insarTelemetryIngestSchema,
+} from "./schemas/satellite.schema.js";
+
+export {
   aiChatSchema,
   aiSafetySchema,
   aiPredictSchema,
@@ -149,3 +159,13 @@ export type {
   TireStatus,
   TireCondition,
 } from "./types/tire-management.types.js";
+
+export type {
+  DrillOperationInput,
+  DrillTelemetryIngestInput,
+} from "./schemas/drill.schema.js";
+
+export type {
+  InsarGeoTIFFUploadInput,
+  InsarTelemetryIngestInput,
+} from "./schemas/satellite.schema.js";

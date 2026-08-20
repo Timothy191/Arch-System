@@ -18,9 +18,12 @@ Rules and guidelines governing reasoning, communication tone, and software engin
      - **Tokens Cached**: Tokens read from cache / prefix context.
      - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
   3. **Suggested Next Steps (3 options)**:
+     - Formatted with `@` symbols (e.g. `@[apps/portal]`, `@[packages/database]`) to auto-attach directory/file metadata for zero-search instant context.
+     - Include relevant or suggested slash commands (e.g., `/goal` for long-running autonomous execution, `/plan`, `/grill-me`, `/schedule`, `/learn`) within the option recommendations.
      - **Option 1**: Immediate operational/functional next step.
      - **Option 2**: Verification, test suite, or quality gate next step.
      - **Option 3**: Architecture, hardening, or performance optimization next step.
+  4. **Tip**: Contextual advice and tips based on past interaction patterns on how to better prompt the agent, utilize system prompts/slash commands, or optimize tool execution to achieve higher quality output.
 
 ## 2. Software Engineering Focus
 
