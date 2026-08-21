@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
@@ -25,6 +25,15 @@ const LEVEL_COLORS: Record<string, string> = {
   moderate: "#3f3f46",
   critical: "#ef4444",
 };
+
+// Pre-parsed RGBA tuples to avoid runtime parseInt / string slicing in 60 FPS animation loops
+const LEVEL_RGBA: Record<string, [number, number, number, number]> = {
+  stable: [62, 207, 142, 200],
+  minor: [113, 113, 122, 200],
+  moderate: [63, 63, 70, 200],
+  critical: [239, 68, 68, 200],
+};
+const DEFAULT_RGBA: [number, number, number, number] = [62, 207, 142, 200];
 
 const LAYER_OPTIONS: { key: MapLayerKey; label: string }[] = [
   { key: "optical", label: "S2 Optical" },
@@ -58,42 +67,66 @@ export function MonitoringMap({
     setCurrentLayer(activeLayer);
   }, [activeLayer]);
 
-  const layers = [
-    new ScatterplotLayer({
-      id: "deformation-points",
-      data: deformationReadings,
-      getPosition: (d: DeformationReading) => [d.lon, d.lat],
-      getFillColor: (d: DeformationReading) => {
-        const hex = LEVEL_COLORS[d.level] || "#3ecf8e";
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return [r, g, b, 200];
-      },
-      getRadius: (d: DeformationReading) => {
-        return d.level === "critical"
-          ? 100
-          : d.level === "moderate"
-            ? 70
-            : d.level === "minor"
-              ? 50
-              : 30;
-      },
-      pickable: true,
-      onClick: (info: { object?: DeformationReading }) => {
-        if (info.object) {
-          onReadingClick?.(info.object);
-        }
-      },
-      updateTriggers: {
-        getFillColor: [deformationReadings],
-        getRadius: [deformationReadings],
-      },
-    }),
-  ];
+  // Performance optimization: Memoize layers to avoid recreating ScatterplotLayer instance
+  // on every frame of 60 FPS panning/zooming viewState changes.
+  const layers = useMemo(
+    () => [
+      new ScatterplotLayer({
+        id: "deformation-points",
+        data: deformationReadings,
+        getPosition: (d: DeformationReading) => [d.lon, d.lat],
+        getFillColor: (d: DeformationReading) => LEVEL_RGBA[d.level] ?? DEFAULT_RGBA,
+        getRadius: (d: DeformationReading) => {
+          return d.level === "critical"
+            ? 100
+            : d.level === "moderate"
+              ? 70
+              : d.level === "minor"
+                ? 50
+                : 30;
+        },
+        pickable: true,
+        onClick: (info: { object?: DeformationReading }) => {
+          if (info.object) {
+            onReadingClick?.(info.object);
+          }
+        },
+        updateTriggers: {
+          getFillColor: [deformationReadings],
+          getRadius: [deformationReadings],
+        },
+      }),
+    ],
+    [deformationReadings, onReadingClick],
+  );
 
   const tileUrl = MAP_TILE_URLS[currentLayer] ?? MAP_TILE_URLS.optical ?? "";
   const meta = LAYER_META[currentLayer] ?? LAYER_META.optical;
+
+  // Performance optimization: Memoize mapStyle object so MapLibre doesn't recalculate/diff style on every frame
+  const mapStyle = useMemo(
+    () => ({
+      version: 8 as const,
+      sources: {
+        "raster-tiles": {
+          type: "raster" as const,
+          tiles: [tileUrl],
+          tileSize: 256,
+          attribution: meta?.attribution ?? "© EOX IT Services / ESA",
+        },
+      },
+      layers: [
+        {
+          id: "raster-layer",
+          type: "raster" as const,
+          source: "raster-tiles",
+          minzoom: 0,
+          maxzoom: 22,
+        },
+      ],
+    }),
+    [tileUrl, meta?.attribution],
+  );
 
   return (
     <div
@@ -109,28 +142,7 @@ export function MonitoringMap({
         layers={layers}
         getCursor={({ isHovering }: { isHovering?: boolean }) => (isHovering ? "pointer" : "grab")}
       >
-        <Map
-          mapStyle={{
-            version: 8,
-            sources: {
-              "raster-tiles": {
-                type: "raster",
-                tiles: [tileUrl],
-                tileSize: 256,
-                attribution: meta?.attribution ?? "© EOX IT Services / ESA",
-              },
-            },
-            layers: [
-              {
-                id: "raster-layer",
-                type: "raster",
-                source: "raster-tiles",
-                minzoom: 0,
-                maxzoom: 22,
-              },
-            ],
-          }}
-        />
+        <Map mapStyle={mapStyle} />
       </DeckGL>
 
       {/* Layer switcher overlay */}
