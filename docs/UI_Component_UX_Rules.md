@@ -13,6 +13,8 @@ code (see `SecondaryButton.tsx`, `FormFields.tsx`, etc.) reference the same set 
 | **HourlyLoadsGrid** | `app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`          | Doherty Threshold (optimistic UI updates), Tesler’s Law (auto‑save & background persist), Miller’s Law (grid limits visible columns to 12)                                                |
 | **DailyLogForm**    | `app/(departments)/[department]/daily-log/DailyLogForm.tsx`                | Miller’s Law (form split into logical sections ≤ 7 fields each), Zeigarnik Effect (progress bar / toast encourages completion), Peak‑End Rule (undo toast), Postel’s Law (Zod validation) |
 | **MacMenuBar**      | `app/(departments)/[department]/layout.tsx` (via `ActiveDepartmentSetter`) | Jakob’s Law (standard top‑level navigation pattern), Law of Proximity (menu items grouped), Serial Position Effect (most important links placed first/last)                               |
+| **Divider**         | `src/components/Divider.tsx`                                               | Law of Common Region (visual separation of sections), Aesthetic-Usability (fading/dotted/double borders)                                                                                  |
+| **BorderBox**       | `src/components/BorderBox.tsx`                                             | Law of Common Region (9 industrial bounding techniques), Aesthetic-Usability (gradient, glass, bevelled, patterned borders)                                                               |
 
 > **How to use** – When adding a new component, locate the appropriate rule(s) in
 > `docs/UX_Design_Rules.md`, add an explanatory comment at the top of the file, and

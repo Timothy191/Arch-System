@@ -356,6 +356,148 @@ export function generateDeformationReadings(
 }
 
 /**
+ * Raw shape of a `satellite_deformations` Postgres row (see migration 078).
+ * Used to map persisted InSAR points into the dashboard's DeformationReading model.
+ */
+export interface DeformationDbRow {
+  id: string;
+  department_id: string;
+  satellite_name: "Sentinel-1" | "TerraSAR-X" | "Capella" | "PAZ";
+  acquisition_date: string;
+  reference_date: string;
+  location_name: string;
+  latitude: number;
+  longitude: number;
+  displacement_mm: number;
+  coherence_index: number;
+  risk_level: "none" | "minor" | "moderate" | "critical";
+  cog_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// AGENT-TRACE: Map a persisted risk_level to the dashboard's DeformationLevel.
+// Used when a location has a single acquisition (no velocity baseline can be derived).
+function riskLevelToDeformationLevel(risk: DeformationDbRow["risk_level"]): DeformationLevel {
+  return risk === "none" ? "stable" : risk;
+}
+
+// AGENT-TRACE: Infer the geotechnical area from the location name so threshold
+// tables (ALERT_THRESHOLDS per area) apply correctly. Falls back to pit-wall.
+function inferAreaFromLocation(locationName: string): DeformationArea {
+  const name = locationName.toLowerCase();
+  if (name.includes("tailings") || name.includes("dam")) return "tailings-dam";
+  if (name.includes("haul") || name.includes("road")) return "haul-road";
+  if (name.includes("plant") || name.includes("processing")) return "processing-plant";
+  return "pit-wall";
+}
+
+function monthsBetween(a: string, b: string): number {
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  return ms / (30 * 86400000);
+}
+
+/**
+ * Map persisted `satellite_deformations` rows into dashboard DeformationReadings.
+ *
+ * Rows are grouped by `location_name` and ordered by acquisition_date. The latest
+ * acquisition becomes the current reading; velocity is derived from the delta
+ * between the two most recent acquisitions (or reference→acquisition baseline for
+ * a single point). When no velocity baseline exists, the persisted `risk_level`
+ * is used directly so a single ingested point still renders honestly.
+ *
+ * AGENT-TRACE: This is the boundary between DB storage (per-acquisition LOS
+ * displacement) and the dashboard model (per-zone velocity/level). No values are
+ * synthesised — every number traces to a persisted row.
+ */
+export function mapDeformationRowsToReadings(rows: DeformationDbRow[]): DeformationReading[] {
+  if (!rows || rows.length === 0) return [];
+
+  const groups = new Map<string, DeformationDbRow[]>();
+  for (const row of rows) {
+    const key = row.location_name || row.id;
+    const list = groups.get(key);
+    if (list) list.push(row);
+    else groups.set(key, [row]);
+  }
+
+  const readings: DeformationReading[] = [];
+
+  for (const [locationName, group] of groups) {
+    // AGENT-TRACE: sort ascending by acquisition_date so history is chronological
+    const sorted = [...group].sort(
+      (a, b) => new Date(a.acquisition_date).getTime() - new Date(b.acquisition_date).getTime(),
+    );
+    const latest = sorted[sorted.length - 1]!;
+    const area = inferAreaFromLocation(locationName);
+
+    // Derive LOS velocity (mm/month) from the most recent baseline available.
+    let velocityMmPerMonth = 0;
+    let velocityDerivable = false;
+    if (sorted.length >= 2) {
+      const prev = sorted[sorted.length - 2]!;
+      const months = monthsBetween(prev.acquisition_date, latest.acquisition_date);
+      if (months > 0) {
+        velocityMmPerMonth = (latest.displacement_mm - prev.displacement_mm) / months;
+        velocityDerivable = true;
+      }
+    } else {
+      const months = monthsBetween(latest.reference_date, latest.acquisition_date);
+      if (months > 0) {
+        velocityMmPerMonth = latest.displacement_mm / months;
+        velocityDerivable = true;
+      }
+    }
+
+    const trend: DeformationReading["trend"] =
+      velocityMmPerMonth > 0.5 ? "uplifting" : velocityMmPerMonth < -0.5 ? "subsiding" : "stable";
+
+    const level: DeformationLevel = velocityDerivable
+      ? classifyDeformationByVelocity(velocityMmPerMonth, area)
+      : riskLevelToDeformationLevel(latest.risk_level);
+
+    // AGENT-TRACE: build a velocity history from every acquisition in the group;
+    // each point's velocity is its delta vs the preceding acquisition.
+    const history: VelocityPoint[] = sorted.map((row, i) => {
+      const prev = i > 0 ? sorted[i - 1]! : null;
+      let v = 0;
+      if (prev) {
+        const m = monthsBetween(prev.acquisition_date, row.acquisition_date);
+        if (m > 0) v = (row.displacement_mm - prev.displacement_mm) / m;
+      } else {
+        const m = monthsBetween(row.reference_date, row.acquisition_date);
+        if (m > 0) v = row.displacement_mm / m;
+      }
+      return {
+        month: new Date(row.acquisition_date).toLocaleDateString("en-ZA", {
+          month: "short",
+          year: "2-digit",
+        }),
+        velocityMmPerMonth: Math.round(v * 10) / 10,
+      };
+    });
+
+    readings.push({
+      id: latest.id,
+      location: locationName,
+      lat: latest.latitude,
+      lon: latest.longitude,
+      shiftMm: Math.round(latest.displacement_mm * 10) / 10,
+      velocityMmPerMonth: Math.round(velocityMmPerMonth * 10) / 10,
+      trend,
+      level,
+      lastUpdated: latest.acquisition_date || latest.created_at,
+      sensor: "Sentinel-1 InSAR",
+      area,
+      history,
+      losAngleDeg: 39,
+    });
+  }
+
+  return readings;
+}
+
+/**
  * Format STAC scene date for display
  */
 export function formatSceneDate(datetime: string): string {

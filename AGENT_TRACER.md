@@ -1,6 +1,41 @@
 # Root Workspace Agent Tracer
 
-## 2026-08-21T12:55:00Z - Final Build + ShiftCoverage Lazy-Load + ShiftCoverageWidget Memoization
+## 2026-08-21T14:40:00Z - Borders & Dividers Industrial Techniques Implementation
+
+- **Purpose**: Implement the full suite of 9 industrial Borders & Dividers design techniques across `@repo/theme` and `@repo/ui`.
+- **Changes**:
+  - `packages/theme/src/css/borders.css`: Added CSS utilities & design variables for Dotted Border, Dotted Divider, Double Border, Gradient Border, Bevelled Border, Hand-Drawn Border, Patterned Border, Thick Transparent Border, and Fading Borders.
+  - `packages/ui/src/components/Divider.tsx`: Created accessible Divider component with horizontal/vertical orientation, label support, and variant styles.
+  - `packages/ui/src/components/BorderBox.tsx`: Created BorderBox component encapsulating all 9 techniques with full typings.
+  - `packages/ui/src/components/BorderBox.stories.tsx` & `Divider.stories.tsx`: Created Storybook stories.
+  - `apps/portal/components/system/BordersAndDividers.test.tsx`: Implemented 13 unit tests.
+- **Verification**: `pnpm --filter @repo/theme build`, `pnpm --filter @repo/ui type-check`, `pnpm --filter portal test` passed (13/13 tests passed, 100%).
+
+## 2026-08-21T14:35:00Z - Split-Terminal SysOps HUD with Animated ASCII Architecture Topology
+
+- **Purpose**: Build a zero-flicker split-screen SysOps HUD displaying deployment metadata, animated ASCII architecture topology with real-time pulse packets, error boundary metrics, and syntax-highlighted log/error streaming.
+- **Changes**:
+  - `scripts/monitor-hud.sh`: Upgraded with absolute cursor positioning, side-by-side split screen, animated ASCII topology diagram (`Browser -> Next.js 16 -> Supabase/Redis/SCADA`), live packet animation frames (`──●──▶`), latency meters, and ANSI syntax-highlighted server event & error streaming.
+  - `scripts/dev.sh`: Wired `launch_status_terminal()` to launch the enhanced `scripts/monitor-hud.sh` SysOps HUD automatically upon development deployment.
+- **Verification**: `bash -n scripts/monitor-hud.sh` and `bash -n scripts/dev.sh` syntax clean.
+
+- **Purpose**: Compare Webpack and Turbopack chunk deduplication to determine optimal build strategy.
+- **Changes**:
+  - Ran `pnpm nx build portal` (Webpack) and compared with Turbopack output.
+  - **Findings**: Webpack produces 0 duplicate chunks vs Turbopack's 3 × 576 KB duplicates.
+  - **Recommendation**: Use Webpack (`pnpm nx build portal`) for production builds where chunk deduplication matters.
+  - Investigated domain package splitting for `@repo/contract` — determined over-engineering at current scale.
+- **Verification**: `pnpm quality` passes with 100% score.
+
+## 2026-08-21T14:15:00Z - Hero Compact Sizing, Smooth 3D Animation & Flash Elimination
+
+- **Purpose**: Compact HeroRotator sizing, refine hardware-accelerated 3D transform animation, and eliminate ambient shimmer white flashes.
+- **Changes**:
+  - `HeroRotator.tsx`: Reduced title, description, and visual card heights to sleek proportions (`text-2xl`, `line-clamp-2`, `max-h-[175px]`). Configured hardware-accelerated `translate3d` slide animation with cubic-bezier easing.
+  - `apps/portal/app/hub/page.tsx`: Compacted hero container padding from `px-8 py-8` to `px-5 py-4`.
+  - `GlassCard.tsx`: Removed ambient `glass-shimmer-ambient` sweep element to eliminate periodic white flashing across cards.
+  - `HeroBackground.tsx`: Removed `mix-blend-overlay` white composite layers.
+- **Verification**: `tsc --noEmit` clean, ESLint clean (0 errors, 0 warnings), Jest tests passing (93 suites, 687 tests).
 
 - **Purpose**: Verify final production build, lazy-load ShiftCoverageSectionClient, add React.memo to ShiftCoverageWidget.
 - **Changes**:

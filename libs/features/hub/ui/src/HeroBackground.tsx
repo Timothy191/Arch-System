@@ -23,11 +23,11 @@ export function HeroBackground() {
       className="absolute inset-0 pointer-events-none overflow-hidden isolate"
       aria-hidden="true"
     >
-      {/* Soft glass overlay to let the global RouteBackground shine through */}
-      <div className="absolute inset-0 bg-white/5 mix-blend-overlay" />
+      {/* Soft glass overlay */}
+      <div className="absolute inset-0 bg-white/[0.02]" />
 
       {/* Ambient Film Grain Overlay */}
-      <div className="absolute inset-0 route-bg-grain opacity-40 mix-blend-overlay" />
+      <div className="absolute inset-0 route-bg-grain opacity-20 pointer-events-none" />
 
       {/* Fallback blobs (shown if prefers reduced motion) */}
       {prefersReducedMotion && (

@@ -38,7 +38,9 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
 
       <span className="opacity-40">|</span>
 
-      <span className="tabular-nums">SAST: {serverTimeSAST}</span>
+      <span className="tabular-nums" suppressHydrationWarning>
+        SAST: {serverTimeSAST}
+      </span>
 
       <span className="opacity-40">|</span>
 

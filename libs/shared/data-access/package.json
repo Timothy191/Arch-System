@@ -15,11 +15,15 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
+    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "test": "jest --config jest.config.js --passWithNoTests --maxWorkers=50%"
   },
   "devDependencies": {
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.0"
   }
 }

@@ -138,69 +138,19 @@ detect_terminal() {
 }
 
 launch_status_terminal() {
-  local script="$REPO_ROOT/.dev-status-$$.sh"
-  cat > "$script" << 'STATUSEOF'
-#!/bin/bash
-clear
-echo -e "\033[0;35m╔════════════════════════════════════════════════════════════════╗\033[0m"
-echo -e "\033[0;35m║           ARCH-SYSTEMS — SYSTEM STATUS                          ║\033[0m"
-echo -e "\033[0;35m╚════════════════════════════════════════════════════════════════╝\033[0m"
-echo ""
-
-echo -e "\033[1mServices:\033[0m"
-echo "────────────────────────────────────────────────────────────────"
-
-pstat="\033[0;31mOFFLINE\033[0m"
-curl -fs http://localhost:PORT_PLACEHOLDER > /dev/null 2>&1 && pstat="\033[0;32mRUNNING\033[0m"
-echo -e "  Portal      $pstat    http://localhost:PORT_PLACEHOLDER"
-
-sstat="\033[0;36mHOSTED\033[0m"
-echo -e "  Supabase    $sstat    (cloud — no local Docker required)"
-
-echo ""
-echo -e "\033[1mInfrastructure:\033[0m"
-echo "────────────────────────────────────────────────────────────────"
-echo "  Supabase:  CLOUD (no Docker required)  — configured via .env"
-echo "  Redis:     ${REDIS_URL:-in-memory fallback (no REDIS_URL set)}"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | head -5 || echo "  (Docker not running — not required)"
-
-echo ""
-echo -e "\033[1mRecent Logs:\033[0m"
-echo "────────────────────────────────────────────────────────────────"
-if [ -f "LOG_PLACEHOLDER" ]; then
-  tail -20 "LOG_PLACEHOLDER" 2>/dev/null | while IFS= read -r line; do
-    echo "  $line"
-  done
-else
-  echo "  No log file yet"
-fi
-
-echo ""
-echo -e "\033[1mSystem:\033[0m"
-echo "────────────────────────────────────────────────────────────────"
-echo -e "  Memory:    $(free -h 2>/dev/null | awk '/^Mem:/{print $3 "/" $2}' || echo 'N/A')"
-echo -e "  Disk:      $(df -h . 2>/dev/null | awk 'NR==2{print $3 "/" $2}' || echo 'N/A')"
-
-echo ""
-echo -e "\033[0;35m────────────────────────────────────────────────────────────────\033[0m"
-echo -e "\033[0;36mPress Enter to close this window...\033[0m"
-read
-STATUSEOF
-  sed -i "s|PORT_PLACEHOLDER|$PORT|g; s|LOG_PLACEHOLDER|$REPO_ROOT/run/portal.log|g" "$script"
-  chmod +x "$script"
-
   local term
   term=$(detect_terminal)
+  local hud_script="$REPO_ROOT/scripts/monitor-hud.sh"
+  chmod +x "$hud_script" 2>/dev/null || true
+
   case "$term" in
-    kitty)      kitty --title "Arch-Systems Status" bash "$script" & ;;
-    gnome)      gnome-terminal --title="Arch-Systems Status" -- bash "$script" & ;;
-    konsole)    konsole --title "Arch-Systems Status" -e "bash $script" & ;;
-    alacritty)  alacritty -t "Arch-Systems Status" -e bash "$script" & ;;
-    xfce4)      xfce4-terminal --title="Arch-Systems Status" -e "bash $script" & ;;
-    xterm)      xterm -title "Arch-Systems Status" -e "bash $script" & ;;
+    kitty)      kitty --title "Arch-Systems SysOps HUD" bash "$hud_script" & ;;
+    gnome)      gnome-terminal --title="Arch-Systems SysOps HUD" -- bash "$hud_script" & ;;
+    konsole)    konsole --title "Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
+    alacritty)  alacritty -t "Arch-Systems SysOps HUD" -e bash "$hud_script" & ;;
+    xfce4)      xfce4-terminal --title="Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
+    xterm)      xterm -title "Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
   esac
-  sleep 1
-  rm -f "$script"
 }
 
 show_results() {

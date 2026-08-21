@@ -18,8 +18,12 @@ const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds
+  // (`next build`). Webpack (`next build --webpack`) produces better chunk deduplication (0 vs
+  // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
+  // can't handle. Until Turbopack improves deduplication or inngest is excluded from the client
+  // bundle, we accept the 67 KB overhead. Track: Turbopack chunk deduplication improvements.
   turbopack: {
-    // AGENT-TRACE: Root must include workspaceRoot to allow dependencies from packages/ to be compiled
     root: workspaceRoot,
   },
   output: "standalone",

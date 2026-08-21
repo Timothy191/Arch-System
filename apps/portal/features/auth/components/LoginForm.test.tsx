@@ -78,7 +78,7 @@ describe("LoginForm", () => {
     expect(screen.getByPlaceholderText("Employee ID or email")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
 
-    const signInBtn = screen.getByRole("button", { name: /^Sign In$/i });
+    const signInBtn = screen.getByRole("button", { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
     expect(signInBtn.className).toContain("liquid-glass-button");
     expect(signInBtn.className).toContain("bg-[var(--color-action-primary)]");
@@ -183,7 +183,11 @@ describe("LoginForm", () => {
 
     // Button should show loading text and be disabled while loading
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /^Sign In$|^Signing in\.\.\.$/i })).toBeDisabled();
+      expect(
+        screen.getByRole("button", {
+          name: /^Accessing your workspace\.\.\.$|^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
+        }),
+      ).toBeDisabled();
     });
 
     resolveFetch!({ ok: true, json: jest.fn().mockResolvedValue({}) });
@@ -191,7 +195,9 @@ describe("LoginForm", () => {
     // After resolution, button should be enabled again
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /^Sign In$|^Signing in\.\.\.$/i }),
+        screen.getByRole("button", {
+          name: /^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
+        }),
       ).not.toBeDisabled();
     });
   });

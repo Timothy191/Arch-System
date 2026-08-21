@@ -336,7 +336,7 @@ export default async function HubPage() {
             aria-hidden="true"
           />
 
-          <div className="px-6 py-6 sm:px-8 sm:py-8 md:px-10 md:py-8 w-full space-y-5 relative">
+          <div className="px-4 py-3.5 sm:px-6 sm:py-4.5 w-full space-y-3.5 relative">
             {/* Eyebrow badge row */}
             <div className="flex items-center gap-3 flex-wrap liquid-shift-y">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-medium tracking-wide text-arch-text-secondary">

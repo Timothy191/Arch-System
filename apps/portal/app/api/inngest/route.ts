@@ -11,7 +11,10 @@ import { shiftRolloverNotificationFn } from "@/lib/jobs/shift-rollover-notificat
 import { dailyPdfReportGenerationFn } from "@/lib/jobs/daily-pdf-report-generation";
 import { machineBreakdownNotificationFn } from "@/lib/jobs/machine-breakdown-notification";
 import { safetyIncidentNotificationFn } from "@/lib/jobs/safety-incident-notification";
+import { insarSceneIngestionFn } from "@/lib/jobs/insar-scene-ingestion";
 
+// AGENT-TRACE: InSAR scene ingestion cron is registered here; it populates
+// `satellite_deformations` from Sentinel-1 STAC acquisitions every day at 06:00.
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
@@ -26,5 +29,6 @@ export const { GET, POST, PUT } = serve({
     dailyPdfReportGenerationFn,
     machineBreakdownNotificationFn,
     safetyIncidentNotificationFn,
+    insarSceneIngestionFn,
   ],
 });

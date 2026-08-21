@@ -1,5 +1,22 @@
 # Scripts Agent Tracer
 
+## 2026-08-21: Split-Terminal SysOps HUD with Animated ASCII Architecture & Error Stream
+
+### Purpose
+
+Upgrade status terminal into a zero-flicker split-screen SysOps HUD with live animated ASCII architecture topology, connection pulse packet animations, security error boundary metrics, and syntax-highlighted server error streaming.
+
+### Changes Made
+
+1. **`scripts/monitor-hud.sh`**:
+   - Re-engineered with curses `tput` absolute positioning (zero terminal flicker).
+   - Side-by-side split layout on wide terminals (Left: Animated Topology & Deployment Metrics, Right: Live Server Stream & Error Trace).
+   - Animated ASCII architecture topology with real-time traveling pulse packets (`──●──▶`).
+   - Dynamic service health checks (Next.js 16, Supabase Cloud PG, Redis, FUXA SCADA) with latency meters.
+   - Syntax-highlighted log stream (`[ERR]` in bold red, `[WRN]` in yellow, `200` in green, `Compiling` in cyan).
+2. **`scripts/dev.sh`**:
+   - Updated `launch_status_terminal()` to launch the new `scripts/monitor-hud.sh` SysOps HUD automatically upon development startup.
+
 ## 2026-08-18: Added Codebase Maps Regeneration Script
 
 ### Purpose

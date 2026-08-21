@@ -22,6 +22,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [passwordError, setPasswordError] = useState("");
 
   const { login, loading, rateLimitCountdown, setRateLimitCountdown } = useLogin();
 
@@ -34,15 +35,36 @@ export function LoginForm() {
     setCapsLock(e.getModifierState("CapsLock"));
   }
 
+  function getPasswordRequirements(password: string): string[] {
+    const requirements: string[] = [];
+    if (password.length < 6) requirements.push("at least 6 characters");
+    if (password.length > 128) requirements.push("fewer than 128 characters");
+    return requirements;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setPasswordError("");
+
+    // Validate password requirements before submission
+    const requirements = getPasswordRequirements(password);
+    if (requirements.length > 0) {
+      setPasswordError(`Password must have ${requirements.join(", ")}`);
+      return;
+    }
+
     const result = await login(employeeId, password);
     if (result?.success) {
       router.push(redirectTo);
       router.refresh();
     } else {
-      setPassword("");
+      // Show specific password requirements if password doesn't meet them
+      const failedRequirements = getPasswordRequirements(password);
+      if (failedRequirements.length > 0) {
+        setPasswordError(`Password must have ${failedRequirements.join(", ")}`);
+      }
     }
+    // Don't clear password on failed login - let user see what they typed
   }
 
   return (
@@ -50,14 +72,14 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none"
+          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
         >
-          Employee ID / Email
+          <span id="email-label">Employee ID / Email</span>
         </label>
         <div className="relative group">
           <Input
             id="email"
-            type="text"
+            type="email"
             required
             autoFocus
             minLength={3}
@@ -65,10 +87,19 @@ export function LoginForm() {
             disabled={loading}
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value && !e.target.value.includes("@")) {
+                // Allow employee IDs without @, but validate email format if @ is present
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (e.target.value.includes("@") && !emailRegex.test(e.target.value)) {
+                  toast.error("Please enter a valid email address");
+                }
+              }
+            }}
             variant="login"
             className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
             placeholder="Employee ID or email"
-            aria-label="Employee ID / Email"
+            aria-labelledby="email-label"
             autoComplete="username"
             aria-describedby="email-hint"
           />
@@ -81,9 +112,9 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none"
+          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
         >
-          Password
+          <span id="password-label">Password</span>
         </label>
         <div className="relative">
           <Input
@@ -94,13 +125,16 @@ export function LoginForm() {
             maxLength={128}
             disabled={loading}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPasswordError("");
+            }}
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             variant="login"
             className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
             placeholder="Enter your password"
-            aria-label="Password"
+            aria-labelledby="password-label"
             autoComplete="current-password"
           />
           <button
@@ -112,6 +146,27 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
+        {password && (
+          <div className="text-[10px] text-arch-text-tertiary space-y-1 animate-fade-up">
+            <p>Password requirements:</p>
+            <ul className="space-y-0.5 ml-3">
+              <li className={password.length >= 6 ? "text-arch-accent-green" : ""}>
+                {password.length >= 6 ? "✓" : "○"} At least 6 characters
+              </li>
+              <li className={password.length <= 128 ? "text-arch-accent-green" : ""}>
+                {password.length <= 128 ? "✓" : "○"} Fewer than 128 characters
+              </li>
+            </ul>
+          </div>
+        )}
+        {passwordError && (
+          <div
+            className="flex items-center gap-1.5 text-[11px] text-arch-accent-red animate-fade-up"
+            role="alert"
+          >
+            <span>{passwordError}</span>
+          </div>
+        )}
         {capsLock && (
           <div
             className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
@@ -139,7 +194,7 @@ export function LoginForm() {
           hoverScale={1}
           tapScale={0.97}
         >
-          {loading ? "Signing in..." : "Sign In"}
+          {loading ? "Accessing your workspace..." : "Access Arch Systems"}
         </AnimatedButton>
       </div>
 
@@ -152,7 +207,7 @@ export function LoginForm() {
           className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors liquid-text-lift"
         />
         <Link
-          href="/reset-password"
+          href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
           className="text-xs text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1 py-0.5 -mx-1"
         >
           Forgot password?

@@ -1,9 +1,15 @@
 import { GlassCard } from "@repo/ui/GlassCard";
-import { generateDeformationReadings, DEFAULT_MINE_CENTER } from "@/lib/monitoring-api";
 import { SatelliteMonitoringClient } from "@/components/monitoring/SatelliteMonitoringClient";
+import { getSatelliteMonitoringData } from "~/lib/monitoring/satellite-data";
 
-export default function ControlRoomSatellitePage() {
-  const readings = generateDeformationReadings(DEFAULT_MINE_CENTER.lat, DEFAULT_MINE_CENTER.lon);
+// AGENT-TRACE: Control-room satellite view. Now a server component that reads
+// real ingested InSAR rows (RLS-gated to the satellite-monitoring department)
+// via getSatelliteMonitoringData — no mock generateDeformationReadings(). KPIs
+// are derived from real readings (0 alerts shown honestly when nothing is
+// ingested yet). Label fixed: was "Real-time site overview" (not backed by a
+// real-time feed) → "site overview".
+export default async function ControlRoomSatellitePage() {
+  const { readings } = await getSatelliteMonitoringData();
   const critical = readings.filter((r) => r.level === "critical").length;
   const moderate = readings.filter((r) => r.level === "moderate").length;
 
@@ -13,7 +19,7 @@ export default function ControlRoomSatellitePage() {
         <div>
           <h2 className="text-xl font-medium text-[var(--text-heading)]">Satellite Monitoring</h2>
           <p className="text-[var(--text-muted)] text-sm mt-0.5">
-            Sentinel-1 InSAR deformation · Real-time site overview
+            Sentinel-1 InSAR deformation · site overview
           </p>
         </div>
         <a

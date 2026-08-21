@@ -12,3 +12,4 @@
 @import "./loaders.css" layer(components);
 @import "./checks.css" layer(components);
 @import "./cards.css" layer(components);
+@import "./borders.css" layer(components);

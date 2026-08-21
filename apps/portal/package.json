@@ -22,6 +22,7 @@
     "@repo/logger": "1.0.0",
     "@repo/rate-limiter": "1.0.0",
     "@repo/redis": "1.0.0",
+    "@repo/shared/data-access": "1.0.0",
     "@repo/supabase": "1.0.0",
     "@repo/theme": "1.0.0",
     "@repo/ui": "1.0.0",

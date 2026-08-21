@@ -134,109 +134,113 @@ export function HeroRotator({
       aria-roledescription="carousel"
       aria-label="Department Hero Highlights"
     >
-      {/* Slide track */}
+      {/* Hardware-accelerated slide track */}
       <div
-        className="flex transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        className="flex transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
+        style={{
+          transform: `translate3d(-${activeIndex * 100}%, 0, 0)`,
+        }}
       >
         {panels.map((panel, idx) => (
           <div
             key={panel.id}
-            className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"
+            className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center"
             role="group"
             aria-roledescription="slide"
             aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
           >
             {/* Left Content Area (7 Cols) */}
-            <div className="lg:col-span-7 space-y-4 flex flex-col justify-between z-10">
-              <div className="space-y-3">
+            <div className="lg:col-span-7 space-y-3 flex flex-col justify-between z-10">
+              <div className="space-y-1.5 sm:space-y-2">
                 {/* Category & Status Pill */}
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-arch-surface-secondary/90 border border-arch-border-subtle text-[11px] font-medium text-arch-text-secondary tracking-wide">
-                    <Layers className="w-3 h-3 text-arch-accent-blue" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-[10.5px] font-medium text-arch-text-secondary tracking-wide">
+                    <Layers className="w-2.5 h-2.5 text-arch-accent-blue" />
                     {panel.category}
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[10px] font-semibold uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[9.5px] font-semibold uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-green" />
                     {panel.status}
                   </span>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-arch-text-primary text-balance">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-arch-text-primary text-balance">
                   {panel.title}
                 </h1>
 
                 {/* Description */}
-                <p className="text-arch-text-secondary text-sm sm:text-base md:text-lg leading-relaxed line-clamp-3 text-pretty">
+                <p className="text-arch-text-secondary text-xs sm:text-sm leading-relaxed line-clamp-2 text-pretty max-w-xl">
                   {panel.description}
                 </p>
               </div>
 
-              {/* Key Operational Stat Row */}
-              {panel.stats && (
-                <div className="inline-flex items-center gap-3 p-2.5 rounded-xl bg-white/50 backdrop-blur-md border border-arch-border-subtle max-w-sm">
-                  <div className="w-8 h-8 rounded-lg bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
-                    <Activity className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[10.5px] font-medium text-arch-text-tertiary uppercase tracking-wider">
-                      {panel.stats.label}
+              {/* Operational Stat & CTAs Row */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                {/* Stat Pill */}
+                {panel.stats && (
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-arch-surface-secondary/70 border border-arch-border-subtle">
+                    <div className="w-5 h-5 rounded-md bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
+                      <Activity className="w-3 h-3" />
                     </div>
-                    <div className="text-sm font-semibold text-arch-text-primary">
-                      {panel.stats.value}
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="text-[10px] font-medium text-arch-text-tertiary uppercase">
+                        {panel.stats.label}:
+                      </span>
+                      <span className="font-semibold text-arch-text-primary">
+                        {panel.stats.value}
+                      </span>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Link
-                  href={panel.primary.href}
-                  data-cta="primary-hero"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-arch-brand-blue text-white font-medium text-xs sm:text-sm shadow-card hover:bg-black transition-all hover:scale-[1.02] active:scale-[0.98] min-h-[40px]"
-                >
-                  {panel.primary.icon}
-                  <span>{panel.primary.label}</span>
-                </Link>
-                {panel.secondary && (
-                  <Link
-                    href={panel.secondary.href}
-                    data-cta="secondary-hero"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-arch-surface-secondary/80 text-arch-text-primary font-medium text-xs sm:text-sm border border-arch-border-subtle hover:bg-arch-surface-tertiary hover:border-arch-border-emphasis transition-all backdrop-blur-md min-h-[40px]"
-                  >
-                    {panel.secondary.icon}
-                    <span>{panel.secondary.label}</span>
-                  </Link>
                 )}
+
+                {/* Action Buttons */}
+                <div className="inline-flex items-center gap-2">
+                  <Link
+                    href={panel.primary.href}
+                    data-cta="primary-hero"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-arch-brand-blue text-white font-medium text-xs shadow-sm hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[32px]"
+                  >
+                    {panel.primary.icon}
+                    <span>{panel.primary.label}</span>
+                  </Link>
+                  {panel.secondary && (
+                    <Link
+                      href={panel.secondary.href}
+                      data-cta="secondary-hero"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-arch-surface-secondary text-arch-text-primary font-medium text-xs border border-arch-border-subtle hover:bg-arch-surface-tertiary transition-all min-h-[32px]"
+                    >
+                      {panel.secondary.icon}
+                      <span>{panel.secondary.label}</span>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Right Visual Image Card (5 Cols) */}
             <div className="lg:col-span-5 relative group/image">
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] rounded-2xl overflow-hidden shadow-card border border-arch-border-emphasis/30 bg-arch-surface-tertiary/40">
+              <div className="relative aspect-[16/9] max-h-[160px] sm:max-h-[175px] rounded-xl overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
                 {/* Visual Terrain / Industrial Image */}
                 <img
                   src={panel.image}
                   alt={`${panel.title} visual`}
-                  className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover/image:scale-105"
+                  className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover/image:scale-102"
                   onError={(e) => {
-                    // Fallback to overview image if department image is missing
                     (e.target as HTMLImageElement).src = "/images/departments/overview.jpg";
                   }}
                 />
 
-                {/* Subtle Liquid Glass Gradient Vignette */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none" />
+                {/* Subtle Gradient Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
                 {/* Live Indicator Pill on Image */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10.5px] font-medium border border-white/20">
-                    <CheckCircle2 className="w-3 h-3 text-accent-green" />
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[9.5px] font-medium border border-white/20">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-accent-green" />
                     {panel.name.toUpperCase()} FEED
                   </span>
-                  <span className="text-[10px] font-mono text-white/80 bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                  <span className="text-[9px] font-mono text-white/80 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
                     CAM-0{idx + 1}
                   </span>
                 </div>
@@ -248,49 +252,49 @@ export function HeroRotator({
 
       {/* Navigation Controls & Carousel Indicator Dots */}
       {panels.length > 1 && (
-        <div className="flex items-center justify-between pt-6 mt-4 border-t border-arch-border-subtle/50">
+        <div className="flex items-center justify-between pt-3 mt-2.5 border-t border-arch-border-subtle/40">
           {/* Left / Right Step Buttons */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={prevSlide}
               aria-label="Previous department highlight"
-              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={nextSlide}
               aria-label="Next department highlight"
-              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setIsPaused((prev) => !prev)}
               aria-label={isPaused ? "Resume auto rotation" : "Pause auto rotation"}
-              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95 ml-1"
+              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95 ml-0.5"
               title={isPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
             >
               {isPaused ? (
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-2.5 h-2.5 fill-current" />
               ) : (
-                <Pause className="w-3.5 h-3.5 fill-current" />
+                <Pause className="w-2.5 h-2.5 fill-current" />
               )}
             </button>
           </div>
 
           {/* Dot Indicators */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {panels.map((p, idx) => (
               <button
                 key={p.id}
                 onClick={() => setActiveIndex(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
+                  "h-1 rounded-full transition-all duration-300",
                   idx === activeIndex
-                    ? "w-6 bg-arch-text-primary"
-                    : "w-1.5 bg-arch-border-emphasis hover:bg-arch-text-secondary",
+                    ? "w-4 bg-arch-text-primary"
+                    : "w-1 bg-arch-border-emphasis hover:bg-arch-text-secondary",
                 )}
               />
             ))}

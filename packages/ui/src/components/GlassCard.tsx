@@ -528,33 +528,6 @@ export function GlassCard({
         />
       )}
 
-      {/* Ambient glass shimmer */}
-      <div
-        className="absolute inset-0 overflow-hidden pointer-events-none rounded-[inherit] z-[1] motion-reduce:hidden"
-        aria-hidden="true"
-      >
-        <div
-          className="absolute inset-0 will-change-transform"
-          style={{
-            background: `linear-gradient(
-              105deg,
-              transparent 30%,
-              rgba(255, 255, 255, 0.12) 45%,
-              rgba(210, 210, 215, 0.08) 50%,
-              rgba(255, 255, 255, 0.12) 55%,
-              transparent 70%
-            )`,
-            transform: "translateX(-100%) skewX(-12deg)",
-            animation: "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
-          }}
-        />
-      </div>
-
-      {/* Hover-only light sweep */}
-      {hover && (variant === "default" || variant === "window") && (
-        <div className="absolute inset-0 translate-x-[-100%] group-hover/window:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
-      )}
-
       {/* Dynamic border highlight facing light source on hover */}
       {hover && (variant === "default" || variant === "window") && (
         <div className="absolute inset-0 rounded-[inherit] pointer-events-none opacity-0 group-hover/window:opacity-100 transition-opacity duration-500">

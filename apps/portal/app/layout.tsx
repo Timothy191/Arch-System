@@ -4,6 +4,7 @@ import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
 import dynamic from "next/dynamic";
+import Script from "next/script";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FocusModeProvider } from "@/components/FocusModeProvider";
@@ -105,8 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           href="/background/macos-27-golden-4480x3088-26626.png"
           as="image"
           type="image/png"
-          // @ts-expect-error fetchpriority is valid in Modern React 19 & HTML Spec
-          fetchpriority="high"
+          fetchPriority="high"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -118,8 +118,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           rel="dns-prefetch"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
         />
-        <script
+        <Script
+          id="speculation-rules"
           type="speculationrules"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               prerender: [
@@ -140,7 +142,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       { not: { href_matches: "/_next/*" } },
                     ],
                   },
-                  eagerness: "moderate", // Prerender on hover with short delay (reduced from "eager" to save CPU on low-end devices)
+                  eagerness: "moderate", // Prerender on hover with short delay
                 },
               ],
             }),

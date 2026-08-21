@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
+import { getSatelliteMonitoringData } from "~/lib/monitoring/satellite-data";
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
@@ -64,8 +65,20 @@ export default async function DepartmentDashboard({
   });
 
   // 1. Early returns for satellite and safety — skip shared queries entirely
+  // AGENT-TRACE: Satellite dashboard is presentational — all data is fetched
+  // server-side here (DB-backed InSAR rows + live Copernicus STAC scenes) and
+  // passed as props. No mock data; an honest empty state renders when nothing
+  // has been ingested yet.
   if (dept.type === "satellite") {
-    return <SatelliteMonitoringDashboard />;
+    const { readings, s1Scenes, s2Scenes, latestS2Pass } = await getSatelliteMonitoringData();
+    return (
+      <SatelliteMonitoringDashboard
+        readings={readings}
+        s1Scenes={s1Scenes}
+        s2Scenes={s2Scenes}
+        latestS2Pass={latestS2Pass}
+      />
+    );
   }
 
   if (dept.type === "safety") {

@@ -4,8 +4,10 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { DeformationSummary } from "@/features/departments/components/satellite/DeformationAlertCard";
-import { DEFAULT_MINE_CENTER, type DeformationReading } from "@/lib/monitoring-api";
+import { DEFAULT_MINE_CENTER, type DeformationReading } from "@repo/shared/data-access";
 
+// AGENT-TRACE: Reads real InSAR deformation readings from the shared data-access
+// package and renders the interactive map + alert summary on the client.
 const MonitoringMap = dynamic(() => import("./MonitoringMap").then((m) => m.MonitoringMap), {
   ssr: false,
   loading: () => (

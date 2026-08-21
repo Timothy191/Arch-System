@@ -46,6 +46,8 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/ui/*": "./src/components/ui/*.tsx",
     "./components/*": "./src/components/*.tsx",
+    "./Divider": "./src/components/Divider.tsx",
+    "./BorderBox": "./src/components/BorderBox.tsx",
     "./Logo": "./src/components/Logo.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",

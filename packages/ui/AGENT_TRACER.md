@@ -1,5 +1,19 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-21 - Borders & Dividers Industrial Techniques Suite
+
+- **Purpose**: Implement the complete suite of 9 industrial Borders & Dividers design techniques in @repo/theme and @repo/ui.
+- **Changes**:
+  - `packages/theme/src/css/borders.css`: Created CSS variables and utility classes implementing all 9 techniques (Dotted Border, Dotted Divider, Double Border, Gradient Border, Bevelled Border, Hand-Drawn Border, Patterned Border, Thick Transparent Border, Fading Borders).
+  - `packages/theme/src/css/index.css`: Added `@import "./borders.css" layer(components)`.
+  - `packages/ui/src/components/Divider.tsx`: Created accessible Divider component supporting default, dotted, fading, double, and dashed variants with horizontal/vertical orientations and center-label support.
+  - `packages/ui/src/components/BorderBox.tsx`: Created polymorphic BorderBox component with 9 variants matching theme tokens and liquid glass architecture.
+  - `packages/ui/package.json`: Registered `./Divider` and `./BorderBox` exports.
+  - `packages/ui/src/components/BorderBox.stories.tsx` & `Divider.stories.tsx`: Created Storybook stories.
+  - `apps/portal/components/system/BordersAndDividers.test.tsx`: Implemented 13 unit tests verifying all 9 techniques (100% pass).
+  - `docs/UI_Component_UX_Rules.md`: Updated mapping table.
+- **Verification**: `pnpm --filter @repo/theme build`, `pnpm --filter @repo/ui type-check`, `pnpm --filter @repo/ui lint`, and `pnpm --filter portal test` passed with 100% success.
+
 ## 2026-08-18 - Liqui Design Integration
 
 - **Purpose**: Integrate liqui liquid-glass components into the existing design system without disrupting current theme tokens.

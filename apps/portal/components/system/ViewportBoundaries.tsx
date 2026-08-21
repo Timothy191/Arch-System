@@ -164,7 +164,9 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
             {/* Time */}
             <div className="group relative flex items-center gap-1.5 text-[var(--text-heading)] font-semibold cursor-default">
               <Clock className="w-3.5 h-3.5 text-[var(--accent-blue)]" />
-              <span className="tabular-nums">{serverTimeSAST}</span>
+              <span className="tabular-nums" suppressHydrationWarning>
+                {serverTimeSAST}
+              </span>
 
               <div className="absolute -top-10 right-0 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 pointer-events-none transition-all duration-200 px-2.5 py-1 rounded-md bg-black/80 text-white text-[10px] font-medium whitespace-nowrap shadow-card origin-bottom-right">
                 South Africa Standard Time

@@ -9,10 +9,10 @@ import { HyperspectralLayer, type SpectralComposite } from "./HyperspectralLayer
 import { HighResPanel } from "./HighResPanel";
 import { DeformationSummary } from "./DeformationAlertCard";
 import {
-  generateDeformationReadings,
   DEFAULT_MINE_CENTER,
   DEFAULT_MINE_BBOX,
   type DeformationReading,
+  type STACItem,
 } from "@repo/shared/data-access";
 
 const LidarLayerPanel = dynamic(
@@ -83,15 +83,28 @@ const TAB_LAYER_MAP: Record<ActiveTab, MapLayer> = {
   kepler: "optical",
 };
 
-const readings = generateDeformationReadings(DEFAULT_MINE_CENTER.lat, DEFAULT_MINE_CENTER.lon);
-
 interface SatelliteMonitoringDashboardProps {
+  /**
+   * AGENT-TRACE: Dashboard is presentational — all data is fetched server-side
+   * (see apps/portal/lib/monitoring/satellite-data.ts) and passed as props so the
+   * client bundle never reaches Copernicus STAC directly (CORS) and values are
+   * never synthesised in the browser. Defaults to empty arrays if data is pending.
+   */
+  readings?: DeformationReading[];
+  s1Scenes?: STACItem[];
+  s2Scenes?: STACItem[];
+  /** ISO datetime of the most recent cloud-free Sentinel-2 pass, or null when none in range. */
+  latestS2Pass?: string | null;
   defaultTab?: ActiveTab;
 }
 
 export function SatelliteMonitoringDashboard({
+  readings = [],
+  s1Scenes = [],
+  s2Scenes = [],
+  latestS2Pass = null,
   defaultTab = "overview",
-}: SatelliteMonitoringDashboardProps) {
+}: SatelliteMonitoringDashboardProps = {}) {
   const [activeTab, setActiveTab] = useState<ActiveTab>(defaultTab);
   const [activeComposite, setActiveComposite] = useState<SpectralComposite>("truecolor");
   const [selectedReading, setSelectedReading] = useState<DeformationReading | null>(null);
@@ -131,10 +144,12 @@ export function SatelliteMonitoringDashboard({
           <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-emphasis)]">
             <span className="text-[10px] text-[var(--text-secondary)]">S2 last pass:</span>
             <span className="text-[10px] text-[var(--text-muted)] font-medium">
-              {new Date(Date.now() - 3 * 86400000).toLocaleDateString("en-ZA", {
-                day: "2-digit",
-                month: "short",
-              })}
+              {latestS2Pass
+                ? new Date(latestS2Pass).toLocaleDateString("en-ZA", {
+                    day: "2-digit",
+                    month: "short",
+                  })
+                : "no recent cloud-free pass"}
             </span>
           </div>
         </div>
@@ -175,6 +190,18 @@ export function SatelliteMonitoringDashboard({
           <p className="text-[var(--text-secondary)] text-xs mt-0.5">no movement</p>
         </GlassCard>
       </div>
+
+      {/* AGENT-TRACE: Honest empty state — when no InSAR acquisitions have been
+          ingested yet, say so plainly instead of showing fabricated readings. */}
+      {readings.length === 0 && (
+        <div className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]">
+          <p className="text-sm text-[var(--text-secondary)]">
+            No InSAR deformation points ingested yet for this site. Deformation readings appear once
+            the Sentinel-1 scene-ingestion job processes acquisitions (or a GeoTIFF is uploaded via
+            the SAR tab). Map tiles and scene metadata below remain live from Copernicus / ESA.
+          </p>
+        </div>
+      )}
 
       {/* Tab bar */}
       <div className="flex flex-wrap gap-1 p-1 bg-[var(--bg-primary)] border border-[var(--border-emphasis)] rounded-xl w-fit">
@@ -273,7 +300,7 @@ export function SatelliteMonitoringDashboard({
                 </div>
               </div>
               <p className="text-[10px] text-[var(--text-secondary)] mt-2">
-                Configure in <code className="text-[#3ecf8e]">lib/monitoring-api.ts</code> →{" "}
+                Configure in <code className="text-[#3ecf8e]">@repo/shared/data-access</code> →{" "}
                 <code className="text-[#3ecf8e]">DEFAULT_MINE_BBOX</code>
               </p>
             </GlassCard>
@@ -288,17 +315,17 @@ export function SatelliteMonitoringDashboard({
           {activeTab === "sar" && (
             <div className="space-y-4">
               <RealtimeInSARStream />
-              <SARLayerPanel scenes={[]} readings={readings} />
+              <SARLayerPanel scenes={s1Scenes} readings={readings} />
             </div>
           )}
           {activeTab === "hyperspectral" && (
             <HyperspectralLayer
-              scenes={[]}
+              scenes={s2Scenes}
               activeComposite={activeComposite}
               onCompositeChange={setActiveComposite}
             />
           )}
-          {activeTab === "highres" && <HighResPanel scenes={[]} />}
+          {activeTab === "highres" && <HighResPanel scenes={s2Scenes} />}
           {activeTab === "lidar" && <LidarLayerPanel />}
           {activeTab === "raster" && <COGRasterLayer />}
           {activeTab === "kepler" && <KeplerGlMap />}

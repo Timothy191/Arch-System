@@ -55,6 +55,8 @@
     "Restorff",
     "Zeigarnik",
     "Pragnanz",
-    "normalise"
+    "normalise",
+    "handdrawn",
+    "synthesised"
   ]
 }

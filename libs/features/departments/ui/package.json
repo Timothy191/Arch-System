@@ -12,6 +12,7 @@
     "@repo/errors": "1.0.0",
     "@repo/logger": "1.0.0",
     "@repo/redis": "1.0.0",
+    "@repo/shared/data-access": "1.0.0",
     "@repo/supabase": "1.0.0",
     "@repo/ui": "1.0.0",
     "@repo/utils": "1.0.0",

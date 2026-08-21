@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { Input } from "@repo/ui/Input";
 import { AnimatedButton } from "@repo/ui/AnimatedButton";
@@ -26,10 +27,16 @@ function mapResetError(raw: string): string {
 }
 
 export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const emailParam = searchParams?.get("email");
+    if (emailParam) setEmail(emailParam);
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,14 +111,15 @@ export default function ResetPasswordPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="reset-email"
-                    className="block text-sm text-[var(--text-secondary)]"
+                    className="block text-sm text-[var(--text-secondary)] cursor-pointer"
                   >
-                    Email
+                    <span id="reset-email-label">Email</span>
                   </label>
                   <Input
                     id="reset-email"
                     type="email"
                     required
+                    autoFocus
                     maxLength={254}
                     disabled={loading}
                     value={email}
@@ -120,6 +128,7 @@ export default function ResetPasswordPage() {
                     className="focus:ring-0 liquid-glass-input"
                     placeholder="admin@arch.os"
                     autoComplete="username"
+                    aria-labelledby="reset-email-label"
                     aria-describedby={error ? "reset-error" : undefined}
                   />
                 </div>
@@ -142,7 +151,7 @@ export default function ResetPasswordPage() {
                   hoverScale={1}
                   tapScale={0.97}
                 >
-                  {loading ? "Sending..." : "Send Reset Link"}
+                  {loading ? "Sending reset link..." : "Send Password Reset Link"}
                 </AnimatedButton>
               </form>
 

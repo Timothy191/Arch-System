@@ -47,7 +47,9 @@ describe("ResetPasswordPage", () => {
     render(<ResetPasswordPage />);
 
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Send Reset Link/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Send (Password )?Reset Link/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
   });
 
