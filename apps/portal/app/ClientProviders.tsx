@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import dynamic from "next/dynamic";
 import { ReactQueryProvider } from "./ReactQueryProvider";
 
-const SmoothScrollProvider = dynamic(
-  () => import("@/components/SmoothScrollProvider").then((mod) => mod.SmoothScrollProvider),
-  { ssr: false },
-) as React.FC<{ children: ReactNode }>;
+// AGENT-TRACE: SmoothScrollProvider (Lenis) removed — cosmetic rAF loop overhead on every page.
+// Native CSS scroll-behavior: smooth handles anchor links. Remove this comment if smooth scroll is re-added.
 
 export default function ClientProviders({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -45,9 +42,5 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  return (
-    <ReactQueryProvider>
-      <SmoothScrollProvider>{children}</SmoothScrollProvider>
-    </ReactQueryProvider>
-  );
+  return <ReactQueryProvider>{children}</ReactQueryProvider>;
 }

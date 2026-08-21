@@ -133,7 +133,7 @@ export const dailyPdfReportGenerationFn: InngestFunction.Any = inngest.createFun
       };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "daily_pdf_report_generation_job",
       });
       throw err;

@@ -84,6 +84,7 @@
     "bundlesize": "node tools/check-bundle-size.cjs",
     "audit:suite": "node tools/run-audit.cjs",
     "audit:design": "node tools/design-audit.cjs",
+    "audit:explain": "node tools/explain-query-plans.cjs",
     "audit:rls": "node tools/audit-rls.cjs",
     "maps:gen": "node tools/generate-codebase-maps.cjs",
     "build": "node scripts/sync-assets-smart.cjs && nx run-many -t build",

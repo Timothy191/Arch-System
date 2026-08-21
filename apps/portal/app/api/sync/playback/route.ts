@@ -61,7 +61,7 @@ import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
-import { syncPlaybackSchema } from "@repo/contract";
+import { syncPlaybackSchema } from "@repo/contract/schemas/sync.schema";
 
 async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
@@ -96,7 +96,7 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, queued: true });
   } catch (err: unknown) {
-    logError(err instanceof Error ? err : new Error(String(err)), {
+    logError(err, {
       context: "sync_playback",
     });
     return NextResponse.json(

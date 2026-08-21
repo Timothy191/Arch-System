@@ -10,10 +10,12 @@ import {
   logTireInspectionSchema,
   createTireSchema,
   replaceTireSchema,
-  type LogTireInspectionInput,
-  type CreateTireInput,
-  type ReplaceTireInput,
-} from "@repo/contract";
+} from "@repo/contract/schemas/tire-management.schema";
+import type {
+  LogTireInspectionInput,
+  CreateTireInput,
+  ReplaceTireInput,
+} from "@repo/contract/types/tire-management.types";
 
 export async function logTireInspection(input: LogTireInspectionInput) {
   const parsed = logTireInspectionSchema.safeParse(input);

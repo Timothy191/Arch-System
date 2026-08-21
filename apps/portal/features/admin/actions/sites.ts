@@ -3,7 +3,7 @@
 import { cacheInvalidateTags } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
-import { adminAddSiteSchema, adminUpdateSiteSchema } from "@repo/contract";
+import { adminAddSiteSchema, adminUpdateSiteSchema } from "@repo/contract/schemas/admin.schema";
 
 async function assertAdmin() {
   const supabase = await createServerSupabaseClient();

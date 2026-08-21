@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useRef } from "react";
 import { useReportWebVitals } from "next/web-vitals";
 import { analyzePerformance, INPMonitor, LCPMonitor } from "@/lib/performance-analyzer";
 
@@ -26,10 +27,52 @@ interface Metric {
  *   - OpenTelemetry spans for production monitoring
  */
 export function WebVitalsReporter() {
+  // AGENT-TRACE: Accumulate metrics in a buffer and flush to sessionStorage
+  // on page hide or after a debounce window — avoids writing on every metric report.
+  const pendingRef = useRef<
+    Array<{
+      key: string;
+      entry: {
+        value: number;
+        rating: string;
+        attribution?: Record<string, unknown>;
+        timestamp: number;
+      };
+    }>
+  >([]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flush = useCallback(() => {
+    if (pendingRef.current.length === 0) return;
+    try {
+      const batch = pendingRef.current.splice(0);
+      for (const { key, entry } of batch) {
+        const raw = sessionStorage.getItem(key);
+        const entries: Array<{
+          value: number;
+          rating: string;
+          attribution?: Record<string, unknown>;
+          timestamp: number;
+        }> = raw ? JSON.parse(raw) : [];
+        entries.push(entry);
+        if (entries.length > 50) entries.shift();
+        sessionStorage.setItem(key, JSON.stringify(entries));
+      }
+    } catch {
+      // sessionStorage may be full or unavailable
+    }
+  }, []);
+
+  useEffect(() => {
+    const onHidden = () => flush();
+    document.addEventListener("visibilitychange", onHidden);
+    return () => document.removeEventListener("visibilitychange", onHidden);
+  }, [flush]);
+
   useReportWebVitals((metric: Metric) => {
     const isDev = process.env.NODE_ENV === "development";
-    
-    // Enhanced logging with performance breakdown for LCP and INP
+
+    // Dev-only: rich console breakdown for LCP and INP
     if (isDev && (metric.name === "LCP" || metric.name === "INP")) {
       const analysis = analyzePerformance({
         lcp: metric.name === "LCP" ? metric.value : undefined,
@@ -40,25 +83,29 @@ export function WebVitalsReporter() {
       console.group(`[Web Vitals] ${metric.name} Analysis`);
       // eslint-disable-next-line no-console
       console.log(`Value: ${metric.value.toFixed(0)}ms (${metric.rating})`);
-      
+
       if (metric.name === "LCP" && analysis.lcp) {
         // eslint-disable-next-line no-console
         console.log("Breakdown:", analysis.lcp.breakdown);
         // eslint-disable-next-line no-console
-        console.log(`Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`);
+        console.log(
+          `Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`,
+        );
         // eslint-disable-next-line no-console
         console.log("Optimization strategies:", analysis.lcp.strategies);
       }
-      
+
       if (metric.name === "INP" && analysis.inp) {
         // eslint-disable-next-line no-console
         console.log("Breakdown:", analysis.inp.breakdown);
         // eslint-disable-next-line no-console
-        console.log(`Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`);
+        console.log(
+          `Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`,
+        );
         // eslint-disable-next-line no-console
         console.log("Optimization strategies:", analysis.inp.strategies);
       }
-      
+
       // eslint-disable-next-line no-console
       console.groupEnd();
       return;
@@ -69,33 +116,22 @@ export function WebVitalsReporter() {
     try {
       document.body.setAttribute(attrName, String(metric.value));
     } catch {
-      // Silently ignore — attribute setting is non-critical
+      // Silently ignore
     }
 
-    // Accumulate in sessionStorage for per-session aggregation with attribution
-    try {
-      const key = `wv:${metric.name}`;
-      const raw = sessionStorage.getItem(key);
-      const entries: Array<{
-        value: number;
-        rating: string;
-        attribution?: Record<string, unknown>;
-        timestamp: number;
-      }> = raw ? JSON.parse(raw) : [];
-      
-      entries.push({
+    // Buffer sessionStorage writes — flush on visibilitychange or after 5s debounce
+    pendingRef.current.push({
+      key: `wv:${metric.name}`,
+      entry: {
         value: metric.value,
         rating: metric.rating,
         attribution: metric.attribution,
         timestamp: Date.now(),
-      });
-      
-      // Keep only last 50 entries per metric
-      if (entries.length > 50) entries.shift();
-      sessionStorage.setItem(key, JSON.stringify(entries));
-    } catch {
-      // sessionStorage may be full or unavailable
-    }
+      },
+    });
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(flush, 5_000);
   });
 
   return null;
@@ -106,34 +142,35 @@ export function WebVitalsReporter() {
  * Sets up INP and LCP observers for continuous monitoring
  */
 export function usePerformanceMonitoring(options?: {
-  onINPChange?: (inp: number, rating: string) => void;
-  onLCPChange?: (lcp: number, rating: string) => void;
+  onINPChange?: (_inp: number, _rating: string) => void;
+  onLCPChange?: (_lcp: number, _rating: string) => void;
 }) {
   const { onINPChange, onLCPChange } = options || {};
 
-  if (typeof window === "undefined") return;
+  // AGENT-TRACE: Fixed unreachable cleanup — monitors are now created inside
+  // useEffect and their cleanup runs on unmount via the return value.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  // INP Monitoring
-  const inpMonitor = new INPMonitor((inp) => {
-    const rating = inp <= 200 ? "good" : inp <= 500 ? "needs-improvement" : "poor";
-    onINPChange?.(inp, rating);
-  });
+    const inpMonitor = new INPMonitor((inp) => {
+      const rating = inp <= 200 ? "good" : inp <= 500 ? "needs-improvement" : "poor";
+      onINPChange?.(inp, rating);
+    });
 
-  // LCP Monitoring
-  const lcpMonitor = new LCPMonitor((lcp) => {
-    const rating = lcp <= 2500 ? "good" : lcp <= 4000 ? "needs-improvement" : "poor";
-    onLCPChange?.(lcp, rating);
-  });
+    const lcpMonitor = new LCPMonitor((lcp) => {
+      const rating = lcp <= 2500 ? "good" : lcp <= 4000 ? "needs-improvement" : "poor";
+      onLCPChange?.(lcp, rating);
+    });
 
-  // Start monitoring after mount
-  setTimeout(() => {
-    inpMonitor.start();
-    lcpMonitor.start();
-  }, 1000);
+    const startTimer = setTimeout(() => {
+      inpMonitor.start();
+      lcpMonitor.start();
+    }, 1000);
 
-  // Cleanup on unmount
-  return () => {
-    inpMonitor.stop();
-    lcpMonitor.stop();
-  };
+    return () => {
+      clearTimeout(startTimer);
+      inpMonitor.stop();
+      lcpMonitor.stop();
+    };
+  }, [onINPChange, onLCPChange]);
 }

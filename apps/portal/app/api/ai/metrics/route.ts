@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
     const { searchParams } = new URL(request.url);
-    
+
     const scope = searchParams.get("scope") || "session"; // 'session' | 'all-time' | '24h' | '7d' | '30d'
     const departmentId = searchParams.get("department_id");
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     if (scope !== "all-time") {
       query = query.gte("created_at", startDate.toISOString());
     }
-    
+
     if (departmentId) {
       query = query.eq("department_id", departmentId);
     }
@@ -76,16 +76,20 @@ export async function GET(request: Request) {
     const totalCostCents = usage.reduce((sum, r) => sum + r.total_cost_usd_cents, 0);
     const totalCostUSD = totalCostCents / 100;
     const totalCostZAR = totalCostUSD * 18.52; // ZAR exchange rate
-    
-    const cacheHitRatio = totalPromptTokens > 0 
-      ? Math.round((totalCachedTokens / totalPromptTokens) * 100 * 10) / 10
-      : 0;
+
+    const cacheHitRatio =
+      totalPromptTokens > 0
+        ? Math.round((totalCachedTokens / totalPromptTokens) * 100 * 10) / 10
+        : 0;
 
     const tokensSaved = totalCachedTokens * 0.75; // 75% savings from cache
 
     // Group by model
-    const byModel: Record<string, { tokens: number; cost: number; requests: number; cachedTokens: number }> = {};
-    usage.forEach(r => {
+    const byModel: Record<
+      string,
+      { tokens: number; cost: number; requests: number; cachedTokens: number }
+    > = {};
+    usage.forEach((r) => {
       const modelName = r.model_name as string;
       if (!byModel[modelName]) {
         byModel[modelName] = {
@@ -109,7 +113,7 @@ export async function GET(request: Request) {
     }));
 
     // Recent usage (last 20 requests)
-    const recentUsage = usage.slice(0, 20).map(r => ({
+    const recentUsage = usage.slice(0, 20).map((r) => ({
       id: r.id,
       timestamp: r.created_at,
       model: r.model_name,
@@ -132,20 +136,20 @@ export async function GET(request: Request) {
         totalCostZAR,
         totalRequests: usage.length,
         avgLatency: Math.round(
-          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1)
+          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1),
         ),
         byModel: modelBreakdown,
         recentUsage,
       },
     });
   } catch (error) {
-    await logError(error instanceof Error ? error : new Error(String(error)), { context: "ai_metrics_route" });
+    await logError(error, { context: "ai_metrics_route" });
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : "Failed to fetch metrics",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

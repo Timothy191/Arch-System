@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { EmptyState } from "@repo/ui/EmptyState";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
@@ -22,7 +22,9 @@ interface MachineWithOp {
   has_entry: boolean;
 }
 
-export function ShiftCoverageWidget({
+// AGENT-TRACE: Memoized to prevent re-renders when parent re-renders.
+// Props are stable strings — re-renders only from internal state (machines, loading, etc.).
+function ShiftCoverageWidgetBase({
   departmentId,
   departmentSlug,
   today,
@@ -250,3 +252,5 @@ export function ShiftCoverageWidget({
     </>
   );
 }
+
+export const ShiftCoverageWidget = memo(ShiftCoverageWidgetBase);

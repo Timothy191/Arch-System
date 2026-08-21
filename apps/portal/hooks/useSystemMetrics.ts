@@ -43,8 +43,10 @@ export function useSystemMetrics(): SystemMetrics {
 
   useEffect(() => {
     // Network status change listeners
-    const handleOnline = () => setMetrics((prev) => ({ ...prev, online: true }));
-    const handleOffline = () => setMetrics((prev) => ({ ...prev, online: false }));
+    const handleOnline = () =>
+      setMetrics((prev) => (prev.online ? prev : { ...prev, online: true }));
+    const handleOffline = () =>
+      setMetrics((prev) => (!prev.online ? prev : { ...prev, online: false }));
 
     if (typeof window !== "undefined") {
       window.addEventListener("online", handleOnline);
@@ -63,11 +65,16 @@ export function useSystemMetrics(): SystemMetrics {
       });
       const currentShift = getThreeShift(now);
 
-      setMetrics((prev) => ({
-        ...prev,
-        serverTimeSAST,
-        currentShift,
-      }));
+      setMetrics((prev) => {
+        if (prev.serverTimeSAST === serverTimeSAST && prev.currentShift === currentShift) {
+          return prev;
+        }
+        return {
+          ...prev,
+          serverTimeSAST,
+          currentShift,
+        };
+      });
     }, 1000);
 
     // Simulate websocket latency update every 3 seconds
@@ -77,10 +84,15 @@ export function useSystemMetrics(): SystemMetrics {
       const spike = Math.random() > 0.95 ? Math.floor(Math.random() * 45) : 0; // 5% chance of spike
       const newLatency = base + jitter + spike;
 
-      setMetrics((prev) => ({
-        ...prev,
-        websocketLatency: newLatency,
-      }));
+      setMetrics((prev) => {
+        if (prev.websocketLatency === newLatency) {
+          return prev;
+        }
+        return {
+          ...prev,
+          websocketLatency: newLatency,
+        };
+      });
     };
 
     updateLatency();

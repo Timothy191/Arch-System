@@ -58,7 +58,10 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { getRedisClient } from "@repo/redis";
 import { withValidation } from "@repo/contract/validation";
-import { insarTelemetryIngestSchema, type InsarTelemetryIngestInput } from "@repo/contract";
+import {
+  insarTelemetryIngestSchema,
+  type InsarTelemetryIngestInput,
+} from "@repo/contract/schemas/satellite.schema";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
 
@@ -86,10 +89,10 @@ const handleIngest = withValidation(insarTelemetryIngestSchema, async (_req, dat
       absDisplacement >= 15.0
         ? "critical"
         : absDisplacement >= 8.0
-        ? "moderate"
-        : absDisplacement >= 3.0
-        ? "minor"
-        : "none";
+          ? "moderate"
+          : absDisplacement >= 3.0
+            ? "minor"
+            : "none";
 
     const risk_level = payload.risk_level || computedRisk;
     const supabase = await createServerSupabaseClient();
@@ -137,11 +140,9 @@ const handleIngest = withValidation(insarTelemetryIngestSchema, async (_req, dat
     // 2. Cache in Redis & publish to pub/sub channel
     try {
       const redis = await getRedisClient();
-      await redis.set(
-        `satellite:insar:last:${eventData.id}`,
-        JSON.stringify(eventData),
-        { EX: 86400 }
-      );
+      await redis.set(`satellite:insar:last:${eventData.id}`, JSON.stringify(eventData), {
+        EX: 86400,
+      });
       await redis.publish("satellite:insar:stream", JSON.stringify(eventData));
     } catch (redisErr) {
       // eslint-disable-next-line no-console
@@ -185,7 +186,7 @@ const handleIngest = withValidation(insarTelemetryIngestSchema, async (_req, dat
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to process InSAR telemetry" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });
@@ -197,6 +198,6 @@ export async function POST(req: Request) {
       const response = await handleIngest(req, { params: Promise.resolve({}) });
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 5242880 } // 5MB limit
+    { maxSize: 5242880 }, // 5MB limit
   );
 }

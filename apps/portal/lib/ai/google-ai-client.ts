@@ -14,7 +14,7 @@ const PRICING = {
   "gemini-2.0-flash": {
     prompt: 0.075, // $0.075 per 1M tokens (cache miss)
     promptCached: 0.01875, // $0.01875 per 1M tokens (cache hit - 75% discount)
-    completion: 0.30, // $0.30 per 1M tokens
+    completion: 0.3, // $0.30 per 1M tokens
   },
   // Gemini 2.0 Pro
   "gemini-2.0-pro": {
@@ -26,7 +26,7 @@ const PRICING = {
   "gemini-1.5-flash": {
     prompt: 0.075,
     promptCached: 0.01875,
-    completion: 0.30,
+    completion: 0.3,
   },
 };
 
@@ -63,13 +63,13 @@ function calculateCost(
   cachedPromptTokens: number,
 ): number {
   const pricing = PRICING[modelName] || PRICING["gemini-2.0-flash"];
-  
+
   const uncachedPromptTokens = promptTokens - cachedPromptTokens;
-  
+
   const promptCost = (uncachedPromptTokens / 1_000_000) * pricing.prompt;
   const cachedCost = (cachedPromptTokens / 1_000_000) * pricing.promptCached;
   const completionCost = (completionTokens / 1_000_000) * pricing.completion;
-  
+
   return promptCost + cachedCost + completionCost;
 }
 
@@ -91,7 +91,7 @@ async function recordTokenUsage(
 ) {
   try {
     const supabase = await createServerSupabaseClient();
-    
+
     const { error: insertError } = await supabase.from("ai_token_usage").insert({
       request_id: metadata.requestId,
       user_id: metadata.userId,
@@ -114,10 +114,10 @@ async function recordTokenUsage(
     });
 
     if (insertError) {
-      console.error("Failed to record AI token usage:", insertError);
+      console.error("Failed to record AI token usage:", insertError); // eslint-disable-line no-console
     }
   } catch (err) {
-    console.error("Error recording token usage:", err);
+    console.error("Error recording token usage:", err); // eslint-disable-line no-console
   }
 }
 
@@ -131,7 +131,7 @@ export class TrackedGoogleAI {
   constructor() {
     this.apiKey = process.env.GOOGLE_AI_API_KEY || "";
     if (!this.apiKey) {
-      console.warn("GOOGLE_AI_API_KEY not configured - AI features will be disabled");
+      console.warn("GOOGLE_AI_API_KEY not configured - AI features will be disabled"); // eslint-disable-line no-console
     }
     this.client = new GoogleGenerativeAI(this.apiKey);
   }
@@ -141,8 +141,8 @@ export class TrackedGoogleAI {
    */
   async generateContentWithTracking(
     model: ModelName,
-    request: GenerateContentRequest,
-    tracking: TokenUsageMetadata,
+    request: string | GenerateContentRequest,
+    tracking: Partial<TokenUsageMetadata>,
   ): Promise<TrackedGenerationResult> {
     const startTime = Date.now();
     const requestId = tracking.requestId || crypto.randomUUID();
@@ -150,15 +150,15 @@ export class TrackedGoogleAI {
     try {
       const genModel = this.client.getGenerativeModel({ model });
       const result = await genModel.generateContent(request);
-      
+
       const latencyMs = Date.now() - startTime;
-      
+
       // Extract token usage from response
       const usageMetadata = result.response.usageMetadata;
       const promptTokens = usageMetadata?.promptTokenCount || 0;
       const completionTokens = usageMetadata?.candidatesTokenCount || 0;
       const totalTokens = usageMetadata?.totalTokenCount || 0;
-      
+
       // Estimate cached tokens (Google doesn't expose this directly)
       // We estimate based on prompt length vs typical context
       const cachedPromptTokens = 0; // Would need prompt caching headers from Google
@@ -194,7 +194,7 @@ export class TrackedGoogleAI {
     } catch (error) {
       const latencyMs = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+
       // Record failed request
       await recordTokenUsage(
         model,

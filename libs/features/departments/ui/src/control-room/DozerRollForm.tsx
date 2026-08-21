@@ -7,7 +7,7 @@ import { getCurrentShift } from "@repo/utils";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { useRouter } from "next/navigation";
 import { Plus, X, Equal, Calculator } from "lucide-react";
-import { dozerRollSchema } from "@repo/contract";
+import { dozerRollSchema } from "@repo/contract/schemas/form.schema";
 import { useUnsavedChangesWarning } from "../hooks/useUnsavedChangesWarning";
 
 interface DozerWithSite {

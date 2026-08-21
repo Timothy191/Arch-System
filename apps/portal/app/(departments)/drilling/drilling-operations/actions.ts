@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { drillOperationSchema, type DrillOperationInput } from "@repo/contract";
+import { drillOperationSchema } from "@repo/contract/schemas/drill.schema";
+import type { DrillOperationInput } from "@repo/contract/schemas/drill.schema";
 
 export interface ActionResult<T = unknown> {
   success: boolean;

@@ -69,8 +69,10 @@ const nextConfig = {
     ],
   },
   compiler: {
+    // AGENT-TRACE: In production, strip console.warn and console.info to reduce bundle size
+    // and prevent sensitive data leakage. Keep console.error for Sentry error capture.
     removeConsole: isProduction && {
-      exclude: ["error", "warn", "info"],
+      exclude: ["error"],
     },
   },
   reactStrictMode: true,

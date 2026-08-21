@@ -39,6 +39,22 @@
     "delamination",
     "insar",
     "highwall",
-    "upserts"
+    "upserts",
+    "maxage",
+    "refetches",
+    "pkey",
+    "Prerender",
+    "prerender",
+    "preconnected",
+    "Preconnected",
+    "Jakob",
+    "Fitts",
+    "Doherty",
+    "Tesler",
+    "Postel",
+    "Restorff",
+    "Zeigarnik",
+    "Pragnanz",
+    "normalise"
   ]
 }

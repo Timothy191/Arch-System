@@ -1,33 +1,30 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
-const WeatherWidget = lazy(() =>
-  import("@/components/weather/WeatherWidget").then((m) => ({
-    default: m.WeatherWidget,
-  })),
+// AGENT-TRACE: Converted React.lazy → next/dynamic for proper Next.js code
+// splitting, chunk prefetching, and SSR control.
+const FeedbackWidget = dynamic(
+  () => import("@/components/FeedbackWidget").then((m) => ({ default: m.FeedbackWidget })),
+  { ssr: false },
 );
 
-const SystemClock = lazy(() =>
-  import("@/components/clock/SystemClock").then((m) => ({
-    default: m.SystemClock,
-  })),
+const SystemClock = dynamic(
+  () => import("@/components/clock/SystemClock").then((m) => ({ default: m.SystemClock })),
+  { ssr: false },
 );
 
-const ServicesDropdown = lazy(() =>
-  import("@/components/nav/ServicesDropdown").then((m) => ({
-    default: m.ServicesDropdown,
-  })),
+const ServicesDropdown = dynamic(
+  () => import("@/components/nav/ServicesDropdown").then((m) => ({ default: m.ServicesDropdown })),
+  { ssr: false },
 );
 
 /**
  * HeaderWidgets
  *
- * Groups the weather widget, system clock, and services dropdown into a single
- * lazy-loaded chunk. This keeps the main layout JS lean — these three widgets
- * are loaded only when the page is idle (via Suspense + browser idle pattern).
- *
- * Each widget renders a minimal skeleton placeholder until its code arrives.
+ * Groups the support/feedback widget, system clock, and services dropdown into a single
+ * lazy-loaded chunk for the top taskbar header.
  */
 function WidgetFallback({ width = "w-7" }: { width?: string }) {
   return (
@@ -41,8 +38,8 @@ function WidgetFallback({ width = "w-7" }: { width?: string }) {
 export function HeaderWidgets() {
   return (
     <>
-      <Suspense fallback={<WidgetFallback />}>
-        <WeatherWidget variant="header" />
+      <Suspense fallback={<WidgetFallback width="w-16" />}>
+        <FeedbackWidget variant="header" />
       </Suspense>
 
       <Suspense fallback={<WidgetFallback width="w-20" />}>

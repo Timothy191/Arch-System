@@ -20,7 +20,7 @@ export const generateEmbeddingFn: InngestFunction.Any = inngest.createFunction(
       return { success: true };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "generate_embedding_job",
         userId,
         hasText: !!text,

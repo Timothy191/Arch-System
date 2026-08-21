@@ -51,6 +51,8 @@ export const useOfflineQueue = create<OfflineQueueState>()(
       clearQueue: () => set({ queue: [] }),
 
       setOnlineStatus: (status) => {
+        // AGENT-TRACE: Guard status update with value equality check to skip Zustand store notification when unchanged.
+        if (get().isOnline === status) return;
         set({ isOnline: status });
       },
 

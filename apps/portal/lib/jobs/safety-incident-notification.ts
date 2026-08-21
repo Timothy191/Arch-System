@@ -33,7 +33,7 @@ export const safetyIncidentNotificationFn: InngestFunction.Any = inngest.createF
     } catch (err) {
       const duration = performance.now() - start;
       recordJobExecution("safety-incident-notifications", duration, false);
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "safetyIncidentNotificationFn",
         data: event.data,
       });

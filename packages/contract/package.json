@@ -11,6 +11,7 @@
     "typescript": "catalog:",
     "zod": "catalog:"
   },
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

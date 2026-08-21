@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 import {
@@ -81,50 +82,76 @@ export function formatTimeSeconds(totalSeconds: number): string {
 /* ------------------------------------------------------------------ */
 //  useNetworkStatus
 /* ------------------------------------------------------------------ */
+// AGENT-TRACE: Consolidated network status state into a single state object with equality check to prevent update depth recursion.
 export function useNetworkStatus() {
-  const [online, setOnline] = useState(true);
-  const [effectiveType, setEffectiveType] = useState<NetworkConnection["effectiveType"]>(undefined);
-  const [connType, setConnType] = useState<NetworkConnection["type"]>(undefined);
-  const [downlink, setDownlink] = useState<number | undefined>(undefined);
-  const [rtt, setRtt] = useState<number | undefined>(undefined);
-  const [supported, setSupported] = useState(true);
+  const [status, setStatus] = useState<{
+    online: boolean;
+    effectiveType?: NetworkConnection["effectiveType"];
+    connType?: NetworkConnection["type"];
+    downlink?: number;
+    rtt?: number;
+    supported: boolean;
+  }>({
+    online: true,
+    supported: true,
+  });
 
   useEffect(() => {
-    const handleOnline = () => setOnline(true);
-    const handleOffline = () => setOnline(false);
-    setOnline(navigator.onLine);
+    const nav =
+      typeof navigator !== "undefined" ? (navigator as NavigatorWithConnection) : undefined;
+    const connection = nav?.connection ?? nav?.mozConnection ?? nav?.webkitConnection;
+
+    const sync = () => {
+      const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+      const isSupported = Boolean(connection);
+      const nextEffectiveType = connection?.effectiveType;
+      const nextConnType = connection?.type;
+      const nextDownlink = connection?.downlink;
+      const nextRtt = connection?.rtt;
+
+      setStatus((prev) => {
+        if (
+          prev.online === isOnline &&
+          prev.supported === isSupported &&
+          prev.effectiveType === nextEffectiveType &&
+          prev.connType === nextConnType &&
+          prev.downlink === nextDownlink &&
+          prev.rtt === nextRtt
+        ) {
+          return prev;
+        }
+        return {
+          online: isOnline,
+          supported: isSupported,
+          effectiveType: nextEffectiveType,
+          connType: nextConnType,
+          downlink: nextDownlink,
+          rtt: nextRtt,
+        };
+      });
+    };
+
+    sync();
+
+    const handleOnline = () => sync();
+    const handleOffline = () => sync();
+
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-
-    const nav = navigator as NavigatorWithConnection;
-    const connection = nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
-
-    if (!connection) {
-      setSupported(false);
-    } else {
-      setSupported(true);
-      const sync = () => {
-        setEffectiveType(connection.effectiveType);
-        setConnType(connection.type);
-        setDownlink(connection.downlink);
-        setRtt(connection.rtt);
-      };
-      sync();
+    if (connection) {
       connection.addEventListener("change", sync);
-      return () => {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
-        connection.removeEventListener("change", sync);
-      };
     }
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      if (connection) {
+        connection.removeEventListener("change", sync);
+      }
     };
   }, []);
 
-  return { online, effectiveType, connType, downlink, rtt, supported };
+  return status;
 }
 
 /* ------------------------------------------------------------------ */
@@ -253,85 +280,67 @@ interface HealthState {
   lastFetched: number | null;
 }
 
+// AGENT-TRACE: Replaced manual useEffect+setInterval polling with React Query
+// for automatic deduplication, stale-while-revalidate, visibility-aware refetch,
+// and proper cleanup on unmount. Reduces redundant API calls across tab switches.
 function useServerHealth() {
-  const [health, setHealth] = useState<HealthState>({
-    status: "healthy",
-    db: "ok",
-    redis: "ok",
-    fuxa: "ok",
-    responseTime: 0,
-    timestamp: "",
-    loading: true,
-    lastFetched: null,
+  const mapServiceStatus = (
+    s: { status: "healthy" | "degraded" | "down" } | null | undefined,
+  ): "ok" | "degraded" | "unavailable" => {
+    if (!s) return "unavailable";
+    if (s.status === "healthy") return "ok";
+    if (s.status === "degraded") return "degraded";
+    return "unavailable";
+  };
+
+  const statusMap = {
+    healthy: "healthy",
+    degraded: "degraded",
+    down: "error",
+  } as const;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["server-health"],
+    queryFn: async (): Promise<HealthState> => {
+      const res = await fetch("/api/health", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const json = await res.json();
+      return {
+        status: json.status
+          ? (statusMap[json.status as keyof typeof statusMap] ?? "error")
+          : "error",
+        db: mapServiceStatus(json.services?.supabase_realtime),
+        redis: mapServiceStatus(json.services?.redis),
+        fuxa: mapServiceStatus(json.services?.fuxa),
+        responseTime: json.latency_ms ?? 0,
+        timestamp: json.last_check ?? "",
+        loading: false,
+        lastFetched: Date.now(),
+      };
+    },
+    // AGENT-TRACE: 60s interval + refetchOnWindowFocus avoids hammering the
+    // health endpoint when the tray popover is closed or the tab is hidden.
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+    staleTime: 30_000,
+    retry: 1,
+    placeholderData: (prev) => prev,
   });
 
-  useEffect(() => {
-    let cancelled = false;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    const fetchHealth = async () => {
-      try {
-        const res = await fetch("/api/health", {
-          method: "GET",
-          cache: "no-store",
-        });
-        const data = await res.json();
-        if (!cancelled) {
-          const statusMap = {
-            healthy: "healthy",
-            degraded: "degraded",
-            down: "error",
-          } as const;
-
-          const mapServiceStatus = (
-            s: { status: "healthy" | "degraded" | "down" } | null | undefined,
-          ): "ok" | "degraded" | "unavailable" => {
-            if (!s) return "unavailable";
-            if (s.status === "healthy") return "ok";
-            if (s.status === "degraded") return "degraded";
-            return "unavailable";
-          };
-
-          setHealth({
-            status: data.status
-              ? (statusMap[data.status as keyof typeof statusMap] ?? "error")
-              : "error",
-            db: mapServiceStatus(data.services?.supabase_realtime),
-            redis: mapServiceStatus(data.services?.redis),
-            fuxa: mapServiceStatus(data.services?.fuxa),
-            responseTime: data.latency_ms ?? 0,
-            timestamp: data.last_check ?? "",
-            loading: false,
-            lastFetched: Date.now(),
-          });
-        }
-      } catch {
-        if (!cancelled) {
-          setHealth((prev) => ({
-            ...prev,
-            status: "error",
-            loading: false,
-            lastFetched: Date.now(),
-          }));
-        }
-      }
-    };
-
-    fetchHealth();
-
-    intervalId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        fetchHealth();
-      }
-    }, 30000);
-
-    return () => {
-      cancelled = true;
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, []);
-
-  return health;
+  return (
+    data ?? {
+      status: "healthy" as const,
+      db: "ok" as const,
+      redis: "ok" as const,
+      fuxa: "ok" as const,
+      responseTime: 0,
+      timestamp: "",
+      loading: isLoading,
+      lastFetched: null,
+    }
+  );
 }
 
 /* ------------------------------------------------------------------ */

@@ -93,7 +93,7 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
       return data.embedding as number[];
     }
   } catch (err) {
-    logError(err instanceof Error ? err : new Error(String(err)), {
+    logError(err, {
       context: "embedding_db_cache_lookup_exception",
       hash,
       userId,
@@ -127,7 +127,7 @@ async function _saveDbCachedEmbedding(
       });
     }
   } catch (err) {
-    logError(err instanceof Error ? err : new Error(String(err)), {
+    logError(err, {
       context: "embedding_db_cache_insert_exception",
       hash,
       userId,
@@ -220,7 +220,7 @@ export async function batchGenerateEmbeddings(
       }
     }
   } catch (dbErr) {
-    logError(dbErr instanceof Error ? dbErr : new Error(String(dbErr)), {
+    logError(dbErr, {
       context: "embedding_batch_db_lookup_failed",
       userId,
     });

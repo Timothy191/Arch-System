@@ -57,7 +57,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
     if (isAppError(error)) {
       logError(error);
     } else {
-      logError((error as any) instanceof Error ? error : new Error(String(error)));
+      logError(error);
     }
   }, [error]);
 

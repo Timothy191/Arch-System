@@ -203,7 +203,7 @@ export const shiftIntegrityReportFn: InngestFunction.Any = inngest.createFunctio
       return result;
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "shift_integrity_report_job",
       });
       throw err;

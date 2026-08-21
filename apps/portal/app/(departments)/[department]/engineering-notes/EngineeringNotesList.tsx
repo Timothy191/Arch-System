@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AutoAnimateList } from "@repo/ui/AnimatedList";
 
@@ -53,7 +54,7 @@ function formatTime(dateStr: string) {
   });
 }
 
-export function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
+function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
   if (notes.length === 0) {
     return (
       <GlassCard>
@@ -190,3 +191,8 @@ function NoteCard({ note }: { note: EngineeringNote }) {
     </GlassCard>
   );
 }
+
+// AGENT-TRACE: Memoize EngineeringNotesList — notes prop is stable across renders;
+// prevents re-rendering the entire list + individual GlassCard items.
+const MemoizedEngineeringNotesList = memo(EngineeringNotesList);
+export { MemoizedEngineeringNotesList as EngineeringNotesList };

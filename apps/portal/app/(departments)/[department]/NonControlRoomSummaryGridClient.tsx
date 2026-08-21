@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useNonControlRoomSummary } from "@/hooks/useDashboardQueries";
 import { GlassCard } from "@repo/ui/GlassCard";
 
@@ -8,7 +9,9 @@ interface NonControlRoomSummaryGridClientProps {
   today: string;
 }
 
-export function NonControlRoomSummaryGridClient({
+// AGENT-TRACE: Memoized to prevent re-renders when parent Dashboard re-renders.
+// Props (deptId, today) are stable strings — re-renders only from React Query data updates.
+function NonControlRoomSummaryGridClientBase({
   deptId,
   today,
 }: NonControlRoomSummaryGridClientProps) {
@@ -44,3 +47,5 @@ export function NonControlRoomSummaryGridClient({
     </div>
   );
 }
+
+export const NonControlRoomSummaryGridClient = memo(NonControlRoomSummaryGridClientBase);

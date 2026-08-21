@@ -6,7 +6,7 @@ export type {
   ReplaceTireInput,
   TireStatus,
   TireCondition,
-} from "@repo/contract";
+} from "@repo/contract/types/tire-management.types";
 
 export interface TireWithInspections {
   id: string;

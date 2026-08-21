@@ -6,7 +6,11 @@ import { revalidatePath } from "next/cache";
 import { logAuditEvent } from "@/lib/audit";
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
-import { createBreakdownSchema, bookOutSchema, directCheckoutSchema } from "@repo/contract";
+import {
+  createBreakdownSchema,
+  bookOutSchema,
+  directCheckoutSchema,
+} from "@repo/contract/schemas/form.schema";
 import type { CreateBreakdownInput, BookOutInput, DirectCheckoutInput } from "./types";
 
 const BookOutSchema = bookOutSchema;

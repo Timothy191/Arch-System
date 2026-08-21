@@ -98,7 +98,7 @@ export const shiftRolloverNotificationFn: InngestFunction.Any = inngest.createFu
       };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "shift_rollover_notification_job",
       });
       throw err;

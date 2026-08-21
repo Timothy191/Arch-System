@@ -26,7 +26,7 @@ export default function HubError({ error, reset }: HubErrorProps) {
     if (isAppError(error)) {
       logError(error);
     } else {
-      logError((error as any) instanceof Error ? error : new Error(String(error)));
+      logError(error);
     }
   }, [error]);
 

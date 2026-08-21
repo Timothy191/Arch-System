@@ -4,7 +4,7 @@ import { logError } from "@/lib/errors/error-logger";
 import { validateBody } from "@/lib/api/response";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
-import { scannerBadgeSchema } from "@repo/contract";
+import { scannerBadgeSchema } from "@repo/contract/schemas/scanner.schema";
 
 /**
  * @swagger
@@ -251,7 +251,7 @@ async function handlePost(request: Request) {
       message: isAuthorized ? "Access Granted" : denialReason,
     });
   } catch (error) {
-    logError(error instanceof Error ? error : new Error(String(error)), {
+    logError(error, {
       url: "/api/c66",
       method: "POST",
     });

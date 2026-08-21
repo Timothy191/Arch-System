@@ -44,5 +44,24 @@ module.exports = {
         "no-undef": "off",
       },
     },
+    // AGENT-TRACE: Enforce subpath imports for @repo/contract in libs packages.
+    // Barrel imports pull all Zod schemas into every route group's chunk.
+    {
+      files: ["**/*.ts", "**/*.tsx"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@repo/contract",
+                message:
+                  "Import from @repo/contract/schemas/* or @repo/contract/types/* for better tree-shaking",
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };

@@ -10,15 +10,13 @@ import { FocusModeProvider } from "@/components/FocusModeProvider";
 import { PerformanceListener } from "@/components/PerformanceListener";
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
-import { PWAInstallButton } from "@/components/PWAInstallButton";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { LCPObserver } from "@/components/LCPObserver";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
-import { CookieConsent } from "@repo/ui/CookieConsent";
-import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { ClientOverlays } from "@/components/ClientOverlays";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -101,6 +99,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     >
       <head>
         <meta charSet="UTF-8" />
+        {/* Preload primary LCP background asset off critical path */}
+        <link
+          rel="preload"
+          href="/background/macos-27-golden-4480x3088-26626.png"
+          as="image"
+          type="image/png"
+          // @ts-expect-error fetchpriority is valid in Modern React 19 & HTML Spec
+          fetchpriority="high"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -123,22 +130,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                       {
                         href_matches: [
                           "/",
+                          "/hub",
                           "/drilling/*",
                           "/production/*",
-                          "/access-control/*",
-                          "/engineering/*",
                           "/control-room/*",
-                          "/safety/*",
-                          "/training/*",
-                          "/satellite-monitoring/*",
-                          "/admin/*",
                         ],
                       },
                       { not: { href_matches: "/api/*" } },
                       { not: { href_matches: "/_next/*" } },
                     ],
                   },
-                  eagerness: "eager", // Prerender on hover (not just moderate)
+                  eagerness: "moderate", // Prerender on hover with short delay (reduced from "eager" to save CPU on low-end devices)
                 },
               ],
             }),
@@ -161,10 +163,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           <ClientProviders>
             <FocusModeProvider>
               <RouteBackground />
-              <PerformanceListener />
+              {/* AGENT-TRACE: PerformanceListener runs a rAF loop for 5s on every page load —
+                  only mount in development to avoid production overhead. */}
+              {process.env.NODE_ENV === "development" && <PerformanceListener />}
               <WebVitalsReporter />
               <OfflineBanner />
-              <PWAInstallButton />
               <AIAssistantWrapper />
 
               {/* Global Navigation Header with proper landmark */}
@@ -192,8 +195,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
               <CommandBar />
               <ViewportBoundaries />
-              <CookieConsent />
-              <FeedbackWidget />
+              <ClientOverlays />
               <Toaster />
 
               {/* Footer landmark - if exists, otherwise contentinfo on body or create footer */}

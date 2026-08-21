@@ -72,20 +72,17 @@ const mockWeatherDataCritical: WeatherData = {
   icon: "⛈️",
 };
 
-jest.mock("@/lib/weather-api", () => {
-  const actual = jest.requireActual("@/lib/weather-api");
-  return {
-    ...actual,
-    fetchWeather: jest.fn().mockImplementation((lat) => {
-      if (lat === 99.99) {
-        throw new Error("Failed to load weather");
-      }
-      return Promise.resolve(mockWeatherData);
-    }),
-  };
+// AGENT-TRACE: WeatherWidget calls fetch("/api/weather"), not fetchWeather()
+// from the weather-api module. Mock global fetch to return test data.
+const mockFetch = jest.fn();
+beforeEach(() => {
+  mockFetch.mockReset();
+  global.fetch = mockFetch;
 });
 
-const { fetchWeather } = jest.requireMock("@/lib/weather-api");
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe("WeatherWidget - Header Variant Popover", () => {
   beforeEach(() => {
@@ -93,7 +90,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
   });
 
   it("renders trigger button with weather icon emoji in header variant", async () => {
-    fetchWeather.mockResolvedValueOnce(mockWeatherData);
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherData) });
     render(<WeatherWidget variant="header" />);
 
     // Wait for weather data to load
@@ -108,7 +105,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
   });
 
   it("toggles the weather popover when trigger is clicked", async () => {
-    fetchWeather.mockResolvedValueOnce(mockWeatherData);
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherData) });
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {
@@ -139,7 +136,10 @@ describe("WeatherWidget - Header Variant Popover", () => {
   });
 
   it("displays alert status overlay dot on trigger when critical weather is active", async () => {
-    fetchWeather.mockResolvedValueOnce(mockWeatherDataCritical);
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockWeatherDataCritical),
+    });
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {

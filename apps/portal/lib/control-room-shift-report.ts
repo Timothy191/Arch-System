@@ -2,7 +2,8 @@
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { controlRoomShiftReportSchema, type ControlRoomShiftReportInput } from "@repo/contract";
+import { controlRoomShiftReportSchema } from "@repo/contract/schemas/control-room.schema";
+import type { ControlRoomShiftReportInput } from "@repo/contract/types/control-room.types";
 import { logAuditEvent } from "./audit";
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";

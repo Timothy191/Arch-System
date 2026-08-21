@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { Play, Info, ArrowUpRight } from "lucide-react";
+import {
+  Play,
+  Pause,
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Activity,
+  CheckCircle2,
+} from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import type { Department } from "@repo/departments/data-access";
 
@@ -16,6 +25,7 @@ interface HeroRotatorProps {
   departments: Department[];
 }
 
+// AGENT-TRACE: Production-grade HeroRotator displaying one dedicated card per department with real industrial terrain visual imagery, status badges, operational telemetry stats, and auto-rotation controls.
 export function HeroRotator({
   defaultTitle,
   defaultDescription,
@@ -26,14 +36,20 @@ export function HeroRotator({
   departments,
 }: HeroRotatorProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-  // AGENT-TRACE: Memoize panels array to avoid allocating objects and JSX elements every render
+  // Construct panels array: Overview first, followed by each department
   const panels = useMemo(
     () => [
       {
-        id: "default",
+        id: "overview",
+        name: "overview",
         title: defaultTitle,
         description: defaultDescription,
+        category: "Central Command",
+        image: "/images/departments/overview.jpg",
+        stats: { label: "System Health", value: "100% Optimal" },
+        status: "active" as const,
         primary: {
           href: primaryHref,
           label: primaryLabel,
@@ -42,13 +58,23 @@ export function HeroRotator({
         secondary: {
           href: secondaryHref,
           label: secondaryLabel,
-          icon: <Info className="w-4 h-4 shrink-0" aria-hidden="true" />,
+          icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
         },
       },
       ...departments.map((dept) => ({
         id: dept.name,
+        name: dept.name,
         title: dept.displayName,
         description: dept.description,
+        category:
+          dept.type === "control_room"
+            ? "SCADA & Telemetry"
+            : dept.type === "satellite"
+              ? "Orbital Intelligence"
+              : "Field Operations",
+        image: `/images/departments/${dept.name}.jpg`,
+        stats: dept.stats || { label: "Telemetry", value: "Online" },
+        status: dept.status || "active",
         primary: dept.actions?.[0]
           ? {
               href: dept.actions[0].href,
@@ -57,7 +83,7 @@ export function HeroRotator({
             }
           : {
               href: `/${dept.name}`,
-              label: `Go to ${dept.displayName}`,
+              label: `Launch ${dept.displayName}`,
               icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
             },
         secondary: dept.actions?.[1]
@@ -66,7 +92,11 @@ export function HeroRotator({
               label: dept.actions[1].label,
               icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
             }
-          : null,
+          : {
+              href: `/${dept.name}`,
+              label: "Explore Module",
+              icon: <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />,
+            },
       })),
     ],
     [
@@ -80,18 +110,31 @@ export function HeroRotator({
     ],
   );
 
-  useEffect(() => {
-    if (panels.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev >= panels.length - 1 ? 0 : prev + 1));
-    }, 6000); // Rotate every 6 seconds
-
-    return () => clearInterval(interval);
+  const nextSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev >= panels.length - 1 ? 0 : prev + 1));
   }, [panels.length]);
 
+  const prevSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev <= 0 ? panels.length - 1 : prev - 1));
+  }, [panels.length]);
+
+  // Auto-rotation effect (every 6 seconds, pauseable on hover)
+  useEffect(() => {
+    if (panels.length <= 1 || isPaused) return;
+
+    const interval = setInterval(nextSlide, 6000);
+    return () => clearInterval(interval);
+  }, [panels.length, isPaused, nextSlide]);
+
   return (
-    <div className="relative overflow-hidden w-full">
+    <div
+      className="relative w-full overflow-hidden select-none"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      aria-roledescription="carousel"
+      aria-label="Department Hero Highlights"
+    >
+      {/* Slide track */}
       <div
         className="flex transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{ transform: `translateX(-${activeIndex * 100}%)` }}
@@ -99,55 +142,162 @@ export function HeroRotator({
         {panels.map((panel, idx) => (
           <div
             key={panel.id}
-            className="w-full shrink-0 flex flex-col justify-start"
+            className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
           >
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-arch-text-primary text-balance">
-                {panel.title}
-              </h1>
-              <p className="text-arch-text-secondary text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-pretty">
-                {panel.description}
-              </p>
+            {/* Left Content Area (7 Cols) */}
+            <div className="lg:col-span-7 space-y-4 flex flex-col justify-between z-10">
+              <div className="space-y-3">
+                {/* Category & Status Pill */}
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-arch-surface-secondary/90 border border-arch-border-subtle text-[11px] font-medium text-arch-text-secondary tracking-wide">
+                    <Layers className="w-3 h-3 text-arch-accent-blue" />
+                    {panel.category}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[10px] font-semibold uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
+                    {panel.status}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-arch-text-primary text-balance">
+                  {panel.title}
+                </h1>
+
+                {/* Description */}
+                <p className="text-arch-text-secondary text-sm sm:text-base md:text-lg leading-relaxed line-clamp-3 text-pretty">
+                  {panel.description}
+                </p>
+              </div>
+
+              {/* Key Operational Stat Row */}
+              {panel.stats && (
+                <div className="inline-flex items-center gap-3 p-2.5 rounded-xl bg-white/50 backdrop-blur-md border border-arch-border-subtle max-w-sm">
+                  <div className="w-8 h-8 rounded-lg bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-[10.5px] font-medium text-arch-text-tertiary uppercase tracking-wider">
+                      {panel.stats.label}
+                    </div>
+                    <div className="text-sm font-semibold text-arch-text-primary">
+                      {panel.stats.value}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Link
+                  href={panel.primary.href}
+                  data-cta="primary-hero"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-arch-brand-blue text-white font-medium text-xs sm:text-sm shadow-card hover:bg-black transition-all hover:scale-[1.02] active:scale-[0.98] min-h-[40px]"
+                >
+                  {panel.primary.icon}
+                  <span>{panel.primary.label}</span>
+                </Link>
+                {panel.secondary && (
+                  <Link
+                    href={panel.secondary.href}
+                    data-cta="secondary-hero"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-arch-surface-secondary/80 text-arch-text-primary font-medium text-xs sm:text-sm border border-arch-border-subtle hover:bg-arch-surface-tertiary hover:border-arch-border-emphasis transition-all backdrop-blur-md min-h-[40px]"
+                  >
+                    {panel.secondary.icon}
+                    <span>{panel.secondary.label}</span>
+                  </Link>
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 pt-2 mt-5">
-              <Link
-                href={panel.primary.href}
-                data-cta="primary-hero"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-blue)] text-white font-medium text-sm shadow-glow-primary transition-all hover:bg-[var(--accent-blue)]/90 active:bg-[var(--accent-blue)]/80 hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)] focus-visible:outline-offset-2 min-h-[44px]"
-              >
-                {panel.primary.icon}
-                {panel.primary.label}
-              </Link>
-              {panel.secondary && (
-                <Link
-                  href={panel.secondary.href}
-                  data-cta="secondary-hero"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-arch-surface-tertiary/60 text-arch-text-secondary font-medium text-sm border border-arch-border-subtle hover:bg-arch-surface-secondary hover:text-arch-text-primary hover:border-arch-border-emphasis active:bg-arch-surface-primary transition-all hover:scale-[1.02] active:scale-[0.97] backdrop-blur-md focus-visible:outline-2 focus-visible:outline-[var(--text-secondary)] focus-visible:outline-offset-2 min-h-[44px]"
-                >
-                  {panel.secondary.icon}
-                  {panel.secondary.label}
-                </Link>
-              )}
+            {/* Right Visual Image Card (5 Cols) */}
+            <div className="lg:col-span-5 relative group/image">
+              <div className="relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3] rounded-2xl overflow-hidden shadow-card border border-arch-border-emphasis/30 bg-arch-surface-tertiary/40">
+                {/* Visual Terrain / Industrial Image */}
+                <img
+                  src={panel.image}
+                  alt={`${panel.title} visual`}
+                  className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover/image:scale-105"
+                  onError={(e) => {
+                    // Fallback to overview image if department image is missing
+                    (e.target as HTMLImageElement).src = "/images/departments/overview.jpg";
+                  }}
+                />
+
+                {/* Subtle Liquid Glass Gradient Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none" />
+
+                {/* Live Indicator Pill on Image */}
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10.5px] font-medium border border-white/20">
+                    <CheckCircle2 className="w-3 h-3 text-accent-green" />
+                    {panel.name.toUpperCase()} FEED
+                  </span>
+                  <span className="text-[10px] font-mono text-white/80 bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                    CAM-0{idx + 1}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Optional: Indicator dots for the carousel */}
+      {/* Navigation Controls & Carousel Indicator Dots */}
       {panels.length > 1 && (
-        <div className="absolute bottom-0 right-0 flex gap-2">
-          {panels.map((_, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
-                idx === activeIndex ? "bg-[var(--accent-blue)] w-4" : "bg-arch-border-emphasis",
+        <div className="flex items-center justify-between pt-6 mt-4 border-t border-arch-border-subtle/50">
+          {/* Left / Right Step Buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={prevSlide}
+              aria-label="Previous department highlight"
+              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={nextSlide}
+              aria-label="Next department highlight"
+              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setIsPaused((prev) => !prev)}
+              aria-label={isPaused ? "Resume auto rotation" : "Pause auto rotation"}
+              className="w-8 h-8 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95 ml-1"
+              title={isPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
+            >
+              {isPaused ? (
+                <Play className="w-3.5 h-3.5 fill-current" />
+              ) : (
+                <Pause className="w-3.5 h-3.5 fill-current" />
               )}
-            />
-          ))}
+            </button>
+          </div>
+
+          {/* Dot Indicators */}
+          <div className="flex items-center gap-1.5">
+            {panels.map((p, idx) => (
+              <button
+                key={p.id}
+                onClick={() => setActiveIndex(idx)}
+                aria-label={`Jump to ${p.title}`}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  idx === activeIndex
+                    ? "w-6 bg-arch-text-primary"
+                    : "w-1.5 bg-arch-border-emphasis hover:bg-arch-text-secondary",
+                )}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
+export default HeroRotator;

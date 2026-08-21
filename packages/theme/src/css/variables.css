@@ -417,8 +417,8 @@
   --shadow-button-uiverse-blob: -10px 10px 30px rgba(0, 81, 255, 0.176);
 
   /* Uiverse.io by uiverse-astronaut Circular Tabs Foundation */
-  --color-cloud: var(--arch0);
-  --color-edge: var(--arch4);
+  --color-cloud: rgba(255, 255, 255, 0.65);
+  --color-edge: rgba(0, 0, 0, 0.08);
   --color-mist: var(--arch9);
   --color-ink: var(--arch11);
   --shadow-cir-tabs: 0 1px 1px rgba(14, 17, 22, 0.04), 0 20px 40px -24px rgba(14, 17, 22, 0.18);

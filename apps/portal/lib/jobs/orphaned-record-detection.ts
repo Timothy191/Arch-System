@@ -156,7 +156,7 @@ export const orphanedRecordDetectionFn: InngestFunction.Any = inngest.createFunc
       return result;
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "orphaned_record_detection_job",
       });
       throw err;

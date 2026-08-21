@@ -31,9 +31,9 @@ interface ErrorLogEntry {
 }
 
 /**
- * Determine error severity based on status code and error type
+ * Determine error severity based on status code
  */
-function getSeverity(error: Error, statusCode?: number): ErrorSeverity {
+function getSeverity(statusCode?: number): ErrorSeverity {
   if (!statusCode) return "error";
   if (statusCode >= 500) return "error";
   if (statusCode >= 400) return "warn";
@@ -41,10 +41,24 @@ function getSeverity(error: Error, statusCode?: number): ErrorSeverity {
 }
 
 /**
+ * Read a string field off a plain object, or undefined.
+ */
+function strField(obj: Record<string, unknown>, key: string): string | undefined {
+  const v = obj[key];
+  return typeof v === "string" && v.length > 0 ? v : undefined;
+}
+
+/**
  * Create a structured error log entry
+ *
+ * Accepts `unknown` because callers legitimately catch non-Error throwables —
+ * most notably Supabase's `PostgrestError`, which is a plain object
+ * `{ message, code, details, hint }` and NOT an `Error` instance. String()-ing
+ * such an object yields "[object Object]" and drops its `code`, which is why
+ * the hourly-loads save path previously logged `UNKNOWN: [object Object]`.
  */
 function createErrorLog(
-  error: Error,
+  error: unknown,
   context?: {
     url?: string;
     method?: string;
@@ -54,6 +68,29 @@ function createErrorLog(
   },
 ): ErrorLogEntry {
   const timestamp = new Date().toISOString();
+
+  // AGENT-TRACE: Non-Error throwables (e.g. Supabase PostgrestError) are plain
+  // objects. Read their fields directly instead of String()-ing them, so the
+  // real message and code survive instead of becoming "[object Object]".
+  if (!(error instanceof Error)) {
+    const obj = (error ?? {}) as Record<string, unknown>;
+    const message = strField(obj, "message") ?? String(error);
+    const statusCode = typeof obj.statusCode === "number" ? obj.statusCode : undefined;
+    return {
+      timestamp,
+      severity: getSeverity(statusCode),
+      code: strField(obj, "code"),
+      statusCode,
+      message,
+      context: context as Record<string, unknown> | undefined,
+      cause: obj.cause,
+      stack: strField(obj, "stack"),
+      url: context?.url,
+      method: context?.method,
+      userId: context?.userId,
+      sessionId: context?.sessionId,
+    };
+  }
 
   // Check if error has AppError-like properties
   const hasAppErrorProps =
@@ -68,7 +105,7 @@ function createErrorLog(
     };
     return {
       timestamp,
-      severity: getSeverity(error, appError.statusCode),
+      severity: getSeverity(appError.statusCode),
       code: appError.code,
       statusCode: appError.statusCode,
       message: error.message,
@@ -106,20 +143,23 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
     error.stack = entry.stack;
   }
 
-  // Keep console output for local debugging
-  // eslint-disable-next-line no-console
-  const logMethod =
-    entry.severity === "error" || entry.severity === "fatal"
-      ? console.error // eslint-disable-line no-console
-      : console.warn; // eslint-disable-line no-console
+  // AGENT-TRACE: In production, skip console output — Sentry handles error capture.
+  // In development, log to console for local debugging.
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    const logMethod =
+      entry.severity === "error" || entry.severity === "fatal"
+        ? console.error // eslint-disable-line no-console
+        : console.warn; // eslint-disable-line no-console
 
-  logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`, {
-    timestamp: entry.timestamp,
-    statusCode: entry.statusCode,
-    context: entry.context,
-    url: entry.url,
-    method: entry.method,
-  });
+    logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`, {
+      timestamp: entry.timestamp,
+      statusCode: entry.statusCode,
+      context: entry.context,
+      url: entry.url,
+      method: entry.method,
+    });
+  }
 
   // Forward server-side errors to Sentry — warn/info are expected control-flow (4xx) and not captured
   if (entry.severity === "error" || entry.severity === "fatal") {
@@ -150,7 +190,7 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
  * ```
  */
 export async function logError(
-  error: Error,
+  error: unknown,
   context?: {
     url?: string;
     method?: string;

@@ -30,7 +30,8 @@ export function useThrottledState<T>(
         }
       }
       queue.current = [];
-      return current;
+      // AGENT-TRACE: Value equality check ensures React skips reconciliation when state data is unchanged.
+      return Object.is(current, prev) ? prev : current;
     });
 
     lastUpdated.current = Date.now();

@@ -79,7 +79,7 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
       };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "memory_persist_job",
         sessionId,
         userId,

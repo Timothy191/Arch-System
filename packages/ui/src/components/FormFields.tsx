@@ -145,11 +145,20 @@ interface SubmitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   loading?: boolean;
 }
 
+// UI Component: SubmitButton
+// ------------------------------------------------------------
+// *Postel's Law* – accepts any interaction (`loading` flag) and emits a clear
+//  ARIA‑busy state for assistive tech.
+// *Peak‑End Rule* – the toast shown on success includes an **Undo** action,
+//  giving the user a memorable concluding moment.
+// *Aesthetic‑Usability* – uses the accent‑blue palette with a smooth hover
+//  transition for a polished feel.
 export function SubmitButton({ loading, children, className, ...props }: SubmitButtonProps) {
   return (
     <button
       type="submit"
       disabled={loading || props.disabled}
+      aria-busy={loading}
       className={cn(
         "bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]",
         "text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors",

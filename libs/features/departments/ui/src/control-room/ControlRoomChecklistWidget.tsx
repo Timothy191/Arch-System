@@ -17,7 +17,10 @@ import {
   CheckSquare,
   AlertOctagon,
 } from "lucide-react";
-import type { ControlRoomChecklistItem, ControlRoomShiftReportInput } from "@repo/contract";
+import type {
+  ControlRoomChecklistItem,
+  ControlRoomShiftReportInput,
+} from "@repo/contract/types/control-room.types";
 
 // AGENT-TRACE: Structural subset of the persisted shift report (ShiftReportRecord
 // in apps/portal/lib/control-room-shift-report.ts). Kept local so the lib package

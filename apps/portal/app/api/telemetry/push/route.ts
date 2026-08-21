@@ -92,7 +92,7 @@
 import { NextResponse } from "next/server";
 import { getRedisClient } from "@repo/redis";
 import { withValidation } from "@repo/contract/validation";
-import { telemetryPushSchema } from "@repo/contract";
+import { telemetryPushSchema } from "@repo/contract/schemas/telemetry.schema";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
 

@@ -99,10 +99,18 @@ export function EngineeringNotesForm({
     });
     setIsTemplatePreFilled(true);
     setDraftsExpanded(false);
-    // Scroll form into view
-    document
-      .getElementById("eng-notes-form")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Scroll form into view and autofocus actionTaken field
+    setTimeout(() => {
+      const actionInput = document.getElementById("eng-action-taken") as HTMLTextAreaElement | null;
+      if (actionInput) {
+        actionInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        actionInput.focus();
+      } else {
+        document
+          .getElementById("eng-notes-form")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
   };
 
   const validate = () => {
@@ -414,6 +422,7 @@ export function EngineeringNotesForm({
               Action Taken <span className="text-[var(--text-muted)]">(Optional)</span>
             </label>
             <textarea
+              id="eng-action-taken"
               value={formData.actionTaken}
               onChange={(e) =>
                 setFormData((prev) => ({

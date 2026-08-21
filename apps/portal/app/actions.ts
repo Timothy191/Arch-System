@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import { inngest, aiGenerateEmbeddingEvent } from "@repo/utils/inngest";
 import { logError } from "@/lib/errors/error-logger";
-import { monthlyReportInputSchema } from "@repo/contract";
+import { monthlyReportInputSchema } from "@repo/contract/schemas/form.schema";
 
 export async function logout() {
   const supabase = await createServerSupabaseClient();

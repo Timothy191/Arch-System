@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
 
+// AGENT-TRACE: Consolidated clock timer effect and guarded setTime/setTimeStr updates to prevent state update depth recursion in Turbopack.
 export function SystemClock() {
   const [timeStr, setTimeStr] = useState<string>("");
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
 
-  // Update clock time string (day + time) every 10 seconds for the header pill
   useEffect(() => {
     function updateClock() {
       const now = new Date();
@@ -27,19 +27,13 @@ export function SystemClock() {
         weekday: "short",
       });
 
-      setTimeStr(`${dayPart} ${timePart}`);
+      const formatted = `${dayPart} ${timePart}`;
+      setTimeStr((prev) => (prev === formatted ? prev : formatted));
     }
-    updateClock();
-    const interval = setInterval(updateClock, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
-  // Update the analog clock every second (independent of the pill updates)
-  useEffect(() => {
-    const secondInterval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(secondInterval);
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!timeStr) return null;

@@ -38,7 +38,7 @@ export default function DepartmentError({ error, reset }: DepartmentErrorProps) 
     if (isAppError(error)) {
       logError(error);
     } else {
-      logError((error as any) instanceof Error ? error : new Error(String(error)));
+      logError(error);
     }
   }, [error]);
 

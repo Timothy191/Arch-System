@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Activity,
-  Coins,
-  Clock,
-  Zap,
-  Bot,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Activity, Coins, Clock, Zap, Bot, RefreshCw, TrendingUp } from "lucide-react";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 interface AIMetrics {
@@ -204,7 +195,8 @@ export default function AIMetricsDashboard() {
               {(metrics.totalTokens / 1_000_000).toFixed(2)}M
             </div>
             <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-              {(metrics.totalPromptTokens / 1_000_000).toFixed(2)}M in • {(metrics.totalCompletionTokens / 1_000_000).toFixed(2)}M out
+              {(metrics.totalPromptTokens / 1_000_000).toFixed(2)}M in •{" "}
+              {(metrics.totalCompletionTokens / 1_000_000).toFixed(2)}M out
             </p>
           </div>
         </GlassCard>
@@ -223,9 +215,7 @@ export default function AIMetricsDashboard() {
             <div className="text-2xl font-bold font-mono text-accent-amber">
               {metrics.avgLatency}ms
             </div>
-            <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-              End-to-end latency
-            </p>
+            <p className="text-[11px] text-[var(--text-secondary)] mt-1">End-to-end latency</p>
           </div>
         </GlassCard>
       </div>
@@ -299,9 +289,7 @@ export default function AIMetricsDashboard() {
       <GlassCard>
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-5 h-5 text-[var(--accent-blue)]" />
-          <h3 className="text-sm font-semibold text-[var(--text-heading)]">
-            Recent AI Requests
-          </h3>
+          <h3 className="text-sm font-semibold text-[var(--text-heading)]">Recent AI Requests</h3>
         </div>
 
         <div className="space-y-2">

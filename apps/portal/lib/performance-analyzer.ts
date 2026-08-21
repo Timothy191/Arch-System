@@ -77,7 +77,12 @@ export function analyzePerformance(metrics?: { lcp?: number; inp?: number }): Pe
 }
 
 function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): PerformanceBreakdown["lcp"] {
-  const rating = value <= thresholds.good ? "good" : value <= thresholds.needsImprovement ? "needs-improvement" : "poor";
+  const rating =
+    value <= thresholds.good
+      ? "good"
+      : value <= thresholds.needsImprovement
+        ? "needs-improvement"
+        : "poor";
 
   // Simulate LCP breakdown (in real implementation, use Performance API)
   const ttfb = Math.min(value * 0.15, 600); // 15% of LCP or max 600ms
@@ -100,7 +105,9 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
     elementRenderDelay: breakdown.elementRenderDelay,
   };
 
-  const longestSubpart = Object.entries(subparts).reduce((a, b) => (b[1] > a[1] ? b : a))[0] as typeof breakdown extends { [key: string]: infer T } ? keyof typeof breakdown : never;
+  const longestSubpart = Object.entries(subparts).reduce((a, b) =>
+    b[1] > a[1] ? b : a,
+  )[0] as typeof breakdown extends { [key: string]: infer _T } ? keyof typeof breakdown : never;
 
   // Generate strategies based on longest subpart
   const strategies: string[] = [];
@@ -150,7 +157,12 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
 }
 
 function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): PerformanceBreakdown["inp"] {
-  const rating = value <= thresholds.good ? "good" : value <= thresholds.needsImprovement ? "needs-improvement" : "poor";
+  const rating =
+    value <= thresholds.good
+      ? "good"
+      : value <= thresholds.needsImprovement
+        ? "needs-improvement"
+        : "poor";
 
   // Simulate INP breakdown (in real implementation, use event timing API)
   const inputDelay = Math.min(value * 0.3, 150); // Time before event handlers run
@@ -170,7 +182,9 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
     presentationDelay: breakdown.presentationDelay,
   };
 
-  const longestSubpart = Object.entries(subparts).reduce((a, b) => (b[1] > a[1] ? b : a))[0] as keyof typeof breakdown;
+  const longestSubpart = Object.entries(subparts).reduce((a, b) =>
+    b[1] > a[1] ? b : a,
+  )[0] as keyof typeof breakdown;
 
   // Generate strategies based on longest subpart
   const strategies: string[] = [];
@@ -200,7 +214,9 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
   }
 
   if (rating === "poor") {
-    strategies.unshift("CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers");
+    strategies.unshift(
+      "CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers",
+    );
   }
 
   return {
@@ -302,9 +318,9 @@ function generateRecommendations(
 export class INPMonitor {
   private observer: PerformanceObserver | null = null;
   private entries: PerformanceEventTiming[] = [];
-  private callback: (inp: number) => void;
+  private callback: (_inp: number) => void;
 
-  constructor(callback: (inp: number) => void) {
+  constructor(callback: (_inp: number) => void) {
     this.callback = callback;
   }
 
@@ -346,9 +362,9 @@ export class INPMonitor {
  */
 export class LCPMonitor {
   private observer: PerformanceObserver | null = null;
-  private callback: (lcp: number) => void;
+  private callback: (_lcp: number) => void;
 
-  constructor(callback: (lcp: number) => void) {
+  constructor(callback: (_lcp: number) => void) {
     this.callback = callback;
   }
 

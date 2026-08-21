@@ -24,8 +24,7 @@ export async function generateAIResponseAction({
   try {
     const ai = createTrackedGoogleAI();
 
-    const result = await ai.generateTextWithTracking(prompt, {
-      modelName: model,
+    const result = await ai.generateContentWithTracking(model, prompt, {
       departmentId: context?.departmentId,
       operationType: context?.operationType || "general",
       metadata: context?.metadata,
@@ -37,7 +36,7 @@ export async function generateAIResponseAction({
       tokenUsage: result.tokenUsage,
     };
   } catch (error) {
-    await logError(error instanceof Error ? error : new Error(String(error)), {
+    await logError(error, {
       context: "ai_actions",
     });
     return {
@@ -114,7 +113,7 @@ export async function getAITokenUsageStats({
       },
     };
   } catch (error) {
-    await logError(error instanceof Error ? error : new Error(String(error)), {
+    await logError(error, {
       context: "ai_actions_stats",
     });
     return {
@@ -190,7 +189,7 @@ export async function getDailyAITokenUsage({
       data,
     };
   } catch (error) {
-    await logError(error instanceof Error ? error : new Error(String(error)), {
+    await logError(error, {
       context: "ai_actions_daily",
     });
     return {

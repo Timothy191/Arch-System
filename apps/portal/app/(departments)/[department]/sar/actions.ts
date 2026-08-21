@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { insarGeoTIFFUploadSchema, type InsarGeoTIFFUploadInput } from "@repo/contract";
+import {
+  insarGeoTIFFUploadSchema,
+  type InsarGeoTIFFUploadInput,
+} from "@repo/contract/schemas/satellite.schema";
 
 export interface ActionResult<T = unknown> {
   success: boolean;
@@ -40,10 +43,10 @@ export async function ingestInSARGeoTIFFAction(
       absDisp >= 15.0
         ? "critical"
         : absDisp >= 8.0
-        ? "moderate"
-        : absDisp >= 3.0
-        ? "minor"
-        : "none";
+          ? "moderate"
+          : absDisp >= 3.0
+            ? "minor"
+            : "none";
 
     const insertData = {
       department_id: payload.department_id,

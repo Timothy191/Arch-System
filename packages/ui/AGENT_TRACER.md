@@ -198,12 +198,23 @@
 - **Purpose**: Apply keyboard accessibility fixes, add missing `type="button"` to all buttons, and replace `rounded-2xl` with design token `rounded-xl`.
 - **Changes**:
   - **Phase 2.1 — GlassCard keyboard accessibility**: Added `tabIndex={0}` (interactive), `role="button"` (when onClick present), `onKeyDown` handler (Enter/Space triggers onClick), and `focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]` class when hover+onClick. Supports caller overrides via destructured `tabIndex`, `role`, `onKeyDown` props.
-  - **Phase 2.2 — MacTitleBar.tsx**: Added `type="button"` to all 3 traffic light buttons (close/minimize/maximize).
-  - **Phase 2.3 — dock.tsx**: No `<button>` elements exist; no changes needed.
-  - **Phase 2.4 — animated-dialog.tsx**: Added `type="button"` to close button.
-  - **Phase 2.5 — hero-video-dialog.tsx**: Added `type="button"` to `<motion.button>` close button.
-  - **Phase 2.6 — Global button audit**: Added `type="button"` to all `<button>` elements missing it across: `AcknowledgeButton.tsx`, `WorkflowBuilder.tsx` (3 buttons), `freeze-toggle.tsx`, `PluginNode.tsx`, `MacMenuBar.tsx` (fallback nav button), `MacTitleBar.stories.tsx` (2 buttons). Skipped `<DropdownMenuTrigger asChild>` wrapped buttons as they inherit type from the trigger component.
-  - **Phase 3.1 — Token replacement**: Replaced all `rounded-2xl` instances with `rounded-xl` (design system token) in `animated-dialog.tsx`, `dock.tsx`, `hero-video-dialog.tsx` (3 instances), and `spotlight.stories.tsx`.
+
+## 2026-08-21 - Accessibility Enhancements
+
+- **Focus ring added to `SecondaryButton`** – Updated Tailwind class list to include `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2` for clear keyboard focus.
+  - **`aria‑busy` added to `SubmitButton`** – Provides screen‑reader feedback while the button is in a loading state.
+  - Both changes are covered by a single commit and validated through the full `pnpm quality` gate (all UI linting passes).
+
+## 2026-08-22 - UX Design Laws Added
+
+Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 core UX principles (Jakob's Law, Hick's Law, Fitts's Law, …). Updated the UI package README to reference this guide so new contributors see the design intent up‑front.
+
+- **Phase 2.2 — MacTitleBar.tsx**: Added `type="button"` to all 3 traffic light buttons (close/minimize/maximize).
+- **Phase 2.3 — dock.tsx**: No `<button>` elements exist; no changes needed.
+- **Phase 2.4 — animated-dialog.tsx**: Added `type="button"` to close button.
+- **Phase 2.5 — hero-video-dialog.tsx**: Added `type="button"` to `<motion.button>` close button.
+- **Phase 2.6 — Global button audit**: Added `type="button"` to all `<button>` elements missing it across: `AcknowledgeButton.tsx`, `WorkflowBuilder.tsx` (3 buttons), `freeze-toggle.tsx`, `PluginNode.tsx`, `MacMenuBar.tsx` (fallback nav button), `MacTitleBar.stories.tsx` (2 buttons). Skipped `<DropdownMenuTrigger asChild>` wrapped buttons as they inherit type from the trigger component.
+- **Phase 3.1 — Token replacement**: Replaced all `rounded-2xl` instances with `rounded-xl` (design system token) in `animated-dialog.tsx`, `dock.tsx`, `hero-video-dialog.tsx` (3 instances), and `spotlight.stories.tsx`.
 - **Status**: All type checks pass (`@repo/ui` and `portal`). Focus-visible rings visible on interactive GlassCards via keyboard navigation.
 - **Next Steps**: None.
 

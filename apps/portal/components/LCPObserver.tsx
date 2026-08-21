@@ -1,9 +1,9 @@
 /**
  * LCP Observer Component
- * 
+ *
  * Tracks Largest Contentful Paint element and provides debugging information
  * in development mode. Helps identify what element is considered the LCP.
- * 
+ *
  * @see https://web.dev/lcp
  */
 "use client";
@@ -24,11 +24,15 @@ interface LCPElement {
 export function LCPObserver() {
   const [lcpElement, setLcpElement] = useState<LCPElement | null>(null);
   const [isDev, setIsDev] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
-    setIsDev(process.env.NODE_ENV === "development");
-    
-    if (typeof PerformanceObserver === "undefined") return;
+    const dev = process.env.NODE_ENV === "development";
+    setIsDev(dev);
+
+    // AGENT-TRACE: Guard PerformanceObserver behind isDev to avoid
+    // running observer setup + callback logic in production.
+    if (!dev || typeof PerformanceObserver === "undefined") return;
 
     const observer = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
@@ -45,15 +49,16 @@ export function LCPObserver() {
         id: element.id || undefined,
         className: element.getAttribute("class") || undefined,
         text: element.textContent?.slice(0, 100).trim(),
-        imageUrl: (element as HTMLImageElement).src || 
-                  (element as HTMLImageElement).currentSrc ||
-                  (element.style.backgroundImage?.match(/url\(["']?(.*?)["']?\)/)?.[1]),
+        imageUrl:
+          (element as HTMLImageElement).src ||
+          (element as HTMLImageElement).currentSrc ||
+          element.style.backgroundImage?.match(/url\(["']?(.*?)["']?\)/)?.[1],
       };
 
       setLcpElement(lcpData);
 
       // Debug logging in development
-      if (isDev) {
+      if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
         console.group("📊 LCP Detected");
         // eslint-disable-next-line no-console
@@ -85,14 +90,14 @@ export function LCPObserver() {
     observer.observe({ type: "largest-contentful-paint", buffered: true });
 
     return () => observer.disconnect();
-  }, [isDev]);
+  }, []);
 
   // Visual highlight for LCP element (development only)
   function highlightLCPElement(element: Element) {
     const originalOutline = (element as HTMLElement).style.outline;
     (element as HTMLElement).style.outline = "4px solid #ff00ff";
     (element as HTMLElement).style.outlineOffset = "2px";
-    
+
     setTimeout(() => {
       (element as HTMLElement).style.outline = originalOutline;
     }, 3000);
@@ -100,9 +105,41 @@ export function LCPObserver() {
 
   if (!isDev || !lcpElement) return null;
 
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-[9999]">
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-lg flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
+          title="Expand LCP Observer"
+        >
+          📊 LCP:{" "}
+          <span
+            className={
+              lcpElement.startTime < 2500
+                ? "text-[var(--accent-green)]"
+                : "text-[var(--accent-red)]"
+            }
+          >
+            {lcpElement.startTime.toFixed(0)}ms
+          </span>
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] bg-[var(--arch0)] text-white p-4 rounded-lg shadow-2xl border-2 border-[var(--accent-blue)] max-w-md">
-      <h3 className="font-bold text-lg mb-2">📊 LCP Element Detected</h3>
+    <div className="fixed bottom-4 right-4 z-[9999] bg-[var(--arch0)] text-white p-4 rounded-lg shadow-lg border-2 border-[var(--accent-blue)] max-w-md">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-bold text-lg">📊 LCP Element Detected</h3>
+        <button
+          onClick={() => setIsMinimized(true)}
+          className="text-xs text-[var(--text-secondary)] hover:text-white px-2 py-0.5 rounded border border-white/10"
+          title="Minimize overlay"
+        >
+          Minimize
+        </button>
+      </div>
       <div className="space-y-1 text-sm font-mono">
         <div>
           <span className="text-[var(--text-secondary)]">Tag:</span>{" "}
@@ -122,7 +159,13 @@ export function LCPObserver() {
         )}
         <div>
           <span className="text-[var(--text-secondary)]">Time:</span>{" "}
-          <span className={lcpElement.startTime < 2500 ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]"}>
+          <span
+            className={
+              lcpElement.startTime < 2500
+                ? "text-[var(--accent-green)]"
+                : "text-[var(--accent-red)]"
+            }
+          >
             {lcpElement.startTime.toFixed(0)}ms
           </span>
         </div>
@@ -133,7 +176,9 @@ export function LCPObserver() {
         {lcpElement.imageUrl && (
           <div className="truncate">
             <span className="text-[var(--text-secondary)]">Image:</span>{" "}
-            <span className="text-[var(--accent-purple)] truncate block">{lcpElement.imageUrl}</span>
+            <span className="text-[var(--accent-purple)] truncate block">
+              {lcpElement.imageUrl}
+            </span>
           </div>
         )}
       </div>
@@ -146,15 +191,15 @@ export function LCPObserver() {
 
 /**
  * Preload LCP image helper
- * 
+ *
  * Call this in your layout or page component to ensure the LCP image
  * is discovered early by the browser.
- * 
+ *
  * @example
  * ```tsx
  * // In layout.tsx or page.tsx
  * preloadLCPImage("/hero.webp");
- * 
+ *
  * function Page() {
  *   return <img src="/hero.webp" priority alt="Hero" />;
  * }
@@ -162,26 +207,26 @@ export function LCPObserver() {
  */
 export function preloadLCPImage(src: string, as: "image" | "fetch" | "style" = "image") {
   if (typeof document === "undefined") return;
-  
+
   const link = document.createElement("link");
   link.rel = "preload";
   link.as = as;
   link.href = src;
-  
+
   if (as === "image") {
     link.setAttribute("fetchpriority", "high");
     link.setAttribute("imagesizes", "(max-width: 768px) 100vw, 1200px");
   }
-  
+
   document.head.appendChild(link);
 }
 
 /**
  * Preconnect to critical origins
- * 
+ *
  * Use this for origins that serve your LCP resources (CDN, image host, etc.)
  * Limit to 4 most important origins to avoid connection overhead.
- * 
+ *
  * @example
  * ```tsx
  * // In layout.tsx
@@ -194,7 +239,7 @@ export function preloadLCPImage(src: string, as: "image" | "fetch" | "style" = "
  */
 export function preconnectToOrigins(origins: string[]) {
   if (typeof document === "undefined") return;
-  
+
   origins.slice(0, 4).forEach((origin) => {
     const link = document.createElement("link");
     link.rel = "preconnect";

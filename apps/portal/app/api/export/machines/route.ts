@@ -82,7 +82,7 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody as _validateBody } from "@/lib/api/response";
 import { applyCors } from "@/lib/api/cors";
-import { exportQuerySchema } from "@repo/contract";
+import { exportQuerySchema } from "@repo/contract/schemas/export.schema";
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;

@@ -177,7 +177,7 @@ class SyncQueue {
           action.status = "synced";
           await this.updateAction(action);
         } catch (error) {
-          logError(error instanceof Error ? error : new Error(String(error)), {
+          logError(error, {
             context: "sync_queue_replay",
             idempotencyKey: action.idempotencyKey,
           });
@@ -190,7 +190,7 @@ class SyncQueue {
         }
       }
     } catch (err) {
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "sync_queue_process",
       });
     } finally {

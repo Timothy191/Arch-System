@@ -12,23 +12,29 @@ interface AutoSaveOptions<T> {
  * A hook to automatically save state to localStorage with debouncing.
  * Useful for preventing data loss in forms like shift closeout notes.
  */
+// AGENT-TRACE: Use onLoadRef to break callback dependency cycles when inline onLoad functions are passed, eliminating "Maximum update depth exceeded" errors.
 export function useAutoSave<T>(data: T, { key, onLoad, debounceMs = 1000 }: AutoSaveOptions<T>) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useRef(true);
+  const onLoadRef = useRef(onLoad);
 
-  // Load data on mount
+  useEffect(() => {
+    onLoadRef.current = onLoad;
+  }, [onLoad]);
+
+  // Load data on mount / key change
   useEffect(() => {
     const saved = localStorage.getItem(key);
-    if (saved && onLoad) {
+    if (saved && onLoadRef.current) {
       try {
         const parsed = JSON.parse(saved);
-        onLoad(parsed);
+        onLoadRef.current(parsed);
       } catch (e) {
         console.error("Failed to parse auto-saved data", e);
       }
     }
     isFirstRender.current = false;
-  }, [key, onLoad]);
+  }, [key]);
 
   // Save data on change with debounce
   useEffect(() => {

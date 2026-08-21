@@ -40,7 +40,7 @@ class PluginOrchestrator {
 
       // Auto-load plugins
       this.loadAllPlugins().catch((err) => {
-        logError(err instanceof Error ? err : new Error(String(err)), {
+        logError(err, {
           context: "plugin_autoload_critical",
         });
       });
@@ -119,7 +119,7 @@ class PluginOrchestrator {
     try {
       return await plugin.engine.execute(params);
     } catch (err: any) {
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "plugin_engine_crash",
         pluginId,
       });
@@ -162,7 +162,7 @@ class PluginOrchestrator {
             await hookFn(data);
           }
         } catch (err: any) {
-          logError(err instanceof Error ? err : new Error(String(err)), {
+          logError(err, {
             context: "plugin_hook_crash",
             pluginId: plugin.metadata.id,
             hookName,

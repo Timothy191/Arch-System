@@ -446,7 +446,7 @@
     "/api/weather": {
       "get": {
         "summary": "Current weather conditions",
-        "description": "Returns current weather data for the mining site location. Data is not cached to ensure freshness.",
+        "description": "Returns current weather data for the mining site location. Data is cached for 5 minutes with stale-while-revalidate.",
         "tags": ["Weather"],
         "responses": {
           "200": {

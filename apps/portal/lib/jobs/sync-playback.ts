@@ -108,7 +108,7 @@ export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
       return { error: `Unknown action type: ${actionType}` };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "sync_playback_job",
         actionType,
         idempotencyKey,

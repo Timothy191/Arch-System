@@ -132,7 +132,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       });
     }
   } catch (err: unknown) {
-    logError(err instanceof Error ? err : new Error(String(err)), {
+    logError(err, {
       context: "rust_telemetry_plugin",
     });
     return NextResponse.json({

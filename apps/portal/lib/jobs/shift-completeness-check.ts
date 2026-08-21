@@ -104,7 +104,7 @@ export const shiftCompletenessCheckFn: InngestFunction.Any = inngest.createFunct
       return result;
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "shift_completeness_check_job",
       });
       throw err;

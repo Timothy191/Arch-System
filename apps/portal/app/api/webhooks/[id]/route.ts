@@ -102,7 +102,7 @@ import { revalidatePath } from "next/cache";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
 import { applyCors } from "@/lib/api/cors";
-import { updateWebhookSchema } from "@repo/contract";
+import { updateWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 
 export const dynamic = "force-dynamic";
 

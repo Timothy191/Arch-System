@@ -11,7 +11,7 @@ interface SparklineProps {
   className?: string;
 }
 
-export function Sparkline({
+function Sparkline({
   data,
   width = 80,
   height = 28,
@@ -168,3 +168,8 @@ export function Sparkline({
     </svg>
   );
 }
+
+// AGENT-TRACE: Memoize Sparkline — small SVG component rendered multiple times
+// inside DepartmentCard grids. Data prop is stable across renders.
+const MemoizedSparkline = React.memo(Sparkline);
+export { MemoizedSparkline as Sparkline };

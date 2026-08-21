@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useTransition } from "react";
+import { memo, useState, useEffect, useTransition } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -77,7 +77,7 @@ interface DepartmentCardProps {
   index: number;
 }
 
-export function DepartmentCard({ department, index }: DepartmentCardProps) {
+function DepartmentCard({ department, index }: DepartmentCardProps) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
@@ -150,13 +150,29 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           data-testid={`dept-link-${department.name}`}
         />
 
-        {/* Banner area */}
+        {/* Banner area with photographic / terrain visual background */}
         <div
           className={cn(
-            "uiverse-card-banner relative z-10 pointer-events-none",
+            "uiverse-card-banner relative z-10 pointer-events-none overflow-hidden",
             `uiverse-card-banner-${department.name}`,
           )}
         >
+          {/* Real industrial terrain visual background with liquid glass gradient overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src={`/images/departments/${department.name}.jpg`}
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                // Fallback gracefully to color gradient if department image is unavailable
+                (e.target as HTMLElement).style.display = "none";
+              }}
+            />
+            {/* Glass gradient overlay to ensure icon bubble contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 z-10" />
+          </div>
+
           {/* Save/Pin Button */}
           <button
             type="button"
@@ -178,7 +194,12 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           </button>
 
           {/* Department Icon Bubble */}
-          <div className={cn("uiverse-card-icon-bubble border-arch-border-emphasis/25", config.bg)}>
+          <div
+            className={cn(
+              "uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20",
+              config.bg,
+            )}
+          >
             <Icon className="w-5 h-5" />
           </div>
         </div>
@@ -244,3 +265,9 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
     </div>
   );
 }
+
+// AGENT-TRACE: Memoize DepartmentCard to prevent re-renders when sibling cards
+// or parent hub state changes. Props (department, index) are stable across renders.
+const MemoizedDepartmentCard = memo(DepartmentCard);
+export { MemoizedDepartmentCard as DepartmentCard };
+export default MemoizedDepartmentCard;

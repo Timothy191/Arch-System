@@ -109,7 +109,7 @@ import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
-import { createWebhookSchema } from "@repo/contract";
+import { createWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 
 type WebhookEventType =
   | "daily_log.created"

@@ -32,7 +32,7 @@ export const machineBreakdownNotificationFn: InngestFunction.Any = inngest.creat
     } catch (err) {
       const duration = performance.now() - start;
       recordJobExecution("machine-breakdown-notifications", duration, false);
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "machineBreakdownNotificationFn",
         data: event.data,
       });

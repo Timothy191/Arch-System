@@ -11,22 +11,14 @@ import {
   TrustLogos,
   ToolBanner,
   DepartmentReviews,
-  DepartmentCard,
+  CoreOperationalModules,
 } from "@/features/hub";
 import type { AlertEvent } from "@/features/hub";
 import type { TrendDataPoint } from "@/features/hub";
 import { getTools } from "@/lib/tools";
 import { DEPARTMENTS } from "@repo/departments/data-access";
 import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  Shield,
-  Activity,
-  Boxes,
-  Wrench as WrenchIcon,
-  AlertTriangle,
-  Wrench,
-  Power,
-} from "lucide-react";
+import { Shield, Activity, Wrench as WrenchIcon, AlertTriangle, Wrench, Power } from "lucide-react";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { withCache } from "@/lib/cache-utils";
 import { cachedRSC } from "@/lib/server-cache";
@@ -344,7 +336,7 @@ export default async function HubPage() {
             aria-hidden="true"
           />
 
-          <div className="px-6 py-6 sm:px-10 sm:py-8 md:px-14 md:py-10 max-w-xl space-y-5 relative">
+          <div className="px-6 py-6 sm:px-8 sm:py-8 md:px-10 md:py-8 w-full space-y-5 relative">
             {/* Eyebrow badge row */}
             <div className="flex items-center gap-3 flex-wrap liquid-shift-y">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-medium tracking-wide text-arch-text-secondary">
@@ -432,41 +424,8 @@ export default async function HubPage() {
         <AlertTicker events={alertEvents} />
       </div>
 
-      {/* Core Operational Modules - Responsive Grid */}
-      <section
-        className="space-y-4 animate-fade-up group/row relative aurora-shadow rounded-lg"
-        style={{ animationDelay: "0.2s", animationFillMode: "both" }}
-      >
-        <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-medium text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
-            <Boxes className="w-4 h-4 text-arch-accent-blue opacity-70" />
-            Core Operational Modules
-            <span className="ml-1 px-1.5 py-0.5 rounded-md bg-arch-surface-tertiary text-arch-text-tertiary text-[11px] font-mono">
-              {departments.length}
-            </span>
-          </h2>
-        </div>
-
-        {departments.length === 0 ? (
-          <div className="p-8 text-center rounded-lg bg-arch-surface-tertiary/40 border border-arch-border-primary">
-            <p className="text-sm text-arch-text-tertiary">
-              No departments available for your account.
-            </p>
-          </div>
-        ) : (
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr"
-            aria-label="Department modules"
-            role="list"
-          >
-            {departments.map((dept, i) => (
-              <div key={dept.name} role="listitem">
-                <DepartmentCard department={dept} index={i} />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      {/* Core Operational Modules - Interactive Filtered Grid */}
+      <CoreOperationalModules departments={departments} />
 
       {/* Productivity & Workflow Tools - Marquee Banner */}
       {tools.length > 0 && (

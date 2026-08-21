@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock, AlertCircle } from "lucide-react";
 
@@ -58,7 +58,11 @@ function formatTime(timeStr: string) {
   return timeStr.slice(0, 5); // HH:MM format
 }
 
-export function MachineOperationsList({ operations, todayLoads, activeBreakdowns = [] }: MachineOperationsListProps) {
+function MachineOperationsList({
+  operations,
+  todayLoads,
+  activeBreakdowns = [],
+}: MachineOperationsListProps) {
   if (operations.length === 0) {
     return (
       <GlassCard>
@@ -131,7 +135,12 @@ export function MachineOperationsList({ operations, todayLoads, activeBreakdowns
                 </h5>
                 <div className="space-y-2">
                   {dayOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} activeBreakdowns={activeBreakdowns} />
+                    <OperationCard
+                      key={op.id}
+                      operation={op}
+                      todayLoads={todayLoads}
+                      activeBreakdowns={activeBreakdowns}
+                    />
                   ))}
                 </div>
               </div>
@@ -145,7 +154,12 @@ export function MachineOperationsList({ operations, todayLoads, activeBreakdowns
                 </h5>
                 <div className="space-y-2">
                   {nightOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} activeBreakdowns={activeBreakdowns} />
+                    <OperationCard
+                      key={op.id}
+                      operation={op}
+                      todayLoads={todayLoads}
+                      activeBreakdowns={activeBreakdowns}
+                    />
                   ))}
                 </div>
               </div>
@@ -183,7 +197,7 @@ function OperationCard({
   const machineBreakdown = activeBreakdowns?.find(
     (b) =>
       b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
+      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number),
   );
 
   // AGENT-TRACE: Calculate delay totals by category and status
@@ -236,13 +250,15 @@ function OperationCard({
                   {operation.machine?.name || "Unknown Machine"}
                 </p>
                 {machineBreakdown && (
-                  <span className={`text-xs px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
-                    machineBreakdown.status === 'active' 
-                      ? "bg-accent-red/10 text-accent-red" 
-                      : "bg-accent-green/10 text-accent-green"
-                  }`}>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                      machineBreakdown.status === "active"
+                        ? "bg-accent-red/10 text-accent-red"
+                        : "bg-accent-green/10 text-accent-green"
+                    }`}
+                  >
                     <AlertCircle size={12} />
-                    {machineBreakdown.status === 'active' ? 'Active Breakdown' : 'Repaired'}
+                    {machineBreakdown.status === "active" ? "Active Breakdown" : "Repaired"}
                   </span>
                 )}
               </div>
@@ -284,9 +300,18 @@ function OperationCard({
         {machineBreakdown && (
           <div className="pt-2 border-t border-[var(--border-default)]">
             <div className="flex items-start gap-2 text-xs">
-              <AlertCircle size={14} className={machineBreakdown.status === 'active' ? "text-accent-red mt-0.5 shrink-0" : "text-accent-green mt-0.5 shrink-0"} />
+              <AlertCircle
+                size={14}
+                className={
+                  machineBreakdown.status === "active"
+                    ? "text-accent-red mt-0.5 shrink-0"
+                    : "text-accent-green mt-0.5 shrink-0"
+                }
+              />
               <div>
-                <p className={`font-medium ${machineBreakdown.status === 'active' ? 'text-accent-red' : 'text-accent-green'}`}>
+                <p
+                  className={`font-medium ${machineBreakdown.status === "active" ? "text-accent-red" : "text-accent-green"}`}
+                >
                   Engineering Breakdown: {machineBreakdown.reason}
                 </p>
                 {machineBreakdown.repair_notes && (
@@ -338,3 +363,8 @@ function OperationCard({
     </GlassCard>
   );
 }
+
+// AGENT-TRACE: Memoize MachineOperationsList — props (operations, todayLoads,
+// activeBreakdowns) are stable across renders from parent state changes.
+const MemoizedMachineOperationsList = memo(MachineOperationsList);
+export { MemoizedMachineOperationsList as MachineOperationsList };

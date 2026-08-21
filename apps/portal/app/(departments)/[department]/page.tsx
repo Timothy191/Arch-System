@@ -26,13 +26,6 @@ const ControlRoomChecklistWidget = dynamic(
   },
 );
 
-const WeatherWidget = dynamic(
-  () => import("@/components/weather/WeatherWidget").then((mod) => mod.WeatherWidget),
-  {
-    loading: () => <div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
-);
-
 const SatelliteMonitoringDashboard = dynamic(
   () => import("@/features/departments").then((mod) => mod.SatelliteMonitoringDashboard),
   {
@@ -48,7 +41,17 @@ import { SafetyDashboard } from "~/features/departments/components/safety/Safety
 import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
 import { ControlRoomSummaryGridClient } from "./ControlRoomSummaryGridClient";
 import { NonControlRoomSummaryGridClient } from "./NonControlRoomSummaryGridClient";
-import { ShiftCoverageSectionClient } from "./ShiftCoverageSectionClient";
+
+// AGENT-TRACE: ShiftCoverageSectionClient lazy-loaded — only used on control room pages.
+// Imports ShiftCoverageWidget from @repo/departments/ui barrel which pulls in
+// control-room dependencies. Dynamic import prevents non-control-room pages from
+// loading this chunk.
+const ShiftCoverageSectionClient = dynamic(
+  () => import("./ShiftCoverageSectionClient").then((m) => m.ShiftCoverageSectionClient),
+  {
+    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
+  },
+);
 
 export default async function DepartmentDashboard({
   params,
@@ -131,13 +134,6 @@ export default async function DepartmentDashboard({
               <ControlRoomSummaryGridClient deptId={deptId} today={today} />
             </Suspense>
 
-            {/* Weather Conditions */}
-            <Suspense
-              fallback={<div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-            >
-              <WeatherWidget variant="compact" />
-            </Suspense>
-
             {/* AGENT-TRACE: Quick Actions - UX improvements based on heuristics:
                  - Single primary action (machine operations) to reduce cognitive load
                  - Removed duplicate "Log Delay" button that went to same destination
@@ -205,17 +201,6 @@ export default async function DepartmentDashboard({
         ) : (
           <>
             <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
-
-            {/* Weather for drilling department - critical for outdoor operations */}
-            {deptSlug === "drilling" && (
-              <Suspense
-                fallback={
-                  <div className="h-32 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                }
-              >
-                <WeatherWidget variant="full" />
-              </Suspense>
-            )}
 
             {/* Non-Control Room Summary Grid - Client-side with React Query */}
             <Suspense

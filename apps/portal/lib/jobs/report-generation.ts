@@ -48,7 +48,7 @@ export const generateReportFn: InngestFunction.Any = inngest.createFunction(
       return { success: true, report: reportData };
     } catch (err) {
       success = false;
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "generate_report_job",
         departmentId,
         dateFrom,

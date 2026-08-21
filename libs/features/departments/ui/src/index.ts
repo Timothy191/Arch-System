@@ -29,4 +29,6 @@ export * from "./satellite/SARLayer";
 export * from "./satellite/RealtimeInSARStream";
 export * from "./tools/ToolCard";
 export * from "./tools/ToolsPageClient";
-export * from "./tools/UniverSheet";
+// AGENT-TRACE: UniverSheet removed from barrel to preserve next/dynamic code-splitting.
+// Import directly: import UniverSheet from "./tools/UniverSheet"
+// The barrel export was pulling @univerjs (~7 MB OT engine) into every page using @repo/departments/ui

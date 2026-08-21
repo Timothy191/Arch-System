@@ -1,6 +1,18 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { DailyLogForm } from "./DailyLogForm";
 
+// Mock next/navigation (useRouter, useParams)
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+  })),
+  useParams: jest.fn(() => ({ department: "test-dept" })),
+}));
+
 // Mock the Supabase client
 jest.mock("@repo/supabase/client", () => ({
   createBrowserSupabaseClient: jest.fn(),
@@ -91,7 +103,10 @@ describe("DailyLogForm", () => {
 
     // Should show success message via toast
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Daily log saved successfully");
+      expect(toast.success).toHaveBeenCalledWith(
+        "Daily log saved successfully",
+        expect.any(Object),
+      );
     });
 
     // Button should be enabled again

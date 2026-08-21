@@ -51,7 +51,10 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { getRedisClient } from "@repo/redis";
 import { withValidation } from "@repo/contract/validation";
-import { drillTelemetryIngestSchema, type DrillTelemetryIngestInput } from "@repo/contract";
+import {
+  drillTelemetryIngestSchema,
+  type DrillTelemetryIngestInput,
+} from "@repo/contract/schemas/drill.schema";
 import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
 
@@ -125,7 +128,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       await redis.set(
         `drilling:telemetry:last:${machine_id}`,
         JSON.stringify(telemetryState),
-        { EX: 86400 } // 24 hours TTL
+        { EX: 86400 }, // 24 hours TTL
       );
       await redis.publish("drilling:telemetry:stream", JSON.stringify(telemetryState));
     } catch (redisErr) {
@@ -142,7 +145,9 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(process.env.FUXA_API_KEY ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` } : {}),
+          ...(process.env.FUXA_API_KEY
+            ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
+            : {}),
         },
         body: JSON.stringify({
           name: `drill_${machine_id}_bit_depth`,
@@ -164,7 +169,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to process drill telemetry" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });
@@ -176,6 +181,6 @@ export async function POST(req: Request) {
       const response = await handleIngest(req, { params: Promise.resolve({}) });
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 1048576 } // 1MB payload limit
+    { maxSize: 1048576 }, // 1MB payload limit
   );
 }

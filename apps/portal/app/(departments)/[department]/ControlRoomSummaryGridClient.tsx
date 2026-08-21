@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useControlRoomSummary } from "@/hooks/useDashboardQueries";
 import { GlassCard } from "@repo/ui/GlassCard";
 
@@ -8,7 +9,9 @@ interface ControlRoomSummaryGridClientProps {
   today: string;
 }
 
-export function ControlRoomSummaryGridClient({ deptId, today }: ControlRoomSummaryGridClientProps) {
+// AGENT-TRACE: Memoized to prevent re-renders when parent Dashboard re-renders.
+// Props (deptId, today) are stable strings — re-renders only from React Query data updates.
+function ControlRoomSummaryGridClientBase({ deptId, today }: ControlRoomSummaryGridClientProps) {
   const { data } = useControlRoomSummary(deptId, today);
 
   if (!data) return null;
@@ -62,3 +65,5 @@ export function ControlRoomSummaryGridClient({ deptId, today }: ControlRoomSumma
     </div>
   );
 }
+
+export const ControlRoomSummaryGridClient = memo(ControlRoomSummaryGridClientBase);

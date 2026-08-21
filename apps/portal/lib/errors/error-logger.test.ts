@@ -78,6 +78,35 @@ describe("logError", () => {
       }),
     );
   });
+
+  it("preserves message and code from non-Error objects (Supabase PostgrestError)", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    // Supabase's PostgrestError is a plain object, not an Error instance.
+    // String()-ing it would yield "[object Object]" and drop its `code`.
+    const postgrestError = {
+      message: 'duplicate key value violates unique constraint "hourly_loads_pkey"',
+      code: "23505",
+      details: "Key already exists",
+      hint: "",
+    };
+    await logError(postgrestError, { context: "hourly_loads_update" });
+
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    const [msg] = errorSpy.mock.calls[0] as [string, unknown];
+    expect(msg).toContain("23505");
+    expect(msg).toContain("duplicate key value");
+    expect(msg).not.toContain("[object Object]");
+    expect(msg).not.toContain("UNKNOWN");
+
+    expect(mockCaptureException).toHaveBeenCalledTimes(1);
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        extra: expect.objectContaining({ code: "23505" }),
+      }),
+    );
+    errorSpy.mockRestore();
+  });
 });
 
 describe("withErrorLogging", () => {

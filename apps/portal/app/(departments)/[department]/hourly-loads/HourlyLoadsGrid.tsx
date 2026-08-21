@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { memo, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { exportToExcel, parseExcel } from "@repo/utils/client";
@@ -43,7 +43,7 @@ interface HourlyLoadsGridProps {
 const DAY_HOUR_LABELS = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"];
 const NIGHT_HOUR_LABELS = ["18", "19", "20", "21", "22", "23", "00", "01", "02", "03", "04", "05"];
 
-export function HourlyLoadsGrid({
+function HourlyLoadsGrid({
   departmentId,
   machines,
   hourlyLoads,
@@ -237,7 +237,7 @@ export function HourlyLoadsGrid({
           ...attrs,
         });
       } catch (err) {
-        logError(err instanceof Error ? err : new Error(String(err)), {
+        logError(err, {
           context: `hourly_loads_${operation}`,
         });
         revertField(machineId, shiftType, field, newValue, previousValue);
@@ -394,7 +394,7 @@ export function HourlyLoadsGrid({
       try {
         await updateMachineSite(machine.id, newSiteId || null);
       } catch (err) {
-        logError(err instanceof Error ? err : new Error(String(err)), {
+        logError(err, {
           context: "hourly_loads_site_change",
         });
         setSiteAssignments((prev) =>
@@ -756,7 +756,7 @@ export function HourlyLoadsGrid({
             },
           );
         } catch (err) {
-          logError(err instanceof Error ? err : new Error(String(err)), {
+          logError(err, {
             context: "hourly_loads_import",
             machineName,
           });
@@ -765,7 +765,7 @@ export function HourlyLoadsGrid({
 
       alert("Import completed successfully!");
     } catch (err) {
-      logError(err instanceof Error ? err : new Error(String(err)), {
+      logError(err, {
         context: "hourly_loads_import_failed",
       });
       alert("Failed to parse Excel file. Please ensure it follows the exported template.");
@@ -863,3 +863,9 @@ export function HourlyLoadsGrid({
     </div>
   );
 }
+
+// AGENT-TRACE: Memoize HourlyLoadsGrid — the heaviest client component in the
+// portal. Props (departmentId, machines, loads, etc.) are stable across renders;
+// memo prevents re-rendering the entire RevoGrid + cell edit machinery.
+const MemoizedHourlyLoadsGrid = memo(HourlyLoadsGrid);
+export { MemoizedHourlyLoadsGrid as HourlyLoadsGrid };
