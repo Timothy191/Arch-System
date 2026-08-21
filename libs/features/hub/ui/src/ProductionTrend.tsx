@@ -27,7 +27,7 @@ export function ProductionTrend({ data }: ProductionTrendProps) {
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-accent-blue" />
+            <div className="w-2 h-2 rounded-full bg-[var(--dept-drilling)]" />
             <span className="text-xs text-arch-text-tertiary">Drilling</span>
           </div>
           <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export function ProductionTrend({ data }: ProductionTrendProps) {
             <span className="text-xs text-arch-text-tertiary">Production</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-accent-blue" />
+            <div className="w-2 h-2 rounded-full bg-[var(--dept-engineering)]" />
             <span className="text-xs text-arch-text-tertiary">Engineering</span>
           </div>
         </div>

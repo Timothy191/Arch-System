@@ -1,5 +1,15 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-21 - Hub Page UI: GlassCard Liquid Mode Performance Fix
+
+- **Purpose**: Stop every `GlassCard` from running the expensive liquid-glass displacement engine regardless of variant; only hero cards that explicitly request `variant="liquid"` should pay the cost.
+- **Changes**:
+  - `packages/ui/src/components/GlassCard.tsx:270`: Replaced hardcoded `const isLiquid = true` with `const isLiquid = variant === "liquid";` so the refraction canvas, SVG filters, ResizeObserver, and blob URLs are only created for liquid variants.
+- **Verification**:
+  - `pnpm --filter @repo/ui type-check` ✅
+  - `pnpm --filter @repo/ui lint` ✅
+- **What the Next Agent Should Know**: Default, window, spotlight, and glowborder cards now skip the liquid engine. The portal hub hero remains liquid because it passes `variant="liquid"`; verify other consumers that expected liquid-by-default still look correct.
+
 ## 2026-08-21 - Borders & Dividers Industrial Techniques Suite
 
 - **Purpose**: Implement the complete suite of 9 industrial Borders & Dividers design techniques in @repo/theme and @repo/ui.

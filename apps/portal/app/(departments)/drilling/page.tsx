@@ -1,5 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Divider } from "@repo/ui/Divider";
+import { BorderBox } from "@repo/ui/BorderBox";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { Drill, Clock, AlertTriangle } from "lucide-react";
 
@@ -81,6 +83,8 @@ export default async function DrillingDashboardPage() {
         </p>
       </div>
 
+      <Divider variant="fading" label="REAL-TIME OPERATIONS" />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <GlassCard>
           <div className="flex items-center gap-2">
@@ -124,18 +128,20 @@ export default async function DrillingDashboardPage() {
           <p className="text-2xl font-bold text-cyan-400 mt-2">{totalHours.toFixed(1)}h</p>
         </GlassCard>
 
-        <GlassCard>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-accent-blue" />
-            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-              Delays
-            </p>
+        <BorderBox variant="patterned-caution" padding="none" className="overflow-hidden">
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-accent-blue" />
+              <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+                Delays
+              </p>
+            </div>
+            <p className="text-2xl font-bold text-accent-blue mt-2">{delayCount}</p>
+            {delayMinutes > 0 && (
+              <p className="text-[var(--text-muted)] text-xs mt-1">{delayMinutes} min lost</p>
+            )}
           </div>
-          <p className="text-2xl font-bold text-accent-blue mt-2">{delayCount}</p>
-          {delayMinutes > 0 && (
-            <p className="text-[var(--text-muted)] text-xs mt-1">{delayMinutes} min lost</p>
-          )}
-        </GlassCard>
+        </BorderBox>
       </div>
     </div>
   );

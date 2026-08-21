@@ -16,6 +16,8 @@
  *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
  */
 
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
 import { Logo } from "@repo/ui/Logo";
 
 interface TrustLogo {
@@ -46,14 +48,15 @@ export function TrustLogos({ logos }: TrustLogosProps) {
       {hasLogos ? (
         <div className="flex flex-wrap items-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
           {logos.map((logo) => (
-            <img
+            <Image
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
-              className="h-6 w-auto object-contain"
-              loading="lazy"
               width={96}
               height={24}
+              className="h-6 w-auto object-contain"
+              loading="lazy"
+              unoptimized={logo.src.startsWith("http")}
             />
           ))}
         </div>

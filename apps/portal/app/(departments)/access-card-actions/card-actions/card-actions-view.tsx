@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
@@ -439,10 +440,13 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
               <div className="flex items-start gap-5">
                 <div className="w-20 h-20 rounded-xl bg-[var(--bg-tertiary)] overflow-hidden shrink-0 flex items-center justify-center">
                   {detail.photo_signed_url ? (
-                    <img
+                    <Image
                       src={detail.photo_signed_url}
                       alt={`${detail.first_name} ${detail.surname}`}
                       className="w-full h-full object-cover"
+                      width={80}
+                      height={80}
+                      unoptimized
                     />
                   ) : (
                     <span className="text-2xl font-bold text-[var(--text-muted)]">

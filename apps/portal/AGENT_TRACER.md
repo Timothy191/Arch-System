@@ -1,5 +1,36 @@
 # Portal Agent Tracer
 
+## Session 2026-08-21 (Borders & Dividers Department Integration, LCP Performance & E2E Hardening)
+
+- **Purpose**: Integrate custom Borders & Dividers in Drilling dashboard, fix LCP warning items, resolve hydration mismatches, and repair Playwright E2E setup timing issues.
+- **Changes**:
+  - `apps/portal/app/(departments)/drilling/page.tsx`: Integrated `<BorderBox variant="patterned-caution">` on Delays and `<Divider variant="fading" label="REAL-TIME OPERATIONS">` under header.
+  - `apps/portal/components/LCPObserver.tsx`: Delayed LCP visual highlight by 2s and mount by 5s to solve hydration mismatch and self-classification issues.
+  - `libs/features/hub/ui/src/HeroBackground.tsx`: Removed redundant viewport background grain overlay to optimize compositor.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Optimized slide image loading with conditional `fetchPriority` and `loading` attributes, scaled images down by 50% for compact layout, and restored raw `<img>` to solve flex box collapse.
+  - `e2e/global.setup.ts`: Corrected wait URL pattern to `**/hub` and set 60s timeout to survive cold dev compiling. Added `fs.mkdirSync` to prevent write errors.
+  - Upgraded raw `<img>` to Next.js `<Image>` in `TrustLogos.tsx`, `card-actions-view.tsx`, and `CardActionsTab.tsx`.
+- **Verification**:
+  - `pnpm --filter portal type-check` ✅ (0 errors)
+  - `pnpm lint` ✅ (0 errors)
+  - `pnpm playwright test e2e/navigation.spec.ts e2e/visual/` against pre-compiled standalone server ✅ (11 passed)
+- **What the Next Agent Should Know**: Next.js production build compiler works flawlessly. E2E setup credentials cache file is now robust. Future tests will benefit from compiling production code prior to execution.
+
+## Session 2026-08-21 (Hub Page UI Quick-Lane Improvements)
+
+- **Purpose**: Apply quick-lane fixes to the hub page UI: GlassCard performance, production-trend legend accuracy, and pending shadow/accessibility/img improvements.
+- **Changes**:
+  - `packages/ui/src/components/GlassCard.tsx:270`: Replaced hardcoded `const isLiquid = true` with `const isLiquid = variant === "liquid";` so only the hub hero (which explicitly passes `variant="liquid"`) runs the displacement engine.
+  - `libs/features/hub/ui/src/ProductionTrend.tsx:30,38`: Fixed legend color mapping — Drilling now uses `--dept-drilling` and Engineering uses `--dept-engineering` so the legend matches the AreaChart series colors.
+  - `apps/portal/features/hub/components/CoreOperationalModules.tsx`: Improved accessibility — added `aria-label`/`aria-describedby` to the search input, accessible name to the clear button, `aria-pressed` and `role="group"` to filter pills; replaced forbidden `shadow-sm` with named `shadow-card` token on active pills.
+  - `apps/portal/features/hub/components/DepartmentCard.tsx:237`: Replaced `shadow-sm hover:shadow-md` with `shadow-card hover:shadow-card-hover` on action pills.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Replaced `shadow-sm` on the primary CTA and carousel controls with `shadow-card`.
+- **Verification**:
+  - `pnpm --filter @repo/ui type-check` ✅
+  - `pnpm --filter @repo/ui lint` ✅
+  - `pnpm --filter portal test -- --testPathPatterns=GlassCard --coverage=false` ✅ (6/6)
+- **What the Next Agent Should Know**: The remaining quick-lane items are tracked as tasks: raw `<img>` → Next.js `<Image>`, raw `shadow-sm/md` → named shadow tokens, and accessibility labels for the module search/filter UI. Pinned-state synchronization and `DepartmentCard` link behavior are deferred to `/spec` because they cross components and need tests.
+
 ## Session 2026-08-21 (Satellite Monitoring Real Data Wiring, Honest Labels & InSAR Ingestion Producer)
 
 - **Purpose**: Wire the Satellite Monitoring dashboard to real data instead of mocked readings, remove misleading "Real-time" labels, and stand up an Inngest cron job that ingests Sentinel-1 scene acquisitions into Supabase + Redis.

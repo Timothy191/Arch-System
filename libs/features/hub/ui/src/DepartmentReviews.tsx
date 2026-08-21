@@ -1,5 +1,7 @@
 "use client";
 
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
 import { Marquee } from "@repo/ui/Marquee";
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors
@@ -82,10 +84,10 @@ function ReviewCard({ img, name, username, body }: ReviewCardProps) {
       <div className="h-full rounded-2xl bg-white/70 border border-black/[0.08] hover:border-black/20 transition-all duration-300">
         <div className="p-4 flex flex-col justify-between h-full select-none">
           <div className="flex flex-row items-center gap-3">
-            <img
-              className="rounded-full w-8 h-8 object-cover bg-arch-surface-tertiary border border-arch-border-primary"
-              width="32"
-              height="32"
+            <Image
+              className="rounded-full object-cover bg-arch-surface-tertiary border border-arch-border-primary"
+              width={32}
+              height={32}
               alt={name}
               src={img}
             />

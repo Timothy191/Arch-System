@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
@@ -73,10 +74,13 @@ export function CardActionsTab() {
               <div className="flex justify-center mb-6">
                 <div className="w-32 h-32 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border-default)] flex items-center justify-center overflow-hidden">
                   {employee.photo_url ? (
-                    <img
+                    <Image
                       src={employee.photo_url}
                       alt="Photo"
                       className="w-full h-full object-cover"
+                      width={128}
+                      height={128}
+                      unoptimized
                     />
                   ) : (
                     <User className="w-12 h-12 text-[var(--text-muted)]" />
@@ -224,10 +228,13 @@ export function CardActionsTab() {
               <div className="flex justify-between items-start">
                 <div className="w-20 h-24 bg-gray-200 rounded border border-gray-300 flex items-center justify-center overflow-hidden">
                   {employee?.photo_url ? (
-                    <img
+                    <Image
                       src={employee.photo_url}
                       alt="Photo"
                       className="w-full h-full object-cover"
+                      width={80}
+                      height={96}
+                      unoptimized
                     />
                   ) : (
                     <User className="w-8 h-8 text-gray-400" />

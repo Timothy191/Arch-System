@@ -267,7 +267,7 @@ export function GlassCard({
   const isWindow = variant === "window";
   const isSpotlight = variant === "spotlight";
   const isGlowBorder = variant === "glowborder";
-  const isLiquid = true; // User requested Liquid Glass effect globally on all panels/cards
+  const isLiquid = variant === "liquid";
 
   // Standardize transparency globally
   const globalBackgroundOpacity = backgroundOpacity ?? 0.08;

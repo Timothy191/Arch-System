@@ -26,9 +26,6 @@ export function HeroBackground() {
       {/* Soft glass overlay */}
       <div className="absolute inset-0 bg-white/[0.02]" />
 
-      {/* Ambient Film Grain Overlay */}
-      <div className="absolute inset-0 route-bg-grain opacity-20 pointer-events-none" />
-
       {/* Fallback blobs (shown if prefers reduced motion) */}
       {prefersReducedMotion && (
         <>

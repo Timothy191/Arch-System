@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { memo, useState, useEffect, useTransition } from "react";
 import {
@@ -81,6 +83,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
   const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
@@ -159,16 +162,17 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
           <div className="absolute inset-0 z-0">
-            <img
-              src={`/images/departments/${department.name}.jpg`}
-              alt=""
-              aria-hidden="true"
-              className="w-full h-full object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
-              onError={(e) => {
-                // Fallback gracefully to color gradient if department image is unavailable
-                (e.target as HTMLElement).style.display = "none";
-              }}
-            />
+            {!imageError && (
+              <Image
+                src={`/images/departments/${department.name}.jpg`}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
+                onError={() => setImageError(true)}
+              />
+            )}
             {/* Glass gradient overlay to ensure icon bubble contrast */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 z-10" />
           </div>
@@ -234,7 +238,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
                     key={action.label}
                     href={action.href}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[10.5px] font-medium text-arch-text-primary hover:text-arch-accent-blue bg-arch-surface-secondary/60 hover:bg-arch-surface-tertiary/90 border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:scale-105 active:scale-95 interactive-element relative z-20 group/action"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[10.5px] font-medium text-arch-text-primary hover:text-arch-accent-blue bg-arch-surface-secondary/60 hover:bg-arch-surface-tertiary/90 border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-card hover:shadow-card-hover transition-all duration-200 ease-out hover:scale-105 active:scale-95 interactive-element relative z-20 group/action"
                     data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     <FileText className="w-3 h-3 shrink-0 text-arch-accent-blue opacity-80 group-hover/action:opacity-100 transition-opacity" />

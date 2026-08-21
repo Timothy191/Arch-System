@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
 import {
   Play,
   Pause,
@@ -37,6 +39,7 @@ export function HeroRotator({
 }: HeroRotatorProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   // Construct panels array: Overview first, followed by each department
   const panels = useMemo(
@@ -149,8 +152,8 @@ export function HeroRotator({
             aria-roledescription="slide"
             aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
           >
-            {/* Left Content Area (7 Cols) */}
-            <div className="lg:col-span-7 space-y-3 flex flex-col justify-between z-10">
+            {/* Left Content Area (9 Cols) */}
+            <div className="lg:col-span-9 space-y-3 flex flex-col justify-between z-10">
               <div className="space-y-1.5 sm:space-y-2">
                 {/* Category & Status Pill */}
                 <div className="flex items-center gap-2">
@@ -199,7 +202,7 @@ export function HeroRotator({
                   <Link
                     href={panel.primary.href}
                     data-cta="primary-hero"
-                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-arch-brand-blue text-white font-medium text-xs shadow-sm hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[32px]"
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-arch-brand-blue text-white font-medium text-xs shadow-card hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[32px]"
                   >
                     {panel.primary.icon}
                     <span>{panel.primary.label}</span>
@@ -218,17 +221,19 @@ export function HeroRotator({
               </div>
             </div>
 
-            {/* Right Visual Image Card (5 Cols) */}
-            <div className="lg:col-span-5 relative group/image">
-              <div className="relative aspect-[16/9] max-h-[160px] sm:max-h-[175px] rounded-xl overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
+            {/* Right Visual Image Card (3 Cols) */}
+            <div className="lg:col-span-3 relative group/image">
+              <div className="relative aspect-[16/9] max-h-[80px] sm:max-h-[88px] rounded-xl overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
                 {/* Visual Terrain / Industrial Image */}
                 <img
-                  src={panel.image}
+                  src={
+                    failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image
+                  }
                   alt={`${panel.title} visual`}
                   className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover/image:scale-102"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/departments/overview.jpg";
-                  }}
+                  loading={idx === activeIndex ? "eager" : "lazy"}
+                  fetchPriority={idx === activeIndex ? "high" : "low"}
+                  onError={() => setFailedImages((prev) => new Set(prev).add(panel.image))}
                 />
 
                 {/* Subtle Gradient Vignette */}
@@ -258,14 +263,14 @@ export function HeroRotator({
             <button
               onClick={prevSlide}
               aria-label="Previous department highlight"
-              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={nextSlide}
               aria-label="Next department highlight"
-              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95"
+              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

@@ -111,13 +111,20 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
             <input
               id="hub-module-search"
               type="text"
+              aria-label="Search operational modules"
+              aria-describedby="hub-module-search-hint"
               placeholder="Search modules... (/)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-7 py-1 text-xs rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
             />
+            <span id="hub-module-search-hint" className="sr-only">
+              Press slash or Command K to focus the module search
+            </span>
             {searchQuery ? (
               <button
+                type="button"
+                aria-label="Clear search"
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-arch-text-tertiary hover:text-arch-text-primary"
               >
@@ -131,13 +138,19 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1 bg-arch-surface-tertiary/60 p-0.5 rounded-full border border-arch-border-subtle text-xs font-medium">
+          <div
+            className="flex items-center gap-1 bg-arch-surface-tertiary/60 p-0.5 rounded-full border border-arch-border-subtle text-xs font-medium"
+            role="group"
+            aria-label="Filter modules by category"
+          >
             <button
+              type="button"
+              aria-pressed={activeFilter === "all"}
               onClick={() => setActiveFilter("all")}
               className={cn(
                 "px-2.5 py-1 rounded-full transition-all text-xs",
                 activeFilter === "all"
-                  ? "bg-white text-arch-text-primary shadow-sm"
+                  ? "bg-white text-arch-text-primary shadow-card"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
@@ -145,11 +158,13 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
             </button>
             {pinnedCount > 0 && (
               <button
+                type="button"
+                aria-pressed={activeFilter === "pinned"}
                 onClick={() => setActiveFilter("pinned")}
                 className={cn(
                   "px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1",
                   activeFilter === "pinned"
-                    ? "bg-white text-arch-accent-blue shadow-sm"
+                    ? "bg-white text-arch-accent-blue shadow-card"
                     : "text-arch-text-tertiary hover:text-arch-text-secondary",
                 )}
               >
@@ -158,22 +173,26 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               </button>
             )}
             <button
+              type="button"
+              aria-pressed={activeFilter === "active"}
               onClick={() => setActiveFilter("active")}
               className={cn(
                 "px-2.5 py-1 rounded-full transition-all text-xs",
                 activeFilter === "active"
-                  ? "bg-white text-accent-green shadow-sm"
+                  ? "bg-white text-accent-green shadow-card"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
               Active
             </button>
             <button
+              type="button"
+              aria-pressed={activeFilter === "critical"}
               onClick={() => setActiveFilter("critical")}
               className={cn(
                 "px-2.5 py-1 rounded-full transition-all text-xs",
                 activeFilter === "critical"
-                  ? "bg-white text-accent-amber shadow-sm"
+                  ? "bg-white text-accent-amber shadow-card"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >

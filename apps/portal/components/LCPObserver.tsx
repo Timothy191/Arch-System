@@ -25,6 +25,17 @@ export function LCPObserver() {
   const [lcpElement, setLcpElement] = useState<LCPElement | null>(null);
   const [isDev, setIsDev] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // AGENT-TRACE: Delay mounting the HUD UI by 5 seconds to guarantee
+    // the observer diagnostic elements aren't painted during the critical LCP window,
+    // preventing the tip box from self-classifying as LCP.
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const dev = process.env.NODE_ENV === "development";
@@ -83,7 +94,9 @@ export function LCPObserver() {
         console.groupEnd();
 
         // Highlight the LCP element
-        highlightLCPElement(element);
+        setTimeout(() => {
+          highlightLCPElement(element);
+        }, 2000);
       }
     });
 
@@ -103,7 +116,7 @@ export function LCPObserver() {
     }, 3000);
   }
 
-  if (!isDev || !lcpElement) return null;
+  if (!isDev || !lcpElement || !mounted) return null;
 
   if (isMinimized) {
     return (
