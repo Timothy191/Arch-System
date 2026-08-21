@@ -2716,3 +2716,12 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
 - Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
+
+## [2026-08-21T04:01:28Z] Performance Optimization: MonitoringMap 60 FPS Viewport Render Stability
+
+**Purpose:** Optimize DeckGL and MapLibre component rendering in `MonitoringMap` to eliminate unnecessary object allocations and style recalculation during 60 FPS panning/zooming animations.
+**Changes:**
+- Pre-parsed static `LEVEL_RGBA` tuples to avoid runtime `parseInt` hex parsing during point scatter calculations.
+- Memoized DeckGL `layers` with `useMemo` to prevent layer re-instantiation on every `viewState` frame change.
+- Memoized MapLibre `mapStyle` object to prevent MapLibre from diffing style definitions on every frame.
+- Created unit test suite in `MonitoringMap.test.tsx` to verify component rendering, layer switching, and conditional switcher display.
