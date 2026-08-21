@@ -724,7 +724,7 @@ phase_build() {
   success "Dependencies installed"
   
   log "Building portal..."
-  run_if_not_dry pnpm turbo build --filter=portal...
+  run_if_not_dry pnpm nx build portal
   success "Build complete"
 }
 
