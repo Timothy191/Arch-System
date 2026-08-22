@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 const SHIFT_HOURS = 12;
@@ -45,32 +46,54 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
-  // Group by site_id, then by shift
-  const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
-
-  for (const activity of todayActivity) {
-    const siteKey = activity.site_id ?? "__none__";
-    const siteName = activity.site?.name ?? "No Site Assigned";
-    if (!siteMap.has(siteKey)) {
-      siteMap.set(siteKey, { siteName, activities: [] });
+  // Pre-index dumper assignments by excavator_activity_id into a Map for O(1) lookup speed.
+  // This avoids quadratic O(A * T) array scanning during render iterations.
+  const assignmentsByActivity = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (const assignment of todayAssignments) {
+      const activityId = assignment.excavator_activity_id;
+      let list = map.get(activityId);
+      if (!list) {
+        list = [];
+        map.set(activityId, list);
+      }
+      list.push(assignment);
     }
-    siteMap.get(siteKey)!.activities.push(activity);
-  }
+    return map;
+  }, [todayAssignments]);
+
+  // Group by site_id, then by shift
+  const siteMap = useMemo(() => {
+    const map = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
+
+    for (const activity of todayActivity) {
+      const siteKey = activity.site_id ?? "__none__";
+      const siteName = activity.site?.name ?? "No Site Assigned";
+      if (!map.has(siteKey)) {
+        map.set(siteKey, { siteName, activities: [] });
+      }
+      map.get(siteKey)!.activities.push(activity);
+    }
+
+    return map;
+  }, [todayActivity]);
 
   // Put "No Site Assigned" last
-  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === "__none__") return 1;
-    if (b === "__none__") return -1;
-    return 0;
-  });
+  const siteEntries = useMemo(() => {
+    return Array.from(siteMap.entries()).sort(([a], [b]) => {
+      if (a === "__none__") return 1;
+      if (b === "__none__") return -1;
+      return 0;
+    });
+  }, [siteMap]);
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id),
+        const siteAssignments = activities.flatMap(
+          (a) => assignmentsByActivity.get(a.id) || [],
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -110,9 +133,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivity.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -131,9 +152,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivity.get(activity.id) || []}
                     />
                   ))}
                 </div>
