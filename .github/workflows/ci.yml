@@ -10,8 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NX_CLOUD_CONTINUOUS_ASSIGNMENT: true
+
 jobs:
-  # Deps Lint job - runs in parallel
+  # Deps Lint job - runs in parallel on coordinator
   deps-lint:
     name: Dependency Lint
     runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
       - name: Run syncpack deps lint
         run: pnpm deps:lint
 
-  # Security Audit job - runs in parallel
+  # Security Audit job - runs in parallel on coordinator
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
@@ -62,7 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
 
-  # Knip dead-code detection job - runs in parallel
+  # Knip dead-code detection job - runs in parallel on coordinator
   knip:
     name: Dead Code Detection
     runs-on: ubuntu-latest
@@ -85,7 +88,7 @@ jobs:
       - name: Run Knip
         run: pnpm knip
 
-  # Policy Check job - runs in parallel
+  # Policy Check job - runs in parallel on coordinator
   policy-check:
     name: Policy Check
     runs-on: ubuntu-latest
@@ -108,7 +111,7 @@ jobs:
       - name: Run Policy Check
         run: pnpm policy:check
 
-  # HTML Meta Tags Check job - runs in parallel
+  # HTML Meta Tags Check job - runs in parallel on coordinator
   html-meta-check:
     name: HTML Meta Tags Check
     runs-on: ubuntu-latest
@@ -131,7 +134,7 @@ jobs:
       - name: Run HTML Meta Tags Check
         run: pnpm html:check
 
-  # Markdown Lint job - runs in parallel
+  # Markdown Lint job - runs in parallel on coordinator
   md-lint:
     name: Markdown Lint
     runs-on: ubuntu-latest
@@ -154,81 +157,10 @@ jobs:
       - name: Run Markdown Lint
         run: pnpm md:lint
 
-  # Lint & Type Check job - runs in parallel with static checks
-  lint-type-check:
-    name: Lint & Type Check
+  # Nx Agents Distributed Work: Lint, Type Check, Build & Test
+  nx-agents:
+    name: Distributed Nx Tasks (Nx Agents)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint & Type Check
-        run: pnpm nx affected -t lint type-check
-
-  # Token & CSS Lint job - runs in parallel
-  token-css-lint:
-    name: Token & CSS Lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Token & CSS Lint
-        run: pnpm nx affected -t lint:tokens lint:css
-
-  # Build job - depends on lint/type-check
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [lint-type-check, token-css-lint]
     permissions:
       contents: read
       issues: write
@@ -236,7 +168,6 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      # Dummy values required for Next.js builds
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_URL: http://localhost:54321
@@ -321,49 +252,20 @@ jobs:
           poetry run deepeval test run tests/
         working-directory: packages/eval
 
-      - name: Build
-        run: pnpm nx affected -t build
+      - name: Start Nx Cloud CI Run
+        run: pnpm exec nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="test" --stop-agents-on-failure=false --require-explicit-completion --with-env-vars=NEXT_TELEMETRY_DISABLED,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_URL,SUPABASE_ANON_KEY,SUPABASE_SERVICE_KEY,PORT,N8N_URL,FLOWISE_URL,DATABASE_URL,PAYLOAD_SECRET
+
+      - name: Run Nx Tasks via Nx Agents
+        run: pnpm nx affected -t lint type-check lint:tokens lint:css build test --coverage --passWithNoTests
+        env:
+          CI: true
 
       - name: Bundle Size Check
         run: pnpm bundlesize
 
-  # Test job - depends on build
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: [build]
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Test with Coverage
-        run: pnpm nx affected -t test -- --coverage --passWithNoTests
-        env:
-          CI: true
+      - name: Complete Nx Cloud CI Run
+        if: always()
+        run: pnpm exec nx-cloud complete-ci-run
 
       - name: Upload Coverage Report
         if: always()
@@ -373,11 +275,11 @@ jobs:
           path: apps/portal/coverage/
           retention-days: 14
 
-  # E2E job - depends on build
+  # E2E job - depends on nx-agents
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [nx-agents]
     permissions:
       contents: read
       issues: write
@@ -385,7 +287,6 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      # Dummy values required for Next.js builds
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_URL: http://localhost:54321
@@ -439,11 +340,11 @@ jobs:
       - name: Run Playwright E2E Tests (Visual Regression)
         run: pnpm test:e2e
 
-  # Lighthouse job - depends on build
+  # Lighthouse job - depends on nx-agents
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [nx-agents]
     permissions:
       contents: read
       issues: write
@@ -451,7 +352,6 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      # Dummy values required for Next.js builds
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_URL: http://localhost:54321
@@ -510,55 +410,6 @@ jobs:
           path: .lighthouseci/
           retention-days: 14
 
-  # Self-healing job - runs after all jobs
-  self-healing:
-    name: Self-Healing CI
-    runs-on: ubuntu-latest
-    needs:
-      [
-        deps-lint,
-        security-audit,
-        knip,
-        policy-check,
-        html-meta-check,
-        md-lint,
-        lint-type-check,
-        token-css-lint,
-        build,
-        test,
-        e2e,
-        lighthouse,
-        a11y,
-      ]
-    if: always()
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Self-Healing CI
-        run: pnpm exec nx fix-ci
-
   a11y:
     name: Accessibility Audit
     runs-on: ubuntu-latest
@@ -592,3 +443,49 @@ jobs:
           npx wait-on http://localhost:6006 --timeout 60000
           pnpm test:a11y --url http://localhost:6006
         working-directory: packages/ui
+
+  # Self-healing job - runs after all jobs
+  self-healing:
+    name: Self-Healing CI
+    runs-on: ubuntu-latest
+    needs:
+      [
+        deps-lint,
+        security-audit,
+        knip,
+        policy-check,
+        html-meta-check,
+        md-lint,
+        nx-agents,
+        e2e,
+        lighthouse,
+        a11y,
+      ]
+    if: always()
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Self-Healing CI
+        run: pnpm exec nx fix-ci

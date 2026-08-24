@@ -153,8 +153,9 @@ fallow_output.txt
 .project/
 .memory/
 
-# Nx cache (per-package)
-**/.nx/
+# Nx cache & workspace runtime data
+.nx/cache/
+.nx/workspace-data/
 
 # Generated OpenAPI types from contract validation
 packages/contract/src/generated/
