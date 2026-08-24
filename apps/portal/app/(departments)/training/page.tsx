@@ -1,4 +1,6 @@
 import { GlassCard } from "@repo/ui/GlassCard";
+import { BorderBox } from "@repo/ui/BorderBox";
+import { Divider } from "@repo/ui/Divider";
 import { GraduationCap, Award, Calendar, Clock } from "lucide-react";
 
 export default async function TrainingDashboardPage() {
@@ -112,22 +114,26 @@ export default async function TrainingDashboardPage() {
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <GlassCard key={i}>
-              <div className="flex items-center justify-between">
-                <p className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
-                  {stat.label}
+            <BorderBox key={i} variant="gradient" className="p-0 border-0 h-full">
+              <GlassCard className="h-full">
+                <div className="flex items-center justify-between">
+                  <p className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+                    {stat.label}
+                  </p>
+                  <Icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
+                <p className="text-3xl font-bold text-[var(--text-heading)] mt-2">{stat.value}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+                  <span className="text-emerald-600 font-medium">{stat.change.split(" ")[0]}</span>
+                  <span>{stat.change.substring(stat.change.indexOf(" "))}</span>
                 </p>
-                <Icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-              <p className="text-3xl font-bold text-[var(--text-heading)] mt-2">{stat.value}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-                <span className="text-emerald-600 font-medium">{stat.change.split(" ")[0]}</span>
-                <span>{stat.change.substring(stat.change.indexOf(" "))}</span>
-              </p>
-            </GlassCard>
+              </GlassCard>
+            </BorderBox>
           );
         })}
       </div>
+
+      <Divider variant="fading" label="CERTIFICATIONS & SCHEDULES" />
 
       {/* Grid of details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

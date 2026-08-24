@@ -4,6 +4,7 @@ import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
 import { getSatelliteMonitoringData } from "~/lib/monitoring/satellite-data";
+import { Divider } from "@repo/ui/Divider";
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
@@ -132,6 +133,8 @@ export default async function DepartmentDashboard({
               </p>
             </div>
 
+            <Divider variant="fading" />
+
             {/* Control Room Summary Grid - Client-side with React Query */}
             <Suspense
               fallback={
@@ -214,6 +217,8 @@ export default async function DepartmentDashboard({
         ) : (
           <>
             <h2 className="text-2xl font-bold text-[var(--text-heading)]">Dashboard</h2>
+
+            <Divider variant="fading" />
 
             {/* Non-Control Room Summary Grid - Client-side with React Query */}
             <Suspense

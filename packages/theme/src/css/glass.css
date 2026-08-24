@@ -57,7 +57,11 @@
   border: 1px solid transparent;
   box-shadow: var(--glass-shadow);
   color: var(--text-on-glass);
-  transition: opacity var(--transition-medium), transform var(--transition-medium), background-color var(--transition-medium), box-shadow var(--transition-medium);
+  transition:
+    opacity var(--transition-medium),
+    transform var(--transition-medium),
+    background-color var(--transition-medium),
+    box-shadow var(--transition-medium);
 }
 
 .glass-hover:hover {
@@ -69,7 +73,10 @@
     0 24px 30px -5px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-2px);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 /* ── Glass Components ── */
@@ -882,37 +889,40 @@
   animation: grain-dance 8s steps(10) infinite;
 }
 
+/* AGENT-TRACE: grain-dance animates transform (compositor) instead of
+   background-position (paint). Consumers must be oversized (inset: -24px)
+   so translate3d offsets never reveal edges. */
 @keyframes grain-dance {
   0%,
   100% {
-    background-position: 0 0;
+    transform: translate3d(0, 0, 0);
   }
   10% {
-    background-position: -5px 10px;
+    transform: translate3d(-5px, 10px, 0);
   }
   20% {
-    background-position: -10px 5px;
+    transform: translate3d(-10px, 5px, 0);
   }
   30% {
-    background-position: 4px -9px;
+    transform: translate3d(4px, -9px, 0);
   }
   40% {
-    background-position: -8px 2px;
+    transform: translate3d(-8px, 2px, 0);
   }
   50% {
-    background-position: 11px 8px;
+    transform: translate3d(11px, 8px, 0);
   }
   60% {
-    background-position: -3px -11px;
+    transform: translate3d(-3px, -11px, 0);
   }
   70% {
-    background-position: 9px 4px;
+    transform: translate3d(9px, 4px, 0);
   }
   80% {
-    background-position: -6px -7px;
+    transform: translate3d(-6px, -7px, 0);
   }
   90% {
-    background-position: 2px 12px;
+    transform: translate3d(2px, 12px, 0);
   }
 }
 
@@ -932,7 +942,8 @@
     transition: none !important;
     animation: none !important;
   }
-  .liquid-grain-overlay {
+  .liquid-grain-overlay,
+  .route-bg-grain {
     animation: none !important;
   }
 }
@@ -1046,10 +1057,12 @@
   }
 }
 
-/* Ambient Film Grain overlay to eliminate H.264 banding and add crisp texture */
+/* Ambient Film Grain overlay to eliminate H.264 banding and add crisp texture.
+   AGENT-TRACE: inset is oversized (-24px) so the transform-based grain-dance
+   translate3d offsets never reveal the element edges. */
 .route-bg-grain {
   position: fixed;
-  inset: 0;
+  inset: -24px;
   z-index: -8;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYDFgQoIWJGvQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDQcAAAAZSURBVFjD7cEBDQAAAMKg909tDwcUAAAAXwYNKQAB5H3g4AAAAABJRU5ErkJggg==");
   background-size: 140px 140px;
@@ -1064,11 +1077,13 @@ body.focus-mode .route-bg-grain {
 }
 
 /* Focus-mode: full-screen atmospheric image */
+/* AGENT-TRACE: 2560px poster (downscaled from 4480px, 6.8MB → ~1.5MB) — the
+   4K PNG was a heavy first-paint resource on the hub page. */
 .route-bg-focus {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background-image: url("/background/macos-27-golden-4480x3088-26626.png");
+  background-image: url("/background/macos-27-golden-2560x1764.png");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

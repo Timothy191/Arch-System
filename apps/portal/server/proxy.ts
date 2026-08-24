@@ -42,17 +42,17 @@ function isValidRedirect(path: string): boolean {
     /^\/login/, // Login page
     /^\/reset-password/, // Password reset
     /^\/update-password/, // Password update
-    /^\/drilling\//, // Drilling department
-    /^\/production\//, // Production department
-    /^\/access-control\//, // Access control department
-    /^\/engineering\//, // Engineering department
-    /^\/control-room\//, // Control room department
-    /^\/safety\//, // Safety department
-    /^\/training\//, // Training department
-    /^\/satellite-monitoring\//, // Satellite monitoring department
-    /^\/access-card-actions\//, // Access Card Actions department
+    /^\/drilling(\/|$)/, // Drilling department
+    /^\/production(\/|$)/, // Production department
+    /^\/access-control(\/|$)/, // Access control department
+    /^\/engineering(\/|$)/, // Engineering department
+    /^\/control-room(\/|$)/, // Control room department
+    /^\/safety(\/|$)/, // Safety department
+    /^\/training(\/|$)/, // Training department
+    /^\/satellite-monitoring(\/|$)/, // Satellite monitoring department
+    /^\/access-card-actions(\/|$)/, // Access Card Actions department
     /^\/hub/, // Hub
-    /^\/admin\//, // Admin
+    /^\/admin(\/|$)/, // Admin
   ];
 
   // Check if path matches any allowed pattern
@@ -226,6 +226,22 @@ export async function proxy(request: NextRequest) {
       // eslint-disable-next-line no-empty
     } catch {}
     return client.response;
+  }
+
+  // Check if session cookie exists before creating Supabase middleware client or calling auth.getUser().
+  // If no session cookie exists, short-circuit immediately to /login without network round-trip.
+  const hasSessionCookie =
+    request.cookies.has("sb-access-token") ||
+    [...request.cookies.getAll()].some(
+      (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+    );
+
+  if (!hasSessionCookie) {
+    const redirectUrl = new URL("/login", request.url);
+    if (isValidRedirect(pathname)) {
+      redirectUrl.searchParams.set("redirect", pathname);
+    }
+    return NextResponse.redirect(redirectUrl);
   }
 
   const client = await createMiddlewareClient(request);

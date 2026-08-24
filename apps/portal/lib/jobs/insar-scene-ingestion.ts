@@ -127,12 +127,14 @@ export const insarSceneIngestionFn: InngestFunction.Any = inngest.createFunction
 
       // AGENT-TRACE: Load existing acquisitions for the last 30 days so we do not
       // insert duplicate bookkeeping rows for the same scene date + zone.
-      const lookbackStart = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
+      const previousWindowStartDate = new Date(Date.now() - 30 * 86400000)
+        .toISOString()
+        .split("T")[0]!;
       const { data: existingRows, error: existingError } = await serviceRole
         .from("satellite_deformations")
         .select("acquisition_date, location_name, satellite_name")
         .eq("department_id", satDept.id)
-        .gte("acquisition_date", lookbackStart);
+        .gte("acquisition_date", previousWindowStartDate);
 
       if (existingError) throw existingError;
 
@@ -171,8 +173,8 @@ export const insarSceneIngestionFn: InngestFunction.Any = inngest.createFunction
         const pendingEscalations = new Set<string>();
 
         for (const zone of MONITORING_ZONES) {
-          const dedupKey = `${acquisitionDate}|${zone.locationName}|Sentinel-1`;
-          if (existingKeySet.has(dedupKey)) continue;
+          const duplicateCheckKey = `${acquisitionDate}|${zone.locationName}|Sentinel-1`;
+          if (existingKeySet.has(duplicateCheckKey)) continue;
 
           const processed = processedResults?.find(
             (r: ProcessedDisplacement) => r.location_name === zone.locationName,
@@ -216,8 +218,8 @@ export const insarSceneIngestionFn: InngestFunction.Any = inngest.createFunction
 
         ingestedCount += inserted?.length ?? 0;
 
-        // AGENT-TRACE: Stream every inserted row to Redis and escalate real criticals.
-        for (const record of inserted ?? []) {
+        // AGENT-TRACE: Stream every inserted row to Redis and escalate real critical events in parallel.
+        const redisWrites = (inserted ?? []).map(async (record) => {
           const eventData = {
             id: record.id,
             department_id: record.department_id,
@@ -233,11 +235,12 @@ export const insarSceneIngestionFn: InngestFunction.Any = inngest.createFunction
             cog_url: record.cog_url,
             created_at: record.created_at,
           };
+          const jsonStr = JSON.stringify(eventData);
 
-          await redis.set(`${LAST_KEY_PREFIX}${record.id}`, JSON.stringify(eventData), {
-            EX: 86400,
-          });
-          await redis.publish(STREAM_CHANNEL, JSON.stringify(eventData));
+          await Promise.all([
+            redis.set(`${LAST_KEY_PREFIX}${record.id}`, jsonStr, { EX: 86400 }),
+            redis.publish(STREAM_CHANNEL, jsonStr),
+          ]);
 
           if (
             safetyDept &&
@@ -247,7 +250,9 @@ export const insarSceneIngestionFn: InngestFunction.Any = inngest.createFunction
             await escalateCriticalDisplacement(serviceRole, safetyDept.id, record);
             escalatedCount++;
           }
-        }
+        });
+
+        await Promise.all(redisWrites);
       }
 
       return {
@@ -289,6 +294,7 @@ async function fetchProcessedDisplacements(
           area: z.areaKeyword,
         })),
       }),
+      signal: AbortSignal.timeout(10000), // 10-second timeout to prevent worker blocking on unresponsive InSAR processor
     });
 
     if (!response.ok) {

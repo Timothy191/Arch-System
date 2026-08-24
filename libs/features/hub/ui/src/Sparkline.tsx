@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { cn } from "@repo/ui/lib/utils";
 
 interface SparklineProps {
@@ -18,12 +18,24 @@ export function Sparkline({
   strokeWidth = 1.5,
   className,
 }: SparklineProps) {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const id = useId();
+
+  // AGENT-TRACE: gate the end-node pulse behind prefers-reduced-motion. The
+  // infinite r/opacity animation was running on every sparkline regardless of
+  // user preference.
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
   if (data.length < 2) return null;
 
-  const id = useId();
   const lineGradId = `sparkLineGrad-${id}`;
   const areaGradId = `sparkAreaGrad-${id}`;
-  const glowId = `sparkGlow-${id}`;
 
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -67,26 +79,9 @@ export function Sparkline({
           <stop offset="0%" stopColor={strokeColor} stopOpacity={0.4} />
           <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
         </linearGradient>
-        <filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="1.5"
-            floodColor={strokeColor}
-            floodOpacity={0.6}
-          />
-        </filter>
-        {/* Glowing refraction filter for the line path */}
-        <filter id={`sparkGlowPath-${id}`} x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.0" result="blur" />
-          <feComponentTransfer in="blur" result="boost">
-            <feFuncA type="linear" slope="0.45" />
-          </feComponentTransfer>
-          <feMerge>
-            <feMergeNode in="boost" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
+        {/* AGENT-TRACE: feDropShadow/feGaussianBlur filters removed — SVG filters
+            on animated elements force a filter re-evaluation every frame. The
+            halo circle + gradient stroke replace them at zero filter cost. */}
         <style>{`
           @keyframes spark-pulse-${id} {
             0%, 100% { r: 1.5; opacity: 0.9; }
@@ -148,23 +143,25 @@ export function Sparkline({
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity={0.95}
-        filter={`url(#sparkGlowPath-${id})`}
         shapeRendering="geometricPrecision"
       />
-      {/* Hardware-like glowing end node */}
-      <g filter={`url(#${glowId})`}>
-        <circle
-          cx={endX}
-          cy={endY}
-          r={1.5}
-          fill={strokeColor}
-          opacity={0.9}
-          style={{
-            animation: `spark-pulse-${id} 2s ease-in-out infinite`,
-            transformOrigin: `${endX}px ${endY}px`,
-          }}
-        />
-      </g>
+      {/* Hardware-like glowing end node — static halo + animated core */}
+      <circle cx={endX} cy={endY} r={3} fill={strokeColor} opacity={0.25} />
+      <circle
+        cx={endX}
+        cy={endY}
+        r={1.5}
+        fill={strokeColor}
+        opacity={0.9}
+        style={
+          prefersReducedMotion
+            ? undefined
+            : {
+                animation: `spark-pulse-${id} 2s ease-in-out infinite`,
+                transformOrigin: `${endX}px ${endY}px`,
+              }
+        }
+      />
     </svg>
   );
 }

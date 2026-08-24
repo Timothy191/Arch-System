@@ -1,5 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { BorderBox } from "@repo/ui/BorderBox";
+import { Divider } from "@repo/ui/Divider";
 import nextDynamic from "next/dynamic";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import {
@@ -40,36 +42,42 @@ export default async function AccessControlDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <Divider variant="dotted" label="SECURITY CLEARANCE MATRIX" />
+
       {/* Top summary row with real DB data */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-accent-green/10 rounded-lg">
-              <span className="text-accent-green font-bold text-sm">BADGES</span>
+        <BorderBox variant="double" className="p-0 border-0">
+          <GlassCard className="h-full">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-accent-green/10 rounded-lg">
+                <span className="text-accent-green font-bold text-sm">BADGES</span>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+                  Active Badges
+                </p>
+                <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
+                  {metrics.activeQrCodes}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-                Active Badges
-              </p>
-              <p className="text-2xl font-bold text-[var(--text-heading)] mt-1">
-                {metrics.activeQrCodes}
-              </p>
+          </GlassCard>
+        </BorderBox>
+        <BorderBox variant="bevelled-inset" className="p-0 border-0">
+          <GlassCard className="h-full">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-cyan-400/10 rounded-lg">
+                <span className="text-cyan-400 font-bold text-sm">VISITORS</span>
+              </div>
+              <div>
+                <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
+                  Active Visitors
+                </p>
+                <p className="text-2xl font-bold text-cyan-400 mt-1">{metrics.accessEventsToday}</p>
+              </div>
             </div>
-          </div>
-        </GlassCard>
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-400/10 rounded-lg">
-              <span className="text-cyan-400 font-bold text-sm">VISITORS</span>
-            </div>
-            <div>
-              <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-wider">
-                Active Visitors
-              </p>
-              <p className="text-2xl font-bold text-cyan-400 mt-1">{metrics.accessEventsToday}</p>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+        </BorderBox>
         <GlassCard>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-accent-blue/10 rounded-lg">

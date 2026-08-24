@@ -392,8 +392,44 @@ function inferAreaFromLocation(locationName: string): DeformationArea {
   return "pit-wall";
 }
 
+// Fast pre-computed short month names
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+function formatShortMonthYear(dateStr: string): string {
+  // Fast path for ISO date YYYY-MM-DD
+  if (dateStr.length >= 7 && dateStr[4] === "-") {
+    const year = dateStr.slice(2, 4);
+    const monthIdx = parseInt(dateStr.slice(5, 7), 10) - 1;
+    if (monthIdx >= 0 && monthIdx < 12) {
+      return `${MONTH_NAMES[monthIdx]} ${year}`;
+    }
+  }
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-ZA", {
+    month: "short",
+    year: "2-digit",
+  });
+}
+
+function parseDateTimestamp(dateStr: string): number {
+  return typeof dateStr === "string" ? Date.parse(dateStr) : Number(dateStr);
+}
+
 function monthsBetween(a: string, b: string): number {
-  const ms = new Date(b).getTime() - new Date(a).getTime();
+  const ms = parseDateTimestamp(b) - parseDateTimestamp(a);
   return ms / (30 * 86400000);
 }
 
@@ -426,7 +462,7 @@ export function mapDeformationRowsToReadings(rows: DeformationDbRow[]): Deformat
   for (const [locationName, group] of groups) {
     // AGENT-TRACE: sort ascending by acquisition_date so history is chronological
     const sorted = [...group].sort(
-      (a, b) => new Date(a.acquisition_date).getTime() - new Date(b.acquisition_date).getTime(),
+      (a, b) => parseDateTimestamp(a.acquisition_date) - parseDateTimestamp(b.acquisition_date),
     );
     const latest = sorted[sorted.length - 1]!;
     const area = inferAreaFromLocation(locationName);
@@ -469,10 +505,7 @@ export function mapDeformationRowsToReadings(rows: DeformationDbRow[]): Deformat
         if (m > 0) v = row.displacement_mm / m;
       }
       return {
-        month: new Date(row.acquisition_date).toLocaleDateString("en-ZA", {
-          month: "short",
-          year: "2-digit",
-        }),
+        month: formatShortMonthYear(row.acquisition_date),
         velocityMmPerMonth: Math.round(v * 10) / 10,
       };
     });

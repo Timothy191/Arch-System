@@ -8,7 +8,7 @@
  */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface LCPElement {
   element: Element;
@@ -26,6 +26,9 @@ export function LCPObserver() {
   const [isDev, setIsDev] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // AGENT-TRACE: Ref to the diagnostic panel root. Used to exclude the panel's own
+  // DOM subtree from LCP detection so the observer never self-classifies as LCP.
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // AGENT-TRACE: Delay mounting the HUD UI by 5 seconds to guarantee
@@ -52,6 +55,13 @@ export function LCPObserver() {
       if (!entry || !entry.element) return;
 
       const element = entry.element;
+
+      // AGENT-TRACE: Self-classification guard — ignore LCP entries that originate
+      // from the observer's own floating panel. Without this, the diagnostic UI's
+      // tip text (mounted 5s after hydration) becomes the page's reported LCP on
+      // slow-hydrating pages, masking the real content's LCP.
+      if (panelRef.current?.contains(element)) return;
+
       const lcpData: LCPElement = {
         element,
         startTime: entry.startTime,
@@ -120,7 +130,7 @@ export function LCPObserver() {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-[9999]">
+      <div ref={panelRef} className="fixed bottom-4 right-4 z-[9999]">
         <button
           onClick={() => setIsMinimized(false)}
           className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-lg flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
@@ -142,7 +152,10 @@ export function LCPObserver() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] bg-[var(--arch0)] text-white p-4 rounded-lg shadow-lg border-2 border-[var(--accent-blue)] max-w-md">
+    <div
+      ref={panelRef}
+      className="fixed bottom-4 right-4 z-[9999] bg-[var(--arch0)] text-white p-4 rounded-lg shadow-lg border-2 border-[var(--accent-blue)] max-w-md"
+    >
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-bold text-lg">📊 LCP Element Detected</h3>
         <button

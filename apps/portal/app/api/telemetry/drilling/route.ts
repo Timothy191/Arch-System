@@ -153,6 +153,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
           name: `drill_${machine_id}_bit_depth`,
           value: bit_depth ?? 0,
         }),
+        signal: AbortSignal.timeout(3000), // Prevent thread blocking on SCADA latency/outage
       });
       scadaSynced = fuxaRes.ok;
     } catch {

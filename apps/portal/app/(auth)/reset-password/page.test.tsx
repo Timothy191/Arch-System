@@ -8,6 +8,12 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null),
+  }),
+}));
+
 jest.mock("@repo/supabase/client", () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));

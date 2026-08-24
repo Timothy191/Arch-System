@@ -15,6 +15,14 @@ import {
   History,
   BarChart3,
   Wrench,
+  Satellite,
+  Image,
+  Layers,
+  AlertTriangle,
+  Users,
+  RefreshCw,
+  Cpu,
+  Truck,
 } from "lucide-react";
 
 const routeIcons: Record<string, React.ReactNode> = {
@@ -24,6 +32,17 @@ const routeIcons: Record<string, React.ReactNode> = {
   History: <History className="w-4 h-4" />,
   Reports: <BarChart3 className="w-4 h-4" />,
   Tools: <Wrench className="w-4 h-4" />,
+  "SAR Analysis": <Satellite className="w-4 h-4" />,
+  "High-Res Imagery": <Image className="w-4 h-4" />,
+  Hyperspectral: <Layers className="w-4 h-4" />,
+  "Operational Delays": <AlertTriangle className="w-4 h-4" />,
+  "Shift Coverage": <Users className="w-4 h-4" />,
+  "Roll Over": <RefreshCw className="w-4 h-4" />,
+  Breakdowns: <Wrench className="w-4 h-4" />,
+  "Engineering Notes": <FileText className="w-4 h-4" />,
+  "Machine Operations": <Cpu className="w-4 h-4" />,
+  "Hourly Loads": <Truck className="w-4 h-4" />,
+  "Excavator Activity": <Cpu className="w-4 h-4" />,
 };
 
 export default function DepartmentBreakdown() {
@@ -32,7 +51,8 @@ export default function DepartmentBreakdown() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-text-heading">Department Breakdown</h2>
         <p className="text-text-secondary mt-1">
-          All 7 departments with their routes, role requirements, and access levels
+          All {DEPARTMENTS.length} departments with their routes, role requirements, and access
+          levels
         </p>
       </div>
 

@@ -1,6 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-dotenv.config({ path: ".env" });
+import fs from "fs";
+import path from "path";
+import { seedControlRoom } from "./generators/control-room";
+import { seedDrilling } from "./generators/drilling";
+import { seedGeology } from "./generators/geology";
+import { seedProduction } from "./generators/production";
+
+// Load from potential .env locations (cwd, root, apps/portal)
+const candidateEnvPaths = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(__dirname, "../../.env"),
+  path.resolve(__dirname, "../../apps/portal/.env"),
+];
+
+for (const envPath of candidateEnvPaths) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -13,90 +31,44 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 async function run() {
-  console.log("Calling reload_schema_cache RPC...");
-  const { data, error } = await supabase.rpc("reload_schema_cache");
-  if (error) {
-    console.error("RPC failed:", error);
-    // If RPC doesn't exist, we fallback to just seeding
-  } else {
-    console.log("Schema cache reloaded via RPC!");
+  const args = process.argv.slice(2);
+  const targetDept = args.find((a) => !a.startsWith("-")) || "all";
+
+  console.log(`\n==============================================`);
+  console.log(`🚀 Plantcor Multi-Department Seed Generator`);
+  console.log(`🎯 Target Department: ${targetDept.toUpperCase()}`);
+  console.log(`==============================================\n`);
+
+  // Optional RPC cache reload attempt
+  try {
+    const { error } = await supabase.rpc("reload_schema_cache");
+    if (!error) {
+      console.log("✓ PostgREST schema cache reloaded via RPC.\n");
+    }
+  } catch {
+    // Non-blocking fallback
   }
 
-  const { data: dept } = await supabase
-    .from("departments")
-    .select("id")
-    .eq("name", "control-room")
-    .single();
+  try {
+    if (targetDept === "all" || targetDept === "control-room") {
+      await seedControlRoom(supabase);
+    }
+    if (targetDept === "all" || targetDept === "drilling") {
+      await seedDrilling(supabase);
+    }
+    if (targetDept === "all" || targetDept === "production" || targetDept === "processing") {
+      await seedProduction(supabase);
+    }
+    if (targetDept === "all" || targetDept === "geology" || targetDept === "satellite") {
+      await seedGeology(supabase);
+    }
 
-  if (!dept) {
-    console.error("Control room department not found");
-    return;
-  }
-
-  const { data: machine } = await supabase
-    .from("machines")
-    .select("id")
-    .eq("department_id", dept.id)
-    .limit(1)
-    .single();
-
-  if (!machine) {
-    console.error("No machines found for control room");
-    return;
-  }
-
-  const today = new Date().toISOString().split("T")[0];
-  const { error: loadError } = await supabase.from("hourly_loads").insert([
-    {
-      department_id: dept.id,
-      machine_id: machine.id,
-      load_date: today,
-      hour_label: "08:00",
-      total_loads: 45,
-    },
-    {
-      department_id: dept.id,
-      machine_id: machine.id,
-      load_date: today,
-      hour_label: "09:00",
-      total_loads: 50,
-    },
-  ]);
-
-  if (loadError) console.error("Error inserting loads:", loadError);
-  else console.log("Mock loads inserted successfully!");
-
-  const { data: op, error: opError } = await supabase
-    .from("machine_operations")
-    .insert({
-      department_id: dept.id,
-      machine_id: machine.id,
-      shift_date: today,
-      shift_type: "day", // CHANGED FROM shift -> shift_type!
-      operator_id: null,
-      start_time: `${today}T06:00:00Z`,
-      hours_worked: 5.5,
-    })
-    .select()
-    .single();
-
-  if (opError) {
-    console.error("Error inserting machine operation:", opError);
-  } else if (op) {
-    console.log("Mock machine operation inserted successfully!");
-
-    const { error: delayError } = await supabase.from("delay_entries").insert({
-      department_id: dept.id,
-      machine_id: machine.id,
-      machine_operation_id: op.id,
-      delay_start_time: `${today}T10:00:00Z`,
-      delay_end_time: `${today}T11:00:00Z`,
-      duration_hours: 1.0,
-      status: "committed",
-    });
-
-    if (delayError) console.error("Error inserting delay entry:", delayError);
-    else console.log("Mock delay entry inserted successfully!");
+    console.log(`\n==============================================`);
+    console.log(`✅ All requested department seeds completed!`);
+    console.log(`==============================================\n`);
+  } catch (err) {
+    console.error("\n❌ Seed generator execution failed:", err);
+    process.exit(1);
   }
 }
 

@@ -335,16 +335,38 @@ export function GlassCard({
       return;
     }
 
+    // AGENT-TRACE: coalesce ResizeObserver bursts with a rAF so the displacement
+    // map regenerates at most once per frame (a drag-resize fires dozens of
+    // callbacks per second). The change-guard also skips re-renders when the
+    // size is unchanged, which would otherwise re-run the displacement effect.
+    let rafId = 0;
+    let pending: { width: number; height: number } | null = null;
+
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const width = entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
         const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-        setSize({ width, height });
+        pending = { width, height };
+      }
+      if (!rafId) {
+        rafId = requestAnimationFrame(() => {
+          rafId = 0;
+          if (pending) {
+            const next = pending;
+            setSize((prev) =>
+              prev.width === next.width && prev.height === next.height ? prev : next,
+            );
+            pending = null;
+          }
+        });
       }
     });
 
     observer.observe(target);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isLiquid]);
 
   useEffect(() => {
@@ -355,9 +377,13 @@ export function GlassCard({
     const feDisplacementMap = feDisplacementMapRef.current;
     if (!canvas || !feImage || !feDisplacementMap) return;
 
-    const canvasDPI = 0.75;
     const finalWidth = size.width;
     const finalHeight = size.height;
+    // AGENT-TRACE: cap the displacement canvas so per-pixel SDF generation is
+    // bounded regardless of card size — a full-width hero would otherwise
+    // build a ~900px canvas. 512px is plenty for the soft refraction border.
+    const MAX_CANVAS_DIM = 512;
+    const canvasDPI = Math.min(0.75, MAX_CANVAS_DIM / Math.max(finalWidth, finalHeight));
     const canvasWidth = Math.max(1, Math.floor(finalWidth * canvasDPI));
     const canvasHeight = Math.max(1, Math.floor(finalHeight * canvasDPI));
 

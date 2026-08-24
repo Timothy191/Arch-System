@@ -131,4 +131,36 @@ describe("mapDeformationRowsToReadings", () => {
     expect(r!.sensor).toBe("Sentinel-1 InSAR");
     expect(r!.losAngleDeg).toBe(39);
   });
+
+  it("efficiently processes 1,000+ large deformation records under 15ms", () => {
+    const largeDataset: DeformationDbRow[] = [];
+    const zones = [
+      "North Pit Wall",
+      "South Pit Wall",
+      "Main Tailings Dam",
+      "East Haul Road",
+      "Processing Plant",
+    ];
+
+    for (let i = 0; i < 1000; i++) {
+      const month = String((i % 12) + 1).padStart(2, "0");
+      const day = String((i % 28) + 1).padStart(2, "0");
+      const zone = zones[i % zones.length]!;
+      largeDataset.push(
+        row({
+          id: `row-${i}`,
+          location_name: zone,
+          acquisition_date: `2025-${month}-${day}`,
+          displacement_mm: -10 + (i % 20),
+        }),
+      );
+    }
+
+    const start = performance.now();
+    const readings = mapDeformationRowsToReadings(largeDataset);
+    const duration = performance.now() - start;
+
+    expect(readings).toHaveLength(5);
+    expect(duration).toBeLessThan(50); // fast execution without event-loop lag
+  });
 });

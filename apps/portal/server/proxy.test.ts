@@ -77,8 +77,12 @@ function buildProxyMock(
   return { supabase, mockResponse };
 }
 
-function makeRequest(path: string) {
-  return new NextRequest(`http://localhost${path}`);
+function makeRequest(path: string, hasCookie = true) {
+  const req = new NextRequest(`http://localhost${path}`);
+  if (hasCookie) {
+    req.cookies.set("sb-access-token", "mock-token");
+  }
+  return req;
 }
 
 describe("normalizeRole", () => {
@@ -162,7 +166,7 @@ describe("proxy", () => {
 
   it("passes /login through for unauthenticated users", async () => {
     buildProxyMock({ user: null });
-    const req = makeRequest("/login");
+    const req = makeRequest("/login", false);
     const res = await proxy(req);
     // Returns the raw middleware response (not a redirect)
     expect(res.status).not.toBe(307);
@@ -170,7 +174,7 @@ describe("proxy", () => {
 
   it("redirects unauthenticated users to /login with redirect param", async () => {
     buildProxyMock({ user: null });
-    const req = makeRequest("/drilling");
+    const req = makeRequest("/drilling", false);
     const res = await proxy(req);
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/login");
@@ -351,5 +355,15 @@ describe("proxy", () => {
 
     expect(supabase.auth.signOut).toHaveBeenCalled();
     expect(res).toBe(mockResponse);
+  });
+
+  it("short-circuits requests without session cookies instantly without calling Supabase auth", async () => {
+    const { supabase } = buildProxyMock();
+    const req = makeRequest("/drilling", false);
+    const res = await proxy(req);
+
+    expect(supabase.auth.getUser).not.toHaveBeenCalled();
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/login?redirect=%2Fdrilling");
   });
 });

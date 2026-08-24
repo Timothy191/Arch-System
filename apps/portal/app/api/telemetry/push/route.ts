@@ -154,6 +154,7 @@ const handleDirectTag = withValidation(telemetryPushSchema, async (_req, data) =
           : {}),
       },
       body: JSON.stringify({ name, value: numValue }),
+      signal: AbortSignal.timeout(3000), // Prevent socket starvation on SCADA latency
     });
 
     if (!fuxaRes.ok) {
@@ -221,25 +222,25 @@ async function handlePost(req: Request) {
         bit_depth,
       };
 
-      const results = [];
+      const entries = Object.entries(metrics).filter(
+        ([, value]) => value !== null && value !== undefined,
+      );
 
-      for (const [key, value] of Object.entries(metrics)) {
-        if (value !== null && value !== undefined) {
+      const results = await Promise.all(
+        entries.map(async ([key, value]) => {
           const tagName = `machine_${machine_id}_${key}`;
           const numValue = Number(value);
 
           // L1 Check
           if (localLastValues.has(tagName) && localLastValues.get(tagName) === numValue) {
-            results.push({ tag: tagName, success: true, cached: true });
-            continue;
+            return { tag: tagName, success: true, cached: true };
           }
 
           // L2 Check (Redis)
           const lastVal = await getRedisLastValue(tagName);
           if (lastVal !== null && lastVal === numValue) {
             localLastValues.set(tagName, numValue);
-            results.push({ tag: tagName, success: true, cached: true });
-            continue;
+            return { tag: tagName, success: true, cached: true };
           }
 
           // Change detected or cache miss -> send update
@@ -253,23 +254,24 @@ async function handlePost(req: Request) {
                   : {}),
               },
               body: JSON.stringify({ name: tagName, value: numValue }),
+              signal: AbortSignal.timeout(3000), // Prevent socket starvation on SCADA latency
             });
 
             const ok = fuxaRes.ok;
-            results.push({ tag: tagName, success: ok });
             if (ok) {
               localLastValues.set(tagName, numValue);
               await setRedisLastValue(tagName, numValue);
             }
+            return { tag: tagName, success: ok };
           } catch {
-            results.push({
+            return {
               tag: tagName,
               success: false,
               error: "Connection failed",
-            });
+            };
           }
-        }
-      }
+        }),
+      );
 
       return NextResponse.json({
         webhook: true,

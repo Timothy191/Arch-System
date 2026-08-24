@@ -5,12 +5,17 @@ import { X } from "lucide-react";
 import Link from "next/link";
 
 export function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(false);
+  // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the
+  // initial HTML and paints at first paint. Previously it started hidden and only
+  // appeared post-hydration, making it a late-painting LCP candidate (the largest
+  // contentful paint on the login page). The useEffect below hides it on return
+  // visits where consent already exists (brief flash, acceptable tradeoff).
+  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     const hasConsented = localStorage.getItem("cookie_consent");
-    if (!hasConsented) {
-      setShowBanner(true);
+    if (hasConsented) {
+      setShowBanner(false);
     }
   }, []);
 

@@ -96,7 +96,7 @@ export default function SystemArchitecture() {
       {
         id: "hub",
         type: "root",
-        position: { x: 550, y: 30 },
+        position: { x: 950, y: 30 },
         data: { label: "Hub" },
       },
       // Login - left
@@ -110,7 +110,7 @@ export default function SystemArchitecture() {
       {
         id: "admin",
         type: "admin",
-        position: { x: 1050, y: 50 },
+        position: { x: 1900, y: 50 },
         data: { label: "Admin" },
       },
     ];

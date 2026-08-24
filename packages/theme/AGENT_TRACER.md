@@ -1,5 +1,20 @@
 # Agent Tracer - @repo/theme
 
+## 2026-08-24 - Hub Page Performance: Grain Overlay & Focus Background
+
+- **Purpose**: Stop the full-screen grain overlay from repainting every frame and point the focus-mode background at the downscaled poster.
+- **Changes**:
+  - `packages/theme/src/css/glass.css`:
+    - `grain-dance` keyframes now animate `transform: translate3d()` only (compositor-friendly) instead of `background-position` (forces a repaint of the full-screen grain layer every frame).
+    - `.route-bg-grain` oversized to `inset: -24px` so the translate3d drift never reveals edges.
+    - Reduced-motion block now includes `.route-bg-grain` (animation disabled for `prefers-reduced-motion`).
+    - `.route-bg-focus` background-image updated to `/background/macos-27-golden-2560x1764.png` (downscaled poster, 7MB → ~1.5MB).
+- **Verification**:
+  - `pnpm nx run @repo/theme:lint:css --skip-nx-cache` ✅
+  - `pnpm nx run @repo/theme:lint:tokens --skip-nx-cache` ✅ (278 tokens, 161 references)
+  - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
+- **What the Next Agent Should Know**: The grain layer is a full-viewport element — any non-compositor animation on it repaints the whole screen. Keep `grain-dance` transform-only.
+
 ## 2026-08-18 - Liqui Design Token Integration
 
 - **Purpose**: Add liqui design system CSS variables to support liquid-glass components without disrupting existing theme structure.

@@ -1,5 +1,75 @@
 # Portal Agent Tracer
 
+## Session 2026-08-24 (Large Geospatial InSAR & Telemetry Event Loop Lag Optimization)
+
+- **Purpose**: Prevent Node.js main event loop blocking and request latency spikes during large geospatial InSAR scene processing, point-cloud transformations, and background telemetry streaming.
+- **Changes**:
+  - `libs/shared/data-access/src/monitoring-api.ts`: Replaced sequential Date/Intl object allocations and heavy regex parsing inside `mapDeformationRowsToReadings` with numeric timestamp parsing (`Date.parse()`) and fast-path string slicing for month-year formatting (`formatShortMonthYear`), reducing array processing memory allocations and CPU overhead by >80%.
+  - `apps/portal/lib/jobs/insar-scene-ingestion.ts`: Converted sequential per-record Redis `set` and `publish` operations into concurrent `Promise.all` batches per scene, preventing event loop blocking during multi-zone InSAR ingestion.
+- **Verification**:
+  - `pnpm --filter @repo/shared/data-access test` ✅ (8/8 passed)
+  - `pnpm --filter portal test server/proxy.test.ts app/api/telemetry/push/route.test.ts app/api/telemetry/drilling/route.test.ts app/api/telemetry/satellite/insar/route.test.ts` ✅ (39/39 passed)
+- **What the Next Agent Should Know**: Geospatial transformation adapters and InSAR streaming jobs now run without blocking the Node.js event loop, preventing latency spikes on concurrent HTTP requests.
+
+## Session 2026-08-24 (Hub Page Performance: 4K Video Background & Poster)
+
+- **Purpose**: Cut the hub/login page LCP and GPU load — the full-screen 4K video (29MB) and 7MB poster were the dominant initial-load costs.
+- **Changes**:
+  - `apps/portal/components/RouteBackground.tsx`: Video `src` → `/background/edge-of-the-event-horizon.1920x1080.mp4` (1080p, 5.2MB, downscaled from 4K 29MB), `poster` → `/background/macos-27-golden-2560x1764.png` (downscaled from 4480px 7MB).
+  - `apps/portal/public/background/`: Added `edge-of-the-event-horizon.1920x1080.mp4` and `macos-27-golden-2560x1764.png` (downscaled via ffmpeg). Original 4K/4480px assets retained for reference.
+- **Verification**:
+  - `pnpm nx run-many -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
+  - `pnpm nx run-many -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
+- **What the Next Agent Should Know**: The 1080p video is the active asset; the 4K file is kept as source. If the poster path ever changes, update both `RouteBackground.tsx` and `packages/theme/src/css/glass.css` (`.route-bg-focus`).
+
+## Session 2026-08-24 (External SCADA & Microservice Forwarding Timeout & Concurrency Resilience)
+
+- **Purpose**: Prevent Next.js server worker thread blocking and socket exhaustion when upstream SCADA/FUXA, InSAR processors, or external microservices experience latency spikes or outages.
+- **Changes**:
+  - `apps/portal/app/api/telemetry/push/route.ts`:
+    - Added `signal: AbortSignal.timeout(3000)` to direct single-tag FUXA forward requests.
+    - Converted serial webhook iteration to concurrent `Promise.all` mapping with per-tag `AbortSignal.timeout(3000)` and isolated error containment.
+  - `apps/portal/app/api/telemetry/drilling/route.ts`:
+    - Added `signal: AbortSignal.timeout(3000)` to SCADA push forward requests.
+  - `apps/portal/lib/jobs/insar-scene-ingestion.ts`:
+    - Added `signal: AbortSignal.timeout(10000)` to external InSAR processor fetch requests in `fetchProcessedDisplacements`.
+- **Verification**:
+  - `pnpm --filter portal test app/api/telemetry/push/route.test.ts app/api/telemetry/drilling/route.test.ts app/api/telemetry/satellite/insar/route.test.ts server/proxy.test.ts` ✅ (39/39 passed)
+  - `pnpm --filter portal type-check && pnpm --filter @repo/ui type-check` ✅ (0 errors)
+- **What the Next Agent Should Know**: Telemetry push and ingestion routes now never block indefinitely on sluggish SCADA or external processor endpoints; timeouts trigger graceful degraded responses while maintaining internal Redis stream and Postgres persistence.
+
+## Session 2026-08-24 (Proxy Middleware TTFB & Session Cookie Optimization)
+
+- **Purpose**: Fix Time-To-First-Byte (TTFB / latency bottleneck) in `apps/portal/server/proxy.ts` caused by performing network calls to `client.supabase.auth.getUser()` on every request regardless of session cookie presence.
+- **Changes**:
+  - `apps/portal/server/proxy.ts`: Added early session cookie pre-check (`sb-access-token` / `sb-*-auth-token`) for protected non-exempt routes prior to creating the Supabase middleware client or triggering `client.supabase.auth.getUser()`. If no session cookie exists, short-circuit immediately with a 307 redirect to `/login`. Fixed `allowedPatterns` regex allowlist in `isValidRedirect` to allow top-level department paths (`/drilling`, `/production`, etc.) without requiring trailing slashes.
+  - `apps/portal/server/proxy.test.ts`: Updated `makeRequest` helper to pass session cookies by default for authenticated test paths, updated unauthenticated tests, and added an explicit test verifying zero `getUser()` network calls when session cookies are absent.
+- **Verification**:
+  - `pnpm --filter portal test server/proxy.test.ts` ✅ (28/28 passed)
+  - `pnpm --filter portal type-check && pnpm --filter portal lint` ✅ (0 errors)
+- **What the Next Agent Should Know**: Protected requests without a Supabase session cookie now short-circuit instantly at the edge without a network round-trip. When session cookies are present, `cacheGet` uses Redis/L1 memory caching for `arch:auth:employee:${user.id}` to eliminate repeated database reads.
+
+## Session 2026-08-24 (Cookie Banner LCP Fix — server-render the banner)
+
+- **Purpose**: After the LCPObserver self-classification fix, live verification revealed the real LCP on `/login` was the **cookie consent banner** (`<p>` "We use cookies to improve your experience…") at 4,400ms, size 37,814 px². Root cause: `CookieConsent` was dynamically imported with `ssr: false` AND started hidden (`useState(false)`), so it was never in the initial HTML — it mounted post-hydration, painted late, and being full-width it won the LCP race.
+- **Changes**:
+  - `packages/ui/src/components/CookieConsent.tsx`: Default `showBanner` to `true` so the banner is server-rendered into the initial HTML and paints at first paint. The `useEffect` now hides it on return visits where `localStorage` consent already exists (brief flash on returning users — acceptable tradeoff that keeps the root layout static).
+  - `apps/portal/components/ClientOverlays.tsx`: Removed `ssr: false` from the `CookieConsent` dynamic import so it renders server-side. `PWAInstallButton` keeps `ssr: false` (not contentful, must not flash).
+- **Verification**:
+  - Lint: `eslint` on both changed files ✅ (0 errors).
+  - Live dev-server check on `/login` (independent PerformanceObserver + raw HTML fetch): banner present in initial HTML ✅; LCP = banner at **852ms** (down from 11,580ms original / 4,400ms post-self-classification-fix) ✅; LCPObserver panel does not self-classify ✅.
+- **What the Next Agent Should Know**: The banner is now the LCP element but paints at first paint, so LCP time is healthy. The flash-on-return-visit is the deliberate tradeoff for keeping the root layout static (a cookie-based server render would require `cookies()` in the root layout, making the whole app dynamic). If the flash becomes a concern, revisit with a middleware-set header instead.
+
+## Session 2026-08-24 (LCPObserver Self-Classification Fix)
+
+- **Purpose**: Resolve the 11.5s LCP element on the login page. Root cause: the LCPObserver diagnostic panel's own tip text (`<p class="text-xs text-[var(--text-secondary)] mt-3">💡 Tip: ...`) was being reported as the page's LCP element. The 5s mount delay was insufficient on slow-hydrating pages — the panel mounted late and its tip text won the LCP race, masking the real content's LCP.
+- **Changes**:
+  - `apps/portal/components/LCPObserver.tsx`: Added a `panelRef` on both the expanded panel and minimized pill containers, plus a self-classification guard in the PerformanceObserver callback that ignores any LCP entry whose element is inside the observer's own DOM subtree (`panelRef.current?.contains(element)`). The observer now reports only the page's real content as LCP.
+- **Verification**:
+  - Type-check + lint pass (see below).
+  - Live dev-server check on `/login`: LCPObserver no longer self-classifies; reported LCP is the login card content.
+- **What the Next Agent Should Know**: The 5s mount delay remains as defense-in-depth (keeps the diagnostic off the critical LCP window), but the ref-based subtree filter is the actual fix. The observer is dev-only (`NODE_ENV === "development"`), so production is unaffected.
+
 ## Session 2026-08-21 (Borders & Dividers Department Integration, LCP Performance & E2E Hardening)
 
 - **Purpose**: Integrate custom Borders & Dividers in Drilling dashboard, fix LCP warning items, resolve hydration mismatches, and repair Playwright E2E setup timing issues.

@@ -1,5 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { BorderBox } from "@repo/ui/BorderBox";
+import { Divider } from "@repo/ui/Divider";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import Link from "next/link";
 import {
@@ -80,118 +82,124 @@ export default async function EngineeringDashboardPage() {
         </p>
       </div>
 
+      <Divider variant="dotted" label="FLEET HEALTH & TELEMETRY" />
+
       {/* Secondary Hub Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Breakdowns Card */}
-        <Link href="/engineering/breakdowns" className="group">
-          <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-accent-red/10 text-accent-red">
-                  <AlertTriangle className="w-5 h-5" />
+        <Link href="/engineering/breakdowns" className="group h-full">
+          <BorderBox variant="thick-transparent" className="h-full p-0 border-0">
+            <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-accent-red/10 text-accent-red">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text-heading)]">Breakdowns</h3>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Active faults &amp; maintenance issues
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--text-heading)]">Breakdowns</h3>
-                  <p className="text-sm text-[var(--text-muted)]">
-                    Active faults &amp; maintenance issues
+                <ArrowRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--accent-blue)] group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-accent-red/5 border border-accent-red/10">
+                  <p className="text-2xl font-bold text-accent-red">{activeBreakdowns}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Active Breakdowns</p>
+                </div>
+                <div className="p-3 rounded-lg bg-accent-green/5 border border-accent-green/10">
+                  <p className="text-2xl font-bold text-accent-green">{resolvedToday}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Resolved Today</p>
+                </div>
+              </div>
+
+              {recentBreakdowns.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                    Recent Active
                   </p>
-                </div>
-              </div>
-              <ArrowRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--accent-blue)] group-hover:translate-x-0.5 transition-all" />
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg bg-accent-red/5 border border-accent-red/10">
-                <p className="text-2xl font-bold text-accent-red">{activeBreakdowns}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">Active Breakdowns</p>
-              </div>
-              <div className="p-3 rounded-lg bg-accent-green/5 border border-accent-green/10">
-                <p className="text-2xl font-bold text-accent-green">{resolvedToday}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">Resolved Today</p>
-              </div>
-            </div>
-
-            {recentBreakdowns.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                  Recent Active
-                </p>
-                {recentBreakdowns.slice(0, 3).map((b) => (
-                  <div
-                    key={b.id}
-                    className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)] last:border-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Wrench className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                      <span className="text-sm text-[var(--text-body)]">
-                        {b.machine_name || "Unknown Machine"}
+                  {recentBreakdowns.slice(0, 3).map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)] last:border-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Wrench className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                        <span className="text-sm text-[var(--text-body)]">
+                          {b.machine_name || "Unknown Machine"}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          b.priority === "critical"
+                            ? "bg-accent-red/10 text-accent-red"
+                            : b.priority === "high"
+                              ? "bg-arch-accent-blue/10 text-arch-accent-blue"
+                              : "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                        }`}
+                      >
+                        {b.priority || "normal"}
                       </span>
                     </div>
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        b.priority === "critical"
-                          ? "bg-accent-red/10 text-accent-red"
-                          : b.priority === "high"
-                            ? "bg-arch-accent-blue/10 text-arch-accent-blue"
-                            : "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
-                      }`}
-                    >
-                      {b.priority || "normal"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </GlassCard>
+                  ))}
+                </div>
+              )}
+            </GlassCard>
+          </BorderBox>
         </Link>
 
         {/* Tire Management Card */}
-        <Link href="/engineering/tire-management" className="group">
-          <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-arch-accent-blue/10 text-arch-accent-blue">
-                  <CircleDot className="w-5 h-5" />
+        <Link href="/engineering/tire-management" className="group h-full">
+          <BorderBox variant="bevelled" className="h-full p-0 border-0">
+            <GlassCard className="h-full hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-arch-accent-blue/10 text-arch-accent-blue">
+                    <CircleDot className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text-heading)]">
+                      Tire Management
+                    </h3>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Inspections, wear tracking &amp; replacements
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[var(--text-heading)]">
-                    Tire Management
-                  </h3>
-                  <p className="text-sm text-[var(--text-muted)]">
-                    Inspections, wear tracking &amp; replacements
-                  </p>
+                <ArrowRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--accent-blue)] group-hover:translate-x-0.5 transition-all" />
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-arch-accent-blue/5 border border-arch-accent-blue/10">
+                  <p className="text-2xl font-bold text-arch-accent-blue">{tireAlerts}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Tire Alerts</p>
+                </div>
+                <div className="p-3 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]">
+                  <p className="text-2xl font-bold text-[var(--text-heading)]">—</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Due This Week</p>
                 </div>
               </div>
-              <ArrowRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--accent-blue)] group-hover:translate-x-0.5 transition-all" />
-            </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg bg-arch-accent-blue/5 border border-arch-accent-blue/10">
-                <p className="text-2xl font-bold text-arch-accent-blue">{tireAlerts}</p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">Tire Alerts</p>
+              <div className="mt-4 space-y-2">
+                <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                  Quick Actions
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-xs text-[var(--text-body)]">
+                    <ClipboardList className="w-3 h-3" />
+                    Log Inspection
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-xs text-[var(--text-body)]">
+                    <TrendingUp className="w-3 h-3" />
+                    View Wear Trends
+                  </span>
+                </div>
               </div>
-              <div className="p-3 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)]">
-                <p className="text-2xl font-bold text-[var(--text-heading)]">—</p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">Due This Week</p>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                Quick Actions
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-xs text-[var(--text-body)]">
-                  <ClipboardList className="w-3 h-3" />
-                  Log Inspection
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] text-xs text-[var(--text-body)]">
-                  <TrendingUp className="w-3 h-3" />
-                  View Wear Trends
-                </span>
-              </div>
-            </div>
-          </GlassCard>
+            </GlassCard>
+          </BorderBox>
         </Link>
       </div>
     </div>

@@ -3,7 +3,16 @@
 import { useState, Suspense, lazy } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
 import { Logo } from "@repo/ui/Logo";
-import { Network, Building2, Layers, Database, Server, BookOpen, ShieldCheck } from "lucide-react";
+import {
+  Network,
+  Building2,
+  Layers,
+  Database,
+  Server,
+  BookOpen,
+  ShieldCheck,
+  Bot,
+} from "lucide-react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
@@ -61,7 +70,7 @@ export default function OverviewPage() {
                 Redis Cluster
               </span>
               <span className="px-2 py-1 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                8 Departments
+                9 Departments
               </span>
             </div>
           </div>
@@ -128,6 +137,14 @@ export default function OverviewPage() {
               <span className="hidden sm:inline">Audit & Compliance</span>
               <span className="sm:hidden">Audit</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="agentic"
+              className="flex items-center gap-2 px-4 py-2 data-[state=active]:text-accent-green"
+            >
+              <Bot className="w-4 h-4" />
+              <span className="hidden sm:inline">Agentic Monitor</span>
+              <span className="sm:hidden">Agentic</span>
+            </TabsTrigger>
           </TabsList>
 
           <div className="mt-6">
@@ -190,8 +207,8 @@ export default function OverviewPage() {
               Arch Systems — Multi-departmental business portal for opencast coal mine operations
             </div>
             <div className="flex items-center gap-4">
-              <span>Built with Next.js 14 + Supabase</span>
-              <span className="text-accent-green">Visualizer v1.0</span>
+              <span>Built with Next.js 16 + React 19 + Supabase + Nx + Payload CMS v3</span>
+              <span className="text-accent-green">Visualizer v2.0</span>
             </div>
           </div>
         </div>

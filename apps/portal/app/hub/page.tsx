@@ -16,7 +16,11 @@ import {
 import type { AlertEvent } from "@/features/hub";
 import type { TrendDataPoint } from "@/features/hub";
 import { getTools } from "@/lib/tools";
-import { DEPARTMENTS } from "@repo/departments/data-access";
+import {
+  DEPARTMENTS,
+  fetchLiveDepartmentMetrics,
+  type DepartmentLiveMetricsMap,
+} from "@repo/departments/data-access";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Shield, Activity, Wrench as WrenchIcon, AlertTriangle, Wrench, Power } from "lucide-react";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
@@ -276,6 +280,46 @@ async function getEmployeeDepartments(
   );
 }
 
+async function getLiveDepartmentMetrics(
+  today: string,
+  cookieList: Array<{ name: string; value: string }>,
+): Promise<DepartmentLiveMetricsMap> {
+  return cachedRSC(
+    ["hub", "live-department-metrics", today],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
+          return fetchLiveDepartmentMetrics(db, today);
+        },
+        {
+          category: CacheCategory.METRICS,
+          keyParts: ["hub", "live-department-metrics", today],
+          tags: [
+            "table:hourly_loads",
+            "table:daily_logs",
+            "table:production_logs",
+            "table:safety_incidents",
+            "table:breakdowns",
+            "table:machines",
+          ],
+        },
+      );
+    },
+    {
+      revalidate: 60,
+      tags: [
+        "table:hourly_loads",
+        "table:daily_logs",
+        "table:production_logs",
+        "table:safety_incidents",
+        "table:breakdowns",
+        "table:machines",
+      ],
+    },
+  );
+}
+
 export default async function HubPage() {
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
@@ -293,23 +337,36 @@ export default async function HubPage() {
   // GAP-3: only fetch the fast, above-the-fold data in the main page so the
   // shell streams immediately. The slow ProductionTrend fetch is hoisted into
   // a Suspense child (`ProductionTrendSection`) so it streams after the shell
-  // paints. `AlertTicker` data is already fast and stays inline.
+  // paints. `AlertTicker` and live shift metrics stay fast and cached.
   const [
     { incidentCount, breakdownCount, offlineMachineCount },
     accessibleDeptIds,
     tools,
     alertEvents,
+    liveMetrics,
   ] = await Promise.all([
     getDashboardCounts(today, cookieList),
     getEmployeeDepartments(userId, cookieList),
     getTools(),
     getRecentAlertEvents(today, cookieList),
+    getLiveDepartmentMetrics(today, cookieList),
   ]);
 
-  const departments =
+  const rawDepartments =
     accessibleDeptIds && accessibleDeptIds.length > 0
       ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
       : DEPARTMENTS;
+
+  const departments = rawDepartments.map((dept) => {
+    const overlay = liveMetrics[dept.name];
+    if (!overlay) return dept;
+    return {
+      ...dept,
+      stats: overlay.stats || dept.stats,
+      trend: overlay.trend || dept.trend,
+      status: overlay.status || dept.status,
+    };
+  });
 
   return (
     <div className="space-y-6 sm:space-y-12">

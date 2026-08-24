@@ -113,6 +113,18 @@ export function HeroRotator({
     ],
   );
 
+  // AGENT-TRACE: circular distance from the active slide. Panels 2+ slides away
+  // are fully off-screen and get content-visibility: auto so the browser skips
+  // their layout/paint. Adjacent panels stay fully rendered so the 500ms slide
+  // transition never shows a blank pop.
+  const distanceFromActive = useCallback(
+    (idx: number) => {
+      const d = Math.abs(idx - activeIndex);
+      return Math.min(d, panels.length - d);
+    },
+    [activeIndex, panels.length],
+  );
+
   const nextSlide = useCallback(() => {
     setActiveIndex((prev) => (prev >= panels.length - 1 ? 0 : prev + 1));
   }, [panels.length]);
@@ -147,10 +159,23 @@ export function HeroRotator({
         {panels.map((panel, idx) => (
           <div
             key={panel.id}
-            className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center"
+            className={cn(
+              "w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center",
+              // AGENT-TRACE: skip layout/paint for panels 2+ slides away. The
+              // slide track still needs them in the DOM for the translate3d math;
+              // contain-intrinsic-size: auto remembers each panel's real height
+              // after first render so the track never collapses.
+              distanceFromActive(idx) > 1 &&
+                "[content-visibility:auto] [contain-intrinsic-size:auto_200px]",
+            )}
             role="group"
             aria-roledescription="slide"
             aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
+            // AGENT-TRACE: non-active panels are inert + aria-hidden so their
+            // links/buttons are not tabbable and they leave the a11y tree —
+            // previously all 9 panels' controls were reachable by keyboard.
+            inert={idx !== activeIndex}
+            aria-hidden={idx !== activeIndex}
           >
             {/* Left Content Area (9 Cols) */}
             <div className="lg:col-span-9 space-y-3 flex flex-col justify-between z-10">

@@ -313,17 +313,17 @@ CREATE POLICY "daily_logs_delete_admin" ON daily_logs FOR DELETE
   USING (public.is_admin());
 
 -- Machine hours: UPDATE/DELETE through parent daily_log
-DROP POLICY IF EXISTS "machine_hours_update_department" ON machine_hours;
-CREATE POLICY "machine_hours_update_department" ON machine_hours FOR UPDATE
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM daily_logs dl
-      JOIN employees e ON e.auth_id = auth.uid()
-      WHERE dl.id = machine_hours.daily_log_id
-        AND (e.role = 'admin' OR e.department_id = dl.department_id)
-    )
-  );
+-- DROP POLICY IF EXISTS "machine_hours_update_department" ON machine_hours;
+-- CREATE POLICY "machine_hours_update_department" ON machine_hours FOR UPDATE
+--   TO authenticated
+--   USING (
+--     EXISTS (
+--       SELECT 1 FROM daily_logs dl
+--       JOIN employees e ON e.auth_id = auth.uid()
+--       WHERE dl.id = machine_hours.daily_log_id
+--         AND (e.role = 'admin' OR e.department_id = dl.department_id)
+--     )
+--   );
 
 DROP POLICY IF EXISTS "machine_hours_delete_admin" ON machine_hours;
 CREATE POLICY "machine_hours_delete_admin" ON machine_hours FOR DELETE

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useFocusMode } from "@/hooks/useFocusMode";
 
 /**
@@ -28,17 +27,20 @@ export function RouteBackground() {
 
   return (
     <>
-      {/* ── Full-Screen macOS 27 Golden Wallpaper ── */}
-      {/* AGENT-TRACE: Set priority and fetchPriority=high on LCP wallpaper image for early browser preload discovery */}
+      {/* ── Full-Screen Event Horizon Video Background ── */}
+      {/* AGENT-TRACE: 1080p H.264 (5.2MB vs 28MB 4K) — downscaled via ffmpeg to cut
+          decode cost and network transfer; 4K was saturating the compositor on the
+          hub page. preload=auto ensures early loading. ── */}
       <div className="fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-        <Image
-          src="/background/macos-27-golden-4480x3088-26626.png"
-          alt="macOS 27 Golden Wallpaper"
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className={`object-cover object-center filter brightness-95 saturate-110 ${
+        <video
+          src="/background/edge-of-the-event-horizon.1920x1080.mp4"
+          poster="/background/macos-27-golden-2560x1764.png"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className={`object-cover object-center w-full h-full filter brightness-95 saturate-110 ${
             prefersReducedMotion ? "" : "transition-opacity duration-300"
           }`}
         />

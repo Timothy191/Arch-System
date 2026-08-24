@@ -4,7 +4,7 @@ export const DEPARTMENTS = [
     id: "drilling",
     name: "Drilling",
     slug: "drilling",
-    description: "Drilling operations and equipment management",
+    description: "Drilling operations, penetration rates, and rig telemetry",
     color: "#3ecf8e",
     routes: [
       {
@@ -20,7 +20,7 @@ export const DEPARTMENTS = [
       {
         path: "/drilling/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Department equipment & drill rigs",
       },
       {
         path: "/drilling/history",
@@ -31,6 +31,16 @@ export const DEPARTMENTS = [
         path: "/drilling/reports",
         name: "Reports",
         description: "Aggregate data + CSV",
+      },
+      {
+        path: "/drilling/operational-delays",
+        name: "Operational Delays",
+        description: "Drill delay logging and tracking",
+      },
+      {
+        path: "/drilling/shift-coverage",
+        name: "Shift Coverage",
+        description: "Crew and rig roster assignments",
       },
       {
         path: "/drilling/tools",
@@ -44,7 +54,7 @@ export const DEPARTMENTS = [
     id: "production",
     name: "Production",
     slug: "production",
-    description: "Coal production and extraction operations",
+    description: "Coal production, pit excavation, and haulage tracking",
     color: "#00c573",
     routes: [
       {
@@ -60,7 +70,17 @@ export const DEPARTMENTS = [
       {
         path: "/production/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Excavators, haul trucks, and dozers",
+      },
+      {
+        path: "/production/hourly-loads",
+        name: "Hourly Loads",
+        description: "Payload tons per hour & cycle metrics",
+      },
+      {
+        path: "/production/excavator-activity",
+        name: "Excavator Activity",
+        description: "Loading cycles & payload distribution",
       },
       {
         path: "/production/history",
@@ -84,13 +104,13 @@ export const DEPARTMENTS = [
     id: "access-control",
     name: "Access Control",
     slug: "access-control",
-    description: "Mine entry/exit and personnel tracking",
+    description: "Mine gate entry/exit, RFID badge verification, and personnel tracking",
     color: "#60a5fa",
     routes: [
       {
         path: "/access-control",
         name: "Dashboard",
-        description: "Today's summary and status",
+        description: "Today's summary and real-time gate muster",
       },
       {
         path: "/access-control/daily-log",
@@ -100,17 +120,17 @@ export const DEPARTMENTS = [
       {
         path: "/access-control/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Turnstiles, boom gates & scanners",
       },
       {
         path: "/access-control/history",
         name: "History",
-        description: "Past daily logs",
+        description: "Past daily logs & entry timestamps",
       },
       {
         path: "/access-control/reports",
         name: "Reports",
-        description: "Aggregate data + CSV",
+        description: "Aggregate data + CSV muster reports",
       },
       {
         path: "/access-control/tools",
@@ -118,13 +138,13 @@ export const DEPARTMENTS = [
         description: "n8n / Flowise embeds",
       },
     ],
-    roles: ["access_control_officer", "supervisor", "admin"],
+    roles: ["access_control_officer", "access_control", "supervisor", "admin"],
   },
   {
     id: "engineering",
     name: "Engineering",
     slug: "engineering",
-    description: "Technical support and maintenance planning",
+    description: "Technical support, predictive maintenance, and breakdown dispatch",
     color: "#a78bfa",
     routes: [
       {
@@ -140,7 +160,22 @@ export const DEPARTMENTS = [
       {
         path: "/engineering/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Department equipment & health",
+      },
+      {
+        path: "/engineering/breakdowns",
+        name: "Breakdowns",
+        description: "Active mechanical/electrical breakdown tickets",
+      },
+      {
+        path: "/engineering/engineering-notes",
+        name: "Engineering Notes",
+        description: "Maintenance logs & predictive alerts",
+      },
+      {
+        path: "/engineering/machine-operations",
+        name: "Machine Operations",
+        description: "OEM operating limits and compliance",
       },
       {
         path: "/engineering/history",
@@ -164,13 +199,13 @@ export const DEPARTMENTS = [
     id: "control-room",
     name: "Control Room",
     slug: "control-room",
-    description: "Central monitoring and alert management",
+    description: "Central monitoring, real-time SCADA telemetry, and shift closeouts",
     color: "#007aff",
     routes: [
       {
         path: "/control-room",
         name: "Dashboard",
-        description: "Alert panel and monitoring",
+        description: "Live SCADA overview and alarm status",
       },
       {
         path: "/control-room/daily-log",
@@ -180,7 +215,12 @@ export const DEPARTMENTS = [
       {
         path: "/control-room/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Pit-wide heavy machinery telemetry",
+      },
+      {
+        path: "/control-room/roll-over",
+        name: "Roll Over",
+        description: "End-of-shift handover & closeout signing",
       },
       {
         path: "/control-room/history",
@@ -198,19 +238,19 @@ export const DEPARTMENTS = [
         description: "n8n / Flowise embeds",
       },
     ],
-    roles: ["control_room_operator", "admin"],
+    roles: ["control_room_operator", "admin", "supervisor", "operator"],
   },
   {
     id: "safety",
     name: "Safety",
     slug: "safety",
-    description: "Safety compliance and incident reporting",
+    description: "Safety compliance, risk audits, and incident reporting",
     color: "#ef4444",
     routes: [
       {
         path: "/safety",
         name: "Dashboard",
-        description: "Today's summary and status",
+        description: "Today's summary and incident statistics",
       },
       {
         path: "/safety/daily-log",
@@ -220,7 +260,7 @@ export const DEPARTMENTS = [
       {
         path: "/safety/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Safety equipment & fire suppression",
       },
       {
         path: "/safety/history",
@@ -244,13 +284,13 @@ export const DEPARTMENTS = [
     id: "training",
     name: "Training",
     slug: "training",
-    description: "Employee training and certification",
+    description: "Employee operator certification, compliance matrices, and skills tracking",
     color: "#ec4899",
     routes: [
       {
         path: "/training",
         name: "Dashboard",
-        description: "Today's summary and status",
+        description: "Today's summary and certification renewals",
       },
       {
         path: "/training/daily-log",
@@ -260,7 +300,7 @@ export const DEPARTMENTS = [
       {
         path: "/training/machines",
         name: "Machines",
-        description: "Department equipment",
+        description: "Simulators and training equipment",
       },
       {
         path: "/training/history",
@@ -279,6 +319,92 @@ export const DEPARTMENTS = [
       },
     ],
     roles: ["trainer", "supervisor", "admin"],
+  },
+  {
+    id: "satellite-monitoring",
+    name: "Satellite Monitoring",
+    slug: "satellite-monitoring",
+    description:
+      "InSAR interferometry, pit wall deformation tracking, and geospatial hyperspectral mapping",
+    color: "#14b8a6",
+    routes: [
+      {
+        path: "/satellite-monitoring",
+        name: "Dashboard",
+        description: "Pit slope stability and deformation heatmaps",
+      },
+      {
+        path: "/satellite-monitoring/sar",
+        name: "SAR Analysis",
+        description: "Synthetic Aperture Radar line-of-sight displacement",
+      },
+      {
+        path: "/satellite-monitoring/highres",
+        name: "High-Res Imagery",
+        description: "Sub-meter optical orthomosaics of pit expansion",
+      },
+      {
+        path: "/satellite-monitoring/hyperspectral",
+        name: "Hyperspectral",
+        description: "Mineralogy, moisture, and seam mapping bands",
+      },
+      {
+        path: "/satellite-monitoring/history",
+        name: "History",
+        description: "Historical scene acquisition timeline",
+      },
+      {
+        path: "/satellite-monitoring/reports",
+        name: "Reports",
+        description: "Geotechnical displacement CSV & alerts",
+      },
+      {
+        path: "/satellite-monitoring/tools",
+        name: "Tools",
+        description: "n8n / Flowise embeds",
+      },
+    ],
+    roles: ["geotechnical_engineer", "supervisor", "admin"],
+  },
+  {
+    id: "access-card-actions",
+    name: "Access Card Actions",
+    slug: "access-card-actions",
+    description: "RFID badge batch printing, template provisioning, and security chip programming",
+    color: "#f59e0b",
+    routes: [
+      {
+        path: "/access-card-actions",
+        name: "Dashboard",
+        description: "Card print queue and batch status",
+      },
+      {
+        path: "/access-card-actions/daily-log",
+        name: "Daily Log",
+        description: "Card issuance logs and audit records",
+      },
+      {
+        path: "/access-card-actions/machines",
+        name: "Machines",
+        description: "Evolis & Zebra industrial badge printers",
+      },
+      {
+        path: "/access-card-actions/history",
+        name: "History",
+        description: "Printed cards and badge assignment records",
+      },
+      {
+        path: "/access-card-actions/reports",
+        name: "Reports",
+        description: "Badge provisioning & security audits",
+      },
+      {
+        path: "/access-card-actions/tools",
+        name: "Tools",
+        description: "n8n / Flowise embeds",
+      },
+    ],
+    roles: ["access_control", "supervisor", "admin"],
   },
 ];
 
@@ -346,9 +472,25 @@ const _NAVIGATION_GRAPH = {
       x: 1000,
       y: 200,
     },
+    {
+      id: "satellite-monitoring",
+      type: "department",
+      label: "Satellite Monitoring",
+      color: "#14b8a6",
+      x: 1150,
+      y: 200,
+    },
+    {
+      id: "access-card-actions",
+      type: "department",
+      label: "Access Card Actions",
+      color: "#f59e0b",
+      x: 1300,
+      y: 200,
+    },
 
     // Admin
-    { id: "admin", type: "admin", label: "Admin", x: 1150, y: 50 },
+    { id: "admin", type: "admin", label: "Admin", x: 1450, y: 50 },
   ],
   edges: [
     // Hub connections
@@ -359,12 +501,14 @@ const _NAVIGATION_GRAPH = {
     { id: "e5", source: "hub", target: "control-room" },
     { id: "e6", source: "hub", target: "safety" },
     { id: "e7", source: "hub", target: "training" },
+    { id: "e8", source: "hub", target: "satellite-monitoring" },
+    { id: "e9", source: "hub", target: "access-card-actions" },
 
     // Auth
-    { id: "e8", source: "login", target: "hub" },
+    { id: "e10", source: "login", target: "hub" },
 
     // Admin
-    { id: "e9", source: "admin", target: "hub" },
+    { id: "e11", source: "admin", target: "hub" },
   ],
 };
 
@@ -375,26 +519,30 @@ export const TECH_STACK = [
     color: "#3ecf8e",
     items: [
       {
-        name: "Next.js 14",
-        version: "14.2.8",
-        description: "App Router, React Server Components",
+        name: "Next.js 16",
+        version: "16.2.6",
+        description: "App Router, React Server Components & Server Actions",
       },
       {
-        name: "React 18",
-        version: "18.3.1",
-        description: "Concurrent features, Suspense",
+        name: "React 19",
+        version: "19.0.0",
+        description: "Action hooks, React compiler optimization & Transitions",
       },
       {
-        name: "Tailwind CSS",
-        version: "3.4.13",
-        description: "Utility-first styling",
+        name: "Tailwind CSS & OKLCH",
+        version: "3.4.17",
+        description: "Perceptually uniform OKLCH palette via @repo/theme design tokens",
       },
       {
-        name: "Framer Motion",
-        version: "",
-        description: "Animations and transitions",
+        name: "@xyflow/react",
+        version: "12.6.0",
+        description: "Interactive node-based system topology and telemetry visualizers",
       },
-      { name: "Lucide React", version: "", description: "Icon library" },
+      {
+        name: "Lucide React",
+        version: "Latest",
+        description: "Tree-shakable industrial iconography",
+      },
     ],
   },
   {
@@ -402,53 +550,67 @@ export const TECH_STACK = [
     color: "#60a5fa",
     items: [
       {
-        name: "Supabase",
-        version: "",
-        description: "Auth, Postgres, Realtime",
+        name: "Supabase PostgreSQL",
+        version: "16.x",
+        description: "Primary ACID relational database with 95+ migrations & pgvector",
       },
       {
-        name: "PostgreSQL",
-        version: "",
-        description: "Primary database with RLS",
+        name: "Row Level Security (RLS)",
+        version: "Active",
+        description: "Declarative Postgres security policies with 100% table coverage",
       },
       {
-        name: "Row Level Security",
-        version: "",
-        description: "Per-row access control",
+        name: "Payload CMS v3",
+        version: "3.x",
+        description: "Headless CMS administration for equipment specs and SOPs",
+      },
+      {
+        name: "Inngest",
+        version: "3.x",
+        description: "Durable event-driven job orchestration and telemetry sync pipelines",
       },
     ],
   },
   {
-    category: "DevOps",
+    category: "DevOps & Caching",
     color: "#007aff",
     items: [
       {
+        name: "Redis 7 / L1+L2 Cache",
+        version: "7.x",
+        description: "In-memory session, department UUID cache, and Redlock distributed locks",
+      },
+      {
+        name: "Nx 22 + Turborepo",
+        version: "22.7.5",
+        description: "Affected task graph, cached pipeline execution & monorepo enforcement",
+      },
+      {
         name: "pnpm",
-        version: "",
-        description: "Package manager with workspaces",
-      },
-      { name: "Nx 22", version: "22.7.5", description: "Monorepo build system & task graph" },
-      {
-        name: "Docker",
-        version: "",
-        description: "Containerization for tools",
+        version: "9.15.9",
+        description: "Strict content-addressable dependency graph and workspace manager",
       },
       {
-        name: "Node.js",
-        version: "20.17.0+",
-        description: "Runtime with Volta",
+        name: "Docker & Supabase Local",
+        version: "Local/Prod",
+        description: "Isolated database, storage, and edge function execution environments",
       },
     ],
   },
   {
-    category: "Testing",
+    category: "Testing & Quality",
     color: "#ec4899",
     items: [
-      { name: "Jest", version: "", description: "Unit testing with ts-jest" },
+      { name: "Jest & ts-jest", version: "29.x", description: "Unit and integration test suites" },
       {
         name: "Playwright",
         version: "1.56.1",
-        description: "E2E browser testing",
+        description: "End-to-end browser automation and visual smoke verification",
+      },
+      {
+        name: "DeepEval & Sentry",
+        version: "Active",
+        description: "Deterministic LLM evaluation harness and full-stack APM telemetry",
       },
     ],
   },
@@ -456,11 +618,20 @@ export const TECH_STACK = [
     category: "Integration Tools",
     color: "#a78bfa",
     items: [
-      { name: "n8n", version: "", description: "Workflow automation (iframe)" },
+      {
+        name: "FUXA SCADA",
+        version: "1.2.x",
+        description: "Real-time OPC-UA and Modbus-TCP machine HMI",
+      },
+      {
+        name: "n8n",
+        version: "Latest",
+        description: "Automated event-triggered operational workflows",
+      },
       {
         name: "Flowise",
-        version: "",
-        description: "LLM workflow builder (iframe)",
+        version: "Latest",
+        description: "Visual node-based agent and tool orchestrator",
       },
     ],
   },
@@ -472,7 +643,7 @@ export const DATABASE_SCHEMA = [
     name: "departments",
     rls: true,
     columns: ["id (UUID PK)", "name (text)", "slug (text)", "created_at"],
-    description: "7 departments (drilling, production, etc.)",
+    description: "9 operational departments with strict routing and access boundaries",
   },
   {
     name: "employees",
@@ -483,15 +654,24 @@ export const DATABASE_SCHEMA = [
       "department_id (FK)",
       "full_name",
       "role",
+      "accessible_departments (UUID[])",
       "created_at",
     ],
-    description: "Linked to auth.users via trigger",
+    description: "Authoritative employee records linked to auth.users with cross-department access",
   },
   {
     name: "machines",
     rls: true,
-    columns: ["id (UUID PK)", "department_id (FK)", "name", "type", "status", "created_at"],
-    description: "Per-department equipment",
+    columns: [
+      "id (UUID PK)",
+      "department_id (FK)",
+      "site_id (FK)",
+      "name",
+      "type",
+      "status",
+      "created_at",
+    ],
+    description: "Pit machinery, drill rigs, excavators, dozers, and haul trucks",
   },
   {
     name: "daily_logs",
@@ -502,28 +682,125 @@ export const DATABASE_SCHEMA = [
       "shift",
       "date",
       "notes",
-      "created_by",
+      "created_by (FK)",
       "created_at",
     ],
-    description: "Append-only (no DELETE policies)",
+    description: "Append-only immutable shift logs with supervisor closeout stamps",
   },
   {
-    name: "machine_hours",
+    name: "breakdowns",
     rls: true,
-    columns: ["id (UUID PK)", "daily_log_id (FK)", "machine_id (FK)", "hours", "created_at"],
-    description: "Child of daily_logs",
+    columns: [
+      "id (UUID PK)",
+      "machine_id (FK)",
+      "department_id (FK)",
+      "severity",
+      "status",
+      "reported_at",
+      "resolved_at",
+      "description",
+    ],
+    description: "Mechanical and electrical breakdown incidents dispatched to engineering",
   },
   {
-    name: "fuel_logs",
+    name: "delay_entries",
     rls: true,
-    columns: ["id (UUID PK)", "daily_log_id (FK)", "machine_id (FK)", "liters", "created_at"],
-    description: "Fuel consumption records",
+    columns: [
+      "id (UUID PK)",
+      "department_id (FK)",
+      "machine_id (FK)",
+      "reason_code",
+      "duration_minutes",
+      "shift",
+      "date",
+      "logged_by (FK)",
+    ],
+    description: "Operational delays and equipment idle tracking across drilling and haulage",
   },
   {
-    name: "production_logs",
+    name: "hourly_loads",
     rls: true,
-    columns: ["id (UUID PK)", "daily_log_id (FK)", "tons", "created_at"],
-    description: "Production output records",
+    columns: [
+      "id (UUID PK)",
+      "excavator_id (FK)",
+      "truck_id (FK)",
+      "material_type",
+      "bucket_count",
+      "payload_tonnage",
+      "recorded_at",
+    ],
+    description: "Time-series payload and pass metrics partitioned for high-speed aggregations",
+  },
+  {
+    name: "satellite_insar_deformations",
+    rls: true,
+    columns: [
+      "id (UUID PK)",
+      "scene_id (FK)",
+      "pit_zone",
+      "displacement_mm",
+      "velocity_mm_yr",
+      "coherence",
+      "coordinates (GeoJSON)",
+      "measured_at",
+    ],
+    description: "InSAR interferometric displacement point clouds and slope subsidence records",
+  },
+  {
+    name: "scada_telemetry_records",
+    rls: true,
+    columns: [
+      "id (UUID PK)",
+      "equipment_tag",
+      "protocol",
+      "register_address",
+      "telemetry_value (numeric)",
+      "unit",
+      "quality_code",
+      "recorded_at",
+    ],
+    description: "High-frequency SCADA tag streaming data from Modbus and OPC-UA PLCs",
+  },
+  {
+    name: "card_print_jobs",
+    rls: true,
+    columns: [
+      "id (UUID PK)",
+      "employee_id (FK)",
+      "template_id (FK)",
+      "status",
+      "badge_rfid",
+      "printer_id",
+      "issued_at",
+    ],
+    description: "RFID badge batch printing queue and issuance audit trail",
+  },
+  {
+    name: "access_logs",
+    rls: true,
+    columns: [
+      "id (UUID PK)",
+      "employee_id (FK)",
+      "gate_id",
+      "direction (IN/OUT)",
+      "rfid_scan",
+      "timestamp",
+    ],
+    description: "Mine portal turnstile logs for emergency muster accounting",
+  },
+  {
+    name: "audit_logs",
+    rls: true,
+    columns: [
+      "id (UUID PK)",
+      "user_id (FK)",
+      "action",
+      "entity_type",
+      "entity_id",
+      "ip_address",
+      "created_at",
+    ],
+    description: "Immutable compliance and security event logs",
   },
 ];
 

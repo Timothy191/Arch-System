@@ -377,3 +377,50 @@ export function getDepartmentSubRoute(departmentName: string, tab: string): stri
  * Type-safe list of all valid department slugs for route validation.
  */
 export const DEPARTMENT_SLUGS = DEPARTMENTS.map((d) => d.name) as readonly string[];
+
+// ============================================================================
+// AGENT-TRACE: Department Operational Domain Models & Telemetry Contracts
+// ============================================================================
+
+export interface DrillOperationRecord {
+  id: string;
+  machineId: string;
+  departmentId: string;
+  operationDate: string;
+  openHours: number | null;
+  closeHours: number | null;
+  totalHours: number | null;
+  holes: number;
+  metersDrilled: number;
+  blockDrilled: string | null;
+  productionDelays: number;
+  nonProductionalDelays: number;
+  engineeringDelays: number;
+  status: "active" | "completed" | "cancelled" | "maintenance";
+}
+
+export interface ProductionYieldRecord {
+  id: string;
+  dailyLogId: string;
+  departmentId: string;
+  logDate: string;
+  shift: "day" | "night";
+  coalTonnes: number;
+  wasteTonnes: number;
+  totalYieldPercentage?: number;
+}
+
+export interface SatelliteDeformationRecord {
+  id: string;
+  departmentId: string;
+  satelliteName: "Sentinel-1" | "TerraSAR-X" | "Capella" | "PAZ";
+  acquisitionDate: string;
+  referenceDate: string;
+  locationName: string;
+  latitude: number;
+  longitude: number;
+  displacementMm: number;
+  coherenceIndex: number;
+  riskLevel: "none" | "minor" | "moderate" | "critical";
+  cogUrl?: string | null;
+}

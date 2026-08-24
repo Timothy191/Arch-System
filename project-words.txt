@@ -277,6 +277,8 @@ timerange
 timestamptz
 tokenbucket
 topo
+evolis
+orthomosaics
 totp
 traceroute
 truecolor

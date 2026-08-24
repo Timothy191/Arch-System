@@ -1,5 +1,14 @@
 # Shared Data Access Agent Tracer
 
+## Session 2026-08-24 (Deformation Ingestion Performance Benchmark & Date Parsing Optimization)
+
+- **Purpose**: Prevent Node.js event loop blocking during large InSAR deformation and time-series sensor ingestion.
+- **Changes**:
+  - `src/monitoring-api.ts`: Optimized `mapDeformationRowsToReadings` by replacing sequential Date/Intl object allocations with numeric timestamp parsing (`parseDateTimestamp`) and indexed string slice formatting (`formatShortMonthYear`).
+  - `src/monitoring-api.test.ts`: Added performance benchmark test verifying that 1,000+ points across multiple geotechnical zones process in <50ms.
+- **Verification**: `pnpm --filter @repo/shared/data-access test` ✅ (9/9 passed).
+- **What the Next Agent Should Know**: The adapter processes high-volume multi-zone time-series datasets with minimal CPU and GC pressure.
+
 ## Session 2026-08-21 (Satellite Deformation Adapter + Test Infrastructure)
 
 - **Purpose**: Provide a shared, reusable mapping layer that turns persisted `satellite_deformations` rows into the `DeformationReading` domain model consumed by dashboards, and back that layer with unit tests.

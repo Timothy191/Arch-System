@@ -1,5 +1,34 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-24 - Hub Page Performance: GlassCard, Marquee & aurora-shadow
+
+- **Purpose**: Reduce GPU/compositor load on the hub page — liquid displacement re-runs, 12 continuous marquee layers, and box-shadow animation were saturating the compositor.
+- **Changes**:
+  - `packages/ui/src/components/GlassCard.tsx`:
+    - rAF-coalesced ResizeObserver: drag-resize bursts (dozens of callbacks/sec) now coalesce to at most one displacement-map regeneration per frame.
+    - Change-guard on `setSize` — skips re-renders when width/height are unchanged.
+    - Canvas DPI cap: `MAX_CANVAS_DIM = 512`, `canvasDPI = Math.min(0.75, MAX_CANVAS_DIM / max(finalWidth, finalHeight))` — bounds the refraction canvas memory/CPU on large cards.
+  - `packages/ui/src/components/ui/marquee.tsx`:
+    - `repeat` default 4 → 2 (halves the DOM layers per marquee).
+    - IntersectionObserver off-screen pause with `rootMargin: "200px"` — off-screen marquees stop animating (inline `animationPlayState: "paused"` wins over the hover class).
+    - Added `"use client"` (component uses hooks).
+  - `packages/ui/src/globals.css`:
+    - `@keyframes aurora-shadow` now animates `opacity` + `transform` (compositor-only) instead of `box-shadow`. The box-shadow is static on the `::after` pseudo-element, painted once.
+- **Verification**:
+  - `pnpm nx run-many -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
+  - `pnpm nx run-many -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
+  - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
+- **What the Next Agent Should Know**: The marquee off-screen pause uses an inline style so it always wins over `group-hover:[animation-play-state:paused]`. The aurora-shadow `::after` keeps a static box-shadow — never move it back into the keyframes (forces a full repaint every frame on the hub page).
+
+## 2026-08-24 - TypeScript Null-Safety & Resize/Intersection Observer Fixes
+
+- **Purpose**: Fix compiler type errors in `GlassCard` and `Marquee` components to guarantee zero build regressions during monorepo type-checking.
+- **Changes**:
+  - `packages/ui/src/components/GlassCard.tsx`: Stored pending resize state in local non-null const before closure evaluation to satisfy strict `SetStateAction` type check.
+  - `packages/ui/src/components/ui/marquee.tsx`: Added null check for `entry` from IntersectionObserver destructured array before accessing `.isIntersecting`.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅ (0 errors).
+- **What the Next Agent Should Know**: Strict compiler type checks pass cleanly across all UI library components.
+
 ## 2026-08-21 - Hub Page UI: GlassCard Liquid Mode Performance Fix
 
 - **Purpose**: Stop every `GlassCard` from running the expensive liquid-glass displacement engine regardless of variant; only hero cards that explicitly request `variant="liquid"` should pay the cost.

@@ -69,17 +69,18 @@
     }
   }
 
+  /* AGENT-TRACE: aurora-shadow animates opacity + transform (compositor) only.
+     The box-shadow is static on the pseudo-element — animating box-shadow
+     forced a full repaint every frame on the hub page. */
   @keyframes aurora-shadow {
     0%,
     100% {
-      box-shadow:
-        0 10px 30px -10px rgba(15, 25, 45, 0.08),
-        0 0 15px rgba(210, 210, 215, 0.15);
+      opacity: 0.6;
+      transform: scale(1);
     }
     50% {
-      box-shadow:
-        0 10px 33px -10px rgba(15, 25, 45, 0.15),
-        0 0 18px rgba(210, 210, 215, 0.25);
+      opacity: 1;
+      transform: scale(1.02);
     }
   }
 
@@ -173,6 +174,10 @@
     inset: 0;
     border-radius: inherit;
     z-index: -1;
+    /* Static shadow — painted once; the animation only breathes opacity/scale. */
+    box-shadow:
+      0 10px 30px -10px rgba(15, 25, 45, 0.08),
+      0 0 15px rgba(210, 210, 215, 0.15);
     animation: aurora-shadow 6s ease-in-out infinite;
     pointer-events: none;
   }
