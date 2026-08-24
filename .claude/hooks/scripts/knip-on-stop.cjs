@@ -47,35 +47,26 @@ async function main() {
       const uniqueFiles = new Set(lines);
 
       if (uniqueFiles.size > 10) {
-        console.error(
-          `[ProWorkflow] ${uniqueFiles.size} files edited — running knip for dead-code check...`,
-        );
         try {
           const out = execSync("pnpm knip --no-config-hints 2>&1", {
             cwd: process.env.CLAUDE_PROJECT_DIR || process.cwd(),
             timeout: 120000,
             stdio: "pipe",
           });
-          const output = out.toString();
+          const output = out.toString().trim();
           if (
             output.includes("unused") ||
             output.includes("unlisted") ||
             output.includes("exports")
           ) {
-            console.error("[ProWorkflow] knip found potential issues:");
-            console.error(output.split("\n").slice(0, 30).join("\n"));
-          } else {
-            console.error("[ProWorkflow] knip clean — no dead code detected.");
+            const lines = output.split("\n").filter((l) => l.trim());
+            console.error(`[knip] Found potential issues (${lines.length} lines):\n${lines.slice(0, 5).join("\n")}${lines.length > 5 ? `\n... (+${lines.length - 5} more lines)` : ""}`);
           }
         } catch (err) {
-          const stdout = (err.stdout || "").toString();
-          const stderr = (err.stderr || "").toString();
-          console.error("[ProWorkflow] knip output:\n" + (stdout || stderr || err.message));
+          const raw = ((err.stdout || "") + "\n" + (err.stderr || "")).trim();
+          const lines = raw.split("\n").filter((l) => l.trim());
+          console.error(`[knip] Issues detected:\n${lines.slice(0, 5).join("\n")}${lines.length > 5 ? `\n... (+${lines.length - 5} more)` : ""}`);
         }
-      } else {
-        console.error(
-          `[ProWorkflow] ${uniqueFiles.size} file(s) edited — knip threshold (10) not reached.`,
-        );
       }
 
       // Clean up session file

@@ -12,21 +12,8 @@
 const fs = require("fs");
 const path = require("path");
 
-console.log("\n═══════════════════════════════════════════════════════════════");
-console.log("📍 MANDATORY AGENT TRACING RULE");
-console.log("═══════════════════════════════════════════════════════════════");
-console.log("When modifying code, you MUST:");
-console.log("");
-console.log("1. 📝 Update AGENT_TRACER.md in the package/app root");
-console.log("   - Log timestamp, purpose, changes made, and next agent notes");
-console.log("   - Location: packages/<package>/AGENT_TRACER.md or apps/<app>/AGENT_TRACER.md");
-console.log("");
-console.log("2. 🥖 Leave inline // AGENT-TRACE: comments");
-console.log("   - For complex architectural logic and implicit business rules");
-console.log("   - Format: // AGENT-TRACE: <explanation>");
-console.log("");
-console.log("3. 📊 Add runtime telemetry where applicable");
-console.log("   - Instrument functions with prom-client or OpenTelemetry spans");
-console.log("");
-console.log("See: CLAUDE.md and AGENTS.md (section: Agent Tracing & Context Hand-off)");
-console.log("═══════════════════════════════════════════════════════════════\n");
+// AGENT-TRACE: Agent Tracing Reminder Hook (Compact)
+console.log(
+  "[Tracing] MANDATORY: (1) Update <pkg>/AGENT_TRACER.md, (2) Inline // AGENT-TRACE: comments, (3) Telemetry (CLAUDE.md)."
+);
+

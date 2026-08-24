@@ -52,13 +52,7 @@ async function main() {
       const recentLearnings = getRecentLearnings(store.db, 5, projectName);
 
       if (recentLearnings.length > 0) {
-        log(`[ProWorkflow] Loaded ${recentLearnings.length} learnings from database:`);
-        recentLearnings.slice(0, 3).forEach((l) => {
-          log(`  - [${l.category}] ${l.rule}`);
-        });
-        if (recentLearnings.length > 3) {
-          log(`  ... and ${recentLearnings.length - 3} more`);
-        }
+        log(`[ProWorkflow] Loaded ${recentLearnings.length} learning(s) from DB.`);
       }
 
       const recentSessions = store.getRecentSessions(3);
@@ -66,7 +60,7 @@ async function main() {
         const lastSession = recentSessions[1];
         if (lastSession && lastSession.ended_at) {
           log(
-            `[ProWorkflow] Previous session: ${lastSession.started_at.split("T")[0]} (${lastSession.edit_count} edits, ${lastSession.corrections_count} corrections)`,
+            `[ProWorkflow] Previous session: ${lastSession.started_at.split("T")[0]} (${lastSession.edit_count} edits, ${lastSession.corrections_count} corrections)`
           );
         }
       }
@@ -74,11 +68,7 @@ async function main() {
       if (typeof store.listWikis === "function") {
         const wikis = store.listWikis();
         if (wikis.length > 0) {
-          log(`[ProWorkflow] ${wikis.length} wiki(s) available:`);
-          wikis.slice(0, 5).forEach((w) => {
-            log(`  - ${w.slug} (${w.flavor}, ${w.scope})`);
-          });
-          if (wikis.length > 5) log(`  ... and ${wikis.length - 5} more`);
+          log(`[ProWorkflow] ${wikis.length} wiki(s) available.`);
         }
       }
     } catch (e) {
@@ -98,7 +88,7 @@ async function main() {
       const learnedPatterns = (content.match(/\[LEARN\]/g) || []).length;
 
       if (learnedPatterns > 0) {
-        log(`[ProWorkflow] Loaded ${learnedPatterns} learned patterns from LEARNED.md`);
+        log(`[ProWorkflow] Loaded ${learnedPatterns} learned pattern(s) from LEARNED.md`);
       }
     }
 
@@ -125,13 +115,11 @@ async function main() {
     const count = worktrees.split("\n").filter((l) => l.trim()).length;
 
     if (count > 1) {
-      log(`[ProWorkflow] ${count} worktrees available for parallel work`);
+      log(`[ProWorkflow] ${count} worktrees available`);
     }
   } catch (e) {
     // Not a git repo or git not available
   }
-
-  log("[ProWorkflow] Ready. Use /wrap-up before ending, /learn to capture corrections.");
 
   process.exit(0);
 }

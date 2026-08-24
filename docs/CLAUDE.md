@@ -31,10 +31,11 @@ Bootstrap: `pnpm dev:up --all` (`--quick`, `--tools`, `--cms`, `--overview`).
 
 Never edit `packages/supabase/supabase/migrations/` directly. Source of truth is `packages/database/migrations/`.
 
-## Domain rules & Docs map
+## Project Instructions & Rules Map
 
-- [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) · [`DESIGN.md`](DESIGN.md) · [`AGENTS.md`](AGENTS.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md)
-- Rules: `.claude/rules/{architecture,portal,auth,design-system,testing,verification}.md`
+- **Behavioral Guidelines**: Defined in [`.claude/rules/`](.claude/rules/) (`process.md`, `architecture.md`, `portal.md`, `auth.md`, `design-system.md`, `development-practices.md`, `testing.md`, `task-workflow.md`, `code-review.md`).
+- **Specialist Profiles**: Specialist agent prompts live in [`.claude/agents/`](.claude/agents/) for domain-specific tasks (`backend-architect`, `database-architect`, `nextjs-developer`, `ui-ux-designer`, `fullstack-developer`).
+- **Documentation**: [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) · [`DESIGN.md`](DESIGN.md) · [`AGENTS.md`](AGENTS.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md)
 
 ## Agent essentials & Nx Guidelines
 

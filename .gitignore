@@ -27,6 +27,8 @@ apps/*/.next/
 .claude/skills/
 .claude/hooks/scripts/db/
 .claude/hooks/scripts/search/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
 .agents/
 # Vendored agent plugin checkouts (e.g. compound-engineering) — not project source
 .agent-plugins/

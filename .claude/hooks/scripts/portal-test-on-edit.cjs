@@ -81,15 +81,25 @@ function findCoLocatedTest(sourcePath) {
         stdio: "pipe",
       },
     );
-    if (out.toString().includes("Tests:") && !out.toString().includes("failed")) {
-      console.error(`[portal-test-on-edit] ${relTest} passed.`);
+    const rawOut = out.toString().trim();
+    if (rawOut.includes("Tests:") && !rawOut.includes("failed")) {
+      console.error(`[portal-test] ${relTest} passed.`);
     } else {
-      console.error(`[portal-test-on-edit] ${relTest} output:\n${out.toString()}`);
+      const compactOut = rawOut
+        .split("\n")
+        .filter((l) => l.includes("✕") || l.includes("●") || l.includes("Error:") || l.includes("Tests:"))
+        .slice(0, 8)
+        .join("\n");
+      console.error(`[portal-test] ${relTest} output:\n${compactOut || rawOut.split("\n").slice(-8).join("\n")}`);
     }
   } catch (err) {
-    const stdout = (err.stdout || "").toString();
-    const stderr = (err.stderr || "").toString();
-    console.error(`[portal-test-on-edit] ${testFile} failed:\n${stdout}\n${stderr}`);
+    const raw = ((err.stdout || "") + "\n" + (err.stderr || "")).trim();
+    const compact = raw
+      .split("\n")
+      .filter((l) => l.includes("✕") || l.includes("●") || l.includes("Error:") || l.includes("Tests:"))
+      .slice(0, 8)
+      .join("\n");
+    console.error(`[portal-test] ${testFile} failed:\n${compact || raw.split("\n").slice(-8).join("\n") || err.message}`);
   }
   process.exit(0);
 })();
