@@ -149,135 +149,159 @@ export function HeroRotator({
       aria-roledescription="carousel"
       aria-label="Department Hero Highlights"
     >
-      {/* Hardware-accelerated slide track */}
-      <div
-        className="flex transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
-        style={{
-          transform: `translate3d(-${activeIndex * 100}%, 0, 0)`,
-        }}
-      >
-        {panels.map((panel, idx) => (
-          <div
-            key={panel.id}
-            className={cn(
-              "w-full shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center",
-              // AGENT-TRACE: skip layout/paint for panels 2+ slides away. The
-              // slide track still needs them in the DOM for the translate3d math;
-              // contain-intrinsic-size: auto remembers each panel's real height
-              // after first render so the track never collapses.
-              distanceFromActive(idx) > 1 &&
-                "[content-visibility:auto] [contain-intrinsic-size:auto_200px]",
-            )}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
-            // AGENT-TRACE: non-active panels are inert + aria-hidden so their
-            // links/buttons are not tabbable and they leave the a11y tree —
-            // previously all 9 panels' controls were reachable by keyboard.
-            inert={idx !== activeIndex}
-            aria-hidden={idx !== activeIndex}
-          >
-            {/* Left Content Area (9 Cols) */}
-            <div className="lg:col-span-9 space-y-1.5 flex flex-col justify-between z-10">
-              <div className="space-y-1">
-                {/* Category & Status Pill */}
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-[9px] font-medium text-arch-text-secondary tracking-wide">
-                    <Layers className="w-2 h-2 text-arch-accent-blue" />
-                    {panel.category}
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[8.5px] font-semibold uppercase tracking-wider">
-                    <span className="w-1 h-1 rounded-full bg-accent-green" />
-                    {panel.status}
-                  </span>
-                </div>
+      {/* 3D Orb Slideshow Container with Perspective */}
+      <div className="relative w-full overflow-visible py-2" style={{ perspective: "1200px" }}>
+        <div className="relative w-full flex items-center justify-center min-h-[90px]">
+          {panels.map((panel, idx) => {
+            const total = panels.length;
+            // Calculate signed circular offset from activeIndex: -1 (prev), 0 (active), 1 (next), etc.
+            let diff = (idx - activeIndex) % total;
+            if (diff > total / 2) diff -= total;
+            if (diff < -total / 2) diff += total;
 
-                {/* Title */}
-                <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-arch-text-primary text-balance leading-snug">
-                  {panel.title}
-                </h1>
+            const isActive = diff === 0;
+            const isPrev = diff === -1;
+            const isNext = diff === 1;
+            const isVisible = isActive || isPrev || isNext;
 
-                {/* Description */}
-                <p className="text-arch-text-secondary text-[11px] leading-tight line-clamp-1 text-pretty max-w-lg">
-                  {panel.description}
-                </p>
-              </div>
+            if (!isVisible) return null;
 
-              {/* Operational Stat & CTAs Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                {/* Stat Pill */}
-                {panel.stats && (
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-arch-surface-secondary/70 border border-arch-border-subtle">
-                    <div className="w-4 h-4 rounded bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
-                      <Activity className="w-2.5 h-2.5" />
+            return (
+              <div
+                key={panel.id}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${idx + 1} of ${panels.length}: ${panel.title}`}
+                inert={!isActive}
+                aria-hidden={!isActive}
+                onClick={() => {
+                  if (isPrev) prevSlide();
+                  if (isNext) nextSlide();
+                }}
+                className={cn(
+                  "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] w-full select-none",
+                  isActive && "relative z-20 opacity-100 scale-100",
+                  isPrev &&
+                    "absolute left-0 z-10 opacity-40 scale-[0.80] blur-[0.3px] hover:opacity-85 cursor-pointer pointer-events-auto",
+                  isNext &&
+                    "absolute right-0 z-10 opacity-40 scale-[0.80] blur-[0.3px] hover:opacity-85 cursor-pointer pointer-events-auto",
+                )}
+                style={{
+                  transformStyle: "preserve-3d",
+                  transform: isActive
+                    ? "none"
+                    : isPrev
+                      ? "translateX(-28%) rotateY(45deg) translateZ(-60px)"
+                      : "translateX(28%) rotateY(-45deg) translateZ(-60px)",
+                }}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-5 items-center bg-arch-surface-primary/40 backdrop-blur-md rounded-xl p-2.5 sm:p-3 border border-arch-border-subtle/80 shadow-card">
+                  {/* Left Content Area (9 Cols) */}
+                  <div className="lg:col-span-9 space-y-1.5 flex flex-col justify-between z-10">
+                    <div className="space-y-1">
+                      {/* Category & Status Pill */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-[9px] font-medium text-arch-text-secondary tracking-wide">
+                          <Layers className="w-2 h-2 text-arch-accent-blue" />
+                          {panel.category}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[8.5px] font-semibold uppercase tracking-wider">
+                          <span className="w-1 h-1 rounded-full bg-accent-green" />
+                          {panel.status}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-arch-text-primary text-balance leading-snug">
+                        {panel.title}
+                      </h1>
+
+                      {/* Description */}
+                      <p className="text-arch-text-secondary text-[11px] leading-tight line-clamp-1 text-pretty max-w-lg">
+                        {panel.description}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px]">
-                      <span className="text-[9px] font-medium text-arch-text-tertiary uppercase">
-                        {panel.stats.label}:
-                      </span>
-                      <span className="font-semibold text-arch-text-primary">
-                        {panel.stats.value}
-                      </span>
+
+                    {/* Operational Stat & CTAs Row */}
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                      {/* Stat Pill */}
+                      {panel.stats && (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-arch-surface-secondary/70 border border-arch-border-subtle">
+                          <div className="w-4 h-4 rounded bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
+                            <Activity className="w-2.5 h-2.5" />
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px]">
+                            <span className="text-[9px] font-medium text-arch-text-tertiary uppercase">
+                              {panel.stats.label}:
+                            </span>
+                            <span className="font-semibold text-arch-text-primary">
+                              {panel.stats.value}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="inline-flex items-center gap-1.5">
+                        <Link
+                          href={panel.primary.href}
+                          data-cta="primary-hero"
+                          className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-brand-blue text-white font-medium text-[10.5px] shadow-card hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[24px]"
+                        >
+                          {panel.primary.icon}
+                          <span>{panel.primary.label}</span>
+                        </Link>
+                        {panel.secondary && (
+                          <Link
+                            href={panel.secondary.href}
+                            data-cta="secondary-hero"
+                            className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-surface-secondary text-arch-text-primary font-medium text-[10.5px] border border-arch-border-subtle hover:bg-arch-surface-tertiary transition-all min-h-[24px]"
+                          >
+                            {panel.secondary.icon}
+                            <span>{panel.secondary.label}</span>
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {/* Action Buttons */}
-                <div className="inline-flex items-center gap-1.5">
-                  <Link
-                    href={panel.primary.href}
-                    data-cta="primary-hero"
-                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-brand-blue text-white font-medium text-[10.5px] shadow-card hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[24px]"
-                  >
-                    {panel.primary.icon}
-                    <span>{panel.primary.label}</span>
-                  </Link>
-                  {panel.secondary && (
-                    <Link
-                      href={panel.secondary.href}
-                      data-cta="secondary-hero"
-                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-surface-secondary text-arch-text-primary font-medium text-[10.5px] border border-arch-border-subtle hover:bg-arch-surface-tertiary transition-all min-h-[24px]"
-                    >
-                      {panel.secondary.icon}
-                      <span>{panel.secondary.label}</span>
-                    </Link>
-                  )}
+                  {/* Right Visual Image Card (3 Cols) */}
+                  <div className="lg:col-span-3 relative group/image">
+                    <div className="relative aspect-[16/9] max-h-[44px] sm:max-h-[48px] rounded-lg overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
+                      {/* Visual Terrain / Industrial Image */}
+                      <img
+                        src={
+                          failedImages.has(panel.image)
+                            ? "/images/departments/overview.jpg"
+                            : panel.image
+                        }
+                        alt={`${panel.title} visual`}
+                        className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover/image:scale-102"
+                        loading={isActive ? "eager" : "lazy"}
+                        fetchPriority={isActive ? "high" : "low"}
+                        onError={() => setFailedImages((prev) => new Set(prev).add(panel.image))}
+                      />
+
+                      {/* Subtle Gradient Vignette */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+
+                      {/* Live Indicator Pill on Image */}
+                      <div className="absolute bottom-1 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-black/60 backdrop-blur-sm text-white text-[8px] font-medium border border-white/20">
+                          <CheckCircle2 className="w-2 h-2 text-accent-green" />
+                          {panel.name.toUpperCase()}
+                        </span>
+                        <span className="text-[7.5px] font-mono text-white/80 bg-black/40 px-1 py-0.2 rounded backdrop-blur-sm">
+                          CAM-0{idx + 1}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Right Visual Image Card (3 Cols) */}
-            <div className="lg:col-span-3 relative group/image">
-              <div className="relative aspect-[16/9] max-h-[44px] sm:max-h-[48px] rounded-lg overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
-                {/* Visual Terrain / Industrial Image */}
-                <img
-                  src={
-                    failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image
-                  }
-                  alt={`${panel.title} visual`}
-                  className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover/image:scale-102"
-                  loading={idx === activeIndex ? "eager" : "lazy"}
-                  fetchPriority={idx === activeIndex ? "high" : "low"}
-                  onError={() => setFailedImages((prev) => new Set(prev).add(panel.image))}
-                />
-
-                {/* Subtle Gradient Vignette */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-
-                {/* Live Indicator Pill on Image */}
-                <div className="absolute bottom-1 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-black/60 backdrop-blur-sm text-white text-[8px] font-medium border border-white/20">
-                    <CheckCircle2 className="w-2 h-2 text-accent-green" />
-                    {panel.name.toUpperCase()}
-                  </span>
-                  <span className="text-[7.5px] font-mono text-white/80 bg-black/40 px-1 py-0.2 rounded backdrop-blur-sm">
-                    CAM-0{idx + 1}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {/* Navigation Controls & Carousel Indicator Dots */}

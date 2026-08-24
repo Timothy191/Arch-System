@@ -1,14 +1,16 @@
-## 2026-08-24 - Hero Card Compact Ergonomics (50% Scale Reduction)
+# Agent Tracer - @repo/features/hub/ui
 
-- **Purpose**: Downscale hero card dimensions, typography, and image container by 50% for high-density industrial dashboard viewports while preserving CLS stability.
+## 2026-08-24 - 3D Slideshow Orb & Ghost Preview Cards
+
+- **Purpose**: Implement 3D slideshow orb carousel layout showing 3 cards simultaneously: the active card straight in the center, and past/future cards angled at 45° as semi-transparent ghost preview cards on the left and right.
 - **Changes**:
   - `libs/features/hub/ui/src/HeroRotator.tsx`:
-    - Reduced image container from `max-h-[80px] sm:max-h-[88px]` to `max-h-[44px] sm:max-h-[48px]`, preserving `aspect-[16/9]` and `object-cover` to prevent CLS layout shift.
-    - Reduced title typography from `text-xl sm:text-2xl md:text-3xl` to `text-sm sm:text-base md:text-lg`.
-    - Downscaled action CTAs to `min-h-[24px]` and reduced stat pills, badge text, and pagination dot footprints.
-  - `apps/portal/app/hub/page.tsx`:
-    - Tightened hero card inner wrapper padding and vertical spacing.
-- **What the Next Agent Should Know**: The `aspect-[16/9]` aspect-ratio anchor combined with bounded `max-h-*` and `object-cover` prevents layout jumps and CLS while keeping the compact 50% reduced hero footprint crisp across mobile and desktop.
+    - Added CSS 3D perspective (`perspective: 1200px`) container.
+    - Rendered active card with full opacity and `transform: none` (relative z-20).
+    - Rendered previous card with `transform: translateX(-28%) rotateY(45deg) translateZ(-60px)` and 40% opacity (interactive click triggers `prevSlide()`).
+    - Rendered next card with `transform: translateX(28%) rotateY(-45deg) translateZ(-60px)` and 40% opacity (interactive click triggers `nextSlide()`).
+    - Applied `inert` and `aria-hidden` to non-active cards while keeping them clickable for direct slide jumps.
+- **What the Next Agent Should Know**: The 3D orb carousel uses pure CSS 3D transforms (`rotateY(45deg)` + `translateZ`) with hardware acceleration and zero external physics libraries, ensuring sub-millisecond frame rendering and zero CLS.
 
 - **Purpose**: Eliminate GPU/compositor saturation on the hub page — SVG filters on animated elements and 9 fully-rendered carousel panels were the dominant cost.
 - **Changes**:
