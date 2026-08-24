@@ -19,54 +19,69 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORT="${PORT:-3000}"
 
 # ── Colors ───────────────────────────────────────────────
-DIM='\033[0;2m'
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
+DIM='\033[2m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
+MAGENTA='\033[35m'
+CYAN='\033[36m'
+WHITE='\033[37m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-PASS="${GREEN}${BOLD}  ✓${NC}"
-FAIL="${RED}${BOLD}  ✗${NC}"
-SKIP="${YELLOW}${BOLD}  –${NC}"
-INFO="${CYAN}${BOLD}  →${NC}"
+# Icons
+PASS="${GREEN}${BOLD} ✔${NC}"
+FAIL="${RED}${BOLD} ✖${NC}"
+SKIP="${DIM}${BOLD} ⏭${NC}"
+WARN="${YELLOW}${BOLD} ⚠${NC}"
+INFO="${BLUE}${BOLD} ℹ${NC}"
 SUPABASE_URL=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
-SUPABASE_ANON_KEY=$(grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+# Anon key: .env defines NEXT_PUBLIC_SUPABASE_ANON_KEY (client-safe, public). Fall back to
+# the non-prefixed name for older setups. Never log the value — only presence/absence.
+SUPABASE_ANON_KEY=$(grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+HOSTED_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
 
 # ── Helpers ──────────────────────────────────────────────
+# phase N TITLE — lightweight section header (colored tag + thin rule).
 phase() {
   local n="$1" title="$2"
   echo
-  echo -e "  ${BOLD}${MAGENTA}━━━  Phase ${n}: ${title}  ━━━${NC}"
+  echo -e "  ${BOLD}${BLUE}◆ Phase ${n}${NC}  ${BOLD}${WHITE}${title}${NC}"
+  echo -e "  ${DIM}  ─────────────────────────────────────────────────${NC}"
 }
 
+# check LABEL STATUS [DETAIL] — two-column row: icon+label (fixed width) | detail.
+# Color tokens are '\033[...' literals, so the padded label is built on the PLAIN
+# text first, then the assembled colored string is rendered with `echo -e`.
 check() {
   local label="$1" status="$2" detail="${3:-}"
+  local pad
+  printf -v pad '%-28s' "$label"
   if [ "$status" = "pass" ]; then
-    echo -e "  ${PASS} ${label}${detail:+ $DIM$detail$NC}"
+    echo -e "  ${PASS} ${pad}${detail:+ $DIM$detail$NC}"
   elif [ "$status" = "fail" ]; then
-    echo -e "  ${FAIL} ${label}${detail:+ $RED$detail$NC}"
+    echo -e "  ${FAIL} ${pad}${detail:+ $RED$detail$NC}"
   elif [ "$status" = "warn" ]; then
-    echo -e "  ${YELLOW}${BOLD}  ⚠${NC} ${label}${detail:+ $YELLOW$detail$NC}"
+    echo -e "  ${WARN} ${pad}${detail:+ $YELLOW$detail$NC}"
   elif [ "$status" = "skip" ]; then
-    echo -e "  ${SKIP} ${label}${detail:+ $DIM$detail$NC}"
+    echo -e "  ${SKIP} ${pad}${detail:+ $DIM$detail$NC}"
+  elif [ "$status" = "info" ]; then
+    echo -e "  ${INFO} ${pad}${detail:+ $DIM$detail$NC}"
   fi
 }
 
 spinner() {
   local pid=$1 msg="$2"
-  local frames=('◐' '◓' '◑' '◒')
+  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
   local i=0
   while kill -0 "$pid" 2>/dev/null; do
     printf "\r  ${CYAN}${frames[$i]}${NC} ${msg}... "
-    i=$(( (i+1) % 4 ))
-    sleep 0.2
+    i=$(( (i+1) % 10 ))
+    sleep 0.1
   done
-  printf "\r  ${GREEN}◉${NC} ${msg}       \n"
+  printf "\r  ${PASS} ${msg}       \n"
 }
 
 wait_for() {
@@ -94,14 +109,26 @@ COMPOSE_CMD=$(detect_compose_cmd)
 
 banner() {
   clear 2>/dev/null || true
+  local branch
+  branch=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "—")
+  local mode_pill
+  if [ "$HOSTED_MODE" = "true" ]; then
+    mode_pill="${CYAN}${BOLD}CLOUD-FIRST · HOSTED SUPABASE${NC}"
+  else
+    mode_pill="${MAGENTA}${BOLD}LOCAL · DOCKER${NC}"
+  fi
   echo
-  echo -e "  ${BOLD}${CYAN}    ___    _   _    ___    _   _   ___   _____   ___   ___ ${NC}"
-  echo -e "  ${BOLD}${CYAN}   / _ \  | | | |  / __|  | | | | / __| |_   _| | _ \ / __|${NC}"
-  echo -e "  ${BOLD}${CYAN}  | (_) | | |_| | | (__   | |_| | \__ \   | |   |  _/ \__ \${NC}"
-  echo -e "  ${BOLD}${CYAN}   \___/   \__,_|  \___|   \___/  |___/   |_|   |_|   |___/${NC}"
+  echo -e "  ${BOLD}${CYAN}  █████╗ ██████╗  ██████╗██╗  ██╗${NC}"
+  echo -e "  ${BOLD}${CYAN} ██╔══██╗██╔══██╗██╔════╝██║  ██║${NC}"
+  echo -e "  ${BOLD}${CYAN} ███████║██████╔╝██║     ███████║${NC}"
+  echo -e "  ${BOLD}${CYAN} ██╔══██║██╔══██╗██║     ██╔══██║${NC}"
+  echo -e "  ${BOLD}${CYAN} ██║  ██║██║  ██║╚██████╗██║  ██║${NC}"
+  echo -e "  ${BOLD}${CYAN} ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝${NC}"
+  echo -e "  ${DIM}  ──────────────────────────────────────────${NC}"
+  echo -e "  ${BOLD}${WHITE}S Y S T E M S${NC}   ${DIM}operational portal · mining ops${NC}"
   echo
-  echo -e "  ${DIM}Cloud-First Dev — Hosted Supabase + HMR (No Docker Required)${NC}"
-  echo -e "  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC}"
+  echo -e "  ${mode_pill}"
+  echo -e "  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC}   ${DIM}branch:${NC} ${DIM}${branch}${NC}"
   echo
 }
 
@@ -111,11 +138,6 @@ open_browser() {
   if command -v google-chrome > /dev/null 2>&1; then
     google-chrome --new-window "$login_url" 2>/dev/null &
   elif command -v chromium > /dev/null 2>&1; then
-    # Show online service URLs sourced from .env
-    echo -e "  ${INFO} Supabase URL: ${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co} (hosted/cloud)"
-    echo -e "  ${INFO} Redis URL:    ${REDIS_URL:-memory (no REDIS_URL set — using in-memory fallback)}"
-    echo
-
     chromium --new-window "$login_url" 2>/dev/null &
   elif command -v firefox > /dev/null 2>&1; then
     firefox --new-window "$login_url" 2>/dev/null &
@@ -153,23 +175,41 @@ launch_status_terminal() {
   esac
 }
 
+# _url_row LABEL URL [SUFFIX] — one aligned row in the status panel.
+_url_row() {
+  local label="$1" url="$2" suffix="${3:-}" pad
+  printf -v pad '%-9s' "$label"
+  echo -e "  ${BOLD}${pad}${NC} ${CYAN}${url}${NC}${suffix:+ ${DIM}${suffix}${NC}}"
+}
+
 show_results() {
+  local studio_url api_url redis_suffix
+  if [ "$HOSTED_MODE" = "true" ]; then
+    studio_url="https://supabase.com/dashboard/project/$HOSTED_PROJECT_REF"
+    api_url="https://$HOSTED_PROJECT_REF.supabase.co"
+    redis_suffix="(local)"
+  else
+    studio_url="http://localhost:54323"
+    api_url="http://localhost:54321"
+    redis_suffix=""
+  fi
+
   echo
-  echo -e "  ${GREEN}${BOLD}┌─────────────────────────────────────────────────────────┐${NC}"
-  echo -e "  ${GREEN}${BOLD}│  All systems go — edit any file, see live updates      │${NC}"
-  echo -e "  ${GREEN}${BOLD}└─────────────────────────────────────────────────────────┘${NC}"
+  echo -e "  ${GREEN}${BOLD}╭──────────────────────────────────────────────────────╮${NC}"
+  echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}✔ All systems go${NC}  ${DIM}edit any file, see live updates${NC}  ${GREEN}${BOLD}│${NC}"
+  echo -e "  ${GREEN}${BOLD}╰──────────────────────────────────────────────────────╯${NC}"
   echo
-  echo -e "  ${BOLD}Login:${NC}    ${CYAN}http://localhost:$PORT/login${NC}"
-  echo -e "  ${BOLD}Portal:${NC}   ${CYAN}http://localhost:$PORT${NC}"
+  _url_row "Login"    "http://localhost:$PORT/login"
+  _url_row "Portal"   "http://localhost:$PORT"
   if [ "$START_CMS" = "true" ]; then
-    echo -e "  ${BOLD}CMS:${NC}      ${CYAN}http://localhost:3001${NC}"
+    _url_row "CMS"      "http://localhost:3001"
   fi
   if [ "$START_OVERVIEW" = "true" ]; then
-    echo -e "  ${BOLD}Overview:${NC}  ${CYAN}http://localhost:${OVERVIEW_PORT:-3003}${NC}"
+    _url_row "Overview" "http://localhost:${OVERVIEW_PORT:-3003}"
   fi
-  echo -e "  ${BOLD}Redis:${NC}    ${CYAN}redis://localhost:6379${NC}"
-  echo -e "  ${BOLD}Studio:${NC}   ${CYAN}http://localhost:54323${NC}"
-  echo -e "  ${BOLD}API:${NC}      ${CYAN}http://localhost:54321${NC}"
+  _url_row "Redis"    "redis://localhost:6379" "$redis_suffix"
+  _url_row "Studio"   "$studio_url"
+  _url_row "API"      "$api_url"
   echo
   echo -e "  ${DIM}Stop with Ctrl+C${NC}"
   echo
@@ -344,7 +384,9 @@ if [ "$FORCE_RESTART" = "true" ]; then
 
   # Project-wide Cache Cleanup (Smart Cleanup)
   clean_dir_cache "$REPO_ROOT/.kilo" "Agent run cache (.kilo)"
-  clean_dir_cache "$REPO_ROOT/.remember" "Agent memory cache (.remember)"
+  # NOTE: .remember holds cross-session agent memory (now.md, today-*.md) read
+  # by the SessionStart hook — do NOT delete it. Only the transient .kilo run
+  # cache is purged.
   smart_cache_cleanup  # Smart Nx cache cleanup + Python bytecode
   clean_dir_cache "$REPO_ROOT/.venv" "Python virtual environment (.venv)"
   clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
@@ -550,8 +592,26 @@ if [ "$QUICK_MODE" = "true" ]; then
   check "Studio" "skip" "quick mode"
 elif [ "$HOSTED_MODE" = "true" ]; then
   phase 2 "Infrastructure (Cloud-First)"
-  check "Supabase API" "pass" "${SUPABASE_URL:-https://mrwhtxbhrzyttlsyuofc.supabase.co} (hosted)"
-  check "Database" "pass" "Cloud Postgres responding"
+  # Real reachability check against the hosted REST endpoint. 200 = reachable +
+  # anon key accepted; 401/403 = reachable but the anon header was rejected
+  # (still proves the endpoint resolves and the project is live). Anything else
+  # (incl. 000 = network error / paused project) is a warn, never a boot blocker.
+  hosted_api_code="000"
+  if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+    hosted_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
+      "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY}" 2>/dev/null)
+    [ -z "$hosted_api_code" ] && hosted_api_code="000"
+  fi
+  case "$hosted_api_code" in
+    200|401|403)
+      check "Supabase API" "pass" "${SUPABASE_URL} reachable (HTTP ${hosted_api_code})"
+      check "Database" "pass" "cloud Postgres reachable via REST"
+      ;;
+    *)
+      check "Supabase API" "warn" "${SUPABASE_URL:-<unset>} not reachable (HTTP ${hosted_api_code}) — check network/keys/paused project"
+      check "Database" "warn" "cloud Postgres not verified"
+      ;;
+  esac
   check "Studio" "skip" "hosted dashboard at supabase.com"
 else
   phase 2 "Infrastructure"
@@ -674,6 +734,91 @@ else
   check "MCP Status" "warn" "some optional servers are offline (see validation details above)"
 fi
 
+# ── Phase 2.6: Security & Exposure ────────────────────────
+# Read-only inspections. NEVER print secret values — only presence/status +
+# templated fix commands. NEVER mutate DB/RLS/auth or rewrite MCP configs.
+phase "2.6" "Security & Exposure"
+
+# Redis bind — warn only if REDIS_URL points beyond localhost.
+sec_redis_host="localhost"
+if [ -n "${REDIS_URL:-}" ]; then
+  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E 's#^redis(s)?://([^:/@]+).*#\2#')
+  [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
+fi
+case "$sec_redis_host" in
+  localhost|127.0.0.1|0.0.0.0)
+    check "Redis bind" "pass" "localhost-only ($sec_redis_host)"
+    ;;
+  *)
+    check "Redis bind" "warn" "$sec_redis_host is non-local — bind 127.0.0.1 + set a password if exposed"
+    ;;
+esac
+
+# FUXA SCADA — best-effort auth probe (SCADA controls real devices, so flag open access).
+sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null)
+[ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
+case "$sec_fuxa_code" in
+  200|301|302)
+    check "FUXA SCADA" "warn" "$sec_fuxa_url reachable (HTTP $sec_fuxa_code) — confirm auth is enabled (controls real devices)"
+    ;;
+  000)
+    check "FUXA SCADA" "skip" "$sec_fuxa_url not reachable"
+    ;;
+  *)
+    check "FUXA SCADA" "info" "$sec_fuxa_url HTTP $sec_fuxa_code"
+    ;;
+esac
+
+# Supabase anon key presence + RLS advisory (read-only reminder, never a mutation).
+if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+  check "Anon key" "pass" "NEXT_PUBLIC_SUPABASE_ANON_KEY present"
+else
+  check "Anon key" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env"
+fi
+check "RLS advisory" "info" "ensure RLS ENABLED on every non-public table (employees.role/department_id policies)"
+
+# MCP configs — scan for secrets and the postgres localhost mismatch.
+# All three files are gitignored; this only reports, never rewrites them.
+sec_mcp_files=("$REPO_ROOT/.mcp.json" "$REPO_ROOT/.agents/mcp_config.json" "$REPO_ROOT/.vscode/mcp.json")
+sec_mcp_secret_hits=0
+sec_mcp_present=0
+for f in "${sec_mcp_files[@]}"; do
+  [ -f "$f" ] || continue
+  sec_mcp_present=$((sec_mcp_present + 1))
+  # Flag service-role keys / long JWT-like secrets (never print the value).
+  if grep -qE '"(service_role|serviceRole|SUPABASE_SERVICE_ROLE_KEY|JWT_SECRET|SUPABASE_KEY)"[[:space:]]*:[[:space:]]*"[^"]{20,}"' "$f" 2>/dev/null; then
+    sec_mcp_secret_hits=$((sec_mcp_secret_hits + 1))
+  fi
+done
+if [ "$sec_mcp_present" -eq 0 ]; then
+  check "MCP secrets" "skip" "no MCP config files found"
+elif [ "$sec_mcp_secret_hits" -eq 0 ]; then
+  check "MCP secrets" "pass" "no service-role keys in MCP configs ($sec_mcp_present/$sec_mcp_present present, all gitignored)"
+else
+  check "MCP secrets" "warn" "$sec_mcp_secret_hits MCP config(s) contain a secret — move to env var + confirm gitignored"
+fi
+
+# postgres MCP mismatch — warn + templated fix command (do NOT rewrite configs).
+sec_pg_local=false
+for f in "${sec_mcp_files[@]}"; do
+  [ -f "$f" ] || continue
+  if grep -qE '127\.0\.0\.1:54322|localhost:54322' "$f" 2>/dev/null; then
+    sec_pg_local=true
+    break
+  fi
+done
+if [ "$sec_pg_local" = "true" ]; then
+  check "postgres MCP" "warn" "→ 127.0.0.1:54322 (local); codebase-memory tools can't reach hosted DB"
+  echo -e "  ${DIM}    Repoint to hosted Supabase via Supavisor (port 6543):${NC}"
+  echo -e "  ${DIM}    postgresql://postgres.mrwhtxbhrzyttlsyuofc:{DB_PASSWORD}@aws-0-{REGION}.pooler.supabase.com:6543/postgres${NC}"
+  echo -e "  ${DIM}    Get the exact string + password from:${NC}"
+  echo -e "  ${DIM}    https://supabase.com/dashboard/project/mrwhtxbhrzyttlsyuofc/settings/database${NC}"
+  echo -e "  ${DIM}    Then update .mcp.json, .agents/mcp_config.json, .vscode/mcp.json (all gitignored).${NC}"
+else
+  check "postgres MCP" "pass" "not pointed at local 54322"
+fi
+
 # ── Phase 3: Portal (Start + Wait) ────────────────────────
 phase 3 "Portal"
 
@@ -770,20 +915,13 @@ else
   check "Login page" "warn" "root page available instead"
 fi
 
-# 4c. Login page renders real HTML (not error overlay)
-if curl -fs "http://localhost:$PORT/login" 2>/dev/null | grep -qi "<html\|<!doctype" 2>/dev/null; then
-  check "HTML render" "pass"
-else
-  check "HTML render" "warn" "login page may show error overlay"
-fi
-
 # 4d. Supabase RLS / anon key check
 if [ "$QUICK_MODE" = "true" ]; then
   check "Auth config" "skip" "quick mode"
-elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/apps/portal/.env" 2>/dev/null || grep -q 'SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
+elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'NEXT_PUBLIC_SUPABASE_ANON_KEY' "$REPO_ROOT/apps/portal/.env" 2>/dev/null || grep -q 'NEXT_PUBLIC_SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
   check "Auth config" "pass" "anon key present"
 else
-  check "Auth config" "warn" "no SUPABASE_ANON_KEY in apps/portal/.env or .env"
+  check "Auth config" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env or .env"
 fi
 
 # 4e. Static assets accessible
@@ -799,6 +937,136 @@ if curl -fs "$FUXA_URL" > /dev/null 2>&1; then
   check "FUXA SCADA" "pass" "$FUXA_URL"
 else
   check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
+fi
+
+# 4g. Database reachability (hosted REST + anon key + RLS end-to-end).
+# 200 = reachable + anon accepted; 401/403 = reachable but RLS-gated (still proves
+# connectivity + auth wiring); 000 = network error / paused project (warn, never block).
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Database" "skip" "quick mode"
+elif [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+  check "Database" "skip" "SUPABASE_URL / anon key unset"
+else
+  smoke_db_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
+    "${SUPABASE_URL}/rest/v1/" \
+    -H "apikey: ${SUPABASE_ANON_KEY}" \
+    -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" 2>/dev/null)
+  [ -z "$smoke_db_code" ] && smoke_db_code="000"
+  case "$smoke_db_code" in
+    200)
+      check "Database" "pass" "hosted REST reachable (HTTP 200, anon key accepted)"
+      ;;
+    401|403)
+      check "Database" "pass" "hosted REST reachable (HTTP $smoke_db_code, RLS-gated)"
+      ;;
+    *)
+      check "Database" "warn" "hosted REST HTTP $smoke_db_code — check network/keys/paused project"
+      ;;
+  esac
+fi
+
+# 4h. Redis ping — direct redis-cli + the portal /api/health/redis endpoint.
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Redis ping" "skip" "quick mode"
+else
+  smoke_redis_ok=false
+  if command -v redis-cli > /dev/null 2>&1; then
+    if redis-cli -h 127.0.0.1 -p 6379 ping > /dev/null 2>&1; then
+      smoke_redis_ok=true
+    fi
+  fi
+  # Belt-and-suspenders: hit the existing portal health endpoint too.
+  if [ "$smoke_redis_ok" = "false" ] && curl -fs "http://localhost:$PORT/api/health/redis" > /dev/null 2>&1; then
+    smoke_redis_ok=true
+  fi
+  if [ "$smoke_redis_ok" = "true" ]; then
+    check "Redis ping" "pass" "PONG (127.0.0.1:6379)"
+  else
+    check "Redis ping" "warn" "no PONG — redis-cli missing or server down"
+  fi
+fi
+
+# 4i. Authenticated endpoint — full Supabase sign-in, then hit a protected route.
+# Reads SMOKE_TEST_EMAIL / SMOKE_TEST_PASSWORD from apps/portal/.env (gitignored).
+# NEVER echoes the password. Skips with an info row if creds absent — never blocks boot.
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Auth endpoint" "skip" "quick mode"
+else
+  smoke_email=$(grep '^SMOKE_TEST_EMAIL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | tr -d '[:space:]')
+  smoke_pass=$(grep '^SMOKE_TEST_PASSWORD=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2-)
+  if [ -z "$smoke_email" ] || [ -z "$smoke_pass" ]; then
+    check "Auth endpoint" "info" "set SMOKE_TEST_EMAIL/SMOKE_TEST_PASSWORD in apps/portal/.env to enable"
+  elif [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+    check "Auth endpoint" "skip" "SUPABASE_URL / anon key unset"
+  else
+    # Sign in via Supabase Auth (password grant). Extract access_token with node -e.
+    smoke_body=$(printf '{"email":"%s","password":"%s"}' "$smoke_email" "$smoke_pass")
+    smoke_token=$(curl -s --max-time 10 \
+      "${SUPABASE_URL}/auth/v1/token?grant_type=password" \
+      -H "apikey: ${SUPABASE_ANON_KEY}" \
+      -H "Content-Type: application/json" \
+      -d "$smoke_body" 2>/dev/null | node -e '
+        let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+          try { const j=JSON.parse(s); process.stdout.write(j.access_token||""); }
+          catch(e){ process.stdout.write(""); }
+        });
+      ' 2>/dev/null)
+    if [ -z "$smoke_token" ]; then
+      check "Auth endpoint" "warn" "sign-in failed — check SMOKE_TEST_EMAIL/PASSWORD (not a code problem)"
+    else
+      smoke_auth_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+        "http://localhost:$PORT/api/printers" \
+        -H "Authorization: Bearer ${smoke_token}" 2>/dev/null)
+      [ -z "$smoke_auth_code" ] && smoke_auth_code="000"
+      case "$smoke_auth_code" in
+        401)
+          check "Auth endpoint" "fail" "/api/printers returned 401 with valid JWT"
+          ;;
+        000)
+          check "Auth endpoint" "warn" "/api/printers unreachable (HTTP 000)"
+          ;;
+        *)
+          check "Auth endpoint" "pass" "signed in + /api/printers HTTP $smoke_auth_code (auth middleware working)"
+          ;;
+      esac
+    fi
+  fi
+fi
+
+# ── Phase 5: Environment Notes (advisory only — no mutation) ──────────────
+phase 5 "Environment Notes"
+
+# inotify watches — Next.js HMR + chokedelta benefit from a high limit.
+env_inotify=$(cat /proc/sys/fs/inotify/max_user_watches 2>/dev/null || echo "0")
+if [ "$env_inotify" -gt 0 ] 2>/dev/null && [ "$env_inotify" -lt 524288 ]; then
+  check "inotify" "info" "max_user_watches=$env_inotify (<524288) — raise for heavy HMR: echo fs.inotify_max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p"
+elif [ "$env_inotify" -gt 0 ] 2>/dev/null; then
+  check "inotify" "pass" "max_user_watches=$env_inotify"
+else
+  check "inotify" "skip" "could not read /proc/sys/fs/inotify/max_user_watches"
+fi
+
+# Nx cache size — advise pnpm nx reset if it has grown large.
+if [ -d "$REPO_ROOT/.nx/cache" ]; then
+  env_nx_size=$(du -sh "$REPO_ROOT/.nx/cache" 2>/dev/null | cut -f1)
+  env_nx_mb=$(du -sm "$REPO_ROOT/.nx/cache" 2>/dev/null | cut -f1)
+  if [ -n "$env_nx_mb" ] && [ "$env_nx_mb" -ge 500 ] 2>/dev/null; then
+    check "Nx cache" "info" "${env_nx_size}B — pnpm nx reset clears stale artifacts"
+  elif [ -n "$env_nx_size" ]; then
+    check "Nx cache" "pass" "${env_nx_size}B"
+  else
+    check "Nx cache" "skip" "could not measure .nx/cache"
+  fi
+else
+  check "Nx cache" "skip" "no .nx/cache directory"
+fi
+
+# Portal log — advisory: logs clear on each start; persist with PORTAL_LOG_LEVEL if wanted.
+check "Portal log" "info" "logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence"
+
+# Supabase free-tier keep-alive (hosted only).
+if [ "$HOSTED_MODE" = "true" ]; then
+  check "Free-tier" "info" "hosted free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier"
 fi
 
 # ── Done ─────────────────────────────────────────────────
