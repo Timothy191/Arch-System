@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -8,7 +8,8 @@ import {
   useSpring,
   useTransform,
   useMotionTemplate,
-  PanInfo,
+  type MotionValue,
+  type PanInfo,
 } from "framer-motion";
 import {
   Play,
@@ -39,6 +40,10 @@ import { TrustLogos } from "./TrustLogos";
 // AGENT-TRACE: Elite-Tier 3D Carousel Implementation
 // Uses continuous MotionValue physics for zero-reflow GPU compositing.
 // Features InteractiveGlassCard with cursor-reactive specular sheen and 3D micro-tilt.
+// AGENT-TRACE: 2026-08-24 — Per-slide useTransform hooks extracted into <HeroSlide>
+// to satisfy Rules-of-Hooks (previously called inside panels.map). Hover-pause and
+// manual-pause states are now separate so cursor movement cannot clobber the
+// play/pause toggle. Carousel root now handles ArrowLeft/ArrowRight keyboard nav.
 
 interface HeroRotatorProps {
   defaultTitle: string;
@@ -67,6 +72,22 @@ interface Panel {
   primary: { href: string; label: string; icon: React.ReactNode };
   secondary?: { href: string; label: string; icon: React.ReactNode };
 }
+
+/**
+ * Centralized tuning constants for the carousel. Extracted so future editors
+ * can reason about geometry/timing without hunting for magic numbers.
+ */
+const CONFIG = {
+  cardWidth: "46%", // active card column width
+  cardLeft: "27%", // left offset that centers the active card in the track
+  perspective: "1200px",
+  perspectiveOrigin: "50% 40%",
+  minHeight: "clamp(340px, 44vw, 520px)",
+  autoRotateMs: 6000, // interval between auto-advances
+  panDivisor: 400, // px-to-index sensitivity for drag
+  velocityThreshold: 300, // px/s above which a flick snaps to next/prev
+  clickDragThresholdPx: 5, // pan distance above which the click handler is suppressed
+} as const;
 
 const DEPT_STYLE_MAP: Record<
   string,
@@ -109,11 +130,7 @@ const DEPT_STYLE_MAP: Record<
     iconColor: "text-dept-satellite",
     bgColor: "bg-dept-satellite/10",
   },
-  satellite: { icon: Orbit, iconColor: "text-dept-satellite", bgColor: "bg-dept-satellite/10" },
 };
-
-const CARD_COL_WIDTH = "46%";
-const CARD_COL_LEFT = "27%";
 
 function InteractiveGlassCard({
   children,
@@ -180,6 +197,246 @@ function InteractiveGlassCard({
   );
 }
 
+interface HeroSlideProps {
+  panel: Panel;
+  idx: number;
+  total: number;
+  smoothIndex: MotionValue<number>;
+  carouselIndex: MotionValue<number>;
+  isActive: boolean;
+  failedImages: Set<string>;
+  onImageError: (src: string) => void;
+  onJumpTo: (idx: number) => void;
+  arrowIcon: React.ReactNode;
+  incidentCount: number;
+  breakdownCount: number;
+  offlineMachineCount: number;
+}
+
+/**
+ * Single carousel slide. Owns its per-panel useTransform hooks at the top
+ * level of a real component so the Rules of Hooks are satisfied (previously
+ * these hooks were called inside HeroRotator's panels.map, which only worked
+ * while the panel count/order never changed between renders).
+ */
+function HeroSlide({
+  panel,
+  idx,
+  total,
+  smoothIndex,
+  carouselIndex,
+  isActive,
+  failedImages,
+  onImageError,
+  onJumpTo,
+  arrowIcon,
+  incidentCount,
+  breakdownCount,
+  offlineMachineCount,
+}: HeroSlideProps) {
+  // AGENT-TRACE: drag-distance guard so a pan-release click does not also fire
+  // jumpToSlide and double-advance the carousel.
+  const panMovedRef = useRef(false);
+
+  const offset = useTransform(smoothIndex, (v) => {
+    let diff = (((v - idx) % total) + total) % total;
+    if (diff > total / 2) diff -= total;
+    return diff;
+  });
+
+  const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, -42, 0, 42, 0]);
+  const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
+  const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.7, 0.88, 1, 0.88, 0.7]);
+  const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0.65, 1, 0.65, 0]);
+  const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
+  const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.1 ? "auto" : "none"));
+
+  return (
+    <motion.div
+      key={panel.id}
+      role="group"
+      aria-roledescription="slide"
+      aria-label={`${idx + 1} of ${total}: ${panel.title}`}
+      inert={!isActive}
+      aria-hidden={!isActive}
+      onPan={(_e, info) => {
+        if (Math.abs(info.delta.x) > 0) {
+          panMovedRef.current = true;
+          carouselIndex.set(carouselIndex.get() - info.delta.x / CONFIG.panDivisor);
+        }
+      }}
+      onPanEnd={(_e, info) => {
+        const current = carouselIndex.get();
+        const velocity = info.velocity.x;
+        let target = Math.round(current);
+        if (velocity < -CONFIG.velocityThreshold) target = Math.ceil(current);
+        if (velocity > CONFIG.velocityThreshold) target = Math.floor(current);
+        carouselIndex.set(target);
+      }}
+      onClick={() => {
+        // Suppress the click that follows a drag so pan-release doesn't also
+        // jump to the clicked (possibly inactive) slide.
+        if (panMovedRef.current) {
+          panMovedRef.current = false;
+          return;
+        }
+        if (!isActive) {
+          onJumpTo(idx);
+        }
+      }}
+      style={{
+        width: CONFIG.cardWidth,
+        left: CONFIG.cardLeft,
+        transformStyle: "preserve-3d",
+        transformOrigin: "center center",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
+        rotateY,
+        x,
+        scale,
+        opacity,
+        zIndex,
+        pointerEvents,
+      }}
+      className="absolute top-0 bottom-0 will-change-transform transform-gpu"
+    >
+      <InteractiveGlassCard isActive={isActive}>
+        <div className="relative h-full flex flex-col px-5 py-5 sm:px-7 sm:py-6 z-10">
+          {/* ── Eyebrow row ── */}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-black/10 bg-black/[0.04] backdrop-blur-sm font-medium tracking-wide text-[var(--text-secondary)]">
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
+                  aria-hidden="true"
+                />
+                Sector-01 Active
+              </span>
+              <span className="text-[var(--text-muted)] tracking-wider">PORTAL v1.5.1</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {incidentCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red border border-accent-red/20 font-medium">
+                  <AlertTriangle className="w-3 h-3" />
+                  {incidentCount} Open
+                </span>
+              )}
+              {breakdownCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber border border-accent-amber/20 font-medium">
+                  <Wrench className="w-3 h-3" />
+                  {breakdownCount} Breakdown{breakdownCount !== 1 ? "s" : ""}
+                </span>
+              )}
+              {offlineMachineCount > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] border border-black/10 font-medium">
+                  <Power className="w-3 h-3" />
+                  {offlineMachineCount} Offline
+                </span>
+              )}
+              {incidentCount === 0 && breakdownCount === 0 && offlineMachineCount === 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20 font-medium">
+                  Nominal
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* ── Title & Department Icon Badge ── */}
+          <div className="mt-4 space-y-1.5 flex-grow">
+            <div className="flex items-center gap-2.5">
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
+                  panel.iconBgColor,
+                )}
+              >
+                {panel.icon}
+              </div>
+              <span className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] font-semibold">
+                {panel.category}
+              </span>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)] leading-snug text-balance">
+              {panel.title}
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 max-w-lg">
+              {panel.description}
+            </p>
+          </div>
+
+          {/* ── Stat + CTAs (Styled after Mac Taskbar controls) ── */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {panel.stats && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/[0.03] border border-black/10 text-xs">
+                <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)] shrink-0" />
+                <span className="text-[var(--text-muted)] uppercase text-[10px] font-medium">
+                  {panel.stats.label}:
+                </span>
+                <span className="font-semibold text-[var(--text-heading)]">
+                  {panel.stats.value}
+                </span>
+              </div>
+            )}
+            <div className="inline-flex items-center gap-1.5 ml-auto">
+              <Link
+                href={panel.primary.href}
+                data-cta="primary-hero"
+                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white font-medium text-xs shadow-card border border-black/80 hover:bg-[var(--accent-blue)]/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                tabIndex={isActive ? 0 : -1}
+              >
+                {panel.primary.icon}
+                {panel.primary.label}
+              </Link>
+              {panel.secondary && (
+                <Link
+                  href={panel.secondary.href}
+                  data-cta="secondary-hero"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.07] text-[var(--text-heading)] font-medium text-xs border border-black/80 transition-all active:scale-95"
+                  tabIndex={isActive ? 0 : -1}
+                >
+                  {panel.secondary.icon}
+                  {panel.secondary.label}
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* ── Scoped image strip ── */}
+          <div className="relative mt-4 flex-shrink-0 h-28 sm:h-36 w-full overflow-hidden rounded-xl border border-black/80 bg-black/[0.02] shadow-sm group/img">
+            <img
+              src={failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image}
+              alt={`${panel.title} visual`}
+              className="h-full w-full object-cover object-center transition-transform duration-500 group-hover/img:scale-105"
+              loading={isActive ? "eager" : "lazy"}
+              fetchPriority={isActive ? "high" : "low"}
+              onError={() => onImageError(panel.image)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-medium border border-white/20">
+                <CheckCircle2 className="w-2.5 h-2.5 text-accent-green" />
+                {panel.name.toUpperCase()}
+              </span>
+              <span className="text-[8px] font-mono text-white/90 bg-black/50 px-1.5 py-0.5 rounded backdrop-blur-md border border-white/20">
+                CAM-{String(idx + 1).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Trust logos (active card only) ── */}
+          {isActive && (
+            <div className="mt-3 opacity-70">
+              <TrustLogos />
+            </div>
+          )}
+        </div>
+      </InteractiveGlassCard>
+    </motion.div>
+  );
+}
+
 export function HeroRotator({
   defaultTitle,
   defaultDescription,
@@ -193,11 +450,21 @@ export function HeroRotator({
   offlineMachineCount = 0,
 }: HeroRotatorProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  // AGENT-TRACE: hover-pause and manual-pause are separate so moving the cursor
+  // no longer clobbers the user's play/pause toggle.
+  const [isHovering, setIsHovering] = useState(false);
+  const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const carouselIndex = useMotionValue(0);
   const smoothIndex = useSpring(carouselIndex, { stiffness: 280, damping: 32, mass: 0.8 });
+
+  // AGENT-TRACE: ref mirror of activeIndex so the carouselIndex.onChange
+  // subscription can bind once without resubscribing on every index change.
+  const activeIndexRef = useRef(0);
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
 
   const arrowIcon = <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />;
 
@@ -255,11 +522,11 @@ export function HeroRotator({
   useEffect(() => {
     return carouselIndex.onChange((v) => {
       const normalized = ((Math.round(v) % total) + total) % total;
-      if (normalized !== activeIndex) {
+      if (normalized !== activeIndexRef.current) {
         setActiveIndex(normalized);
       }
     });
-  }, [carouselIndex, total, activeIndex]);
+  }, [carouselIndex, total]);
 
   const nextSlide = useCallback(() => {
     carouselIndex.set(Math.round(carouselIndex.get()) + 1);
@@ -281,232 +548,71 @@ export function HeroRotator({
     [carouselIndex, total],
   );
 
+  const handleImageError = useCallback((src: string) => {
+    setFailedImages((prev) => {
+      if (prev.has(src)) return prev;
+      const next = new Set(prev);
+      next.add(src);
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
-    if (total <= 1 || isPaused) return;
-    const id = setInterval(nextSlide, 6000);
+    if (total <= 1 || isHovering || isManuallyPaused) return;
+    const id = setInterval(nextSlide, CONFIG.autoRotateMs);
     return () => clearInterval(id);
-  }, [total, isPaused, nextSlide]);
+  }, [total, isHovering, isManuallyPaused, nextSlide]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (total <= 1) return;
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevSlide();
+      }
+    },
+    [total, nextSlide, prevSlide],
+  );
 
   return (
     <div
-      className="relative w-full select-none py-4"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      className="relative w-full select-none py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 rounded-2xl"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
       aria-roledescription="carousel"
       aria-label="Department Hero Highlights"
     >
       <div
         className="relative w-full"
-        style={{ perspective: "1200px", perspectiveOrigin: "50% 40%" }}
+        style={{ perspective: CONFIG.perspective, perspectiveOrigin: CONFIG.perspectiveOrigin }}
       >
         <div
           className="relative w-full overflow-hidden"
-          style={{ height: "clamp(340px, 44vw, 520px)", touchAction: "pan-y" }}
+          style={{ height: CONFIG.minHeight, touchAction: "pan-y" }}
         >
-          {panels.map((panel, idx) => {
-            const offset = useTransform(smoothIndex, (v) => {
-              let diff = (((v - idx) % total) + total) % total;
-              if (diff > total / 2) diff -= total;
-              return diff;
-            });
-
-            const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, -42, 0, 42, 0]);
-            const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
-            const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.7, 0.88, 1, 0.88, 0.7]);
-            const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0.65, 1, 0.65, 0]);
-            const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
-            const pointerEvents = useTransform(offset, (v) =>
-              Math.abs(v) < 0.1 ? "auto" : "none",
-            );
-
-            const isActive = idx === activeIndex;
-
-            return (
-              <motion.div
-                key={panel.id}
-                role="group"
-                aria-roledescription="slide"
-                aria-label={`${idx + 1} of ${total}: ${panel.title}`}
-                inert={!isActive || undefined}
-                aria-hidden={!isActive}
-                onPan={(e, info) => {
-                  if (Math.abs(info.delta.x) > 0) {
-                    carouselIndex.set(carouselIndex.get() - info.delta.x / 400);
-                  }
-                }}
-                onPanEnd={(e, info) => {
-                  const current = carouselIndex.get();
-                  const velocity = info.velocity.x;
-                  let target = Math.round(current);
-                  if (velocity < -300) target = Math.ceil(current);
-                  if (velocity > 300) target = Math.floor(current);
-                  carouselIndex.set(target);
-                }}
-                onClick={() => {
-                  if (!isActive) {
-                    jumpToSlide(idx);
-                  }
-                }}
-                style={{
-                  width: CARD_COL_WIDTH,
-                  left: CARD_COL_LEFT,
-                  transformStyle: "preserve-3d",
-                  transformOrigin: "center center",
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  rotateY,
-                  x,
-                  scale,
-                  opacity,
-                  zIndex,
-                  pointerEvents,
-                }}
-                className="absolute top-0 bottom-0 will-change-transform transform-gpu"
-              >
-                <InteractiveGlassCard isActive={isActive}>
-                  <div className="relative h-full flex flex-col px-5 py-5 sm:px-7 sm:py-6 z-10">
-                    {/* ── Eyebrow row ── */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
-                      <div className="flex items-center gap-2.5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-black/10 bg-black/[0.04] backdrop-blur-sm font-medium tracking-wide text-[var(--text-secondary)]">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
-                            aria-hidden="true"
-                          />
-                          Sector-01 Active
-                        </span>
-                        <span className="text-[var(--text-muted)] tracking-wider">
-                          PORTAL v1.5.1
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        {incidentCount > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red border border-accent-red/20 font-medium">
-                            <AlertTriangle className="w-3 h-3" />
-                            {incidentCount} Open
-                          </span>
-                        )}
-                        {breakdownCount > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber border border-accent-amber/20 font-medium">
-                            <Wrench className="w-3 h-3" />
-                            {breakdownCount} Breakdown{breakdownCount !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {offlineMachineCount > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] border border-black/10 font-medium">
-                            <Power className="w-3 h-3" />
-                            {offlineMachineCount} Offline
-                          </span>
-                        )}
-                        {incidentCount === 0 &&
-                          breakdownCount === 0 &&
-                          offlineMachineCount === 0 && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20 font-medium">
-                              Nominal
-                            </span>
-                          )}
-                      </div>
-                    </div>
-
-                    {/* ── Title & Department Icon Badge ── */}
-                    <div className="mt-4 space-y-1.5 flex-grow">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={cn(
-                            "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
-                            panel.iconBgColor,
-                          )}
-                        >
-                          {panel.icon}
-                        </div>
-                        <span className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] font-semibold">
-                          {panel.category}
-                        </span>
-                      </div>
-
-                      <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)] leading-snug text-balance">
-                        {panel.title}
-                      </h2>
-                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 max-w-lg">
-                        {panel.description}
-                      </p>
-                    </div>
-
-                    {/* ── Stat + CTAs (Styled after Mac Taskbar controls) ── */}
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      {panel.stats && (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/[0.03] border border-black/10 text-xs">
-                          <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)] shrink-0" />
-                          <span className="text-[var(--text-muted)] uppercase text-[10px] font-medium">
-                            {panel.stats.label}:
-                          </span>
-                          <span className="font-semibold text-[var(--text-heading)]">
-                            {panel.stats.value}
-                          </span>
-                        </div>
-                      )}
-                      <div className="inline-flex items-center gap-1.5 ml-auto">
-                        <Link
-                          href={panel.primary.href}
-                          data-cta="primary-hero"
-                          className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white font-medium text-xs shadow-card border border-black/80 hover:bg-[var(--accent-blue)]/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                          tabIndex={isActive ? 0 : -1}
-                        >
-                          {panel.primary.icon}
-                          {panel.primary.label}
-                        </Link>
-                        {panel.secondary && (
-                          <Link
-                            href={panel.secondary.href}
-                            data-cta="secondary-hero"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.07] text-[var(--text-heading)] font-medium text-xs border border-black/80 transition-all active:scale-95"
-                            tabIndex={isActive ? 0 : -1}
-                          >
-                            {panel.secondary.icon}
-                            {panel.secondary.label}
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* ── Scoped image strip ── */}
-                    <div className="relative mt-4 flex-shrink-0 h-28 sm:h-36 w-full overflow-hidden rounded-xl border border-black/80 bg-black/[0.02] shadow-sm group/img">
-                      <img
-                        src={
-                          failedImages.has(panel.image)
-                            ? "/images/departments/overview.jpg"
-                            : panel.image
-                        }
-                        alt={`${panel.title} visual`}
-                        className="h-full w-full object-cover object-center transition-transform duration-500 group-hover/img:scale-105"
-                        loading={isActive ? "eager" : "lazy"}
-                        fetchPriority={isActive ? "high" : "low"}
-                        onError={() => setFailedImages((prev) => new Set(prev).add(panel.image))}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-medium border border-white/20">
-                          <CheckCircle2 className="w-2.5 h-2.5 text-accent-green" />
-                          {panel.name.toUpperCase()}
-                        </span>
-                        <span className="text-[8px] font-mono text-white/90 bg-black/50 px-1.5 py-0.5 rounded backdrop-blur-md border border-white/20">
-                          CAM-{String(idx + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* ── Trust logos (active card only) ── */}
-                    {isActive && (
-                      <div className="mt-3 opacity-70">
-                        <TrustLogos />
-                      </div>
-                    )}
-                  </div>
-                </InteractiveGlassCard>
-              </motion.div>
-            );
-          })}
+          {panels.map((panel, idx) => (
+            <HeroSlide
+              key={panel.id}
+              panel={panel}
+              idx={idx}
+              total={total}
+              smoothIndex={smoothIndex}
+              carouselIndex={carouselIndex}
+              isActive={idx === activeIndex}
+              failedImages={failedImages}
+              onImageError={handleImageError}
+              onJumpTo={jumpToSlide}
+              arrowIcon={arrowIcon}
+              incidentCount={incidentCount}
+              breakdownCount={breakdownCount}
+              offlineMachineCount={offlineMachineCount}
+            />
+          ))}
         </div>
       </div>
 
@@ -530,11 +636,11 @@ export function HeroRotator({
             </button>
             <div className="w-px h-3.5 bg-black/10 mx-0.5" />
             <button
-              onClick={() => setIsPaused((p) => !p)}
-              aria-label={isPaused ? "Resume auto rotation" : "Pause auto rotation"}
+              onClick={() => setIsManuallyPaused((p) => !p)}
+              aria-label={isManuallyPaused ? "Resume auto rotation" : "Pause auto rotation"}
               className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
-              {isPaused ? (
+              {isManuallyPaused ? (
                 <Play className="w-3.5 h-3.5 fill-current" />
               ) : (
                 <Pause className="w-3.5 h-3.5 fill-current" />

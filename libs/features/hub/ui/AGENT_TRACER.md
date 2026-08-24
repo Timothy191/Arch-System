@@ -1,5 +1,27 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-08-24 - HeroRotator Rules-of-Hooks, Pause-Conflict & A11y Hardening
+
+- **Purpose**: Resolve the Rules-of-Hooks violation (per-slide `useTransform` calls inside `panels.map`), separate hover-pause from manual-pause so cursor movement no longer clobbers the play/pause toggle, and close a11y/UX gaps (keyboard nav, drag-vs-click double-advance, `inert` on React 19, magic constants).
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`:
+    - Extracted a `<HeroSlide>` child component that owns all per-panel `useTransform` hooks (offset, rotateY, x, scale, opacity, zIndex, pointerEvents) + pan/click handlers. `HeroRotator` now maps panels to `<HeroSlide />`, so hooks are called unconditionally at the top of a real component — no longer reliant on a stable panel count/order.
+    - Split `isPaused` into `isHovering` (driven by `onMouseEnter`/`onMouseLeave`) and `isManuallyPaused` (driven by the Play/Pause button). Auto-rotate runs only when neither is true; the button reflects/toggles `isManuallyPaused` only.
+    - `carouselIndex.onChange` subscription now reads `activeIndexRef` (a ref mirror) instead of `activeIndex`, so it binds once and no longer resubscribes on every index change.
+    - Replaced `inert={!isActive || undefined}` with `inert={!isActive}` (React 19 boolean `inert`).
+    - Added a `panMovedRef` drag-distance guard on each slide so the click that follows a pan-release no longer also fires `jumpToSlide` and double-advances.
+    - Added `onKeyDown` on the carousel root: `ArrowRight`→`nextSlide`, `ArrowLeft`→`prevSlide` (gated on `total > 1`), with `tabIndex={0}` + a `focus-visible` ring.
+    - Extracted magic numbers into a commented `CONFIG` block (`cardWidth`, `cardLeft`, `perspective`, `autoRotateMs`, `panDivisor`, `velocityThreshold`, `clickDragThresholdPx`, `minHeight`).
+    - Removed the dead duplicate `DEPT_STYLE_MAP.satellite` entry — the canonical slug is `satellite-monitoring` (confirmed against `departments.ts`); the fallback in the `.map` already covers unknown slugs.
+    - Memoized `handleImageError` and made it skip-allocation when the src is already known-failed.
+    - Switched `PanInfo` import to a `type`-only import; added `type MotionValue` import for the `HeroSlide` prop signature.
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx` (new): 10 tests covering panel rendering, active/inactive `aria-hidden` + CTA `tabIndex`, prev/next/jump navigation, manual pause toggle, urgency badges, Nominal badge, and HUD suppression for single-panel carousels. Mocks `framer-motion` (MotionValues as plain objects with a working `onChange`, `motion.*` as plain divs) and `TrustLogos`.
+- **Verification**:
+  - `pnpm --filter @repo/hub/ui type-check` ✅
+  - `pnpm --filter @repo/hub/ui lint` ✅ (--max-warnings 0)
+  - `pnpm --filter @repo/hub/ui test -- --testPathPatterns=HeroRotator` ✅ (10/10)
+- **What the Next Agent Should Know**: The carousel slide track still keeps all panels mounted (the translate3d math depends on it); `content-visibility` + `inert` remain the correct levers, not lazy-mounting. Per-slide hooks now live in `<HeroSlide>` — add any new per-panel MotionValue there, not back in the `.map`. Hover-pause and manual-pause are independent states; do not collapse them back into a single `isPaused`.
+
 ## 2026-08-24 - Frontend Design System, Spacing, Padding & Bordering Polish
 
 - **Purpose**: Refactor Hub page components to align with modern frontend design standards, consistent spacing rhythm (4/8/16/24px), refined border hierarchies, and responsive padding.
