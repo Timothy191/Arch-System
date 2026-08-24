@@ -4,17 +4,21 @@
   "version": "1.0.0",
   "dependencies": {
     "@novu/node": "^2.6.6",
+    "@repo/errors": "1.0.0",
     "exceljs": "^4.4.0",
     "inngest": "^4.4.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
+    "./fetch-client": "./src/fetch-client.ts",
+    "./offline-storage": "./src/offline-storage.ts",
     "./inngest": "./src/inngest.ts",
     "./novu": "./src/novu.ts"
   },

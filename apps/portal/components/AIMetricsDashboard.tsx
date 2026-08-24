@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, Coins, Clock, Zap, Bot, RefreshCw, TrendingUp } from "lucide-react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { fetchClient } from "@repo/utils/client";
 
 interface AIMetrics {
   totalTokens: number;
@@ -43,11 +44,11 @@ export default function AIMetricsDashboard() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["ai-metrics", scope],
     queryFn: async () => {
-      const response = await fetch(`/api/ai/metrics?scope=${scope}`);
-      if (!response.ok) throw new Error("Failed to fetch AI metrics");
-      const json = await response.json();
-      if (!json.success) throw new Error(json.error);
-      return json.metrics as AIMetrics;
+      const json = await fetchClient.get<{ success: boolean; error?: string; metrics: AIMetrics }>(
+        `/api/ai/metrics?scope=${scope}`,
+      );
+      if (!json.success) throw new Error(json.error || "Failed to fetch AI metrics");
+      return json.metrics;
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });

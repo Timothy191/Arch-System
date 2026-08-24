@@ -18,3 +18,13 @@ Resolve ESLint `no-unused-vars` warnings flagged during the pre-commit checks du
 ### What the Next Agent Should Know
 
 - Constructor overloads in `src/index.ts` declare signatures for initialization options but are not parsed as implementations by the base `no-unused-vars` rule. The top-level ignore comment is necessary unless a dedicated TypeScript-specific rule is configured.
+
+## 2026-08-24: Add FetchTimeoutError & NetworkError
+
+### Purpose
+
+Provide specialized error subclasses under `APIError` to wrap raw browser `TypeError: Failed to fetch` and timeout boundaries in Next.js client-side operations.
+
+### Changes Made
+
+1. **[src/index.ts](file:///home/tim/Documents/Arch-System/packages/errors/src/index.ts)**: Added `FetchTimeoutError` (504), `NetworkError` (503), and type guards `isFetchTimeoutError` and `isNetworkError`.

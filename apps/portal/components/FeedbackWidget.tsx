@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { analytics } from "@repo/utils";
+import { fetchClient } from "@repo/utils/client";
 
 interface FeedbackWidgetProps {
   variant?: "header" | "floating";
@@ -35,12 +36,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
       properties: { type, messageLength: message.length },
     });
 
-    // In a real application, POST to an API route to save the feedback or send to Jira/Zendesk
-    await fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, message }),
-    }).catch(() => {});
+    await fetchClient.post("/api/feedback", { type, message }).catch(() => {});
 
     setSubmitting(false);
     setMessage("");

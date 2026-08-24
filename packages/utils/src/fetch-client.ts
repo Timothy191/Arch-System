@@ -8,6 +8,7 @@ import {
   RateLimitError,
   ValidationError,
 } from "@repo/errors";
+import { offlineStorage, type QueuedFetchRequest } from "./offline-storage";
 
 export interface FetchClientOptions {
   /**
@@ -55,6 +56,11 @@ export interface FetchClientOptions {
    */
   retryOnPost?: boolean;
   /**
+   * Automatically flush offline queue on browser 'online' event.
+   * @default true
+   */
+  autoFlushOffline?: boolean;
+  /**
    * Request / Response interceptors.
    */
   interceptors?: {
@@ -68,6 +74,10 @@ export interface RequestOptions extends RequestInit {
   maxRetries?: number;
   retryOnPost?: boolean;
   parseJson?: boolean;
+  offlineQueue?: boolean;
+  offlineCache?: boolean;
+  idempotencyKey?: string;
+  description?: string;
 }
 
 const IDEMPOTENT_METHODS = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
@@ -79,6 +89,7 @@ export class FetchClient {
     retryStatusCodesSet: Set<number>;
     interceptors: FetchClientOptions["interceptors"];
   };
+  private isFlushingQueue = false;
 
   constructor(options: FetchClientOptions = {}) {
     this.config = {
@@ -92,8 +103,19 @@ export class FetchClient {
       retryStatusCodes: options.retryStatusCodes ?? Array.from(DEFAULT_RETRY_STATUSES),
       retryStatusCodesSet: new Set(options.retryStatusCodes ?? Array.from(DEFAULT_RETRY_STATUSES)),
       retryOnPost: options.retryOnPost ?? false,
+      autoFlushOffline: options.autoFlushOffline ?? true,
       interceptors: options.interceptors,
     };
+
+    if (
+      this.config.autoFlushOffline &&
+      typeof window !== "undefined" &&
+      typeof window.addEventListener === "function"
+    ) {
+      window.addEventListener("online", () => {
+        this.flushOfflineQueue().catch(() => {});
+      });
+    }
   }
 
   private resolveUrl(path: string): string {
@@ -111,7 +133,6 @@ export class FetchClient {
     if (!this.config.jitter) {
       return cappedDelay;
     }
-    // Full jitter algorithm: random value between 0 and cappedDelay
     return Math.floor(Math.random() * cappedDelay);
   }
 
@@ -132,7 +153,6 @@ export class FetchClient {
       return this.config.retryStatusCodesSet.has(response.status);
     }
 
-    // Network errors and timeouts are retryable for allowed methods
     if (error instanceof FetchTimeoutError || error instanceof NetworkError) {
       return true;
     }
@@ -161,7 +181,6 @@ export class FetchClient {
         controller.abort("TIMEOUT");
       }, timeoutMs);
 
-      // Link external abort signal if provided
       const externalSignal = options.signal;
       const onExternalAbort = () => controller.abort(externalSignal?.reason);
 
@@ -202,7 +221,6 @@ export class FetchClient {
           return response;
         }
 
-        // Handle HTTP error statuses
         const error = await this.parseHttpError(response, fullUrl, method);
 
         if (
@@ -248,9 +266,51 @@ export class FetchClient {
           continue;
         }
 
+        // Handle offline queueing for mutations when requested or network error occurs
+        if (
+          options.offlineQueue &&
+          (caughtError instanceof NetworkError || caughtError instanceof FetchTimeoutError) &&
+          method !== "GET"
+        ) {
+          const idempotencyKey = options.idempotencyKey || crypto.randomUUID();
+          let bodyStr: string | undefined;
+          if (typeof options.body === "string") {
+            bodyStr = options.body;
+          }
+
+          const headersObj: Record<string, string> = {
+            "X-Idempotency-Key": idempotencyKey,
+          };
+          if (options.headers) {
+            const h = new Headers(options.headers);
+            h.forEach((v, k) => {
+              headersObj[k] = v;
+            });
+          }
+
+          await offlineStorage.enqueue({
+            idempotencyKey,
+            url: fullUrl,
+            method,
+            headers: headersObj,
+            body: bodyStr,
+            description: options.description || `${method} ${url}`,
+          });
+
+          throw new NetworkError(
+            `Connection lost. Request enqueued offline for replay (${idempotencyKey})`,
+            { url: fullUrl, method, enqueued: true, idempotencyKey },
+          );
+        }
+
         throw caughtError;
       }
     }
+
+    throw new NetworkError(`Request failed after ${maxRetries} retry attempts`, {
+      url: fullUrl,
+      method,
+    });
   }
 
   private async parseHttpError(response: Response, url: string, method: string): Promise<APIError> {
@@ -291,11 +351,35 @@ export class FetchClient {
   }
 
   public async request<T = unknown>(url: string, options: RequestOptions = {}): Promise<T> {
-    const res = await this.fetch(url, options);
-    if (options.parseJson === false) {
-      return (await res.text()) as unknown as T;
+    const isGet = (options.method || "GET").toUpperCase() === "GET";
+    const cacheKey = `GET:${this.resolveUrl(url)}`;
+
+    try {
+      const res = await this.fetch(url, options);
+      if (options.parseJson === false) {
+        const text = (await res.text()) as unknown as T;
+        if (isGet && options.offlineCache) {
+          await offlineStorage.cacheResponse(cacheKey, text);
+        }
+        return text;
+      }
+      const data = (await res.json()) as T;
+      if (isGet && options.offlineCache) {
+        await offlineStorage.cacheResponse(cacheKey, data);
+      }
+      return data;
+    } catch (err) {
+      if (
+        isGet &&
+        (options.offlineCache || err instanceof NetworkError || err instanceof FetchTimeoutError)
+      ) {
+        const cached = await offlineStorage.getCachedResponse<T>(cacheKey);
+        if (cached !== null) {
+          return cached;
+        }
+      }
+      throw err;
     }
-    return (await res.json()) as T;
   }
 
   public async get<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
@@ -357,6 +441,51 @@ export class FetchClient {
 
   public async delete<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(url, { ...options, method: "DELETE" });
+  }
+
+  public async flushOfflineQueue(): Promise<{ synced: number; failed: number }> {
+    if (this.isFlushingQueue) return { synced: 0, failed: 0 };
+    this.isFlushingQueue = true;
+
+    let synced = 0;
+    let failed = 0;
+
+    try {
+      const pending = await offlineStorage.getPending();
+      for (const req of pending) {
+        if (!req.id) continue;
+        try {
+          await offlineStorage.updateStatus(req.id, "processing");
+          const headers = new Headers(req.headers);
+          if (!headers.has("X-Idempotency-Key")) {
+            headers.set("X-Idempotency-Key", req.idempotencyKey);
+          }
+
+          const res = await this.fetch(req.url, {
+            method: req.method,
+            headers,
+            body: req.body,
+            maxRetries: 1,
+            offlineQueue: false,
+          });
+
+          if (res.ok) {
+            await offlineStorage.remove(req.id);
+            synced++;
+          } else {
+            await offlineStorage.updateStatus(req.id, "failed", `HTTP ${res.status}`);
+            failed++;
+          }
+        } catch (err: any) {
+          await offlineStorage.updateStatus(req.id, "failed", err?.message || "Replay failed");
+          failed++;
+        }
+      }
+    } finally {
+      this.isFlushingQueue = false;
+    }
+
+    return { synced, failed };
   }
 }
 

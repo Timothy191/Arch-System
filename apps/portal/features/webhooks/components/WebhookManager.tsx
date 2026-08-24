@@ -8,6 +8,7 @@ import { Card } from "@repo/ui/components/ui/card";
 import { Checkbox } from "@repo/ui/Checkbox";
 import { Trash2, Plus, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { fetchClient } from "@repo/utils/client";
 
 type WebhookEventType =
   | "daily_log.created"
@@ -69,11 +70,8 @@ export function WebhookManager() {
 
   const fetchWebhooks = async () => {
     try {
-      const response = await fetch("/api/webhooks");
-      const data = await response.json();
-      if (response.ok) {
-        setWebhooks(data.webhooks);
-      }
+      const data = await fetchClient.get<{ webhooks: WebhookEndpoint[] }>("/api/webhooks");
+      setWebhooks(data.webhooks);
     } catch (error) {
       toast.error("Failed to fetch webhooks");
     } finally {
@@ -90,28 +88,18 @@ export function WebhookManager() {
     }
 
     try {
-      const response = await fetch("/api/webhooks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await fetchClient.post("/api/webhooks", formData);
+      toast.success("Webhook created successfully");
+      setShowForm(false);
+      setFormData({
+        url: "",
+        description: "",
+        event_types: [],
+        active: true,
       });
-
-      if (response.ok) {
-        toast.success("Webhook created successfully");
-        setShowForm(false);
-        setFormData({
-          url: "",
-          description: "",
-          event_types: [],
-          active: true,
-        });
-        fetchWebhooks();
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to create webhook");
-      }
-    } catch (error) {
-      toast.error("Failed to create webhook");
+      fetchWebhooks();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to create webhook");
     }
   };
 
@@ -119,28 +107,18 @@ export function WebhookManager() {
     if (!editingWebhook) return;
 
     try {
-      const response = await fetch(`/api/webhooks/${editingWebhook.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await fetchClient.put(`/api/webhooks/${editingWebhook.id}`, formData);
+      toast.success("Webhook updated successfully");
+      setEditingWebhook(null);
+      setFormData({
+        url: "",
+        description: "",
+        event_types: [],
+        active: true,
       });
-
-      if (response.ok) {
-        toast.success("Webhook updated successfully");
-        setEditingWebhook(null);
-        setFormData({
-          url: "",
-          description: "",
-          event_types: [],
-          active: true,
-        });
-        fetchWebhooks();
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to update webhook");
-      }
-    } catch (error) {
-      toast.error("Failed to update webhook");
+      fetchWebhooks();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to update webhook");
     }
   };
 
@@ -148,19 +126,11 @@ export function WebhookManager() {
     if (!confirm("Are you sure you want to delete this webhook?")) return;
 
     try {
-      const response = await fetch(`/api/webhooks/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        toast.success("Webhook deleted successfully");
-        fetchWebhooks();
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to delete webhook");
-      }
-    } catch (error) {
-      toast.error("Failed to delete webhook");
+      await fetchClient.delete(`/api/webhooks/${id}`);
+      toast.success("Webhook deleted successfully");
+      fetchWebhooks();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to delete webhook");
     }
   };
 

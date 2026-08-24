@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import {
-  getWeatherAlert,
-  getWindDirection,
-  type WeatherData,
-} from "@/lib/weather-api";
+import { getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
+
+import { fetchClient } from "@repo/utils/client";
 
 interface WeatherWidgetProps {
   lat?: number;
@@ -31,12 +29,8 @@ export function WeatherWidget({
     async function loadWeather() {
       try {
         setLoading(true);
-        // Fetch from API route to avoid CSP issues with direct external calls
-        const response = await fetch("/api/weather");
-        if (!response.ok) {
-          throw new Error(`Weather API error: ${response.status}`);
-        }
-        const data = await response.json();
+        // Fetch from API route using fetchClient to handle retry & error boundaries
+        const data = await fetchClient.get<WeatherData>("/api/weather");
         setWeather(data);
         setError(null);
       } catch (err) {

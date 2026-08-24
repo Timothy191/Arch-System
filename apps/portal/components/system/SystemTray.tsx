@@ -29,7 +29,10 @@ import {
   CheckCircle2,
   MinusCircle,
   Clock,
+  CloudOff,
+  RefreshCw,
 } from "lucide-react";
+import { useFetchOfflineQueue } from "@/hooks/useFetchOfflineQueue";
 
 /* ------------------------------------------------------------------ */
 //  Types for APIs not in all TS lib definitions
@@ -633,6 +636,41 @@ export function ServerHealthRow({
   );
 }
 
+export function OfflineQueueRow() {
+  const { pendingCount, isOnline, isSyncing, flushQueue } = useFetchOfflineQueue();
+
+  if (pendingCount === 0 && isOnline) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+      <div className="flex items-center gap-2 min-w-0">
+        <CloudOff className="w-4 h-4 text-amber-600 shrink-0" />
+        <div className="flex flex-col min-w-0">
+          <span className="text-[12px] font-medium text-[var(--text-heading)]">
+            {pendingCount > 0
+              ? `${pendingCount} Offline Action${pendingCount > 1 ? "s" : ""}`
+              : "Offline Mode"}
+          </span>
+          <span className="text-[10px] text-[var(--text-muted)]">
+            {!isOnline ? "Tablet disconnected" : "Pending replay"}
+          </span>
+        </div>
+      </div>
+      {pendingCount > 0 && isOnline && (
+        <button
+          type="button"
+          onClick={() => flushQueue()}
+          disabled={isSyncing}
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={cn("w-3 h-3", isSyncing && "animate-spin")} />
+          {isSyncing ? "Syncing..." : "Sync Now"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
 export function SystemTrayPill() {
@@ -641,6 +679,7 @@ export function SystemTrayPill() {
   const volume = useAppVolume();
   const notifications = useNotificationCount();
   const health = useServerHealth();
+  const offlineQueue = useFetchOfflineQueue();
 
   const healthDotColor = health.loading
     ? "bg-[var(--text-muted)]"
@@ -725,6 +764,20 @@ export function SystemTrayPill() {
                 </span>
               )}
             </div>
+
+            {/* Offline queue pending badge */}
+            {offlineQueue.pendingCount > 0 && (
+              <>
+                <span className="w-[1px] h-3 bg-black/[0.08]" />
+                <div
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 animate-pulse"
+                  title={`${offlineQueue.pendingCount} offline actions pending sync`}
+                >
+                  <CloudOff className="w-3 h-3" />
+                  <span className="text-[10px] font-semibold">{offlineQueue.pendingCount}</span>
+                </div>
+              </>
+            )}
           </button>
         </Popover.Trigger>
         <Popover.Portal>
@@ -746,6 +799,11 @@ export function SystemTrayPill() {
                 responseTime={health.responseTime}
                 loading={health.loading}
               />
+
+              <div className="h-[1px] bg-black/[0.05]" />
+
+              {/* Offline Queue Section */}
+              <OfflineQueueRow />
 
               <div className="h-[1px] bg-black/[0.05]" />
 

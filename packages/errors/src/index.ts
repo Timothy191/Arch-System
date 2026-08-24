@@ -310,6 +310,62 @@ export class RateLimitError extends AppError {
   }
 }
 
+export class FetchTimeoutError extends APIError {
+  constructor(
+    message: string = "Request timed out",
+    options?: {
+      timeoutMs?: number;
+      url?: string;
+      method?: string;
+      cause?: Error;
+      context?: Record<string, unknown>;
+      [key: string]: any;
+    },
+  ) {
+    const { timeoutMs, url, method, cause, context, ...extra } = options || {};
+    super(message, {
+      statusCode: 504,
+      cause,
+      context: {
+        ...context,
+        ...(timeoutMs !== undefined && { timeoutMs }),
+        ...(url && { url }),
+        ...(method && { method }),
+        ...extra,
+      },
+    });
+    this.name = "FetchTimeoutError";
+    this.code = "FETCH_TIMEOUT";
+  }
+}
+
+export class NetworkError extends APIError {
+  constructor(
+    message: string = "Network request failed",
+    options?: {
+      url?: string;
+      method?: string;
+      cause?: Error;
+      context?: Record<string, unknown>;
+      [key: string]: any;
+    },
+  ) {
+    const { url, method, cause, context, ...extra } = options || {};
+    super(message, {
+      statusCode: 503,
+      cause,
+      context: {
+        ...context,
+        ...(url && { url }),
+        ...(method && { method }),
+        ...extra,
+      },
+    });
+    this.name = "NetworkError";
+    this.code = "NETWORK_ERROR";
+  }
+}
+
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
@@ -324,4 +380,12 @@ export function isAuthError(error: unknown): error is AuthError {
 
 export function isNotFoundError(error: unknown): error is NotFoundError {
   return error instanceof NotFoundError;
+}
+
+export function isFetchTimeoutError(error: unknown): error is FetchTimeoutError {
+  return error instanceof FetchTimeoutError;
+}
+
+export function isNetworkError(error: unknown): error is NetworkError {
+  return error instanceof NetworkError;
 }
