@@ -78,11 +78,11 @@ interface Panel {
  * can reason about geometry/timing without hunting for magic numbers.
  */
 const CONFIG = {
-  cardWidth: "46%", // active card column width
-  cardLeft: "27%", // left offset that centers the active card in the track
+  cardWidth: "52%", // active card column width
+  cardLeft: "24%", // left offset that centers the active card in the track
   perspective: "1200px",
   perspectiveOrigin: "50% 40%",
-  minHeight: "clamp(340px, 44vw, 520px)",
+  minHeight: "clamp(380px, 48vw, 560px)",
   autoRotateMs: 6000, // interval between auto-advances
   panDivisor: 400, // px-to-index sensitivity for drag
   velocityThreshold: 300, // px/s above which a flick snaps to next/prev
@@ -245,8 +245,10 @@ function HeroSlide({
   });
 
   const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, -42, 0, 42, 0]);
+  const rotateX = useTransform(offset, [-2, -1, 0, 1, 2], [12, 6, 0, 6, 12]);
   const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
   const z = useTransform(offset, [-2, -1, 0, 1, 2], [-250, -120, 0, -120, -250]);
+  const imageX = useTransform(offset, [-2, -1, 0, 1, 2], ["25%", "12%", "0%", "-12%", "-25%"]);
   const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.7, 0.88, 1, 0.88, 0.7]);
   const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0.65, 1, 0.65, 0]);
   const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
@@ -295,6 +297,7 @@ function HeroSlide({
         backfaceVisibility: "hidden",
         WebkitBackfaceVisibility: "hidden",
         rotateY,
+        rotateX,
         x,
         scale,
         opacity,
@@ -410,7 +413,8 @@ function HeroSlide({
 
           {/* ── Scoped image strip ── */}
           <div className="relative mt-4 flex-shrink-0 h-28 sm:h-36 w-full overflow-hidden rounded-xl border border-black/80 bg-black/[0.02] shadow-sm group/img">
-            <img
+            <motion.img
+              style={{ x: imageX }}
               src={failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image}
               alt={`${panel.title} visual`}
               className="h-full w-full object-cover object-center transition-transform duration-500 group-hover/img:scale-105"

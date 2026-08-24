@@ -2,15 +2,18 @@
 
 ## 2026-08-24 - HeroRotator Elite 3D Spatial Cylinder Physics & Focal Blur
 
-- **Purpose**: Implement continuous 3D spatial cylinder mechanics on `<HeroSlide>` with `translateZ` depth tracking (`z: [-250, -120, 0, -120, -250]`) and dynamic depth-of-field focal blur (`filter: blur([8, 4, 0, 4, 8]px)`).
+- **Purpose**: Implement continuous 3D spatial cylinder mechanics on `<HeroSlide>` with `translateZ` depth tracking (`z: [-250, -120, 0, -120, -250]`), dynamic depth-of-field focal blur (`filter: blur([8, 4, 0, 4, 8]px)`), Z-axis pitch/tilt (`rotateX`), and internal image parallax (`imageX`). Enlarged the active card width to 52% to command more attention.
 - **Changes**:
   - `libs/features/hub/ui/src/HeroRotator.tsx`:
+    - Updated `CONFIG` to `cardWidth: "52%"`, `cardLeft: "24%"`, and `minHeight: "clamp(380px, 48vw, 560px)"`.
     - Added `z` translation to `useTransform` mappings in `HeroSlide` for true 3D spatial projection.
+    - Added `rotateX` tilt mapping to lean flanking cards back slightly.
+    - Added `imageX` mapping and updated the `<img>` to a `<motion.img style={{ x: imageX }}>` to create a "window" parallax effect.
     - Added `filter: blur(...)` using `useMotionTemplate` on non-active flanking cards.
-    - Attached `z` and `filter` into `HeroSlide` motion.div inline styles.
+    - Attached `z`, `rotateX`, and `filter` into `HeroSlide` motion.div inline styles.
 - **Verification**:
   - `pnpm --filter @repo/hub/ui test` ✅ (16/16 tests passing)
-- **What the Next Agent Should Know**: `<HeroSlide>` uses continuous GPU-composited `translateZ` and dynamic focal blur. `transform-gpu` and `will-change-transform` prevent layout reflows during panning and automatic rotation.
+- **What the Next Agent Should Know**: `<HeroSlide>` uses continuous GPU-composited `translateZ`, `rotateX`, internal parallax `x`, and dynamic focal blur. `transform-gpu` and `will-change-transform` prevent layout reflows during panning and automatic rotation.
 
 ## 2026-08-24 - TrustLogos SVG Icons & Spacing Elevation
 
