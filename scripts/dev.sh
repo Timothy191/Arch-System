@@ -470,6 +470,13 @@ check_and_fix_port() {
       return 0
     fi
 
+    # If it's Redis and it responds to PING (even with NOAUTH or WRONGPASS), it's a valid native service
+    if [ "$name" = "Redis" ] && [ "$port" = "6379" ]; then
+      if command -v redis-cli >/dev/null 2>&1 && redis-cli -p "$port" PING 2>&1 | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
+        return 0
+      fi
+    fi
+
     local pid
     pid=$(lsof -i :"$port" -sTCP:LISTEN -t | head -n1 2>/dev/null || true)
     if [ -z "$pid" ]; then
@@ -678,7 +685,7 @@ else
   # 2b. Redis — auto-start if not already running
   REDIS_REQUIRED=true
   if [ "$REDIS_REQUIRED" = "true" ]; then
-    if echo "PING" | redis-cli 2>/dev/null | grep -q "PONG"; then
+    if command -v redis-cli >/dev/null 2>&1 && echo "PING" | redis-cli 2>/dev/null | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
       check "Redis" "pass" "redis://localhost:6379 (already running)"
     elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q "arch-redis"; then
       check "Redis" "pass" "Docker container already running"
