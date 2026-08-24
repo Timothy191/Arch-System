@@ -424,3 +424,37 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
   }
 }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Hide navigation, sidebars, and non-printable elements */
+  nav,
+  header:not(.print-header),
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove backgrounds and shadows for cleaner print */
+  * {
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Make grid/flex layouts break properly */
+  .grid,
+  .flex {
+    page-break-inside: avoid;
+  }
+
+  /* Specifically for the shift compilation layout */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

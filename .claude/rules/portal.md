@@ -4,7 +4,7 @@
 
 - **Config file**: `apps/portal/next.config.mjs` (not `.ts`). Configures PWA (`@ducanh2912/next-pwa`), Sentry, and `transpilePackages: ["@repo/ui", "@repo/supabase", "@repo/utils", "@repo/redis", "@repo/theme"]`.
 - **Server Actions**: A root `app/actions.ts` (and `actions.test.ts`) co-locates shared Server Actions at the app level.
-- **Environment**: Copy `apps/portal/.env.example` to `apps/portal/.env` and populate Supabase credentials before running `pnpm dev`.
+- **Environment**: Copy `apps/portal/env/.env.example` to `apps/portal/.env` and populate Supabase credentials before running `pnpm dev`.
 - **Build behavior env vars**:
   - `ENABLE_HEAVY_PLUGINS=true` — Enables PWA, Sentry source maps, and standalone output. Defaults off locally.
   - `SKIP_TYPE_CHECK=true` — Bypasses TypeScript errors during Next.js build.

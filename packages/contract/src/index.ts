@@ -47,9 +47,14 @@ export {
 } from "./schemas/control-room.schema.js";
 
 export {
-  drillOperationSchema,
-  drillTelemetryIngestSchema,
-} from "./schemas/drill.schema.js";
+  machinePerformanceSchema,
+  shiftBreakdownSummarySchema,
+  shiftTireEventSchema,
+  unifiedShiftReportSchema,
+  lockAndSignShiftSchema,
+} from "./schemas/shift-compilation.schema.js";
+
+export { drillOperationSchema, drillTelemetryIngestSchema } from "./schemas/drill.schema.js";
 
 export {
   insarGeoTIFFUploadSchema,
@@ -160,12 +165,17 @@ export type {
   TireCondition,
 } from "./types/tire-management.types.js";
 
-export type {
-  DrillOperationInput,
-  DrillTelemetryIngestInput,
-} from "./schemas/drill.schema.js";
+export type { DrillOperationInput, DrillTelemetryIngestInput } from "./schemas/drill.schema.js";
 
 export type {
   InsarGeoTIFFUploadInput,
   InsarTelemetryIngestInput,
 } from "./schemas/satellite.schema.js";
+
+export type {
+  MachinePerformance,
+  ShiftBreakdownSummary,
+  ShiftTireEvent,
+  UnifiedShiftReport,
+  LockAndSignShiftInput,
+} from "./types/shift-compilation.types.js";

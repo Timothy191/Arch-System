@@ -1,5 +1,23 @@
 # Portal Agent Tracer
 
+## Session 2026-08-24 (Unified Shift Compilation & Closeout Engine)
+
+- **Purpose**: Implement end-to-end operational compilation aggregating hourly loads, SMU machine hours & delays, engineering breakdowns, and tire records into a single shift compilation and closeout dashboard.
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/shift-compilation/actions.ts`: Added Server Actions `getUnifiedShiftReport` and `lockAndSignUnifiedShift`.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/page.tsx`: Server component resolving department context, executing compilation fetch, and providing fallback structure.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/ShiftCompilationClient.tsx`: Client dashboard assembling header, KPI overview, production cards, fleet KPI table, breakdown widget, tire alerts, and closeout modal.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/loading.tsx`: Streaming suspense skeleton for compilation view.
+- **What the Next Agent Should Know**: The shift compilation page is accessible under `/[department]/shift-compilation` and uses PostgreSQL RPC `get_unified_shift_compilation`.
+
+## Session 2026-08-24 (Context Optimization, Dead Code Removal & Dependency Pruning)
+
+- **Purpose**: Remove obsolete AI action routes, dead Google AI client wrapper, and prune unused dependencies (`@google/generative-ai`, `lenis`) in alignment with the AI deprecation decision and knip bloat audit.
+- **Changes**:
+  - Removed `apps/portal/app/(departments)/[department]/ai/actions.ts` and `apps/portal/lib/ai/google-ai-client.ts`.
+  - Pruned unused dependencies `@google/generative-ai` and `lenis` from `apps/portal/package.json`.
+- **What the Next Agent Should Know**: AI generation actions and routes are fully removed; embedding caches remain preserved.
+
 ## Session 2026-08-24 (Large Geospatial InSAR & Telemetry Event Loop Lag Optimization)
 
 - **Purpose**: Prevent Node.js main event loop blocking and request latency spikes during large geospatial InSAR scene processing, point-cloud transformations, and background telemetry streaming.

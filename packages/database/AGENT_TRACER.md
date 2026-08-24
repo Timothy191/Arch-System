@@ -1,5 +1,23 @@
 # Database Agent Tracer
 
+## 2026-08-24: Unified Shift Compilation Migration (0147)
+
+### Purpose
+
+Unify hourly loads, SMU machine operating hours, engineering breakdowns, and tire management records into a single shift aggregation RPC engine (`get_unified_shift_compilation`) and enrich foreign key linkages.
+
+### Changes Made
+
+1. **Migration 0147 `0147_unified_shift_compilation.sql`**:
+   - Added `machine_id` (UUID FK `machines(id)`) to `breakdowns` with backfill from existing `machine_name`/`fleet_id`.
+   - Added `machine_operation_id`, `current_smu`, `shift_date`, and `shift_type` to `tire_inspections`.
+   - Added `get_unified_shift_compilation` PostgreSQL RPC returning consolidated JSONB shift compilation payload.
+
+### Status
+
+- **Schema**: Ready and validated.
+- **RPC**: Implemented with security definer and aggregated sub-queries.
+
 ## 2026-08-18: Control Room Shift Reports Table
 
 ### Purpose

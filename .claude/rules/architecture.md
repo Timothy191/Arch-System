@@ -2,8 +2,8 @@
 
 ## Monorepo Structure
 
-- **Package manager**: pnpm 9.12.0 (Volta-managed). Workspaces: `apps/*`, `packages/*`.
-- **Node.js**: `>=20.17.0`.
+- **Package manager**: pnpm 9.15.9 (Volta-managed). Workspaces: `apps/*`, `packages/*`.
+- **Node.js**: `>=22`.
 - **Build orchestration**: Nx (`nx.json`). Tasks: `build`, `dev`, `lint`, `test`, `type-check`, `codegen` (theme tokens).
 - **Dependency versioning**: pnpm workspace `catalog:` and named catalog blocks (e.g., `catalog:react19`). Check `pnpm-workspace.yaml` before bumping shared packages. Bumping a catalog entry affects all consuming packages automatically.
 
