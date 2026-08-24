@@ -40,34 +40,34 @@ export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-6 border-t border-arch-border-subtle">
-      <p className="text-[10px] uppercase tracking-wider text-arch-text-tertiary font-medium mb-3">
+    <div className="pt-2 border-t border-arch-border-subtle/50">
+      <p className="text-[9px] uppercase tracking-wider text-arch-text-tertiary font-medium mb-1.5">
         Trusted by forward-thinking teams
       </p>
 
       {hasLogos ? (
-        <div className="flex flex-wrap items-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+        <div className="flex flex-wrap items-center gap-3 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
           {logos.map((logo) => (
             <Image
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
-              width={96}
-              height={24}
-              className="h-6 w-auto object-contain"
+              width={80}
+              height={18}
+              className="h-4.5 w-auto object-contain"
               loading="lazy"
               unoptimized={logo.src.startsWith("http")}
             />
           ))}
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {PLACEHOLDERS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-7 px-3 text-xs font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
+              className="inline-flex items-center justify-center h-5 px-2 text-[10px] font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
             >
-              {p.label === "Arch Mining" && <Logo className="w-3.5 h-3.5 mr-1.5 shrink-0" />}
+              {p.label === "Arch Mining" && <Logo className="w-2.5 h-2.5 mr-1 shrink-0" />}
               {p.label}
             </span>
           ))}

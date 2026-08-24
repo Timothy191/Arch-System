@@ -373,7 +373,7 @@ export default async function HubPage() {
       {/* Light-theme glass hero section */}
       {/* Light-theme glass hero section */}
       <section
-        className="relative overflow-hidden rounded-xl pt-1 pb-0 sm:pt-2 sm:pb-0 md:pt-3 md:pb-0 lg:pt-4 lg:pb-0 px-4 sm:px-6 md:px-10 motion-reduce:animate-none animate-fade-up"
+        className="relative overflow-hidden rounded-xl pt-1 pb-0 px-3 sm:px-6 max-w-5xl mx-auto w-full motion-reduce:animate-none animate-fade-up"
         style={{
           animationDelay: "0s",
           animationFillMode: "both",
@@ -393,14 +393,14 @@ export default async function HubPage() {
             aria-hidden="true"
           />
 
-          <div className="px-4 py-3.5 sm:px-6 sm:py-4.5 w-full space-y-3.5 relative">
+          <div className="px-3 py-2 sm:px-4 sm:py-2.5 w-full space-y-2 relative">
             {/* Eyebrow badge row */}
-            <div className="flex items-center gap-3 flex-wrap liquid-shift-y">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-xs font-medium tracking-wide text-arch-text-secondary">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-green" aria-hidden="true" />
+            <div className="flex items-center gap-2 flex-wrap liquid-shift-y">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-[10px] font-medium tracking-wide text-arch-text-secondary">
+                <span className="w-1 h-1 rounded-full bg-accent-green" aria-hidden="true" />
                 Sector-01 Active
               </span>
-              <span className="text-xs font-mono text-arch-text-tertiary tracking-wider">
+              <span className="text-[10px] font-mono text-arch-text-tertiary tracking-wider">
                 PORTAL v{PORTAL_VERSION}
               </span>
               <FocusModeToggle />

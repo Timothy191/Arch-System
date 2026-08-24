@@ -178,41 +178,41 @@ export function HeroRotator({
             aria-hidden={idx !== activeIndex}
           >
             {/* Left Content Area (9 Cols) */}
-            <div className="lg:col-span-9 space-y-3 flex flex-col justify-between z-10">
-              <div className="space-y-1.5 sm:space-y-2">
+            <div className="lg:col-span-9 space-y-1.5 flex flex-col justify-between z-10">
+              <div className="space-y-1">
                 {/* Category & Status Pill */}
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-[10.5px] font-medium text-arch-text-secondary tracking-wide">
-                    <Layers className="w-2.5 h-2.5 text-arch-accent-blue" />
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-[9px] font-medium text-arch-text-secondary tracking-wide">
+                    <Layers className="w-2 h-2 text-arch-accent-blue" />
                     {panel.category}
                   </span>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[9.5px] font-semibold uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent-green" />
+                  <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-accent-green/10 text-accent-green text-[8.5px] font-semibold uppercase tracking-wider">
+                    <span className="w-1 h-1 rounded-full bg-accent-green" />
                     {panel.status}
                   </span>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-arch-text-primary text-balance">
+                <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-arch-text-primary text-balance leading-snug">
                   {panel.title}
                 </h1>
 
                 {/* Description */}
-                <p className="text-arch-text-secondary text-xs sm:text-sm leading-relaxed line-clamp-2 text-pretty max-w-xl">
+                <p className="text-arch-text-secondary text-[11px] leading-tight line-clamp-1 text-pretty max-w-lg">
                   {panel.description}
                 </p>
               </div>
 
               {/* Operational Stat & CTAs Row */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-2 pt-0.5">
                 {/* Stat Pill */}
                 {panel.stats && (
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-arch-surface-secondary/70 border border-arch-border-subtle">
-                    <div className="w-5 h-5 rounded-md bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
-                      <Activity className="w-3 h-3" />
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-arch-surface-secondary/70 border border-arch-border-subtle">
+                    <div className="w-4 h-4 rounded bg-arch-surface-tertiary flex items-center justify-center text-arch-accent-blue">
+                      <Activity className="w-2.5 h-2.5" />
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-[10px] font-medium text-arch-text-tertiary uppercase">
+                    <div className="flex items-center gap-1 text-[10px]">
+                      <span className="text-[9px] font-medium text-arch-text-tertiary uppercase">
                         {panel.stats.label}:
                       </span>
                       <span className="font-semibold text-arch-text-primary">
@@ -223,11 +223,11 @@ export function HeroRotator({
                 )}
 
                 {/* Action Buttons */}
-                <div className="inline-flex items-center gap-2">
+                <div className="inline-flex items-center gap-1.5">
                   <Link
                     href={panel.primary.href}
                     data-cta="primary-hero"
-                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-arch-brand-blue text-white font-medium text-xs shadow-card hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[32px]"
+                    className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-brand-blue text-white font-medium text-[10.5px] shadow-card hover:bg-black transition-all hover:scale-[1.01] active:scale-[0.99] min-h-[24px]"
                   >
                     {panel.primary.icon}
                     <span>{panel.primary.label}</span>
@@ -236,7 +236,7 @@ export function HeroRotator({
                     <Link
                       href={panel.secondary.href}
                       data-cta="secondary-hero"
-                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-arch-surface-secondary text-arch-text-primary font-medium text-xs border border-arch-border-subtle hover:bg-arch-surface-tertiary transition-all min-h-[32px]"
+                      className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-arch-surface-secondary text-arch-text-primary font-medium text-[10.5px] border border-arch-border-subtle hover:bg-arch-surface-tertiary transition-all min-h-[24px]"
                     >
                       {panel.secondary.icon}
                       <span>{panel.secondary.label}</span>
@@ -248,7 +248,7 @@ export function HeroRotator({
 
             {/* Right Visual Image Card (3 Cols) */}
             <div className="lg:col-span-3 relative group/image">
-              <div className="relative aspect-[16/9] max-h-[80px] sm:max-h-[88px] rounded-xl overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
+              <div className="relative aspect-[16/9] max-h-[44px] sm:max-h-[48px] rounded-lg overflow-hidden shadow-card border border-arch-border-subtle bg-arch-surface-tertiary">
                 {/* Visual Terrain / Industrial Image */}
                 <img
                   src={
@@ -265,12 +265,12 @@ export function HeroRotator({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
                 {/* Live Indicator Pill on Image */}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[9.5px] font-medium border border-white/20">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-accent-green" />
-                    {panel.name.toUpperCase()} FEED
+                <div className="absolute bottom-1 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-black/60 backdrop-blur-sm text-white text-[8px] font-medium border border-white/20">
+                    <CheckCircle2 className="w-2 h-2 text-accent-green" />
+                    {panel.name.toUpperCase()}
                   </span>
-                  <span className="text-[9px] font-mono text-white/80 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
+                  <span className="text-[7.5px] font-mono text-white/80 bg-black/40 px-1 py-0.2 rounded backdrop-blur-sm">
                     CAM-0{idx + 1}
                   </span>
                 </div>
@@ -282,33 +282,33 @@ export function HeroRotator({
 
       {/* Navigation Controls & Carousel Indicator Dots */}
       {panels.length > 1 && (
-        <div className="flex items-center justify-between pt-3 mt-2.5 border-t border-arch-border-subtle/40">
+        <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-arch-border-subtle/40">
           {/* Left / Right Step Buttons */}
           <div className="flex items-center gap-1">
             <button
               onClick={prevSlide}
               aria-label="Previous department highlight"
-              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
+              className="w-5 h-5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
+              <ChevronLeft className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={nextSlide}
               aria-label="Next department highlight"
-              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
+              className="w-5 h-5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-card active:scale-95"
             >
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-2.5 h-2.5" />
             </button>
             <button
               onClick={() => setIsPaused((prev) => !prev)}
               aria-label={isPaused ? "Resume auto rotation" : "Pause auto rotation"}
-              className="w-6 h-6 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95 ml-0.5"
+              className="w-5 h-5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle flex items-center justify-center text-arch-text-secondary hover:text-arch-text-primary hover:bg-white transition-all shadow-sm active:scale-95 ml-0.5"
               title={isPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
             >
               {isPaused ? (
-                <Play className="w-2.5 h-2.5 fill-current" />
+                <Play className="w-2 h-2 fill-current" />
               ) : (
-                <Pause className="w-2.5 h-2.5 fill-current" />
+                <Pause className="w-2 h-2 fill-current" />
               )}
             </button>
           </div>
@@ -321,10 +321,10 @@ export function HeroRotator({
                 onClick={() => setActiveIndex(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  "h-1 rounded-full transition-all duration-300",
+                  "h-0.5 rounded-full transition-all duration-300",
                   idx === activeIndex
-                    ? "w-4 bg-arch-text-primary"
-                    : "w-1 bg-arch-border-emphasis hover:bg-arch-text-secondary",
+                    ? "w-3 bg-arch-text-primary"
+                    : "w-0.5 bg-arch-border-emphasis hover:bg-arch-text-secondary",
                 )}
               />
             ))}

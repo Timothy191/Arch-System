@@ -1,6 +1,14 @@
-# Agent Tracer - @repo/features/hub/ui
+## 2026-08-24 - Hero Card Compact Ergonomics (50% Scale Reduction)
 
-## 2026-08-24 - Hub Page Performance: Sparkline & HeroRotator Optimization
+- **Purpose**: Downscale hero card dimensions, typography, and image container by 50% for high-density industrial dashboard viewports while preserving CLS stability.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`:
+    - Reduced image container from `max-h-[80px] sm:max-h-[88px]` to `max-h-[44px] sm:max-h-[48px]`, preserving `aspect-[16/9]` and `object-cover` to prevent CLS layout shift.
+    - Reduced title typography from `text-xl sm:text-2xl md:text-3xl` to `text-sm sm:text-base md:text-lg`.
+    - Downscaled action CTAs to `min-h-[24px]` and reduced stat pills, badge text, and pagination dot footprints.
+  - `apps/portal/app/hub/page.tsx`:
+    - Tightened hero card inner wrapper padding and vertical spacing.
+- **What the Next Agent Should Know**: The `aspect-[16/9]` aspect-ratio anchor combined with bounded `max-h-*` and `object-cover` prevents layout jumps and CLS while keeping the compact 50% reduced hero footprint crisp across mobile and desktop.
 
 - **Purpose**: Eliminate GPU/compositor saturation on the hub page — SVG filters on animated elements and 9 fully-rendered carousel panels were the dominant cost.
 - **Changes**:
