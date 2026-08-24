@@ -159,9 +159,11 @@ All AI agents MUST enforce maximum token efficiency across all operations withou
 
 ## 📚 Authoritative Docs
 
+- **[AGENTS.md](AGENTS.md)** — Concise contributor index with anchored cross-references to every detail below. Start here.
+- **[CLAUDE.md](CLAUDE.md)** — Technical guide & command list. Key sections: [Common commands](CLAUDE.md#common-commands), [Architecture](CLAUDE.md#architecture), [Conventions](CLAUDE.md#conventions), [Codegen](CLAUDE.md#codegen--never-edit-generated-output), [Heuristics](CLAUDE.md#heuristics).
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — Full contributor guide. Key sections: [Quality gates](CONTRIBUTING.md#quality-gates), [Adding a new package](CONTRIBUTING.md#adding-a-new-package), [Code conventions](CONTRIBUTING.md#code-conventions), [Testing](CONTRIBUTING.md#testing), [Database migrations](CONTRIBUTING.md#database-migrations), [Troubleshooting](CONTRIBUTING.md#troubleshooting).
 - **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** — Complete documentation index.
-- **[CLAUDE.md](CLAUDE.md)** — Technical guide & command list.
-- **[AGENTS.md](AGENTS.md)** — Development workflow and quality gates.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** — Deployment guide for all environments.
 - **[DESIGN.md](./DESIGN.md)** — Color system & visual rules.
 - **[PRODUCT.md](./PRODUCT.md)** — User personas & strategy.
+- **[SECURITY.md](./SECURITY.md)** — Security policy & incident response.

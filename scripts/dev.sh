@@ -999,8 +999,8 @@ fi
 if [ "$QUICK_MODE" = "true" ]; then
   check "Auth endpoint" "skip" "quick mode"
 else
-  smoke_email=$(grep '^SMOKE_TEST_EMAIL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | tr -d '[:space:]')
-  smoke_pass=$(grep '^SMOKE_TEST_PASSWORD=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2-)
+  smoke_email=$(grep '^SMOKE_TEST_EMAIL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | tr -d '[:space:]' || echo '')
+  smoke_pass=$(grep '^SMOKE_TEST_PASSWORD=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
   if [ -z "$smoke_email" ] || [ -z "$smoke_pass" ]; then
     check "Auth endpoint" "info" "set SMOKE_TEST_EMAIL/SMOKE_TEST_PASSWORD in apps/portal/.env to enable"
   elif [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then

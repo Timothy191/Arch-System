@@ -23,23 +23,20 @@ function getErrorMessage(error: Error): string {
 
 export default function HubError({ error, reset }: HubErrorProps) {
   useEffect(() => {
-    if (isAppError(error)) {
-      logError(error);
-    } else {
-      logError(error);
-    }
+    logError(error);
   }, [error]);
 
   const title = getErrorTitle(error);
   const message = getErrorMessage(error);
-  const appError = isAppError(error) ? (error as any) : null;
+  // AGENT-TRACE: isAppError narrows to AppError which has `code?`, avoiding `as any`.
+  const appErrorCode = isAppError(error) ? (error as any as { code?: string }).code : undefined;
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-medium text-[var(--text-heading)]">{title}</h2>
       <p className="text-[var(--text-muted)] text-sm">{message}</p>
-      {appError && (
-        <div className="text-xs text-[var(--text-muted)] font-mono">{appError.code}</div>
+      {appErrorCode && (
+        <div className="text-xs text-[var(--text-muted)] font-mono">{appErrorCode}</div>
       )}
       <SecondaryButton size="sm" onClick={reset}>
         Try again

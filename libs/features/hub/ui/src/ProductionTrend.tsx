@@ -1,6 +1,7 @@
 "use client";
 
 import { Title, AreaChart, Text as TremorText } from "@tremor/react";
+import { AlertCircle } from "lucide-react";
 
 export interface TrendDataPoint {
   date: string;
@@ -11,9 +12,10 @@ export interface TrendDataPoint {
 
 interface ProductionTrendProps {
   data: TrendDataPoint[];
+  isFallback?: boolean;
 }
 
-export function ProductionTrend({ data }: ProductionTrendProps) {
+export function ProductionTrend({ data, isFallback = false }: ProductionTrendProps) {
   if (data.length === 0) return null;
 
   return (
@@ -26,6 +28,13 @@ export function ProductionTrend({ data }: ProductionTrendProps) {
           <TremorText className="text-xs text-arch-text-tertiary mt-0.5">
             Real-time tonnage and volume output across core departments (last 24h)
           </TremorText>
+          {/* AGENT-TRACE: Fallback indicator shown when RPC returns no data or errors */}
+          {isFallback && (
+            <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-accent-amber font-medium">
+              <AlertCircle className="w-3 h-3" />
+              Showing sample data — live telemetry unavailable
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle">

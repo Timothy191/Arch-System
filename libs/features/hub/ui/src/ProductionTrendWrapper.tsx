@@ -13,8 +13,9 @@ const ProductionTrendInner = dynamic(
 
 interface ProductionTrendProps {
   data: TrendDataPoint[];
+  isFallback?: boolean;
 }
 
-export function ProductionTrendWrapper({ data }: ProductionTrendProps) {
-  return <ProductionTrendInner data={data} />;
+export function ProductionTrendWrapper({ data, isFallback }: ProductionTrendProps) {
+  return <ProductionTrendInner data={data} isFallback={isFallback} />;
 }

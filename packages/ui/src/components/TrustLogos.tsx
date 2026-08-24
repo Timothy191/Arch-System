@@ -18,33 +18,33 @@
 
 import NextImage from "next/image";
 import { Radio, Cpu, ShieldCheck } from "lucide-react";
-import { Logo } from "@repo/ui/Logo";
+import { Logo } from "./Logo";
 
-interface LogoItem {
+export interface TrustLogo {
   src: string;
   alt: string;
 }
 
-interface TrustLogosProps {
-  logos?: LogoItem[];
+export interface TrustLogosProps {
+  logos?: TrustLogo[];
 }
 
 const PLACEHOLDERS = [
   {
     label: "Arch Mining",
-    icon: <Logo className="w-3 h-3 mr-1.5 shrink-0 text-[var(--accent-blue)]" />,
+    icon: <Logo className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
   },
   {
     label: "Sector-01",
-    icon: <Radio className="w-3 h-3 mr-1.5 shrink-0 text-accent-green" />,
+    icon: <Radio className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
   },
   {
     label: "Modbus Ready",
-    icon: <Cpu className="w-3 h-3 mr-1.5 shrink-0 text-[var(--accent-blue)]" />,
+    icon: <Cpu className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
   },
   {
     label: "ISO 27001",
-    icon: <ShieldCheck className="w-3 h-3 mr-1.5 shrink-0 text-accent-green" />,
+    icon: <ShieldCheck className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
   },
 ];
 
@@ -52,31 +52,32 @@ export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-3 border-t border-black/[0.08]">
-      <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-mono font-medium mb-2">
+    <div className="pt-1.5 border-t border-black/[0.08]">
+      <p className="text-[9px] uppercase tracking-wider text-[var(--text-muted)] font-mono font-medium mb-1">
         Trusted by forward-thinking teams
       </p>
 
       {hasLogos ? (
-        <div className="flex flex-wrap items-center gap-3 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+        <div className="flex flex-wrap items-center gap-2.5 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
           {logos.map((logo) => (
             <NextImage
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
-              className="h-6 w-auto object-contain"
+              width={80}
+              height={18}
+              className="h-4.5 w-auto object-contain"
               loading="lazy"
-              width={96}
-              height={24}
+              unoptimized={logo.src.startsWith("http")}
             />
           ))}
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {PLACEHOLDERS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-6 px-3 text-[11px] font-medium font-mono text-[var(--text-secondary)] bg-white/70 backdrop-blur-md rounded-full border border-black/[0.08] shadow-card transition-colors hover:bg-white/90"
+              className="inline-flex items-center justify-center h-5 px-2.5 text-[10px] font-medium font-mono text-[var(--text-secondary)] bg-white/70 backdrop-blur-md rounded-full border border-black/[0.08] shadow-card transition-colors hover:bg-white/90"
             >
               {p.icon}
               {p.label}

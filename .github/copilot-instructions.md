@@ -140,11 +140,26 @@ Commit both source and generated files in the same atomic change.
 
 ## 4) Other AI assistant configs to consult (authoritative sources)
 
-- `CLAUDE.md` — technical guide, commands, architecture, codegen.
-- `AGENTS.md` — agent contracts, workflow phases, quality gates.
-- `CONTRIBUTING.md` — full contributor guide, quality gates, new-package workflow, policy compiler, troubleshooting.
-- `DESIGN.md` — color system, typography, components, animation.
-- `SECURITY.md` — security policy and incident response.
+Each entry below links to the file and its key sections with anchors. `AGENTS.md` is the concise contributor index; full detail lives one click deeper.
+
+- [`AGENTS.md`](AGENTS.md) (→ `docs/AGENTS.md`) — concise contributor index with anchored cross-references to every detail below.
+- [`CLAUDE.md`](CLAUDE.md):
+  - [Common commands](CLAUDE.md#common-commands) — full command table, `pnpm quality` breakdown.
+  - [Architecture](CLAUDE.md#architecture) — apps, packages, portal routing, DB & authorization.
+  - [Conventions](CLAUDE.md#conventions) — package management, TypeScript, design system, tests, agent tracing, git.
+  - [Codegen](CLAUDE.md#codegen--never-edit-generated-output) — design tokens, DB types.
+  - [Policy & dependency constraints](CLAUDE.md#policy--dependency-constraints-single-source-of-truth) — SSoT.
+  - [Heuristics](CLAUDE.md#heuristics) — common pitfalls (duplicate video, Jest resolution, transpilePackages).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md):
+  - [Architecture overview](CONTRIBUTING.md#architecture-overview) — monorepo layout table.
+  - [Quality gates](CONTRIBUTING.md#quality-gates) — 14-step CI pipeline table.
+  - [Adding a new package](CONTRIBUTING.md#adding-a-new-package) — 6-step workflow.
+  - [Code conventions](CONTRIBUTING.md#code-conventions) — enforced rules.
+  - [Testing](CONTRIBUTING.md#testing) — Jest `moduleNameMapper` pitfall, coverage.
+  - [Database migrations](CONTRIBUTING.md#database-migrations) — workflow, RLS requirements.
+  - [Troubleshooting](CONTRIBUTING.md#troubleshooting) — lockfile, policy drift, circular deps.
+- [`DESIGN.md`](DESIGN.md) — color system, typography, components, animation.
+- [`SECURITY.md`](SECURITY.md) — security policy and incident response.
 
 Domain rules (architecture, portal, auth, design-system, testing, code review) are consolidated in `CLAUDE.md` (Conventions) and `CONTRIBUTING.md`.
 

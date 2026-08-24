@@ -81,6 +81,8 @@
     "./MacMenuBar": "./src/components/MacMenuBar.tsx",
     "./MacTitleBar": "./src/components/MacTitleBar.tsx",
     "./WorkflowBuilder": "./src/components/WorkflowBuilder.tsx",
+    "./HeroRotator": "./src/components/HeroRotator.tsx",
+    "./TrustLogos": "./src/components/TrustLogos.tsx",
     "./AcknowledgeButton": "./src/components/AcknowledgeButton.tsx",
     "./ActionConfirmDialog": "./src/components/ui/action-confirm-dialog.tsx",
     "./TelemetryChart": "./src/components/ui/telemetry-chart.tsx",

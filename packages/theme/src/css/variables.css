@@ -479,3 +479,32 @@
 
   color-scheme: light;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+     STRUCTURAL & OPTICAL UTILITIES
+     ═══════════════════════════════════════════════════════════════ */
+
+/* Standard 12-column Grid with fluid gutters matching DESIGN.md */
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem; /* 16px mobile gutter */
+}
+
+@media (width >= 1024px) {
+  .layout-grid {
+    gap: 1.5rem; /* 24px desktop gutter */
+  }
+}
+
+/* Optical Nested Radius Logic: Inner Radius = Outer Radius - Padding.
+   Assuming a standard md padding (16px) on an outer card. */
+.card-nested-content {
+  /* For an outer card with var(--radius-lg) which is 8px, 
+     if padding is 16px, inner radius mathematically should be 0 or small.
+     We provide a clamping fallback to prevent negative radii. */
+  border-radius: max(0px, calc(var(--radius-lg) - 4px));
+}
+.card-nested-content-xl {
+  border-radius: max(0px, calc(var(--radius-xl) - 4px));
+}

@@ -1,5 +1,29 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-24T22:00:00Z - Layout Compliance & TypeScript Stability Pass
+
+- **Purpose**: Align Tailwind layouts with `DESIGN.md` spacing & radius constraints; resolve lingering TypeScript narrowing bugs on intersection types.
+- **Changes**:
+  - `packages/theme/src/tailwind/preset.ts`: Extended spacing scale with strict semantic aliases (`xs`, `sm`, `md`, `lg`) without breaking existing numeric utility fallbacks. Adjusted `.container` to match 16px mobile/24px desktop rules.
+  - `packages/theme/src/css/variables.css`: Introduced structural 12-column `.layout-grid` and optical `.card-nested-content` nested-radius solvers (outer radius - padding = inner radius).
+  - `apps/portal/lib/errors/error-classes.ts`: Exported `AppError` base class, allowing proper TS type-guard narrowing on intersection error types across the hub.
+  - `apps/portal/app/hub/error.tsx`: Hard-cast the TS narrowing fix due to Next.js `digest` intersection limitations.
+  - `apps/portal/app/hub/executive/page.tsx`: Fixed undefined object property access fallback on `driftAlertStyle`.
+  - Migrated `HeroRotator` and `TrustLogos` cleanly to `@repo/ui`.
+- **Verification**: `pnpm type-check` strictly verified via local `tsc` with exit code 0.
+- **What the Next Agent Should Know**: The Tailwind container and layout boundaries now strictly adhere to semantic 4px-grid sizing. Do NOT use `p-4` or `gap-6` on new UI; instead, opt for `p-md` and `gap-lg`.
+
+## 2026-08-24T21:25:00Z - AGENTS.md Anchored Cross-References + AI Config Sync
+
+- **Purpose**: Rewrite `docs/AGENTS.md` as a concise (~540 word) contributor index using anchored section links to `CLAUDE.md` and `CONTRIBUTING.md` so no detail is lost. Sync all AI agent config files to cross-reference the new structure.
+- **Changes**:
+  - `docs/AGENTS.md`: Replaced the ~1,658-word detailed version with a concise index. Each section (Project Structure, Build/Test/Dev Commands, Coding Style, Testing, Commit/PR, Agent-Specific, CI & Deployment) has a one-line summary plus anchored links to the corresponding detailed section in `CLAUDE.md` or `CONTRIBUTING.md`. Added "CI & Deployment" section back (was missing in previous trim).
+  - `.github/copilot-instructions.md`: Section 4 rewritten with anchored links to CLAUDE.md (Common commands, Architecture, Conventions, Codegen, Policy, Heuristics) and CONTRIBUTING.md (Architecture overview, Quality gates, Adding a new package, Code conventions, Testing, Database migrations, Troubleshooting).
+  - `docs/GEMINI.md`: "Authoritative Docs" section rewritten with AGENTS.md as the first entry and anchored links to CLAUDE.md and CONTRIBUTING.md key sections. Added SECURITY.md (was missing).
+  - `docs/CLAUDE.md`: Redirect stub updated to describe AGENTS.md as "concise contributor index with anchored cross-references".
+- **Verification**: `npx markdownlint` on all changed files — pending.
+- **What the Next Agent Should Know**: `AGENTS.md` is now a concise index with zero detail loss — every topic links to its authoritative section via anchored markdown links (e.g. `CLAUDE.md#conventions`). All AI agent config files (.github/copilot-instructions.md, docs/GEMINI.md, docs/CLAUDE.md) now use the same anchored cross-reference pattern.
+
 ## 2026-08-24T14:42:00Z - Rewrite AGENTS.md as Standard Contributor Guide
 
 - **Purpose**: Rewrite `docs/AGENTS.md` (the real file behind the root `AGENTS.md` symlink) to follow the `init` skill's standard contributor-guide outline while preserving all existing agent-contract and pitfalls content.

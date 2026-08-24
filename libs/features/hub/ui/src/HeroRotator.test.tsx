@@ -51,11 +51,7 @@ jest.mock("framer-motion", () => {
   };
 });
 
-// Mock TrustLogos to keep the test focused on the carousel itself.
-jest.mock("./TrustLogos", () => ({
-  TrustLogos: () => <div data-testid="trust-logos" />,
-}));
-
+// Removed TrustLogos mock since it's now in @repo/ui
 const baseProps = {
   defaultTitle: "System Overview",
   defaultDescription: "Top-level mining operations command center",
@@ -137,7 +133,7 @@ describe("HeroRotator", () => {
 
   it("advances the active slide when the Next button is clicked", () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
-    const nextBtn = screen.getByLabelText("Next department highlight");
+    const nextBtn = screen.getByLabelText("Next highlight");
 
     // Initially overview is active
     expect(screen.getAllByText("System Overview")[0]).toBeInTheDocument();
@@ -152,7 +148,7 @@ describe("HeroRotator", () => {
 
   it("retreats the active slide when the Previous button is clicked", () => {
     render(<HeroRotator {...baseProps} departments={mockDepartments} />);
-    const prevBtn = screen.getByLabelText("Previous department highlight");
+    const prevBtn = screen.getByLabelText("Previous highlight");
 
     fireEvent.click(prevBtn);
     // Wrapped to the last slide (Production)
@@ -202,7 +198,7 @@ describe("HeroRotator", () => {
 
   it("does not render the control HUD when there is only one panel", () => {
     render(<HeroRotator {...baseProps} departments={[]} />);
-    expect(screen.queryByLabelText("Next department highlight")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Previous department highlight")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Next highlight")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Previous highlight")).not.toBeInTheDocument();
   });
 });

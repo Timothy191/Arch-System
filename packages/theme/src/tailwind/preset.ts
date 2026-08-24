@@ -14,12 +14,26 @@ const archTheme: Config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem", // 16px mobile
+        lg: "1.5rem", // 24px desktop
+      },
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
+      spacing: {
+        "0.5x": "2px",
+        xs: "4px",
+        sm: "8px",
+        md: "16px",
+        lg: "24px",
+        xl: "32px",
+        "2xl": "40px",
+        "3xl": "48px",
+        "4xl": "64px",
+      },
       fontFamily: {
         sans: [
           "var(--font-sans)",

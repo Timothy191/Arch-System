@@ -21,12 +21,21 @@ import {
   type DepartmentLiveMetricsMap,
 } from "@repo/departments/data-access";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Shield, Activity, Wrench as WrenchIcon } from "lucide-react";
+import { Shield, Activity, Wrench as WrenchIcon, BarChart3, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { withCache } from "@/lib/cache-utils";
 import { cachedRSC } from "@/lib/server-cache";
 import { CacheCategory } from "@repo/redis";
+import { getAccessibleDepartmentNames } from "@/lib/hub-departments";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Hub — Arch Systems",
+  description:
+    "Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, safety, training, and satellite monitoring dashboards.",
+};
 
 async function getDashboardCounts(
   today: string,
@@ -71,6 +80,11 @@ async function getDashboardCounts(
   );
 }
 
+interface ProductionTrendResult {
+  data: TrendDataPoint[];
+  isFallback: boolean;
+}
+
 const FALLBACK_TREND_DATA: TrendDataPoint[] = [
   { date: "08:00", Drilling: 2890, Production: 2338, Engineering: 1200 },
   { date: "09:00", Drilling: 2756, Production: 2103, Engineering: 1400 },
@@ -82,7 +96,7 @@ const FALLBACK_TREND_DATA: TrendDataPoint[] = [
 
 async function getProductionTrendData(
   cookieList: Array<{ name: string; value: string }>,
-): Promise<TrendDataPoint[]> {
+): Promise<ProductionTrendResult> {
   return cachedRSC(
     ["hub", "production-trend"],
     async () => {
@@ -94,7 +108,7 @@ async function getProductionTrendData(
           });
 
           if (error || !trendData || trendData.length === 0) {
-            return FALLBACK_TREND_DATA;
+            return { data: FALLBACK_TREND_DATA, isFallback: true };
           }
 
           // Format RPC response into TrendDataPoint[]
@@ -120,7 +134,9 @@ async function getProductionTrendData(
           }
 
           const formatted = Array.from(hourlyMap.values());
-          return formatted.length > 0 ? formatted : FALLBACK_TREND_DATA;
+          return formatted.length > 0
+            ? { data: formatted, isFallback: false }
+            : { data: FALLBACK_TREND_DATA, isFallback: true };
         },
         {
           category: CacheCategory.METRICS,
@@ -236,45 +252,8 @@ async function getRecentAlertEvents(
   );
 }
 
-async function getEmployeeDepartments(
-  userId: string,
-  cookieList: Array<{ name: string; value: string }>,
-) {
-  return cachedRSC(
-    ["user", userId, "accessible-dept-names"],
-    async () => {
-      return withCache(
-        async () => {
-          const db = await createReadReplicaClient(cookieList);
-          const { data: empData } = await db
-            .from("employees")
-            .select("accessible_departments")
-            .eq("auth_id", userId)
-            .single();
-
-          const accessibleDeptIds = (empData?.accessible_departments ?? []) as string[];
-          if (accessibleDeptIds.length === 0) return [];
-
-          const { data: deptData } = await db
-            .from("departments")
-            .select("name")
-            .in("id", accessibleDeptIds);
-
-          return (deptData ?? []).map((d) => d.name);
-        },
-        {
-          category: CacheCategory.AUTH,
-          keyParts: ["user", userId, "accessible-dept-names"],
-          tags: [`auth:${userId}`, "table:employees", "table:departments"],
-        },
-      );
-    },
-    {
-      revalidate: 3600,
-      tags: [`auth:${userId}`, "table:employees", "table:departments"],
-    },
-  );
-}
+// AGENT-TRACE: getEmployeeDepartments moved to @/lib/hub-departments for shared
+// cached access between layout.tsx and page.tsx.
 
 async function getLiveDepartmentMetrics(
   today: string,
@@ -340,18 +319,33 @@ export default async function HubPage() {
     tools,
     alertEvents,
     liveMetrics,
+    userRole,
   ] = await Promise.all([
     getDashboardCounts(today, cookieList),
-    getEmployeeDepartments(userId, cookieList),
+    getAccessibleDepartmentNames(userId, cookieList),
     getTools(),
     getRecentAlertEvents(today, cookieList),
     getLiveDepartmentMetrics(today, cookieList),
+    // AGENT-TRACE: Fetch user role in parallel to conditionally show executive dashboard link
+    supabase
+      .from("employees")
+      .select("role")
+      .eq("auth_id", userId)
+      .single()
+      .then(({ data }) => data?.role ?? null),
   ]);
 
-  const rawDepartments =
-    accessibleDeptIds && accessibleDeptIds.length > 0
-      ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
-      : DEPARTMENTS;
+  const canSeeExecutive = userRole === "admin" || userRole === "manager";
+
+  // AGENT-TRACE: Admin/manager users see all departments. Regular users with
+  // zero assigned departments get an explicit empty state instead of silently
+  // seeing every department (authorization safety).
+  const hasAssignedDepts = accessibleDeptIds && accessibleDeptIds.length > 0;
+  const rawDepartments = hasAssignedDepts
+    ? DEPARTMENTS.filter((d) => accessibleDeptIds.includes(d.name))
+    : canSeeExecutive
+      ? DEPARTMENTS
+      : [];
 
   const departments = rawDepartments.map((dept) => {
     const overlay = liveMetrics[dept.name];
@@ -405,6 +399,23 @@ export default async function HubPage() {
         />
       </section>
 
+      {/* Executive Dashboard link (admin/manager only) */}
+      {canSeeExecutive && (
+        <div
+          className="flex justify-end animate-fade-up"
+          style={{ animationDelay: "0.05s", animationFillMode: "both" }}
+        >
+          <Link
+            href="/hub/executive"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Executive Dashboard
+            <ArrowUpRight className="w-3 h-3" />
+          </Link>
+        </div>
+      )}
+
       {/* Department & Operational Testimonials Double Marquee */}
       <DepartmentReviews />
 
@@ -425,7 +436,19 @@ export default async function HubPage() {
       </div>
 
       {/* Core Operational Modules - Interactive Filtered Grid */}
-      <CoreOperationalModules departments={departments} />
+      {departments.length === 0 ? (
+        <div className="p-8 sm:p-12 text-center rounded-2xl bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
+          <Shield className="w-8 h-8 mx-auto text-accent-amber" />
+          <p className="text-sm font-medium text-arch-text-secondary">
+            No departments assigned to your account.
+          </p>
+          <p className="text-xs text-arch-text-tertiary">
+            Contact your administrator to request department access.
+          </p>
+        </div>
+      ) : (
+        <CoreOperationalModules departments={departments} />
+      )}
 
       {/* Productivity & Workflow Tools - Marquee Banner */}
       {tools.length > 0 && (
@@ -486,6 +509,6 @@ export default async function HubPage() {
 async function ProductionTrendSection() {
   const cookieStore = await cookies();
   const cookieList = cookieStore.getAll();
-  const productionTrendData = await getProductionTrendData(cookieList);
-  return <ProductionTrend data={productionTrendData} />;
+  const { data: productionTrendData, isFallback } = await getProductionTrendData(cookieList);
+  return <ProductionTrend data={productionTrendData} isFallback={isFallback} />;
 }

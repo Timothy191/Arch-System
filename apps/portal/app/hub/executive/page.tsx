@@ -1,8 +1,10 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import { GlassCard } from "@repo/ui/GlassCard";
+import type { KPIColor } from "@repo/ui/KPI";
 import {
   TrendingUp,
   BarChart3,
@@ -16,18 +18,190 @@ import { ExportButton } from "@/features/analytics/components/ExportButton";
 import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
 import { ProductionTrendChart } from "@/features/analytics/components/ProductionTrendChartWrapper";
 import { classifyReconciliationDrift, RECONCILIATION_UI } from "@/lib/production-reconciliation";
+import { cachedRSC } from "@/lib/server-cache";
+import { withCache } from "@/lib/cache-utils";
+import { CacheCategory } from "@repo/redis";
 
 export const dynamic = "force-dynamic";
 
+// AGENT-TRACE: Typed interface for the get_production_summary RPC response.
+// Replaces the previous `any` annotations throughout this page.
+interface ProductionSummaryRow {
+  log_date: string;
+  actual_coal_tonnes: number | string;
+  actual_waste_tonnes: number | string;
+  total_fuel_litres: number | string;
+  total_hours_worked: number | string;
+  reconciliation_drift_pct: number | string;
+}
+
+interface ChartDataRow {
+  date: string;
+  coal: number;
+  waste: number;
+  drift: number;
+}
+
+// AGENT-TRACE: Static Tailwind class mapping for drift alert colors.
+// Dynamic class construction (bg-${color}/10) is not detectable by Tailwind's
+// purge — this ensures all classes are statically present in the build.
+const DRIFT_ALERT_STYLES: Record<string, { container: string; icon: string }> = {
+  emerald: {
+    container: "bg-accent-green/10 border-accent-green/30",
+    icon: "text-accent-green",
+  },
+  amber: {
+    container: "bg-accent-amber/10 border-accent-amber/30",
+    icon: "text-accent-amber",
+  },
+  orange: {
+    container: "bg-accent-amber/10 border-accent-amber/30",
+    icon: "text-accent-amber",
+  },
+  red: {
+    container: "bg-accent-red/10 border-accent-red/30",
+    icon: "text-accent-red",
+  },
+};
+
+// Map reconciliation color names to KPIColor values accepted by <KPICard>.
+const RECON_COLOR_TO_KPI: Record<string, KPIColor> = {
+  emerald: "green",
+  amber: "alert",
+  orange: "alert",
+  red: "red",
+};
+
+function toNumber(v: number | string): number {
+  return Number(v) || 0;
+}
+
+async function getExecutiveData(cookieList: Array<{ name: string; value: string }>) {
+  return cachedRSC(
+    ["hub", "executive", new Date().toISOString().split("T")[0]!],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
+          const today = new Date().toISOString().split("T")[0]!;
+          const monthStart = today.slice(0, 7) + "-01";
+          const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
+
+          // Step 1: Fetch Unified Production Summary (RPC)
+          const { data: summaryData } = await db.rpc("get_production_summary", {
+            p_start_date: thirtyDaysAgo,
+            p_end_date: today,
+          });
+
+          const typedSummary = (summaryData ?? []) as unknown as ProductionSummaryRow[];
+          const mtdSummary = typedSummary.filter((s) => s.log_date >= monthStart);
+
+          // Step 2: parallel fetch of remaining KPI data
+          const [
+            { count: activeMachines },
+            { count: totalMachines },
+            { count: openIncidents },
+            { count: activeEmployees },
+            { data: breakdownsMtd },
+          ] = await Promise.all([
+            db
+              .from("machines")
+              .select("id", { count: "exact", head: true })
+              .eq("active", true)
+              .is("deleted_at", null),
+            db.from("machines").select("id", { count: "exact", head: true }).is("deleted_at", null),
+            db
+              .from("safety_incidents")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "open"),
+            db
+              .from("employees")
+              .select("id", { count: "exact", head: true })
+              .is("deleted_at", null),
+            db
+              .from("breakdowns")
+              .select("id, status")
+              .gte("date_in", monthStart)
+              .is("deleted_at", null),
+          ]);
+
+          // Compute MTD aggregates
+          const totalCoalMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_coal_tonnes), 0);
+          const totalWasteMtd = mtdSummary.reduce((s, r) => s + toNumber(r.actual_waste_tonnes), 0);
+          const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
+          const totalFuelMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_fuel_litres), 0);
+          const totalHoursMtd = mtdSummary.reduce((s, r) => s + toNumber(r.total_hours_worked), 0);
+
+          const avgDriftPct =
+            mtdSummary.length > 0
+              ? mtdSummary.reduce((s, r) => s + Math.abs(toNumber(r.reconciliation_drift_pct)), 0) /
+                mtdSummary.length
+              : 0;
+
+          const driftLevel = classifyReconciliationDrift(avgDriftPct);
+          const driftUi = RECONCILIATION_UI[driftLevel];
+
+          const fleetPct =
+            totalMachines && totalMachines > 0
+              ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
+              : 0;
+          const fuelPerTonne =
+            totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : "—";
+          const openBreakdowns = breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
+
+          // Build 30-day chart data from summary
+          const chartData: ChartDataRow[] = typedSummary.map((s) => ({
+            date: s.log_date,
+            coal: toNumber(s.actual_coal_tonnes),
+            waste: toNumber(s.actual_waste_tonnes),
+            drift: toNumber(s.reconciliation_drift_pct),
+          }));
+
+          return {
+            today,
+            totalCoalMtd,
+            totalWasteMtd,
+            totalTonnageMtd,
+            totalFuelMtd,
+            totalHoursMtd,
+            avgDriftPct,
+            driftLevel,
+            driftUi,
+            fleetPct,
+            fuelPerTonne,
+            openBreakdowns,
+            activeMachines: activeMachines ?? 0,
+            totalMachines: totalMachines ?? 0,
+            openIncidents: openIncidents ?? 0,
+            activeEmployees: activeEmployees ?? 0,
+            chartData,
+          };
+        },
+        {
+          category: CacheCategory.METRICS,
+          keyParts: ["hub", "executive"],
+          tags: ["table:machines", "table:safety_incidents", "table:employees", "table:breakdowns"],
+        },
+      );
+    },
+    {
+      revalidate: 300,
+      tags: ["table:machines", "table:safety_incidents", "table:employees", "table:breakdowns"],
+    },
+  );
+}
+
 export default async function ExecutiveDashboardPage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const user = await getUserSafely(supabase);
 
-  // Gate: admin only
-  const { data: employee } = await supabase
+  if (!user || !user.id) {
+    redirect("/login");
+  }
+
+  // Gate: admin/manager only — query role from read-replica
+  const db = await createReadReplicaClient();
+  const { data: employee } = await db
     .from("employees")
     .select("role")
     .eq("auth_id", user.id)
@@ -37,84 +211,35 @@ export default async function ExecutiveDashboardPage() {
     redirect("/");
   }
 
-  const db = await createReadReplicaClient();
-  const today = new Date().toISOString().split("T")[0]!;
-  const monthStart = today.slice(0, 7) + "-01";
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
+  const cookieStore = await cookies();
+  const cookieList = cookieStore.getAll();
+  const data = await getExecutiveData(cookieList);
 
-  // Step 1: Fetch Unified Production Summary (RPC)
-  // This single call replaces multiple production_logs, machine_hours, and fuel_logs fetches.
-  const { data: summaryData } = await db.rpc("get_production_summary", {
-    p_start_date: thirtyDaysAgo,
-    p_end_date: today,
-  });
+  const {
+    today,
+    totalCoalMtd,
+    totalWasteMtd,
+    totalTonnageMtd,
+    totalFuelMtd,
+    totalHoursMtd,
+    avgDriftPct,
+    driftLevel,
+    driftUi,
+    fleetPct,
+    fuelPerTonne,
+    openBreakdowns,
+    activeMachines,
+    totalMachines,
+    openIncidents,
+    activeEmployees,
+    chartData,
+  } = data;
 
-  const mtdSummary = summaryData?.filter((s: any) => s.log_date >= monthStart) ?? [];
-
-  // Step 2: parallel fetch of remaining KPI data
-  const [
-    { count: activeMachines },
-    { count: totalMachines },
-    { count: openIncidents },
-    { count: activeEmployees },
-    { data: breakdownsMtd },
-  ] = await Promise.all([
-    db
-      .from("machines")
-      .select("id", { count: "exact", head: true })
-      .eq("active", true)
-      .is("deleted_at", null),
-    db.from("machines").select("id", { count: "exact", head: true }).is("deleted_at", null),
-    db.from("safety_incidents").select("id", { count: "exact", head: true }).eq("status", "open"),
-    db.from("employees").select("id", { count: "exact", head: true }).is("deleted_at", null),
-    db.from("breakdowns").select("id, status").gte("date_in", monthStart).is("deleted_at", null),
-  ]);
-
-  // Compute MTD aggregates from server-side summary
-  const totalCoalMtd = mtdSummary.reduce(
-    (s: number, r: any) => s + Number(r.actual_coal_tonnes),
-    0,
-  );
-  const totalWasteMtd = mtdSummary.reduce(
-    (s: number, r: any) => s + Number(r.actual_waste_tonnes),
-    0,
-  );
-  const totalTonnageMtd = totalCoalMtd + totalWasteMtd;
-  const totalFuelMtd = mtdSummary.reduce((s: number, r: any) => s + Number(r.total_fuel_litres), 0);
-  const totalHoursMtd = mtdSummary.reduce(
-    (s: number, r: any) => s + Number(r.total_hours_worked),
-    0,
-  );
-
-  // reconciliation calculation
-  const avgDriftPct =
-    mtdSummary.length > 0
-      ? mtdSummary.reduce(
-          (s: number, r: any) => s + Math.abs(Number(r.reconciliation_drift_pct)),
-          0,
-        ) / mtdSummary.length
-      : 0;
-
-  const driftLevel = classifyReconciliationDrift(avgDriftPct);
-  const driftUi = RECONCILIATION_UI[driftLevel];
-
-  const fleetPct =
-    totalMachines && totalMachines > 0
-      ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
-      : 0;
-  const fuelPerTonne = totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : "—";
-  const openBreakdowns = breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
-
-  // Build 30-day chart data from summary
-  const chartData = (summaryData ?? []).map((s: any) => ({
-    date: s.log_date,
-    coal: Number(s.actual_coal_tonnes),
-    waste: Number(s.actual_waste_tonnes),
-    drift: Number(s.reconciliation_drift_pct),
-  }));
+  const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES["red"]!;
+  const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? "red";
 
   // CSV export payload
-  const exportRows = chartData.map((r: any) => ({
+  const exportRows = chartData.map((r) => ({
     Date: r.date,
     "Coal (t)": r.coal.toFixed(2),
     "Waste (t)": r.waste.toFixed(2),
@@ -134,7 +259,7 @@ export default async function ExecutiveDashboardPage() {
       { label: "Active Breakdowns", value: `${openBreakdowns}` },
     ],
     tableHeaders: ["Date", "Coal (t)", "Waste (t)", "Total Tonnage (t)", "Drift %"],
-    tableRows: chartData.map((r: any) => [
+    tableRows: chartData.map((r) => [
       r.date,
       r.coal.toFixed(2),
       r.waste.toFixed(2),
@@ -173,7 +298,7 @@ export default async function ExecutiveDashboardPage() {
           <KPICard
             label="Reconciliation Drift"
             value={`${avgDriftPct.toFixed(1)}%`}
-            color={driftUi.color as any}
+            color={driftKpiColor}
             sub={driftUi.label}
             icon={<Scale className="w-4 h-4" />}
           />
@@ -188,9 +313,9 @@ export default async function ExecutiveDashboardPage() {
         {/* Drift Alert (only if not stable) */}
         {driftLevel !== "stable" && (
           <div
-            className={`p-3 rounded-lg border flex items-start gap-3 bg-${driftUi.color}/10 border-${driftUi.color}/30 text-sm`}
+            className={`p-3 rounded-lg border flex items-start gap-3 ${driftAlertStyle.container} text-sm`}
           >
-            <AlertCircle className={`w-5 h-5 text-${driftUi.color} mt-0.5 shrink-0`} />
+            <AlertCircle className={`w-5 h-5 ${driftAlertStyle.icon} mt-0.5 shrink-0`} />
             <div>
               <p className="font-medium">Operational Drift Warning</p>
               <p className="text-[var(--text-muted)]">{driftUi.description}</p>
@@ -209,7 +334,7 @@ export default async function ExecutiveDashboardPage() {
             label="Fleet Availability"
             value={`${fleetPct}%`}
             color={fleetPct >= 80 ? "green" : fleetPct >= 60 ? "blue" : "red"}
-            sub={`${activeMachines ?? 0} / ${totalMachines ?? 0} machines`}
+            sub={`${activeMachines} / ${totalMachines} machines`}
           />
           <KPICard
             label="Machine Hours (MTD)"
@@ -221,7 +346,7 @@ export default async function ExecutiveDashboardPage() {
             value={openBreakdowns}
             color={openBreakdowns > 5 ? "red" : openBreakdowns > 2 ? "blue" : "green"}
           />
-          <KPICard label="Active Personnel" value={activeEmployees ?? 0} color="default" />
+          <KPICard label="Active Personnel" value={activeEmployees} color="default" />
         </KPIGrid>
       </section>
 
@@ -233,8 +358,8 @@ export default async function ExecutiveDashboardPage() {
         <KPIGrid cols={4}>
           <KPICard
             label="Open Incidents"
-            value={openIncidents ?? 0}
-            color={(openIncidents ?? 0) > 0 ? "red" : "green"}
+            value={openIncidents}
+            color={openIncidents > 0 ? "red" : "green"}
           />
           <KPICard
             label="Diesel Consumed (MTD)"

@@ -7,4 +7,3 @@ export * from "./ProductionTrend";
 export * from "./ProductionTrendWrapper";
 export * from "./Sparkline";
 export * from "./ToolBanner";
-export * from "./TrustLogos";

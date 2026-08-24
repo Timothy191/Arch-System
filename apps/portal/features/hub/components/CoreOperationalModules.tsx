@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import type { Department } from "@repo/departments/data-access";
-import { DepartmentCard } from "./DepartmentCard";
+import { DepartmentCard } from "@/features/hub";
 import { Boxes, Search, Star } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
