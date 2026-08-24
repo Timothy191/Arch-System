@@ -8,7 +8,6 @@ import {
   ProductionTrendWrapper as ProductionTrend,
   HeroBackground,
   HeroRotator,
-  TrustLogos,
   ToolBanner,
   DepartmentReviews,
   CoreOperationalModules,
@@ -22,13 +21,10 @@ import {
   type DepartmentLiveMetricsMap,
 } from "@repo/departments/data-access";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Shield, Activity, Wrench as WrenchIcon, AlertTriangle, Wrench, Power } from "lucide-react";
-import { FocusModeToggle } from "@/components/FocusModeToggle";
+import { Shield, Activity, Wrench as WrenchIcon } from "lucide-react";
 import { withCache } from "@/lib/cache-utils";
 import { cachedRSC } from "@/lib/server-cache";
 import { CacheCategory } from "@repo/redis";
-
-const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.4.1";
 
 export const dynamic = "force-dynamic";
 
@@ -381,87 +377,33 @@ export default async function HubPage() {
       >
         <HeroBackground />
 
-        <GlassCard
-          variant="liquid"
-          hover={false}
-          padding={false}
-          className="relative z-10 rounded-xl shadow-card overflow-hidden"
-        >
-          {/* Inner glass highlight ring */}
-          <div
-            className="absolute inset-0 rounded-xl ring-1 ring-inset ring-arch-border-emphasis/40 pointer-events-none"
-            aria-hidden="true"
-          />
-
-          <div className="px-3 py-2 sm:px-4 sm:py-2.5 w-full space-y-2 relative">
-            {/* Eyebrow badge row */}
-            <div className="flex items-center gap-2 flex-wrap liquid-shift-y">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-arch-border-subtle bg-arch-surface-secondary/80 backdrop-blur-sm text-[10px] font-medium tracking-wide text-arch-text-secondary">
-                <span className="w-1 h-1 rounded-full bg-accent-green" aria-hidden="true" />
-                Sector-01 Active
-              </span>
-              <span className="text-[10px] font-mono text-arch-text-tertiary tracking-wider">
-                PORTAL v{PORTAL_VERSION}
-              </span>
-              <FocusModeToggle />
-              {incidentCount > 0 && (
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red text-[10px] font-medium tracking-wide"
-                  title={`${incidentCount} open safety incidents`}
-                >
-                  <AlertTriangle className="w-3 h-3" aria-hidden="true" />
-                  {incidentCount} Open
-                </span>
-              )}
-              {breakdownCount > 0 && (
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber text-[10px] font-medium tracking-wide"
-                  title={`${breakdownCount} active breakdowns`}
-                >
-                  <Wrench className="w-3 h-3" aria-hidden="true" />
-                  {breakdownCount} Breakdown
-                </span>
-              )}
-              {offlineMachineCount > 0 && (
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-arch-surface-tertiary text-arch-text-secondary text-[10px] font-medium tracking-wide"
-                  title={`${offlineMachineCount} machines offline`}
-                >
-                  <Power className="w-3 h-3" aria-hidden="true" />
-                  {offlineMachineCount} Offline
-                </span>
-              )}
-            </div>
-
-            {/* Heading, body and CTAs */}
-            <HeroRotator
-              defaultTitle="Central Operations Portal"
-              defaultDescription="Centralized monitoring and control system for Arch Systems industrial complexes. Access Modbus diagnostics, machine breakdowns, shifts, and live telemetry."
-              primaryHref={
-                accessibleDeptIds.includes("control-room")
-                  ? "/control-room"
-                  : accessibleDeptIds.length > 0
-                    ? `/${accessibleDeptIds[0]}`
-                    : "/"
-              }
-              primaryLabel={
-                accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
-              }
-              secondaryHref={
-                accessibleDeptIds.includes("training")
-                  ? "/training"
-                  : accessibleDeptIds.length > 0
-                    ? `/${accessibleDeptIds[0]}`
-                    : "/"
-              }
-              secondaryLabel="System Guidelines"
-              departments={departments}
-            />
-
-            {/* Trust section */}
-            <TrustLogos />
-          </div>
-        </GlassCard>
+        {/* Heading, 3D Hero Carousel with separate cards, and CTAs */}
+        <HeroRotator
+          defaultTitle="Central Operations Portal"
+          defaultDescription="Centralized monitoring and control system for Arch Systems industrial complexes. Access Modbus diagnostics, machine breakdowns, shifts, and live telemetry."
+          primaryHref={
+            accessibleDeptIds.includes("control-room")
+              ? "/control-room"
+              : accessibleDeptIds.length > 0
+                ? `/${accessibleDeptIds[0]}`
+                : "/"
+          }
+          primaryLabel={
+            accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
+          }
+          secondaryHref={
+            accessibleDeptIds.includes("training")
+              ? "/training"
+              : accessibleDeptIds.length > 0
+                ? `/${accessibleDeptIds[0]}`
+                : "/"
+          }
+          secondaryLabel="System Guidelines"
+          departments={departments}
+          incidentCount={incidentCount}
+          breakdownCount={breakdownCount}
+          offlineMachineCount={offlineMachineCount}
+        />
       </section>
 
       {/* Department & Operational Testimonials Double Marquee */}

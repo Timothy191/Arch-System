@@ -1,16 +1,19 @@
 # Agent Tracer - @repo/features/hub/ui
 
-## 2026-08-24 - 3D Slideshow Orb & Ghost Preview Cards
+## 2026-08-24 - 3D Slideshow Orb & Standalone Ghost Preview Cards
 
-- **Purpose**: Implement 3D slideshow orb carousel layout showing 3 cards simultaneously: the active card straight in the center, and past/future cards angled at 45° as semi-transparent ghost preview cards on the left and right.
+- **Purpose**: Implement 3D slideshow orb carousel layout where the main center view, the past preview card on the left, and the future preview card on the right each have their own independent, standalone liquid `GlassCard` wrapper angled in 3D space.
 - **Changes**:
   - `libs/features/hub/ui/src/HeroRotator.tsx`:
-    - Added CSS 3D perspective (`perspective: 1200px`) container.
-    - Rendered active card with full opacity and `transform: none` (relative z-20).
-    - Rendered previous card with `transform: translateX(-28%) rotateY(45deg) translateZ(-60px)` and 40% opacity (interactive click triggers `prevSlide()`).
-    - Rendered next card with `transform: translateX(28%) rotateY(-45deg) translateZ(-60px)` and 40% opacity (interactive click triggers `nextSlide()`).
-    - Applied `inert` and `aria-hidden` to non-active cards while keeping them clickable for direct slide jumps.
-- **What the Next Agent Should Know**: The 3D orb carousel uses pure CSS 3D transforms (`rotateY(45deg)` + `translateZ`) with hardware acceleration and zero external physics libraries, ensuring sub-millisecond frame rendering and zero CLS.
+    - Moved `GlassCard` wrapper from outer section into individual slide panels.
+    - Added CSS 3D perspective (`perspective: 1400px`) container.
+    - Main card: rendered with full opacity, active `GlassCard`, and `transform: none` (relative z-20).
+    - Left ghost card: rendered as its own separate `GlassCard` with `transform: translateX(-32%) rotateY(45deg) translateZ(-80px)` and 40% opacity (click activates `prevSlide()`).
+    - Right ghost card: rendered as its own separate `GlassCard` with `transform: translateX(32%) rotateY(-45deg) translateZ(-80px)` and 40% opacity (click activates `nextSlide()`).
+    - Propagated operational urgency status badges (`Open`, `Breakdown`, `Offline`) into active card headers.
+  - `apps/portal/app/hub/page.tsx`:
+    - Unwrapped static outer `GlassCard` to allow 3D cards to project independently outside the card boundary.
+- **What the Next Agent Should Know**: Each slide panel is its own dedicated `GlassCard` instance with independent glass highlights and borders. The 3D orb projection angles are hardware-accelerated with zero CLS layout shifts.
 
 - **Purpose**: Eliminate GPU/compositor saturation on the hub page — SVG filters on animated elements and 9 fully-rendered carousel panels were the dominant cost.
 - **Changes**:
