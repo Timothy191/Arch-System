@@ -1,5 +1,15 @@
 # Contract Package Agent Tracer
 
+## 2026-08-24: Multi-Site Shift Report Schemas & Types
+
+- **Purpose**: Export canonical Zod schemas and TypeScript types for multi-site shift compilation across BKF, EXT, PLANT, and Bredell Workshop.
+- **Changes**:
+  - `packages/contract/src/schemas/multi-site-production.schema.ts`: Created `multiSiteShiftReportSchema`, `operationalStatusEnum`, `excavatorHaulSchema`, `dozerRolloverEntrySchema`, `fleetSmuEntrySchema`, `breakdownReportEntrySchema`, `ancillaryReportEntrySchema`, and `bredellReportEntrySchema`.
+  - `packages/contract/src/types/multi-site-production.types.ts`: Derived and exported TypeScript interfaces.
+  - `packages/contract/src/index.ts`: Barrel exports for schemas and types.
+  - `packages/contract/src/index.test.ts`: Added validation unit test.
+- **Verification**: `pnpm --filter @repo/contract test` and `pnpm --filter @repo/contract build` pass with 0 errors.
+
 ## 2026-08-18: Form Types and Schema Barrel Export Consolidation
 
 - **Purpose**: Export missing derived types (`CreateBreakdownInput`, `BookOutInput`, `DirectCheckoutInput`, `MonthlyReportInput`, `UpdateMachineSiteInput`) from the contract package, aligning index type exports with their schema counterparts in `form.schema.ts`.

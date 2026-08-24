@@ -1,5 +1,24 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-24T14:42:00Z - Rewrite AGENTS.md as Standard Contributor Guide
+
+- **Purpose**: Rewrite `docs/AGENTS.md` (the real file behind the root `AGENTS.md` symlink) to follow the `init` skill's standard contributor-guide outline while preserving all existing agent-contract and pitfalls content.
+- **Changes**:
+  - `docs/AGENTS.md`: Restructured into 9 standard sections (Project Structure & Module Organization, Build/Test/Dev Commands, Coding Style & Naming Conventions, Testing Guidelines, Commit & PR Guidelines, Codegen, Agent-Specific Instructions, CI & Deployment, Common Pitfalls). Folded the existing "Contract", "Nx Guidelines", and "Pitfalls" content into the new structure. Added "Further Reading" cross-references. Compressed redundancy with `CLAUDE.md`/`CONTRIBUTING.md` (which hold full detail).
+- **Verification**: `npx markdownlint docs/AGENTS.md --config config/tools/.markdownlint.json` passes clean. Root `AGENTS.md` symlink (`→ docs/AGENTS.md`) resolves correctly.
+- **What the Next Agent Should Know**: `docs/AGENTS.md` is now a concise contributor index (not an agent-operational contract). Full technical detail lives in `CLAUDE.md` and `CONTRIBUTING.md`. The file is ~1657 words / ~14.9KB.
+
+## 2026-08-24T10:17:00Z - Context Optimizer, Bloat Removal & Topology Alignment
+
+- **Purpose**: Execute context optimization across codebase topology: prune unused dead code/files, remove unreferenced dependencies (`@google/generative-ai`, `lenis`), eliminate duplicate exports (`HeroRotator`), regenerate codebase maps, and align repository context memory.
+- **Changes**:
+  - `apps/portal/package.json`: Pruned unused dependencies `@google/generative-ai` and `lenis`.
+  - `apps/portal/app/(departments)/[department]/ai/actions.ts` & `apps/portal/lib/ai/google-ai-client.ts`: Removed dead files from legacy AI routes.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Removed duplicate default export.
+  - `codebase-maps/`: Regenerated comprehensive codebase topological maps and manifest metadata.
+- **Verification**: `pnpm knip`, `pnpm deps:lint`, `node tools/generate-codebase-maps.cjs`.
+- **What the Next Agent Should Know**: Repository topology and context indexes are refreshed and clean with zero duplicate exports or dead AI action handlers.
+
 ## 2026-08-21T14:40:00Z - Borders & Dividers Industrial Techniques Implementation
 
 - **Purpose**: Implement the full suite of 9 industrial Borders & Dividers design techniques across `@repo/theme` and `@repo/ui`.

@@ -40,7 +40,7 @@ export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-2 border-t border-arch-border-subtle/50">
+    <div className="pt-2 border-t border-black/15">
       <p className="text-[9px] uppercase tracking-wider text-arch-text-tertiary font-medium mb-1.5">
         Trusted by forward-thinking teams
       </p>
@@ -65,7 +65,7 @@ export function TrustLogos({ logos }: TrustLogosProps) {
           {PLACEHOLDERS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-5 px-2 text-[10px] font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
+              className="inline-flex items-center justify-center h-5 px-2 text-[10px] font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-black"
             >
               {p.label === "Arch Mining" && <Logo className="w-2.5 h-2.5 mr-1 shrink-0" />}
               {p.label}

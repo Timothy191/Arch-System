@@ -145,8 +145,8 @@ Commit both source and generated files in the same atomic change.
 - `CONTRIBUTING.md` — full contributor guide, quality gates, new-package workflow, policy compiler, troubleshooting.
 - `DESIGN.md` — color system, typography, components, animation.
 - `SECURITY.md` — security policy and incident response.
-- `.claude/rules/` — auto-loaded domain rules: `architecture.md`, `portal.md`, `auth.md`, `design-system.md`, `testing.md`, `verification.md`, `development-practices.md`, `code-review.md`, `thought-process.md`.
-- `.claude/guides/operational-handbook.md` — full operational commands, workflows, pitfalls, MCP.
+
+Domain rules (architecture, portal, auth, design-system, testing, code review) are consolidated in `CLAUDE.md` (Conventions) and `CONTRIBUTING.md`.
 
 ---
 

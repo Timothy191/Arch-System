@@ -54,6 +54,18 @@ export {
   lockAndSignShiftSchema,
 } from "./schemas/shift-compilation.schema.js";
 
+export {
+  operationalStatusEnum,
+  truckTallySchema,
+  excavatorHaulSchema,
+  dozerRolloverEntrySchema,
+  fleetSmuEntrySchema,
+  breakdownReportEntrySchema,
+  ancillaryReportEntrySchema,
+  bredellReportEntrySchema,
+  multiSiteShiftReportSchema,
+} from "./schemas/multi-site-production.schema.js";
+
 export { drillOperationSchema, drillTelemetryIngestSchema } from "./schemas/drill.schema.js";
 
 export {
@@ -179,3 +191,15 @@ export type {
   UnifiedShiftReport,
   LockAndSignShiftInput,
 } from "./types/shift-compilation.types.js";
+
+export type {
+  MachineOperationalStatus,
+  TruckTally,
+  ExcavatorHaul,
+  DozerRolloverEntry,
+  FleetSmuEntry,
+  BreakdownReportEntry,
+  AncillaryReportEntry,
+  BredellReportEntry,
+  MultiSiteShiftReport,
+} from "./types/multi-site-production.types.js";

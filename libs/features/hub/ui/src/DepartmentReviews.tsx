@@ -71,6 +71,8 @@ const REVIEWS = [
 const firstRow = REVIEWS.slice(0, REVIEWS.length / 2);
 const secondRow = REVIEWS.slice(REVIEWS.length / 2);
 
+import { MessageSquareQuote } from "lucide-react";
+
 interface ReviewCardProps {
   img: string;
   name: string;
@@ -80,23 +82,25 @@ interface ReviewCardProps {
 
 function ReviewCard({ img, name, username, body }: ReviewCardProps) {
   return (
-    <div className="w-[300px] shrink-0">
-      <div className="h-full rounded-2xl bg-white/70 border border-black/[0.08] hover:border-black/20 transition-all duration-300">
-        <div className="p-4 flex flex-col justify-between h-full select-none">
+    <div className="w-[320px] shrink-0">
+      <div className="h-full rounded-2xl bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300">
+        <div className="p-4 sm:p-5 flex flex-col justify-between h-full select-none">
           <div className="flex flex-row items-center gap-3">
             <Image
-              className="rounded-full object-cover bg-arch-surface-tertiary border border-arch-border-primary"
-              width={32}
-              height={32}
+              className="rounded-full object-cover bg-arch-surface-tertiary border border-arch-border-subtle shadow-sm shrink-0"
+              width={36}
+              height={36}
               alt={name}
               src={img}
             />
-            <div className="flex flex-col text-left">
-              <span className="text-sm font-medium text-arch-text-primary">{name}</span>
-              <p className="text-[11px] font-medium text-arch-text-secondary">{username}</p>
+            <div className="flex flex-col text-left min-w-0">
+              <span className="text-xs sm:text-sm font-semibold text-arch-text-primary truncate">
+                {name}
+              </span>
+              <p className="text-[11px] font-medium text-arch-text-tertiary truncate">{username}</p>
             </div>
           </div>
-          <blockquote className="mt-2.5 text-xs text-arch-text-secondary leading-relaxed text-left line-clamp-2">
+          <blockquote className="mt-3 text-xs text-arch-text-secondary leading-relaxed text-left line-clamp-2 italic">
             "{body}"
           </blockquote>
         </div>
@@ -117,8 +121,11 @@ export function DepartmentReviews() {
       className="space-y-4 animate-fade-up group/row"
       style={{ animationDelay: "0.05s", animationFillMode: "both" }}
     >
-      <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-        <h2 className="text-[17px] font-medium text-arch-text-primary">
+      <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
+          <span className="p-1 rounded-md bg-arch-surface-secondary text-arch-accent-blue">
+            <MessageSquareQuote className="w-4 h-4" />
+          </span>
           Operational Feedback & Department Logs
         </h2>
       </div>
@@ -127,12 +134,12 @@ export function DepartmentReviews() {
         className="relative flex w-full flex-col items-center justify-center overflow-hidden"
         style={maskStyle}
       >
-        <Marquee pauseOnHover className="[--duration:30s] gap-6 py-1">
+        <Marquee pauseOnHover className="[--duration:30s] gap-4 sm:gap-6 py-1.5">
           {firstRow.map((review) => (
             <ReviewCard key={review.username} {...review} />
           ))}
         </Marquee>
-        <Marquee reverse pauseOnHover className="[--duration:30s] gap-6 py-1">
+        <Marquee reverse pauseOnHover className="[--duration:30s] gap-4 sm:gap-6 py-1.5">
           {secondRow.map((review) => (
             <ReviewCard key={review.username} {...review} />
           ))}

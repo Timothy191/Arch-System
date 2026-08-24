@@ -1,5 +1,35 @@
 # Portal Agent Tracer
 
+## Session 2026-08-24 (Multi-Site Production & Engineering Shift Report with PDF Export)
+
+- **Purpose**: Implement multi-site operational compilation for BKF, EXT, PLANT, and Bredell Workshop with excavator-truck tallies, bulldozer rollover tracking, and cryptographic digital PDF sign-off.
+- **Changes**:
+  - `apps/portal/styles/print-report.css`: Created standard A4 print stylesheet with zero chrome, page-break controls, high-density data tables, and digital verification seal styling.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/pdf-actions.ts`: Added Server Action `exportSignedShiftReportPdf` with HMAC-SHA256 digital signature seal generation.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/actions.ts`: Added Server Action `getMultiSiteShiftReport`.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/page.tsx` & `ShiftCompilationClient.tsx`: Integrated multi-site report fetching, view toggle, and `ExportPdfButton`.
+  - `apps/portal/app/layout.tsx`: Imported `print-report.css`.
+- **Verification**:
+  - `pnpm --filter @repo/departments/ui test` ✅ (16/16 test suites passed)
+  - `pnpm --filter @repo/contract test` ✅ (2/2 test suites passed)
+- **What the Next Agent Should Know**: The shift compilation view supports both single department breakdowns and cross-site compilation (BKF, EXT, PLANT, Bredell) with signed PDF export.
+
+## Session 2026-08-24 (Hub Page Layout, Spacing, Bordering & Background Asset Resolution)
+
+- **Purpose**: Refactor Hub page and its subcomponents (`layout.tsx`, `page.tsx`, `CoreOperationalModules`, `AlertTicker`, `ToolBanner`, `ProductionTrend`, `HeroRotator`, `DepartmentReviews`) to strictly adhere to design system specifications, and resolve missing downscaled background video (`1920x1080.mp4`) and poster (`2560x1764.png`) assets.
+- **Changes**:
+  - Generated `edge-of-the-event-horizon.1920x1080.mp4` (7.6MB) and `macos-27-golden-2560x1764.png` (2.8MB) via ffmpeg in `apps/portal/assets/background/` and synced them to `apps/portal/public/background/`.
+  - Updated `apps/portal/app/layout.tsx` to preload `/background/macos-27-golden-2560x1764.png`.
+  - `apps/portal/app/hub/layout.tsx`: Replaced conflicting padding utility classes and negative margins with standard max-width container (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-20 md:pb-12`).
+  - `apps/portal/app/hub/page.tsx`: Established standard section vertical rhythm (`space-y-10 sm:space-y-14`), unified section headers with semantic colored icon badges and subtle divider borders, removed duplicate comments, and refined telemetry `GlassCard` padding.
+  - `apps/portal/features/hub/components/CoreOperationalModules.tsx`: Refined search bar height and focus ring, category filter group styling, empty state padding (`p-8 sm:p-12`), and grid spacing (`gap-4 sm:gap-5`).
+  - `apps/portal/features/hub/components/AlertTicker.tsx`: Enhanced card radius (`rounded-2xl`), refined row padding and divider lines, padded status chips.
+- **Verification**:
+  - `pnpm nx test features-hub-ui` ✅ (6/6 tests passed)
+  - `pnpm --filter portal test app/hub features/hub` ✅ (18/18 tests passed)
+  - `pnpm nx run-many -t type-check lint --projects=features-hub-ui,portal` ✅ (All targets passed)
+- **What the Next Agent Should Know**: The Hub page shell and all child modules are fully aligned with OKLCH light-theme glass surfaces, named shadow tokens, and responsive padding boundaries.
+
 ## Session 2026-08-24 (Unified Shift Compilation & Closeout Engine)
 
 - **Purpose**: Implement end-to-end operational compilation aggregating hourly loads, SMU machine hours & delays, engineering breakdowns, and tire records into a single shift compilation and closeout dashboard.

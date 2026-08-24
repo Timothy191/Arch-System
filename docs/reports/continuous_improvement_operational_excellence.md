@@ -137,7 +137,7 @@ Foster easier onboarding, consistent development patterns, and a robust document
 ### Current Status
 
 - **Workspace Guides**: [docs/DOCUMENTATION_INDEX.md](file:///home/timoty/Desktop/project/Arch-System/docs/DOCUMENTATION_INDEX.md) and [CLAUDE.md](file:///home/timoty/Desktop/project/Arch-System/CLAUDE.md) are available as quick-reference indexes.
-- **Rules**: Detailed rules are isolated under [.claude/rules/](file:///home/timoty/Desktop/project/Arch-System/.claude/rules).
+- **Rules**: Consolidated in [CLAUDE.md](../../CLAUDE.md) (Conventions) and [CONTRIBUTING.md](../../CONTRIBUTING.md).
 - **Code Scaffolding**: Nx generators are configured to speed up creation.
 
 ### Action Plan & Recommendations

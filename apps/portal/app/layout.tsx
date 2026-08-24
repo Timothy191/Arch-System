@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import "@repo/ui/globals.css";
+import "@/styles/print-report.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
@@ -103,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         {/* Preload primary LCP background asset off critical path */}
         <link
           rel="preload"
-          href="/background/macos-27-golden-4480x3088-26626.png"
+          href="/background/macos-27-golden-2560x1764.png"
           as="image"
           type="image/png"
           fetchPriority="high"

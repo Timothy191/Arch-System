@@ -114,6 +114,7 @@
         "src/client.ts",
         "src/middleware.ts",
         "src/service-role.ts",
+        "src/seed.ts",
         ".eslintrc.{js,cjs}"
       ],
       "project": ["src/**/*.ts"],

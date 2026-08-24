@@ -1,5 +1,17 @@
 [
   {
+    "id": "log-20(26-08-24)",
+    "logNumber": 20,
+    "folderName": "log-20(26-08-24)",
+    "folderDate": "26-08-24",
+    "isoDate": "2026-08-24T08:25:58.438Z",
+    "displayDate": "8/24/2026, 8:25:58 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  },
+  {
     "id": "log-19(26-08-24)",
     "logNumber": 19,
     "folderName": "log-19(26-08-24)",

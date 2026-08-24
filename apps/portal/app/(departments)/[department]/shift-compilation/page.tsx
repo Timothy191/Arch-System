@@ -1,7 +1,7 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
-import { getUnifiedShiftReport } from "./actions";
+import { getUnifiedShiftReport, getMultiSiteShiftReport } from "./actions";
 import { ShiftCompilationClient } from "./ShiftCompilationClient";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,10 @@ export default async function ShiftCompilationPage({
   const shiftDate = queryDate || today;
   const shiftType = queryShift === "day" || queryShift === "night" ? queryShift : getCurrentShift();
 
-  const { data: compiledReport } = await getUnifiedShiftReport(deptId, shiftDate, shiftType);
+  const [{ data: compiledReport }, { data: multiSiteReport }] = await Promise.all([
+    getUnifiedShiftReport(deptId, shiftDate, shiftType),
+    getMultiSiteShiftReport(deptId, shiftDate, shiftType),
+  ]);
 
   const fallbackReport: UnifiedShiftReport = {
     meta: {
@@ -49,6 +52,7 @@ export default async function ShiftCompilationPage({
   return (
     <ShiftCompilationClient
       initialReport={report}
+      multiSiteReport={multiSiteReport || null}
       departmentId={deptId}
       departmentSlug={department}
       shiftDate={shiftDate}

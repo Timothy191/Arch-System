@@ -20,7 +20,8 @@
     "*.tsbuildinfo",
     "*.lock",
     ".prisma/**",
-    "**/AGENT_TRACER.md"
+    "**/AGENT_TRACER*.md",
+    "docs/archive/**"
   ],
   "ignoreRegExpList": [
     "sb_publishable_[A-Za-z0-9_]+",

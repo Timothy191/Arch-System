@@ -1,5 +1,27 @@
 # Database Agent Tracer
 
+## 2026-08-24: Multi-Site Production & Shift Report Migration (0148)
+
+### Purpose
+
+Provide schema support and RPC aggregation for multi-site operations (Brakfontein, Extension Pit, Processing Plant, and Bredell Workshop) with excavator haul tallies, bulldozer rollover volumes, ancillary runs, and equipment operational availability.
+
+### Changes Made
+
+1. **Migration 0148 `0148_multi_site_production_report.sql`**:
+   - Created enum `machine_operational_status` ('ACTIVE', 'STANDBY', 'BREAKDOWN', 'BREDELL', 'NO_OPERATOR', 'NO_SPACE', 'OFFSITE').
+   - Enhanced `machine_operations` with `operational_status`, `operator_name`, `start_smu`, `end_smu`, `site_code`.
+   - Created `excavator_haul_logs` and `excavator_truck_tallies` with unique constraints and loading metric defaults.
+   - Created `dozer_rollover_logs` with stored generated columns for delta hours and calculated pushed BCM (`push_factor_bcm_per_hour = 250.0`).
+   - Created `ancillary_shift_logs` for dust suppression, fuel delivery, and logistics.
+   - Enhanced `breakdowns` with `site_code`, `is_operational_defect`, and `duration_minutes`.
+   - Created `get_multi_site_shift_compilation` RPC function returning full multi-site JSONB structure.
+   - Enabled RLS with authenticated/service_role policies on all new tables.
+
+### Status
+
+- **Schema**: Ready for migration application.
+
 ## 2026-08-24: Unified Shift Compilation Migration (0147)
 
 ### Purpose

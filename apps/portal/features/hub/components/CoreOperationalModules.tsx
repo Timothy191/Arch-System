@@ -88,16 +88,18 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
   return (
     <section
-      className="space-y-4 animate-fade-up group/row relative aurora-shadow rounded-lg"
+      className="space-y-4 animate-fade-up group/row relative rounded-xl bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card p-4 sm:p-6"
       style={{ animationDelay: "0.2s", animationFillMode: "both" }}
     >
       {/* Section Header with Live Filtering */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 pb-3 border-b border-arch-border-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-arch-border-subtle">
         <div className="flex items-center gap-2">
-          <h2 className="text-[17px] font-medium text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
-            <Boxes className="w-4 h-4 text-arch-accent-blue opacity-70" />
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
+            <span className="p-1 rounded-md bg-arch-accent-blue/10 text-arch-accent-blue">
+              <Boxes className="w-4 h-4" />
+            </span>
             Core Operational Modules
-            <span className="ml-1 px-1.5 py-0.5 rounded-md bg-arch-surface-tertiary text-arch-text-tertiary text-[11px] font-mono">
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary text-[11px] font-mono">
               {filteredDepartments.length} / {departments.length}
             </span>
           </h2>
@@ -106,7 +108,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         {/* Search & Category Filter Pills */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Quick Search Input */}
-          <div className="relative flex-1 sm:w-48 min-w-[150px]">
+          <div className="relative flex-1 sm:w-52 min-w-[160px]">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-arch-text-tertiary pointer-events-none" />
             <input
               id="hub-module-search"
@@ -116,7 +118,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               placeholder="Search modules... (/)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-7 py-1 text-xs rounded-full bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
+              className="w-full h-8 pl-8 pr-7 text-xs rounded-lg bg-arch-surface-secondary/80 border border-arch-border-subtle focus:border-arch-accent-blue/50 focus:outline-none focus:ring-1 focus:ring-arch-accent-blue/50 text-arch-text-primary placeholder:text-arch-text-tertiary transition-all"
             />
             <span id="hub-module-search-hint" className="sr-only">
               Press slash or Command K to focus the module search
@@ -139,7 +141,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-1 bg-arch-surface-tertiary/60 p-0.5 rounded-full border border-arch-border-subtle text-xs font-medium"
+            className="flex items-center gap-1 bg-arch-surface-secondary/80 p-1 rounded-lg border border-arch-border-subtle text-xs font-medium"
             role="group"
             aria-label="Filter modules by category"
           >
@@ -148,9 +150,9 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === "all"}
               onClick={() => setActiveFilter("all")}
               className={cn(
-                "px-2.5 py-1 rounded-full transition-all text-xs",
+                "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "all"
-                  ? "bg-white text-arch-text-primary shadow-card"
+                  ? "bg-white text-arch-text-primary shadow-card font-semibold"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
@@ -162,9 +164,9 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 aria-pressed={activeFilter === "pinned"}
                 onClick={() => setActiveFilter("pinned")}
                 className={cn(
-                  "px-2.5 py-1 rounded-full transition-all text-xs flex items-center gap-1",
+                  "px-2.5 py-1 rounded-md transition-all text-xs flex items-center gap-1",
                   activeFilter === "pinned"
-                    ? "bg-white text-arch-accent-blue shadow-card"
+                    ? "bg-white text-arch-accent-blue shadow-card font-semibold"
                     : "text-arch-text-tertiary hover:text-arch-text-secondary",
                 )}
               >
@@ -177,9 +179,9 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === "active"}
               onClick={() => setActiveFilter("active")}
               className={cn(
-                "px-2.5 py-1 rounded-full transition-all text-xs",
+                "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "active"
-                  ? "bg-white text-accent-green shadow-card"
+                  ? "bg-white text-accent-green shadow-card font-semibold"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
@@ -190,9 +192,9 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               aria-pressed={activeFilter === "critical"}
               onClick={() => setActiveFilter("critical")}
               className={cn(
-                "px-2.5 py-1 rounded-full transition-all text-xs",
+                "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "critical"
-                  ? "bg-white text-accent-amber shadow-card"
+                  ? "bg-white text-accent-amber shadow-card font-semibold"
                   : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
@@ -204,7 +206,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
       {/* Grid Display */}
       {filteredDepartments.length === 0 ? (
-        <div className="p-8 text-center rounded-lg bg-arch-surface-tertiary/40 border border-arch-border-primary space-y-2">
+        <div className="p-8 sm:p-12 text-center rounded-2xl bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
           <p className="text-sm font-medium text-arch-text-secondary">
             No operational modules matched your search filter.
           </p>
@@ -220,7 +222,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         </div>
       ) : (
         <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 auto-rows-fr"
           aria-label="Department modules"
           role="list"
         >

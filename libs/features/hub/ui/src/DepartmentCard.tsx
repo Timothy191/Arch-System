@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useTransition, type ComponentType } from "react";
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { memo, useState, useEffect, useTransition } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -23,7 +26,7 @@ import type { Department } from "@repo/departments/data-access";
 import { Sparkline } from "./Sparkline";
 import { toast } from "sonner";
 
-const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
   Drill: Pickaxe,
   Factory,
@@ -76,9 +79,11 @@ interface DepartmentCardProps {
   index: number;
 }
 
-export function DepartmentCard({ department, index }: DepartmentCardProps) {
+function DepartmentCard({ department, index }: DepartmentCardProps) {
+  const router = useRouter();
   const [isNavigating, startTransition] = useTransition();
   const [isPinned, setIsPinned] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
@@ -132,25 +137,46 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           </div>
         )}
 
-        {/* Stretched client-side Link covering the entire card */}
+        {/* Stretched client-side Link with proper useTransition */}
         <Link
           href={route}
           prefetch={true}
-          onClick={() => {
-            startTransition(() => {});
+          onClick={(e) => {
+            e.preventDefault();
+            // Use useTransition for smoother navigation with loading state
+            startTransition(() => {
+              router.push(route);
+            });
           }}
           className="absolute inset-0 z-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue rounded-[24px]"
           aria-label={`Open ${department.displayName} department`}
           data-testid={`dept-link-${department.name}`}
         />
 
-        {/* Banner area */}
+        {/* Banner area with photographic / terrain visual background */}
         <div
           className={cn(
-            "uiverse-card-banner relative z-10 pointer-events-none",
+            "uiverse-card-banner relative z-10 pointer-events-none overflow-hidden",
             `uiverse-card-banner-${department.name}`,
           )}
         >
+          {/* Real industrial terrain visual background with liquid glass gradient overlay */}
+          <div className="absolute inset-0 z-0">
+            {!imageError && (
+              <Image
+                src={`/images/departments/${department.name}.jpg`}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-105"
+                onError={() => setImageError(true)}
+              />
+            )}
+            {/* Glass gradient overlay to ensure icon bubble contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 z-10" />
+          </div>
+
           {/* Save/Pin Button */}
           <button
             type="button"
@@ -172,7 +198,12 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
           </button>
 
           {/* Department Icon Bubble */}
-          <div className={cn("uiverse-card-icon-bubble border-arch-border-emphasis/25", config.bg)}>
+          <div
+            className={cn(
+              "uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20",
+              config.bg,
+            )}
+          >
             <Icon className="w-5 h-5" />
           </div>
         </div>
@@ -207,12 +238,12 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
                     key={action.label}
                     href={action.href}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 h-5.5 rounded-full glass-action-button text-[10px] font-medium transition-all interactive-element relative z-20"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[10.5px] font-medium text-arch-text-primary hover:text-arch-accent-blue bg-arch-surface-secondary/60 hover:bg-arch-surface-tertiary/90 border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-card hover:shadow-card-hover transition-all duration-200 ease-out hover:scale-105 active:scale-95 interactive-element relative z-20 group/action"
                     data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
-                    <FileText className="w-2.5 h-2.5 shrink-0" />
+                    <FileText className="w-3 h-3 shrink-0 text-arch-accent-blue opacity-80 group-hover/action:opacity-100 transition-opacity" />
                     <span>{action.label}</span>
-                    <ArrowUpRight className="w-2.5 h-2.5 opacity-50 shrink-0" />
+                    <ArrowUpRight className="w-3 h-3 opacity-60 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-transform duration-200 shrink-0 text-arch-accent-blue" />
                   </Link>
                 ))}
               </div>
@@ -238,3 +269,9 @@ export function DepartmentCard({ department, index }: DepartmentCardProps) {
     </div>
   );
 }
+
+// AGENT-TRACE: Memoize DepartmentCard to prevent re-renders when sibling cards
+// or parent hub state changes. Props (department, index) are stable across renders.
+const MemoizedDepartmentCard = memo(DepartmentCard);
+export { MemoizedDepartmentCard as DepartmentCard };
+export default MemoizedDepartmentCard;

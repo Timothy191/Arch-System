@@ -365,11 +365,10 @@ export default async function HubPage() {
   });
 
   return (
-    <div className="space-y-6 sm:space-y-12">
-      {/* Light-theme glass hero section */}
+    <div className="space-y-8 sm:space-y-10 w-full">
       {/* Light-theme glass hero section */}
       <section
-        className="relative overflow-hidden rounded-xl pt-1 pb-0 px-3 sm:px-6 max-w-5xl mx-auto w-full motion-reduce:animate-none animate-fade-up"
+        className="relative w-full pt-2 pb-2 px-4 sm:px-6 motion-reduce:animate-none animate-fade-up"
         style={{
           animationDelay: "0s",
           animationFillMode: "both",
@@ -414,9 +413,11 @@ export default async function HubPage() {
         className="space-y-4 animate-fade-up group/row"
         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
       >
-        <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-medium text-arch-text-primary flex items-center gap-2">
-            <Shield className="w-4 h-4 text-arch-accent-red" />
+        <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
+            <span className="p-1 rounded-md bg-accent-red/10 text-accent-red">
+              <Shield className="w-4 h-4" />
+            </span>
             Live System Urgency & Incident Controls
           </h2>
         </div>
@@ -432,15 +433,17 @@ export default async function HubPage() {
           className="space-y-4 animate-fade-up group/row"
           style={{ animationDelay: "0.3s", animationFillMode: "both" }}
         >
-          <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-            <h2 className="text-[17px] font-medium text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2">
-              <WrenchIcon className="w-4 h-4 text-arch-accent-blue opacity-70" />
+          <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
+              <span className="p-1 rounded-md bg-arch-accent-blue/10 text-arch-accent-blue">
+                <WrenchIcon className="w-4 h-4" />
+              </span>
               Daily Workflow & Efficiency Tools
             </h2>
           </div>
 
           <Suspense
-            fallback={<div className="h-24 animate-pulse bg-arch-surface-tertiary rounded-xl" />}
+            fallback={<div className="h-28 animate-pulse bg-arch-surface-tertiary rounded-2xl" />}
           >
             <ToolBanner tools={tools} />
           </Suspense>
@@ -452,16 +455,18 @@ export default async function HubPage() {
         className="space-y-4 animate-fade-up group/row"
         style={{ animationDelay: "0.4s", animationFillMode: "both" }}
       >
-        <div className="flex items-center justify-between pb-2 border-b border-arch-border-subtle">
-          <h2 className="text-[17px] font-medium text-arch-text-primary flex items-center gap-2">
-            <Activity className="w-4 h-4 text-arch-accent-green" />
+        <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
+            <span className="p-1 rounded-md bg-accent-green/10 text-accent-green">
+              <Activity className="w-4 h-4" />
+            </span>
             Operational Ingestion Telemetry
           </h2>
         </div>
         <GlassCard
           variant="default"
           padding
-          className="bg-arch-surface-secondary/70 border-arch-border-subtle"
+          className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-2xl p-5 sm:p-6"
         >
           <Suspense
             fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-xl" />}

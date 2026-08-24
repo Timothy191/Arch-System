@@ -1,5 +1,24 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-08-24 - Frontend Design System, Spacing, Padding & Bordering Polish
+
+- **Purpose**: Refactor Hub page components to align with modern frontend design standards, consistent spacing rhythm (4/8/16/24px), refined border hierarchies, and responsive padding.
+- **Changes**:
+  - `HeroRotator.tsx`: Elevated hero card internal padding (`p-4 sm:p-6 lg:p-7`), increased preview thumbnail height (`h-24 sm:h-28 lg:h-32`), polished typography hierarchy (`text-base sm:text-lg md:text-xl`), enhanced CTA button sizing and hover/focus rings, refined glass pill badges and dot indicator widths.
+  - `DepartmentReviews.tsx`: Upgraded review card dimensions (`w-[320px]`), added `MessageSquareQuote` semantic header icon, polished review card padding (`p-4 sm:p-5`), and glass surface styling (`bg-white/75 backdrop-blur-xl border border-black/[0.08]`).
+  - `AlertTicker.tsx`: Refined container with `rounded-2xl border border-arch-border-subtle bg-white/70 shadow-card`, enhanced header contrast, list row dividers, and padded status chips.
+  - `ToolBanner.tsx`: Polished tool card padding (`p-5 sm:p-6`), rounded-2xl glass card geometry, icon wrapper borders, and typographic hierarchy.
+  - `ProductionTrend.tsx`: Removed unwanted top margin offset (`mt-8` -> `mt-2`), added clean header divider, refined department legend badges with OKLCH tokens.
+  - `DepartmentCard.tsx`: Synchronized library implementation with photographic terrain background image fallback, `useTransition` navigation, and memoization.
+- **What the Next Agent Should Know**: Hub components use unified 4/8/16/24px rhythm with light-only glass surfaces (`bg-white/70 backdrop-blur-xl border border-black/[0.08]`), named shadow tokens (`shadow-card`, `shadow-card-hover`), and responsive layout containers.
+
+## 2026-08-24 - Context Optimization & Export Alignment
+
+- **Purpose**: Remove duplicate default export in `HeroRotator.tsx` to align exports with `@repo/features/hub/ui` named export barrel and eliminate knip duplicate export warning.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Removed `export default HeroRotator`, keeping canonical `export function HeroRotator`.
+- **What the Next Agent Should Know**: All consumers import `HeroRotator` as a named export from `@/features/hub` or `@repo/features/hub/ui`.
+
 ## 2026-08-24 - 3D Slideshow Orb & Standalone Ghost Preview Cards
 
 - **Purpose**: Implement 3D slideshow orb carousel layout where the main center view, the past preview card on the left, and the future preview card on the right each have their own independent, standalone liquid `GlassCard` wrapper angled in 3D space.
@@ -31,3 +50,14 @@
   - `pnpm nx run @repo/theme:lint:tokens --skip-nx-cache` ✅ (278 tokens, 161 references)
   - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
 - **What the Next Agent Should Know**: The carousel slide track must keep all panels mounted (the translate3d math depends on it); `content-visibility` + `inert` are the correct levers, not lazy-mounting. The sparkline pulse is now motion-safe. Adjacent panels stay fully rendered so the 500ms slide transition never shows a blank pop.
+
+## 2026-08-24 - Hero Rotator Taskbar Theme Alignment & Design Tokens
+
+- **Purpose**: Refactor 3D hero carousel cards to fully adopt the theme, liquid-glass effects, and OKLCH color palette of the top Mac Menu Bar (`MacMenuBar.tsx`).
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`:
+    - Adopted `liquid-glass-light border border-black/10 shadow-window rounded-2xl` matching top taskbar glass reflection.
+    - Integrated department squircle icons matching `DEPARTMENTS_LIST` from `MacMenuBar.tsx` (`Pickaxe`, `TrendingUp`, `ScanFace`, `CreditCard`, `TowerControl`, `HardHat`, `GraduationCap`, `Orbit`) with their departmental OKLCH tints (`text-dept-*`, `bg-dept-*/10`).
+    - Standardized typography and interaction tokens: `text-[var(--text-heading)]`, `text-[var(--text-secondary)]`, `text-[var(--text-muted)]`, `bg-[var(--accent-blue)]`.
+    - Refactored HUD pill controller to `liquid-glass-light border border-black/10 shadow-window` with smooth hover states and active dot highlighting in `bg-[var(--accent-blue)]`.
+- **What the Next Agent Should Know**: The hero carousel cards and top taskbar share identical macOS Sonoma liquid glass surfaces, department icon color definitions, and semantic design tokens.

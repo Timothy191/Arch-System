@@ -236,7 +236,7 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 - **Animation discipline** — animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Never animate layout properties. Easing is `cubic-bezier(0.16, 1, 0.3, 1)`.
 - **Glass pattern** — `bg-white/70 backdrop-blur-xl border border-black/[0.08]` is the standard surface.
 - **Icon and path aliases** — `@/*` and `~/*` both resolve to `apps/portal/*`. `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*` are conventional sub-cuts.
-- **Server Actions validate first line** — `createServerSupabaseClient()` from `@repo/supabase/server` and validate the user as line one. See `.claude/rules/auth.md`.
+- **Server Actions validate first line** — `createServerSupabaseClient()` from `@repo/supabase/server` and validate the user as line one.
 - **Conventional commits** — enforced by commitlint. Husky `commit-msg` hook will reject non-conforming messages.
 
 ## Testing
@@ -344,4 +344,3 @@ After editing `packages/theme/tokens.json`, run `pnpm --filter @repo/theme build
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** — Deployment guide for all environments.
 - **[SECURITY.md](SECURITY.md)** — Security policy and vulnerability reporting.
 - **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** — Full documentation index and quick navigation.
-- **[.claude/rules/](.claude/rules/)** — Auto-loaded domain rules (portal, auth, design-system, architecture, testing, verification).

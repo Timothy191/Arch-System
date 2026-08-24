@@ -6,10 +6,12 @@ import {
   unifiedShiftReportSchema,
   lockAndSignShiftSchema,
 } from "@repo/contract/schemas/shift-compilation.schema";
+import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
 import type {
   UnifiedShiftReport,
   LockAndSignShiftInput,
 } from "@repo/contract/types/shift-compilation.types";
+import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { logAuditEvent } from "@/lib/audit";
@@ -58,6 +60,57 @@ export async function getUnifiedShiftReport(
         details: parsed.error.issues,
       });
       return { error: "Failed to validate shift report data structure" };
+    }
+
+    return { data: parsed.data };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "An unexpected error occurred";
+    return { error: message };
+  }
+}
+
+// AGENT-TRACE: Server action fetching multi-site shift compilation from PostgreSQL RPC.
+export async function getMultiSiteShiftReport(
+  departmentId: string,
+  shiftDate: string,
+  shiftType: "day" | "night",
+): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      throw new AuthError("Unauthorized: valid session required", {
+        context: { operation: "getMultiSiteShiftReport" },
+      });
+    }
+
+    const { data, error } = await supabase.rpc("get_multi_site_shift_compilation", {
+      p_department_id: departmentId,
+      p_shift_date: shiftDate,
+      p_shift_type: shiftType,
+    });
+
+    if (error) {
+      serverLogger.error({
+        err: new Error(error.message),
+        context: "getMultiSiteShiftReport:rpc",
+        details: error,
+      });
+      return { error: error.message };
+    }
+
+    const parsed = multiSiteShiftReportSchema.safeParse(data);
+    if (!parsed.success) {
+      serverLogger.error({
+        err: new Error("Failed to validate multi-site shift report data structure"),
+        context: "getMultiSiteShiftReport:validation",
+        details: parsed.error.issues,
+      });
+      return { error: "Failed to validate multi-site shift report data structure" };
     }
 
     return { data: parsed.data };

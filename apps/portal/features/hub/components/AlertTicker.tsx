@@ -61,7 +61,7 @@ const severityConfig = {
 export function AlertTicker({ events }: AlertTickerProps) {
   if (events.length === 0) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent-green/20 w-fit backdrop-blur-xl">
+      <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-accent-green/20 bg-accent-green/5 w-fit backdrop-blur-xl shadow-sm">
         <div className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse" />
         <p className="text-xs text-accent-green font-medium">All systems operational</p>
       </div>
@@ -71,12 +71,12 @@ export function AlertTicker({ events }: AlertTickerProps) {
   return (
     <div
       className={cn(
-        "w-full rounded-xl border border-arch-border-primary overflow-hidden backdrop-blur-xl will-change-[backdrop-filter]",
+        "w-full rounded-2xl border border-arch-border-subtle bg-white/70 overflow-hidden shadow-card backdrop-blur-xl will-change-[backdrop-filter]",
       )}
     >
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-arch-border-primary bg-arch-surface-tertiary/60">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-arch-border-subtle bg-arch-surface-secondary/70">
         <AlertTriangle className="w-3.5 h-3.5 text-accent-amber" />
-        <span className="text-xs font-medium text-arch-text-primary uppercase tracking-wider">
+        <span className="text-xs font-semibold text-arch-text-primary uppercase tracking-wider">
           Live Alerts
         </span>
         <span className="ml-auto text-[10px] font-mono text-arch-text-tertiary">
@@ -84,7 +84,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
         </span>
       </div>
 
-      <AutoAnimateList className="max-h-[200px] overflow-y-auto">
+      <AutoAnimateList className="max-h-[220px] overflow-y-auto divide-y divide-arch-border-subtle/60">
         {events.map((event) => {
           const config = severityConfig[event.severity];
           const Icon = event.type === "breakdown" ? Wrench : AlertTriangle;
@@ -94,7 +94,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
               key={event.id}
               href={event.href}
               className={cn(
-                "flex items-start gap-3 px-4 py-3 border-b border-arch-border-subtle last:border-b-0",
+                "flex items-start gap-3 px-4 py-3",
                 "hover:bg-arch-surface-secondary/50 transition-colors duration-150",
               )}
             >
@@ -104,7 +104,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-medium text-arch-text-primary truncate">
+                  <span className="text-xs sm:text-sm font-medium text-arch-text-primary truncate">
                     {event.title}
                   </span>
                   <span
@@ -117,7 +117,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
                   </span>
                 </div>
                 {event.description && (
-                  <p className="text-xs text-arch-text-tertiary line-clamp-1 mb-1">
+                  <p className="text-xs text-arch-text-secondary line-clamp-1 mb-1">
                     {event.description}
                   </p>
                 )}

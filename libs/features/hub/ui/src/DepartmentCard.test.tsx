@@ -2,6 +2,19 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { DepartmentCard } from "./DepartmentCard";
 import type { Department } from "@repo/departments/data-access";
 
+// AGENT-TRACE: DepartmentCard uses useRouter() from next/navigation.
+// Must mock it before rendering or the component throws.
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+  }),
+}));
+
 // Mock Sparkline to avoid rendering complexity
 jest.mock("./Sparkline", () => ({
   Sparkline: () => <div data-testid="sparkline" />,

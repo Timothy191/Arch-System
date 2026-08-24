@@ -19,7 +19,6 @@ catalog:
   sonner: "^2.0.1"
   animejs: "^4.4.1"
   framer-motion: "^12.40.0"
-  lenis: "^1.2.0"
   recharts: "^3.8.1"
   zod: "^4.4.3"
   zustand: "^5.0.14"

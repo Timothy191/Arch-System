@@ -8,8 +8,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 - **[docs/ONBOARDING.md](./ONBOARDING.md)** - Step-by-step developer onboarding checklist
 - **[README.md](../README.md)** - Project overview and quick start (5 min read)
-- **[CLAUDE.md](../CLAUDE.md)** - Slim always-on agent index (~2 min read)
-- **[.claude/guides/operational-handbook.md](../.claude/guides/operational-handbook.md)** - Full technical onboarding (archived detail)
+- **[CLAUDE.md](../CLAUDE.md)** - Authoritative technical guide: commands, architecture, conventions, codegen (~2 min read)
 - **[docs/wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)** - Project Overview & Tech Stack (Deep architectural & stack breakdown)
 
 ### Quick Reference
@@ -23,8 +22,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Core Development
 
-- **[CLAUDE.md](CLAUDE.md)** - Slim session index (commands, tracing, links to rules)
-- **[.claude/guides/operational-handbook.md](../.claude/guides/operational-handbook.md)** - Full technical guide (workflows, pitfalls, MCP, agent contracts)
+- **[CLAUDE.md](../CLAUDE.md)** - Authoritative technical guide (commands, tracing, conventions)
 
 ### Workflow & Quality
 

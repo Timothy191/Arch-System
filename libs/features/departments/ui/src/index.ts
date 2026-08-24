@@ -9,6 +9,8 @@ export * from "./control-room/BreakdownsShiftWidget";
 export * from "./control-room/TireAlertsBanner";
 export * from "./control-room/ShiftCompilationHeader";
 export * from "./control-room/UnifiedShiftCloseoutModal";
+export * from "./control-room/MultiSiteShiftReportClient";
+export * from "./control-room/ExportPdfButton";
 export * from "./control-room/FuxaFrame";
 export * from "./control-room/MachineControl";
 export * from "./control-room/ScadaPanel";

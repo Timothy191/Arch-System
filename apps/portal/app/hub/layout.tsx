@@ -35,12 +35,10 @@ export default async function HubLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">
       <div className="relative z-10">
-        {/* Content */}
-        <div>
-          <main className="w-full px-4 pt-0 pb-6 sm:px-8 sm:pt-0 sm:pb-8 pb-20 md:pb-8 -mt-4">
-            {children}
-          </main>
-        </div>
+        {/* Full-width responsive Hub Content Container */}
+        <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 pt-2 pb-20 md:pb-12">
+          {children}
+        </main>
 
         {/* Mobile bottom navigation (hidden on md+) */}
         <BottomNav accessibleDepartments={accessibleDepartments} />
