@@ -16,7 +16,8 @@
  *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
  */
 
-import Image from "next/image";
+import NextImage from "next/image";
+import { Radio, Cpu, ShieldCheck } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
 
 interface LogoItem {
@@ -29,25 +30,37 @@ interface TrustLogosProps {
 }
 
 const PLACEHOLDERS = [
-  { label: "Arch Mining" },
-  { label: "Sector-01" },
-  { label: "Modbus Ready" },
-  { label: "ISO 27001" },
+  {
+    label: "Arch Mining",
+    icon: <Logo className="w-3 h-3 mr-1.5 shrink-0 text-[var(--accent-blue)]" />,
+  },
+  {
+    label: "Sector-01",
+    icon: <Radio className="w-3 h-3 mr-1.5 shrink-0 text-accent-green" />,
+  },
+  {
+    label: "Modbus Ready",
+    icon: <Cpu className="w-3 h-3 mr-1.5 shrink-0 text-[var(--accent-blue)]" />,
+  },
+  {
+    label: "ISO 27001",
+    icon: <ShieldCheck className="w-3 h-3 mr-1.5 shrink-0 text-accent-green" />,
+  },
 ];
 
 export function TrustLogos({ logos }: TrustLogosProps) {
   const hasLogos = logos && logos.length > 0;
 
   return (
-    <div className="pt-6 border-t border-arch-border-subtle">
-      <p className="text-[10px] uppercase tracking-wider text-arch-text-tertiary font-medium mb-3">
+    <div className="pt-3 border-t border-black/[0.08]">
+      <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-mono font-medium mb-2">
         Trusted by forward-thinking teams
       </p>
 
       {hasLogos ? (
-        <div className="flex flex-wrap items-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+        <div className="flex flex-wrap items-center gap-3 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
           {logos.map((logo) => (
-            <Image
+            <NextImage
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
@@ -59,13 +72,13 @@ export function TrustLogos({ logos }: TrustLogosProps) {
           ))}
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {PLACEHOLDERS.map((p) => (
             <span
               key={p.label}
-              className="inline-flex items-center justify-center h-7 px-3 text-xs font-medium text-arch-text-secondary bg-arch-surface-tertiary/80 rounded-md border border-arch-border-subtle"
+              className="inline-flex items-center justify-center h-6 px-3 text-[11px] font-medium font-mono text-[var(--text-secondary)] bg-white/70 backdrop-blur-md rounded-full border border-black/[0.08] shadow-card transition-colors hover:bg-white/90"
             >
-              {p.label === "Arch Mining" && <Logo className="w-3.5 h-3.5 mr-1.5 shrink-0" />}
+              {p.icon}
               {p.label}
             </span>
           ))}

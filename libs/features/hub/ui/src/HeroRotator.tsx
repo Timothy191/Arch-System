@@ -246,10 +246,13 @@ function HeroSlide({
 
   const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, -42, 0, 42, 0]);
   const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
+  const z = useTransform(offset, [-2, -1, 0, 1, 2], [-250, -120, 0, -120, -250]);
   const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.7, 0.88, 1, 0.88, 0.7]);
   const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0.65, 1, 0.65, 0]);
   const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
   const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.1 ? "auto" : "none"));
+  const blurValue = useTransform(offset, [-2, -1, 0, 1, 2], [8, 4, 0, 4, 8]);
+  const filter = useMotionTemplate`blur(${blurValue}px)`;
 
   return (
     <motion.div
@@ -297,6 +300,8 @@ function HeroSlide({
         opacity,
         zIndex,
         pointerEvents,
+        z,
+        filter,
       }}
       className="absolute top-0 bottom-0 will-change-transform transform-gpu"
     >

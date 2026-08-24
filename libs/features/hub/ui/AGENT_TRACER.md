@@ -1,5 +1,27 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-08-24 - HeroRotator Elite 3D Spatial Cylinder Physics & Focal Blur
+
+- **Purpose**: Implement continuous 3D spatial cylinder mechanics on `<HeroSlide>` with `translateZ` depth tracking (`z: [-250, -120, 0, -120, -250]`) and dynamic depth-of-field focal blur (`filter: blur([8, 4, 0, 4, 8]px)`).
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`:
+    - Added `z` translation to `useTransform` mappings in `HeroSlide` for true 3D spatial projection.
+    - Added `filter: blur(...)` using `useMotionTemplate` on non-active flanking cards.
+    - Attached `z` and `filter` into `HeroSlide` motion.div inline styles.
+- **Verification**:
+  - `pnpm --filter @repo/hub/ui test` ✅ (16/16 tests passing)
+- **What the Next Agent Should Know**: `<HeroSlide>` uses continuous GPU-composited `translateZ` and dynamic focal blur. `transform-gpu` and `will-change-transform` prevent layout reflows during panning and automatic rotation.
+
+## 2026-08-24 - TrustLogos SVG Icons & Spacing Elevation
+
+- **Purpose**: Integrate dedicated SVG vector icons (`Logo`, `Radio`, `Cpu`, `ShieldCheck`) into each placeholder trust pill, refine typography to font-mono, and adjust vertical padding and margins so pill borders never collide with outer hero card borders.
+- **Changes**:
+  - `libs/features/hub/ui/src/TrustLogos.tsx`: Added Lucide & Logo icons to each badge, updated container padding to `pt-1.5 border-t border-black/[0.08]` to elevate the component above bottom card bounds.
+  - `apps/portal/features/hub/components/TrustLogos.tsx`: Synchronized icon definitions and responsive padding.
+- **Verification**:
+  - `pnpm --filter @repo/hub/ui test` ✅ (16/16 tests passing)
+- **What the Next Agent Should Know**: Each placeholder item in `TrustLogos` now has an explicit SVG `icon` JSX node and renders in a `rounded-full` liquid-glass pill.
+
 ## 2026-08-24 - HeroRotator Rules-of-Hooks, Pause-Conflict & A11y Hardening
 
 - **Purpose**: Resolve the Rules-of-Hooks violation (per-slide `useTransform` calls inside `panels.map`), separate hover-pause from manual-pause so cursor movement no longer clobbers the play/pause toggle, and close a11y/UX gaps (keyboard nav, drag-vs-click double-advance, `inert` on React 19, magic constants).
