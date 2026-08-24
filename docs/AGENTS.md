@@ -89,6 +89,7 @@ Deploy: `pnpm deploy:local` / `deploy:staging` / `deploy:production` / `deploy:r
 
 | Path                                     | Covers                                                       |
 | ---------------------------------------- | ------------------------------------------------------------ |
+| `.claude/rules/process.md`               | Consolidated task discipline, TDD, debugging, verification   |
 | `.claude/rules/architecture.md`          | Monorepo, packages, DB, AI                                   |
 | `.claude/rules/portal.md`                | Routes, shell, CI order, path aliases, Jest moduleNameMapper |
 | `.claude/rules/auth.md`                  | Middleware, RLS, `/api/c66` exemption                        |
@@ -97,6 +98,7 @@ Deploy: `pnpm deploy:local` / `deploy:staging` / `deploy:production` / `deploy:r
 | `.claude/rules/development-practices.md` | Dev workflow                                                 |
 | `.claude/rules/code-review.md`           | Review checklist                                             |
 | `.claude/rules/thought-process.md`       | Token conservation + response format                         |
+| `.claude/agents/*.md`                    | Domain specialist agent persona profiles                     |
 
 ## Nx Guidelines
 
