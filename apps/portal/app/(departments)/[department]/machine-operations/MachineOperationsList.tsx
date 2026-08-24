@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock, AlertCircle } from "lucide-react";
 
@@ -48,6 +48,15 @@ function formatTime(timeStr: string) {
 }
 
 export function MachineOperationsList({ operations, todayLoads }: MachineOperationsListProps) {
+  // Pre-index total loads by machine_id to replace nested O(N * M) `.filter()` lookups with O(1) Map lookups
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const load of todayLoads || []) {
+      map.set(load.machine_id, (map.get(load.machine_id) || 0) + (load.total_loads || 0));
+    }
+    return map;
+  }, [todayLoads]);
+
   if (operations.length === 0) {
     return (
       <GlassCard>
@@ -83,9 +92,7 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
         const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
           const bf = op.machine?.bin_factor || 0;
-          const loads = todayLoads
-            .filter((l) => l.machine_id === op.machine_id)
-            .reduce((s, l) => s + (l.total_loads || 0), 0);
+          const loads = loadsByMachine.get(op.machine_id) || 0;
           return sum + loads * bf;
         }, 0);
 
@@ -120,7 +127,11 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
                 </h5>
                 <div className="space-y-2">
                   {dayOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
+                    <OperationCard
+                      key={op.id}
+                      operation={op}
+                      machineLoads={loadsByMachine.get(op.machine_id) || 0}
+                    />
                   ))}
                 </div>
               </div>
@@ -134,7 +145,11 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
                 </h5>
                 <div className="space-y-2">
                   {nightOps.map((op) => (
-                    <OperationCard key={op.id} operation={op} todayLoads={todayLoads} />
+                    <OperationCard
+                      key={op.id}
+                      operation={op}
+                      machineLoads={loadsByMachine.get(op.machine_id) || 0}
+                    />
                   ))}
                 </div>
               </div>
@@ -148,20 +163,16 @@ export function MachineOperationsList({ operations, todayLoads }: MachineOperati
 
 function OperationCard({
   operation,
-  todayLoads,
+  machineLoads,
 }: {
   operation: MachineOperation;
-  todayLoads: HourlyLoadSummary[];
+  machineLoads: number;
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
-  // Calculate BCM metrics
+  // Calculate BCM metrics using pre-indexed machineLoads (O(1) lookup)
   const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads =
-    todayLoads
-      ?.filter((l) => l.machine_id === operation.machine_id)
-      ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;

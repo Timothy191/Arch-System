@@ -1,5 +1,14 @@
 # Portal Agent Tracer
 
+## 2026-08-24: MachineOperationsList Pre-indexed Hourly Loads Optimization
+
+- **Purpose**: Optimize rendering performance of `MachineOperationsList.tsx` by pre-indexing `todayLoads` into a `useMemo` Map keyed by `machine_id`, eliminating O(N * M) nested `.filter()` iterations on every render pass.
+- **Changes**:
+  1. `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsList.tsx`: Pre-indexed `todayLoads` using `useMemo` (`loadsByMachine`). Replaced nested `.filter()` in site BCM calculation and passed `machineLoads` directly to `OperationCard`.
+  2. `apps/portal/app/(departments)/[department]/machine-operations/MachineOperationsList.test.tsx`: Added unit test suite covering empty state, site grouping, BCM metrics calculations, and delay details expansion.
+- **Verification**: Ran `pnpm --filter portal test` and verified all 85 test suites (659 tests) passed cleanly.
+- **What the Next Agent Should Know**: `MachineOperationsList` now computes machine loads in O(1) time per operation rather than scanning the full `todayLoads` array on every render.
+
 ## 2026-08-18: DepartmentCard Quick Actions Micro-Animations & Styling Enhancement
 
 - **Purpose**: Enhance `DepartmentCard.tsx` quick action pills with dynamic micro-animations, active glow feedback, and smooth icon transitions.
