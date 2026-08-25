@@ -313,14 +313,19 @@ export default async function HubPage() {
   // shell streams immediately. The slow ProductionTrend fetch is hoisted into
   // a Suspense child (`ProductionTrendSection`) so it streams after the shell
   // paints. `AlertTicker` and live shift metrics stay fast and cached.
+  //
+  // AGENT-TRACE: Using Promise.allSettled so a single DB/network failure
+  // (e.g. local Supabase down, Redis unavailable) never propagates an
+  // unhandled rejection to HubPage and triggers the error boundary.
+  // Each slot has a typed safe default so the page always renders.
   const [
-    { incidentCount, breakdownCount, offlineMachineCount },
-    accessibleDeptIds,
-    tools,
-    alertEvents,
-    liveMetrics,
-    userRole,
-  ] = await Promise.all([
+    dashboardCountsResult,
+    accessibleDeptIdsResult,
+    toolsResult,
+    alertEventsResult,
+    liveMetricsResult,
+    userRoleResult,
+  ] = await Promise.allSettled([
     getDashboardCounts(today, cookieList),
     getAccessibleDepartmentNames(userId, cookieList),
     getTools(),
@@ -334,6 +339,22 @@ export default async function HubPage() {
       .single()
       .then(({ data }) => data?.role ?? null),
   ]);
+
+  const { incidentCount, breakdownCount, offlineMachineCount } =
+    dashboardCountsResult.status === "fulfilled"
+      ? dashboardCountsResult.value
+      : { incidentCount: 0, breakdownCount: 0, offlineMachineCount: 0 };
+
+  const accessibleDeptIds =
+    accessibleDeptIdsResult.status === "fulfilled" ? accessibleDeptIdsResult.value : [];
+
+  const tools = toolsResult.status === "fulfilled" ? toolsResult.value : [];
+
+  const alertEvents = alertEventsResult.status === "fulfilled" ? alertEventsResult.value : [];
+
+  const liveMetrics = liveMetricsResult.status === "fulfilled" ? liveMetricsResult.value : {};
+
+  const userRole = userRoleResult.status === "fulfilled" ? userRoleResult.value : null;
 
   const canSeeExecutive = userRole === "admin" || userRole === "manager";
 
