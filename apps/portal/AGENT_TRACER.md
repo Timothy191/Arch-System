@@ -1,5 +1,17 @@
 # Portal Agent Tracer
 
+## Session 2026-08-25 (ExcavatorActivityList Render Lookup Optimization)
+
+- **Purpose**: Eliminate O(A * T) nested array filter lookups in `ExcavatorActivityList` during component render by pre-indexing assignments into a memoized Map.
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityList.tsx`: Pre-indexed `todayAssignments` into `assignmentsByActivityId` using `useMemo`. Replaced nested `todayAssignments.filter()` calls with O(1) Map lookups.
+  - `apps/portal/app/(departments)/[department]/excavator-activity/ExcavatorActivityList.test.tsx`: Added unit test covering site grouping, shift details, assignment lookups, and total calculations.
+- **Verification**:
+  - `pnpm --filter portal test -- ExcavatorActivityList` ✅ (1/1 passed)
+  - `pnpm --filter portal test` ✅ (95/95 test suites passed)
+  - `pnpm lint` ✅ (25 projects passed)
+- **What the Next Agent Should Know**: `ExcavatorActivityList` now uses pre-indexed Map lookups for dumper assignments, matching the performance pattern used in `ExcavatorActivityList` and `HourlyLoadsGrid`.
+
 ## Session 2026-08-24 (Large Geospatial InSAR & Telemetry Event Loop Lag Optimization)
 
 - **Purpose**: Prevent Node.js main event loop blocking and request latency spikes during large geospatial InSAR scene processing, point-cloud transformations, and background telemetry streaming.
