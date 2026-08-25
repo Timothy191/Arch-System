@@ -183,5 +183,6 @@
       "notDependOnLibsWithTags": ["scope:app"]
     }
   ],
-  "nxCloudId": "6a86c7aa30436118802a8634"
+  "nxCloudId": "6a86c7aa30436118802a8634",
+  "nxCloudAccessToken": "NzE0N2NjYTItNWJmOS00YjZkLWI1MzMtZGI5YmM2ZDY0OTg3fHJlYWQtd3JpdGU="
 }
