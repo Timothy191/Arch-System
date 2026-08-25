@@ -16,7 +16,7 @@ export function useControlRoomSummary(deptId: string, today: string) {
       const [todayOperations, todayDelayEntries, todayLoads, machines] = await Promise.all([
         supabase
           .from("machine_operations")
-          .select("hours_worked, end_time, delay_entries:delay_entries(duration_hours, status)")
+          .select("hours_worked, end_smu, delay_entries:delay_entries(duration_hours, status)")
           .eq("department_id", deptId)
           .eq("shift_date", today),
         supabase
@@ -36,7 +36,7 @@ export function useControlRoomSummary(deptId: string, today: string) {
       const totalHours =
         todayOperations.data?.reduce((sum, op) => sum + (op.hours_worked || 0), 0) || 0;
       const activeOperations =
-        todayOperations.data?.filter((op) => op.end_time === null).length || 0;
+        todayOperations.data?.filter((op) => op.end_smu === null).length || 0;
 
       const totalDelayHours =
         todayDelayEntries.data?.reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
@@ -49,8 +49,7 @@ export function useControlRoomSummary(deptId: string, today: string) {
           ?.filter((d) => d.status === "draft")
           .reduce((sum, d) => sum + (d.duration_hours || 0), 0) || 0;
 
-      const totalLoads =
-        todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+      const totalLoads = todayLoads.data?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
       const machineCount = machines.count ?? 0;
 
       return {
