@@ -1,6 +1,7 @@
 {
   "name": "arch-systems",
   "version": "1.5.1",
+  "nxCloudTestProp": "trigger-cache-fill",
   "commitlint": {
     "extends": [
       "./config/tools/commitlint.config.mjs"
