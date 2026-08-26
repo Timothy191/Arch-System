@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Search, UserPlus, Edit2, Trash2 } from "lucide-react";
@@ -82,11 +82,20 @@ export function UsersTab() {
     loadData();
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
+  // Optimization: Memoize filtered employees to prevent O(N) array filtering on every component re-render
+  const filteredEmployees = useMemo(
+    () =>
+      employees.filter((emp) =>
+        emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [employees, searchTerm],
   );
 
-  const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
+  // Optimization: Memoize department lookup Map to avoid reconstructing Map on every render
+  const deptMap = useMemo(
+    () => new Map(departments.map((d) => [d.id, d.display_name])),
+    [departments],
+  );
 
   return (
     <div className="space-y-6">
