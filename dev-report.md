@@ -1,7 +1,7 @@
 # Development Boot Report
 
-- **Status**: ❌ TIMEOUT (stuck > 10s)
-- **Timestamp**: 2026-08-26T05:23:55.189Z
+- **Status**: ✅ SUCCESS
+- **Timestamp**: 2026-08-26T10:03:44.360Z
 - **Node.js**: v22.23.2
 - **pnpm**: 9.15.9
 
@@ -10,22 +10,23 @@
 ### Phase 0: Pre-flight
 
 - ✅ **Temp artifacts** - _cleaned_
-- ⚠️ **Portal health** - _needs restart_
+- ✅ **Portal health** - _serving pages_
+- ⚠️ **Source files** - _changed since last start — force restart_
 - ✅ **Restart** - _preparing fresh start_
 - ⏭️ **Stale portal process** - _no pid file_
-- ✅ **Port 3000 cleared** - _already free_
+- ✅ **Port 3000 cleared** - _freed by force_
 - ⏭️ **Agent run cache (.kilo)** - _not present_
-- ✅ **Nx cache** - _size acceptable (130MB)_
+- ✅ **Nx cache** - _size acceptable (12MB)_
 - ⏭️ **Python bytecode** - _no **pycache** directories_
 - ⏭️ **Python virtual environment (.venv)not present**
 - ⏭️ **Vercel cache (.vercel)** - _not present_
 - ✅ **Orphan MCP workers** - _cleaned_
 - ⏭️ **Deployment logs directorynot present**
-- ✅ **Next.js portal cache** - _freed 20K_
-- ⏭️ **Next.js CMS cache** - _not present_
-- ⏭️ **Next.js overview cache** - _not present_
+- ✅ **Next.js portal cache** - _freed 1.5M_
+- ✅ **Next.js CMS cache** - _freed 16K_
+- ✅ **Next.js overview cache** - _freed 236K_
 - ⏭️ **Pytest cache** - _not present_
-- ✅ **Portal log** - _cleared 4.0K_
+- ✅ **Portal log** - _cleared 196K_
 
 ### Phase 1: Environment
 
@@ -52,7 +53,7 @@
 ### Phase 2.6: Security & Exposure
 
 - ✅ **Redis bind** - _localhost-only (localhost)_
-- ⚠️ **FUXA SCADA** - _<http://localhost:1881> reachable (HTTP 200) — confirm auth is enabled (controls real devices)_
+- ⏭️ **FUXA SCADA** - _<http://localhost:1881> not reachable_
 - ✅ **Anon key** - _NEXT_PUBLIC_SUPABASE_ANON_KEY present_
 - ℹ️ **RLS advisory** - _ensure RLS ENABLED on every non-public table (employees.role/department_id policies)_
 - ✅ **MCP secrets** - _no service-role keys in MCP configs (3/3 present, all gitignored)_
@@ -60,83 +61,26 @@
 
 ### Phase 3: Portal
 
-- ❌ **Watchdog timeout: Boot hung or exceeded 10 seconds.**
+- ✅ **Dev server** - _<http://localhost:3000> (compiled)_
 
-## Troubleshooting & Diagnostics
+### Phase 3b: Additional Apps
 
-### Last 50 lines of dev.log
+- ⏭️ **Extra apps** - _use --cms, --overview, or --all_
 
-```text
-  [OK] Port 8000 (Kong Gateway) free
-  [OK] Environment file         exists
-  [OK] Dependencies
+### Phase 4: Smoke Tests
 
-  PHASE 2 › Infrastructure (Cloud-First)
-  ────────────────────────────────────────────────────────
-  [OK] Supabase API             https://mrwhtxbhrzyttlsyuofc.supabase.co reachable (HTTP 401)
-  [OK] Database                 cloud Postgres reachable via REST
-  [SKIP] Studio                   hosted dashboard at supabase.com
+- ✅ **Health API** - _/api/health_
+- ✅ **Login page** - _/login_
+- ✅ **Auth config** - _anon key present_
+- ✅ **Static assets**
+- ⚠️ **FUXA SCADA** - _<http://localhost:1881> not reachable (SCADA degraded mode will activate)_
+- ✅ **Database** - _hosted REST reachable (HTTP 401, RLS-gated)_
+- ✅ **Redis ping** - _PONG (127.0.0.1:6379)_
+- ℹ️ **Auth endpoint** - _set SMOKE_TEST_EMAIL/SMOKE_TEST_PASSWORD in apps/portal/.env to enable_
 
-  PHASE 2.5 › MCP Servers
-  ────────────────────────────────────────────────────────
-Syncing MCP configurations...
-Generated /home/tim/Documents/Arch-System/.mcp.json
-Generated /home/tim/Documents/Arch-System/.agents/mcp_config.json
-Generated /home/tim/Documents/Arch-System/.vscode/mcp.json
-  [OK] MCP Configs              synchronized
-Validating MCP Servers Configuration & Connectivity
+### Phase 5: Environment Notes
 
-  • codebase-memory ... ✓ Ready (npx verified)
-  • context7 ... ✓ Ready (npx verified)
-  • knowledge-rail ... ✓ Ready (npx verified)
-  • next-devtools ... ✓ Ready (npx verified)
-  • nx-mcp ... ✓ Ready (npx verified)
-  • postgres ... ⚠ Postgres database not running on port 54322 (Supabase)
-
-Validation complete: PASS (0 error(s), 1 warning(s))
-
-  [OK] MCP Status               verified and operational
-
-  PHASE 2.6 › Security & Exposure
-  ────────────────────────────────────────────────────────
-  [OK] Redis bind               localhost-only (localhost)
-  [WARN] FUXA SCADA               http://localhost:1881 reachable (HTTP 200) — confirm auth is enabled (controls real devices)
-  [OK] Anon key                 NEXT_PUBLIC_SUPABASE_ANON_KEY present
-  [INFO] RLS advisory             ensure RLS ENABLED on every non-public table (employees.role/department_id policies)
-  [OK] MCP secrets              no service-role keys in MCP configs (3/3 present, all gitignored)
-  [WARN] postgres MCP             → 127.0.0.1:54322 (local); codebase-memory tools can't reach hosted DB
-      Repoint to hosted Supabase via Supavisor (port 6543):
-      postgresql://postgres.mrwhtxbhrzyttlsyuofc:{DB_PASSWORD}@aws-0-{REGION}.pooler.supabase.com:6543/postgres
-      Get the exact string + password from:
-      https://supabase.com/dashboard/project/mrwhtxbhrzyttlsyuofc/settings/database
-      Then update .mcp.json, .agents/mcp_config.json, .vscode/mcp.json (all gitignored).
-
-  PHASE 3 › Portal
-  ────────────────────────────────────────────────────────
-  INFO Starting Next.js dev server...
-
-  [ERR] Watchdog timeout: Boot hung or exceeded 10 seconds.
-
-```
-
-### Last 50 lines of portal.log
-
-```text
-
-> portal@1.0.0 dev /home/tim/Documents/Arch-System/apps/portal
-> next dev --turbopack --hostname 0.0.0.0
-
-▲ Next.js 16.2.6 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://0.0.0.0:3000
-- Environments: .env.local, .env
-✓ Ready in 399ms
-- Experiments (use with caution):
-  · clientTraceMetadata
-  ✓ inlineCss
-  · optimizePackageImports
-  · webVitalsAttribution
-
-○ Compiling /login ...
-
-```
+- ✅ **inotify** - _max_user_watches=524288_
+- ✅ **Nx cache** - _12MB_
+- ℹ️ **Portal log** - _logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence_
+- ℹ️ **Free-tier** - _hosted free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier_

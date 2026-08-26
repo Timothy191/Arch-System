@@ -246,6 +246,63 @@ jobs:
           curl -f ${{ vars.PRODUCTION_URL }}/api/health || exit 1
           curl -f ${{ vars.PRODUCTION_URL }}/login || exit 1
 
+      - name: Output URL
+        id: deploy
+        run: echo "url=${{ vars.PRODUCTION_URL }}" >> $GITHUB_OUTPUT
+
+      # ── Publish Build Artifacts to GitHub ──────────────────────────
+      # Pushes the production build output as a versioned GitHub Release
+      # asset so the built artifact is archived alongside the source tag.
+      - name: Publish Build Artifacts
+        if: always() && startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tar -czf arch-systems-build-${{ github.ref_name }}.tar.gz \
+            -C apps/portal/.next/standalone . \
+            --exclude='*.log' --exclude='*.pid' 2>/dev/null || \
+          tar -czf arch-systems-build-${{ github.ref_name }}.tar.gz \
+            -C apps/portal/out . \
+            --exclude='*.log' --exclude='*.pid' 2>/dev/null || \
+          echo "No standalone or static export — skipping tarball."
+
+          gh release upload "${{ github.ref_name }}" \
+            arch-systems-build-${{ github.ref_name }}.tar.gz \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Push Build Snapshot to Deployment Branch ─────────────────────
+      # Optionally pushes a deployment snapshot to a `deployments/<sha>`
+      # branch so a built artifact reference is tracked in git history.
+      # Requires `push` permission on the repo (default for GITHUB_TOKEN
+      # on the same repo). Disabled by default — set DEPLOY_PUSH_BRANCH
+      # in the production environment variables to enable.
+      - name: Push Build to Deployment Branch
+        if: always() && vars.DEPLOY_PUSH_BRANCH != ''
+        run: |
+          SHORT_SHA="${{ github.sha }}"
+          DEPLOY_BRANCH="deployments/${SHORT_SHA}"
+          git config user.name "arch-systems-deploy[bot]"
+          git config user.email "deploy@arch-systems.os"
+
+          tar -czf build-snapshot.tar.gz \
+            -C apps/portal/.next/standalone . \
+            --exclude='*.log' --exclude='*.pid' 2>/dev/null || \
+          tar -czf build-snapshot.tar.gz \
+            -C apps/portal/out . \
+            --exclude='*.log' --exclude='*.pid' 2>/dev/null || \
+          echo "No build output — skipping."
+
+          git checkout --orphan "$DEPLOY_BRANCH" 2>/dev/null || git reset --hard
+          git clean -fdxq
+          cp build-snapshot.tar.gz . 2>/dev/null || true
+          git add build-snapshot.tar.gz 2>/dev/null || true
+          git commit -m "Build snapshot for ${{ github.ref_name }} (${SHORT_SHA})" \
+            --allow-empty || true
+          git push origin "$DEPLOY_BRANCH" --force || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Notify Deployment
         if: always()
         run: |
@@ -258,8 +315,4 @@ jobs:
               \"version\": \"${{ github.ref_name }}\",
               \"commit\": \"${{ github.sha }}\",
               \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-            }" || true
-
-      - name: Output URL
-        id: deploy
-        run: echo "url=${{ vars.PRODUCTION_URL }}" >> $GITHUB_OUTPUT
+            }\" || true

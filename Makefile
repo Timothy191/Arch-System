@@ -115,7 +115,13 @@ monitor-stop: ## Stop Grafana monitoring stack
 
 # Deployment
 deploy-local: ## Deploy to local environment
-	pnpm deploy:local
+		pnpm deploy:local
+
+deploy-dashboards: ## Start Glance + Dashy sidecar dashboards
+		docker compose -f infra/docker/compose.dashboards.yml up -d
+
+deploy-dashboards-stop: ## Stop Glance + Dashy sidecar dashboards
+		docker compose -f infra/docker/compose.dashboards.yml down
 
 deploy-staging: ## Deploy to staging
 	pnpm deploy:staging

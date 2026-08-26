@@ -1,0 +1,162 @@
+# Arch-Systems - Dashy configuration
+# Place at: infra/docker/dashy/user-data/conf.yml
+# (mounted into the container at /app/user-data/conf.yml)
+#
+# Dashy is a self-hostable personal dashboard with status-checking,
+# widgets, themes, icon packs, and a UI editor.
+# Full config reference: https://github.com/lissy93/dashy/blob/master/docs/configuring.md
+
+page_info:
+  title: Arch-Systems Dashboard
+  description: Mining operations portal - services, feeds, and status at a glance
+  theme: light
+  layout: responsive
+
+# Services to display as cards with status indicators.
+# Each service can have an HTTP health check, TCP check, or command check.
+services:
+  # Core Infrastructure
+  - name: Portal (Next.js)
+    url: http://host.docker.internal:3000
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:3000/api/health
+    icon: mdi:web-exact
+    color: "#3b82f6"
+
+  - name: Supabase API
+    url: http://host.docker.internal:54321
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:54321/rest/v1/
+    icon: mdi:database
+    color: "#8b5cf6"
+
+  - name: Redis
+    url: redis://host.docker.internal:6379
+    healthcheck:
+      type: tcp
+      host: host.docker.internal
+      port: 6379
+    icon: mdi:flash
+    color: "#ef4444"
+
+  - name: Postgres (Supabase DB)
+    url: postgres://host.docker.internal:54322
+    healthcheck:
+      type: tcp
+      host: host.docker.internal
+      port: 54322
+    icon: mdi:database-search
+    color: "#10b981"
+
+  # Dashboard Sidecars
+  - name: Glance (Feed Aggregator)
+    url: http://host.docker.internal:9898
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:9898/
+    icon: mdi:rss-box
+    color: "#f59e0b"
+
+  - name: Dashy (Status Dashboard)
+    url: http://host.docker.internal:8080
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:8080/
+    icon: mdi:dashboard
+    color: "#ec4899"
+
+  # Supporting Services
+  - name: n8n (Workflow Automation)
+    url: http://host.docker.internal:5678
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:5678/healthz
+    icon: mdi:robot
+    color: "#6366f1"
+
+  - name: Flowise (LLM Flows)
+    url: http://host.docker.internal:3001
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:3001/
+    icon: mdi:brain
+    color: "#14b8a6"
+
+  - name: Grafana (Monitoring)
+    url: http://host.docker.internal:9091
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:9091/api/health
+    icon: mdi:pressure-fire
+    color: "#8b5cf6"
+
+  - name: Prometheus (Metrics)
+    url: http://host.docker.internal:9093
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:9093/-/healthy
+    icon: mdi:chart-line
+    color: "#f97316"
+
+  - name: FUXA SCADA
+    url: http://host.docker.internal:1881
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:1881
+    icon: mdi:radio-tower
+    color: "#ef4444"
+    info: "Controls real devices - confirm auth is enabled"
+
+  - name: Qdrant (Vector DB)
+    url: http://host.docker.internal:6333
+    healthcheck:
+      type: http
+      url: http://host.docker.internal:6333/cluster
+    icon: mdi:dots-hexagon
+    color: "#06b6d4"
+
+  # External Links
+  - name: Supabase Studio
+    url: https://supabase.com/dashboard
+    icon: mdi:cloud-search
+    color: "#3b82f6"
+    type: link
+
+  - name: GitHub Repo
+    url: https://github.com/Timothy191/Arch-System
+    icon: mdi:github
+    color: "#18181b"
+    type: link
+
+# Optional: widget sections (clock, weather, system stats, etc.)
+widgets:
+  - type: clock
+    title: Time
+    position: top-bar
+
+  - type: system-stats
+    title: Server Stats
+    position: top-bar
+
+# Navigation links shown at the top.
+navigation:
+  - title: Portal
+    url: http://host.docker.internal:3000
+    icon: mdi:web-exact
+
+  - title: Dashboards
+    url: http://host.docker.internal:9898
+    icon: mdi:rss-box
+
+  - title: Status
+    url: http://host.docker.internal:8080
+    icon: mdi:dashboard
+
+  - title: Monitoring
+    url: http://host.docker.internal:9091
+    icon: mdi:pressure-fire
+# Docker-friendly: use host.docker.internal to reach host services.
+# On Linux, ensure --add-host=host.docker.internal:host-gateway is set
+# (handled in compose.dashboards.yml via extra_hosts if needed).

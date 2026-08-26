@@ -1,0 +1,88 @@
+version: "3.8"
+
+# Arch-Systems — Glance + Dashy sidecar services
+# Usage:
+#   docker compose -f infra/docker/compose.dashboards.yml up -d
+#   docker compose -f infra/docker/compose.dashboards.yml down
+#
+# These services run alongside the existing tools stack (Redis, n8n, Flowise, etc.)
+# and are embedded into the portal via iframe or linked from the dashboard index.
+#
+# Config files (git-tracked):
+#   infra/docker/glance/config.yaml   → Glance feed configuration
+#   infra/docker/dashy/user-data/conf.yml → Dashy service/status configuration
+#
+# Data volumes (persistent, NOT git-tracked):
+#   plantcor-glance-data   → Glance feed cache and state
+#   plantcor-dashy-logs   → Dashy application logs
+
+services:
+  # ── Glance: Feed aggregator dashboard (Go, 36.6k stars) ─────────────
+  # Self-hosted dashboard that aggregates RSS feeds, Reddit, YouTube, and more
+  # into a single clean homepage.
+  glance:
+    image: glanceapp/glance:latest
+    container_name: plantcor-glance
+    restart: unless-stopped
+    ports:
+      - "9898:9898"
+    volumes:
+      # Bind-mount the tracked config file.
+      - ./glance/config.yaml:/app/config/config.yaml:ro
+      # Named volume for feed data (persists across restarts, not in git).
+      - glance_data:/app/data
+    environment:
+      - TZ=${TIMEZONE:-America/Denver}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9898/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - plantcor-dashboards
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - dashboards
+
+  # ── Dashy: Personal dashboard (Vue.js, 26.3k stars) ──────────────────
+  # Self-hostable personal dashboard with status-checking, widgets, themes,
+  # icon packs, and a UI editor.
+  dashy:
+    image: lissy93/dashy:latest
+    container_name: plantcor-dashy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      # Bind-mount the tracked config directory.
+      - ./dashy/user-data:/app/user-data:ro
+      # Named volume for logs (persists across restarts, not in git).
+      - dashy_logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - DASHY_BACKEND_DB_FILE=/app/user-data/conf.yml
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - plantcor-dashboards
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - dashboards
+
+networks:
+  plantcor-dashboards:
+    driver: bridge
+    external: false
+
+volumes:
+  glance_data:
+    name: plantcor-glance-data
+  dashy_logs:
+    name: plantcor-dashy-logs

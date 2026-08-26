@@ -261,7 +261,7 @@ while true; do
   [ "$SPLIT_MODE" = true ] && { move_cursor 15 "$LEFT_WIDTH"; printf "${CLR_MAGENTA}│${CLR_RESET}"; }
 
   move_cursor 16 0
-  local s_txt r_txt f_txt
+  # Declare variables
   s_txt="${CLR_GREEN}HOSTED OK${CLR_RESET}"
   [ "$REDIS_STATUS" = "ACTIVE" ] && r_txt="${CLR_GREEN}ONLINE${CLR_RESET}" || r_txt="${CLR_GRAY}IN-MEM${CLR_RESET}"
   [ "$FUXA_STATUS" = "ACTIVE" ] && f_txt="${CLR_GREEN}ONLINE${CLR_RESET}" || f_txt="${CLR_YELLOW}READY${CLR_RESET}"
@@ -290,7 +290,7 @@ while true; do
   [ "$SPLIT_MODE" = true ] && { move_cursor 20 "$LEFT_WIDTH"; printf "${CLR_MAGENTA}│${CLR_RESET}"; }
 
   move_cursor 21 0
-  local err_color="${CLR_GREEN}"
+  err_color="${CLR_GREEN}"
   [ "$ERROR_COUNT" -gt 0 ] && err_color="${CLR_RED}"
   printf "${CLR_MAGENTA}│${CLR_RESET}  %b│%b  Fatal Crashes: %b0%b | Intercepts: %b%s%b   %b│%b" \
     "${CLR_GREEN}" "${CLR_RESET}" "${CLR_GREEN}" "${CLR_RESET}" "$err_color" "$ERROR_COUNT" "${CLR_RESET}" "${CLR_GREEN}" "${CLR_RESET}"
@@ -319,7 +319,7 @@ while true; do
 
     if [ -f "$PORTAL_LOG" ]; then
       mapfile -t RECENT_LOGS < <(tail -n "$LOG_LINES_COUNT" "$PORTAL_LOG" 2>/dev/null || true)
-      local r_idx=0
+      r_idx=0
       for (( row=LOG_START_ROW; row<LOG_START_ROW+LOG_LINES_COUNT; row++ )); do
         move_cursor "$row" "$RIGHT_START"
         printf " "

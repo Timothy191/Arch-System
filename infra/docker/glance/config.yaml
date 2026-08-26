@@ -1,0 +1,71 @@
+# Arch-Systems — Glance feed aggregator configuration
+# Place at: infra/docker/glance/config.yaml
+# (mounted into the container at /app/config/config.yaml)
+#
+# Glance aggregates RSS feeds, Reddit, YouTube, and more into a single dashboard.
+# Full config reference: https://github.com/glanceapp/glance/blob/main/docs/config.md
+
+# Layout: "list" (vertical feed list), "grid" (card grid), "split" (left sidebar + feeds)
+layout: list
+
+# Refresh interval for feeds (duration string: 1m, 5m, 1h, etc.)
+refresh: 5m
+
+# Default timezone for timestamps
+timezone: America/Denver
+
+# Docker-friendly: listen on all interfaces inside the container.
+host: 0.0.0.0
+port: 9898
+
+# Feeds — each entry is a named feed with a URL and optional filters.
+feeds:
+  # Mining & Industry News
+  - name: Mining Journal
+    url: https://www.miningjournal.com/feed/
+    group: Industry News
+
+  - name: MINING.com
+    url: https://www.mining.com/feed/
+    group: Industry News
+
+  - name: Reuters Commodities
+    url: https://www.reuters.com/site-search/API/?VF=2&PU=1&TC=1&SF=1&BC=0&SC=3&SR=4&SV=0&WT=news&PI=1&NR=10&LC=eng&DCAT=plaintext&FLK=0&JD=20240101&ED=20261231&somalias=0&searchType=advanced&searchTerm=commodities&siteReRestriction=www.reuters.com&tz=±1200&dateRange=all&sorting=P_pub_date:0
+    group: Commodities
+
+  - name: Bloomberg Energy
+    url: https://about.bnef.com/blog/feed/
+    group: Energy
+
+  # Internal Ops Feeds (replace with your actual endpoints)
+  - name: Portal Alerts
+    url: http://host.docker.internal:3000/api/feeds/alerts/rss
+    group: Internal
+
+  - name: Equipment Status
+    url: http://host.docker.internal:3000/api/feeds/equipment/rss
+    group: Internal
+
+# Reddit integration (optional — set client_id/client_secret for better rate limits)
+reddit:
+  enabled: false
+  # client_id: ""
+  # client_secret: ""
+  # user_agent: "arch-systems-glance/1.0"
+
+# YouTube integration (optional)
+youtube:
+  enabled: false
+  # api_key: ""
+
+# Themes — Glance supports light/dark; pick one or cycle.
+theme: auto
+
+# Show notification badges, enable audio alerts, etc.
+notifications: true
+audio_alerts: false
+
+# Ignore certain feeds or keywords
+ignore:
+  keywords: []
+  feeds: []

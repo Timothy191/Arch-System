@@ -47,8 +47,9 @@ export interface HeroRotatorProps {
 }
 
 const CONFIG = {
-  cardWidth: "52%", // active card column width
-  cardLeft: "24%", // left offset that centers the active card in the track
+  // AGENT-TRACE: Extended cardWidth further to 70% with cardLeft centered at 15% ((100% - 70%) / 2)
+  cardWidth: "70%", // active card column width
+  cardLeft: "15%", // left offset that centers the active card in the track
   perspective: "1200px",
   perspectiveOrigin: "50% 40%",
   minHeight: "clamp(380px, 48vw, 560px)",
@@ -160,16 +161,17 @@ function HeroSlide({
     return diff;
   });
 
-  const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, -42, 0, 42, 0]);
-  const rotateX = useTransform(offset, [-2, -1, 0, 1, 2], [12, 6, 0, 6, 12]);
+  // AGENT-TRACE: Side cards matched with center card (no 3D tilt distortion, full opacity, no blur, uniform scale: 0.98)
+  const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
+  const rotateX = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
   const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
-  const z = useTransform(offset, [-2, -1, 0, 1, 2], [-250, -120, 0, -120, -250]);
-  const imageX = useTransform(offset, [-2, -1, 0, 1, 2], ["25%", "12%", "0%", "-12%", "-25%"]);
-  const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.75, 0.92, 1.05, 0.92, 0.75]);
-  const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0.65, 1, 0.65, 0]);
+  const z = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
+  const imageX = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "0%", "0%", "0%", "0%"]);
+  const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.75, 0.98, 0.98, 0.98, 0.75]);
+  const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 1, 1, 1, 0]);
   const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
   const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.1 ? "auto" : "none"));
-  const blurValue = useTransform(offset, [-2, -1, 0, 1, 2], [8, 4, 0, 4, 8]);
+  const blurValue = useTransform(offset, [-2, -1, 0, 1, 2], [8, 0, 0, 0, 8]);
   const filter = useMotionTemplate`blur(${blurValue}px)`;
 
   return (

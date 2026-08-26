@@ -1,5 +1,35 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-26 - HeroRotator Side Cards Matched to Center Card
+
+- **Purpose**: Remove 3D angle distortion, tilt, blur, and opacity fade from adjacent side Hero Cards so they visually mirror and match the center Hero Card.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`:
+    - Set `rotateY` to `0` across adjacent offsets (`[-2, -1, 0, 1, 2] -> [0, 0, 0, 0, 0]`).
+    - Set `rotateX` to `0` and `z` depth to `0`.
+    - Set `imageX` parallax to `0%`.
+    - Set `opacity` at offset `[-1, 0, 1]` to `1` (clean, un-dimmed visibility).
+    - Set `blurValue` at offset `[-1, 0, 1]` to `0px` (zero blur).
+    - Set uniform `scale` at offset `[-1, 0, 1]` to `0.98`.
+    - Added inline `// AGENT-TRACE` comments.
+- **Verification**:
+  - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
+  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+- **What the Next Agent Should Know**: Adjacent side slides match the center slide in scale (0.98), opacity (1.0), and 0-degree 3D tilt without blur.
+
+## 2026-08-26 - HeroRotator Middle Card Width Expansion to 70%
+
+- **Purpose**: Extend the horizontal length of the middle active hero card further to 70% while keeping track centering and perspective transforms aligned.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`:
+    - Adjusted `CONFIG.cardWidth` from `60%` to `70%`.
+    - Adjusted `CONFIG.cardLeft` from `20%` to `15%` (`(100% - 70%) / 2 = 15%`).
+    - Active center card scale retained at `0.98`. Added inline `// AGENT-TRACE` comment.
+- **Verification**:
+  - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
+  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+- **What the Next Agent Should Know**: The HeroRotator active card is 70% track width centered at 15% left offset.
+
 ## 2026-08-25 - Workspace Dependency Link
 
 **Purpose**: Declare the package utility dependency used by `ShiftToggle`.
