@@ -1,5 +1,13 @@
 # Departments UI Agent Tracer
 
+## 2026-08-25 - Workspace Dependency Link
+
+**Purpose**: Declare the shared hooks package imported by the departments UI.
+
+**Changes**: Added `@repo/shared/hooks` as a pnpm workspace dependency.
+
+**Handoff**: The departments UI hook import now resolves through an explicit workspace link.
+
 ## Session 2026-08-21 (Satellite Monitoring Dashboard Presentation-Only Refactor)
 
 - **Purpose**: Remove fake/mock data generation from the Satellite Monitoring dashboard so it becomes a presentational component that receives real readings and scenes from Server Components in `apps/portal`.

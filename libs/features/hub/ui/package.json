@@ -8,14 +8,15 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@repo/departments/data-access": "workspace:^",
     "@repo/ui": "1.0.0",
     "@tremor/react": "catalog:",
+    "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "next": "^16.2.6",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
-    "sonner": "catalog:",
-    "framer-motion": "catalog:"
+    "sonner": "catalog:"
   },
   "peerDependencies": {
     "react": "^19",

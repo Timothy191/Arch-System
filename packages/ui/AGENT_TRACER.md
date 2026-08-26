@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-25 - Workspace Dependency Link
+
+**Purpose**: Declare the package utility dependency used by `ShiftToggle`.
+
+**Changes**: Added `@repo/utils` as a pnpm workspace dependency.
+
+**Handoff**: The UI package now resolves its local utility import through an explicit workspace link. - @repo/ui
+
 ## 2026-08-24 - Hub Page Performance: GlassCard, Marquee & aurora-shadow
 
 - **Purpose**: Reduce GPU/compositor load on the hub page — liquid displacement re-runs, 12 continuous marquee layers, and box-shadow animation were saturating the compositor.

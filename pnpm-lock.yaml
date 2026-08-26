@@ -575,6 +575,12 @@ importers:
 
   libs/features/auth/ui:
     dependencies:
+      '@repo/auth/data-access':
+        specifier: workspace:^
+        version: link:../data-access
+      '@repo/auth/utils':
+        specifier: workspace:^
+        version: link:../utils
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
@@ -655,6 +661,9 @@ importers:
       '@repo/shared/data-access':
         specifier: 1.0.0
         version: link:../../../shared/data-access
+      '@repo/shared/hooks':
+        specifier: workspace:^
+        version: link:../../../shared/hooks
       '@repo/supabase':
         specifier: 1.0.0
         version: link:../../../../packages/supabase
@@ -716,6 +725,9 @@ importers:
 
   libs/features/hub/ui:
     dependencies:
+      '@repo/departments/data-access':
+        specifier: workspace:^
+        version: link:../../departments/data-access
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
@@ -973,9 +985,6 @@ importers:
       '@types/pg':
         specifier: ^8.11.10
         version: 8.20.0
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
       next:
         specifier: ^16.2.6
         version: 16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4)
@@ -1057,6 +1066,9 @@ importers:
       '@repo/theme':
         specifier: 1.0.0
         version: link:../theme
+      '@repo/utils':
+        specifier: workspace:^
+        version: link:../utils
       '@revolist/react-datagrid':
         specifier: ^4.21.0
         version: 4.21.9

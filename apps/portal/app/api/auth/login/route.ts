@@ -173,13 +173,43 @@ export async function POST(request: NextRequest) {
         });
 
         if (error) {
-          // Return generic error message to avoid account enumeration
-          const isRateLimitError = error.message.toLowerCase().includes("rate limit");
+          const errMsg = error.message ? error.message.toLowerCase() : "";
+          const status = (error as { status?: number }).status || 0;
+
+          // 1. Upstream / Network / Outage / Connection failure / Timeout
+          const isUpstreamFailure =
+            status >= 500 ||
+            errMsg.includes("fetch failed") ||
+            errMsg.includes("networkerror") ||
+            errMsg.includes("timeout") ||
+            errMsg.includes("econnrefused") ||
+            errMsg.includes("failed to fetch") ||
+            errMsg.includes("invalid api key");
+
+          if (isUpstreamFailure) {
+            return NextResponse.json(
+              {
+                error: "Authentication service is temporarily unavailable. Please try again later.",
+              },
+              { status: 503 },
+            );
+          }
+
+          // 2. Auth Rate Limiting
+          const isRateLimitError = status === 429 || errMsg.includes("rate limit");
+          if (isRateLimitError) {
+            return NextResponse.json(
+              {
+                error: "Too many attempts. Please wait a moment and try again.",
+              },
+              { status: 429 },
+            );
+          }
+
+          // 3. Invalid credentials (status 400 or default credential rejection)
           return NextResponse.json(
             {
-              error: isRateLimitError
-                ? "Too many attempts. Please wait a moment and try again."
-                : "Invalid credentials",
+              error: "Invalid credentials",
             },
             { status: 401 },
           );
@@ -199,6 +229,20 @@ export async function POST(request: NextRequest) {
         if (err instanceof SyntaxError) {
           return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
         }
+
+        const isNetworkOrTimeout =
+          err instanceof Error &&
+          (err.message.toLowerCase().includes("fetch failed") ||
+            err.message.toLowerCase().includes("timeout") ||
+            err.message.toLowerCase().includes("econnrefused"));
+
+        if (isNetworkOrTimeout) {
+          return NextResponse.json(
+            { error: "Authentication service is temporarily unavailable. Please try again later." },
+            { status: 503 },
+          );
+        }
+
         return NextResponse.json({ error: "An error occurred during sign in" }, { status: 500 });
       }
     },

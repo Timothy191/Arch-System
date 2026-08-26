@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@repo/ui/Input";
 import { AnimatedButton } from "@repo/ui/AnimatedButton";
 import { Checkbox } from "@repo/ui/Checkbox";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLogin } from "@repo/auth/data-access";
 import { isValidPageRedirect } from "@repo/auth/utils";
@@ -25,6 +25,7 @@ export function LoginForm() {
   const [passwordError, setPasswordError] = useState("");
 
   const { login, loading, rateLimitCountdown, setRateLimitCountdown } = useLogin();
+  const isRateLimited = rateLimitCountdown !== null && rateLimitCountdown > 0;
 
   useEffect(() => {
     const emailParam = searchParams.get("email") || searchParams.get("employeeId");
@@ -35,21 +36,15 @@ export function LoginForm() {
     setCapsLock(e.getModifierState("CapsLock"));
   }
 
-  function getPasswordRequirements(password: string): string[] {
-    const requirements: string[] = [];
-    if (password.length < 6) requirements.push("at least 6 characters");
-    if (password.length > 128) requirements.push("fewer than 128 characters");
-    return requirements;
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setPasswordError("");
 
-    // Validate password requirements before submission
-    const requirements = getPasswordRequirements(password);
-    if (requirements.length > 0) {
-      setPasswordError(`Password must have ${requirements.join(", ")}`);
+    if (isRateLimited) return;
+
+    // Client-side length sanity checks only
+    if (password.length < 6) {
+      setPasswordError("Invalid email/employee ID or password");
       return;
     }
 
@@ -58,13 +53,8 @@ export function LoginForm() {
       router.push(redirectTo);
       router.refresh();
     } else {
-      // Show specific password requirements if password doesn't meet them
-      const failedRequirements = getPasswordRequirements(password);
-      if (failedRequirements.length > 0) {
-        setPasswordError(`Password must have ${failedRequirements.join(", ")}`);
-      }
+      setPasswordError("Invalid email/employee ID or password");
     }
-    // Don't clear password on failed login - let user see what they typed
   }
 
   return (
@@ -84,9 +74,10 @@ export function LoginForm() {
             autoFocus
             minLength={3}
             maxLength={254}
-            disabled={loading}
+            disabled={loading || isRateLimited}
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
+            onFocus={(e) => e.target.select()}
             onBlur={(e) => {
               if (e.target.value && !e.target.value.includes("@")) {
                 // Allow employee IDs without @, but validate email format if @ is present
@@ -123,12 +114,13 @@ export function LoginForm() {
             required
             minLength={6}
             maxLength={128}
-            disabled={loading}
+            disabled={loading || isRateLimited}
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setPasswordError("");
             }}
+            onFocus={(e) => e.target.select()}
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             variant="login"
@@ -146,23 +138,11 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
-        {password && (
-          <div className="text-[10px] text-arch-text-tertiary space-y-1 animate-fade-up">
-            <p>Password requirements:</p>
-            <ul className="space-y-0.5 ml-3">
-              <li className={password.length >= 6 ? "text-arch-accent-green" : ""}>
-                {password.length >= 6 ? "✓" : "○"} At least 6 characters
-              </li>
-              <li className={password.length <= 128 ? "text-arch-accent-green" : ""}>
-                {password.length <= 128 ? "✓" : "○"} Fewer than 128 characters
-              </li>
-            </ul>
-          </div>
-        )}
         {passwordError && (
           <div
             className="flex items-center gap-1.5 text-[11px] text-arch-accent-red animate-fade-up"
             role="alert"
+            aria-live="assertive"
           >
             <span>{passwordError}</span>
           </div>
@@ -171,6 +151,7 @@ export function LoginForm() {
           <div
             className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
             role="alert"
+            aria-live="polite"
           >
             <Lock className="w-3 h-3" strokeWidth={1.5} />
             <span>Caps Lock is on</span>
@@ -180,6 +161,7 @@ export function LoginForm() {
           <div
             className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
             role="alert"
+            aria-live="polite"
           >
             <span>Too many attempts. Try again in {rateLimitCountdown}s</span>
           </div>
@@ -189,12 +171,19 @@ export function LoginForm() {
       <div className="flex flex-col gap-4">
         <AnimatedButton
           type="submit"
-          disabled={loading}
+          disabled={loading || isRateLimited}
           className="w-full h-12 rounded-md liquid-glass-button bg-[var(--color-action-primary)] hover:bg-[var(--color-action-primary-hover)] text-white font-medium relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-action-primary)]/50 focus-visible:ring-offset-1 transition-colors"
           hoverScale={1}
           tapScale={0.97}
         >
-          {loading ? "Accessing your workspace..." : "Access Arch Systems"}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              <span>Accessing your workspace...</span>
+            </span>
+          ) : (
+            "Access Arch Systems"
+          )}
         </AnimatedButton>
       </div>
 

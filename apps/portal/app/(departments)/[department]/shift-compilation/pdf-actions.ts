@@ -103,7 +103,7 @@ export async function exportSignedShiftReportPdf(
 }
 
 // Standalone HTML template builder for pixel-accurate print layout
-export function generatePrintHtml(
+function generatePrintHtml(
   report: MultiSiteShiftReport,
   signatureHash: string,
   signerEmail: string,

@@ -31,11 +31,11 @@ NC='\033[0m'
 BOLD='\033[1m'
 
 # Icons
-PASS="${GREEN}${BOLD} ✔${NC}"
-FAIL="${RED}${BOLD} ✖${NC}"
-SKIP="${DIM}${BOLD} ⏭${NC}"
-WARN="${YELLOW}${BOLD} ⚠${NC}"
-INFO="${BLUE}${BOLD} ℹ${NC}"
+PASS="${GREEN}${BOLD}OK${NC}"
+FAIL="${RED}${BOLD}ERR${NC}"
+SKIP="${DIM}${BOLD}SKIP${NC}"
+WARN="${YELLOW}${BOLD}WARN${NC}"
+INFO="${BLUE}${BOLD}INFO${NC}"
 SUPABASE_URL=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 # Anon key: .env defines NEXT_PUBLIC_SUPABASE_ANON_KEY (client-safe, public). Fall back to
@@ -43,13 +43,40 @@ REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -
 SUPABASE_ANON_KEY=$(grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 HOSTED_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
 
+# ── Redirect & Watchdog Setup ───────────────────────────
+mkdir -p "$REPO_ROOT/run"
+rm -f "$REPO_ROOT/run/.dev_ready" "$REPO_ROOT/run/.dev_timeout"
+
+# Redirect stdout/stderr to dev.log while maintaining console output
+exec > >(tee "$REPO_ROOT/run/dev.log") 2>&1
+
+WATCHDOG_TIMEOUT=10
+watchdog() {
+  sleep "$WATCHDOG_TIMEOUT"
+  if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
+    echo -e "\n${RED}${BOLD}  [ERR] Watchdog timeout: Boot hung or exceeded ${WATCHDOG_TIMEOUT} seconds.${NC}"
+    touch "$REPO_ROOT/run/.dev_timeout"
+    node "$REPO_ROOT/tools/generate-dev-report.js" "TIMEOUT (stuck > 10s)"
+    # Shutdown background PIDs that we started
+    for pidfile in .portal.pid .cms.pid .overview.pid; do
+      [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
+      rm -f "$REPO_ROOT/run/$pidfile"
+    done
+    kill -TERM "$1" 2>/dev/null || true
+    exit 1
+  fi
+}
+# Start watchdog in background, passing parent PID
+watchdog $$ &
+WATCHDOG_PID=$!
+
 # ── Helpers ──────────────────────────────────────────────
 # phase N TITLE — lightweight section header (colored tag + thin rule).
 phase() {
   local n="$1" title="$2"
   echo
-  echo -e "  ${BOLD}${BLUE}◆ Phase ${n}${NC}  ${BOLD}${WHITE}${title}${NC}"
-  echo -e "  ${DIM}  ─────────────────────────────────────────────────${NC}"
+  echo -e "  ${BLUE}${BOLD}PHASE ${n}${NC} ${DIM}›${NC} ${BOLD}${WHITE}${title}${NC}"
+  echo -e "  ${DIM}────────────────────────────────────────────────────────${NC}"
 }
 
 # check LABEL STATUS [DETAIL] — two-column row: icon+label (fixed width) | detail.
@@ -58,17 +85,17 @@ phase() {
 check() {
   local label="$1" status="$2" detail="${3:-}"
   local pad
-  printf -v pad '%-28s' "$label"
+  printf -v pad '%-25s' "$label"
   if [ "$status" = "pass" ]; then
-    echo -e "  ${PASS} ${pad}${detail:+ $DIM$detail$NC}"
+    echo -e "  [${PASS}] ${pad}${detail:+${DIM}${detail}${NC}}"
   elif [ "$status" = "fail" ]; then
-    echo -e "  ${FAIL} ${pad}${detail:+ $RED$detail$NC}"
+    echo -e "  [${FAIL}] ${pad}${detail:+${RED}${detail}${NC}}"
   elif [ "$status" = "warn" ]; then
-    echo -e "  ${WARN} ${pad}${detail:+ $YELLOW$detail$NC}"
+    echo -e "  [${WARN}] ${pad}${detail:+${YELLOW}${detail}${NC}}"
   elif [ "$status" = "skip" ]; then
-    echo -e "  ${SKIP} ${pad}${detail:+ $DIM$detail$NC}"
+    echo -e "  [${SKIP}] ${pad}${detail:+${DIM}${detail}${NC}}"
   elif [ "$status" = "info" ]; then
-    echo -e "  ${INFO} ${pad}${detail:+ $DIM$detail$NC}"
+    echo -e "  [${INFO}] ${pad}${detail:+${DIM}${detail}${NC}}"
   fi
 }
 
@@ -118,17 +145,10 @@ banner() {
     mode_pill="${MAGENTA}${BOLD}LOCAL · DOCKER${NC}"
   fi
   echo
-  echo -e "  ${BOLD}${CYAN}  █████╗ ██████╗  ██████╗██╗  ██╗${NC}"
-  echo -e "  ${BOLD}${CYAN} ██╔══██╗██╔══██╗██╔════╝██║  ██║${NC}"
-  echo -e "  ${BOLD}${CYAN} ███████║██████╔╝██║     ███████║${NC}"
-  echo -e "  ${BOLD}${CYAN} ██╔══██║██╔══██╗██║     ██╔══██║${NC}"
-  echo -e "  ${BOLD}${CYAN} ██║  ██║██║  ██║╚██████╗██║  ██║${NC}"
-  echo -e "  ${BOLD}${CYAN} ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝${NC}"
-  echo -e "  ${DIM}  ──────────────────────────────────────────${NC}"
-  echo -e "  ${BOLD}${WHITE}S Y S T E M S${NC}   ${DIM}operational portal · mining ops${NC}"
-  echo
-  echo -e "  ${mode_pill}"
-  echo -e "  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC}   ${DIM}branch:${NC} ${DIM}${branch}${NC}"
+  echo -e "  ${CYAN}${BOLD}╭─ ARCH SYSTEMS / DEV CONTROL ─────────────────────────────╮${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${BOLD}${WHITE}Operational portal${NC} ${DIM}· mining operations${NC}                 ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}branch${NC} ${WHITE}${branch}${NC}  ${DIM}·${NC}  ${mode_pill}  ${DIM}·${NC}  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC} ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}╰───────────────────────────────────────────────────────────╯${NC}"
   echo
 }
 
@@ -195,10 +215,11 @@ show_results() {
   fi
 
   echo
-  echo -e "  ${GREEN}${BOLD}╭──────────────────────────────────────────────────────╮${NC}"
-  echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}✔ All systems go${NC}  ${DIM}edit any file, see live updates${NC}  ${GREEN}${BOLD}│${NC}"
-  echo -e "  ${GREEN}${BOLD}╰──────────────────────────────────────────────────────╯${NC}"
+  echo -e "  ${GREEN}${BOLD}╭─ READY ──────────────────────────────────────────────────╮${NC}"
+  echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}All systems go${NC} ${DIM}· edit a file to see live updates${NC}       ${GREEN}${BOLD}│${NC}"
+  echo -e "  ${GREEN}${BOLD}╰──────────────────────────────────────────────────────────╯${NC}"
   echo
+  echo -e "  ${BOLD}${WHITE}Services${NC}"
   _url_row "Login"    "http://localhost:$PORT/login"
   _url_row "Portal"   "http://localhost:$PORT"
   if [ "$START_CMS" = "true" ]; then
@@ -211,13 +232,32 @@ show_results() {
   _url_row "Studio"   "$studio_url"
   _url_row "API"      "$api_url"
   echo
-  echo -e "  ${DIM}Stop with Ctrl+C${NC}"
+  echo -e "  ${BOLD}${WHITE}Controls${NC}"
+  echo -e "  ${DIM}Ctrl+C${NC}  stop services    ${DIM}logs${NC}  run/portal.log    ${DIM}HUD${NC}  separate status terminal"
   echo
 }
 
 cleanup() {
+  # Temporarily disable traps to prevent recursion on exit
+  trap - EXIT INT TERM
+
   echo
   echo -e "  ${YELLOW}Shutting down...${NC}"
+  # Kill watchdog if still running
+  if [ -n "${WATCHDOG_PID:-}" ]; then
+    kill "$WATCHDOG_PID" 2>/dev/null || true
+  fi
+  # Generate FAILURE/TIMEOUT report if not completed
+  if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
+    if [ -f "$REPO_ROOT/run/.dev_timeout" ]; then
+      rm -f "$REPO_ROOT/run/.dev_timeout"
+      exit 1
+    else
+      node "$REPO_ROOT/tools/generate-dev-report.js" "FAILURE"
+      exit 1
+    fi
+  fi
+  rm -f "$REPO_ROOT/run/.dev_ready"
   for pidfile in .portal.pid .cms.pid .overview.pid; do
     [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
     rm -f "$REPO_ROOT/run/$pidfile"
@@ -606,7 +646,7 @@ elif [ "$HOSTED_MODE" = "true" ]; then
   hosted_api_code="000"
   if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ANON_KEY:-}" ]; then
     hosted_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
-      "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY}" 2>/dev/null)
+        "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY}" 2>/dev/null || true)
     [ -z "$hosted_api_code" ] && hosted_api_code="000"
   fi
   case "$hosted_api_code" in
@@ -749,7 +789,8 @@ phase "2.6" "Security & Exposure"
 # Redis bind — warn only if REDIS_URL points beyond localhost.
 sec_redis_host="localhost"
 if [ -n "${REDIS_URL:-}" ]; then
-  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E 's#^redis(s)?://([^:/@]+).*#\2#')
+  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E \
+    's#^[[:alpha:]][[:alnum:]+.-]*://##; s#^.*@##; s#[:/].*$##')
   [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
 fi
 case "$sec_redis_host" in
@@ -763,7 +804,7 @@ esac
 
 # FUXA SCADA — best-effort auth probe (SCADA controls real devices, so flag open access).
 sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
-sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null)
+sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null || true)
 [ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
 case "$sec_fuxa_code" in
   200|301|302)
@@ -957,7 +998,7 @@ else
   smoke_db_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
     "${SUPABASE_URL}/rest/v1/" \
     -H "apikey: ${SUPABASE_ANON_KEY}" \
-    -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" 2>/dev/null)
+    -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" 2>/dev/null || true)
   [ -z "$smoke_db_code" ] && smoke_db_code="000"
   case "$smoke_db_code" in
     200)
@@ -1078,6 +1119,15 @@ fi
 
 # ── Done ─────────────────────────────────────────────────
 show_results
+
+# Touch dev_ready file to signal success to the watchdog and cleanup traps
+touch "$REPO_ROOT/run/.dev_ready"
+# Kill the watchdog since boot completed
+if [ -n "${WATCHDOG_PID:-}" ]; then
+  kill "$WATCHDOG_PID" 2>/dev/null || true
+fi
+# Generate successful markdown report
+node "$REPO_ROOT/tools/generate-dev-report.js" "SUCCESS"
 
 # ── E2E Test Runner ─────────────────────────
 if [ "$RUN_E2E" = "true" ]; then

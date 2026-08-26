@@ -2,5 +2,8 @@
   "name": "@repo/eval",
   "description": "LLM evaluation suite for Arch-Systems portal — AI service quality and code generation compliance",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "poetry run pytest tests/ -v"
+  }
 }

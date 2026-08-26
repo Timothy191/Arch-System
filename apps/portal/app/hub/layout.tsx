@@ -2,6 +2,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { redirect } from "next/navigation";
 import { getAccessibleDepartmentNames } from "@/lib/hub-departments";
+import { cookies } from "next/headers";
 
 export default async function HubLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
@@ -11,7 +12,9 @@ export default async function HubLayout({ children }: { children: React.ReactNod
     redirect("/login");
   }
 
-  const accessibleDepartments = await getAccessibleDepartmentNames(user.id);
+  const cookieStore = await cookies();
+  const cookieList = cookieStore.getAll();
+  const accessibleDepartments = await getAccessibleDepartmentNames(user.id, cookieList);
 
   return (
     <div className="min-h-[calc(100vh-28px)] text-[var(--text-heading)]">

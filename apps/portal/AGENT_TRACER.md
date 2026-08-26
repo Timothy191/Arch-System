@@ -1,5 +1,22 @@
 # Portal Agent Tracer
 
+## Session 2026-08-25 (Auth Error Resilience, Environment Synchronization & Lifecycle Verification)
+
+- **Purpose**: Resolve "Invalid Credentials" login failure by synchronizing `.env.production` and workspace `.env` with hosted Cloud Supabase credentials, adding defensive upstream error handling in `/api/auth/login`, and verifying full session lifecycle.
+- **Changes**:
+  - `.env.production`: Replaced offline `localhost:54321` fallback configuration with hosted Supabase credentials (`https://mrwhtxbhrzyttlsyuofc.supabase.co`) and authenticated Redis URL (`redis://:Yugioh%40123%23@localhost:6379`).
+  - `.env`: Corrected malformed `NEXT_PUBLIC_SUPABASE_URL` typo and ensured `SUPABASE_URL` is properly populated.
+  - `apps/portal/app/api/auth/login/route.ts`: Added defensive error classification to distinguish between upstream service/connection failures (`503`), rate-limiting (`429`), and credential errors (`401`).
+  - `apps/portal/app/api/auth/login/route.test.ts`: Created comprehensive unit test suite covering HTTP 200, 400, 401, 415, 429, and 503 error handling paths.
+  - `apps/portal/app/(departments)/[department]/shift-compilation/pdf-actions.ts`: Fixed Server Action export constraint by scoping non-async helper function internally.
+- **Verification**:
+  - `pnpm --filter portal test -- app/api/auth/login/route.test.ts` ✅ (7/7 tests passed)
+  - `pnpm --filter portal test -- features/auth/components/LoginForm.test.tsx` ✅ (9/9 tests passed)
+  - `pnpm --filter portal type-check` ✅ (Passed with 0 errors)
+  - `pnpm --filter portal build` ✅ (Production build compiled and optimized successfully)
+  - Live HTTP verification: Tested invalid credentials -> 401, valid credentials (`admin@plantcor.os`) -> 200 with `Set-Cookie` session token, and verified authenticated access to `/hub` -> 200.
+- **What the Next Agent Should Know**: Production and development configurations are now unified against Cloud Supabase project `mrwhtxbhrzyttlsyuofc`. The default admin login is `admin@plantcor.os` / `Yugioh@123#`.
+
 ## Session 2026-08-24 (Multi-Site Production & Engineering Shift Report with PDF Export)
 
 - **Purpose**: Implement multi-site operational compilation for BKF, EXT, PLANT, and Bredell Workshop with excavator-truck tallies, bulldozer rollover tracking, and cryptographic digital PDF sign-off.

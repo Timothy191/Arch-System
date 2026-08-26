@@ -209,3 +209,19 @@ e2e/.auth/
 
 # Compound Engineering local scratch space
 .context/compound-engineering/
+
+# AI tool runtime dirs (crush, mimocode, kilocode, remember)
+.crush/
+.mimocode/
+.kilocode/
+.remember/
+
+# DAST / security scan artifacts
+.zap/
+
+# Playwright MCP session logs
+.playwright-mcp/
+
+# Deploy lock & asset checksums (ephemeral CI artifacts)
+.deploy.lock
+.assets-checksum

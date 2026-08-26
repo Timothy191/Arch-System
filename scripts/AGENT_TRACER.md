@@ -1,5 +1,36 @@
 # Scripts Agent Tracer
 
+## 2026-08-25: Resilient Dev Probes
+
+### Purpose
+
+Prevent optional connectivity probes from aborting `pnpm dev` and avoid displaying Redis credentials in security diagnostics.
+
+### Changes
+
+- Made hosted Supabase, FUXA, and smoke database curl assignments non-fatal under `set -e`.
+- Normalized Redis URLs by removing schemes, credentials, ports, and paths before classification.
+
+### Handoff
+
+Unavailable optional services now produce warnings and allow startup to continue; probe exit codes no longer terminate the launcher.
+
+## 2026-08-25: Dev Terminal Output Refresh
+
+### Purpose
+
+Improve the readability and visual hierarchy of `scripts/dev.sh` startup output.
+
+### Changes
+
+- Replaced the large ASCII banner with a compact bordered control-panel header.
+- Standardized check rows with consistent `OK`, `ERR`, `WARN`, `SKIP`, and `INFO` badges.
+- Simplified phase separators and grouped ready-state endpoints under Services and Controls.
+
+### Handoff
+
+Startup behavior and health-check logic are unchanged; only terminal presentation was revised.
+
 ## 2026-08-21: Split-Terminal SysOps HUD with Animated ASCII Architecture & Error Stream
 
 ### Purpose

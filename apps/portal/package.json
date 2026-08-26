@@ -74,7 +74,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "node scripts/generate-openapi-spec.js && next build",
+    "build": "node scripts/generate-openapi-spec.js && next build && node ../../scripts/sync-assets-smart.cjs",
     "build:analyze": "ANALYZE=true next build",
     "dev": "next dev --turbopack --hostname 0.0.0.0",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",

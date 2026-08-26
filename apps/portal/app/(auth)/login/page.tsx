@@ -39,9 +39,9 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-start justify-start py-8 pl-6 pr-8 md:pl-12 md:pr-16 lg:pl-20 lg:pr-32 overflow-y-auto">
+    <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-center justify-center py-8 px-4 overflow-y-auto bg-[var(--color-bg-base)]">
       {/* Login Card wrapper */}
-      <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up -top-16 flex flex-col justify-center">
+      <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up flex flex-col justify-center">
         {/* Liquid Refraction Glow (Behind Card) */}
         <RefractionGlow />
         {systemUnavailable ? (
@@ -74,7 +74,7 @@ export default async function LoginPage() {
         ) : (
           <div
             data-testid="login-card"
-            className="w-full flex flex-col min-h-[660px] overflow-hidden login-card-container layer-signin-card liquid-glass-light border border-white/40 shadow-window rounded-xl"
+            className="w-full flex flex-col min-h-[660px] overflow-hidden login-card-container layer-signin-card bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-window rounded-xl"
           >
             {/* Title bar */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-[var(--overlay-dim)]">

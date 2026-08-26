@@ -1,5 +1,48 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-26T07:35:00Z - Visual & Ergonomic Login Page Enhancements
+
+- **Purpose**: Upgrade the login card and input form to align with design system glassmorphism standards, introduce advanced ergonomics (zero-click overwrite, rate-limit locking), and streamline error messages for production security.
+- **Changes**:
+  - `apps/portal/app/(auth)/login/page.tsx`: Centered the login card wrapper in the viewport and changed the card border style from low-contrast `white/40` to standard design-system contrast `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
+  - `libs/features/auth/ui/src/LoginForm.tsx`:
+    - Added `onFocus={(e) => e.target.select()}` to both inputs to implement the **Zero-Click Overwrite** pattern.
+    - Gated form states by checking `isRateLimited` and disabled inputs/submit button when the rate limit countdown is active.
+    - Simplified client-side error feedback and removed the cluttered signup requirements checklist from the login card.
+    - Added an inline spin loader (`Loader2`) to the submit button when `loading` is active.
+    - Integrated screen reader `aria-live="polite"` and `aria-live="assertive"` roles to dynamic warning states.
+- **Verification**: Ran `pnpm type-check` successfully (100% pass across all 25 monorepo projects).
+- **What the Next Agent Should Know**: The login portal is now fully optimized for accessibility (a11y), visual contrast, and high-speed autofill overwrite.
+
+## 2026-08-26T07:15:00Z - Resolve Cache Scope Violation on Hub Layout
+
+- **Purpose**: Fix Next.js Server Components render crash on `/hub` caused by a cache scope violation when calling dynamic APIs (`cookies()`) inside a cached function.
+- **Changes**:
+  - `apps/portal/app/hub/layout.tsx`: Resolved `cookies()` cache scope violation by calling `cookies()` outside the cache scope (in `HubLayout`) and passing the retrieved `cookieList` as a parameter to the cached `getAccessibleDepartmentNames(user.id, cookieList)` function.
+- **Verification**: Verified via Playwright E2E tests (`e2e/temp/hub-verify.spec.ts`) that `/hub` now compiles and renders successfully with HTTP 200 OK after user authentication, with zero console cache errors.
+- **What the Next Agent Should Know**: Next.js App Router dynamic functions (`cookies()`, `headers()`) must never be called inside functions wrapped in `unstable_cache()` or `withCache()`. Always pass dynamic properties as parameters.
+
+## 2026-08-26T06:45:00Z - Monitored Dev Server Boot & Watchdog Report System
+
+- **Purpose**: Implement a 10-second watchdog timer on the development server boot script (`scripts/dev.sh`) to automatically end the process and output a diagnostic markdown report if the setup hangs, and always output a full status report on successful boot.
+- **Changes**:
+  - `tools/generate-dev-report.js`: Created parser script that reads `run/dev.log`, strips ANSI escape codes, parses checks/phases, extracts Node/pnpm versions, and writes `dev-report.md`. Includes last 50 lines of `dev.log` and `portal.log` for failure diagnostics.
+  - `scripts/dev.sh`:
+    - Added `exec > >(tee "$REPO_ROOT/run/dev.log") 2>&1` to capture all output.
+    - Launched a 10-second background watchdog process that monitors `.dev_ready`.
+    - Integrated report generation in `cleanup()` trap for both `FAILURE` and `TIMEOUT` scenarios.
+    - Triggered `SUCCESS` report generation right after `show_results` completes successfully.
+- **Verification**: Ran `pnpm dev` successfully and verified creation of a `SUCCESS` report in `dev-report.md`. Injected a temporary `sleep 12` into `scripts/dev.sh` to trigger the watchdog, and verified that the process terminated cleanly in 10 seconds with exit code 1, generating a `TIMEOUT` report containing full logs. Reverted the temporary sleep.
+- **What the Next Agent Should Know**: The development setup process is now fully monitored. If a boot step takes more than 10 seconds, the watchdog will kill the main dev server shell and write `dev-report.md`.
+
+## 2026-08-26T06:30:00Z - Synthesize Repository Guidelines (AGENTS.md)
+
+- **Purpose**: Synthesize findings from parallel scout agents (Core Src, Tests, Configs/Build, Scripts/Docs) into a unified, concise, and structured Repository Guidelines document in the project root.
+- **Changes**:
+  - `docs/AGENTS.md`: Overwrote file (symlinked to root `AGENTS.md`) with the new "Repository Guidelines" structure. Provided clear components architecture, operational caching & middleware gating flows, command references, custom Zod/Zustand/XState conventions, standardized error hierarchy, mocking strategies, visual/accessibility regression specs, and coverage expectations.
+- **Verification**: Checked file linkage via `stat` and verified that root `AGENTS.md` symlinks correctly. Inspected the generated document structure and verified compliance with all guidelines.
+- **What the Next Agent Should Know**: The root `AGENTS.md` is a symbolic link to `docs/AGENTS.md`. Both are fully synchronized. The document serves as the authoritative, dense technical guidelines for AI assistants working in this monorepo.
+
 ## 2026-08-24T22:00:00Z - Layout Compliance & TypeScript Stability Pass
 
 - **Purpose**: Align Tailwind layouts with `DESIGN.md` spacing & radius constraints; resolve lingering TypeScript narrowing bugs on intersection types.

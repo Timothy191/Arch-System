@@ -552,7 +552,7 @@ export const TECH_STACK = [
       {
         name: "Supabase PostgreSQL",
         version: "16.x",
-        description: "Primary ACID relational database with 95+ migrations & pgvector",
+        description: "Primary ACID relational database with 150 migrations & pgvector",
       },
       {
         name: "Row Level Security (RLS)",
@@ -914,7 +914,7 @@ export const BACKEND_SERVICES: BackendService[] = [
     tech: "Node.js Edge / Serverless + Zod + Supabase Server SDK",
     color: "#3b82f6",
     protocols: ["Direct Server RPC", "HTTPS", "Supabase Session Claims"],
-    security: "Server-side Session & 95 RLS Policy Enforcement (Zero-Proxy)",
+    security: "Server-side Session & 354 RLS Policy Enforcement (Zero-Proxy)",
     sla: "<25ms Execution",
     features: [
       "Direct Supabase RLS Session Forwarding",
@@ -951,11 +951,11 @@ export const BACKEND_SERVICES: BackendService[] = [
     category: "database",
     role: "Primary ACID Data Store",
     description:
-      "PostgreSQL 15 cluster with 95+ versioned migrations, partition pruning, and strict Row Level Security policies.",
+      "PostgreSQL 15 cluster with 150 versioned migrations, partition pruning, and strict Row Level Security policies.",
     tech: "PostgreSQL 15 + PostgREST + pgvector",
     color: "#3ecf8e",
     protocols: ["PostgreSQL Wire (5432)", "HTTPS / PostgREST"],
-    security: "95 RLS Policies, Encrypted at rest (AES-256)",
+    security: "354 RLS Policies, Encrypted at rest (AES-256)",
     sla: "<10ms Query p95",
     features: [
       "Partitioned Production Logs",
@@ -1256,7 +1256,7 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     protocol: "Server RPC ──► Postgres / RLS",
     flowType: "data",
     description:
-      "Direct zero-middleman mutations forwarding authenticated user session tokens to Supabase PostgreSQL, enforcing 95 Row Level Security policies with strict Zod validation.",
+      "Direct zero-middleman mutations forwarding authenticated user session tokens to Supabase PostgreSQL, enforcing 354 Row Level Security policies with strict Zod validation.",
     color: "#3ecf8e",
   },
   {

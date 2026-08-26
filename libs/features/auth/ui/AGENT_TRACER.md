@@ -1,5 +1,13 @@
 # Agent Tracer
 
+## 2026-08-25 - Workspace Dependency Links
+
+**Purpose**: Declare local packages imported by `LoginForm`.
+
+**Changes**: Added workspace dependencies on `@repo/auth/data-access` and `@repo/auth/utils`.
+
+**Handoff**: Auth UI local imports are now backed by explicit pnpm workspace links.
+
 ## 2026-08-21T00:00:00Z - Login Page UX Improvements
 
 **Purpose**: Implement comprehensive UX improvements to the login and reset password pages based on Erik D. Kennedy's interaction design principles.

@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-08-25 - Workspace Dependency Link
+
+**Purpose**: Declare the departments data-access package imported by the hub UI.
+
+**Changes**: Added `@repo/departments/data-access` as a pnpm workspace dependency.
+
+**Handoff**: Hub UI department imports now resolve through an explicit workspace link.
+
 ## 2026-08-24 - HeroRotator Elite 3D Spatial Cylinder Physics & Focal Blur
 
 - **Purpose**: Implement continuous 3D spatial cylinder mechanics on `<HeroSlide>` with `translateZ` depth tracking (`z: [-250, -120, 0, -120, -250]`), dynamic depth-of-field focal blur (`filter: blur([8, 4, 0, 4, 8]px)`), Z-axis pitch/tilt (`rotateX`), and internal image parallax (`imageX`). Enlarged the active card width to 52% to command more attention.

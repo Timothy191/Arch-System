@@ -14,9 +14,16 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
   if (!cookieList) {
     cookieStore = await cookies();
   }
-  const replicaUrl = process.env.SUPABASE_READ_REPLICA_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const replicaUrl =
+    process.env.SUPABASE_READ_REPLICA_URL && process.env.SUPABASE_READ_REPLICA_URL.trim() !== ""
+      ? process.env.SUPABASE_READ_REPLICA_URL
+      : process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        process.env.SUPABASE_URL ||
+        "https://mrwhtxbhrzyttlsyuofc.supabase.co";
 
-  return createServerClient(replicaUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+
+  return createServerClient(replicaUrl, anonKey, {
     global: {
       fetch: instrumentedFetch,
     },

@@ -1,93 +1,232 @@
 # Repository Guidelines
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal — an **Nx 22 + pnpm** monorepo serving authenticated, department-specific dashboards. Node `>=22` (Volta pins `24.15.0`), pnpm `9.15.9`, ESM, Docker for local Supabase.
+Arch-Systems (Plantcor) is a multi-departmental mining operations portal — an **Nx 22 + pnpm** workspaces monorepo serving authenticated, department-specific dashboards. Enforces strict role and department-based authorization.
 
-> Concise contributor index. Each section links to the authoritative detail in [`CLAUDE.md`](../CLAUDE.md) (technical guide) or [`CONTRIBUTING.md`](../CONTRIBUTING.md) (full contributor guide). Nothing is lost — just one click away.
+---
 
-## Project Structure & Module Organization
+## Project Overview
 
-- `apps/portal` — Next.js 15+ App Router, React 19 (:3000). Server Actions + API routes co-located with features.
-- `apps/cms` — Payload CMS v3. `apps/overview` — architecture visualization (React Flow).
-- `packages/` — `theme`, `ui`, `supabase`, `database`, `redis`, `utils`, `errors`, `types`, `contract`, `logger`, `rate-limiter`, `eval`, `agents`.
-- `tools/` — build-time scripts (policy compiler, tag applicator). `e2e/` — Playwright tests.
-- Migrations source of truth: `packages/database/migrations/`. Never edit `packages/supabase/supabase/migrations/` (deploy-time copy).
+The portal integrates mining analytics, equipment status, and employee operations into department-specific dashboards. It relies on a Next.js frontend, Payload CMS headless content provider, PostgreSQL database with Row-Level Security, Redis caching, and a Python evaluation suite.
 
-Full architecture detail: [CLAUDE.md > Architecture](../CLAUDE.md#architecture) · [CONTRIBUTING.md > Architecture overview](../CONTRIBUTING.md#architecture-overview).
+---
 
-## Build, Test, and Development Commands
+## Architecture & Data Flow
 
-```bash
-pnpm install
-cp apps/portal/env/.env.example apps/portal/.env
-pnpm --filter @repo/database supabase:dev   # local Postgres + Auth (:54321), separate terminal
-pnpm dev                                    # portal on :3000
-pnpm quality                                # full quality gate — run before push
+### Conceptual Component Architecture
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                              CLIENT / UI                               │
+│  - apps/portal (Next.js)      - apps/overview (React Flow Topology)     │
+│  - @repo/ui (shadcn/ui)       - libs/features/* (Domain Feature Modules)│
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Http/WS Requests
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        EDGE / MIDDLEWARE GATEWAY                       │
+│  - apps/portal/proxy.ts (Next.js edge middleware router)              │
+│  - apps/portal/server/proxy.ts (Auth verification & Redis gating)       │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                  ┌─────────────────┴─────────────────┐
+                  ▼                                   ▼
+┌───────────────────────────────────┐   ┌────────────────────────────────┐
+│            CACHING                │   │        EXTERNAL SERVICES       │
+│  - @repo/redis (L1/L2 Write-Through│  │  - apps/cms (Payload CMS v3)   │
+│    Cache with Coalescing)         │   │  - @repo/supabase (SSR Wrapper)│
+└─────────────────┬─────────────────┘   └────────────────┬───────────────┘
+                  │ Cached Auth Profiles                 │ Queries & Auth
+                  ▼                                      ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                             DATABASE LAYER                             │
+│  - PostgreSQL (local Supabase CLI container)                           │
+│  - Row-Level Security (RLS) policies enforcing auth.uid() isolation     │
+│  - Sequential Zero-Padded SQL migrations (@repo/database/migrations/)  │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Goal              | Command                                                                             |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| Build all / one   | `pnpm build` · `pnpm nx build <name>`                                               |
-| Lint / type-check | `pnpm lint` · `pnpm type-check`                                                     |
-| Unit tests        | `pnpm test` · single file: `pnpm --filter portal test -- --testPathPatterns=<file>` |
-| E2E               | `pnpm test:e2e` (needs portal on :3000)                                             |
+### Core Data & Auth Flows
 
-Prefer `pnpm nx run` / `nx run-many` over invoking underlying tools directly.
-Full command table + `pnpm quality` breakdown: [CLAUDE.md > Common commands](../CLAUDE.md#common-commands).
-Quality gate order + 14-step CI pipeline: [CONTRIBUTING.md > Quality gates](../CONTRIBUTING.md#quality-gates).
+1. **Authentication**: Managed via Supabase Auth (JWT). Session tokens are stored in HttpOnly Secure cookies. CSRF and Origin headers are validated on login.
+2. **Authorization Mapping**: The `public.employees` table maps user `auth_id` to an operational `role` (e.g. operator, manager, admin), a `department_id`, and `accessible_departments` (an array of UUIDs).
+3. **Route Gating**: Next.js Edge middleware (`apps/portal/proxy.ts`) gates department directories (`/drilling`, `/production`, `/access-control`, `/engineering`, `/control-room`, `/safety`, `/training`, `/satellite-monitoring`, `/access-card-actions`). It extracts the user session, resolves department UUIDs, and queries the employee profile. Access profiles are cached in Redis under `arch:auth:employee:${user.id}` to eliminate DB overhead.
+4. **Database RLS Isolation**: Every PostgreSQL table has RLS enabled. Policies consult `auth.uid()` and cross-reference roles or departments against `public.employees` to restrict rows on select, insert, update, and delete. Transaction-wrapped SQL unit tests verify that non-admin roles cannot self-elevate permissions or access unauthorized departments.
 
-## Coding Style & Naming Conventions
+---
 
-- TypeScript strict. No `any`, no `// @ts-ignore`. Use `unknown` + type guards or Zod at boundaries.
-- Server Actions call `createServerSupabaseClient()` and validate the user on line one.
-- Merge classes with `cn()` from `@repo/ui/lib/utils`. Named icon imports only (`import { Drill } from "lucide-react"`).
-- Use semantic design tokens from `@repo/theme` — never hardcode OKLCH/hex. Light theme only.
-- No raw `box-shadow` / Tailwind `shadow-*`. Use tokenized shadows: `shadow-card`, `shadow-window`, `shadow-diffusion-*`.
-- Animate only `opacity`, `transform`, color props. Easing: `cubic-bezier(0.16, 1, 0.3, 1)`.
-- Path aliases: `@/*` and `~/*` resolve to `apps/portal/*`.
-- Formatting: Prettier. Linting: ESLint + Stylelint + cspell.
+## Key Directories
 
-Full conventions (package management, portal routing, design system, codegen): [CLAUDE.md > Conventions](../CLAUDE.md#conventions) · [CONTRIBUTING.md > Code conventions](../CONTRIBUTING.md#code-conventions).
-Design system rules (OKLCH, glass surface, typography, motion): [DESIGN.md](DESIGN.md).
+- `apps/portal` — Next.js 15+ App Router portal frontend.
+- `apps/cms` — Headless Payload CMS v3.
+- `apps/overview` — Architecture and DB schema visualizer (React Flow).
+- `libs/features/` — Domain feature modules (e.g. `hub/ui`, `departments/ui`, `auth/ui`, `dashboard/data-access`).
+- `packages/` — Shared monorepo libraries:
+  - `packages/contract` — Shared Zod schemas and inferred types (Data Contract SSoT).
+  - `packages/supabase` — Supabase SSR client factories, cookies config, and telemetry tracers.
+  - `packages/redis` — Write-Through local + Redis cache wrapper and invalidation routines.
+  - `packages/database` — Migration scripts, SQL privilege assertions, and rollback validation scripts.
+  - `packages/errors` — Standardized application domain errors.
+  - `packages/rate-limiter` — Sliding-window and token-bucket rate limit controls.
+  - `packages/theme` & `packages/ui` — Design token CSS compilation and component primitives.
+  - `packages/eval` — Python LLM metrics and code compliance evaluations (DeepEval + Pytest).
+- `tools/` — Repository verification scripts, tag applicators, and policy compilers.
+- `e2e/` — Playwright end-to-end and visual regression test suites.
 
-## Testing Guidelines
+---
 
-- Unit tests: Jest (jsdom, ts-jest). Co-locate as `*.test.ts(x)` next to source.
-- E2E: Playwright in `e2e/`. Mock at the network boundary (Supabase, Redis), not at function calls.
-- Coverage thresholds: lines 40%, branches 30%, functions 35%, statements 40%.
-- Jest pitfall: `apps/portal/jest.config.js` uses explicit `moduleNameMapper` — add a mapping for any new `@repo/*` import.
+## Development Commands
 
-Full testing detail + new `@repo/*` import workflow: [CONTRIBUTING.md > Testing](../CONTRIBUTING.md#testing).
+```bash
+# 1. Install dependencies
+pnpm install
 
-## Commit & Pull Request Guidelines
+# 2. Configure environment vars
+cp apps/portal/env/.env.example apps/portal/.env
 
-- Conventional commits enforced by commitlint: `feat(scope): description`, `fix(scope): description`, `chore(scope): description`.
-- One commit per task. No amend/force-push without permission. Never `--no-verify`.
-- Husky runs lint-staged on commit, lint + type-check on push. Do not bypass hooks.
-- Pause for human review before merging any DB schema, RLS, or auth change.
-- Commit migrations and regenerated `packages/supabase/src/database.types.ts` atomically.
+# 3. Spin up local Supabase container (Postgres, Auth, Studio) in a separate terminal
+pnpm --filter @repo/database supabase:dev
 
-Full migration workflow + RLS requirements: [CONTRIBUTING.md > Database migrations](../CONTRIBUTING.md#database-migrations).
-Git + agent tracing rules: [CLAUDE.md > Git](../CLAUDE.md#git).
+# 4. Launch Next.js dev server
+pnpm dev
 
-## Agent-Specific Instructions
+# 5. Execute full quality validation gate (run prior to merging or pushing code)
+pnpm quality
+```
 
-- Read the affected package's `AGENT_TRACER.md` before editing; update it after every change (ISO 8601 timestamp, purpose, changes, handoff).
-- Add `// AGENT-TRACE:` breadcrumbs for non-obvious logic. Instrument new service paths with OpenTelemetry / prom-client.
-- Run `pnpm quality` before marking work complete.
-- Policy SSoT: edit `tools/policy-compiler.cjs`, run `pnpm policy:gen`, commit source and generated files atomically. CI fails on drift.
-- Codegen pipelines (design tokens, DB types): [CLAUDE.md > Codegen](../CLAUDE.md#codegen--never-edit-generated-output).
-- Policy + dependency rules: [CLAUDE.md > Policy & dependency constraints](../CLAUDE.md#policy--dependency-constraints-single-source-of-truth).
-- New package workflow (6 steps): [CONTRIBUTING.md > Adding a new package](../CONTRIBUTING.md#adding-a-new-package).
-- Nx: explore with the `nx-workspace` skill first. Scaffolding: invoke the `nx-generate` skill before other exploration.
-- Common pitfalls (duplicate video, Jest resolution, transpilePackages, AI removal): [CLAUDE.md > Heuristics](../CLAUDE.md#heuristics).
+### Build, Test, and Lint Tasks
 
-## CI & Deployment
+Nx handles target execution and caching. Prefer `pnpm nx run` over underlying tools:
 
-- CI workflows in `.github/workflows/`: `ci.yml` (parallel lint/type/test/build/e2e/lighthouse/a11y/security/deps/knip/policy), `release.yml`, `deploy.yml`, `theme-ci.yml`, `dast.yml`.
-- Deploy: `pnpm deploy:local` / `:staging` / `:production` / `:rollback`. `pnpm fresh-start` = clean rebuild. `pnpm shutdown` = stop all services.
+| Task Goal                        | Command                                                        |
+| :------------------------------- | :------------------------------------------------------------- |
+| Build all workspaces             | `pnpm build`                                                   |
+| Build single app/package         | `pnpm nx build <name>` (e.g. `pnpm nx build portal`)           |
+| Run all unit tests               | `pnpm test`                                                    |
+| Run single Jest spec file        | `pnpm --filter portal test -- --testPathPatterns=<file_path>`  |
+| Run all Playwright E2E           | `pnpm test:e2e` (requires portal dev server active on `:3000`) |
+| Run visual spec tests            | `pnpm test:e2e:visual`                                         |
+| Spin up Storybook UI             | `pnpm ui`                                                      |
+| Execute accessibility checks     | `pnpm test:a11y`                                               |
+| Regenerate architecture policies | `pnpm policy:gen`                                              |
 
-Full deployment guide: [DEPLOYMENT.md](DEPLOYMENT.md). Security policy: [SECURITY.md](SECURITY.md).
+---
 
-## Further Reading
+## Code Conventions & Common Patterns
 
-[`CLAUDE.md`](../CLAUDE.md) (technical guide) · [`CONTRIBUTING.md`](../CONTRIBUTING.md) (full contributor guide) · [`DESIGN.md`](DESIGN.md) · [`DEPLOYMENT.md`](DEPLOYMENT.md) · [`SECURITY.md`](SECURITY.md) · [`PRODUCT.md`](PRODUCT.md).
+### Code Formatting & Quality
+
+- **Enforcement**: Prettier formats code; ESLint, Stylelint, and cspell lint styles and spellings.
+- **Strictness**: TypeScript strict mode is enabled. No `any` types; no `// @ts-ignore` exceptions. Cast dynamic boundaries to `unknown` and validate via Zod.
+
+### Naming Conventions
+
+- **Routing**: Portal pages must be named `page.tsx` and parent interfaces `layout.tsx`.
+- **Packages**: Monorepo packages must be named `@repo/<name>` and export a public API strictly from `src/index.ts`.
+- **Database Migrations**: SQL files under `packages/database/migrations/` must use zero-padded serial naming: `NNN_description.sql` (e.g. `001_initial_schema.sql`).
+
+### Error Handling Pattern
+
+- All modules must throw subclassed exceptions from `@repo/errors` (e.g., `ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`).
+- **Prohibited**: Throwing generic `Error` instances is forbidden.
+- **Catching**: Server Actions and API Routes must catch exceptions and check type safety using `isAppError(error)` before returning error structures to the UI.
+- **Example**:
+  ```typescript
+  import { ValidationError, isAppError } from "@repo/errors";
+
+  try {
+    if (!data) throw new ValidationError("Data payload is missing", { code: "MISSING_PAYLOAD" });
+  } catch (err) {
+    if (isAppError(err)) {
+      return { success: false, error: err.message, code: err.params?.code };
+    }
+    return { success: false, error: "Internal system failure" };
+  }
+  ```
+
+### Async & Mutating Patterns
+
+- **Server Actions**: Must declare `"use server"` and call `createServerSupabaseClient()` to authenticate and validate session claims on line one.
+- **Returns**: Server Actions must return a safe object `{ success: boolean; data?: T; error?: string }` instead of throwing uncaught promises that crash the client-side UI.
+- **Invalidation**: Actions mutating state must run `revalidatePath()` or `revalidateTag()` to purge portal router caches.
+
+### Client-Side State Management
+
+- **Zustand 5**: Strictly limited to UI chrome state (e.g., active menu indices, modal open states, sidebar toggles). **Do not store server-sourced data caches in Zustand.**
+- **TanStack React Query**: Manages and caches all server-side data retrieved by client components.
+- **XState**: Reserved for complex async workflows requiring structured state charts (such as plugin pipelines).
+
+### Architectural Boundary Enforcement
+
+- `tools/policy-compiler.cjs` is the Single Source of Truth (SSoT) for package boundaries.
+- Run `pnpm policy:gen` to synchronize policies. This script invokes `tools/apply-project-tags.cjs` to tag folders (e.g. `scope:app`, `scope:package:ui`, `scope:package:db`) and generates the ESLint import rules in `eslint-boundaries.generated.cjs`.
+- **Constraints**:
+  - UI components (`scope:package:ui`) must remain pure: they are prohibited from importing data packages (`@repo/supabase`, `@repo/redis`, `@repo/database`).
+  - Theme (`scope:package:theme`) cannot depend on UI components.
+  - Apps (`scope:app`) cannot import `@repo/database-internal` or other internal db utilities directly; they must query via `@repo/supabase`.
+
+### Agent Tracing & breadcrumbs
+
+- Every workspace package contains an `AGENT_TRACER.md` recording changes. **Assistants must append an ISO 8601 timestamped entry describing the modification and handover details.**
+- Annotate complex or non-obvious logic inline using `// AGENT-TRACE: <explanation>` breadcrumbs.
+
+---
+
+## Important Files
+
+- `apps/portal/proxy.ts` — Edge middleware entry point routing portal directories.
+- `apps/portal/server/proxy.ts` — Proxy implementation containing cached Redis auth profile lookups.
+- `tools/policy-compiler.cjs` — Architecture rules compiler and SSoT.
+- `tools/apply-project-tags.cjs` — Nx project tagging script mapping folders to scope tags.
+- `tools/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.
+- `packages/database/tests/migration-rollback-safety.mjs` — Validates migration SQL naming and checks rollback (`DROP TABLE IF EXISTS`) requirements.
+- `packages/errors/src/index.ts` — AppError base classes and type guards.
+
+---
+
+## Runtime/Tooling Preferences
+
+- **Runtime Engine**: Node.js `>=22` (pinned via Volta to Node `24.15.0`). Bun is **not** supported for running the portal application.
+- **Package Manager**: pnpm `9.15.9`.
+- **Shared Catalogs**: Workspace dependencies are consolidated in `pnpm-workspace.yaml`. Shared libraries must declare imports using the `catalog:` prefix (or `catalog:react19` for React-related dependencies).
+- **Local Services (Docker)**:
+  - **Supabase CLI Container**: API gateway on `54321`, Postgres DB on `54322`, Studio UI on `54323`, Pooler on `54329`.
+  - **Metrics Stack**: Grafana dashboard on `9091`, Prometheus on `9093`, cAdvisor on `8082`.
+
+---
+
+## Testing & QA
+
+### Test Environments
+
+- **Node**: For data adapters, schemas, and API contracts (`@repo/contract`, `libs/shared/data-access`).
+- **JSDOM**: For layouts, hooks, and React page elements (`apps/portal`, `libs/features/*`). Jest uses `@swc/jest` for compilation.
+
+### Mocking Boundaries in Unit Tests
+
+- **Redis**: Mocked globally using an in-memory `Map` database implemented in `apps/portal/setupTests.ts` and `libs/features/jest.setup.ts`. Mocks standard operations (`get`, `set`, `del`, `incr`, `expire`).
+- **Supabase**: Mocked on a per-test basis using `jest.mock`. Mock clients return chainable spies simulating query structures: `from().select().eq()`.
+
+### Playwright E2E & Visual Testing
+
+- **E2E tests** run against the local Docker database. Authentication is handled globally in `playwright.config.ts` via `e2e/global.setup.ts` using cached credentials (`admin@plantcor.os` / `Yugioh@123#`) saved to `e2e/.auth/user.json`.
+- **Visual specs** (`e2e/visual/`) use `toHaveScreenshot()` with a 2% pixel variance tolerance (`0.02`). They mask dynamic UI elements (clocks, videos, canvas, pulsed animations) to ensure determinism.
+- **UI theme invariant**: Visual tests check that the interface stays in light-mode (macOS-style gray background `#f3f4f6`, luminance > 200). Dark mode is not supported.
+
+### Storybook Accessibility Testing
+
+- Runs on the component library (`packages/ui`) via `@storybook/test-runner` using `axe-playwright`.
+- **Hooks**: The `preVisit` hook injects the Axe auditor; the `postVisit` hook runs validation against the `#storybook-root` component context on every story (unless disabled via the `storyContext.parameters?.a11y?.disable` flag).
+
+### Database Row-Level Security Validation
+
+- Sequential SQL transaction-wrapped unit tests in `packages/database/tests/` verify RLS permissions (e.g. checking that role modifications fail for non-admins) and auto-rollback to verify DB invariants safely.
+
+### Coverage Thresholds
+
+Enforced via Jest in `apps/portal/jest.config.js`:
+
+- **Lines**: 35%
+- **Branches**: 24%
+- **Functions**: 24%
+- **Statements**: 34%
+  _(Note: These are set to represent a sustainable baseline accounting for extensive presentational page components; do not artificially depress these rates)._
