@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
-  "commit": "a3e7ad7499c73745b71cb661c7edddf4c83a7ac4",
-  "indexed_at": "2026-08-27T08:55:55Z",
+  "commit": "0948c122f06cbc70c13192d42dbc3907b271aa18",
+  "indexed_at": "2026-08-27T11:10:08Z",
   "project": "home-tim-Documents-Arch-System",
-  "nodes": 14854,
-  "edges": 35491,
-  "original_size": 36438016,
-  "compressed_size": 6230361,
+  "nodes": 14905,
+  "edges": 35542,
+  "original_size": 36569088,
+  "compressed_size": 6249226,
   "compression_level": 3
 }
