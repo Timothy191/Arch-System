@@ -1,0 +1,3 @@
+## 2026-08-25 - SafetyDashboard Single-Pass Array Aggregation
+**Learning:** In server dashboard components like `SafetyDashboard`, deriving multiple chart and KPI data structures (lost time, near misses, equipment damage, unique dates, trend buckets, distribution metrics) through separate array operations (`.filter()`, `.map()`, `.forEach()`) incurs O(5N) iteration overhead and allocates unnecessary intermediate arrays.
+**Action:** Consolidate multiple array operations over identical dataset parameters into a single O(N) `for` loop pass that populates all metric counters, Sets, and Map/Record buckets simultaneously.

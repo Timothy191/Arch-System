@@ -37,13 +37,67 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
   const injuredToday = todayIncidents?.reduce((sum, i) => sum + (i.injured_parties || 0), 0) ?? 0;
 
   const monthlyCount = monthlyIncidents?.length ?? 0;
-  const monthlyLostTime =
-    monthlyIncidents?.filter((i) => i.incident_type === "lost-time").length ?? 0;
+
+  // Single-pass optimization: Pre-initialize trend bucket map for the last 30 days
+  const trend: Record<string, { date: string; incidents: number; severity: number }> = {};
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr: string = d.toISOString().split("T")[0]!;
+    trend[dateStr] = {
+      date: dateStr.slice(5),
+      incidents: 0,
+      severity: 0,
+    };
+  }
+
+  // Single-pass metrics accumulators: replace 5 separate iterations over monthlyIncidents with O(N) single loop
+  let monthlyLostTime = 0;
+  let nearMissCount = 0;
+  let equipmentDamageCount = 0;
+  const uniqueDates = new Set<string>();
+  const dist: Record<string, number> = {};
+
+  if (monthlyIncidents) {
+    for (let i = 0; i < monthlyIncidents.length; i++) {
+      const inc = monthlyIncidents[i];
+      if (!inc) continue;
+
+      // Track unique incident dates for incident-free days calculation
+      if (inc.incident_date) {
+        uniqueDates.add(inc.incident_date);
+      }
+
+      // Aggregate type counts
+      if (inc.incident_type === "lost-time") {
+        monthlyLostTime++;
+      } else if (inc.incident_type === "near-miss") {
+        nearMissCount++;
+      } else if (inc.incident_type === "equipment-damage") {
+        equipmentDamageCount++;
+      }
+
+      // Build trend data
+      const dateStr = inc.incident_date;
+      if (dateStr && trend[dateStr]) {
+        const entry = trend[dateStr];
+        if (entry) {
+          entry.incidents += 1;
+          entry.severity += 1;
+        }
+      }
+
+      // Build distribution data
+      const type = inc.incident_type.replace("-", " ").toUpperCase();
+      dist[type] = (dist[type] || 0) + 1;
+    }
+  }
+
+  const trendData = Object.values(trend);
+  const distributionData = Object.entries(dist).map(([name, value]) => ({ name, value }));
 
   const lastLTIDate = lastLTI ? new Date(lastLTI.incident_date) : new Date("2000-01-01");
   const ltiFreeDays = Math.floor((Date.now() - lastLTIDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  const uniqueDates = new Set(monthlyIncidents?.map((d) => d.incident_date).filter(Boolean) ?? []);
   const incidentFreeDays = 30 - uniqueDates.size;
 
   return (
@@ -87,43 +141,7 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
       </div>
 
       {/* Safety Visualizations */}
-      <SafetyCharts
-        trendData={(() => {
-          const trend: Record<string, { date: string; incidents: number; severity: number }> = {};
-          // Initialize last 30 days
-          for (let i = 29; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr: string = d.toISOString().split("T")[0]!;
-            trend[dateStr] = {
-              date: dateStr.slice(5),
-              incidents: 0,
-              severity: 0,
-            };
-          }
-
-          monthlyIncidents?.forEach((inc) => {
-            const dateStr = inc.incident_date;
-            if (dateStr && trend[dateStr]) {
-              const entry = trend[dateStr];
-              if (entry) {
-                entry.incidents += 1;
-                entry.severity += 1;
-              }
-            }
-          });
-
-          return Object.values(trend);
-        })()}
-        distributionData={(() => {
-          const dist: Record<string, number> = {};
-          monthlyIncidents?.forEach((inc) => {
-            const type = inc.incident_type.replace("-", " ").toUpperCase();
-            dist[type] = (dist[type] || 0) + 1;
-          });
-          return Object.entries(dist).map(([name, value]) => ({ name, value }));
-        })()}
-      />
+      <SafetyCharts trendData={trendData} distributionData={distributionData} />
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
@@ -180,16 +198,11 @@ export async function SafetyDashboard({ deptId }: { deptId: string }) {
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Near misses</span>
-              <span className="text-[var(--text-heading)]">
-                {monthlyIncidents?.filter((i) => i.incident_type === "near-miss").length ?? 0}
-              </span>
+              <span className="text-[var(--text-heading)]">{nearMissCount}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Equipment damage</span>
-              <span className="text-[var(--text-heading)]">
-                {monthlyIncidents?.filter((i) => i.incident_type === "equipment-damage").length ??
-                  0}
-              </span>
+              <span className="text-[var(--text-heading)]">{equipmentDamageCount}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Injured parties (today)</span>
