@@ -1,5 +1,16 @@
 # Agent Tracer - @repo/features/hub/ui
 
+## 2026-08-26 - ThreeHeroRotatorDynamic 3D WebGL Integration & Full Offline Hardening
+
+- **Purpose**: Wire `@repo/ui/ThreeHeroRotatorDynamic` into `libs/features/hub/ui/src/HeroRotator.tsx` with complete Next.js SSR protection, offline local test suite, and gesture navigation.
+- **Changes**:
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Switched renderer to `ThreeHeroRotatorDynamic` from `@repo/ui/ThreeHeroRotatorDynamic`.
+  - `libs/features/hub/ui/src/ThreeHeroRotator.test.tsx`: Added full unit test suite for R3F 3D hero rotator covering mounting, 3D projections, dot indicators, touch swipe gestures, urgency badges, keyboard shortcuts, and dynamic wrapper rendering.
+  - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Updated tests to mock `@react-three/fiber`, `@react-three/drei`, and `next/dynamic`.
+- **Verification**:
+  - `pnpm nx test features-hub-ui` ✅ (25/25 tests passing)
+- **What the Next Agent Should Know**: The hub feature now runs the WebGL-powered 3D hero carousel safely in client-only mode with zero server-side overhead and complete test coverage.
+
 ## 2026-08-25 - Workspace Dependency Link
 
 **Purpose**: Declare the departments data-access package imported by the hub UI.

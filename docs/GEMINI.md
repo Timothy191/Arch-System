@@ -20,6 +20,21 @@ Industrial operations portal built for high-scale vigilance and operational prec
   - Database schema migrations (`packages/database`).
   - Data mutation logic (Server Actions, API routes).
   - Changes to authentication or authorization rules (RLS).
+- **Mandatory Migration Rollback Testing**: Whenever creating or editing any SQL migration under `packages/database/migrations/`, I MUST run `pnpm nx run @repo/database:test:migration-rollback` to guarantee rollback safety invariants before applying changes to the database.
+
+### Artifact Auto-Approval (MANDATORY RULE)
+
+- **Continuous Autonomous Execution**: All created and updated artifacts (such as implementation plans, design documents, walkthroughs, and reports) are considered **pre-approved** by user policy.
+- **Zero Blocking**: Do not pause, halt, or block execution waiting for manual interactive modal approval on generated plans. Proceed immediately to execution and verification while maintaining detailed markdown artifacts for observability.
+
+### Skills Installation & Spec Work Tooling (MANDATORY RULE)
+
+- **Installing New Skills**: Always use `npx skills add <owner/repo>` when installing or integrating new skills into the agent environment. Never clone or copy skills ad-hoc.
+- **Specification Work**: Always use `npm install -g mmx-cli` (or run via `mmx-cli`) for all specification, architecture blueprint, schema, and API contract spec work. When creating or refining specifications, use `mmx-cli` to produce standardized contract blueprints before running `pnpm audit:drift`.
+
+### Pre-Commit Compliance & Drift Verification (MANDATORY RULE)
+
+- **Mandatory Pre-Commit Gate**: Both `pnpm audit:drift` and `pnpm audit:compliance` must be triggered before committing new features to guarantee complete compliance across all monorepo boundaries.
 
 ### Production Readiness & Recovery
 

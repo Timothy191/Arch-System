@@ -1,21 +1,66 @@
 # Agent Tracer - @repo/ui
 
-## 2026-08-26 - HeroRotator Side Cards Matched to Center Card
+## 2026-08-26 - R3F Hero Rotator Production Hardening & Pure Component Modularization
 
-- **Purpose**: Remove 3D angle distortion, tilt, blur, and opacity fade from adjacent side Hero Cards so they visually mirror and match the center Hero Card.
+- **Purpose**: Complete production-hardening of the React Three Fiber migration and fluid typography implementation, eliminate UI duplication, add dynamic client-only SSR guarding, add multi-touch swipe support, and purge all Nx Cloud dependencies.
+- **Changes**:
+  - `packages/ui/src/components/HeroCardContent.tsx`: Extracted pure, shared card content component to eliminate markup duplication between DOM `HeroRotator` and 3D WebGL `ThreeHeroRotator`.
+  - `packages/ui/src/components/ThreeHeroRotatorDynamic.tsx`: Created `next/dynamic({ ssr: false })` wrapper preventing ~600KB Three.js bundle from executing during Next.js SSR passes.
+  - `packages/ui/src/components/ThreeHeroRotator.tsx`: Integrated `HeroCardContent`, added Pointer & Touch swipe gesture handlers (`onTouchStart`, `onTouchEnd`, `onPointerDown`, `onPointerUp`), keyboard navigation (ArrowLeft/Right/Space), and screen reader ARIA live region announcements.
+  - `packages/ui/src/components/KPI.tsx`, `PageHeader.tsx`, `EmptyState.tsx`: Propagated `text-fluid-*` typography tokens for fluid responsive scaling.
+  - `packages/ui/package.json`: Switched `three`, `@types/three`, `@react-three/fiber`, `@react-three/drei` to `catalog:` references; added exports for `./ThreeHeroRotatorDynamic` and `./HeroCardContent`.
+  - `nx.json`, `package.json`, `.github/workflows/ci.yml`: Completely purged Nx Cloud configuration (`nxCloudId`, `nxCloudAccessToken`, `nx-cloud` CI steps) and set `neverConnectToCloud: true`.
+- **Verification**:
+  - `pnpm nx test features-hub-ui` ✅ (25/25 tests passed)
+  - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
+  - `pnpm nx lint ui` ✅
+- **What the Next Agent Should Know**: The active hub hero rotator is `@repo/ui/ThreeHeroRotatorDynamic` with SSR safety, zero code duplication, full gesture support, and 100% offline local workspace execution.
+
+## 2026-08-26 - HeroRotator Horizontal Extension & Slimmed Vertical Profile
+
+- **Purpose**: Extend the hero card length horizontally for a wide command-center aspect ratio while slimming down vertical height and internal padding.
 - **Changes**:
   - `packages/ui/src/components/HeroRotator.tsx`:
-    - Set `rotateY` to `0` across adjacent offsets (`[-2, -1, 0, 1, 2] -> [0, 0, 0, 0, 0]`).
-    - Set `rotateX` to `0` and `z` depth to `0`.
-    - Set `imageX` parallax to `0%`.
-    - Set `opacity` at offset `[-1, 0, 1]` to `1` (clean, un-dimmed visibility).
-    - Set `blurValue` at offset `[-1, 0, 1]` to `0px` (zero blur).
-    - Set uniform `scale` at offset `[-1, 0, 1]` to `0.98`.
+    - Extended horizontal card width to `min(720px, 60%)` and centered left offset.
+    - Slimmed down container height to `minHeight: clamp(390px, 42vw, 490px)` with perspective `1800px`.
+    - Tuned orbital cylinder radius to `980px` to maintain distinct card separation with the wider card width.
+    - Compacted internal padding to `px-5 py-3.5 sm:px-7 sm:py-4` with streamlined vertical margins.
+    - Updated panoramic preview image container to a sleek `h-24 sm:h-28` letterbox.
+- **Verification**:
+  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm --filter @repo/ui type-check` ✅
+- **What the Next Agent Should Know**: The card is now in a wide 60% format (min 720px) with a slim vertical height (390–490px).
+
+## 2026-08-26 - HeroRotator Frosted White Backing & Refined 3D Coverflow Geometry
+
+- **Purpose**: Eliminate transparency bleed-through of overlapping/stacked background cards into the active hero card, reduce aggressive 3D distortion, cull distant slides, and create clean horizontal separation between hero cards while preserving 3D angles and animations.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`:
+    - Added solid frosted white backing (`bg-white/85 backdrop-blur-2xl`) to `InteractiveGlassCard` to stop overlapping cards from showing through text and partner chips.
+    - Reduced 3D lean-back angle `leanBackDeg` from 45° to 10° for subtle dimensional depth without trapezoidal distortion.
+    - Expanded 3D orbital cylinder radius to `920px` and set `cardWidth` to `min(620px, 52%)` so side cards flank the active card cleanly with distinct horizontal separation rather than crowded overlaps.
+    - Added distant slide culling in `opacity` transform (fades to 0 for `|offset| > 1.8` and completely hidden at `>= 2.5`).
+    - Configured responsive container dimensions (`cardWidth: min(620px, 52%)`, `cardLeft: calc((100% - min(620px, 52%)) / 2)`, `minHeight: clamp(460px, 52vw, 620px)`, `perspective: 1600px`).
+    - Adjusted preview image banner container height to `h-32 sm:h-40` for balanced card proportions.
+- **Verification**:
+  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm --filter @repo/ui type-check` ✅
+- **What the Next Agent Should Know**: The active card is backed with `bg-white/85 backdrop-blur-2xl`, cylinder radius is `920px` providing distinct card separation with 10° subtle tilt, and distant orbital slides are smoothly culled beyond an offset of 1.8.
+
+## 2026-08-26 - HeroRotator 3D Globe Cylinder Ring Architecture
+
+- **Purpose**: Implement a full 3D globe cylinder rotation effect across all department hero cards, with adjacent cards leaning back at 45 degrees, cards placed around a 3D orbital ring at the back, and circular rotation physics during transitions.
+- **Changes**:
+  - `packages/ui/src/components/HeroRotator.tsx`:
+    - Computed circular trigonometric transforms (`x = sin(θ) * R`, `z = (cos(θ) - 1) * R`) placing all department cards on an orbital ring cylinder (radius: 680px, step: `360 / total`).
+    - Added `rotateX: 45deg` lean-back tilt on adjacent and background panels with `rotateY` matching cylinder tangent angle (`θ = v * -angleStepDeg`).
+    - Configured depth scaling (`0.98` front to `0.65` back), subtle opacity layering (`1.0` front to `0.4` back), and depth-indexed layering (`zIndex: 10 - 90`).
+    - Updated container perspective (`perspective: 1400px`, `perspectiveOrigin: 50% 35%`) and adjusted card track width to 55% for optimal multi-card visibility.
     - Added inline `// AGENT-TRACE` comments.
 - **Verification**:
   - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
   - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
-- **What the Next Agent Should Know**: Adjacent side slides match the center slide in scale (0.98), opacity (1.0), and 0-degree 3D tilt without blur.
+- **What the Next Agent Should Know**: The HeroRotator now renders in a true 3D cylinder ring where all department panels populate the circle in 3D space, rotating smoothly in a continuous orbit.
 
 ## 2026-08-26 - HeroRotator Middle Card Width Expansion to 70%
 
@@ -348,3 +393,6 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
   - `packages/theme/src/tailwind/preset.ts`: Added `marquee` and `marquee-vertical` keyframes and animations directly to the tailwind preset, bypassing the `@theme inline` block from `globals.css` which was being ignored by Tailwind v3.
   - `libs/features/hub/ui/src/HeroRotator.tsx`: Refactored from a snappy `setInterval` slider to a continuous `Marquee` component, providing a smooth moving banner for the hero section as requested by the user.
 - **Status**: Completed. All Marquee banners are now smoothly animating.
+  \n- 2026-08-26T12:58:32Z: Enhanced InteractiveGlassCard effects and color palette (frosted white gradients, macOS Sonoma-style shadows, refined button transitions, inner glow/sheen). [Agent: Antigravity]
+  \n- 2026-08-26T13:02:24Z: Slightly increased HeroRotator overall container height (minHeight) for better vertical breathing room. [Agent: Antigravity]
+  \n- 2026-08-26T14:25:45Z: Extracted HeroCardContent to support a 2D native scroll fallback for mobile, hiding the 3D rotating cylinder on small screens. [Agent: Antigravity]

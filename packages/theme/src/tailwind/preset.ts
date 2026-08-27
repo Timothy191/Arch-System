@@ -328,6 +328,19 @@ const archTheme: Config = {
         "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
+
+        // Fluid typography scaling (CSS clamp() smooth transitions from mobile to ultra-wide)
+        "fluid-2xs": ["clamp(0.625rem, 0.58rem + 0.2vw, 0.6875rem)", { lineHeight: "1rem" }],
+        "fluid-xs": ["clamp(0.7rem, 0.65rem + 0.25vw, 0.75rem)", { lineHeight: "1rem" }],
+        "fluid-sm": ["clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem)", { lineHeight: "1.25rem" }],
+        "fluid-base": ["clamp(0.925rem, 0.875rem + 0.25vw, 1rem)", { lineHeight: "1.5rem" }],
+        "fluid-lg": ["clamp(1.05rem, 0.95rem + 0.5vw, 1.125rem)", { lineHeight: "1.75rem" }],
+        "fluid-xl": ["clamp(1.15rem, 1rem + 0.75vw, 1.25rem)", { lineHeight: "1.75rem" }],
+        "fluid-2xl": ["clamp(1.35rem, 1.15rem + 1vw, 1.5rem)", { lineHeight: "2rem" }],
+        "fluid-3xl": ["clamp(1.6rem, 1.35rem + 1.25vw, 1.875rem)", { lineHeight: "2.25rem" }],
+        "fluid-4xl": ["clamp(1.9rem, 1.55rem + 1.75vw, 2.25rem)", { lineHeight: "2.5rem" }],
+        "fluid-5xl": ["clamp(2.25rem, 1.75rem + 2.5vw, 3rem)", { lineHeight: "1.15" }],
+        "fluid-6xl": ["clamp(2.75rem, 2rem + 3.75vw, 3.75rem)", { lineHeight: "1.1" }],
       },
       borderRadius: {
         sm: "var(--radius-sm)",

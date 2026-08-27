@@ -1,5 +1,12 @@
 import React from "react";
-import { CheckCircle2, XCircle, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  ArrowRight,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import StatusBadge, { AccessStatus } from "@/features/access-control/components/StatusBadge";
 import { AutoAnimateList } from "@repo/ui/AnimatedList";
@@ -14,7 +21,7 @@ interface ActivityEntry {
   qrId: string;
 }
 
-const statusIcons: Record<string, React.ElementType> = {
+const statusIcons: Record<string, LucideIcon> = {
   Granted: CheckCircle2,
   Denied: XCircle,
   "Expired Credential": Clock,

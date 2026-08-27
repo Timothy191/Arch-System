@@ -47,12 +47,12 @@ export interface HeroRotatorProps {
 }
 
 const CONFIG = {
-  // AGENT-TRACE: Extended cardWidth further to 70% with cardLeft centered at 15% ((100% - 70%) / 2)
-  cardWidth: "70%", // active card column width
-  cardLeft: "15%", // left offset that centers the active card in the track
-  perspective: "1200px",
-  perspectiveOrigin: "50% 40%",
-  minHeight: "clamp(380px, 48vw, 560px)",
+  // AGENT-TRACE: 3D Globe cylinder carousel configuration with sleek wide horizontal profile
+  cardWidth: "min(720px, 60%)", // extended horizontal width
+  cardLeft: "calc((100% - min(720px, 60%)) / 2)", // centered left offset
+  perspective: "1800px",
+  perspectiveOrigin: "50% 35%",
+  minHeight: "clamp(440px, 46vw, 560px)", // slightly increased vertical profile for more breathing room
   autoRotateMs: 6000, // interval between auto-advances
   panDivisor: 400, // px-to-index sensitivity for drag
   velocityThreshold: 300, // px/s above which a flick snaps to next/prev
@@ -95,7 +95,8 @@ function InteractiveGlassCard({
     mouseY.set(0);
   }
 
-  const background = useMotionTemplate`radial-gradient(600px circle at ${sheenX} ${sheenY}, rgba(255,255,255,0.12), transparent 40%)`;
+  const background = useMotionTemplate`radial-gradient(800px circle at ${sheenX} ${sheenY}, rgba(255,255,255,0.3), transparent 40%)`;
+  const glow = useMotionTemplate`radial-gradient(400px circle at ${sheenX} ${sheenY}, rgba(255,255,255,0.15), transparent 40%)`;
 
   return (
     <motion.div
@@ -108,21 +109,31 @@ function InteractiveGlassCard({
       }}
       className={cn(
         "relative h-full w-full rounded-2xl overflow-hidden",
-        "liquid-glass-light border border-black/[0.08] shadow-window",
-        "transition-shadow duration-300 group/card",
+        "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
+        "transition-[shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group/card",
+        isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
         isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
       )}
     >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
       {isActive && (
-        <motion.div
-          className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 z-50 mix-blend-overlay"
-          style={{ background }}
-        />
+        <>
+          <motion.div
+            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:opacity-100 z-50 mix-blend-overlay"
+            style={{ background }}
+          />
+          <motion.div
+            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:opacity-100 z-40"
+            style={{ background: glow }}
+          />
+        </>
       )}
       {children}
     </motion.div>
   );
 }
+
+import { HeroCardContent } from "./HeroCardContent";
 
 interface HeroSlideProps {
   panel: Panel;
@@ -161,17 +172,58 @@ function HeroSlide({
     return diff;
   });
 
-  // AGENT-TRACE: Side cards matched with center card (no 3D tilt distortion, full opacity, no blur, uniform scale: 0.98)
-  const rotateY = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
-  const rotateX = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
-  const x = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "-100%", "0%", "100%", "0%"]);
-  const z = useTransform(offset, [-2, -1, 0, 1, 2], [0, 0, 0, 0, 0]);
-  const imageX = useTransform(offset, [-2, -1, 0, 1, 2], ["0%", "0%", "0%", "0%", "0%"]);
-  const scale = useTransform(offset, [-2, -1, 0, 1, 2], [0.75, 0.98, 0.98, 0.98, 0.75]);
-  const opacity = useTransform(offset, [-2, -1, 0, 1, 2], [0, 1, 1, 1, 0]);
-  const zIndex = useTransform(offset, (v) => Math.round(20 - Math.abs(v) * 10));
-  const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.1 ? "auto" : "none"));
-  const blurValue = useTransform(offset, [-2, -1, 0, 1, 2], [8, 0, 0, 0, 8]);
+  // AGENT-TRACE: 3D Globe Ring cylinder geometry: cards arranged circularly in 3D space with subtle 10deg lean-back on side cards and expanded radius for distinct separation
+  const angleStepDeg = 360 / Math.max(total, 1);
+  const radius = 980; // px distance from center of 3D cylinder for clean separation
+  const leanBackDeg = 10; // Subtle 10 degree lean back tilt
+
+  const rotateY = useTransform(offset, (v) => v * -angleStepDeg);
+  const rotateX = useTransform(offset, (v) => {
+    // Active card faces viewer flat (0deg), while adjacent side & back cards lean back subtly by 10deg
+    const distance = Math.min(Math.abs(v), 1);
+    return distance * leanBackDeg;
+  });
+
+  const x = useTransform(offset, (v) => {
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    return `${Math.sin(angleRad) * radius}px`;
+  });
+
+  const z = useTransform(offset, (v) => {
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    return (Math.cos(angleRad) - 1) * radius;
+  });
+
+  const scale = useTransform(offset, (v) => {
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    const depthFactor = (Math.cos(angleRad) + 1) / 2; // 1 at front (0 rad), 0 at back (PI rad)
+    return 0.72 + depthFactor * 0.26; // 0.98 at front, 0.72 at back
+  });
+
+  const opacity = useTransform(offset, (v) => {
+    const absV = Math.abs(v);
+    if (absV >= 2.5) return 0;
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    const depthFactor = (Math.cos(angleRad) + 1) / 2;
+    const baseOpacity = 0.4 + depthFactor * 0.6;
+    if (absV > 1.8) {
+      // Smoothly fade out distant back-facing slides to prevent visual ghosting and clutter
+      return baseOpacity * (1 - (absV - 1.8) / 0.7);
+    }
+    return baseOpacity;
+  });
+
+  const zIndex = useTransform(offset, (v) => {
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    return Math.round(50 + Math.cos(angleRad) * 40); // 90 at front, 10 at back
+  });
+
+  const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.5 ? "auto" : "none"));
+  const blurValue = useTransform(offset, (v) => {
+    const angleRad = (v * angleStepDeg * Math.PI) / 180;
+    const depthFactor = (Math.cos(angleRad) + 1) / 2;
+    return (1 - depthFactor) * 2; // 0px blur at front, 2px slight atmospheric blur at far back
+  });
   const filter = useMotionTemplate`blur(${blurValue}px)`;
 
   return (
@@ -225,133 +277,16 @@ function HeroSlide({
       className="absolute top-0 bottom-0 will-change-transform transform-gpu"
     >
       <InteractiveGlassCard isActive={isActive}>
-        <div className="relative h-full flex flex-col px-5 py-5 sm:px-7 sm:py-6 z-10">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-black/10 bg-black/[0.04] backdrop-blur-sm font-medium tracking-wide text-[var(--text-secondary)]">
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-accent-green animate-pulse"
-                  aria-hidden="true"
-                />
-                Sector-01 Active
-              </span>
-              <span className="text-[var(--text-muted)] tracking-wider">PORTAL v1.5.1</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {incidentCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-red/10 text-accent-red border border-accent-red/20 font-medium">
-                  <AlertTriangle className="w-3 h-3" />
-                  {incidentCount} Open
-                </span>
-              )}
-              {breakdownCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent-amber/10 text-accent-amber border border-accent-amber/20 font-medium">
-                  <Wrench className="w-3 h-3" />
-                  {breakdownCount} Breakdown{breakdownCount !== 1 ? "s" : ""}
-                </span>
-              )}
-              {offlineMachineCount > 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/[0.04] text-[var(--text-secondary)] border border-black/10 font-medium">
-                  <Power className="w-3 h-3" />
-                  {offlineMachineCount} Offline
-                </span>
-              )}
-              {incidentCount === 0 && breakdownCount === 0 && offlineMachineCount === 0 && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/20 font-medium">
-                  Nominal
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-1.5 flex-grow">
-            <div className="flex items-center gap-2.5">
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
-                  panel.iconBgColor,
-                )}
-              >
-                {panel.icon}
-              </div>
-              <span className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] font-semibold">
-                {panel.category}
-              </span>
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-heading)] leading-snug text-balance">
-              {panel.title}
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-2 max-w-lg">
-              {panel.description}
-            </p>
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {panel.stats && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/[0.03] border border-black/10 text-xs">
-                <Activity className="w-3.5 h-3.5 text-[var(--accent-blue)] shrink-0" />
-                <span className="text-[var(--text-muted)] uppercase text-[10px] font-medium">
-                  {panel.stats.label}:
-                </span>
-                <span className="font-semibold text-[var(--text-heading)]">
-                  {panel.stats.value}
-                </span>
-              </div>
-            )}
-            <div className="inline-flex items-center gap-1.5 ml-auto">
-              <Link
-                href={panel.primary.href}
-                data-cta="primary-hero"
-                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)] text-white font-medium text-xs shadow-card border border-black/[0.08] hover:bg-[var(--accent-blue)]/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                tabIndex={isActive ? 0 : -1}
-              >
-                {panel.primary.icon}
-                {panel.primary.label}
-              </Link>
-              {panel.secondary && (
-                <Link
-                  href={panel.secondary.href}
-                  data-cta="secondary-hero"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.07] text-[var(--text-heading)] font-medium text-xs border border-black/[0.08] transition-all active:scale-95"
-                  tabIndex={isActive ? 0 : -1}
-                >
-                  {panel.secondary.icon}
-                  {panel.secondary.label}
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <div className="relative mt-4 flex-shrink-0 h-28 sm:h-36 w-full overflow-hidden rounded-xl border border-black/[0.08] bg-black/[0.02] shadow-sm group/img">
-            <motion.img
-              style={{ x: imageX }}
-              src={failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image}
-              alt={`${panel.title} visual`}
-              className="h-full w-full object-cover object-center transition-transform duration-500 group-hover/img:scale-105"
-              loading={isActive ? "eager" : "lazy"}
-              fetchPriority={isActive ? "high" : "low"}
-              onError={() => onImageError(panel.image)}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-medium border border-white/20">
-                <CheckCircle2 className="w-2.5 h-2.5 text-accent-green" />
-                {panel.name.toUpperCase()}
-              </span>
-              <span className="text-[8px] font-mono text-white/90 bg-black/50 px-1.5 py-0.5 rounded backdrop-blur-md border border-white/20">
-                CAM-{String(idx + 1).padStart(2, "0")}
-              </span>
-            </div>
-          </div>
-
-          {isActive && (
-            <div className="mt-3 opacity-70">
-              <TrustLogos />
-            </div>
-          )}
-        </div>
+        <HeroCardContent
+          panel={panel}
+          idx={idx}
+          isActive={isActive}
+          failedImages={failedImages}
+          onImageError={onImageError}
+          incidentCount={incidentCount}
+          breakdownCount={breakdownCount}
+          offlineMachineCount={offlineMachineCount}
+        />
       </InteractiveGlassCard>
     </motion.div>
   );

@@ -1,5 +1,14 @@
 # Shared Data Access Agent Tracer
 
+## Session 2026-08-27 (Universal Edge Telemetry Circuit Breaker)
+
+- **Purpose**: Provide resilient telemetry ingestion with full-jitter exponential backoff, state transitions (CLOSED, OPEN, HALF_OPEN), and cached fallbacks for erratic SCADA Modbus / IoT satellite telemetry streams.
+- **Changes**:
+  - `src/telemetry-circuit-breaker.ts`: Implemented `TelemetryCircuitBreaker` class and typed execution wrappers.
+  - `src/telemetry-circuit-breaker.test.ts`: Added unit test suite validating state transitions, timeout recovery, and fallback caching.
+  - `src/index.ts`: Exported `TelemetryCircuitBreaker`, `CircuitState`, `CircuitBreakerOptions`, and `CircuitBreakerMetrics`.
+- **Verification**: `pnpm --filter @repo/shared/data-access test` ✅ (12/12 passed) and `pnpm --filter @repo/shared/data-access type-check` ✅ (0 errors).
+
 ## Session 2026-08-24 (Deformation Ingestion Performance Benchmark & Date Parsing Optimization)
 
 - **Purpose**: Prevent Node.js event loop blocking during large InSAR deformation and time-series sensor ingestion.

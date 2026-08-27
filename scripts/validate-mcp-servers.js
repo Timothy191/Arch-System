@@ -191,11 +191,21 @@ async function main() {
 
     // Server-specific dependency checks
     if (name === 'postgres') {
-      const isPostgresUp = await checkPort(54322);
-      if (!isPostgresUp) {
-        console.log(`${YELLOW}⚠ Postgres database not running on port 54322 (Supabase)${NC}`);
-        warningsCount++;
-        continue;
+      const connStr = (server.args || []).find(a => typeof a === 'string' && a.startsWith('postgres'));
+      const isRemote = connStr && (connStr.includes('pooler.supabase.com') || connStr.includes(':6543'));
+      if (isRemote) {
+        if (connStr.includes('[PASSWORD]') || connStr.includes('[REGION]')) {
+          console.log(`${YELLOW}⚠ Supavisor pooler configured (awaiting DB password/region in apps/portal/.env)${NC}`);
+          warningsCount++;
+          continue;
+        }
+      } else {
+        const isPostgresUp = await checkPort(54322);
+        if (!isPostgresUp) {
+          console.log(`${YELLOW}⚠ Postgres database not running on port 54322 (Supabase)${NC}`);
+          warningsCount++;
+          continue;
+        }
       }
     } else if (name === 'redis') {
       const isRedisUp = await checkPort(6379);

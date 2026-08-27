@@ -71,7 +71,7 @@ function ServiceNode({
 
   return (
     <div
-      className={`w-64 rounded-xl border transition-all duration-200 shadow-xl overflow-hidden cursor-pointer ${
+      className={`w-64 rounded-xl border transition-all duration-200 shadow-lg overflow-hidden cursor-pointer ${
         selected
           ? "ring-2 ring-[#3ecf8e] border-[#3ecf8e] bg-[#222222] shadow-[0_0_20px_rgba(62,207,142,0.25)]"
           : "border-[#363636] bg-[#171717] hover:border-[#525252] hover:bg-[#1c1c1c]"
@@ -217,7 +217,7 @@ function ScadaTelemetryInspector({
   }, [metrics.tags, filterProto, searchQuery]);
 
   return (
-    <div className="bg-[#171717] border border-[#06b6d4]/40 rounded-2xl p-5 shadow-xl space-y-4">
+    <div className="bg-[#171717] border border-[#06b6d4]/40 rounded-2xl p-5 shadow-lg space-y-4">
       {/* Telemetry Stream Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#2a2a2a]">
         <div className="flex items-center gap-2.5">
@@ -647,7 +647,7 @@ export default function BackendArchitecture() {
       {/* Main Diagram & Detail Inspector Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* React Flow Interactive Canvas */}
-        <div className="xl:col-span-8 bg-[#121212] border border-[#2a2a2a] rounded-2xl h-[760px] relative overflow-hidden shadow-2xl">
+        <div className="xl:col-span-8 bg-[#121212] border border-[#2a2a2a] rounded-2xl h-[760px] relative overflow-hidden shadow-window">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -756,7 +756,7 @@ export default function BackendArchitecture() {
           )}
 
           {/* Active Node Detail Card */}
-          <div className="bg-[#171717] border border-[#363636] rounded-2xl p-5 shadow-xl">
+          <div className="bg-[#171717] border border-[#363636] rounded-2xl p-5 shadow-lg">
             <div className="flex items-start justify-between gap-3 pb-4 border-b border-[#2a2a2a]">
               <div className="flex items-center gap-3">
                 <div

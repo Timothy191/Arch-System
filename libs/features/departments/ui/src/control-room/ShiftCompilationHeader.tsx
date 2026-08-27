@@ -84,7 +84,7 @@ export function ShiftCompilationHeader({
             onClick={() => handleShiftChange("day")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
               shiftType === "day"
-                ? "bg-white text-neutral-900 shadow-xs font-semibold"
+                ? "bg-white text-neutral-900 shadow-sm font-semibold"
                 : "text-neutral-500 hover:text-neutral-800"
             }`}
           >
@@ -96,7 +96,7 @@ export function ShiftCompilationHeader({
             onClick={() => handleShiftChange("night")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
               shiftType === "night"
-                ? "bg-white text-neutral-900 shadow-xs font-semibold"
+                ? "bg-white text-neutral-900 shadow-sm font-semibold"
                 : "text-neutral-500 hover:text-neutral-800"
             }`}
           >

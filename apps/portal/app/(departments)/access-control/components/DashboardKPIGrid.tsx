@@ -9,6 +9,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  type LucideIcon,
 } from "lucide-react";
 import type { AccessControlMetrics } from "../actions";
 
@@ -17,7 +18,7 @@ interface KPICardProps {
   title: string;
   value: string | number;
   subtext: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   trend?: { direction: "up" | "down" | "neutral"; label: string };
   variant?: "default" | "warning" | "danger" | "success";
   hero?: boolean;

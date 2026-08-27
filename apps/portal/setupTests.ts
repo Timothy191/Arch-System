@@ -127,4 +127,19 @@ if (typeof window !== "undefined") {
   });
 
   global.IntersectionObserver = MockIntersectionObserver as any;
+
+  // Mock ResizeObserver
+  class MockResizeObserver {
+    observe = jest.fn();
+    disconnect = jest.fn();
+    unobserve = jest.fn();
+  }
+
+  Object.defineProperty(window, "ResizeObserver", {
+    writable: true,
+    configurable: true,
+    value: MockResizeObserver,
+  });
+
+  global.ResizeObserver = MockResizeObserver as any;
 }

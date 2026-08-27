@@ -1,5 +1,19 @@
 # Portal Agent Tracer
 
+## Session 2026-08-27 (Quality Gate Hardening, Design System Compliance & Type Remediation)
+
+- **Purpose**: Resolve type check errors in access-control dashboard components, fix design system audit violations in `layout.tsx` and `print-report.css`, and achieve 100% pass across all 26 monorepo packages during `pnpm quality`.
+- **Changes**:
+  - `apps/portal/app/(departments)/access-control/components/DashboardActivityFeed.tsx`: Fixed icon typing to `LucideIcon` instead of raw `React.ElementType`.
+  - `apps/portal/app/(departments)/access-control/components/DashboardEntityStatus.tsx`: Fixed icon typing to `LucideIcon`.
+  - `apps/portal/app/(departments)/access-control/components/DashboardKPIGrid.tsx`: Fixed `KPICardProps` icon typing to `LucideIcon`.
+  - `apps/portal/app/layout.tsx`: Replaced unapproved `shadow-2xl` with approved `shadow-window` token.
+  - `apps/portal/styles/print-report.css`: Updated `box-shadow` to use `var(--shadow-none, none)` to satisfy design token audit rules.
+- **Verification**:
+  - `pnpm --filter portal type-check` ✅ (0 errors)
+  - `pnpm quality` ✅ (All 27 projects, linter, tests, knip, policy, security, and design audit passed 100%)
+- **What the Next Agent Should Know**: The whole monorepo is at 100% compliance across all quality gates.
+
 ## Session 2026-08-25 (Auth Error Resilience, Environment Synchronization & Lifecycle Verification)
 
 - **Purpose**: Resolve "Invalid Credentials" login failure by synchronizing `.env.production` and workspace `.env` with hosted Cloud Supabase credentials, adding defensive upstream error handling in `/api/auth/login`, and verifying full session lifecycle.
@@ -3434,3 +3448,4 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
   - `DailyLogForm.tsx`: Integrated auto-save draft persistence on tab switch.
 - **Status**: Completed. Verified with unit tests and type-check.
   \n## 2026-08-20: Cross-Department Data Bridging (Engineering & Control Room)\n\n**Purpose:** Document the schema linkage between Engineering Breakdowns and Control Room Machine Operations.\n**Changes:**\n- _Learning / Reference_: To see exactly how tables connect between departments, always reference `packages/database/migrations/`. In this case, matching `breakdowns.fleet_id` to `machines.serial_number` successfully bridged the gap between Engineering (which logs breakdowns) and the Control Room (which monitors machine operations). The UI now surfaces active breakdown comments and repair notes directly on the Machine Ops dashboard by performing this join.\n
+  \n- 2026-08-26T14:25:45Z: Added max-w-[1920px] and mx-auto constraints to root body to enforce layout limits on ultra-wide displays. [Agent: Antigravity]

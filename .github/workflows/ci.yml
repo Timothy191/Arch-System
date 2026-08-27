@@ -10,9 +10,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NX_CLOUD_CONTINUOUS_ASSIGNMENT: true
-
 jobs:
   # Deps Lint job - runs in parallel on coordinator
   deps-lint:
@@ -252,20 +249,13 @@ jobs:
           poetry run deepeval test run tests/
         working-directory: packages/eval
 
-      - name: Start Nx Cloud CI Run
-        run: pnpm exec nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="test" --stop-agents-on-failure=false --require-explicit-completion --with-env-vars=NEXT_TELEMETRY_DISABLED,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_URL,SUPABASE_ANON_KEY,SUPABASE_SERVICE_KEY,PORT,N8N_URL,FLOWISE_URL,DATABASE_URL,PAYLOAD_SECRET
-
-      - name: Run Nx Tasks via Nx Agents
+      - name: Run Nx Tasks
         run: pnpm nx affected -t lint type-check lint:tokens lint:css build test --coverage --passWithNoTests
         env:
           CI: true
 
       - name: Bundle Size Check
         run: pnpm bundlesize
-
-      - name: Complete Nx Cloud CI Run
-        if: always()
-        run: pnpm exec nx-cloud complete-ci-run
 
       - name: Upload Coverage Report
         if: always()

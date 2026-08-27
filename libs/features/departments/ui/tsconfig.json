@@ -4,11 +4,7 @@
     "baseUrl": "../../../../",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
-    "paths": {
-      "@/components/*": ["apps/portal/components/*"],
-      "@/lib/*": ["apps/portal/lib/*"]
-    }
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]

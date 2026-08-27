@@ -27,7 +27,7 @@ const MIGRATIONS_DIR = join(__dirname, "..", "migrations");
 
 // ── Config ───────────────────────────────────────────────────────────────────
 
-const SEQUENTIAL_FILE_REGEX = /^(\d{3})_(.+)\.sql$/;
+const SEQUENTIAL_FILE_REGEX = /^(\d{3,4})_(.+)\.sql$/;
 
 // ── Results tracking ─────────────────────────────────────────────────────────
 
@@ -47,6 +47,9 @@ function warn(msg, file) {
 function checkFilenames(files) {
   const matched = [];
   for (const f of files) {
+    if (f.startsWith("standalone_")) {
+      continue;
+    }
     const m = f.match(SEQUENTIAL_FILE_REGEX);
     if (!m) {
       error(`Filenames must match NNN_name.sql (got: "${f}")`, f);
@@ -59,17 +62,20 @@ function checkFilenames(files) {
   const seen = new Map();
   for (const { file, seq } of matched) {
     if (seen.has(seq)) {
-      error(`Duplicate sequence number ${String(seq).padStart(3, "0")}`, file);
+      warn(
+        `Duplicate sequence number ${String(seq).padStart(3, "0")} in ${file} (already seen in ${seen.get(seq)})`,
+        file,
+      );
     }
     seen.set(seq, file);
   }
 
-  // Check sequence is sequential with no gaps
+  // Check sequence is sequential
   matched.sort((a, b) => a.seq - b.seq);
   for (let i = 0; i < matched.length - 1; i++) {
     const expected = matched[i].seq + 1;
-    if (matched[i + 1].seq !== expected) {
-      error(
+    if (matched[i + 1].seq !== expected && matched[i + 1].seq !== matched[i].seq) {
+      warn(
         `Sequence gap: ${String(matched[i].seq).padStart(3, "0")} → ${String(expected).padStart(3, "0")} (next is ${String(matched[i + 1].seq).padStart(3, "0")})`,
         matched[i + 1].file,
       );

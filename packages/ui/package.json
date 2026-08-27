@@ -12,10 +12,13 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.0",
+    "@react-three/drei": "catalog:",
+    "@react-three/fiber": "catalog:",
     "@repo/theme": "1.0.0",
     "@repo/utils": "1.0.0",
     "@revolist/react-datagrid": "^4.21.0",
     "@revolist/revogrid": "^4.21.0",
+    "@types/three": "catalog:",
     "@xyflow/react": "^12.6.0",
     "animejs": "catalog:",
     "class-variance-authority": "^0.7.0",
@@ -24,7 +27,8 @@
     "lucide-react": "catalog:",
     "recharts": "^3.8.1",
     "sonner": "catalog:",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.4",
+    "three": "catalog:"
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
@@ -83,6 +87,9 @@
     "./MacTitleBar": "./src/components/MacTitleBar.tsx",
     "./WorkflowBuilder": "./src/components/WorkflowBuilder.tsx",
     "./HeroRotator": "./src/components/HeroRotator.tsx",
+    "./HeroCardContent": "./src/components/HeroCardContent.tsx",
+    "./ThreeHeroRotator": "./src/components/ThreeHeroRotator.tsx",
+    "./ThreeHeroRotatorDynamic": "./src/components/ThreeHeroRotatorDynamic.tsx",
     "./TrustLogos": "./src/components/TrustLogos.tsx",
     "./AcknowledgeButton": "./src/components/AcknowledgeButton.tsx",
     "./ActionConfirmDialog": "./src/components/ui/action-confirm-dialog.tsx",

@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/theme
 
+## 2026-08-26 - Fluid Typography CSS Clamp() Token Integration
+
+- **Purpose**: Implement fluid typography scaling via CSS `clamp()` in Tailwind preset according to responsive design constraints.
+- **Changes**:
+  - `packages/theme/src/tailwind/preset.ts`: Added `fluid-2xs` through `fluid-6xl` font size tokens utilizing dynamic viewport calculation and `clamp()` boundaries for smooth mobile to ultra-wide scaling.
+- **Verification**:
+  - `pnpm nx run @repo/theme:lint` / type-check.
+- **Next Steps**: Components across apps/portal and packages/ui can now use `text-fluid-*` classes for seamless responsive scaling without abrupt media-query jumps.
+
 ## 2026-08-24 - Hub Page Performance: Grain Overlay & Focus Background
 
 - **Purpose**: Stop the full-screen grain overlay from repainting every frame and point the focus-mode background at the downscaled poster.

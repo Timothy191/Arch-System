@@ -1,5 +1,5 @@
 import React from "react";
-import { Users, Car, Wrench, ChevronRight } from "lucide-react";
+import { Users, Car, Wrench, ChevronRight, type LucideIcon } from "lucide-react";
 
 interface EntityRow {
   type: string;
@@ -13,7 +13,7 @@ interface DashboardEntityStatusProps {
   entityStatus: EntityRow[];
 }
 
-const typeToIcon: Record<string, React.ElementType> = {
+const typeToIcon: Record<string, LucideIcon> = {
   Employees: Users,
   Vehicles: Car,
   Equipment: Wrench,

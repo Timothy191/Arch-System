@@ -58,7 +58,7 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:54322/postgres"
+        "postgresql://postgres.mrwhtxbhrzyttlsyuofc:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
       ],
       "enabled": true
     },

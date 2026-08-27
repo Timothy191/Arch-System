@@ -75,7 +75,7 @@ export function TireInspectionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-      <GlassCard className="w-full max-w-lg p-6 bg-[var(--bg-primary)] border-[var(--border-emphasis)] shadow-2xl relative">
+      <GlassCard className="w-full max-w-lg p-6 bg-[var(--bg-primary)] border-[var(--border-emphasis)] shadow-window relative">
         <div className="flex items-center justify-between pb-4 border-b border-[var(--border-default)]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]">

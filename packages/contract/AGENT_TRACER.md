@@ -1,5 +1,14 @@
 # Contract Package Agent Tracer
 
+## 2026-08-27: Compliance Audit Contract Schemas & Drift Detection
+
+- **Purpose**: Add canonical Zod contracts for compliance audit runs (`complianceAuditRunSchema`, `createComplianceAuditRunSchema`) and support automated schema drift detection.
+- **Changes**:
+  - `packages/contract/src/schemas/compliance-audit.schema.ts`: Created compliance audit schemas and types.
+  - `packages/contract/src/index.ts`: Barrel exports for `complianceAuditRunSchema`, `createComplianceAuditRunSchema`, `ComplianceAuditRun`, and `CreateComplianceAuditRunInput`.
+  - Added `tools/audit-contract-drift.cjs` to enforce continuous 1:1 synchronization between `@repo/database` and `@repo/contract`.
+- **Verification**: `pnpm --filter @repo/contract test`, `pnpm --filter @repo/contract type-check`, and `pnpm audit:drift` pass 100% green.
+
 ## 2026-08-24: Multi-Site Shift Report Schemas & Types
 
 - **Purpose**: Export canonical Zod schemas and TypeScript types for multi-site shift compilation across BKF, EXT, PLANT, and Bredell Workshop.

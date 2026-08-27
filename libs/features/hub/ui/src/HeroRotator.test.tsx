@@ -25,29 +25,25 @@ function makeMotionValue(initial: number): MV {
   };
 }
 
-jest.mock("framer-motion", () => {
+jest.mock("next/dynamic", () => () => {
+  const { ThreeHeroRotator } = jest.requireActual("@repo/ui/ThreeHeroRotator");
+  return ThreeHeroRotator;
+});
+
+jest.mock("@react-three/fiber", () => {
   const React = jest.requireActual("react") as typeof import("react");
-  const motionProxy = new Proxy(
-    {},
-    {
-      get: () => {
-        // motion.div / motion.span / etc. → render as a plain element forwarding props.
-        return React.forwardRef(function MockMotion(
-          props: Record<string, unknown> & { children?: React.ReactNode },
-          ref: React.Ref<HTMLElement>,
-        ) {
-          const { children, ...rest } = props;
-          return React.createElement("div", { ...rest, ref }, children);
-        });
-      },
-    },
-  );
   return {
-    motion: motionProxy,
-    useMotionValue: (initial: number) => makeMotionValue(initial),
-    useSpring: (initial: number) => makeMotionValue(initial),
-    useTransform: () => makeMotionValue(0),
-    useMotionTemplate: () => makeMotionValue(0),
+    Canvas: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("div", { "data-testid": "r3f-canvas" }, children),
+    useFrame: jest.fn(),
+  };
+});
+
+jest.mock("@react-three/drei", () => {
+  const React = jest.requireActual("react") as typeof import("react");
+  return {
+    Html: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("div", { "data-testid": "r3f-html" }, children),
   };
 });
 

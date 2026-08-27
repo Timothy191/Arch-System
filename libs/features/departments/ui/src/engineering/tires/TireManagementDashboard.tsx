@@ -182,7 +182,7 @@ export function TireManagementDashboard({
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 mt-1 w-56 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)] shadow-2xl p-1.5 z-30 space-y-1">
+              <div className="absolute right-0 mt-1 w-56 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-emphasis)] shadow-card p-1.5 z-30 space-y-1">
                 <a
                   href="/api/export/tires?type=all&format=csv"
                   download

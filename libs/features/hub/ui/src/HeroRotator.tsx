@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import { Logo } from "@repo/ui/Logo";
-import { HeroRotator as GenericHeroRotator, type Panel } from "@repo/ui/HeroRotator";
+import { ThreeHeroRotatorDynamic as GenericHeroRotator } from "@repo/ui/ThreeHeroRotatorDynamic";
+import type { Panel } from "@repo/ui/HeroRotator";
 import type { Department } from "@repo/departments/data-access";
 
 export interface HeroRotatorProps {

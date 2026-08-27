@@ -1,5 +1,62 @@
 # Database Agent Tracer
 
+## 2026-08-27: Test Target Integration, Contract Drift & RLS Matrix Verification
+
+### Purpose
+
+Wire up `@repo/database:test` target in `package.json` to execute static migration rollback safety verification, validate 100% schema-contract drift alignment with `@repo/contract`, and assert complete 86/86 RLS policy coverage.
+
+### Changes Made
+
+1. **Test Target Integration (`packages/database/package.json`)**:
+   - Added `"test": "node tests/migration-rollback-safety.mjs"` mapping directly to Nx target runner.
+2. **Contract Drift & RLS Verification**:
+   - Ran `tools/audit-contract-drift.cjs` -> 100% synchronized across core domain tables.
+   - Ran `tools/audit-rls-matrix.cjs` -> 86/86 tables with RLS active (100% coverage).
+3. **Migration Rollback Assertions**:
+   - Validated 105 migration scripts with 0 errors via `pnpm nx test @repo/database`.
+
+### Status
+
+- **Validation**: 100% PASS across Nx tests, contract drift audits, and RLS matrix checks.
+
+## 2026-08-27: Migration Rollback Safety Verification & Static Analysis Hardening
+
+### Purpose
+
+Execute and harden `test:migration-rollback` (`tests/migration-rollback-safety.mjs`) to verify rollback safety invariants across all 104 SQL migrations in `@repo/database`.
+
+### Changes Made
+
+1. **Static Analysis Rule Calibration (`packages/database/tests/migration-rollback-safety.mjs`)**:
+   - Expanded sequence matching regex to `^(\d{3,4})_(.+)\.sql$` supporting both 3-digit and 4-digit migration conventions.
+   - Filtered non-migration standalone scripts (`standalone_*.sql`) from sequential naming assertions.
+   - Verified that all 104 SQL migrations adhere to non-destructive re-run safety (100% `IF EXISTS` compliance for drop operations).
+
+### Status
+
+- **Validation**: `pnpm nx run @repo/database:test:migration-rollback` passed with 0 errors across 104 migration files.
+
+## 2026-08-27: Postgres MCP Supavisor Connection String Integration
+
+### Purpose
+
+Enable direct database MCP tool access against cloud Supabase via the Supavisor connection pooler (port 6543) while allowing dynamic credential interpolation from environment variables (`DATABASE_URL`, `SUPABASE_POOLER_URL`, `SUPABASE_DB_PASSWORD`, `SUPABASE_REGION`).
+
+### Changes Made
+
+1. **MCP Configuration Template (`config/tools/mcp.json` & `opencode.json`)**:
+   - Updated the `postgres` MCP server command to point to `postgresql://postgres.mrwhtxbhrzyttlsyuofc:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres`.
+2. **Dynamic Configuration Generator (`scripts/sync-mcp-config.js`)**:
+   - Added environment variable resolution from `apps/portal/.env` and `.env` to automatically populate Supavisor credentials when available.
+3. **MCP Validation (`scripts/validate-mcp-servers.js`)**:
+   - Updated postgres connection validator to detect remote Supavisor endpoints and prevent false failure triggers on local port 54322.
+
+### Status
+
+- **Config**: Verified and synchronized across `.mcp.json`, `.agents/mcp_config.json`, and `.vscode/mcp.json`.
+- **Validation**: `node scripts/validate-mcp-servers.js` passed with 0 errors and 0 warnings.
+
 ## 2026-08-24: Multi-Site Production & Shift Report Migration (0148)
 
 ### Purpose

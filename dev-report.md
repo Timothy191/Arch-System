@@ -1,7 +1,7 @@
 # Development Boot Report
 
 - **Status**: ✅ SUCCESS
-- **Timestamp**: 2026-08-26T10:03:44.360Z
+- **Timestamp**: 2026-08-27T04:01:36.354Z
 - **Node.js**: v22.23.2
 - **pnpm**: 9.15.9
 
@@ -16,17 +16,17 @@
 - ⏭️ **Stale portal process** - _no pid file_
 - ✅ **Port 3000 cleared** - _freed by force_
 - ⏭️ **Agent run cache (.kilo)** - _not present_
-- ✅ **Nx cache** - _size acceptable (12MB)_
+- ✅ **Nx cache** - _size acceptable (1MB)_
 - ⏭️ **Python bytecode** - _no **pycache** directories_
 - ⏭️ **Python virtual environment (.venv)not present**
 - ⏭️ **Vercel cache (.vercel)** - _not present_
 - ✅ **Orphan MCP workers** - _cleaned_
 - ⏭️ **Deployment logs directorynot present**
-- ✅ **Next.js portal cache** - _freed 1.5M_
-- ✅ **Next.js CMS cache** - _freed 16K_
-- ✅ **Next.js overview cache** - _freed 236K_
+- ⏭️ **Next.js portal cache** - _not present_
+- ⏭️ **Next.js CMS cache** - _not present_
+- ⏭️ **Next.js overview cache** - _not present_
 - ⏭️ **Pytest cache** - _not present_
-- ✅ **Portal log** - _cleared 196K_
+- ✅ **Portal log** - _cleared 4.0K_
 
 ### Phase 1: Environment
 
@@ -81,6 +81,6 @@
 ### Phase 5: Environment Notes
 
 - ✅ **inotify** - _max_user_watches=524288_
-- ✅ **Nx cache** - _12MB_
+- ✅ **Nx cache** - _344KB_
 - ℹ️ **Portal log** - _logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence_
 - ℹ️ **Free-tier** - _hosted free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier_

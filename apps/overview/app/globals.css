@@ -25,12 +25,12 @@
     padding: 12px 16px;
     font-size: 14px;
     color: var(--text-heading);
-    box-shadow: none;
+    box-shadow: var(--shadow-none, none);
   }
 
   .react-flow__node.selected {
     border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px var(--border-emphasis);
+    box-shadow: var(--shadow-sm, 0 0 0 2px var(--border-emphasis));
   }
 
   .react-flow__edge-path {

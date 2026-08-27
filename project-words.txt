@@ -323,3 +323,8 @@ wrongpass
 xgboost
 xyflow
 yourcompany
+yugioh
+recognisable
+viewports
+multispectral
+lerp

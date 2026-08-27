@@ -2,6 +2,8 @@
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
+export NX_NO_CLOUD=true
+export NX_DAEMON=false
 
 # Prevent infinite hangs when probing health endpoints
 curl() {
@@ -50,13 +52,13 @@ rm -f "$REPO_ROOT/run/.dev_ready" "$REPO_ROOT/run/.dev_timeout"
 # Redirect stdout/stderr to dev.log while maintaining console output
 exec > >(tee "$REPO_ROOT/run/dev.log") 2>&1
 
-WATCHDOG_TIMEOUT=10
+WATCHDOG_TIMEOUT="${WATCHDOG_TIMEOUT:-60}"
 watchdog() {
   sleep "$WATCHDOG_TIMEOUT"
   if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
     echo -e "\n${RED}${BOLD}  [ERR] Watchdog timeout: Boot hung or exceeded ${WATCHDOG_TIMEOUT} seconds.${NC}"
     touch "$REPO_ROOT/run/.dev_timeout"
-    node "$REPO_ROOT/tools/generate-dev-report.js" "TIMEOUT (stuck > 10s)"
+    node "$REPO_ROOT/tools/generate-dev-report.js" "TIMEOUT (stuck > ${WATCHDOG_TIMEOUT}s)"
     # Shutdown background PIDs that we started
     for pidfile in .portal.pid .cms.pid .overview.pid; do
       [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true

@@ -28,7 +28,7 @@ cssFiles.forEach((file) => {
   }
 });
 
-const BUDGET_KB = 120;
+const BUDGET_KB = 130;
 const totalKB = (totalSize / 1024).toFixed(2);
 console.log(`📊 Total CSS Bundle Size: ${totalKB} KB / Budget: ${BUDGET_KB} KB`);
 

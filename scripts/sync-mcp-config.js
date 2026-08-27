@@ -59,6 +59,14 @@ function main() {
   const mcpServers = baseConfig.mcpServers || {};
 
 
+  const portalEnv = parseEnvFile(path.join(REPO_ROOT, 'apps/portal/.env'));
+  const rootEnv = parseEnvFile(path.join(REPO_ROOT, '.env'));
+  const mergedEnv = { ...rootEnv, ...portalEnv, ...process.env };
+
+  const dbUrl = mergedEnv.DATABASE_URL || mergedEnv.SUPABASE_POOLER_URL || mergedEnv.SUPABASE_DB_URL;
+  const dbPassword = mergedEnv.SUPABASE_DB_PASSWORD || mergedEnv.DB_PASSWORD;
+  const dbRegion = mergedEnv.SUPABASE_REGION || mergedEnv.AWS_REGION || 'us-east-1';
+
   // Resolve all paths in mcpServers
   const resolvedServers = {};
   for (const [name, server] of Object.entries(mcpServers)) {
@@ -67,7 +75,20 @@ function main() {
       resolvedServer.command = resolvePath(resolvedServer.command);
     }
     if (resolvedServer.args) {
-      resolvedServer.args = resolvedServer.args.map(arg => typeof arg === 'string' ? resolvePath(arg) : arg);
+      resolvedServer.args = resolvedServer.args.map(arg => {
+        if (typeof arg !== 'string') return arg;
+        let resolved = resolvePath(arg);
+        if (name === 'postgres' && resolved.includes('pooler.supabase.com')) {
+          if (dbUrl && !dbUrl.includes('[PASSWORD]')) {
+            resolved = dbUrl;
+          } else if (dbPassword) {
+            resolved = resolved
+              .replace('[PASSWORD]', encodeURIComponent(dbPassword))
+              .replace('[REGION]', dbRegion);
+          }
+        }
+        return resolved;
+      });
     }
     if (resolvedServer.url) {
       resolvedServer.url = resolvePath(resolvedServer.url);

@@ -38,7 +38,7 @@ export function KPICard({
       <div className="flex items-start justify-between">
         <div>
           <p className="system-label">{label}</p>
-          <p className={cn("text-2xl font-medium mt-1", colorMap[color])}>{value}</p>
+          <p className={cn("text-fluid-2xl font-medium mt-1", colorMap[color])}>{value}</p>
         </div>
         {icon && (
           <div
@@ -51,7 +51,7 @@ export function KPICard({
           </div>
         )}
       </div>
-      {sub && <p className={cn("text-xs mt-1", colorMap[subColor])}>{sub}</p>}
+      {sub && <p className={cn("text-fluid-xs mt-1", colorMap[subColor])}>{sub}</p>}
     </GlassCard>
   );
 }

@@ -6,9 +6,9 @@ interface PageHeaderProps {
 export function PageHeader({ title, showDate = true }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-2xl font-medium text-[var(--text-heading)]">{title}</h2>
+      <h2 className="text-fluid-2xl font-medium text-[var(--text-heading)]">{title}</h2>
       {showDate && (
-        <p className="text-[var(--text-muted)] text-sm">
+        <p className="text-[var(--text-muted)] text-fluid-xs">
           {new Date().toLocaleDateString("en-ZA", {
             weekday: "long",
             year: "numeric",

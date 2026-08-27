@@ -8,8 +8,9 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 
 - **Node** `>=22` (Volta pins `24.15.0`), **pnpm** `9.15.9`, ESM (`"type": "module"`).
 - Docker required for local Supabase. Husky hooks install on `pnpm install`.
+- Follows XDG Base Directory specification - all user files stay in appropriate `~/.config`, `~/.local/share`, etc.
 
-## Common commands
+## Common Commands
 
 ```bash
 pnpm install
@@ -19,105 +20,183 @@ pnpm dev                                                  # portal on :3000 (scr
 pnpm quality                                              # full quality gate — run before push
 ```
 
-| Action | Command |
-| --- | --- |
-| Build all | `pnpm build` |
-| Build one project | `pnpm nx build <name>` or `pnpm --filter @repo/<name> build` |
-| Lint all / one | `pnpm lint` · `pnpm nx lint <name>` |
-| Type-check all / one | `pnpm type-check` · `pnpm nx type-check <name>` |
-| All unit tests | `pnpm test` |
-| Single portal test file | `pnpm --filter portal test -- --testPathPatterns=<file>` |
-| E2E (needs portal on :3000) | `pnpm test:e2e` |
-| Visual E2E snapshots | `pnpm test:e2e:visual` |
-| Storybook | `pnpm ui` |
-| Storybook a11y | `pnpm test:a11y` |
-| Format | `pnpm format` |
-| Deploy (local/staging/production) | `pnpm deploy:local` / `:staging` / `:production` |
+### Development Targets
 
-Prefer `pnpm nx run` / `nx run-many` over invoking underlying tools directly.
+| Action                            | Command                                                      |
+| --------------------------------- | ------------------------------------------------------------ |
+| Build all                         | `pnpm build`                                                 |
+| Build one project                 | `pnpm nx build <name>` or `pnpm --filter @repo/<name> build` |
+| Lint all / one                    | `pnpm lint` · `pnpm nx lint <name>`                          |
+| Type-check all / one              | `pnpm type-check` · `pnpm nx type-check <name>`              |
+| All unit tests                    | `pnpm test`                                                  |
+| Single portal test file           | `pnpm --filter portal test -- --testPathPatterns=<file>`     |
+| E2E (needs portal on :3000)       | `pnpm test:e2e`                                              |
+| Visual E2E snapshots              | `pnpm test:e2e:visual`                                       |
+| Storybook                         | `pnpm ui` (opens `@repo/ui` Storybook)                       |
+| Storybook a11y                    | `pnpm test:a11y`                                             |
+| Format                            | `pnpm format`                                                |
+| Deploy (local/staging/production) | `pnpm deploy:local` / `:staging` / `:production`             |
+| Generate DB types                 | `pnpm db-gen`                                                |
+| Push DB migrations                | `pnpm db-push`                                               |
+| Reset local DB                    | `pnpm db-reset` (destructive)                                |
+| Start local Supabase              | `pnpm db-start`                                              |
+| Generate DB docs                  | `pnpm db-docs`                                               |
+| Start monitoring HUD              | `pnpm monitor`                                               |
+| Start Grafana stack               | `pnpm monitor:grafana`                                       |
+| Stop Grafana stack                | `pnpm monitor:grafana-stop`                                  |
 
-### `pnpm quality` runs
+### Makefile Shortcuts
 
-`nx run-many -t lint type-check test lint:tokens lint:css`, then `lint:root`, `lint:styles`, `lint:css-perf`, `lint:spelling`, `format:check`, `deps:lint` (syncpack), `knip`, `policy:check`, `audit:suite`, `html:check`. Jest enforces coverage thresholds: lines 40%, branches 30%, functions 35%, statements 40%.
+All common commands are also available via `make`:
 
-## Architecture
+- `make dev` - equivalent to `pnpm dev`
+- `make dev-quick` - dev mode without Docker/Supabase
+- `make dev-tools` - dev with additional tools (Redis, n8n, Flowise)
+- `make dev-all` - dev with all apps (portal, CMS, overview)
+- `make build` - build everything
+- `make test` - run unit tests
+- `make test:e2e` - run E2E tests
+- `make test:watch` - test watch mode
+- `make test:coverage` - test with coverage
+- `make lint` - run ESLint
+- `make lint:fix` - auto-fix lint issues
+- `make type-check` - TypeScript checking
+- `make format` - Prettier formatting
+- `make format:check` - check formatting only
+- `make quality` - full quality gate (lint + type-check + test + format + deps + knip + policy)
+- `make deps:lint` - check dependency versions
+- `make deps:fix` - auto-fix dependency versions
+- `make knip` - check for unused exports/deps
+- `make knip:fix` - remove unused exports/deps
+- `make md:lint` - lint markdown
+- `make md:fix` - auto-fix markdown
+- `make policy:gen` - generate policy files
+- `make policy:check` - validate architectural boundaries
+- `make audit:rls` - audit Row-Level Security policies
+- `make audit:design` - run design system audit
+- `make fresh-start` - clean rebuild from scratch
+- `make shutdown` - stop all services
+- `make clean` - remove build artifacts & caches
+- `make clean-cache` - clear Nx cache only
+- `make clean-docker` - stop & remove Docker containers/volumes
 
-### Apps (`apps/`)
-- **`portal`** — Next.js 15+ App Router, React 19. Server Actions and API routes co-located with features. `:3000`. Middleware lives in `apps/portal/proxy.ts` (session refresh, department slug → UUID resolution via Redis cache, route gating).
-- **`cms`** — Payload CMS v3, headless content service.
-- **`overview`** — standalone architecture-visualization app (React Flow).
-- **`ci-observer`** — CI observation helper.
+## Architecture Overview
 
-### Packages (`packages/`)
-`theme`, `ui`, `supabase`, `database`, `redis`, `utils`, `errors`, `types`, `eval`, `agents`, `contract`, `logger`, `rate-limiter`, `eslint-config`, `typescript-config`.
+### Monorepo Structure
 
-### Portal routing
-App Router groups: `(auth)/` (login, reset/update password), `(departments)/[department]/` (dynamic per-department dashboards with sub-pages like `shift-compilation`, `satellite`, `machines`, `reports`), `(hub)/`, `admin/`. Static department sub-pages must export their own `layout.tsx` re-exporting `DepartmentLayout`.
+```
+apps/
+├── portal/          # Main Next.js 15+ app (App Router) - user dashboards
+├── cms/             # Payload CMS v3 (headless) - content management
+└── overview/        # Standalone Next.js app - system architecture visualization
 
-Path aliases: `~/*` and `@/*` both resolve to `apps/portal/*`. Conventional sub-cuts: `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*`.
+packages/
+├── theme/           # Design tokens (OKLCH), Tailwind config (SSOT)
+├── ui/              # Shared React components (Radix UI, shadcn/ui)
+├── supabase/        # Supabase clients (browser/server/middleware) + auth
+├── database/        # SQL migrations & Supabase schema management
+├── utils/           # Date/formatting/shift helper functions
+└── types/           # Shared TypeScript interfaces & types
 
-### Database & authorization
-- Supabase/Postgres. The **`employees` table is the source of truth for authorization** (role + department).
-- Every new table must `ENABLE ROW LEVEL SECURITY`. RLS policies should consult `employees.role` and `employees.department_id`, not `auth.uid()` alone.
-- Migrations source of truth: `packages/database/migrations/NNN_description.sql` (zero-padded). **Never edit `packages/supabase/supabase/migrations/`** — it's a deploy-time copy (a PreToolUse hook blocks edits there).
-- Migration workflow: add migration → `pnpm --filter @repo/database supabase:push` → `pnpm --filter @repo/database supabase:gen` → commit migration **and** regenerated `packages/supabase/src/database.types.ts` atomically.
-- SQL privilege-escalation and index-coverage tests live in `packages/database/tests/`.
+tools/
+├── policy-compiler.cjs      # Enforces architectural boundaries (nx.json)
+├── design-audit.cjs         # Validates OKLCH color usage & theme compliance
+├── enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
+└── apply-project-tags.cjs   # Applies Nx scope tags to new projects
 
-### Policy & dependency constraints (Single Source of Truth)
-`tools/policy-compiler.cjs` generates `tools/policy/*.json` and `tools/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI runs `pnpm policy:check` and fails on drift. `nx.json` enforces `scope:app` → `scope:package` constraints. Run `node tools/apply-project-tags.cjs` after adding a new project.
+scripts/
+├── sync-assets-smart.cjs    # Asset synchronization utility
+└── ensure_reachability.py   # Network connectivity validation
+```
 
-### Codegen — never edit generated output
-| Pipeline | Source | Generate |
-| --- | --- | --- |
-| Design tokens | `packages/theme/tokens.json` + `src/css/variables.css` | `pnpm --filter @repo/theme build` → `src/tokens/generated.ts`, `variables-generated.css` |
-| DB types | `packages/database/migrations/` | `supabase:push` → `supabase:gen` → `packages/supabase/src/database.types.ts` |
+### Key Architectural Constraints
 
-Commit source and generated files in the same atomic change.
+1. **Boundary Enforcement**: UI packages cannot import from database or Supabase packages directly (checked via `pnpm policy:check`)
+2. **Design System**: All colors must use OKLCH format from `@repo/theme` (validated by `pnpm audit:design`)
+3. **Security**: Static analysis blocks `eval()`, string-concatenated SQL, and hardcoded secrets
+4. **Data Access**: All Supabase interactions go through `@repo/supabase` layer with proper RLS policies
+5. **Type Safety**: End-to-end TypeScript with strict `nx.json` boundary rules
 
-## Conventions
+### Critical Development Flows
 
-### Package management
-- Workspace-wide catalogs live in `pnpm-workspace.yaml`. Use `catalog:` or `catalog:react19` for shared deps.
-- New packages: name `@repo/<name>`, export public API from `src/index.ts`, add a `project.json`, tag via `node tools/apply-project-tags.cjs`, add a `DEPENDENCY_RULES` entry in `tools/policy-compiler.cjs`, then `pnpm policy:gen`.
+#### Database Changes
 
-### TypeScript & code style
-- Strict TS. No `any`, no `// @ts-ignore`. Use `unknown` + type guards or Zod at boundaries.
-- Server Actions must call `createServerSupabaseClient()` and validate the user on line one.
-- Conventional commits enforced by commitlint; Husky `commit-msg` rejects non-conforming messages.
+1. Modify SQL in `packages/database/migrations/`
+2. Run `pnpm db-push` to apply to local Supabase
+3. Run `pnpm db-gen` to regenerate TypeScript types
+4. Commit both migration files and generated types
 
-### Design system (`@repo/theme`)
-- Light theme only (`data-theme="light"`). No dark mode.
-- Use semantic tokens from `@repo/theme` — never hardcode OKLCH/hex colors.
-- Forbidden: raw `box-shadow` and Tailwind `shadow-*`. Use tokenized shadows (`shadow-card`, `shadow-window`, `shadow-diffusion-*`).
-- Merge classes with `cn()` from `@repo/ui/lib/utils`.
-- Named icon imports only: `import { Drill } from "lucide-react"` (never `import * as Icons`).
-- Animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Easing: `cubic-bezier(0.16, 1, 0.3, 1)`.
-- Standard glass surface: `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
+#### UI/Component Development
 
-### Tests
-- Co-locate unit tests as `*.test.ts(x)`. E2E lives in `e2e/`.
-- Unit tests do not need Supabase; E2E does. Mock at the network boundary (Supabase, Redis), not at function calls.
-- `apps/portal/jest.config.js` uses explicit `moduleNameMapper` entries — add an explicit mapping for any new `@repo/*` import or subpath export.
+1. Develop in `packages/ui/` with Storybook (`pnpm ui`)
+2. Follow shadcn/ui + Radix UI patterns
+3. Use tokens from `@repo/theme` exclusively
+4. Test accessibility with `pnpm test:a11y`
 
-### Agent tracing (mandatory for every code change)
-1. Read the affected package's `AGENT_TRACER.md` before editing; update it after every change (ISO 8601 timestamp, purpose, changes, handoff).
-2. Add `// AGENT-TRACE:` breadcrumbs for non-obvious logic.
-3. Instrument new service paths with OpenTelemetry / prom-client where applicable.
+#### Feature Development (Portal)
 
-### Git
-- One commit per task. No amend/force-push without permission. Never `--no-verify`.
-- Husky runs lint-staged on commit and lint + type-check on push — do not bypass hooks.
-- **Pause for human review before merging any DB schema, RLS, or auth/authorization change.**
+1. Create route in `apps/portal/app/` using Next.js App Router
+2. Access data via `@repo/supabase` clients (browser/server)
+3. Use shared components from `@repo/ui`
+4. Apply layouts from `@repo/ui` (DepartmentLayout, etc.)
+5. Validate with `pnpm --filter portal test -- --testPathPatterns=<feature>`
 
-## Heuristics
-- Small targeted edits (≤5 files) can be done directly; larger cross-cutting changes should be planned and validated with `pnpm quality`.
-- When adding a new `@repo/*` import to portal code, update `apps/portal/jest.config.js` `moduleNameMapper`.
-- When adding a new project, run `node tools/apply-project-tags.cjs` and update `tools/policy-compiler.cjs`.
-- If `pnpm policy:check` fails, run `pnpm policy:gen`, inspect the diff, and commit generated files atomically with the source change.
+#### Supabase Setup
 
-## Further reading
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — full contributor guide, quality gates, new-package workflow, troubleshooting.
-- [`AGENTS.md`](AGENTS.md) → `docs/AGENTS.md` — agent contracts, workflow phases, quality gates.
-- [`DESIGN.md`](DESIGN.md) → `docs/DESIGN.md` — color system, typography, components, animation.
-- [`DEPLOYMENT.md`](DEPLOYMENT.md) · [`SECURITY.md`](SECURITY.md) · [`PRODUCT.md`](PRODUCT.md) — all symlinked into `docs/`.
-- [`documentation/`](documentation/) — unified docs center: audit reports, codebase maps, wiki.
+1. Requires Docker: `pnpm db-start` launches Supabase stack
+2. Studio available at <http://localhost:54323>
+3. Anonymous API: <http://localhost:54321>
+4. Service role key available for server-side operations
+5. Database resets: `pnpm db-reset` (WARNING: destructive)
+
+### Testing Strategy
+
+- **Unit Tests**: Vitest (via Nx test target) - co-located with implementation
+- **E2E Tests**: Playwright - requires dev server running on :3000
+- **Visual Tests**: Playwright image snapshots for UI regression detection
+- **Accessibility**: axe-core automated scanning (`pnpm test:a11y`)
+- **Coverage**: `pnpm --filter portal test -- --coverage`
+
+### Code Generation
+
+1. **Design Tokens**: `pnpm nx run theme:codegen` converts CSS variables to TypeScript
+2. **Database Types**: `pnpm db-gen` generates TS from Supabase schema
+3. **Token Validation**: `pnpm nx run theme:lint:tokens` validates design token usage
+4. **CSS Linting**: `pnpm nx run theme:lint:css` ensures Stylelint compliance
+
+### Pre-Commit & CI
+
+- Husky runs `pnpm lint --fix` and `pnpm format` on commit
+- Commitlint enforces conventional commits (`feat:`, `fix:`, `docs:`, etc.)
+- CI runs full `pnpm quality` gate on all PRs
+- Never use `--no-verify` - fixes must pass local quality checks
+
+### Troubleshooting
+
+- **Port Conflicts**: If :3000 is busy, kill existing Next.js processes
+- **Supabase Connection**: Verify `pnpm db-start` running and .env credentials
+- **Type Errors**: Run `pnpm type-check` to catch TS issues early
+- **Lint Failures**: Use `pnpm lint --fix` for auto-fixable issues
+- **Tests Flaky**: Check for missing awaits or race conditions in test setup
+- **Policy Violations**: Review `tools/policy-compiler.cjs` for boundary rules
+
+## File Conventions
+
+- **Component Files**: PascalCase with `.tsx` extension
+- **Hook Files**: `use*` prefix in `packages/utils/hooks/` or feature-specific
+- **Utils**: Pure functions in `packages/utils/` with descriptive names
+- **Tests**: `.test.ts` or `.test.tsx` files co-located with source
+- **Styles**: CSS modules (`*.module.css`) or Tailwind utility classes
+- **Env Vars**: Prefixed with `NEXT_PUBLIC_` for client-side exposure
+- **Database**: SQL migrations in `packages/database/migrations/` with timestamp prefix
+- **Config**: Environment-specific in `/env/` directories, never committed raw
+
+## When in Doubt
+
+1. Check `MONOREPO.md` for detailed workspace structure
+2. Consult `README.md` for department-specific dashboard info
+3. Review `tools/policy-compiler.cjs` for architectural boundaries
+4. Look at existing similar features for patterns
+5. Run `pnpm lint` and `pnpm type-check` before complex changes
+6. Validate design system usage with `pnpm audit:design`
+7. Test boundary violations with `pnpm policy:check`

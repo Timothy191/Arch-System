@@ -115,9 +115,35 @@ export {
   replaceTireSchema,
 } from "./schemas/tire-management.schema.js";
 
+export {
+  complianceAuditRunSchema,
+  createComplianceAuditRunSchema,
+} from "./schemas/compliance-audit.schema.js";
+
+export {
+  fleetCategoryEnum,
+  fleetStatusEnum,
+  fleetSchema,
+  equipmentStatusEnum,
+  equipmentSchema,
+} from "./schemas/fleet-equipment.schema.js";
+
 // ---------------------------------------------------------------------------
 // Derived types (inferred from schemas)
 // ---------------------------------------------------------------------------
+
+export type {
+  ComplianceAuditRun,
+  CreateComplianceAuditRunInput,
+} from "./schemas/compliance-audit.schema.js";
+
+export type {
+  Fleet,
+  Equipment,
+  FleetCategory,
+  FleetStatus,
+  EquipmentStatus,
+} from "./schemas/fleet-equipment.schema.js";
 
 export type { Uuid, DateString, DateMonthString, NonEmptyString } from "./types/common.types.js";
 

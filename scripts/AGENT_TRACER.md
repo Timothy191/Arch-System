@@ -1,5 +1,19 @@
 # Scripts Agent Tracer
 
+## 2026-08-27: Dev Server Boot Watchdog Timeout Resilience
+
+### Purpose
+
+Prevent false positive watchdog timeouts on `pnpm dev` when Next.js Turbopack compilation, cloud Supabase REST checks, MCP server synchronization, and Phase 4 smoke test curls exceed 10 seconds.
+
+### Changes
+
+- Updated `scripts/dev.sh` to set `WATCHDOG_TIMEOUT="${WATCHDOG_TIMEOUT:-60}"` (defaulting to 60s instead of hardcoded 10s) and dynamically format the error message.
+
+### Handoff
+
+The dev server script now allows adequate time for full Turbopack initial compilation and smoke test validation to complete before triggering a watchdog abort.
+
 ## 2026-08-25: Resilient Dev Probes
 
 ### Purpose

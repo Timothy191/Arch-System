@@ -130,6 +130,7 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 - **Prohibited**: Throwing generic `Error` instances is forbidden.
 - **Catching**: Server Actions and API Routes must catch exceptions and check type safety using `isAppError(error)` before returning error structures to the UI.
 - **Example**:
+
   ```typescript
   import { ValidationError, isAppError } from "@repo/errors";
 
@@ -191,6 +192,10 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 - **Local Services (Docker)**:
   - **Supabase CLI Container**: API gateway on `54321`, Postgres DB on `54322`, Studio UI on `54323`, Pooler on `54329`.
   - **Metrics Stack**: Grafana dashboard on `9091`, Prometheus on `9093`, cAdvisor on `8082`.
+- **Agent Skills & Spec Tooling**:
+  - Always use `npx skills add <owner/repo>` when adding or installing new skills into `.agents/skills/`.
+  - Always use `npm install -g mmx-cli` (or run via `mmx-cli`) for all specification, architecture blueprint, schema, and API contract spec work. When creating or refining specifications, use `mmx-cli` to produce standardized contract blueprints before running `pnpm audit:drift`.
+  - Always trigger both `pnpm audit:drift` and `pnpm audit:compliance` before committing new features to guarantee complete compliance across all monorepo boundaries.
 
 ---
 

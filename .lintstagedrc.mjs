@@ -127,6 +127,24 @@ export default {
     return ["pnpm --filter @repo/theme lint:tokens"];
   },
 
+  // Database migrations → rollback safety & contract drift
+  "packages/database/migrations/*.sql": (files) => {
+    if (files.length === 0) return [];
+    return ["pnpm nx run @repo/database:test:migration-rollback", "pnpm audit:drift"];
+  },
+
+  // Contract schemas → contract drift
+  "packages/contract/src/schemas/*.ts": (files) => {
+    if (files.length === 0) return [];
+    return ["pnpm audit:drift"];
+  },
+
+  // Agent rules & skills → audit:agents
+  ".agents/**/*": (files) => {
+    if (files.length === 0) return [];
+    return ["pnpm audit:agents"];
+  },
+
   // project.json files → apply project tags then prettier format
   "**/project.json": (files) => {
     if (files.length === 0) return [];
