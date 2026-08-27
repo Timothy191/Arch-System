@@ -1,7 +1,7 @@
 # Development Boot Report
 
 - **Status**: ✅ SUCCESS
-- **Timestamp**: 2026-08-27T08:56:24.911Z
+- **Timestamp**: 2026-08-27T10:58:57.575Z
 - **Node.js**: v22.23.2
 - **pnpm**: 9.15.9
 
@@ -11,22 +11,7 @@
 
 - ✅ **Temp artifacts** - _cleaned_
 - ✅ **Portal health** - _serving pages_
-- ⚠️ **Source files** - _changed since last start — force restart_
-- ✅ **Restart** - _preparing fresh start_
-- ✅ **Stale portal process** - _PID 16631 cleaned_
-- ✅ **Port 3000 cleared** - _already free_
-- ⏭️ **Agent run cache (.kilo)** - _not present_
-- ✅ **Nx cache** - _size acceptable (114MB)_
-- ✅ **Python bytecode** - _removed 4 **pycache** directories_
-- ⏭️ **Python virtual environment (.venv)not present**
-- ⏭️ **Vercel cache (.vercel)** - _not present_
-- ✅ **Orphan MCP workers** - _cleaned_
-- ⏭️ **Deployment logs directorynot present**
-- ⏭️ **Next.js portal cache** - _not present_
-- ⏭️ **Next.js CMS cache** - _not present_
-- ⏭️ **Next.js overview cache** - _not present_
-- ✅ **Pytest cache** - _freed 32K_
-- ✅ **Portal log** - _cleared 272K_
+- ✅ **Source files** - _no changes since last start_
 
 ### Phase 1: Environment
 
@@ -61,7 +46,7 @@
 
 ### Phase 3: Portal
 
-- ✅ **Dev server** - _<http://localhost:3000> (compiled)_
+- ✅ **Dev server** - _<http://localhost:3000> (already up)_
 
 ### Phase 3b: Additional Apps
 
