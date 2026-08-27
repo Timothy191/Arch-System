@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { performMockLogin } from "../helpers/auth";
 
 test("hub page renders images and no broken img tags", async ({ page }) => {
-  const response = await page.goto("http://localhost:3000/hub", { waitUntil: "networkidle" });
+  await performMockLogin(page, "admin");
+  const response = await page.goto("http://localhost:3000/hub", { waitUntil: "domcontentloaded" });
   console.log("Status:", response?.status(), "URL:", page.url());
 
   // If redirected to login, we can't verify hub UI without auth.
@@ -9,6 +11,9 @@ test("hub page renders images and no broken img tags", async ({ page }) => {
     console.log("Redirected to login; hub UI requires authenticated session.");
     return;
   }
+
+  // Wait for images to load / settle in DOM
+  await page.waitForTimeout(3000);
 
   // Verify Next.js optimized images exist (img tags with src including _next/image)
   const images = await page.locator("img").all();
@@ -29,5 +34,5 @@ test("hub page renders images and no broken img tags", async ({ page }) => {
   expect(broken.length).toBe(0);
 
   // Verify hero rotator is present
-  await expect(page.locator("[data-testid='hero-rotator']").or(page.locator("main"))).toBeVisible();
+  await expect(page.locator("[data-testid='hero-rotator']").or(page.locator("main").first())).toBeVisible();
 });

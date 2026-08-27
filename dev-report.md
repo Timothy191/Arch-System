@@ -1,7 +1,7 @@
 # Development Boot Report
 
 - **Status**: ✅ SUCCESS
-- **Timestamp**: 2026-08-27T04:01:36.354Z
+- **Timestamp**: 2026-08-27T08:56:24.911Z
 - **Node.js**: v22.23.2
 - **pnpm**: 9.15.9
 
@@ -13,11 +13,11 @@
 - ✅ **Portal health** - _serving pages_
 - ⚠️ **Source files** - _changed since last start — force restart_
 - ✅ **Restart** - _preparing fresh start_
-- ⏭️ **Stale portal process** - _no pid file_
-- ✅ **Port 3000 cleared** - _freed by force_
+- ✅ **Stale portal process** - _PID 16631 cleaned_
+- ✅ **Port 3000 cleared** - _already free_
 - ⏭️ **Agent run cache (.kilo)** - _not present_
-- ✅ **Nx cache** - _size acceptable (1MB)_
-- ⏭️ **Python bytecode** - _no **pycache** directories_
+- ✅ **Nx cache** - _size acceptable (114MB)_
+- ✅ **Python bytecode** - _removed 4 **pycache** directories_
 - ⏭️ **Python virtual environment (.venv)not present**
 - ⏭️ **Vercel cache (.vercel)** - _not present_
 - ✅ **Orphan MCP workers** - _cleaned_
@@ -25,8 +25,8 @@
 - ⏭️ **Next.js portal cache** - _not present_
 - ⏭️ **Next.js CMS cache** - _not present_
 - ⏭️ **Next.js overview cache** - _not present_
-- ⏭️ **Pytest cache** - _not present_
-- ✅ **Portal log** - _cleared 4.0K_
+- ✅ **Pytest cache** - _freed 32K_
+- ✅ **Portal log** - _cleared 272K_
 
 ### Phase 1: Environment
 
@@ -57,7 +57,7 @@
 - ✅ **Anon key** - _NEXT_PUBLIC_SUPABASE_ANON_KEY present_
 - ℹ️ **RLS advisory** - _ensure RLS ENABLED on every non-public table (employees.role/department_id policies)_
 - ✅ **MCP secrets** - _no service-role keys in MCP configs (3/3 present, all gitignored)_
-- ⚠️ **postgres MCP** - _→ 127.0.0.1:54322 (local); codebase-memory tools can't reach hosted DB_
+- ✅ **postgres MCP** - _not pointed at local 54322_
 
 ### Phase 3: Portal
 
@@ -81,6 +81,6 @@
 ### Phase 5: Environment Notes
 
 - ✅ **inotify** - _max_user_watches=524288_
-- ✅ **Nx cache** - _344KB_
+- ✅ **Nx cache** - _114MB_
 - ℹ️ **Portal log** - _logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence_
 - ℹ️ **Free-tier** - _hosted free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier_
