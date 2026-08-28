@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 const SHIFT_HOURS = 12;
@@ -45,6 +46,20 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
+  // Pre-index dumper assignments by excavator_activity_id into a Map to avoid O(N * M) repeated .filter() operations during render.
+  const assignmentsByActivityId = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (const assignment of todayAssignments) {
+      const list = map.get(assignment.excavator_activity_id);
+      if (list) {
+        list.push(assignment);
+      } else {
+        map.set(assignment.excavator_activity_id, [assignment]);
+      }
+    }
+    return map;
+  }, [todayAssignments]);
+
   // Group by site_id, then by shift
   const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
 
@@ -69,8 +84,8 @@ export function ExcavatorActivityList({
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id),
+        const siteAssignments = activities.flatMap(
+          (a) => assignmentsByActivityId.get(a.id) || [],
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -110,9 +125,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -131,9 +144,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -199,28 +210,16 @@ function ActivityCard({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border-default)]">
-                  <th
-                    scope="col"
-                    className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
-                  >
+                  <th scope="col" className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs">
                     Dumper
                   </th>
-                  <th
-                    scope="col"
-                    className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
-                  >
+                  <th scope="col" className="text-left text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs">
                     Material
                   </th>
-                  <th
-                    scope="col"
-                    className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
-                  >
+                  <th scope="col" className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs">
                     Loads
                   </th>
-                  <th
-                    scope="col"
-                    className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs"
-                  >
+                  <th scope="col" className="text-right text-[var(--text-muted)] py-1.5 px-2 font-medium text-xs">
                     BCM
                   </th>
                 </tr>
@@ -229,10 +228,12 @@ function ActivityCard({
                 {assignments.map((assignment) => (
                   <tr key={assignment.id} className="border-b border-[var(--border-default)]/30">
                     <td className="py-1.5 px-2 text-[var(--text-heading)]">
-                      {assignment.dumper?.name || "Unknown"}
-                      <span className="text-[var(--text-muted)] text-xs ml-1">
-                        ({assignment.dumper?.machine_type || ""})
-                      </span>
+                      {assignment.dumper?.name || "Unknown Dumper"}
+                      {assignment.dumper?.machine_type && (
+                        <span className="text-[var(--text-muted)] text-xs ml-1">
+                          ({assignment.dumper.machine_type})
+                        </span>
+                      )}
                     </td>
                     <td className="py-1.5 px-2 text-[var(--text-muted)]">
                       {assignment.material_type}
@@ -241,17 +242,14 @@ function ActivityCard({
                       {assignment.total_loads}
                     </td>
                     <td className="py-1.5 px-2 text-right text-[var(--accent-blue)] font-medium">
-                      {(assignment.total_bcm || 0).toFixed(1)}
+                      {assignment.total_bcm?.toFixed(1) ?? "-"}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="border-t border-[var(--border-default)]">
-                  <td
-                    colSpan={2}
-                    className="py-1.5 px-2 text-[var(--text-heading)] font-medium text-xs"
-                  >
+                  <td colSpan={2} className="py-1.5 px-2 text-[var(--text-heading)] font-medium text-xs">
                     Total
                   </td>
                   <td className="py-1.5 px-2 text-right text-[var(--text-heading)] font-medium text-xs">
@@ -265,33 +263,34 @@ function ActivityCard({
             </table>
           </div>
         ) : (
-          <p className="text-[var(--text-muted)] text-sm text-center py-2">No dumper assignments</p>
+          <p className="text-[var(--text-muted)] text-xs italic">No dumper assignments recorded</p>
         )}
 
-        {/* Metrics Row */}
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">BCM/h:</span>
-            <span className="text-accent-blue font-medium">{bcmPerHour.toFixed(1)}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">Loads/h:</span>
-            <span className="text-accent-green font-medium">{loadsPerHour.toFixed(1)}</span>
-          </div>
-          {estimatedScoopMinutes > 0 && (
+        {/* Productivity Metrics */}
+        {assignments.length > 0 && (
+          <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="text-[var(--text-muted)]">Scoop time:</span>
-              <span className="text-[var(--text-heading)] font-medium">
-                {estimatedScoopMinutes.toFixed(1)} min/load
-              </span>
+              <span className="text-[var(--text-muted)]">BCM/h:</span>
+              <span className="text-accent-blue font-medium">{bcmPerHour.toFixed(1)}</span>
             </div>
-          )}
-        </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[var(--text-muted)]">Loads/h:</span>
+              <span className="text-accent-green font-medium">{loadsPerHour.toFixed(1)}</span>
+            </div>
+            {estimatedScoopMinutes > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[var(--text-muted)]">Scoop time:</span>
+                <span className="text-[var(--text-heading)] font-medium">
+                  {estimatedScoopMinutes.toFixed(1)} min/load
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Notes */}
         {activity.notes && (
-          <p className="text-[var(--text-muted)] text-xs italic border-t border-[var(--border-default)]/50 pt-2">
-            {activity.notes}
+          <p className="text-xs text-[var(--text-muted)] italic border-t border-[var(--border-default)]/30 pt-2">
+            &quot;{activity.notes}&quot;
           </p>
         )}
       </div>
