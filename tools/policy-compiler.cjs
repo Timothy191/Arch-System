@@ -198,6 +198,22 @@ const SECURITY_CHECKS = [
     severity: "warning",
     enforceAt: ["local"],
   },
+  {
+    id: "no-mutable-search-path",
+    rule: "PL/pgSQL functions must explicitly set search_path",
+    pattern: "CREATE\\s+(OR\\s+REPLACE\\s+)?FUNCTION(?!.*SET\\s+search_path)",
+    paths: ["packages/database/migrations/*.sql"],
+    severity: "warning",
+    enforceAt: ["ci", "local"],
+  },
+  {
+    id: "require-extension-schema",
+    rule: "Extensions created in migrations must specify SCHEMA extensions",
+    pattern: "CREATE\\s+EXTENSION\\s+(?!.*SCHEMA\\s+extensions)(?!.*(uuid-ossp|vector|pg_cron|vectorscale|pgcrypto|pg_net|pg_stat_statements))",
+    paths: ["packages/database/migrations/*.sql"],
+    severity: "warning",
+    enforceAt: ["ci", "local"],
+  },
 ];
 
 const CHECK_MODE = process.argv.includes("--check");
