@@ -146,11 +146,6 @@
     "release": "changeset publish",
     "version-packages": "changeset version"
   },
-  "lint-staged": {
-    "packages/database/migrations/*.sql": [
-      "pnpm nx run @repo/database:test:migration-rollback"
-    ]
-  },
   "syncpack": {
     "config": "config/tools/.syncpackrc.js"
   },
