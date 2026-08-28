@@ -1,5 +1,12 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-28T09:00:00Z - FUXA prod-config doc refreshed (reverse-flow) + full-portal review
+
+- **Purpose**: Review the FUXA setup against full portal requirements; refresh the stale `FUXA_PRODUCTION_CONFIG.md` (2026-06-15, described the abandoned push-to-FUXA model) to the reverse-flow architecture.
+- **Changes**: `docs/operations/FUXA_PRODUCTION_CONFIG.md` — prepended an authoritative "Current Production Architecture (reverse-flow)" section + checklist (tunnel URLs, bridge-not-host networking, connection template + gauge-grid script, `/api/scada/tags` prod gating, FUXA security + API key, SSL); marked legacy forward-model sections as superseded.
+- **Review findings**: Dev setup meets portal dev requirements (env schema `NEXT_PUBLIC_FUXA_URL`, `/control-room` gating, routes, UI, 13 unit tests, type-check, live, persistence, reproducibility — all verified). e2e `control-room/scada.spec.ts` authed tests fail because **Supabase cloud is unreachable** (HTTP 000 — free-tier project paused/down) → no session in `e2e/.auth/user.json`; environmental, not a FUXA regression (unauth redirect tests pass; FUXA changes don't touch auth/login/control-room UI). Prod gaps flagged: `/api/scada/tags` unauthenticated (dev-fine, prod-needs-gating), FUXA security off (prod-needs-on), host networking dev-only (prod-uses-tunnel/bridge).
+- **What the Next Agent Should Know**: To re-run the control-room e2e, restore Supabase (restart the paused project) and re-run the Playwright global setup to refresh `e2e/.auth/user.json`, then the FUXA-frame test verifies the iframe end-to-end.
+
 ## 2026-08-28T08:30:00Z - FUXA dashboard reproducibility script (`scripts/fuxa-gauge-grid.py`)
 
 - **Purpose**: Make the FUXA SCADA dashboard reproducible from code so it can be regenerated when the portal telemetry tag set changes, without hand-authoring gauges in the FUXA editor.

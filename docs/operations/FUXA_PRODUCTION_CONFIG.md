@@ -1,8 +1,53 @@
 # FUXA SCADA Integration - Production Configuration Guide
 
 **Purpose:** Configure FUXA SCADA integration for production deployment  
-**Last Updated:** 2026-06-15  
+**Last Updated:** 2026-08-28 (reverse-flow redesign)  
 **Priority:** CRITICAL (Blocking for production launch)
+
+> **Authoritative architecture:** see `docs/operations/fuxa-integration-plan.md`
+> (Reverse-Flow Ingest section). The sections below written 2026-06-15 described
+> the abandoned forward (push-to-FUXA) model; treat them as legacy reference
+> only.
+
+---
+
+## Current Production Architecture (reverse-flow)
+
+Production FUXA **pulls** telemetry from the portal; the portal never pushes to
+FUXA (FUXA exposes no tag-write endpoint).
+
+```
+On-prem FUXA box (bridge network, :8088)
+  └─ WebAPI device, getTags = https://portal.production-mining.com/api/scada/tags
+        (via Cloudflare tunnel — infra/cloudflared/fuxa-tunnel.yml)
+Portal (Next.js, public)
+  └─ GET  /api/scada/tags        → serves Redis telemetry cache (system of record)
+  └─ POST /api/telemetry/push   → Supabase webhook writes Redis
+Browser (operator, control-room)
+  └─ FuxaFrame iframe → NEXT_PUBLIC_FUXA_URL (FUXA runtime via tunnel)
+```
+
+**Production checklist (reverse-flow):**
+
+- [ ] `NEXT_PUBLIC_FUXA_URL=https://fuxa.production-mining.com` (tunnel) in prod `.env`
+- [ ] FUXA runs on the on-prem box on a **bridge network** — **not**
+      `network_mode: host` (which is dev-only; see `infra/docker/compose.scada.yml`)
+      — bridged via `infra/cloudflared/fuxa-tunnel.yml`
+- [ ] FUXA WebAPI device imported from `templates/fuxa-portal-connection.json`
+      with `getTags` = `https://portal.production-mining.com/api/scada/tags`
+- [ ] Dashboard authored with `scripts/fuxa-gauge-grid.py` (`--fuxa-url
+  https://fuxa.production-mining.com --tags-url
+  https://portal.production-mining.com/api/scada/tags`)
+- [ ] **`/api/scada/tags` access gated in prod** — it exposes machine telemetry.
+      Restrict to the FUXA origin (tunnel), an internal header/token, or Supabase
+      auth. It is unauthenticated in dev (FUXA on host networking, same host).
+- [ ] **FUXA security enabled** in prod (`secureEnabled`) + a FUXA user/login;
+      set `FUXA_API_KEY` and send it as `x-api-key` for FUXA API calls
+- [ ] SSL/TLS on `fuxa.production-mining.com` + `portal.production-mining.com`;
+      latency < 500 ms; light theme (`apps/portal/public/css/fuxa-light-theme.css`)
+
+The legacy sections below (CORS-for-iframe, forward dashboard-ID mapping) are
+superseded by the reverse-flow model above.
 
 ---
 
