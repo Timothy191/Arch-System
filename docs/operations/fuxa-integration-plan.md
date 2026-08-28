@@ -187,6 +187,11 @@ Machines / Supabase webhook
   check. `stop_signal: SIGINT` + `stop_grace_period: 30s` give a clean exit 0 (was 137).
 - **Env:** `NEXT_PUBLIC_FUXA_URL=http://localhost:1881` (D1=a — local/tunnel
   clients only; for LAN-client iframe access use the host LAN IP or mDNS).
+- **Reproducible dashboard:** `scripts/fuxa-gauge-grid.py` regenerates the FUXA view
+  as a grid of radial gauges (one per telemetry tag) via the `set-view` API —
+  re-run it after the telemetry tag set changes. Optional `FUXA_API_KEY` env is
+  sent as `x-api-key`; `--dry-run` previews. Imports the connection first via
+  `templates/fuxa-portal-connection.json`, then run this script.
 
 ## Status
 

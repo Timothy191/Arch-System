@@ -1,5 +1,23 @@
 # Scripts Agent Tracer
 
+## 2026-08-28: FUXA Gauge-Grid Generator (`fuxa-gauge-grid.py`)
+
+### Purpose
+
+Reproducible FUXA SCADA dashboard: regenerates a view of radial gauges (one per portal telemetry tag) via FUXA's `set-view` API, so the operator dashboard can be rebuilt from code when the telemetry tag set changes — without hand-authoring gauges in the FUXA editor.
+
+### Changes
+
+- Added `scripts/fuxa-gauge-grid.py` (stdlib-only Python): fetches tags from the portal reverse-flow endpoint (`/api/scada/tags`), clones the existing view's gauge styling (or a faithful `svg-ext-html_bag` template), lays out a configurable grid, sets per-metric min/max + labeled zones, and saves with `POST /api/projectData {cmd:"set-view"}`. Optional `FUXA_API_KEY` sent as `x-api-key` (never printed). Supports `--dry-run`.
+
+### Verification
+
+- `python3 -m py_compile` OK; `--dry-run` builds the 10-gauge grid with correct ranges; real run `set-view` HTTP 200, view persisted with 10 bound gauges.
+
+### Notes
+
+- Reverse-flow integration: FUXA (host networking) pulls `/api/scada/tags`; this script only authors the visualization layer. Re-run after adding new telemetry metrics.
+
 ## 2026-08-27: Dev Server Boot Watchdog Timeout Resilience
 
 ### Purpose

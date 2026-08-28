@@ -1,5 +1,12 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-28T08:30:00Z - FUXA dashboard reproducibility script (`scripts/fuxa-gauge-grid.py`)
+
+- **Purpose**: Make the FUXA SCADA dashboard reproducible from code so it can be regenerated when the portal telemetry tag set changes, without hand-authoring gauges in the FUXA editor.
+- **Changes**: Added `scripts/fuxa-gauge-grid.py` (stdlib-only): fetches `/api/scada/tags`, clones the existing view gauge styling (or a faithful `svg-ext-html_bag` template), builds a configurable grid with per-metric min/max + labeled zones, saves via FUXA `set-view` API. Optional `FUXA_API_KEY` via `x-api-key` (never printed). Also populated the live MainView with a 10-gauge grid (verified: 10 bound gauges, live values).
+- **Verification**: `py_compile` OK; `--dry-run` builds 10-gauge grid with correct ranges; real run `set-view` HTTP 200; view persisted with 10 bound gauges; `scada-status` healthy.
+- **What the Next Agent Should Know**: The FUXA operator dashboard is now code-defined. To refresh it after new telemetry metrics are added, run `python3 scripts/fuxa-gauge-grid.py` (set `FUXA_API_KEY` env if FUXA security is enabled). The script replaces the target view's gauges idempotently.
+
 ## 2026-08-28T07:10:00Z - FUXA data persistence fixed (userDir onto volume)
 
 - **Purpose**: Fix a latent persistence bug — FUXA wrote its project (`project.fuxap.db`, settings, alarms) to `<cwd>/_appdata` inside the ephemeral image filesystem, while the `fuxa_data` volume was mounted at `/root/.fuxa` (empty, unused). Any operator-authored FUXA dashboard would have been lost on container recreation.
