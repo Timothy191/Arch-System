@@ -1,5 +1,14 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-28T06:55:00Z - FUXA reverse-flow reachability resolved (host networking)
+
+- **Purpose**: Complete Step 2 of the FUXA resolution. The host's hardened nftables firewall (`input` policy=drop) blocked bridge container→host traffic, so FUXA couldn't reach the portal's `/api/scada/tags`. Switched FUXA to host networking to use the host loopback.
+- **Changes**:
+  - `infra/docker/compose.scada.yml`: replaced `ports:`+`networks:`+`extra_hosts` with `network_mode: host`. FUXA's 1881 now binds on the host directly; FUXA reaches the portal via `127.0.0.1:3000`.
+  - `docs/operations/fuxa-integration-plan.md`: updated the reverse-flow section — `getTags` = `http://127.0.0.1:3000/api/scada/tags` (explicit IPv4, since FUXA's node resolves `localhost` to IPv6 `::1` and the portal is IPv4-only), and documented the host-networking rationale.
+- **Verification**: end-to-end pipeline test passed — `POST /api/telemetry/push {name,value}` → `synced:true`; FUXA container `GET http://127.0.0.1:3000/api/scada/tags` → `[{id,name,value,type}]` with the pushed value; `scada-status` → `healthy`, `cached_tag_count:1`, `fuxa_url:http://localhost:1881`.
+- **What the Next Agent Should Know**: In dev, FUXA runs with `network_mode: host` (not a bridge) because the host firewall drops container→host traffic. The portal must run with `--hostname 0.0.0.0` (the `dev` script already does). For production, revert to bridge isolation + a firewall rule (or the Cloudflare tunnel) — host networking is a dev-only convenience. The one remaining step is operator UI: open `http://localhost:1881`, add a WebAPI device with `getTags` = `http://127.0.0.1:3000/api/scada/tags`, Load Tags, author a dashboard.
+
 ## 2026-08-28T05:30:00Z - FUXA SCADA Permanent Resolution (6 root causes)
 
 - **Purpose**: Permanently resolve the recurring "FUXA SCADA not reachable — degraded mode" warning and two latent endpoint defects (broken health probe + mismatched telemetry ingest), validated against the live FUXA container and upstream frangoteam/FUXA docs.

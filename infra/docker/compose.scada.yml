@@ -3,39 +3,34 @@
 # FUXA dev-sim is always available without opting into the heavy tools stack
 # (`pnpm dev -- -t`). Volume name `docker_fuxa_data` is preserved because the
 # compose project name derives from this directory (`docker`) — zero migration.
-# Reverse-flow ingest (D2-a): the portal exposes /api/scada/tags which FUXA
-# pulls via host.docker.internal → host portal dev server.
+#
+# network_mode: host (2026-08-28): the host runs a hardened nftables firewall
+# (input policy=drop, accepts only lo / established / icmp) that drops all
+# container->host traffic, so FUXA in a bridge network cannot reach the portal's
+# /api/scada/tags reverse-flow endpoint. Host networking lets FUXA use the host
+# loopback: getTags = http://127.0.0.1:3000/api/scada/tags (explicit IPv4; the
+# portal is IPv4-only and FUXA's node resolves `localhost` to IPv6 ::1).
+# FUXA's port 1881 binds directly on the host (browser iframe -> localhost:1881). Acceptable for
+# a local dev sim; revisit with bridge isolation + a firewall rule for prod.
 services:
   fuxa:
     image: frangoteam/fuxa:latest
     container_name: plantcor-fuxa
     restart: unless-stopped
-    # AGENT-TRACE: FUXA's node process ignores SIGTERM, so `docker stop` escalates
-    # to SIGKILL (exit 137). SIGINT traps cleanly in node; 30s grace covers shutdown.
+    network_mode: host
+    # FUXA's node process ignores SIGTERM -> SIGKILL (exit 137). SIGINT traps
+    # cleanly in node; 30s grace covers shutdown.
     stop_signal: SIGINT
     stop_grace_period: 30s
-    ports:
-      - "1881:1881"
     volumes:
       - fuxa_data:/root/.fuxa
     environment:
       - NODE_ENV=production
-    # Lets the FUXA container reach the portal dev server on the host so its
-    # WebAPI device can pull /api/scada/tags (D2-a). host-gateway is the Linux
-    # equivalent of Docker Desktop's host.docker.internal.
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
       interval: 15s
       timeout: 10s
       retries: 3
-    networks:
-      - plantcor-tools
 
 volumes:
   fuxa_data:
-
-networks:
-  plantcor-tools:
-    driver: bridge

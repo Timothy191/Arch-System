@@ -164,19 +164,24 @@ Machines / Supabase webhook
 - **FUXA pull source:** `GET /api/scada/tags` returns `[{id,name,value,type}]` in
   the FUXA WebAPI device shape.
 - **FUXA-side config (operator step in FUXA editor):** add a **WebAPI** device
-  with `getTags` = `http://host.docker.internal:3000/api/scada/tags` (dev; the
-  `compose.scada.yml` fuxa service has `extra_hosts: host.docker.internal:host-gateway`).
-  Production: point `getTags` at the portal's public URL via the Cloudflare tunnel.
-  The portal dev server must be reachable from the FUXA container (bind `0.0.0.0`
-  via `pnpm dev -- -H 0.0.0.0` if needed).
+  with `getTags` = `http://127.0.0.1:3000/api/scada/tags` (dev). Use the explicit
+  IPv4 `127.0.0.1`, not `localhost` — FUXA's node resolves `localhost` to IPv6
+  `::1` first, but the portal (`next dev --hostname 0.0.0.0`) is IPv4-only, so
+  `localhost` gets `ECONNREFUSED`.
+  The FUXA container runs with `network_mode: host` (see `compose.scada.yml`), so it
+  shares the host loopback and reaches the portal directly — this sidesteps the
+  host's hardened nftables firewall (`input` policy=drop, which blocks bridge
+  container→host traffic). Production: point `getTags` at the portal's public URL
+  via the Cloudflare tunnel (and use bridge isolation + a firewall rule, not host
+  networking).
 - **Health probe:** `GET /api/control-room/scada-status` HEADs the FUXA web root
   `/` (200 = healthy). The old probe of `/api/health` (404) falsely reported
   `degraded`; do not revert it.
 - **Container lifecycle:** FUXA lives in `infra/docker/compose.scada.yml` (split
-  from `compose.tools.yml`) and is brought up on every plain `pnpm dev` boot
-  (non-quick, non-hosted). `scripts/dev.sh` self-heals an explicitly-stopped
-  `plantcor-fuxa` container before the health check. `stop_signal: SIGINT` +
-  `stop_grace_period: 30s` give a clean exit 0 (was 137).
+  from `compose.tools.yml`, `network_mode: host`) and is brought up on every
+  plain `pnpm dev` boot (non-quick, non-hosted). `scripts/dev.sh` self-heals an
+  explicitly-stopped `plantcor-fuxa` container before the health check.
+  `stop_signal: SIGINT` + `stop_grace_period: 30s` give a clean exit 0 (was 137).
 - **Env:** `NEXT_PUBLIC_FUXA_URL=http://localhost:1881` (D1=a — local/tunnel
   clients only; for LAN-client iframe access use the host LAN IP or mDNS).
 

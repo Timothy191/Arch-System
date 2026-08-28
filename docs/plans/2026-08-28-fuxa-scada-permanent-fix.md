@@ -1,7 +1,7 @@
 # Validated Implementation Plan — FUXA SCADA Permanent Resolution
 
 **Created / validated:** 2026-08-28
-**Status:** ✅ IMPLEMENTED (all 6 phases, D1=a + D2=a). Verification log in Appendix C.
+**Status:** ✅ IMPLEMENTED & LIVE-VERIFIED (all 6 phases, D1=a + D2=a; reverse-flow reachability confirmed end-to-end via FUXA host networking). Verification log in Appendix C.
 **Supersedes:** the earlier 4-gap draft (container-only) in this same file.
 **RCA method:** Hypothesis-driven falsification + differential diagnosis + reproducibility toggle test (AGENTS.md §12).
 
