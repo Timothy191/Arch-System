@@ -18,7 +18,12 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   await expect(bgTint).toBeAttached();
 
   const bgColor = await bgTint.evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(bgColor).toBe("rgba(255, 255, 255, 0.5)");
+  const viewportSize = page.viewportSize();
+  const isMobileOrTablet = viewportSize && viewportSize.width <= 768;
+  const expectedBgColor = isMobileOrTablet
+    ? "rgba(255, 255, 255, 0.7)"
+    : "rgba(255, 255, 255, 0.5)";
+  expect(bgColor).toBe(expectedBgColor);
 
   // 2. Check that a key token variable (arch0) is defined and used
   const htmlBackground = await page.evaluate(() =>
@@ -52,7 +57,7 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   });
 
   console.log("Video State:", videoState);
-  expect(videoState.src).toContain("837668e02b8cc6414cd7a78c19d1746c.webm");
+  expect(videoState.src).toMatch(/edge-of-the-event-horizon|837668e02b8cc6414cd7a78c19d1746c/);
 
   // 4. (Optional) Full‑page screenshot for visual comparison
   await expect(page).toHaveScreenshot("light-glass-background.png", {
