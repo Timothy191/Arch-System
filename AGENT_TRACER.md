@@ -1,5 +1,22 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-28T05:30:00Z - FUXA SCADA Permanent Resolution (6 root causes)
+
+- **Purpose**: Permanently resolve the recurring "FUXA SCADA not reachable — degraded mode" warning and two latent endpoint defects (broken health probe + mismatched telemetry ingest), validated against the live FUXA container and upstream frangoteam/FUXA docs.
+- **Changes**:
+  - `infra/docker/compose.scada.yml` (NEW): split FUXA out of `compose.tools.yml` so the lightweight dev-sim is always up on plain `pnpm dev` (non-quick, non-hosted). Added `stop_signal: SIGINT` + `stop_grace_period: 30s` (clean exit 0, was 137) and `extra_hosts: host.docker.internal:host-gateway` (FUXA → portal reachability for reverse-flow pull).
+  - `infra/docker/compose.tools.yml`: removed the `fuxa` service + `fuxa_data` volume (now in `compose.scada.yml`); heavy tools remain opt-in via `-t`. Volume name `docker_fuxa_data` preserved (same compose project `docker`).
+  - `scripts/dev.sh`: (a) added base boot of `compose.scada.yml` after Redis auto-start (P1); (b) replaced the warn-only FUXA check (4f) with a self-heal block that `docker start`s an explicitly-stopped `plantcor-fuxa` before probing (P2).
+  - `apps/portal/app/api/control-room/scada-status/route.ts` (P5): health probe changed from `GET ${fuxaUrl}/api/health` (404) → `HEAD ${fuxaUrl}/` (200), mirroring the correct sibling `/api/health/fuxa` route. A healthy FUXA now reports `healthy` instead of permanently `degraded`.
+  - `apps/portal/app/api/telemetry/push/route.ts` (P6 / D2-a): removed the dead `POST ${fuxaUrl}/api/tag` calls in both code paths (FUXA exposes no tag-write endpoint). Redis is now the system of record; FUXA pulls via the new `/api/scada/tags` endpoint.
+  - `apps/portal/app/api/telemetry/drilling/route.ts` (P6 cascade): replaced the broken FUXA forward with writing drilling metrics into the `telemetry:last:drill_<id>_<metric>` Redis namespace so they are FUXA-pullable.
+  - `apps/portal/app/api/scada/tags/route.ts` (NEW): `GET` serves the Redis telemetry cache in FUXA WebAPI device shape `[{id,name,value,type}]` — the `getTags` source FUXA polls.
+  - `.env` + `apps/portal/.env` (P3 / D1=a): `NEXT_PUBLIC_FUXA_URL` pinned to `http://localhost:1881` (matches `.env.example`; was the host's DHCP LAN IP `192.168.1.52`).
+  - Tests: rewrote `telemetry/push/route.test.ts` + `scada/tags/route.test.ts` (NEW) for reverse-flow; updated `scada-status` + `drilling` tests; all 13 pass.
+  - `docs/operations/fuxa-integration-plan.md`: documented the implemented reverse-flow ingest + compose split + FUXA WebAPI device config.
+- **Verification**: `pnpm nx type-check portal` green; 4 suites / 13 tests pass; `docker stop` → exit 0 (was 137); container recreated from `compose.scada.yml` healthy with `extra_hosts`; self-heal functional test (stop → revive → PASS); `/api/tag` orphan sweep clean.
+- **What the Next Agent Should Know**: FUXA ingests by _pulling_ `/api/scada/tags` (reverse flow) — never POST to `/api/tag` (404). The running dev portal must be restarted to pick up the route + env changes. The one remaining operator step is configuring a FUXA WebAPI device with `getTags` = `http://host.docker.internal:3000/api/scada/tags` (dev). For LAN-client iframe access, `NEXT_PUBLIC_FUXA_URL` would need the host LAN IP / mDNS instead of localhost (D1 trade-off).
+
 ## 2026-08-26T07:35:00Z - Visual & Ergonomic Login Page Enhancements
 
 - **Purpose**: Upgrade the login card and input form to align with design system glassmorphism standards, introduce advanced ergonomics (zero-click overwrite, rate-limit locking), and streamline error messages for production security.

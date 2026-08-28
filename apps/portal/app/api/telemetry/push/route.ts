@@ -3,7 +3,7 @@
  * /api/telemetry/push:
  *   post:
  *     summary: Push telemetry data to SCADA
- *     description: Forward machine telemetry to FUXA SCADA server with two-level caching (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates. Deduplicates unchanged values.
+ *     description: Store machine telemetry in the Redis cache (system of record) for FUXA to pull via /api/scada/tags (reverse-flow ingest). Two-level dedup (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates.
  *     tags:
  *       - Telemetry
  *     requestBody:
@@ -87,7 +87,7 @@
  *       400:
  *         description: Invalid request body
  *       500:
- *         description: Internal server error or SCADA unreachable
+ *         description: Internal server error
  */
 import { NextResponse } from "next/server";
 import { getRedisClient } from "@repo/redis";
@@ -128,8 +128,6 @@ async function setRedisLastValue(key: string, value: number): Promise<void> {
 // withValidation. handlePost parses the body once and routes accordingly.
 const handleDirectTag = withValidation(telemetryPushSchema, async (_req, data) => {
   const { name, value } = data;
-  const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
-  const endpoint = `${fuxaUrl}/api/tag`;
   const numValue = Number(value);
 
   // L1 Check
@@ -144,42 +142,13 @@ const handleDirectTag = withValidation(telemetryPushSchema, async (_req, data) =
     return NextResponse.json({ success: true, synced: true, cached: true });
   }
 
-  try {
-    const fuxaRes = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(process.env.FUXA_API_KEY
-          ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
-          : {}),
-      },
-      body: JSON.stringify({ name, value: numValue }),
-      signal: AbortSignal.timeout(3000), // Prevent socket starvation on SCADA latency
-    });
+  // AGENT-TRACE: Reverse-flow ingest (D2-a) — Redis is the system of record.
+  // FUXA exposes no /api/tag write endpoint; it pulls tags via /api/scada/tags.
+  // On change detected (L1/L2 miss), persist to Redis so FUXA's next poll picks it up.
+  localLastValues.set(name, numValue);
+  await setRedisLastValue(name, numValue);
 
-    if (!fuxaRes.ok) {
-      return NextResponse.json(
-        {
-          warning: `FUXA SCADA server returned status ${fuxaRes.status}`,
-          synced: false,
-        },
-        { status: 200 },
-      );
-    }
-
-    localLastValues.set(name, numValue);
-    await setRedisLastValue(name, numValue);
-
-    return NextResponse.json({ success: true, synced: true });
-  } catch {
-    return NextResponse.json(
-      {
-        warning: "FUXA SCADA server is unreachable",
-        synced: false,
-      },
-      { status: 200 },
-    );
-  }
+  return NextResponse.json({ success: true, synced: true });
 });
 
 export async function POST(req: Request) {
@@ -198,8 +167,6 @@ export async function POST(req: Request) {
 async function handlePost(req: Request) {
   try {
     const body = await req.clone().json();
-    const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
-    const endpoint = `${fuxaUrl}/api/tag`;
 
     // 1. Check if this is a Supabase Database Webhook payload
     if (body.table === "machine_telemetry" && body.record) {
@@ -243,33 +210,11 @@ async function handlePost(req: Request) {
             return { tag: tagName, success: true, cached: true };
           }
 
-          // Change detected or cache miss -> send update
-          try {
-            const fuxaRes = await fetch(endpoint, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(process.env.FUXA_API_KEY
-                  ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
-                  : {}),
-              },
-              body: JSON.stringify({ name: tagName, value: numValue }),
-              signal: AbortSignal.timeout(3000), // Prevent socket starvation on SCADA latency
-            });
-
-            const ok = fuxaRes.ok;
-            if (ok) {
-              localLastValues.set(tagName, numValue);
-              await setRedisLastValue(tagName, numValue);
-            }
-            return { tag: tagName, success: ok };
-          } catch {
-            return {
-              tag: tagName,
-              success: false,
-              error: "Connection failed",
-            };
-          }
+          // AGENT-TRACE: Reverse-flow ingest (D2-a) — persist to Redis (system
+          // of record); FUXA pulls via /api/scada/tags. No FUXA REST write call.
+          localLastValues.set(tagName, numValue);
+          await setRedisLastValue(tagName, numValue);
+          return { tag: tagName, success: true };
         }),
       );
 
@@ -291,7 +236,7 @@ async function handlePost(req: Request) {
     );
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Failed to forward telemetry" },
+      { error: err.message || "Failed to store telemetry" },
       { status: 500 },
     );
   }

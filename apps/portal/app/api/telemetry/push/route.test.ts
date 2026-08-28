@@ -4,11 +4,13 @@
 
 import { POST, clearTelemetryCache } from "./route";
 
+// Redis is disabled in tests — setRedisLastValue/getRedisLastValue catch the
+// rejection and no-op, so the L1 in-memory cache is the effective dedup store.
 jest.mock("@repo/redis", () => ({
   getRedisClient: jest.fn().mockRejectedValue(new Error("Redis disabled in tests")),
 }));
 
-describe("POST /api/telemetry/push", () => {
+describe("POST /api/telemetry/push (reverse-flow ingest — Redis is system of record)", () => {
   let originalFetch: typeof global.fetch;
 
   beforeAll(() => {
@@ -43,11 +45,8 @@ describe("POST /api/telemetry/push", () => {
     expect(json.error).toBe("Request body validation failed");
   });
 
-  it("successfully forwards direct single tag payload to FUXA", async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-    });
+  it("stores a direct single-tag payload in Redis and never calls FUXA", async () => {
+    const mockFetch = jest.fn();
     global.fetch = mockFetch;
 
     const req = createRequest({ name: "machine_1_engine_rpm", value: 1200 });
@@ -58,50 +57,12 @@ describe("POST /api/telemetry/push", () => {
     expect(json.success).toBe(true);
     expect(json.synced).toBe(true);
 
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://localhost:1881/api/tag",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ name: "machine_1_engine_rpm", value: 1200 }),
-      }),
-    );
+    // AGENT-TRACE: reverse-flow ingest — FUXA is never POSTed to; it pulls /api/scada/tags.
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("gracefully returns warning when FUXA returns an error status", async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
-    });
-    global.fetch = mockFetch;
-
-    const req = createRequest({ name: "machine_1_engine_rpm", value: 1200 });
-    const res = await POST(req);
-
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.warning).toContain("FUXA SCADA server returned status 500");
-    expect(json.synced).toBe(false);
-  });
-
-  it("gracefully returns warning when FUXA is unreachable", async () => {
-    const mockFetch = jest.fn().mockRejectedValue(new Error("Connection refused"));
-    global.fetch = mockFetch;
-
-    const req = createRequest({ name: "machine_1_engine_rpm", value: 1200 });
-    const res = await POST(req);
-
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.warning).toBe("FUXA SCADA server is unreachable");
-    expect(json.synced).toBe(false);
-  });
-
-  it("processes Supabase database webhook payloads and updates multiple tags", async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-    });
+  it("processes Supabase database webhook payloads and stores all tags", async () => {
+    const mockFetch = jest.fn();
     global.fetch = mockFetch;
 
     const webhookBody = {
@@ -130,53 +91,33 @@ describe("POST /api/telemetry/push", () => {
     expect(json.webhook).toBe(true);
     expect(json.processed).toBe(6); // 6 metrics are non-null and mapped
     expect(json.results).toHaveLength(6);
+    expect(json.results.every((r: { success: boolean }) => r.success)).toBe(true);
 
-    // Verify all 6 tags were posted
-    expect(mockFetch).toHaveBeenCalledTimes(6);
-    expect(mockFetch).toHaveBeenNthCalledWith(
-      1,
-      "http://localhost:1881/api/tag",
-      expect.objectContaining({
-        body: JSON.stringify({
-          name: "machine_machine-uuid-456_engine_rpm",
-          value: 1500,
-        }),
-      }),
-    );
-    expect(mockFetch).toHaveBeenNthCalledWith(
-      2,
-      "http://localhost:1881/api/tag",
-      expect.objectContaining({
-        body: JSON.stringify({
-          name: "machine_machine-uuid-456_engine_temp",
-          value: 92.4,
-        }),
-      }),
-    );
+    // Reverse-flow: no FUXA REST write — Redis is the system of record.
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("skips sending duplicate tag values (delta diff caching)", async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-    });
+  it("skips storing duplicate tag values (L1 delta-diff caching)", async () => {
+    const mockFetch = jest.fn();
     global.fetch = mockFetch;
 
-    // Send first request - should be a cache miss and call fetch
+    // First request — L1 miss → store.
     const req1 = createRequest({ name: "machine_1_engine_rpm", value: 1200 });
     const res1 = await POST(req1);
     expect(res1.status).toBe(200);
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const json1 = await res1.json();
+    expect(json1.success).toBe(true);
+    expect(json1.synced).toBe(true);
 
-    mockFetch.mockClear();
-
-    // Send duplicate second request - should be a cache hit and bypass fetch
+    // Second (duplicate) request — L1 hit → cached, no store path, no fetch.
     const req2 = createRequest({ name: "machine_1_engine_rpm", value: 1200 });
     const res2 = await POST(req2);
     expect(res2.status).toBe(200);
     const json2 = await res2.json();
     expect(json2.success).toBe(true);
     expect(json2.synced).toBe(true);
-    expect(mockFetch).not.toHaveBeenCalled(); // fetch skipped!
+    expect(json2.cached).toBe(true);
+
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

@@ -66,7 +66,11 @@ describe("POST /api/telemetry/drilling", () => {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
                 maybeSingle: jest.fn().mockResolvedValue({
-                  data: { id: "123e4567-e89b-12d3-a456-426614174000", name: "DR-101", department_id: "dept-1" },
+                  data: {
+                    id: "123e4567-e89b-12d3-a456-426614174000",
+                    name: "DR-101",
+                    department_id: "dept-1",
+                  },
                 }),
               }),
             }),
@@ -99,5 +103,7 @@ describe("POST /api/telemetry/drilling", () => {
     const json = await res.json();
     expect(json.success).toBe(true);
     expect(json.machine_id).toBe("123e4567-e89b-12d3-a456-426614174000");
+    // Reverse-flow ingest (D2-a): FUXA pulls /api/scada/tags — no FUXA REST write.
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

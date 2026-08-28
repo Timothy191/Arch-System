@@ -136,26 +136,31 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       console.warn("[DrillTelemetry] Redis caching warning:", redisErr);
     }
 
-    // 4. Forward to SCADA push endpoint asynchronously
-    const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
+    // 4. Reverse-flow ingest (D2-a) — expose drilling metrics as FUXA-pullable
+    // tags in the telemetry:last:* Redis namespace (read by /api/scada/tags).
+    // FUXA exposes no /api/tag write endpoint; it pulls via its WebAPI device.
     let scadaSynced = false;
-
     try {
-      const fuxaRes = await fetch(`${fuxaUrl}/api/tag`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(process.env.FUXA_API_KEY
-            ? { Authorization: `Bearer ${process.env.FUXA_API_KEY}` }
-            : {}),
-        },
-        body: JSON.stringify({
-          name: `drill_${machine_id}_bit_depth`,
-          value: bit_depth ?? 0,
-        }),
-        signal: AbortSignal.timeout(3000), // Prevent thread blocking on SCADA latency/outage
-      });
-      scadaSynced = fuxaRes.ok;
+      const redis = await getRedisClient();
+      const drillMetrics: Record<string, number | null | undefined> = {
+        bit_depth,
+        engine_rpm,
+        engine_temp,
+        hydraulic_pressure,
+        vibration_level,
+        fuel_level,
+        penetration_rate,
+        pull_down_force,
+        rotary_speed,
+      };
+      for (const [metric, val] of Object.entries(drillMetrics)) {
+        if (val !== null && val !== undefined && !Number.isNaN(Number(val))) {
+          await redis.set(`telemetry:last:drill_${machine_id}_${metric}`, String(val), {
+            EX: 86400, // 24 hours TTL
+          });
+        }
+      }
+      scadaSynced = true;
     } catch {
       scadaSynced = false;
     }

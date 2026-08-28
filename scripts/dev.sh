@@ -750,6 +750,14 @@ else
     fi
   fi
 
+  # 2d. FUXA SCADA dev-sim — always up on local (non-quick, non-hosted) boot.
+  # Lightweight local container (frangoteam/fuxa), not real hardware. Heavy tools
+  # remain opt-in via -t (compose.tools.yml). Reverse-flow ingest (D2-a): the
+  # portal exposes /api/scada/tags which FUXA pulls via host.docker.internal.
+  if [ -f "$REPO_ROOT/infra/docker/compose.scada.yml" ]; then
+    $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.scada.yml" up -d > /dev/null 2>&1
+  fi
+
   # 2c. Open WebUI — launch if tools compose configuration has it
   # if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
   #   if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "plantcor-open-webui"; then
@@ -981,8 +989,20 @@ else
   check "Static assets" "skip"
 fi
 
-# 4f. FUXA SCADA health check
+# 4f. FUXA SCADA — self-heal a stopped container, then health check.
+# AGENT-TRACE: `restart: unless-stopped` never revives an explicitly-stopped
+# container, so a single `docker stop`/`make clean-docker` would leave FUXA dead
+# forever. Detect exited -> start -> wait healthy before probing.
 FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+fuxa_state="$(docker inspect --format='{{.State.Status}}' plantcor-fuxa 2>/dev/null || true)"
+if [ "$fuxa_state" = "exited" ]; then
+  echo -e "  ${INFO} FUXA stopped — self-healing..."
+  docker start plantcor-fuxa > /dev/null 2>&1 || true
+  for i in $(seq 1 15); do
+    docker inspect --format='{{.State.Health.Status}}' plantcor-fuxa 2>/dev/null | grep -q healthy && break
+    sleep 2
+  done
+fi
 if curl -fs "$FUXA_URL" > /dev/null 2>&1; then
   check "FUXA SCADA" "pass" "$FUXA_URL"
 else

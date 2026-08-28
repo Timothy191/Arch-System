@@ -145,11 +145,48 @@ FUXA supports custom CSS themes. Map Arch-Mk2 design tokens:
 }
 ```
 
+## Reverse-Flow Ingest (Implemented 2026-08-28)
+
+FUXA (`frangoteam/fuxa` v1.3.4) exposes **no** `/api/tag` write endpoint and **no**
+`/api/health` endpoint (live-verified). It ingests external data by _pulling_ a
+tag list from a **WebAPI device** (upstream issue #650 + DeepWiki). The portal
+therefore uses a **reverse-flow** model:
+
+```
+Machines / Supabase webhook
+  → POST /api/telemetry/push (portal)        # writes telemetry:last:<tag> in Redis
+  → GET  /api/scada/tags (portal)             # FUXA WebAPI device polls this (getTags)
+  → FUXA dashboard renders live tag values
+```
+
+- **System of record:** Redis keys `telemetry:last:<tag>` (24h TTL), written by
+  `/api/telemetry/push` (direct + Supabase webhook) and `/api/telemetry/drilling`.
+- **FUXA pull source:** `GET /api/scada/tags` returns `[{id,name,value,type}]` in
+  the FUXA WebAPI device shape.
+- **FUXA-side config (operator step in FUXA editor):** add a **WebAPI** device
+  with `getTags` = `http://host.docker.internal:3000/api/scada/tags` (dev; the
+  `compose.scada.yml` fuxa service has `extra_hosts: host.docker.internal:host-gateway`).
+  Production: point `getTags` at the portal's public URL via the Cloudflare tunnel.
+  The portal dev server must be reachable from the FUXA container (bind `0.0.0.0`
+  via `pnpm dev -- -H 0.0.0.0` if needed).
+- **Health probe:** `GET /api/control-room/scada-status` HEADs the FUXA web root
+  `/` (200 = healthy). The old probe of `/api/health` (404) falsely reported
+  `degraded`; do not revert it.
+- **Container lifecycle:** FUXA lives in `infra/docker/compose.scada.yml` (split
+  from `compose.tools.yml`) and is brought up on every plain `pnpm dev` boot
+  (non-quick, non-hosted). `scripts/dev.sh` self-heals an explicitly-stopped
+  `plantcor-fuxa` container before the health check. `stop_signal: SIGINT` +
+  `stop_grace_period: 30s` give a clean exit 0 (was 137).
+- **Env:** `NEXT_PUBLIC_FUXA_URL=http://localhost:1881` (D1=a — local/tunnel
+  clients only; for LAN-client iframe access use the host LAN IP or mDNS).
+
 ## Status
 
-- [ ] Add FUXA to Docker Compose
-- [ ] Create FuxaFrame embed component
-- [ ] Wire into ScadaPanel with view toggle
-- [ ] Set up data bridge (MQTT or HTTP)
-- [ ] Apply theme tokens
-- [ ] Deploy and test
+- [x] Add FUXA to Docker Compose (now `infra/docker/compose.scada.yml`)
+- [x] Create FuxaFrame embed component (with degraded-mode fallback + retry)
+- [x] Wire into ScadaPanel with view toggle (rendered from `[department]/page.tsx`)
+- [x] Set up data bridge (reverse-flow: Redis ← push, FUXA ← /api/scada/tags)
+- [x] Apply theme tokens (`apps/portal/public/css/fuxa-light-theme.css`)
+- [x] Self-heal + always-up dev boot + clean shutdown (P1/P2/P4)
+- [x] Correct scada-status health probe (P5)
+- [ ] Deploy and test (operator configures FUXA WebAPI device `getTags` URL)

@@ -16,6 +16,8 @@ import { getRedisClient } from "@repo/redis";
 import { applyCors } from "@/lib/api/cors";
 
 // AGENT-TRACE: Route to provide Control Room components with Redis-backed SCADA status and fallback telemetry metadata
+// Health probe targets the FUXA web root (HEAD /) — FUXA exposes no
+// /api/health endpoint (404), so probing /api/health falsely reported degraded.
 export async function GET(req: Request) {
   try {
     const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
@@ -24,8 +26,8 @@ export async function GET(req: Request) {
 
     const startTime = Date.now();
     try {
-      const res = await fetch(`${fuxaUrl}/api/health`, {
-        method: "GET",
+      const res = await fetch(fuxaUrl, {
+        method: "HEAD",
         signal: AbortSignal.timeout(3000),
       });
       latencyMs = Date.now() - startTime;
@@ -49,11 +51,7 @@ export async function GET(req: Request) {
       redisConnected = false;
     }
 
-    const overallStatus = isFuxaHealthy
-      ? "healthy"
-      : redisConnected
-      ? "degraded"
-      : "offline";
+    const overallStatus = isFuxaHealthy ? "healthy" : redisConnected ? "degraded" : "offline";
 
     const body = {
       status: overallStatus,
@@ -69,7 +67,7 @@ export async function GET(req: Request) {
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to fetch SCADA status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
