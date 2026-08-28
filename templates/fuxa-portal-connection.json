@@ -1,0 +1,14 @@
+[
+  {
+    "id": "cf0b89d8-2853-4349-8aba-7c2c000b30a8",
+    "name": "Portal",
+    "type": "WebAPI",
+    "enabled": true,
+    "polling": 1000,
+    "property": {
+      "getTags": "http://127.0.0.1:3000/api/scada/tags",
+      "postTags": ""
+    },
+    "tags": {}
+  }
+]
