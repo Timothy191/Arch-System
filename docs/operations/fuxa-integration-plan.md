@@ -178,10 +178,13 @@ Machines / Supabase webhook
   `/` (200 = healthy). The old probe of `/api/health` (404) falsely reported
   `degraded`; do not revert it.
 - **Container lifecycle:** FUXA lives in `infra/docker/compose.scada.yml` (split
-  from `compose.tools.yml`, `network_mode: host`) and is brought up on every
-  plain `pnpm dev` boot (non-quick, non-hosted). `scripts/dev.sh` self-heals an
-  explicitly-stopped `plantcor-fuxa` container before the health check.
-  `stop_signal: SIGINT` + `stop_grace_period: 30s` give a clean exit 0 (was 137).
+  from `compose.tools.yml`, `network_mode: host`, `userDir=/root/.fuxa`) and is
+  brought up on every plain `pnpm dev` boot (non-quick, non-hosted).
+  `userDir` points FUXA at the persistent `fuxa_data` volume so authored projects
+  (`project.fuxap.db`, settings, alarms) survive container recreation (FUXA's default
+  data dir is `<cwd>/_appdata`, which is ephemeral in the image). `scripts/dev.sh`
+  self-heals an explicitly-stopped `plantcor-fuxa` container before the health
+  check. `stop_signal: SIGINT` + `stop_grace_period: 30s` give a clean exit 0 (was 137).
 - **Env:** `NEXT_PUBLIC_FUXA_URL=http://localhost:1881` (D1=a — local/tunnel
   clients only; for LAN-client iframe access use the host LAN IP or mDNS).
 

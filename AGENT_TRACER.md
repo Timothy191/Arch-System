@@ -1,5 +1,14 @@
 # Root Workspace Agent Tracer
 
+## 2026-08-28T07:10:00Z - FUXA data persistence fixed (userDir onto volume)
+
+- **Purpose**: Fix a latent persistence bug — FUXA wrote its project (`project.fuxap.db`, settings, alarms) to `<cwd>/_appdata` inside the ephemeral image filesystem, while the `fuxa_data` volume was mounted at `/root/.fuxa` (empty, unused). Any operator-authored FUXA dashboard would have been lost on container recreation.
+- **Changes**:
+  - `infra/docker/compose.scada.yml`: added `userDir=/root/.fuxa` env so FUXA uses `/root/.fuxa/_appdata` on the persistent `fuxa_data` volume.
+  - `docs/operations/fuxa-integration-plan.md`: documented `userDir` persistence in the container-lifecycle section.
+- **Verification**: toggle test — recreated the container twice; `project.fuxap.db` (size 94208, mtime 05:05) survived on the volume; FUXA healthy; FUXA→portal `/api/scada/tags` HTTP 200.
+- **What the Next Agent Should Know**: FUXA now persists authored projects on `docker_fuxa_data`. Do NOT remove the `userDir=/root/.fuxa` env, or FUXA reverts to the ephemeral `_appdata` and loses authored dashboards. The operator still authors the WebAPI device + dashboard in the FUXA editor (UI, no API) — `getTags` = `http://127.0.0.1:3000/api/scada/tags`.
+
 ## 2026-08-28T06:55:00Z - FUXA reverse-flow reachability resolved (host networking)
 
 - **Purpose**: Complete Step 2 of the FUXA resolution. The host's hardened nftables firewall (`input` policy=drop) blocked bridge container→host traffic, so FUXA couldn't reach the portal's `/api/scada/tags`. Switched FUXA to host networking to use the host loopback.

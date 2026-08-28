@@ -26,6 +26,10 @@ services:
       - fuxa_data:/root/.fuxa
     environment:
       - NODE_ENV=production
+      # Point FUXA at the persistent volume so authored projects (project.fuxap.db,
+      # settings, alarms) survive container recreation. FUXA's default data dir is
+      # <cwd>/_appdata (ephemeral in the image); userDir moves it onto fuxa_data.
+      - userDir=/root/.fuxa
     healthcheck:
       test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
       interval: 15s
