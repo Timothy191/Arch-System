@@ -1067,7 +1067,7 @@ importers:
         specifier: 1.0.0
         version: link:../theme
       '@repo/utils':
-        specifier: workspace:^
+        specifier: 1.0.0
         version: link:../utils
       '@revolist/react-datagrid':
         specifier: ^4.21.0
