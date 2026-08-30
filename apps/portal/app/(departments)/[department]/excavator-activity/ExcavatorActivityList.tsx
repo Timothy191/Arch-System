@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 
 const SHIFT_HOURS = 12;
@@ -45,32 +46,48 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
-  // Group by site_id, then by shift
-  const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
-
-  for (const activity of todayActivity) {
-    const siteKey = activity.site_id ?? "__none__";
-    const siteName = activity.site?.name ?? "No Site Assigned";
-    if (!siteMap.has(siteKey)) {
-      siteMap.set(siteKey, { siteName, activities: [] });
+  // Pre-index dumper assignments by excavator_activity_id to turn nested O(N * M) .filter() into O(1) Map lookups
+  const assignmentsByActivityId = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (const assignment of todayAssignments) {
+      const list = map.get(assignment.excavator_activity_id);
+      if (list) {
+        list.push(assignment);
+      } else {
+        map.set(assignment.excavator_activity_id, [assignment]);
+      }
     }
-    siteMap.get(siteKey)!.activities.push(activity);
-  }
+    return map;
+  }, [todayAssignments]);
 
-  // Put "No Site Assigned" last
-  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === "__none__") return 1;
-    if (b === "__none__") return -1;
-    return 0;
-  });
+  // Group by site_id, then calculate totals using the indexed Map
+  const siteEntries = useMemo(() => {
+    const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
+
+    for (const activity of todayActivity) {
+      const siteKey = activity.site_id ?? "__none__";
+      const siteName = activity.site?.name ?? "No Site Assigned";
+      if (!siteMap.has(siteKey)) {
+        siteMap.set(siteKey, { siteName, activities: [] });
+      }
+      siteMap.get(siteKey)!.activities.push(activity);
+    }
+
+    // Put "No Site Assigned" last
+    return Array.from(siteMap.entries()).sort(([a], [b]) => {
+      if (a === "__none__") return 1;
+      if (b === "__none__") return -1;
+      return 0;
+    });
+  }, [todayActivity]);
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id),
+        const siteAssignments = activities.flatMap(
+          (a) => assignmentsByActivityId.get(a.id) ?? [],
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -110,9 +127,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) ?? []}
                     />
                   ))}
                 </div>
@@ -131,9 +146,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) ?? []}
                     />
                   ))}
                 </div>
