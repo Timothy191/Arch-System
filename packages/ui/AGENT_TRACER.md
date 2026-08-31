@@ -1,5 +1,18 @@
 # Agent Tracer - @repo/ui
 
+## 2026-08-31 - FluidCanvas Ripple Component Implementation & Background Integration
+
+- **Purpose**: Implement a high-efficiency Eulerian fluid dynamics canvas simulation component in `@repo/ui` and wire it into the portal route background above the 4K video wallpaper.
+- **Changes**:
+  - `packages/ui/src/components/FluidCanvas.tsx`: Created responsive fluid canvas component implementing Navier-Stokes density relaxation with pointer velocity injection, passive event listeners, automatic rAF pausing on scroll/visibility via `IntersectionObserver`, and `prefers-reduced-motion` compliance.
+  - `packages/ui/package.json`: Exported `./FluidCanvas`.
+  - `apps/portal/components/RouteBackground.tsx`: Integrated `<FluidCanvas />` overlay layer above the 4K video background.
+- **Verification**:
+  - `pnpm nx run @repo/ui:type-check` ✅ (0 errors)
+  - `pnpm nx run portal:type-check` ✅ (0 errors)
+  - `pnpm --filter portal test` ✅ (95/95 suites passed)
+- **What the Next Agent Should Know**: Fluid dynamics interactions are decoupled from React state renders and run purely within a bounded rAF loop.
+
 ## 2026-08-26 - R3F Hero Rotator Production Hardening & Pure Component Modularization
 
 - **Purpose**: Complete production-hardening of the React Three Fiber migration and fluid typography implementation, eliminate UI duplication, add dynamic client-only SSR guarding, add multi-touch swipe support, and purge all Nx Cloud dependencies.

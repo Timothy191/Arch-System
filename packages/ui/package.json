@@ -60,6 +60,7 @@
     "./Input": "./src/components/Input.tsx",
     "./KPI": "./src/components/KPI.tsx",
     "./Clock": "./src/components/Clock.tsx",
+    "./FluidCanvas": "./src/components/FluidCanvas.tsx",
     "./PageHeader": "./src/components/PageHeader.tsx",
     "./ShiftToggle": "./src/components/ShiftToggle.tsx",
     "./Checkbox": "./src/components/Checkbox.tsx",

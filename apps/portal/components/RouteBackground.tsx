@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useFocusMode } from "@/hooks/useFocusMode";
+import { FluidCanvas } from "@repo/ui/FluidCanvas";
 
 /**
  * RouteBackground
@@ -36,9 +37,7 @@ export function RouteBackground() {
   return (
     <>
       {/* ── Full-Screen Event Horizon Video Background ── */}
-      {/* AGENT-TRACE: 1080p H.264 (5.2MB vs 28MB 4K) — downscaled via ffmpeg to cut
-          decode cost and network transfer; 4K was saturating the compositor on the
-          hub page. preload=auto ensures early loading. ── */}
+      {/* AGENT-TRACE: 4K (3840x2160) H.264 video background asset — preload=auto ensures early loading. ── */}
       <div
         className="fixed inset-0 overflow-hidden -z-10 route-bg-video-container"
         aria-hidden="true"
@@ -46,7 +45,7 @@ export function RouteBackground() {
         <video
           ref={videoRef}
           id="route-bg-light-video"
-          src="/background/edge-of-the-event-horizon.1920x1080.mp4"
+          src="/background/edge-of-the-event-horizon.3840x2160.mp4"
           poster="/background/macos-27-golden-2560x1764.png"
           autoPlay
           muted
@@ -57,6 +56,8 @@ export function RouteBackground() {
             prefersReducedMotion ? "" : "transition-opacity duration-300"
           }`}
         />
+        {/* Interactive Fluid Simulation Overlay */}
+        <FluidCanvas className="absolute inset-0 opacity-40 mix-blend-screen" />
       </div>
 
       {/* ── Tint overlay — legibility scrim for glassmorphism panels ── */}

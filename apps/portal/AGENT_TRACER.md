@@ -1,5 +1,18 @@
 # Portal Agent Tracer
 
+## Session 2026-08-31 (Background Video 4K Asset Replacement & Documentation Alignment)
+
+- **Purpose**: Remove downscaled 1080p background video and replace with native 4K asset `edge-of-the-event-horizon.3840x2160.mp4` across portal components, public directories, and documentation.
+- **Changes**:
+  - `apps/portal/public/background/`: Removed `edge-of-the-event-horizon.1920x1080.mp4`, preserved `edge-of-the-event-horizon.3840x2160.mp4` and poster images.
+  - `apps/portal/components/RouteBackground.tsx`: Updated video `src` to `/background/edge-of-the-event-horizon.3840x2160.mp4` and updated agent trace comments.
+  - `docs/DESIGN.md`: Updated background video documentation specifications to reflect 4K `3840x2160.mp4` asset at ~28MB.
+  - `scripts/sync-assets.sh`: Re-synchronized assets from `apps/portal/assets` to `apps/portal/public`.
+- **Verification**:
+  - Validated asset presence in `apps/portal/public/background/` (28MB 4K MP4 + poster PNGs).
+  - Executed type-checks and test suites.
+- **What the Next Agent Should Know**: The background wallpaper across all portal routes now uses the native 4K `/background/edge-of-the-event-horizon.3840x2160.mp4` asset.
+
 ## Session 2026-08-27 (Quality Gate Hardening, Design System Compliance & Type Remediation)
 
 - **Purpose**: Resolve type check errors in access-control dashboard components, fix design system audit violations in `layout.tsx` and `print-report.css`, and achieve 100% pass across all 26 monorepo packages during `pnpm quality`.

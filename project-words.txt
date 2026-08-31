@@ -1,3 +1,14 @@
+metabase
+hasura
+octotools
+sqlx
+fuxap
+nftables
+pullable
+dedup
+runscript
+ECONNREFUSED
+XPOST
 abliterated
 accesscontrol
 afteredit
@@ -328,3 +339,7 @@ recognisable
 viewports
 multispectral
 lerp
+modernclock
+Navier
+Eulerian
+downscales
