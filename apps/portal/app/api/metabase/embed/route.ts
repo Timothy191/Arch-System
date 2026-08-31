@@ -1,6 +1,6 @@
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { getUserSafely } from "@repo/supabase/server";
+import { getUserSafely, createServerSupabaseClient } from "@repo/supabase/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
 /**
@@ -48,8 +48,9 @@ function createMetabaseToken(
 export async function GET(request: NextRequest): Promise<NextResponse> {
   return withRateLimit(request, async () => {
     // 1. Authenticate user session
-    const { user, error } = await getUserSafely();
-    if (error || !user) {
+    const supabase = await createServerSupabaseClient();
+    const user = await getUserSafely(supabase);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
