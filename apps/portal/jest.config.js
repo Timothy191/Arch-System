@@ -48,6 +48,7 @@ module.exports = {
     "^@repo/ui/DepartmentLayout$":
       "<rootDir>/../../packages/ui/src/components/DepartmentLayout.tsx",
     "^@repo/ui/KPI$": "<rootDir>/../../packages/ui/src/components/KPI.tsx",
+    "^@repo/ui/Clock$": "<rootDir>/../../packages/ui/src/components/Clock.tsx",
     "^@repo/ui/PageHeader$": "<rootDir>/../../packages/ui/src/components/PageHeader.tsx",
     "^@repo/ui/MacMenuBar$": "<rootDir>/../../packages/ui/src/components/MacMenuBar.tsx",
     "^@repo/ui/MacTitleBar$": "<rootDir>/../../packages/ui/src/components/MacTitleBar.tsx",

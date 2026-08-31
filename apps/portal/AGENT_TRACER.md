@@ -3449,3 +3449,23 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
 - **Status**: Completed. Verified with unit tests and type-check.
   \n## 2026-08-20: Cross-Department Data Bridging (Engineering & Control Room)\n\n**Purpose:** Document the schema linkage between Engineering Breakdowns and Control Room Machine Operations.\n**Changes:**\n- _Learning / Reference_: To see exactly how tables connect between departments, always reference `packages/database/migrations/`. In this case, matching `breakdowns.fleet_id` to `machines.serial_number` successfully bridged the gap between Engineering (which logs breakdowns) and the Control Room (which monitors machine operations). The UI now surfaces active breakdown comments and repair notes directly on the Machine Ops dashboard by performing this join.\n
   \n- 2026-08-26T14:25:45Z: Added max-w-[1920px] and mx-auto constraints to root body to enforce layout limits on ultra-wide displays. [Agent: Antigravity]
+
+## 2026-08-28 - Wire native Clock into login page (login-clock + footer-date)
+
+- **Purpose**: Back the pre-existing `e2e/visual/login.visual.spec.ts` mask selectors (`[data-testid="login-clock"]`, `[data-testid="footer-date"]`) with real rendered elements. Implements the plan in `docs/plans/clock-widget.md`.
+- **Changes**:
+  - `features/auth/components/LoginClock.tsx` (new): Thin `"use client"` wrapper around `@repo/ui/Clock` with `testId="login-clock"`, `format="time"`. Isolates client JS to the clock so the login page stays a server component for its auth-cookie check.
+  - `features/auth/components/LoginClock.test.tsx` (new): Jest/jsdom. Asserts testid contract, live time string after mount, and no setState-after-unmount warning.
+  - `app/(auth)/login/page.tsx`: Imported `LoginClock` and `@repo/ui/Clock`. Rendered `<LoginClock />` in both card title bars (login + system-unavailable) and `<Clock testId="footer-date" format="date" />` in the enterprise footer next to the version + Arch OS label.
+  - `jest.config.js`: Added `"^@repo/ui/Clock$"` module mapper.
+- **RCA**: The visual spec already masked these testids but nothing rendered them — a planned-but-unbuilt feature. Built native rather than porting the discarded QML widget.
+- **Verification**: `pnpm --filter portal test -- --testPathPatterns=features/auth/components/LoginClock` → 3/3 pass. `pnpm --filter portal type-check` clean. `npx eslint` on touched files clean (max-warnings 0).
+- **Risk**: Clock is masked in the visual snapshot, so adding it must not change the baseline — run `pnpm test:e2e:visual` to confirm the mask now matches a real element.
+- **Status**: Completed.
+
+## 2026-08-28 - Fix login visual spec capturing the dashboard instead of the login page
+
+- **RCA**: `e2e/visual/login.visual.spec.ts` ran under the `chromium` project which sets `storageState: e2e/.auth/user.json` (authenticated). The (auth) middleware (`apps/portal/server/proxy.ts:222`) redirects authenticated users from `/login` -> `/`. So the spec followed the redirect and screenshotted the **dashboard home (~3023px tall)**, then compared against the `login-full.png` baseline (1009px) → a 3x "height blowup" that looked like a UI regression but was a test-harness auth leak. Verified: `curl /login` with the auth cookie returns `307 -> /`; direct DOM measurement of the unauthenticated `/login` was always ~1036px.
+- **Fix**: Added `test.use({ storageState: { cookies: [], origins: [] } })` at the top of the spec (mirrors the existing pattern in `e2e/login.spec.ts:3`) so it runs unauthenticated and stays on `/login`. Verified the spec now captures the real login page (full page 819px, form card 314x300) instead of the 3023px dashboard.
+- **Remaining (separate, expected)**: The login baselines (`login-full.png`, `login-form-card.png`, `login-form-filled.png`) are stale vs the current login UI (form 300px vs 457px baseline; page 819px vs 1009px). These are legitimate baseline drift, NOT the redirect bug. Regenerate with `pnpm test:e2e:visual -- --update-snapshots` once the working tree normalizes (e.g. after the clock work is committed) so the new baselines reflect the intended login UI and don't bake in arbitrary WIP state.
+- **Status**: RCA + fix complete. Baseline regen deferred (decision pending tree normalization).

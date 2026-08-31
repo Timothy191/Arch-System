@@ -2,8 +2,10 @@ import { cookies } from "next/headers";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
+import { LoginClock } from "@/features/auth/components/LoginClock";
 import { AlertTriangle, Lock, AlertCircle, ChevronDown } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
+import { Clock } from "@repo/ui/Clock";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
@@ -55,6 +57,7 @@ export default async function LoginPage() {
               <span className="flex-1 text-center text-[13px] font-medium text-arch-text-secondary select-none pr-14">
                 Arch — System Sign In
               </span>
+              <LoginClock />
             </div>
             <div className="p-6 space-y-4 text-center">
               <AlertTriangle className="w-8 h-8 text-arch-accent-red mx-auto" strokeWidth={1.5} />
@@ -86,6 +89,7 @@ export default async function LoginPage() {
               <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">
                 Arch — System Sign In
               </span>
+              <LoginClock />
             </div>
 
             <div className="px-8 py-10 flex-1 flex flex-col justify-center space-y-8">
@@ -136,6 +140,7 @@ export default async function LoginPage() {
                 <ChevronDown className="w-2.5 h-2.5 opacity-60" strokeWidth={2.5} />
               </button>
               <div className="flex items-center gap-3">
+                <Clock testId="footer-date" format="date" className="text-[10px]" />
                 <span>v{PORTAL_VERSION}</span>
                 <span className="uppercase tracking-wider font-medium">Arch OS</span>
               </div>

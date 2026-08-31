@@ -396,3 +396,14 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
   \n- 2026-08-26T12:58:32Z: Enhanced InteractiveGlassCard effects and color palette (frosted white gradients, macOS Sonoma-style shadows, refined button transitions, inner glow/sheen). [Agent: Antigravity]
   \n- 2026-08-26T13:02:24Z: Slightly increased HeroRotator overall container height (minHeight) for better vertical breathing room. [Agent: Antigravity]
   \n- 2026-08-26T14:25:45Z: Extracted HeroCardContent to support a 2D native scroll fallback for mobile, hiding the 3D rotating cylinder on small screens. [Agent: Antigravity]
+
+## 2026-08-28 - Add native Clock widget (replaces discarded QML modernclock)
+
+- **Purpose**: Provide a system-native, hydration-safe live time/date component. Supersedes the discarded `new-content/modernclock-1.0.0.tar.gz` KDE Plasma QML widget, which had no path into the Nx + Next.js stack. Satisfies the pre-existing `e2e/visual/login.visual.spec.ts` mask contract for `[data-testid="login-clock"]` and `[data-testid="footer-date"]`, which previously masked a component that did not exist.
+- **Changes**:
+  - `src/components/Clock.tsx` (new): Pure `"use client"` component. `useState(null)` + `useEffect` so SSR emits an empty `<span>` and hydration matches before the client effect runs (no Next.js hydration mismatch). `Intl.DateTimeFormat` with fixed `en-US` default locale for snapshot determinism. Minute-aligned `setTimeout` loop (1s when `showSeconds`). Reads theme tokens only (`var(--text-secondary)`) — preserves light-mode invariant. Props: `format`, `locale`, `hour12`, `showSeconds`, `testId`, `ariaLabel`, `className`. `role="timer"` + full localized `aria-label`.
+  - `src/components/Clock.stories.tsx` (new): Stories for Time12h, Time24h, TimeWithSeconds, DateOnly, DateTime — covered by the existing `@storybook/test-runner` axe hook.
+  - `package.json`: Added `"./Clock": "./src/components/Clock.tsx"` to `exports`.
+- **Policy**: `scope:package:ui` purity maintained — no imports from `@repo/supabase`, `@repo/redis`, or `@repo/database`.
+- **Verification**: `pnpm nx run @repo/ui:type-check` clean; `pnpm --filter @repo/ui lint` clean.
+- **Status**: Completed. Hand-off: consume via `@repo/ui/Clock`; login wiring lives in `apps/portal`.
