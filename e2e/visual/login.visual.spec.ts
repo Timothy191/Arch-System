@@ -8,6 +8,13 @@
 
 import { test, expect } from "@playwright/test";
 
+// AGENT-TRACE: Override the project-level authenticated storageState (e2e/.auth/user.json)
+// so this spec runs UNauthenticated. The (auth) middleware redirects authenticated
+// users from /login -> /, which previously caused this spec to screenshot the
+// dashboard (~3023px) instead of the login page (~1036px) and fail against the
+// login baseline. Mirrors the pattern in e2e/login.spec.ts.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("login page visual regression", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/login");
