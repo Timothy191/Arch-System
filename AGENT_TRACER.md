@@ -1,286 +1,236 @@
 # Root Workspace Agent Tracer
 
-## 2026-08-28T09:00:00Z - FUXA prod-config doc refreshed (reverse-flow) + full-portal review
+Entries are reverse-chronological. Each records a meaningful code or documentation change.
+Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
+Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
-- **Purpose**: Review the FUXA setup against full portal requirements; refresh the stale `FUXA_PRODUCTION_CONFIG.md` (2026-06-15, described the abandoned push-to-FUXA model) to the reverse-flow architecture.
-- **Changes**: `docs/operations/FUXA_PRODUCTION_CONFIG.md` — prepended an authoritative "Current Production Architecture (reverse-flow)" section + checklist (tunnel URLs, bridge-not-host networking, connection template + gauge-grid script, `/api/scada/tags` prod gating, FUXA security + API key, SSL); marked legacy forward-model sections as superseded.
-- **Review findings**: Dev setup meets portal dev requirements (env schema `NEXT_PUBLIC_FUXA_URL`, `/control-room` gating, routes, UI, 13 unit tests, type-check, live, persistence, reproducibility — all verified). e2e `control-room/scada.spec.ts` authed tests fail because **Supabase cloud is unreachable** (HTTP 000 — free-tier project paused/down) → no session in `e2e/.auth/user.json`; environmental, not a FUXA regression (unauth redirect tests pass; FUXA changes don't touch auth/login/control-room UI). Prod gaps flagged: `/api/scada/tags` unauthenticated (dev-fine, prod-needs-gating), FUXA security off (prod-needs-on), host networking dev-only (prod-uses-tunnel/bridge).
-- **What the Next Agent Should Know**: To re-run the control-room e2e, restore Supabase (restart the paused project) and re-run the Playwright global setup to refresh `e2e/.auth/user.json`, then the FUXA-frame test verifies the iframe end-to-end.
+---
 
-## 2026-08-28T08:30:00Z - FUXA dashboard reproducibility script (`scripts/fuxa-gauge-grid.py`)
+## 2026-08-31 — Documentation Health: Coverage Thresholds, Department Manuals & Dual-Root Clarification
 
-- **Purpose**: Make the FUXA SCADA dashboard reproducible from code so it can be regenerated when the portal telemetry tag set changes, without hand-authoring gauges in the FUXA editor.
-- **Changes**: Added `scripts/fuxa-gauge-grid.py` (stdlib-only): fetches `/api/scada/tags`, clones the existing view gauge styling (or a faithful `svg-ext-html_bag` template), builds a configurable grid with per-metric min/max + labeled zones, saves via FUXA `set-view` API. Optional `FUXA_API_KEY` via `x-api-key` (never printed). Also populated the live MainView with a 10-gauge grid (verified: 10 bound gauges, live values).
-- **Verification**: `py_compile` OK; `--dry-run` builds 10-gauge grid with correct ranges; real run `set-view` HTTP 200; view persisted with 10 bound gauges; `scada-status` healthy.
-- **What the Next Agent Should Know**: The FUXA operator dashboard is now code-defined. To refresh it after new telemetry metrics are added, run `python3 scripts/fuxa-gauge-grid.py` (set `FUXA_API_KEY` env if FUXA security is enabled). The script replaces the target view's gauges idempotently.
-
-## 2026-08-28T07:10:00Z - FUXA data persistence fixed (userDir onto volume)
-
-- **Purpose**: Fix a latent persistence bug — FUXA wrote its project (`project.fuxap.db`, settings, alarms) to `<cwd>/_appdata` inside the ephemeral image filesystem, while the `fuxa_data` volume was mounted at `/root/.fuxa` (empty, unused). Any operator-authored FUXA dashboard would have been lost on container recreation.
+- **Branch**: `docs/fix-coverage-thresholds-and-dept-manuals`
+- **Purpose**: Three documentation fixes from a full `/docs` + `/documentation` audit.
 - **Changes**:
-  - `infra/docker/compose.scada.yml`: added `userDir=/root/.fuxa` env so FUXA uses `/root/.fuxa/_appdata` on the persistent `fuxa_data` volume.
-  - `docs/operations/fuxa-integration-plan.md`: documented `userDir` persistence in the container-lifecycle section.
-- **Verification**: toggle test — recreated the container twice; `project.fuxap.db` (size 94208, mtime 05:05) survived on the volume; FUXA healthy; FUXA→portal `/api/scada/tags` HTTP 200.
-- **What the Next Agent Should Know**: FUXA now persists authored projects on `docker_fuxa_data`. Do NOT remove the `userDir=/root/.fuxa` env, or FUXA reverts to the ephemeral `_appdata` and loses authored dashboards. The operator still authors the WebAPI device + dashboard in the FUXA editor (UI, no API) — `getTags` = `http://127.0.0.1:3000/api/scada/tags`.
+  - `AGENTS.md`: Corrected stale Jest thresholds (35/24/24/34 → 40/30/35/40). Added note about active CI gap: functions at ~28.47% below 35% threshold.
+  - `documentation/02-system-wiki/drilling-department.md` (NEW): Full operational manual — SOPs, KPI table, 4-tier checklists.
+  - `documentation/02-system-wiki/access-control-department.md` (NEW): Full operational manual — badge issuance, visitor, muster SOPs.
+  - `documentation/02-system-wiki/safety-department.md` (NEW): Full operational manual — incident triage, LTI KPIs, corrective action workflow.
+  - `documentation/02-system-wiki/training-department.md` (NEW): Full operational manual — induction, certification expiry, competency matrix.
+  - `documentation/02-system-wiki/satellite-monitoring-department.md` (NEW): Full operational manual — SAR/InSAR alert workflow, hyperspectral SOP.
+  - `docs/DOCUMENTATION_INDEX.md`: Per-topic canonical location table + 2026-11-01 migration deadline.
+  - `docs/wiki/index.md`: Migration notice blocking new additions; direct to `documentation/02-system-wiki/`.
+  - `documentation/README.md`: Phase 2b marked complete; target dates added for Phases 3–6.
+- **What the Next Agent Should Know**: All 8 departments now have full manuals in `documentation/02-system-wiki/`. Functions coverage CI failure (28.47% vs 35%) is pre-existing. Migration deadline: **2026-11-01**.
 
-## 2026-08-28T06:55:00Z - FUXA reverse-flow reachability resolved (host networking)
+## 2026-08-28 — `pg_graphql` Migration, PL/pgSQL Security Checks & Metabase Embed API
 
-- **Purpose**: Complete Step 2 of the FUXA resolution. The host's hardened nftables firewall (`input` policy=drop) blocked bridge container→host traffic, so FUXA couldn't reach the portal's `/api/scada/tags`. Switched FUXA to host networking to use the host loopback.
+- **Purpose**: Safe database extension auditing, PL/pgSQL security lint rules, and rate-limited Metabase embed JWT API.
 - **Changes**:
-  - `infra/docker/compose.scada.yml`: replaced `ports:`+`networks:`+`extra_hosts` with `network_mode: host`. FUXA's 1881 now binds on the host directly; FUXA reaches the portal via `127.0.0.1:3000`.
-  - `docs/operations/fuxa-integration-plan.md`: updated the reverse-flow section — `getTags` = `http://127.0.0.1:3000/api/scada/tags` (explicit IPv4, since FUXA's node resolves `localhost` to IPv6 `::1` and the portal is IPv4-only), and documented the host-networking rationale.
-- **Verification**: end-to-end pipeline test passed — `POST /api/telemetry/push {name,value}` → `synced:true`; FUXA container `GET http://127.0.0.1:3000/api/scada/tags` → `[{id,name,value,type}]` with the pushed value; `scada-status` → `healthy`, `cached_tag_count:1`, `fuxa_url:http://localhost:1881`.
-- **What the Next Agent Should Know**: In dev, FUXA runs with `network_mode: host` (not a bridge) because the host firewall drops container→host traffic. The portal must run with `--hostname 0.0.0.0` (the `dev` script already does). For production, revert to bridge isolation + a firewall rule (or the Cloudflare tunnel) — host networking is a dev-only convenience. The one remaining step is operator UI: open `http://localhost:1881`, add a WebAPI device with `getTags` = `http://127.0.0.1:3000/api/scada/tags`, Load Tags, author a dashboard.
+  - `packages/database/migrations/097_enable_pg_graphql.sql` (NEW): Enables `pg_graphql` in `extensions` schema with RLS compatibility and `search_path` hardening.
+  - `packages/database/tests/rls_extension_safety.sql` (NEW): Assertion test for RLS isolation and `search_path`.
+  - `tools/policy-compiler.cjs` + `tools/policy/security.checks.json`: Added `no-mutable-search-path` and `require-extension-schema` lint rules.
+  - `apps/portal/app/api/metabase/embed/route.ts` (NEW): Signed HMAC-SHA256 JWT route for Metabase embeds; rate-limited.
+  - `apps/portal/app/api/metabase/embed/route.test.ts` (NEW): 3 tests — auth, params, token signature.
+- **What the Next Agent Should Know**: Metabase embed at `/api/metabase/embed?dashboardId=<id>&departmentId=<dept_uuid>`.
 
-## 2026-08-28T05:30:00Z - FUXA SCADA Permanent Resolution (6 root causes)
+## 2026-08-28 — External Repository Architectural Evaluation
 
-- **Purpose**: Permanently resolve the recurring "FUXA SCADA not reachable — degraded mode" warning and two latent endpoint defects (broken health probe + mismatched telemetry ingest), validated against the live FUXA container and upstream frangoteam/FUXA docs.
+- **Purpose**: Evaluate six repos for adoption/discard: `metabase`, `hasura/graphql-engine`, `sqlx`, `postgres-language-server`, `pg_graphql`, `octotools`.
+- **Key Decisions**: Adopt Metabase (BI embeds), `pg_graphql`, and Postgres Language Server. Discard Hasura (duplicate proxy layer). Keep SQLx optional.
+- **Changes**: `docs/wiki/comparisons/REPOSITORY_EVALUATION.md` (NEW): full evaluation matrix.
+- **What the Next Agent Should Know**: Decision matrix at `docs/wiki/comparisons/REPOSITORY_EVALUATION.md`.
+
+## 2026-08-28 — FUXA: Full Reverse-Flow Resolution (6 root causes) + Prod Config
+
+- **Purpose**: Permanently resolve FUXA SCADA "degraded mode" warning, fix broken health probe and mismatched telemetry ingest, document prod reverse-flow config.
 - **Changes**:
-  - `infra/docker/compose.scada.yml` (NEW): split FUXA out of `compose.tools.yml` so the lightweight dev-sim is always up on plain `pnpm dev` (non-quick, non-hosted). Added `stop_signal: SIGINT` + `stop_grace_period: 30s` (clean exit 0, was 137) and `extra_hosts: host.docker.internal:host-gateway` (FUXA → portal reachability for reverse-flow pull).
-  - `infra/docker/compose.tools.yml`: removed the `fuxa` service + `fuxa_data` volume (now in `compose.scada.yml`); heavy tools remain opt-in via `-t`. Volume name `docker_fuxa_data` preserved (same compose project `docker`).
-  - `scripts/dev.sh`: (a) added base boot of `compose.scada.yml` after Redis auto-start (P1); (b) replaced the warn-only FUXA check (4f) with a self-heal block that `docker start`s an explicitly-stopped `plantcor-fuxa` before probing (P2).
-  - `apps/portal/app/api/control-room/scada-status/route.ts` (P5): health probe changed from `GET ${fuxaUrl}/api/health` (404) → `HEAD ${fuxaUrl}/` (200), mirroring the correct sibling `/api/health/fuxa` route. A healthy FUXA now reports `healthy` instead of permanently `degraded`.
-  - `apps/portal/app/api/telemetry/push/route.ts` (P6 / D2-a): removed the dead `POST ${fuxaUrl}/api/tag` calls in both code paths (FUXA exposes no tag-write endpoint). Redis is now the system of record; FUXA pulls via the new `/api/scada/tags` endpoint.
-  - `apps/portal/app/api/telemetry/drilling/route.ts` (P6 cascade): replaced the broken FUXA forward with writing drilling metrics into the `telemetry:last:drill_<id>_<metric>` Redis namespace so they are FUXA-pullable.
-  - `apps/portal/app/api/scada/tags/route.ts` (NEW): `GET` serves the Redis telemetry cache in FUXA WebAPI device shape `[{id,name,value,type}]` — the `getTags` source FUXA polls.
-  - `.env` + `apps/portal/.env` (P3 / D1=a): `NEXT_PUBLIC_FUXA_URL` pinned to `http://localhost:1881` (matches `.env.example`; was the host's DHCP LAN IP `192.168.1.52`).
-  - Tests: rewrote `telemetry/push/route.test.ts` + `scada/tags/route.test.ts` (NEW) for reverse-flow; updated `scada-status` + `drilling` tests; all 13 pass.
-  - `docs/operations/fuxa-integration-plan.md`: documented the implemented reverse-flow ingest + compose split + FUXA WebAPI device config.
-- **Verification**: `pnpm nx type-check portal` green; 4 suites / 13 tests pass; `docker stop` → exit 0 (was 137); container recreated from `compose.scada.yml` healthy with `extra_hosts`; self-heal functional test (stop → revive → PASS); `/api/tag` orphan sweep clean.
-- **What the Next Agent Should Know**: FUXA ingests by _pulling_ `/api/scada/tags` (reverse flow) — never POST to `/api/tag` (404). The running dev portal must be restarted to pick up the route + env changes. The one remaining operator step is configuring a FUXA WebAPI device with `getTags` = `http://host.docker.internal:3000/api/scada/tags` (dev). For LAN-client iframe access, `NEXT_PUBLIC_FUXA_URL` would need the host LAN IP / mDNS instead of localhost (D1 trade-off).
+  - `infra/docker/compose.scada.yml` (NEW): Splits FUXA out of `compose.tools.yml`; always up on `pnpm dev`. `stop_signal: SIGINT`, `stop_grace_period: 30s`, `network_mode: host` (dev only — host firewall blocks bridge→host traffic).
+  - `infra/docker/compose.tools.yml`: Removed `fuxa` service.
+  - `scripts/dev.sh`: Auto-boots `compose.scada.yml`; self-heal block restarts stopped `plantcor-fuxa` container.
+  - `apps/portal/app/api/control-room/scada-status/route.ts`: Health probe `GET /api/health` (404) → `HEAD /` (200).
+  - `apps/portal/app/api/telemetry/push/route.ts`: Removed dead `POST /api/tag` calls; Redis is system of record.
+  - `apps/portal/app/api/scada/tags/route.ts` (NEW): Serves Redis telemetry cache in FUXA WebAPI shape `[{id,name,value,type}]`.
+  - `apps/portal/app/api/telemetry/drilling/route.ts`: Writes drilling metrics to `telemetry:last:drill_<id>_<metric>` namespace.
+  - `scripts/fuxa-gauge-grid.py` (NEW): Stdlib-only script to regenerate FUXA gauge dashboard from `/api/scada/tags`.
+  - `docs/operations/FUXA_PRODUCTION_CONFIG.md`: Reverse-flow architecture section prepended; legacy push-model sections marked superseded.
+  - `docs/operations/fuxa-integration-plan.md`: `userDir` persistence, host-networking rationale, WebAPI device config.
+  - `.env` + `apps/portal/.env`: `NEXT_PUBLIC_FUXA_URL` pinned to `http://localhost:1881`.
+  - All 13 FUXA-related tests pass.
+- **What the Next Agent Should Know**: FUXA pulls `/api/scada/tags` (reverse flow) — never POST to `/api/tag`. For prod, revert to bridge networking + firewall rule. `userDir=/root/.fuxa` env must stay or dashboards are lost on container recreate.
 
-## 2026-08-26T07:35:00Z - Visual & Ergonomic Login Page Enhancements
+## 2026-08-26 — Visual & Ergonomic Login Page Enhancements
 
-- **Purpose**: Upgrade the login card and input form to align with design system glassmorphism standards, introduce advanced ergonomics (zero-click overwrite, rate-limit locking), and streamline error messages for production security.
+- **Purpose**: Align login card with glassmorphism design system; add zero-click overwrite, rate-limit locking, and accessibility roles.
 - **Changes**:
-  - `apps/portal/app/(auth)/login/page.tsx`: Centered the login card wrapper in the viewport and changed the card border style from low-contrast `white/40` to standard design-system contrast `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
-  - `libs/features/auth/ui/src/LoginForm.tsx`:
-    - Added `onFocus={(e) => e.target.select()}` to both inputs to implement the **Zero-Click Overwrite** pattern.
-    - Gated form states by checking `isRateLimited` and disabled inputs/submit button when the rate limit countdown is active.
-    - Simplified client-side error feedback and removed the cluttered signup requirements checklist from the login card.
-    - Added an inline spin loader (`Loader2`) to the submit button when `loading` is active.
-    - Integrated screen reader `aria-live="polite"` and `aria-live="assertive"` roles to dynamic warning states.
-- **Verification**: Ran `pnpm type-check` successfully (100% pass across all 25 monorepo projects).
-- **What the Next Agent Should Know**: The login portal is now fully optimized for accessibility (a11y), visual contrast, and high-speed autofill overwrite.
+  - `apps/portal/app/(auth)/login/page.tsx`: Card border `white/40` → `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
+  - `libs/features/auth/ui/src/LoginForm.tsx`: `onFocus` select-all on inputs; rate-limit input/button gating; `Loader2` spinner; `aria-live` roles.
+- **What the Next Agent Should Know**: Login fully optimized for a11y, visual contrast, and autofill overwrite.
 
-## 2026-08-26T07:15:00Z - Resolve Cache Scope Violation on Hub Layout
+## 2026-08-26 — Fix Cache Scope Violation on Hub Layout
 
-- **Purpose**: Fix Next.js Server Components render crash on `/hub` caused by a cache scope violation when calling dynamic APIs (`cookies()`) inside a cached function.
+- **Purpose**: Resolve Next.js render crash on `/hub` — `cookies()` called inside a cached function.
+- **Changes**: `apps/portal/app/hub/layout.tsx`: Call `cookies()` outside cache scope; pass `cookieList` as parameter to `getAccessibleDepartmentNames`.
+- **What the Next Agent Should Know**: Never call `cookies()` or `headers()` inside `unstable_cache()` / `withCache()`. Pass as parameters.
+
+## 2026-08-26 — Dev Server Boot Watchdog & Report System
+
+- **Purpose**: 10-second watchdog on `scripts/dev.sh`; auto-write diagnostic `dev-report.md` on timeout or success.
 - **Changes**:
-  - `apps/portal/app/hub/layout.tsx`: Resolved `cookies()` cache scope violation by calling `cookies()` outside the cache scope (in `HubLayout`) and passing the retrieved `cookieList` as a parameter to the cached `getAccessibleDepartmentNames(user.id, cookieList)` function.
-- **Verification**: Verified via Playwright E2E tests (`e2e/temp/hub-verify.spec.ts`) that `/hub` now compiles and renders successfully with HTTP 200 OK after user authentication, with zero console cache errors.
-- **What the Next Agent Should Know**: Next.js App Router dynamic functions (`cookies()`, `headers()`) must never be called inside functions wrapped in `unstable_cache()` or `withCache()`. Always pass dynamic properties as parameters.
+  - `tools/generate-dev-report.js` (NEW): Reads `run/dev.log`, strips ANSI, parses phases, writes `dev-report.md`.
+  - `scripts/dev.sh`: `tee` to `run/dev.log`; watchdog background process; report generation in `cleanup()` trap.
 
-## 2026-08-26T06:45:00Z - Monitored Dev Server Boot & Watchdog Report System
+## 2026-08-26 — AGENTS.md Consolidated Rewrite
 
-- **Purpose**: Implement a 10-second watchdog timer on the development server boot script (`scripts/dev.sh`) to automatically end the process and output a diagnostic markdown report if the setup hangs, and always output a full status report on successful boot.
+- **Purpose**: Synthesize from scout-agent findings into unified Repository Guidelines; align all AI config files with anchored cross-references.
 - **Changes**:
-  - `tools/generate-dev-report.js`: Created parser script that reads `run/dev.log`, strips ANSI escape codes, parses checks/phases, extracts Node/pnpm versions, and writes `dev-report.md`. Includes last 50 lines of `dev.log` and `portal.log` for failure diagnostics.
-  - `scripts/dev.sh`:
-    - Added `exec > >(tee "$REPO_ROOT/run/dev.log") 2>&1` to capture all output.
-    - Launched a 10-second background watchdog process that monitors `.dev_ready`.
-    - Integrated report generation in `cleanup()` trap for both `FAILURE` and `TIMEOUT` scenarios.
-    - Triggered `SUCCESS` report generation right after `show_results` completes successfully.
-- **Verification**: Ran `pnpm dev` successfully and verified creation of a `SUCCESS` report in `dev-report.md`. Injected a temporary `sleep 12` into `scripts/dev.sh` to trigger the watchdog, and verified that the process terminated cleanly in 10 seconds with exit code 1, generating a `TIMEOUT` report containing full logs. Reverted the temporary sleep.
-- **What the Next Agent Should Know**: The development setup process is now fully monitored. If a boot step takes more than 10 seconds, the watchdog will kill the main dev server shell and write `dev-report.md`.
+  - `docs/AGENTS.md` / root `AGENTS.md` (symlinked): Full "Repository Guidelines" structure with 9 sections — architecture, commands, conventions, error handling, testing, coverage thresholds.
+  - `.github/copilot-instructions.md`: Anchored links to CLAUDE.md and CONTRIBUTING.md.
+  - `docs/GEMINI.md`: Authoritative docs section with AGENTS.md as first entry.
+- **What the Next Agent Should Know**: Root `AGENTS.md` is a symlink to `docs/AGENTS.md`. Both are synchronized.
 
-## 2026-08-26T06:30:00Z - Synthesize Repository Guidelines (AGENTS.md)
+## 2026-08-24 — Layout Compliance & TypeScript Stability Pass
 
-- **Purpose**: Synthesize findings from parallel scout agents (Core Src, Tests, Configs/Build, Scripts/Docs) into a unified, concise, and structured Repository Guidelines document in the project root.
+- **Purpose**: Align Tailwind layouts with DESIGN.md spacing/radius constraints; fix TS narrowing bugs on intersection types.
 - **Changes**:
-  - `docs/AGENTS.md`: Overwrote file (symlinked to root `AGENTS.md`) with the new "Repository Guidelines" structure. Provided clear components architecture, operational caching & middleware gating flows, command references, custom Zod/Zustand/XState conventions, standardized error hierarchy, mocking strategies, visual/accessibility regression specs, and coverage expectations.
-- **Verification**: Checked file linkage via `stat` and verified that root `AGENTS.md` symlinks correctly. Inspected the generated document structure and verified compliance with all guidelines.
-- **What the Next Agent Should Know**: The root `AGENTS.md` is a symbolic link to `docs/AGENTS.md`. Both are fully synchronized. The document serves as the authoritative, dense technical guidelines for AI assistants working in this monorepo.
+  - `packages/theme/src/tailwind/preset.ts`: Semantic spacing aliases (`xs`, `sm`, `md`, `lg`); `.container` 16px/24px rules.
+  - `packages/theme/src/css/variables.css`: 12-column `.layout-grid` + `.card-nested-content` nested-radius solver.
+  - `apps/portal/lib/errors/error-classes.ts`: Exported `AppError` base for TS type-guard narrowing.
+  - `apps/portal/app/hub/error.tsx` + `hub/executive/page.tsx`: Narrowing hard-cast and `driftAlertStyle` fallback.
+- **What the Next Agent Should Know**: Use `p-md` / `gap-lg` — not `p-4` / `gap-6` — on new UI.
 
-## 2026-08-24T22:00:00Z - Layout Compliance & TypeScript Stability Pass
+## 2026-08-24 — Context Optimizer: Dead Code, Unused Deps & Topology Refresh
 
-- **Purpose**: Align Tailwind layouts with `DESIGN.md` spacing & radius constraints; resolve lingering TypeScript narrowing bugs on intersection types.
+- **Purpose**: Prune dead code, remove unreferenced dependencies, eliminate duplicate exports, regenerate codebase maps.
 - **Changes**:
-  - `packages/theme/src/tailwind/preset.ts`: Extended spacing scale with strict semantic aliases (`xs`, `sm`, `md`, `lg`) without breaking existing numeric utility fallbacks. Adjusted `.container` to match 16px mobile/24px desktop rules.
-  - `packages/theme/src/css/variables.css`: Introduced structural 12-column `.layout-grid` and optical `.card-nested-content` nested-radius solvers (outer radius - padding = inner radius).
-  - `apps/portal/lib/errors/error-classes.ts`: Exported `AppError` base class, allowing proper TS type-guard narrowing on intersection error types across the hub.
-  - `apps/portal/app/hub/error.tsx`: Hard-cast the TS narrowing fix due to Next.js `digest` intersection limitations.
-  - `apps/portal/app/hub/executive/page.tsx`: Fixed undefined object property access fallback on `driftAlertStyle`.
-  - Migrated `HeroRotator` and `TrustLogos` cleanly to `@repo/ui`.
-- **Verification**: `pnpm type-check` strictly verified via local `tsc` with exit code 0.
-- **What the Next Agent Should Know**: The Tailwind container and layout boundaries now strictly adhere to semantic 4px-grid sizing. Do NOT use `p-4` or `gap-6` on new UI; instead, opt for `p-md` and `gap-lg`.
-
-## 2026-08-24T21:25:00Z - AGENTS.md Anchored Cross-References + AI Config Sync
-
-- **Purpose**: Rewrite `docs/AGENTS.md` as a concise (~540 word) contributor index using anchored section links to `CLAUDE.md` and `CONTRIBUTING.md` so no detail is lost. Sync all AI agent config files to cross-reference the new structure.
-- **Changes**:
-  - `docs/AGENTS.md`: Replaced the ~1,658-word detailed version with a concise index. Each section (Project Structure, Build/Test/Dev Commands, Coding Style, Testing, Commit/PR, Agent-Specific, CI & Deployment) has a one-line summary plus anchored links to the corresponding detailed section in `CLAUDE.md` or `CONTRIBUTING.md`. Added "CI & Deployment" section back (was missing in previous trim).
-  - `.github/copilot-instructions.md`: Section 4 rewritten with anchored links to CLAUDE.md (Common commands, Architecture, Conventions, Codegen, Policy, Heuristics) and CONTRIBUTING.md (Architecture overview, Quality gates, Adding a new package, Code conventions, Testing, Database migrations, Troubleshooting).
-  - `docs/GEMINI.md`: "Authoritative Docs" section rewritten with AGENTS.md as the first entry and anchored links to CLAUDE.md and CONTRIBUTING.md key sections. Added SECURITY.md (was missing).
-  - `docs/CLAUDE.md`: Redirect stub updated to describe AGENTS.md as "concise contributor index with anchored cross-references".
-- **Verification**: `npx markdownlint` on all changed files — pending.
-- **What the Next Agent Should Know**: `AGENTS.md` is now a concise index with zero detail loss — every topic links to its authoritative section via anchored markdown links (e.g. `CLAUDE.md#conventions`). All AI agent config files (.github/copilot-instructions.md, docs/GEMINI.md, docs/CLAUDE.md) now use the same anchored cross-reference pattern.
-
-## 2026-08-24T14:42:00Z - Rewrite AGENTS.md as Standard Contributor Guide
-
-- **Purpose**: Rewrite `docs/AGENTS.md` (the real file behind the root `AGENTS.md` symlink) to follow the `init` skill's standard contributor-guide outline while preserving all existing agent-contract and pitfalls content.
-- **Changes**:
-  - `docs/AGENTS.md`: Restructured into 9 standard sections (Project Structure & Module Organization, Build/Test/Dev Commands, Coding Style & Naming Conventions, Testing Guidelines, Commit & PR Guidelines, Codegen, Agent-Specific Instructions, CI & Deployment, Common Pitfalls). Folded the existing "Contract", "Nx Guidelines", and "Pitfalls" content into the new structure. Added "Further Reading" cross-references. Compressed redundancy with `CLAUDE.md`/`CONTRIBUTING.md` (which hold full detail).
-- **Verification**: `npx markdownlint docs/AGENTS.md --config config/tools/.markdownlint.json` passes clean. Root `AGENTS.md` symlink (`→ docs/AGENTS.md`) resolves correctly.
-- **What the Next Agent Should Know**: `docs/AGENTS.md` is now a concise contributor index (not an agent-operational contract). Full technical detail lives in `CLAUDE.md` and `CONTRIBUTING.md`. The file is ~1657 words / ~14.9KB.
-
-## 2026-08-24T10:17:00Z - Context Optimizer, Bloat Removal & Topology Alignment
-
-- **Purpose**: Execute context optimization across codebase topology: prune unused dead code/files, remove unreferenced dependencies (`@google/generative-ai`, `lenis`), eliminate duplicate exports (`HeroRotator`), regenerate codebase maps, and align repository context memory.
-- **Changes**:
-  - `apps/portal/package.json`: Pruned unused dependencies `@google/generative-ai` and `lenis`.
-  - `apps/portal/app/(departments)/[department]/ai/actions.ts` & `apps/portal/lib/ai/google-ai-client.ts`: Removed dead files from legacy AI routes.
+  - `apps/portal/package.json`: Removed `@google/generative-ai` and `lenis`.
+  - `apps/portal/app/(departments)/[department]/ai/actions.ts` + `lib/ai/google-ai-client.ts`: Deleted dead legacy AI files.
   - `libs/features/hub/ui/src/HeroRotator.tsx`: Removed duplicate default export.
-  - `codebase-maps/`: Regenerated comprehensive codebase topological maps and manifest metadata.
-- **Verification**: `pnpm knip`, `pnpm deps:lint`, `node tools/generate-codebase-maps.cjs`.
-- **What the Next Agent Should Know**: Repository topology and context indexes are refreshed and clean with zero duplicate exports or dead AI action handlers.
+  - `codebase-maps/`: Regenerated all topological maps.
 
-## 2026-08-21T14:40:00Z - Borders & Dividers Industrial Techniques Implementation
+## 2026-08-21 — Performance & Bundle Optimization Pass (Full Day)
 
-- **Purpose**: Implement the full suite of 9 industrial Borders & Dividers design techniques across `@repo/theme` and `@repo/ui`.
+- **Purpose**: Bundle split fixes, React.memo, interaction ergonomics, hero carousel, contract subpath migration, quality gate.
 - **Changes**:
-  - `packages/theme/src/css/borders.css`: Added CSS utilities & design variables for Dotted Border, Dotted Divider, Double Border, Gradient Border, Bevelled Border, Hand-Drawn Border, Patterned Border, Thick Transparent Border, and Fading Borders.
-  - `packages/ui/src/components/Divider.tsx`: Created accessible Divider component with horizontal/vertical orientation, label support, and variant styles.
-  - `packages/ui/src/components/BorderBox.tsx`: Created BorderBox component encapsulating all 9 techniques with full typings.
-  - `packages/ui/src/components/BorderBox.stories.tsx` & `Divider.stories.tsx`: Created Storybook stories.
-  - `apps/portal/components/system/BordersAndDividers.test.tsx`: Implemented 13 unit tests.
-- **Verification**: `pnpm --filter @repo/theme build`, `pnpm --filter @repo/ui type-check`, `pnpm --filter portal test` passed (13/13 tests passed, 100%).
+  - `libs/features/departments/ui/src/index.ts`: Removed `UniverSheet` barrel re-export (was pulling 7 MB `@univerjs` into every page).
+  - `packages/contract/package.json`: Added `sideEffects: false`; all 17 barrel consumers migrated to subpath imports. 67 KB duplicate chunk reduction.
+  - `libs/features/hub/ui/src/HeroRotator.tsx`: Refactored to two-column department carousel with photo cards, category pills, and play/pause controls.
+  - `apps/portal/app/ClientProviders.tsx`: Removed `SmoothScrollProvider` (Lenis) — cosmetic rAF overhead.
+  - `app/layout.tsx`: Reduced speculation rules to 5 routes at `moderate` eagerness. Gated `PerformanceListener` behind dev-only.
+  - `apps/portal/app/ReactQueryProvider.tsx`: `staleTime` → 5 min, `gcTime` → 10 min.
+  - `apps/portal/components/ClientOverlays.tsx` (NEW): Isolated `ssr: false` dynamic imports from `RootLayout` Server Component.
+  - `apps/portal/components/RouteBackground.tsx`: `fetchPriority="high"` + `priority` on hero background.
+  - `apps/portal/app/layout.tsx`: `<link rel="preload">` for hero background asset.
+  - React.memo applied to 8 components: `DepartmentCard`, `HourlyLoadsGrid`, `Sparkline`, `MachineOperationsList`, `EngineeringNotesList`, `ControlRoomSummaryGridClient`, `NonControlRoomSummaryGridClient`, `ShiftCoverageWidget`.
+  - `ShiftCoverageSectionClient`: Converted to `next/dynamic({ ssr: false })` — 22 KB chunk, control-room only.
+  - Interaction ergonomics: `onFocus` select-all on `DailyLogForm` inputs; autofocus on `EngineeringNotesForm`; `Cmd+K`/`/` shortcut on hub module search; `Cmd+Enter` submit + `Escape` close on `FeedbackWidget`.
+  - State guard optimizations in `useThrottledState`, `useOfflineQueue`, `SystemClock`, `SystemTray`, `useSystemMetrics` — skip re-renders on unchanged values.
+  - Fixed 4 "Maximum update depth exceeded" re-render loops in `useAutoSave`, `SystemClock`, `SystemTray`, `useSystemMetrics`.
+  - `apps/portal/components/system/SystemTray.tsx`: Polling replaced with React Query (`refetchInterval: 60s`).
+  - `packages/theme/src/css/cards.css` + `variables.css`: All department cards/panels to frosted glass (`bg-white/65 backdrop-blur-xl`).
+  - `packages/theme/src/css/borders.css` + `packages/ui/src/components/Divider.tsx` + `BorderBox.tsx`: 9 industrial border techniques; Storybook stories; 13 unit tests.
+  - `cspell.json` + `project-words.txt` (316 terms): cSpell integrated into `pnpm quality` chain — 0 issues across 838 files.
+  - `@repo/contract` `no-restricted-imports` ESLint rule added to `packages/eslint-config/react-internal.js`.
+  - `documentation/03-audit-reports/explain-query-plans-report.md` (NEW): 100% composite foreign key alignment audit report.
+  - `tools/explain-query-plans.cjs` (NEW): Static AST scanner for partition key / composite FK alignment.
+- **Verification**: `pnpm quality` 100%. All 93 test suites / 687 tests passing. Build: 214 chunks, 21 MB, 0 duplicate `@repo/contract` barrel refs.
+- **What the Next Agent Should Know**: Build production with Webpack (`pnpm nx build portal`) — Turbopack produces 3 × 576 KB duplicate chunks due to route-group splitting.
 
-## 2026-08-21T14:35:00Z - Split-Terminal SysOps HUD with Animated ASCII Architecture Topology
+## 2026-08-19 — Engineering Department 100% + Production Department Audit
 
-- **Purpose**: Build a zero-flicker split-screen SysOps HUD displaying deployment metadata, animated ASCII architecture topology with real-time pulse packets, error boundary metrics, and syntax-highlighted log/error streaming.
+- **Purpose**: Complete Engineering Department, implement tire audit export, establish Production Department documentation and audit.
 - **Changes**:
-  - `scripts/monitor-hud.sh`: Upgraded with absolute cursor positioning, side-by-side split screen, animated ASCII topology diagram (`Browser -> Next.js 16 -> Supabase/Redis/SCADA`), live packet animation frames (`──●──▶`), latency meters, and ANSI syntax-highlighted server event & error streaming.
-  - `scripts/dev.sh`: Wired `launch_status_terminal()` to launch the enhanced `scripts/monitor-hud.sh` SysOps HUD automatically upon development deployment.
-- **Verification**: `bash -n scripts/monitor-hud.sh` and `bash -n scripts/dev.sh` syntax clean.
+  - `apps/portal/app/api/export/tires/route.ts` (NEW): Rate-limited export API for `fleet`, `inspections`, `scrap`, and `all` in CSV/JSON.
+  - `libs/features/departments/ui/src/engineering/tires/TireManagementDashboard.tsx`: `Export Audit Log` dropdown.
+  - `packages/contract`: `tire-management.schema.ts` + `tire-management.types.ts` (NEW).
+  - `libs/features/departments/ui/src/engineering/tires/`: Full tire workflow — `actions.ts`, `TireWearCurveChart.tsx`, `TireInspectionModal.tsx`, `TireReplacementModal.tsx`.
+  - `libs/features/departments/ui/src/engineering/breakdowns/`: MTTR vs MTBF chart, Automated Preventative Service Triggers panel.
+  - `BookInForm.tsx` + `BookOutForm.tsx`: `localStorage` draft caching with draft indicator, clear button, quick-select presets.
+  - `documentation/02-system-wiki/engineering-department.md`: Signed off at 100%.
+  - `documentation/02-system-wiki/production-department.md` (NEW): RoM coal extraction, overburden stripping, yield reconciliation SOPs.
+- **Verification**: 13 suites, 76 tests passing. Lint + type-check clean.
 
-- **Purpose**: Compare Webpack and Turbopack chunk deduplication to determine optimal build strategy.
+## 2026-08-19 — Control Room 100% Sign-Off
+
 - **Changes**:
-  - Ran `pnpm nx build portal` (Webpack) and compared with Turbopack output.
-  - **Findings**: Webpack produces 0 duplicate chunks vs Turbopack's 3 × 576 KB duplicates.
-  - **Recommendation**: Use Webpack (`pnpm nx build portal`) for production builds where chunk deduplication matters.
-  - Investigated domain package splitting for `@repo/contract` — determined over-engineering at current scale.
-- **Verification**: `pnpm quality` passes with 100% score.
+  - `apps/portal/app/api/control-room/scada-status/route.ts` + shift-completeness route: Wired to DB.
+  - `documentation/02-system-wiki/control-room-department.md`: Signed off 100% across all 8 sub-systems.
+- **What the Next Agent Should Know**: Control Room is fully operational and documented.
 
-## 2026-08-21T14:15:00Z - Hero Compact Sizing, Smooth 3D Animation & Flash Elimination
+## 2026-08-18 — Staging Pipeline, Standalone Build & CI Integration
 
-- **Purpose**: Compact HeroRotator sizing, refine hardware-accelerated 3D transform animation, and eliminate ambient shimmer white flashes.
+- **Purpose**: Configure Next.js standalone output, staging compose simulation, pre-flight validation, and GitHub Actions smoke test.
 - **Changes**:
-  - `HeroRotator.tsx`: Reduced title, description, and visual card heights to sleek proportions (`text-2xl`, `line-clamp-2`, `max-h-[175px]`). Configured hardware-accelerated `translate3d` slide animation with cubic-bezier easing.
-  - `apps/portal/app/hub/page.tsx`: Compacted hero container padding from `px-8 py-8` to `px-5 py-4`.
-  - `GlassCard.tsx`: Removed ambient `glass-shimmer-ambient` sweep element to eliminate periodic white flashing across cards.
-  - `HeroBackground.tsx`: Removed `mix-blend-overlay` white composite layers.
-- **Verification**: `tsc --noEmit` clean, ESLint clean (0 errors, 0 warnings), Jest tests passing (93 suites, 687 tests).
+  - `apps/portal/next.config.mjs`: `output: "standalone"` unconditional.
+  - `libs/features/departments/ui/src/index.ts`: Removed `SafetyDashboard` from client barrel (RSC `next/headers` decoupling).
+  - `scripts/verify-prod-env.sh` (NEW): Production pre-flight validation.
+  - `infra/docker/compose.staging.yml` (NEW): Staging topology — Next.js standalone + Nginx SSL + Redis.
+  - `scripts/staging-local.sh` (NEW): `start|stop|restart|status|logs` for staging stack.
+  - `.github/workflows/deploy.yml`: `Staging Compose Simulation Smoke Test` step added.
+  - `docs/DEPLOYMENT.md`: Self-hosted standalone workflow, systemd unit, Nginx reverse proxy config.
+- **Verification**: `pnpm quality` 100% green. Standalone artifact boots on port 3099 HTTP 200.
+- **What the Next Agent Should Know**: Standalone artifact at `node apps/portal/.next/standalone/apps/portal/server.js`.
 
-- **Purpose**: Verify final production build, lazy-load ShiftCoverageSectionClient, add React.memo to ShiftCoverageWidget.
+## 2026-08-18 — Control Room Shift Checklist & KPI Widget
+
 - **Changes**:
-  - Fixed `ssr: false` error in Server Component for ShiftCoverageSectionClient dynamic import.
-  - Added `React.memo` to `ShiftCoverageWidget` in `libs/features/departments/ui`.
-  - **Build**: 213 chunks, 21 MB total. ShiftCoverage in 22 KB lazy chunk.
-  - **Total memoized**: 8 components.
-- **Verification**: `pnpm quality` passes with 100% score.
+  - `packages/contract/src/schemas/control-room.schema.ts` + `types/control-room.types.ts` (NEW): Zod schemas for checklist and shift report.
+  - `libs/features/departments/ui/src/control-room/ControlRoomChecklistWidget.tsx` (NEW): Live KPI metrics (<60s alarm, <30s ack, ≥99.9% uptime), category tabs, completion timestamps, handover logging.
+  - `apps/portal/app/(departments)/[department]/page.tsx`: Dynamically mounted checklist widget for control-room.
+- **Verification**: 11 suites, 67 tests passing. Type-check + lint clean.
 
-## 2026-08-21T12:40:00Z - Interaction Design Ergonomics: Autofocus, Keyboard Shortcuts & Zero-Click Overwrites
+## 2026-08-18 — Payload CMS Setup & Schema Isolation
 
-- **Purpose**: Implement interaction design enhancements across portal forms, modal popovers, and Hub module search.
+- **Purpose**: Resolve Node 26 ESM/CJS interop issues; isolate Payload tables in `payload` schema; generate TypeScript types.
 - **Changes**:
-  - `FeedbackWidget.tsx`: Added `autoFocus` on `<textarea>` on modal open, keyboard shortcuts (`Cmd+Enter` / `Ctrl+Enter` to submit, `Escape` to close), and updated accessibility attributes.
-  - `DailyLogForm.tsx`: Added `onFocus={(e) => e.target.select()}` across numerical metric inputs for instant zero-backspace value replacement.
-  - `EngineeringNotesForm.tsx`: Added post-breakdown prefill autofocus transitioning cursor directly to `#eng-action-taken`.
-  - `CoreOperationalModules.tsx`: Added global `/` and `Cmd+K` keyboard shortcut to focus the module search bar instantly.
-- **Verification**: `pnpm --filter portal type-check`, `pnpm --filter portal lint`, and `pnpm --filter portal test` (93 test suites, 687 tests) passed 100% clean.
-- **What the Next Agent Should Know**: All primary input surfaces and modals now implement first-field autofocus and zero-click ergonomics.
+  - `apps/cms/payload.config.ts`: `schemaName: "payload"` on `postgresAdapter`.
+  - `apps/cms/scripts/setup.ts`: `@next/env` default import polyfill for Node 26+.
+  - `apps/cms/payload-types.ts` (NEW): Generated TypeScript types.
+  - Seeded admin (`admin@plantcor.com`) and default departments in `payload` schema.
+- **Verification**: CMS type-check, lint, build — 0 errors.
 
-## 2026-08-21T12:45:00Z - ShiftCoverage Lazy-Load + Memoization Verification + Quality Gate
+## 2026-08-18 — Nx AI Agent Config Sync & cSpell Integration
 
-- **Purpose**: Lazy-load ShiftCoverageSectionClient for control room pages only, verify memoization patterns, pass full quality gate.
 - **Changes**:
-  - Converted `ShiftCoverageSectionClient` to `next/dynamic({ ssr: false })` — 22 KB chunk only loaded on control room pages.
-  - All 7 memoized components confirmed.
-  - `pnpm quality` passes with 100% score.
-- **Verification**: All gates clean.
+  - `pnpm nx configure-ai-agents` run — all agents (claude, codex, copilot, cursor, gemini, opencode) up-to-date.
+  - `cspell.json` + `project-words.txt` (NEW): 316 domain terms; `lint:spelling` added to `quality` chain. `AGENT_TRACER.md` excluded from spell-check.
+  - `packages/README.md`: Fixed `pretttier-config` typo.
+  - `scripts/dev.sh`: Loopback `127.0.0.1` port detection; env loading from `$REPO_ROOT/apps/portal/.env`.
+  - `packages/theme/sd.config.mjs` + `apps/portal/scripts/generate-openapi-spec.js`: Prettier post-hooks on codegen outputs.
+  - `config/generate-certs.sh`: Absolute `$REPO_ROOT/certs` path. `.gitignore`: `certs/` added.
+- **Verification**: `pnpm quality` exit 0. All quality gates green.
 
-## 2026-08-21T12:30:00Z - Final Build Verification + React.memo for Dashboard Grids
+## 2026-08-18 — Backend Architecture Visualizer & Overview App
 
-- **Purpose**: Verify final production bundle sizes, add React.memo to department dashboard grid components.
 - **Changes**:
-  - **Build Verification**: Production build confirmed — 214 JS chunks, 21 MB total. Duplicate chunks reduced 599 KB → 576 KB (67 KB saved). `@repo/contract` barrel references: 0. Lenis references: 0.
-  - Added `React.memo` to `ControlRoomSummaryGridClient` and `NonControlRoomSummaryGridClient`.
-- **Verification**: Type-check and lint pass clean.
-- **Total React.memo coverage**: 7 components (`DepartmentCard`, `HourlyLoadsGrid`, `Sparkline`, `MachineOperationsList`, `EngineeringNotesList`, `ControlRoomSummaryGridClient`, `NonControlRoomSummaryGridClient`).
+  - `apps/overview/app/sections/BackendArchitecture.tsx` (NEW): Interactive React Flow canvas — service nodes, animated wire edges, topology layers, flow-type filters, inspector drawer.
+  - `apps/overview/lib/data.ts`: `BACKEND_SERVICES` + `BACKEND_CONNECTIONS` data contracts.
+  - `apps/overview/app/page.tsx`: `Backend Connections` tab registered.
+- **Verification**: Overview type-check, lint, build — 0 errors.
 
-## 2026-08-21T12:20:00Z - Full Quality Gate + Libs ESLint Enforcement + CSpell Cleanup
+## 2026-08-18 — Database Migrations Sync & Control Room Component Migration
 
-- **Purpose**: Pass full quality gate, enforce `@repo/contract` subpath imports in libs packages, fix cspell failures.
 - **Changes**:
-  - Re-applied `monthlyReportInputSchema` subpath import in `app/actions.ts` (reverted by earlier git checkout).
-  - Added `@repo/contract` `no-restricted-imports` rule to `packages/eslint-config/react-internal.js` for libs enforcement.
-  - Added UX law names to `cspell.json` (`Jakob`, `Fitts`, `Doherty`, `Tesler`, `Postel`, `Restorff`, `Zeigarnik`, `Pragnanz`, `normalise`).
-- **Verification**: `pnpm quality` passes with 100% score.
+  - `packages/supabase/migrations/`: Synced migrations 050–095 from `packages/database/migrations/` (1:1 parity, 95/95).
+  - `libs/features/departments/ui/src/control-room/`: Relocated Control Room components from `apps/portal`.
+  - `@repo/contract` form schemas/types extended.
+  - `libs/features/departments/ui/src/control-room/FuxaFrame.tsx`: Strong typing, `online`/`offline` network listeners, resilient cache fallback.
+- **Verification**: `pnpm quality` exit 0.
 
-## 2026-08-21T12:08:00Z - Hero Card Refactor: Dynamic Department Visual Carousel with Photographic Feeds
+## 2026-08-17 — Langfuse Tracing Integration
 
-- **Purpose**: Fulfill request by transforming the top Hub page Hero Card into a dynamic department-by-department carousel where the entire card transitions through each department with synchronized photographic terrain visuals, operational telemetry stats, category badges, and interactive navigation controls.
 - **Changes**:
-  - `libs/features/hub/ui/src/HeroRotator.tsx`: Refactored `HeroRotator` into a two-column responsive layout (7 cols content, 5 cols visual image showcase) with department category pills, live status indicators, key operational telemetry badges, and high-definition terrain photograph cards (`/images/departments/${dept.name}.jpg`) with liquid glass overlays and live camera feed badges.
-  - Controls: Added Previous/Next step buttons, Play/Pause auto-rotation toggle, and jump-to-dot indicators with pause-on-hover capability.
-  - `apps/portal/app/hub/page.tsx`: Expanded hero container width to full width to support the visual card carousel showcase.
-- **Verification**: `pnpm --filter portal type-check` passed cleanly with exit code 0.
-- **What the Next Agent Should Know**: The top Hero card on `/hub` now auto-rotates one complete visual card per department, featuring real terrain photography and operational metrics.
+  - `.agents/skills/langfuse/` (NEW): Langfuse skill installed.
+  - `packages/agents/src/langfuse.ts` (NEW): Langfuse client singleton.
+  - `packages/agents`: `SubagentCoordinator` instrumented with trace/generation lifecycle.
+  - `scripts/test-langfuse-tracing.mjs` (NEW): Sample multi-agent trace script.
+  - `apps/portal/.env`: Langfuse observability keys added.
+- **Verification**: `pnpm --filter @repo/agents type-check` — 0 errors. Live trace delivered to Langfuse US Cloud.
 
-## 2026-08-21T12:10:00Z - Full Contract Subpath Migration + ESLint Enforcement + Bundle Measurement
+## 2026-08-17 — Dev Infrastructure & Import Path Fixes
 
-- **Purpose**: Convert all remaining `@repo/contract` barrel consumers to subpath imports, add ESLint enforcement, measure production bundle impact.
 - **Changes**:
-  - **Full Barrel Migration**: Converted all 17 remaining barrel consumers to subpath imports across `libs/features/departments/ui`, `apps/portal/app/api/*`, `apps/portal/lib/*`.
-  - **ESLint Rule**: Added `no-restricted-imports` rule — catches new `@repo/contract` barrel imports with message directing to `schemas/*` or `types/*`.
-  - **Build Measurement**: Duplicate chunks shrank from 599 KB → 576 KB each (67 KB saved total). `@repo/contract"` eliminated from all chunks.
-  - `packages/contract/package.json`: Added `sideEffects: false`.
-- **Verification**: All type-check and lint gates pass clean.
-
-## 2026-08-21T11:50:00Z - Quality Gate Pass + Contract Subpath Imports + Test Fixes
-
-- **Purpose**: Pass full quality gate, convert `@repo/contract` consumers to subpath imports for better tree-shaking, fix pre-existing test failures.
-- **Changes**:
-  - **Quality Gate**: Added 7 words to `cspell.json`. Fixed `shadow-2xl` → `shadow-lg` in `LCPObserver.tsx` (design audit violation).
-  - **Contract Subpath Imports**: Converted 7 high-traffic consumers from barrel `@repo/contract` to domain-specific subpath imports. Added `sideEffects: false` to `packages/contract/package.json`.
-  - **DailyLogForm Test Fix**: Added `next/navigation` mock. Fixed `toast.success` assertion to accept options object.
-- **Verification**: `pnpm quality` passes with 100% score. All 93 test suites pass (687/687 tests).
-
-## 2026-08-21T11:35:00Z - Self-Healing Diagnosis: Production Server Mode (`next start`) vs Dev Mode Resolution
-
-- **Purpose**: Investigate user-reported `Internal Server Error` by examining server logs (`run/portal.log`).
-- **Diagnosis**: Empirical log inspection revealed `pnpm start` (`next start`) was invoked when no pre-built production bundle (`.next`) existed, causing Next.js to crash with `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL` / status 1.
-- **Fix & Verification**: Executed `pnpm dev` (`next dev --turbopack`), cleared stale cache artifacts, and verified HTTP 200 OK responses on `http://localhost:3000/login` and 307 redirects on `/hub`.
-- **What the Next Agent Should Know**: Next.js portal is running in development mode (`pnpm dev`) at `http://localhost:3000` with live Turbopack HMR enabled.
-
-## 2026-08-21T11:30:00Z - Production Build Verification & React.memo Assessment
-
-- **Purpose**: Verify production build impact from LOW priority optimizations, assess React.memo opportunities for heavy dashboard components.
-- **Changes**:
-  - **Build Verification**: Production build completed. Lenis (SmoothScroll) completely eliminated from bundle (0 references). `removeConsole` confirmed stripping `console.warn`/`console.info` in production.
-  - **React.memo Assessment**: `DepartmentDashboard` and `SafetyDashboard` are Server Components — `React.memo` does not apply. Client sub-components are lightweight with stable props — no memoization needed.
-  - **Bundle Metrics**: 214 JS chunks, 21 MB total. Top offenders: `@univerjs` (5 MB), protobuf (1.1 MB), `@react-pdf/renderer` (1 MB), `maplibre-gl` + `@deck.gl` (765 KB). All behind `next/dynamic({ ssr: false })`.
-- **Verification**: `pnpm --filter portal type-check` and `pnpm --filter portal lint` both pass with 0 errors.
-
-## 2026-08-21T11:15:00Z - Department Card Asset Update: Training Simulator Visual Banner
-
-- **Purpose**: Fulfill request by generating dedicated high-resolution visual imagery for the Training department card (`training.jpg`), replacing flat color bands with an authentic industrial equipment training simulator academy visual.
-- **Changes**:
-  - `generate_image`: Generated custom high-definition simulator room visual featuring operator VR headsets and digital haul truck simulation displays.
-  - `apps/portal/public/images/departments/training.jpg`: Deployed `training.jpg` asset to public portal image root.
-- **Verification**: `pnpm --filter portal type-check` passed cleanly with exit code 0.
-- **What the Next Agent Should Know**: The Training department card banner header now renders with the high-resolution simulator visual image.
-
-## 2026-08-21T10:45:00Z - LOW Priority Performance: Speculation Rules, Console Suppression, SmoothScroll Removal
-
-- **Purpose**: Implement remaining LOW priority performance optimizations — reduce speculation rules CPU overhead, suppress console output in production, remove cosmetic smooth scrolling.
-- **Changes**:
-  - `app/layout.tsx`: Reduced speculation rules from 10 routes to 5 high-traffic routes. Changed eagerness from `"eager"` to `"moderate"`.
-  - `next.config.mjs`: Changed `removeConsole` exclude from `["error", "warn", "info"]` to `["error"]` — strips `console.warn` and `console.info` in production.
-  - `lib/errors/error-logger.ts`: Wrapped console output in dev-only check — Sentry handles error capture in production.
-  - `app/ClientProviders.tsx`: Removed `SmoothScrollProvider` (Lenis) — cosmetic rAF loop overhead on every page.
-  - `components/SmoothScrollProvider.tsx`: Deleted.
-- **Verification**: `pnpm --filter portal type-check` and `pnpm --filter portal lint` both pass with 0 errors.
-
-> **Older entries archived to [docs/archive/AGENT_TRACER_archive.md](file:///home/tim/Documents/Arch-System/docs/archive/AGENT_TRACER_archive.md)**
+  - `scripts/dev.sh`: Loopback port detection; env var loading paths.
+  - `libs/features/departments/ui/src/control-room/CloseShiftModal.test.tsx`: Normalized `~/lib/shift-closeout` → `@/lib/shift-closeout`.
+  - `packages/supabase/seed.sql`: Null-guard on `hourly_loads.machine_id` constraint.
+  - `~/.local/bin/supabase` (NEW): XDG launcher for Supabase CLI binary.
+  - `.gitignore`: `certs/` excluded.

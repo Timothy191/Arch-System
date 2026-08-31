@@ -320,7 +320,7 @@ Overlays and HUD elements overlay layout pages without completely blocking backg
 
 The sign-in interface is a key entry point that demonstrates the peak of the system's "Liquid Glass" visual design language and macOS Sonoma aesthetics.
 
-- **Background Video**: Fixed downscaled, high-performance H.264 loop representing active operations (`/background/edge-of-the-event-horizon.1920x1080.mp4` at ~5.2MB–7.6MB, downscaled from 4K/28MB to optimize GPU decode performance and eliminate UI lag). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/macos-27-golden-2560x1764.png`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
+- **Background Video**: Fixed high-resolution 4K H.264 loop representing active operations (`/background/edge-of-the-event-horizon.3840x2160.mp4` at ~28MB). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/macos-27-golden-2560x1764.png`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
 - **Ambient Film Grain & Glass Filters**: A persistent noise/grain layer overlay (`.route-bg-grain`) is rendered on top of the layout to eliminate color banding in gradients and videos. The background video uses standard Sonoma filters (`brightness-95 saturate-110`) for optimal glass legibility.
 - **Window Geometry (macOS Sign-In Card)**:
   - **Container**: A `w-[380px]` frosty glassmorphic panel (`.liquid-glass-light` class) with a 1px white border (`border-white/40`), custom shadow (`shadow-window`), and rounded corners (`rounded-xl`).

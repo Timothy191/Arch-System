@@ -1,8 +1,13 @@
 import { test, expect } from "@playwright/test";
 
+// AGENT-TRACE: The /login test must run unauthenticated or the auth middleware
+// redirects it to / and the screenshot captures the dashboard instead. The
+// /privacy and /offline tests are public and are left on the project default.
 test.describe("Visual Regression - Layout", () => {
   // We use test user credentials to bypass auth and check the dashboard
   // (Assuming typical login handling here, or testing the unauthenticated routes)
+
+  test.use({ storageState: { cookies: [], origins: [] } });
 
   test("Login Page - Visual Check", async ({ page }) => {
     await page.goto("/login");
