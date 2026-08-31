@@ -5,11 +5,13 @@ import { cn } from "../lib/utils";
 
 export interface FluidCanvasProps {
   className?: string;
-  /** Simulation intensity / decay rate (0.8 - 0.99) @default 0.95 */
+  /** Simulation intensity / decay rate (0.8 - 0.99) @default 0.96 */
   dissipation?: number;
-  /** Radius of pointer fluid disturbance @default 24 */
+  /** Radius of pointer fluid disturbance in px @default 26 */
   brushRadius?: number;
-  /** Color tint in OKLCH or hex @default "rgba(47, 107, 255, 0.25)" */
+  /** Fluid injection impulse multiplier (0.1 - 3.0) @default 1.5 */
+  impulseIntensity?: number;
+  /** Color tint in OKLCH, rgba or hex @default "rgba(47, 107, 255, 0.22)" */
   tintColor?: string;
   /** Fallback to static render if prefers-reduced-motion is detected @default true */
   respectReducedMotion?: boolean;
@@ -27,6 +29,7 @@ export function FluidCanvas({
   className,
   dissipation = 0.96,
   brushRadius = 26,
+  impulseIntensity = 1.5,
   tintColor = "rgba(47, 107, 255, 0.22)",
   respectReducedMotion = true,
 }: FluidCanvasProps) {
@@ -96,7 +99,7 @@ export function FluidCanvas({
             const dist = Math.sqrt(i * i + j * j);
             if (dist <= r) {
               const idx = px + py * width;
-              const strength = (1 - dist / r) * 1.5;
+              const strength = (1 - dist / r) * impulseIntensity;
               const cur = currentDensity[idx] ?? 0;
               currentDensity[idx] = Math.min(1.0, cur + strength);
               velocityX[idx] = (velocityX[idx] ?? 0) + dx * 0.1;
@@ -179,7 +182,7 @@ export function FluidCanvas({
       window.removeEventListener("pointermove", handlePointerMove);
       observer.disconnect();
     };
-  }, [prefersReducedMotion, dissipation, brushRadius, tintColor]);
+  }, [prefersReducedMotion, dissipation, brushRadius, impulseIntensity, tintColor]);
 
   if (prefersReducedMotion) {
     return null;

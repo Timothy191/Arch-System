@@ -57,7 +57,12 @@ export function RouteBackground() {
           }`}
         />
         {/* Interactive Fluid Simulation Overlay */}
-        <FluidCanvas className="absolute inset-0 opacity-40 mix-blend-screen" />
+        <FluidCanvas
+          brushRadius={32}
+          dissipation={0.97}
+          impulseIntensity={1.8}
+          className="absolute inset-0 opacity-45 mix-blend-screen"
+        />
       </div>
 
       {/* ── Tint overlay — legibility scrim for glassmorphism panels ── */}
