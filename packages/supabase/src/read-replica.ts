@@ -21,7 +21,14 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
         process.env.SUPABASE_URL ||
         "https://mrwhtxbhrzyttlsyuofc.supabase.co";
 
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+  // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    "";
 
   return createServerClient(replicaUrl, anonKey, {
     global: {
