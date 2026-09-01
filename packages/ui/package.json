@@ -15,7 +15,6 @@
     "@react-three/drei": "catalog:",
     "@react-three/fiber": "catalog:",
     "@repo/theme": "1.0.0",
-    "@repo/utils": "1.0.0",
     "@revolist/react-datagrid": "^4.21.0",
     "@revolist/revogrid": "^4.21.0",
     "@types/three": "catalog:",

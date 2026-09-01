@@ -395,9 +395,6 @@ importers:
       '@repo/redis':
         specifier: 1.0.0
         version: link:../../packages/redis
-      '@repo/shared/data-access':
-        specifier: 1.0.0
-        version: link:../../libs/shared/data-access
       '@repo/supabase':
         specifier: 1.0.0
         version: link:../../packages/supabase
@@ -550,12 +547,6 @@ importers:
         specifier: ^19
         version: 19.2.7(react@19.2.7)
     devDependencies:
-      '@types/react':
-        specifier: catalog:react19
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: catalog:react19
-        version: 19.2.3(@types/react@19.2.17)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -593,12 +584,6 @@ importers:
 
   libs/features/auth/ui:
     dependencies:
-      '@repo/auth/data-access':
-        specifier: workspace:^
-        version: link:../data-access
-      '@repo/auth/utils':
-        specifier: workspace:^
-        version: link:../utils
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
@@ -676,12 +661,6 @@ importers:
       '@repo/redis':
         specifier: 1.0.0
         version: link:../../../../packages/redis
-      '@repo/shared/data-access':
-        specifier: 1.0.0
-        version: link:../../../shared/data-access
-      '@repo/shared/hooks':
-        specifier: workspace:^
-        version: link:../../../shared/hooks
       '@repo/supabase':
         specifier: 1.0.0
         version: link:../../../../packages/supabase
@@ -743,18 +722,12 @@ importers:
 
   libs/features/hub/ui:
     dependencies:
-      '@repo/departments/data-access':
-        specifier: workspace:^
-        version: link:../../departments/data-access
       '@repo/ui':
         specifier: 1.0.0
         version: link:../../../../packages/ui
       '@tremor/react':
         specifier: 'catalog:'
         version: 3.18.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      framer-motion:
-        specifier: 'catalog:'
-        version: 12.40.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
         specifier: 'catalog:'
         version: 1.18.0(react@19.2.7)
@@ -799,13 +772,13 @@ importers:
   libs/shared/data-access:
     dependencies:
       '@repo/errors':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../../../packages/errors
       '@repo/redis':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../../../packages/redis
       '@repo/supabase':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../../../packages/supabase
       next:
         specifier: ^16.2.6
@@ -851,10 +824,10 @@ importers:
   libs/shared/utils:
     dependencies:
       '@repo/errors':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../../../packages/errors
       '@repo/redis':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../../../packages/redis
       zod:
         specifier: 'catalog:'
@@ -880,7 +853,7 @@ importers:
         version: 5.0.0
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
@@ -892,7 +865,7 @@ importers:
   packages/contract:
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/jest':
         specifier: ^30.0.0
@@ -939,7 +912,7 @@ importers:
         version: 9.14.0
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
@@ -954,7 +927,7 @@ importers:
   packages/rate-limiter:
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
@@ -970,11 +943,14 @@ importers:
         version: 4.7.1
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.19
+      jest:
+        specifier: ^30.0.0
+        version: 30.2.0(@types/node@22.19.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.1))(ts-node@10.9.2(@swc/core@1.15.40(@swc/helpers@0.5.21))(@types/node@22.19.19)(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -984,6 +960,9 @@ importers:
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@supabase/ssr':
         specifier: ^0.10.3
         version: 0.10.3(@supabase/supabase-js@2.108.2)
@@ -1017,7 +996,7 @@ importers:
         version: 1.18.0(react@19.2.7)
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
@@ -1088,11 +1067,8 @@ importers:
         specifier: 'catalog:'
         version: 9.7.0(@types/react@19.2.17)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.185.1)
       '@repo/theme':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../theme
-      '@repo/utils':
-        specifier: 1.0.0
-        version: link:../utils
       '@revolist/react-datagrid':
         specifier: ^4.21.0
         version: 4.21.9
@@ -1140,7 +1116,7 @@ importers:
         version: 0.185.1
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
@@ -1182,7 +1158,7 @@ importers:
         specifier: ^2.6.6
         version: 2.6.6
       '@repo/errors':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../errors
       exceljs:
         specifier: ^4.4.0
@@ -1192,7 +1168,7 @@ importers:
         version: 4.4.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(encoding@0.1.13)(express@5.2.1)(hono@4.12.23)(next@16.2.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(sass@1.77.4))(react@19.2.7)(typescript@5.9.3)(zod@4.4.3)
     devDependencies:
       '@repo/typescript-config':
-        specifier: 1.0.0
+        specifier: workspace:*
         version: link:../typescript-config
       '@types/jest':
         specifier: ^30.0.0

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
+    "@repo/logger": "1.0.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "catalog:",
     "kysely": ">=0.28.17",

@@ -8,6 +8,7 @@
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
     "@types/node": "catalog:",
+    "jest": "^30.0.0",
     "typescript": "catalog:"
   },
   "exports": {
@@ -22,7 +23,8 @@
     "clean": "rm -rf dist .nx",
     "dev": "tsc --watch",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "jest tests"
   },
   "types": "./src/index.ts"
 }
