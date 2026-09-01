@@ -19,6 +19,7 @@ import { LCPObserver } from "@/components/LCPObserver";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import { ClientOverlays } from "@/components/ClientOverlays";
+import { SkipLinks } from "@/components/accessibility/SkipLinks";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -154,10 +155,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         suppressHydrationWarning
         className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent max-w-[1920px] mx-auto shadow-window"
       >
-        {/* Skip navigation link for keyboard users */}
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
+        {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
+        <SkipLinks />
 
         {/* Announce SPA route changes to screen readers (WCAG 4.1.3) */}
         <RouteAnnouncer />
@@ -173,11 +172,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <OfflineBanner />
               <AIAssistantWrapper />
 
-              {/* Global Navigation Header with proper landmark */}
-              <header role="banner" className="flex items-center gap-3">
+              {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
+              <header
+                role="banner"
+                aria-label="Global navigation"
+                className="flex items-center gap-3"
+              >
                 <MacMenuBar
                   rightSlot={
-                    <nav role="navigation" aria-label="Global">
+                    <nav id="navigation" role="navigation" aria-label="Main menu">
                       <div className="flex items-center gap-3">
                         <FocusModeToggle variant="icon" />
                         <SystemTrayPill />
@@ -188,8 +191,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                 />
               </header>
 
-              {/* Content wrapper with main landmark */}
-              <main id="main-content" role="main" className="relative z-primary-card pt-16">
+              {/* Content wrapper with main landmark (WCAG 1.3.1) */}
+              <main
+                id="main-content"
+                role="main"
+                aria-label="Main content"
+                className="relative z-primary-card pt-16"
+              >
                 <Suspense fallback={null}>
                   <LCPObserver />
                 </Suspense>
