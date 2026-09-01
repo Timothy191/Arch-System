@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { SatelliteMonitoringClient } from "@/components/monitoring/SatelliteMonitoringClient";
 import { getSatelliteMonitoringData } from "~/lib/monitoring/satellite-data";
@@ -22,12 +23,12 @@ export default async function ControlRoomSatellitePage() {
             Sentinel-1 InSAR deformation · site overview
           </p>
         </div>
-        <a
-          href="/executive"
+        <Link
+          href="/hub/executive"
           className="px-3 py-1.5 text-xs font-medium text-[var(--accent-blue)] border border-[var(--accent-blue)]/30 rounded-lg hover:bg-[var(--accent-blue)]/10 transition-colors"
         >
           Executive Hub →
-        </a>
+        </Link>
       </div>
 
       {/* Summary KPIs */}

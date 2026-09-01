@@ -5,7 +5,10 @@
   "dependencies": {},
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
+    "jest": "^30.0.0",
     "typescript": "catalog:"
   },
   "exports": {
@@ -18,23 +21,8 @@
     "clean": "rm -rf dist .nx",
     "dev": "tsc --watch",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "type-check": "tsc --noEmit"
-  },
-  "types": "./src/index.ts",
-  "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist .nx",
-    "dev": "tsc --watch",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests"
   },
-  "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "@types/jest": "^30.0.0",
-    "@types/node": "catalog:",
-    "jest": "^30.0.0",
-    "@swc/jest": "^0.2.39",
-    "typescript": "catalog:"
-  }
+  "types": "./src/index.ts"
 }

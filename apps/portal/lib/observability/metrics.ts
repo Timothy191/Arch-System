@@ -1,4 +1,5 @@
 import promClient from "prom-client";
+import { getCacheStats } from "@repo/redis";
 
 // AGENT-TRACE: Performance metrics for Control Room operations
 // Uses prom-client for Prometheus-compatible metrics
@@ -147,6 +148,28 @@ register.registerMetric(shiftCompletenessRate);
 /**
  * Get metrics in Prometheus format
  */
+// AGENT-TRACE: Redis X-Fetch metrics
+const xFetchTriggersTotal = new promClient.Gauge({
+  name: "redis_cache_xfetch_triggers_total",
+  help: "Total number of X-Fetch probabilistic early expirations triggered",
+});
+
+const xFetchLatency = new promClient.Histogram({
+  name: "redis_cache_xfetch_latency_ms",
+  help: "Latency of X-Fetch probabilistic early expirations",
+  buckets: [1, 5, 10, 50, 100],
+});
+
+register.registerMetric(xFetchTriggersTotal);
+register.registerMetric(xFetchLatency);
+
 export async function getMetrics(): Promise<string> {
+  try {
+    const stats = await getCacheStats();
+    xFetchTriggersTotal.set(stats.xFetchTriggers || 0);
+  } catch (e) {
+    // Ignore error
+  }
+
   return await register.metrics();
 }

@@ -19,8 +19,10 @@ services:
       - N8N_PROTOCOL=http
       - N8N_CONCURRENCY_PRODUCTION_LIMIT=16
       - N8N_LOG_LEVEL=warn
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
     volumes:
-      - /home/timothy/.n8n:/home/node/.n8n
+      - /home/tim/.n8n:/home/node/.n8n
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1"]
       interval: 10s

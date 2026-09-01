@@ -156,7 +156,7 @@ export const DEPARTMENTS: Department[] = [
     trend: [445, 446, 447, 448, 449, 450, 450, 450],
     actions: [
       { label: "Daily Log", href: "/safety/daily-log" },
-      { label: "Incidents", href: "/safety/daily-log" },
+      { label: "Reports", href: "/safety/reports" },
     ],
   },
   {
@@ -206,8 +206,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "Employees", value: "248" },
     trend: [240, 242, 243, 245, 246, 247, 248, 249],
     actions: [
-      { label: "Personnel", href: "/admin/personnel" },
-      { label: "Shifts", href: "/admin/shifts" },
+      { label: "Users", href: "/admin?tab=users" },
+      { label: "Departments", href: "/admin?tab=departments" },
     ],
   },
 ];

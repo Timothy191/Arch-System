@@ -1,5 +1,6 @@
-import { recordCacheHit, recordCacheMiss, recordRedisError } from "./stats";
+import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from "./stats";
 import { cacheInvalidateTags, cacheInvalidatePrefixes, indexCacheKeyByTags } from "./invalidation";
+import { XFetchWrapper, shouldEarlyExpire } from "./xfetch";
 
 // ------------------------------------------------------------------
 // L1 In-Memory Cache with TTL + LRU eviction
@@ -68,6 +69,13 @@ async function getRedisClientSafe() {
 // Core cache operations with stats
 // ------------------------------------------------------------------
 
+function unwrap<T>(parsed: any): T {
+  if (parsed && typeof parsed === "object" && parsed.__isXFetchWrapper) {
+    return parsed.value;
+  }
+  return parsed;
+}
+
 /**
  * Get a cached value by key.
  * Checks L1 (In-Memory) first for ultra-low latency, then falls back to L2 (Redis).
@@ -77,10 +85,10 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
   const start = performance.now();
 
   // 1. Check L1 Cache (Local Memory) first - speed: < 0.1ms
-  const l1Value = memoryGet<T>(key);
+  const l1Value = memoryGet<any>(key);
   if (l1Value !== null) {
     recordCacheHit("l1", performance.now() - start);
-    return l1Value;
+    return unwrap<T>(l1Value);
   }
 
   // 2. Miss in L1, check L2 Cache (Redis)
@@ -92,12 +100,12 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
     }
     const value = await redis.get(key);
     if (value) {
-      const parsed = JSON.parse(value) as T;
+      const parsed = JSON.parse(value);
 
       // Populate L1 cache with a short TTL (15s) to accelerate subsequent near-term reads
       memorySet(key, parsed, 15);
       recordCacheHit("l2", performance.now() - start);
-      return parsed;
+      return unwrap<T>(parsed);
     }
     recordCacheMiss(performance.now() - start);
     return null;
@@ -117,10 +125,10 @@ export async function cacheGetWithStats<T>(
 ): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
   const start = performance.now();
 
-  const l1Value = memoryGet<T>(key);
+  const l1Value = memoryGet<any>(key);
   if (l1Value !== null) {
     recordCacheHit("l1", performance.now() - start);
-    return { value: l1Value, source: "l1" };
+    return { value: unwrap<T>(l1Value), source: "l1" };
   }
 
   try {
@@ -131,10 +139,10 @@ export async function cacheGetWithStats<T>(
     }
     const value = await redis.get(key);
     if (value) {
-      const parsed = JSON.parse(value) as T;
+      const parsed = JSON.parse(value);
       memorySet(key, parsed, 15);
       recordCacheHit("l2", performance.now() - start);
-      return { value: parsed, source: "l2" };
+      return { value: unwrap<T>(parsed), source: "l2" };
     }
     recordCacheMiss(performance.now() - start);
     return { value: null, source: null };
@@ -142,6 +150,26 @@ export async function cacheGetWithStats<T>(
     recordRedisError();
     recordCacheMiss(performance.now() - start);
     return { value: null, source: null };
+  }
+}
+
+async function cacheGetRaw<T>(key: string): Promise<T | XFetchWrapper<T> | null> {
+  const l1Value = memoryGet<any>(key);
+  if (l1Value !== null) {
+    return l1Value;
+  }
+  try {
+    const redis = await getRedisClientSafe();
+    if (!redis) return null;
+    const value = await redis.get(key);
+    if (value) {
+      const parsed = JSON.parse(value);
+      memorySet(key, parsed, 15);
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 
@@ -192,14 +220,53 @@ export async function cacheWrap<T>(
   fn: () => Promise<T>,
   ttlSeconds: number,
 ): Promise<T> {
-  const cached = await cacheGet<T>(key);
-  if (cached !== null) return cached;
+  const rawCached = await cacheGetRaw<T>(key);
+
+  if (rawCached !== null) {
+    if (typeof rawCached === "object" && (rawCached as any).__isXFetchWrapper) {
+      const wrapper = rawCached as XFetchWrapper<T>;
+      if (shouldEarlyExpire(wrapper)) {
+        if (!activeFetches.has(key)) {
+          const bgStart = performance.now();
+          const activeFetch = fn()
+            .then(async (result) => {
+              const bgDelta = performance.now() - bgStart;
+              const newWrapper: XFetchWrapper<T> = {
+                value: result,
+                ttl: ttlSeconds,
+                delta: bgDelta,
+                computedAt: Date.now(),
+                __isXFetchWrapper: true,
+              };
+              await cacheSet(key, newWrapper, ttlSeconds);
+              return result;
+            })
+            .finally(() => {
+              activeFetches.delete(key);
+            });
+          activeFetches.set(key, activeFetch);
+          recordXFetchTrigger(0); // Optional: latency of trigger logic
+        }
+      }
+      return wrapper.value;
+    }
+    return rawCached as T;
+  }
 
   let activeFetch = activeFetches.get(key);
   if (!activeFetch) {
+    const start = performance.now();
     activeFetch = fn()
       .then(async (result) => {
-        await cacheSet(key, result, ttlSeconds);
+        const delta = performance.now() - start;
+        const wrapper: XFetchWrapper<T> = {
+          value: result,
+          ttl: ttlSeconds,
+          delta,
+          computedAt: Date.now(),
+          __isXFetchWrapper: true,
+        };
+        await cacheSet(key, wrapper, ttlSeconds);
         return result;
       })
       .finally(() => {

@@ -7,6 +7,10 @@ export interface Subtask {
   id: string;
   specialistRole: string;
   instructions: string;
+  steps?: string[];
+  expectation?: string;
+  constraints?: string[];
+  workspaceContext?: string;
   mcpToolsRequired?: string[];
 }
 
@@ -52,7 +56,8 @@ export class SubagentCoordinator {
   }
 
   /**
-   * Run a single specialist subagent with target system role and instructions.
+   * Run a single specialist subagent with target system role and instructions
+   * formatted via the RISEN prompt engineering protocol.
    */
   public async executeSpecialist(
     task: Subtask,
@@ -67,13 +72,28 @@ export class SubagentCoordinator {
       input: {
         role: task.specialistRole,
         instructions: task.instructions,
+        steps: task.steps,
+        expectation: task.expectation,
+        constraints: task.constraints,
       },
       metadata: {
         subtaskId: task.id,
         specialistRole: task.specialistRole,
+        workspaceContext: task.workspaceContext,
         mcpToolsRequired: task.mcpToolsRequired || [],
       },
     });
+
+    const systemPrompt = `<role>
+${task.specialistRole}
+</role>
+<instructions>
+${task.instructions}
+</instructions>
+${task.steps && task.steps.length > 0 ? `<steps>\n${task.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n</steps>` : ""}
+${task.expectation ? `<expectation>\n${task.expectation}\n</expectation>` : "<expectation>\nProvide structured, production-grade output without conversational filler.\n</expectation>"}
+${task.constraints && task.constraints.length > 0 ? `<constraints>\n${task.constraints.map((c) => `- ${c}`).join("\n")}\n</constraints>` : "<constraints>\n- Zero stubs or placeholders.\n- Strict adherence to monorepo and XDG standards.\n</constraints>"}
+${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ""}`;
 
     try {
       const response = await this.openai.chat.completions.create({
@@ -81,11 +101,7 @@ export class SubagentCoordinator {
         messages: [
           {
             role: "system",
-            content: `You are a specialist subagent.
-Role: ${task.specialistRole}
-Instructions: ${task.instructions}
-
-Your objective is to execute the instructions precisely. Output only the clear, structured results of your task without conversational filler.`,
+            content: systemPrompt,
           },
           {
             role: "user",

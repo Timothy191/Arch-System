@@ -21,7 +21,7 @@ const NAV_ITEMS = [
     icon: Radar,
     dept: "control-room",
   },
-  { href: "/executive", label: "Analytics", icon: BarChart3, dept: null },
+  { href: "/hub/executive", label: "Analytics", icon: BarChart3, dept: null },
 ];
 
 interface BottomNavProps {

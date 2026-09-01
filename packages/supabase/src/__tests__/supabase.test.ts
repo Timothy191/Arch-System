@@ -277,9 +277,9 @@ describe("createServerSupabaseClient", () => {
     // Should not throw (called from Server Component context)
   });
 });
+
 describe("getUserSafely", () => {
-  test("returns user when authenticated via getClaims()", async () => {
-    // Per Supabase docs, getClaims() is preferred for identity verification
+  test("returns user when authenticated", async () => {
     const mockClaims = { sub: "user-123", email: "test@example.com" };
     const mockSupabase = {
       auth: {

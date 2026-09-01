@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { GET } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
+  createServerSupabaseClient: jest.fn().mockResolvedValue({}),
   getUserSafely: jest.fn(),
 }));
 
@@ -20,7 +21,7 @@ describe("GET /api/metabase/embed", () => {
   });
 
   it("returns 401 if user is unauthenticated", async () => {
-    getUserSafely.mockResolvedValueOnce({ user: null, error: new Error("No session") });
+    getUserSafely.mockResolvedValueOnce(null);
 
     const req = new NextRequest("http://localhost:3000/api/metabase/embed?dashboardId=1");
     const res = await GET(req);
@@ -31,7 +32,7 @@ describe("GET /api/metabase/embed", () => {
   });
 
   it("returns 400 if dashboardId parameter is missing", async () => {
-    getUserSafely.mockResolvedValueOnce({ user: { id: "usr_123" }, error: null });
+    getUserSafely.mockResolvedValueOnce({ id: "usr_123" });
 
     const req = new NextRequest("http://localhost:3000/api/metabase/embed");
     const res = await GET(req);
@@ -42,11 +43,12 @@ describe("GET /api/metabase/embed", () => {
   });
 
   it("generates a valid signed Metabase iframe URL for authenticated user", async () => {
-    getUserSafely.mockResolvedValueOnce({ user: { id: "usr_123" }, error: null });
+    getUserSafely.mockResolvedValueOnce({ id: "usr_123" });
 
     const req = new NextRequest(
       "http://localhost:3000/api/metabase/embed?dashboardId=42&departmentId=dept_drilling",
     );
+
     const res = await GET(req);
     expect(res.status).toBe(200);
 

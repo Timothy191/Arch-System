@@ -8,8 +8,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/auth/data-access": "workspace:^",
-    "@repo/auth/utils": "workspace:^",
     "@repo/ui": "1.0.0",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",

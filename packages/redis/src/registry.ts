@@ -20,7 +20,7 @@ export const CACHE_TTL_REGISTRY: Record<CacheCategory, CacheTtlConfig> = {
   [CacheCategory.METRICS]: { l1Seconds: 15, l2Seconds: 300 },
   [CacheCategory.SHIFT]: { l1Seconds: 30, l2Seconds: 120 },
   [CacheCategory.AI_MEMORY]: { l1Seconds: 10, l2Seconds: 60 },
-  [CacheCategory.DEPARTMENT]: { l1Seconds: 60, l2Seconds: 3600 },
+  [CacheCategory.DEPARTMENT]: { l1Seconds: 60, l2Seconds: 43200 },
   [CacheCategory.EQUIPMENT]: { l1Seconds: 30, l2Seconds: 300 },
 };
 

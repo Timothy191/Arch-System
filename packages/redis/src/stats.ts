@@ -1,6 +1,7 @@
 import { getRedisClient } from "./client";
 
 interface CacheStatsSnapshot {
+  xFetchTriggers: number;
   hits: number;
   misses: number;
   l1Hits: number;
@@ -50,6 +51,7 @@ function buildSnapshot(): CacheStatsSnapshot {
     redisErrors: stats.redisErrors,
     avgLatencyMs: Math.round(avg * 100) / 100,
     p95LatencyMs: Math.round(computePercentile(sorted, 95) * 100) / 100,
+    xFetchTriggers: globalObj.__cacheStats.xFetchTriggers || 0,
   };
 }
 
@@ -70,6 +72,26 @@ export function recordCacheHit(source: "l1" | "l2", latencyMs: number): void {
           .lPush("stats:latencies", latencyMs.toString())
           .then(() => {
             redis.lTrim("stats:latencies", 0, 999).catch(() => {});
+          })
+          .catch(() => {});
+      }
+    })
+    .catch(() => {});
+}
+
+export function recordXFetchTrigger(latencyMs: number): void {
+  // 1. Local update
+  globalObj.__cacheStats.xFetchTriggers = (globalObj.__cacheStats.xFetchTriggers || 0) + 1;
+
+  // 2. Redis sync
+  getRedisClient()
+    .then((redis) => {
+      if (redis?.isOpen) {
+        redis.hIncrBy("stats:cache", "xFetchTriggers", 1).catch(() => {});
+        redis
+          .lPush("stats:xfetch_latencies", latencyMs.toString())
+          .then(() => {
+            redis.lTrim("stats:xfetch_latencies", 0, 999).catch(() => {});
           })
           .catch(() => {});
       }
@@ -133,6 +155,7 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
         redisErrors: parseInt(data.redisErrors || "0", 10),
         avgLatencyMs: Math.round(avg * 100) / 100,
         p95LatencyMs: Math.round(computePercentile(sorted, 95) * 100) / 100,
+        xFetchTriggers: parseInt(data.xFetchTriggers || "0", 10),
       };
     }
   } catch {
@@ -147,6 +170,7 @@ export function resetCacheStats(): void {
   stats.l1Hits = 0;
   stats.l2Hits = 0;
   stats.redisErrors = 0;
+  stats.xFetchTriggers = 0;
   latencies.length = 0;
 
   getRedisClient()

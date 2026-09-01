@@ -7,4 +7,5 @@ module.exports = {
   moduleNameMapper: {
     "^@repo/(.*)$": "<rootDir>/../$1/src",
   },
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
 };

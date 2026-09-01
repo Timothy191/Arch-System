@@ -178,6 +178,14 @@ MANIFEST
   echo -e "  ${BOLD}Data:${NC}       ${DATA_FILE} (${DATA_SIZE})"
   echo -e "  ${BOLD}Manifest:${NC}   ${MANIFEST_FILE}"
   echo
+  
+  # --- Retention Policy ---
+  header "Retention Policy (7 Days)"
+  log "Cleaning up backups older than 7 days..."
+  find "$BACKUP_DIR" -type f -name 'backup-*' -mtime +7 -delete
+  ok "Cleanup complete"
+
+  echo
   echo -e "  ${GREEN}${BOLD}✓ Backup completed successfully${NC}"
   echo
 }

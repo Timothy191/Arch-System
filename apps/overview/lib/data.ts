@@ -379,6 +379,16 @@ export const DEPARTMENTS = [
         description: "Card print queue and batch status",
       },
       {
+        path: "/access-card-actions/print-cards",
+        name: "Print Cards",
+        description: "Industrial card print jobs and batch queues",
+      },
+      {
+        path: "/access-card-actions/qr-codes",
+        name: "QR Codes",
+        description: "Batch QR generation and encoding",
+      },
+      {
         path: "/access-card-actions/daily-log",
         name: "Daily Log",
         description: "Card issuance logs and audit records",

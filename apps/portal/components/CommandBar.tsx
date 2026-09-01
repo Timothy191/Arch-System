@@ -23,6 +23,8 @@ import {
   LogOut,
   User,
   Bot,
+  CreditCard,
+  Activity,
 } from "lucide-react";
 
 interface CommandItem {
@@ -36,6 +38,13 @@ interface CommandItem {
 }
 
 const DEPARTMENT_COMMANDS: CommandItem[] = [
+  {
+    id: "dept-overview",
+    label: "System Overview",
+    href: "/overview",
+    category: "Departments",
+    icon: <Activity className="w-4 h-4" />,
+  },
   {
     id: "dept-drilling",
     label: "Drilling Operations",
@@ -79,6 +88,13 @@ const DEPARTMENT_COMMANDS: CommandItem[] = [
     icon: <ShieldCheck className="w-4 h-4" />,
   },
   {
+    id: "dept-access-cards",
+    label: "Access Card Actions",
+    href: "/access-card-actions",
+    category: "Departments",
+    icon: <CreditCard className="w-4 h-4" />,
+  },
+  {
     id: "dept-training",
     label: "Training",
     href: "/training",
@@ -91,6 +107,13 @@ const DEPARTMENT_COMMANDS: CommandItem[] = [
     href: "/satellite-monitoring",
     category: "Departments",
     icon: <Satellite className="w-4 h-4" />,
+  },
+  {
+    id: "dept-admin",
+    label: "Admin Management",
+    href: "/admin",
+    category: "Departments",
+    icon: <ShieldCheck className="w-4 h-4" />,
   },
 ];
 

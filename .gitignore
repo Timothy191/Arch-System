@@ -152,6 +152,7 @@ fallow_output.txt
 .poolside/
 .project/
 .memory/
+.codebase-memory/
 
 # Nx cache & workspace runtime data
 .nx/cache/

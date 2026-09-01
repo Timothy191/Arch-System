@@ -2,7 +2,9 @@
  * Arch System — Reset & Utility Styles
  */
 
-* {
+*,
+::before,
+::after {
   @apply border-border;
 }
 

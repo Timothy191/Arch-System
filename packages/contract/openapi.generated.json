@@ -659,7 +659,7 @@
     "/api/telemetry/push": {
       "post": {
         "summary": "Push telemetry data to SCADA",
-        "description": "Forward machine telemetry to FUXA SCADA server with two-level caching (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates. Deduplicates unchanged values.",
+        "description": "Store machine telemetry in the Redis cache (system of record) for FUXA to pull via /api/scada/tags (reverse-flow ingest). Two-level dedup (in-memory + Redis). Accepts Supabase webhook payloads or direct tag updates.",
         "tags": ["Telemetry"],
         "requestBody": {
           "required": true,
@@ -779,7 +779,7 @@
             "description": "Invalid request body"
           },
           "500": {
-            "description": "Internal server error or SCADA unreachable"
+            "description": "Internal server error"
           }
         }
       }
@@ -937,6 +937,56 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/scada/tags": {
+      "get": {
+        "summary": "FUXA WebAPI tag source (reverse-flow ingest)",
+        "description": "Serves the current telemetry tag values from the Redis cache in the FUXA WebAPI device shape (`[{id,name,value,type}]`). FUXA polls this endpoint via its WebAPI device `getTags` URL — FUXA exposes no /api/tag write endpoint, so ingest is pull-based (D2-a).",
+        "tags": ["SCADA"],
+        "responses": {
+          "200": {
+            "description": "FUXA WebAPI tag array",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "oneOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": ["number", "string"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to read SCADA tags"
           }
         }
       }

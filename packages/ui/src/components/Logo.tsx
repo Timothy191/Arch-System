@@ -5,7 +5,7 @@ interface LogoProps {
   variant?: "default" | "focus";
 }
 
-export function Logo({ className, variant = "default" }: LogoProps) {
+export function Logo({ className, variant: _variant = "default" }: LogoProps) {
   // AGENT-TRACE: Vector logo rendering the official Arch OS scalable symbol
   return (
     <svg
