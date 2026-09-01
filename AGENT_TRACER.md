@@ -6,6 +6,27 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 
 ---
 
+## 2026-09-01 — Portal Department Linkage Audit & Route Rectification
+
+- **Purpose**: Comprehensive audit and rectification of department routes, quick actions, command bar shortcuts, and navigation links across `apps/portal` and `libs/features`.
+- **Changes**:
+  - `libs/features/departments/data-access/src/departments.ts`: Fixed `safety` department quick actions (`/safety/daily-log` + `/safety/reports`) and `admin` quick actions (`/admin?tab=users` + `/admin?tab=departments`).
+  - `apps/portal/components/nav/BottomNav.tsx`: Fixed Analytics link from broken `/executive` to canonical `/hub/executive`.
+  - `apps/portal/app/(departments)/[department]/satellite/page.tsx`: Updated Executive Hub link from raw `<a>` with broken href to Next.js `<Link href="/hub/executive">`.
+  - `apps/portal/components/CommandBar.tsx`: Added missing department commands (`/access-card-actions`, `/overview`, `/admin`) with proper Lucide icons.
+  - `apps/overview/lib/data.ts`: Synchronized `access-card-actions` routes in system topology dataset.
+  - `apps/portal/app/api/metabase/embed/route.test.ts`: Fixed `@repo/supabase/server` Jest mock to include `createServerSupabaseClient` and typed `getUserSafely` response.
+  - `libs/features/departments/data-access/src/departments.test.ts` (NEW): Added comprehensive unit tests asserting route, name, and action uniqueness and formatting.
+- **Verification**: `pnpm nx run-many -t test` ✅ (All 8 workspace test suites passed).
+- **What the Next Agent Should Know**: Department routes are 100% verified across Hub, CommandBar, BottomNav, and System Overview.
+
+## 2026-08-31 — Adaptive Probabilistic Early Expiration (X-Fetch) Requirements Plan (`docs/plans`)
+
+- **Purpose**: Authored requirements-only unified plan for the X-Fetch probabilistic early expiration algorithm in `packages/redis`.
+- **Changes**:
+  - `docs/plans/2026-08-31-x-fetch-early-expiration-requirements.md` (NEW): Established product contract, mathematical formulation ($-\beta \cdot \delta \cdot \ln(\text{rand}()) > \text{TTL}_{\text{remaining}}$), single-flight background recomputation requirements, and Prometheus observability metrics.
+- **What the Next Agent Should Know**: Next step is to invoke `ce-plan` to enrich this artifact with implementation details (`artifact_readiness: implementation-ready`).
+
 ## 2026-08-31 — Documentation Health: Coverage Thresholds, Department Manuals & Dual-Root Clarification
 
 - **Branch**: `docs/fix-coverage-thresholds-and-dept-manuals`
@@ -234,3 +255,32 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - `packages/supabase/seed.sql`: Null-guard on `hourly_loads.machine_id` constraint.
   - `~/.local/bin/supabase` (NEW): XDG launcher for Supabase CLI binary.
   - `.gitignore`: `certs/` excluded.
+
+## 2026-09-01 — Documentation Specialist Agent Deployment & Complete Docs Harmonization
+
+- **Author**: Antigravity Documentation Specialist Agent
+- **Mandate**: Review, audit, fully update, and harmonize all documentation across `docs/`, `documentation/`, and Rule 10 living system repositories.
+- **Changes**:
+  - `.agents/skills/documentation-specialist/` (NEW): Production-grade documentation specialist skill and framework.
+  - `system-wiki/` (NEW): Living system architecture, runtime guidelines, environment configs, and department domain workflows (Rule 10 compliance).
+  - `agentic-system-wiki/` (UPDATED): Living multi-agent protocols, 4-agent critique council contracts, MCP integrations, and skill registry (Rule 10 compliance).
+  - `storybook/` (NEW): Living UI component states, OKLCH visual contracts, and accessibility test specifications (Rule 10 compliance).
+  - `documentation/` (EXPANDED): Full structure populated with index READMEs across all categories (`00-core`, `01-operations`, `05-wiki`, `06-archives`, `08-guides`, `09-tools`, `10-references`).
+  - `docs/DOCUMENTATION_INDEX.md`: Updated directory topology, fixed invalid relative paths, corrected project nomenclature, and synchronized quick lookup references.
+  - `docs/wiki/`: Eliminated stale `file://` URIs and normalized relative markdown links across `quick-reference.md`, `project-overview.md`, `nx-monorepo.md`, and `breakdown/`.
+  - `docs/DEPLOYMENT.md` & `docs/archive/LIQUID_GLASS_CHECKLIST.md`: Corrected relative target links.
+- **Verification**: Complete link sweep script passed with 0 unresolved paths. Rule 10 repositories verified.
+
+## 2026-09-01 — Agentic System Expert Deployment, Prompt Engineering Rule & Quality Gate Remediation
+
+- **Author**: Antigravity Multi-Agent Orchestrator
+- **Mandate**: Deploy Agentic System Expert skill, codify prompt engineering rules (RISEN framework), execute Option 1 (pnpm quality), Option 2 (domain workflows), and Option 3 (SVG codebase generator).
+- **Changes**:
+  - `.agents/skills/agentic-system-expert/` (NEW): Specialization framework for multi-agent coordination, MCP tool integration, and Langfuse tracing.
+  - `.agents/rules/agent-prompting-engineering.md` (NEW): Comprehensive RISEN prompt engineering rules for agent/subagent prompting.
+  - `apps/portal/lib/observability/metrics.ts`: Fixed broken deep import `@repo/redis/src/stats` -> `@repo/redis`.
+  - `packages/redis/jest.config.js`: Corrected test runner to use `@swc/jest` instead of missing `ts-jest` preset.
+  - `packages/redis/tests/cache.test.ts`: Calibrated computation delta for probabilistic X-Fetch early expiration tests.
+  - `apps/portal/app/api/metabase/embed/route.test.ts`: Fixed `getUserSafely` and `createServerSupabaseClient` mock signatures.
+  - `project-words.txt`: Added domain words (`xfetch`, `distroless`, `httpx`, `smol`) for zero-warning CSpell validation.
+- **Verification**: `pnpm quality` executed across all 27 monorepo projects with 100% passing tests and exit code 0.

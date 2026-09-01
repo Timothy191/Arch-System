@@ -1,5 +1,21 @@
 # Portal Agent Tracer
 
+## Session 2026-09-01 (Department Routing, Link Integrity & Metabase Test Mock Fix)
+
+- **Purpose**: Audit and rectify department route linkages across the portal (Hub, CommandBar, BottomNav, subviews) and fix pre-existing Jest mock failure in metabase embed route.
+- **Changes**:
+  - `libs/features/departments/data-access/src/departments.ts`: Fixed `safety` quick actions (`/safety/daily-log` + `/safety/reports`), and `admin` quick actions (`/admin?tab=users` + `/admin?tab=departments`).
+  - `apps/portal/components/nav/BottomNav.tsx`: Corrected Analytics link from broken `/executive` to `/hub/executive`.
+  - `apps/portal/app/(departments)/[department]/satellite/page.tsx`: Replaced raw `<a>` with Next.js `<Link>` pointing to `/hub/executive`.
+  - `apps/portal/components/CommandBar.tsx`: Added missing department commands (`/access-card-actions`, `/overview`, `/admin`) with proper Lucide icons.
+  - `apps/overview/lib/data.ts`: Synchronized `access-card-actions` routes to include `/access-card-actions/print-cards` and `/access-card-actions/qr-codes`.
+  - `apps/portal/app/api/metabase/embed/route.test.ts`: Fixed `@repo/supabase/server` Jest mock to include `createServerSupabaseClient` and typed `getUserSafely` response.
+  - `libs/features/departments/data-access/src/departments.test.ts` (NEW): Added comprehensive unit tests asserting route, name, and action uniqueness and formatting.
+- **Verification**:
+  - `pnpm --filter portal test app/api/metabase/embed/route.test.ts` ✅ (3/3 passed)
+  - `pnpm nx run-many -t test` ✅ (All 8 workspace test suites passed)
+- **What the Next Agent Should Know**: All department routes and subview actions across Hub, Navigation, CommandBar, and System Overview are 100% verified and synchronized.
+
 ## Session 2026-08-31 (Background Video 4K Asset Replacement & Documentation Alignment)
 
 - **Purpose**: Remove downscaled 1080p background video and replace with native 4K asset `edge-of-the-event-horizon.3840x2160.mp4` across portal components, public directories, and documentation.
@@ -3482,3 +3498,9 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
 - **Fix**: Added `test.use({ storageState: { cookies: [], origins: [] } })` at the top of the spec (mirrors the existing pattern in `e2e/login.spec.ts:3`) so it runs unauthenticated and stays on `/login`. Verified the spec now captures the real login page (full page 819px, form card 314x300) instead of the 3023px dashboard.
 - **Remaining (separate, expected)**: The login baselines (`login-full.png`, `login-form-card.png`, `login-form-filled.png`) are stale vs the current login UI (form 300px vs 457px baseline; page 819px vs 1009px). These are legitimate baseline drift, NOT the redirect bug. Regenerate with `pnpm test:e2e:visual -- --update-snapshots` once the working tree normalizes (e.g. after the clock work is committed) so the new baselines reflect the intended login UI and don't bake in arbitrary WIP state.
 - **Status**: RCA + fix complete. Baseline regen deferred (decision pending tree normalization).
+
+## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit
+
+- **Agent**: Antigravity
+- **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
+- **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
