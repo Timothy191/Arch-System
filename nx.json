@@ -126,7 +126,16 @@
         "region": "{env.NXCACHE_S3_REGION}",
         "forcePathStyle": true,
         "read": true,
-        "write": true
+        "write": true,
+        "cacheDirectory": "{workspaceRoot}/.nx/cache"
+      }
+    },
+    "local": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheDirectory": "{workspaceRoot}/.nx/cache",
+        "parallel": 3,
+        "cacheableOperations": ["build", "lint", "test", "type-check"]
       }
     }
   },

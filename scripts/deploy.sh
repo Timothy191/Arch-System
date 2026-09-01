@@ -715,13 +715,23 @@ phase_stop_services() {
 phase_build() {
   [ "$SKIP_BUILD" = true ] && return 0
   
-  phase "5. BUILDING APPLICATION"
+  phase "5. BUILDING APPLICATION (Nx Pipeline)"
   
   run_if_not_dry cd "$REPO_ROOT"
   
   log "Installing dependencies..."
   run_if_not_dry pnpm install --frozen-lockfile
   success "Dependencies installed"
+  
+  # AGENT-TRACE: Run Nx quality gates before build — lint, type-check, and
+  # dependency graph validation are cached by Nx and only re-run on change.
+  log "Running Nx quality gates (lint + type-check)..."
+  run_if_not_dry pnpm nx run-many -t lint type-check --exclude=portal
+  success "Quality gates passed"
+  
+  log "Building all workspace packages via Nx..."
+  run_if_not_dry pnpm nx run-many -t build --exclude=portal --parallel
+  success "Workspace packages built"
   
   log "Building portal..."
   run_if_not_dry pnpm nx build portal
@@ -842,7 +852,13 @@ phase_deploy_portal() {
       run_if_not_dry cd "$PORTAL_DIR"
       
       if [ "$DRY_RUN" = false ]; then
-        HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/run/portal.log" 2>&1 &
+        if [ -f "$PORTAL_DIR/.next/standalone/apps/portal/server.js" ]; then
+          HOSTNAME=0.0.0.0 PORT=$PORT node "$PORTAL_DIR/.next/standalone/apps/portal/server.js" > "$REPO_ROOT/run/portal.log" 2>&1 &
+        elif [ -f "$PORTAL_DIR/.next/standalone/server.js" ]; then
+          HOSTNAME=0.0.0.0 PORT=$PORT node "$PORTAL_DIR/.next/standalone/server.js" > "$REPO_ROOT/run/portal.log" 2>&1 &
+        else
+          HOSTNAME=0.0.0.0 PORT=$PORT pnpm start > "$REPO_ROOT/run/portal.log" 2>&1 &
+        fi
         echo $! > "$REPO_ROOT/run/.portal.pid"
       fi
       

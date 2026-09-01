@@ -2,8 +2,9 @@
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
+# AGENT-TRACE: NX_NO_CLOUD uses local S3 remote cache (nx-remotecache-s3 runner).
+# NX_DAEMON enabled for persistent task graph, file watching, and caching.
 export NX_NO_CLOUD=true
-export NX_DAEMON=false
 
 # Prevent infinite hangs when probing health endpoints
 curl() {
@@ -884,11 +885,18 @@ phase 3 "Portal"
 if [ "${SKIP_RESTART:-false}" = "true" ]; then
   check "Dev server" "pass" "http://localhost:$PORT (already up)"
 else
+  # AGENT-TRACE: Build all workspace dependencies via Nx before starting dev server.
+  # Nx caches builds across packages — only rebuilds what changed.
+  echo -e "  ${INFO} Building workspace dependencies via Nx (cached)..."
+  pnpm nx run-many -t build --exclude=portal --parallel 2>/dev/null && \
+    check "Workspace deps" "pass" "Nx build cached" || \
+    check "Workspace deps" "warn" "build had warnings — proceeding anyway"
+
   cd "$REPO_ROOT/apps/portal"
   PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! > "$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
-  echo -e "  ${INFO} Starting Next.js dev server..."
+  echo -e "  ${INFO} Starting Next.js dev server (via pnpm dev → Turbopack)..."
 
   compiled=false
   for i in $(seq 1 120); do
