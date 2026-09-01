@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
@@ -636,7 +636,7 @@ export function ServerHealthRow({
   );
 }
 
-export function OfflineQueueRow() {
+function OfflineQueueRow() {
   const { pendingCount, isOnline, isSyncing, flushQueue } = useFetchOfflineQueue();
 
   if (pendingCount === 0 && isOnline) return null;
@@ -673,7 +673,7 @@ export function OfflineQueueRow() {
 
 /* ─────────────────────────── SystemTrayPill ─────────────────────────── */
 
-export function SystemTrayPill() {
+export const SystemTrayPill = React.memo(function SystemTrayPill() {
   const network = useNetworkStatus();
   const battery = useBatteryStatus();
   const volume = useAppVolume();
@@ -830,4 +830,4 @@ export function SystemTrayPill() {
       </Popover.Root>
     </div>
   );
-}
+});

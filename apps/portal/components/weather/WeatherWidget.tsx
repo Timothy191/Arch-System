@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
 import { GlassCard } from "@repo/ui/GlassCard";
@@ -15,7 +15,7 @@ interface WeatherWidgetProps {
   variant?: "compact" | "full" | "header";
 }
 
-export function WeatherWidget({
+export const WeatherWidget = React.memo(function WeatherWidget({
   lat = -26.35914,
   lon = 28.79267,
   locationName = "Delmas, Mpumalanga",
@@ -279,4 +279,4 @@ export function WeatherWidget({
       </div>
     </GlassCard>
   );
-}
+});

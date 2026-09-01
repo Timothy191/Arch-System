@@ -1,0 +1,80 @@
+/* ─── Accessibility Styles (WCAG 2.1 AA) ─── */
+
+/* Focus visible indicators for keyboard navigation (WCAG 2.4.7) */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip link styles (WCAG 2.4.1) */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(-100%);
+  z-index: 9999;
+  padding: 12px 24px;
+  background-color: var(--accent-blue, #3b82f6);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  *:focus-visible {
+    outline: 2px solid ButtonText;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Screen reader only content (visually hidden but accessible) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus trap for modals */
+[aria-modal="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+/* Ensure proper color contrast for interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  color-scheme: light dark;
+}

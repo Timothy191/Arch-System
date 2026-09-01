@@ -93,10 +93,10 @@ module.exports = {
   // features/**) rather than logic. Raise these as UI tests are added.
   coverageThreshold: {
     global: {
-      lines: 35,
-      branches: 24,
-      functions: 24,
-      statements: 34,
+      lines: 40,
+      branches: 30,
+      functions: 30,
+      statements: 40,
     },
   },
 };

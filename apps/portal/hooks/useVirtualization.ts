@@ -16,7 +16,7 @@ interface UseVirtualizationResult {
   }>;
   totalHeight: number;
   scrollToIndex: (_index: number) => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 /**

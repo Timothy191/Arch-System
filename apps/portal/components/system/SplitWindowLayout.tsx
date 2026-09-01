@@ -37,7 +37,9 @@ const SERVICE_META: Record<
 
 /* ─────────────────────────── SplitWindowLayout ─────────────────────────── */
 
-export function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
+export const SplitWindowLayout = React.memo(function SplitWindowLayout({
+  children,
+}: SplitWindowLayoutProps) {
   const { isOpen, tabs, activeTabId, openTab, closeTab, activateTab, closeAll } = useSplitWindow();
 
   // Listen to custom window events dispatched from the navigation taskbar
@@ -145,7 +147,7 @@ export function SplitWindowLayout({ children }: SplitWindowLayoutProps) {
       </div>
     </div>
   );
-}
+});
 
 /* ─────────────────────────── GitHub Mock View ─────────────────────────── */
 

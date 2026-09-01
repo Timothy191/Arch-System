@@ -63,8 +63,12 @@ export function FocusManager({
 
         if (focusableElements.length === 0) return;
 
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
+        const firstElement = focusableElements[0] as HTMLElement | undefined;
+        const lastElement = focusableElements[focusableElements.length - 1] as
+          | HTMLElement
+          | undefined;
+
+        if (!firstElement || !lastElement) return;
 
         // Shift + Tab: If on first element, move to last
         if (event.shiftKey) {

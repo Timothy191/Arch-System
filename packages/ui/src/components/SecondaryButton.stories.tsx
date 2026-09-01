@@ -4,9 +4,7 @@ import { SecondaryButton } from "./SecondaryButton";
 const meta: Meta<typeof SecondaryButton> = {
   title: "Components/SecondaryButton",
   component: SecondaryButton,
-  parameters: {
-    layout: "centered",
-  },
+  tags: ["autodocs"],
   argTypes: {
     size: {
       control: "select",
@@ -16,41 +14,36 @@ const meta: Meta<typeof SecondaryButton> = {
       control: "select",
       options: ["default", "rounded-lg"],
     },
-    disabled: {
-      control: "boolean",
-    },
+    disabled: { control: "boolean" },
   },
 };
 
 export default meta;
-
 type Story = StoryObj<typeof SecondaryButton>;
 
 export const Default: Story = {
   args: {
-    children: "Action Button",
-    size: "default",
-    variant: "default",
+    children: "Secondary Button",
   },
 };
 
 export const Small: Story = {
   args: {
-    children: "Small Action",
     size: "sm",
+    children: "Small Button",
   },
 };
 
-export const RoundedLg: Story = {
+export const RoundedCorners: Story = {
   args: {
-    children: "Square-ish Button",
     variant: "rounded-lg",
+    children: "Rounded Button",
   },
 };
 
 export const Disabled: Story = {
   args: {
-    children: "Disabled State",
     disabled: true,
+    children: "Disabled Button",
   },
 };
