@@ -3,6 +3,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { User } from "@supabase/supabase-js";
 
+import { serverLogger } from "@repo/logger";
+
 export async function instrumentedFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -39,9 +41,25 @@ export async function instrumentedFetch(
       }
     }
 
-    const recordDbQuery = (globalThis as any).__recordDbQuery;
-    if (typeof recordDbQuery === "function") {
-      recordDbQuery(tableName, method, duration, success);
+    const logData = {
+      tableName,
+      method,
+      durationMs: Math.round(duration),
+      success,
+    };
+
+    if (duration > 500) {
+      serverLogger.warn(
+        logData,
+        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`,
+      );
+    } else if (!success) {
+      serverLogger.error(logData, `Database query failed: ${tableName} (${method})`);
+    } else {
+      serverLogger.debug(
+        logData,
+        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`,
+      );
     }
   }
 }
@@ -85,20 +103,39 @@ export async function createServerSupabaseClient() {
 }
 
 /**
- * Safely gets the current user from Supabase auth, handling refresh token errors gracefully.
- * Returns null if the user is not authenticated or if a refresh token error occurs.
- * This prevents "AuthApiError: Invalid Refresh Token: Refresh Token Not Found" errors
- * from crashing server components.
+ * Safely gets the current user from Supabase auth using getClaims().
+ *
+ * Per Supabase official docs (https://supabase.com/docs/guides/auth/server-side/creating-a-client):
+ * - Use getClaims() to protect pages and user data (verifies JWT signature locally)
+ * - getUser() makes a network call and should only be used when you need fresh user data
+ * - getSession() should not be trusted for authorization decisions
+ *
+ * getClaims() is preferred because it:
+ * - Validates JWT signature against published public keys
+ * - Works locally via WebCrypto API (faster, no network call)
+ * - Returns claims from decoding the JWT, not from a user lookup
+ *
+ * Returns null if the user is not authenticated or if token validation fails.
  */
 export async function getUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
 ): Promise<User | null> {
   try {
-    const result = await supabase.auth.getUser();
-    return result.data.user ?? null;
+    // Use getClaims() for identity verification (recommended by Supabase docs)
+    // This validates the JWT signature locally without making a network call
+    const { data, error } = await supabase.auth.getClaims();
+
+    if (error || !data) {
+      return null;
+    }
+
+    // getClaims() returns JWT claims, not the full User object
+    // If you need the full User object, use getUser() instead
+    // For most authorization purposes, the claims are sufficient
+    return data as unknown as User;
   } catch (error) {
-    // Handle refresh token errors - treat as no user
-    // This can happen when the access token is expired and refresh token is invalid/missing
+    // Handle token validation errors gracefully
+    // This can happen when the token is invalid, expired, or malformed
     return null;
   }
 }

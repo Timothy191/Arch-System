@@ -1,7 +1,8 @@
 export { createBrowserSupabaseClient } from "./client";
-export { createMiddlewareClient } from "./middleware";
+export { createMiddlewareClient, refreshSession } from "./middleware";
 export { withSpan } from "./tracing";
-export { getUserSafely } from "./server";
+export { getUserSafely, createServerSupabaseClient, instrumentedFetch } from "./server";
+export { updateSession, createProxyClient } from "./proxy";
 // Database types - Database is a stub until supabase:gen can run against local DB
 export type { Database } from "./database.types";
 // Json and manual table types from manual-types.ts (tables exist in migrations)

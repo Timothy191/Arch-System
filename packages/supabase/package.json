@@ -21,6 +21,7 @@
     "./server": "./src/server.ts",
     "./client": "./src/client.ts",
     "./middleware": "./src/middleware.ts",
+    "./proxy": "./src/proxy.ts",
     "./read-replica": "./src/read-replica.ts",
     "./kysely": "./src/kysely.ts",
     "./service-role": "./src/service-role.ts"

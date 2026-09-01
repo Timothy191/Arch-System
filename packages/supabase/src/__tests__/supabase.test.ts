@@ -277,26 +277,26 @@ describe("createServerSupabaseClient", () => {
     // Should not throw (called from Server Component context)
   });
 });
-
 describe("getUserSafely", () => {
-  test("returns user when authenticated", async () => {
-    const mockUser = { id: "user-123", email: "test@example.com" };
+  test("returns user when authenticated via getClaims()", async () => {
+    // Per Supabase docs, getClaims() is preferred for identity verification
+    const mockClaims = { sub: "user-123", email: "test@example.com" };
     const mockSupabase = {
       auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: mockUser }, error: null }),
+        getClaims: jest.fn().mockResolvedValue({ data: mockClaims, error: null }),
       },
     };
 
     const result = await getUserSafely(mockSupabase as any);
 
-    expect(result).toEqual(mockUser);
-    expect(mockSupabase.auth.getUser).toHaveBeenCalled();
+    expect(result).toEqual(mockClaims);
+    expect(mockSupabase.auth.getClaims).toHaveBeenCalled();
   });
 
   test("returns null when not authenticated", async () => {
     const mockSupabase = {
       auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+        getClaims: jest.fn().mockResolvedValue({ data: null, error: null }),
       },
     };
 
@@ -305,24 +305,10 @@ describe("getUserSafely", () => {
     expect(result).toBeNull();
   });
 
-  test("returns null on refresh token error", async () => {
+  test("returns null on token validation error", async () => {
     const mockSupabase = {
       auth: {
-        getUser: jest
-          .fn()
-          .mockRejectedValue(new Error("Invalid Refresh Token: Refresh Token Not Found")),
-      },
-    };
-
-    const result = await getUserSafely(mockSupabase as any);
-
-    expect(result).toBeNull();
-  });
-
-  test("returns null on auth API error", async () => {
-    const mockSupabase = {
-      auth: {
-        getUser: jest.fn().mockRejectedValue(new Error("AuthApiError: Token expired")),
+        getClaims: jest.fn().mockResolvedValue({ data: null, error: { message: "Invalid token" } }),
       },
     };
 
@@ -334,7 +320,7 @@ describe("getUserSafely", () => {
   test("returns null on network error", async () => {
     const mockSupabase = {
       auth: {
-        getUser: jest.fn().mockRejectedValue(new Error("Network request failed")),
+        getClaims: jest.fn().mockRejectedValue(new Error("Network request failed")),
       },
     };
 
@@ -343,10 +329,12 @@ describe("getUserSafely", () => {
     expect(result).toBeNull();
   });
 
-  test("handles undefined user gracefully", async () => {
+  test("handles JWT validation failure gracefully", async () => {
     const mockSupabase = {
       auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: undefined }, error: null }),
+        getClaims: jest
+          .fn()
+          .mockResolvedValue({ data: null, error: { message: "JWT validation failed" } }),
       },
     };
 

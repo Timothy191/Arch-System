@@ -1,6 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Creates a Supabase client for use in Next.js middleware.
+ *
+ * Per Supabase official docs (https://supabase.com/docs/guides/auth/server-side/creating-a-client):
+ * - Use getClaims() to verify identity (validates JWT signature locally)
+ * - Use getUser() only when you need fresh user data from Auth server
+ * - Never trust getSession() for authorization decisions
+ */
 export async function createMiddlewareClient(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -43,4 +51,30 @@ export async function createMiddlewareClient(request: NextRequest) {
       return supabaseResponse;
     },
   };
+}
+
+/**
+ * Refreshes the session token using getClaims().
+ *
+ * Per Supabase docs, this should be called in middleware to:
+ * 1. Validate the JWT signature
+ * 2. Refresh the token if needed
+ * 3. Update cookies for both server and browser
+ */
+export async function refreshSession(supabase: ReturnType<typeof createServerClient>) {
+  try {
+    // Use getClaims() to validate and refresh the token
+    // This is preferred over getSession() which doesn't guarantee revalidation
+    const { error } = await supabase.auth.getClaims();
+
+    if (error) {
+      console.error("Session refresh failed:", error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Unexpected error during session refresh:", err);
+    return false;
+  }
 }
