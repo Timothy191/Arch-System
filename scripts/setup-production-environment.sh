@@ -385,9 +385,11 @@ setup_environment() {
   success "Environment file created: $ENV_TARGET"
 
   log "Verifying environment variables..."
+  # Per Supabase docs: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is preferred
+  # Fall back to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   local required_vars=(
     "NEXT_PUBLIC_SUPABASE_URL"
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
     "SUPABASE_SERVICE_KEY"
     "DATABASE_URL"
   )

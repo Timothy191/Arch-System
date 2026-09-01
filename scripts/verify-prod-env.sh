@@ -90,12 +90,12 @@ else
     log_fail "NEXT_PUBLIC_SUPABASE_URL must be a valid HTTP/HTTPS URL: $SUPA_URL"
   fi
 
-  # Check Supabase Anon Key
-  SUPA_ANON="${ENV_NEXT_PUBLIC_SUPABASE_ANON_KEY:-${ENV_SUPABASE_ANON_KEY:-}}"
+  # Check Supabase Anon Key (per Supabase docs: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+  SUPA_ANON="${ENV_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-${ENV_NEXT_PUBLIC_SUPABASE_ANON_KEY:-${ENV_SUPABASE_PUBLISHABLE_KEY:-${ENV_SUPABASE_ANON_KEY:-}}}}"
   if [ -z "$SUPA_ANON" ] || [[ "$SUPA_ANON" == *"your_supabase_anon_key"* ]] || [[ "$SUPA_ANON" == *"<your-anon-key>"* ]]; then
-    log_fail "NEXT_PUBLIC_SUPABASE_ANON_KEY is missing or contains placeholder text"
+    log_fail "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY) is missing or contains placeholder text"
   else
-    log_pass "NEXT_PUBLIC_SUPABASE_ANON_KEY is present"
+    log_pass "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is present"
   fi
 
   # Check Supabase Service Key

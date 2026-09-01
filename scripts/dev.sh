@@ -40,9 +40,10 @@ WARN="${YELLOW}${BOLD}WARN${NC}"
 INFO="${BLUE}${BOLD}INFO${NC}"
 SUPABASE_URL=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
-# Anon key: .env defines NEXT_PUBLIC_SUPABASE_ANON_KEY (client-safe, public). Fall back to
-# the non-prefixed name for older setups. Never log the value — only presence/absence.
-SUPABASE_ANON_KEY=$(grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+# Anon key: .env defines NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (per Supabase docs).
+# Fall back to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility.
+# Never log the value — only presence/absence.
+SUPABASE_ANON_KEY=$(grep '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_PUBLISHABLE_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 HOSTED_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
 
 # ── Redirect & Watchdog Setup ───────────────────────────
