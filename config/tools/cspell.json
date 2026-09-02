@@ -4,7 +4,7 @@
   "dictionaryDefinitions": [
     {
       "name": "project-words",
-      "path": "./project-words.txt"
+      "path": "../project-words.txt"
     }
   ],
   "dictionaries": ["project-words"],
@@ -58,6 +58,10 @@
     "Pragnanz",
     "normalise",
     "handdrawn",
-    "synthesised"
+    "synthesised",
+    "xfetch",
+    "distroless",
+    "httpx",
+    "smol"
   ]
 }

@@ -1,10 +1,10 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-09-01T08:08:02.986Z
+Generated on 2026-09-02T05:05:46.036Z
 
 ## Summary
 - **Database Tables Scanned**: 86
-- **Zod Contract Schemas**: 66
+- **Zod Contract Schemas**: 63
 - **Domain Contract Sync Coverage**: 31.4%
 
 ## Synchronized Domain Contracts (27 Tables)

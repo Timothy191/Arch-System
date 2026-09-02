@@ -1,0 +1,1 @@
+- **Workflow Separation**: Creating a requirements-only unified plan artifact during ce-brainstorm ensures implementation details (such as function signatures and unit tests) can be cleanly added in ce-plan without losing product focus.
