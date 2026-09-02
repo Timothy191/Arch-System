@@ -39,9 +39,9 @@ test.describe("department navigation", () => {
   });
 
   test("unauthenticated access to reports tab redirects", async ({ page }) => {
-    await page.goto("/safety/reports");
+    await page.goto("/production/reports");
     await expect(page).toHaveURL(/\/login/);
-    expect(page.url()).toContain("redirect=%2Fsafety%2Freports");
+    expect(page.url()).toContain("redirect=%2Fproduction%2Freports");
   });
 
   test("unauthenticated access to tools tab redirects", async ({ page }) => {

@@ -241,46 +241,6 @@ export const DEPARTMENTS = [
     roles: ["control_room_operator", "admin", "supervisor", "operator"],
   },
   {
-    id: "safety",
-    name: "Safety",
-    slug: "safety",
-    description: "Safety compliance, risk audits, and incident reporting",
-    color: "#ef4444",
-    routes: [
-      {
-        path: "/safety",
-        name: "Dashboard",
-        description: "Today's summary and incident statistics",
-      },
-      {
-        path: "/safety/daily-log",
-        name: "Daily Log",
-        description: "Submit shift logs",
-      },
-      {
-        path: "/safety/machines",
-        name: "Machines",
-        description: "Safety equipment & fire suppression",
-      },
-      {
-        path: "/safety/history",
-        name: "History",
-        description: "Past daily logs",
-      },
-      {
-        path: "/safety/reports",
-        name: "Reports",
-        description: "Aggregate data + CSV",
-      },
-      {
-        path: "/safety/tools",
-        name: "Tools",
-        description: "n8n / Flowise embeds",
-      },
-    ],
-    roles: ["safety_officer", "supervisor", "admin"],
-  },
-  {
     id: "training",
     name: "Training",
     slug: "training",

@@ -277,6 +277,7 @@ cd packages/eval && python -m pytest
 
 - [`../concepts/testing-qa-strategy.md`](../concepts/testing-qa-strategy.md) — full QA strategy
 - [`../concepts/deepeval-integration.md`](../concepts/deepeval-integration.md) — AI eval details
-- [`../../apps/portal/jest.config.js`](../../apps/portal/jest.config.js) — coverage config
-- [`../../playwright.config.ts`](../../playwright.config.ts) — E2E config
-- [`../../scripts/pentest.sh`](../../scripts/pentest.sh) — security scan
+- [`apps/portal/jest.config.js`](../../../apps/portal/jest.config.js) — coverage config
+- [`playwright.config.ts`](../../../playwright.config.ts) — E2E config
+- [`package.json`](../../../package.json) — test script commands
+

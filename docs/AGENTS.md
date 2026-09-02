@@ -6,7 +6,9 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal — an 
 
 ## Project Overview
 
-The portal integrates mining analytics, equipment status, and employee operations into department-specific dashboards. It relies on a Next.js frontend, Payload CMS headless content provider, PostgreSQL database with Row-Level Security, Redis caching, and a Python evaluation suite.
+The portal integrates mining analytics, equipment status, and employee operations into department-specific dashboards. It relies on a Next.js frontend, Payload CMS headless content provider, PostgreSQL database with Row-Level Security, Redis caching, and a Python LLM evaluation suite.
+
+**Version**: 1.5.1 | **License**: MIT | **Private**: true
 
 ---
 
@@ -17,7 +19,7 @@ The portal integrates mining analytics, equipment status, and employee operation
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                              CLIENT / UI                               │
-│  - apps/portal (Next.js)      - apps/overview (React Flow Topology)     │
+│  - apps/portal (Next.js 16)   - apps/overview (React Flow Topology)     │
 │  - @repo/ui (shadcn/ui)       - libs/features/* (Domain Feature Modules)│
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ Http/WS Requests
@@ -56,21 +58,40 @@ The portal integrates mining analytics, equipment status, and employee operation
 
 ## Key Directories
 
-- `apps/portal` — Next.js 15+ App Router portal frontend.
-- `apps/cms` — Headless Payload CMS v3.
-- `apps/overview` — Architecture and DB schema visualizer (React Flow).
-- `libs/features/` — Domain feature modules (e.g. `hub/ui`, `departments/ui`, `auth/ui`, `dashboard/data-access`).
-- `packages/` — Shared monorepo libraries:
-  - `packages/contract` — Shared Zod schemas and inferred types (Data Contract SSoT).
-  - `packages/supabase` — Supabase SSR client factories, cookies config, and telemetry tracers.
-  - `packages/redis` — Write-Through local + Redis cache wrapper and invalidation routines.
-  - `packages/database` — Migration scripts, SQL privilege assertions, and rollback validation scripts.
-  - `packages/errors` — Standardized application domain errors.
-  - `packages/rate-limiter` — Sliding-window and token-bucket rate limit controls.
-  - `packages/theme` & `packages/ui` — Design token CSS compilation and component primitives.
-  - `packages/eval` — Python LLM metrics and code compliance evaluations (DeepEval + Pytest).
-- `tools/` — Repository verification scripts, tag applicators, and policy compilers.
+- `apps/portal` — Next.js 16 App Router portal frontend (Turbopack dev, standalone output).
+- `apps/cms` — Headless Payload CMS v3 (3.84.1) with Postgres adapter and Lexical rich text editor.
+- `apps/overview` — Architecture and DB schema visualizer (React Flow / `@xyflow/react`).
+- `libs/features/` — Domain feature modules organized as `<domain>/ui` (components) and `<domain>/data-access` (hooks/services):
+  - `auth/ui`, `auth/data-access`, `auth/utils`
+  - `departments/ui`, `departments/data-access`
+  - `dashboard/data-access`
+  - `analytics/data-access`
+  - `hub/ui`
+  - `access-control/ui`
+- `libs/shared/` — Cross-cutting shared modules:
+  - `libs/shared/data-access`
+  - `libs/shared/utils`
+  - `libs/shared/hooks`
+- `packages/` — Shared monorepo libraries (all named `@repo/<name>`):
+  - `packages/contract` — Canonical Zod schemas and inferred types (Data Contract SSoT).
+  - `packages/supabase` — Supabase SSR client factories (browser, server, middleware, read-replica, service-role), Kysely query builder, cookies config, and telemetry tracers.
+  - `packages/redis` — Redis client, L1/L2 write-through cache wrapper, TTL registry, and invalidation routines.
+  - `packages/database` — Sequential zero-padded SQL migrations, SQL privilege assertions, and rollback validation scripts.
+  - `packages/errors` — Standardized application domain errors (`AppError` base class with `ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `DatabaseError`, `RateLimitError`, `APIError`, `FetchTimeoutError`, `NetworkError`).
+  - `packages/rate-limiter` — Sliding-window, fixed-window, and token-bucket rate limit controls with memory/Redis stores.
+  - `packages/theme` — OKLCH design tokens, Style Dictionary code generation, Tailwind preset, and CSS variables.
+  - `packages/ui` — shadcn/ui + Radix component primitives, animated components, data grids, workflow builders, and Storybook stories.
+  - `packages/logger` — Structured logging with Pino (server, browser, Next.js helpers).
+  - `packages/utils` — Third-party integrations: Novu notifications, Inngest workflows, ExcelJS exports.
+  - `packages/agents` — Agent Coordination engine using MCP and OpenAI/Together APIs with Langfuse tracing.
+  - `packages/eval` — Python LLM metrics and code compliance evaluations (DeepEval + Pytest via Poetry).
+  - `packages/eslint-config` — Shared ESLint configurations (`library.js`, `react-internal.js`, `next.js`).
+  - `packages/typescript-config` — Shared TypeScript configuration.
+- `scripts/seeds` — Database seeding scripts (workspace package).
+- `tools/` — Repository verification scripts, tag applicators, policy compilers, and audit tools.
 - `e2e/` — Playwright end-to-end and visual regression test suites.
+- `infra/` — Docker Compose files, Kubernetes manifests, monitoring stack (Prometheus, Grafana, cAdvisor), Redis config, and Cloudflared tunnels.
+- `scripts/` — Shell scripts for deployment, development, monitoring, backups, and database operations.
 
 ---
 
@@ -86,7 +107,7 @@ cp apps/portal/env/.env.example apps/portal/.env
 # 3. Spin up local Supabase container (Postgres, Auth, Studio) in a separate terminal
 pnpm --filter @repo/database supabase:dev
 
-# 4. Launch Next.js dev server
+# 4. Launch Next.js dev server (Turbopack)
 pnpm dev
 
 # 5. Execute full quality validation gate (run prior to merging or pushing code)
@@ -108,6 +129,21 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 | Spin up Storybook UI             | `pnpm ui`                                                      |
 | Execute accessibility checks     | `pnpm test:a11y`                                               |
 | Regenerate architecture policies | `pnpm policy:gen`                                              |
+| Run Python eval suite            | `pnpm --filter @repo/eval test`                                |
+| Type-check all workspaces        | `pnpm type-check`                                              |
+| Lint all workspaces              | `pnpm lint`                                                    |
+| Check dependency mismatches      | `pnpm deps:check`                                              |
+| Find unused exports/deps         | `pnpm knip`                                                    |
+
+### Deployment Commands
+
+| Task Goal                        | Command                                                        |
+| :------------------------------- | :------------------------------------------------------------- |
+| Deploy local stack               | `pnpm deploy:local`                                            |
+| Deploy to staging                | `pnpm deploy:staging`                                          |
+| Deploy to production             | `pnpm deploy:production`                                       |
+| Rollback production              | `pnpm deploy:rollback`                                         |
+| Fresh start (clean local)        | `pnpm fresh-start`                                             |
 
 ---
 
@@ -117,12 +153,15 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 
 - **Enforcement**: Prettier formats code; ESLint, Stylelint, and cspell lint styles and spellings.
 - **Strictness**: TypeScript strict mode is enabled. No `any` types; no `// @ts-ignore` exceptions. Cast dynamic boundaries to `unknown` and validate via Zod.
+- **Commit Messages**: Enforced via commitlint with conventional commits (`@commitlint/config-conventional`).
+- **Pre-commit Hooks**: Husky runs lint-staged on commit.
 
 ### Naming Conventions
 
 - **Routing**: Portal pages must be named `page.tsx` and parent interfaces `layout.tsx`.
 - **Packages**: Monorepo packages must be named `@repo/<name>` and export a public API strictly from `src/index.ts`.
-- **Database Migrations**: SQL files under `packages/database/migrations/` must use zero-padded serial naming: `NNN_description.sql` (e.g. `001_initial_schema.sql`).
+- **Database Migrations**: SQL files under `packages/database/migrations/` must use zero-padded serial naming: `NNN_description.sql` (e.g. `001_initial.sql`). Verified by `migration-rollback-safety.mjs`.
+- **Feature Modules**: Follow the pattern `libs/features/<domain>/ui` for components and `libs/features/<domain>/data-access` for hooks/services.
 
 ### Error Handling Pattern
 
@@ -154,33 +193,60 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 
 - **Zustand 5**: Strictly limited to UI chrome state (e.g., active menu indices, modal open states, sidebar toggles). **Do not store server-sourced data caches in Zustand.**
 - **TanStack React Query**: Manages and caches all server-side data retrieved by client components.
-- **XState**: Reserved for complex async workflows requiring structured state charts (such as plugin pipelines).
+- **XState**: Reserved for complex async workflows requiring structured state charts (such as plugin pipelines in `apps/portal/lib/plugins/machines/`).
 
 ### Architectural Boundary Enforcement
 
 - `tools/policy-compiler.cjs` is the Single Source of Truth (SSoT) for package boundaries.
-- Run `pnpm policy:gen` to synchronize policies. This script invokes `tools/apply-project-tags.cjs` to tag folders (e.g. `scope:app`, `scope:package:ui`, `scope:package:db`) and generates the ESLint import rules in `eslint-boundaries.generated.cjs`.
+- Run `pnpm policy:gen` to synchronize policies. This script invokes `tools/apply-project-tags.cjs` to tag folders (e.g. `scope:app`, `scope:package:ui`, `scope:package:db`) and generates the ESLint import rules in `tools/policy/eslint-boundaries.generated.cjs`.
 - **Constraints**:
   - UI components (`scope:package:ui`) must remain pure: they are prohibited from importing data packages (`@repo/supabase`, `@repo/redis`, `@repo/database`).
   - Theme (`scope:package:theme`) cannot depend on UI components.
   - Apps (`scope:app`) cannot import `@repo/database-internal` or other internal db utilities directly; they must query via `@repo/supabase`.
+  - Feature modules (`scope:feature`) cannot depend on apps (`scope:app`).
 
-### Agent Tracing & breadcrumbs
+### Agent Tracing & Breadcrumbs
 
 - Every workspace package contains an `AGENT_TRACER.md` recording changes. **Assistants must append an ISO 8601 timestamped entry describing the modification and handover details.**
 - Annotate complex or non-obvious logic inline using `// AGENT-TRACE: <explanation>` breadcrumbs.
+
+### Task Reporting
+
+- **Full Report Required**: Upon completion of any task, the assistant must provide a comprehensive report summarizing:
+  - What was done (summary of changes/actions performed)
+  - Files modified, created, or deleted (with paths)
+  - Commands executed and their outcomes
+  - Any tests run and their results (pass/fail)
+  - Outstanding issues, blockers, or follow-up actions required
+  - Verification steps taken to confirm correctness
+- The report should be structured, concise, and actionable — enabling the user to quickly understand the full scope of work performed without re-examining the conversation.
 
 ---
 
 ## Important Files
 
 - `apps/portal/proxy.ts` — Edge middleware entry point routing portal directories.
-- `apps/portal/server/proxy.ts` — Proxy implementation containing cached Redis auth profile lookups.
+- `apps/portal/server/proxy.ts` — Proxy implementation containing cached Redis auth profile lookups, redirect validation, and department route gating.
+- `apps/portal/next.config.mjs` — Next.js configuration (Turbopack, standalone output, transpile packages, Sentry, bundle analyzer).
+- `apps/portal/docker/Dockerfile` — Multi-stage Docker build (pruner → deps → builder → distroless production).
+- `apps/cms/payload.config.ts` — Payload CMS configuration (collections: users, departments, documents).
 - `tools/policy-compiler.cjs` — Architecture rules compiler and SSoT.
 - `tools/apply-project-tags.cjs` — Nx project tagging script mapping folders to scope tags.
 - `tools/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.
 - `packages/database/tests/migration-rollback-safety.mjs` — Validates migration SQL naming and checks rollback (`DROP TABLE IF EXISTS`) requirements.
 - `packages/errors/src/index.ts` — AppError base classes and type guards.
+- `packages/contract/src/index.ts` — Canonical Zod schemas re-exports and derived types.
+- `packages/redis/src/index.ts` — Redis client and caching helpers.
+- `packages/supabase/src/index.ts` — Supabase client factories and database types.
+- `packages/eval/pyproject.toml` — Python eval suite dependencies (DeepEval, pytest, httpx).
+- `packages/ui/.stylelintrc.mjs` — Stylelint config with Tailwind at-rule allowances.
+- `packages/eslint-config/library.js` — Base ESLint config (restricts direct Zod imports; use `@repo/contract`).
+- `tsconfig.base.json` — Root TypeScript config with path aliases for all packages and feature modules.
+- `nx.json` — Nx workspace configuration (target defaults, dependency constraints, plugins).
+- `pnpm-workspace.yaml` — Workspace packages and shared dependency catalogs.
+- `infra/docker/compose.portal.yml` — Portal Docker Compose (portal + nginx with healthchecks).
+- `infra/docker/compose.production.yml` — Production overrides (resource limits, restart policies).
+- `scripts/deploy.sh` — Sequential stable deployment script (local/staging/production modes).
 
 ---
 
@@ -188,10 +254,13 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 
 - **Runtime Engine**: Node.js `>=22` (pinned via Volta to Node `24.15.0`). Bun is **not** supported for running the portal application.
 - **Package Manager**: pnpm `9.15.9`.
+- **Build Tool**: Turbopack for both dev (`next dev --turbopack`) and production builds (`next build`). Webpack is not used due to `inngest`/`node:async_hooks` incompatibility.
+- **Output**: Next.js standalone output for Docker deployment.
 - **Shared Catalogs**: Workspace dependencies are consolidated in `pnpm-workspace.yaml`. Shared libraries must declare imports using the `catalog:` prefix (or `catalog:react19` for React-related dependencies).
 - **Local Services (Docker)**:
   - **Supabase CLI Container**: API gateway on `54321`, Postgres DB on `54322`, Studio UI on `54323`, Pooler on `54329`.
   - **Metrics Stack**: Grafana dashboard on `9091`, Prometheus on `9093`, cAdvisor on `8082`.
+- **Monitoring**: Sentry (`@sentry/nextjs`), OpenTelemetry (`@opentelemetry/*`), Prom Client (`prom-client`), and custom metrics in `apps/portal/lib/observability/`.
 - **Agent Skills & Spec Tooling**:
   - Always use `npx skills add <owner/repo>` when adding or installing new skills into `.agents/skills/`.
   - Always use `npm install -g mmx-cli` (or run via `mmx-cli`) for all specification, architecture blueprint, schema, and API contract spec work. When creating or refining specifications, use `mmx-cli` to produce standardized contract blueprints before running `pnpm audit:drift`.
@@ -225,6 +294,15 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 ### Database Row-Level Security Validation
 
 - Sequential SQL transaction-wrapped unit tests in `packages/database/tests/` verify RLS permissions (e.g. checking that role modifications fail for non-admins) and auto-rollback to verify DB invariants safely.
+- Key test files: `p0_signup_role_self_elevation.sql`, `accessible_departments_priv_esc.sql`, `rls_extension_safety.sql`, `index_coverage.sql`.
+
+### Python Eval Suite
+
+- Located in `packages/eval/` with its own `pyproject.toml` (Poetry-based).
+- Uses DeepEval for LLM evaluation and Pytest for test execution.
+- Test categories: `ai_service/` (translation, shift handoff, safety compliance, predictive maintenance, equipment manual) and `code_generation/` (shift closeout compliance, conventions).
+- Metrics: `supabase_import_compliance.py`, `rls_completeness.py`, `design_system_compliance.py`, `department_pattern_compliance.py`.
+- Requires `OPENAI_API_KEY` for LLM-judge tests (skipped if not set).
 
 ### Coverage Thresholds
 
@@ -235,3 +313,37 @@ Enforced via Jest in `apps/portal/jest.config.js`:
 - **Functions**: 24%
 - **Statements**: 34%
   _(Note: These are set to represent a sustainable baseline accounting for extensive presentational page components; do not artificially depress these rates)._
+
+---
+
+## Security Considerations
+
+- **Row-Level Security (RLS)**: Every PostgreSQL table has RLS enabled. Policies consult `auth.uid()` and cross-reference roles/departments against `public.employees`.
+- **Middleware Validation**: `apps/portal/server/proxy.ts` validates redirect targets against an allowlist to prevent open redirect vulnerabilities.
+- **Pre-commit Security Audit**: `tools/enforce-security-checks.cjs` audits codebase for `eval`, SQL concatenation, or disabled RLS.
+- **Dependency Security**: `pnpm-workspace.yaml` includes `overrides` to pin vulnerable transitive dependencies (handlebars, brace-expansion, minimatch, braces, glob, serialize-javascript, kysely, tmp, uuid, smol-toml, esbuild, @babel/runtime, js-yaml).
+- **Secrets**: Never commit `.env` files. Use `.env.example` as a template. The `.env.bak` and `.env.local` files are gitignored.
+- **Rate Limiting**: `@repo/rate-limiter` provides sliding-window, fixed-window, and token-bucket strategies enforced via `apps/portal/lib/api/rate-limit-middleware.ts`.
+
+---
+
+## Technology Stack Summary
+
+| Layer | Technology |
+|-------|------------|
+| Frontend Framework | Next.js 16 (App Router, Turbopack) |
+| UI Library | React 19, shadcn/ui, Radix UI |
+| State Management | Zustand 5 (UI), TanStack Query (server), XState (workflows) |
+| Styling | Tailwind CSS 3.4, OKLCH design tokens, CSS variables |
+| Backend/API | Supabase (Auth, DB, Realtime), Payload CMS v3 |
+| Database | PostgreSQL with Row-Level Security |
+| Caching | Redis (L1/L2 write-through with coalescing) |
+| Testing | Jest, Playwright, Storybook test-runner, axe-playwright |
+| Logging | Pino (structured logging) |
+| Monitoring | Sentry, OpenTelemetry, Prometheus, Grafana |
+| AI/ML | OpenAI/Together APIs, MCP, Langfuse tracing |
+| Python | DeepEval, Pytest (Poetry) |
+| Deployment | Docker, Docker Compose, Nginx, systemd |
+| Package Management | pnpm 9.15.9 with catalogs |
+| Build System | Nx 22 with caching and remote cache (S3) |
+| Node.js | >=22 (Volta-pinned to 24.15.0) |

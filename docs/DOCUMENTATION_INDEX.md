@@ -107,10 +107,8 @@ Quick navigation guide for Arch-Systems documentation.
   - SELinux considerations and policies
   - Troubleshooting for Rocky Linux environments
 
-## 📊 Documentation Structure
-
-```text
-Arch-Mk2/
+## 📊 Document```text
+Arch-System/
 ├── README.md                          # Project overview
 ├── CLAUDE.md                          # Technical guide (authoritative)
 ├── AGENTS.md                          # Workflow rules
@@ -120,6 +118,9 @@ Arch-Mk2/
 ├── GEMINI.md                          # AI conventions
 ├── SECURITY.md                        # Security policy
 ├── DOCUMENTATION_INDEX.md             # This file
+├── system-wiki/                       # Living system architecture & runtime guidelines (Rule 10)
+├── agentic-system-wiki/               # Living agentic protocols & tool contracts (Rule 10)
+├── storybook/                         # UI component states & accessibility contracts (Rule 10)
 ├── documentation/                     # Unified documentation center
 │   ├── README.md                      # Documentation center index
 │   ├── 00-core/                       # Core project documentation
@@ -127,31 +128,30 @@ Arch-Mk2/
 │   ├── 02-system-wiki/                # System knowledge base
 │   ├── 03-audit-reports/              # Audit reports and RLS analysis
 │   ├── 04-codebase-maps/              # Codebase visualization and maps
+│   ├── 04-specifications/             # API and contract blueprints
 │   ├── 05-wiki/                       # Comprehensive technical wiki
 │   ├── 06-archives/                   # Historical documentation
 │   ├── 07-agentic-systems/            # Agentic system documentation
 │   ├── 08-guides/                     # Operational guides and handbooks
-│   ├── 09-tools/                     # Documentation tools and generators
+│   ├── 09-tools/                      # Documentation tools and generators
 │   └── 10-references/                 # Reference materials
-├── docs/                              # Legacy documentation (migrating to documentation/)
-│   ├── archive/                       # Historical checklists, phase plans, and reports
-│   ├── operations/                    # Control room procedures, FUXA integrations, and runbooks
-│   ├── reports/                       # Project audits and upgrade plans
-│   └── wiki/                          # Detailed technical wiki and domain concept docs
-└── scripts/
-    └── ROCKY_LINUX_COMPATIBILITY.md   # Rocky Linux/RHEL compatibility guide
+└── docs/                              # Detailed documentation
+    ├── archive/                       # Historical checklists, phase plans, and reports
+    ├── operations/                    # Control room procedures, FUXA integrations, and runbooks
+    ├── reports/                       # Project audits and upgrade plans
+    └── wiki/                          # Detailed technical wiki and domain concept docs
 ```
 
 ## 🔍 Quick Lookup
 
 ### I need to
 
-- **Understand the system architecture & stack**: Read [docs/wiki/concepts/project-overview.md](./docs/wiki/concepts/project-overview.md)
-- **Browse the complete developer wiki**: Check [docs/wiki/index.md](./docs/wiki/index.md)
-- **Visualize the codebase structure**: Explore [codebase-maps/README.md](../documentation/04-codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
+- **Understand the system architecture & stack**: Read [wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)
+- **Browse the complete developer wiki**: Check [wiki/index.md](./wiki/index.md)
+- **Visualize the codebase structure**: Explore [04-codebase-maps/README.md](../documentation/04-codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
 - **Review audit reports and quality status**: Check [documentation/03-audit-reports/](../documentation/03-audit-reports/) for RLS and design compliance reports
-- **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](CLAUDE.md) Architecture section or view [codebase-maps](../documentation/04-codebase-maps/)
+- **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](../CLAUDE.md)
+- **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section or view [codebase-maps](../documentation/04-codebase-maps/)
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)
@@ -159,8 +159,8 @@ Arch-Mk2/
 - **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
 - **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)
 - **Understand quality gates**: Review [AGENTS.md](AGENTS.md) Quality Gates section
-- **Review historical plans / checklist**: Check [docs/archive/LIQUID_GLASS_CHECKLIST.md](./docs/archive/LIQUID_GLASS_CHECKLIST.md)
-- **Find operational runbooks**: Check [docs/operations/runbooks/](./docs/operations/runbooks/)
+- **Review historical plans / checklist**: Check [archive/LIQUID_GLASS_CHECKLIST.md](./archive/LIQUID_GLASS_CHECKLIST.md)
+- **Find operational runbooks**: Check [operations/runbooks/](./operations/runbooks/)
 - **Explore unified documentation**: Visit [documentation/README.md](../documentation/README.md) for the new documentation center structure
 
 ## 📝 Documentation Maintenance
@@ -169,14 +169,12 @@ Arch-Mk2/
 - Update this index when adding new documentation files
 - Ensure cross-references between documents are maintained
 - Review documentation relevance quarterly
-- **Migration in Progress**: Documentation is being consolidated into the unified `documentation/` directory structure
-  - Phase 1 ✅: Core documentation structure created
-  - Phase 2 ✅: Audit reports migrated to `documentation/03-audit-reports/`
-  - Phase 3 ⏳: Codebase maps migration planned
-  - Phase 4 ⏳: System wiki consolidation planned
-  - Legacy `docs/` directory will remain during migration period
+- **Living Documentation Repositories (Rule 10 Compliance)**:
+  - `system-wiki/`: Core system architecture, workflows, environmental configurations, and runtime guidelines.
+  - `agentic-system-wiki/`: Autonomous workflows, multi-agent protocol contracts, MCP tool integrations, and agent reasoning logs.
+  - `storybook/`: Component states, visual contracts, interaction specs, and component documentation.
 
 ---
 
-**Last Updated**: 2026-08-20  
-**Maintained by**: Arch-Systems Development Team
+**Last Updated**: 2026-09-01  
+**Maintained by**: Arch-Systems Development Team & Documentation Specialist Agent

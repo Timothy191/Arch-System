@@ -17,3 +17,9 @@
 - **Verification**:
   - `pnpm nx type-check features-departments-ui` ✅
 - **What the Next Agent Should Know**: `SatelliteMonitoringDashboard` no longer generates its own data. All five call sites in `apps/portal/app/(departments)/[department]/` and its sub-pages now fetch via `getSatelliteMonitoringData()` and pass props down.
+
+## [2026-09-02T06:23:10Z] Safety Department Deprecation Cleanup
+- **Agent**: Antigravity
+- **Summary**: Inspected pending safety department removal changes across `packages/database/migrations` (`150_remove_safety_department.sql`), `libs/features/departments`, and `packages/ui`. Verified DB migration rollback invariants, fixed `getUserSafely` auth test assertions in `@repo/supabase`, and resolved badge text rendering in `@repo/ui` (`HeroCardContent`).
+- **Handoff**: All unit tests (`pnpm test`) and migration rollback checks (`pnpm nx run @repo/database:test:migration-rollback`) are 100% green.
+

@@ -142,7 +142,7 @@ Before pushing changes or staging deployments, developers must pass the full ver
 
 - **Conventional Commits**: Enforced via `commitlint` on git commit hooks (Husky).
 - **Secret Checking**: `secretlint` runs on every staged commit to prevent accidental leakages of credentials or local variables.
-- **Mandatory Agent Tracing**: As detailed in [AGENT_TRACER.md](file:///home/timothy/Documents/Arch-System/AGENT_TRACER.md), all automated code modifications must document their changes, log runtime impact, and leave inline codebase comments (`// AGENT-TRACE:`) to ensure context continuity.
+- **Mandatory Agent Tracing**: As detailed in [AGENT_TRACER.md](../../../AGENT_TRACER.md), all automated code modifications must document their changes, log runtime impact, and leave inline codebase comments (`// AGENT-TRACE:`) to ensure context continuity.
 
 ---
 
@@ -158,10 +158,11 @@ On-premises deployments target **Rocky Linux / RHEL** architectures.
 
 ## Related Documentation
 
-- **[DOCUMENTATION_INDEX.md](file:///home/timothy/Documents/Arch-System/DOCUMENTATION_INDEX.md)** — Core navigation index.
-- **[CLAUDE.md](file:///home/timothy/Documents/Arch-System/CLAUDE.md)** — Local commands and developer guidelines.
-- **[DESIGN.md](file:///home/timothy/Documents/Arch-System/DESIGN.md)** — Tokens, HSL mapping, and typography.
-- **[PRODUCT.md](file:///home/timothy/Documents/Arch-System/PRODUCT.md)** — User personas and product objectives.
-- **[DEPLOYMENT.md](file:///home/timothy/Documents/Arch-System/DEPLOYMENT.md)** — Local and production deploy instructions.
-- **[nx-monorepo](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/nx-monorepo.md)** — Workspace and build configs.
-- **[supabase-local-dev](file:///home/timothy/Documents/Arch-System/docs/wiki/concepts/supabase-local-dev.md)** — Supabase local configuration.
+- **[DOCUMENTATION_INDEX.md](../../DOCUMENTATION_INDEX.md)** — Core navigation index.
+- **[CLAUDE.md](../../../CLAUDE.md)** — Local commands and developer guidelines.
+- **[DESIGN.md](../../../DESIGN.md)** — Tokens, HSL mapping, and typography.
+- **[PRODUCT.md](../../../PRODUCT.md)** — User personas and product objectives.
+- **[DEPLOYMENT.md](../../../DEPLOYMENT.md)** — Local and production deploy instructions.
+- **[nx-monorepo](./nx-monorepo.md)** — Workspace and build configs.
+- **[supabase-local-dev](./supabase-local-dev.md)** — Supabase local configuration.
+

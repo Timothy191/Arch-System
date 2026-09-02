@@ -96,8 +96,8 @@ test.describe("Authenticated User Flows", () => {
     });
 
     test("can access reports page", async ({ page }) => {
-      await page.goto("/safety/reports");
-      await expect(page).toHaveURL(/.*\/safety\/reports/);
+      await page.goto("/production/reports");
+      await expect(page).toHaveURL(/.*\/production\/reports/);
       await expect(page.getByText(/reports/i)).toBeVisible();
     });
 

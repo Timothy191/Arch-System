@@ -13,10 +13,10 @@ test.describe("daily log data entry (unauthenticated)", () => {
     expect(page.url()).toContain("redirect=%2Fproduction%2Fdaily-log");
   });
 
-  test("accessing safety daily-log redirects to login", async ({ page }) => {
-    await page.goto("/safety/daily-log");
+  test("accessing drilling operations redirects to login", async ({ page }) => {
+    await page.goto("/drilling/drilling-operations");
     await expect(page).toHaveURL(/\/login/);
-    expect(page.url()).toContain("redirect=%2Fsafety%2Fdaily-log");
+    expect(page.url()).toContain("redirect=%2Fdrilling%2Fdrilling-operations");
   });
 });
 

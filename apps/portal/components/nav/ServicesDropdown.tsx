@@ -323,23 +323,23 @@ export function ServicesDropdown() {
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
-                    window.location.href = "/safety/daily-log";
+                    window.location.href = "/control-room/hourly-loads";
                   }}
                 >
                   <ClipboardList className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                   <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                    Daily Safety Log
+                    Control Room Telemetry
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
-                    window.location.href = "/safety";
+                    window.location.href = "/control-room";
                   }}
                 >
                   <ShieldAlert className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                   <span className="text-[13px] font-medium text-[var(--text-heading)]">
-                    Safety Dashboard
+                    Control Room Dashboard
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />

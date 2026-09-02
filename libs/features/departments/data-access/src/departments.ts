@@ -11,7 +11,7 @@ export interface Department {
   icon: string;
   description: string;
   color: string;
-  type: "standard" | "control_room" | "satellite" | "safety";
+  type: "standard" | "control_room" | "satellite";
   status?: "active" | "maintenance" | "alert";
   gridSpan?: string;
   stats?: {
@@ -140,57 +140,6 @@ export const DEPARTMENTS: Department[] = [
     actions: [
       { label: "Hourly Loads", href: "/control-room/hourly-loads" },
       { label: "Machine Ops", href: "/control-room/machine-operations" },
-    ],
-  },
-  {
-    name: "safety",
-    displayName: "Safety",
-    route: "/safety",
-    icon: "HardHat",
-    description: "Incident logs, compliance & inspections",
-    color: "blue",
-    type: "safety",
-    status: "active",
-    gridSpan: "md:col-span-1 xl:col-span-1",
-    stats: { label: "LTI-free", value: "450d" },
-    trend: [445, 446, 447, 448, 449, 450, 450, 450],
-    actions: [
-      { label: "Daily Log", href: "/safety/daily-log" },
-      { label: "Reports", href: "/safety/reports" },
-    ],
-  },
-  {
-    name: "training",
-    displayName: "Training",
-    route: "/training",
-    icon: "GraduationCap",
-    description: "LMS, certifications & competency tracking",
-    color: "cyan",
-    type: "standard",
-    status: "active",
-    gridSpan: "md:col-span-1 xl:col-span-1",
-    stats: { label: "Courses", value: "8" },
-    trend: [6, 7, 7, 8, 8, 8, 8, 9],
-    actions: [
-      { label: "Certifications", href: "/training/certifications" },
-      { label: "Schedules", href: "/training/schedules" },
-    ],
-  },
-  {
-    name: "satellite-monitoring",
-    displayName: "Satellite Monitoring",
-    route: "/satellite-monitoring",
-    icon: "Satellite",
-    description: "SAR/InSAR, hyperspectral & high-resolution imagery",
-    color: "indigo",
-    type: "satellite",
-    status: "active",
-    gridSpan: "md:col-span-2 xl:col-span-1",
-    stats: { label: "Imagery", value: "Latest" },
-    trend: [3, 4, 4, 5, 5, 6, 6, 7],
-    actions: [
-      { label: "SAR View", href: "/satellite-monitoring/sar" },
-      { label: "High-Res", href: "/satellite-monitoring/highres" },
     ],
   },
   {
@@ -325,17 +274,6 @@ export const ACCESS_CARD_ACTIONS_TABS = [
   { name: "reports", label: "Reports", icon: "FileText" },
 ] as const;
 
-/**
- * Training specific tabs - focused on training programs, certifications, schedules, and LMS progress
- */
-export const TRAINING_TABS = [
-  { name: "dashboard", label: "Overview", icon: "BarChart2" },
-  { name: "certifications", label: "Certifications", icon: "ShieldCheck" },
-  { name: "courses", label: "Courses & LMS", icon: "GraduationCap" },
-  { name: "schedules", label: "Schedules", icon: "Clock" },
-  { name: "reports", label: "Reports", icon: "FileText" },
-] as const;
-
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
@@ -346,7 +284,6 @@ const DEPARTMENT_TABS_MAP: Record<
   "satellite-monitoring": SATELLITE_MONITORING_TABS,
   engineering: ENGINEERING_TABS,
   drilling: DRILLING_TABS,
-  training: TRAINING_TABS,
 };
 
 /**

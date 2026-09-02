@@ -24,17 +24,6 @@ export * from "./engineering/breakdowns/BreakdownsTable";
 export * from "./engineering/breakdowns/types";
 export * from "./engineering/breakdowns/actions";
 export * from "./engineering/tires";
-export type { SafetyChartsProps } from "./safety/SafetyCharts";
-export { SafetyCharts } from "./safety/SafetyChartsWrapper";
-export * from "./safety/SafetyIncidentForm";
-export * from "./safety/SafetyIncidentsList";
-export * from "./satellite/SatelliteMonitoringDashboard";
-export * from "./satellite/DeformationAlertCard";
-export * from "./satellite/DeformationVelocityChart";
-export * from "./satellite/HighResPanel";
-export * from "./satellite/HyperspectralLayer";
-export * from "./satellite/SARLayer";
-export * from "./satellite/RealtimeInSARStream";
 export * from "./tools/ToolCard";
 export * from "./tools/ToolsPageClient";
 // AGENT-TRACE: UniverSheet removed from barrel to preserve next/dynamic code-splitting.

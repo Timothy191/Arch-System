@@ -2,42 +2,44 @@
 
 | I need to...               | Go to                                                                               |
 | -------------------------- | ----------------------------------------------------------------------------------- |
-| Understand the project     | [Arch-Systems Overview](/entities/arch-systems)                                     |
-| Start developing           | [Onboarding](/concepts/onboarding) → [Monorepo](/concepts/turborepo-monorepo)       |
-| Build a department feature | [Department Features](/concepts/department-features)                                |
-| Add UI components          | [Design System](/concepts/design-system)                                            |
-| Work with database         | [Database Schema](/concepts/database-schema) → [RLS Policies](/concepts/rls-policy) |
-| Implement auth             | [Auth & Middleware](/concepts/auth-middleware)                                      |
-| Use AI service             | [AI Service](/concepts/ai-service)                                                  |
-| Set up external tools      | [External Tools](/concepts/external-tools)                                          |
-| Monitor/debug              | [Monitoring](/concepts/monitoring-error-tracking)                                   |
-| Run tests/eval             | [DeepEval](/concepts/deepeval-integration)                                          |
-| Debug issues               | [Troubleshooting](/concepts/troubleshooting)                                        |
-| Deploy code                | [Deployment](/concepts/deployment)                                                  |
+| Understand the project     | [Arch-Systems Overview](./entities/arch-systems.md)                                 |
+| Start developing           | [Onboarding](./concepts/onboarding.md) → [Monorepo](./concepts/nx-monorepo.md)        |
+| Build a department feature | [Department Features](./concepts/department-features.md)                            |
+| Add UI components          | [Design System](./concepts/design-system.md)                                        |
+| Work with database         | [Database Schema](./concepts/database-schema.md) → [RLS Policies](./concepts/rls-policy.md) |
+| Implement auth             | [Auth & Middleware](./concepts/auth-middleware.md)                                  |
+| Use AI service             | [Multi-Provider AI](./concepts/adr-006-multi-provider-ai.md)                         |
+| Set up external tools      | [External Tools](./concepts/external-tools.md)                                      |
+| Monitor/debug              | [Monitoring](./concepts/monitoring-error-tracking.md)                               |
+| Run tests/eval             | [DeepEval](./concepts/deepeval-integration.md)                                      |
+| Debug issues               | [Troubleshooting](./concepts/troubleshooting.md)                                    |
+| Deploy code                | [Deployment](./concepts/deployment.md)                                              |
 
 ## Common Commands
 
 ```bash
 # Development
-pnpm dev                    # Start portal
-pnpm build                  # Build all packages
-pnpm lint                   # Run ESLint
-pnpm --filter portal test   # Run tests
+pnpm dev                                         # Start portal frontend
+pnpm build                                       # Build all packages and apps
+pnpm lint                                        # Run ESLint across workspace
+pnpm test                                        # Run all unit tests
+pnpm quality                                     # Full quality gate (lint, test, format)
 
-# Supabase
-cd packages/database && pnpm supabase:dev    # Start local Supabase
-pnpm supabase:push                           # Push migrations
+# Supabase Local Database
+pnpm --filter @repo/database supabase:dev        # Start local Supabase Docker stack
+pnpm --filter @repo/database db:migrate          # Apply latest database migrations
 
 # Deployment
-pnpm dlx vercel --prod      # Deploy to production
+pnpm dlx vercel --prod                           # Deploy to production
 ```
 
 ## Key Architecture Decisions
 
-1. [ADR-001: Next.js App Router](/concepts/adr-001-nextjs-app-router)
-2. [ADR-002: Supabase Backend](/concepts/adr-002-supabase-backend)
-3. [ADR-003: Turborepo](/concepts/adr-003-turborepo-monorepo)
-4. [ADR-004: Tailwind Design System](/concepts/adr-004-tailwind-design-system)
-5. [ADR-005: Zustand State](/concepts/adr-005-zustand-state-management)
-6. [ADR-006: Multi-Provider AI](/concepts/adr-006-multi-provider-ai)
-7. [ADR-007: React 19](/concepts/adr-007-react-19-adoption)
+1. [ADR-001: Next.js App Router](./concepts/adr-001-nextjs-app-router.md)
+2. [ADR-002: Supabase Backend](./concepts/adr-002-supabase-backend.md)
+3. [ADR-003: Turborepo](./concepts/adr-003-turborepo-monorepo.md)
+4. [ADR-004: Tailwind Design System](./concepts/adr-004-tailwind-design-system.md)
+5. [ADR-005: Zustand State](./concepts/adr-005-zustand-state-management.md)
+6. [ADR-006: Multi-Provider AI](./concepts/adr-006-multi-provider-ai.md)
+7. [ADR-007: React 19](./concepts/adr-007-react-19-adoption.md)
+

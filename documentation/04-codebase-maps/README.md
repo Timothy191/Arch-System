@@ -159,7 +159,7 @@ Maps are named with the generation date in `YY-MM-DD` format (e.g., `project-dep
 
 ## Integration with Documentation
 
-These maps are referenced from the main documentation index at [`docs/DOCUMENTATION_INDEX.md`](../docs/DOCUMENTATION_INDEX.md). They serve as visual companions to the textual documentation.
+These maps are referenced from the main documentation index at [`docs/DOCUMENTATION_INDEX.md`](../../docs/DOCUMENTATION_INDEX.md). They serve as visual companions to the textual documentation.
 
 ## Maintenance
 
@@ -202,7 +202,8 @@ When making changes that affect the codebase structure:
 
 ## Related Documentation
 
-- [`docs/DOCUMENTATION_INDEX.md`](../docs/DOCUMENTATION_INDEX.md) - Main documentation navigation
-- [`DESIGN.md`](../DESIGN.md) - System design documentation
-- [`AGENTS.md`](../AGENTS.md) - Agent contract and guidelines
-- [`DEPLOYMENT.md`](../docs/DEPLOYMENT.md) - Deployment procedures
+- [`docs/DOCUMENTATION_INDEX.md`](../../docs/DOCUMENTATION_INDEX.md) - Main documentation navigation
+- [`DESIGN.md`](../../DESIGN.md) - System design documentation
+- [`AGENTS.md`](../../AGENTS.md) - Agent contract and guidelines
+- [`DEPLOYMENT.md`](../../DEPLOYMENT.md) - Deployment procedures
+

@@ -170,7 +170,8 @@ The script automates:
 7. Portal build and startup
 8. Health check
 
-**Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](scripts/ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
+**Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](./ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
+
 
 ### Self-Hosted Production Setup (with Cloud Supabase)
 

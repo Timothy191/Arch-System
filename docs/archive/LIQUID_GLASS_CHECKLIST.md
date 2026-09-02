@@ -4,10 +4,11 @@
 
 ## Related Documentation
 
-- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
-- **[DESIGN.md](DESIGN.md)** — Design system, color palette, and component rules
-- **[PRODUCT.md](PRODUCT.md)** — Product strategy and visual direction
-- **[CLAUDE.md](CLAUDE.md)** — Technical implementation guide
+- **[DOCUMENTATION_INDEX.md](../DOCUMENTATION_INDEX.md)** — Complete documentation index and quick navigation guide
+- **[DESIGN.md](../../DESIGN.md)** — Design system, color palette, and component rules
+- **[PRODUCT.md](../../PRODUCT.md)** — Product strategy and visual direction
+- **[CLAUDE.md](../../CLAUDE.md)** — Technical implementation guide
+
 
 ---
 

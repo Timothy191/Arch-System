@@ -26,7 +26,7 @@ const DOCK_APPS = [
   { name: "Hub", icon: LayoutDashboard, href: "/" },
   { name: "Drilling", icon: MapIcon, href: "/drilling" },
   { name: "Engineering", icon: Wrench, href: "/engineering" },
-  { name: "Alerts", icon: Bell, href: "/safety" },
+  { name: "Alerts", icon: Bell, href: "/control-room" },
   { name: "Settings", icon: Settings, href: "/admin" },
 ];
 

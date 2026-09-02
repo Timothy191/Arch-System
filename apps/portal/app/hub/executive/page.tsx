@@ -100,7 +100,6 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
           const [
             { count: activeMachines },
             { count: totalMachines },
-            { count: openIncidents },
             { count: activeEmployees },
             { data: breakdownsMtd },
           ] = await Promise.all([
@@ -110,10 +109,6 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
               .eq("active", true)
               .is("deleted_at", null),
             db.from("machines").select("id", { count: "exact", head: true }).is("deleted_at", null),
-            db
-              .from("safety_incidents")
-              .select("id", { count: "exact", head: true })
-              .eq("status", "open"),
             db
               .from("employees")
               .select("id", { count: "exact", head: true })
@@ -172,7 +167,7 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
             openBreakdowns,
             activeMachines: activeMachines ?? 0,
             totalMachines: totalMachines ?? 0,
-            openIncidents: openIncidents ?? 0,
+            openIncidents: 0,
             activeEmployees: activeEmployees ?? 0,
             chartData,
           };
@@ -180,13 +175,13 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "executive"],
-          tags: ["table:machines", "table:safety_incidents", "table:employees", "table:breakdowns"],
+          tags: ["table:machines", "table:employees", "table:breakdowns"],
         },
       );
     },
     {
       revalidate: 300,
-      tags: ["table:machines", "table:safety_incidents", "table:employees", "table:breakdowns"],
+      tags: ["table:machines", "table:employees", "table:breakdowns"],
     },
   );
 }

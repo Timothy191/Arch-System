@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Drill, Factory, Radar, HardHat, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Drill, Factory, Radar, BarChart3 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
 const NAV_ITEMS = [
@@ -14,7 +14,6 @@ const NAV_ITEMS = [
     icon: Factory,
     dept: "production",
   },
-  { href: "/safety", label: "Safety", icon: HardHat, dept: "safety" },
   {
     href: "/control-room",
     label: "Control",

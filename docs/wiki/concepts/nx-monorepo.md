@@ -37,7 +37,7 @@ packages/
 
 ## Task Orchestration (Nx Target Defaults)
 
-Nx task pipelines and cache keys are configured in [nx.json](file:///home/timothy/Project/Arch-Mk2/nx.json). Tasks are run in parallel, resolving dependencies in topological order.
+Nx task pipelines and cache keys are configured in [nx.json](../../../nx.json). Tasks are run in parallel, resolving dependencies in topological order.
 
 ### Target Pipelines
 
@@ -58,7 +58,8 @@ Nx tracks global workspace files (`turbo.json`, `tsconfig.json`, `pnpm-workspace
 
 ## pnpm Workspace Catalogs
 
-Shared dependency versions are centralized in [pnpm-workspace.yaml](file:///home/timothy/Project/Arch-Mk2/pnpm-workspace.yaml) under catalogs, avoiding version drift:
+Shared dependency versions are centralized in [pnpm-workspace.yaml](../../../pnpm-workspace.yaml) under catalogs, avoiding version drift:
+
 
 - `catalog:` — shared general dependencies (framer-motion, tailwindcss, lucide-react, sonner, lenis, zustand, etc.)
 - `catalogs:react19` — React 19 specific dependencies (`react`, `react-dom`, `@types/react`, etc.)

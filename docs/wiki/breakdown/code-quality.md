@@ -163,5 +163,6 @@ Config: `.bundlesize.json` — thresholds defined, CI integration pending.
 - [`../concepts/testing-qa-strategy.md`](../concepts/testing-qa-strategy.md) — test quality details
 - [`../error-migration-tracking.md`](../error-migration-tracking.md) — full error migration log
 - [`../project-stability-analysis.md`](../project-stability-analysis.md) — overall stability analysis
-- [`../../.bundlesize.json`](../../.bundlesize.json) — bundle size thresholds
-- [`../../knip.json`](../../knip.json) — dead code config
+- [`.bundlesize-config.json`](../../../.bundlesize-config.json) — bundle size thresholds
+- [`package.json`](../../../package.json) — workspace quality scripts
+

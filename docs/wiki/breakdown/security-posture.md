@@ -264,6 +264,6 @@ Layer 5: Data Protection
 - [`../concepts/rls-policy.md`](../concepts/rls-policy.md) — RLS patterns reference
 - [`../concepts/incident-response.md`](../concepts/incident-response.md) — security incident playbook
 - [`../concepts/monitoring-error-tracking.md`](../concepts/monitoring-error-tracking.md) — error tracking
-- [`../../scripts/pentest.sh`](../../scripts/pentest.sh) — OWASP ZAP scan runner
-- [`../../docker-compose.security.yml`](../../docker-compose.security.yml) — ZAP compose services
-- [`../../packages/database/migrations/012_rls_refinement.sql`](../../packages/database/migrations/012_rls_refinement.sql) — RLS policies
+- [`scripts/setup-production-environment.sh`](../../../scripts/setup-production-environment.sh) — production security configuration
+- [`packages/database/migrations/012_rls_refinement.sql`](../../../packages/database/migrations/012_rls_refinement.sql) — RLS policies
+
