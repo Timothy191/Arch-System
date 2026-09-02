@@ -1,0 +1,82 @@
+> nx run features-departments-ui:test
+
+> pnpm run test
+
+
+> @repo/departments/ui@1.0.0 test /home/tim/Documents/Arch-System/libs/features/departments/ui
+> jest --config jest.config.js --passWithNoTests --maxWorkers=50%
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mCloseShiftModal.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      An update to CloseShiftModal inside a test was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that causes React state updates should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* fire events that update state */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m    [0m [90m 48 |[39m         setState({ type[33m:[39m [32m"has_errors"[39m[33m,[39m errors[33m:[39m result[33m.[39merrors })[33m;[39m[22m
+[2m     [90m 49 |[39m       } [36melse[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 50 |[39m         setState({ type[33m:[39m [32m"pin_entry"[39m })[33m;[39m[22m
+[2m     [90m    |[39m         [31m[1m^[22m[2m[39m[22m
+[2m     [90m 51 |[39m       }[22m
+[2m     [90m 52 |[39m     } [36mcatch[39m (err) {[22m
+[2m     [90m 53 |[39m       setState({[0m[22m
+[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18758:19[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat warnIfUpdatesNotWrappedWithActDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18757:9)[22m[2m[22m
+[2m      [2mat scheduleUpdateOnFiber ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16409:11)[22m[2m[22m
+[2m      [2mat dispatchSetStateInternal ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9170:13)[22m[2m[22m
+[2m      [2mat dispatchSetState ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9127:7)[22m[2m[22m
+[2m      [2mat setState ([22m[2msrc/control-room/CloseShiftModal.tsx[2m:50:9)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mMultiSiteShiftReportClient.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mControlRoomActivityFeed.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mScadaPanel.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/engineering/breakdowns/[22m[1mBookInForm.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mDozerRollForm.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/engineering/tires/[22m[1mTireManagementDashboard.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/engineering/tires/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mFleetKpiTable.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mControlRoomChecklistWidget.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/tools/[22m[1mUniverSheet.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mMachineControl.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mProductionSummaryCard.test.tsx[22m
+[05:00:32.743] [31mERROR[39m (arch-portal): [36mUnauthorized[39m
+    [35mcontext[39m: "bookOutBreakdown"
+    err: {
+      "type": "Error",
+      "message": "Unauthorized",
+      "stack":
+          Error: Unauthorized
+              at bookOutBreakdown (/home/tim/Documents/Arch-System/libs/features/departments/ui/src/engineering/breakdowns/actions.ts:67:31)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at Object.<anonymous> (/home/tim/Documents/Arch-System/libs/features/departments/ui/src/engineering/breakdowns/actions.test.ts:127:5)
+    }
+[05:00:33.077] [31mERROR[39m (arch-portal): [36mUnauthorized[39m
+    [35mcontext[39m: "directCheckout"
+    err: {
+      "type": "Error",
+      "message": "Unauthorized",
+      "stack":
+          Error: Unauthorized
+              at directCheckout (/home/tim/Documents/Arch-System/libs/features/departments/ui/src/engineering/breakdowns/actions.ts:126:31)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at Object.<anonymous> (/home/tim/Documents/Arch-System/libs/features/departments/ui/src/engineering/breakdowns/actions.test.ts:151:5)
+    }
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/control-room/[22m[1mAlertPanel.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/engineering/breakdowns/[22m[1mactions.test.ts[22m
+[999D[K
+[1mTest Suites: [22m[1m[32m15 passed[39m[22m, 15 total
+[1mTests:       [22m[1m[32m79 passed[39m[22m, 79 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        3.393 s, estimated 4 s
+[2mRan all test suites[22m[2m.[22m
+[1mForce exiting Jest: [22mHave you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Activity, Wifi, WifiOff, RefreshCw, Gauge, Thermometer, Droplets, ArrowDown, Layers } from "lucide-react";
 
-export interface LiveTelemetryPayload {
+interface LiveTelemetryPayload {
   machine_id: string;
   machine_name: string;
   engine_rpm?: number;

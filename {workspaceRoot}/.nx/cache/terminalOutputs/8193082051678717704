@@ -1,0 +1,8 @@
+> nx run features-auth-data-access:type-check
+
+> pnpm run type-check
+
+
+> @repo/auth/data-access@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/auth/data-access
+> tsc --noEmit
+

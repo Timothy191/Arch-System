@@ -1,0 +1,107 @@
+> nx run @repo/database:test:migration-rollback
+
+> pnpm run test:migration-rollback
+
+
+> @repo/database@1.0.0 test:migration-rollback /home/tim/Documents/Arch-System/packages/database
+> node tests/migration-rollback-safety.mjs
+
+
+🔍 Checking 107 migration files for rollback safety...
+
+
+⚠️  91 warning(s):
+   078_satellite_insar_deformations.sql: Duplicate sequence number 078 in 078_satellite_insar_deformations.sql (already seen in 078_enable_rls_material_density.sql)
+   150_update_unified_shift_compilation_smu.sql: Duplicate sequence number 150 in 150_update_unified_shift_compilation_smu.sql (already seen in 150_remove_safety_department.sql)
+   094_security_linter_hardening.sql: Sequence gap: 092 → 093 (next is 094)
+   100_ai_token_usage_tracking.sql: Sequence gap: 097 → 098 (next is 100)
+   0145_shift_closeout.sql: Sequence gap: 100 → 101 (next is 145)
+   004_breakdowns.sql: CREATE INDEX without IF NOT EXISTS: "idx_breakdowns_department"
+   004_breakdowns.sql: CREATE INDEX without IF NOT EXISTS: "idx_breakdowns_status"
+   004_breakdowns.sql: CREATE INDEX without IF NOT EXISTS: "idx_breakdowns_fleet_id"
+   004_breakdowns.sql: CREATE INDEX without IF NOT EXISTS: "idx_breakdowns_date_in"
+   007_audit_logs.sql: CREATE INDEX without IF NOT EXISTS: "idx_audit_logs_table_record"
+   007_audit_logs.sql: CREATE INDEX without IF NOT EXISTS: "idx_audit_logs_performed_by"
+   007_audit_logs.sql: CREATE INDEX without IF NOT EXISTS: "idx_audit_logs_department"
+   007_audit_logs.sql: CREATE INDEX without IF NOT EXISTS: "idx_audit_logs_created_at"
+   015_user_feedback.sql: CREATE INDEX without IF NOT EXISTS: "idx_user_feedback_status"
+   015_user_feedback.sql: CREATE INDEX without IF NOT EXISTS: "idx_user_feedback_type"
+   015_user_feedback.sql: CREATE INDEX without IF NOT EXISTS: "idx_user_feedback_created"
+   015_user_feedback.sql: CREATE INDEX without IF NOT EXISTS: "idx_quick_feedback_page"
+   016_schema_enhancements.sql: ALTER TABLE ADD COLUMN without IF NOT EXISTS: "ALTER TABLE breakdowns ADD COLUMN duration_hours"
+   020_partition_time_series.sql: CREATE TABLE without IF NOT EXISTS: "hourly_loads"
+   020_partition_time_series.sql: CREATE TABLE without IF NOT EXISTS: "daily_logs"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_hourly_loads_department_date"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_hourly_loads_machine_date"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_hourly_loads_shift_type"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_daily_logs_department_date"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_daily_logs_shift"
+   020_partition_time_series.sql: CREATE INDEX without IF NOT EXISTS: "idx_daily_logs_sync_status"
+   026_drill_delays_refinement.sql: UPDATE without WHERE clause: "UPDATE drill_operations SET"
+   028_access_control_system.sql: CREATE TABLE without IF NOT EXISTS: "personnel"
+   028_access_control_system.sql: CREATE TABLE without IF NOT EXISTS: "visitors"
+   028_access_control_system.sql: CREATE TABLE without IF NOT EXISTS: "badges"
+   028_access_control_system.sql: CREATE TABLE without IF NOT EXISTS: "access_logs"
+   028_access_control_system.sql: CREATE INDEX without IF NOT EXISTS: "idx_badges_qr_code"
+   028_access_control_system.sql: CREATE INDEX without IF NOT EXISTS: "idx_access_logs_scanned_at"
+   028_access_control_system.sql: CREATE INDEX without IF NOT EXISTS: "idx_access_logs_gate"
+   035_fleet_and_equipment_tables.sql: CREATE TABLE without IF NOT EXISTS: "fleet"
+   035_fleet_and_equipment_tables.sql: CREATE TABLE without IF NOT EXISTS: "equipment"
+   035_fleet_and_equipment_tables.sql: CREATE INDEX without IF NOT EXISTS: "idx_fleet_code"
+   035_fleet_and_equipment_tables.sql: CREATE INDEX without IF NOT EXISTS: "idx_fleet_department"
+   035_fleet_and_equipment_tables.sql: CREATE INDEX without IF NOT EXISTS: "idx_equipment_code"
+   035_fleet_and_equipment_tables.sql: CREATE INDEX without IF NOT EXISTS: "idx_equipment_department"
+   035_fleet_and_equipment_tables.sql: CREATE INDEX without IF NOT EXISTS: "idx_equipment_assigned_to"
+   036_documents.sql: CREATE TABLE without IF NOT EXISTS: "documents"
+   036_documents.sql: CREATE TABLE without IF NOT EXISTS: "document_versions"
+   036_documents.sql: CREATE INDEX without IF NOT EXISTS: "idx_documents_department_id"
+   036_documents.sql: CREATE INDEX without IF NOT EXISTS: "idx_documents_created_by"
+   036_documents.sql: CREATE INDEX without IF NOT EXISTS: "idx_documents_created_at"
+   036_documents.sql: CREATE INDEX without IF NOT EXISTS: "idx_documents_deleted_at"
+   036_documents.sql: CREATE INDEX without IF NOT EXISTS: "idx_document_versions_doc_id"
+   061_drop_procedural_memory_type.sql: DROP TYPE without IF EXISTS — verify type was created in this migration: "DROP TYPE memory_type_old"
+   061_drop_procedural_memory_type.sql: CREATE INDEX without IF NOT EXISTS: "idx_memory_embeddings_hnsw_episodic"
+   061_drop_procedural_memory_type.sql: CREATE INDEX without IF NOT EXISTS: "idx_memory_embeddings_hnsw_semantic"
+   061_drop_procedural_memory_type.sql: ALTER TYPE RENAME — complex rollback, verify down.sql exists: "ALTER TYPE memory_type RENAME TO"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_cache_user_id"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_cache_memory_type"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_cache_created_at"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_cache_ttl"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_performance_user_id"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_performance_search_type"
+   064_vector_search_query_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_vector_search_performance_created_at"
+   065_materialized_view_refresh_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_mv_refresh_log_view_name"
+   065_materialized_view_refresh_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_mv_refresh_log_status"
+   065_materialized_view_refresh_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_mv_refresh_log_refresh_start"
+   065_materialized_view_refresh_optimization.sql: CREATE INDEX without IF NOT EXISTS: "idx_mv_refresh_log_duration"
+   072_partition_production_logs.sql: CREATE TABLE without IF NOT EXISTS: "production_logs"
+   072_partition_production_logs.sql: CREATE INDEX without IF NOT EXISTS: "idx_production_logs_daily_log"
+   073_production_summary_view.sql: CREATE INDEX without IF NOT EXISTS: "uidx_production_summary_log"
+   073_production_summary_view.sql: CREATE INDEX without IF NOT EXISTS: "idx_production_summary_date"
+   073_production_summary_view.sql: CREATE INDEX without IF NOT EXISTS: "idx_production_summary_dept"
+   074_hourly_production_trend.sql: CREATE INDEX without IF NOT EXISTS: "uidx_hourly_production"
+   074_hourly_production_trend.sql: CREATE INDEX without IF NOT EXISTS: "idx_hourly_production_timestamp"
+   076_card_printing_infrastructure.sql: ALTER TABLE ADD COLUMN without IF NOT EXISTS: "ALTER TABLE personnel ADD COLUMN photo_url"
+   076_card_printing_infrastructure.sql: CREATE TABLE without IF NOT EXISTS: "card_printers"
+   076_card_printing_infrastructure.sql: CREATE TABLE without IF NOT EXISTS: "card_templates"
+   076_card_printing_infrastructure.sql: CREATE TABLE without IF NOT EXISTS: "print_jobs"
+   076_card_printing_infrastructure.sql: CREATE TABLE without IF NOT EXISTS: "issued_cards"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_print_jobs_status"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_print_jobs_printer_id"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_print_jobs_personnel_id"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_print_jobs_queued_at"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_issued_cards_personnel_id"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_issued_cards_status"
+   076_card_printing_infrastructure.sql: CREATE INDEX without IF NOT EXISTS: "idx_issued_cards_expires_at"
+   092_feature_flags.sql: CREATE INDEX without IF NOT EXISTS: "idx_feature_flag_exposures_user"
+   092_feature_flags.sql: CREATE INDEX without IF NOT EXISTS: "idx_feature_flag_exposures_flag"
+   092_feature_flags.sql: CREATE INDEX without IF NOT EXISTS: "idx_ab_test_results_flag"
+   100_ai_token_usage_tracking.sql: CREATE TABLE without IF NOT EXISTS: "ai_token_usage"
+   100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_user_id"
+   100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_department_id"
+   100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_created_at"
+   100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_model_name"
+   100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_date_range"
+
+📊 107 migrations — 0 errors, 91 warnings.
+

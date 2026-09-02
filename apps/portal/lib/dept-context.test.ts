@@ -36,9 +36,9 @@ describe("getDepartmentContext", () => {
       }),
     });
 
-    const result = await getDepartmentContext({ department: "safety" });
+    const result = await getDepartmentContext({ department: "drilling" });
 
-    expect(result.dept.name).toBe("safety");
+    expect(result.dept.name).toBe("drilling");
     expect(result.deptId).toBe("dept-uuid-123");
     expect(result.supabase).toBeDefined();
     expect(result.today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -83,16 +83,16 @@ describe("requireDepartment", () => {
   });
 
   it("calls notFound when department is not allowed", () => {
-    expect(() => requireDepartment("safety", "control-room")).toThrow("NEXT_NOT_FOUND");
+    expect(() => requireDepartment("drilling", "control-room")).toThrow("NEXT_NOT_FOUND");
     expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("allows department when in array of allowed departments", () => {
-    expect(() => requireDepartment("safety", ["control-room", "safety"])).not.toThrow();
+    expect(() => requireDepartment("drilling", ["control-room", "drilling"])).not.toThrow();
   });
 
   it("calls notFound when department is not in allowed array", () => {
-    expect(() => requireDepartment("drilling", ["control-room", "safety"])).toThrow(
+    expect(() => requireDepartment("drilling", ["control-room", "training"])).toThrow(
       "NEXT_NOT_FOUND",
     );
     expect(notFound).toHaveBeenCalledTimes(1);

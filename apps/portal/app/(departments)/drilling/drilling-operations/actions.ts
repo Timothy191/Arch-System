@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { drillOperationSchema } from "@repo/contract/schemas/drill.schema";
 import type { DrillOperationInput } from "@repo/contract/schemas/drill.schema";
 
-export interface ActionResult<T = unknown> {
+interface ActionResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -56,7 +56,7 @@ export async function upsertDrillOperationAction(
 
     const { data, error } = await supabase
       .from("drill_operations")
-      .upsert(upsertData as any, {
+      .upsert(upsertData as unknown as Record<string, unknown>, {
         onConflict: "machine_id,operation_date,shift_type",
       })
       .select()
@@ -70,70 +70,11 @@ export async function upsertDrillOperationAction(
     revalidatePath("/drilling/drilling-operations");
 
     return { success: true, data };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unexpected server error during drill operation upsert";
     return {
       success: false,
-      error: err.message || "Unexpected server error during drill operation upsert",
+      error: message,
     };
-  }
-}
-
-// AGENT-TRACE: Server Action to fetch drill operations for a specific date and department
-export async function getDrillOperationsAction({
-  departmentId,
-  date,
-}: {
-  departmentId: string;
-  date: string;
-}): Promise<ActionResult> {
-  try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const { data, error } = await supabase
-      .from("drill_operations")
-      .select("*")
-      .eq("department_id", departmentId)
-      .eq("operation_date", date)
-      .order("operation_date", { ascending: false });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, data };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to fetch drill operations" };
-  }
-}
-
-// AGENT-TRACE: Server Action to execute archival of drill operations older than 30 days
-export async function archiveStaleDrillOperationsAction(): Promise<ActionResult> {
-  try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const { error } = await supabase.rpc("archive_old_drill_operations");
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    revalidatePath("/drilling");
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Archival operation failed" };
   }
 }

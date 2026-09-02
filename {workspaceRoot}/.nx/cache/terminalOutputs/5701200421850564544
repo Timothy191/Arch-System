@@ -1,0 +1,8 @@
+> nx run @repo/rate-limiter:type-check
+
+> pnpm run type-check
+
+
+> @repo/rate-limiter@1.0.0 type-check /home/tim/Documents/Arch-System/packages/rate-limiter
+> tsc --noEmit
+

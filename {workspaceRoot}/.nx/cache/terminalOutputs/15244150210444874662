@@ -1,0 +1,8 @@
+> nx run features-auth-ui:lint
+
+> pnpm run lint
+
+
+> @repo/auth/ui@1.0.0 lint /home/tim/Documents/Arch-System/libs/features/auth/ui
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

@@ -9,8 +9,13 @@ process.env.DISABLE_RATE_LIMIT = "false";
 process.env.NEXT_PUBLIC_FUXA_URL = "http://localhost:1881";
 
 // Jest setup file — provide Web API globals that Next.js server modules expect
-
 // but jsdom may not define in all versions.
+
+jest.mock("next/cache", () => ({
+  unstable_cache: jest.fn((cb) => cb),
+  revalidatePath: jest.fn(),
+  revalidateTag: jest.fn(),
+}));
 
 global.Request =
   global.Request ||

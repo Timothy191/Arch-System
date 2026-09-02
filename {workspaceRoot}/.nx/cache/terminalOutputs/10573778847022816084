@@ -1,0 +1,28 @@
+> nx run @repo/theme:lint:tokens
+
+> pnpm run lint:tokens
+
+
+> @repo/theme@1.0.0 lint:tokens /home/tim/Documents/Arch-System/packages/theme
+> node scripts/validate-tokens.mjs
+
+
+📦  Found 278 defined tokens across variables.css + variables-generated.css
+🔗  Found 161 var() references in preset.ts
+
+── Check 1: All var() references exist in CSS ────────────────────
+  ✅  All references are defined
+
+── Check 2: No --arch* primitives in semantic utility sections ───
+  ✅  No primitive leaks in semantic sections
+
+── Check 3: Deprecated alias usage in preset.ts ──────────────────
+  ✅  No deprecated aliases in preset.ts
+
+── Check 4: Token drift between tokens.json and variables.css ────
+  ✅  No token drift detected
+
+─────────────────────────────────────────────────────────────────
+
+✅  Token validation PASSED — 278 tokens, 161 references, all clean.
+

@@ -1,0 +1,102 @@
+> nx run @repo/errors:test
+
+> pnpm run test
+
+
+> @repo/errors@1.0.0 test /home/tim/Documents/Arch-System/packages/errors
+> jest --passWithNoTests
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/__tests__/[22m[1merrors.test.ts[22m
+  AppError (base class)
+    constructor overloads
+      [32m✓[39m [2mcreates with message only (3 ms)[22m
+      [32m✓[39m [2mcreates with message and code string (1 ms)[22m
+      [32m✓[39m [2mcreates with message, code, and statusCode[22m
+      [32m✓[39m [2mcreates with options object[22m
+      [32m✓[39m [2mmerges extra options into context[22m
+    error inheritance
+      [32m✓[39m [2mis instance of Error (1 ms)[22m
+      [32m✓[39m [2mis instance of AppError[22m
+      [32m✓[39m [2mhas correct stack trace (9 ms)[22m
+  ValidationError
+    [32m✓[39m [2muses VALIDATION_ERROR code and 400 status[22m
+    [32m✓[39m [2mplaces field and value into context (1 ms)[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mhandles undefined value correctly (1 ms)[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  AuthError
+    [32m✓[39m [2muses AUTH_ERROR code and 401 status (1 ms)[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mis instance of AppError (1 ms)[22m
+  ForbiddenError
+    [32m✓[39m [2muses FORBIDDEN_ERROR code and 403 status[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  NotFoundError
+    [32m✓[39m [2muses NOT_FOUND code and 404 status (1 ms)[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  ConflictError
+    [32m✓[39m [2muses CONFLICT_ERROR code and 409 status[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  DatabaseError
+    [32m✓[39m [2muses DATABASE_ERROR code and 500 status (1 ms)[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  RateLimitError
+    [32m✓[39m [2muses RATE_LIMIT_ERROR code and 429 status (1 ms)[22m
+    [32m✓[39m [2mmerges extra options into context[22m
+    [32m✓[39m [2mis instance of AppError (1 ms)[22m
+  APIError
+    [32m✓[39m [2mcreates with Response object (1 ms)[22m
+    [32m✓[39m [2mcreates with options object[22m
+    [32m✓[39m [2mmerges extra options into context (1 ms)[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mis instance of AppError[22m
+  FetchTimeoutError
+    [32m✓[39m [2muses FETCH_TIMEOUT code and 504 status (1 ms)[22m
+    [32m✓[39m [2mcreates with custom message[22m
+    [32m✓[39m [2mincludes timeout details in context[22m
+    [32m✓[39m [2mmerges extra options into context (1 ms)[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mis instance of APIError and AppError[22m
+  NetworkError
+    [32m✓[39m [2muses NETWORK_ERROR code and 503 status (1 ms)[22m
+    [32m✓[39m [2mcreates with custom message[22m
+    [32m✓[39m [2mincludes network details in context[22m
+    [32m✓[39m [2mmerges extra options into context (1 ms)[22m
+    [32m✓[39m [2mpreserves cause chain[22m
+    [32m✓[39m [2mis instance of APIError and AppError[22m
+  Type Guards
+    isAppError
+      [32m✓[39m [2mreturns true for AppError instances (1 ms)[22m
+      [32m✓[39m [2mreturns false for non-AppError values[22m
+    isValidationError
+      [32m✓[39m [2mreturns true for ValidationError instances (1 ms)[22m
+      [32m✓[39m [2mreturns false for other error types[22m
+    isAuthError
+      [32m✓[39m [2mreturns true for AuthError instances (2 ms)[22m
+      [32m✓[39m [2mreturns false for other error types[22m
+    isNotFoundError
+      [32m✓[39m [2mreturns true for NotFoundError instances[22m
+      [32m✓[39m [2mreturns false for other error types (1 ms)[22m
+    isFetchTimeoutError
+      [32m✓[39m [2mreturns true for FetchTimeoutError instances[22m
+      [32m✓[39m [2mreturns false for other error types[22m
+    isNetworkError
+      [32m✓[39m [2mreturns true for NetworkError instances[22m
+      [32m✓[39m [2mreturns false for other error types (1 ms)[22m
+  Error Chaining and Context
+    [32m✓[39m [2msupports deep error chaining[22m
+    [32m✓[39m [2mcontext can hold complex nested objects (1 ms)[22m
+    [32m✓[39m [2mmultiple error instances are independent (1 ms)[22m
+
+[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m66 passed[39m[22m, 66 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.182 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m

@@ -1,0 +1,76 @@
+> nx run @repo/rate-limiter:test
+
+> pnpm run test
+
+
+> @repo/rate-limiter@1.0.0 test /home/tim/Documents/Arch-System/packages/rate-limiter
+> jest --passWithNoTests
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/__tests__/[22m[1mrate-limiter.test.ts[22m
+  MemoryStore
+    get
+      [32m✓[39m [2mreturns null for non-existent key (2 ms)[22m
+      [32m✓[39m [2mreturns value for existing key (1 ms)[22m
+      [32m✓[39m [2mreturns null for expired key (10 ms)[22m
+    set
+      [32m✓[39m [2mstores value with TTL[22m
+      [32m✓[39m [2moverwrites existing value (1 ms)[22m
+    delete
+      [32m✓[39m [2mremoves existing key[22m
+      [32m✓[39m [2mhandles non-existent key gracefully[22m
+    clear
+      [32m✓[39m [2mremoves all entries[22m
+  RedisStore
+    get
+      [32m✓[39m [2mreturns value from client (1 ms)[22m
+      [32m✓[39m [2mreturns null when client returns null[22m
+    set
+      [32m✓[39m [2mcalls client set with EX option (1 ms)[22m
+      [32m✓[39m [2mensures minimum TTL of 1 second (1 ms)[22m
+      [32m✓[39m [2mhandles negative TTL by using 1[22m
+    delete
+      [32m✓[39m [2mcalls client del[22m
+    eval
+      [32m✓[39m [2mcalls client eval with script (1 ms)[22m
+      [32m✓[39m [2mthrows when client does not support eval (10 ms)[22m
+  FixedWindowStrategy
+    [32m✓[39m [2mallows request within limit (1 ms)[22m
+    [32m✓[39m [2mblocks request exceeding limit (1 ms)[22m
+    [32m✓[39m [2mresets count after window expires (150 ms)[22m
+    [32m✓[39m [2mtracks different users separately[22m
+    [32m✓[39m [2mhandles corrupted store data gracefully (1 ms)[22m
+  SlidingWindowStrategy
+    [32m✓[39m [2mallows request within limit (1 ms)[22m
+    [32m✓[39m [2mblocks request exceeding limit[22m
+    [32m✓[39m [2mallows requests after oldest timestamp expires (251 ms)[22m
+    [32m✓[39m [2mtracks different users separately[22m
+    [32m✓[39m [2mhandles corrupted store data gracefully (1 ms)[22m
+    [32m✓[39m [2mfilters out expired timestamps correctly (151 ms)[22m
+  TokenBucketStrategy
+    [32m✓[39m [2mallows request when tokens available[22m
+    [32m✓[39m [2mrefills tokens over time (202 ms)[22m
+    [32m✓[39m [2mdoes not exceed max tokens (100 ms)[22m
+    [32m✓[39m [2mtracks different users separately[22m
+    [32m✓[39m [2mhandles corrupted store data gracefully (1 ms)[22m
+    [32m✓[39m [2mcalculates correct retryAfter when blocked[22m
+  RateLimiter (Integration)
+    with FixedWindowStrategy
+      [32m✓[39m [2mallows requests within limit (1 ms)[22m
+      [32m✓[39m [2mblocks requests exceeding limit[22m
+      [32m✓[39m [2muses custom key prefix (1 ms)[22m
+    with SlidingWindowStrategy
+      [32m✓[39m [2mallows requests within limit[22m
+      [32m✓[39m [2mblocks requests exceeding limit (1 ms)[22m
+    with TokenBucketStrategy
+      [32m✓[39m [2mallows requests when tokens available[22m
+      [32m✓[39m [2mrefills tokens over time (401 ms)[22m
+  Edge Cases
+    [32m✓[39m [2mhandles zero limit gracefully (1 ms)[22m
+    [32m✓[39m [2mhandles very large window sizes[22m
+    [32m✓[39m [2mhandles sequential requests correctly (1 ms)[22m
+
+[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m43 passed[39m[22m, 43 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.472 s, estimated 2 s
+[2mRan all test suites[22m[2m.[22m

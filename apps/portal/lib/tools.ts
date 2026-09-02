@@ -1,5 +1,8 @@
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { PRODUCTIVITY_TOOLS } from "@repo/departments/data-access";
+import { cachedRSC } from "@/lib/server-cache";
+import { withCache } from "@/lib/cache-utils";
+import { CacheCategory } from "@repo/redis";
 
 interface Tool {
   id: string;
@@ -23,47 +26,65 @@ interface ExternalTool {
  * Fetch productivity tools from database.
  * Falls back to PRODUCTIVITY_TOOLS constant if database query fails.
  */
-export async function getTools(): Promise<Tool[]> {
-  const db = await createReadReplicaClient();
+export async function getTools(cookieList?: Array<{ name: string; value: string }>): Promise<Tool[]> {
+  return cachedRSC(
+    ["hub", "tools"],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
 
-  const { data, error } = await db
-    .from("tools")
-    .select("id, name, display_name, description, icon, color")
-    .eq("active", true)
-    .order("sort_order", { ascending: true });
+          const { data, error } = await db
+            .from("tools")
+            .select("id, name, display_name, description, icon, color")
+            .eq("active", true)
+            .order("sort_order", { ascending: true });
 
-  if (error) {
-    // eslint-disable-next-line no-console
-    console.warn("Failed to fetch tools from database, falling back to constant:", error);
-    return PRODUCTIVITY_TOOLS.map((t, i) => ({
-      id: String(i),
-      name: t.name,
-      displayName: t.displayName,
-      description: t.description,
-      icon: t.icon,
-      color: t.color,
-    }));
-  }
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.warn("Failed to fetch tools from database, falling back to constant:", error);
+            return PRODUCTIVITY_TOOLS.map((t, i) => ({
+              id: String(i),
+              name: t.name,
+              displayName: t.displayName,
+              description: t.description,
+              icon: t.icon,
+              color: t.color,
+            }));
+          }
 
-  if (!data || data.length === 0) {
-    return PRODUCTIVITY_TOOLS.map((t, i) => ({
-      id: String(i),
-      name: t.name,
-      displayName: t.displayName,
-      description: t.description,
-      icon: t.icon,
-      color: t.color,
-    }));
-  }
+          if (!data || data.length === 0) {
+            return PRODUCTIVITY_TOOLS.map((t, i) => ({
+              id: String(i),
+              name: t.name,
+              displayName: t.displayName,
+              description: t.description,
+              icon: t.icon,
+              color: t.color,
+            }));
+          }
 
-  return data.map((t) => ({
-    id: t.id,
-    name: t.name,
-    displayName: t.display_name,
-    description: t.description,
-    icon: t.icon,
-    color: t.color,
-  }));
+          return data.map((t) => ({
+            id: t.id,
+            name: t.name,
+            displayName: t.display_name,
+            description: t.description,
+            icon: t.icon,
+            color: t.color,
+          }));
+        },
+        {
+          category: CacheCategory.METRICS,
+          keyParts: ["hub", "tools"],
+          tags: ["table:tools"],
+        }
+      );
+    },
+    {
+      revalidate: 3600,
+      tags: ["table:tools"],
+    }
+  );
 }
 
 /**

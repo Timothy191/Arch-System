@@ -1,0 +1,44 @@
+> nx run features-access-control-ui:type-check
+
+> pnpm run type-check
+
+
+> @repo/access-control/ui@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/access-control/ui
+> tsc --noEmit
+
+[96msrc/StatusBadge.tsx[0m:[93m81[0m:[93m5[0m - [91merror[0m[90m TS7026: [0mJSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+[7m81[0m     <span
+[7m  [0m [91m    ~~~~~[0m
+[7m82[0m       className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${sizeClass} ${config.bg} ${config.text}`}
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m83[0m     >
+[7m  [0m [91m~~~~~[0m
+
+[96msrc/StatusBadge.tsx[0m:[93m81[0m:[93m5[0m - [91merror[0m[90m TS7016: [0mCould not find a declaration file for module 'react/jsx-runtime'. '/home/tim/Documents/Arch-System/node_modules/.pnpm/react@19.2.7/node_modules/react/jsx-runtime.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/react` if it exists or add a new declaration (.d.ts) file containing `declare module 'react/jsx-runtime';`
+
+[7m 81[0m     <span
+[7m   [0m [91m    ~~~~~[0m
+[7m 82[0m       className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${sizeClass} ${config.bg} ${config.text}`}
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 85[0m       {config.label}
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~[0m
+[7m 86[0m     </span>
+[7m   [0m [91m~~~~~~~~~~~[0m
+
+[96msrc/StatusBadge.tsx[0m:[93m84[0m:[93m7[0m - [91merror[0m[90m TS7026: [0mJSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+[7m84[0m       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${config.dot}`} />
+[7m  [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/StatusBadge.tsx[0m:[93m86[0m:[93m5[0m - [91merror[0m[90m TS7026: [0mJSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.
+
+[7m86[0m     </span>
+[7m  [0m [91m    ~~~~~~~[0m
+
+
+Found 4 errors in the same file, starting at: src/StatusBadge.tsx[90m:81[0m
+
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 1.[39m

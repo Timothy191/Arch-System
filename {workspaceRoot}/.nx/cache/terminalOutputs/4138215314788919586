@@ -1,0 +1,707 @@
+> nx run portal:test
+
+> pnpm run test
+
+
+> portal@1.0.0 test /home/tim/Documents/Arch-System/apps/portal
+> jest --passWithNoTests --maxWorkers=50%
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/sync/playback/[22m[1mroute.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Inngest down {[39m
+[31m        timestamp: '2026-09-02T05:00:23.416Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat handlePlaybackRequest ([22m[2mapp/api/sync/playback/route.ts[2m:99:13)[22m[2m[22m
+[2m      [2mat withRateLimit ([22m[2mlib/api/rate-limit-middleware.ts[2m:256:20)[22m[2m[22m
+[2m      [2mat POST.maxSize ([22m[2mapp/api/sync/playback/route.ts[2m:113:29)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mapp/api/sync/playback/route.test.ts[39m[0m[2m:181:17)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/weather/[22m[1mWeatherWidget.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/ai/[22m[1mchunking.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mshift-closeout.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Not authenticated {[39m
+[31m        timestamp: '2026-09-02T05:00:23.328Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat setPin ([22m[2mlib/shift-closeout.ts[2m:250:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/shift-closeout.test.ts[39m[0m[2m:102:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Employee not found {[39m
+[31m        timestamp: '2026-09-02T05:00:23.393Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat setPin ([22m[2mlib/shift-closeout.ts[2m:261:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/shift-closeout.test.ts[39m[0m[2m:107:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Only supervisors and admins can set PINs {[39m
+[31m        timestamp: '2026-09-02T05:00:23.401Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat setPin ([22m[2mlib/shift-closeout.ts[2m:266:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/shift-closeout.test.ts[39m[0m[2m:112:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Not authenticated {[39m
+[31m        timestamp: '2026-09-02T05:00:23.704Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat [22m[2mlib/shift-closeout.ts[2m:372:17[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/shift-closeout.test.ts[39m[0m[2m:196:5)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/nav/[22m[1mServicesDropdown.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      An update to ServicesDropdown inside a test was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that causes React state updates should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* fire events that update state */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m    [0m [90m 120 |[39m       [33m.[39mthen((data) [33m=>[39m {[22m
+[2m     [90m 121 |[39m         [36mif[39m ([33m![39mcancelled) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 122 |[39m           setWeather(data)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 123 |[39m           setWeatherLoading([36mfalse[39m)[33m;[39m[22m
+[2m     [90m 124 |[39m         }[22m
+[2m     [90m 125 |[39m       })[0m[22m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18758:19[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat warnIfUpdatesNotWrappedWithActDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18757:9)[22m[2m[22m
+[2m      [2mat scheduleUpdateOnFiber ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16409:11)[22m[2m[22m
+[2m      [2mat dispatchSetStateInternal ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9170:13)[22m[2m[22m
+[2m      [2mat dispatchSetState ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9127:7)[22m[2m[22m
+[2m      [2mat setWeather ([22m[2mcomponents/nav/ServicesDropdown.tsx[2m:122:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      An update to ServicesDropdown inside a test was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that causes React state updates should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* fire events that update state */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m    [0m [90m 121 |[39m         [36mif[39m ([33m![39mcancelled) {[22m
+[2m     [90m 122 |[39m           setWeather(data)[33m;[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 123 |[39m           setWeatherLoading([36mfalse[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 124 |[39m         }[22m
+[2m     [90m 125 |[39m       })[22m
+[2m     [90m 126 |[39m       [33m.[39m[36mcatch[39m(() [33m=>[39m {[0m[22m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18758:19[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat warnIfUpdatesNotWrappedWithActDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18757:9)[22m[2m[22m
+[2m      [2mat scheduleUpdateOnFiber ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16409:11)[22m[2m[22m
+[2m      [2mat dispatchSetStateInternal ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9170:13)[22m[2m[22m
+[2m      [2mat dispatchSetState ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9127:7)[22m[2m[22m
+[2m      [2mat setWeatherLoading ([22m[2mcomponents/nav/ServicesDropdown.tsx[2m:123:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      An update to ServicesDropdown inside a test was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that causes React state updates should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* fire events that update state */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m    [0m [90m 120 |[39m       [33m.[39mthen((data) [33m=>[39m {[22m
+[2m     [90m 121 |[39m         [36mif[39m ([33m![39mcancelled) {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 122 |[39m           setWeather(data)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 123 |[39m           setWeatherLoading([36mfalse[39m)[33m;[39m[22m
+[2m     [90m 124 |[39m         }[22m
+[2m     [90m 125 |[39m       })[0m[22m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18758:19[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat warnIfUpdatesNotWrappedWithActDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18757:9)[22m[2m[22m
+[2m      [2mat scheduleUpdateOnFiber ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16409:11)[22m[2m[22m
+[2m      [2mat dispatchSetStateInternal ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9170:13)[22m[2m[22m
+[2m      [2mat dispatchSetState ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9127:7)[22m[2m[22m
+[2m      [2mat setWeather ([22m[2mcomponents/nav/ServicesDropdown.tsx[2m:122:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      An update to ServicesDropdown inside a test was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that causes React state updates should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* fire events that update state */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m    [0m [90m 121 |[39m         [36mif[39m ([33m![39mcancelled) {[22m
+[2m     [90m 122 |[39m           setWeather(data)[33m;[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 123 |[39m           setWeatherLoading([36mfalse[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 124 |[39m         }[22m
+[2m     [90m 125 |[39m       })[22m
+[2m     [90m 126 |[39m       [33m.[39m[36mcatch[39m(() [33m=>[39m {[0m[22m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18758:19[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat warnIfUpdatesNotWrappedWithActDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18757:9)[22m[2m[22m
+[2m      [2mat scheduleUpdateOnFiber ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16409:11)[22m[2m[22m
+[2m      [2mat dispatchSetStateInternal ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9170:13)[22m[2m[22m
+[2m      [2mat dispatchSetState ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:9127:7)[22m[2m[22m
+[2m      [2mat setWeatherLoading ([22m[2mcomponents/nav/ServicesDropdown.tsx[2m:123:11)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/departments/components/engineering/breakdowns/[22m[1mBookInForm.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/[department]/daily-log/[22m[1mDailyLogForm.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: `cookies` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context {[39m
+[31m        timestamp: '2026-09-02T05:00:24.138Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat /home/tim/Documents/Arch-System/apps/portal/app/(departments)[22m[2m../../../../../../[department]/daily-log/DailyLogForm.tsx[2m:230:15[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Database error {[39m
+[31m        timestamp: '2026-09-02T05:00:24.283Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat onSubmit (/home/tim/Documents/Arch-System/apps/portal/app/(departments)[22m[2m../../../../../../[department]/daily-log/DailyLogForm.tsx[2m:183:15)[22m[2m[22m
+[2m      [2mat name ([22m[2m../../node_modules/.pnpm/react-hook-form@7.79.0_react@19.2.7/node_modules/react-hook-form/src/logic/createFormControl.ts[2m:1568:30)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/auth/components/[22m[1mLoginForm.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/system/[22m[1mSystemTray.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(auth)/update-password/[22m[1mpage.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/plugins/machines/[22m[1mplugin.machine.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/dashboard/services/[22m[1mdashboard-service.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: RPC not found {[39m
+[31m        timestamp: '2026-09-02T05:00:24.846Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat fetchDashboard ([22m[2mfeatures/dashboard/services/dashboard-service.ts[2m:32:13)[22m[2m[22m
+[2m      [2mat [22m[2m../../packages/supabase/src/tracing.ts[2m:26:22[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mfeatures/dashboard/services/dashboard-service.test.ts[39m[0m[2m:98:5)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/sync/[22m[1msync-queue.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] DATABASE_ERROR: Sync queue sync failed {[39m
+[31m        timestamp: '2026-09-02T05:00:24.790Z',[39m
+[31m        statusCode: 500,[39m
+[31m        context: {[39m
+[31m          status: 500,[39m
+[31m          statusText: 'Error',[39m
+[31m          operation: 'sync',[39m
+[31m          context: 'sync_queue_replay',[39m
+[31m          idempotencyKey: 'key-retry'[39m
+[31m        },[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat SyncQueue.processQueue ([22m[2mlib/sync/sync-queue.ts[2m:180:19)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/sync/sync-queue.test.ts[39m[0m[2m:169:7)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] DATABASE_ERROR: Sync queue sync failed {[39m
+[31m        timestamp: '2026-09-02T05:00:24.844Z',[39m
+[31m        statusCode: 500,[39m
+[31m        context: {[39m
+[31m          status: 500,[39m
+[31m          statusText: 'Error',[39m
+[31m          operation: 'sync',[39m
+[31m          context: 'sync_queue_replay',[39m
+[31m          idempotencyKey: 'key-retry2'[39m
+[31m        },[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat SyncQueue.processQueue ([22m[2mlib/sync/sync-queue.ts[2m:180:19)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/sync/sync-queue.test.ts[39m[0m[2m:192:7)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/analytics/components/[22m[1mExportButton.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(auth)/login/[22m[1mpage.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mweather-api.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/[22m[1mPagination.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/system/[22m[1mSplitWindowLayout.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(auth)/reset-password/[22m[1mpage.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/plugins/rust-telemetry/[22m[1mroute.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: fs crash {[39m
+[31m        timestamp: '2026-09-02T05:00:25.427Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat handleTelemetryRequest ([22m[2mapp/api/plugins/rust-telemetry/route.ts[2m:135:13)[22m[2m[22m
+[2m      [2mat withRateLimit ([22m[2mlib/api/rate-limit-middleware.ts[2m:256:20)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mapp/api/plugins/rust-telemetry/route.test.ts[39m[0m[2m:104:19)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museFormDraft.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/plugins/machines/[22m[1morchestrator.machine.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/access-card-actions/card-actions/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mcache-utils.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/webhooks/[id]/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/departments/components/engineering/breakdowns/[22m[1mactions.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Unauthorized {[39m
+[31m        timestamp: '2026-09-02T05:00:25.633Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat bookOutBreakdown ([22m[2mfeatures/departments/components/engineering/breakdowns/actions.ts[2m:73:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mfeatures/departments/components/engineering/breakdowns/actions.test.ts[39m[0m[2m:127:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Unauthorized {[39m
+[31m        timestamp: '2026-09-02T05:00:25.667Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat directCheckout ([22m[2mfeatures/departments/components/engineering/breakdowns/actions.ts[2m:131:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mfeatures/departments/components/engineering/breakdowns/actions.test.ts[39m[0m[2m:151:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: Unauthorized {[39m
+[31m        timestamp: '2026-09-02T05:00:25.676Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat softDeleteBreakdown ([22m[2mfeatures/departments/components/engineering/breakdowns/actions.ts[2m:185:13)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mfeatures/departments/components/engineering/breakdowns/actions.test.ts[39m[0m[2m:183:5)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/ui/[22m[1mGlassCard.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/export/fuel-logs/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/errors/[22m[1merror-logger.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/telemetry/drilling/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mcontrol-room-shift-report.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/system/[22m[1mViewportBoundaries.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/accessibility/__tests__/[22m[1mSkipLinks.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(auth)/[22m[1mlayout.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/analytics/components/[22m[1mPDFDownloadButton.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museSystemMetrics.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/hub/[22m[1mpage.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ProductionTrendSection> is an async Client Component. Only Server Components can be async at the moment. This error is often caused by accidentally adding `'use client'` to a module that was originally written for the server.[39m
+[2m[22m
+[2m    [0m [90m 158 |[39m   it([32m"renders without throwing when all data-fetchers succeed"[39m[33m,[39m [36masync[39m () [33m=>[39m {[22m
+[2m     [90m 159 |[39m     [36mconst[39m jsx [33m=[39m [36mawait[39m [33mHubPage[39m()[33m;[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 160 |[39m     [36mconst[39m { container } [33m=[39m render(jsx)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 161 |[39m     [90m// Page renders some hub UI — not the error boundary[39m[22m
+[2m     [90m 162 |[39m     expect(container[33m.[39mfirstChild)[33m.[39mnot[33m.[39mtoBeNull()[33m;[39m[22m
+[2m     [90m 163 |[39m     expect(screen[33m.[39mqueryByText([35m/Hub Error/i[39m))[33m.[39mtoBeNull()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat renderWithHooks ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:7645:21)[22m[2m[22m
+[2m      [2mat updateFunctionComponent ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:10166:19)[22m[2m[22m
+[2m      [2mat beginWork ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:11778:18)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17641:22)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mapp/hub/page.test.tsx[39m[0m[2m:160:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      A component suspended inside an `act` scope, but the `act` call was not awaited. When testing React components that depend on asynchronous data, you must await the result:[39m
+[31m      [39m
+[31m      await act(() => ...)[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:890:23[22m[2m[22m
+[2m      [2mat invokeTheCallbackFunction ([22m[2m../../node_modules/.pnpm/jsdom@26.1.0/node_modules/jsdom/lib/jsdom/living/generated/Function.js[2m:19:26)[22m[2m[22m
+[2m      [2mat [22m[2m../../node_modules/.pnpm/jsdom@26.1.0/node_modules/jsdom/lib/jsdom/browser/Window.js[2m:613:9[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      A suspended resource finished loading inside a test, but the event was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that resolves suspended data should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* finish loading suspended data */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m      [2mat pingSuspendedRoot ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18600:17)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      A suspended resource finished loading inside a test, but the event was not wrapped in act(...).[39m
+[31m      [39m
+[31m      When testing, code that resolves suspended data should be wrapped into act(...):[39m
+[31m      [39m
+[31m      act(() => {[39m
+[31m        /* finish loading suspended data */[39m
+[31m      });[39m
+[31m      /* assert on the output */[39m
+[31m      [39m
+[31m      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act[39m
+[2m[22m
+[2m      [2mat pingSuspendedRoot ([22m[2m../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18600:17)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museThrottledState.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/auth/components/[22m[1mLoginClock.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/analytics/components/[22m[1mReportTemplate.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/c66/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mserver/[22m[1mproxy.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/[department]/hourly-loads/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/access-card-actions/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/analytics/components/[22m[1mProductionTrendChart.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/system/[22m[1mBordersAndDividers.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/webhooks/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museUnsavedChangesWarning.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/drilling/drilling-operations/[22m[1mactions.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/scada/tags/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/accessibility/__tests__/[22m[1mLiveRegion.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mdept-context.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mshift-calculation.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/metrics/prometheus/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/[department]/hourly-loads/[22m[1mhourly-loads-keys.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mfeatures/departments/components/tools/[22m[1mUniverSheet.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1muse-form-submit.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1menv.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/access-card-actions/lib/__tests__/[22m[1mprinter-detection.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1memployee.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/ai/[22m[1mschemas.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/plugins/[22m[1morchestrator.test.ts[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: computation failed {[39m
+[31m        timestamp: '2026-09-02T05:00:25.493Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat PluginOrchestrator.executeEngine ([22m[2mlib/plugins/orchestrator.ts[2m:122:15)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/plugins/orchestrator.test.ts[39m[0m[2m:181:5)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      [ERROR] UNKNOWN: hook crashed {[39m
+[31m        timestamp: '2026-09-02T05:00:26.203Z',[39m
+[31m        statusCode: undefined,[39m
+[31m        context: undefined,[39m
+[31m        url: undefined,[39m
+[31m        method: undefined[39m
+[31m      }[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m         [33m:[39m console[33m.[39mwarn[33m;[39m [90m// eslint-disable-line no-console[39m[22m
+[2m     [90m 154 |[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     logMethod([32m`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`[39m[33m,[39m {[22m
+[2m     [90m     |[39m     [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m       timestamp[33m:[39m entry[33m.[39mtimestamp[33m,[39m[22m
+[2m     [90m 157 |[39m       statusCode[33m:[39m entry[33m.[39mstatusCode[33m,[39m[22m
+[2m     [90m 158 |[39m       context[33m:[39m entry[33m.[39mcontext[33m,[39m[0m[22m
+[2m[22m
+[2m      [2mat logMethod ([22m[2mlib/errors/error-logger.ts[2m:155:5)[22m[2m[22m
+[2m      [2mat sendToMonitoring ([22m[2mlib/errors/error-logger.ts[2m:204:11)[22m[2m[22m
+[2m      [2mat [22m[2mlib/plugins/orchestrator.ts[2m:165:19[22m[2m[22m
+[2m          at async Promise.allSettled (index 0)[22m
+[2m      [2mat PluginOrchestrator.triggerHook ([22m[2mlib/plugins/orchestrator.ts[2m:174:7)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mlib/plugins/orchestrator.test.ts[39m[0m[2m:228:5)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1mreport-generation.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mshift-completeness.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/(departments)/access-card-actions/[22m[1mprinting.test.ts[22m
+  [1m● [22mConsole
+
+    [2mconsole.log[22m
+      Print spooled: request id is Magicard_300NEO-123 (1 file(s))
+[2m[22m
+[2m      [2mat log (/home/tim/Documents/Arch-System/apps/portal/app/(departments)[22m[2m../../../../../../access-card-actions/printing.ts[2m:43:15)[22m[2m[22m
+
+    [2m[33mconsole.warn[39m[22m
+[33m      CUPS 'lp' command failed or not found, falling back to mock success. Error: Error: Printer not found[39m
+[33m          at /home/tim/Documents/Arch-System/apps/portal/app/(departments)/access-card-actions/printing.test.ts:62:10[39m
+[33m          at /home/tim/Documents/Arch-System/node_modules/.pnpm/jest-mock@30.2.0/node_modules/jest-mock/build/index.js:305:39[39m
+[33m          at /home/tim/Documents/Arch-System/node_modules/.pnpm/jest-mock@30.2.0/node_modules/jest-mock/build/index.js:312:13[39m
+[33m          at mockConstructor (/home/tim/Documents/Arch-System/node_modules/.pnpm/jest-mock@30.2.0/node_modules/jest-mock/build/index.js:62:19)[39m
+[33m          at node:internal/util:491:21[39m
+[33m          at new Promise (<anonymous>)[39m
+[33m          at mockConstructor (node:internal/util:477:12)[39m
+[33m          at execAsync (/home/tim/Documents/Arch-System/apps/portal/app/(departments)/access-card-actions/printing.ts:41:32)[39m
+[33m          at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[33m          at Object.<anonymous> (/home/tim/Documents/Arch-System/apps/portal/app/(departments)/access-card-actions/printing.test.ts:77:20)[39m
+[2m[22m
+[2m    [0m [90m 45 |[39m       [90m// Fallback for development environments without CUPS[39m[22m
+[2m     [90m 46 |[39m       [90m// eslint-disable-next-line no-console[39m[22m
+[2m    [31m[1m>[22m[2m[39m[90m 47 |[39m       console[33m.[39mwarn([22m
+[2m     [90m    |[39m               [31m[1m^[22m[2m[39m[22m
+[2m     [90m 48 |[39m         [32m"CUPS 'lp' command failed or not found, falling back to mock success. Error:"[39m[33m,[39m[22m
+[2m     [90m 49 |[39m         e[33m,[39m[22m
+[2m     [90m 50 |[39m       )[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat warn (/home/tim/Documents/Arch-System/apps/portal/app/(departments)[22m[2m../../../../../../access-card-actions/printing.ts[2m:47:15)[22m[2m[22m
+[2m      [2mat Object.<anonymous> (/home/tim/Documents/Arch-System/apps/portal/app/(departments)[22m[2m../../../../../../access-card-actions/printing.test.ts[2m:77:20)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1msync-playback.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/system/[22m[1mLiveMetricsTicker.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/api/[22m[1mrate-limit-middleware.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/webhooks/[id]/logs/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/control-room/scada-status/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1mmemory-persist.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museAdaptivePerformance.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museOfflineQueue.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/accessibility/__tests__/[22m[1mFocusManager.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/__tests__/[22m[1museVirtualization.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1membedding-generation.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mcomponents/[22m[1mPerformanceListener.test.tsx[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mproduction-reconciliation.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/errors/[22m[1merror-classes.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/telemetry/push/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1mtools.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/__tests__/[22m[1museDebounce.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/[22m[1maudit.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/errors/[22m[1mutils.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/analytics/[22m[1mforecast.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/reports/[22m[1mshift-integrity.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1mshift-rollover-notification.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/metabase/embed/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/metrics/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mapp/api/auth/login/[22m[1mroute.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museFocusMode.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1mshift-completeness-check.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1morphaned-record-detection.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mlib/jobs/[22m[1mdaily-pdf-report-generation.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mhooks/[22m[1museNavigationState.test.ts[22m
+[999D[K
+[1mTest Suites: [22m[1m[32m96 passed[39m[22m, 96 total
+[1mTests:       [22m[1m[32m678 passed[39m[22m, 678 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5.145 s
+[2mRan all test suites[22m[2m.[22m
+[1mForce exiting Jest: [22mHave you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

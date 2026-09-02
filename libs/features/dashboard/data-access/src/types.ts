@@ -21,15 +21,4 @@ export interface MonolithizedDashboardPayload {
     idempotency_key: string;
     last_synced_at: string;
   }>;
-  safety_incidents: Array<{
-    id: string;
-    incident_date: string;
-    shift_type: "day" | "night";
-    incident_type: "near-miss" | "incident" | "lost-time" | "equipment-damage";
-    description: string;
-    status: "open" | "under-investigation" | "resolved" | "closed";
-    sync_status: "pending" | "synced" | "failed";
-    idempotency_key: string;
-    last_synced_at: string;
-  }>;
 }

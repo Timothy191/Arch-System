@@ -26,7 +26,7 @@ import Link from "next/link";
 import { withCache } from "@/lib/cache-utils";
 import { cachedRSC } from "@/lib/server-cache";
 import { CacheCategory } from "@repo/redis";
-import { getAccessibleDepartmentNames } from "@/lib/hub-departments";
+import { getAccessibleDepartmentNames, getEmployeeRole } from "@/lib/hub-departments";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -34,8 +34,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Hub — Arch Systems",
   description:
-    "Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, safety, training, and satellite monitoring dashboards.",
+    "Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, and satellite monitoring dashboards.",
 };
+
 
 async function getDashboardCounts(
   today: string,
@@ -47,21 +48,17 @@ async function getDashboardCounts(
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
-          const [incidents, breakdowns, machines] = await Promise.all([
-            db
-              .from("safety_incidents")
-              .select("id", { count: "exact", head: true })
-              .eq("incident_date", today)
-              .eq("status", "open"),
+          const [breakdowns, machines] = await Promise.all([
             db
               .from("breakdowns")
               .select("id", { count: "exact", head: true })
               .eq("status", "active")
               .is("deleted_at", null),
+
             db.from("machines").select("id", { count: "exact", head: true }).eq("active", false),
           ]);
           return {
-            incidentCount: incidents.count ?? 0,
+            incidentCount: 0,
             breakdownCount: breakdowns.count ?? 0,
             offlineMachineCount: machines.count ?? 0,
           };
@@ -69,13 +66,13 @@ async function getDashboardCounts(
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "counts", today],
-          tags: ["table:safety_incidents", "table:breakdowns", "table:machines"],
+          tags: [ "table:breakdowns", "table:machines"],
         },
       );
     },
     {
       revalidate: 300,
-      tags: ["table:safety_incidents", "table:breakdowns", "table:machines"],
+      tags: [ "table:breakdowns", "table:machines"],
     },
   );
 }
@@ -164,51 +161,8 @@ async function getRecentAlertEvents(
           const db = await createReadReplicaClient(cookieList);
           const events: AlertEvent[] = [];
 
-          // Fetch recent open safety incidents with actual severity levels
-          const { data: incidents } = await db
-            .from("safety_incidents")
-            .select(
-              "id, description, created_at, severity_id, location, severity:safety_severities(level)",
-            )
-            .eq("incident_date", today)
-            .eq("status", "open")
-            .order("created_at", { ascending: false })
-            .limit(5);
-
-          function mapSeverityLevel(level?: string): AlertEvent["severity"] {
-            if (!level) return "warning";
-            const lower = level.toLowerCase();
-            if (lower.includes("critical") || lower.includes("high") || lower.includes("severe")) {
-              return "critical";
-            }
-            if (
-              lower.includes("warning") ||
-              lower.includes("medium") ||
-              lower.includes("moderate")
-            ) {
-              return "warning";
-            }
-            return "info";
-          }
-
-          if (incidents) {
-            for (const incident of incidents) {
-              const sev = incident.severity as unknown as {
-                level: string;
-              } | null;
-              events.push({
-                id: `incident-${incident.id}`,
-                type: "incident",
-                title: incident.location ? `${incident.location}: Incident` : "Safety Incident",
-                description: incident.description,
-                timestamp: incident.created_at,
-                severity: mapSeverityLevel(sev?.level),
-                href: "/safety/daily-log",
-              });
-            }
-          }
-
           // Fetch recent active breakdowns
+
           const { data: breakdownsData } = await db
             .from("breakdowns")
             .select("id, machine_name, machine_type, reason, created_at, date_in")
@@ -241,13 +195,13 @@ async function getRecentAlertEvents(
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "alerts", today],
-          tags: ["table:safety_incidents", "table:breakdowns"],
+          tags: [ "table:breakdowns"],
         },
       );
     },
     {
       revalidate: 300,
-      tags: ["table:safety_incidents", "table:breakdowns"],
+      tags: [ "table:breakdowns"],
     },
   );
 }
@@ -274,7 +228,7 @@ async function getLiveDepartmentMetrics(
             "table:hourly_loads",
             "table:daily_logs",
             "table:production_logs",
-            "table:safety_incidents",
+            
             "table:breakdowns",
             "table:machines",
           ],
@@ -287,7 +241,7 @@ async function getLiveDepartmentMetrics(
         "table:hourly_loads",
         "table:daily_logs",
         "table:production_logs",
-        "table:safety_incidents",
+        
         "table:breakdowns",
         "table:machines",
       ],
@@ -328,16 +282,10 @@ export default async function HubPage() {
   ] = await Promise.allSettled([
     getDashboardCounts(today, cookieList),
     getAccessibleDepartmentNames(userId, cookieList),
-    getTools(),
+    getTools(cookieList),
     getRecentAlertEvents(today, cookieList),
     getLiveDepartmentMetrics(today, cookieList),
-    // AGENT-TRACE: Fetch user role in parallel to conditionally show executive dashboard link
-    supabase
-      .from("employees")
-      .select("role")
-      .eq("auth_id", userId)
-      .single()
-      .then(({ data }) => data?.role ?? null),
+    getEmployeeRole(userId, cookieList),
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =
@@ -406,12 +354,11 @@ export default async function HubPage() {
             accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
           }
           secondaryHref={
-            accessibleDeptIds.includes("training")
-              ? "/training"
-              : accessibleDeptIds.length > 0
-                ? `/${accessibleDeptIds[0]}`
-                : "/"
+            accessibleDeptIds.length > 0
+              ? `/${accessibleDeptIds[0]}`
+              : "/"
           }
+
           secondaryLabel="System Guidelines"
           departments={departments}
           incidentCount={incidentCount}

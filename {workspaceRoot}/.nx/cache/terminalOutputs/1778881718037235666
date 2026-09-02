@@ -1,0 +1,8 @@
+> nx run arch-systems-overview:lint
+
+> pnpm run lint
+
+
+> arch-systems-overview@1.0.0 lint /home/tim/Documents/Arch-System/apps/overview
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

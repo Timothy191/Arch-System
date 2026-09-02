@@ -6,6 +6,15 @@ jest.mock("@repo/supabase/read-replica", () => ({
   createReadReplicaClient: jest.fn(() => ({ from: mockFrom })),
 }));
 
+// Bypass caching so tests verify the raw fetch & fallback logic
+jest.mock("@/lib/server-cache", () => ({
+  cachedRSC: jest.fn((_keys, fn) => fn()),
+}));
+
+jest.mock("@/lib/cache-utils", () => ({
+  withCache: jest.fn((fn) => fn()),
+}));
+
 function mockQueryResult(result: { data: unknown; error: unknown }) {
   const mockOrder = jest.fn().mockResolvedValue(result);
   const mockEq = jest.fn().mockReturnValue({ order: mockOrder });

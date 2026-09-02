@@ -49,3 +49,38 @@ export async function getAccessibleDepartmentNames(
     },
   );
 }
+
+/**
+ * Fetch the role of the given user.
+ */
+export async function getEmployeeRole(
+  userId: string,
+  cookieList?: Array<{ name: string; value: string }>,
+): Promise<string | null> {
+  return cachedRSC(
+    ["user", userId, "role"],
+    async () => {
+      return withCache(
+        async () => {
+          const db = await createReadReplicaClient(cookieList);
+          const { data } = await db
+            .from("employees")
+            .select("role")
+            .eq("auth_id", userId)
+            .single();
+
+          return data?.role ?? null;
+        },
+        {
+          category: CacheCategory.AUTH,
+          keyParts: ["user", userId, "role"],
+          tags: [`auth:${userId}`, "table:employees"],
+        },
+      );
+    },
+    {
+      revalidate: 3600,
+      tags: [`auth:${userId}`, "table:employees"],
+    },
+  );
+}

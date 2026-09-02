@@ -6,6 +6,67 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 
 ---
 
+## 2026-09-02 — Satellite Backend Endpoints, Schemas & Table Removal
+
+- **Purpose**: Fully removed Satellite Monitoring backend endpoints, API routes, Inngest cron jobs, Zod contracts, and PostgreSQL tables across `@[packages]` and `@[apps/portal]`.
+- **Changes**:
+  - `packages/database/migrations/151_remove_satellite_monitoring.sql` (NEW): Dropped `satellite_insar_deformations` table with `CASCADE` and cleaned `departments` table.
+  - `packages/supabase/migrations/151_remove_satellite_monitoring.sql` (NEW): Synchronized migration in Supabase.
+  - `packages/contract`: Removed `satellite.schema.ts`, `satellite.schema.test.ts`, and all satellite exports from `packages/contract/src/index.ts`.
+  - `apps/portal`:
+    - Removed `app/api/telemetry/satellite/` routes.
+    - Removed `lib/jobs/insar-scene-ingestion.ts`, `lib/monitoring/satellite-data.ts`, `lib/monitoring-api.ts`, and unreferenced monitoring components.
+    - Unregistered `insarSceneIngestionFn` from `app/api/inngest/route.ts`.
+    - Removed `satellite-monitoring` from proxy route gating in `apps/portal/server/proxy.ts`.
+    - Pruned satellite sub-pages (`sar`, `satellite`, `highres`, `hyperspectral`) and cleaned `apps/portal/app/(departments)/[department]/page.tsx`.
+  - `libs/features`: Cleaned satellite components in `libs/features/departments/ui/` and exports in `libs/features/departments/ui/src/index.ts`.
+- **Verification**:
+  - `pnpm nx run @repo/database:test:migration-rollback` ✅ (108 migrations validated, 0 errors).
+  - `pnpm --filter @repo/contract test` ✅ (100% pass).
+  - `pnpm --filter @repo/departments/ui test` ✅ (15 suites passed).
+  - `pnpm type-check` ✅ (All 26 workspaces passed).
+  - `pnpm quality` ✅ (Full gate passed with exit code 0).
+  - `pnpm audit:drift && pnpm audit:compliance` ✅ (100% compliant).
+- **What the Next Agent Should Know**: Satellite monitoring backend and database structures are completely decommissioned.
+
+## 2026-09-02 — Satellite Monitoring UI & Navigation Pruning
+
+- **Purpose**: Removed Satellite Monitoring department card and shortcuts from portal navigation and registries while preserving underlying database schema and historical telemetry data.
+- **Changes**:
+  - `libs/features/departments/data-access/src/departments.ts`: Removed `satellite-monitoring` entry from the canonical `DEPARTMENTS` array.
+  - `apps/portal/components/CommandBar.tsx`: Removed `dept-satellite` navigation command item.
+  - `libs/features/departments/data-access/src/departments.test.ts`: Updated department registry unit test assertions.
+- **Verification**: `pnpm nx run-many -t test` ✅ (All 11 workspace test projects passed).
+- **What the Next Agent Should Know**: Satellite Monitoring is excluded from Hub cards and CommandBar navigation. Underlying DB tables and routes remain intact.
+
+## 2026-09-02 — Monorepo Complexity Removal & Debloat Execution
+
+- **Purpose**: Executed system-wide debloat and complexity elimination across `@[packages]` and `@[apps/portal]` via `system-simplifier-agent`.
+- **Changes**:
+  - `apps/portal/components/accessibility/A11yDevTools.tsx` (DELETED): Removed dead development accessibility component unreferenced across the codebase.
+  - `apps/portal/components/performance/VirtualList.tsx` (DELETED): Removed uncalled virtual list component and pruned empty directory `apps/portal/components/performance`.
+  - `package.json`: Pruned unreferenced `@axe-core/react` dependency.
+  - `apps/portal/app/(departments)/drilling/drilling-operations/actions.ts`: Refactored to eliminate uncalled actions (`archiveStaleDrillOperationsAction`), replaced unsafe `any` error casts with type-safe `unknown` boundaries.
+  - `{workspaceRoot}` (DELETED): Purged dangling root directory.
+- **Verification**:
+  - `pnpm deps:check` ✅ (0 mismatches).
+  - `pnpm knip` ✅ (0 unused files, dead components pruned).
+  - `pnpm type-check` ✅ (All 26 workspace projects passed).
+  - `pnpm quality` ✅ (Full gate passed: lint, styles, cspell, CSS budgets, unit tests, rollback tests).
+  - `pnpm audit:drift` && `pnpm audit:compliance` ✅ (100% boundary compliance).
+- **What the Next Agent Should Know**: Monorepo dependencies and exports are clean with zero dead files and 100% passing quality gates.
+
+## 2026-09-02 — System Simplifier Agent Specification & Debloat Planning
+
+- **Purpose**: Created dedicated `system-simplifier-agent` to audit, plan (`/plan`), and execute (`/goal`) the systematic removal of unused complexity, dead code, and redundant abstractions.
+- **Changes**:
+  - `~/.gemini/config/plugins/agentic-council/agents/system-simplifier-agent.md` (NEW): Full agent spec and execution workflow.
+  - `~/.gemini/config/plugins/agentic-council/plugin.json`: Registered `system-simplifier-agent` in the agentic council plugin.
+  - `.agents/rules/system-simplification-and-debloat.md` (NEW): Workspace-level simplification and anti-bloat guidelines.
+  - `implementation_plan.md`: Generated 4-phase debloating and simplification plan ready for `/goal` execution.
+  - Stored persistent memory via `agent-memory store`.
+- **What the Next Agent Should Know**: The `system-simplifier-agent` can be invoked or driven via `/goal` to execute Phase 1 (`pnpm knip`) through Phase 4 (`pnpm quality`).
+
 ## 2026-09-01 — Portal Department Linkage Audit & Route Rectification
 
 - **Purpose**: Comprehensive audit and rectification of department routes, quick actions, command bar shortcuts, and navigation links across `apps/portal` and `libs/features`.

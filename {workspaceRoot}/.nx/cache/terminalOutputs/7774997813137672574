@@ -1,0 +1,8 @@
+> nx run @repo/rate-limiter:lint
+
+> pnpm run lint
+
+
+> @repo/rate-limiter@1.0.0 lint /home/tim/Documents/Arch-System/packages/rate-limiter
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

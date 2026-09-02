@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { getDepartmentContext } from "~/lib/dept-context";
 import { getCurrentShift } from "@repo/utils";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
-import { getSatelliteMonitoringData } from "~/lib/monitoring/satellite-data";
 import { Divider } from "@repo/ui/Divider";
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
@@ -28,19 +27,8 @@ const ControlRoomChecklistWidget = dynamic(
   },
 );
 
-const SatelliteMonitoringDashboard = dynamic(
-  () => import("@/features/departments").then((mod) => mod.SatelliteMonitoringDashboard),
-  {
-    loading: () => (
-      <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
-      </div>
-    ),
-  },
-);
-
-import { SafetyDashboard } from "~/features/departments/components/safety/SafetyDashboard";
 import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
+
 import { ControlRoomSummaryGridClient } from "./ControlRoomSummaryGridClient";
 import { NonControlRoomSummaryGridClient } from "./NonControlRoomSummaryGridClient";
 
@@ -65,38 +53,8 @@ export default async function DepartmentDashboard({
     department: deptSlug,
   });
 
-  // 1. Early returns for satellite and safety — skip shared queries entirely
-  // AGENT-TRACE: Satellite dashboard is presentational — all data is fetched
-  // server-side here (DB-backed InSAR rows + live Copernicus STAC scenes) and
-  // passed as props. No mock data; an honest empty state renders when nothing
-  // has been ingested yet.
-  if (dept.type === "satellite") {
-    const { readings, s1Scenes, s2Scenes, latestS2Pass } = await getSatelliteMonitoringData();
-    return (
-      <SatelliteMonitoringDashboard
-        readings={readings}
-        s1Scenes={s1Scenes}
-        s2Scenes={s2Scenes}
-        latestS2Pass={latestS2Pass}
-      />
-    );
-  }
-
-  if (dept.type === "safety") {
-    return (
-      <Suspense
-        fallback={
-          <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
-            <div className="w-8 h-8 border-2 border-[var(--accent-green)]/20 border-t-[var(--accent-green)] rounded-full animate-spin" />
-          </div>
-        }
-      >
-        <SafetyDashboard deptId={deptId} />
-      </Suspense>
-    );
-  }
-
   if (deptSlug === "production") {
+
     return (
       <Suspense
         fallback={

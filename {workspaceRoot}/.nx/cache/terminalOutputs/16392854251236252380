@@ -1,0 +1,17 @@
+> nx run shared-data-access:test
+
+> pnpm run test
+
+
+> @repo/shared/data-access@1.0.0 test /home/tim/Documents/Arch-System/libs/shared/data-access
+> jest --config jest.config.js --passWithNoTests --maxWorkers=50%
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mmonitoring-api.test.ts[22m
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mtelemetry-circuit-breaker.test.ts[22m
+[999D[K
+[1mTest Suites: [22m[1m[32m2 passed[39m[22m, 2 total
+[1mTests:       [22m[1m[32m12 passed[39m[22m, 12 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.206 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m
+[1mForce exiting Jest: [22mHave you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

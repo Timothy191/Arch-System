@@ -9,7 +9,7 @@ import Script from "next/script";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FocusModeProvider } from "@/components/FocusModeProvider";
-import { PerformanceListener } from "@/components/PerformanceListener";
+
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
@@ -165,9 +165,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           <ClientProviders>
             <FocusModeProvider>
               <RouteBackground />
-              {/* AGENT-TRACE: PerformanceListener runs a rAF loop for 5s on every page load —
-                  only mount in development to avoid production overhead. */}
-              {process.env.NODE_ENV === "development" && <PerformanceListener />}
+              {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
               <WebVitalsReporter />
               <OfflineBanner />
               <AIAssistantWrapper />

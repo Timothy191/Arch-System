@@ -3,7 +3,7 @@
  * /api/admin/data/{table}:
  *   get:
  *     summary: Query admin data tables
- *     description: Query operational tables (machines, daily_logs, breakdowns, safety_incidents, etc.) with pagination. Admin-only access.
+ *     description: Query operational tables (machines, daily_logs, breakdowns, etc.) with pagination. Admin-only access.
  *     tags:
  *       - Admin
  *     security:
@@ -208,7 +208,6 @@ const OPERATIONAL_TABLES = new Set([
   "excavator_dumper_assignments",
   "dozer_rolls",
   "breakdowns",
-  "safety_incidents",
   "drill_operations",
   "documents",
   "document_versions",
@@ -217,8 +216,6 @@ const OPERATIONAL_TABLES = new Set([
   "sites",
   "mine_blocks",
   "report_templates",
-  "safety_severities",
-  "safety_incident_categories",
   "generated_reports",
   "personnel",
   "visitors",

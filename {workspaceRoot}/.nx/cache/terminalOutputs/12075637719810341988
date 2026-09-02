@@ -1,0 +1,8 @@
+> nx run @repo/contract:type-check
+
+> pnpm run type-check
+
+
+> @repo/contract@1.0.0 type-check /home/tim/Documents/Arch-System/packages/contract
+> tsc --noEmit
+

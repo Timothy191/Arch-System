@@ -35,7 +35,7 @@
  *                         type: array
  *                         items:
  *                           type: string
- *                           enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, safety_incident.created, safety_incident.updated, safety_incident.resolved, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
+ *                           enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
  *                       department_id:
  *                         type: string
  *                         nullable: true
@@ -75,7 +75,7 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                   enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, safety_incident.created, safety_incident.updated, safety_incident.resolved, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
+ *                   enum: [daily_log.created, daily_log.updated, breakdown.created, breakdown.updated, breakdown.completed, production_log.created, production_log.updated, operational_delay.created, operational_delay.updated]
  *                 description: Event types to subscribe to
  *               department_id:
  *                 type: string
@@ -117,9 +117,6 @@ type WebhookEventType =
   | "breakdown.created"
   | "breakdown.updated"
   | "breakdown.completed"
-  | "safety_incident.created"
-  | "safety_incident.updated"
-  | "safety_incident.resolved"
   | "production_log.created"
   | "production_log.updated"
   | "operational_delay.created"

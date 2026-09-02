@@ -63,7 +63,6 @@ const DEPT_STYLE_MAP: Record<
     iconColor: "text-dept-control-room",
     bgColor: "bg-dept-control-room/10",
   },
-  safety: { icon: HardHat, iconColor: "text-dept-safety", bgColor: "bg-dept-safety/10" },
   training: {
     icon: GraduationCap,
     iconColor: "text-dept-training",

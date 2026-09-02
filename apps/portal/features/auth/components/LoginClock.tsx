@@ -13,5 +13,3 @@ import { Clock } from "@repo/ui/Clock";
 export function LoginClock() {
   return <Clock testId="login-clock" format="time" className="text-[12px] font-medium" />;
 }
-
-export default LoginClock;

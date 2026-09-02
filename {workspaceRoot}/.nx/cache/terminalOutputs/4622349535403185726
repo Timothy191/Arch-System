@@ -1,0 +1,8 @@
+> nx run portal:type-check
+
+> pnpm run type-check
+
+
+> portal@1.0.0 type-check /home/tim/Documents/Arch-System/apps/portal
+> tsc --noEmit
+

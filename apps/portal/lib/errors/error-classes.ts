@@ -8,7 +8,7 @@
  */
 /* eslint-disable no-unused-vars */
 
-export class AppError extends Error {
+class AppError extends Error {
   public code?: string;
   public statusCode?: number;
   public context?: Record<string, unknown>;

@@ -1,0 +1,8 @@
+> nx run features-auth-ui:type-check
+
+> pnpm run type-check
+
+
+> @repo/auth/ui@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/auth/ui
+> tsc --noEmit
+

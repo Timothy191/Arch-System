@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-quick dev-tools dev-all build analyze test test-e2e test-watch test-coverage lint lint-fix lint-root type-check format format-check md-lint md-fix quality deps-lint deps-fix deps-check knip knip-fix db-gen db-push db-reset db-start db-docs monitor monitor-grafana monitor-stop deploy-local deploy-staging deploy-production deploy-rollback fresh-start shutdown ui clean clean-cache clean-docker hooks-install policy-gen policy-check audit-rls workspace-list workspace-graph info
+.PHONY: help install dev dev-quick dev-tools dev-all build analyze test test-e2e test-watch test-coverage lint lint-fix lint-root type-check format format-check md-lint md-fix quality deps-lint deps-fix deps-check knip knip-fix db-gen db-push db-reset db-start db-docs monitor monitor-grafana monitor-stop deploy-local deploy-staging deploy-production deploy-rollback deploy-dashboards deploy-dashboards-stop fresh-start shutdown ui clean clean-cache clean-docker hooks-install policy-gen policy-check audit-rls workspace-list workspace-graph info
 
 # Default target
 help: ## Show this help message

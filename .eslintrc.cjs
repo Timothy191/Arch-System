@@ -2,7 +2,24 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   // Apps and packages extend this configuration.
-  ignorePatterns: ["apps/**", "packages/**", "e2e/**", "playwright.config.ts", "k6/**", "docs/**"],
+  ignorePatterns: [
+    "apps/**",
+    "packages/**",
+    "e2e/**",
+    "k6/**",
+    "docs/**",
+    "scripts/**",
+    "tools/**",
+    "template/**",
+    "scratch/**",
+    "test-results/**",
+    "node_modules/**",
+    ".next/**",
+    "dist/**",
+    "build/**",
+    "report/**",
+    "commitlint.config.mjs"
+  ],
   rules: {
     "no-console": ["warn", { allow: ["warn", "error"] }],
   },

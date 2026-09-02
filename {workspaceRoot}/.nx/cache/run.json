@@ -1,0 +1,21 @@
+{
+  "run": {
+    "command": "nx run @repo/database:test:migration-rollback",
+    "startTime": "2026-09-02T05:06:13.140Z",
+    "endTime": "2026-09-02T05:06:13.690Z",
+    "inner": false
+  },
+  "tasks": [
+    {
+      "taskId": "@repo/database:test:migration-rollback",
+      "target": "test:migration-rollback",
+      "projectName": "@repo/database",
+      "hash": "11409269909168856101",
+      "startTime": "2026-09-02T05:06:13.153Z",
+      "endTime": "2026-09-02T05:06:13.689Z",
+      "params": "",
+      "cacheStatus": "cache-miss",
+      "status": 0
+    }
+  ]
+}

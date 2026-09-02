@@ -16,9 +16,6 @@ type WebhookEventType =
   | "breakdown.created"
   | "breakdown.updated"
   | "breakdown.completed"
-  | "safety_incident.created"
-  | "safety_incident.updated"
-  | "safety_incident.resolved"
   | "production_log.created"
   | "production_log.updated"
   | "operational_delay.created"
@@ -43,9 +40,6 @@ const EVENT_TYPES: WebhookEventType[] = [
   "breakdown.created",
   "breakdown.updated",
   "breakdown.completed",
-  "safety_incident.created",
-  "safety_incident.updated",
-  "safety_incident.resolved",
   "production_log.created",
   "production_log.updated",
   "operational_delay.created",

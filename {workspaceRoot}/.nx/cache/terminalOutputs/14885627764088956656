@@ -1,0 +1,8 @@
+> nx run @repo/utils:lint
+
+> pnpm run lint
+
+
+> @repo/utils@1.0.0 lint /home/tim/Documents/Arch-System/packages/utils
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

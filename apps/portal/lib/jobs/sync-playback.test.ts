@@ -131,31 +131,6 @@ describe("syncPlaybackFn", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/[department]/breakdowns", "page");
   });
 
-  it("inserts a safety incident when none exists", async () => {
-    const result = await handler(
-      makeEvent("ADD_SAFETY_INCIDENT", {
-        payload: {
-          incidentDate: "2026-08-17",
-          shiftType: "day",
-          incidentType: "first-aid",
-          description: "minor cut",
-          location: "Pit 3",
-        },
-      }),
-    );
-
-    expect(result).toEqual({ success: true });
-    expect(builderFor("safety_incidents").insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        department_id: "dept-1",
-        incident_type: "first-aid",
-        status: "open",
-        idempotency_key: "key-1",
-        sync_status: "synced",
-      }),
-    );
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/[department]/safety", "page");
-  });
 
   it("inserts a daily log when none exists", async () => {
     const result = await handler(

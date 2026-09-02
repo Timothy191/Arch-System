@@ -7,16 +7,6 @@
  * Usage: Import and call analyzePerformance() in development or monitoring contexts
  */
 
-export interface PerformanceMetric {
-  name: string;
-  value: number;
-  rating: "good" | "needs-improvement" | "poor";
-  threshold: {
-    good: number;
-    needsImprovement: number;
-  };
-}
-
 const LCP_THRESHOLDS = { good: 2500, needsImprovement: 4000 };
 const INP_THRESHOLDS = { good: 200, needsImprovement: 500 };
 

@@ -56,13 +56,6 @@ SHIFT_HANDOFF_INPUTS = [
     },
 ]
 
-SAFETY_COMPLIANCE_INPUTS = [
-    {
-        "input": "Shift log: Worker observed standing on excavator tracks without fall protection at 14:30. Near-miss: drill rod dropped from 0.5m during rod change at 16:00, no injuries. PPE compliance: 98% hard hat, 95% safety glasses.",
-        "context": [
-            "Fall protection required when working at heights >1.2m per site policy MP-003.",
-            "All near-misses must be reported within 24 hours per incident reporting procedure IR-001.",
-        ],
     },
 ]
 

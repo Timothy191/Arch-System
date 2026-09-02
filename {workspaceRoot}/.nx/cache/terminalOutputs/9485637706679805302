@@ -1,0 +1,20 @@
+> nx run @repo/redis:test
+
+> pnpm run test
+
+
+> @repo/redis@1.0.0 test /home/tim/Documents/Arch-System/packages/redis
+> jest tests
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2mtests/[22m[1mcache.test.ts[22m
+  X-Fetch Cache Wrapper
+    [32m✓[39m [2mStandard Miss & Set (5 ms)[22m
+    [32m✓[39m [2mEarly Expiration Triggered (Stale Return) (2 ms)[22m
+    [32m✓[39m [2mSingle-Flight Coalescing (30 ms)[22m
+    [32m✓[39m [2mEarly Expiration Not Triggered (1 ms)[22m
+
+[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m4 passed[39m[22m, 4 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.2 s, estimated 1 s
+[2mRan all test suites[22m[2m matching [22mtests[2m.[22m

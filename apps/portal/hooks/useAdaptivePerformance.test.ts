@@ -111,32 +111,4 @@ describe("useAdaptivePerformance", () => {
     expect(result.current).toBe(false);
   });
 
-  it("recovers after degradation when performance improves", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
-    const { result } = renderHook(() => useAdaptivePerformance());
-
-    // First: degrade with slow frames
-    act(() => {
-      let time = 100;
-      if (rafCallback) rafCallback(time);
-
-      time += 5000;
-      if (rafCallback) rafCallback(time);
-
-      for (let i = 0; i < 45; i++) {
-        time += 50;
-        if (rafCallback) rafCallback(time);
-      }
-    });
-
-    expect(result.current).toBe(true);
-
-    // Advance the recovery timer (10 seconds)
-    act(() => {
-      jest.advanceTimersByTime(10_000);
-    });
-
-    // After recovery timer fires, lowPerf should reset to false
-    expect(result.current).toBe(false);
-  });
 });

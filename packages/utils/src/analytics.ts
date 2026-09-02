@@ -18,7 +18,7 @@ export const analytics = {
   track: (event: AnalyticsEvent) => {
     if (typeof window !== "undefined") {
       // Client-side tracking: send to an API endpoint that handles the external integration
-      fetch("/api/analytics", {
+      fetch("/api/capture", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...event, timestamp: new Date().toISOString() }),
@@ -39,7 +39,7 @@ export const analytics = {
    */
   identify: (userId: string, traits?: Record<string, any>) => {
     if (typeof window !== "undefined") {
-      fetch("/api/analytics/identify", {
+      fetch("/api/capture/identify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, traits }),

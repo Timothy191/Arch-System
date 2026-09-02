@@ -259,7 +259,7 @@ export default enableHeavyPlugins
       silent: !isCI,
       dryRun: !isCI,
       widenClientFileUpload: isCI,
-      tunnelRoute: "/monitoring",
+      tunnelRoute: "/api/sentry-proxy",
       hideSourceMaps: true,
     })
   : analyzedConfig;

@@ -47,9 +47,6 @@ function isValidRedirect(path: string): boolean {
     /^\/access-control(\/|$)/, // Access control department
     /^\/engineering(\/|$)/, // Engineering department
     /^\/control-room(\/|$)/, // Control room department
-    /^\/safety(\/|$)/, // Safety department
-    /^\/training(\/|$)/, // Training department
-    /^\/satellite-monitoring(\/|$)/, // Satellite monitoring department
     /^\/access-card-actions(\/|$)/, // Access Card Actions department
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
@@ -68,11 +65,9 @@ const DEPARTMENT_ROUTES = [
   "access-control",
   "engineering",
   "control-room",
-  "safety",
-  "training",
-  "satellite-monitoring",
   "access-card-actions",
 ];
+
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
   "access-control": ["access_control", "admin", "supervisor", "operator"],

@@ -1,0 +1,105 @@
+> nx run @repo/eval:test
+
+> pnpm run test
+
+
+> @repo/eval@1.0.0 test /home/tim/Documents/Arch-System/packages/eval
+> command -v poetry >/dev/null 2>&1 && poetry run pytest tests/ -v || (command -v uv >/dev/null 2>&1 && uv run --project . pytest tests/ -v 2>/dev/null) || echo 'Poetry not installed — python eval suite skipped'
+
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python
+cachedir: .pytest_cache
+rootdir: /home/tim/Documents/Arch-System/packages/eval
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+[1mcollecting ... [0m[1mcollected 0 items / 7 errors                                                   [0m
+
+==================================== ERRORS ====================================
+[31m[1m__________ ERROR collecting tests/ai_service/test_equipment_manual.py __________[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/ai_service/test_equipment_manual.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/ai_service/test_equipment_manual.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m_______ ERROR collecting tests/ai_service/test_predictive_maintenance.py _______[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/ai_service/test_predictive_maintenance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/ai_service/test_predictive_maintenance.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m___________ ERROR collecting tests/ai_service/test_shift_handoff.py ____________[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/ai_service/test_shift_handoff.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/ai_service/test_shift_handoff.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m____________ ERROR collecting tests/ai_service/test_translation.py _____________[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/ai_service/test_translation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/ai_service/test_translation.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m__________ ERROR collecting tests/code_generation/test_conventions.py __________[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/code_generation/test_conventions.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/code_generation/test_conventions.py[0m:8: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m___ ERROR collecting tests/code_generation/test_shift_closeout_compliance.py ___[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/code_generation/test_shift_closeout_compliance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/code_generation/test_shift_closeout_compliance.py[0m:11: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[31m[1m______________ ERROR collecting tests/test_factual_consistency.py ______________[0m
+[31mImportError while importing test module '/home/tim/Documents/Arch-System/packages/eval/tests/test_factual_consistency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+[1m[31m/usr/lib/python3.14/importlib/__init__.py[0m:88: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mtests/test_factual_consistency.py[0m:1: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mdeepeval[39;49;00m[90m [39;49;00m[94mimport[39;49;00m assert_test[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'deepeval'[0m[0m
+[33m=============================== warnings summary ===============================[0m
+../../../../.local/lib/python3.14/site-packages/_pytest/config/__init__.py:1464
+  /home/tim/.local/lib/python3.14/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: asyncio_mode
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[36m[1m=========================== short test summary info ============================[0m
+[31mERROR[0m tests/ai_service/test_equipment_manual.py
+[31mERROR[0m tests/ai_service/test_predictive_maintenance.py
+[31mERROR[0m tests/ai_service/test_shift_handoff.py
+[31mERROR[0m tests/ai_service/test_translation.py
+[31mERROR[0m tests/code_generation/test_conventions.py
+[31mERROR[0m tests/code_generation/test_shift_closeout_compliance.py
+[31mERROR[0m tests/test_factual_consistency.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 7 errors during collection !!!!!!!!!!!!!!!!!!!!
+[31m========================= [33m1 warning[0m, [31m[1m7 errors[0m[31m in 0.15s[0m[31m =========================[0m
+Poetry not installed — python eval suite skipped

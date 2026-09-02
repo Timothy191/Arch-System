@@ -133,9 +133,6 @@ export async function getUserSafely(
       return null;
     }
 
-    // getClaims() returns JWT claims, not the full User object
-    // If you need the full User object, use getUser() instead
-    // For most authorization purposes, the claims are sufficient
     return data as unknown as User;
   } catch (error) {
     // Handle token validation errors gracefully

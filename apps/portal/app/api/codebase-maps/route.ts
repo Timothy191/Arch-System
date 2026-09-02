@@ -5,14 +5,16 @@ import path from "node:path";
 function getMapsRoot() {
   let current = process.cwd();
   while (current !== "/" && current !== path.dirname(current)) {
-    const candidate = path.join(current, "codebase-maps");
+    // Tell Turbopack to ignore this highly dynamic path traversal
+    const candidate = path.join(/*turbopackIgnore: true*/ current, "codebase-maps");
     if (fs.existsSync(candidate)) {
       return candidate;
     }
     current = path.dirname(current);
   }
-  return path.resolve(process.cwd(), "../../codebase-maps");
+  return path.resolve(/*turbopackIgnore: true*/ process.cwd(), "../../codebase-maps");
 }
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

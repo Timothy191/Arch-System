@@ -13,7 +13,7 @@ const spec = createSwaggerSpec({
       title: "Arch-Systems Portal API",
       version: "1.0.0",
       description:
-        "API for industrial operations portal - control room, drilling, engineering, safety, and production management",
+        "API for industrial operations portal - control room, drilling, engineering, and production management",
     },
     servers: [
       {

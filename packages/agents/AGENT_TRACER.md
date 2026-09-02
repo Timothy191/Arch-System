@@ -1,6 +1,16 @@
 # Agent Tracer - @repo/agents
 
+## 2026-09-01T14:28:00Z - Technical Specialist Personas & Focus Onboarding
+
+- **Purpose**: Onboard and define focused technical specialist personas to decouple agent execution from business departments into engineering domain roles.
+- **Changes**:
+  - `src/specialists.ts`: Created `SPECIALIST_PERSONAS` defining `databaseArchitect`, `uiEngineer`, `securityAndQualityGate`, and `coreCoordinator`.
+  - `src/index.ts`: Exported specialist contracts and personas.
+  - `agentic-system-wiki/specialist-agent-personas.md`: Documented architecture focus areas, boundaries, and narrowing constraints.
+- **Verification**: Verified TypeScript compilation with `pnpm --filter @repo/agents type-check`.
+
 ## 2026-08-17 - Langfuse Observability & Tracing Integration
+
 
 - **Purpose**: Integrate full Langfuse tracing into `SubagentCoordinator` following Langfuse Agent Skill best practices.
 - **Changes**:

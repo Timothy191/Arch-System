@@ -140,10 +140,10 @@ describe("POST /api/sync/playback – queuing", () => {
     expect(body.queued).toBe(true);
   });
 
-  it("queues ADD_SAFETY_INCIDENT via Inngest and returns 200", async () => {
+  it("queues ADD_BREAKDOWN via Inngest and returns 200", async () => {
     const req = makeRequest({
       idempotencyKey: "si-1",
-      actionType: "ADD_SAFETY_INCIDENT",
+      actionType: "ADD_BREAKDOWN",
       payload: {
         incidentDate: "2026-05-17",
         shiftType: "day",

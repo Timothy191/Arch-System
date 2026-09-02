@@ -458,8 +458,8 @@ describe("RateLimiter (Integration)", () => {
       const blocked = await rateLimiter.check("user:123");
       expect(blocked.allowed).toBe(false);
 
-      // Wait for refill
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Wait for refill (refill rate: 5 tokens / 1000ms = 1 token per 200ms)
+      await new Promise((resolve) => setTimeout(resolve, 400));
       const allowed = await rateLimiter.check("user:123");
       expect(allowed.allowed).toBe(true);
     });

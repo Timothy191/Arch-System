@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFocusMode } from "@/hooks/useFocusMode";
 
-/* AGENT-TRACE: Adaptive performance monitor. Previous version had three bugs:
-   1. 50 FPS threshold → false positives on glass+video compositing at load
-   2. 2.5s warm-up too short for hydration+video decode burst
-   3. lowPerf could never recover once set true
-   Fixed: 30 FPS threshold, 5s warm-up, periodic recovery checks. */
+/* AGENT-TRACE: Adaptive performance monitor.
+   Removed periodic recovery checks to prevent infinite loops of the background 
+   appearing and disappearing on slow devices. Once degraded, it stays degraded. */
 
 /**
  * useAdaptivePerformance
@@ -15,15 +13,10 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  * Hooks into the browser's requestAnimationFrame to measure frame render times.
  * If frame rate drops below 30 FPS for a sustained 2-second window, or if Focus Mode
  * is activated, returns true to signal that rendering should be downgraded.
- *
- * Recovery: once degraded, the hook re-evaluates every 10 seconds. If FPS
- * has stabilised above 30 for the last measurement window it clears the flag,
- * restoring full-quality rendering.
  */
 export function useAdaptivePerformance(): boolean {
   const [lowPerf, setLowPerf] = useState(false);
   const focusMode = useFocusMode((s) => s.enabled);
-  const recoveryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Focus Mode forces degraded rendering (dark atmospheric mode is lighter)
@@ -45,7 +38,6 @@ export function useAdaptivePerformance(): boolean {
     const WARMUP_MS = 5000; // 5 seconds — covers hydration, video decode, font swap
     const WINDOW_MS = 2000; // 2-second sliding measurement window
     const FPS_THRESHOLD = 30; // Only degrade on genuinely poor hardware
-    const RECOVERY_DELAY_MS = 10_000; // Re-evaluate 10s after degradation
 
     const checkFrame = (timestamp: number) => {
       if (firstFrameTime === null) {
@@ -81,18 +73,8 @@ export function useAdaptivePerformance(): boolean {
           isDegraded = true;
           setLowPerf(true);
 
-          // Schedule a recovery check instead of stopping permanently
-          recoveryTimerRef.current = setTimeout(() => {
-            // Reset state so the rAF loop re-measures from scratch
-            isDegraded = false;
-            frameTimes = [];
-            startTime = null;
-            firstFrameTime = null;
-            setLowPerf(false);
-            animationFrameId = requestAnimationFrame(checkFrame);
-          }, RECOVERY_DELAY_MS);
-
-          // Stop the rAF loop during degradation (save CPU)
+          // Once degraded, stay degraded to prevent the UI from flickering
+          // back and forth (background disappearing and appearing).
           return;
         }
       }
@@ -104,10 +86,6 @@ export function useAdaptivePerformance(): boolean {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      if (recoveryTimerRef.current) {
-        clearTimeout(recoveryTimerRef.current);
-        recoveryTimerRef.current = null;
-      }
     };
   }, [focusMode]);
 

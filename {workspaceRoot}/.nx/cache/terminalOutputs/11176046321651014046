@@ -1,0 +1,43 @@
+> nx run @repo/supabase:test
+
+> pnpm run test
+
+
+> @repo/supabase@1.0.0 test /home/tim/Documents/Arch-System/packages/supabase
+> jest --passWithNoTests
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/__tests__/[22m[1msupabase.test.ts[22m
+  instrumentedFetch
+    [32m✓[39m [2mcalls fetch with correct arguments (3 ms)[22m
+    [32m✓[39m [2mreturns fetch response on success (1 ms)[22m
+    [32m✓[39m [2mreturns response even on failure (does not throw) (1 ms)[22m
+    [32m✓[39m [2mlogs slow queries (duration > 500ms) (601 ms)[22m
+    [32m✓[39m [2mlogs failed queries[22m
+    [32m✓[39m [2mlogs successful queries at debug level[22m
+    [32m✓[39m [2mextracts table name from Supabase REST URL (1 ms)[22m
+    [32m✓[39m [2mhandles URL object input (1 ms)[22m
+    [32m✓[39m [2mhandles Request object input (1 ms)[22m
+    [32m✓[39m [2mextracts method from init options[22m
+    [32m✓[39m [2mdefaults to GET method (1 ms)[22m
+    [32m✓[39m [2mhandles invalid URL gracefully (1 ms)[22m
+  createServerSupabaseClient
+    [32m✓[39m [2mcreates Supabase client with correct configuration[22m
+    [32m✓[39m [2muses environment variables when available[22m
+    [32m✓[39m [2mcookies.getAll returns all cookies (1 ms)[22m
+    [32m✓[39m [2mcookies.setAll handles cookie setting[22m
+  getUserSafely
+    [32m✓[39m [2mreturns user when authenticated (1 ms)[22m
+    [32m✓[39m [2mreturns null when not authenticated[22m
+    [32m✓[39m [2mreturns null on token validation error[22m
+    [32m✓[39m [2mreturns null on network error (1 ms)[22m
+    [32m✓[39m [2mhandles JWT validation failure gracefully[22m
+  createBrowserSupabaseClient
+    [32m✓[39m [2mcreates browser client with correct configuration (1 ms)[22m
+    [32m✓[39m [2muses environment variables when available[22m
+    [32m✓[39m [2mrewrites hostname for localhost in LAN deployment (1 ms)[22m
+
+[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m24 passed[39m[22m, 24 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.744 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m

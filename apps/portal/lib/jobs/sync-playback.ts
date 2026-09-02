@@ -56,33 +56,8 @@ export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
         return { success: true };
       }
 
-      if (actionType === "ADD_SAFETY_INCIDENT") {
-        const { data: existing } = await supabase
-          .from("safety_incidents")
-          .select("id")
-          .eq("idempotency_key", idempotencyKey)
-          .maybeSingle();
-
-        if (existing) return { success: true, bypassed: true };
-
-        const { error } = await supabase.from("safety_incidents").insert({
-          department_id: departmentId,
-          incident_date: payload.incidentDate,
-          shift_type: payload.shiftType,
-          incident_type: payload.incidentType,
-          description: payload.description,
-          location: payload.location,
-          status: "open",
-          idempotency_key: idempotencyKey,
-          sync_status: "synced",
-        });
-
-        if (error) throw error;
-        revalidatePath("/[department]/safety", "page");
-        return { success: true };
-      }
-
       if (actionType === "ADD_DAILY_LOG") {
+
         const { data: existing } = await supabase
           .from("daily_logs")
           .select("id")

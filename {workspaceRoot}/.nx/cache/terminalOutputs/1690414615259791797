@@ -1,0 +1,8 @@
+> nx run cms:type-check
+
+> pnpm run type-check
+
+
+> cms@1.0.0 type-check /home/tim/Documents/Arch-System/apps/cms
+> tsc --noEmit
+

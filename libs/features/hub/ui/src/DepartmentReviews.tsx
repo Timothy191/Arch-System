@@ -9,7 +9,6 @@ import { cn } from "@repo/ui/lib/utils";
 // if the external avatar.vercel.sh URL fails (network blocked, service down, etc.).
 const DEPT_COLOR_MAP: Record<string, string> = {
   drilling: "bg-dept-drilling/20 text-dept-drilling",
-  safety: "bg-dept-safety/20 text-dept-safety",
   production: "bg-dept-production/20 text-dept-production",
   controlroom: "bg-dept-control-room/20 text-dept-control-room",
   training: "bg-dept-training/20 text-dept-training",
@@ -27,13 +26,6 @@ const REVIEWS = [
     body: "Rig 4 telemetry tracking is extremely fast now. Makes scheduling down-hole operations trivial.",
     img: "https://avatar.vercel.sh/drilling",
     color: DEPT_COLOR_MAP.drilling ?? "bg-accent-blue/20 text-accent-blue",
-  },
-  {
-    name: "Safety Control",
-    username: "@safety",
-    body: "The real-time incident reports have helped us maintain our LTI-free record. Seamless compliance.",
-    img: "https://avatar.vercel.sh/safety",
-    color: DEPT_COLOR_MAP.safety ?? "bg-accent-blue/20 text-accent-blue",
   },
   {
     name: "Production Unit",

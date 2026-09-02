@@ -1,0 +1,19 @@
+> nx run @repo/contract:test
+
+> pnpm run test
+
+
+> @repo/contract@1.0.0 test /home/tim/Documents/Arch-System/packages/contract
+> jest --passWithNoTests
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mindex.test.ts[22m
+  @repo/contract exports
+    [32m✓[39m [2mexports drillingDailyLogSchema and validates valid input (5 ms)[22m
+    [32m✓[39m [2mexports dailyLogSchema and dozerRollSchema (3 ms)[22m
+    [32m✓[39m [2mexports multiSiteShiftReportSchema and validates comprehensive multi-site report payload (6 ms)[22m
+
+[999D[K[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m3 passed[39m[22m, 3 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.349 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m

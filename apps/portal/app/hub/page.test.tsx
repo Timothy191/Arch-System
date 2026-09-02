@@ -134,6 +134,7 @@ jest.mock("@/lib/tools", () => ({
 
 jest.mock("@/lib/hub-departments", () => ({
   getAccessibleDepartmentNames: jest.fn(async () => ["drilling"]),
+  getEmployeeRole: jest.fn(async () => "operator"),
 }));
 
 // ── Import the page AFTER all mocks are in place ──────────────────────────────

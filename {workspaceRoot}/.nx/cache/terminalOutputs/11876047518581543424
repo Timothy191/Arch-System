@@ -1,0 +1,8 @@
+> nx run @repo/ui:lint:css
+
+> pnpm run lint:css
+
+
+> @repo/ui@1.0.0 lint:css /home/tim/Documents/Arch-System/packages/ui
+> stylelint 'src/**/*.css'
+

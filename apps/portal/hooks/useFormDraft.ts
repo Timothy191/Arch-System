@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useRef, useState } from "react";
 
-export interface UseFormDraftOptions<T> {
+interface UseFormDraftOptions<T> {
   /** Unique storage key for this draft (e.g. 'control_room_checklist_dept123_2026-08-19_day') */
   key: string;
   /** Initial or default state value */

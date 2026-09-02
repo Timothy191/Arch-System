@@ -1,0 +1,8 @@
+> nx run features-dashboard-data-access:lint
+
+> pnpm run lint
+
+
+> @repo/dashboard/data-access@1.0.0 lint /home/tim/Documents/Arch-System/libs/features/dashboard/data-access
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

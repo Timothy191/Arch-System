@@ -1,0 +1,8 @@
+> nx run @repo/supabase:lint
+
+> pnpm run lint
+
+
+> @repo/supabase@1.0.0 lint /home/tim/Documents/Arch-System/packages/supabase
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

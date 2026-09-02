@@ -1,0 +1,8 @@
+> nx run shared-data-access:type-check
+
+> pnpm run type-check
+
+
+> @repo/shared/data-access@1.0.0 type-check /home/tim/Documents/Arch-System/libs/shared/data-access
+> tsc --noEmit
+

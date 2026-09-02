@@ -1,0 +1,8 @@
+> nx run features-access-control-ui:lint
+
+> pnpm run lint
+
+
+> @repo/access-control/ui@1.0.0 lint /home/tim/Documents/Arch-System/libs/features/access-control/ui
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

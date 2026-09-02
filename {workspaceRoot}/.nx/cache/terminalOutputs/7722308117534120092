@@ -1,0 +1,1166 @@
+> nx run features-hub-ui:test
+
+> pnpm run test
+
+
+> @repo/hub/ui@1.0.0 test /home/tim/Documents/Arch-System/libs/features/hub/ui
+> jest --config jest.config.js --passWithNoTests --maxWorkers=50%
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mThreeHeroRotator.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 77 |[39m[22m
+[2m     [90m 78 |[39m   it([32m"renders all panels in the 3D projection tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 79 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 80 |[39m[22m
+[2m     [90m 81 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 82 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:79:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <ambientLight> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m 77 |[39m[22m
+[2m     [90m 78 |[39m   it([32m"renders all panels in the 3D projection tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 79 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 80 |[39m[22m
+[2m     [90m 81 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 82 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:79:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 77 |[39m[22m
+[2m     [90m 78 |[39m   it([32m"renders all panels in the 3D projection tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 79 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 80 |[39m[22m
+[2m     [90m 81 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 82 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:79:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <directionalLight> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m 77 |[39m[22m
+[2m     [90m 78 |[39m   it([32m"renders all panels in the 3D projection tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 79 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 80 |[39m[22m
+[2m     [90m 81 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 82 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:79:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <group> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m 77 |[39m[22m
+[2m     [90m 78 |[39m   it([32m"renders all panels in the 3D projection tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 79 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 80 |[39m[22m
+[2m     [90m 81 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 82 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:79:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 85 |[39m[22m
+[2m     [90m 86 |[39m   it([32m"sets aria-hidden=false on active card and true on inactive cards"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 87 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 88 |[39m     [36mconst[39m slides [33m=[39m container[33m.[39mquerySelectorAll([32m'[role="group"]'[39m)[33m;[39m[22m
+[2m     [90m 89 |[39m     expect(slides)[33m.[39mtoHaveLength([35m3[39m)[33m;[39m[22m
+[2m     [90m 90 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:87:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 85 |[39m[22m
+[2m     [90m 86 |[39m   it([32m"sets aria-hidden=false on active card and true on inactive cards"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 87 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m    |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 88 |[39m     [36mconst[39m slides [33m=[39m container[33m.[39mquerySelectorAll([32m'[role="group"]'[39m)[33m;[39m[22m
+[2m     [90m 89 |[39m     expect(slides)[33m.[39mtoHaveLength([35m3[39m)[33m;[39m[22m
+[2m     [90m 90 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:87:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m  95 |[39m[22m
+[2m     [90m  96 |[39m   it([32m"removes inactive CTA links from the tab order"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  97 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m  98 |[39m     [36mconst[39m primaryCtas [33m=[39m [33mArray[39m[33m.[39m[36mfrom[39m([22m
+[2m     [90m  99 |[39m       container[33m.[39mquerySelectorAll[33m<[39m[33mHTMLAnchorElement[39m[33m>[39m([32m'[data-cta="primary-hero"]'[39m)[33m,[39m[22m
+[2m     [90m 100 |[39m     )[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:97:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m  95 |[39m[22m
+[2m     [90m  96 |[39m   it([32m"removes inactive CTA links from the tab order"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  97 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m  98 |[39m     [36mconst[39m primaryCtas [33m=[39m [33mArray[39m[33m.[39m[36mfrom[39m([22m
+[2m     [90m  99 |[39m       container[33m.[39mquerySelectorAll[33m<[39m[33mHTMLAnchorElement[39m[33m>[39m([32m'[data-cta="primary-hero"]'[39m)[33m,[39m[22m
+[2m     [90m 100 |[39m     )[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:97:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 106 |[39m[22m
+[2m     [90m 107 |[39m   it([32m"advances and retreats active index when Next and Prev buttons are clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 108 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 109 |[39m     [36mconst[39m nextBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Next highlight"[39m)[33m;[39m[22m
+[2m     [90m 110 |[39m     [36mconst[39m prevBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Previous highlight"[39m)[33m;[39m[22m
+[2m     [90m 111 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:108:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 106 |[39m[22m
+[2m     [90m 107 |[39m   it([32m"advances and retreats active index when Next and Prev buttons are clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 108 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 109 |[39m     [36mconst[39m nextBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Next highlight"[39m)[33m;[39m[22m
+[2m     [90m 110 |[39m     [36mconst[39m prevBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Previous highlight"[39m)[33m;[39m[22m
+[2m     [90m 111 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:108:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 124 |[39m[22m
+[2m     [90m 125 |[39m   it([32m"jumps to specific slide when dot indicator is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 126 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 127 |[39m     [36mconst[39m jumpToProduction [33m=[39m screen[33m.[39mgetByLabelText([32m"Jump to Production"[39m)[33m;[39m[22m
+[2m     [90m 128 |[39m[22m
+[2m     [90m 129 |[39m     fireEvent[33m.[39mclick(jumpToProduction)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:126:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 124 |[39m[22m
+[2m     [90m 125 |[39m   it([32m"jumps to specific slide when dot indicator is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 126 |[39m     render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 127 |[39m     [36mconst[39m jumpToProduction [33m=[39m screen[33m.[39mgetByLabelText([32m"Jump to Production"[39m)[33m;[39m[22m
+[2m     [90m 128 |[39m[22m
+[2m     [90m 129 |[39m     fireEvent[33m.[39mclick(jumpToProduction)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:126:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 132 |[39m[22m
+[2m     [90m 133 |[39m   it([32m"handles keyboard navigation (ArrowLeft / ArrowRight / Space)"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 134 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 135 |[39m     [36mconst[39m carousel [33m=[39m container[33m.[39mquerySelector([32m'[role="region"]'[39m)[33m![39m[33m;[39m[22m
+[2m     [90m 136 |[39m[22m
+[2m     [90m 137 |[39m     fireEvent[33m.[39mkeyDown(carousel[33m,[39m { key[33m:[39m [32m"ArrowRight"[39m })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:134:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 132 |[39m[22m
+[2m     [90m 133 |[39m   it([32m"handles keyboard navigation (ArrowLeft / ArrowRight / Space)"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 134 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 135 |[39m     [36mconst[39m carousel [33m=[39m container[33m.[39mquerySelector([32m'[role="region"]'[39m)[33m![39m[33m;[39m[22m
+[2m     [90m 136 |[39m[22m
+[2m     [90m 137 |[39m     fireEvent[33m.[39mkeyDown(carousel[33m,[39m { key[33m:[39m [32m"ArrowRight"[39m })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:134:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 154 |[39m[22m
+[2m     [90m 155 |[39m   it([32m"handles touch swipe gestures"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 156 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 157 |[39m     [36mconst[39m swipeContainer [33m=[39m container[33m.[39mquerySelector([32m".touch-pan-y"[39m)[33m![39m[33m;[39m[22m
+[2m     [90m 158 |[39m[22m
+[2m     [90m 159 |[39m     [90m// Swipe left to advance[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:156:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 154 |[39m[22m
+[2m     [90m 155 |[39m   it([32m"handles touch swipe gestures"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 156 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mThreeHeroRotator[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 157 |[39m     [36mconst[39m swipeContainer [33m=[39m container[33m.[39mquerySelector([32m".touch-pan-y"[39m)[33m![39m[33m;[39m[22m
+[2m     [90m 158 |[39m[22m
+[2m     [90m 159 |[39m     [90m// Swipe left to advance[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:156:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 183 |[39m[22m
+[2m     [90m 184 |[39m   it([32m"renders urgency badges and nominal badge correctly"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 185 |[39m     [36mconst[39m { rerender } [33m=[39m render([22m
+[2m     [90m     |[39m                                [31m[1m^[22m[2m[39m[22m
+[2m     [90m 186 |[39m       [33m<[39m[33mThreeHeroRotator[39m[22m
+[2m     [90m 187 |[39m         panels[33m=[39m{mockPanels}[22m
+[2m     [90m 188 |[39m         incidentCount[33m=[39m{[35m2[39m}[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:185:32)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 183 |[39m[22m
+[2m     [90m 184 |[39m   it([32m"renders urgency badges and nominal badge correctly"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 185 |[39m     [36mconst[39m { rerender } [33m=[39m render([22m
+[2m     [90m     |[39m                                [31m[1m^[22m[2m[39m[22m
+[2m     [90m 186 |[39m       [33m<[39m[33mThreeHeroRotator[39m[22m
+[2m     [90m 187 |[39m         panels[33m=[39m{mockPanels}[22m
+[2m     [90m 188 |[39m         incidentCount[33m=[39m{[35m2[39m}[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:185:32)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 201 |[39m[22m
+[2m     [90m 202 |[39m   it([32m"renders via ThreeHeroRotatorDynamic wrapper"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 203 |[39m     render([33m<[39m[33mThreeHeroRotatorDynamic[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 204 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 205 |[39m   })[33m;[39m[22m
+[2m     [90m 206 |[39m })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:203:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 201 |[39m[22m
+[2m     [90m 202 |[39m   it([32m"renders via ThreeHeroRotatorDynamic wrapper"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 203 |[39m     render([33m<[39m[33mThreeHeroRotatorDynamic[39m panels[33m=[39m{mockPanels} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 204 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 205 |[39m   })[33m;[39m[22m
+[2m     [90m 206 |[39m })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/ThreeHeroRotator.test.tsx[39m[0m[2m:203:11)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mHeroRotator.test.tsx[22m
+  [1m● [22mConsole
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m  97 |[39m[22m
+[2m     [90m  98 |[39m   it([32m"renders the overview panel plus all department panels"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  99 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 100 |[39m[22m
+[2m     [90m 101 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 102 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:99:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <ambientLight> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m  97 |[39m[22m
+[2m     [90m  98 |[39m   it([32m"renders the overview panel plus all department panels"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  99 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 100 |[39m[22m
+[2m     [90m 101 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 102 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:99:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m  97 |[39m[22m
+[2m     [90m  98 |[39m   it([32m"renders the overview panel plus all department panels"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  99 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 100 |[39m[22m
+[2m     [90m 101 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 102 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:99:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <directionalLight> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m  97 |[39m[22m
+[2m     [90m  98 |[39m   it([32m"renders the overview panel plus all department panels"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  99 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 100 |[39m[22m
+[2m     [90m 101 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 102 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:99:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      The tag <group> is unrecognized in this browser. If you meant to render a React component, start its name with an uppercase letter.[39m
+[2m[22m
+[2m    [0m [90m  97 |[39m[22m
+[2m     [90m  98 |[39m   it([32m"renders the overview panel plus all department panels"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m  99 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 100 |[39m[22m
+[2m     [90m 101 |[39m     expect(screen[33m.[39mgetByText([32m"System Overview"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 102 |[39m     expect(screen[33m.[39mgetByText([32m"Drilling Operations"[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12621:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:99:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 108 |[39m[22m
+[2m     [90m 109 |[39m   it([32m"marks the active slide as visible and hides inactive slides from a11y tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 110 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 111 |[39m     [36mconst[39m slides [33m=[39m container[33m.[39mquerySelectorAll([32m'[role="group"]'[39m)[33m;[39m[22m
+[2m     [90m 112 |[39m     expect(slides)[33m.[39mtoHaveLength([35m3[39m)[33m;[39m[22m
+[2m     [90m 113 |[39m     [90m// First slide is active[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:110:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 108 |[39m[22m
+[2m     [90m 109 |[39m   it([32m"marks the active slide as visible and hides inactive slides from a11y tree"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 110 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 111 |[39m     [36mconst[39m slides [33m=[39m container[33m.[39mquerySelectorAll([32m'[role="group"]'[39m)[33m;[39m[22m
+[2m     [90m 112 |[39m     expect(slides)[33m.[39mtoHaveLength([35m3[39m)[33m;[39m[22m
+[2m     [90m 113 |[39m     [90m// First slide is active[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:110:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 118 |[39m[22m
+[2m     [90m 119 |[39m   it([32m"removes inactive CTA links from the tab order"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 120 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 121 |[39m     [36mconst[39m primaryCtas [33m=[39m [33mArray[39m[33m.[39m[36mfrom[39m([22m
+[2m     [90m 122 |[39m       container[33m.[39mquerySelectorAll[33m<[39m[33mHTMLAnchorElement[39m[33m>[39m([32m'[data-cta="primary-hero"]'[39m)[33m,[39m[22m
+[2m     [90m 123 |[39m     )[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:120:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 118 |[39m[22m
+[2m     [90m 119 |[39m   it([32m"removes inactive CTA links from the tab order"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 120 |[39m     [36mconst[39m { container } [33m=[39m render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m                                 [31m[1m^[22m[2m[39m[22m
+[2m     [90m 121 |[39m     [36mconst[39m primaryCtas [33m=[39m [33mArray[39m[33m.[39m[36mfrom[39m([22m
+[2m     [90m 122 |[39m       container[33m.[39mquerySelectorAll[33m<[39m[33mHTMLAnchorElement[39m[33m>[39m([32m'[data-cta="primary-hero"]'[39m)[33m,[39m[22m
+[2m     [90m 123 |[39m     )[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:120:33)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 129 |[39m[22m
+[2m     [90m 130 |[39m   it([32m"advances the active slide when the Next button is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 131 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 132 |[39m     [36mconst[39m nextBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Next highlight"[39m)[33m;[39m[22m
+[2m     [90m 133 |[39m[22m
+[2m     [90m 134 |[39m     [90m// Initially overview is active[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:131:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 129 |[39m[22m
+[2m     [90m 130 |[39m   it([32m"advances the active slide when the Next button is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 131 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 132 |[39m     [36mconst[39m nextBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Next highlight"[39m)[33m;[39m[22m
+[2m     [90m 133 |[39m[22m
+[2m     [90m 134 |[39m     [90m// Initially overview is active[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:131:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 144 |[39m[22m
+[2m     [90m 145 |[39m   it([32m"retreats the active slide when the Previous button is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 146 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 147 |[39m     [36mconst[39m prevBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Previous highlight"[39m)[33m;[39m[22m
+[2m     [90m 148 |[39m[22m
+[2m     [90m 149 |[39m     fireEvent[33m.[39mclick(prevBtn)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:146:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 144 |[39m[22m
+[2m     [90m 145 |[39m   it([32m"retreats the active slide when the Previous button is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 146 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 147 |[39m     [36mconst[39m prevBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Previous highlight"[39m)[33m;[39m[22m
+[2m     [90m 148 |[39m[22m
+[2m     [90m 149 |[39m     fireEvent[33m.[39mclick(prevBtn)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:146:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m[22m
+[2m     [90m 154 |[39m   it([32m"jumps to the target slide when a dot indicator is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m     [36mconst[39m jumpToProduction [33m=[39m screen[33m.[39mgetByLabelText([32m"Jump to Production"[39m)[33m;[39m[22m
+[2m     [90m 157 |[39m[22m
+[2m     [90m 158 |[39m     fireEvent[33m.[39mclick(jumpToProduction)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:155:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 153 |[39m[22m
+[2m     [90m 154 |[39m   it([32m"jumps to the target slide when a dot indicator is clicked"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 155 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 156 |[39m     [36mconst[39m jumpToProduction [33m=[39m screen[33m.[39mgetByLabelText([32m"Jump to Production"[39m)[33m;[39m[22m
+[2m     [90m 157 |[39m[22m
+[2m     [90m 158 |[39m     fireEvent[33m.[39mclick(jumpToProduction)[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:155:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 161 |[39m[22m
+[2m     [90m 162 |[39m   it([32m"toggles manual pause state via the play/pause button"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 163 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 164 |[39m     [36mconst[39m pauseBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Pause auto rotation"[39m)[33m;[39m[22m
+[2m     [90m 165 |[39m     expect(pauseBtn)[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 166 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:163:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 161 |[39m[22m
+[2m     [90m 162 |[39m   it([32m"toggles manual pause state via the play/pause button"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 163 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 164 |[39m     [36mconst[39m pauseBtn [33m=[39m screen[33m.[39mgetByLabelText([32m"Pause auto rotation"[39m)[33m;[39m[22m
+[2m     [90m 165 |[39m     expect(pauseBtn)[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 166 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:163:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 173 |[39m[22m
+[2m     [90m 174 |[39m   it([32m"renders operational urgency badges when counts are non-zero"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 175 |[39m     render([22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 176 |[39m       [33m<[39m[33mHeroRotator[39m[22m
+[2m     [90m 177 |[39m         {[33m...[39mbaseProps}[22m
+[2m     [90m 178 |[39m         departments[33m=[39m{mockDepartments}[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:175:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 173 |[39m[22m
+[2m     [90m 174 |[39m   it([32m"renders operational urgency badges when counts are non-zero"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 175 |[39m     render([22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 176 |[39m       [33m<[39m[33mHeroRotator[39m[22m
+[2m     [90m 177 |[39m         {[33m...[39mbaseProps}[22m
+[2m     [90m 178 |[39m         departments[33m=[39m{mockDepartments}[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:175:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 189 |[39m[22m
+[2m     [90m 190 |[39m   it([32m"renders a Nominal badge when all counts are zero"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 191 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 192 |[39m     expect(screen[33m.[39mgetAllByText([32m"Nominal"[39m)[33m.[39mlength)[33m.[39mtoBeGreaterThan([35m0[39m)[33m;[39m[22m
+[2m     [90m 193 |[39m   })[33m;[39m[22m
+[2m     [90m 194 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:191:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 189 |[39m[22m
+[2m     [90m 190 |[39m   it([32m"renders a Nominal badge when all counts are zero"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 191 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{mockDepartments} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 192 |[39m     expect(screen[33m.[39mgetAllByText([32m"Nominal"[39m)[33m.[39mlength)[33m.[39mtoBeGreaterThan([35m0[39m)[33m;[39m[22m
+[2m     [90m 193 |[39m   })[33m;[39m[22m
+[2m     [90m 194 |[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:191:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <ambientLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 194 |[39m[22m
+[2m     [90m 195 |[39m   it([32m"does not render the control HUD when there is only one panel"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 196 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{[]} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 197 |[39m     expect(screen[33m.[39mqueryByLabelText([32m"Next highlight"[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 198 |[39m     expect(screen[33m.[39mqueryByLabelText([32m"Previous highlight"[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 199 |[39m   })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:196:11)[22m[2m[22m
+
+    [2m[31mconsole.error[39m[22m
+[31m      <directionalLight /> is using incorrect casing. Use PascalCase for React components, or lowercase for HTML elements.[39m
+[2m[22m
+[2m    [0m [90m 194 |[39m[22m
+[2m     [90m 195 |[39m   it([32m"does not render the control HUD when there is only one panel"[39m[33m,[39m () [33m=>[39m {[22m
+[2m    [31m[1m>[22m[2m[39m[90m 196 |[39m     render([33m<[39m[33mHeroRotator[39m {[33m...[39mbaseProps} departments[33m=[39m{[]} [33m/[39m[33m>[39m)[33m;[39m[22m
+[2m     [90m     |[39m           [31m[1m^[22m[2m[39m[22m
+[2m     [90m 197 |[39m     expect(screen[33m.[39mqueryByLabelText([32m"Next highlight"[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 198 |[39m     expect(screen[33m.[39mqueryByLabelText([32m"Previous highlight"[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m[22m
+[2m     [90m 199 |[39m   })[33m;[39m[0m[22m
+[2m[22m
+[2m      [2mat completeWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:12613:37)[22m[2m[22m
+[2m      [2mat runWithFiberInDEV ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:874:13)[22m[2m[22m
+[2m      [2mat completeUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17777:19)[22m[2m[22m
+[2m      [2mat performUnitOfWork ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17658:11)[22m[2m[22m
+[2m      [2mat workLoopSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17469:41)[22m[2m[22m
+[2m      [2mat renderRootSync ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:17450:11)[22m[2m[22m
+[2m      [2mat performWorkOnRoot ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:16504:11)[22m[2m[22m
+[2m      [2mat performWorkOnRootViaSchedulerTask ([22m[2m../../../../node_modules/.pnpm/react-dom@19.2.7_react@19.2.7/node_modules/react-dom/cjs/react-dom-client.development.js[2m:18957:7)[22m[2m[22m
+[2m      [2mat flushActQueue ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:590:34)[22m[2m[22m
+[2m      [2mat process.env.NODE_ENV.exports.act ([22m[2m../../../../node_modules/.pnpm/react@19.2.7/node_modules/react/cjs/react.development.js[2m:884:10)[22m[2m[22m
+[2m      [2mat [22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/act-compat.js[2m:47:25[22m[2m[22m
+[2m      [2mat renderRoot ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:190:26)[22m[2m[22m
+[2m      [2mat render ([22m[2m../../../../node_modules/.pnpm/@testing-library+react@16.3.0_@testing-library+dom@10.4.1_@types+react-dom@19.2.3_@types+reac_5frhkeekhlyqzenp5k2c76nuli/node_modules/@testing-library/react/dist/pure.js[2m:292:10)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36msrc/HeroRotator.test.tsx[39m[0m[2m:196:11)[22m[2m[22m
+
+[0m[7m[1m[32m PASS [39m[22m[27m[0m [2msrc/[22m[1mDepartmentCard.test.tsx[22m
+[999D[K
+[1mTest Suites: [22m[1m[32m3 passed[39m[22m, 3 total
+[1mTests:       [22m[1m[32m25 passed[39m[22m, 25 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.843 s
+[2mRan all test suites[22m[2m.[22m
+[1mForce exiting Jest: [22mHave you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
