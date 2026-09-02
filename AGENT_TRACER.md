@@ -6,6 +6,25 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 
 ---
 
+## 2026-09-02 — Specialized Engineering Agents & Shared Industrial Hooks Suite
+
+- **Purpose**: Created 3 specialized domain subagents and implemented 4 high-impact shared hooks in `@repo/shared/hooks` ([libs/shared/hooks](file:///home/tim/Documents/Arch-System/libs/shared/hooks)) with full unit test coverage.
+- **Created Agents**:
+  - `realtime-engineer-agent`: Specializes in Supabase Realtime CDC channels and telemetry.
+  - `mutation-engineer-agent`: Specializes in React 19 `useOptimistic` transitions and Server Action lifecycles.
+  - `resilience-engineer-agent`: Specializes in open-pit network state detection and control-room keybindings.
+- **Implemented Hooks**:
+  - `useSupabaseRealtime`: Declarative PostgreSQL CDC subscription hook with filter querying and unmount cleanup.
+  - `useOptimisticAction`: React 19 `useOptimistic` + `useTransition` server action wrapper with `@repo/errors` rollback boundaries.
+  - `usePitConnectivity`: Mining pit connectivity sensor combining `navigator.onLine` with jittered heartbeat health pings.
+  - `useCommandScope`: Input-guarded industrial keyboard shortcut manager.
+- **Verification**:
+  - `portal:test` (4 new hook test suites passed, 9/9 tests passed).
+  - `pnpm type-check` ✅ (All 26 workspaces passed).
+  - `pnpm quality` ✅ (Full gate passed with exit code 0).
+  - `pnpm audit:drift && pnpm audit:compliance` ✅ (100% compliant).
+- **What the Next Agent Should Know**: Import these hooks directly from `@repo/shared/hooks` anywhere in `apps/portal` or `apps/overview`.
+
 ## 2026-09-02 — Satellite Backend Endpoints, Schemas & Table Removal
 
 - **Purpose**: Fully removed Satellite Monitoring backend endpoints, API routes, Inngest cron jobs, Zod contracts, and PostgreSQL tables across `@[packages]` and `@[apps/portal]`.

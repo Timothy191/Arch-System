@@ -1,0 +1,8 @@
+> nx run shared-hooks:type-check
+
+> pnpm run type-check
+
+
+> @repo/shared/hooks@1.0.0 type-check /home/tim/Documents/Arch-System/libs/shared/hooks
+> tsc --noEmit
+

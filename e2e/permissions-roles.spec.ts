@@ -11,12 +11,10 @@ test.describe("Permissions and Roles Testing", () => {
       const departments = [
         "drilling",
         "production",
-        "safety",
         "engineering",
         "control-room",
-        "training",
         "access-control",
-        "satellite-monitoring",
+        "access-card-actions",
       ];
 
       for (const dept of departments) {

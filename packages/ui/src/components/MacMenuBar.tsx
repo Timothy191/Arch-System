@@ -110,30 +110,6 @@ const DEPARTMENTS_LIST = [
     bgColor: "bg-dept-control-room/10 hover:bg-dept-control-room/15",
     description: "Real-time operations monitor",
   },
-  {
-    name: "safety",
-    displayName: "Safety Compliance",
-    icon: HardHat,
-    iconColor: "text-dept-safety",
-    bgColor: "bg-dept-safety/10 hover:bg-dept-safety/15",
-    description: "Incident reporting & inspections",
-  },
-  {
-    name: "training",
-    displayName: "Training & LMS",
-    icon: GraduationCap,
-    iconColor: "text-dept-training",
-    bgColor: "bg-dept-training/10 hover:bg-dept-training/15",
-    description: "LMS, certificates & site rules",
-  },
-  {
-    name: "satellite-monitoring",
-    displayName: "Satellite Monitoring",
-    icon: Orbit,
-    iconColor: "text-dept-satellite",
-    bgColor: "bg-dept-satellite/10 hover:bg-dept-satellite/15",
-    description: "SAR, High-Res & Hyperspectral",
-  },
 ] as const;
 
 const PRODUCTIVITY_LIST = [

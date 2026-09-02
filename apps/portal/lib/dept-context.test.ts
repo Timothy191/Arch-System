@@ -92,7 +92,7 @@ describe("requireDepartment", () => {
   });
 
   it("calls notFound when department is not in allowed array", () => {
-    expect(() => requireDepartment("drilling", ["control-room", "training"])).toThrow(
+    expect(() => requireDepartment("drilling", ["control-room", "production"])).toThrow(
       "NEXT_NOT_FOUND",
     );
     expect(notFound).toHaveBeenCalledTimes(1);

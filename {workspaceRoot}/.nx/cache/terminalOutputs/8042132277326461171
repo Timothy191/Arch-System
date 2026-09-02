@@ -1,0 +1,8 @@
+> nx run shared-hooks:lint
+
+> pnpm run lint
+
+
+> @repo/shared/hooks@1.0.0 lint /home/tim/Documents/Arch-System/libs/shared/hooks
+> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
+

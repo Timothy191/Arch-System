@@ -121,9 +121,6 @@ test.describe("Department Navigation E2E", () => {
         "access-card-actions",
         "engineering",
         "control-room",
-        "safety",
-        "training",
-        "satellite-monitoring",
         "admin",
       ];
 

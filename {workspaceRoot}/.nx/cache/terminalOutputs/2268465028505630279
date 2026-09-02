@@ -7,7 +7,7 @@
 > node tests/migration-rollback-safety.mjs
 
 
-🔍 Checking 108 migration files for rollback safety...
+🔍 Checking 109 migration files for rollback safety...
 
 
 ⚠️  92 warning(s):
@@ -104,5 +104,5 @@
    100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_model_name"
    100_ai_token_usage_tracking.sql: CREATE INDEX without IF NOT EXISTS: "idx_ai_token_usage_date_range"
 
-📊 108 migrations — 0 errors, 92 warnings.
+📊 109 migrations — 0 errors, 92 warnings.
 
