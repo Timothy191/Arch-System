@@ -6,6 +6,7 @@ import { GET } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   getUserSafely: jest.fn(),
+  createServerSupabaseClient: jest.fn().mockResolvedValue({}),
 }));
 
 jest.mock("@/lib/api/rate-limit-middleware", () => ({
@@ -20,7 +21,7 @@ describe("GET /api/metabase/embed", () => {
   });
 
   it("returns 401 if user is unauthenticated", async () => {
-    getUserSafely.mockResolvedValueOnce({ user: null, error: new Error("No session") });
+    getUserSafely.mockResolvedValueOnce(null);
 
     const req = new NextRequest("http://localhost:3000/api/metabase/embed?dashboardId=1");
     const res = await GET(req);
