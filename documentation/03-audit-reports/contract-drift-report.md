@@ -1,45 +1,48 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-09-03T06:43:23.534Z
+Generated on 2026-09-03T06:57:57.691Z
 
 ## Fitness Function Telemetry
+
 - **Database Tables Scanned**: 86
 - **Zod Contract Schemas**: 63
 - **Drift Health Index (DHI)**: 31.4%
 - **Contract Coverage Rating**: 🟡 Needs Review
 
 ## Synchronized Domain Contracts (27 Tables)
-| Database Table | Migration Source | Contract Schema |
-| :--- | :--- | :--- |
-| `daily_logs` | `001_initial.sql` | `dailyLogSchema` |
-| `production_logs` | `001_initial.sql` | `productionDailyLogSchema` |
-| `shift_notes` | `002_control_room_tables.sql` | `controlRoomShiftReportSchema, unifiedShiftReportSchema` |
-| `excavator_activity` | `002_control_room_tables.sql` | `excavatorHaulSchema` |
-| `dozer_rolls` | `002_control_room_tables.sql` | `dozerRollSchema` |
-| `breakdowns` | `004_breakdowns.sql` | `createBreakdownSchema, breakdownReportEntrySchema` |
-| `memory_embeddings` | `009_ai_memory.sql` | `aiHandoffSchema, riskAssessmentSchema` |
-| `shift_status` | `0145_shift_closeout.sql` | `lockAndSignShiftSchema` |
-| `tires` | `0146_tire_management.sql` | `tireSchema, createTireSchema, replaceTireSchema` |
-| `tire_inspections` | `0146_tire_management.sql` | `tireInspectionSchema, logTireInspectionSchema` |
-| `webhook_endpoints` | `017_webhooks.sql` | `createWebhookSchema, updateWebhookSchema` |
-| `drill_operations` | `024_drill_operations.sql` | `drillOperationSchema, drillTelemetryIngestSchema` |
-| `badges` | `028_access_control_system.sql` | `scannerBadgeSchema` |
-| `ai_usage_logs` | `032_ai_usage_logs.sql` | `aiChatSchema, aiSafetySchema, aiPredictSchema` |
-| `fleet` | `035_fleet_and_equipment_tables.sql` | `fleetSchema` |
-| `equipment` | `035_fleet_and_equipment_tables.sql` | `equipmentSchema` |
-| `card_printers` | `076_card_printing_infrastructure.sql` | `PrintRequestSchema` |
-| `card_templates` | `076_card_printing_infrastructure.sql` | `PrintRequestSchema` |
-| `print_jobs` | `076_card_printing_infrastructure.sql` | `PrintRequestSchema` |
-| `issued_cards` | `076_card_printing_infrastructure.sql` | `PrintRequestSchema, EmployeeProfileUpdateSchema` |
-| `satellite_deformations` | `078_satellite_insar_deformations.sql` | `insarTelemetryIngestSchema, insarGeoTIFFUploadSchema` |
-| `ai_token_usage` | `100_ai_token_usage_tracking.sql` | `aiChatSchema, aiPredictSchema` |
-| `excavator_haul_logs` | `148_multi_site_production_report.sql` | `excavatorHaulSchema` |
-| `excavator_truck_tallies` | `148_multi_site_production_report.sql` | `truckTallySchema` |
-| `dozer_rollover_logs` | `148_multi_site_production_report.sql` | `dozerRolloverEntrySchema` |
-| `ancillary_shift_logs` | `148_multi_site_production_report.sql` | `ancillaryReportEntrySchema` |
-| `compliance_audit_runs` | `151_operational_compliance_checks.sql` | `complianceAuditRunSchema, createComplianceAuditRunSchema` |
+
+| Database Table            | Migration Source                        | Contract Schema                                            |
+| :------------------------ | :-------------------------------------- | :--------------------------------------------------------- |
+| `daily_logs`              | `001_initial.sql`                       | `dailyLogSchema`                                           |
+| `production_logs`         | `001_initial.sql`                       | `productionDailyLogSchema`                                 |
+| `shift_notes`             | `002_control_room_tables.sql`           | `controlRoomShiftReportSchema, unifiedShiftReportSchema`   |
+| `excavator_activity`      | `002_control_room_tables.sql`           | `excavatorHaulSchema`                                      |
+| `dozer_rolls`             | `002_control_room_tables.sql`           | `dozerRollSchema`                                          |
+| `breakdowns`              | `004_breakdowns.sql`                    | `createBreakdownSchema, breakdownReportEntrySchema`        |
+| `memory_embeddings`       | `009_ai_memory.sql`                     | `aiHandoffSchema, riskAssessmentSchema`                    |
+| `shift_status`            | `0145_shift_closeout.sql`               | `lockAndSignShiftSchema`                                   |
+| `tires`                   | `0146_tire_management.sql`              | `tireSchema, createTireSchema, replaceTireSchema`          |
+| `tire_inspections`        | `0146_tire_management.sql`              | `tireInspectionSchema, logTireInspectionSchema`            |
+| `webhook_endpoints`       | `017_webhooks.sql`                      | `createWebhookSchema, updateWebhookSchema`                 |
+| `drill_operations`        | `024_drill_operations.sql`              | `drillOperationSchema, drillTelemetryIngestSchema`         |
+| `badges`                  | `028_access_control_system.sql`         | `scannerBadgeSchema`                                       |
+| `ai_usage_logs`           | `032_ai_usage_logs.sql`                 | `aiChatSchema, aiSafetySchema, aiPredictSchema`            |
+| `fleet`                   | `035_fleet_and_equipment_tables.sql`    | `fleetSchema`                                              |
+| `equipment`               | `035_fleet_and_equipment_tables.sql`    | `equipmentSchema`                                          |
+| `card_printers`           | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema`                                       |
+| `card_templates`          | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema`                                       |
+| `print_jobs`              | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema`                                       |
+| `issued_cards`            | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema, EmployeeProfileUpdateSchema`          |
+| `satellite_deformations`  | `078_satellite_insar_deformations.sql`  | `insarTelemetryIngestSchema, insarGeoTIFFUploadSchema`     |
+| `ai_token_usage`          | `100_ai_token_usage_tracking.sql`       | `aiChatSchema, aiPredictSchema`                            |
+| `excavator_haul_logs`     | `148_multi_site_production_report.sql`  | `excavatorHaulSchema`                                      |
+| `excavator_truck_tallies` | `148_multi_site_production_report.sql`  | `truckTallySchema`                                         |
+| `dozer_rollover_logs`     | `148_multi_site_production_report.sql`  | `dozerRolloverEntrySchema`                                 |
+| `ancillary_shift_logs`    | `148_multi_site_production_report.sql`  | `ancillaryReportEntrySchema`                               |
+| `compliance_audit_runs`   | `151_operational_compliance_checks.sql` | `complianceAuditRunSchema, createComplianceAuditRunSchema` |
 
 ## System & Infrastructure Tables (59 Tables)
+
 - `departments` (001_initial.sql)
 - `employees` (001_initial.sql)
 - `machines` (001_initial.sql)
