@@ -235,13 +235,6 @@ export const ENGINEERING_TABS = [
   { name: "tools", label: "Tools", icon: "Wrench" },
 ] as const;
 
-export const SATELLITE_MONITORING_TABS = [
-  { name: "dashboard", label: "Overview", icon: "BarChart2" },
-  { name: "sar", label: "SAR / InSAR", icon: "Radio" },
-  { name: "hyperspectral", label: "Hyperspectral", icon: "Layers" },
-  { name: "highres", label: "High-Res", icon: "ScanSearch" },
-] as const;
-
 /**
  * Drilling specific tabs - focused on rig operations and telemetry
  */
@@ -281,7 +274,6 @@ const DEPARTMENT_TABS_MAP: Record<
   "control-room": CONTROL_ROOM_TABS,
   "access-control": ACCESS_CONTROL_TABS,
   "access-card-actions": ACCESS_CARD_ACTIONS_TABS,
-  "satellite-monitoring": SATELLITE_MONITORING_TABS,
   engineering: ENGINEERING_TABS,
   drilling: DRILLING_TABS,
 };

@@ -8,9 +8,6 @@ import {
   CreditCard,
   Wrench,
   TowerControl,
-  HardHat,
-  GraduationCap,
-  Orbit,
   Pickaxe,
   ArrowUpRight,
 } from "lucide-react";
@@ -62,16 +59,6 @@ const DEPT_STYLE_MAP: Record<
     icon: TowerControl,
     iconColor: "text-dept-control-room",
     bgColor: "bg-dept-control-room/10",
-  },
-  training: {
-    icon: GraduationCap,
-    iconColor: "text-dept-training",
-    bgColor: "bg-dept-training/10",
-  },
-  "satellite-monitoring": {
-    icon: Orbit,
-    iconColor: "text-dept-satellite",
-    bgColor: "bg-dept-satellite/10",
   },
 };
 

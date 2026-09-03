@@ -341,40 +341,16 @@ const _NAVIGATION_GRAPH = {
       y: 200,
     },
     {
-      id: "safety",
-      type: "department",
-      label: "Safety",
-      color: "#ef4444",
-      x: 850,
-      y: 200,
-    },
-    {
-      id: "training",
-      type: "department",
-      label: "Training",
-      color: "#ec4899",
-      x: 1000,
-      y: 200,
-    },
-    {
-      id: "satellite-monitoring",
-      type: "department",
-      label: "Satellite Monitoring",
-      color: "#14b8a6",
-      x: 1150,
-      y: 200,
-    },
-    {
       id: "access-card-actions",
       type: "department",
       label: "Access Card Actions",
       color: "#f59e0b",
-      x: 1300,
+      x: 850,
       y: 200,
     },
 
     // Admin
-    { id: "admin", type: "admin", label: "Admin", x: 1450, y: 50 },
+    { id: "admin", type: "admin", label: "Admin", x: 1000, y: 50 },
   ],
   edges: [
     // Hub connections
@@ -383,9 +359,6 @@ const _NAVIGATION_GRAPH = {
     { id: "e3", source: "hub", target: "access-control" },
     { id: "e4", source: "hub", target: "engineering" },
     { id: "e5", source: "hub", target: "control-room" },
-    { id: "e6", source: "hub", target: "safety" },
-    { id: "e7", source: "hub", target: "training" },
-    { id: "e8", source: "hub", target: "satellite-monitoring" },
     { id: "e9", source: "hub", target: "access-card-actions" },
 
     // Auth
@@ -789,7 +762,12 @@ export const BACKEND_SERVICES: BackendService[] = [
     protocols: ["HTTPS", "React Server Components", "Server Actions"],
     security: "Supabase Session JWT + Role Gating",
     sla: "<16ms 60fps interactive rendering",
-    features: ["Interactive System Graph", "Live Telemetry Simulator", "DB Schema Graph", "Drift Health Audit (DHI)"],
+    features: [
+      "Interactive System Graph",
+      "Live Telemetry Simulator",
+      "DB Schema Graph",
+      "Drift Health Audit (DHI)",
+    ],
   },
 
   // API & Gateway Tier
@@ -1198,7 +1176,8 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     label: "Native Department Integration",
     protocol: "React Server Components / In-Memory",
     flowType: "data",
-    description: "Overview topology runs natively in apps/portal on port 3000 without cross-port overhead.",
+    description:
+      "Overview topology runs natively in apps/portal on port 3000 without cross-port overhead.",
     color: "#007aff",
   },
   {
@@ -1208,7 +1187,8 @@ export const BACKEND_CONNECTIONS: BackendConnection[] = [
     label: "Schema & RLS Introspection",
     protocol: "Postgres Wire / SSL",
     flowType: "data",
-    description: "Real-time schema graph rendering from 109 migration definitions and RLS policy catalog.",
+    description:
+      "Real-time schema graph rendering from 109 migration definitions and RLS policy catalog.",
     color: "#3ecf8e",
   },
 

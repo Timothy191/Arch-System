@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import { seedControlRoom } from "./generators/control-room";
 import { seedDrilling } from "./generators/drilling";
-import { seedGeology } from "./generators/geology";
 import { seedProduction } from "./generators/production";
 
 // Load from potential .env locations (cwd, root, apps/portal)
@@ -58,9 +57,6 @@ async function run() {
     }
     if (targetDept === "all" || targetDept === "production" || targetDept === "processing") {
       await seedProduction(supabase);
-    }
-    if (targetDept === "all" || targetDept === "geology" || targetDept === "satellite") {
-      await seedGeology(supabase);
     }
 
     console.log(`\n==============================================`);

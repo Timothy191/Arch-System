@@ -1,7 +1,7 @@
 {
   "name": "Arch-Systems | Arch OS",
   "short_name": "Arch Portal",
-  "description": "Multi-departmental mining operations portal — control room, safety, engineering, production and more.",
+  "description": "Multi-departmental mining operations portal — control room, drilling, engineering, access control, and production management.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

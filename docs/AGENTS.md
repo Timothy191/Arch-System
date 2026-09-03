@@ -51,7 +51,7 @@ The portal integrates mining analytics, equipment status, and employee operation
 
 1. **Authentication**: Managed via Supabase Auth (JWT). Session tokens are stored in HttpOnly Secure cookies. CSRF and Origin headers are validated on login.
 2. **Authorization Mapping**: The `public.employees` table maps user `auth_id` to an operational `role` (e.g. operator, manager, admin), a `department_id`, and `accessible_departments` (an array of UUIDs).
-3. **Route Gating**: Next.js Edge middleware (`apps/portal/proxy.ts`) gates department directories (`/drilling`, `/production`, `/access-control`, `/engineering`, `/control-room`, `/safety`, `/training`, `/satellite-monitoring`, `/access-card-actions`). It extracts the user session, resolves department UUIDs, and queries the employee profile. Access profiles are cached in Redis under `arch:auth:employee:${user.id}` to eliminate DB overhead.
+3. **Route Gating**: Next.js Edge middleware (`apps/portal/proxy.ts`) gates department directories (`/drilling`, `/production`, `/access-control`, `/engineering`, `/control-room`, `/access-card-actions`). It extracts the user session, resolves department UUIDs, and queries the employee profile. Access profiles are cached in Redis under `arch:auth:employee:${user.id}` to eliminate DB overhead.
 4. **Database RLS Isolation**: Every PostgreSQL table has RLS enabled. Policies consult `auth.uid()` and cross-reference roles or departments against `public.employees` to restrict rows on select, insert, update, and delete. Transaction-wrapped SQL unit tests verify that non-admin roles cannot self-elevate permissions or access unauthorized departments.
 
 ---
@@ -135,13 +135,13 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 
 ### Deployment Commands
 
-| Task Goal                        | Command                                                        |
-| :------------------------------- | :------------------------------------------------------------- |
-| Deploy local stack               | `pnpm deploy:local`                                            |
-| Deploy to staging                | `pnpm deploy:staging`                                          |
-| Deploy to production             | `pnpm deploy:production`                                       |
-| Rollback production              | `pnpm deploy:rollback`                                         |
-| Fresh start (clean local)        | `pnpm fresh-start`                                             |
+| Task Goal                 | Command                  |
+| :------------------------ | :----------------------- |
+| Deploy local stack        | `pnpm deploy:local`      |
+| Deploy to staging         | `pnpm deploy:staging`    |
+| Deploy to production      | `pnpm deploy:production` |
+| Rollback production       | `pnpm deploy:rollback`   |
+| Fresh start (clean local) | `pnpm fresh-start`       |
 
 ---
 
@@ -330,21 +330,21 @@ Enforced via Jest in `apps/portal/jest.config.js`:
 
 ## Technology Stack Summary
 
-| Layer | Technology |
-|-------|------------|
-| Frontend Framework | Next.js 16 (App Router, Turbopack) |
-| UI Library | React 19, shadcn/ui, Radix UI |
-| State Management | Zustand 5 (UI), TanStack Query (server), XState (workflows) |
-| Styling | Tailwind CSS 3.4, OKLCH design tokens, CSS variables |
-| Backend/API | Supabase (Auth, DB, Realtime), Payload CMS v3 |
-| Database | PostgreSQL with Row-Level Security |
-| Caching | Redis (L1/L2 write-through with coalescing) |
-| Testing | Jest, Playwright, Storybook test-runner, axe-playwright |
-| Logging | Pino (structured logging) |
-| Monitoring | Sentry, OpenTelemetry, Prometheus, Grafana |
-| AI/ML | OpenAI/Together APIs, MCP, Langfuse tracing |
-| Python | DeepEval, Pytest (Poetry) |
-| Deployment | Docker, Docker Compose, Nginx, systemd |
-| Package Management | pnpm 9.15.9 with catalogs |
-| Build System | Nx 22 with caching and remote cache (S3) |
-| Node.js | >=22 (Volta-pinned to 24.15.0) |
+| Layer              | Technology                                                  |
+| ------------------ | ----------------------------------------------------------- |
+| Frontend Framework | Next.js 16 (App Router, Turbopack)                          |
+| UI Library         | React 19, shadcn/ui, Radix UI                               |
+| State Management   | Zustand 5 (UI), TanStack Query (server), XState (workflows) |
+| Styling            | Tailwind CSS 3.4, OKLCH design tokens, CSS variables        |
+| Backend/API        | Supabase (Auth, DB, Realtime), Payload CMS v3               |
+| Database           | PostgreSQL with Row-Level Security                          |
+| Caching            | Redis (L1/L2 write-through with coalescing)                 |
+| Testing            | Jest, Playwright, Storybook test-runner, axe-playwright     |
+| Logging            | Pino (structured logging)                                   |
+| Monitoring         | Sentry, OpenTelemetry, Prometheus, Grafana                  |
+| AI/ML              | OpenAI/Together APIs, MCP, Langfuse tracing                 |
+| Python             | DeepEval, Pytest (Poetry)                                   |
+| Deployment         | Docker, Docker Compose, Nginx, systemd                      |
+| Package Management | pnpm 9.15.9 with catalogs                                   |
+| Build System       | Nx 22 with caching and remote cache (S3)                    |
+| Node.js            | >=22 (Volta-pinned to 24.15.0)                              |

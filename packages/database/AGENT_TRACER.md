@@ -1,5 +1,25 @@
 # Database Agent Tracer
 
+## 2026-09-03: Stale Department Cleanup & Employee Permission Purge
+
+### Purpose
+
+Purge all traces of obsolete departments (`safety`, `training`, `satellite-monitoring`) from `public.departments`, clean up employee `accessible_departments` arrays, and add migration 153.
+
+### Changes Made
+
+1. **Migration 153 (`153_cleanup_stale_department_access.sql`)**:
+   - Added migration to strip `516ab006-...`, `47540f48-...`, and `89af13e7-...` from `public.employees.accessible_departments`.
+   - Executed deletion of `safety`, `training`, and `satellite-monitoring` rows from `public.departments`.
+2. **Rollback Verification**:
+   - Executed `pnpm nx run @repo/database:test:migration-rollback` -> 110 migrations, 0 errors.
+3. **Cache Invalidation**:
+   - Flushed Redis cache to ensure no stale employee department tokens remain in memory.
+
+### Status
+
+- **Validation**: 100% PASS across DB queries and migration rollback tests.
+
 ## 2026-08-27: Test Target Integration, Contract Drift & RLS Matrix Verification
 
 ### Purpose

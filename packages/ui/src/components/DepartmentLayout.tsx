@@ -118,8 +118,6 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               department.color === "emerald" && "bg-dept-production/10 text-dept-production",
               department.color === "violet" && "bg-dept-engineering/10 text-dept-engineering",
               department.color === "red" && "bg-dept-control-room/10 text-dept-control-room",
-              department.color === "cyan" && "bg-dept-training/10 text-dept-training",
-              department.color === "indigo" && "bg-dept-satellite/10 text-dept-satellite",
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />
