@@ -24,7 +24,7 @@ catalog:
   xstate: "^5.19.2"
   "@tremor/react": "^3.18.7"
   "@sentry/nextjs": "^10.57.0"
-  react-hook-form: "^7.79.0"
+  react-hook-form: "^7.87.0"
   three: "^0.185.1"
   "@types/three": "^0.185.4"
   "@react-three/fiber": "^9.7.0"
