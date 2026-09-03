@@ -282,10 +282,10 @@ export default async function ExecutiveDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Row 1 — Production & Reconciliation */}
+      {/* KPI Row 1 — Production &amp; Reconciliation */}
       <section className="space-y-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <TrendingUp className="w-3.5 h-3.5" /> Production & Reconciliation (MTD)
+          <TrendingUp className="w-3.5 h-3.5" /> Production &amp; Reconciliation (MTD)
         </h2>
         <KPIGrid cols={4}>
           <KPICard label="Total Tonnage" value={`${totalTonnageMtd.toFixed(0)} t`} color="green" />
@@ -319,10 +319,10 @@ export default async function ExecutiveDashboardPage() {
         )}
       </section>
 
-      {/* KPI Row 2 — Fleet & Personnel */}
+      {/* KPI Row 2 — Fleet &amp; Personnel */}
       <section className="space-y-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <Truck className="w-3.5 h-3.5" /> Fleet & Personnel
+          <Truck className="w-3.5 h-3.5" /> Fleet &amp; Personnel
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -345,10 +345,10 @@ export default async function ExecutiveDashboardPage() {
         </KPIGrid>
       </section>
 
-      {/* KPI Row 3 — Safety & Environment */}
+      {/* KPI Row 3 — Safety &amp; Environment */}
       <section className="space-y-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <ShieldAlert className="w-3.5 h-3.5" /> Safety & Resource Usage
+          <ShieldAlert className="w-3.5 h-3.5" /> Safety &amp; Resource Usage
         </h2>
         <KPIGrid cols={4}>
           <KPICard

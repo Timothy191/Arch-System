@@ -260,7 +260,7 @@ export default async function MachineTelemetryPage({ searchParams }: MachineTele
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-[var(--accent-blue)]" />
               <h3 className="text-lg font-semibold text-[var(--text-heading)]">
-                Monthly Availability & Utilization
+                Monthly Availability &amp; Utilization
               </h3>
             </div>
             <p className="text-sm text-[var(--text-muted)] mt-1">

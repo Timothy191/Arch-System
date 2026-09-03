@@ -51,7 +51,7 @@ function formatDate(dateStr: string | null): string {
 function ExpiryPill({ date }: { date: string | null }) {
   if (!date) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-gray-50/70 border-gray-200/50 text-gray-500">
+      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)]">
         Not set
       </span>
     );

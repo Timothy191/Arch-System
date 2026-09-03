@@ -26,9 +26,9 @@ export const DataGrid = dynamic(
   () => import("@repo/ui/DataGrid").then((m) => ({ default: m.DataGrid })),
   {
     loading: () => (
-      <div className="flex items-center justify-center h-64 bg-white/50 border border-black/[0.08] rounded-lg">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2 text-sm text-gray-600">Loading data grid...</span>
+      <div className="flex items-center justify-center h-64 bg-[var(--bg-glass-card)] border border-[var(--border-default)] rounded-lg">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-blue)]"></div>
+        <span className="ml-2 text-sm text-[var(--text-muted)]">Loading data grid...</span>
       </div>
     ),
     ssr: false, // Don't SSR this heavy component
@@ -48,9 +48,9 @@ export const WorkflowBuilder = dynamic(
     })),
   {
     loading: () => (
-      <div className="flex items-center justify-center h-64 bg-white/50 border border-black/[0.08] rounded-lg">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-        <span className="ml-2 text-sm text-gray-600">Loading workflow builder...</span>
+      <div className="flex items-center justify-center h-64 bg-[var(--bg-glass-card)] border border-[var(--border-default)] rounded-lg">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-blue)]"></div>
+        <span className="ml-2 text-sm text-[var(--text-muted)]">Loading workflow builder...</span>
       </div>
     ),
     ssr: false,

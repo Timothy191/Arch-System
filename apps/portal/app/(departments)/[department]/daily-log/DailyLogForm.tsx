@@ -567,7 +567,9 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       {/* Machines list (read-only reference) */}
       {machines.length > 0 && (
         <div className="space-y-2">
-          <label className="block text-sm text-[var(--text-muted)]">Active Rigs & Equipment</label>
+          <label className="block text-sm text-[var(--text-muted)]">
+            Active Rigs &amp; Equipment
+          </label>
           <div className="flex flex-wrap gap-2">
             {machines.map((m) => (
               <span
@@ -584,7 +586,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       {/* Notes */}
       <div className="space-y-2">
         <label htmlFor="daily-log-notes" className="block text-sm text-[var(--text-muted)]">
-          Observations & Shift Handover Notes
+          Observations &amp; Shift Handover Notes
         </label>
         <textarea
           id="daily-log-notes"

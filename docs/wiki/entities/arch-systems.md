@@ -10,7 +10,7 @@ confidence: high
 
 # Arch-Systems (Plantcor)
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, engineering, control room, safety, training, and satellite monitoring.
+Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as a monorepo. It provides authenticated access to department-specific dashboards for drilling, production, access control, access card actions, engineering, and control room.
 
 ## Technology Stack
 
@@ -58,9 +58,9 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 Standard departments get: dashboard, daily-log, machines, history, reports, tools.
 Specialized routes:
 
-- `control-room`: dashboard, hourly-loads, machine-operations, operational-delays, engineering-notes, excavator-activity, roll-over, machines, reports, satellite
+- `control-room`: dashboard, hourly-loads, machine-operations, operational-delays, engineering-notes, excavator-activity, roll-over, machines, reports
 - `engineering`: dashboard, breakdowns, daily-log, machines, history, reports, tools
-- `satellite-monitoring`: overview, sar, hyperspectral, highres
+- `access-card-actions`: card issuance, batch printing, access logs
 
 ## Auth & Security
 

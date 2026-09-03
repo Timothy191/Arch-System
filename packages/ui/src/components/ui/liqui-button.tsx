@@ -64,11 +64,7 @@ export interface LiquiButtonProps
 export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
   ({ variant, size, glass, className, children, ...props }, ref) => {
     return (
-      <button
-        ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
-        {...props}
-      >
+      <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props}>
         <LiquiGlass {...BUTTON_GLASS} {...glass}>
           <div className={buttonContentVariants({ size })}>{children}</div>
         </LiquiGlass>
@@ -79,5 +75,4 @@ export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
 
 LiquiButton.displayName = "LiquiButton";
 
-export { buttonVariants };
-
+export { buttonVariants as liquiButtonVariants, buttonVariants };

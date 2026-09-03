@@ -43,9 +43,6 @@
 - [[access-control-department|Access Control Department]] — Site access, badging & security
 - [[engineering-department|Engineering Department]] — Equipment specs, maintenance & CAD
 - [[control-room-department|Control Room Department]] — SCADA systems & real-time monitoring
-- [[safety-department|Safety Department]] — Safety incidents, compliance, and inspection workflows
-- [[training-department|Training Department]] — LMS, certifications & competency tracking
-- [[satellite-monitoring-department|Satellite Monitoring Department]] — SAR/InSAR, hyperspectral & high-resolution imagery
 
 ## Concepts (17 + 9 ADRs + 5 Operational + 4 Git Tree)
 

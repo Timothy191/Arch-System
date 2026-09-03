@@ -26,7 +26,7 @@ function SubmitButton() {
       ) : (
         <>
           <Plus className="w-4 h-4 mr-2" />
-          Register & Issue Badge
+          Register &amp; Issue Badge
         </>
       )}
     </Button>

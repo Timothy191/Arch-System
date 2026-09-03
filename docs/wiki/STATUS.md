@@ -214,10 +214,10 @@
 
 ### Wiki Sections
 
-**Entities (9):** ✅
+**Entities (7):** ✅
 
 - Arch-Systems overview
-- 8 Departments (Drilling, Production, Access Control, Engineering, Control Room, Training, Safety, Satellite Monitoring)
+- 6 Core Departments (Drilling, Production, Access Control, Engineering, Control Room, Access Card Actions)
 
 **Concepts (12):** ✅
 
@@ -323,7 +323,7 @@
 
 ### What's Ready
 
-- ✅ Full portal application (departments: drilling, production, access-control, engineering, control-room, safety, training, satellite-monitoring)
+- ✅ Full portal application (departments: drilling, production, access-control, access-card-actions, engineering, control-room)
 - ✅ Production authentication & RLS (61 migrations)
 - ✅ Real-time dashboards & monitoring
 - ✅ Light-only theme (macOS Sonoma palette, design system compliant)

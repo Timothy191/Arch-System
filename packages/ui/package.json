@@ -2,6 +2,8 @@
   "name": "@repo/ui",
   "description": "Shared Radix/shadcn UI components including glass cards, animated components, data grids, and workflow builders",
   "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@liqui-design/glass": "^0.2.2",
@@ -42,6 +44,7 @@
     "typescript": "catalog:"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./globals.css": "./src/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
@@ -108,9 +111,11 @@
   },
   "private": true,
   "scripts": {
+    "build-storybook": "storybook build -o dist/storybook",
     "clean": "rm -rf .nx",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:css": "stylelint 'src/**/*.css'",
+    "storybook": "storybook dev -p 6006",
     "test-storybook": "test-storybook",
     "test-storybook:a11y": "test-storybook",
     "type-check": "tsc --noEmit",

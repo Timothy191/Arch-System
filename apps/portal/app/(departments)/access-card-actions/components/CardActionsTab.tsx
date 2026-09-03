@@ -134,7 +134,7 @@ export function CardActionsTab() {
       <div className="xl:col-span-1 space-y-6">
         <GlassCard className="p-6">
           <h3 className="text-lg font-medium text-[var(--text-heading)] mb-4">
-            Card Encoding & Design
+            Card Encoding &amp; Design
           </h3>
 
           <div className="space-y-5">

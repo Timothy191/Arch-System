@@ -33,7 +33,7 @@ export function FocusModeToggle({ className, variant = "default" }: FocusModeTog
           {enabled ? (
             <EyeOff className="w-2.5 h-2.5 text-accent-blue" />
           ) : (
-            <Eye className="w-2.5 h-2.5 text-gray-500" />
+            <Eye className="w-2.5 h-2.5 text-[var(--text-muted)]" />
           )}
         </span>
       </button>
