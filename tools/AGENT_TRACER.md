@@ -25,6 +25,7 @@
 **Purpose:** Synthesized `tools/onboard.cjs` diagnostic CLI and streamlined monorepo onboarding guide in `docs/ONBOARDING.md`.
 
 **Changes made:**
+
 - Created `tools/onboard.cjs` diagnostic suite with automated checks for:
   - Node engine (`>=22`) and Volta (`24.15.0`)
   - pnpm workspace package manager (`9.15.9`)
@@ -36,3 +37,14 @@
 - Updated `docs/ONBOARDING.md` with complete 15-minute quickstart, sub-second testing patterns, and dependency graph navigation.
 
 **Next agent:** The `pnpm onboard` command is registered as the canonical entry point for local and agent workspace validation. Any new required environment variables in `apps/portal/env/.env.example` will automatically be validated by this tool.
+
+## 2026-09-03T09:26:00Z
+
+**Purpose:** Relocated skill pre-commit validation hook from `.claude/` to `tools/skills-pre-commit.mjs` and updated `.husky/pre-commit`.
+
+**Changes made:**
+
+- Created `tools/skills-pre-commit.mjs` to maintain Agent Skill pre-commit specification validation.
+- Updated `.husky/pre-commit` to invoke `node tools/skills-pre-commit.mjs`.
+
+**Next agent:** Skills validation is hosted in `tools/skills-pre-commit.mjs` independent of legacy IDE/agent folders.

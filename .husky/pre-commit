@@ -1,2 +1,2 @@
 pnpm lint-staged
-node .claude/hooks/scripts/skills-pre-commit.mjs
+node tools/skills-pre-commit.mjs

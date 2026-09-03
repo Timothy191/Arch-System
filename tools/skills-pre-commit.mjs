@@ -3,12 +3,7 @@
  * skills-pre-commit — pre-commit guard that blocks commits which would invalidate
  * any STAGED Agent Skill directory (per https://agentskills.io/specification).
  *
- * Unlike the reference `~/.cline/skills-tools/pre-commit-skills`, this walks UP
- * from each staged file and only validates directories that actually contain a
- * `SKILL.md`. This avoids false-positive FATAL failures on unrelated code commits
- * (the reference hook matches every staged file's immediate parent, which in a
- * monorepo like Arch-System would block nearly all commits).
- *
+ * Walks UP from each staged file and validates directories that contain a `SKILL.md`.
  * Wired from `.husky/pre-commit` after `lint-staged`. Exits 0 (no-op) when:
  *   - no skilled directories are touched by staged files, or
  *   - the validator is unavailable (e.g. CI without `~/.cline/skills-tools`).
