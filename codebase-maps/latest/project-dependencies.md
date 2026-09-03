@@ -1,13 +1,13 @@
 # 🕸️ Project Dependencies & Monorepo Graph Map
 
-**Generated:** 8/24/2026, 8:12:37 AM UTC  
+**Generated:** 9/2/2026, 11:13:16 AM UTC  
 **Workspace:** Nx Monorepo Workspace
 
 ---
 
 ## 📦 Package Graph Rules
 
-- **Apps**: `apps/portal`, `apps/cms`, `apps/overview`
+- **Apps**: `apps/portal` (Unified Portal, Hub & Overview)
 - **Packages**:
   - `@repo/ui` — Shared OKLCH UI component library
   - `@repo/theme` — Design tokens and Tailwind configuration

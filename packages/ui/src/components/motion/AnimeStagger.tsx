@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
 
 interface AnimeStaggerProps {
@@ -22,53 +23,52 @@ export function AnimeStagger({
   staggerDelay = 60,
   delayChildren = 0,
   duration = 600,
-  ease = "outExpo",
   axis = "y",
   distance = 24,
 }: AnimeStaggerProps) {
-  const root = useRef<HTMLDivElement>(null);
-  const scope = useRef<{ revert: () => void } | null>(null);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: staggerDelay / 1000,
+        delayChildren: delayChildren / 1000,
+      },
+    },
+  };
 
-  useEffect(() => {
-    if (!root.current) return;
-
-    let cancelled = false;
-
-    import("animejs").then(({ animate, createScope, stagger }) => {
-      if (cancelled || !root.current) return;
-
-      const targets = root.current.querySelectorAll("[data-anime-child]");
-      if (!targets.length) return;
-
-      const fromValue = axis === "y" ? [distance, 0] : [distance, 0];
-      const prop = axis === "y" ? "y" : "x";
-
-      scope.current = createScope({ root }).add(() => {
-        animate(targets, {
-          [prop]: fromValue,
-          opacity: [0, 1],
-          duration,
-          ease,
-          delay: stagger(staggerDelay, { start: delayChildren }),
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      scope.current?.revert();
-    };
-  }, [staggerDelay, delayChildren, duration, ease, axis, distance]);
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      x: axis === "x" ? distance : 0,
+      y: axis === "y" ? distance : 0,
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: {
+        duration: duration / 1000,
+        ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+      },
+    },
+  };
 
   return (
-    <div ref={root} className={cn(className)}>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className={cn(className)}
+    >
       {Array.isArray(children)
         ? children.map((child, i) => (
-            <div key={i} data-anime-child className={childClassName}>
+            <motion.div key={i} variants={itemVariants} className={childClassName}>
               {child}
-            </div>
+            </motion.div>
           ))
         : children}
-    </div>
+    </motion.div>
   );
 }
+

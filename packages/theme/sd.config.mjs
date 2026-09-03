@@ -40,7 +40,7 @@ const sd = new StyleDictionary({
       files: [
         {
           destination: "tokens-hsl.json",
-          format: "json",
+          format: "json/nested",
         },
       ],
     },

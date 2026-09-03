@@ -1,0 +1,23 @@
+{
+  "goal-1": {
+    "status": "completed",
+    "description": "Locate and document Antigravity CLI core configs and setup.",
+    "verification_criteria": "A detailed report of the core configuration files, their locations, and setup steps is generated.",
+    "owner": "self",
+    "evidence": "/home/tim/.omg/ultragoal/goal-1-report.md"
+  },
+  "goal-2": {
+    "status": "completed",
+    "description": "Craft a fully detailed system delegation prompt including all agentic coding prompting rules.",
+    "verification_criteria": "A prompt string is created integrating all rules and formatted for a manager agent to autonomously complete tasks.",
+    "owner": "manager-agent",
+    "evidence": "/home/tim/.omg/ultragoal/manager-delegation-prompt.md"
+  },
+  "goal-3": {
+    "status": "completed",
+    "description": "Research and identify all available models for use.",
+    "verification_criteria": "A list of available models and their capabilities is compiled and documented.",
+    "owner": "research-agent",
+    "evidence": "/home/tim/.omg/ultragoal/goal-3-report.md"
+  }
+}

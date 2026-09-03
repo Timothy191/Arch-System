@@ -1,11 +1,12 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-09-02T05:15:34.191Z
+Generated on 2026-09-03T06:43:23.534Z
 
-## Summary
+## Fitness Function Telemetry
 - **Database Tables Scanned**: 86
 - **Zod Contract Schemas**: 63
-- **Domain Contract Sync Coverage**: 31.4%
+- **Drift Health Index (DHI)**: 31.4%
+- **Contract Coverage Rating**: 🟡 Needs Review
 
 ## Synchronized Domain Contracts (27 Tables)
 | Database Table | Migration Source | Contract Schema |

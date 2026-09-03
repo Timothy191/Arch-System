@@ -1,5 +1,22 @@
 # Agent Tracer - @repo/ui
 
+## 2026-09-02 - Dependency Consolidation & Framer Motion Standardization
+
+- **Purpose**: Consolidate motion wrappers onto `framer-motion`, eliminate dead dependencies (`animejs` and `@base-ui/react`), and prune workspace catalogs.
+- **Changes**:
+  - `packages/ui/src/components/motion/AnimeNumber.tsx`: Refactored to use `framer-motion` `animate` and `useMotionValue` with out-expo easing.
+  - `packages/ui/src/components/motion/AnimeTimeline.tsx`: Refactored to declarative `framer-motion` container and item variants with imperative handle preservation.
+  - `packages/ui/src/components/motion/AnimeStagger.tsx`: Refactored to Framer Motion stagger transitions.
+  - `packages/ui/src/components/ui/liqui-button.tsx`: Replaced `@base-ui/react` with native accessible button element preserving LiquiGlass aesthetics.
+  - `packages/ui/package.json`: Removed `animejs` and `@base-ui/react`.
+  - `pnpm-workspace.yaml`: Removed `animejs` from root catalog.
+- **Verification**:
+  - `pnpm policy:check` ✅ (0 errors)
+  - `pnpm bundlesize` ✅ (49/49 files passed)
+  - `pnpm knip` ✅ (0 missing deps)
+  - `pnpm --filter portal test -- --testPathPatterns="hook"` ✅ (18/18 suites passed)
+- **What the Next Agent Should Know**: All UI animations are now unified on `framer-motion` and standard CSS transitions.
+
 ## 2026-08-31 - FluidCanvas Ripple Component Implementation & Background Integration
 
 - **Purpose**: Implement a high-efficiency Eulerian fluid dynamics canvas simulation component in `@repo/ui` and wire it into the portal route background above the 4K video wallpaper.

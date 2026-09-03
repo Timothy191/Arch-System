@@ -62,6 +62,20 @@
     "xfetch",
     "distroless",
     "httpx",
-    "smol"
+    "smol",
+    "overwatch",
+    "Overwatch",
+    "pasteable",
+    "Packwerk",
+    "unvetted",
+    "lifecycles",
+    "Debloat",
+    "debloat",
+    "debloated",
+    "SOTA",
+    "panaversity",
+    "adrs",
+    "addyosmani",
+    "toolsets"
   ]
 }

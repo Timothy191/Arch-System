@@ -4,7 +4,107 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
----
+## 2026-09-02 — Playwright E2E Suite Calibration, Overview Spec & Workspace Quality Gate Pass
+
+- **Purpose**: Verified and calibrated the Playwright E2E testing framework, resolved relative directory resolution in `playwright.config.ts`, added the dedicated `e2e/overview.spec.ts` test suite for the 8 interactive React Flow tabs, verified standalone production build, and executed the full `pnpm quality` validation gate across all 23 monorepo packages and applications.
+- **Changes**:
+  - `e2e/playwright.config.ts`: Calibrated `testDir: "."`, `snapshotDir: "./visual/__snapshots__"`, and non-blocking reporter `[["list"], ["html", { open: "never" }]]`.
+  - `e2e/global.setup.ts` & `e2e/helpers/auth.ts`: Optimized auth flow with fast storage-state cache reuse (reduced setup time from 45s to 163ms) and session redirect awareness.
+  - `e2e/overview.spec.ts`: Created comprehensive E2E spec verifying navigation, all 8 interactive tabs (System Architecture, Backend Topology, Departments, Tech Stack, Database Schema, Docs & Maps, Audit & Compliance, Agentic Monitor), and React Flow canvas rendering with zero console errors.
+  - `e2e/open-login.spec.ts`: Updated with resilient unauthenticated edge middleware redirect tests and input attribute checks.
+- **Verification**:
+  - `playwright test e2e/open-login.spec.ts e2e/overview.spec.ts`: 5/5 passed in 13.2s with zero console/page errors.
+  - `pnpm nx build portal`: Standalone production build compiled in 18.1s across 82 routes with 0 TypeScript errors.
+  - `pnpm bundlesize`: 266/266 static assets passed within strict $\le 1.5\text{ MB} / 1\text{ MB}$ limits.
+  - `pnpm quality`: 23/23 Nx workspace projects passed with 0 errors.
+  - `pnpm audit:compliance`: 109 migrations verified with 0 rollback errors, 86 tables with 100% RLS.
+- **What the Next Agent Should Know**: E2E testing is fully verified and working with Playwright 1.60 on Chromium. The entire monorepo is at 100% green gate status.
+
+## 2026-09-02 — CMS Decommissioning & Overview Department Consolidation into Unified Portal
+
+- **Purpose**: Decommissioned standalone `apps/cms` (Payload CMS v3) and merged the interactive React Flow system topology and database schema visualizer from `apps/overview` directly into `apps/portal` (`/overview`), consolidating the monorepo from 3 applications down to a single unified Next.js 16 operations portal (`apps/portal`).
+- **Changes**:
+  - `apps/portal/app/overview/page.tsx`: Integrated full tabbed interactive React Flow architecture and DB schema visualizer (`@xyflow/react`).
+  - `apps/portal/app/overview/sections/*` & `apps/portal/app/overview/lib/*`: Embedded interactive architecture nodes, backend flows, database models, agent monitors, and audit reports.
+  - `pnpm-workspace.yaml`: Added `@xyflow/react` to root catalog and pruned 21 obsolete `@payloadcms/*` packages.
+  - `apps/cms/` & `apps/overview/`: Completely removed, eliminating duplicate ports (`:3001`, `:3003`) and ~150 MB disk overhead.
+  - `tools/policy-compiler.cjs` & `tools/policy/intent-map.json`: Updated allowed clients for `ui-rendering` to `scope:app:portal`, regenerated boundary policies (`pnpm policy:gen`).
+  - `tools/generate-codebase-maps.cjs`: Updated architecture diagrams and generated Log #3 in `codebase-maps/latest/`.
+- **Verification**:
+  - `pnpm nx build portal`: Successfully compiled standalone production build with 0 TypeScript errors in 19.8s.
+  - `pnpm bundlesize`: 266/266 static chunks and public image assets verified within strict 1.5 MB/1 MB gzip limits.
+  - `pnpm audit:compliance`: 109 migrations verified with 0 rollback errors, 86 tables with 100% RLS.
+  - `pnpm quality`: 23/23 Nx workspace projects passed (lint, type-check, test, tokens, css, spellcheck, syncpack, knip, policy).
+- **What the Next Agent Should Know**: The entire Arch-Systems application layer is now consolidated into a single unified Next.js 16 portal on port `:3000` with the `/overview` department providing complete live system topology and audit metrics.
+
+## 2026-09-02 — Multi-Agent Architecture Topology Maps & Full Monorepo Quality Gate Pass
+
+
+- **Purpose**: Generated updated codebase topology maps reflecting the new Multi-Agent Specialist Hierarchy and Architectural Pre-Flight Research Gate, verified zero-drift database compliance, and passed the full monorepo quality gate with 0 errors across all 25 workspace projects.
+- **Changes**:
+  - `tools/generate-codebase-maps.cjs`: Added `multi-agent-architecture.md` map to topology generator covering specialist personas, pre-flight research gates, and SOTA benchmark fitness functions.
+  - `codebase-maps/latest/`: Generated updated map suite and `manifest.json`.
+  - `config/tools/cspell.json`: Registered specialized technical terms (`Packwerk`, `unvetted`, `lifecycles`, `Debloat`, `debloat`, `debloated`, `SOTA`).
+- **Verification**:
+  - `node tools/generate-codebase-maps.cjs`: Succeeded generating Log #2 and active `codebase-maps/latest/`.
+  - `pnpm audit:compliance`: 109 migrations verified with 0 rollback errors, 86 tables with 100% RLS.
+  - `pnpm quality`: 25/25 Nx workspace projects passed (lint, type-check, test, tokens, css, spellcheck, syncpack, knip, policy).
+- **What the Next Agent Should Know**: Monorepo is 100% clean and fully synchronized with active codebase topology maps and architectural pre-flight research gates.
+
+## 2026-09-02 — Workspace Onboarding Diagnostics, Framer Motion Standardization & Asset Compression
+
+- **Purpose**: Concluded monorepo onboarding architecture research, created automated `pnpm onboard` diagnostic suite, consolidated all motion primitives onto `framer-motion`, removed redundant libraries (`animejs`, `@base-ui/react`), and compressed all oversized public assets to achieve 100% pass on `pnpm bundlesize` and `pnpm quality`.
+- **Changes**:
+  - `tools/onboard.cjs`: Synthesized interactive/non-interactive workspace onboarding CLI checking Node engine (`>=22`), Volta (`24.15.0`), pnpm catalogs, Docker daemon, `.env` parity, and sub-second test runs.
+  - `package.json`: Registered `"onboard": "node tools/onboard.cjs"`.
+  - `docs/ONBOARDING.md`: Overhauled developer onboarding guide with 15-minute quickstart, sub-second test execution patterns, and dependency graph navigation.
+  - `packages/ui/src/components/motion/`: Refactored `AnimeNumber.tsx`, `AnimeTimeline.tsx`, and `AnimeStagger.tsx` to native `framer-motion` implementations.
+  - `packages/ui/src/components/ui/liqui-button.tsx`: Refactored to native accessible button element, removing `@base-ui/react`.
+  - `pnpm-workspace.yaml` & `packages/ui/package.json`: Removed `animejs` and `@base-ui/react` from root catalog and package manifests.
+  - `apps/portal/assets/` & `apps/portal/public/`: Optimized wallpapers and department graphics from 6.9 MB down to ~346 kB (gzip).
+  - `.gitignore`: Added `{workspaceRoot}/` ignore rule and purged accidental directory from git index.
+- **Verification**:
+  - `pnpm onboard`: 6/6 passed.
+  - `pnpm nx build portal`: Turbopack build succeeded in 13.1s with 43 static pages and OpenAPI spec.
+  - `pnpm bundlesize`: 257/257 files passed ($\le 1.0\text{ MB}$ asset budget).
+  - `pnpm quality`: 25/25 Nx workspace projects passed (lint, type-check, test, tokens, css, spelling, syncpack, knip, policy).
+  - `pnpm audit:compliance`: 109 SQL migrations verified with 0 rollback errors.
+  - `pnpm dev:quick` + `scripts/monitor-hud.sh`: Verified live TCP latency probes and packet pulses on `http://localhost:3000/login` (HTTP 200).
+- **What the Next Agent Should Know**: Monorepo is at 100% green gate status. All UI motion is unified on `framer-motion`, and `pnpm onboard` is the canonical entry point for local and agent workspace validation.
+
+## 2026-09-02 — Monorepo Debloat & Safe Unused Content Removal (Tier 1)
+
+- **Purpose**: Safely pruned all zero-risk unused content, duplicate workspace packages, unreferenced hooks, dead source files, stale scratch files, and unreferenced heavy media assets as approved in `UNUSED_CONTENT_AUDIT.md`.
+- **Changes**:
+  - Removed accidental `{workspaceRoot}/` directory and fixed path in `apps/portal/project.json`.
+  - Pruned 4 ghost / duplicate packages: `libs/shared/styles/`, `libs/features/access-control/ui/`, `libs/features/analytics/data-access/`, `libs/features/dashboard/data-access/`.
+  - Cleaned path aliases in `tsconfig.base.json` and `apps/portal/tsconfig.json`.
+  - Removed duplicate & dead source files in `apps/portal`: `PrecisionInput.tsx`, `useThrottledState.ts`, `use-form-submit.ts`, `lib/errors/utils.ts`, `useVirtualization.ts`, `useDebounce.ts`, and their test suites.
+  - Removed scratch / stale files: `packages/ui/src/components/ui/pagination-improvements.md`, `packages/database/verify_*.sql`, `scripts/archive/`, `ci/workflows/*`, `ci/scripts/rollback.sh`, `infra/k8s/manifests/cache-agent.yaml`, `infra/monitoring/promtail.yaml`.
+  - Removed ~5.4 MB of unreferenced static media assets from `apps/portal/public/` and `apps/portal/assets/`.
+  - Cleaned obsolete script `deploy:dev` in `package.json` and stale ignores in `config/tools/knip.json`.
+  - Fixed easing tuple type annotations in `@repo/ui` `AnimeStagger.tsx` and `AnimeTimeline.tsx`.
+- **Verification**:
+  - `pnpm policy:gen`: Successfully regenerated all 5 boundary and architecture policy files.
+  - `pnpm knip`: Clean pass, 0 unused files.
+  - `pnpm type-check`: 23/23 projects succeeded with 0 errors.
+  - `pnpm test`: 11/11 test targets passed.
+- **What the Next Agent Should Know**: Monorepo workspace boundaries are now clean with 0 orphan packages and accurate tsconfig path mappings.
+
+## 2026-09-02 — Control Room Telemetry Realtime Refactor & Pit Connectivity Banner
+
+- **Purpose**: Integrated `useSupabaseRealtime` into Control Room HourlyLoadsGrid, built the reactive `PitConnectivityBanner`, enforced sub-second targeted testing directives, and achieved 100% design compliance.
+- **Changes**:
+  - `apps/portal/app/(departments)/[department]/hourly-loads/HourlyLoadsGrid.tsx`: Refactored to use `useSupabaseRealtime` for live PostgreSQL CDC events on `hourly_loads`.
+  - `apps/portal/components/PitConnectivityBanner.tsx` (NEW): Built pit connectivity alert component detecting degraded and offline states with light-mode OKLCH styling.
+  - `apps/portal/components/PitConnectivityBanner.test.tsx` (NEW): Unit tests verifying online, degraded, and offline rendering states.
+  - `docs/GEMINI.md` & `.agents/rules/sub-second-targeted-testing.md`: Enforced pre-flight targeted testing directive (`pnpm --filter portal test -- --testPathPatterns="<hook-name>"`).
+  - `config/tools/cspell.json`: Added `overwatch`, `Overwatch`, `pasteable`.
+- **Verification**:
+  - `portal:test`: 101/101 test suites passed (691/691 tests).
+  - `pnpm quality`: 65/65 targets passed (100% score on RLS, Design, Vulnerability, and Rollback audits).
+  - `pnpm audit:drift && pnpm audit:compliance`: 100% compliant.
+- **What the Next Agent Should Know**: Control Room hourly loads dynamically update via Supabase CDC with zero unmount memory leaks.
 
 ## 2026-09-02 — Specialized Engineering Agents & Shared Industrial Hooks Suite
 

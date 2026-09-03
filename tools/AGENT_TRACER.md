@@ -19,3 +19,20 @@
   - Ensures project tags stay synchronized with directory structure automatically
 
 **Next agent:** The `apply-project-tags.cjs` script now has robust error handling and comprehensive documentation. When modifying this script, maintain the inline documentation for tag vocabulary and tools/ subdirectory handling. The script is automatically run via lint-staged when project.json files change, ensuring tags stay up-to-date. For reference on the canonical tag vocabulary, see tools/policy-compiler.cjs.
+
+## 2026-09-02T10:04:00Z
+
+**Purpose:** Synthesized `tools/onboard.cjs` diagnostic CLI and streamlined monorepo onboarding guide in `docs/ONBOARDING.md`.
+
+**Changes made:**
+- Created `tools/onboard.cjs` diagnostic suite with automated checks for:
+  - Node engine (`>=22`) and Volta (`24.15.0`)
+  - pnpm workspace package manager (`9.15.9`)
+  - Docker daemon and local Supabase container reachability
+  - `.env` variable key alignment against `apps/portal/env/.env.example`
+  - Architecture policies (`apply-project-tags.cjs` + `policy-compiler.cjs --check`)
+  - Fast sub-second feature hook unit test sanity
+- Added `"onboard": "node tools/onboard.cjs"` to root `package.json`.
+- Updated `docs/ONBOARDING.md` with complete 15-minute quickstart, sub-second testing patterns, and dependency graph navigation.
+
+**Next agent:** The `pnpm onboard` command is registered as the canonical entry point for local and agent workspace validation. Any new required environment variables in `apps/portal/env/.env.example` will automatically be validated by this tool.

@@ -59,7 +59,17 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
   console.log("Video State:", videoState);
   expect(videoState.src).toMatch(/edge-of-the-event-horizon|837668e02b8cc6414cd7a78c19d1746c/);
 
-  // 4. (Optional) Full‑page screenshot for visual comparison
+  // 4. SOTA Synthetic Performance & Layout Stability Probe
+  const perfMetrics = await page.evaluate(() => {
+    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    return {
+      domContentLoaded: nav ? nav.domContentLoadedEventEnd - nav.startTime : 0,
+      loadTime: nav ? nav.loadEventEnd - nav.startTime : 0,
+    };
+  });
+  console.log("Synthetic Navigation Metrics (ms):", perfMetrics);
+
+  // 5. Visual Theme Screenshot Check
   await expect(page).toHaveScreenshot("light-glass-background.png", {
     fullPage: false,
   });

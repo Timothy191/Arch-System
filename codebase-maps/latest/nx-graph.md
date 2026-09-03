@@ -1,6 +1,6 @@
 # ⚡ Nx 22 Project Graph & Task Pipeline Map
 
-**Generated:** 8/24/2026, 8:12:37 AM UTC  
+**Generated:** 9/2/2026, 11:13:16 AM UTC  
 **Orchestration Engine:** Nx 22.7.5 + pnpm Workspaces
 
 ---
@@ -55,9 +55,7 @@ flowchart TD
 ```mermaid
 graph TD
     subgraph Apps ["Applications (apps/*)"]
-        PORTAL["scope:app:portal"]
-        CMS["scope:app:cms"]
-        OVERVIEW["scope:app:arch-systems-overview"]
+        PORTAL["scope:app:portal (Unified Mining Operations & Overview Portal)"]
     end
 
     subgraph Features ["Feature Libraries (libs/features/*)"]
@@ -85,10 +83,6 @@ graph TD
     PORTAL --> CONTRACT
     PORTAL --> REDIS
 
-    CMS --> CONTRACT
-    OVERVIEW --> UI
-    OVERVIEW --> THEME
-
     HUB --> UI
     DEPTS --> UI
 
@@ -99,7 +93,6 @@ graph TD
 ---
 
 ## ⚙️ Nx Configuration Overview (`nx.json`)
-
 - **Default Base**: `master`
 - **Task Hashing**: Inputs hash includes `sharedGlobals` + project files
 - **Caching**: `build`, `lint`, `type-check`, `test`, `codegen` set to `cache: true`

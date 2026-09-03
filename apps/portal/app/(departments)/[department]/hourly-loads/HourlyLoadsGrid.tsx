@@ -7,6 +7,7 @@ import { exportToExcel, parseExcel } from "@repo/utils/client";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";
 import { Download, Upload } from "lucide-react";
 import { logError } from "@/lib/errors/error-logger";
+import { useSupabaseRealtime } from "@repo/shared/hooks";
 import { updateMachineSite } from "./actions";
 import { trackClientMetric } from "@/lib/observability/client-telemetry";
 import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
@@ -57,6 +58,31 @@ function HourlyLoadsGrid({
   // No router.refresh() anywhere — each change updates local state instantly and
   // persists in the background, so the page never reloads between values.
   const [loadsState, setLoadsState] = useState<HourlyLoad[]>(hourlyLoads);
+
+  // AGENT-TRACE: Real-time synchronization of hourly_loads CDC events across operators
+  useSupabaseRealtime<HourlyLoad>({
+    supabaseClient: supabase,
+    table: "hourly_loads",
+    filter: `department_id=eq.${departmentId}`,
+    onChange: (payload) => {
+      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+        setLoadsState((prev) => {
+          const index = prev.findIndex(
+            (item) => item.machine_id === payload.new.machine_id && item.shift_type === payload.new.shift_type,
+          );
+          if (index >= 0) {
+            const next = [...prev];
+            next[index] = { ...next[index], ...payload.new };
+            return next;
+          }
+          return [...prev, payload.new];
+        });
+      } else if (payload.eventType === "DELETE" && payload.old.id) {
+        setLoadsState((prev) => prev.filter((item) => item.id !== payload.old.id));
+      }
+    },
+  });
+
   const [siteAssignments, setSiteAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? ""])),
   );

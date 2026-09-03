@@ -119,7 +119,7 @@ Arch-System/
 ├── SECURITY.md                        # Security policy
 ├── DOCUMENTATION_INDEX.md             # This file
 ├── system-wiki/                       # Living system architecture & runtime guidelines (Rule 10)
-├── agentic-system-wiki/               # Living agentic protocols & tool contracts (Rule 10)
+├── packages/agents/docs/              # Living agentic protocols & tool contracts (Rule 10)
 ├── storybook/                         # UI component states & accessibility contracts (Rule 10)
 ├── documentation/                     # Unified documentation center
 │   ├── README.md                      # Documentation center index
@@ -171,8 +171,8 @@ Arch-System/
 - Review documentation relevance quarterly
 - **Living Documentation Repositories (Rule 10 Compliance)**:
   - `system-wiki/`: Core system architecture, workflows, environmental configurations, and runtime guidelines.
-  - `agentic-system-wiki/`: Autonomous workflows, multi-agent protocol contracts, MCP tool integrations, and agent reasoning logs.
-  - `storybook/`: Component states, visual contracts, interaction specs, and component documentation.
+- `packages/agents/docs/`: Autonomous workflows, multi-agent protocol contracts, MCP tool integrations, and agent reasoning logs.
+- `storybook/`: Component states, visual contracts, interaction specs, and component documentation.
 
 ---
 

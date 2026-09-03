@@ -150,7 +150,7 @@ const INTENT_CAPABILITIES = [
   },
   {
     name: "ui-rendering",
-    allowedClients: ["scope:app:portal", "scope:app:cms", "scope:app:overview"],
+    allowedClients: ["scope:app:portal"],
     dbAccess: false,
     auditRequired: false,
     description: "React components and shadcn primitives",

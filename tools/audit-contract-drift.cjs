@@ -124,22 +124,27 @@ for (const [table, info] of dbTables.entries()) {
   }
 }
 
+const coveragePct = ((coveredTables.length / (coveredTables.length + unmappedTables.length)) * 100).toFixed(1);
+const driftHealthIndex = Number(coveragePct);
+
 console.log('\n==================================================');
-console.log('📊 Schema & Contract Drift Results');
+console.log('📊 Schema & Contract Drift Results (Architecture Fitness)');
 console.log('==================================================');
 console.log(`✅ Fully Synchronized Domain Tables: ${coveredTables.length}`);
 console.log(`ℹ️  System Reference / State Tables: ${unmappedTables.length}`);
+console.log(`📈 Drift Health Index (DHI): ${driftHealthIndex}%`);
 
-// Write Drift Report
+// Write Drift Markdown Report
 if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
 const reportMd = `# Schema & Contract Drift Audit Report
 
 Generated on ${new Date().toISOString()}
 
-## Summary
+## Fitness Function Telemetry
 - **Database Tables Scanned**: ${dbTables.size}
 - **Zod Contract Schemas**: ${contractSchemas.size}
-- **Domain Contract Sync Coverage**: ${((coveredTables.length / (coveredTables.length + unmappedTables.length)) * 100).toFixed(1)}%
+- **Drift Health Index (DHI)**: ${driftHealthIndex}%
+- **Contract Coverage Rating**: ${driftHealthIndex >= 90 ? '🟢 Tier-1 Synchronized' : '🟡 Needs Review'}
 
 ## Synchronized Domain Contracts (${coveredTables.length} Tables)
 | Database Table | Migration Source | Contract Schema |
@@ -151,6 +156,21 @@ ${unmappedTables.map((u) => `- \`${u.table}\` (${u.info.file})`).join('\n')}
 `;
 
 fs.writeFileSync(path.join(REPORT_DIR, 'contract-drift-report.md'), reportMd, 'utf8');
-console.log(`📄 Report written to: documentation/03-audit-reports/contract-drift-report.md`);
+
+// Write Structured JSON Telemetry
+const telemetryPayload = {
+  timestamp: new Date().toISOString(),
+  databaseTablesCount: dbTables.size,
+  contractSchemasCount: contractSchemas.size,
+  synchronizedTablesCount: coveredTables.length,
+  unmappedTablesCount: unmappedTables.length,
+  driftHealthIndex: driftHealthIndex,
+  status: driftHealthIndex >= 80 ? 'HEALTHY' : 'DRIFT_DETECTED',
+  tables: coveredTables.map(c => ({ table: c.table, schemas: c.schemas, migration: c.info.file }))
+};
+fs.writeFileSync(path.join(REPORT_DIR, 'contract-drift-summary.json'), JSON.stringify(telemetryPayload, null, 2), 'utf8');
+
+console.log(`📄 Markdown Report written to: documentation/03-audit-reports/contract-drift-report.md`);
+console.log(`📊 JSON Telemetry written to: documentation/03-audit-reports/contract-drift-summary.json`);
 console.log('🎯 Contract Drift Audit: 100% COMPLETE & PASS\n');
 process.exit(0);

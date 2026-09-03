@@ -8,11 +8,11 @@
     "sync-assets": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bash scripts/sync-assets.sh"
+        "command": "node scripts/sync-assets-smart.cjs"
       },
       "inputs": [
-        "{workspaceRoot}/assets/**/*",
-        "{workspaceRoot}/scripts/sync-assets.sh"
+        "{projectRoot}/assets/**/*",
+        "{workspaceRoot}/scripts/sync-assets-smart.cjs"
       ],
       "outputs": [
         "{projectRoot}/public/background",

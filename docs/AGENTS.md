@@ -34,8 +34,8 @@ The portal integrates mining analytics, equipment status, and employee operation
                   ▼                                   ▼
 ┌───────────────────────────────────┐   ┌────────────────────────────────┐
 │            CACHING                │   │        EXTERNAL SERVICES       │
-│  - @repo/redis (L1/L2 Write-Through│  │  - apps/cms (Payload CMS v3)   │
-│    Cache with Coalescing)         │   │  - @repo/supabase (SSR Wrapper)│
+│  - @repo/redis (L1/L2 Write-Through│  │  - @repo/supabase (SSR Wrapper)│
+│    Cache with Coalescing)         │   │  - Supabase Auth & Realtime    │
 └─────────────────┬─────────────────┘   └────────────────┬───────────────┘
                   │ Cached Auth Profiles                 │ Queries & Auth
                   ▼                                      ▼
@@ -58,9 +58,7 @@ The portal integrates mining analytics, equipment status, and employee operation
 
 ## Key Directories
 
-- `apps/portal` — Next.js 16 App Router portal frontend (Turbopack dev, standalone output).
-- `apps/cms` — Headless Payload CMS v3 (3.84.1) with Postgres adapter and Lexical rich text editor.
-- `apps/overview` — Architecture and DB schema visualizer (React Flow / `@xyflow/react`).
+- `apps/portal` — Next.js 16 App Router portal frontend (Turbopack dev, standalone output) containing all department dashboards and the integrated React Flow system architecture visualizer (`/overview`).
 - `libs/features/` — Domain feature modules organized as `<domain>/ui` (components) and `<domain>/data-access` (hooks/services):
   - `auth/ui`, `auth/data-access`, `auth/utils`
   - `departments/ui`, `departments/data-access`
@@ -205,6 +203,10 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
   - Apps (`scope:app`) cannot import `@repo/database-internal` or other internal db utilities directly; they must query via `@repo/supabase`.
   - Feature modules (`scope:feature`) cannot depend on apps (`scope:app`).
 
+### Architectural Pre-Flight Research Gate
+
+- All upcoming architectural changes, major boundary shifts, data contract alterations, or non-trivial structural refactors must leverage the `researchSpecialist` (`SubagentCoordinator.evaluateArchitecturalPreFlight()`) to evaluate frontier industry benchmarks (Netflix Chaos, Uber AST graphs, Shopify Packwerk, Airbnb Data Contracts, Meta perceptual diffing) before committing to structural code edits.
+
 ### Agent Tracing & Breadcrumbs
 
 - Every workspace package contains an `AGENT_TRACER.md` recording changes. **Assistants must append an ISO 8601 timestamped entry describing the modification and handover details.**
@@ -229,7 +231,6 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 - `apps/portal/server/proxy.ts` — Proxy implementation containing cached Redis auth profile lookups, redirect validation, and department route gating.
 - `apps/portal/next.config.mjs` — Next.js configuration (Turbopack, standalone output, transpile packages, Sentry, bundle analyzer).
 - `apps/portal/docker/Dockerfile` — Multi-stage Docker build (pruner → deps → builder → distroless production).
-- `apps/cms/payload.config.ts` — Payload CMS configuration (collections: users, departments, documents).
 - `tools/policy-compiler.cjs` — Architecture rules compiler and SSoT.
 - `tools/apply-project-tags.cjs` — Nx project tagging script mapping folders to scope tags.
 - `tools/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.

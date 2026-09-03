@@ -18,15 +18,12 @@
       "@repo/auth/ui": ["../../libs/features/auth/ui/src/index.ts"],
       "@repo/auth/data-access": ["../../libs/features/auth/data-access/src/index.ts"],
       "@repo/auth/utils": ["../../libs/features/auth/utils/src/index.ts"],
-      "@repo/access-control/ui": ["../../libs/features/access-control/ui/src/index.ts"],
-      "@repo/dashboard/data-access": ["../../libs/features/dashboard/data-access/src/index.ts"],
       "@repo/departments/ui": ["../../libs/features/departments/ui/src/index.ts"],
       "@repo/departments/data-access": ["../../libs/features/departments/data-access/src/index.ts"],
       "@repo/hub/ui": ["../../libs/features/hub/ui/src/index.ts"],
       "@repo/shared/data-access": ["../../libs/shared/data-access/src/index.ts"],
       "@repo/shared/utils": ["../../libs/shared/utils/src/index.ts"],
-      "@repo/shared/hooks": ["../../libs/shared/hooks/src/index.ts"],
-      "@repo/analytics/data-access": ["../../libs/features/analytics/data-access/src/index.ts"]
+      "@repo/shared/hooks": ["../../libs/shared/hooks/src/index.ts"]
     }
   },
   "include": [

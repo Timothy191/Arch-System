@@ -1,5 +1,14 @@
 # Agent Tracer - @repo/agents
 
+## 2026-09-02T11:27:00Z - Frontier Systems Research Specialist & SOTA Telemetry Integration
+
+- **Purpose**: Introduced the `researchSpecialist` persona in `@repo/agents`, conducted industry research on smoke testing & architecture drift telemetry, and enhanced `tools/audit-contract-drift.cjs` and `e2e/visual/theme.smoke.spec.ts`.
+- **Changes**:
+  - `src/specialists.ts`: Added `researchSpecialist`, `realtimeEngineer`, `resilienceEngineer`, `systemSimplifier`, and `telemetryArchitect` personas.
+  - `tools/audit-contract-drift.cjs`: Added automated Drift Health Index (DHI) calculation and structured JSON telemetry export.
+  - `e2e/visual/theme.smoke.spec.ts`: Added synthetic performance canary timing and layout stability evaluation.
+- **Verification**: Verified `pnpm nx run @repo/agents:type-check` (0 errors) and sub-second component test suite in 0.389s.
+
 ## 2026-09-01T14:28:00Z - Technical Specialist Personas & Focus Onboarding
 
 - **Purpose**: Onboard and define focused technical specialist personas to decouple agent execution from business departments into engineering domain roles.

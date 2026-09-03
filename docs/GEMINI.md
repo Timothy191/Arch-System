@@ -36,6 +36,10 @@ Industrial operations portal built for high-scale vigilance and operational prec
 
 - **Mandatory Pre-Commit Gate**: Both `pnpm audit:drift` and `pnpm audit:compliance` must be triggered before committing new features to guarantee complete compliance across all monorepo boundaries.
 
+### Architectural Pre-Flight Research Gate (MANDATORY RULE)
+
+- **Frontier Benchmark Evaluation**: All upcoming architectural changes, major boundary shifts, data contract alterations, or non-trivial structural refactors MUST leverage the `researchSpecialist` (`SubagentCoordinator.evaluateArchitecturalPreFlight()`) to evaluate frontier industry benchmarks (Netflix Chaos, Uber AST graphs, Shopify Packwerk, Airbnb Data Contracts, Meta perceptual diffing) before committing to structural code edits.
+
 ### Production Readiness & Recovery
 
 - **Production Readiness**: All changes must pass the full quality gate (`pnpm quality`) and live verification to ensure the system remains deployable at all times.
@@ -46,6 +50,10 @@ Industrial operations portal built for high-scale vigilance and operational prec
 - **Tests pass ≠ program working.** Fresh runs are mandatory.
 - **Frontend changes require live verification.** Start `pnpm dev`, navigate to the page, and interact with the UI.
 - **Evidence before claims.** Never say "it works" without concrete proof (test output, browser check).
+
+### Sub-Second Targeted Test Feedback (MANDATORY RULE)
+
+- **Instant Pre-Flight Testing**: Whenever modifying shared feature hooks (`@repo/shared/hooks`), components, or server mutations, always run `pnpm --filter portal test -- --testPathPatterns="<hook-name>"` for instant sub-second feedback before triggering the full monorepo quality gate (`pnpm quality`).
 
 ### Systematic Debugging
 
@@ -76,12 +84,14 @@ All AI agents MUST conclude every response with the following standardized secti
    - **Tokens Reused from cached**: Tokens reused across prompt turns via system prompt prefix caching.
    - **Tokens Saved**: Estimated tokens saved via caching, targeted slicing, or subagent scoping.
 3. **Suggested Next Steps (3 options)**:
-   - Include `@[path]` references (e.g., `@[apps/portal]`, `@[packages/database]`) to auto-attach workspace directory metadata for instant zero-search inspection.
-   - Embed relevant slash commands (e.g., `/goal`, `/plan`, `/schedule`, `/grill-me`, `/learn`) within recommendations.
+   - Each option MUST include:
+     - **Action**: Clear, concise title and operational objective.
+     - **Agent**: The exact specialized subagent assigned to implement the recommendation (e.g., `realtime-engineer-agent`, `mutation-engineer-agent`, `resilience-engineer-agent`, `system-simplifier-agent`, `advisor-agent`, `overwatch-agent`).
+     - **Prompt**: A complete, highly optimized, copy-pasteable prompt crafted using all rules, relevant slash commands (`/goal`, `/plan`, `/schedule`, `/grill-me`, `/learn`), target package references `@[path]` (e.g. `@[apps/portal]`, `@[packages/theme]`), and explicit architectural constraints.
    - **Option 1**: Immediate operational or functional next step.
    - **Option 2**: Verification, test suite, or quality gate next step.
    - **Option 3**: Architecture, hardening, or performance optimization next step.
-4. **Tip**: Contextual tips based on past interaction history on how to better prompt the agent, use system prompts/slash commands, or optimize tool execution to improve output quality.
+4. **Advisor & Overwatch Council Directives (Continuous Injection Tip)**: Contextual guidance, anti-drift reminders, and proactive AST/monorepo boundary guardrails systematically injected by the `advisor-agent` and `overwatch-agent` to continually elevate execution quality.
 
 ### Token Conservation & High-Efficiency Context Engineering (MANDATORY RULE)
 

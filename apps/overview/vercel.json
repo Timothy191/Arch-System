@@ -1,5 +1,0 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "cd ../.. && nx build arch-systems-overview",
-  "outputDirectory": "dist"
-}

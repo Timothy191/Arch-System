@@ -197,7 +197,7 @@ function buildCodebaseMaps(dateInfo) {
 
 ## 📦 Package Graph Rules
 
-- **Apps**: \`apps/portal\`, \`apps/cms\`, \`apps/overview\`
+- **Apps**: \`apps/portal\` (Unified Portal, Hub & Overview)
 - **Packages**:
   - \`@repo/ui\` — Shared OKLCH UI component library
   - \`@repo/theme\` — Design tokens and Tailwind configuration
@@ -271,9 +271,7 @@ flowchart TD
 \`\`\`mermaid
 graph TD
     subgraph Apps ["Applications (apps/*)"]
-        PORTAL["scope:app:portal"]
-        CMS["scope:app:cms"]
-        OVERVIEW["scope:app:arch-systems-overview"]
+        PORTAL["scope:app:portal (Unified Mining Operations & Overview Portal)"]
     end
 
     subgraph Features ["Feature Libraries (libs/features/*)"]
@@ -300,10 +298,6 @@ graph TD
     PORTAL --> SUPABASE
     PORTAL --> CONTRACT
     PORTAL --> REDIS
-
-    CMS --> CONTRACT
-    OVERVIEW --> UI
-    OVERVIEW --> THEME
 
     HUB --> UI
     DEPTS --> UI
@@ -339,9 +333,7 @@ graph TD
 \`\`\`mermaid
 graph LR
     subgraph ClientApps ["Presentation & App Layer"]
-        A_PORTAL["apps/portal (:3000)"]
-        A_CMS["apps/cms (:3001)"]
-        A_OVERVIEW["apps/overview (:3003)"]
+        A_PORTAL["apps/portal (:3000 - Portal & Overview)"]
     end
 
     subgraph DomainLibs ["Domain Feature Libraries"]
@@ -371,11 +363,6 @@ graph LR
     A_PORTAL --> P_CONTRACT
     A_PORTAL --> P_REDIS
 
-    A_CMS --> P_CONTRACT
-
-    A_OVERVIEW --> P_UI
-    A_OVERVIEW --> P_THEME
-
     L_HUB --> P_UI
     L_DEPTS --> P_UI
     L_AUTH --> P_CONTRACT
@@ -389,7 +376,7 @@ graph LR
     classDef pkgStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#b45309;
     classDef dbStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
 
-    class A_PORTAL,A_CMS,A_OVERVIEW appStyle;
+    class A_PORTAL appStyle;
     class L_HUB,L_DEPTS,L_AUTH libStyle;
     class P_UI,P_THEME,P_SUPABASE,P_CONTRACT,P_REDIS,P_LOGGER pkgStyle;
     class P_DB dbStyle;
@@ -422,12 +409,74 @@ graph LR
 
 ## 📂 Root Structure Overview
 
-- \`apps/\`: Deployable applications (\`portal\`, \`cms\`, \`overview\`)
-- \`packages/\`: Shared infrastructure packages (\`ui\`, \`theme\`, \`supabase\`, \`database\`, \`contract\`, \`redis\`)
-- \`libs/\`: Domain feature libraries (\`features/hub\`, \`features/departments\`)
+- \`apps/\`: Unified portal application (\`apps/portal\`)
+- \`packages/\`: Shared infrastructure packages (\`ui\`, \`theme\`, \`supabase\`, \`database\`, \`contract\`, \`redis\`, \`agents\`)
+- \`libs/\`: Domain feature libraries (\`features/hub\`, \`features/departments\`, \`features/auth\`)
 - \`tools/\`: Build, audit, and quality automation tools
 - \`codebase-maps/\`: Automated visual codebase topology maps
 - \`documentation/\`: Unified documentation center including audit reports, codebase maps, and system wiki
+`,
+    },
+    {
+      key: "multi-agent-architecture",
+      filename: "multi-agent-architecture.md",
+      title: "Multi-Agent Architecture & Pre-Flight Research Gate Map",
+      category: "Agent Orchestration",
+      summary: "Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.",
+      content: `# 🤖 Multi-Agent Architecture & Pre-Flight Research Gate Map
+
+**Generated:** ${dateInfo.displayDate}  
+**Package:** \`@repo/agents\`  
+**Orchestration:** Multi-Agent Specialist Hierarchy + Langfuse Tracing
+
+---
+
+## 🏛️ Autonomous Specialist Persona Roster
+
+\`\`\`mermaid
+flowchart TD
+    USER["User Request / Goal"] --> MGR["Engineering Manager"]
+    MGR --> COUNCIL["LLM Critique Council (5-Layer Gates)"]
+    COUNCIL --> COORD["SubagentCoordinator (@repo/agents)"]
+
+    subgraph PreFlight ["Mandatory Pre-Flight Research Gate"]
+        RS["researchSpecialist (Frontier Systems & SOTA Benchmarks)"]
+        BENCH["Evaluates SOTA: Netflix, Uber AST, Shopify, Airbnb, Meta"]
+        RS --> BENCH
+    end
+
+    COORD -->|Non-Trivial Architectural Refactor| RS
+    BENCH -->|Approved JSON Assessment| HOD["Head of Department (HoD)"]
+
+    subgraph Specialists ["Domain Execution Specialists"]
+        DBA["databaseArchitect (PostgreSQL & RLS)"]
+        UIE["uiEngineer (React 19 & OKLCH Theme)"]
+        SECG["securityAndQualityGate (ESLint & Playwright)"]
+        RTE["realtimeEngineer (Supabase CDC & WS)"]
+        RESE["resilienceEngineer (Harsh Pit Network & HUD)"]
+        SIMP["systemSimplifier (Debloat & Bundlesize)"]
+        TELA["telemetryArchitect (Codebase Maps & Drift)"]
+    end
+
+    HOD --> DBA
+    HOD --> UIE
+    HOD --> SECG
+    HOD --> RTE
+    HOD --> RESE
+    HOD --> SIMP
+    HOD --> TELA
+\`\`\`
+
+---
+
+## 🔬 Architectural Pre-Flight Research Gate Mandate
+- **Rule Source**: Codified in \`docs/GEMINI.md\` and \`docs/AGENTS.md\`.
+- **Implementation**: \`SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)\`.
+- **Benchmark Evaluation Surface**:
+  - **Airbnb / PayPal**: Semantic Data Contracts (Zero database-to-contract drift).
+  - **Netflix / ThoughtWorks**: Architecture-as-Code Fitness Functions (Drift Health Index $\ge 90\\%$).
+  - **Uber / Sourcegraph**: AST Codebase Maps & Topology Graphs.
+  - **Meta / Google**: Perceptual visual diffing & synthetic navigation canaries.
 `,
     },
   ];

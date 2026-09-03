@@ -1,28 +1,20 @@
 "use client";
 
-import { Button as BaseButton } from "@base-ui/react/button";
+import React, { forwardRef } from "react";
 import { LiquiGlass, type LiquiGlassProps } from "@liqui-design/glass";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@repo/ui/lib/utils";
 
 /**
- * liqui Button — a Base UI button rendered as a LiquiGlass surface.
- *
- * The glass anatomy (backdrop/tint/specular layers + a content wrapper) can't
- * live inside a native <button>: its content model is phrasing content, so
- * the wrapper div would be invalid HTML. nativeButton={false} is Base UI's
- * supported escape — useButton then supplies role="button", tabIndex, and
- * the Enter/Space handlers itself. The one thing it can't give back is implicit
- * form submission, so pass nativeButton explicitly (and drop the glass) for a
- * real submit button.
+ * LiquiButton — a glass button rendered as a LiquiGlass surface.
  *
  * Variants retint the glass by overriding --lq-tint rather than painting over
  * it, so the lens still refracts the background through the accent color.
  */
 
 const buttonVariants = cva(
-  "group inline-flex cursor-default select-none outline-none transition-[transform,box-shadow] duration-150 data-[pressed]:scale-[0.97] active:scale-[0.97] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50",
+  "group inline-flex cursor-pointer select-none items-center justify-center outline-none transition-[transform,box-shadow] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -43,7 +35,7 @@ const buttonVariants = cva(
 );
 
 const buttonContentVariants = cva(
-  "inline-flex items-center justify-center rounded-[inherit] font-semibold leading-tight whitespace-nowrap group-hover:bg-[color-mix(in_srgb,var(--lq-highlight)_40%,transparent)] group-data-[disabled]:bg-transparent",
+  "inline-flex items-center justify-center rounded-[inherit] font-semibold leading-tight whitespace-nowrap group-hover:bg-[color-mix(in_srgb,var(--lq-highlight)_40%,transparent)] group-disabled:bg-transparent",
   {
     variants: {
       size: {
@@ -62,23 +54,30 @@ const BUTTON_GLASS = {
   bezel: 11,
 } satisfies Partial<LiquiGlassProps>;
 
-export interface LiquiButtonProps extends BaseButton.Props, VariantProps<typeof buttonVariants> {
+export interface LiquiButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   /** Overrides for the underlying glass surface (radius, refraction, bezel…). */
   glass?: Partial<LiquiGlassProps>;
 }
 
-export function LiquiButton({ variant, size, glass, className, ...props }: LiquiButtonProps) {
-  return (
-    <BaseButton
-      className={cn(buttonVariants({ variant, size }), className)}
-      nativeButton={false}
-      {...props}
-    >
-      <LiquiGlass {...BUTTON_GLASS} {...glass}>
-        <div className={buttonContentVariants({ size })}>{props.children}</div>
-      </LiquiGlass>
-    </BaseButton>
-  );
-}
+export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
+  ({ variant, size, glass, className, children, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size }), className)}
+        {...props}
+      >
+        <LiquiGlass {...BUTTON_GLASS} {...glass}>
+          <div className={buttonContentVariants({ size })}>{children}</div>
+        </LiquiGlass>
+      </button>
+    );
+  },
+);
+
+LiquiButton.displayName = "LiquiButton";
 
 export { buttonVariants };
+

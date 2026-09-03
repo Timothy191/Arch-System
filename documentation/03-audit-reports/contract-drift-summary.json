@@ -1,0 +1,214 @@
+{
+  "timestamp": "2026-09-03T06:43:23.534Z",
+  "databaseTablesCount": 86,
+  "contractSchemasCount": 63,
+  "synchronizedTablesCount": 27,
+  "unmappedTablesCount": 59,
+  "driftHealthIndex": 31.4,
+  "status": "DRIFT_DETECTED",
+  "tables": [
+    {
+      "table": "daily_logs",
+      "schemas": [
+        "dailyLogSchema"
+      ],
+      "migration": "001_initial.sql"
+    },
+    {
+      "table": "production_logs",
+      "schemas": [
+        "productionDailyLogSchema"
+      ],
+      "migration": "001_initial.sql"
+    },
+    {
+      "table": "shift_notes",
+      "schemas": [
+        "controlRoomShiftReportSchema",
+        "unifiedShiftReportSchema"
+      ],
+      "migration": "002_control_room_tables.sql"
+    },
+    {
+      "table": "excavator_activity",
+      "schemas": [
+        "excavatorHaulSchema"
+      ],
+      "migration": "002_control_room_tables.sql"
+    },
+    {
+      "table": "dozer_rolls",
+      "schemas": [
+        "dozerRollSchema"
+      ],
+      "migration": "002_control_room_tables.sql"
+    },
+    {
+      "table": "breakdowns",
+      "schemas": [
+        "createBreakdownSchema",
+        "breakdownReportEntrySchema"
+      ],
+      "migration": "004_breakdowns.sql"
+    },
+    {
+      "table": "memory_embeddings",
+      "schemas": [
+        "aiHandoffSchema",
+        "riskAssessmentSchema"
+      ],
+      "migration": "009_ai_memory.sql"
+    },
+    {
+      "table": "shift_status",
+      "schemas": [
+        "lockAndSignShiftSchema"
+      ],
+      "migration": "0145_shift_closeout.sql"
+    },
+    {
+      "table": "tires",
+      "schemas": [
+        "tireSchema",
+        "createTireSchema",
+        "replaceTireSchema"
+      ],
+      "migration": "0146_tire_management.sql"
+    },
+    {
+      "table": "tire_inspections",
+      "schemas": [
+        "tireInspectionSchema",
+        "logTireInspectionSchema"
+      ],
+      "migration": "0146_tire_management.sql"
+    },
+    {
+      "table": "webhook_endpoints",
+      "schemas": [
+        "createWebhookSchema",
+        "updateWebhookSchema"
+      ],
+      "migration": "017_webhooks.sql"
+    },
+    {
+      "table": "drill_operations",
+      "schemas": [
+        "drillOperationSchema",
+        "drillTelemetryIngestSchema"
+      ],
+      "migration": "024_drill_operations.sql"
+    },
+    {
+      "table": "badges",
+      "schemas": [
+        "scannerBadgeSchema"
+      ],
+      "migration": "028_access_control_system.sql"
+    },
+    {
+      "table": "ai_usage_logs",
+      "schemas": [
+        "aiChatSchema",
+        "aiSafetySchema",
+        "aiPredictSchema"
+      ],
+      "migration": "032_ai_usage_logs.sql"
+    },
+    {
+      "table": "fleet",
+      "schemas": [
+        "fleetSchema"
+      ],
+      "migration": "035_fleet_and_equipment_tables.sql"
+    },
+    {
+      "table": "equipment",
+      "schemas": [
+        "equipmentSchema"
+      ],
+      "migration": "035_fleet_and_equipment_tables.sql"
+    },
+    {
+      "table": "card_printers",
+      "schemas": [
+        "PrintRequestSchema"
+      ],
+      "migration": "076_card_printing_infrastructure.sql"
+    },
+    {
+      "table": "card_templates",
+      "schemas": [
+        "PrintRequestSchema"
+      ],
+      "migration": "076_card_printing_infrastructure.sql"
+    },
+    {
+      "table": "print_jobs",
+      "schemas": [
+        "PrintRequestSchema"
+      ],
+      "migration": "076_card_printing_infrastructure.sql"
+    },
+    {
+      "table": "issued_cards",
+      "schemas": [
+        "PrintRequestSchema",
+        "EmployeeProfileUpdateSchema"
+      ],
+      "migration": "076_card_printing_infrastructure.sql"
+    },
+    {
+      "table": "satellite_deformations",
+      "schemas": [
+        "insarTelemetryIngestSchema",
+        "insarGeoTIFFUploadSchema"
+      ],
+      "migration": "078_satellite_insar_deformations.sql"
+    },
+    {
+      "table": "ai_token_usage",
+      "schemas": [
+        "aiChatSchema",
+        "aiPredictSchema"
+      ],
+      "migration": "100_ai_token_usage_tracking.sql"
+    },
+    {
+      "table": "excavator_haul_logs",
+      "schemas": [
+        "excavatorHaulSchema"
+      ],
+      "migration": "148_multi_site_production_report.sql"
+    },
+    {
+      "table": "excavator_truck_tallies",
+      "schemas": [
+        "truckTallySchema"
+      ],
+      "migration": "148_multi_site_production_report.sql"
+    },
+    {
+      "table": "dozer_rollover_logs",
+      "schemas": [
+        "dozerRolloverEntrySchema"
+      ],
+      "migration": "148_multi_site_production_report.sql"
+    },
+    {
+      "table": "ancillary_shift_logs",
+      "schemas": [
+        "ancillaryReportEntrySchema"
+      ],
+      "migration": "148_multi_site_production_report.sql"
+    },
+    {
+      "table": "compliance_audit_runs",
+      "schemas": [
+        "complianceAuditRunSchema",
+        "createComplianceAuditRunSchema"
+      ],
+      "migration": "151_operational_compliance_checks.sql"
+    }
+  ]
+}

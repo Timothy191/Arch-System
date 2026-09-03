@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { animate, useMotionValue } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
 
 interface AnimeNumberProps {
@@ -22,39 +23,30 @@ export function AnimeNumber({
   className,
   format = "number",
 }: AnimeNumberProps) {
-  const root = useRef<HTMLSpanElement>(null);
-  const scope = useRef<{ revert: () => void } | null>(null);
-
-  useEffect(() => {
-    if (!root.current) return;
-
-    let cancelled = false;
-
-    import("animejs").then(({ animate, createScope }) => {
-      if (cancelled || !root.current) return;
-
-      scope.current = createScope({ root }).add(() => {
-        animate(root.current!, {
-          innerHTML: [0, value],
-          round,
-          duration,
-          ease: "outExpo",
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      scope.current?.revert();
-    };
-  }, [value, duration, round]);
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const count = useMotionValue(0);
 
   const displayPrefix = format === "percentage" && !prefix ? "" : prefix;
   const displaySuffix = format === "percentage" && !suffix ? "%" : suffix;
 
+  useEffect(() => {
+    const controls = animate(count, value, {
+      duration: duration / 1000,
+      ease: [0.16, 1, 0.3, 1], // ease-out-expo
+      onUpdate: (latest) => {
+        if (nodeRef.current) {
+          nodeRef.current.textContent = `${displayPrefix}${latest.toFixed(round)}${displaySuffix}`;
+        }
+      },
+    });
+
+    return () => controls.stop();
+  }, [value, duration, round, displayPrefix, displaySuffix]);
+
   return (
-    <span ref={root} className={cn("tabular-nums", className)}>
+    <span ref={nodeRef} className={cn("tabular-nums", className)}>
       {displayPrefix}0{displaySuffix}
     </span>
   );
 }
+

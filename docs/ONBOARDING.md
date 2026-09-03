@@ -1,85 +1,122 @@
 # Developer Onboarding Guide
 
-Welcome to the Arch-Systems project! This guide will help you get set up and start contributing.
+Welcome to the Arch-Systems (Plantcor) project! This guide will help you set up, validate your workspace environment, and start contributing to our Nx monorepo.
 
-## 1. Prerequisites
+---
 
-Ensure you have the following installed:
+## 1. Prerequisites & Toolchain
 
-- **Node.js**: `>=22` (Managed via Volta, see `package.json`)
+Ensure your local machine satisfies the monorepo engine requirements:
+
+- **Node.js**: `>=22` (Pinned via Volta to `24.15.0`)
 - **pnpm**: `9.15.9` (Enforced via `packageManager` field)
-- **Docker & Docker Compose**: For local Supabase, Redis, and tools.
-- **Git**: Ensure your SSH keys are configured for GitHub/GitLab.
+- **Docker & Docker Compose**: Required for local Supabase database and E2E visual suites.
+- **Git & SSH**: Configured with proper commit signing and repository access.
 
-## 2. Initial Setup
+---
 
-Clone the repository and run the initial setup commands:
+## 2. Quick Setup (Time-to-First-Commit < 15 mins)
+
+Clone the repository and run the setup sequence:
 
 ```bash
 git clone git@github.com:arch-systems/portal.git
-cd portal
+cd Arch-System
 
-# Install all dependencies (Nx workspace)
+# 1. Install dependencies across all Nx workspace projects
 pnpm install
 
-# Copy environment variables
-cp apps/portal/.env.example apps/portal/.env
-cp .env.tools.example .env.tools
+# 2. Provision environment configuration
+cp apps/portal/env/.env.example apps/portal/.env
+
+# 3. Run the automated workspace diagnostic suite
+pnpm onboard
 ```
 
-_Note: Request the actual development secrets from your team lead._
+The `pnpm onboard` diagnostic suite checks:
+1. Node engine & Volta toolchain compatibility.
+2. pnpm workspace catalog integrity.
+3. Docker & local Supabase container health.
+4. `.env` variable key alignment against templates.
+5. ESLint architecture policy boundaries (SSoT).
+6. Sub-second feature hook test sanity.
 
-## 3. Start Local Infrastructure
+---
 
-We use Supabase for our database and authentication. Start it locally:
+## 3. Local Infrastructure & Development Stack
+
+We use Supabase for PostgreSQL, Auth, and Row-Level Security (RLS).
 
 ```bash
+# Start local Supabase containers (DB on :54322, Studio on :54323, API on :54321)
 pnpm --filter @repo/database supabase:dev
-```
 
-_Note: This will print out your local `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Update your `apps/portal/.env` with these values._
-
-## 4. Run the Development Server
-
-With the database running, you can start the Next.js portal:
-
-```bash
+# Launch Next.js 16 Portal with Turbopack dev server (:3000)
 pnpm dev
 ```
 
-Navigate to `http://localhost:3000`.
+> **Fast-Boot Alternative**: Run `pnpm dev:quick` for headless / background dev execution.
 
-## 5. Quality Gates & Git Workflow
+---
 
-Before committing, always ensure your code passes the quality gates:
+## 4. Understanding Monorepo Architecture
+
+Before making changes, inspect the interactive dependency graph to understand module boundaries and blast radius:
 
 ```bash
-pnpm quality
+# Launch interactive graph visualizer
+pnpm nx:graph
+
+# View affected projects based on your local branch diff
+pnpm dev:graph
 ```
 
-This runs:
+### Key Architectural Boundaries
+- `apps/portal`: Next.js 16 App Router interface (must not import DB internals directly).
+- `packages/contract`: Canonical Zod schemas and entity definitions (Single Source of Truth).
+- `libs/features/*`: Domain-specific UI and data-access modules (`scope:feature`).
+- `packages/theme`: OKLCH design tokens (Light mode only; dark mode is unsupported).
 
-- `eslint` and `prettier`
-- `tsc` (Type Checking)
-- `jest` (Unit Tests)
-- `knip` (Dead code detection)
+---
 
-We use `husky` and `lint-staged` to enforce this on pre-commit.
+## 5. Development Workflow & Quality Gates
 
-## 6. Required Reading
+### A. Sub-Second Inner-Loop Feedback
+Do not wait for the entire monorepo test suite on every change. Use targeted test runners:
 
-To understand the architecture and our AI-assisted development workflow, please read:
+```bash
+# Instant sub-second test execution for active hooks/components
+pnpm --filter portal test -- --testPathPatterns="<hook-or-component-name>"
+```
 
-- **[CLAUDE.md](../CLAUDE.md)**: Deep dive into the monorepo structure and technical patterns.
-- **[AGENTS.md](../AGENTS.md)**: How we use AI agents, the `AGENT_TRACER.md` requirement, and strict handoff procedures.
-- **[DESIGN.md](../DESIGN.md)**: Our UI/UX philosophy and Tailwind OKLCH token system.
+### B. Pre-Commit Quality Gate
+Before opening a PR or merging, execute the complete quality suite:
+
+```bash
+# Runs ESLint, TypeScript check, unit tests, token linting, dead code scan, and policy checks
+pnpm quality
+
+# Verify database migration rollback safety & contract compliance
+pnpm audit:compliance
+```
+
+---
+
+## 6. Required Reading & Agentic Context
+
+- **[CLAUDE.md](../CLAUDE.md)**: Monorepo conventions, common commands, and heuristics.
+- **[AGENTS.md](../AGENTS.md)**: Agentic workflow contracts, AI hierarchy, and `AGENT_TRACER.md` logging requirements.
+- **[DESIGN.md](../DESIGN.md)**: Design system tokens, OKLCH palette, and motion rules.
+- **[SECURITY.md](../SECURITY.md)**: Row-Level Security (RLS) policies and security audit scripts.
+
+---
 
 ## 7. Your First Contribution
 
-1. Check the Linear/Jira board for a "good first issue".
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and **update `AGENT_TRACER.md`** in the respective package.
-4. Run `pnpm quality`.
-5. Submit a Pull Request. CI will automatically run tests and deploy a preview environment.
+1. Create a feature branch: `git checkout -b feature/your-feature-name`
+2. Implement your changes within the appropriate domain (`libs/features/` or `apps/portal`).
+3. **Update `AGENT_TRACER.md`** in the modified package with a timestamp and handover summary.
+4. Run `pnpm onboard` and `pnpm quality`.
+5. Submit your Pull Request. CI will run verification and deploy preview environments.
 
 Welcome aboard! 🚀

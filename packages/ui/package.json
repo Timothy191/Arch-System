@@ -3,7 +3,6 @@
   "description": "Shared Radix/shadcn UI components including glass cards, animated components, data grids, and workflow builders",
   "version": "1.0.0",
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
     "@formkit/auto-animate": "^0.8.2",
     "@liqui-design/glass": "^0.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -19,7 +18,6 @@
     "@revolist/revogrid": "^4.21.0",
     "@types/three": "catalog:",
     "@xyflow/react": "^12.6.0",
-    "animejs": "catalog:",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "catalog:",

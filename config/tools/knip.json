@@ -73,14 +73,8 @@
         "@opentelemetry/sdk-trace-node"
       ],
       "ignore": [
-        "lib/observability/logger.ts",
-        "lib/api/schemas.ts",
         "lib/observability/metrics.ts",
-        "components/ui/PrecisionInput.tsx",
         "features/analytics/components/ReportTemplate.tsx",
-        "hooks/use-form-submit.ts",
-        "lib/errors/utils.ts",
-        "components/feedback/FeedbackWidget.tsx",
         "lib/feature-flags.ts"
       ]
     },

@@ -29,6 +29,7 @@
     "@univerjs/preset-sheets-core": "^0.23.0",
     "@univerjs/presets": "^0.23.0",
     "@vercel/otel": "^2.1.3",
+    "@xyflow/react": "catalog:",
     "bcryptjs": "^3.0.3",
     "inngest": "^4.4.0",
     "lucide-react": "catalog:",

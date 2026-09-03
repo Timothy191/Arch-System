@@ -25,8 +25,8 @@ const chromeExecutable = resolveChromeExecutable();
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./e2e",
-  snapshotDir: "./e2e/visual/__snapshots__",
+  testDir: ".",
+  snapshotDir: "./visual/__snapshots__",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -36,7 +36,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",

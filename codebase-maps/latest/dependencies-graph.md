@@ -1,6 +1,6 @@
 # 🕸️ Monorepo Dependencies & Topology Graph Map
 
-**Generated:** 8/24/2026, 8:12:37 AM UTC  
+**Generated:** 9/2/2026, 11:13:16 AM UTC  
 **Architecture:** Nx 22 Monorepo Topology
 
 ---
@@ -10,9 +10,7 @@
 ```mermaid
 graph LR
     subgraph ClientApps ["Presentation & App Layer"]
-        A_PORTAL["apps/portal (:3000)"]
-        A_CMS["apps/cms (:3001)"]
-        A_OVERVIEW["apps/overview (:3003)"]
+        A_PORTAL["apps/portal (:3000 - Portal & Overview)"]
     end
 
     subgraph DomainLibs ["Domain Feature Libraries"]
@@ -42,11 +40,6 @@ graph LR
     A_PORTAL --> P_CONTRACT
     A_PORTAL --> P_REDIS
 
-    A_CMS --> P_CONTRACT
-
-    A_OVERVIEW --> P_UI
-    A_OVERVIEW --> P_THEME
-
     L_HUB --> P_UI
     L_DEPTS --> P_UI
     L_AUTH --> P_CONTRACT
@@ -60,7 +53,7 @@ graph LR
     classDef pkgStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#b45309;
     classDef dbStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#b91c1c;
 
-    class A_PORTAL,A_CMS,A_OVERVIEW appStyle;
+    class A_PORTAL appStyle;
     class L_HUB,L_DEPTS,L_AUTH libStyle;
     class P_UI,P_THEME,P_SUPABASE,P_CONTRACT,P_REDIS,P_LOGGER pkgStyle;
     class P_DB dbStyle;
@@ -70,9 +63,9 @@ graph LR
 
 ## 🚫 ESLint Module Boundary Enforcement Matrix
 
-| Source Tag            | Allowed Dependencies             | Forbidden Dependencies                                                    |
-| :-------------------- | :------------------------------- | :------------------------------------------------------------------------ |
-| `scope:app`           | `scope:package`, `scope:feature` | `scope:package:db-internal`                                               |
-| `scope:package:ui`    | `scope:package:theme`            | `scope:package:db`, `scope:package:db-internal`, `scope:package:supabase` |
-| `scope:package:theme` | Primitive tokens                 | `scope:package:ui`                                                        |
-| `scope:tool`          | Local Node scripts               | `scope:app`, `scope:package:supabase`                                     |
+| Source Tag | Allowed Dependencies | Forbidden Dependencies |
+| :--- | :--- | :--- |
+| `scope:app` | `scope:package`, `scope:feature` | `scope:package:db-internal` |
+| `scope:package:ui` | `scope:package:theme` | `scope:package:db`, `scope:package:db-internal`, `scope:package:supabase` |
+| `scope:package:theme` | Primitive tokens | `scope:package:ui` |
+| `scope:tool` | Local Node scripts | `scope:app`, `scope:package:supabase` |

@@ -204,7 +204,6 @@ e2e/.auth/
 
 # Local stub docs dirs (root-level README-only stubs)
 /system-wiki/
-/agentic-system-wiki/
 /storybook/
 /supabase/
 
@@ -235,3 +234,4 @@ e2e/.auth/
 # Local feature-lib Next tooling copies (untracked dev artifacts)
 libs/features/*/node_modules/
 dev-report.md
+{workspaceRoot}/
