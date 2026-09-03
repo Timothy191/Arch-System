@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock, AlertCircle } from "lucide-react";
 
@@ -73,6 +73,18 @@ function MachineOperationsList({
     );
   }
 
+  // Performance Optimization: Pre-index total loads by machine_id into a Map using useMemo.
+  // Replaces O(N * M) nested .filter().reduce() operations during render with O(1) Map lookups.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const load of todayLoads) {
+      if (load.machine_id) {
+        map.set(load.machine_id, (map.get(load.machine_id) || 0) + (load.total_loads || 0));
+      }
+    }
+    return map;
+  }, [todayLoads]);
+
   // Group by site_id, then by shift
   const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
 
@@ -98,9 +110,7 @@ function MachineOperationsList({
         const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
           const bf = op.machine?.bin_factor || 0;
-          const loads = todayLoads
-            .filter((l) => l.machine_id === op.machine_id)
-            .reduce((s, l) => s + (l.total_loads || 0), 0);
+          const loads = loadsByMachine.get(op.machine_id) || 0;
           return sum + loads * bf;
         }, 0);
 
@@ -138,7 +148,7 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
+                      loadsByMachine={loadsByMachine}
                       activeBreakdowns={activeBreakdowns}
                     />
                   ))}
@@ -157,7 +167,7 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
+                      loadsByMachine={loadsByMachine}
                       activeBreakdowns={activeBreakdowns}
                     />
                   ))}
@@ -173,22 +183,19 @@ function MachineOperationsList({
 
 function OperationCard({
   operation,
-  todayLoads,
+  loadsByMachine,
   activeBreakdowns,
 }: {
   operation: MachineOperation;
-  todayLoads: HourlyLoadSummary[];
+  loadsByMachine: Map<string, number>;
   activeBreakdowns: Breakdown[];
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
-  // Calculate BCM metrics
+  // Performance Optimization: Calculate BCM metrics using O(1) Map lookup
   const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads =
-    todayLoads
-      ?.filter((l) => l.machine_id === operation.machine_id)
-      ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+  const machineLoads = loadsByMachine.get(operation.machine_id) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
@@ -200,28 +207,20 @@ function OperationCard({
       (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number),
   );
 
-  // AGENT-TRACE: Calculate delay totals by category and status
+  // Performance Optimization: Single loop pass to calculate delay totals and category breakdown
   const delayEntries = operation.delay_entries || [];
-  const totalDelayHours = delayEntries.reduce((sum, d) => sum + d.duration_hours, 0);
-  const _committedDelayHours = delayEntries
-    .filter((d) => d.status === "committed")
-    .reduce((sum, d) => sum + d.duration_hours, 0);
-  const draftDelayHours = delayEntries
-    .filter((d) => d.status === "draft")
-    .reduce((sum, d) => sum + d.duration_hours, 0);
+  let totalDelayHours = 0;
+  let draftDelayHours = 0;
+  const delaysByCategory: Record<string, number> = {};
 
-  // Group delays by category
-  const delaysByCategory = delayEntries.reduce(
-    (acc, delay) => {
-      const categoryName = delay.delay_category?.name || "Unknown";
-      if (!acc[categoryName]) {
-        acc[categoryName] = 0;
-      }
-      acc[categoryName] += delay.duration_hours;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  for (const d of delayEntries) {
+    totalDelayHours += d.duration_hours;
+    if (d.status === "draft") {
+      draftDelayHours += d.duration_hours;
+    }
+    const categoryName = d.delay_category?.name || "Unknown";
+    delaysByCategory[categoryName] = (delaysByCategory[categoryName] || 0) + d.duration_hours;
+  }
 
   const [showDelays, setShowDelays] = useState(false);
 
