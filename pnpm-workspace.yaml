@@ -11,7 +11,7 @@ catalog:
   cspell: "^10.0.1"
   prettier: "~3.6.2"
   typescript: "^5.7.0"
-  "@types/node": "^22"
+  "@types/node": "^26"
   "@types/eslint": "^8"
   "@supabase/supabase-js": "^2.108.2"
   supabase: "^2.106.0"
