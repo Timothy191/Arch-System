@@ -1,8 +1,0 @@
-> nx run cms:lint
-
-> pnpm run lint
-
-
-> cms@1.0.0 lint /home/tim/Documents/Arch-System/apps/cms
-> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
-

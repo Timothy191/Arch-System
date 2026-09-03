@@ -1,8 +1,0 @@
-> nx run @repo/theme:type-check
-
-> pnpm run type-check
-
-
-> @repo/theme@1.0.0 type-check /home/tim/Documents/Arch-System/packages/theme
-> tsc --noEmit
-

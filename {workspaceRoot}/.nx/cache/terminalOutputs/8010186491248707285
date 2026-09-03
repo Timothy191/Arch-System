@@ -1,8 +1,0 @@
-> nx run features-hub-ui:type-check
-
-> pnpm run type-check
-
-
-> @repo/hub/ui@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/hub/ui
-> tsc --noEmit
-

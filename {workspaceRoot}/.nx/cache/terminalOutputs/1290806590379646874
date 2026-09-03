@@ -1,8 +1,0 @@
-> nx run @repo/ui:lint
-
-> pnpm run lint
-
-
-> @repo/ui@1.0.0 lint /home/tim/Documents/Arch-System/packages/ui
-> eslint . --cache --cache-location node_modules/.cache/.eslintcache
-

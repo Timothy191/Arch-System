@@ -1,8 +1,0 @@
-> nx run @repo/redis:type-check
-
-> pnpm run type-check
-
-
-> @repo/redis@1.0.0 type-check /home/tim/Documents/Arch-System/packages/redis
-> tsc --noEmit
-

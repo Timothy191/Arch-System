@@ -1,8 +1,0 @@
-> nx run @repo/logger:type-check
-
-> pnpm run type-check
-
-
-> @repo/logger@1.0.0 type-check /home/tim/Documents/Arch-System/packages/logger
-> tsc --noEmit
-

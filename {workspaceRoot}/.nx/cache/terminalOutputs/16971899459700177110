@@ -1,8 +1,0 @@
-> nx run @repo/redis:lint
-
-> pnpm run lint
-
-
-> @repo/redis@1.0.0 lint /home/tim/Documents/Arch-System/packages/redis
-> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
-

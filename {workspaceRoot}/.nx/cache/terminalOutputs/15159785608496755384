@@ -1,8 +1,0 @@
-> nx run features-auth-utils:type-check
-
-> pnpm run type-check
-
-
-> @repo/auth/utils@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/auth/utils
-> tsc --noEmit
-

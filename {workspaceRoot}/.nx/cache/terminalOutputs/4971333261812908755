@@ -1,8 +1,0 @@
-> nx run portal:lint
-
-> pnpm run lint
-
-
-> portal@1.0.0 lint /home/tim/Documents/Arch-System/apps/portal
-> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
-

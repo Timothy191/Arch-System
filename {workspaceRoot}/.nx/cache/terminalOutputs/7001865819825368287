@@ -1,8 +1,0 @@
-> nx run features-analytics-data-access:type-check
-
-> pnpm run type-check
-
-
-> @repo/analytics/data-access@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/analytics/data-access
-> tsc --noEmit
-

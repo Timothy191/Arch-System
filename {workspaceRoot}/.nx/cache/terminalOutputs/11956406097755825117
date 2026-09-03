@@ -1,17 +1,0 @@
-> nx run @repo/contract:type-check
-
-> pnpm run type-check
-
-
-> @repo/contract@1.0.0 type-check /home/tim/Documents/Arch-System/packages/contract
-> tsc --noEmit
-
-[96msrc/index.ts[0m:[93m206[0m:[93m8[0m - [91merror[0m[90m TS2307: [0mCannot find module './schemas/satellite.schema.js' or its corresponding type declarations.
-
-[7m206[0m } from "./schemas/satellite.schema.js";
-[7m   [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
-
-
-Found 1 error in src/index.ts[90m:206[0m
-
-[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

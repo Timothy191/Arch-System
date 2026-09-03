@@ -1,8 +1,0 @@
-> nx run features-hub-ui:lint
-
-> pnpm run lint
-
-
-> @repo/hub/ui@1.0.0 lint /home/tim/Documents/Arch-System/libs/features/hub/ui
-> eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0
-

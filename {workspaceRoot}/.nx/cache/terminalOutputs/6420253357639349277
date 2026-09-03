@@ -1,8 +1,0 @@
-> nx run features-dashboard-data-access:type-check
-
-> pnpm run type-check
-
-
-> @repo/dashboard/data-access@1.0.0 type-check /home/tim/Documents/Arch-System/libs/features/dashboard/data-access
-> tsc --noEmit
-

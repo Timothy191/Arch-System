@@ -1,9 +1,0 @@
-> nx run @repo/database:lint
-
-> pnpm run lint
-
-
-> @repo/database@1.0.0 lint /home/tim/Documents/Arch-System/packages/database
-> echo 'No lintable files in @repo/database'
-
-No lintable files in @repo/database

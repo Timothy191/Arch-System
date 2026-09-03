@@ -1,8 +1,0 @@
-> nx run @repo/errors:type-check
-
-> pnpm run type-check
-
-
-> @repo/errors@1.0.0 type-check /home/tim/Documents/Arch-System/packages/errors
-> tsc --noEmit
-
