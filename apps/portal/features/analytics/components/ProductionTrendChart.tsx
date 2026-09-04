@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AreaChart, Text } from "@tremor/react";
 import { linearForecast } from "@/lib/analytics/forecast";
 
@@ -15,36 +16,43 @@ export interface ProductionTrendChartProps {
 }
 
 export function ProductionTrendChart({ data, showForecast = true }: ProductionTrendChartProps) {
-  const coalValues = data.map((d) => d.coal);
-  const forecast: number[] = showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
+  // Bolt Optimization: Memoize linear forecast calculation, formatted chart data, and category list.
+  // This prevents running linear regression, constructing Date instances, and re-allocating array
+  // objects on every render, ensuring stable props for Tremor AreaChart and avoiding chart re-diffing.
+  const { chartData, categories, forecast } = useMemo(() => {
+    const coalValues = data.map((d) => d.coal);
+    const forecast: number[] = showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
 
-  const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
+    const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
 
-  const forecastPoints = forecast.map((val: number, i: number) => {
-    const d = new Date(lastDate);
-    d.setDate(d.getDate() + i + 1);
-    return {
-      date: d.toISOString().split("T")[0]!,
-      coal: undefined,
-      waste: undefined,
-      "Coal Forecast": Math.max(0, Math.round(val)),
-    };
-  });
+    const forecastPoints = forecast.map((val: number, i: number) => {
+      const d = new Date(lastDate);
+      d.setDate(d.getDate() + i + 1);
+      return {
+        date: d.toISOString().split("T")[0]!,
+        coal: undefined,
+        waste: undefined,
+        "Coal Forecast": Math.max(0, Math.round(val)),
+      };
+    });
 
-  const chartData = [
-    ...data.map((d) => ({
-      date: d.date,
-      "Coal (t)": Math.round(d.coal),
-      "Waste (t)": Math.round(d.waste),
-      "Coal Forecast": undefined,
-    })),
-    ...forecastPoints,
-  ];
+    const chartData = [
+      ...data.map((d) => ({
+        date: d.date,
+        "Coal (t)": Math.round(d.coal),
+        "Waste (t)": Math.round(d.waste),
+        "Coal Forecast": undefined,
+      })),
+      ...forecastPoints,
+    ];
 
-  const categories =
-    showForecast && forecast.length > 0
-      ? ["Coal (t)", "Waste (t)", "Coal Forecast"]
-      : ["Coal (t)", "Waste (t)"];
+    const categories =
+      showForecast && forecast.length > 0
+        ? ["Coal (t)", "Waste (t)", "Coal Forecast"]
+        : ["Coal (t)", "Waste (t)"];
+
+    return { chartData, categories, forecast };
+  }, [data, showForecast]);
 
   if (data.length === 0) {
     return (
