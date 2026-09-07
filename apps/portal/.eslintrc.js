@@ -20,7 +20,13 @@ module.exports = {
     },
     {
       files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/setupTests.ts"],
-      env: { jest: true },
+      env: { jest: true, browser: true },
+      parserOptions: {
+        project: null,
+      },
+      rules: {
+        "no-undef": "off",
+      },
     },
     {
       files: ["lib/env.ts", "lib/ai/tools.ts", "lib/api/response.ts"],
