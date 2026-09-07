@@ -50,6 +50,7 @@ function isValidRedirect(path: string): boolean {
     /^\/access-card-actions(\/|$)/, // Access Card Actions department
     /^\/hub/, // Hub
     /^\/admin(\/|$)/, // Admin
+    /^\/overview(\/|$)/, // System Overview topology
   ];
 
   // Check if path matches any allowed pattern
@@ -67,7 +68,6 @@ const DEPARTMENT_ROUTES = [
   "control-room",
   "access-card-actions",
 ];
-
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
   "access-control": ["access_control", "admin", "supervisor", "operator"],

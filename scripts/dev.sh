@@ -472,9 +472,9 @@ env_pass=true
 node -v > /dev/null 2>&1 && check "Node.js" "pass" "$(node -v)" || { check "Node.js" "fail"; env_pass=false; }
 pnpm -v > /dev/null 2>&1 && check "pnpm" "pass" "$(pnpm -v)" || { check "pnpm" "fail"; env_pass=false; }
 
-# 1a. Check & Fix Docker (skip in quick mode)
-if [ "$QUICK_MODE" = "true" ]; then
-  check "Docker" "skip" "quick mode"
+# 1a. Check & Fix Docker (skip in quick mode or hosted cloud mode)
+if [ "$QUICK_MODE" = "true" ] || [ "$HOSTED_MODE" = "true" ]; then
+  check "Docker" "skip" "$([ "$HOSTED_MODE" = "true" ] && echo "hosted cloud mode" || echo "quick mode")"
 else
   if ! docker info > /dev/null 2>&1; then
     echo -e "  ${INFO} Docker is not running. Attempting to start docker..."

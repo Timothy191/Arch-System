@@ -1,15 +1,31 @@
 import pino from "pino";
 
+// AGENT-TRACE: Disable pino-pretty worker thread transport in test environments (Jest/Vitest)
+const isTest = process.env.NODE_ENV === "test" || !!process.env.JEST_WORKER_ID;
 const isDev = process.env.NODE_ENV !== "production";
 const isVercel = !!process.env.VERCEL;
 
 const level = process.env.LOG_LEVEL ?? (isDev ? "debug" : "info");
 
+let canUsePretty = false;
+if (isDev && !isVercel && !isTest && process.env.ENABLE_PINO_PRETTY === "true") {
+  try {
+    // AGENT-TRACE: Dynamic import resolution avoids Turbopack static AST analysis warnings
+    const req = (
+      typeof module !== "undefined" && module.require ? module.require : require
+    ) as NodeRequire;
+    req.resolve("pino-pretty");
+    canUsePretty = true;
+  } catch {
+    canUsePretty = false;
+  }
+}
+
 export function createLogger(name?: string) {
   return pino({
     name,
     level,
-    ...(isDev && !isVercel
+    ...(canUsePretty
       ? {
           transport: {
             target: "pino-pretty",

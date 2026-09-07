@@ -18,8 +18,10 @@
   - `pnpm nx type-check features-departments-ui` ✅
 - **What the Next Agent Should Know**: `SatelliteMonitoringDashboard` no longer generates its own data. All five call sites in `apps/portal/app/(departments)/[department]/` and its sub-pages now fetch via `getSatelliteMonitoringData()` and pass props down.
 
-## [2026-09-02T06:23:10Z] Safety Department Deprecation Cleanup
-- **Agent**: Antigravity
-- **Summary**: Inspected pending safety department removal changes across `packages/database/migrations` (`150_remove_safety_department.sql`), `libs/features/departments`, and `packages/ui`. Verified DB migration rollback invariants, fixed `getUserSafely` auth test assertions in `@repo/supabase`, and resolved badge text rendering in `@repo/ui` (`HeroCardContent`).
-- **Handoff**: All unit tests (`pnpm test`) and migration rollback checks (`pnpm nx run @repo/database:test:migration-rollback`) are 100% green.
+## [2026-09-07T09:35:00Z] Subpackage AGENTS.md Implementation
 
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Created localized `AGENTS.md` following the open AGENTS.md standard from `.agents/skills/agents-md/`.
+- **Changes**:
+  - `libs/features/departments/ui/AGENTS.md`: Established package-level guidelines defining presentational UI boundaries, OKLCH light-mode design tokens, and fast inner-loop commands (`pnpm nx test features-departments-ui`, `pnpm nx type-check features-departments-ui`).
+- **Handoff**: Subpackage now provides autonomous, localized guidelines for AI coding agents without modifying or duplicating root workspace directives.

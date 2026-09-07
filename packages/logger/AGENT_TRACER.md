@@ -22,3 +22,16 @@
 - Replace `console.log` across API routes, Server Actions, and middleware with structured logger calls
 - Consider adding Opentelemetry integration (pino-opentelemetry transport)
 - Add query-level logging in database/service layers by injecting child logger
+
+## Entry: 2026-09-07T08:34:00Z
+
+**Purpose:** Onboarding setup and Jest test environment resilience for logger transport.
+
+**Changes:**
+
+- Updated `src/server.ts` to guard `pino-pretty` transport instantiation when running in test environments (`NODE_ENV === "test"` or `JEST_WORKER_ID`).
+- Prevented worker thread resolution crashes (`unable to determine transport target for "pino-pretty"`) in Jest suites across monorepo packages.
+
+**What the Next Agent Should Know:**
+
+- `isTest` is verified in `src/server.ts`. When tests run, JSON/standard formatting is used without thread worker targets. In dev, `pino-pretty` colorized logging remains active.

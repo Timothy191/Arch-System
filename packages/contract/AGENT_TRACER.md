@@ -208,5 +208,12 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
   - Adding schema property-by-property validation
 - The generated types file (`src/generated/openapi.types.ts`) should be added to `.gitignore` as it's generated from the running API
 - To run validation in CI, first generate types from a production API URL or cached spec file
-- Current workflow: Run dev server → generate types → validate → add JSDoc annotations to uncovered endpoints → repeat
 - **Status Update**: All 28 API routes now have JSDoc annotations (100% coverage achieved). The validation workflow can now focus on deep type equivalence checking rather than coverage gaps.
+
+## [2026-09-07T09:35:00Z] Subpackage AGENTS.md Implementation
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Created localized `AGENTS.md` following the open AGENTS.md standard from `.agents/skills/agents-md/`.
+- **Changes**:
+  - `packages/contract/AGENTS.md`: Established package-level guidelines defining the canonical Zod Data Contract SSoT, barrel exports, required build step (`tsc` compiling `./dist/`), and drift checks (`pnpm audit:drift`).
+- **Handoff**: Any coding agent working on schema contracts can now inspect localized inner-loop commands and invariants directly from `packages/contract/AGENTS.md`.

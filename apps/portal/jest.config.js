@@ -27,6 +27,7 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/$1",
     "^~/(.*)$": "<rootDir>/$1",
     "^@repo/contract$": "<rootDir>/../../packages/contract/src/index.ts",
+    "^@repo/contract/(.*)$": "<rootDir>/../../packages/contract/src/$1",
     "^@repo/supabase/(.*)$": "<rootDir>/../../packages/supabase/src/$1",
     "^@repo/supabase$": "<rootDir>/../../packages/supabase/src/index.ts",
     "^@repo/redis$": "<rootDir>/../../packages/redis/src/index.ts",

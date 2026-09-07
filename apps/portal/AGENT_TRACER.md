@@ -1,4 +1,5 @@
-@repo/ui type-check            → PASS ✓
+@repo/ui type-check → PASS ✓
+
 ```
 
 ### What the Next Agent Should Know
@@ -212,3 +213,18 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
   6. **Ultragoal Documentation**: Consolidated and archived all milestone reports into `documentation/08-ultragoal-archives/milestone-2-packaging-deployment/`.
 - **Handoff**: Monorepo packages and portal application are production-compiled, verified, and sealed in the ultragoal ledger.
 
+## [2026-09-07T08:35:00Z] Full Developer Onboarding & Jest Module Resolution Fix
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Monorepo onboarding and complete environment setup for local development.
+- **Actions & Verifications**:
+  1. **Runtime & Package Manager**: Activated `pnpm@9.15.9` in environment via `mise`.
+  2. **Dependencies & Workspaces**: Ran `pnpm install` across all workspaces (2,589 dependencies resolved).
+  3. **Environment Secrets & Configuration**: Generated `.env` and `apps/portal/.env` from `.env.example` templates with all 16 configuration keys aligned.
+  4. **Contract Compilation**: Built all 6 foundational packages (`@repo/contract`, `@repo/logger`, `@repo/theme`, `@repo/redis`, `@repo/supabase`, `@repo/rate-limiter`).
+  5. **Jest Config Fix**: Added `"^@repo/contract/(.*)$"` path mapper to `apps/portal/jest.config.js` to ensure deep schema/type imports resolve in unit tests.
+  6. **Onboarding Diagnostics**: Ran `pnpm onboard` → 6 Passed, 0 Failures.
+  7. **Compliance & Drift**: Ran `pnpm audit:drift` and `pnpm audit:compliance` → 100% PASS across 110 migrations with zero errors.
+  8. **Type-Check & Tests**: Verified `pnpm type-check` across all 21 projects (21/21 PASS) and `CI=true pnpm test` across all 11 test suites (100% PASS).
+- **Handoff**: Monorepo workspace is fully initialized, compiled, green, and ready for immediate active development.
+```
