@@ -1,19 +1,28 @@
 # apps/portal/app/api/feedback/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
+- `route.ts`: POST-only feedback submission endpoint.
 
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+- Accept user-submitted feedback from the portal.
+- Log feedback locally for observability.
+- Return a synthetic ticket identifier for client confirmation.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Single handler: `POST`.
+- Request body fields: `type`, `message`, `userEmail`, `metadata`.
+- External ticketing/Slack integrations are present as commented placeholders, not active behavior.
+- Errors are caught in-route and returned as `{ success: false }` with HTTP 500.
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+1. Parse JSON body.
+2. Log feedback with `userEmail` and `metadata`.
+3. Return `{ success: true, ticketId: "TKT-1234" }`.
+4. On failure, log the error and return `{ success: false }` with status 500.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Uses `@repo/logger` for structured logging.
+- No active external service calls; commented references to Zendesk/Jira and Slack indicate intended future integration points.

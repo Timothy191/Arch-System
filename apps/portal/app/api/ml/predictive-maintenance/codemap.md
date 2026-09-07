@@ -1,19 +1,22 @@
 # apps/portal/app/api/ml/predictive-maintenance/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
-
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Expose a GET endpoint that returns predictive-maintenance predictions for machines with frequent recent breakdowns.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+Single GET handler. Authenticates via `createServerSupabaseClient()`, applies an in-route heuristic ML mock, and returns prediction objects. No external model endpoint is called.
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+1. Authenticate the request.
+2. Query non-deleted `breakdowns` from the last 30 days.
+3. Count breakdowns per `machine_id`.
+4. Flag machines with more than 2 breakdowns as high risk.
+5. Fetch matching machine details from `machines`.
+6. Return predictions with fixed confidence, reason text, and recommended action.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+Depends on `breakdowns` and `machines` tables through `@repo/supabase/server`. Returns JSON consumed by portal clients.

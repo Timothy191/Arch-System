@@ -1,6 +1,6 @@
 # AI & Agentic Content Audit Report
 
-Generated on 2026-09-07T07:40:00.661Z
+Generated on 2026-09-07T10:19:57.114Z
 
 ## Summary Metrics
 
@@ -11,7 +11,7 @@ Generated on 2026-09-07T07:40:00.661Z
 
 ## Critical Findings
 
-✅ None
+- **[MISSING_ROOT_DIRECTIVE]** `GEMINI.md`: Essential root AI instruction file "GEMINI.md" is missing.
 
 ## Advisories & Warnings
 

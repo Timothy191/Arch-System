@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
 
-function getMapsRoot() {
+export function getMapsRoot() {
   let current = process.cwd();
   while (current !== "/" && current !== path.dirname(current)) {
     // Tell Turbopack to ignore this highly dynamic path traversal
@@ -15,13 +15,12 @@ function getMapsRoot() {
   return path.resolve(/*turbopackIgnore: true*/ process.cwd(), "../../codebase-maps");
 }
 
-
-export async function GET(request: Request) {
+export async function GET(request: Request, options?: { mapsRoot?: string }) {
+  const mapsRoot = options?.mapsRoot ?? getMapsRoot();
   const { searchParams } = new URL(request.url);
   const logId = searchParams.get("log") || "latest";
   const fileKey = searchParams.get("file") || "route-feature-architecture.md";
 
-  const mapsRoot = getMapsRoot();
   const manifestPath = path.join(mapsRoot, "manifest.json");
 
   let manifest = [];

@@ -1,19 +1,17 @@
 # apps/portal/app/api/ml/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
-
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Parent route group for portal ML API endpoints.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+Next.js App Router API group under `apps/portal/app/api/ml/`. Contains feature-specific route folders, each exposing JSON endpoints for ML-backed portal data.
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+Requests are routed to subfolder handlers. Each handler is a standalone server-side route that returns JSON responses.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+Part of the portal API surface. ML routes use the Supabase server client and depend on portal auth/session handling.

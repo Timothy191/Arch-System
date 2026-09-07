@@ -1,19 +1,27 @@
 # apps/portal/app/api/printers/[id]/
 
-<!-- Fixer: Fill in this section with architectural understanding -->
-
 ## Responsibility
 
-<!-- What is this folder's job in the system? -->
+Handles item-level printer operations. Currently provides soft deletion for a specific registered printer by ID.
 
 ## Design
 
-<!-- Key patterns, abstractions, architectural decisions -->
+- Uses dynamic route params as an async promise (`params: Promise<{ id: string }>`).
+- Uses server-side Supabase auth via `createServerSupabaseClient()`.
+- Restricts access to `admin` and `access_control` roles by checking `employees.role`.
+- Performs soft delete by setting `deleted_at` instead of removing the row.
 
 ## Flow
 
-<!-- How does data/control flow through this module? -->
+- `DELETE /api/printers/:id`
+  - Authenticates the user.
+  - Authorizes by employee role.
+  - Resolves `id` from route params.
+  - Updates `card_printers.deleted_at` for the matching `id`.
+  - Returns `{ success: true }` on success.
 
 ## Integration
 
-<!-- How does it connect to other parts of the system? -->
+- Depends on `@repo/supabase/server` for database and auth.
+- Operates on the same `card_printers` table as `apps/portal/app/api/printers/`.
+- Intended to be paired with list/create endpoints in the parent printers route group.

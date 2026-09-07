@@ -40,4 +40,20 @@ describe("GET /api/control-room/scada-status", () => {
     expect(json.fuxa_healthy).toBe(true);
     expect(json.redis_connected).toBe(true);
   });
+
+  it("returns offline status when FUXA and Redis are both unreachable", async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error("FUXA unreachable"));
+
+    const { getRedisClient } = require("@repo/redis");
+    getRedisClient.mockRejectedValueOnce(new Error("Redis unreachable"));
+
+    const req = new Request("http://localhost:3000/api/control-room/scada-status");
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+
+    const json = await res.json();
+    expect(json.status).toBe("offline");
+    expect(json.fuxa_healthy).toBe(false);
+    expect(json.redis_connected).toBe(false);
+  });
 });

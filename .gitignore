@@ -235,3 +235,12 @@ e2e/.auth/
 libs/features/*/node_modules/
 dev-report.md
 {workspaceRoot}/
+# AgentsRoom local MCP workspace and cache
+.agentsroom/
+# Autoresearch benchmark harness (runtime script, not project source)
+autoresearch.sh
+# Generated portal route map (per-route /init pass output)
+apps/portal/docs/
+# Generated audit report logs (runtime audit output)
+documentation/03-audit-reports/log-*/
+
