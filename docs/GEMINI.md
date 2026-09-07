@@ -73,6 +73,23 @@ Industrial operations portal built for high-scale vigilance and operational prec
 - **Workflow Traces**: All agents MUST update the `AGENT_TRACER.md` file in the root of the package/app they are modifying. You must log a timestamp, your purpose, the changes made, and what the next agent should know.
 - **Context Breadcrumbs**: When implementing complex architectural logic, agents MUST leave inline `// AGENT-TRACE: <explanation>` or `/* AGENT-TRACE: ... */` comments. This ensures future AI agents understand the implicit business rules or domain context immediately upon reading the file.
 
+### Mandatory End-of-Turn Testing & Clean Worktree Protocol (MANDATORY RULE)
+
+Before concluding ANY turn or completing an assigned task, all AI agents MUST strictly execute the following verification and Git worktree hygiene sequence:
+
+1. **Strict Verification Checklist**:
+   - Run relevant unit tests, type-checking, or linting (`pnpm quality` or targeted tests `pnpm --filter portal test -- --testPathPatterns="..."`) to verify all modifications.
+   - Confirm zero syntax errors, missing dependencies, or failing test assertions exist before staging.
+2. **Git Worktree Hygiene & Auto-Commit/Push Protocol**:
+   - Execute `rtk git status` and `rtk git diff` to review all modified, added, or untracked files.
+   - Stage all relevant changes (`git add .` or specific target files).
+   - Commit changes using standard conventional commit messages (e.g., `feat: ...`, `fix: ...`, `chore: ...`).
+   - If an upstream/remote tracking branch exists, push changes (`git push`) to guarantee remote synchronization.
+   - Ensure the Git working tree is left in a **100% clean state** (`nothing to commit, working tree clean`) before ending execution.
+3. **Seamless Session Handoff**:
+   - Guarantee zero untracked or uncommitted code remains in the active worktree.
+   - Update `AGENT_TRACER.md` with an ISO 8601 timestamp, a summary of modifications, and explicit confirmation of worktree cleanliness so work can be resumed seamlessly tomorrow without Git friction or stale state.
+
 ### Mandatory Response Summary, Token Metrics & Next Steps Protocol (MANDATORY RULE)
 
 All AI agents MUST conclude every response with the following standardized sections:

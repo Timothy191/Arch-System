@@ -43,6 +43,17 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - `.gitignore`: Ignored generated `.opencode/` (and `.nx/polygraph`); `.mcp.json` nx-mcp entry removed (now handled by the Claude plugin).
 - **Verification**: `nx configure-ai-agents --check all` reports all agents up to date except Codex, which is a confirmed upstream nx bug (generator writes bare `[mcp_servers.nx-mcp]` key, detector requires quoted `[mcp_servers."nx-mcp"]`; smol-toml always stringifies to the bare form, so the generator can never satisfy its own check — persists in nx 23.2.0). Commits `03d2d72`, `4901ed5`.
 
+## 2026-09-07 — Global End-of-Turn Testing Checklist & Clean Worktree Protocol
+
+- **Purpose**: Implemented mandatory global agent rules and project documentation ensuring that after every turn, strict test verification is executed, and worktree changes are committed/pushed to leave the Git worktree in a 100% clean state for friction-free session resumption.
+- **Changes**:
+  - `/home/timothy/.agents/rules/end-of-turn-clean-worktree.md`: Created global OS-level agent rule file mandating strict verification checklists, Git status/diff audits, conventional commits, and clean worktree enforcement.
+  - `docs/GEMINI.md`: Integrated `Mandatory End-of-Turn Testing & Clean Worktree Protocol (MANDATORY RULE)` into project documentation.
+- **Verification**:
+  - `rtk git status`: Verified tracked changes and updated `AGENT_TRACER.md`.
+  - `rtk git commit`: Committed changes with clean conventional commit message.
+- **What the Next Agent Should Know**: Before ending any turn, always run tests, stage/commit changes, push if remote exists, and ensure `git status` reports `working tree clean`.
+
 ## 2026-09-02 — Playwright E2E Suite Calibration, Overview Spec & Workspace Quality Gate Pass
 
 - **Purpose**: Verified and calibrated the Playwright E2E testing framework, resolved relative directory resolution in `playwright.config.ts`, added the dedicated `e2e/overview.spec.ts` test suite for the 8 interactive React Flow tabs, verified standalone production build, and executed the full `pnpm quality` validation gate across all 23 monorepo packages and applications.
