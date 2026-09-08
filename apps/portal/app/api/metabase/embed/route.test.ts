@@ -7,6 +7,7 @@ import { GET } from "./route";
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn().mockResolvedValue({}),
   getUserSafely: jest.fn(),
+  createServerSupabaseClient: jest.fn().mockResolvedValue({}),
 }));
 
 jest.mock("@/lib/api/rate-limit-middleware", () => ({
