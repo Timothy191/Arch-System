@@ -6,9 +6,16 @@ set -euo pipefail
 # Other devices on the same network can access the portal via http://<server-ip>:3000.
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PORTAL_DIR="$REPO_ROOT/apps/portal"
-DATABASE_DIR="$REPO_ROOT/packages/database"
-SUPABASE_DIR="$REPO_ROOT/packages/supabase"
+ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+  DATABASE_DIR="$ARCH_BASE_DIR"
+  SUPABASE_DIR="$ARCH_BASE_DIR/supabase"
+  ARCH_BASE_WEB_DIR="$ARCH_BASE_DIR/apps/web"
+else
+  DATABASE_DIR="$REPO_ROOT/packages/database"
+  SUPABASE_DIR="$REPO_ROOT/packages/supabase"
+  ARCH_BASE_WEB_DIR=""
+fi
 ENV_FILE="$PORTAL_DIR/.env"
 ENV_BAK="$PORTAL_DIR/.env.bak"
 PORT="${PORT:-3000}"
@@ -156,6 +163,27 @@ rm -rf "$PORTAL_DIR/.next"
 
 pnpm install --frozen-lockfile
 pnpm --filter portal build
+
+# ── Step 5b: Start Arch-Base Web App ─────────────────────────
+if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
+  if curl -fs "http://localhost:3001" > /dev/null 2>&1; then
+    info "Arch-Base web app already running on port 3001."
+  else
+    info "Starting Arch-Base web app on port 3001..."
+    cd "$ARCH_BASE_DIR"
+    pnpm --filter web dev > "$ARCH_BASE_DIR/.arch-base-web.log" 2>&1 &
+    echo $! > "$ARCH_BASE_DIR/.arch-base-web.pid"
+    cd "$REPO_ROOT"
+    # Wait for it to become healthy
+    for i in {1..30}; do
+      if curl -fs "http://localhost:3001" > /dev/null 2>&1; then
+        info "Arch-Base web app is healthy"
+        break
+      fi
+      sleep 2
+    done
+  fi
+fi
 
 # ── Step 6: Start Secondary Tools ────────────────────────────
 info "Starting secondary tools..."

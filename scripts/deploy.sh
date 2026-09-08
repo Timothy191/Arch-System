@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Arch-Systems — Sequential Stable Deployment Script v2.2
+# Arch-Systems — Sequential Stable Deployment Script v2.3
 # Usage: ./scripts/deploy.sh [local|production|staging] [options]
 #
 # Features:
@@ -9,6 +9,7 @@ set -euo pipefail
 #   - Kitty terminal monitoring support
 #   - Service dependency checks (connect if present, start if not)
 #   - Auto-browser open when all services ready
+#   - Integrated Arch-Base deployment (Supabase + Web App on port 3001)
 #
 # Modes:
 #   local       - Full stack with local Supabase (development)
@@ -16,9 +17,19 @@ set -euo pipefail
 #   production  - Production deployment (external Supabase)
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+  DATABASE_DIR="$ARCH_BASE_DIR"
+  SUPABASE_DIR="$ARCH_BASE_DIR/supabase"
+  ARCH_BASE_WEB_DIR="$ARCH_BASE_DIR/apps/web"
+else
+  DATABASE_DIR="$REPO_ROOT/packages/database"
+  SUPABASE_DIR="$REPO_ROOT/packages/supabase"
+  ARCH_BASE_WEB_DIR=""
+fi
+
+# Define portal directory
 PORTAL_DIR="$REPO_ROOT/apps/portal"
-DATABASE_DIR="$REPO_ROOT/packages/database"
-SUPABASE_DIR="$REPO_ROOT/packages/supabase"
 
 # Configuration
 PORT="${PORT:-3000}"
@@ -252,12 +263,13 @@ confirm() {
   echo "   3. Create backup (production)"
   echo "   4. Stop existing services"
   echo "   5. Build application"
-  echo "   6. Start infrastructure (Supabase, Docker)"
+  echo "   6. Start infrastructure (Arch-Base, Supabase, Docker)"
   echo "   7. Run database migrations"
   echo "   8. Deploy portal"
   echo "   9. Running tests"
   echo "   10. Launch monitoring terminal"
   echo "   11. Open browser"
+  [ -n "$ARCH_BASE_DIR" ] && echo -e "${YELLOW}   Includes:${NC} Arch-Base services (Supabase + Web App)"
   echo
   read -rp "Continue? [y/N] " response
   [[ "$response" =~ ^[Yy]$ ]] || exit 0
@@ -321,6 +333,10 @@ is_supabase_running() {
   curl -fs "http://127.0.0.1:54321/rest/v1/" > /dev/null 2>&1
 }
 
+is_arch_base_web_running() {
+  [ -n "$ARCH_BASE_WEB_DIR" ] && curl -fs "http://localhost:3001" > /dev/null 2>&1
+}
+
 is_docker_tool_running() {
   local service="$1"
   docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${service}$"
@@ -372,7 +388,7 @@ validate_prerequisites() {
   log "Checking required directories..."
   [ ! -d "$PORTAL_DIR" ] && collect_error "Portal directory missing: $PORTAL_DIR"
   [ ! -d "$DATABASE_DIR" ] && collect_error "Database directory missing: $DATABASE_DIR"
-  [ ! -d "$DATABASE_DIR/migrations" ] && collect_error "Migrations directory missing"
+  [ ! -d "$DATABASE_DIR/migrations" ] && [ ! -d "$DATABASE_DIR/supabase/migrations" ] && collect_error "Migrations directory missing"
   if [ ${#DEPLOY_ERRORS[@]} -eq 0 ]; then
     success "Required directories OK"
   fi
@@ -513,6 +529,10 @@ phase_port_check() {
     check_and_fix_port 54321 "Supabase API" ""
     check_and_fix_port 8000 "Kong Gateway" ""
     check_and_fix_port "$PORT" "Portal Dev Server" ""
+    # Check Arch-Base port if Arch-Base directory exists
+    if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
+      check_and_fix_port 3001 "Arch-Base Web App" ""
+    fi
     success "All port requirements verified and cleared"
   else
     success "Non-local environment — native port checks skipped"
@@ -658,6 +678,34 @@ phase_backup() {
 phase_stop_services() {
   phase "4. STOPPING EXISTING SERVICES"
   
+  # Stop Arch-Base services if available
+  if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
+    log "Stopping Arch-Base services..."
+    
+    # Stop Arch-Base web app
+    if [ -f "$ARCH_BASE_DIR/.arch-base-web.pid" ]; then
+      local arch_base_pid
+      arch_base_pid=$(cat "$ARCH_BASE_DIR/.arch-base-web.pid" 2>/dev/null || true)
+      if [ -n "$arch_base_pid" ] && ps -p "$arch_base_pid" > /dev/null 2>&1; then
+        log "Stopping Arch-Base web app (PID: $arch_base_pid)..."
+        run_if_not_dry kill -SIGTERM "$arch_base_pid" 2>/dev/null || true
+        sleep 2
+        run_if_not_dry kill -9 "$arch_base_pid" 2>/dev/null || true
+      fi
+      run_if_not_dry rm -f "$ARCH_BASE_DIR/.arch-base-web.pid"
+    fi
+    
+    # Stop Arch-Base Supabase if in clean mode
+    if [ "$CLEAN_ONLY" = true ]; then
+      log "Stopping Arch-Base Supabase..."
+      cd "$ARCH_BASE_DIR"
+      run_if_not_dry pnpm --filter @repo/supabase supabase:stop || warn "Arch-Base Supabase stop failed"
+      cd "$REPO_ROOT"
+    fi
+    
+    success "Arch-Base services stopped"
+  fi
+  
   # Stop portal
   if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
     local pid
@@ -740,20 +788,60 @@ phase_build() {
 
 # ── Phase 5: Start Infrastructure ───────────────────────
 phase_start_infrastructure() {
-  phase "6. STARTING INFRASTRUCTURE"
+  phase "6. STARTING INFRASTRUCTURE (Arch-Base + Supabase + Docker)"
   
   case "$DEPLOY_MODE" in
     local)
-      # Supabase
-      if is_supabase_running; then
-        success "Supabase already running - connecting to existing instance"
+      # Arch-Base Services (if available)
+      if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
+        log "Starting Arch-Base services..."
+        
+        # Start Arch-Base Supabase if not running
+        if [ -d "$ARCH_BASE_DIR/packages/supabase" ]; then
+          cd "$ARCH_BASE_DIR"
+          if ! is_supabase_running; then
+            log "Starting Arch-Base Supabase..."
+            run_if_not_dry pnpm --filter @repo/supabase supabase:start || warn "Arch-Base Supabase start failed (may already be running)"
+            healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Arch-Base Supabase API"
+          else
+            success "Arch-Base Supabase already running"
+          fi
+        fi
+        
+        # Start Arch-Base web app if not running
+        if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
+          if ! is_arch_base_web_running; then
+            log "Starting Arch-Base web app on port 3001..."
+            cd "$ARCH_BASE_DIR"
+            if [ "$DRY_RUN" = false ]; then
+              # Start in background
+              pnpm --filter web dev > "$ARCH_BASE_DIR/.arch-base-web.log" 2>&1 &
+              echo $! > "$ARCH_BASE_DIR/.arch-base-web.pid"
+            fi
+            healthcheck "http://localhost:3001" 30 "Arch-Base Web App"
+          else
+            success "Arch-Base web app already running"
+          fi
+        fi
+        
+        cd "$REPO_ROOT"
+        success "Arch-Base services started"
       else
-        log "Supabase is not running. Attempting to start existing Supabase containers..."
-        if docker ps -a --format '{{.Names}}' | grep -q "^supabase_db_supabase$"; then
-          run_if_not_dry docker start $(docker ps -a --filter "name=supabase" --format "{{.ID}}")
-          healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Supabase API"
+        info "Arch-Base directory not found - skipping Arch-Base services"
+      fi
+      
+      # Supabase (Arch-System fallback if no Arch-Base)
+      if [ -z "$ARCH_BASE_DIR" ] || [ ! -d "$ARCH_BASE_DIR" ]; then
+        if is_supabase_running; then
+          success "Supabase already running - connecting to existing instance"
         else
-          fatal "Supabase is not running and no existing Supabase containers were found. Please start it first."
+          log "Supabase is not running. Attempting to start existing Supabase containers..."
+          if docker ps -a --format '{{.Names}}' | grep -q "^supabase_db_supabase$"; then
+            run_if_not_dry docker start $(docker ps -a --filter "name=supabase" --format "{{.ID}}")
+            healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Supabase API"
+          else
+            fatal "Supabase is not running and no existing Supabase containers were found. Please start it first."
+          fi
         fi
       fi
       
@@ -810,6 +898,44 @@ phase_start_infrastructure() {
       ;;
       
     production|staging)
+      # Arch-Base Services (if available)
+      if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
+        log "Starting Arch-Base services..."
+        
+        # Start Arch-Base Supabase if not running
+        if [ -d "$ARCH_BASE_DIR/packages/supabase" ]; then
+          cd "$ARCH_BASE_DIR"
+          if ! is_supabase_running; then
+            log "Starting Arch-Base Supabase..."
+            run_if_not_dry pnpm --filter @repo/supabase supabase:start || warn "Arch-Base Supabase start failed (may already be running)"
+            healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Arch-Base Supabase API"
+          else
+            success "Arch-Base Supabase already running"
+          fi
+        fi
+        
+        # Start Arch-Base web app if not running
+        if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
+          if ! is_arch_base_web_running; then
+            log "Starting Arch-Base web app on port 3001..."
+            cd "$ARCH_BASE_DIR"
+            if [ "$DRY_RUN" = false ]; then
+              # Start in background
+              pnpm --filter web start > "$ARCH_BASE_DIR/.arch-base-web.log" 2>&1 &
+              echo $! > "$ARCH_BASE_DIR/.arch-base-web.pid"
+            fi
+            healthcheck "http://localhost:3001" 30 "Arch-Base Web App"
+          else
+            success "Arch-Base web app already running"
+          fi
+        fi
+        
+        cd "$REPO_ROOT"
+        success "Arch-Base services started"
+      else
+        info "Arch-Base directory not found - skipping Arch-Base services"
+      fi
+      
       local tools_compose="$REPO_ROOT/infra/docker/compose.tools.yml"
       local prod_compose="$REPO_ROOT/infra/docker/compose.production.yml"
       
@@ -977,11 +1103,24 @@ echo ""
 echo "Services Status:"
 echo "────────────────"
 
+# Check Arch-Base if available
+if curl -fs http://localhost:3001 > /dev/null 2>&1; then
+  echo -e "  🟢 Arch-Base:  http://localhost:3001"
+else
+  echo -e "  ⚪ Arch-Base:  Not running"
+fi
+
 # Check services
 if curl -fs http://localhost:3000 > /dev/null 2>&1; then
   echo -e "  🟢 Portal:     http://localhost:3000"
 else
   echo -e "  🔴 Portal:     NOT RESPONDING"
+fi
+
+if curl -fs http://localhost:3001 > /dev/null 2>&1; then
+  echo -e "  🟢 Arch-Base:  http://localhost:3001"
+else
+  echo -e "  ⚪ Arch-Base:  Not running"
 fi
 
 if curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
@@ -1084,6 +1223,12 @@ if curl -fs http://localhost:$PORT > /dev/null 2>&1; then
   echo -e "  ✅ \033[1mLogin Page:\033[0m   http://localhost:$PORT/login"
 else
   echo -e "  ❌ \033[1mPortal:\033[0m       FAILED"
+fi
+
+if curl -fs http://localhost:3001 > /dev/null 2>&1; then
+  echo -e "  ✅ \033[1mArch-Base:\033[0m    http://localhost:3001"
+else
+  echo -e "  ⚪ \033[1mArch-Base:\033[0m    Not running"
 fi
 
 if curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
@@ -1208,7 +1353,7 @@ RESULTSEOF
 main() {
   echo
   echo -e "${BOLD}╔════════════════════════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}║     ARCH-SYSTEMS SEQUENTIAL DEPLOYMENT v2.2                    ║${NC}"
+  echo -e "${BOLD}║     ARCH-SYSTEMS SEQUENTIAL DEPLOYMENT v2.3                    ║${NC}"
   echo -e "${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}"
   echo
   
@@ -1299,11 +1444,12 @@ main() {
   echo -e "${GREEN}${BOLD}║     🎉 DEPLOYMENT COMPLETE - ALL SYSTEMS OPERATIONAL          ║${NC}"
   echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}"
   echo
-  log "Portal:    http://localhost:$PORT"
-  log "Login:     http://localhost:$PORT/login"
-  [ "$DEPLOY_MODE" = "local" ] && log "Supabase:  http://localhost:54321"
-  [ "$DEPLOY_MODE" = "local" ] && log "n8n:       http://localhost:5678"
-  [ "$DEPLOY_MODE" = "local" ] && log "Grafana:   http://localhost:9091"
+  log "Portal:     http://localhost:$PORT"
+  log "Login:      http://localhost:$PORT/login"
+  [ -n "$ARCH_BASE_DIR" ] && log "Arch-Base:  http://localhost:3001"
+  [ "$DEPLOY_MODE" = "local" ] && log "Supabase:   http://localhost:54321"
+  [ "$DEPLOY_MODE" = "local" ] && log "n8n:        http://localhost:5678"
+  [ "$DEPLOY_MODE" = "local" ] && log "Grafana:    http://localhost:9091"
   echo
   log "Logs: tail -f $DEPLOY_LOG"
   log "Stop: $0 $DEPLOY_MODE --clean"
