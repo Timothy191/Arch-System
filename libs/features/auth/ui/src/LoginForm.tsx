@@ -16,9 +16,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/";
   const redirectTo =
-    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login")
-      ? rawRedirect
-      : "/";
+    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login") ? rawRedirect : "/";
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
@@ -217,6 +215,16 @@ export function LoginForm() {
         >
           Forgot password?
         </Link>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 pt-2 border-t border-black/10 text-[11px] text-black/60 select-none">
+        <span className="font-mono text-[10px] tracking-wider uppercase">AI Engine</span>
+        <span className="opacity-40">•</span>
+        <img
+          src="/images/ai-sdk/ai-sdk-logotype-light.svg"
+          alt="Powered by Vercel AI SDK"
+          className="h-4 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity"
+        />
       </div>
     </form>
   );

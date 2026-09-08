@@ -75,16 +75,34 @@ export function AriaLauncher(): JSX.Element {
           )}
         >
           <div
-            className="absolute bottom-[88px] right-0 w-[400px] h-[min(620px,70vh)] rounded-2xl overflow-hidden border border-arch-border-subtle shadow-window bg-[var(--bg-primary)]"
+            className="absolute bottom-[88px] right-0 w-[400px] h-[min(620px,70vh)] rounded-2xl overflow-hidden border border-arch-border-subtle shadow-window bg-[var(--bg-primary)] flex flex-col"
             role="dialog"
             aria-label="Aria operations assistant"
             aria-hidden={!isOpen}
           >
+            <div className="flex items-center justify-between px-4 py-2 border-b border-arch-border-subtle bg-black/40 backdrop-blur-md text-xs text-white/70 shrink-0 select-none">
+              <span className="font-semibold text-white/90">Aria Operations Assistant</span>
+              <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                <span className="text-[10px] text-white/50 uppercase tracking-wider font-mono">
+                  Powered by
+                </span>
+                <img
+                  src="/images/ai-sdk/ai-sdk-logotype-dark.svg"
+                  alt="Vercel AI SDK"
+                  className="h-3.5 w-auto object-contain dark:block hidden"
+                />
+                <img
+                  src="/images/ai-sdk/ai-sdk-logotype-light.svg"
+                  alt="Vercel AI SDK text logo"
+                  className="h-3.5 w-auto object-contain dark:hidden block invert"
+                />
+              </div>
+            </div>
             <iframe
               ref={frameRef}
               src="/assistant"
               title="Aria operations assistant"
-              className="w-full h-full border-0"
+              className="w-full flex-1 border-0"
               tabIndex={0}
               onLoad={() => isOpen && frameRef.current?.focus()}
             />
