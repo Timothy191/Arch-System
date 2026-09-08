@@ -2,7 +2,7 @@ import { DepartmentLayout } from "@repo/ui/DepartmentLayout";
 import { DEPARTMENTS, getDepartmentTabs } from "@repo/departments/data-access";
 import { notFound } from "next/navigation";
 import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
-import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
+import { AriaLauncher } from "@/components/ai/AriaLauncher";
 
 export default async function EngineeringLayout({ children }: { children: React.ReactNode }) {
   const dept = DEPARTMENTS.find((d) => d.name === "engineering");
@@ -15,7 +15,7 @@ export default async function EngineeringLayout({ children }: { children: React.
       <ActiveDepartmentSetter department="engineering" />
       <DepartmentLayout department={dept} tabs={tabs}>
         {children}
-        <AIAssistantWrapper context="Engineering Department" />
+        <AriaLauncher />
       </DepartmentLayout>
     </>
   );

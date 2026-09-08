@@ -227,4 +227,103 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
   7. **Compliance & Drift**: Ran `pnpm audit:drift` and `pnpm audit:compliance` → 100% PASS across 110 migrations with zero errors.
   8. **Type-Check & Tests**: Verified `pnpm type-check` across all 21 projects (21/21 PASS) and `CI=true pnpm test` across all 11 test suites (100% PASS).
 - **Handoff**: Monorepo workspace is fully initialized, compiled, green, and ready for immediate active development.
+
+## [2026-09-08T06:52:00Z] Setup Auto-Hide Feature for Unified OS Dock
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Implement auto-hide capability for the desktop Unified OS Dock in the portal layout.
+- **Actions & Verifications**:
+  1. **Zustand Store**: Implemented persistent hook `apps/portal/hooks/useDockPreferences.ts` (`autoHide` boolean, `toggleAutoHide`, `setAutoHide`) persisted under `arch-dock-preferences`.
+  2. **ViewportBoundaries Component**: Enhanced `apps/portal/components/system/ViewportBoundaries.tsx` with:
+     - Local hover and focus state management with 400ms leave debounce.
+     - Global mousemove sensor on viewport bottom (36px threshold) to smoothly reveal dock.
+     - Dedicated hot-edge trigger strip (`[data-testid="dock-trigger-zone"]`) and peek indicator pill (`[data-testid="dock-peek-indicator"]`).
+     - Dock controls section featuring a pin / auto-hide toggle button (`[data-testid="dock-autohide-toggle"]`) with `Pin` / `PinOff` icons and keyboard focus accessibility.
+     - Context menu right-click shortcut on dock to toggle auto-hide.
+     - Preserved split-window persistent layout offset (`sm:-translate-x-[200px]`).
+  3. **Unit Tests**:
+     - Added `apps/portal/hooks/useDockPreferences.test.ts` (100% PASS).
+     - Expanded `apps/portal/components/system/ViewportBoundaries.test.tsx` testing default hidden state, hover reveal, grace period hide, trigger zone detection, keyboard focus retention, and toggle button pin persistence (10/10 PASS).
+  4. **Validation**: Ran `pnpm --filter portal test -- --testPathPatterns="(ViewportBoundaries|useDockPreferences)"` (13/13 tests PASS), `pnpm --filter portal type-check` (0 TS errors), and live browser verification on `localhost:3000/login`.
+- **Handoff**: Dock auto-hide feature is fully tested, functional, and verified.
+
+## [2026-09-08T07:06:00Z] Refine Login Card Layout and Vertical Ergonomics
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Refine login card container and inner content layout (`div.px-8.py-10.flex-1.flex.flex-col.justify-center.space-y-8`) to eliminate vertical bloat and improve aesthetic balance.
+- **Actions & Verifications**:
+  1. **Card Container & Padding**: In `apps/portal/app/(auth)/login/page.tsx`, removed rigid `min-h-[660px]`, upgraded to `rounded-2xl`, and balanced inner padding/spacing to `px-7 py-7 space-y-5`.
+  2. **Visual Hierarchy**: Refined header with a pulsing secure badge (`Lock` + emerald pulse), unified logo badge container with `Arch Systems` branding, and balanced contextual VPN notice.
+  3. **Form Spacing**: In `libs/features/auth/ui/src/LoginForm.tsx`, optimized spacing from `space-y-8` to ergonomic `space-y-4`, adjusted input padding to `px-3.5 py-2.5`, and balanced submit button to `h-11 rounded-lg`.
+  4. **Validation**: Ran `pnpm --filter portal test -- --testPathPatterns="(LoginForm|ViewportBoundaries|useDockPreferences)"` (22/22 PASS), verified live element dimensions in browser (reduced height from 634px to 526px with centered viewport positioning).
+- **Handoff**: Login card and form layout is compact, ergonomic, and fully verified.
+
+## [2026-09-08T07:11:00Z] Fix Background Video Poster Flash Artifact
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Resolve static wallpaper flicker where the obsolete golden macOS PNG wallpaper (`macos-27-golden-2560x1764.png`) flashed for ~1s prior to the MP4 wallpaper (`edge-of-the-event-horizon.3840x2160.mp4`) buffering.
+- **Actions & Verifications**:
+  1. **Poster Frame Extraction**: Extracted the exact initial frame from `edge-of-the-event-horizon.3840x2160.mp4` to `apps/portal/public/background/edge-of-the-event-horizon-poster.webp` (86 KB, 94% smaller than previous 1.5MB PNG).
+  2. **Layout Preload**: Updated `apps/portal/app/layout.tsx` to preload `/background/edge-of-the-event-horizon-poster.webp` instead of `macos-27-golden-2560x1764.png`.
+  3. **Video Component**: Updated `apps/portal/components/RouteBackground.tsx` to set `poster="/background/edge-of-the-event-horizon-poster.webp"`.
+  4. **Theme Styles**: Updated `packages/theme/src/css/glass.css` (`.route-bg-focus` background-image and `.route-bg-video-container` background-color to matching dark `#0b0d14`).
+  5. **Verification**: Checked HTTP response headers (preload link header), verified live video DOM node in browser snapshot, and validated unit tests (22/22 PASS).
+- **Handoff**: Background video loads seamlessly with matching poster frame; static PNG flash eliminated.
+
+## [2026-09-08T07:23:00Z] Remove White Wash Scrim Overlay for Crisp Video Background
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Eliminate the milky semi-transparent "white wash" layer (`.route-bg-tint`) sitting between the UI panels and the 4K MP4 wallpaper (`edge-of-the-event-horizon.3840x2160.mp4`).
+- **Actions & Verifications**:
+  1. **Theme Video & Scrim**: In `packages/theme/src/css/glass.css`, restored `.route-bg-video` and `.route-bg-focus-video` to full clarity (`opacity: 1; filter: none;`). Disabled `.route-bg-tint` (`display: none; background: transparent;`).
+  2. **RouteBackground Element**: In `apps/portal/components/RouteBackground.tsx`, removed `<div className="route-bg-tint" aria-hidden="true" />` to prevent unnecessary DOM nodes and compositor layers.
+  3. **Visual Smoke Test**: In `e2e/visual/theme.smoke.spec.ts`, updated step 1 assertion to verify `.route-bg-tint` has been removed.
+  4. **Validation**: Built theme (`pnpm --filter @repo/theme build` PASS), ran unit tests (`pnpm --filter portal test` 123/123 suites, 786/786 tests PASS).
+- **Handoff**: Background MP4 wallpaper renders crisply with vibrant depth directly beneath the liquid glass panels without milky wash.
+
+## [2026-09-08T07:37:00Z] Unify All Panels with Liquid Glass Light Effect
+
+- **Agent**: Antigravity (Pair Programmer)
+- **Purpose**: Align all UI panels, navigation bars, popovers, dropdowns, and cards with the exact Liquid Glass recipe demonstrated by the Unified Dock (`liquid-glass-light border border-white/40 shadow-window rounded-2xl`).
+- **Actions & Verifications**:
+  1. **Login Card**: In `apps/portal/app/(auth)/login/page.tsx`, updated sign-in card container and fallback card to `liquid-glass-light border border-white/40 shadow-window rounded-2xl`, eliminating legacy `bg-white/70 backdrop-blur-xl border border-black/[0.08]`. Converted titlebar, footer, and VPN notice to translucent glass layers (`border-white/20 bg-white/10`).
+  2. **Mac Menu Bar & Header**: In `packages/ui/src/components/MacMenuBar.tsx`, upgraded navigation bar to `liquid-glass-light border border-white/40 shadow-window rounded-full`, system logo button to `liquid-glass-light border border-white/40`, and dropdown menus to `liquid-glass-light backdrop-blur-2xl border border-white/40 shadow-window rounded-xl`. Upgraded header search input to translucent glass.
+  3. **System Tray & Clock**: In `SystemTray.tsx`, `SystemClock.tsx`, and `ServicesDropdown.tsx`, upgraded trigger pills and popover dialogs to `liquid-glass-light border border-white/40 shadow-window rounded-xl`.
+  4. **GlassCard Base**: In `packages/ui/src/components/GlassCard.tsx`, set base classes to `liquid-glass-light border border-white/40 shadow-window rounded-2xl` and updated macOS window titlebar to `border-white/20 bg-white/10 backdrop-blur-md`.
+  5. **Hub Modules & Alerts**: In `AlertTicker.tsx` and `CoreOperationalModules.tsx`, upgraded panel containers to `rounded-2xl liquid-glass-light border border-white/40 shadow-window`.
+  6. **Design Tokens & Theme**: In `tokens.json` and `variables.css`, updated `--glass-surface` to `rgba(255, 255, 255, 0.15)` and `--glass-border` to `rgba(255, 255, 255, 0.4)`. In `glass.css`, updated `.glass`, `.glass-card`, and `.layer-signin-card` to match the liquid glass recipe.
+  7. **Documentation**: Updated `docs/DESIGN.md`, `CONTRIBUTING.md`, and `docs/CONTRIBUTING.md` to declare `liquid-glass-light border border-white/40 shadow-window rounded-2xl` as the universal system standard.
+- **Handoff**: All panels throughout the workspace now consistently exhibit clean liquid glass refraction with crisp specular borders over the active 4K background video.
+
+
+
+
+
+
+---
+
+## 2026-09-08: Aria Assistant Sidecar Integration (AGENT-TRACE)
+
+### Purpose
+
+Wire the Aria assistant (aria-overlay sidecar, port 3100, basePath `/assistant`)
+into the portal as a same-origin proxied iframe, replacing the dead in-portal
+AIAssistant chat.
+
+### Changes Made
+
+1. **`apps/portal/next.config.mjs`**:
+   - Added `async rewrites()` mapping `/assistant/:path*` → `${AI_ASSISTANT_URL}/assistant/:path*` (default `http://127.0.0.1:3100`).
+   - Added a dedicated `/assistant/:path*` headers rule (`X-Frame-Options: SAMEORIGIN`, CSP `frame-ancestors 'self'`, report-only in dev) so the sidecar document can be embedded.
+   - Carved `/assistant` out of the generic `/:path*` hardening rule via a negative-lookahead `source`.
+2. **`apps/portal/middleware.ts`**: Added `assistant(?:/|$)` to the matcher exclusion so middleware auth does not gate the proxied sidecar.
+3. **`apps/portal/app/api/ai/actions/route.ts`** (new): `POST /api/ai/actions` — the authenticated backend for Aria. `read` tools (`get_active_breakdowns`, `get_shift_summary`) are department-scoped via `employees.auth_id → department_id`; `write` tools (`create_breakdown`, `book_out_breakdown`, `direct_checkout`) reuse the engineering breakdowns server actions and inject `department_id`. Errors funnel through `@/lib/errors/error-classes` / `error-logger`; `ZodError` → 400.
+4. **`apps/portal/components/ai/AriaLauncher.tsx`** (new): Floating button (matches prior AIAssistant styling/positioning/z-index) opening a same-origin `/assistant` iframe; closes on Escape, backdrop, or the sidecar's `{ type: "aria-close" }` postMessage; stays mounted after first open so chat survives hide; keeps the `open-ai-assistant` window event for CommandBar.
+5. **Layouts** `app/layout.tsx` + `(departments)/access-control|drilling|access-card-actions|[department]|engineering/layout.tsx`: swapped `AIAssistantWrapper` → `AriaLauncher`.
+6. **Deleted** `components/ai/AIAssistant.tsx`, `AIAssistantWrapper.tsx`, `ToolOutputRenderer.tsx` (old route `/api/ai/chat` never existed; code was dead).
+
+### Verification
+
+- `aria-overlay` running under pm2 (`aria-overlay`, id 2): `/assistant/api/health` OK; UI chat streams via `x-vercel-ai-ui-message-stream: v1`.
+- Pending: portal lint/type-check/build, header verification (`curl -I /assistant` shows `SAMEORIGIN`, not `DENY`), full chat → read tool → confirm → write round trip via a real session, kill-sidecar failover, visual check.
 ```

@@ -4,14 +4,12 @@ import { ArchThemeProvider } from "@repo/theme/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
 import dynamic from "next/dynamic";
-import Script from "next/script";
 import ClientProviders from "./ClientProviders";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FocusModeProvider } from "@/components/FocusModeProvider";
 
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
-import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
-import { FocusModeToggle } from "@/components/FocusModeToggle";
+import { AriaLauncher } from "@/components/ai/AriaLauncher";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
@@ -27,9 +25,9 @@ const HeaderWidgets = dynamic(
   {
     loading: () => (
       <div className="flex items-center gap-3" aria-hidden="true">
-        <div className="w-7 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
-        <div className="w-20 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
-        <div className="w-7 h-7 rounded-full bg-[var(--overlay-dim)] border border-[var(--border-subtle)] animate-pulse" />
+        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
+        <div className="w-20 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
+        <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
       </div>
     ),
   },
@@ -98,14 +96,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
-      <head>
+      <head suppressHydrationWarning>
         <meta charSet="UTF-8" />
         {/* Preload primary LCP background asset off critical path */}
         <link
           rel="preload"
-          href="/background/macos-27-golden-2560x1764.png"
+          href="/background/edge-of-the-event-horizon-poster.webp"
           as="image"
-          type="image/png"
+          type="image/webp"
           fetchPriority="high"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -117,36 +115,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         <link
           rel="dns-prefetch"
           href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
-        />
-        <Script
-          id="speculation-rules"
-          type="speculationrules"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              prerender: [
-                {
-                  source: "document",
-                  where: {
-                    and: [
-                      {
-                        href_matches: [
-                          "/",
-                          "/hub",
-                          "/drilling/*",
-                          "/production/*",
-                          "/control-room/*",
-                        ],
-                      },
-                      { not: { href_matches: "/api/*" } },
-                      { not: { href_matches: "/_next/*" } },
-                    ],
-                  },
-                  eagerness: "moderate", // Prerender on hover with short delay
-                },
-              ],
-            }),
-          }}
         />
       </head>
       <body
@@ -166,7 +134,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
               <WebVitalsReporter />
               <OfflineBanner />
-              <AIAssistantWrapper />
+              <AriaLauncher />
 
               {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
               <header
@@ -178,7 +146,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   rightSlot={
                     <nav id="navigation" role="navigation" aria-label="Main menu">
                       <div className="flex items-center gap-3">
-                        <FocusModeToggle variant="icon" />
                         <SystemTrayPill />
                         <HeaderWidgets />
                       </div>

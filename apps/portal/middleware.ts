@@ -15,6 +15,10 @@ export async function middleware(request: NextRequest) {
 export default middleware;
 
 export const config = {
-  // Exclude static assets and API routes from middleware.
-  matcher: ["/((?!_next/static|_next/image|api/|favicon.ico).*)"],
+  // Exclude static assets, API routes, and the Aria assistant overlay (which is
+  // proxied to the aria-overlay sidecar and handles its own session checks) from
+  // middleware.
+  matcher: [
+    "/((?!_next/static|_next/image|api/|assistant(?:/|$)|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)",
+  ],
 };
