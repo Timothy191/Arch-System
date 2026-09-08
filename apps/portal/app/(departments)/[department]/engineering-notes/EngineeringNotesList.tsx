@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AutoAnimateList } from "@repo/ui/AnimatedList";
 
@@ -65,9 +65,9 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
     );
   }
 
-  // Group by shift
-  const dayNotes = notes.filter((n) => n.shift_type === "day");
-  const nightNotes = notes.filter((n) => n.shift_type === "night");
+  // AGENT-TRACE: Memoize shift-based filtering to avoid array re-allocations on parent re-renders
+  const dayNotes = useMemo(() => notes.filter((n) => n.shift_type === "day"), [notes]);
+  const nightNotes = useMemo(() => notes.filter((n) => n.shift_type === "night"), [notes]);
 
   return (
     <div className="space-y-4">
@@ -102,7 +102,8 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
   );
 }
 
-function NoteCard({ note }: { note: EngineeringNote }) {
+// AGENT-TRACE: Memoize NoteCard to prevent unnecessary card re-renders when parent re-renders
+const NoteCard = memo(function NoteCard({ note }: { note: EngineeringNote }) {
   const issueColor = ISSUE_TYPE_COLORS[note.issue_type] || "var(--text-muted)";
   const severityColor = SEVERITY_COLORS[note.severity] || "var(--text-muted)";
   const statusColor = STATUS_COLORS[note.status] || "var(--text-muted)";
@@ -190,7 +191,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
       </div>
     </GlassCard>
   );
-}
+});
 
 // AGENT-TRACE: Memoize EngineeringNotesList — notes prop is stable across renders;
 // prevents re-rendering the entire list + individual GlassCard items.
