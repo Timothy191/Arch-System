@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { trackClientMetric, useThrottledState } from "@repo/shared/hooks";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { MachineControl } from "./MachineControl";
+import { useEffect, useState } from "react";
 import { FuxaFrame } from "./FuxaFrame";
-import { useThrottledState } from "@repo/shared/hooks";
-import { trackClientMetric } from "@repo/shared/hooks";
+import { MachineControl } from "./MachineControl";
 
 interface Machine {
   id: string;
@@ -42,7 +41,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
           setMachines(data || []);
           setLoading(false);
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
@@ -79,9 +78,9 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
             {
               department_id: departmentId,
               event_type: payload.eventType,
-            },
+            }
           );
-        },
+        }
       )
       .subscribe();
 

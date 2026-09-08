@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { createUniver, LocaleType, mergeLocales, type IDisposable } from "@univerjs/presets";
 import { UniverSheetsCorePreset } from "@univerjs/preset-sheets-core";
 import UniverPresetSheetsCoreEnUS from "@univerjs/preset-sheets-core/locales/en-US";
+import { createUniver, type IDisposable, LocaleType, mergeLocales } from "@univerjs/presets";
+import { useEffect, useRef } from "react";
 
 import "@univerjs/preset-sheets-core/lib/index.css";
 

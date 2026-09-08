@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
+import { motion } from "framer-motion";
+import type React from "react";
 
 interface AnimeStaggerProps {
   children: React.ReactNode;
@@ -71,4 +71,3 @@ export function AnimeStagger({
     </motion.div>
   );
 }
-

@@ -25,7 +25,7 @@ export function MacTitleBar({
         "group/titlebar flex items-center gap-3 px-4 h-11",
         "bg-white/50 backdrop-blur-sm border-b border-black/[0.06]",
         "select-none shrink-0",
-        className,
+        className
       )}
     >
       {/* Traffic lights */}

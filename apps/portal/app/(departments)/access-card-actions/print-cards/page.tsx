@@ -1,5 +1,4 @@
-import { PageHeader } from "@repo/ui/PageHeader";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,30 +7,31 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { Button } from "@repo/ui/components/ui/button";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { cn } from "@repo/ui/lib/utils";
+import { PageHeader } from "@repo/ui/PageHeader";
 import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Layers,
   Printer,
   RefreshCw,
-  Trash2,
-  XCircle,
   RotateCcw,
+  Trash2,
   Wifi,
   WifiOff,
-  AlertTriangle,
-  Clock,
-  CheckCircle,
-  Layers,
+  XCircle,
 } from "lucide-react";
 import {
-  rescanPrinters,
-  getPrintJobs,
-  unregisterPrinter,
   cancelPrintJob,
+  getPrintJobs,
+  rescanPrinters,
   retryPrintJob,
+  unregisterPrinter,
 } from "../actions";
 import { RegisterPrinterForm } from "./register-form";
 import { StatusFilter } from "./status-filter";
-import { cn } from "@repo/ui/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -133,7 +133,7 @@ function JobStatusPill({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border",
-        pill.className,
+        pill.className
       )}
     >
       {pill.icon}

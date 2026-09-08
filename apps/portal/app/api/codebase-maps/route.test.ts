@@ -1,10 +1,11 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import fs from "node:fs";
-import path from "node:path";
 import os from "node:os";
+import path from "node:path";
+import { GET } from "./route";
 
 // FIXTURE_ROOT is intentionally unused; tests use a temporary directory instead.
 
@@ -28,7 +29,7 @@ describe("GET /api/codebase-maps", () => {
     fs.writeFileSync(path.join(tempRoot, "manifest.json"), "[]");
     fs.writeFileSync(
       path.join(tempRoot, "latest", "route-feature-architecture.md"),
-      "# default map",
+      "# default map"
     );
 
     const res = await GET(makeRequest(), { mapsRoot: tempRoot });

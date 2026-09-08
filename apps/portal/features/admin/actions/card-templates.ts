@@ -1,8 +1,8 @@
 "use server";
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { AuthError, ForbiddenError, DatabaseError } from "@/lib/errors/error-classes";
 import { revalidatePath } from "next/cache";
+import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
 
 async function assertAdminRole() {
   const supabase = await createServerSupabaseClient();

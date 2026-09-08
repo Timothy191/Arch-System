@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
+import { useEffect, useState } from "react";
 
 // AGENT-TRACE: Consolidated clock timer effect and guarded setTime/setTimeStr updates to prevent state update depth recursion in Turbopack.
 export function SystemClock() {
@@ -101,7 +101,7 @@ export function SystemClock() {
           sideOffset={6}
           className={cn(
             "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-[120]",
-            "flex gap-5 select-none focus:outline-none",
+            "flex gap-5 select-none focus:outline-none"
           )}
         >
           {/* Left panel: Calendar */}
@@ -179,7 +179,7 @@ export function SystemClock() {
                       "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
                       isToday
                         ? "bg-[var(--accent-blue)] text-white font-bold shadow-card"
-                        : "text-[var(--text-heading)] hover:bg-black/[0.04]",
+                        : "text-[var(--text-heading)] hover:bg-black/[0.04]"
                     )}
                   >
                     {day}

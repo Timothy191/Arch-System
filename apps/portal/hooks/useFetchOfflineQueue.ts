@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { fetchClient, offlineStorage, type QueuedFetchRequest } from "@repo/utils/client";
+import { useCallback, useEffect, useState } from "react";
 
 export function useFetchOfflineQueue() {
   const [pendingQueue, setPendingQueue] = useState<QueuedFetchRequest[]>([]);
   const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== "undefined" ? navigator.onLine : true,
+    typeof navigator !== "undefined" ? navigator.onLine : true
   );
   const [isSyncing, setIsSyncing] = useState(false);
 

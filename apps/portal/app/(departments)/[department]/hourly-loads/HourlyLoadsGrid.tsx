@@ -1,25 +1,25 @@
 "use client";
 
-import { memo, useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { exportToExcel, parseExcel } from "@repo/utils/client";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { Download, Upload } from "lucide-react";
-import { logError } from "@/lib/errors/error-logger";
 import { useSupabaseRealtime } from "@repo/shared/hooks";
-import { updateMachineSite } from "./actions";
-import { trackClientMetric } from "@/lib/observability/client-telemetry";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { SecondaryButton } from "@repo/ui/SecondaryButton";
+import { exportToExcel, parseExcel } from "@repo/utils/client";
+import { Download, Upload } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
+import { logError } from "@/lib/errors/error-logger";
+import { trackClientMetric } from "@/lib/observability/client-telemetry";
+import { updateMachineSite } from "./actions";
 import {
-  HOURS_12,
-  HOUR_PROP,
-  loadKey,
   buildHourlyLoadsMap,
-  sumHourlyTotal,
-  type HourlyShift,
+  HOUR_PROP,
+  HOURS_12,
   type HourlyLoad,
   type HourlyMaterial,
+  type HourlyShift,
+  loadKey,
+  sumHourlyTotal,
 } from "./loads-utils";
 
 interface Machine {
@@ -68,7 +68,9 @@ function HourlyLoadsGrid({
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
         setLoadsState((prev) => {
           const index = prev.findIndex(
-            (item) => item.machine_id === payload.new.machine_id && item.shift_type === payload.new.shift_type,
+            (item) =>
+              item.machine_id === payload.new.machine_id &&
+              item.shift_type === payload.new.shift_type
           );
           if (index >= 0) {
             const next = [...prev];
@@ -84,10 +86,10 @@ function HourlyLoadsGrid({
   });
 
   const [siteAssignments, setSiteAssignments] = useState<Record<string, string>>(() =>
-    Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? ""])),
+    Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? ""]))
   );
   const [selectedShift, setSelectedShift] = useState<HourlyShift>(
-    initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night"),
+    initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night")
   );
   const [saving, setSaving] = useState(false);
 
@@ -119,7 +121,7 @@ function HourlyLoadsGrid({
       const field = HOUR_PROP(hourIndex) as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   const getMachineTotal = useCallback(
@@ -127,7 +129,7 @@ function HourlyLoadsGrid({
       const load = loadsByMachine.get(loadKey(machineId, selectedShift));
       return load?.total_loads || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   const getMaterialType = useCallback(
@@ -135,7 +137,7 @@ function HourlyLoadsGrid({
       const load = loadsByMachine.get(loadKey(machineId, selectedShift));
       return load?.material_type || "Waste";
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   /**
@@ -179,7 +181,7 @@ function HourlyLoadsGrid({
         return [...prev, { ...row, total_loads: sumHourlyTotal(row) }];
       });
     },
-    [],
+    []
   );
 
   /**
@@ -198,11 +200,11 @@ function HourlyLoadsGrid({
           shift_type: shiftType,
           ...patch,
         },
-        { onConflict: "machine_id,load_date,shift_type" },
+        { onConflict: "machine_id,load_date,shift_type" }
       );
       if (error) throw error;
     },
-    [supabase, departmentId, today],
+    [supabase, departmentId, today]
   );
 
   /**
@@ -216,7 +218,7 @@ function HourlyLoadsGrid({
       shiftType: HourlyShift,
       field: string,
       newValue: number | string,
-      previousValue: number | string,
+      previousValue: number | string
     ) => {
       const key = loadKey(machineId, shiftType);
       setLoadsState((prev) => {
@@ -237,7 +239,7 @@ function HourlyLoadsGrid({
         return prev.map((load) => (load === existing ? reverted : load));
       });
     },
-    [],
+    []
   );
 
   /**
@@ -253,7 +255,7 @@ function HourlyLoadsGrid({
       newValue: number | string,
       patch: Partial<HourlyLoad>,
       operation: string,
-      attrs: Record<string, string | number>,
+      attrs: Record<string, string | number>
     ) => {
       applyLoadState(machineId, shiftType, patch);
       try {
@@ -270,7 +272,7 @@ function HourlyLoadsGrid({
         alert("Failed to save. Please try again.");
       }
     },
-    [applyLoadState, persistLoad, revertField, departmentId],
+    [applyLoadState, persistLoad, revertField, departmentId]
   );
 
   // Check if any machine in this department has a bin_factor set
@@ -336,10 +338,10 @@ function HourlyLoadsGrid({
           previous_value: currentValue,
           new_value: newValue,
           operation: "increment_decrement",
-        },
+        }
       );
     },
-    [machines, selectedShift, getHourValue, commitLoadChange],
+    [machines, selectedShift, getHourValue, commitLoadChange]
   );
 
   // Handle toggling material type for a row
@@ -364,10 +366,10 @@ function HourlyLoadsGrid({
           previous_value: currentMaterial,
           new_value: newMaterial,
           operation: "toggle_material",
-        },
+        }
       );
     },
-    [machines, selectedShift, getMaterialType, commitLoadChange],
+    [machines, selectedShift, getMaterialType, commitLoadChange]
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -383,7 +385,7 @@ function HourlyLoadsGrid({
       }
 
       const button = target.closest(
-        '[data-action="up"], [data-action="down"]',
+        '[data-action="up"], [data-action="down"]'
       ) as HTMLElement | null;
       if (!button) return;
 
@@ -396,7 +398,7 @@ function HourlyLoadsGrid({
       const delta = action === "up" ? 1 : -1;
       handleCellChange(rowIndex, hourProp, delta);
     },
-    [handleCellChange, handleMaterialToggle],
+    [handleCellChange, handleMaterialToggle]
   );
 
   // Handle site selection dropdown change
@@ -424,12 +426,12 @@ function HourlyLoadsGrid({
           context: "hourly_loads_site_change",
         });
         setSiteAssignments((prev) =>
-          prev[machine.id] === newSiteId ? { ...prev, [machine.id]: previousSiteId } : prev,
+          prev[machine.id] === newSiteId ? { ...prev, [machine.id]: previousSiteId } : prev
         );
         alert("Failed to update site. Please try again.");
       }
     },
-    [machines, siteAssignments],
+    [machines, siteAssignments]
   );
 
   // Build RevoGrid columns (stable reference)
@@ -498,7 +500,7 @@ function HourlyLoadsGrid({
                     value: "",
                     selected: !currentSiteId ? "selected" : undefined,
                   },
-                  "No Site",
+                  "No Site"
                 ),
                 ...sites.map((s) =>
                   h(
@@ -507,10 +509,10 @@ function HourlyLoadsGrid({
                       value: s.id,
                       selected: s.id === currentSiteId ? "selected" : undefined,
                     },
-                    s.name,
-                  ),
+                    s.name
+                  )
                 ),
-              ],
+              ]
             ),
           ]);
         },
@@ -538,7 +540,7 @@ function HourlyLoadsGrid({
                 "data-action": "toggle-material",
                 title: "Click to toggle between Waste and Coal",
               },
-              value,
+              value
             ),
           ]);
         },
@@ -581,8 +583,8 @@ function HourlyLoadsGrid({
                       "stroke-linecap": "round",
                       "stroke-linejoin": "round",
                     },
-                    h("path", { d: "m18 15-6-6-6 6" }),
-                  ),
+                    h("path", { d: "m18 15-6-6-6 6" })
+                  )
                 ),
                 h(
                   "button",
@@ -608,8 +610,8 @@ function HourlyLoadsGrid({
                       "stroke-linecap": "round",
                       "stroke-linejoin": "round",
                     },
-                    h("path", { d: "m6 9 6 6 6-6" }),
-                  ),
+                    h("path", { d: "m6 9 6 6 6-6" })
+                  )
                 ),
               ]),
             ]);
@@ -627,7 +629,7 @@ function HourlyLoadsGrid({
             {
               class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
-            model?.total ?? 0,
+            model?.total ?? 0
           );
         },
       },
@@ -646,7 +648,7 @@ function HourlyLoadsGrid({
             {
               class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
-            model?.binFactor ?? "-",
+            model?.binFactor ?? "-"
           );
         },
       });
@@ -661,7 +663,7 @@ function HourlyLoadsGrid({
             {
               class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
             },
-            model?.totalMaterial ?? "-",
+            model?.totalMaterial ?? "-"
           );
         },
       });
@@ -704,10 +706,10 @@ function HourlyLoadsGrid({
         value,
         { [prop]: value },
         "hourly_loads_direct_edit",
-        { hour_prop: prop, value, operation: "direct_edit" },
+        { hour_prop: prop, value, operation: "direct_edit" }
       );
     },
-    [machines, selectedShift, getHourValue, applyLoadState, commitLoadChange],
+    [machines, selectedShift, getHourValue, applyLoadState, commitLoadChange]
   );
 
   const handleExport = async () => {
@@ -779,7 +781,7 @@ function HourlyLoadsGrid({
               machine_id: machine.id,
               machine_name: machineName,
               operation: "import",
-            },
+            }
           );
         } catch (err) {
           logError(err, {
@@ -894,4 +896,5 @@ function HourlyLoadsGrid({
 // portal. Props (departmentId, machines, loads, etc.) are stable across renders;
 // memo prevents re-rendering the entire RevoGrid + cell edit machinery.
 const MemoizedHourlyLoadsGrid = memo(HourlyLoadsGrid);
+
 export { MemoizedHourlyLoadsGrid as HourlyLoadsGrid };

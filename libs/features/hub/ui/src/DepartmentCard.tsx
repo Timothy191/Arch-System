@@ -1,10 +1,7 @@
 "use client";
 
-import Link from "next/link";
-// eslint-disable-next-line no-redeclare
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { memo, useState, useEffect, useTransition } from "react";
+import type { Department } from "@repo/departments/data-access";
+import { cn } from "@repo/ui/lib/utils";
 import {
   Activity,
   ArrowUpRight,
@@ -12,8 +9,8 @@ import {
   CreditCard,
   Factory,
   FileText,
-  HardHat,
   GraduationCap,
+  HardHat,
   Loader2,
   Monitor,
   Pickaxe,
@@ -21,10 +18,13 @@ import {
   ShieldCheck,
   Wrench,
 } from "lucide-react";
-import { cn } from "@repo/ui/lib/utils";
-import type { Department } from "@repo/departments/data-access";
-import { Sparkline } from "./Sparkline";
+// eslint-disable-next-line no-redeclare
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { memo, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { Sparkline } from "./Sparkline";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -157,7 +157,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
         <div
           className={cn(
             "uiverse-card-banner relative z-10 pointer-events-none overflow-hidden",
-            `uiverse-card-banner-${department.name}`,
+            `uiverse-card-banner-${department.name}`
           )}
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
@@ -190,9 +190,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
             <Bookmark
               className={cn(
                 "w-3.5 h-3.5 transition-all duration-200",
-                isPinned
-                  ? "fill-arch-accent-blue text-arch-accent-blue"
-                  : "text-arch-text-tertiary",
+                isPinned ? "fill-arch-accent-blue text-arch-accent-blue" : "text-arch-text-tertiary"
               )}
             />
           </button>
@@ -201,7 +199,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
           <div
             className={cn(
               "uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20",
-              config.bg,
+              config.bg
             )}
           >
             <Icon className="w-5 h-5" />
@@ -220,7 +218,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
                       "w-1.5 h-1.5 rounded-full animate-pulse",
                       department.status === "active" && "bg-accent-green",
                       department.status === "maintenance" && "bg-accent-amber",
-                      department.status === "alert" && "bg-accent-red",
+                      department.status === "alert" && "bg-accent-red"
                     )}
                   />
                   <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-arch-text-tertiary">
@@ -273,5 +271,6 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
 // AGENT-TRACE: Memoize DepartmentCard to prevent re-renders when sibling cards
 // or parent hub state changes. Props (department, index) are stable across renders.
 const MemoizedDepartmentCard = memo(DepartmentCard);
+
 export { MemoizedDepartmentCard as DepartmentCard };
 export default MemoizedDepartmentCard;

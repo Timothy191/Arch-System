@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { LiveMetricsTicker } from "./LiveMetricsTicker";
 import { useSystemMetrics } from "@/hooks/useSystemMetrics";
+import { LiveMetricsTicker } from "./LiveMetricsTicker";
 
 jest.mock("@/hooks/useSystemMetrics");
 

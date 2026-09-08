@@ -1,4 +1,4 @@
-import { getNeo300PrinterStatus, getEmployeeCardProfiles, getRecentNeo300Jobs } from "./actions";
+import { getEmployeeCardProfiles, getNeo300PrinterStatus, getRecentNeo300Jobs } from "./actions";
 import { Neo300PrintStudio } from "./neo300-print-studio";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +11,6 @@ export default async function PrintCardsPage() {
   ]);
 
   return (
-    <Neo300PrintStudio
-      initialPrinter={printer}
-      initialEmployees={employees}
-      initialJobs={jobs}
-    />
+    <Neo300PrintStudio initialPrinter={printer} initialEmployees={employees} initialJobs={jobs} />
   );
 }

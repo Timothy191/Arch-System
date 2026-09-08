@@ -1,7 +1,7 @@
 "use server";
 
+import type { BadgesRow, IssuedCardsRow, PersonnelRow } from "@repo/supabase";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import type { PersonnelRow, BadgesRow, IssuedCardsRow } from "@repo/supabase";
 import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
 import { submitCupsPrintJob } from "../lib/printer-detection";
 
@@ -78,7 +78,7 @@ export async function searchPersonnel(query: string): Promise<PersonnelSearchRes
       status,
       department_id,
       badges!left(id)
-    `,
+    `
     )
     .or(`first_name.ilike.${searchTerm},surname.ilike.${searchTerm},id_number.ilike.${searchTerm}`)
     .order("surname", { ascending: true })

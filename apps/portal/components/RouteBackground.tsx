@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFocusMode } from "@/hooks/useFocusMode";
 
 /**
@@ -29,7 +29,7 @@ export function RouteBackground() {
 
   useEffect(() => {
     if (videoRef.current && !prefersReducedMotion) {
-      videoRef.current.play().catch(() => { });
+      videoRef.current.play().catch(() => {});
     }
   }, [prefersReducedMotion]);
 
@@ -51,8 +51,9 @@ export function RouteBackground() {
           loop
           playsInline
           preload="auto"
-          className={`route-bg-video object-cover object-center w-full h-full filter brightness-95 saturate-110 ${prefersReducedMotion ? "" : "transition-opacity duration-300"
-            }`}
+          className={`route-bg-video object-cover object-center w-full h-full filter brightness-95 saturate-110 ${
+            prefersReducedMotion ? "" : "transition-opacity duration-300"
+          }`}
         >
           <source src="/background/edge-of-the-event-horizon.3840x2160.mp4" type="video/mp4" />
         </video>

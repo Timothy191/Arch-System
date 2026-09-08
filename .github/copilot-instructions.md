@@ -14,8 +14,8 @@ All tasks run through Nx (`nx run-many`). Use pnpm as the package manager (Volta
 | ------------------------------------------ | ---------------------------------------------------------------------- |
 | Install deps                               | `pnpm install`                                                         |
 | Dev server (portal on `:3000`)             | `pnpm dev`                                                             |
-| Minimal dev server                         | `pnpm dev:minimal`                                                     |
-| Bootstrap everything                       | `pnpm dev:up --all` (`--quick`, `--tools`, `--cms`, `--overview`)      |
+| Minimal dev server (headless, no Docker)   | `pnpm dev:quick`                                                       |
+| Bootstrap everything (all dev targets)     | `pnpm dev:all:nx`                                                      |
 | Local Supabase (Docker, separate terminal) | `pnpm --filter @repo/database supabase:dev`                            |
 | Build all                                  | `pnpm build`                                                           |
 | Build one package/app                      | `pnpm --filter @repo/<name> build` or `pnpm nx build <name>`           |

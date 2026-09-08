@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -65,7 +66,7 @@ describe("GET /api/export/fuel-logs", () => {
     } as any);
 
     const req = new NextRequest(
-      "http://localhost/api/export/fuel-logs?from=2026-06-01&to=2026-06-02",
+      "http://localhost/api/export/fuel-logs?from=2026-06-01&to=2026-06-02"
     );
     const res = await GET(req);
     expect(res.status).toBe(200);
@@ -124,7 +125,7 @@ describe("GET /api/export/fuel-logs", () => {
 
     const text = await res.text();
     expect(text).toContain(
-      "id,log_date,shift,department_id,machine_id,machine_name,machine_type,diesel_litres",
+      "id,log_date,shift,department_id,machine_id,machine_name,machine_type,diesel_litres"
     );
     expect(text).toContain("Excavator 01");
     expect(text).toContain("120.50");

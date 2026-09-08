@@ -1,32 +1,32 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuGroup,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-} from "./dropdown-menu";
-import { Button } from "./button";
-import {
-  User,
+  Cloud,
   CreditCard,
-  Settings,
-  Users,
-  UserPlus,
+  LogOut,
   Mail,
   MessageSquare,
   PlusCircle,
-  Cloud,
-  LogOut,
+  Settings,
+  User,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import React from "react";
+import { Button } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
 
 const GithubIcon = () => (
   <svg className="mr-2 h-4 w-4 shrink-0 text-black fill-current" viewBox="0 0 24 24">

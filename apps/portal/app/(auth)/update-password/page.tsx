@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Input } from "@repo/ui/Input";
 import { AnimatedButton } from "@repo/ui/AnimatedButton";
-import { Lock, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { Input } from "@repo/ui/Input";
+import { AlertTriangle, Check, Loader2, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Maps raw Supabase user profile update errors to precise, readable user instructions.

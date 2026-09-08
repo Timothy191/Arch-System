@@ -1,7 +1,7 @@
-import React from "react";
 import { render } from "@testing-library/react";
-import { PerformanceListener } from "./PerformanceListener";
+import React from "react";
 import { useAdaptivePerformance } from "@/hooks/useAdaptivePerformance";
+import { PerformanceListener } from "./PerformanceListener";
 
 jest.mock("@/hooks/useAdaptivePerformance", () => ({
   useAdaptivePerformance: jest.fn(),

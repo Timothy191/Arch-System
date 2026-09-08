@@ -1,4 +1,4 @@
-import { buildHourlyLoadsMap, sumHourlyTotal, type HourlyLoad } from "./loads-utils";
+import { buildHourlyLoadsMap, type HourlyLoad, sumHourlyTotal } from "./loads-utils";
 
 /** Regression: day/night rows must not overwrite each other in the grid map. */
 describe("hourly loads helpers", () => {

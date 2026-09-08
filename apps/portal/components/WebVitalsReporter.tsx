@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
 import { useReportWebVitals } from "next/web-vitals";
+import { useCallback, useEffect, useRef } from "react";
 import { analyzePerformance, INPMonitor, LCPMonitor } from "@/lib/performance-analyzer";
 
 interface Metric {
@@ -89,7 +89,7 @@ export function WebVitalsReporter() {
         console.log("Breakdown:", analysis.lcp.breakdown);
         // eslint-disable-next-line no-console
         console.log(
-          `Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`,
+          `Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`
         );
         // eslint-disable-next-line no-console
         console.log("Optimization strategies:", analysis.lcp.strategies);
@@ -100,7 +100,7 @@ export function WebVitalsReporter() {
         console.log("Breakdown:", analysis.inp.breakdown);
         // eslint-disable-next-line no-console
         console.log(
-          `Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`,
+          `Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`
         );
         // eslint-disable-next-line no-console
         console.log("Optimization strategies:", analysis.inp.strategies);

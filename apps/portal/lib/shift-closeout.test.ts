@@ -41,13 +41,13 @@ jest.mock("@repo/redis", () => ({
     Promise.resolve(
       redisEnabled.value
         ? { isOpen: true, get: mockRedisGet, set: mockRedisSet, del: mockRedisDel }
-        : null,
-    ),
+        : null
+    )
   ),
 }));
 const redisEnabled: { value: boolean } = { value: false };
 
-import { setPin, verifyPin, closeShift } from "./shift-closeout";
+import { closeShift, setPin, verifyPin } from "./shift-closeout";
 
 // Single-result chain — single() resolves from a per-table FIFO queue so the
 // same table can serve both the "existing record" and "inserted record" checks.
@@ -118,7 +118,7 @@ describe("setPin", () => {
     expect(updateCalls).toHaveLength(1);
     expect(updateCalls[0]!.table).toBe("employees");
     expect(updateCalls[0]!.args).toEqual(
-      expect.objectContaining({ employee_code: "EMP-1", pin_hash: expect.any(String) }),
+      expect.objectContaining({ employee_code: "EMP-1", pin_hash: expect.any(String) })
     );
     const hash = (updateCalls[0]!.args as { pin_hash: string }).pin_hash;
     await expect(bcrypt.compare("4321", hash)).resolves.toBe(true);
@@ -134,7 +134,7 @@ describe("verifyPin", () => {
   it("returns lockedOut when the attempt lockout is active", async () => {
     redisEnabled.value = true;
     mockRedisGet.mockResolvedValue(
-      JSON.stringify({ count: 3, firstAttempt: Date.now(), lockedUntil: Date.now() + 600000 }),
+      JSON.stringify({ count: 3, firstAttempt: Date.now(), lockedUntil: Date.now() + 600000 })
     );
 
     const result = await verifyPin("EMP-1", "1234");
@@ -160,7 +160,7 @@ describe("verifyPin", () => {
     expect(mockRedisSet).toHaveBeenCalledWith(
       expect.stringContaining("pin_attempts:"),
       expect.any(String),
-      expect.objectContaining({ EX: expect.any(Number) }),
+      expect.objectContaining({ EX: expect.any(Number) })
     );
   });
 
@@ -194,7 +194,7 @@ describe("closeShift", () => {
   it("throws AuthError when unauthenticated", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
     await expect(closeShift("d1", "2026-08-17", "day", "appr-1", "1234")).rejects.toThrow(
-      "Not authenticated",
+      "Not authenticated"
     );
   });
 
@@ -256,7 +256,7 @@ describe("closeShift", () => {
       "appr-1",
       "1111",
       false,
-      "control-room",
+      "control-room"
     );
     expect(result).toEqual({ success: true, shiftStatusId: "ss-1" });
 
@@ -269,10 +269,10 @@ describe("closeShift", () => {
         status: "closed",
         closed_by: "e1",
         approved_by: "appr-1",
-      }),
+      })
     );
     expect(mockLogAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "insert", tableName: "shift_status", recordId: "ss-1" }),
+      expect.objectContaining({ action: "insert", tableName: "shift_status", recordId: "ss-1" })
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/control-room");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/control-room/shift-coverage");

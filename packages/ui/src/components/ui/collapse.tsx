@@ -1,6 +1,8 @@
+"use client";
+
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { ChevronDown } from "lucide-react";
 
 interface CollapseGroupContextValue {
   multiple?: boolean;
@@ -38,7 +40,7 @@ export function CollapseGroup({
         return next;
       });
     },
-    [multiple],
+    [multiple]
   );
 
   return (
@@ -46,7 +48,7 @@ export function CollapseGroup({
       <div
         className={cn(
           "divide-y divide-neutral-200 dark:divide-neutral-800 border-y border-neutral-200 dark:border-neutral-800",
-          className,
+          className
         )}
         {...props}
       >
@@ -81,7 +83,7 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
       id,
       ...props
     },
-    ref,
+    ref
   ) => {
     const generatedId = React.useId();
     const collapseId = id ?? generatedId;
@@ -129,7 +131,7 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
             "w-full flex items-center justify-between text-left transition-colors select-none",
             size === "small" ? "py-2.5 text-xs font-medium" : "py-4 text-sm font-semibold",
             "text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-300",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100"
           )}
         >
           <div className="flex flex-col pr-4">
@@ -141,7 +143,7 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
           <ChevronDown
             className={cn(
               "w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200",
-              isExpanded && "rotate-180 text-neutral-900 dark:text-neutral-100",
+              isExpanded && "rotate-180 text-neutral-900 dark:text-neutral-100"
             )}
             aria-hidden="true"
           />
@@ -153,7 +155,7 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
             role="region"
             className={cn(
               "text-neutral-600 dark:text-neutral-300 transition-all",
-              size === "small" ? "pb-2.5 text-xs" : "pb-4 text-sm",
+              size === "small" ? "pb-2.5 text-xs" : "pb-4 text-sm"
             )}
           >
             {children}
@@ -161,7 +163,7 @@ export const Collapse = React.forwardRef<HTMLDivElement, CollapseProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 Collapse.displayName = "Collapse";

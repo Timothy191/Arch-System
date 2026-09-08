@@ -70,7 +70,7 @@ export function ExcavatorActivityList({
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
         const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id),
+          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -111,7 +111,7 @@ export function ExcavatorActivityList({
                       key={activity.id}
                       activity={activity}
                       assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
+                        (a) => a.excavator_activity_id === activity.id
                       )}
                     />
                   ))}
@@ -132,7 +132,7 @@ export function ExcavatorActivityList({
                       key={activity.id}
                       activity={activity}
                       assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id,
+                        (a) => a.excavator_activity_id === activity.id
                       )}
                     />
                   ))}

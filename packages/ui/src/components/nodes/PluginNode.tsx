@@ -1,8 +1,8 @@
 "use client";
 
+import { Handle, type NodeProps, Position } from "@xyflow/react";
+import { Puzzle, Settings } from "lucide-react";
 import React, { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Settings, Puzzle } from "lucide-react";
 
 // =============================================================================
 // Plugin Node Data Type

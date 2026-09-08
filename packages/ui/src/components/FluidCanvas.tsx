@@ -163,7 +163,7 @@ export function FluidCanvas({
               y * cellH + cellH * 0.5,
               cellW * (0.8 + d * 0.8),
               0,
-              Math.PI * 2,
+              Math.PI * 2
             );
             ctx.fill();
           }

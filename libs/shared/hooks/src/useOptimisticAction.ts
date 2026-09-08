@@ -37,10 +37,7 @@ export function useOptimisticAction<TState, TInput, TData = unknown>({
   const [isPending, startTransition] = useTransition();
   const [lastError, setLastError] = useState<string | null>(null);
 
-  const [optimisticState, setOptimisticState] = useOptimistic(
-    currentState,
-    updateFn,
-  );
+  const [optimisticState, setOptimisticState] = useOptimistic(currentState, updateFn);
 
   const execute = (input: TInput) => {
     setLastError(null);

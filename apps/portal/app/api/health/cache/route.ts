@@ -30,8 +30,9 @@
  *                   type: string
  *                   format: date-time
  */
-import { NextResponse } from "next/server";
+
 import { getCacheStats, getRedisClient } from "@repo/redis";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 

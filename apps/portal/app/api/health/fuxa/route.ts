@@ -37,7 +37,7 @@
  *       503:
  *         description: FUXA server is down
  */
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 // AGENT-TRACE: Health check endpoint for FUXA SCADA integration
 // Monitors FUXA server connectivity, HTTP response, and iframe loadability

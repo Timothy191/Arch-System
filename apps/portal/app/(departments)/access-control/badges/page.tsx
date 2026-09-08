@@ -1,5 +1,3 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { Badge } from "@repo/ui";
 import { Button } from "@repo/ui/components/ui/button";
 import { Pagination } from "@repo/ui/components/ui/pagination";
@@ -11,7 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { QrCode, Plus, UserCheck, ShieldOff } from "lucide-react";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Plus, QrCode, ShieldOff, UserCheck } from "lucide-react";
+import { getDepartmentContext } from "~/lib/dept-context";
 import { getBadgesForDepartment } from "../actions";
 
 interface BadgeWithRelations {

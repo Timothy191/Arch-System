@@ -1,50 +1,50 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
   addEdge,
+  Background,
   type Connection,
+  Controls,
   type Edge,
-  type Node,
   Handle,
+  MiniMap,
+  type Node,
   Position,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import {
-  BACKEND_SERVICES,
+  Activity,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  Database,
+  Eye,
+  Filter,
+  Gauge,
+  Info,
+  Layers,
+  Pause,
+  Play,
+  Radio,
+  Search,
+  Server,
+  Shield,
+  SlidersHorizontal,
+  Sparkles,
+  Workflow,
+  Zap,
+} from "lucide-react";
+import {
   BACKEND_CONNECTIONS,
+  BACKEND_SERVICES,
   type BackendService,
   type ScadaMetrics,
   type ScadaTelemetryTag,
 } from "../lib/data";
-import {
-  Server,
-  Database,
-  Layers,
-  Cpu,
-  Eye,
-  Shield,
-  Clock,
-  Activity,
-  CheckCircle2,
-  Filter,
-  Info,
-  Radio,
-  Workflow,
-  Sparkles,
-  Gauge,
-  Zap,
-  Search,
-  Play,
-  Pause,
-  SlidersHorizontal,
-} from "lucide-react";
 
 // Category Icons & Color Mapping
 const CATEGORY_ICONS: Record<
@@ -171,7 +171,7 @@ function getLiveTagValue(
   tag: ScadaTelemetryTag,
   tick: number,
   isLive: boolean,
-  index: number,
+  index: number
 ): string {
   if (typeof tag.baseValue === "boolean") {
     return tag.baseValue ? "TRIGGERED (ALARM)" : "NORMAL (OK)";
@@ -558,7 +558,7 @@ export default function BackendArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -585,7 +585,7 @@ export default function BackendArchitecture() {
   const relatedConnections = useMemo(() => {
     if (!activeService) return [];
     return BACKEND_CONNECTIONS.filter(
-      (c) => c.source === activeService.id || c.target === activeService.id,
+      (c) => c.source === activeService.id || c.target === activeService.id
     );
   }, [activeService]);
 

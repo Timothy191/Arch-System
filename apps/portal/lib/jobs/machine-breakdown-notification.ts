@@ -1,5 +1,5 @@
 import { inngest, machineBreakdownEvent } from "@repo/utils/inngest";
-import { InngestFunction } from "inngest";
+import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -38,5 +38,5 @@ export const machineBreakdownNotificationFn: InngestFunction.Any = inngest.creat
       });
       throw err;
     }
-  },
+  }
 );

@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import {
-  createBreakdown,
-  bookOutBreakdown,
-  directCheckout,
-} from "@/features/departments/components/engineering/breakdowns/actions";
-import {
-  createBreakdownSchema,
   bookOutSchema,
+  createBreakdownSchema,
   directCheckoutSchema,
 } from "@repo/contract/schemas/form.schema";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { NextResponse } from "next/server";
+import {
+  bookOutBreakdown,
+  createBreakdown,
+  directCheckout,
+} from "@/features/departments/components/engineering/breakdowns/actions";
 import { isAppError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   if (!body || (body.kind !== "read" && body.kind !== "write")) {
     return NextResponse.json(
       { success: false, error: 'Expected { kind: "read" | "write", tool, args }' },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     if (!employee?.department_id) {
       return NextResponse.json(
         { success: false, error: "Employee record or department not found" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     if (isAppError(error)) {
       return NextResponse.json(
         { success: false, error: error.message, code: error.code },
-        { status: 500 },
+        { status: 500 }
       );
     }
     return NextResponse.json(
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to process request",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
 async function handleRead(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   tool: string,
-  departmentId: string,
+  departmentId: string
 ): Promise<NextResponse> {
   if (tool === "get_active_breakdowns") {
     const { data, error } = await supabase
@@ -110,7 +110,7 @@ async function handleRead(
   if (tool === "get_shift_summary") {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-      today.getDate(),
+      today.getDate()
     ).padStart(2, "0")}`;
 
     const { data: activeBreakdowns, error: bdError } = await supabase
@@ -163,14 +163,14 @@ async function handleRead(
 
   return NextResponse.json(
     { success: false, error: `Unknown read tool: ${tool}` },
-    { status: 400 },
+    { status: 400 }
   );
 }
 
 async function handleWrite(
   tool: string,
   args: Record<string, unknown>,
-  departmentId: string,
+  departmentId: string
 ): Promise<NextResponse> {
   if (tool === "create_breakdown") {
     const parsed = createBreakdownSchema.safeParse(args);
@@ -184,7 +184,7 @@ async function handleWrite(
     if (!breakdownId) {
       return NextResponse.json(
         { success: false, error: "book_out_breakdown requires breakdown_id" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const parsed = bookOutSchema.safeParse(args);
@@ -202,7 +202,7 @@ async function handleWrite(
 
   return NextResponse.json(
     { success: false, error: `Unknown write tool: ${tool}` },
-    { status: 400 },
+    { status: 400 }
   );
 }
 
@@ -212,6 +212,6 @@ function invalidInput(error: {
   const detail = error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
   return NextResponse.json(
     { success: false, error: detail ? `Invalid input — ${detail}` : "Invalid input" },
-    { status: 400 },
+    { status: 400 }
   );
 }

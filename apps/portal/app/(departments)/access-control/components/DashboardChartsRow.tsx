@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import type { HourlyAccessPoint, BadgeStatusDistribution } from "../actions";
+import dynamic from "next/dynamic";
+import React from "react";
+import type { BadgeStatusDistribution, HourlyAccessPoint } from "../actions";
 
 const HourlyAccessChart = dynamic(() => import("./HourlyAccessChart"), {
   ssr: false,

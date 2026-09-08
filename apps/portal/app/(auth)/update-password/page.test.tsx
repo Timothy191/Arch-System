@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import UpdatePasswordPage from "./page";
 
 const mockPush = jest.fn();
@@ -66,7 +66,7 @@ describe("UpdatePasswordPage", () => {
     mockGetSession.mockReturnValue(
       new Promise((resolve) => {
         resolveSession = resolve;
-      }),
+      })
     );
 
     render(<UpdatePasswordPage />);

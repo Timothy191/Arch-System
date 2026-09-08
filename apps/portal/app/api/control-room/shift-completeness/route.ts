@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getShiftCompleteness } from "@/lib/shift-completeness";
 
 /**
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
   if (!deptId || !deptSlug || !date || !shift) {
     return NextResponse.json(
       { error: "Missing required params: deptId, deptSlug, date, shift" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 

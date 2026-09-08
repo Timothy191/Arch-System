@@ -1,15 +1,15 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { BorderBox } from "@repo/ui/BorderBox";
-import { Divider } from "@repo/ui/Divider";
-import nextDynamic from "next/dynamic";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
+import { Divider } from "@repo/ui/Divider";
+import { GlassCard } from "@repo/ui/GlassCard";
+import nextDynamic from "next/dynamic";
+import { getDepartmentContext } from "~/lib/dept-context";
 import {
   getAccessControlMetrics,
-  getRecentAccessActivity,
+  getBadgeStatusDistribution,
   getEntityBadgeStatus,
   getHourlyAccessStats,
-  getBadgeStatusDistribution,
+  getRecentAccessActivity,
 } from "./actions";
 
 export const dynamic = "force-dynamic";

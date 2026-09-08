@@ -1,6 +1,8 @@
+"use client";
+
+import { X } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { X } from "lucide-react";
 
 export interface ClearableInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
@@ -24,7 +26,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
       className,
       ...props
     },
-    ref,
+    ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -42,7 +44,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         // Synthesize native change event so React form handlers work
         const nativeSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
-          "value",
+          "value"
         )?.set;
         nativeSetter?.call(inputRef.current, "");
 
@@ -60,7 +62,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         if (inputRef.current) {
           const nativeSetter = Object.getOwnPropertyDescriptor(
             window.HTMLInputElement.prototype,
-            "value",
+            "value"
           )?.set;
           nativeSetter?.call(inputRef.current, "");
           const event = new Event("input", { bubbles: true });
@@ -97,7 +99,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
                   ? "h-11 px-3.5 text-base"
                   : "h-9 px-3 text-sm",
               hasValue || cmdk ? "pr-14" : "",
-              className,
+              className
             )}
             {...props}
           />
@@ -126,7 +128,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         </div>
       </div>
     );
-  },
+  }
 );
 
 ClearableInput.displayName = "ClearableInput";

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { Checkbox } from "@repo/ui/Checkbox";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { useAutoSave } from "@repo/ui/hooks/useAutoSave";
-import { Checkbox } from "@repo/ui/Checkbox";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { getCurrentShift } from "@repo/utils";
+import { AlertTriangle, ChevronDown, ChevronUp, Wrench } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Wrench, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
-import { speculativeEmbedShiftLog } from "@/app/actions";
-import { BreakdownControlRoomView } from "@/features/departments";
+import { useState } from "react";
 import { toast } from "sonner";
+import { speculativeEmbedShiftLog } from "@/app/actions";
+import type { BreakdownControlRoomView } from "@/features/departments";
 
 interface Machine {
   id: string;
@@ -54,7 +54,7 @@ function matchMachineId(machines: Machine[], machineName: string | null): string
     (m) =>
       m.name.toLowerCase() === needle ||
       m.name.toLowerCase().includes(needle) ||
-      needle.includes(m.name.toLowerCase()),
+      needle.includes(m.name.toLowerCase())
   );
   return match?.id ?? "";
 }

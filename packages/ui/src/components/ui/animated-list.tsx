@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, type ComponentPropsWithoutRef } from "react";
-import { AnimatePresence, motion, type MotionProps } from "framer-motion";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-
 import { cn } from "@repo/ui/lib/utils";
+import { AnimatePresence, type MotionProps, motion } from "framer-motion";
+import React, { type ComponentPropsWithoutRef, useEffect, useMemo, useState } from "react";
 
 export function AnimatedListItem({ children }: { children: React.ReactNode }) {
   const animations: MotionProps = {
@@ -61,7 +60,7 @@ export const AnimatedList = React.memo(
         </AnimatePresence>
       </div>
     );
-  },
+  }
 );
 
 AnimatedList.displayName = "AnimatedList";

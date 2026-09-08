@@ -1,17 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useForm } from "react-hook-form";
 // eslint-disable-next-line no-restricted-imports
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { useRouter } from "next/navigation";
-import { cn } from "@repo/ui/lib/utils";
-import { ShiftToggle } from "@repo/ui/ShiftToggle";
-import { toast } from "sonner";
-import { logError } from "@/lib/errors/error-logger";
-import { speculativeEmbedShiftLog, revalidateRSC } from "@/app/actions";
 import {
   dailyLogSchema,
   drillingDailyLogSchema,
@@ -22,6 +12,16 @@ import type {
   DrillingDailyLogFormValues,
   ProductionDailyLogFormValues,
 } from "@repo/contract/types/form.types";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { cn } from "@repo/ui/lib/utils";
+import { SecondaryButton } from "@repo/ui/SecondaryButton";
+import { ShiftToggle } from "@repo/ui/ShiftToggle";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { revalidateRSC, speculativeEmbedShiftLog } from "@/app/actions";
+import { logError } from "@/lib/errors/error-logger";
 import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
 interface Machine {
@@ -309,7 +309,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                     setValue(
                       "actualCoalTonnes",
                       Math.max(0, (Number(watch("actualCoalTonnes")) || 0) - 100),
-                      { shouldDirty: true },
+                      { shouldDirty: true }
                     )
                   }
                   className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
@@ -322,7 +322,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   onFocus={(e) => e.target.select()}
                   className={cn(
                     "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                    errors.actualCoalTonnes && "border-accent-red",
+                    errors.actualCoalTonnes && "border-accent-red"
                   )}
                   placeholder="0"
                 />
@@ -354,7 +354,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                     setValue(
                       "actualWasteTonnes",
                       Math.max(0, (Number(watch("actualWasteTonnes")) || 0) - 500),
-                      { shouldDirty: true },
+                      { shouldDirty: true }
                     )
                   }
                   className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
@@ -367,7 +367,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   onFocus={(e) => e.target.select()}
                   className={cn(
                     "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                    errors.actualWasteTonnes && "border-accent-red",
+                    errors.actualWasteTonnes && "border-accent-red"
                   )}
                   placeholder="0"
                 />
@@ -420,7 +420,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 onFocus={(e) => e.target.select()}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.holesDrilled && "border-accent-red",
+                  errors.holesDrilled && "border-accent-red"
                 )}
                 placeholder="0"
               />
@@ -444,7 +444,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 onFocus={(e) => e.target.select()}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.totalDepthMeters && "border-accent-red",
+                  errors.totalDepthMeters && "border-accent-red"
                 )}
                 placeholder="0.0"
               />
@@ -468,7 +468,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 onFocus={(e) => e.target.select()}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.penetrationRate && "border-accent-red",
+                  errors.penetrationRate && "border-accent-red"
                 )}
                 placeholder="0.0"
               />
@@ -491,7 +491,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 onFocus={(e) => e.target.select()}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.bitWearPercentage && "border-accent-red",
+                  errors.bitWearPercentage && "border-accent-red"
                 )}
                 placeholder="0"
               />
@@ -552,7 +552,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 {...register("delayMinutes", { valueAsNumber: true })}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.delayMinutes && "border-accent-red",
+                  errors.delayMinutes && "border-accent-red"
                 )}
                 placeholder="0"
               />
@@ -594,7 +594,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
           rows={4}
           className={cn(
             "w-full px-4 py-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none",
-            errors.notes && "border-accent-red",
+            errors.notes && "border-accent-red"
           )}
           placeholder="Enter any stratum notes, bit wear observations, or safety handovers..."
           aria-label="Daily log notes"

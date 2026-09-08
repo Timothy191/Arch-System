@@ -53,15 +53,16 @@
  *       500:
  *         description: Internal server error
  */
-import { NextRequest, NextResponse } from "next/server";
-import { inngest, syncPlaybackEvent } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
+
+import { syncPlaybackSchema } from "@repo/contract/schemas/sync.schema";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { inngest, syncPlaybackEvent } from "@repo/utils/inngest";
+import { type NextRequest, NextResponse } from "next/server";
+import { withBodyLimit } from "@/lib/api/body-limit";
+import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
-import { applyCors } from "@/lib/api/cors";
-import { withBodyLimit } from "@/lib/api/body-limit";
-import { syncPlaybackSchema } from "@repo/contract/schemas/sync.schema";
+import { logError } from "@/lib/errors/error-logger";
 
 async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
@@ -101,7 +102,7 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     });
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -112,6 +113,6 @@ export async function POST(req: NextRequest) {
     async () => {
       return applyCors(req, await withRateLimit(req, () => handlePlaybackRequest(req)));
     },
-    { maxSize: 1048576 },
+    { maxSize: 1048576 }
   );
 }

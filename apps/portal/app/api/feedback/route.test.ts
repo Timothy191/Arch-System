@@ -35,7 +35,7 @@ describe("POST /api/feedback", () => {
         message: "Something broke",
         userEmail: "user@example.com",
         metadata: { browser: "chrome" },
-      }),
+      })
     );
 
     expect(response.status).toBe(200);
@@ -43,7 +43,7 @@ describe("POST /api/feedback", () => {
     expect(data).toEqual({ success: true, ticketId: "TKT-1234" });
     expect(serverLogger.info).toHaveBeenCalledWith(
       { userEmail: "user@example.com", metadata: { browser: "chrome" } },
-      "[FEEDBACK] Type: bug - Something broke",
+      "[FEEDBACK] Type: bug - Something broke"
     );
     expect(serverLogger.error).not.toHaveBeenCalled();
   });
@@ -54,7 +54,7 @@ describe("POST /api/feedback", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: "not-json",
-      }),
+      })
     );
 
     expect(response.status).toBe(500);
@@ -81,8 +81,8 @@ describe("POST /api/feedback", () => {
             }
             return (target as unknown as Record<string, unknown>)[property];
           },
-        } as unknown as Request,
-      ),
+        } as unknown as Request
+      )
     );
 
     expect(response.status).toBe(500);

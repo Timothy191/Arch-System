@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
-import { Plus, Trash2, Clock, AlertCircle, CheckCircle, Info, HelpCircle } from "lucide-react";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertCircle, CheckCircle, Clock, HelpCircle, Info, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
 
 // AGENT-TRACE: Delay entry form with granular tracking, auto-calculation, and manual override
 // Supports draft/committed workflow with role-based access control
@@ -179,7 +179,7 @@ export function DelayEntriesForm({
 
       return null;
     },
-    [delayEntries, calculateDuration],
+    [delayEntries, calculateDuration]
   );
 
   // Add new empty delay entry
@@ -213,7 +213,7 @@ export function DelayEntriesForm({
       });
       toast.success("Delay entry removed");
     },
-    [delayEntries],
+    [delayEntries]
   );
 
   // Update delay entry field
@@ -242,7 +242,7 @@ export function DelayEntriesForm({
       // Notify parent of changes
       onDelayChange?.(updatedEntries);
     },
-    [delayEntries, validateEntry, onDelayChange],
+    [delayEntries, validateEntry, onDelayChange]
   );
 
   // Save all delay entries
@@ -580,7 +580,7 @@ export function DelayEntriesForm({
                             updateDelayEntry(
                               index,
                               "delay_start_time",
-                              new Date(e.target.value).toISOString(),
+                              new Date(e.target.value).toISOString()
                             )
                           }
                           disabled={
@@ -607,7 +607,7 @@ export function DelayEntriesForm({
                             updateDelayEntry(
                               index,
                               "delay_end_time",
-                              new Date(e.target.value).toISOString(),
+                              new Date(e.target.value).toISOString()
                             )
                           }
                           disabled={
@@ -680,7 +680,7 @@ export function DelayEntriesForm({
                           updateDelayEntry(
                             index,
                             "manual_duration_hours",
-                            parseFloat(e.target.value) || null,
+                            parseFloat(e.target.value) || null
                           )
                         }
                         className="w-full md:w-48 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"

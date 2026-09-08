@@ -1,9 +1,7 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import { Drawer } from "@repo/ui/components/ui/drawer";
 import { Entity } from "@repo/ui/components/ui/entity";
 import { Fieldset } from "@repo/ui/components/ui/fieldset";
-import { Tree, Folder, File } from "@repo/ui/components/ui/file-tree";
+import { File, Folder, Tree } from "@repo/ui/components/ui/file-tree";
 import { Gauge } from "@repo/ui/components/ui/gauge";
 import { Grid, GridCell, GridCross } from "@repo/ui/components/ui/grid";
 import { Input, SearchInput } from "@repo/ui/components/ui/input";
@@ -16,16 +14,18 @@ import {
   MenuButton,
   MenuContainer,
   MenuItem,
-  MenuSection,
   MenuItemLocked,
+  MenuSection,
 } from "@repo/ui/components/ui/menu";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Batch 4 Components", () => {
   it("renders Drawer correctly", () => {
     render(
       <Drawer show={true} onDismiss={() => {}}>
         Drawer Content
-      </Drawer>,
+      </Drawer>
     );
     expect(screen.getByText("Drawer Content")).toBeInTheDocument();
   });
@@ -48,7 +48,7 @@ describe("Geist Batch 4 Components", () => {
         <Folder name="src">
           <File name="index.ts" />
         </Folder>
-      </Tree>,
+      </Tree>
     );
     expect(screen.getByText("src")).toBeInTheDocument();
   });
@@ -63,7 +63,7 @@ describe("Geist Batch 4 Components", () => {
       <Grid columns={3}>
         <GridCell columnSpan={2}>Main</GridCell>
         <GridCross />
-      </Grid>,
+      </Grid>
     );
     expect(screen.getByText("Main")).toBeInTheDocument();
   });
@@ -106,7 +106,7 @@ describe("Geist Batch 4 Components", () => {
             <MenuItemLocked>Delete</MenuItemLocked>
           </MenuSection>
         </Menu>
-      </MenuContainer>,
+      </MenuContainer>
     );
     expect(screen.getByText("Actions")).toBeInTheDocument();
   });

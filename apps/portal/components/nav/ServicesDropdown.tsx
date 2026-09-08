@@ -1,36 +1,36 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { logout } from "~/app/actions";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
 import { cn } from "@repo/ui/lib/utils";
 import {
-  LogOut,
-  RotateCcw,
-  PowerOff,
-  Lock,
-  Moon,
-  Maximize2,
   ChevronDown,
-  Sun,
-  CloudSun,
-  Wind,
-  ShieldAlert,
-  Phone,
   ClipboardList,
+  CloudSun,
+  Lock,
+  LogOut,
+  Maximize2,
+  Moon,
+  Phone,
+  PowerOff,
+  RotateCcw,
+  ShieldAlert,
   Siren,
+  Sun,
+  Wind,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchWeather, getWindDirection, type WeatherData } from "@/lib/weather-api";
+import { logout } from "~/app/actions";
 
 /* ------------------------------------------------------------------ */
 //  Shift helpers
@@ -159,13 +159,13 @@ export function ServicesDropdown() {
               "transition-all duration-150 ease-in-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
               "cursor-default select-none",
-              open && "bg-white/60",
+              open && "bg-white/60"
             )}
           >
             <ChevronDown
               className={cn(
                 "w-3.5 h-3.5 transition-transform duration-200 ease-out",
-                open && "rotate-180",
+                open && "rotate-180"
               )}
             />
           </button>
@@ -252,7 +252,7 @@ export function ServicesDropdown() {
                       ? "text-[var(--accent-red)]"
                       : safety.warningCount > 0
                         ? "text-[var(--accent-orange)]"
-                        : "text-[var(--accent-green)]",
+                        : "text-[var(--accent-green)]"
                   )}
                 />
                 <span className="text-[12px] text-[var(--text-heading)] flex-1">
@@ -296,9 +296,9 @@ export function ServicesDropdown() {
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
                     if (!document.fullscreenElement) {
-                      document.documentElement.requestFullscreen().catch(() => { });
+                      document.documentElement.requestFullscreen().catch(() => {});
                     } else if (document.exitFullscreen) {
-                      document.exitFullscreen().catch(() => { });
+                      document.exitFullscreen().catch(() => {});
                     }
                   }}
                 >

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AnimatedFeed } from "@repo/ui/AnimatedList";
 import { useThrottledState } from "@repo/shared/hooks";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { AnimatedFeed } from "@repo/ui/AnimatedList";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { useEffect, useState } from "react";
 
 type ActivityType = "insert" | "update" | "delete";
 
@@ -54,7 +54,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
             },
             ...prev.slice(0, 49),
           ]);
-        },
+        }
       )
       .subscribe();
 

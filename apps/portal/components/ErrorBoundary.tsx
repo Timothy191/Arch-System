@@ -1,9 +1,9 @@
 "use client";
 
-import { Component, ReactNode } from "react";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { Component, type ReactNode } from "react";
 
 // AGENT-TRACE: ErrorBoundary provides graceful degradation when React components fail
 // Critical for production stability, especially for external dependencies like FUXA SCADA

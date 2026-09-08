@@ -1,7 +1,7 @@
 // AGENT-TRACE: CloseShiftModal test covering full shift closeout workflow states (validating -> has_errors -> pin_entry -> verifying -> verified -> submitting -> success -> api_error).
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { closeShift, verifyPin } from "@/lib/shift-closeout";
 import { CloseShiftModal } from "./CloseShiftModal";
-import { verifyPin, closeShift } from "@/lib/shift-closeout";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -55,7 +55,7 @@ describe("CloseShiftModal", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Cannot close shift until the following are resolved:"),
+        screen.getByText("Cannot close shift until the following are resolved:")
       ).toBeInTheDocument();
     });
 
@@ -74,7 +74,7 @@ describe("CloseShiftModal", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("All machines accounted for. Supervisor PIN required to close."),
+        screen.getByText("All machines accounted for. Supervisor PIN required to close.")
       ).toBeInTheDocument();
     });
 

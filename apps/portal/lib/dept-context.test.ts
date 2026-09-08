@@ -46,7 +46,7 @@ describe("getDepartmentContext", () => {
 
   it("calls notFound for an invalid department slug", async () => {
     await expect(getDepartmentContext({ department: "nonexistent-dept" })).rejects.toThrow(
-      "NEXT_NOT_FOUND",
+      "NEXT_NOT_FOUND"
     );
 
     expect(notFound).toHaveBeenCalledTimes(1);
@@ -66,7 +66,7 @@ describe("getDepartmentContext", () => {
     });
 
     await expect(getDepartmentContext({ department: "drilling" })).rejects.toThrow(
-      "NEXT_NOT_FOUND",
+      "NEXT_NOT_FOUND"
     );
 
     expect(notFound).toHaveBeenCalledTimes(1);
@@ -93,7 +93,7 @@ describe("requireDepartment", () => {
 
   it("calls notFound when department is not in allowed array", () => {
     expect(() => requireDepartment("drilling", ["control-room", "production"])).toThrow(
-      "NEXT_NOT_FOUND",
+      "NEXT_NOT_FOUND"
     );
     expect(notFound).toHaveBeenCalledTimes(1);
   });

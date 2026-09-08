@@ -1,9 +1,9 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Divider } from "@repo/ui/Divider";
-import { BorderBox } from "@repo/ui/BorderBox";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { Drill, Clock, AlertTriangle } from "lucide-react";
+import { BorderBox } from "@repo/ui/BorderBox";
+import { Divider } from "@repo/ui/Divider";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertTriangle, Clock, Drill } from "lucide-react";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 export const dynamic = "force-dynamic";
 

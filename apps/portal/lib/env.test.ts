@@ -8,7 +8,7 @@
  *   - process.env is carefully saved/restored in afterEach.
  */
 
-import { env, resetEnv, getEnvErrors } from "@/lib/env";
+import { env, getEnvErrors, resetEnv } from "@/lib/env";
 
 /**
  * Helper to set env vars that TypeScript considers read-only (e.g. NODE_ENV).

@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { RevoGrid } from "@revolist/react-datagrid";
-import type { SortingConfig, ColumnFilterConfig } from "@revolist/revogrid";
 import { cn } from "@repo/ui/lib/utils";
+import { RevoGrid } from "@revolist/react-datagrid";
+import type { ColumnFilterConfig, SortingConfig } from "@revolist/revogrid";
+import * as React from "react";
 import { GlassCard } from "../GlassCard";
 
 type RevoColumn = React.ComponentProps<typeof RevoGrid>["columns"];

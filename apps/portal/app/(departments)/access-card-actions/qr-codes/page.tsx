@@ -1,5 +1,4 @@
-import { PageHeader } from "@repo/ui/PageHeader";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { createServerSupabaseClient } from "@repo/supabase/server";
 import {
   Table,
   TableBody,
@@ -8,8 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { QrCode, Smartphone, ShieldCheck, ShieldOff, AlertTriangle, Scan } from "lucide-react";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { PageHeader } from "@repo/ui/PageHeader";
+import { AlertTriangle, QrCode, Scan, ShieldCheck, ShieldOff, Smartphone } from "lucide-react";
 import { assertAccessCardActionsRole } from "../actions";
 
 export const dynamic = "force-dynamic";

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { EmptyState } from "@repo/ui/EmptyState";
-import { AvatarGroup, Badge } from "@repo/ui";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { AvatarGroup, Badge } from "@repo/ui";
+import { EmptyState } from "@repo/ui/EmptyState";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertTriangle, CheckCircle, Clock, XCircle } from "lucide-react";
+import { memo, useEffect, useState } from "react";
 import { CloseShiftModal } from "./CloseShiftModal";
 
 interface ShiftCoverageWidgetProps {

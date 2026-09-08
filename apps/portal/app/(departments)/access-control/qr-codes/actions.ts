@@ -55,7 +55,7 @@ async function assertAccessControlRole() {
  */
 export async function getBadgesInventory(
   filterType?: string,
-  search?: string,
+  search?: string
 ): Promise<BadgeInventoryItem[]> {
   const { supabase } = await assertAccessControlRole();
 
@@ -206,10 +206,26 @@ export async function getEntityOptions(): Promise<{
   const { supabase } = await assertAccessControlRole();
 
   const [pRes, fRes, vRes, eqRes] = await Promise.all([
-    supabase.from("personnel").select("id, first_name, surname, emp_code, job_title").eq("status", "Active").limit(50),
-    supabase.from("fleet").select("id, fleet_code, vehicle_type, registration_number, make, model").eq("status", "Active").limit(50),
-    supabase.from("visitors").select("id, first_name, surname, company").eq("status", "Checked In").limit(50),
-    supabase.from("equipment").select("id, equip_code, equipment_type").eq("status", "Active").limit(50),
+    supabase
+      .from("personnel")
+      .select("id, first_name, surname, emp_code, job_title")
+      .eq("status", "Active")
+      .limit(50),
+    supabase
+      .from("fleet")
+      .select("id, fleet_code, vehicle_type, registration_number, make, model")
+      .eq("status", "Active")
+      .limit(50),
+    supabase
+      .from("visitors")
+      .select("id, first_name, surname, company")
+      .eq("status", "Checked In")
+      .limit(50),
+    supabase
+      .from("equipment")
+      .select("id, equip_code, equipment_type")
+      .eq("status", "Active")
+      .limit(50),
   ]);
 
   const personnel: EntityOption[] = (pRes.data ?? []).map((p) => ({
@@ -299,7 +315,8 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         })
         .select()
         .single();
-      if (fErr) throw new DatabaseError("Failed to create Coal Truck", { table: "fleet", cause: fErr });
+      if (fErr)
+        throw new DatabaseError("Failed to create Coal Truck", { table: "fleet", cause: fErr });
       entityId = fleetRec.id;
     } else if (entityType === "vehicle") {
       const fleetCode = d.code || `VEH-${Math.floor(100 + Math.random() * 900)}`;
@@ -316,7 +333,8 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         })
         .select()
         .single();
-      if (fErr) throw new DatabaseError("Failed to create vehicle", { table: "fleet", cause: fErr });
+      if (fErr)
+        throw new DatabaseError("Failed to create vehicle", { table: "fleet", cause: fErr });
       entityId = fleetRec.id;
     } else if (entityType === "visitor") {
       const [fName, ...sNames] = (d.name || "Guest Visitor").split(" ");
@@ -332,7 +350,8 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         })
         .select()
         .single();
-      if (vErr) throw new DatabaseError("Failed to create visitor", { table: "visitors", cause: vErr });
+      if (vErr)
+        throw new DatabaseError("Failed to create visitor", { table: "visitors", cause: vErr });
       entityId = visRec.id;
     } else if (entityType === "equipment") {
       const eqCode = d.code || `EQP-${Math.floor(100 + Math.random() * 900)}`;
@@ -346,7 +365,8 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
         })
         .select()
         .single();
-      if (eqErr) throw new DatabaseError("Failed to create equipment", { table: "equipment", cause: eqErr });
+      if (eqErr)
+        throw new DatabaseError("Failed to create equipment", { table: "equipment", cause: eqErr });
       entityId = eqRec.id;
     }
   }
@@ -389,10 +409,10 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
     entityType === "coal_truck" || entityType === "vehicle"
       ? "vehicle"
       : entityType === "equipment"
-      ? "equipment"
-      : entityType === "visitor"
-      ? "visitor"
-      : "personnel";
+        ? "equipment"
+        : entityType === "visitor"
+          ? "visitor"
+          : "personnel";
 
   // 5. Insert Badge
   const insertPayload: Record<string, unknown> = {

@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Activity, Wifi, WifiOff, RefreshCw, Gauge, Thermometer, Droplets, ArrowDown, Layers } from "lucide-react";
+import {
+  Activity,
+  ArrowDown,
+  Droplets,
+  Gauge,
+  Layers,
+  RefreshCw,
+  Thermometer,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface LiveTelemetryPayload {
   machine_id: string;
@@ -78,7 +88,8 @@ export function RealtimeDrillTelemetryStream() {
               Live Rig Telemetry Stream (Redis SSE)
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
-              Subscribed to channel <code className="font-mono text-[var(--accent-blue)]">drilling:telemetry:stream</code>
+              Subscribed to channel{" "}
+              <code className="font-mono text-[var(--accent-blue)]">drilling:telemetry:stream</code>
             </p>
           </div>
         </div>
@@ -113,7 +124,8 @@ export function RealtimeDrillTelemetryStream() {
             Awaiting real-time telemetry packets...
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
-            Data pushed to <code className="font-mono">/api/telemetry/drilling</code> will instantly stream here.
+            Data pushed to <code className="font-mono">/api/telemetry/drilling</code> will instantly
+            stream here.
           </p>
         </div>
       ) : (
@@ -135,23 +147,48 @@ export function RealtimeDrillTelemetryStream() {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Gauge className="w-3.5 h-3.5 text-accent-blue" />
-                  <span>RPM: <strong className="text-[var(--text-heading)]">{rig.engine_rpm ?? "N/A"}</strong></span>
+                  <span>
+                    RPM:{" "}
+                    <strong className="text-[var(--text-heading)]">
+                      {rig.engine_rpm ?? "N/A"}
+                    </strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Thermometer className="w-3.5 h-3.5 text-accent-amber" />
-                  <span>Temp: <strong className="text-[var(--text-heading)]">{rig.engine_temp ? `${rig.engine_temp}°C` : "N/A"}</strong></span>
+                  <span>
+                    Temp:{" "}
+                    <strong className="text-[var(--text-heading)]">
+                      {rig.engine_temp ? `${rig.engine_temp}°C` : "N/A"}
+                    </strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Droplets className="w-3.5 h-3.5 text-accent-indigo" />
-                  <span>Press: <strong className="text-[var(--text-heading)]">{rig.hydraulic_pressure ? `${rig.hydraulic_pressure} kPa` : "N/A"}</strong></span>
+                  <span>
+                    Press:{" "}
+                    <strong className="text-[var(--text-heading)]">
+                      {rig.hydraulic_pressure ? `${rig.hydraulic_pressure} kPa` : "N/A"}
+                    </strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <ArrowDown className="w-3.5 h-3.5 text-accent-green" />
-                  <span>Bit Depth: <strong className="text-[var(--text-heading)]">{rig.bit_depth ? `${rig.bit_depth}m` : "N/A"}</strong></span>
+                  <span>
+                    Bit Depth:{" "}
+                    <strong className="text-[var(--text-heading)]">
+                      {rig.bit_depth ? `${rig.bit_depth}m` : "N/A"}
+                    </strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Layers className="w-3.5 h-3.5 text-accent-purple" />
-                  <span>Pen Rate: <strong className="text-[var(--text-heading)]">{rig.penetration_rate ? `${rig.penetration_rate}m/h` : "N/A"}</strong></span>
+                  <span>
+                    Pen Rate:{" "}
+                    <strong className="text-[var(--text-heading)]">
+                      {rig.penetration_rate ? `${rig.penetration_rate}m/h` : "N/A"}
+                    </strong>
+                  </span>
                 </div>
               </div>
             </div>

@@ -93,7 +93,7 @@ export const ALERT_THRESHOLDS: Record<
 
 export function classifyDeformationByVelocity(
   velocityMmPerMonth: number,
-  area: DeformationArea,
+  area: DeformationArea
 ): DeformationLevel {
   const t = ALERT_THRESHOLDS[area];
   const abs = Math.abs(velocityMmPerMonth);
@@ -171,7 +171,7 @@ export const LAYER_META: Record<
  */
 export async function fetchSentinel1Scenes(
   bbox: BoundingBox,
-  days: number = 7,
+  days: number = 7
 ): Promise<STACItem[]> {
   const dateEnd = new Date().toISOString();
   const dateStart = new Date(Date.now() - days * 86400000).toISOString();
@@ -197,7 +197,7 @@ export async function fetchSentinel1Scenes(
 export async function fetchSentinel2Scenes(
   bbox: BoundingBox,
   maxCloudCover: number = 30,
-  days: number = 14,
+  days: number = 14
 ): Promise<STACItem[]> {
   const dateEnd = new Date().toISOString();
   const dateStart = new Date(Date.now() - days * 86400000).toISOString();
@@ -276,7 +276,7 @@ function generateHistory(baseVelocity: number, noiseScale: number = 1.5): Veloci
  */
 export function generateDeformationReadings(
   centerLat: number,
-  centerLon: number,
+  centerLon: number
 ): DeformationReading[] {
   const now = new Date().toISOString();
 
@@ -462,7 +462,7 @@ export function mapDeformationRowsToReadings(rows: DeformationDbRow[]): Deformat
   for (const [locationName, group] of groups) {
     // AGENT-TRACE: sort ascending by acquisition_date so history is chronological
     const sorted = [...group].sort(
-      (a, b) => parseDateTimestamp(a.acquisition_date) - parseDateTimestamp(b.acquisition_date),
+      (a, b) => parseDateTimestamp(a.acquisition_date) - parseDateTimestamp(b.acquisition_date)
     );
     const latest = sorted[sorted.length - 1]!;
     const area = inferAreaFromLocation(locationName);

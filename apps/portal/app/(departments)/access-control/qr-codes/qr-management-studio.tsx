@@ -1,33 +1,33 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { Button } from "@repo/ui/components/ui/button";
+import { GlassCard } from "@repo/ui/GlassCard";
 import {
+  Car,
+  CheckCircle2,
+  Layers,
+  Plus,
   QrCode,
   Radio,
   Search,
-  Plus,
+  ShieldCheck,
+  Sparkles,
   Truck,
   Users,
-  Car,
   Wrench,
-  ShieldCheck,
-  CheckCircle2,
-  XCircle,
-  Sparkles,
-  Layers,
   X,
+  XCircle,
 } from "lucide-react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { QRCodeSection } from "../../access-card-actions/card-actions/qr-section";
 import type {
   BadgeInventoryItem,
-  CredentialEntityType,
   CreateBadgePayload,
+  CredentialEntityType,
   EntityOption,
 } from "./actions";
-import { createBadgeCredential, revokeBadgeCredential, getBadgesInventory } from "./actions";
+import { createBadgeCredential, getBadgesInventory, revokeBadgeCredential } from "./actions";
 
 interface QrManagementStudioProps {
   initialBadges: BadgeInventoryItem[];
@@ -50,7 +50,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
   // Form State for Quick Issue
   const [formEntityType, setFormEntityType] = useState<CredentialEntityType>(
-    "employee" as unknown as CredentialEntityType,
+    "employee" as unknown as CredentialEntityType
   );
   const [selectedEntityId, setSelectedEntityId] = useState<string>("");
   const [isCustomEntity, setIsCustomEntity] = useState(false);
@@ -105,7 +105,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       try {
         await revokeBadgeCredential(badgeId);
         setBadges((prev) =>
-          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: "Revoked" } : b)),
+          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: "Revoked" } : b))
         );
         toast.success("Credential revoked successfully");
       } catch {

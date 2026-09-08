@@ -1,10 +1,10 @@
 import {
-  detectContentType,
-  chunkText,
-  mergeSmallChunks,
-  estimateTokens,
-  chunkForEmbedding,
   type Chunk,
+  chunkForEmbedding,
+  chunkText,
+  detectContentType,
+  estimateTokens,
+  mergeSmallChunks,
 } from "./chunking";
 
 // ---- detectContentType -----------------------------------------------

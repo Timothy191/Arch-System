@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET, POST } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET, POST } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),

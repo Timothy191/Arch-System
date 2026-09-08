@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET } from "./route";
 
 // Mock the prom-client metrics generator
 jest.mock("@/lib/observability/metrics", () => ({
@@ -57,7 +58,7 @@ describe("GET /api/metrics/prometheus", () => {
     process.env.METRICS_SCRAPE_TOKEN = "secure-secret-token";
 
     const req = new NextRequest(
-      "http://localhost/api/metrics/prometheus?token=secure-secret-token",
+      "http://localhost/api/metrics/prometheus?token=secure-secret-token"
     );
     const res = await GET(req);
 

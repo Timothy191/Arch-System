@@ -76,7 +76,7 @@ class SyncQueue {
   public async enqueueAction<T = unknown>(
     actionType: string,
     payload: T,
-    departmentId: string,
+    departmentId: string
   ): Promise<string> {
     const idempotencyKey = crypto.randomUUID();
     const action: QueuedAction = {

@@ -1,6 +1,6 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { LoginForm } from "./LoginForm";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
+import { LoginForm } from "./LoginForm";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
@@ -107,7 +107,7 @@ describe("LoginForm", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({ email: "PC-12345", password: "testpass" }),
-        }),
+        })
       );
     });
 
@@ -185,7 +185,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Accessing your workspace\.\.\.$|^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        }),
+        })
       ).toBeDisabled();
     });
 
@@ -196,7 +196,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        }),
+        })
       ).not.toBeDisabled();
     });
   });

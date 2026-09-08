@@ -154,7 +154,7 @@ function parseEnv(): EnvVars {
     Object.entries(raw).map(([key, val]) => [
       key,
       typeof val === "string" && (val.trim() === "" || val.trim() === "...") ? undefined : val,
-    ]),
+    ])
   ) as Record<keyof typeof raw, unknown>;
 
   const result = envSchema.safeParse(cleaned);
@@ -175,7 +175,7 @@ function parseEnv(): EnvVars {
     // Non-critical — log warning and apply defaults
     console.warn(
       "[env] Some environment variables have warnings:",
-      result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+      result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`)
     );
   }
 

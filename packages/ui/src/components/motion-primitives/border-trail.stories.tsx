@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BorderTrail } from "./border-trail";
 import React from "react";
+import { BorderTrail } from "./border-trail";
 
 const meta: Meta<typeof BorderTrail> = {
   title: "Motion/BorderTrail",

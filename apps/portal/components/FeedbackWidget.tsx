@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { analytics } from "@repo/utils";
 import { fetchClient } from "@repo/utils/client";
+import { useState } from "react";
 
 interface FeedbackWidgetProps {
   variant?: "header" | "floating";
@@ -36,7 +36,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
       properties: { type, messageLength: message.length },
     });
 
-    await fetchClient.post("/api/feedback", { type, message }).catch(() => { });
+    await fetchClient.post("/api/feedback", { type, message }).catch(() => {});
 
     setSubmitting(false);
     setMessage("");

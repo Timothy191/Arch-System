@@ -18,9 +18,8 @@ export async function getRedisClient(): Promise<RedisClientType> {
   if (connecting) return connecting;
 
   connecting = (async () => {
-    // @ts-ignore — pnpm hoists two copies of @redis/client types, causing
-    // spurious "Two different types with this name exist" errors. Cast to
-    // any so TS uses structural typing instead of nominal.
+    // cast to any — pnpm may hoist multiple copies of @redis/client types;
+    // structural typing via `any` keeps this compatible across all resolutions.
     const next: RedisClientType = createClient({
       url: REDIS_URL,
       socket: {

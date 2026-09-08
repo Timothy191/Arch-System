@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
-import { SplitWindowLayout } from "./SplitWindowLayout";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useSplitWindow } from "@/hooks/useSplitWindow";
+import { SplitWindowLayout } from "./SplitWindowLayout";
 
 describe("SplitWindowLayout", () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div data-testid="main-content">Main Content</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
     expect(screen.getByTestId("main-content")).toBeInTheDocument();
     expect(screen.getByText("Main Content")).toBeInTheDocument();
@@ -26,14 +26,14 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div>Main</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
 
     await act(async () => {
       window.dispatchEvent(
         new CustomEvent("open-split-view", {
           detail: { service: "whatsapp" },
-        }),
+        })
       );
     });
 
@@ -46,7 +46,7 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div>Main</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
 
     await act(async () => {
@@ -64,7 +64,7 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div>Main</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
 
     await act(async () => {
@@ -82,7 +82,7 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div>Main</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
 
     await act(async () => {
@@ -104,7 +104,7 @@ describe("SplitWindowLayout", () => {
     render(
       <SplitWindowLayout>
         <div>Main</div>
-      </SplitWindowLayout>,
+      </SplitWindowLayout>
     );
 
     await act(async () => {

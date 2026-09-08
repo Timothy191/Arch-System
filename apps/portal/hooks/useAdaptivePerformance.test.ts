@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { useAdaptivePerformance } from "./useAdaptivePerformance";
 import { useFocusMode } from "./useFocusMode";
 
@@ -110,5 +110,4 @@ describe("useAdaptivePerformance", () => {
 
     expect(result.current).toBe(false);
   });
-
 });

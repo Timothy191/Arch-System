@@ -32,7 +32,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
           <ol
             className={cn(
               "flex items-center flex-wrap list-none p-0 m-0",
-              type === "menu" ? "gap-1.5" : "gap-2 text-sm",
+              type === "menu" ? "gap-1.5" : "gap-2 text-sm"
             )}
           >
             {React.Children.map(children, (child, index) => {
@@ -48,7 +48,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
                         "select-none shrink-0",
                         type === "menu"
                           ? "text-neutral-400 dark:text-neutral-600 text-xs mx-0.5"
-                          : "text-neutral-400 dark:text-neutral-500 font-mono text-xs",
+                          : "text-neutral-400 dark:text-neutral-500 font-mono text-xs"
                       )}
                     >
                       {separator}
@@ -61,7 +61,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
         </nav>
       </BreadcrumbContext.Provider>
     );
-  },
+  }
 );
 
 Breadcrumb.displayName = "Breadcrumb";
@@ -84,7 +84,7 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
         active
           ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 border-transparent shadow-xs font-semibold"
           : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200/80 dark:border-neutral-700/60 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/60 hover:text-neutral-900 dark:hover:text-white",
-        disabled && "opacity-40 pointer-events-none cursor-not-allowed border-transparent",
+        disabled && "opacity-40 pointer-events-none cursor-not-allowed border-transparent"
       );
     } else {
       contentClasses = cn(
@@ -92,7 +92,7 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
         active
           ? "text-neutral-900 dark:text-neutral-100 font-semibold cursor-default"
           : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100",
-        disabled && "opacity-40 pointer-events-none cursor-not-allowed",
+        disabled && "opacity-40 pointer-events-none cursor-not-allowed"
       );
     }
 
@@ -120,7 +120,7 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
         {children}
       </span>
     );
-  },
+  }
 );
 
 BreadcrumbItem.displayName = "BreadcrumbItem";

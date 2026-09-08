@@ -96,19 +96,20 @@
  *       500:
  *         description: Internal server error
  */
-import { NextRequest, NextResponse } from "next/server";
+
+import { updateWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
+import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
-import { applyCors } from "@/lib/api/cors";
-import { updateWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 
 export const dynamic = "force-dynamic";
 
 async function handlePutWebhook(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
@@ -187,7 +188,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 async function handleDeleteWebhook(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
@@ -250,7 +251,7 @@ async function handleDeleteWebhook(
 // DELETE /api/webhooks/[id] - Delete a webhook endpoint
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const response = await withRateLimit(request, () => handleDeleteWebhook(request, { params }));
   return applyCors(request, response);

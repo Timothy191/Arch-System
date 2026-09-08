@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import { getRedisClient } from "@repo/redis";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +53,6 @@ export async function GET() {
       latencyMs: Date.now() - startedAt,
       checks,
     },
-    { status: responseStatus },
+    { status: responseStatus }
   );
 }

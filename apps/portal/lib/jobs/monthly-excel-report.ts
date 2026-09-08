@@ -59,5 +59,5 @@ export const monthlyExcelReportFn: InngestFunction.Any = inngest.createFunction(
     });
 
     return { success: true, report: reportMeta };
-  },
+  }
 );

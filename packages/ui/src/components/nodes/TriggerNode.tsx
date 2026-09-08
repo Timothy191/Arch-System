@@ -1,8 +1,8 @@
 "use client";
 
-import React, { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { Play } from "lucide-react";
+import React, { memo } from "react";
 
 // =============================================================================
 // Trigger Node Data Type

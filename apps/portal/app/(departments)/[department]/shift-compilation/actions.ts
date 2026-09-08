@@ -1,28 +1,28 @@
 "use server";
 
+import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
+import {
+  lockAndSignShiftSchema,
+  unifiedShiftReportSchema,
+} from "@repo/contract/schemas/shift-compilation.schema";
+import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
+import type {
+  LockAndSignShiftInput,
+  UnifiedShiftReport,
+} from "@repo/contract/types/shift-compilation.types";
+import { AuthError, ForbiddenError, ValidationError } from "@repo/errors";
+import { serverLogger } from "@repo/logger";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import {
-  unifiedShiftReportSchema,
-  lockAndSignShiftSchema,
-} from "@repo/contract/schemas/shift-compilation.schema";
-import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
-import type {
-  UnifiedShiftReport,
-  LockAndSignShiftInput,
-} from "@repo/contract/types/shift-compilation.types";
-import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
-import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { revalidatePath } from "next/cache";
 import { logAuditEvent } from "@/lib/audit";
-import { serverLogger } from "@repo/logger";
-import { AuthError, ValidationError, ForbiddenError } from "@repo/errors";
 
 // AGENT-TRACE: Server action fetching unified shift compilation from PostgreSQL RPC.
 export async function getUnifiedShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): Promise<{ data?: UnifiedShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -73,7 +73,7 @@ export async function getUnifiedShiftReport(
 export async function getMultiSiteShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -122,7 +122,7 @@ export async function getMultiSiteShiftReport(
 
 // AGENT-TRACE: Server action locking and signing the unified shift closeout with supervisor PIN verification.
 export async function lockAndSignUnifiedShift(
-  payload: LockAndSignShiftInput & { departmentSlug?: string },
+  payload: LockAndSignShiftInput & { departmentSlug?: string }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const validated = lockAndSignShiftSchema.parse(payload);
@@ -200,7 +200,7 @@ export async function lockAndSignUnifiedShift(
         },
         {
           onConflict: "department_id,shift_date,shift_type",
-        },
+        }
       )
       .select("id")
       .single();

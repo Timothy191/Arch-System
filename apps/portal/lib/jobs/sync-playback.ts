@@ -1,9 +1,9 @@
-import { inngest } from "@repo/utils/inngest";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { inngest } from "@repo/utils/inngest";
+import type { InngestFunction } from "inngest";
 import { revalidatePath } from "next/cache";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
-import type { InngestFunction } from "inngest";
 
 export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
   { id: "sync-playback", triggers: [{ event: "sync/playback" }] },
@@ -57,7 +57,6 @@ export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
       }
 
       if (actionType === "ADD_DAILY_LOG") {
-
         const { data: existing } = await supabase
           .from("daily_logs")
           .select("id")
@@ -92,5 +91,5 @@ export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
     } finally {
       recordJobExecution("sync-playback", performance.now() - start, success);
     }
-  },
+  }
 );

@@ -1,6 +1,6 @@
-import { TECH_STACK } from "../lib/data";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import { TECH_STACK } from "../lib/data";
 
 const categoryIcons: Record<string, string> = {
   Frontend: "🎨",

@@ -33,7 +33,7 @@ function buildFormatter(
   format: ClockFormat,
   locale: string,
   hour12: boolean,
-  showSeconds: boolean,
+  showSeconds: boolean
 ): Intl.DateTimeFormat {
   switch (format) {
     case "date":
@@ -101,7 +101,7 @@ export function Clock({
 
   const formatter = React.useMemo(
     () => buildFormatter(format, locale, hour12, showSeconds),
-    [format, locale, hour12, showSeconds],
+    [format, locale, hour12, showSeconds]
   );
 
   const display = time ? formatter.format(time) : "";
@@ -126,7 +126,7 @@ export function Clock({
       className={cn(
         // AGENT-TRACE: reads theme tokens only — no hardcoded colors, preserves light-mode invariant
         "tabular-nums select-none text-[var(--text-secondary)]",
-        className,
+        className
       )}
       suppressHydrationWarning
     >

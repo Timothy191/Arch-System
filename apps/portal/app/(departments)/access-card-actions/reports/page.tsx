@@ -1,6 +1,3 @@
-import { PageHeader } from "@repo/ui/PageHeader";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import {
   Table,
   TableBody,
@@ -9,17 +6,20 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
+import { PageHeader } from "@repo/ui/PageHeader";
 import {
-  FileText,
-  Download,
+  CheckCircle,
   CreditCard,
+  Download,
+  FileText,
+  Printer,
   ShieldCheck,
   ShieldOff,
-  TrendingUp,
-  Printer,
-  XCircle,
   Trash2,
-  CheckCircle,
+  TrendingUp,
+  XCircle,
 } from "lucide-react";
 import { getPrintJobs } from "../actions";
 

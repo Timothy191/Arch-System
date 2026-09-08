@@ -1,5 +1,5 @@
-import { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const AIMetricsDashboard = dynamic(

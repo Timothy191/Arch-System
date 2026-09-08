@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { X, ClipboardCheck, AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ClipboardCheck, ShieldAlert, X } from "lucide-react";
+import { useState, useTransition } from "react";
 import { logTireInspection } from "./actions";
 import type { TireWithInspections } from "./types";
 
@@ -21,7 +21,7 @@ export function TireInspectionModal({
 }: TireInspectionModalProps) {
   const [isPending, startTransition] = useTransition();
   const [inspectionDate, setInspectionDate] = useState(
-    new Date().toISOString().split("T")[0] ?? "",
+    new Date().toISOString().split("T")[0] ?? ""
   );
   const [pressurePsi, setPressurePsi] = useState<number>(100);
   const [treadDepthMm, setTreadDepthMm] = useState<number>(50);

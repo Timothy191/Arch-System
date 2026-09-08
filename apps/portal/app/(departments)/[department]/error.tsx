@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import Link from "next/link";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { isAppError, isNotFoundError, isAuthError } from "@/lib/errors/error-classes";
+import Link from "next/link";
+import { useEffect } from "react";
+import { isAppError, isAuthError, isNotFoundError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 
 interface DepartmentErrorProps {

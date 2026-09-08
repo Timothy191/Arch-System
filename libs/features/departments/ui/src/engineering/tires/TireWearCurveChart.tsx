@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, Title, LineChart, Color } from "@tremor/react";
-import { TrendingDown, ShieldAlert, Activity } from "lucide-react";
+import { Card, type Color, LineChart, Title } from "@tremor/react";
+import { Activity, ShieldAlert, TrendingDown } from "lucide-react";
 import type { WearCurvePoint } from "./types";
 
 interface TireWearCurveChartProps {

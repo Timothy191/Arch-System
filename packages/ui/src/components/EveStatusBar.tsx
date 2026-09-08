@@ -21,7 +21,7 @@ export function EveStatusBar({ className }: EveStatusBarProps) {
       data-testid="eve-status-bar"
       className={cn(
         "mt-3 px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white/60 backdrop-blur-sm shadow-sm select-none",
-        className,
+        className
       )}
     >
       <div className="flex items-center justify-between gap-3">

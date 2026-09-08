@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { normalizeRole, isTokenExpiredError, proxy } from "./proxy";
+
 import { NextRequest } from "next/server";
+import { isTokenExpiredError, normalizeRole, proxy } from "./proxy";
 
 jest.mock("@repo/supabase/middleware", () => ({
   createMiddlewareClient: jest.fn(),
@@ -23,11 +24,7 @@ const { createMiddlewareClient } = jest.requireMock("@repo/supabase/middleware")
 const { cacheGet } = jest.requireMock("@repo/redis/cache");
 
 function buildProxyMock(
-  overrides: {
-    user?: unknown;
-    employee?: unknown;
-    deptData?: unknown;
-  } = {},
+  overrides: { user?: unknown; employee?: unknown; deptData?: unknown } = {}
 ) {
   const user = overrides.user !== undefined ? overrides.user : { id: "auth-1" };
   const employee =

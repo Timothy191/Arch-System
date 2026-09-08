@@ -99,7 +99,7 @@ function extractPrinterName(line: string): string | null {
  * Determine connection type and extract USB vendor/product IDs from a device URI.
  */
 function parseDeviceUri(
-  uri: string,
+  uri: string
 ): Pick<DetectedPrinter, "connectionType" | "vendorId" | "productId" | "devicePath"> {
   if (uri.startsWith("usb://")) {
     // Format: usb://Vendor/Product?serial=... or usb://Vendor:Product/...
@@ -238,7 +238,7 @@ export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry
 
   // Skip header lines — find the column header first, then parse data rows
   const dataStartIndex = lines.findIndex(
-    (l) => l.includes("Rank") && l.includes("Owner") && l.includes("Job") && l.includes("File"),
+    (l) => l.includes("Rank") && l.includes("Owner") && l.includes("Job") && l.includes("File")
   );
   if (dataStartIndex === -1) return [];
 
@@ -324,7 +324,7 @@ export async function scanUsbDevices(): Promise<string[]> {
 export async function submitCupsPrintJob(
   cupsName: string,
   jobName: string,
-  data?: string,
+  data?: string
 ): Promise<{ cupsJobId: number | null }> {
   const cmd = data
     ? `echo ${JSON.stringify(data)} | lp -d "${cupsName}" -t "${jobName}"`

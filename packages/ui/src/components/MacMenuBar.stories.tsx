@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MacMenuBar } from "./MacMenuBar";
+import { Battery, Bell, Wifi } from "lucide-react";
 import React from "react";
-import { Bell, Wifi, Battery } from "lucide-react";
+import { MacMenuBar } from "./MacMenuBar";
 
 const meta: Meta<typeof MacMenuBar> = {
   title: "Components/MacMenuBar",

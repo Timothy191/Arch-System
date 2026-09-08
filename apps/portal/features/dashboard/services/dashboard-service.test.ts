@@ -49,7 +49,7 @@ describe("getMonolithizedDashboard", () => {
     expect(cacheWrap).toHaveBeenCalledWith(
       "dept:dashboard:monolith:dept-drilling",
       expect.any(Function),
-      15,
+      15
     );
   });
 
@@ -96,7 +96,7 @@ describe("getMonolithizedDashboard", () => {
     });
 
     await expect(getMonolithizedDashboard("dept-bad")).rejects.toThrow(
-      "Failed to query dashboard data",
+      "Failed to query dashboard data"
     );
   });
 

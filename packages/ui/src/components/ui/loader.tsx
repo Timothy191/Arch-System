@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
+import type * as React from "react";
 
 export interface LoaderProps extends React.SVGProps<SVGSVGElement> {
   className?: string;

@@ -1,6 +1,9 @@
-import React, { useEffect } from "react";
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import type React from "react";
+import { useEffect } from "react";
 import { cn } from "../../lib/utils";
 
 export interface DrawerProps
@@ -113,7 +116,7 @@ export function Drawer({
             className={cn(
               "fixed z-50 flex flex-col bg-background shadow-xl outline-none border-border",
               getPositionClasses(),
-              className,
+              className
             )}
             {...props}
           >

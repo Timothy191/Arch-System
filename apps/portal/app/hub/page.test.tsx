@@ -167,7 +167,7 @@ describe("HubPage — graceful degradation", () => {
   it("resolves without throwing when getDashboardCounts rejects", async () => {
     const { cachedRSC } = await import("@/lib/server-cache");
     (cachedRSC as jest.Mock).mockImplementationOnce(() =>
-      Promise.reject(new Error("ECONNREFUSED — Supabase down")),
+      Promise.reject(new Error("ECONNREFUSED — Supabase down"))
     );
 
     await expect(HubPage()).resolves.not.toThrow();
@@ -176,7 +176,7 @@ describe("HubPage — graceful degradation", () => {
   it("resolves without throwing when getAccessibleDepartmentNames rejects", async () => {
     const { getAccessibleDepartmentNames } = await import("@/lib/hub-departments");
     (getAccessibleDepartmentNames as jest.Mock).mockRejectedValueOnce(
-      new Error("ECONNREFUSED — Supabase down"),
+      new Error("ECONNREFUSED — Supabase down")
     );
 
     await expect(HubPage()).resolves.not.toThrow();

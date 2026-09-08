@@ -1,17 +1,17 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { BorderBox } from "@repo/ui/BorderBox";
 import { Divider } from "@repo/ui/Divider";
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import Link from "next/link";
+import { GlassCard } from "@repo/ui/GlassCard";
 import {
   AlertTriangle,
+  ArrowRight,
   CircleDot,
-  Wrench,
   ClipboardList,
   TrendingUp,
-  ArrowRight,
+  Wrench,
 } from "lucide-react";
+import Link from "next/link";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 export const dynamic = "force-dynamic";
 

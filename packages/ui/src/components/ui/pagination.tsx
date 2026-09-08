@@ -1,7 +1,7 @@
-import * as React from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "./button";
 import { cn } from "@repo/ui/lib/utils";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import * as React from "react";
+import { Button } from "./button";
 
 export interface PaginationProps {
   className?: string;
@@ -67,7 +67,7 @@ export function Pagination({
     <div
       className={cn(
         "flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white/40 backdrop-blur-md border border-black/[0.08] rounded-xl",
-        className,
+        className
       )}
     >
       {/* Total count status */}
@@ -157,7 +157,7 @@ export function Pagination({
                   "w-8 h-8 rounded-lg font-semibold text-sm",
                   isCurrent
                     ? "bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
-                    : "bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]",
+                    : "bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]"
                 )}
               >
                 {page}

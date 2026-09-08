@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { cn } from "@repo/ui/lib/utils";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -29,7 +29,7 @@ export function StatusFilter({ current }: StatusFilterProps) {
       const qs = params.toString();
       router.push(qs ? `${pathname}?${qs}` : pathname);
     },
-    [pathname, router],
+    [pathname, router]
   );
 
   return (
@@ -41,7 +41,7 @@ export function StatusFilter({ current }: StatusFilterProps) {
         "bg-white/70 backdrop-blur-xl",
         "px-3 py-1.5 text-sm text-[var(--text-primary)]",
         "focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30",
-        "appearance-none cursor-pointer",
+        "appearance-none cursor-pointer"
       )}
     >
       {STATUS_OPTIONS.map((opt) => (

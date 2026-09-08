@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { CloseShiftModal } from "@repo/departments/ui";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { ShiftToggle } from "@repo/ui/ShiftToggle";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import {
+  AlertTriangle,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,
-  CheckCircle,
   XCircle,
-  AlertTriangle,
 } from "lucide-react";
-import { CloseShiftModal } from "@repo/departments/ui";
+import { useEffect, useState } from "react";
 
 interface ShiftCoverageClientProps {
   departmentId: string;

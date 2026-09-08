@@ -1,8 +1,8 @@
 "use client";
 
+import { MoreHorizontal } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { MoreHorizontal } from "lucide-react";
 
 interface DotsMenuContextType {
   close: () => void;
@@ -80,7 +80,7 @@ export function DotsMenu({
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
             "inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
-            disabled && "cursor-not-allowed opacity-50 pointer-events-none",
+            disabled && "cursor-not-allowed opacity-50 pointer-events-none"
           )}
         >
           <MoreHorizontal style={{ width: iconSize, height: iconSize }} />
@@ -91,7 +91,7 @@ export function DotsMenu({
             role="menu"
             className={cn(
               "absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 animate-in fade-in-0 zoom-in-95 duration-100",
-              alignClasses,
+              alignClasses
             )}
           >
             {children}
@@ -138,7 +138,7 @@ export function DotsMenuItem({
       ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
       : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100",
     disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className,
+    className
   );
 
   const content = (

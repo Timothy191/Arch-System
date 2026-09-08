@@ -2,7 +2,7 @@
 
 import type { ShiftBreakdownSummary } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Wrench, CheckCircle2, AlertOctagon, Clock } from "lucide-react";
+import { AlertOctagon, CheckCircle2, Clock, Wrench } from "lucide-react";
 
 interface BreakdownsShiftWidgetProps {
   breakdowns: ShiftBreakdownSummary[];

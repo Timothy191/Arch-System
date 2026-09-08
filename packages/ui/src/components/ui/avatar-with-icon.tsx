@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "../../lib/utils";
 import { Avatar, type AvatarProps } from "./avatar";
 
@@ -39,7 +39,7 @@ export function AvatarWithIcon({
           positionClass,
           iconSizeClass,
           iconBackground &&
-            "bg-white dark:bg-neutral-900 ring-2 ring-white dark:ring-neutral-950 border border-black/10 dark:border-white/15 shadow-sm",
+            "bg-white dark:bg-neutral-900 ring-2 ring-white dark:ring-neutral-950 border border-black/10 dark:border-white/15 shadow-sm"
         )}
         aria-hidden="true"
       >

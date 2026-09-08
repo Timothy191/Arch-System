@@ -32,7 +32,7 @@ export const DataGrid = dynamic(
       </div>
     ),
     ssr: false, // Don't SSR this heavy component
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ export const WorkflowBuilder = dynamic(
       </div>
     ),
     ssr: false,
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────

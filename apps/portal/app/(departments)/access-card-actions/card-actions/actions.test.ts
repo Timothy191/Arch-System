@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { searchPersonnel, getPersonnelDetail, printCardForPersonnel } from "./actions";
+
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
+import { getPersonnelDetail, printCardForPersonnel, searchPersonnel } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -49,7 +50,7 @@ function buildMockClient(
       { data: unknown; error?: null } | { data?: unknown; error: { message: string; code: string } }
     >;
     storageSignedUrl?: string | null;
-  } = {},
+  } = {}
 ) {
   const user = config.user !== undefined ? config.user : { id: "user-1" };
   const tables = config.tables ?? {};
@@ -69,11 +70,7 @@ function buildMockClient(
   }
 
   function chainable(
-    opts: {
-      terminal?: "single" | "maybeSingle" | "limit";
-      data?: unknown;
-      error?: unknown;
-    } = {},
+    opts: { terminal?: "single" | "maybeSingle" | "limit"; data?: unknown; error?: unknown } = {}
   ) {
     const d = opts.data ?? null;
     const e = opts.error ?? null;

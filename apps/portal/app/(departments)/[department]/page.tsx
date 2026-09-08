@@ -1,9 +1,9 @@
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { getCurrentShift } from "@repo/utils";
-import { ErrorBoundary } from "~/components/ErrorBoundary";
 import { Divider } from "@repo/ui/Divider";
+import { getCurrentShift } from "@repo/utils";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import { ErrorBoundary } from "~/components/ErrorBoundary";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
@@ -17,14 +17,14 @@ const ControlRoomActivityFeed = dynamic(
   () => import("@/features/departments").then((m) => m.ControlRoomActivityFeed),
   {
     loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const ControlRoomChecklistWidget = dynamic(
   () => import("@/features/departments").then((m) => m.ControlRoomChecklistWidget),
   {
     loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
@@ -40,7 +40,7 @@ const ShiftCoverageSectionClient = dynamic(
   () => import("./ShiftCoverageSectionClient").then((m) => m.ShiftCoverageSectionClient),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 export default async function DepartmentDashboard({
@@ -54,7 +54,6 @@ export default async function DepartmentDashboard({
   });
 
   if (deptSlug === "production") {
-
     return (
       <Suspense
         fallback={

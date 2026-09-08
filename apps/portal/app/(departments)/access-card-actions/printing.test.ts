@@ -13,9 +13,9 @@ jest.mock("@react-pdf/renderer", () => ({
   }),
 }));
 
-import { submitPrintJob } from "./printing";
-import fs from "fs/promises";
 import { exec } from "child_process";
+import fs from "fs/promises";
+import { submitPrintJob } from "./printing";
 
 jest.mock("fs/promises", () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),

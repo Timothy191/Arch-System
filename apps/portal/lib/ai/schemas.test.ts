@@ -1,4 +1,4 @@
-import { riskAssessmentSchema, complianceResultSchema } from "@repo/contract/schemas/ai.schema";
+import { complianceResultSchema, riskAssessmentSchema } from "@repo/contract/schemas/ai.schema";
 
 describe("riskAssessmentSchema", () => {
   it("accepts valid low-risk assessment", () => {

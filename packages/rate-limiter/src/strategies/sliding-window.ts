@@ -1,11 +1,11 @@
-import { IStore, IStrategy, RateLimitResult } from "../interfaces";
+import type { IStore, IStrategy, RateLimitResult } from "../interfaces";
 
 export class SlidingWindowStrategy implements IStrategy {
   async check(
     key: string,
     limit: number,
     windowMs: number,
-    store: IStore,
+    store: IStore
   ): Promise<RateLimitResult> {
     const now = Date.now();
     const cutoff = now - windowMs;

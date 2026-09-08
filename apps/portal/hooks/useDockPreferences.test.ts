@@ -24,4 +24,3 @@ describe("useDockPreferences", () => {
     expect(useDockPreferences.getState().autoHide).toBe(true);
   });
 });
-

@@ -85,6 +85,7 @@ Object.defineProperty(global, "crypto", {
 
 // Now import the module (singleton will be created with the fake IDB above)
 import type { QueuedAction } from "./sync-queue";
+
 const { syncQueue } = require("./sync-queue");
 
 // Helper to reset the singleton's isProcessing flag between tests
@@ -146,7 +147,7 @@ describe("SyncQueue", () => {
 
       expect((global as any).fetch).toHaveBeenCalledWith(
         "/api/sync/playback",
-        expect.objectContaining({ method: "POST" }),
+        expect.objectContaining({ method: "POST" })
       );
     });
 

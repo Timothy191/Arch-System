@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import { Breadcrumb, BreadcrumbItem } from "@repo/ui/components/ui/breadcrumb";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Breadcrumbs Primitive", () => {
   it("renders with default text type and accessible nav element", () => {
@@ -9,7 +9,7 @@ describe("Geist Breadcrumbs Primitive", () => {
         <BreadcrumbItem>Home</BreadcrumbItem>
         <BreadcrumbItem>Dashboard</BreadcrumbItem>
         <BreadcrumbItem active>Overview</BreadcrumbItem>
-      </Breadcrumb>,
+      </Breadcrumb>
     );
 
     const nav = screen.getByRole("navigation", { name: "Breadcrumbs" });
@@ -27,7 +27,7 @@ describe("Geist Breadcrumbs Primitive", () => {
       <Breadcrumb type="menu">
         <BreadcrumbItem href="/home">Home</BreadcrumbItem>
         <BreadcrumbItem active>Dashboard</BreadcrumbItem>
-      </Breadcrumb>,
+      </Breadcrumb>
     );
 
     const link = screen.getByRole("link", { name: "Home" });
@@ -45,7 +45,7 @@ describe("Geist Breadcrumbs Primitive", () => {
         <BreadcrumbItem>Home</BreadcrumbItem>
         <BreadcrumbItem disabled>Dashboard</BreadcrumbItem>
         <BreadcrumbItem>Overview</BreadcrumbItem>
-      </Breadcrumb>,
+      </Breadcrumb>
     );
 
     const disabledItem = screen.getByText("Dashboard");
@@ -58,7 +58,7 @@ describe("Geist Breadcrumbs Primitive", () => {
       <Breadcrumb separator={<span data-testid="custom-sep">&gt;</span>}>
         <BreadcrumbItem>First</BreadcrumbItem>
         <BreadcrumbItem>Second</BreadcrumbItem>
-      </Breadcrumb>,
+      </Breadcrumb>
     );
 
     const sep = screen.getByTestId("custom-sep");

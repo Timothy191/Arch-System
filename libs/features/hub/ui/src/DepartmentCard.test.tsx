@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { DepartmentCard } from "./DepartmentCard";
 import type { Department } from "@repo/departments/data-access";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { DepartmentCard } from "./DepartmentCard";
 
 // AGENT-TRACE: DepartmentCard uses useRouter() from next/navigation.
 // Must mock it before rendering or the component throws.
@@ -51,7 +51,7 @@ describe("DepartmentCard", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByText("Drilling Operations")).toBeInTheDocument();
     expect(
-      screen.getByText("Core drilling operations telemetry and systems control."),
+      screen.getByText("Core drilling operations telemetry and systems control.")
     ).toBeInTheDocument();
     expect(screen.getByText("1,240 m")).toBeInTheDocument();
     expect(screen.getByText("Daily Logs")).toBeInTheDocument();

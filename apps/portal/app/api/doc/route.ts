@@ -1,6 +1,6 @@
+import { createServerSupabaseClient } from "@repo/supabase/server";
 import { NextResponse } from "next/server";
 import { createSwaggerSpec } from "next-swagger-doc";
-import { createServerSupabaseClient } from "@repo/supabase/server";
 
 /**
  * @swagger

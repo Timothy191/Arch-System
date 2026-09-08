@@ -1,5 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
 import { useCommandScope } from "@repo/shared/hooks";
+import { act, renderHook } from "@testing-library/react";
 
 describe("useCommandScope hook", () => {
   it("should trigger handler on matching shortcut", () => {
@@ -13,7 +13,7 @@ describe("useCommandScope hook", () => {
             handler,
           },
         ],
-      }),
+      })
     );
 
     act(() => {
@@ -41,7 +41,7 @@ describe("useCommandScope hook", () => {
             allowInInputs: false,
           },
         ],
-      }),
+      })
     );
 
     // Mock active element as an input

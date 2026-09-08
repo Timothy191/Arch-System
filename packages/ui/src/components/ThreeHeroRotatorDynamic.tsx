@@ -22,7 +22,7 @@ const ThreeHeroRotatorInner = dynamic(
         </div>
       </div>
     ),
-  },
+  }
 );
 
 export function ThreeHeroRotatorDynamic(props: HeroRotatorProps) {

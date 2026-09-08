@@ -1,13 +1,13 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { registerVisitor } from "../actions";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Users, Plus, Loader2 } from "lucide-react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Loader2, Plus, Users } from "lucide-react";
 import { useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { registerVisitor } from "../actions";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

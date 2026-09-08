@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
-
 import { cn } from "@repo/ui/lib/utils";
+import { type ComponentPropsWithoutRef, useEffect, useRef, useState } from "react";
 
 interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
   /**
@@ -62,7 +61,7 @@ export function Marquee({
       },
       {
         rootMargin: "200px",
-      },
+      }
     );
     observer.observe(target);
     return () => observer.disconnect();
@@ -78,7 +77,7 @@ export function Marquee({
           "flex-row": !vertical,
           "flex-col": vertical,
         },
-        className,
+        className
       )}
     >
       {Array(repeat)

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { useState } from "react";
 import { toast } from "sonner";
 
 async function pushTelemetry(name: string) {
@@ -56,7 +56,7 @@ export function useLogin() {
       }
 
       // Supabase SSR natively sets cookies via Set-Cookie headers in the API response.
-      // We removed the manual client-side cookie assignment (sb-127-auth-token) to prevent 
+      // We removed the manual client-side cookie assignment (sb-127-auth-token) to prevent
       // edge cases where middleware might detect conflicting or outdated tokens.
 
       Sentry.addBreadcrumb({ message: "Auth succeeded", category: "auth", level: "info" });

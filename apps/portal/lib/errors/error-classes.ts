@@ -23,7 +23,7 @@ class AppError extends Error {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   );
   constructor(
     message: string,
@@ -36,7 +36,7 @@ class AppError extends Error {
           cause?: unknown;
           [key: string]: unknown;
         },
-    statusCode?: number,
+    statusCode?: number
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -63,7 +63,7 @@ type AppErrorMeta = {
 
 function mergeExtra(
   base: Record<string, unknown> | undefined,
-  extra: Record<string, unknown>,
+  extra: Record<string, unknown>
 ): Record<string, unknown> {
   const next = { ...base, ...extra };
   for (const key of Object.keys(next)) {
@@ -89,7 +89,7 @@ export class APIError extends AppError {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   );
   constructor(message: string, responseOrOptions?: Response | AppErrorMeta) {
     let statusCode: number | undefined;
@@ -134,7 +134,7 @@ export class ValidationError extends AppError {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   ) {
     const extra = {
       ...(options?.field && { field: options.field }),
@@ -161,7 +161,7 @@ export class AuthError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
       code: "AUTH_ERROR",
@@ -184,7 +184,7 @@ export class DatabaseError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
       code: "DATABASE_ERROR",
@@ -207,7 +207,7 @@ export class NotFoundError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
       code: "NOT_FOUND",
@@ -230,7 +230,7 @@ export class ConflictError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
       code: "CONFLICT",
@@ -253,7 +253,7 @@ export class ForbiddenError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
       code: "FORBIDDEN",

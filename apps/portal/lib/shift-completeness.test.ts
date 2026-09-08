@@ -1,9 +1,9 @@
 // AGENT-TRACE: Unit tests for shift completeness validation and operational integrity rules in control room
 import {
   getShiftCompleteness,
-  validateMachineHours,
   validateBinFactor,
   validateLoadConsistency,
+  validateMachineHours,
   validateShiftDataIntegrity,
 } from "./shift-completeness";
 
@@ -158,7 +158,7 @@ describe("Shift Completeness Validation", () => {
         "dept-1",
         "control-room",
         "2026-06-15",
-        "day",
+        "day"
       );
       expect(res.complete).toBe(true);
       expect(res.totalRequired).toBe(2);
@@ -194,7 +194,7 @@ describe("Shift Completeness Validation", () => {
         "dept-1",
         "control-room",
         "2026-06-15",
-        "day",
+        "day"
       );
       expect(res.complete).toBe(false);
       expect(res.totalRequired).toBe(2);
@@ -230,7 +230,7 @@ describe("Shift Completeness Validation", () => {
         "dept-1",
         "control-room",
         "2026-06-15",
-        "day",
+        "day"
       );
       expect(res.complete).toBe(true);
       expect(res.totalRequired).toBe(1);

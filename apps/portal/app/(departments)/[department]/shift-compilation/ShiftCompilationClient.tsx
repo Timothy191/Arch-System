@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
+import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 import {
-  ShiftCompilationHeader,
-  FleetKpiTable,
-  ProductionSummaryCard,
   BreakdownsShiftWidget,
+  ExportPdfButton,
+  FleetKpiTable,
+  MultiSiteShiftReportClient,
+  ProductionSummaryCard,
+  ShiftCompilationHeader,
   TireAlertsBanner,
   UnifiedShiftCloseoutModal,
-  MultiSiteShiftReportClient,
-  ExportPdfButton,
 } from "@repo/departments/ui";
-import { KPIGrid, KPICard } from "@repo/ui/KPI";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
+import { cn } from "@repo/ui/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { lockAndSignUnifiedShift } from "./actions";
 import { exportSignedShiftReportPdf } from "./pdf-actions";
-import { cn } from "@repo/ui/lib/utils";
 
 interface ShiftCompilationClientProps {
   initialReport: UnifiedShiftReport;
@@ -49,7 +49,7 @@ export function ShiftCompilationClient({
       ? (
           report.fleet_performance.reduce(
             (acc, curr) => acc + curr.mechanical_availability_pct,
-            0,
+            0
           ) / activeMachines
         ).toFixed(1)
       : "100.0";
@@ -89,7 +89,7 @@ export function ShiftCompilationClient({
               "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
               activeTab === "department"
                 ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                : "text-arch-text-tertiary hover:text-arch-text-secondary"
             )}
           >
             Department Breakdown
@@ -101,7 +101,7 @@ export function ShiftCompilationClient({
               "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
               activeTab === "multisite"
                 ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                : "text-arch-text-tertiary hover:text-arch-text-secondary"
             )}
           >
             Multi-Site Operational Report (BKF / EXT / PLANT)

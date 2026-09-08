@@ -79,7 +79,7 @@ describe("generateReportFn", () => {
         total_shifts: 2,
         total_coal_tonnes: 150,
         total_waste_tonnes: 75,
-      }),
+      })
     );
   });
 
@@ -89,7 +89,7 @@ describe("generateReportFn", () => {
 
     const result = await handler(makeEvent());
     expect(result.report).toEqual(
-      expect.objectContaining({ total_shifts: 0, total_coal_tonnes: 0, total_waste_tonnes: 0 }),
+      expect.objectContaining({ total_shifts: 0, total_coal_tonnes: 0, total_waste_tonnes: 0 })
     );
   });
 
@@ -99,7 +99,7 @@ describe("generateReportFn", () => {
     await expect(handler(makeEvent())).rejects.toThrow("insert failed");
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "generate_report_job", departmentId: "dept-1" }),
+      expect.objectContaining({ context: "generate_report_job", departmentId: "dept-1" })
     );
   });
 });

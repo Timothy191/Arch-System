@@ -1,25 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { Button } from "@repo/ui/components/ui/button";
+import { GlassCard } from "@repo/ui/GlassCard";
 import {
-  Printer,
-  Search,
   Clock,
+  Cpu,
+  Download,
+  FileCheck2,
+  Layers,
+  Printer,
   QrCode,
   RefreshCw,
-  FileCheck2,
-  Stethoscope,
-  Download,
+  Search,
   ShieldCheck,
-  Cpu,
-  Layers,
+  Stethoscope,
 } from "lucide-react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { QRCodeSection } from "../../access-card-actions/card-actions/qr-section";
-import type { Neo300Printer, EmployeeCardProfile, CardPrintJob } from "./actions";
-import { sendNeo300PrintJob, cancelNeo300Job, getEmployeeCardProfiles } from "./actions";
+import type { CardPrintJob, EmployeeCardProfile, Neo300Printer } from "./actions";
+import { cancelNeo300Job, getEmployeeCardProfiles, sendNeo300PrintJob } from "./actions";
 
 interface Neo300PrintStudioProps {
   initialPrinter: Neo300Printer;
@@ -35,7 +35,7 @@ export function Neo300PrintStudio({
   const [printer] = useState<Neo300Printer>(initialPrinter);
   const [employees, setEmployees] = useState<EmployeeCardProfile[]>(initialEmployees);
   const [selectedEmp, setSelectedEmp] = useState<EmployeeCardProfile | null>(
-    initialEmployees[0] ?? null,
+    initialEmployees[0] ?? null
   );
   const [jobs, setJobs] = useState<CardPrintJob[]>(initialJobs);
   const [search, setSearch] = useState("");
@@ -59,7 +59,7 @@ export function Neo300PrintStudio({
         const result = await sendNeo300PrintJob(employeeId);
         if (result.success && result.job) {
           toast.success(
-            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`,
+            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`
           );
           setJobs((prev) => [result.job as CardPrintJob, ...prev]);
         }

@@ -11,7 +11,7 @@ const metrics: TelemetryMetric[] = [];
 export function trackClientMetric(
   name: string,
   fn: () => void | Promise<void>,
-  attributes?: Record<string, string | number | boolean>,
+  attributes?: Record<string, string | number | boolean>
 ): void | Promise<void> {
   const startTime = performance.now();
   const result = fn();

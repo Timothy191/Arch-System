@@ -1,7 +1,7 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { getCurrentShift } from "@repo/utils";
 import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
-import { getUnifiedShiftReport, getMultiSiteShiftReport } from "./actions";
+import { getCurrentShift } from "@repo/utils";
+import { getDepartmentContext } from "~/lib/dept-context";
+import { getMultiSiteShiftReport, getUnifiedShiftReport } from "./actions";
 import { ShiftCompilationClient } from "./ShiftCompilationClient";
 
 export const dynamic = "force-dynamic";

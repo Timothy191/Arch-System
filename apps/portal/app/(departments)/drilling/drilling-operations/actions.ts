@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { drillOperationSchema } from "@repo/contract/schemas/drill.schema";
 import type { DrillOperationInput } from "@repo/contract/schemas/drill.schema";
+import { drillOperationSchema } from "@repo/contract/schemas/drill.schema";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { revalidatePath } from "next/cache";
 
 interface ActionResult<T = unknown> {
   success: boolean;
@@ -13,7 +13,7 @@ interface ActionResult<T = unknown> {
 
 // AGENT-TRACE: Server Action to validate and upsert drill operations daily shift log
 export async function upsertDrillOperationAction(
-  rawInput: DrillOperationInput,
+  rawInput: DrillOperationInput
 ): Promise<ActionResult> {
   try {
     const parseResult = drillOperationSchema.safeParse(rawInput);
@@ -71,7 +71,8 @@ export async function upsertDrillOperationAction(
 
     return { success: true, data };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unexpected server error during drill operation upsert";
+    const message =
+      err instanceof Error ? err.message : "Unexpected server error during drill operation upsert";
     return {
       success: false,
       error: message,

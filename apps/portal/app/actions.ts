@@ -1,11 +1,11 @@
 "use server";
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { redirect } from "next/navigation";
-import { revalidateTag } from "next/cache";
-import { inngest, aiGenerateEmbeddingEvent } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
 import { monthlyReportInputSchema } from "@repo/contract/schemas/form.schema";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { aiGenerateEmbeddingEvent, inngest } from "@repo/utils/inngest";
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
+import { logError } from "@/lib/errors/error-logger";
 
 export async function logout() {
   const supabase = await createServerSupabaseClient();

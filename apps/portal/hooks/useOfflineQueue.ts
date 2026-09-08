@@ -1,6 +1,6 @@
+import { toast } from "sonner";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { toast } from "sonner";
 
 export interface QueuedRequest {
   id: string;
@@ -95,8 +95,8 @@ export const useOfflineQueue = create<OfflineQueueState>()(
     }),
     {
       name: "arch-offline-queue",
-    },
-  ),
+    }
+  )
 );
 
 // We need a way to initialize the listeners

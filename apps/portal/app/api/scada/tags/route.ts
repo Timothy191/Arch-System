@@ -32,8 +32,8 @@
  *         description: Failed to read SCADA tags
  */
 
-import { NextResponse } from "next/server";
 import { getRedisClient } from "@repo/redis";
+import { NextResponse } from "next/server";
 import { applyCors } from "@/lib/api/cors";
 
 export interface FuxaWebApiTag {
@@ -78,7 +78,7 @@ export async function GET(req: Request) {
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to read SCADA tags" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

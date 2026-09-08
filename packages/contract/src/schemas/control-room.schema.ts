@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, dateSchema, nonEmptyString } from "./common.schema";
+import { dateSchema, nonEmptyString, uuidSchema } from "./common.schema";
 
 export const shiftCompletenessSchema = z.object({
   deptId: uuidSchema,

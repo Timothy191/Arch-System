@@ -1,19 +1,13 @@
 {
   "name": "portal",
-  "tags": [
-    "scope:app",
-    "scope:app:portal"
-  ],
+  "tags": ["scope:app", "scope:app:portal"],
   "targets": {
     "sync-assets": {
       "executor": "nx:run-commands",
       "options": {
         "command": "node scripts/sync-assets-smart.cjs"
       },
-      "inputs": [
-        "{projectRoot}/assets/**/*",
-        "{workspaceRoot}/scripts/sync-assets-smart.cjs"
-      ],
+      "inputs": ["{projectRoot}/assets/**/*", "{workspaceRoot}/scripts/sync-assets-smart.cjs"],
       "outputs": [
         "{projectRoot}/public/background",
         "{projectRoot}/public/error-pages",

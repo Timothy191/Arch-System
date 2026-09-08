@@ -1,6 +1,6 @@
+import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from "./invalidation";
 import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from "./stats";
-import { cacheInvalidateTags, cacheInvalidatePrefixes, indexCacheKeyByTags } from "./invalidation";
-import { XFetchWrapper, shouldEarlyExpire } from "./xfetch";
+import { shouldEarlyExpire, type XFetchWrapper } from "./xfetch";
 
 // ------------------------------------------------------------------
 // L1 In-Memory Cache with TTL + LRU eviction
@@ -121,7 +121,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
  * Returns { value, source } where source is "l1", "l2", or null.
  */
 export async function cacheGetWithStats<T>(
-  key: string,
+  key: string
 ): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
   const start = performance.now();
 
@@ -200,7 +200,7 @@ export async function cacheSetWithTags<T>(
   key: string,
   value: T,
   ttlSeconds: number,
-  tags?: string[],
+  tags?: string[]
 ): Promise<void> {
   await cacheSet(key, value, ttlSeconds);
   if (tags && tags.length > 0) {
@@ -218,7 +218,7 @@ const activeFetches = new Map<string, Promise<any>>();
 export async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
-  ttlSeconds: number,
+  ttlSeconds: number
 ): Promise<T> {
   const rawCached = await cacheGetRaw<T>(key);
 
@@ -308,7 +308,7 @@ export async function cacheDeletePattern(pattern: string): Promise<void> {
   await cacheInvalidatePrefixes([prefix]);
 }
 
-export { cacheInvalidateTags, cacheInvalidatePrefixes };
+export { cacheInvalidatePrefixes, cacheInvalidateTags };
 
 /**
  * Evict keys from the L1 in-memory cache by prefix.

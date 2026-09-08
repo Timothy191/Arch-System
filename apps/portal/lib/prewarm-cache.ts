@@ -1,8 +1,8 @@
 "use server";
 
+import { DEPARTMENTS } from "@repo/departments/data-access";
 import { cacheGet, cacheSet } from "@repo/redis/cache";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { DEPARTMENTS } from "@repo/departments/data-access";
 
 /**
  * Pre-warm department UUID cache for all departments.
@@ -33,6 +33,6 @@ export async function prewarmDepartmentCache() {
           // Silently fail - cache will be populated on-demand
         }
       }
-    }),
+    })
   );
 }

@@ -12,7 +12,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 async function main() {
   console.log("Seeding 20 days of realistic data...");
   // 1. Fetch or create a department
-  let { data: depts, error: deptError } = await supabase.from("departments").select("id, name");
+  const { data: depts, error: deptError } = await supabase.from("departments").select("id, name");
   if (deptError) console.error("Error fetching depts:", deptError);
 
   let deptId = depts?.find((d) => d.name === "drilling")?.id;
@@ -99,7 +99,7 @@ async function main() {
     const dateStr = date.toISOString().split("T")[0];
 
     // Add daily log so foreign keys pass
-    let { data: dailyLog, error: dailyLogErr } = await supabase
+    const { data: dailyLog, error: dailyLogErr } = await supabase
       .from("daily_logs")
       .upsert(
         {
@@ -107,7 +107,7 @@ async function main() {
           log_date: dateStr,
           shift: "day",
         },
-        { onConflict: "department_id, log_date, shift" },
+        { onConflict: "department_id, log_date, shift" }
       )
       .select()
       .single();
@@ -172,7 +172,7 @@ async function main() {
   });
 
   // Make sure the machine has operations today
-  let { data: todayLog, error: todayLogErr } = await supabase
+  const { data: todayLog, error: todayLogErr } = await supabase
     .from("daily_logs")
     .upsert(
       {
@@ -180,7 +180,7 @@ async function main() {
         log_date: todayStr,
         shift: "day",
       },
-      { onConflict: "department_id, log_date, shift" },
+      { onConflict: "department_id, log_date, shift" }
     )
     .select()
     .single();

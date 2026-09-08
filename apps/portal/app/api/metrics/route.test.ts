@@ -1,12 +1,13 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import {
-  recordJobExecution,
-  recordDbQuery,
   clearObservabilityMetrics,
+  recordDbQuery,
+  recordJobExecution,
 } from "@/lib/observability/simple-metrics";
+import { GET } from "./route";
 
 // Mock @repo/redis stats
 jest.mock("@repo/redis", () => ({
@@ -55,11 +56,11 @@ describe("GET /api/metrics", () => {
 
     // 3. Verify DB query metrics
     expect(text).toContain(
-      'portal_db_query_executions_total{table="machines",operation="SELECT"} 2',
+      'portal_db_query_executions_total{table="machines",operation="SELECT"} 2'
     );
     expect(text).toContain('portal_db_query_errors_total{table="machines",operation="SELECT"} 1');
     expect(text).toContain(
-      'portal_db_query_duration_ms_total{table="machines",operation="SELECT"} 125.2',
+      'portal_db_query_duration_ms_total{table="machines",operation="SELECT"} 125.2'
     );
   });
 });

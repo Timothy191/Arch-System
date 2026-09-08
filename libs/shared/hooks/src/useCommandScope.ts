@@ -39,7 +39,7 @@ function matchesShortcut(event: KeyboardEvent, shortcut: string): boolean {
 
   // Filter out modifier names to isolate the target key
   const targetKeyParts = parts.filter(
-    (p) => !["ctrl", "control", "cmd", "meta", "alt", "shift"].includes(p),
+    (p) => !["ctrl", "control", "cmd", "meta", "alt", "shift"].includes(p)
   );
 
   const targetKey = targetKeyParts[0];

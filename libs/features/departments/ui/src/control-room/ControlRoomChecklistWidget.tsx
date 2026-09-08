@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import {
-  CheckCircle2,
-  Circle,
-  Clock,
-  ShieldCheck,
-  Activity,
-  Radio,
-  Zap,
-  AlertTriangle,
-  Send,
-  FileCheck,
-  CalendarCheck,
-  CheckSquare,
-  AlertOctagon,
-} from "lucide-react";
 import type {
   ControlRoomChecklistItem,
   ControlRoomShiftReportInput,
 } from "@repo/contract/types/control-room.types";
+import { GlassCard } from "@repo/ui/GlassCard";
+import {
+  Activity,
+  AlertOctagon,
+  AlertTriangle,
+  CalendarCheck,
+  CheckCircle2,
+  CheckSquare,
+  Circle,
+  Clock,
+  FileCheck,
+  Radio,
+  Send,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 // AGENT-TRACE: Structural subset of the persisted shift report (ShiftReportRecord
 // in apps/portal/lib/control-room-shift-report.ts). Kept local so the lib package
@@ -273,14 +273,14 @@ export function ControlRoomChecklistWidget({
   // AGENT-TRACE: Restore persisted checklist state on mount so a partially
   // completed closeout survives reloads. Falls back to the default SOP list.
   const [items, setItems] = useState<ControlRoomChecklistItem[]>(
-    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS,
+    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS
   );
   const [operatorName, setOperatorName] = useState(
-    initialReport?.operatorName ?? initialOperatorName,
+    initialReport?.operatorName ?? initialOperatorName
   );
   const [summaryNotes, setSummaryNotes] = useState(initialReport?.summaryNotes ?? "");
   const [supervisorSignature, setSupervisorSignature] = useState(
-    initialReport?.supervisorSignature ?? "",
+    initialReport?.supervisorSignature ?? ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(!!initialReport);
@@ -289,7 +289,7 @@ export function ControlRoomChecklistWidget({
   // Live KPI metrics — editable, defaults matching wiki SLAs, restored from an
   // existing report so a revision starts from the last submitted values.
   const [alarmResponseSec, setAlarmResponseSec] = useState(
-    initialReport?.alarmResponseAvgSeconds ?? 42,
+    initialReport?.alarmResponseAvgSeconds ?? 42
   );
   const [incidentAckSec, setIncidentAckSec] = useState(initialReport?.incidentAckAvgSeconds ?? 18);
   const [systemUptime, setSystemUptime] = useState(initialReport?.systemUptimePercent ?? 99.98);
@@ -408,7 +408,7 @@ export function ControlRoomChecklistWidget({
           };
         }
         return item;
-      }),
+      })
     );
   };
 
@@ -477,7 +477,7 @@ export function ControlRoomChecklistWidget({
       setSubmitted(true);
     } catch (err) {
       setValidationError(
-        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry.",
+        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry."
       );
     } finally {
       setIsSubmitting(false);
@@ -538,7 +538,7 @@ export function ControlRoomChecklistWidget({
               setItems(
                 initialReport?.checklistItems?.length
                   ? initialReport.checklistItems
-                  : DEFAULT_CHECKLIST_ITEMS,
+                  : DEFAULT_CHECKLIST_ITEMS
               );
               setOperatorName(initialReport?.operatorName ?? initialOperatorName);
               setSummaryNotes(initialReport?.summaryNotes ?? "");
@@ -631,7 +631,7 @@ export function ControlRoomChecklistWidget({
               const Icon = cat.icon;
               const isActive = activeCategory === cat.key;
               const catCompleted = items.filter(
-                (i) => i.category === cat.key && i.completed,
+                (i) => i.category === cat.key && i.completed
               ).length;
               const catTotal = items.filter((i) => i.category === cat.key).length;
 

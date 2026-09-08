@@ -1,5 +1,3 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { AvatarWithIcon, Badge, Breadcrumb, BreadcrumbItem } from "@repo/ui";
 import { Pagination } from "@repo/ui/components/ui/pagination";
 import {
@@ -10,7 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock } from "lucide-react";
+import { getDepartmentContext } from "~/lib/dept-context";
 import { getAccessLogsForDepartment } from "../actions";
 
 interface AccessLogWithBadge {

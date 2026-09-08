@@ -1,13 +1,13 @@
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
-import { LiveRegion, Announcer } from "../LiveRegion";
+import { Announcer, LiveRegion } from "../LiveRegion";
 
 describe("LiveRegion", () => {
   test("renders children with correct ARIA attributes", () => {
     render(
       <LiveRegion live="polite" atomic>
         <span>Test content</span>
-      </LiveRegion>,
+      </LiveRegion>
     );
 
     const region = screen.getByText("Test content").parentElement;
@@ -20,7 +20,7 @@ describe("LiveRegion", () => {
     render(
       <LiveRegion live="assertive">
         <span>Important message</span>
-      </LiveRegion>,
+      </LiveRegion>
     );
 
     const region = screen.getByText("Important message").parentElement;

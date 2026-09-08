@@ -47,16 +47,16 @@
  *         description: Server ingestion error
  */
 
-import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { getRedisClient } from "@repo/redis";
-import { withValidation } from "@repo/contract/validation";
 import {
-  drillTelemetryIngestSchema,
   type DrillTelemetryIngestInput,
+  drillTelemetryIngestSchema,
 } from "@repo/contract/schemas/drill.schema";
-import { applyCors } from "@/lib/api/cors";
+import { withValidation } from "@repo/contract/validation";
+import { getRedisClient } from "@repo/redis";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { NextResponse } from "next/server";
 import { withBodyLimit } from "@/lib/api/body-limit";
+import { applyCors } from "@/lib/api/cors";
 
 // AGENT-TRACE: Ingestion route for Drill Rig IoT telemetry
 // Updates machine_telemetry table, updates Redis cache, and syncs with SCADA tag system
@@ -128,7 +128,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       await redis.set(
         `drilling:telemetry:last:${machine_id}`,
         JSON.stringify(telemetryState),
-        { EX: 86400 }, // 24 hours TTL
+        { EX: 86400 } // 24 hours TTL
       );
       await redis.publish("drilling:telemetry:stream", JSON.stringify(telemetryState));
     } catch (redisErr) {
@@ -175,7 +175,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to process drill telemetry" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 });
@@ -187,6 +187,6 @@ export async function POST(req: Request) {
       const response = await handleIngest(req, { params: Promise.resolve({}) });
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 1048576 }, // 1MB payload limit
+    { maxSize: 1048576 } // 1MB payload limit
   );
 }

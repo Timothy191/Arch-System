@@ -1,7 +1,7 @@
 "use client";
 
+import { Calendar, CheckCircle, Clock, Lock, Moon, Printer, Sun } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Calendar, Sun, Moon, Lock, CheckCircle, Clock, Printer } from "lucide-react";
 
 interface ShiftCompilationHeaderProps {
   departmentSlug: string;

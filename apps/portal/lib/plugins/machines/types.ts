@@ -1,5 +1,5 @@
-import { ActorRefFrom } from "xstate";
-import { ArchPlugin } from "../types";
+import type { ActorRefFrom } from "xstate";
+import type { ArchPlugin } from "../types";
 
 // =============================================================================
 // Plugin Machine Types

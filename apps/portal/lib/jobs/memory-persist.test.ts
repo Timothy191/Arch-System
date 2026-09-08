@@ -72,7 +72,7 @@ describe("memoryPersistFn", () => {
     expect(result).toEqual({ success: true, recovered: false });
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "memory_persist_job" }),
+      expect.objectContaining({ context: "memory_persist_job" })
     );
   });
 
@@ -82,7 +82,7 @@ describe("memoryPersistFn", () => {
     await expect(
       handler({
         event: { data: { sessionId: "s1", userId: "u1", assistantResponseStored: false } },
-      }),
+      })
     ).rejects.toThrow("Failed to query session memories");
     expect(mockLogError).toHaveBeenCalled();
   });

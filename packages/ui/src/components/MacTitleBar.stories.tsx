@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MacTitleBar } from "./MacTitleBar";
+import { MoreHorizontal, Search } from "lucide-react";
 import React from "react";
-import { Search, MoreHorizontal } from "lucide-react";
+import { MacTitleBar } from "./MacTitleBar";
 
 const meta: Meta<typeof MacTitleBar> = {
   title: "Components/MacTitleBar",

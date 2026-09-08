@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { ClipboardPlus, ClipboardList, Clock, CalendarDays } from "lucide-react";
 import { inngest, machineBreakdownEvent } from "@repo/utils/inngest";
+import { CalendarDays, ClipboardList, ClipboardPlus, Clock } from "lucide-react";
+import { useState, useTransition } from "react";
 import { createBreakdown } from "./actions";
 import type { Breakdown, Machine } from "./types";
 
@@ -58,16 +58,18 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         });
 
         // Dispatch Inngest event for breakdown alert
-        inngest.send({
-          name: machineBreakdownEvent,
-          data: {
-            department_id: departmentId,
-            fleet_id: selectedMachine.serial_number || selectedMachine.id,
-            machine_type: selectedMachine.machine_type,
-            reason,
-            status: "active",
-          },
-        }).catch(() => {});
+        inngest
+          .send({
+            name: machineBreakdownEvent,
+            data: {
+              department_id: departmentId,
+              fleet_id: selectedMachine.serial_number || selectedMachine.id,
+              machine_type: selectedMachine.machine_type,
+              reason,
+              status: "active",
+            },
+          })
+          .catch(() => {});
 
         setSelectedMachineId("");
         setDateIn(new Date().toISOString().slice(0, 10));

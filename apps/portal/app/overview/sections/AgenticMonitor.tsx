@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import {
   Activity,
-  Coins,
-  Clock,
-  Bug,
-  Zap,
-  Terminal,
-  RefreshCw,
   BarChart3,
   Bot,
+  Bug,
+  Clock,
+  Coins,
+  RefreshCw,
+  Terminal,
+  Zap,
 } from "lucide-react";
+import { useState } from "react";
 
 interface AgentTaskLog {
   id: string;
@@ -196,11 +196,12 @@ const PROJECT_MILESTONES: MilestoneSpend[] = [
   {
     period: "Week 11 (Current)",
     dateRange: "Aug 25 – Sep 2, 2026",
-    milestone: "Pre-Flight Research Gate, CMS Decommissioning, React Flow Overview Consolidation & 8-Agent Hierarchy",
+    milestone:
+      "Pre-Flight Research Gate, CMS Decommissioning, React Flow Overview Consolidation & 8-Agent Hierarchy",
     tokensUsed: "1.92M",
     tokensCached: "18.40M",
-    usdCost: 24.80,
-    zarCost: 458.80,
+    usdCost: 24.8,
+    zarCost: 458.8,
     zarSaved: 3820.5,
     commits: 18,
     bugsFixed: 15,

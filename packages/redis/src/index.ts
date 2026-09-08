@@ -1,22 +1,22 @@
-export { getRedisClient, createRedisSubscriber, closeRedis } from "./client";
 export {
+  cacheDelete,
+  cacheDeletePattern,
+  cacheEvictL1ByPrefix,
   cacheGet,
   cacheGetWithStats,
+  cacheInvalidatePrefixes,
+  cacheInvalidateTags,
   cacheSet,
   cacheSetWithTags,
   cacheWrap,
-  cacheDelete,
-  cacheDeletePattern,
-  cacheInvalidateTags,
-  cacheInvalidatePrefixes,
-  cacheEvictL1ByPrefix,
   clearMemoryCache,
 } from "./cache";
-export { CacheCategory, CACHE_TTL_REGISTRY, buildCacheKey, type CacheTtlConfig } from "./registry";
+export { closeRedis, createRedisSubscriber, getRedisClient } from "./client";
+export { buildCacheKey, CACHE_TTL_REGISTRY, CacheCategory, type CacheTtlConfig } from "./registry";
 export {
+  getCacheStats,
   recordCacheHit,
   recordCacheMiss,
   recordRedisError,
-  getCacheStats,
   resetCacheStats,
 } from "./stats";

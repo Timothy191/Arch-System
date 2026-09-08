@@ -64,7 +64,7 @@ function extractOpenAPIEndpoints() {
   const endpoints = [];
   for (const [path, methods] of Object.entries(spec.paths)) {
     const operations = Object.keys(methods).filter(
-      (m) => m !== "parameters" && m !== "$ref" && m !== "servers",
+      (m) => m !== "parameters" && m !== "$ref" && m !== "servers"
     );
     for (const operation of operations) {
       endpoints.push({

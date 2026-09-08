@@ -1,4 +1,4 @@
-import { IStore, IStrategy, RateLimitResult } from "../interfaces";
+import type { IStore, IStrategy, RateLimitResult } from "../interfaces";
 
 interface TokenBucketData {
   tokens: number;
@@ -61,7 +61,7 @@ export class TokenBucketStrategy implements IStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: IStore,
+    store: IStore
   ): Promise<RateLimitResult> {
     const now = Date.now();
 
@@ -71,7 +71,7 @@ export class TokenBucketStrategy implements IStrategy {
         const resultString = (await store.eval(
           LUA_TOKEN_BUCKET,
           [key],
-          [limit.toString(), windowMs.toString(), now.toString(), "1"],
+          [limit.toString(), windowMs.toString(), now.toString(), "1"]
         )) as string;
 
         const res = JSON.parse(resultString);

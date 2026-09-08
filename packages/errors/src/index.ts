@@ -14,7 +14,7 @@ export class AppError extends Error {
       context?: Record<string, unknown>;
       cause?: Error;
       [key: string]: any;
-    },
+    }
   );
   constructor(
     message: string,
@@ -27,7 +27,7 @@ export class AppError extends Error {
           cause?: Error;
           [key: string]: any;
         },
-    statusCode?: number,
+    statusCode?: number
   ) {
     super(message);
     this.name = "AppError";
@@ -61,7 +61,7 @@ export class ValidationError extends AppError {
       context?: Record<string, unknown>;
       cause?: Error;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "VALIDATION_ERROR",
@@ -93,7 +93,7 @@ export class AuthError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "AUTH_ERROR",
@@ -121,7 +121,7 @@ export class ForbiddenError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "FORBIDDEN_ERROR",
@@ -149,7 +149,7 @@ export class NotFoundError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "NOT_FOUND",
@@ -177,7 +177,7 @@ export class ConflictError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "CONFLICT_ERROR",
@@ -209,7 +209,7 @@ export class APIError extends AppError {
       context?: Record<string, unknown>;
       cause?: Error;
       [key: string]: any;
-    },
+    }
   );
   constructor(
     message: string,
@@ -220,7 +220,7 @@ export class APIError extends AppError {
           context?: Record<string, unknown>;
           cause?: Error;
           [key: string]: any;
-        },
+        }
   ) {
     let statusCode: number | undefined;
     let response: Response | undefined;
@@ -261,7 +261,7 @@ export class DatabaseError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "DATABASE_ERROR",
@@ -289,7 +289,7 @@ export class RateLimitError extends AppError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     super(message, {
       code: "RATE_LIMIT_ERROR",
@@ -320,7 +320,7 @@ export class FetchTimeoutError extends APIError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     const { timeoutMs, url, method, cause, context, ...extra } = options || {};
     super(message, {
@@ -348,7 +348,7 @@ export class NetworkError extends APIError {
       cause?: Error;
       context?: Record<string, unknown>;
       [key: string]: any;
-    },
+    }
   ) {
     const { url, method, cause, context, ...extra } = options || {};
     super(message, {

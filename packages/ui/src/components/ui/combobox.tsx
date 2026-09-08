@@ -1,8 +1,8 @@
 "use client";
 
+import { Check, ChevronDown, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { ChevronDown, X, Check } from "lucide-react";
 
 interface OptionRegistration {
   value: string;
@@ -94,7 +94,7 @@ export function Combobox({
       }
       setIsOpen(false);
     },
-    [isControlled, onChange],
+    [isControlled, onChange]
   );
 
   const registerOption = React.useCallback((opt: OptionRegistration) => {
@@ -203,7 +203,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
     React.useImperativeHandle(ref, () => inputRef.current!);
 
     const filteredOptions = options.filter(
-      (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase())),
+      (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase()))
     );
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -218,14 +218,14 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          filteredOptions.length === 0 ? 0 : (prev + 1) % filteredOptions.length,
+          filteredOptions.length === 0 ? 0 : (prev + 1) % filteredOptions.length
         );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setHighlightedIndex((prev) =>
           filteredOptions.length === 0
             ? 0
-            : (prev - 1 + filteredOptions.length) % filteredOptions.length,
+            : (prev - 1 + filteredOptions.length) % filteredOptions.length
         );
       } else if (e.key === "Enter") {
         if (isOpen && filteredOptions[highlightedIndex]) {
@@ -277,7 +277,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
               ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
               : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-neutral-900 dark:focus:border-neutral-100",
             disabled && "cursor-not-allowed opacity-50 bg-neutral-100 dark:bg-neutral-800/50",
-            className,
+            className
           )}
           {...props}
         />
@@ -296,13 +296,13 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           <ChevronDown
             className={cn(
               "h-4 w-4 transition-transform duration-150 pointer-events-none",
-              isOpen && "rotate-180",
+              isOpen && "rotate-180"
             )}
           />
         </div>
       </div>
     );
-  },
+  }
 );
 
 ComboboxInput.displayName = "ComboboxInput";
@@ -326,7 +326,7 @@ export function ComboboxList({
   if (!isOpen) return null;
 
   const filtered = options.filter(
-    (o) => query === "" || o.label.toLowerCase().includes(query.toLowerCase()),
+    (o) => query === "" || o.label.toLowerCase().includes(query.toLowerCase())
   );
 
   const customStyle: React.CSSProperties = {
@@ -342,7 +342,7 @@ export function ComboboxList({
       style={customStyle}
       className={cn(
         "absolute left-0 top-[calc(100%+4px)] z-50 min-w-full max-h-60 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-200 bg-white p-1 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 animate-in fade-in-0 duration-100",
-        className,
+        className
       )}
       {...props}
     >
@@ -405,7 +405,7 @@ export function ComboboxOption({
 
   const isSelected = selectedValue === value;
   const filtered = options.filter(
-    (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase())),
+    (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase()))
   );
   const isHighlighted = filtered[highlightedIndex]?.value === value;
 
@@ -426,7 +426,7 @@ export function ComboboxOption({
           ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-medium"
           : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/60",
         disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-        className,
+        className
       )}
       {...props}
     >

@@ -96,7 +96,7 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
   };
 
   const longestSubpart = Object.entries(subparts).reduce((a, b) =>
-    b[1] > a[1] ? b : a,
+    b[1] > a[1] ? b : a
   )[0] as typeof breakdown extends { [key: string]: infer _T } ? keyof typeof breakdown : never;
 
   // Generate strategies based on longest subpart
@@ -107,14 +107,14 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
       "Optimize server response time (use Edge Functions, CDN caching)",
       "Implement early hints for critical resources",
       "Reduce redirect chains",
-      "Preconnect to required origins",
+      "Preconnect to required origins"
     );
   } else if (longestSubpart === "resourceLoadDelay") {
     strategies.push(
       "Prioritize critical resources with preload hints",
       "Remove render-blocking resources",
       "Defer non-critical CSS/JS",
-      "Use resource hints (preconnect, prefetch, preload)",
+      "Use resource hints (preconnect, prefetch, preload)"
     );
   } else if (longestSubpart === "resourceLoadTime") {
     strategies.push(
@@ -122,14 +122,14 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
       "Implement responsive images with srcset",
       "Use a CDN for static assets",
       "Enable text compression (gzip, brotli)",
-      "Reduce resource file sizes through tree-shaking",
+      "Reduce resource file sizes through tree-shaking"
     );
   } else if (longestSubpart === "elementRenderDelay") {
     strategies.push(
       "Optimize CSS for LCP element (avoid layout thrashing)",
       "Reduce DOM complexity around LCP element",
       "Use content-visibility for off-screen content",
-      "Prioritize LCP element in rendering queue",
+      "Prioritize LCP element in rendering queue"
     );
   }
 
@@ -173,7 +173,7 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
   };
 
   const longestSubpart = Object.entries(subparts).reduce((a, b) =>
-    b[1] > a[1] ? b : a,
+    b[1] > a[1] ? b : a
   )[0] as keyof typeof breakdown;
 
   // Generate strategies based on longest subpart
@@ -184,7 +184,7 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
       "Reduce main thread work (break up long tasks)",
       "Use Web Workers for heavy computations",
       "Defer non-critical JavaScript",
-      "Minimize style recalculations during interaction",
+      "Minimize style recalculations during interaction"
     );
   } else if (longestSubpart === "processingTime") {
     strategies.push(
@@ -192,20 +192,20 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
       "Use React.memo and useMemo for expensive calculations",
       "Break up state updates with useTransition",
       "Move non-critical work to useEffect (post-interaction)",
-      "Consider using Suspense for conditional content",
+      "Consider using Suspense for conditional content"
     );
   } else if (longestSubpart === "presentationDelay") {
     strategies.push(
       "Reduce paint complexity (simplify DOM structure)",
       "Use CSS containment (contain: layout)",
       "Avoid forced synchronous layouts",
-      "Use requestAnimationFrame for visual updates",
+      "Use requestAnimationFrame for visual updates"
     );
   }
 
   if (rating === "poor") {
     strategies.unshift(
-      "CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers",
+      "CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers"
     );
   }
 
@@ -220,7 +220,7 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
 
 function generateRecommendations(
   lcp: PerformanceBreakdown["lcp"],
-  inp: PerformanceBreakdown["inp"],
+  inp: PerformanceBreakdown["inp"]
 ): PerformanceBreakdown["recommendations"] {
   const recommendations: PerformanceBreakdown["recommendations"] = [];
 

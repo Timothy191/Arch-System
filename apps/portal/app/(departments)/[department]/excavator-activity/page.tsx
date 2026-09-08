@@ -1,6 +1,6 @@
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { KPIGrid, KPICard } from "@repo/ui/KPI";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import { PageHeader } from "@repo/ui/PageHeader";
+import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { ExcavatorActivityForm } from "./ExcavatorActivityForm";
 import { ExcavatorActivityList } from "./ExcavatorActivityList";
 
@@ -53,7 +53,7 @@ export default async function ExcavatorActivityPage({
     supabase
       .from("excavator_activity")
       .select(
-        "*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)",
+        "*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)"
       )
       .eq("department_id", deptId)
       .eq("activity_date", today)

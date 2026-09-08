@@ -1,20 +1,20 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
   addEdge,
+  Background,
   type Connection,
+  Controls,
   type Edge,
-  type Node,
   Handle,
+  MiniMap,
+  type Node,
   Position,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
+import { useCallback, useMemo } from "react";
 import "@xyflow/react/dist/style.css";
 import { DEPARTMENTS } from "../lib/data";
 
@@ -172,7 +172,7 @@ export default function SystemArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   return (

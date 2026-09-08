@@ -2,7 +2,7 @@
 
 import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Truck, Layers, BarChart2 } from "lucide-react";
+import { BarChart2, Layers, Truck } from "lucide-react";
 
 interface ProductionSummaryCardProps {
   production: UnifiedShiftReport["production"];
@@ -47,7 +47,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
             {production.machines.map((machine) => {
               const maxHourly = Math.max(
                 1,
-                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0),
+                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0)
               );
 
               return (

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
 import { cn } from "@repo/ui/lib/utils";
+import { useEffect, useId, useState } from "react";
 
 interface SparklineProps {
   data: number[];

@@ -46,7 +46,7 @@ describe("shiftRolloverNotificationFn", () => {
     expect(mockRecordJobExecution).toHaveBeenCalledWith(
       "shift-rollover-notifications",
       expect.any(Number),
-      true,
+      true
     );
   });
 

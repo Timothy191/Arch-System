@@ -1,15 +1,15 @@
-import React from "react";
+import { AutoAnimateList } from "@repo/ui/AnimatedList";
 import {
-  CheckCircle2,
-  XCircle,
   AlertTriangle,
-  Clock,
   ArrowRight,
+  CheckCircle2,
+  Clock,
   type LucideIcon,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import StatusBadge, { AccessStatus } from "@/features/access-control/components/StatusBadge";
-import { AutoAnimateList } from "@repo/ui/AnimatedList";
+import React from "react";
+import StatusBadge, { type AccessStatus } from "@/features/access-control/components/StatusBadge";
 
 interface ActivityEntry {
   id: string;

@@ -1,11 +1,11 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { Calendar } from "@repo/ui/components/ui/calendar";
 import { Checkbox } from "@repo/ui/components/ui/checkbox";
 import { ClearableInput } from "@repo/ui/components/ui/clearable-input";
 import { Code } from "@repo/ui/components/ui/code";
 import { CodeBlock } from "@repo/ui/components/ui/code-block";
 import { Collapse, CollapseGroup } from "@repo/ui/components/ui/collapse";
-import { Calendar } from "@repo/ui/components/ui/calendar";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Extended Primitives", () => {
   describe("Checkbox", () => {
@@ -15,7 +15,7 @@ describe("Geist Extended Primitives", () => {
       const { rerender } = render(
         <Checkbox checked={false} onChange={onChange} onCheckedChange={onCheckedChange}>
           Option 1
-        </Checkbox>,
+        </Checkbox>
       );
 
       const checkbox = screen.getByRole("checkbox");
@@ -29,7 +29,7 @@ describe("Geist Extended Primitives", () => {
       rerender(
         <Checkbox checked={true} onChange={onChange}>
           Option 1
-        </Checkbox>,
+        </Checkbox>
       );
       expect(screen.getByRole("checkbox")).toBeChecked();
     });
@@ -45,7 +45,7 @@ describe("Geist Extended Primitives", () => {
       render(
         <Checkbox disabled onChange={onChange}>
           Disabled Checkbox
-        </Checkbox>,
+        </Checkbox>
       );
       const checkbox = screen.getByRole("checkbox");
       expect(checkbox).toBeDisabled();
@@ -65,7 +65,7 @@ describe("Geist Extended Primitives", () => {
           onChange={onChange}
           onClear={onClear}
           placeholder="Type here..."
-        />,
+        />
       );
 
       const input = screen.getByPlaceholderText("Type here...");
@@ -86,7 +86,7 @@ describe("Geist Extended Primitives", () => {
           onChange={() => {}}
           onClear={onClear}
           placeholder="Input"
-        />,
+        />
       );
 
       const input = screen.getByPlaceholderText("Input");
@@ -102,7 +102,7 @@ describe("Geist Extended Primitives", () => {
           value=""
           onChange={() => {}}
           cmdk
-        />,
+        />
       );
 
       expect(screen.getByText("Search Database")).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("Geist Extended Primitives", () => {
       render(
         <CodeBlock filename="example.ts" language="typescript" highlightedLinesNumbers={[2]}>
           {source}
-        </CodeBlock>,
+        </CodeBlock>
       );
 
       expect(screen.getByText("example.ts")).toBeInTheDocument();
@@ -136,7 +136,7 @@ describe("Geist Extended Primitives", () => {
       render(
         <CodeBlock addedLinesNumbers={[2]} removedLinesNumbers={[3]}>
           {source}
-        </CodeBlock>,
+        </CodeBlock>
       );
 
       expect(screen.getByText("+")).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("Geist Extended Primitives", () => {
           }}
         >
           {`console.log("hello");`}
-        </CodeBlock>,
+        </CodeBlock>
       );
 
       const tsTab = screen.getByRole("button", { name: "TS" });
@@ -171,7 +171,7 @@ describe("Geist Extended Primitives", () => {
       render(
         <Collapse title="Section Header">
           <p>Secret content</p>
-        </Collapse>,
+        </Collapse>
       );
 
       const trigger = screen.getByRole("button", { name: /Section Header/ });
@@ -196,7 +196,7 @@ describe("Geist Extended Primitives", () => {
           <Collapse title="Item 2">
             <p>Content 2</p>
           </Collapse>
-        </CollapseGroup>,
+        </CollapseGroup>
       );
 
       expect(screen.getByText("Content 1")).toBeInTheDocument();

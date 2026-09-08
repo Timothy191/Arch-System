@@ -1,5 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
 import { useOptimisticAction } from "@repo/shared/hooks";
+import { act, renderHook } from "@testing-library/react";
 
 interface BreakdownState {
   id: string;
@@ -24,7 +24,7 @@ describe("useOptimisticAction hook", () => {
         }),
         action: mockAction,
         onSuccess,
-      }),
+      })
     );
 
     expect(result.current.state.status).toBe("active");
@@ -55,7 +55,7 @@ describe("useOptimisticAction hook", () => {
         }),
         action: mockAction,
         onError,
-      }),
+      })
     );
 
     await act(async () => {

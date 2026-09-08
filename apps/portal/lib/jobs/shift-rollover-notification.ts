@@ -1,6 +1,6 @@
-import { inngest, shiftRolloverNotificationEvent } from "@repo/utils/inngest";
-import { InngestFunction } from "inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
+import { inngest, shiftRolloverNotificationEvent } from "@repo/utils/inngest";
+import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -105,5 +105,5 @@ export const shiftRolloverNotificationFn: InngestFunction.Any = inngest.createFu
     } finally {
       recordJobExecution("shift-rollover-notifications", performance.now() - start, success);
     }
-  },
+  }
 );

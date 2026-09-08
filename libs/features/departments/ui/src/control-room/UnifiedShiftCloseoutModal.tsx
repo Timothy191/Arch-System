@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { X, Lock, AlertCircle, CheckCircle2, Loader2, KeyRound } from "lucide-react";
 import type { LockAndSignShiftInput } from "@repo/contract/types/shift-compilation.types";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertCircle, CheckCircle2, KeyRound, Loader2, Lock, X } from "lucide-react";
+import { useState } from "react";
 
 interface UnifiedShiftCloseoutModalProps {
   open: boolean;
@@ -13,7 +13,7 @@ interface UnifiedShiftCloseoutModalProps {
   shiftDate: string;
   shiftType: "day" | "night";
   onSignShift: (
-    payload: LockAndSignShiftInput & { departmentSlug?: string },
+    payload: LockAndSignShiftInput & { departmentSlug?: string }
   ) => Promise<{ success: boolean; error?: string }>;
   onSuccess: () => void;
 }

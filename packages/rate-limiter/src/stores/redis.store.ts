@@ -1,4 +1,4 @@
-import { IStore } from "../interfaces";
+import type { IStore } from "../interfaces";
 
 export interface SimpleRedisClient {
   get(key: string): Promise<string | null>;

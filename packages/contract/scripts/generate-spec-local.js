@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import { createSwaggerSpec } from "next-swagger-doc";
+
 import { writeFileSync } from "fs";
+import { createSwaggerSpec } from "next-swagger-doc";
 import { join } from "path";
 
 // Read the actual API routes to generate spec

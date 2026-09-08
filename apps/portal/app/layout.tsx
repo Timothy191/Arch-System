@@ -1,22 +1,21 @@
 import "@repo/ui/globals.css";
 import "@/styles/print-report.css";
 import { ArchThemeProvider } from "@repo/theme/react";
-import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
-import dynamic from "next/dynamic";
-import ClientProviders from "./ClientProviders";
-import { OfflineBanner } from "@/components/OfflineBanner";
-import { FocusModeProvider } from "@/components/FocusModeProvider";
-
-import { RouteAnnouncer } from "@/components/RouteAnnouncer";
-import { AriaLauncher } from "@/components/ai/AriaLauncher";
-import { SystemTrayPill } from "@/components/system/SystemTray";
-import { WebVitalsReporter } from "@/components/WebVitalsReporter";
+import { EveLogo } from "@repo/ui/EveLogo";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
-import { EveLogo } from "@repo/ui/EveLogo";
-import { ClientOverlays } from "@/components/ClientOverlays";
+import type { Metadata, Viewport } from "next";
+import dynamic from "next/dynamic";
+import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
 import { SkipLinks } from "@/components/accessibility/SkipLinks";
+import { AriaLauncher } from "@/components/ai/AriaLauncher";
+import { ClientOverlays } from "@/components/ClientOverlays";
+import { FocusModeProvider } from "@/components/FocusModeProvider";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { RouteAnnouncer } from "@/components/RouteAnnouncer";
+import { SystemTrayPill } from "@/components/system/SystemTray";
+import { WebVitalsReporter } from "@/components/WebVitalsReporter";
+import ClientProviders from "./ClientProviders";
 
 const HeaderWidgets = dynamic(
   () =>
@@ -31,14 +30,15 @@ const HeaderWidgets = dynamic(
         <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
       </div>
     ),
-  },
+  }
 );
 
 const CommandBar = dynamic(() =>
-  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
+  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar }))
 );
-import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
+
 import { RouteBackground } from "@/components/RouteBackground";
+import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
 import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
 
 const inter = Inter({

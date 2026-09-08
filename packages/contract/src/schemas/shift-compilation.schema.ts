@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, dateSchema, nonEmptyString } from "./common.schema";
+import { dateSchema, nonEmptyString, uuidSchema } from "./common.schema";
 
 export const machinePerformanceSchema = z.object({
   machine_id: uuidSchema,
@@ -60,7 +60,7 @@ export const unifiedShiftReportSchema = z.object({
         machine_type: z.string(),
         total_loads: z.number().int().nonnegative(),
         hourly_distribution: z.record(z.string(), z.number()),
-      }),
+      })
     ),
   }),
   fleet_performance: z.array(machinePerformanceSchema),

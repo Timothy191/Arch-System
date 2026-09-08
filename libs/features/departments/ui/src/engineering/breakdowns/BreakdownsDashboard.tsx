@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { LayoutDashboard, LogIn, LogOut, Search, Zap } from "lucide-react";
-import type { Breakdown, BreakdownMetrics, Machine, MTBFDataPoint, ServiceTrigger } from "./types";
-import { BreakdownStats } from "./BreakdownStats";
+import dynamic from "next/dynamic";
+import { useMemo, useState } from "react";
 import { BookInForm } from "./BookInForm";
 import { BookOutForm } from "./BookOutForm";
+import { BreakdownStats } from "./BreakdownStats";
 import { BreakdownsTable } from "./BreakdownsTable";
-import dynamic from "next/dynamic";
+import type { Breakdown, BreakdownMetrics, Machine, MTBFDataPoint, ServiceTrigger } from "./types";
 
 const BreakdownCharts = dynamic(() => import("./BreakdownCharts").then((m) => m.BreakdownCharts), {
   ssr: false,
@@ -123,7 +123,7 @@ export function BreakdownsDashboard({
         { category: "Excavator", mttrHours: 4.2, mtbfHours: 120, failureCount: 3 },
         { category: "Haul Truck", mttrHours: 6.8, mtbfHours: 95, failureCount: 5 },
         { category: "Dozer", mttrHours: 3.1, mtbfHours: 160, failureCount: 2 },
-        { category: "Drill Rig", mttrHours: 5.5, mtbfHours: 110, failureCount: 4 },
+        { category: "Drill Rig", mttrHours: 5.5, mtbfHours: 110, failureCount: 4 }
       );
     }
 

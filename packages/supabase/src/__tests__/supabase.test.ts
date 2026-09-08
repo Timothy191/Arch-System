@@ -19,8 +19,8 @@ jest.mock("@repo/logger", () => ({
   },
 }));
 
-import { createServerSupabaseClient, getUserSafely, instrumentedFetch } from "../server";
 import { createBrowserSupabaseClient } from "../client";
+import { createServerSupabaseClient, getUserSafely, instrumentedFetch } from "../server";
 
 describe("instrumentedFetch", () => {
   const originalFetch = global.fetch;
@@ -69,8 +69,8 @@ describe("instrumentedFetch", () => {
     (global.fetch as jest.Mock).mockImplementationOnce(
       () =>
         new Promise((resolve) =>
-          setTimeout(() => resolve(new Response("ok", { status: 200 })), 600),
-        ),
+          setTimeout(() => resolve(new Response("ok", { status: 200 })), 600)
+        )
     );
 
     await instrumentedFetch("https://api.supabase.co/v1/machines");
@@ -80,7 +80,7 @@ describe("instrumentedFetch", () => {
         tableName: "machines",
         method: "GET",
       }),
-      expect.stringContaining("Slow database query detected"),
+      expect.stringContaining("Slow database query detected")
     );
   });
 
@@ -96,7 +96,7 @@ describe("instrumentedFetch", () => {
         tableName: "users",
         method: "GET",
       }),
-      expect.stringContaining("Database query failed"),
+      expect.stringContaining("Database query failed")
     );
   });
 
@@ -112,7 +112,7 @@ describe("instrumentedFetch", () => {
         tableName: "equipment",
         method: "GET",
       }),
-      expect.stringContaining("Database query"),
+      expect.stringContaining("Database query")
     );
   });
 
@@ -127,7 +127,7 @@ describe("instrumentedFetch", () => {
       expect.objectContaining({
         tableName: "machines",
       }),
-      expect.any(String),
+      expect.any(String)
     );
   });
 
@@ -161,7 +161,7 @@ describe("instrumentedFetch", () => {
       expect.objectContaining({
         method: "POST",
       }),
-      expect.any(String),
+      expect.any(String)
     );
   });
 
@@ -176,7 +176,7 @@ describe("instrumentedFetch", () => {
       expect.objectContaining({
         method: "GET",
       }),
-      expect.any(String),
+      expect.any(String)
     );
   });
 
@@ -191,7 +191,7 @@ describe("instrumentedFetch", () => {
       expect.objectContaining({
         tableName: "unknown",
       }),
-      expect.any(String),
+      expect.any(String)
     );
   });
 });
@@ -230,7 +230,7 @@ describe("createServerSupabaseClient", () => {
           getAll: expect.any(Function),
           setAll: expect.any(Function),
         }),
-      }),
+      })
     );
   });
 
@@ -249,7 +249,7 @@ describe("createServerSupabaseClient", () => {
     expect(createServerClient).toHaveBeenCalledWith(
       "https://test.supabase.co",
       "test-anon-key",
-      expect.any(Object),
+      expect.any(Object)
     );
 
     process.env = originalEnv;
@@ -384,7 +384,7 @@ describe("createBrowserSupabaseClient", () => {
     expect(createBrowserClient).toHaveBeenCalledWith(
       "https://test.supabase.co",
       "test-anon-key",
-      expect.any(Object),
+      expect.any(Object)
     );
 
     process.env = originalEnv;

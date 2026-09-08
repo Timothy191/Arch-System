@@ -17,7 +17,7 @@ describe("AuthLayout", () => {
     const { getByText } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
     expect(getByText("Test Child")).toBeInTheDocument();
   });
@@ -26,7 +26,7 @@ describe("AuthLayout", () => {
     const { container } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
 
     const outerContainer = container.firstChild;
@@ -42,7 +42,7 @@ describe("AuthLayout", () => {
     const { unmount } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
     expect(() => unmount()).not.toThrow();
   });

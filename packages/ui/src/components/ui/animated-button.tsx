@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@repo/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import { type HTMLMotionProps, motion } from "framer-motion";
+import * as React from "react";
 
 const animatedButtonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
@@ -35,7 +35,7 @@ const animatedButtonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 interface AnimatedButtonProps
@@ -87,7 +87,7 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
         {children}
       </motion.button>
     );
-  },
+  }
 );
 
 AnimatedButton.displayName = "AnimatedButton";

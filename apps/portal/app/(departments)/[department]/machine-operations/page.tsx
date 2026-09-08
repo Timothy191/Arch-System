@@ -1,13 +1,13 @@
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 
 const MachineOperationsForm = dynamic(
   () => import("./MachineOperationsForm").then((m) => m.MachineOperationsForm),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const MachineOperationsList = dynamic(
@@ -20,7 +20,7 @@ const MachineOperationsList = dynamic(
         ))}
       </div>
     ),
-  },
+  }
 );
 
 const MachineOperationsComplianceWidget = dynamic(
@@ -28,7 +28,7 @@ const MachineOperationsComplianceWidget = dynamic(
     import("./MachineOperationsComplianceWidget").then((m) => m.MachineOperationsComplianceWidget),
   {
     loading: () => <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 export default async function MachineOperationsPage({
@@ -66,7 +66,7 @@ export default async function MachineOperationsPage({
     supabase
       .from("machine_operations")
       .select(
-        "*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))",
+        "*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))"
       )
       .eq("department_id", deptId)
       .eq("shift_date", today)
@@ -194,10 +194,10 @@ export default async function MachineOperationsPage({
             </div>
           }
         >
-          <MachineOperationsList 
-            operations={todayOperations || []} 
-            todayLoads={todayLoads || []} 
-            activeBreakdowns={activeBreakdowns || []} 
+          <MachineOperationsList
+            operations={todayOperations || []}
+            todayLoads={todayLoads || []}
+            activeBreakdowns={activeBreakdowns || []}
           />
         </Suspense>
       </div>

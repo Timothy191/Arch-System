@@ -1,6 +1,6 @@
-import * as React from "react";
-import { Search } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { Search } from "lucide-react";
+import * as React from "react";
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   prefix?: React.ReactNode;
@@ -26,7 +26,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               : "border-input focus-visible:ring-ring focus-visible:border-ring",
             prefix && "pl-9",
             suffix && "pr-9",
-            className,
+            className
           )}
           ref={ref}
           {...props}
@@ -38,7 +38,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  },
+  }
 );
 Input.displayName = "Input";
 
@@ -66,7 +66,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
         {...props}
       />
     );
-  },
+  }
 );
 SearchInput.displayName = "SearchInput";
 

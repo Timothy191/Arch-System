@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { useSplitWindow } from "@/hooks/useSplitWindow";
 import { cn } from "@repo/ui/lib/utils";
 import {
-  X,
+  CheckCheck,
+  Columns2,
   GitBranch,
-  Send,
+  Maximize2,
+  MessageSquare,
+  Minimize2,
   Paperclip,
   QrCode,
-  MessageSquare,
-  CheckCheck,
-  Maximize2,
-  Minimize2,
-  Columns2,
   RefreshCw,
+  Send,
+  X,
 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSplitWindow } from "@/hooks/useSplitWindow";
 
 interface SplitWindowLayoutProps {
   children: React.ReactNode;
@@ -96,7 +96,9 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] w-full overflow-hidden">
       {/* Left side: Main Website Workspace - Splits in half when open */}
-      <div className={cn("min-w-0 transition-all duration-300 ease-in-out", getWorkspaceWidthClass())}>
+      <div
+        className={cn("min-w-0 transition-all duration-300 ease-in-out", getWorkspaceWidthClass())}
+      >
         {children}
       </div>
 
@@ -109,7 +111,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
           "transition-all duration-300 ease-glass transform",
           isOpen
             ? "translate-x-0 opacity-100 pointer-events-auto"
-            : "translate-x-full opacity-0 pointer-events-none",
+            : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
         {/* Tab Bar & Split Controls */}
@@ -129,7 +131,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                     "transition-colors select-none whitespace-nowrap",
                     isActive
                       ? "bg-white border border-black/[0.08] shadow-card text-[var(--text-heading)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-black/[0.03]",
+                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-black/[0.03]"
                   )}
                 >
                   <button
@@ -167,7 +169,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "50"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                 )}
                 title="Split 50% in half"
               >
@@ -181,7 +183,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "70"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                 )}
                 title="Wide Split (70%)"
               >
@@ -195,7 +197,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "35"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                 )}
                 title="Compact Sidebar (35%)"
               >
@@ -287,7 +289,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "code"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]",
+              : "border-transparent hover:text-[var(--text-secondary)]"
           )}
         >
           Commits
@@ -299,7 +301,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "pulls"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]",
+              : "border-transparent hover:text-[var(--text-secondary)]"
           )}
         >
           Pull Requests (1)
@@ -311,7 +313,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "issues"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]",
+              : "border-transparent hover:text-[var(--text-secondary)]"
           )}
         >
           Issues (2)
@@ -486,14 +488,12 @@ function WhatsAppWebView() {
 
     // Simulate auto-acknowledgement from station
     setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === newMsg.id ? { ...m, status: "read" } : m)),
-      );
+      setMessages((prev) => prev.map((m) => (m.id === newMsg.id ? { ...m, status: "read" } : m)));
     }, 1200);
   };
 
   const filteredMessages = messages.filter(
-    (m) => m.channel === selectedChannel || m.channel === "all",
+    (m) => m.channel === selectedChannel || m.channel === "all"
   );
   const currentChannelObj = CHANNELS.find((c) => c.id === selectedChannel);
 
@@ -518,7 +518,9 @@ function WhatsAppWebView() {
               </span>
             </div>
             <p className="text-[10.5px] text-emerald-100/90 truncate mt-0.5">
-              {currentChannelObj ? `${currentChannelObj.icon} ${currentChannelObj.name}` : "Online Dispatch Network"}
+              {currentChannelObj
+                ? `${currentChannelObj.icon} ${currentChannelObj.name}`
+                : "Online Dispatch Network"}
             </p>
           </div>
         </div>
@@ -531,7 +533,9 @@ function WhatsAppWebView() {
               onClick={() => setActiveTab("chat")}
               className={cn(
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
-                activeTab === "chat" ? "bg-white text-emerald-800 shadow-sm" : "text-emerald-200 hover:text-white",
+                activeTab === "chat"
+                  ? "bg-white text-emerald-800 shadow-sm"
+                  : "text-emerald-200 hover:text-white"
               )}
             >
               <MessageSquare className="w-3 h-3" />
@@ -542,7 +546,9 @@ function WhatsAppWebView() {
               onClick={() => setActiveTab("link")}
               className={cn(
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
-                activeTab === "link" ? "bg-white text-emerald-800 shadow-sm" : "text-emerald-200 hover:text-white",
+                activeTab === "link"
+                  ? "bg-white text-emerald-800 shadow-sm"
+                  : "text-emerald-200 hover:text-white"
               )}
             >
               <QrCode className="w-3 h-3" />
@@ -566,7 +572,7 @@ function WhatsAppWebView() {
                   "px-2 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 shrink-0",
                   selectedChannel === ch.id
                     ? "bg-[#008069] text-white shadow-sm font-semibold"
-                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80",
+                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80"
                 )}
               >
                 <span>{ch.icon}</span>
@@ -595,7 +601,7 @@ function WhatsAppWebView() {
                 key={msg.id}
                 className={cn(
                   "flex items-end gap-1.5 max-w-[85%]",
-                  msg.isSelf ? "ml-auto flex-row-reverse" : "mr-auto",
+                  msg.isSelf ? "ml-auto flex-row-reverse" : "mr-auto"
                 )}
               >
                 {!msg.isSelf && (
@@ -608,7 +614,7 @@ function WhatsAppWebView() {
                     "px-3 py-2 rounded-2xl shadow-sm text-[12.5px] leading-relaxed relative",
                     msg.isSelf
                       ? "bg-[#d9fdd3] text-slate-800 rounded-tr-none border border-emerald-200/40"
-                      : "bg-white text-slate-800 rounded-tl-none border border-slate-200/60",
+                      : "bg-white text-slate-800 rounded-tl-none border border-slate-200/60"
                   )}
                 >
                   {!msg.isSelf && (
@@ -621,7 +627,7 @@ function WhatsAppWebView() {
                       <CheckCheck
                         className={cn(
                           "w-3 h-3",
-                          msg.status === "read" ? "text-sky-500" : "text-slate-400",
+                          msg.status === "read" ? "text-sky-500" : "text-slate-400"
                         )}
                       />
                     )}
@@ -639,7 +645,9 @@ function WhatsAppWebView() {
             </span>
             <button
               type="button"
-              onClick={() => handleSendMessage("🚛 Coal Truck CT-01 cleared Weighbridge Outbound Scale")}
+              onClick={() =>
+                handleSendMessage("🚛 Coal Truck CT-01 cleared Weighbridge Outbound Scale")
+              }
               className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
             >
               🚛 CT-01 Cleared
@@ -653,7 +661,11 @@ function WhatsAppWebView() {
             </button>
             <button
               type="button"
-              onClick={() => handleSendMessage("🛡️ Security Alert: Contractor badge verification required at Boom A")}
+              onClick={() =>
+                handleSendMessage(
+                  "🛡️ Security Alert: Contractor badge verification required at Boom A"
+                )
+              }
               className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
             >
               🛡️ Gate Verification
@@ -697,7 +709,7 @@ function WhatsAppWebView() {
                 "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
                 inputText.trim()
                   ? "bg-[#008069] text-white shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed",
+                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
               )}
               title="Send Message"
             >
@@ -716,14 +728,19 @@ function WhatsAppWebView() {
                 Link Official WhatsApp on Workstation
               </h3>
               <p className="text-xs text-slate-500">
-                Connect your WhatsApp mobile app to this split screen for seamless communication without new tabs.
+                Connect your WhatsApp mobile app to this split screen for seamless communication
+                without new tabs.
               </p>
             </div>
 
             {/* QR Card */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-xs">
               <div className="w-44 h-44 bg-white p-2.5 rounded-xl border border-slate-300/80 shadow-inner flex items-center justify-center relative group">
-                <svg className="w-full h-full text-slate-800" viewBox="0 0 100 100" fill="currentColor">
+                <svg
+                  className="w-full h-full text-slate-800"
+                  viewBox="0 0 100 100"
+                  fill="currentColor"
+                >
                   {/* Stylized high-density QR code representation */}
                   <rect x="5" y="5" width="25" height="25" fill="#111827" />
                   <rect x="10" y="10" width="15" height="15" fill="#ffffff" />
@@ -774,8 +791,13 @@ function WhatsAppWebView() {
               <p className="font-semibold text-slate-900">Instructions:</p>
               <ol className="list-decimal pl-4 space-y-1 text-slate-600">
                 <li>Open WhatsApp on your mobile phone</li>
-                <li>Tap <strong>Settings</strong> or <strong>Menu</strong> and select <strong>Linked Devices</strong></li>
-                <li>Tap <strong>Link a Device</strong> and point your camera at this QR code</li>
+                <li>
+                  Tap <strong>Settings</strong> or <strong>Menu</strong> and select{" "}
+                  <strong>Linked Devices</strong>
+                </li>
+                <li>
+                  Tap <strong>Link a Device</strong> and point your camera at this QR code
+                </li>
               </ol>
             </div>
 

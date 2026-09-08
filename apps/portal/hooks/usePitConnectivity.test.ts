@@ -1,5 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
 import { usePitConnectivity } from "@repo/shared/hooks";
+import { act, renderHook } from "@testing-library/react";
 
 describe("usePitConnectivity hook", () => {
   const originalFetch = global.fetch;
@@ -24,7 +24,7 @@ describe("usePitConnectivity hook", () => {
         pingUrl: "/api/health",
         pingIntervalMs: 10000,
         degradedThresholdMs: 1000,
-      }),
+      })
     );
 
     await act(async () => {
@@ -44,7 +44,7 @@ describe("usePitConnectivity hook", () => {
       usePitConnectivity({
         pingUrl: "/api/health",
         onStatusChange,
-      }),
+      })
     );
 
     await act(async () => {

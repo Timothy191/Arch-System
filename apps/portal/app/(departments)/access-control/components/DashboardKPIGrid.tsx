@@ -1,16 +1,16 @@
-import React from "react";
 import {
-  QrCode,
-  Clock,
-  ShieldAlert,
-  ScanLine,
   AlertCircle,
   CheckCircle2,
-  TrendingUp,
-  TrendingDown,
-  Minus,
+  Clock,
   type LucideIcon,
+  Minus,
+  QrCode,
+  ScanLine,
+  ShieldAlert,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
+import React from "react";
 import type { AccessControlMetrics } from "../actions";
 
 interface KPICardProps {

@@ -25,7 +25,7 @@ jest.mock(
     __esModule: true,
     default: { enUS: true },
   }),
-  { virtual: true },
+  { virtual: true }
 );
 
 jest.mock("@univerjs/preset-sheets-core/lib/index.css", () => ({}), {

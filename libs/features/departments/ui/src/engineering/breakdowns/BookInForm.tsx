@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useTransition, useMemo, useEffect } from "react";
 import {
-  ClipboardPlus,
-  ClipboardList,
-  Clock,
   CalendarDays,
+  ClipboardList,
+  ClipboardPlus,
+  Clock,
   Save,
-  Trash2,
   Sparkles,
+  Trash2,
 } from "lucide-react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { createBreakdown } from "./actions";
 import type { Breakdown, Machine } from "./types";
 
@@ -67,7 +67,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
       try {
         localStorage.setItem(
           DRAFT_KEY,
-          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason }),
+          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason })
         );
         setHasDraft(true);
       } catch {
@@ -91,7 +91,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
   const selectedMachine = useMemo(
     () => machines.find((m) => m.id === selectedMachineId),
-    [machines, selectedMachineId],
+    [machines, selectedMachineId]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -130,16 +130,18 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
         // Dispatch Inngest event for breakdown alert
         import("@repo/utils/inngest").then(({ inngest, machineBreakdownEvent }) => {
-          inngest.send({
-            name: machineBreakdownEvent,
-            data: {
-              department_id: departmentId,
-              fleet_id: selectedMachine.serial_number || selectedMachine.id,
-              machine_type: selectedMachine.machine_type,
-              reason,
-              status: "active",
-            },
-          }).catch(() => {});
+          inngest
+            .send({
+              name: machineBreakdownEvent,
+              data: {
+                department_id: departmentId,
+                fleet_id: selectedMachine.serial_number || selectedMachine.id,
+                machine_type: selectedMachine.machine_type,
+                reason,
+                status: "active",
+              },
+            })
+            .catch(() => {});
         });
       } catch (err) {
         setMessage({ type: "error", text: "Failed to book in machine." });

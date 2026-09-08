@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 
-import { POST } from "./route";
 import { NextRequest } from "next/server";
+import { POST } from "./route";
 
 const mockSignInWithPassword = jest.fn();
 
@@ -142,7 +142,7 @@ describe("POST /api/auth/login", () => {
 
   it("returns 503 when network connection throws an unhandled error", async () => {
     mockSignInWithPassword.mockRejectedValueOnce(
-      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321"),
+      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321")
     );
 
     const req = createRequest({

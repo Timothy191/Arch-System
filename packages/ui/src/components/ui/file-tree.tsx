@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useState } from "react";
+"use client";
+
 import {
   ChevronRight,
   File as FileIcon,
   Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
 } from "lucide-react";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
 import { cn } from "../../lib/utils";
 
 const TreeContext = createContext<{ level: number }>({ level: 0 });
@@ -74,7 +77,7 @@ export function File({ name, active, icon, className, ...props }: FileProps) {
         active
           ? "bg-muted/50 text-foreground font-medium"
           : "text-muted-foreground hover:text-foreground",
-        className,
+        className
       )}
       style={{ paddingLeft: `${level * 16 + 28}px` }}
       {...props}

@@ -1,6 +1,6 @@
+import { CacheCategory } from "@repo/redis";
 import type { createServerSupabaseClient } from "@repo/supabase/server";
 import { withCache } from "@/lib/cache-utils";
-import { CacheCategory } from "@repo/redis";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -70,7 +70,7 @@ interface ValidationError {
  */
 export function validateMachineHours(
   hours: number,
-  _shiftType: "day" | "night",
+  _shiftType: "day" | "night"
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -123,7 +123,7 @@ export function validateBinFactor(binFactor: number | null): ValidationError[] {
  */
 export function validateLoadConsistency(
   totalLoads: number,
-  hoursWorked: number | null,
+  hoursWorked: number | null
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -161,7 +161,7 @@ export function validateShiftDataIntegrity(
   hoursWorked: number | null,
   totalLoads: number | null,
   binFactor: number | null,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): ValidationError[] {
   const allErrors: ValidationError[] = [];
 
@@ -186,7 +186,7 @@ export async function getShiftCompleteness(
   deptId: string,
   departmentSlug: string | null,
   date: string,
-  shift: "day" | "night",
+  shift: "day" | "night"
 ): Promise<ShiftCompleteness> {
   return withCache(
     async () => {
@@ -230,18 +230,18 @@ export async function getShiftCompleteness(
       ]);
 
       const machineOpIds = new Set(
-        (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id),
+        (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id)
       );
       const excavatorIds = new Set(
-        (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id),
+        (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id)
       );
       const dozerIds = new Set((dozerRolls ?? []).map((r: { machine_id: string }) => r.machine_id));
       const loadIds = new Set(
         (hourlyLoads ?? [])
           .filter(
-            (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0,
+            (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0
           )
-          .map((r: { machine_id: string; total_loads: number | null }) => r.machine_id),
+          .map((r: { machine_id: string; total_loads: number | null }) => r.machine_id)
       );
 
       const machineOpHoursMap = new Map<string, number>();
@@ -298,7 +298,7 @@ export async function getShiftCompleteness(
             exempt: m.report_exempt ?? false,
             hoursWorked,
           };
-        },
+        }
       );
 
       const required = statuses.filter((s) => !s.exempt);
@@ -322,6 +322,6 @@ export async function getShiftCompleteness(
         "table:dozer_rolls",
         "table:hourly_loads",
       ],
-    },
+    }
   );
 }

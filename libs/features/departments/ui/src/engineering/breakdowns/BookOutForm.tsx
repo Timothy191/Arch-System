@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
 import {
-  Wrench,
   AlertTriangle,
-  Info,
-  Clock,
   CalendarDays,
+  Clock,
+  Info,
   Save,
-  Trash2,
   Sparkles,
+  Trash2,
+  Wrench,
 } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
 import { bookOutBreakdown, directCheckout } from "./actions";
-import { MACHINE_TYPES, type Breakdown } from "./types";
+import { type Breakdown, MACHINE_TYPES } from "./types";
 
 interface BookOutFormProps {
   departmentId: string;
@@ -79,7 +79,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       try {
         localStorage.setItem(
           DRAFT_BOOKOUT_KEY,
-          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes }),
+          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes })
         );
         setHasDraft(true);
       } catch {

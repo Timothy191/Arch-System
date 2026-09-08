@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
 /**
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
               {
                 error: "Authentication service is temporarily unavailable. Please try again later.",
               },
-              { status: 503 },
+              { status: 503 }
             );
           }
 
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
               {
                 error: "Too many attempts. Please wait a moment and try again.",
               },
-              { status: 429 },
+              { status: 429 }
             );
           }
 
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
             {
               error: "Invalid credentials",
             },
-            { status: 401 },
+            { status: 401 }
           );
         }
 
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
                 }
               : undefined,
           },
-          { status: 200 },
+          { status: 200 }
         );
       } catch (err) {
         // Distinguish malformed JSON from internal server errors
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
         if (isNetworkOrTimeout) {
           return NextResponse.json(
             { error: "Authentication service is temporarily unavailable. Please try again later." },
-            { status: 503 },
+            { status: 503 }
           );
         }
 
@@ -260,6 +260,6 @@ export async function POST(request: NextRequest) {
         windowMs: 15 * 60 * 1000, // 15 minutes
         maxRequests: 5, // 5 attempts per 15 minutes
       },
-    },
+    }
   );
 }

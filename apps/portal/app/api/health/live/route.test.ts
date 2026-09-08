@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET } from "./route";
 
 describe("GET /api/health/live", () => {
   it("returns healthy liveness payload", async () => {

@@ -175,12 +175,12 @@ describe("POST /api/ai/actions", () => {
           time_in: "06:15",
           reason: "Transmission fault",
         },
-      }),
+      })
     );
     expect(res.status).toBe(200);
     expect(actions.createBreakdown).toHaveBeenCalledWith(
       "dept-1",
-      expect.objectContaining({ fleet_id: "md-102", machine_type: "Loader" }),
+      expect.objectContaining({ fleet_id: "md-102", machine_type: "Loader" })
     );
     expect((await res.json()).data).toEqual({ success: true });
   });
@@ -192,7 +192,7 @@ describe("POST /api/ai/actions", () => {
         kind: "write",
         tool: "create_breakdown",
         args: { machine_type: "Loader" },
-      }),
+      })
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("Invalid input");
@@ -206,7 +206,7 @@ describe("POST /api/ai/actions", () => {
         kind: "write",
         tool: "book_out_breakdown",
         args: { date_out: "2026-09-08", time_out: "14:00" },
-      }),
+      })
     );
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("breakdown_id");
@@ -222,12 +222,12 @@ describe("POST /api/ai/actions", () => {
         kind: "write",
         tool: "book_out_breakdown",
         args: { breakdown_id: "b-1", date_out: "2026-09-08", time_out: "14:00" },
-      }),
+      })
     );
     expect(res.status).toBe(200);
     expect(actions.bookOutBreakdown).toHaveBeenCalledWith(
       "b-1",
-      expect.objectContaining({ date_out: "2026-09-08", time_out: "14:00" }),
+      expect.objectContaining({ date_out: "2026-09-08", time_out: "14:00" })
     );
   });
 
@@ -246,7 +246,7 @@ describe("POST /api/ai/actions", () => {
           date_out: "2026-09-08",
           time_out: "15:00",
         },
-      }),
+      })
     );
     expect(res.status).toBe(200);
     expect(actions.directCheckout).toHaveBeenCalledWith("dept-1", expect.any(Object));

@@ -1,10 +1,10 @@
 "use server";
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import crypto from "node:crypto";
 import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
 import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
 import { serverLogger } from "@repo/logger";
+import { createServerSupabaseClient } from "@repo/supabase/server";
 
 interface ExportPdfParams {
   departmentId: string;
@@ -23,7 +23,7 @@ interface ExportPdfResponse {
 
 // AGENT-TRACE: Server action fetching multi-site compilation, generating SHA256 digital signature seal, and providing report markup/PDF export payload.
 export async function exportSignedShiftReportPdf(
-  params: ExportPdfParams,
+  params: ExportPdfParams
 ): Promise<ExportPdfResponse> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -44,7 +44,7 @@ export async function exportSignedShiftReportPdf(
         p_department_id: params.departmentId,
         p_shift_date: params.shiftDate,
         p_shift_type: params.shiftType,
-      },
+      }
     );
 
     if (rpcError || !rawData) {
@@ -81,7 +81,7 @@ export async function exportSignedShiftReportPdf(
     const htmlContent = generatePrintHtml(
       reportData,
       signatureHash,
-      user.email || "Control Room Lead",
+      user.email || "Control Room Lead"
     );
 
     const fileName = `Shift_Report_${params.shiftDate}_${params.shiftType.toUpperCase()}_${signatureHash.slice(0, 8)}.pdf`;
@@ -106,7 +106,7 @@ export async function exportSignedShiftReportPdf(
 function generatePrintHtml(
   report: MultiSiteShiftReport,
   signatureHash: string,
-  signerEmail: string,
+  signerEmail: string
 ): string {
   const { meta, production, rollover, breakdowns, ancillary } = report;
 
@@ -177,8 +177,8 @@ function generatePrintHtml(
               <td class="mono bold">${exc.rate_per_hour}</td>
               <td style="color: #b45309;">${exc.delays || "—"}</td>
             </tr>
-          `,
-            ),
+          `
+            )
           )
           .join("")}
       </tbody>
@@ -202,7 +202,7 @@ function generatePrintHtml(
                 <td class="mono">${r.hours}h</td>
                 <td class="bold mono">${r.total_bcm.toLocaleString()} BCM</td>
               </tr>
-            `,
+            `
               )
               .join("")}
             <tr style="background-color: #f1f5f9;">
@@ -225,7 +225,7 @@ function generatePrintHtml(
                 <td>${a.site_code}</td>
                 <td>${a.activity_type} ${a.trip_loads ? `(${a.trip_loads} loads)` : ""} ${a.notes || ""}</td>
               </tr>
-            `,
+            `
               )
               .join("")}
           </tbody>
@@ -256,7 +256,7 @@ function generatePrintHtml(
             <td>${b.reason} ${b.repair_notes ? `— <em>${b.repair_notes}</em>` : ""}</td>
             <td>${b.is_operational_defect ? '<span style="color: #d97706;">Operational with Defect</span>' : b.status.toUpperCase()}</td>
           </tr>
-        `,
+        `
           )
           .join("")}
       </tbody>

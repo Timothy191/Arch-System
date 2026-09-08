@@ -59,11 +59,11 @@ describe("generateEmbeddingFn", () => {
     mockGenerateEmbedding.mockRejectedValue(new Error("embedding service unavailable"));
 
     await expect(handler({ event: { data: { text: "hello", userId: "u1" } } })).rejects.toThrow(
-      "embedding service unavailable",
+      "embedding service unavailable"
     );
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "generate_embedding_job" }),
+      expect.objectContaining({ context: "generate_embedding_job" })
     );
   });
 });

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { Background, ReactFlow } from "@xyflow/react";
 import { PluginNode } from "./PluginNode";
-import { ReactFlow, Background } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import React from "react";
 

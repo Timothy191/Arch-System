@@ -45,7 +45,7 @@ function midnightInTimeZone(dateStr: string, timeZone: string): Date {
     hourCycle: "h23",
   });
   const hour = Number(
-    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value,
+    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value
   );
   const utcHour = new Date(utcGuess).getUTCHours();
   // Shift the guess by the timezone's offset so the result is midnight there.
@@ -60,7 +60,7 @@ function midnightInTimeZone(dateStr: string, timeZone: string): Date {
 export * from "./analytics";
 export function getCurrentShift(
   date: Date = new Date(),
-  timeZone: string = "Africa/Johannesburg",
+  timeZone: string = "Africa/Johannesburg"
 ): "day" | "night" {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -83,7 +83,7 @@ export function getCurrentShift(
  */
 export function getThreeShift(
   date: Date = new Date(),
-  timeZone: string = "Africa/Johannesburg",
+  timeZone: string = "Africa/Johannesburg"
 ): {
   shift: "A" | "B" | "C";
   label: string;

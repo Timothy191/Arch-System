@@ -1,8 +1,8 @@
 export {
   fetchWeather,
-  searchLocation,
+  getWeatherAlert,
   getWeatherDescription,
   getWindDirection,
-  getWeatherAlert,
+  searchLocation,
   type WeatherData,
 } from "@repo/shared/data-access";

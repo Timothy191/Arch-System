@@ -77,7 +77,7 @@ export async function adminUpdateMachine(
     site_id?: string | null;
     active?: boolean;
     report_exempt?: boolean;
-  },
+  }
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };

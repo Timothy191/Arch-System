@@ -1,11 +1,11 @@
 export type {
-  Tire,
-  TireInspection,
   CreateTireInput,
   LogTireInspectionInput,
   ReplaceTireInput,
-  TireStatus,
+  Tire,
   TireCondition,
+  TireInspection,
+  TireStatus,
 } from "@repo/contract/types/tire-management.types";
 
 export interface TireWithInspections {

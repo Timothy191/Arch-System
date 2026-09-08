@@ -8,9 +8,7 @@ jest.mock("@repo/supabase/server", () => ({
 }));
 
 jest.mock("@repo/redis", () => ({
-  cacheWrap: jest.fn(
-    async (_key: string, fn: () => Promise<unknown>, _ttlSeconds: number) => fn(),
-  ),
+  cacheWrap: jest.fn(async (_key: string, fn: () => Promise<unknown>, _ttlSeconds: number) => fn()),
 }));
 
 const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
@@ -116,10 +114,6 @@ describe("GET /api/tools/status", () => {
     await GET(req);
 
     expect(cacheWrap).toHaveBeenCalledTimes(1);
-    expect(cacheWrap).toHaveBeenCalledWith(
-      "tools:status",
-      expect.any(Function),
-      60,
-    );
+    expect(cacheWrap).toHaveBeenCalledWith("tools:status", expect.any(Function), 60);
   });
 });

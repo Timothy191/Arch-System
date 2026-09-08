@@ -1,5 +1,5 @@
-import { useOfflineQueue, initOfflineQueueListeners } from "./useOfflineQueue";
 import type { QueuedRequest } from "./useOfflineQueue";
+import { initOfflineQueueListeners, useOfflineQueue } from "./useOfflineQueue";
 
 const mockToastInfo = jest.fn();
 const mockToastSuccess = jest.fn();
@@ -86,7 +86,7 @@ describe("useOfflineQueue", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/sync",
-      expect.objectContaining({ method: "POST" }),
+      expect.objectContaining({ method: "POST" })
     );
     expect(useOfflineQueue.getState().queue).toHaveLength(0);
     expect(mockToastSuccess).toHaveBeenCalledWith(expect.stringContaining("1"));

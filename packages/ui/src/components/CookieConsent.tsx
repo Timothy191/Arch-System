@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 export function CookieConsent() {
   // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the
@@ -41,18 +41,21 @@ export function CookieConsent() {
       </div>
       <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
         <button
+          type="button"
           onClick={() => setShowBanner(false)}
           className="flex-1 sm:flex-none px-4 py-2 bg-transparent hover:bg-black/5 text-[var(--text-heading)] rounded-lg font-medium transition-colors"
         >
           Decline Optional
         </button>
         <button
+          type="button"
           onClick={acceptCookies}
           className="flex-1 sm:flex-none px-6 py-2 bg-[var(--text-heading)] hover:bg-[var(--text-heading)]/90 text-white rounded-lg font-medium transition-colors shadow-card"
         >
           Accept All
         </button>
         <button
+          type="button"
           onClick={() => setShowBanner(false)}
           className="p-2 text-[var(--text-muted)] hover:bg-black/5 rounded-full transition-colors hidden sm:block"
           aria-label="Close"

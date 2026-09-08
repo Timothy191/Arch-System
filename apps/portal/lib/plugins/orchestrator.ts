@@ -1,8 +1,8 @@
-import { ArchPlugin, PluginHooks, PluginWidget } from "./types";
-import { NotFoundError, APIError, ConflictError } from "@/lib/errors/error-classes";
+import { type ActorRefFrom, interpret } from "xstate";
+import { APIError, ConflictError, NotFoundError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
-import { interpret, type ActorRefFrom } from "xstate";
-import { orchestratorMachine, type HealthReport } from "./machines";
+import { type HealthReport, orchestratorMachine } from "./machines";
+import type { ArchPlugin, PluginHooks, PluginWidget } from "./types";
 
 /**
  * PluginOrchestrator - XState-powered plugin lifecycle management
@@ -85,7 +85,7 @@ class PluginOrchestrator {
    */
   public async executeEngine(
     pluginId: string,
-    params?: Record<string, any>,
+    params?: Record<string, any>
   ): Promise<Record<string, any>> {
     // Find plugin from XState context
     const snapshot = this.actor.getSnapshot();

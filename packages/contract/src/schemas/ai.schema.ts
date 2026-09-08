@@ -12,7 +12,7 @@ export const aiChatSchema = z.object({
         role: z.enum(["user", "assistant", "system"]),
         content: z.string().max(32768),
         parts: z.array(z.object({ type: z.string(), text: z.string().optional() })).optional(),
-      }),
+      })
     )
     .min(1, "At least one message required")
     .max(50, "Too many messages"),

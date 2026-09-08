@@ -1,6 +1,6 @@
-import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
 import Link from "next/link";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 export default async function MachinesPage({
   params,
@@ -15,7 +15,7 @@ export default async function MachinesPage({
   const { data: machines } = await supabase
     .from("machines")
     .select(
-      "id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)",
+      "id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)"
     )
     .order("name");
 

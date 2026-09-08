@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { Pause, Play } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { Pause, Play } from "lucide-react";
+import * as React from "react";
 
 interface FreezeToggleProps {
   isFrozen: boolean;
@@ -24,7 +24,7 @@ export function FreezeToggle({ isFrozen, onToggle, className }: FreezeToggleProp
         isFrozen
           ? "bg-accent-blue/10 border-accent-blue text-accent-blue"
           : "bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:border-[var(--border-emphasis)]",
-        className,
+        className
       )}
       aria-pressed={isFrozen}
       aria-label={isFrozen ? "Resume live updates" : "Freeze live updates"}

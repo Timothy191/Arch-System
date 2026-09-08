@@ -5,7 +5,7 @@ import "swagger-ui-react/swagger-ui.css";
 
 const SwaggerUI = dynamic(
   () => import("swagger-ui-react").then((mod) => ({ default: mod.SwaggerUI })),
-  { ssr: false },
+  { ssr: false }
 );
 
 // AGENT-TRACE: API documentation page using Swagger UI

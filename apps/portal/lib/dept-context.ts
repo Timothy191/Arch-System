@@ -1,8 +1,8 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { cacheGet, cacheSet } from "@repo/redis/cache";
 import { DEPARTMENTS } from "@repo/departments/data-access";
-import { notFound } from "next/navigation";
+import { cacheGet, cacheSet } from "@repo/redis/cache";
+import { createServerSupabaseClient } from "@repo/supabase/server";
 import { getOperationalToday } from "@repo/utils";
+import { notFound } from "next/navigation";
 
 /**
  * Resolves department context for a server component page.

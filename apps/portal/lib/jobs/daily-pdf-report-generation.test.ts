@@ -86,7 +86,7 @@ describe("dailyPdfReportGenerationFn", () => {
     expect(mockRecordJobExecution).toHaveBeenCalledWith(
       "daily-pdf-report-generation",
       expect.any(Number),
-      true,
+      true
     );
   });
 });

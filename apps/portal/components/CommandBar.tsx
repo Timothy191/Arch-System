@@ -1,27 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { logout } from "~/app/actions";
-import { cn } from "@repo/ui/lib/utils";
 import { getServiceUrls } from "@repo/ui/lib/urls";
+import { cn } from "@repo/ui/lib/utils";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { logout } from "~/app/actions";
 
 const urls = getServiceUrls();
+
 import {
-  Search,
-  X,
-  Pickaxe,
-  Factory,
-  ShieldCheck,
-  Wrench,
-  Monitor,
-  LayoutDashboard,
-  Settings,
-  LogOut,
-  User,
+  Activity,
   Bot,
   CreditCard,
-  Activity,
+  Factory,
+  LayoutDashboard,
+  LogOut,
+  Monitor,
+  Pickaxe,
+  Search,
+  Settings,
+  ShieldCheck,
+  User,
+  Wrench,
+  X,
 } from "lucide-react";
 
 interface CommandItem {
@@ -147,7 +148,7 @@ export function CommandBar() {
   const router = useRouter();
 
   const filtered = ALL_COMMANDS.filter((cmd) =>
-    cmd.label.toLowerCase().includes(query.toLowerCase()),
+    cmd.label.toLowerCase().includes(query.toLowerCase())
   );
 
   const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
@@ -171,7 +172,7 @@ export function CommandBar() {
       }
       if (item.action) item.action();
     },
-    [router],
+    [router]
   );
 
   useEffect(() => {
@@ -277,13 +278,13 @@ export function CommandBar() {
                         "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
                         isSelected
                           ? "bg-arch-accent-blue/10 text-arch-accent-blue"
-                          : "text-arch-text-secondary hover:bg-arch-surface-tertiary",
+                          : "text-arch-text-secondary hover:bg-arch-surface-tertiary"
                       )}
                     >
                       <span
                         className={cn(
                           "shrink-0",
-                          isSelected ? "text-arch-accent-blue" : "text-arch-text-tertiary",
+                          isSelected ? "text-arch-accent-blue" : "text-arch-text-tertiary"
                         )}
                       >
                         {item.icon}

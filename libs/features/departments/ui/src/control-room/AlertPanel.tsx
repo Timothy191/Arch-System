@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { trackClientMetric, useThrottledState } from "@repo/shared/hooks";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { AcknowledgeButton } from "@repo/ui/AcknowledgeButton";
 import { EmptyState } from "@repo/ui/EmptyState";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { CheckCircle2 } from "lucide-react";
-import { useThrottledState } from "@repo/shared/hooks";
-import { trackClientMetric } from "@repo/shared/hooks";
+import { useEffect } from "react";
 
 interface Machine {
   id: string;
@@ -63,7 +62,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
             () => {
               setAlerts((prev) => {
                 const acknowledged = new Set(
-                  prev.filter((a) => a.acknowledged).map((a) => a.machineId),
+                  prev.filter((a) => a.acknowledged).map((a) => a.machineId)
                 );
                 return newAlerts.map((a) => ({
                   ...a,
@@ -75,10 +74,10 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               department_id: departmentId,
               offline_count: newAlerts.length,
               total_machines: machines.length,
-            },
+            }
           );
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
@@ -96,7 +95,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
         },
         () => {
           fetchMachines();
-        },
+        }
       )
       .subscribe();
 

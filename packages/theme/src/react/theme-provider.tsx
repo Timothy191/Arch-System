@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useEffect } from "react";
 
 interface ArchThemeContextType {
   theme: "light";

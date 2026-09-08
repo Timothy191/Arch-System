@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 
-import { GET, POST, PUT } from "./route";
 import { NextRequest } from "next/server";
+import { GET, POST, PUT } from "./route";
 
 function buildRequest(method: "GET" | "POST" | "PUT", url = "http://localhost:3000/api/inngest") {
   return new NextRequest(url, { method, headers: { accept: "application/json" } });

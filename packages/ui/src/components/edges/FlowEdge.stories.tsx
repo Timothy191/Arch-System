@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FlowEdge } from "./FlowEdge";
-import { TriggerNode } from "../nodes/TriggerNode";
+import { Background, Position, ReactFlow } from "@xyflow/react";
 import { PluginNode } from "../nodes/PluginNode";
-import { ReactFlow, Background, Position } from "@xyflow/react";
+import { TriggerNode } from "../nodes/TriggerNode";
+import { FlowEdge } from "./FlowEdge";
 import "@xyflow/react/dist/style.css";
 import React from "react";
 

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
+import { NextResponse } from "next/server";
 
 export function getMapsRoot() {
   let current = process.cwd();

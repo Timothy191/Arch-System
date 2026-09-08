@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useImperativeHandle, forwardRef } from "react";
-import { motion } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
+import { motion } from "framer-motion";
+import type React from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
 export interface AnimeTimelineHandle {
   play: () => void;
@@ -78,8 +79,7 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
           : children}
       </motion.div>
     );
-  },
+  }
 );
 
 AnimeTimeline.displayName = "AnimeTimeline";
-

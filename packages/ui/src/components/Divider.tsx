@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { cn } from "../lib/utils";
 
 export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -44,7 +44,7 @@ export function Divider({
             variant === "double" &&
               "w-[3px] border-l-[3px] border-double border-arch-border-emphasis",
             variant === "dashed" && "w-0 border-l border-dashed border-arch-border-emphasis",
-            className,
+            className
           )}
           {...props}
         />
@@ -63,7 +63,7 @@ export function Divider({
           variant === "double" &&
             "h-[3px] border-t-[3px] border-double border-arch-border-emphasis",
           variant === "dashed" && "border-t border-dashed border-arch-border-emphasis",
-          className,
+          className
         )}
         {...props}
       />
@@ -87,7 +87,7 @@ export function Divider({
             "h-px bg-gradient-to-r from-transparent via-arch-border-emphasis to-arch-border-emphasis",
           variant === "double" &&
             "h-[3px] border-t-[3px] border-double border-arch-border-emphasis",
-          variant === "dashed" && "border-t border-dashed border-arch-border-emphasis",
+          variant === "dashed" && "border-t border-dashed border-arch-border-emphasis"
         )}
       />
       <span className="px-3 text-xs font-medium uppercase tracking-wider text-arch-text-tertiary select-none">
@@ -102,7 +102,7 @@ export function Divider({
             "h-px bg-gradient-to-l from-transparent via-arch-border-emphasis to-arch-border-emphasis",
           variant === "double" &&
             "h-[3px] border-t-[3px] border-double border-arch-border-emphasis",
-          variant === "dashed" && "border-t border-dashed border-arch-border-emphasis",
+          variant === "dashed" && "border-t border-dashed border-arch-border-emphasis"
         )}
       />
     </div>

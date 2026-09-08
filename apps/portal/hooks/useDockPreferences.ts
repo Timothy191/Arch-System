@@ -18,7 +18,6 @@ export const useDockPreferences = create<DockPreferencesState>()(
     }),
     {
       name: "arch-dock-preferences",
-    },
-  ),
+    }
+  )
 );
-

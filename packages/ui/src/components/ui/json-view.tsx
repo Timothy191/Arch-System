@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { ChevronRight, ChevronDown, Copy, Check } from "lucide-react";
+"use client";
+
+import { Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { cn } from "../../lib/utils";
 
 export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {

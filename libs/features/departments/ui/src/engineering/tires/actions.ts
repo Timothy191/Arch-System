@@ -1,21 +1,21 @@
 "use server";
 
-import { cacheInvalidateTags } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
-import { logAuditEvent } from "@repo/shared/data-access";
-import { AuthError, DatabaseError, ValidationError } from "@repo/errors";
-import { serverLogger } from "@repo/logger";
 import {
-  logTireInspectionSchema,
   createTireSchema,
+  logTireInspectionSchema,
   replaceTireSchema,
 } from "@repo/contract/schemas/tire-management.schema";
 import type {
-  LogTireInspectionInput,
   CreateTireInput,
+  LogTireInspectionInput,
   ReplaceTireInput,
 } from "@repo/contract/types/tire-management.types";
+import { AuthError, DatabaseError, ValidationError } from "@repo/errors";
+import { serverLogger } from "@repo/logger";
+import { cacheInvalidateTags } from "@repo/redis";
+import { logAuditEvent } from "@repo/shared/data-access";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export async function logTireInspection(input: LogTireInspectionInput) {
   const parsed = logTireInspectionSchema.safeParse(input);
@@ -233,7 +233,7 @@ export async function getTireWearHistory(tireId: string) {
   const { data, error } = await supabase
     .from("tire_inspections")
     .select(
-      "id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at",
+      "id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at"
     )
     .eq("tire_id", tireId)
     .order("inspection_date", { ascending: true });

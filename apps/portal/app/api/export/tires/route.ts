@@ -28,10 +28,10 @@
  *         description: Export data (CSV or JSON)
  */
 
-import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
+import { type NextRequest, NextResponse } from "next/server";
 import { applyCors } from "@/lib/api/cors";
+import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
 function sanitizeCsvCell(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return '""';
@@ -74,7 +74,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
   if (tiresErr || inspErr) {
     return applyCors(
       req,
-      NextResponse.json({ error: "Failed to retrieve tire audit records" }, { status: 500 }),
+      NextResponse.json({ error: "Failed to retrieve tire audit records" }, { status: 500 })
     );
   }
 
@@ -91,7 +91,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
         totalInspections: inspections?.length || 0,
         tires: tires || [],
         inspections: inspections || [],
-      }),
+      })
     );
   }
 
@@ -159,7 +159,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       sanitizeCsvCell(
         t.removed_hours !== null && t.installed_hours !== null
           ? t.removed_hours - t.installed_hours
-          : "—",
+          : "—"
       ),
       sanitizeCsvCell(t.scrapped_reason || "Unspecified"),
     ]);

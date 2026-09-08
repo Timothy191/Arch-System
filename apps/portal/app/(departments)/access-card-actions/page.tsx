@@ -1,6 +1,4 @@
-import { PageHeader } from "@repo/ui/PageHeader";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
+import type { IssuedCardsRow } from "@repo/supabase";
 import {
   Table,
   TableBody,
@@ -9,12 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@repo/ui/components/ui/tabs";
-import { CardActionsTab } from "./components/CardActionsTab";
-import { Printer, Layers, Clock, AlertTriangle, Wifi, WifiOff } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import { cn } from "@repo/ui/lib/utils";
-import type { IssuedCardsRow } from "@repo/supabase";
+import { PageHeader } from "@repo/ui/PageHeader";
+import { AlertTriangle, Clock, Layers, Printer, Wifi, WifiOff } from "lucide-react";
 import { getDashboardMetrics, getExpiringCards } from "./actions";
+import { CardActionsTab } from "./components/CardActionsTab";
 
 interface ExpiringCard extends IssuedCardsRow {
   personnel: { first_name: string; surname: string } | null;
@@ -172,7 +172,7 @@ export default async function AccessCardActionsDashboardPage() {
                       <span
                         className={cn(
                           "inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border",
-                          card.expiryStatus.pillClass,
+                          card.expiryStatus.pillClass
                         )}
                       >
                         {card.daysRemaining < 0 ? (

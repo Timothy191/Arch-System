@@ -162,7 +162,7 @@ export function SubmitButton({ loading, children, className, ...props }: SubmitB
       className={cn(
         "bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]",
         "text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors",
-        className,
+        className
       )}
       {...props}
     >

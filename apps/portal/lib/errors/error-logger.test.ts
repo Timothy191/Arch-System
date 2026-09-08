@@ -75,7 +75,7 @@ describe("logError", () => {
           url: "/api/machines",
           method: "POST",
         }),
-      }),
+      })
     );
   });
 
@@ -103,7 +103,7 @@ describe("logError", () => {
       expect.any(Error),
       expect.objectContaining({
         extra: expect.objectContaining({ code: "23505" }),
-      }),
+      })
     );
     errorSpy.mockRestore();
   });
@@ -124,7 +124,7 @@ describe("withErrorLogging", () => {
     await expect(
       withErrorLogging(req, async () => {
         throw new Error("handler failed");
-      }),
+      })
     ).rejects.toThrow("handler failed");
     expect(console.error).toHaveBeenCalled();
   });
@@ -134,7 +134,7 @@ describe("withErrorLogging", () => {
     await expect(
       withErrorLogging(req, async () => {
         throw "string error";
-      }),
+      })
     ).rejects.toBe("string error");
   });
 
@@ -146,8 +146,8 @@ describe("withErrorLogging", () => {
         async () => {
           throw new Error("context error");
         },
-        { userId: "u-1", sessionId: "s-1" },
-      ),
+        { userId: "u-1", sessionId: "s-1" }
+      )
     ).rejects.toThrow("context error");
   });
 });
@@ -165,7 +165,7 @@ describe("withServerActionLogging", () => {
     await expect(
       withServerActionLogging(async () => {
         throw new Error("action failed");
-      }, "deleteRecord"),
+      }, "deleteRecord")
     ).rejects.toThrow("action failed");
     expect(console.error).toHaveBeenCalled();
   });
@@ -174,7 +174,7 @@ describe("withServerActionLogging", () => {
     await expect(
       withServerActionLogging(async () => {
         throw "non-error thrown";
-      }, "someAction"),
+      }, "someAction")
     ).rejects.toBe("non-error thrown");
   });
 });

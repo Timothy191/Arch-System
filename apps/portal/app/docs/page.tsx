@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Book } from "@repo/ui/components/ui/book";
 import { Breadcrumb, BreadcrumbItem } from "@repo/ui/components/ui/breadcrumb";
 import { Browser } from "@repo/ui/components/ui/browser";
@@ -7,15 +6,16 @@ import { CodeBlock } from "@repo/ui/components/ui/code-block";
 import { Collapse, CollapseGroup } from "@repo/ui/components/ui/collapse";
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
+  ArrowRight,
+  BookOpen,
+  Bot,
+  ExternalLink,
+  FileCode,
+  Layers,
   Network,
   ShieldCheck,
-  Bot,
-  Layers,
-  FileCode,
-  BookOpen,
-  ArrowRight,
-  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = {
   title: "Documentation & Runbooks | Arch Systems",
@@ -129,8 +129,8 @@ export default function DocsLandingPage() {
             Documentation & System Manuals
           </h1>
           <p className="mt-2 text-base text-[var(--text-muted)] max-w-3xl">
-            Explore authoritative operational manuals, architectural blueprints, compliance runbooks,
-            and machine-to-machine API specifications.
+            Explore authoritative operational manuals, architectural blueprints, compliance
+            runbooks, and machine-to-machine API specifications.
           </p>
         </div>
 
@@ -192,9 +192,7 @@ export default function DocsLandingPage() {
             </div>
 
             <div className="pt-5 mt-4 border-t border-[var(--border-default)]/60 flex items-center justify-between">
-              <span className="text-xs text-[var(--text-muted)] font-mono">
-                {vol.subtitle}
-              </span>
+              <span className="text-xs text-[var(--text-muted)] font-mono">{vol.subtitle}</span>
               <Link
                 href={vol.href}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-blue)] hover:underline"
@@ -234,7 +232,8 @@ export default function DocsLandingPage() {
             Frequently Referenced Operational Runbooks
           </h2>
           <p className="text-xs text-[var(--text-muted)]">
-            Standard emergency response procedures, cryptographic credential rotation, and shift protocols.
+            Standard emergency response procedures, cryptographic credential rotation, and shift
+            protocols.
           </p>
         </div>
 
@@ -242,17 +241,23 @@ export default function DocsLandingPage() {
           <CollapseGroup multiple>
             <Collapse defaultExpanded title="Emergency SCADA Failover Procedure">
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                In the event of an edge telemetry connection interruption exceeding 90 seconds, the local gateway buffers all PLC tag events in memory. Standby Redis clusters automatically initiate replica promotion within 450ms.
+                In the event of an edge telemetry connection interruption exceeding 90 seconds, the
+                local gateway buffers all PLC tag events in memory. Standby Redis clusters
+                automatically initiate replica promotion within 450ms.
               </p>
             </Collapse>
             <Collapse title="Cryptographic Access Card Key Rotation">
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                RFID credentials and QR badges are signed with rotating SHA-256 HMAC tokens. Access keys expire every 24 hours and can be manually refreshed from the Access Control Credential Manager.
+                RFID credentials and QR badges are signed with rotating SHA-256 HMAC tokens. Access
+                keys expire every 24 hours and can be manually refreshed from the Access Control
+                Credential Manager.
               </p>
             </Collapse>
             <Collapse title="Multi-Agent Mesh Coordinator Handover">
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                When transferring supervisory control between agents (e.g., Antigravity to Claude), ensure all active background workers have concluded transactions before synchronizing state trees.
+                When transferring supervisory control between agents (e.g., Antigravity to Claude),
+                ensure all active background workers have concluded transactions before
+                synchronizing state trees.
               </p>
             </Collapse>
           </CollapseGroup>
@@ -294,10 +299,14 @@ export default function DocsLandingPage() {
               </div>
               <div className="p-4 rounded-lg bg-neutral-800/80 border border-neutral-700/60">
                 <span className="text-xs text-neutral-400 block font-mono">Blast Hole Drills</span>
-                <span className="text-2xl font-bold text-emerald-400 mt-1 block">98.4% Nominal</span>
+                <span className="text-2xl font-bold text-emerald-400 mt-1 block">
+                  98.4% Nominal
+                </span>
               </div>
               <div className="p-4 rounded-lg bg-neutral-800/80 border border-neutral-700/60">
-                <span className="text-xs text-neutral-400 block font-mono">RFID Gate Verifications</span>
+                <span className="text-xs text-neutral-400 block font-mono">
+                  RFID Gate Verifications
+                </span>
                 <span className="text-2xl font-bold text-blue-400 mt-1 block">342 Today</span>
               </div>
             </div>

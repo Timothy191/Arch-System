@@ -1,6 +1,6 @@
+import { ChevronLeft, ChevronRight, Lock, RotateCw } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { Lock, ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
 
 export interface BrowserProps extends React.HTMLAttributes<HTMLDivElement> {
   address?: string;
@@ -29,7 +29,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
       style,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Format address display
     const cleanAddress = address.replace(/^https?:\/\//, "");
@@ -41,7 +41,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         className={cn(
           "w-full overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800",
           "bg-white dark:bg-neutral-950 shadow-xl select-none",
-          className,
+          className
         )}
         style={{
           aspectRatio,
@@ -84,7 +84,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 Browser.displayName = "Browser";

@@ -1,6 +1,6 @@
-import * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type * as React from "react";
 
 interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: LucideIcon;
@@ -21,7 +21,7 @@ export function EmptyState({
     <div
       className={cn(
         "flex flex-col items-center justify-center text-center p-8 rounded-lg",
-        className,
+        className
       )}
       {...props}
     >

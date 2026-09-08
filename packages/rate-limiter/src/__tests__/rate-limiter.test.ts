@@ -1,9 +1,9 @@
+import { RateLimiter } from "../index";
 import { MemoryStore } from "../stores/memory.store";
 import { RedisStore } from "../stores/redis.store";
 import { FixedWindowStrategy } from "../strategies/fixed-window";
 import { SlidingWindowStrategy } from "../strategies/sliding-window";
 import { TokenBucketStrategy } from "../strategies/token-bucket";
-import { RateLimiter } from "../index";
 
 describe("MemoryStore", () => {
   let store: MemoryStore;
@@ -145,7 +145,7 @@ describe("RedisStore", () => {
       const clientWithoutEval = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
       const storeWithoutEval = new RedisStore(clientWithoutEval as any);
       await expect(storeWithoutEval.eval("script", [], [])).rejects.toThrow(
-        "Redis client does not support eval method",
+        "Redis client does not support eval method"
       );
     });
   });

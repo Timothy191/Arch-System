@@ -1,9 +1,9 @@
-import { DepartmentLayout } from "@repo/ui/DepartmentLayout";
 import { DEPARTMENTS, getDepartmentTabs } from "@repo/departments/data-access";
-import { notFound } from "next/navigation";
-import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
-import { AriaLauncher } from "@/components/ai/AriaLauncher";
+import { DepartmentLayout } from "@repo/ui/DepartmentLayout";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { AriaLauncher } from "@/components/ai/AriaLauncher";
+import { ActiveDepartmentSetter } from "@/components/nav/ActiveDepartmentSetter";
 import { prewarmDepartmentCache } from "@/lib/prewarm-cache";
 
 export async function generateMetadata({ params }: { params: Promise<any> }): Promise<Metadata> {

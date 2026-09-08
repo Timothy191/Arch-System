@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { redirect } from "next/navigation";
 
 // AGENT-TRACE: Layout for documentation routes - enforces auth protection
 // Only accessible to authenticated users with admin or engineering roles

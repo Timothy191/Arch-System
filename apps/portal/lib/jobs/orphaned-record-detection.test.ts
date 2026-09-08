@@ -66,7 +66,7 @@ describe("orphanedRecordDetectionFn", () => {
     // row is flagged twice (invalid machine_id + invalid operator_id).
     expect(result.issues).toHaveLength(2);
     expect(result.issues).toContainEqual(
-      expect.objectContaining({ type: "invalid_machine_id_in_operations", count: 1 }),
+      expect.objectContaining({ type: "invalid_machine_id_in_operations", count: 1 })
     );
     expect(insertCalls).toContainEqual(
       expect.objectContaining({
@@ -77,7 +77,7 @@ describe("orphanedRecordDetectionFn", () => {
           record_id: "op1",
           severity: "high",
         }),
-      }),
+      })
     );
   });
 
@@ -93,7 +93,7 @@ describe("orphanedRecordDetectionFn", () => {
       count: 1,
     });
     expect(insertCalls[0]!.args).toEqual(
-      expect.objectContaining({ table_name: "hourly_loads", severity: "medium" }),
+      expect.objectContaining({ table_name: "hourly_loads", severity: "medium" })
     );
   });
 
@@ -125,7 +125,7 @@ describe("orphanedRecordDetectionFn", () => {
     await expect(handler({})).rejects.toThrow("query timeout");
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "orphaned_record_detection_job" }),
+      expect.objectContaining({ context: "orphaned_record_detection_job" })
     );
   });
 });

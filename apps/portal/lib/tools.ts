@@ -1,8 +1,8 @@
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { PRODUCTIVITY_TOOLS } from "@repo/departments/data-access";
-import { cachedRSC } from "@/lib/server-cache";
-import { withCache } from "@/lib/cache-utils";
 import { CacheCategory } from "@repo/redis";
+import { createReadReplicaClient } from "@repo/supabase/read-replica";
+import { withCache } from "@/lib/cache-utils";
+import { cachedRSC } from "@/lib/server-cache";
 
 interface Tool {
   id: string;
@@ -27,7 +27,7 @@ interface ExternalTool {
  * Falls back to PRODUCTIVITY_TOOLS constant if database query fails.
  */
 export async function getTools(
-  cookieList?: Array<{ name: string; value: string }>,
+  cookieList?: Array<{ name: string; value: string }>
 ): Promise<Tool[]> {
   return cachedRSC(
     ["hub", "tools"],
@@ -79,13 +79,13 @@ export async function getTools(
           category: CacheCategory.METRICS,
           keyParts: ["hub", "tools"],
           tags: ["table:tools"],
-        },
+        }
       );
     },
     {
       revalidate: 3600,
       tags: ["table:tools"],
-    },
+    }
   );
 }
 

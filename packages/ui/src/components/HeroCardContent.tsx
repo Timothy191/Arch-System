@@ -1,10 +1,10 @@
 "use client";
 
+import { Activity, AlertTriangle, CheckCircle2, Power, Wrench } from "lucide-react";
 import Link from "next/link";
-import { Activity, CheckCircle2, AlertTriangle, Wrench, Power } from "lucide-react";
 import { cn } from "../lib/utils";
-import { TrustLogos } from "./TrustLogos";
 import type { Panel } from "./HeroRotator";
+import { TrustLogos } from "./TrustLogos";
 
 export interface HeroCardContentProps {
   panel: Panel;
@@ -71,7 +71,7 @@ export function HeroCardContent({
               <div
                 className={cn(
                   "w-6 h-6 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
-                  panel.iconBgColor,
+                  panel.iconBgColor
                 )}
               >
                 {panel.icon}
@@ -131,7 +131,7 @@ export function HeroCardContent({
           onError={() => onImageError(panel.image)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 pointer-events-none" />
-        
+
         {/* Floating Overlays */}
         <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 pointer-events-none z-20">
           {panel.stats && (
@@ -158,4 +158,3 @@ export function HeroCardContent({
     </div>
   );
 }
-

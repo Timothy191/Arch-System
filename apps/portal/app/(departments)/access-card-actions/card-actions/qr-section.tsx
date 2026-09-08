@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import QRCodeStyling from "qr-code-styling";
+import { useEffect, useRef } from "react";
 
 interface QRCodeSectionProps {
   data: string;

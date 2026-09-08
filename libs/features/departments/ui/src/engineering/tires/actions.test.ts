@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { logTireInspection, installTire, replaceTire, getTireWearHistory } from "./actions";
+
 import { AuthError, DatabaseError, ValidationError } from "@repo/errors";
+import { getTireWearHistory, installTire, logTireInspection, replaceTire } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -44,7 +45,7 @@ function buildSupabaseMock(
     updateError?: unknown;
     selectData?: unknown;
     selectError?: unknown;
-  } = {},
+  } = {}
 ) {
   const user = overrides.getUser !== undefined ? overrides.getUser : { id: "user-123" };
 

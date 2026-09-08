@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AlertPanel } from "./AlertPanel";
 
 jest.mock("@repo/supabase/client", () => ({

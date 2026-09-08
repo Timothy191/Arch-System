@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ShineBorder } from "./shine-border";
 import React from "react";
+import { ShineBorder } from "./shine-border";
 
 const meta: Meta<typeof ShineBorder> = {
   title: "UI/ShineBorder",

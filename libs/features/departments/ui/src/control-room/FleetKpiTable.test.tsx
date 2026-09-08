@@ -1,6 +1,6 @@
+import type { MachinePerformance } from "@repo/contract/types/shift-compilation.types";
 import { render, screen } from "@testing-library/react";
 import { FleetKpiTable } from "./FleetKpiTable";
-import type { MachinePerformance } from "@repo/contract/types/shift-compilation.types";
 
 const mockFleet: MachinePerformance[] = [
   {

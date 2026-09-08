@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 
-import { withRateLimit, skipForInternal } from "./rate-limit-middleware";
 import { NextRequest, NextResponse } from "next/server";
+import { skipForInternal, withRateLimit } from "./rate-limit-middleware";
 
 const mockCache = new Map<string, string>();
 
@@ -63,7 +63,7 @@ describe("withRateLimit", () => {
         makeRequest("http://localhost/api/ai/chat", {
           "x-forwarded-for": "10.0.0.1",
         }),
-        handler,
+        handler
       );
     }
 
@@ -91,7 +91,7 @@ describe("withRateLimit", () => {
         "x-forwarded-for": "10.0.0.2",
       }),
       handler,
-      { customLimit },
+      { customLimit }
     );
 
     expect(res.status).toBe(429);

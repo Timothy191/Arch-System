@@ -1,13 +1,13 @@
-import { redirect } from "next/navigation";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
+import { redirect } from "next/navigation";
 import { AdminTabsClient } from "~/features/admin/components/AdminTabsClient";
-import { UsersTab } from "~/features/admin/tabs/UsersTab";
+import { AuditLogsTab } from "~/features/admin/tabs/AuditLogsTab";
 import { DepartmentsTab } from "~/features/admin/tabs/DepartmentsTab";
 import { FleetTab } from "~/features/admin/tabs/FleetTab";
-import { SitesTab } from "~/features/admin/tabs/SitesTab";
-import { WebhooksTab } from "~/features/admin/tabs/WebhooksTab";
-import { AuditLogsTab } from "~/features/admin/tabs/AuditLogsTab";
 import { SettingsTab } from "~/features/admin/tabs/SettingsTab";
+import { SitesTab } from "~/features/admin/tabs/SitesTab";
+import { UsersTab } from "~/features/admin/tabs/UsersTab";
+import { WebhooksTab } from "~/features/admin/tabs/WebhooksTab";
 
 const TABS = ["users", "departments", "fleet", "sites", "webhooks", "audit-logs", "settings"];
 

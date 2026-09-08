@@ -2,7 +2,7 @@
 
 import type { MachinePerformance } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Wrench, Clock, Activity, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Clock, Wrench } from "lucide-react";
 
 interface FleetKpiTableProps {
   fleet: MachinePerformance[];

@@ -149,7 +149,7 @@ describe("shiftIntegrityReportFn", () => {
     expect(insertCalls).toHaveLength(1);
     expect(insertCalls[0]!.table).toBe("shift_integrity_reports");
     expect(insertCalls[0]!.args).toEqual(
-      expect.objectContaining({ report_date: expect.any(String) }),
+      expect.objectContaining({ report_date: expect.any(String) })
     );
   });
 
@@ -166,7 +166,7 @@ describe("shiftIntegrityReportFn", () => {
     await expect(handler({})).rejects.toThrow("shift_status query failed");
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "shift_integrity_report_job" }),
+      expect.objectContaining({ context: "shift_integrity_report_job" })
     );
   });
 });
@@ -175,17 +175,17 @@ describe("timeAtOperationalZone", () => {
   it("maps SAST times to the correct UTC instant (SAST = UTC+2)", () => {
     // 20:00 SAST == 18:00 UTC
     expect(timeAtOperationalZone("2026-08-10", "20:00").toISOString()).toBe(
-      "2026-08-10T18:00:00.000Z",
+      "2026-08-10T18:00:00.000Z"
     );
     // 08:00 SAST == 06:00 UTC
     expect(timeAtOperationalZone("2026-08-10", "08:00").toISOString()).toBe(
-      "2026-08-10T06:00:00.000Z",
+      "2026-08-10T06:00:00.000Z"
     );
   });
 
   it("supports arbitrary IANA zones", () => {
     expect(timeAtOperationalZone("2026-08-10", "20:00", "UTC").toISOString()).toBe(
-      "2026-08-10T20:00:00.000Z",
+      "2026-08-10T20:00:00.000Z"
     );
   });
 });

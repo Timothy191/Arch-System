@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertCircle, CheckCircle, Loader2, Lock, UserCheck, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { X, AlertCircle, CheckCircle, Loader2, UserCheck, Lock } from "lucide-react";
-import { verifyPin, closeShift } from "@/lib/shift-closeout";
+import { useCallback, useEffect, useState } from "react";
+import { closeShift, verifyPin } from "@/lib/shift-closeout";
 
 interface CloseShiftModalProps {
   open: boolean;
@@ -101,7 +101,7 @@ export function CloseShiftModal({
         state.employeeId,
         pin,
         false,
-        departmentSlug,
+        departmentSlug
       );
       if (result.success) {
         setState({ type: "success" });

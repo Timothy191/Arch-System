@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Inbox, Search, AlertCircle } from "lucide-react";
+import { AlertCircle, Inbox, Search } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 
 const meta: Meta<typeof EmptyState> = {
@@ -35,15 +35,15 @@ export const WithAction: Story = {
     icon: Search,
     title: "No results",
     description: "Try adjusting your search criteria.",
-    action: <button className="text-sm text-blue-500 hover:underline">Clear filters</button>,
+    action: <button type="button" className="text-sm text-blue-500 hover:underline">Clear filters</button>,
   },
 };
 
-export const Error: Story = {
+export const ErrorState: Story = {
   args: {
     icon: AlertCircle,
     title: "Something went wrong",
     description: "We couldn't load the data. Please try again.",
-    action: <button className="text-sm text-blue-500 hover:underline">Retry</button>,
+    action: <button type="button" className="text-sm text-blue-500 hover:underline">Retry</button>,
   },
 };

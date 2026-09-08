@@ -1,8 +1,8 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { Copy, Check } from "lucide-react";
 
 export interface CopyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   textToCopy: string;
@@ -22,7 +22,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
       onClick,
       ...props
     },
-    ref,
+    ref
   ) => {
     const [copied, setCopied] = React.useState(false);
 
@@ -67,7 +67,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
           sizeClasses,
           copied &&
             "border-green-500/50 text-green-600 dark:border-green-500/50 dark:text-green-400",
-          className,
+          className
         )}
         {...props}
       >
@@ -78,7 +78,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
         )}
       </button>
     );
-  },
+  }
 );
 
 CopyButton.displayName = "CopyButton";

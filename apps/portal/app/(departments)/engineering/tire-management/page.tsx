@@ -1,7 +1,7 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { TireManagementDashboard } from "@/features/departments";
-import type { TireWithInspections } from "@/features/departments";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
+import type { TireWithInspections } from "@/features/departments";
+import { TireManagementDashboard } from "@/features/departments";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ export default async function TireManagementPage() {
       db
         .from("tire_inspections")
         .select(
-          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at",
+          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at"
         )
         .order("inspection_date", { ascending: true }),
     ]);

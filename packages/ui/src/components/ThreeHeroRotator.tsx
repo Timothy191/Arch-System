@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import type { Panel, HeroRotatorProps } from "./HeroRotator";
-import { HeroCardContent } from "./HeroCardContent";
 import { cn } from "../lib/utils";
-import { Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
+import { HeroCardContent } from "./HeroCardContent";
+import type { HeroRotatorProps, Panel } from "./HeroRotator";
 
 // AGENT-TRACE: 3D Cylinder configuration for React Three Fiber hero carousel
 const R3F_CONFIG = {
@@ -70,7 +70,7 @@ function ThreeCardItem({
         }}
         className={cn(
           "transition-opacity duration-500",
-          isActive ? "opacity-100" : "opacity-40 hover:opacity-75 cursor-pointer",
+          isActive ? "opacity-100" : "opacity-40 hover:opacity-75 cursor-pointer"
         )}
       >
         <div
@@ -85,7 +85,7 @@ function ThreeCardItem({
             "relative h-full w-full rounded-2xl overflow-hidden select-none",
             "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
             "transition-[shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
+            isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]"
           )}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
@@ -136,7 +136,7 @@ function CarouselCylinder({
     currentAngleRef.current = THREE.MathUtils.lerp(
       currentAngleRef.current,
       targetAngle,
-      R3F_CONFIG.rotDamping,
+      R3F_CONFIG.rotDamping
     );
     groupRef.current.rotation.y = currentAngleRef.current;
   });
@@ -200,7 +200,7 @@ export function ThreeHeroRotator({
       if (diff < -total / 2) diff += total;
       setTargetIndex((prev) => prev + diff);
     },
-    [targetIndex, total],
+    [targetIndex, total]
   );
 
   const handleImageError = useCallback((src: string) => {
@@ -226,7 +226,7 @@ export function ThreeHeroRotator({
         setIsManuallyPaused((p) => !p);
       }
     },
-    [nextSlide, prevSlide],
+    [nextSlide, prevSlide]
   );
 
   // Pointer swipe handlers
@@ -426,7 +426,7 @@ export function ThreeHeroRotator({
                   "h-1.5 rounded-full transition-all duration-300",
                   idx === activeIndex
                     ? "w-6 bg-[var(--accent-blue)]"
-                    : "w-1.5 bg-black/20 hover:bg-black/40",
+                    : "w-1.5 bg-black/20 hover:bg-black/40"
                 )}
               />
             ))}

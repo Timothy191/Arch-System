@@ -38,7 +38,7 @@ describe("POST /api/log", () => {
     expect(await res.json()).toEqual({ success: true });
     expect(serverLogger.error).toHaveBeenCalledWith(
       { clientTimestamp: "2026-09-07T00:00:00.000Z", foo: 1 },
-      "[CLIENT] boom",
+      "[CLIENT] boom"
     );
   });
 
@@ -55,7 +55,7 @@ describe("POST /api/log", () => {
     expect(await res.json()).toEqual({ success: true });
     expect(serverLogger.warn).toHaveBeenCalledWith(
       { clientTimestamp: "2026-09-07T00:00:00.000Z", bar: 2 },
-      "[CLIENT] heads up",
+      "[CLIENT] heads up"
     );
   });
 
@@ -72,7 +72,7 @@ describe("POST /api/log", () => {
     expect(await res.json()).toEqual({ success: true });
     expect(serverLogger.info).toHaveBeenCalledWith(
       { clientTimestamp: "2026-09-07T00:00:00.000Z", baz: 3 },
-      "[CLIENT] note",
+      "[CLIENT] note"
     );
   });
 
@@ -89,7 +89,7 @@ describe("POST /api/log", () => {
     expect(await res.json()).toEqual({ success: true });
     expect(serverLogger.debug).toHaveBeenCalledWith(
       { clientTimestamp: "2026-09-07T00:00:00.000Z", qux: 4 },
-      "[CLIENT] fallback",
+      "[CLIENT] fallback"
     );
   });
 
@@ -105,7 +105,7 @@ describe("POST /api/log", () => {
     expect(await res.json()).toEqual({ success: false });
     expect(serverLogger.error).toHaveBeenCalledWith(
       { error: expect.any(Error) },
-      "Failed to parse client log payload",
+      "Failed to parse client log payload"
     );
   });
 });

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { Copy, Check } from "lucide-react";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 interface CopyReportButtonProps {
   csvContent: string;

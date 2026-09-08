@@ -102,14 +102,15 @@
  *       500:
  *         description: Internal server error
  */
-import { NextRequest, NextResponse } from "next/server";
+
+import { createWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
+import { type NextRequest, NextResponse } from "next/server";
+import { withBodyLimit } from "@/lib/api/body-limit";
+import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody } from "@/lib/api/response";
-import { applyCors } from "@/lib/api/cors";
-import { withBodyLimit } from "@/lib/api/body-limit";
-import { createWebhookSchema } from "@repo/contract/schemas/webhook.schema";
 
 type WebhookEventType =
   | "daily_log.created"
@@ -163,7 +164,7 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
 
   if (employee.role !== "admin") {
     query = query.or(
-      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(",")})`,
+      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(",")})`
     );
   }
 
@@ -245,7 +246,7 @@ export async function POST(request: NextRequest) {
   const response = await withRateLimit(request, () =>
     withBodyLimit(request, () => handleCreateWebhook(request), {
       maxSize: 524288,
-    }),
+    })
   );
   return applyCors(request, response);
 }

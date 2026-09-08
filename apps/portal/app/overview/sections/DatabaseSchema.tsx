@@ -1,13 +1,13 @@
-import { DATABASE_SCHEMA } from "../lib/data";
+import { Badge } from "@repo/ui/components/ui/badge";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@repo/ui/components/ui/card";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Lock, Table2, Key, ArrowRight } from "lucide-react";
+import { ArrowRight, Key, Lock, Table2 } from "lucide-react";
+import { DATABASE_SCHEMA } from "../lib/data";
 
 export default function DatabaseSchema() {
   return (

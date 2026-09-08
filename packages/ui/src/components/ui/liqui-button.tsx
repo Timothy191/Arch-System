@@ -1,10 +1,14 @@
 "use client";
 
-import React, { forwardRef } from "react";
 import { LiquiGlass, type LiquiGlassProps } from "@liqui-design/glass";
-import { cva, type VariantProps } from "class-variance-authority";
-
+// AGENT-TRACE: @liqui-design/glass/dist/glass.css originally used @layer base
+// which Turbopack's isolated PostCSS pass can't resolve. The @layer base wrapper
+// has been patched out in node_modules via scripts/patch-glass-css.mjs.
+// Run `pnpm postinstall` or `node scripts/patch-glass-css.mjs` after pnpm install.
 import { cn } from "@repo/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import type React from "react";
+import { forwardRef } from "react";
 
 /**
  * LiquiButton — a glass button rendered as a LiquiGlass surface.
@@ -31,7 +35,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: { variant: "glass", size: "md" },
-  },
+  }
 );
 
 const buttonContentVariants = cva(
@@ -44,7 +48,7 @@ const buttonContentVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  },
+  }
 );
 
 const BUTTON_GLASS = {
@@ -70,7 +74,7 @@ export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
         </LiquiGlass>
       </button>
     );
-  },
+  }
 );
 
 LiquiButton.displayName = "LiquiButton";

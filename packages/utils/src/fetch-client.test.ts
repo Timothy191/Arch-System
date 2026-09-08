@@ -8,7 +8,7 @@ import {
   RateLimitError,
   ValidationError,
 } from "@repo/errors";
-import { FetchClient, createFetchClient } from "./fetch-client";
+import { createFetchClient, FetchClient } from "./fetch-client";
 
 describe("FetchClient", () => {
   const originalFetch = global.fetch;
@@ -45,7 +45,7 @@ describe("FetchClient", () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.archsystem.local/v1/telemetry",
-      expect.objectContaining({ method: "GET" }),
+      expect.objectContaining({ method: "GET" })
     );
   });
 
@@ -137,7 +137,7 @@ describe("FetchClient", () => {
       "/health",
       expect.objectContaining({
         headers: expect.any(Headers),
-      }),
+      })
     );
   });
 });

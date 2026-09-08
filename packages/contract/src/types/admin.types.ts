@@ -1,9 +1,9 @@
 import type { z } from "zod";
 import type {
+  adminAddSiteSchema,
+  adminDataDeleteSchema,
   adminDataQuerySchema,
   adminDataUpdateSchema,
-  adminDataDeleteSchema,
-  adminAddSiteSchema,
   adminUpdateSiteSchema,
 } from "../schemas/admin.schema.js";
 

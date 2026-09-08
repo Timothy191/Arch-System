@@ -1,9 +1,8 @@
-import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
+import { cn } from "@repo/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
-
-import { cn } from "@repo/ui/lib/utils";
+import * as React from "react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shrink-0",
@@ -53,7 +52,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "medium",
     },
-  },
+  }
 );
 
 export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
@@ -95,7 +94,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Resolve variant: if `variant` is provided, use it; otherwise check if `type` was passed as a variant name
     let resolvedVariant: ButtonVariant = variant ?? "default";
@@ -139,7 +138,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className,
+          className
         )}
         {...props}
       >
@@ -157,7 +156,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </Comp>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";
@@ -191,7 +190,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <a
@@ -200,7 +199,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
           buttonVariants({ variant, size, shape }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className,
+          className
         )}
         {...props}
       >
@@ -217,7 +216,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
         )}
       </a>
     );
-  },
+  }
 );
 
 ButtonLink.displayName = "ButtonLink";
@@ -255,14 +254,14 @@ export const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProp
           hover?.background && `hover:bg-[${hover.background}]`,
           hover?.foreground && `hover:text-[${hover.foreground}]`,
           hover?.border && `hover:border-[${hover.border}]`,
-          className,
+          className
         )}
         {...props}
       >
         {children}
       </Button>
     );
-  },
+  }
 );
 
 CustomButton.displayName = "CustomButton";

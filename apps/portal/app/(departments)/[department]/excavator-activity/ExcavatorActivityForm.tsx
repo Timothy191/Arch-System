@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { useRouter } from "next/navigation";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { getCurrentShift } from "@repo/utils";
-import { ExcavatorDumperTable, DumperAssignmentRow } from "./ExcavatorDumperTable";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { type DumperAssignmentRow, ExcavatorDumperTable } from "./ExcavatorDumperTable";
 
 interface ExcavatorMachine {
   id: string;
@@ -96,7 +96,7 @@ export function ExcavatorActivityForm({
       if (formData.excavatorId || formData.siteId) {
         localStorage.setItem(
           getAutoSaveKey(departmentId),
-          JSON.stringify({ formData, dumperAssignments }),
+          JSON.stringify({ formData, dumperAssignments })
         );
         setLastSaved(new Date());
       }

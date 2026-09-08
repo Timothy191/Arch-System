@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { dozerRollSchema } from "@repo/contract/schemas/form.schema";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { ShiftToggle } from "@repo/ui/ShiftToggle";
 import { getCurrentShift } from "@repo/utils";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { Calculator, Equal, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Equal, Calculator } from "lucide-react";
-import { dozerRollSchema } from "@repo/contract/schemas/form.schema";
+import { useEffect, useMemo, useState } from "react";
 import { useUnsavedChangesWarning } from "../hooks/useUnsavedChangesWarning";
 
 interface DozerWithSite {
@@ -78,7 +78,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               pushCount,
               hoursOperated,
               shiftType,
-            }),
+            })
           );
         } else {
           localStorage.removeItem(draftKey);

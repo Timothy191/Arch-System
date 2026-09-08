@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Plus, Power, Search } from "lucide-react";
-import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Button } from "@repo/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Edit2, Plus, Power, Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 import { adminAddMachine, adminUpdateMachine } from "../actions/fleet";
 
@@ -62,7 +62,7 @@ export function FleetTab() {
       supabase
         .from("machines")
         .select(
-          "id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)",
+          "id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)"
         )
         .order("name"),
       supabase.from("departments").select("id, display_name").order("display_name"),
@@ -294,7 +294,7 @@ export function FleetTab() {
               ) : (
                 filtered.map((m) => {
                   const isDumper = DUMPER_TYPES.some((t) =>
-                    m.machine_type.toLowerCase().includes(t),
+                    m.machine_type.toLowerCase().includes(t)
                   );
                   return (
                     <tr key={m.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">

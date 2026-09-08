@@ -64,7 +64,7 @@ export class CohereClient {
   async embed(
     texts: string[],
     model: string = "embed-english-v3.0",
-    inputType: "search_document" | "search_query" = "search_document",
+    inputType: "search_document" | "search_query" = "search_document"
   ): Promise<any> {
     const response = await fetch(`${this.baseUrl}/embed`, {
       method: "POST",

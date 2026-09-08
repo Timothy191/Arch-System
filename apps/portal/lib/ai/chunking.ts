@@ -42,7 +42,7 @@ export function detectContentType(text: string): ContentType {
   ];
 
   const codeScore = codeIndicators.filter((r) =>
-    typeof r === "boolean" ? r : r.test(text),
+    typeof r === "boolean" ? r : r.test(text)
   ).length;
 
   if (codeScore >= 2) return "code";

@@ -1,24 +1,24 @@
 "use server";
 
+import { FixedWindowStrategy, RateLimiter, RedisStore } from "@repo/rate-limiter";
+import { getRedisClient } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { logAuditEvent } from "./audit";
 import {
   AuthError,
-  NotFoundError,
-  ForbiddenError,
   DatabaseError,
+  ForbiddenError,
+  NotFoundError,
 } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
-import { getShiftCompleteness } from "./shift-completeness";
-import { withAsyncSpan, addEvent, setAttributes } from "@/lib/observability/tracing";
-import { RateLimiter, RedisStore, FixedWindowStrategy } from "@repo/rate-limiter";
-import { getRedisClient } from "@repo/redis";
+import { addEvent, setAttributes, withAsyncSpan } from "@/lib/observability/tracing";
+import { logAuditEvent } from "./audit";
 import {
-  validateShiftDataIntegrity,
-  validateMachineHours,
+  getShiftCompleteness,
   validateBinFactor,
+  validateMachineHours,
+  validateShiftDataIntegrity,
 } from "./shift-completeness";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -115,7 +115,7 @@ async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
           count: 1,
           firstAttempt: now,
         }),
-        { EX: 15 * 60 },
+        { EX: 15 * 60 }
       );
     }
   } catch (error) {
@@ -128,7 +128,7 @@ async function validateShiftData(
   supabase: SupabaseClient,
   departmentId: string,
   date: string,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): Promise<string[]> {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift validation
   return withAsyncSpan(
@@ -159,7 +159,7 @@ async function validateShiftData(
         departmentId,
         null,
         date,
-        shiftType,
+        shiftType
       );
 
       setAttributes({ machine_count: completeness.statuses.length });
@@ -222,7 +222,7 @@ async function validateShiftData(
               status.hoursWorked,
               loads.total_loads,
               machine.bin_factor,
-              shiftType,
+              shiftType
             );
             errors.push(...consistencyErrors.map((e) => `Machine '${machine.name}': ${e.message}`));
           }
@@ -236,7 +236,7 @@ async function validateShiftData(
       });
 
       return errors;
-    },
+    }
   );
 }
 
@@ -350,7 +350,7 @@ export async function closeShift(
   approvedById: string,
   pin: string,
   validateOnly: boolean = false,
-  departmentSlug?: string,
+  departmentSlug?: string
 ) {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift closeout
   return withAsyncSpan(
@@ -480,6 +480,6 @@ export async function closeShift(
       }
 
       return { success: true, shiftStatusId: inserted.id };
-    },
+    }
   );
 }

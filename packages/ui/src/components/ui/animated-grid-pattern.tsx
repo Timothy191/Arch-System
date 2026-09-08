@@ -1,16 +1,15 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
+import { motion } from "framer-motion";
 import {
+  type ComponentPropsWithoutRef,
   useCallback,
   useEffect,
   useId,
   useRef,
   useState,
-  type ComponentPropsWithoutRef,
 } from "react";
-import { motion } from "framer-motion";
-
-import { cn } from "@repo/ui/lib/utils";
 
 export interface AnimatedGridPatternProps extends ComponentPropsWithoutRef<"svg"> {
   width?: number;
@@ -63,7 +62,7 @@ export function AnimatedGridPattern({
         iteration: 0,
       }));
     },
-    [getPos],
+    [getPos]
   );
 
   const updateSquarePosition = useCallback(
@@ -82,7 +81,7 @@ export function AnimatedGridPattern({
         return nextSquares;
       });
     },
-    [getPos],
+    [getPos]
   );
 
   useEffect(() => {
@@ -125,7 +124,7 @@ export function AnimatedGridPattern({
       aria-hidden="true"
       className={cn(
         "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
-        className,
+        className
       )}
       {...props}
     >

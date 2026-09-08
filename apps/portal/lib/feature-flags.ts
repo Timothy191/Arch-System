@@ -39,7 +39,7 @@ export async function logConversion(
   userId: string,
   variant: string,
   metricName: string,
-  metricValue?: number,
+  metricValue?: number
 ): Promise<void> {
   const supabase = await createServerSupabaseClient();
 

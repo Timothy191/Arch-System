@@ -89,15 +89,16 @@
  *       500:
  *         description: Internal server error
  */
-import { NextResponse } from "next/server";
-import { getRedisClient } from "@repo/redis";
-import { withValidation } from "@repo/contract/validation";
+
 import { telemetryPushSchema } from "@repo/contract/schemas/telemetry.schema";
-import { applyCors } from "@/lib/api/cors";
+import { withValidation } from "@repo/contract/validation";
+import { getRedisClient } from "@repo/redis";
+import { NextResponse } from "next/server";
 import { withBodyLimit } from "@/lib/api/body-limit";
+import { applyCors } from "@/lib/api/cors";
 
 // L1 cache (in-memory)
-let localLastValues = new Map<string, number>();
+const localLastValues = new Map<string, number>();
 
 export function clearTelemetryCache() {
   localLastValues.clear();
@@ -160,7 +161,7 @@ export async function POST(req: Request) {
       // NextResponse. At runtime NextResponse extends Response so the cast is safe.
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 10485760 },
+    { maxSize: 10485760 }
   );
 }
 
@@ -190,7 +191,7 @@ async function handlePost(req: Request) {
       };
 
       const entries = Object.entries(metrics).filter(
-        ([, value]) => value !== null && value !== undefined,
+        ([, value]) => value !== null && value !== undefined
       );
 
       const results = await Promise.all(
@@ -215,7 +216,7 @@ async function handlePost(req: Request) {
           localLastValues.set(tagName, numValue);
           await setRedisLastValue(tagName, numValue);
           return { tag: tagName, success: true };
-        }),
+        })
       );
 
       return NextResponse.json({
@@ -232,12 +233,12 @@ async function handlePost(req: Request) {
         headers: req.headers,
         body: JSON.stringify(body),
       }),
-      { params: Promise.resolve({}) },
+      { params: Promise.resolve({}) }
     );
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to store telemetry" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

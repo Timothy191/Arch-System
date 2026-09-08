@@ -1,10 +1,10 @@
 "use server";
 
-import { cacheInvalidateTags, CacheCategory } from "@repo/redis";
+import { CacheCategory, cacheInvalidateTags } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidatePath } from "next/cache";
-import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
 import { withCache } from "@/lib/cache-utils";
+import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -118,7 +118,7 @@ export async function getAccessControlMetrics(deptId: string): Promise<AccessCon
       category: CacheCategory.METRICS,
       keyParts: ["access-control", deptId, "metrics"],
       tags: [`dept:${deptId}`, "table:badges", "table:access_logs", "table:personnel"],
-    },
+    }
   );
 }
 
@@ -142,7 +142,7 @@ interface AccessLogWithBadge {
 
 export async function getRecentAccessActivity(
   deptId: string,
-  limit = 8,
+  limit = 8
 ): Promise<AccessActivityEntry[]> {
   const { supabase } = await assertAccessControlRole();
 
@@ -156,7 +156,7 @@ export async function getRecentAccessActivity(
       access_granted,
       denial_reason,
       badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(name))
-    `,
+    `
     )
     .eq("department_id", deptId)
     .order("scanned_at", { ascending: false })
@@ -263,7 +263,7 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
       category: CacheCategory.METRICS,
       keyParts: ["access-control", deptId, "badge-status"],
       tags: [`dept:${deptId}`, "table:badges", "table:personnel", "table:fleet", "table:equipment"],
-    },
+    }
   );
 }
 
@@ -273,7 +273,7 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
 
 export async function getHourlyAccessStats(
   deptId: string,
-  date?: string,
+  date?: string
 ): Promise<HourlyAccessPoint[]> {
   const { supabase } = await assertAccessControlRole();
 
@@ -314,7 +314,7 @@ export async function getHourlyAccessStats(
 /* ------------------------------------------------------------------ */
 
 export async function getBadgeStatusDistribution(
-  deptId: string,
+  deptId: string
 ): Promise<BadgeStatusDistribution[]> {
   return withCache(
     async () => {
@@ -354,7 +354,7 @@ export async function getBadgeStatusDistribution(
       category: CacheCategory.METRICS,
       keyParts: ["access-control", deptId, "distribution"],
       tags: [`dept:${deptId}`, "table:badges"],
-    },
+    }
   );
 }
 
@@ -404,7 +404,7 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
       fleet:fleet_id(fleet_code, vehicle_type),
       equipment:equipment_id(equip_code, equipment_type)
     `,
-      { count: "exact" },
+      { count: "exact" }
     )
     .eq("department_id", deptId)
     .order("issued_at", { ascending: false })
@@ -445,7 +445,7 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
       check_out_time,
       status
     `,
-      { count: "exact" },
+      { count: "exact" }
     )
     .eq("department_id", deptId)
     .order("check_in_time", { ascending: false })
@@ -534,7 +534,7 @@ export async function getAccessLogsForDepartment(deptId: string, page = 1, pageS
       direction,
       badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
     `,
-      { count: "exact" },
+      { count: "exact" }
     )
     .eq("department_id", deptId)
     .order("scanned_at", { ascending: false })

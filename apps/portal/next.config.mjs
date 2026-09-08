@@ -75,6 +75,10 @@ const nextConfig = {
     "@repo/departments/ui",
     "@repo/hub/ui",
     "@repo/dashboard/data-access",
+    // AGENT-TRACE: @liqui-design/glass ships glass.css with @layer base which
+    // requires @tailwind base to be present in the same PostCSS pass.
+    // transpiling it ensures Turbopack runs it through our full PostCSS pipeline.
+    "@liqui-design/glass",
   ],
   images: {
     formats: ["image/avif", "image/webp"],

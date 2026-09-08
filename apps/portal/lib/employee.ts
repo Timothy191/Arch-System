@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import type { createServerSupabaseClient } from "@repo/supabase/server";
+import { headers } from "next/headers";
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -8,7 +8,7 @@ type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
  *  Falls back to DB query when headers() is unavailable (e.g. tests). */
 export async function getEmployeeIdForAuthUser(
   supabase: SupabaseClient,
-  authUserId: string,
+  authUserId: string
 ): Promise<string | null> {
   try {
     const headerEmployeeId = (await headers()).get("x-auth-employee-id");

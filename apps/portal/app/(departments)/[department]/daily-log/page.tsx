@@ -1,6 +1,6 @@
+import { GlassCard } from "@repo/ui/GlassCard";
 import { getDepartmentContext } from "~/lib/dept-context";
 import { DailyLogForm } from "./DailyLogForm";
-import { GlassCard } from "@repo/ui/GlassCard";
 
 export default async function DailyLogPage({
   params,

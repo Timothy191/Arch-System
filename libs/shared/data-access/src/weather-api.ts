@@ -96,12 +96,12 @@ export function getWindDirection(deg: number): string {
 export async function fetchWeather(
   lat: number = -26.1436, // Delmas, Mpumalanga, South Africa default
   lon: number = 28.6811,
-  locationName?: string,
+  locationName?: string
 ): Promise<WeatherData> {
   // Use API route when coordinates match default (server-side proxy)
   // Direct API call for custom coordinates (client-side with CSP)
   const useApiRoute = lat === -26.1436 && lon === 28.6811;
-  
+
   const url = useApiRoute
     ? "/api/weather"
     : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
@@ -111,7 +111,10 @@ export async function fetchWeather(
   if (!response.ok) {
     throw new APIError(`Weather API error: ${response.status}`, {
       statusCode: response.status,
-      context: { endpoint: useApiRoute ? "weather-api-route" : "open-meteo", statusText: response.statusText },
+      context: {
+        endpoint: useApiRoute ? "weather-api-route" : "open-meteo",
+        statusText: response.statusText,
+      },
     });
   }
 
@@ -153,7 +156,7 @@ export async function fetchWeather(
  * Search for location coordinates by name (using Open-Meteo Geocoding API)
  */
 export async function searchLocation(
-  name: string,
+  name: string
 ): Promise<{ lat: number; lon: number; name: string }[]> {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`;
 

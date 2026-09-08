@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
-  ShieldCheck,
-  FileText,
   AlertTriangle,
-  ClipboardList,
-  History,
-  RefreshCw,
   CheckCircle2,
+  ClipboardList,
+  FileText,
+  History,
   Lock,
   Palette,
+  RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface AuditLogMeta {
   id: string;
@@ -76,7 +76,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
               ))}
             </tbody>
           </table>
-        </div>,
+        </div>
       );
       inTable = false;
       tableHeader = [];
@@ -110,7 +110,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           className="text-2xl font-bold text-[var(--text-heading)] mt-6 mb-3 flex items-center gap-2 border-b border-[var(--border-subtle)] pb-2"
         >
           {trimmed.slice(2)}
-        </h1>,
+        </h1>
       );
     } else if (trimmed.startsWith("## ")) {
       elements.push(
@@ -119,13 +119,13 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           className="text-lg font-semibold text-[var(--text-heading)] mt-5 mb-2 flex items-center gap-2"
         >
           {trimmed.slice(3)}
-        </h2>,
+        </h2>
       );
     } else if (trimmed.startsWith("### ")) {
       elements.push(
         <h3 key={idx} className="text-md font-medium text-[var(--text-secondary)] mt-4 mb-1">
           {trimmed.slice(4)}
-        </h3>,
+        </h3>
       );
     } else if (trimmed.startsWith("- [ ]") || trimmed.startsWith("- [x]")) {
       const isChecked = trimmed.startsWith("- [x]");
@@ -150,19 +150,19 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           >
             {text}
           </span>
-        </div>,
+        </div>
       );
     } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
       elements.push(
         <li key={idx} className="ml-5 list-disc text-sm text-[var(--text-secondary)] my-1">
           {trimmed.slice(2)}
-        </li>,
+        </li>
       );
     } else if (trimmed.length > 0) {
       elements.push(
         <p key={idx} className="text-sm text-[var(--text-secondary)] leading-relaxed my-2">
           {trimmed}
-        </p>,
+        </p>
       );
     }
   });
@@ -241,8 +241,8 @@ export default function AuditReportsSection() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
-                      ) === index,
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>

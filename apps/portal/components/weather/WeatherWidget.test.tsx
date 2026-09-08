@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { WeatherData } from "@/lib/weather-api";
 import { WeatherWidget } from "./WeatherWidget";
-import { type WeatherData } from "@/lib/weather-api";
 
 // Mock Radix Popover
 jest.mock("@radix-ui/react-popover", () => {
@@ -153,7 +153,7 @@ describe("WeatherWidget - Header Variant Popover", () => {
     // Open popover to see alert message
     fireEvent.click(trigger);
     expect(
-      screen.getByText("⚠️ Thunderstorm - Cease outdoor operations immediately"),
+      screen.getByText("⚠️ Thunderstorm - Cease outdoor operations immediately")
     ).toBeInTheDocument();
   });
 });

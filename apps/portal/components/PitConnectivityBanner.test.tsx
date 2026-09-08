@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { PitConnectivityBanner } from "./PitConnectivityBanner";
 import * as sharedHooks from "@repo/shared/hooks";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { PitConnectivityBanner } from "./PitConnectivityBanner";
 
 jest.mock("@repo/shared/hooks", () => ({
   ...jest.requireActual("@repo/shared/hooks"),
@@ -35,7 +35,7 @@ describe("PitConnectivityBanner", () => {
 
     render(<PitConnectivityBanner />);
     expect(
-      screen.getByText(/Degraded Network Detected \(1450ms\) — Local draft buffering active/),
+      screen.getByText(/Degraded Network Detected \(1450ms\) — Local draft buffering active/)
     ).toBeInTheDocument();
 
     const button = screen.getByRole("button", { name: /Check Link/i });
@@ -54,7 +54,7 @@ describe("PitConnectivityBanner", () => {
 
     render(<PitConnectivityBanner />);
     expect(
-      screen.getByText(/Offline Mode Active — Inputs are safely preserved in local draft buffer/),
+      screen.getByText(/Offline Mode Active — Inputs are safely preserved in local draft buffer/)
     ).toBeInTheDocument();
   });
 });

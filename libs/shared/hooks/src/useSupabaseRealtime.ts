@@ -53,7 +53,9 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
   onDelete,
   enabled = true,
 }: UseSupabaseRealtimeOptions<T>) {
-  const [status, setStatus] = useState<"CONNECTING" | "SUBSCRIBED" | "TIMED_OUT" | "CLOSED">("CONNECTING");
+  const [status, setStatus] = useState<"CONNECTING" | "SUBSCRIBED" | "TIMED_OUT" | "CLOSED">(
+    "CONNECTING"
+  );
   const [lastError, setLastError] = useState<Error | null>(null);
 
   // Store stable callback references
@@ -96,7 +98,13 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
       .on(
         "postgres_changes",
         subscriptionConfig,
-        (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: T; old: Partial<T>; table: string; schema: string }) => {
+        (payload: {
+          eventType: "INSERT" | "UPDATE" | "DELETE";
+          new: T;
+          old: Partial<T>;
+          table: string;
+          schema: string;
+        }) => {
           if (!isMounted) return;
 
           const formattedPayload: RealtimePayload<T> = {
@@ -116,7 +124,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
           } else if (payload.eventType === "DELETE") {
             onDeleteRef.current?.(payload.old);
           }
-        },
+        }
       )
       .subscribe((subscriptionStatus: string, err?: Error) => {
         if (!isMounted) return;

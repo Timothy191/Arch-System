@@ -96,7 +96,7 @@ export const monthlyReportInputSchema = z.object({
       z.object({
         label: z.string(),
         value: z.string(),
-      }),
+      })
     )
     .default([]),
   tableHeaders: z.array(z.string()).default([]),

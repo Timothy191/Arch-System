@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, BrainCircuit } from "lucide-react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { AnimatedList } from "@repo/ui/AnimatedList";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { AlertCircle, BrainCircuit } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MLPrediction {
   machine_id: string;

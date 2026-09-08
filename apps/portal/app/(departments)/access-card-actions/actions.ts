@@ -295,7 +295,7 @@ export async function searchEmployees(query: string) {
   const { data, error } = await supabase
     .from("employees")
     .select(
-      "id, first_name, last_name, national_id, job_title, areas, medical_expiry_date, induction_expiry_date, qr_code_data, photo_url",
+      "id, first_name, last_name, national_id, job_title, areas, medical_expiry_date, induction_expiry_date, qr_code_data, photo_url"
     )
     .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,national_id.ilike.%${query}%`)
     .limit(10);

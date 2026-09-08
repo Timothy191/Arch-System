@@ -1,8 +1,8 @@
 "use client";
 
+import { Info } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { Info } from "lucide-react";
 
 export interface DescriptionProps
   extends Omit<React.HTMLAttributes<HTMLDListElement>, "title" | "content"> {
@@ -29,14 +29,14 @@ export function Description({
       className={cn(
         "flex text-sm font-sans",
         right ? "flex-row items-baseline justify-between gap-4" : "flex-col gap-1",
-        className,
+        className
       )}
       {...props}
     >
       <dt
         className={cn(
           "flex items-center gap-1.5 font-medium text-xs text-neutral-500 dark:text-neutral-400 select-none",
-          right && "shrink-0",
+          right && "shrink-0"
         )}
       >
         <span>{title}</span>
@@ -67,7 +67,7 @@ export function Description({
         className={cn(
           "text-sm text-neutral-900 dark:text-neutral-100 m-0",
           right && "text-right",
-          ellipsis && "truncate max-w-full",
+          ellipsis && "truncate max-w-full"
         )}
       >
         {content}

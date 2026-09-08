@@ -1,9 +1,9 @@
 "use server";
 
+import { AuthError } from "@repo/errors";
 import { cacheInvalidateTags } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidateTag } from "next/cache";
-import { AuthError } from "@repo/errors";
 
 type AuditAction = "insert" | "update" | "delete";
 

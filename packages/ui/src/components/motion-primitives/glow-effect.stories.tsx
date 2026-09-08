@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { GlowEffect } from "./glow-effect";
 import React from "react";
+import { GlowEffect } from "./glow-effect";
 
 const meta: Meta<typeof GlowEffect> = {
   title: "Motion/GlowEffect",

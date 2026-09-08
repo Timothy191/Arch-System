@@ -51,7 +51,7 @@ export class TelemetryCircuitBreaker {
   private readonly onStateChange?: (
     from: CircuitState,
     to: CircuitState,
-    streamName?: string,
+    streamName?: string
   ) => void;
 
   constructor(options: CircuitBreakerOptions = {}) {
@@ -99,7 +99,7 @@ export class TelemetryCircuitBreaker {
    * Calculates exponential backoff with full jitter to avoid thundering herd.
    */
   public calculateBackoff(attempt: number): number {
-    const exponential = Math.min(this.maxBackoffMs, this.baseBackoffMs * Math.pow(2, attempt));
+    const exponential = Math.min(this.maxBackoffMs, this.baseBackoffMs * 2 ** attempt);
     // Full jitter: random duration between 0 and exponential
     return Math.floor(Math.random() * exponential);
   }
@@ -109,7 +109,7 @@ export class TelemetryCircuitBreaker {
    */
   public async execute<T>(
     operation: () => Promise<T>,
-    fallback?: () => Promise<T> | T,
+    fallback?: () => Promise<T> | T
   ): Promise<T> {
     this.totalExecutions++;
     const currentState = this.getState();
@@ -119,7 +119,7 @@ export class TelemetryCircuitBreaker {
         return await fallback();
       }
       throw new Error(
-        `[TelemetryCircuitBreaker] Stream "${this.streamName}" circuit is OPEN. Request rejected to prevent service saturation.`,
+        `[TelemetryCircuitBreaker] Stream "${this.streamName}" circuit is OPEN. Request rejected to prevent service saturation.`
       );
     }
 

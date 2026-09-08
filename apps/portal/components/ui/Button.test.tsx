@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import { Button, ButtonLink, CustomButton } from "@repo/ui/components/ui/button";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Button Primitive", () => {
   it("renders with default variant and medium size", () => {
@@ -42,21 +42,21 @@ describe("Geist Button Primitive", () => {
     const { rerender } = render(
       <Button shape="square" aria-label="Square Button" svgOnly>
         <span>■</span>
-      </Button>,
+      </Button>
     );
     expect(screen.getByRole("button")).toHaveClass("aspect-square");
 
     rerender(
       <Button shape="circle" aria-label="Circle Button" svgOnly>
         <span>●</span>
-      </Button>,
+      </Button>
     );
     expect(screen.getByRole("button")).toHaveClass("rounded-full", "aspect-square");
 
     rerender(
       <Button shape="rounded" shadow variant="secondary">
         Rounded
-      </Button>,
+      </Button>
     );
     expect(screen.getByRole("button")).toHaveClass("rounded-full", "shadow-lg");
   });
@@ -68,7 +68,7 @@ describe("Geist Button Primitive", () => {
         suffix={<span data-testid="suffix-icon">&gt;</span>}
       >
         Upload
-      </Button>,
+      </Button>
     );
 
     const prefix = screen.getByTestId("prefix-icon");
@@ -91,7 +91,7 @@ describe("Geist Button Primitive", () => {
     render(
       <ButtonLink href="/pricing" variant="default" size="small">
         Upgrade to Pro
-      </ButtonLink>,
+      </ButtonLink>
     );
 
     const link = screen.getByRole("link", { name: "Upgrade to Pro" });
@@ -111,7 +111,7 @@ describe("Geist Button Primitive", () => {
         }}
       >
         Upgrade
-      </CustomButton>,
+      </CustomButton>
     );
 
     const btn = screen.getByRole("button", { name: "Upgrade" });

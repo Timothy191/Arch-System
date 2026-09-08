@@ -50,7 +50,7 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
         if (cookieList) return;
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore?.set(name, value, options),
+            cookieStore?.set(name, value, options)
           );
         } catch {
           // Called from a Server Component — safe to ignore.

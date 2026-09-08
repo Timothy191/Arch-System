@@ -26,7 +26,7 @@ export interface GenericDbClient {
  */
 export async function fetchLiveDepartmentMetrics(
   db: GenericDbClient,
-  today: string,
+  today: string
 ): Promise<DepartmentLiveMetricsMap> {
   const result: DepartmentLiveMetricsMap = {};
 
@@ -36,7 +36,7 @@ export async function fetchLiveDepartmentMetrics(
       db
         .from("hourly_loads")
         .select(
-          "hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads",
+          "hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads"
         )
         .eq("load_date", today)
         .order("created_at", { ascending: false })
@@ -101,11 +101,11 @@ export async function fetchLiveDepartmentMetrics(
 
       const totalCoal = prodLogs.reduce(
         (sum: number, l: any) => sum + (Number(l.coal_tonnes) || 0),
-        0,
+        0
       );
       const totalWaste = prodLogs.reduce(
         (sum: number, l: any) => sum + (Number(l.waste_tonnes) || 0),
-        0,
+        0
       );
       const totalMined = totalCoal + totalWaste;
       const yieldPct = totalMined > 0 ? Math.round((totalCoal / totalMined) * 100) : 85;

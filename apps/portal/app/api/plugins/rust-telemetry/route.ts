@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import path from "path";
-import fs from "fs";
-import { logError } from "@/lib/errors/error-logger";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { execFile } from "child_process";
+import fs from "fs";
+import { type NextRequest, NextResponse } from "next/server";
+import path from "path";
+import { promisify } from "util";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
+import { logError } from "@/lib/errors/error-logger";
 
 /**
  * @swagger
@@ -96,7 +96,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       "rust-telemetry-engine",
       "target",
       "release",
-      "rust-telemetry-engine",
+      "rust-telemetry-engine"
     );
 
     if (fs.existsSync(binaryPath)) {

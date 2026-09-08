@@ -37,7 +37,7 @@ export function recordDbQuery(
   tableName: string,
   operation: string,
   durationMs: number,
-  success: boolean,
+  success: boolean
 ): void {
   const key = `${tableName}:${operation}`;
   const entry = dbMetrics.get(key) || {

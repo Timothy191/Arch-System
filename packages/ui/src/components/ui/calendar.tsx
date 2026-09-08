@@ -1,6 +1,8 @@
+"use client";
+
+import { ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { ChevronLeft, ChevronRight, X, Clock } from "lucide-react";
 
 export interface DateRange {
   start?: Date | null;
@@ -51,7 +53,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
       className,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Current viewed month
     const [viewDate, setViewDate] = React.useState<Date>(() => {
@@ -159,7 +161,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
             ? "flex-col md:flex-row gap-6"
             : "flex-col gap-4",
           isSmall ? "text-xs" : "text-sm",
-          className,
+          className
         )}
         {...props}
       >
@@ -170,7 +172,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
               "flex flex-col gap-1 shrink-0",
               stacked
                 ? "border-b border-neutral-200 dark:border-neutral-800 pb-3"
-                : "border-r border-neutral-200 dark:border-neutral-800 pr-4",
+                : "border-r border-neutral-200 dark:border-neutral-800 pr-4"
             )}
           >
             <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
@@ -256,7 +258,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                       : isInRange
                         ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 rounded-none"
                         : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
-                    isDisabled && "opacity-30 pointer-events-none cursor-not-allowed",
+                    isDisabled && "opacity-30 pointer-events-none cursor-not-allowed"
                   )}
                 >
                   {day}
@@ -292,7 +294,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 Calendar.displayName = "Calendar";

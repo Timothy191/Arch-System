@@ -1,8 +1,8 @@
 "use client";
 
-import { memo } from "react";
 import { usePitConnectivity } from "@repo/shared/hooks";
-import { AlertTriangle, WifiOff, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, WifiOff } from "lucide-react";
+import { memo } from "react";
 
 export interface PitConnectivityBannerProps {
   /** Optional custom ping URL */

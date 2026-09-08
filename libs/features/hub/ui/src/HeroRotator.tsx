@@ -1,21 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
-import {
-  Layers,
-  TrendingUp,
-  ScanFace,
-  CreditCard,
-  Wrench,
-  TowerControl,
-  Pickaxe,
-  ArrowUpRight,
-} from "lucide-react";
-import { cn } from "@repo/ui/lib/utils";
-import { Logo } from "@repo/ui/Logo";
-import { ThreeHeroRotatorDynamic as GenericHeroRotator } from "@repo/ui/ThreeHeroRotatorDynamic";
-import type { Panel } from "@repo/ui/HeroRotator";
 import type { Department } from "@repo/departments/data-access";
+import type { Panel } from "@repo/ui/HeroRotator";
+import { Logo } from "@repo/ui/Logo";
+import { cn } from "@repo/ui/lib/utils";
+import { ThreeHeroRotatorDynamic as GenericHeroRotator } from "@repo/ui/ThreeHeroRotatorDynamic";
+import {
+  ArrowUpRight,
+  CreditCard,
+  Layers,
+  Pickaxe,
+  ScanFace,
+  TowerControl,
+  TrendingUp,
+  Wrench,
+} from "lucide-react";
+import { useMemo } from "react";
 
 export interface HeroRotatorProps {
   defaultTitle: string;

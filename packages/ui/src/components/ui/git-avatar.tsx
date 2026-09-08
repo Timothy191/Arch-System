@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { Avatar, type AvatarProps } from "./avatar";
 
 export interface GitAvatarProps extends Omit<AvatarProps, "src"> {

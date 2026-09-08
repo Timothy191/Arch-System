@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
+import { type HTMLMotionProps, motion } from "framer-motion";
+import type * as React from "react";
 
 interface CyberButtonProps extends HTMLMotionProps<"button"> {
   children: React.ReactNode;
@@ -72,7 +72,7 @@ export function CyberButton({
         sizeMap[size],
         "before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-10",
         colors.before,
-        className,
+        className
       )}
       {...props}
     >

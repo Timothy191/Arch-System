@@ -77,12 +77,13 @@
  *       500:
  *         description: Internal server error
  */
-import { NextRequest, NextResponse } from "next/server";
+
+import { exportQuerySchema } from "@repo/contract/schemas/export.schema";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { validateBody as _validateBody } from "@/lib/api/response";
-import { applyCors } from "@/lib/api/cors";
-import { exportQuerySchema } from "@repo/contract/schemas/export.schema";
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
@@ -107,8 +108,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       req,
       NextResponse.json(
         { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 },
-      ),
+        { status: 400 }
+      )
     );
   }
   const { dept, limit, offset } = parsed.data;
@@ -119,7 +120,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     .from("machines")
     .select(
       "id, name, machine_type, serial_number, bin_factor, active, department_id, site_id, created_at",
-      { count: "estimated" },
+      { count: "estimated" }
     )
     .order("name")
     .range(offset, offset + limit - 1);

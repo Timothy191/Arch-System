@@ -1,4 +1,4 @@
-import { mapDeformationRowsToReadings, type DeformationDbRow } from "./monitoring-api";
+import { type DeformationDbRow, mapDeformationRowsToReadings } from "./monitoring-api";
 
 // AGENT-TRACE: Unit tests for the DB-row → DeformationReading adapter.
 // Contra-variant with implementation structure: they assert behaviour
@@ -152,7 +152,7 @@ describe("mapDeformationRowsToReadings", () => {
           location_name: zone,
           acquisition_date: `2025-${month}-${day}`,
           displacement_mm: -10 + (i % 20),
-        }),
+        })
       );
     }
 

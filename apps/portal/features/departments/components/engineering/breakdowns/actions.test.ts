@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { createBreakdown, bookOutBreakdown, directCheckout, softDeleteBreakdown } from "./actions";
+
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
+import { bookOutBreakdown, createBreakdown, directCheckout, softDeleteBreakdown } from "./actions";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -32,7 +33,7 @@ function buildSupabaseMock(
     insertError?: unknown;
     updateError?: unknown;
     selectData?: unknown;
-  } = {},
+  } = {}
 ) {
   const user = overrides.getUser !== undefined ? overrides.getUser : { id: "user-1" };
 

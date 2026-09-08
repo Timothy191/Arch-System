@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import type { ZodSchema } from "@repo/contract";
+import { NextResponse } from "next/server";
 
 export async function validateBody<T>(
   request: Request,
-  schema: ZodSchema<T>,
+  schema: ZodSchema<T>
 ): Promise<{ data: T } | NextResponse> {
   try {
     const body = await request.json();
@@ -18,7 +18,7 @@ export async function validateBody<T>(
           error: `invalid request body: ${errorMsg}`,
           details: result.error.issues,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
     return { data: result.data };

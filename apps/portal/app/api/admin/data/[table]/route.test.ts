@@ -2,9 +2,9 @@
  * @jest-environment node
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { RateLimiter, RedisStore, FixedWindowStrategy } from "@repo/rate-limiter";
-import { GET, PUT, DELETE } from "./route";
+import { FixedWindowStrategy, RateLimiter, RedisStore } from "@repo/rate-limiter";
+import { NextRequest, type NextResponse } from "next/server";
+import { DELETE, GET, PUT } from "./route";
 
 jest.mock("@/lib/api/rate-limit-middleware", () => ({
   withRateLimit: jest.fn((_req: Request, handler: () => Promise<NextResponse>) => handler()),
@@ -154,7 +154,7 @@ describe("GET /api/admin/data/[table]", () => {
     mockServiceRole();
 
     const req = buildRequest(
-      "http://localhost:3000/api/admin/data/machines?limit=10&offset=20&order_by=created_at&order_dir=asc",
+      "http://localhost:3000/api/admin/data/machines?limit=10&offset=20&order_by=created_at&order_dir=asc"
     );
     const res = await GET(req, { params: Promise.resolve({ table: "Machines" }) });
 
@@ -269,7 +269,7 @@ describe("PUT /api/admin/data/[table]", () => {
         table_name: "machines",
         record_id: "1",
         performed_by: "emp-1",
-      }),
+      })
     );
   });
 
@@ -282,11 +282,11 @@ describe("PUT /api/admin/data/[table]", () => {
       check: jest.fn().mockResolvedValue({ allowed: false, retryAfter: 42 }),
     };
     (RateLimiter as unknown as jest.Mock).mockImplementation(
-      () => rateLimiter as unknown as RateLimiter,
+      () => rateLimiter as unknown as RateLimiter
     ); // Jest mock needs unchecked cast for constructor replacement
     (RedisStore as unknown as jest.Mock).mockImplementation(() => ({}) as RedisStore); // Jest mock needs unchecked cast for constructor replacement
     (FixedWindowStrategy as unknown as jest.Mock).mockImplementation(
-      () => ({}) as FixedWindowStrategy,
+      () => ({}) as FixedWindowStrategy
     ); // Jest mock needs unchecked cast for constructor replacement
 
     const req = buildRequest("http://localhost:3000/api/admin/data/machines", {
@@ -381,7 +381,7 @@ describe("DELETE /api/admin/data/[table]", () => {
         table_name: "machines",
         record_id: "1",
         performed_by: "emp-1",
-      }),
+      })
     );
   });
 });

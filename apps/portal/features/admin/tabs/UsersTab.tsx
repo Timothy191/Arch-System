@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Search, UserPlus, Edit2, Trash2 } from "lucide-react";
-import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Button } from "@repo/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Edit2, Search, Trash2, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 
 interface Employee {
@@ -83,7 +83,7 @@ export function UsersTab() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
+    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
@@ -251,7 +251,7 @@ function EditEmployeeForm({
   const [role, setRole] = useState(employee?.role || "operator");
   const [departmentId, setDepartmentId] = useState(employee?.department_id || "");
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
-    employee?.accessible_departments || [],
+    employee?.accessible_departments || []
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -265,7 +265,7 @@ function EditEmployeeForm({
 
   const toggleAccessibleDept = (deptId: string) => {
     setAccessibleDepts((prev) =>
-      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId],
+      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId]
     );
   };
 

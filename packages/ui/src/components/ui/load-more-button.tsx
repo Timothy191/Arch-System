@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Button, ButtonProps } from "./button";
 import { cn } from "../../lib/utils";
+import { Button, type ButtonProps } from "./button";
 
 export interface LoadMoreButtonProps extends ButtonProps {
   loading?: boolean;
@@ -28,7 +28,7 @@ const LoadMoreButton = React.forwardRef<HTMLButtonElement, LoadMoreButtonProps>(
         </Button>
       </div>
     );
-  },
+  }
 );
 LoadMoreButton.displayName = "LoadMoreButton";
 

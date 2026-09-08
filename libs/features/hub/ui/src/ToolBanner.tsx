@@ -1,9 +1,9 @@
 "use client";
 
-import { Marquee } from "@repo/ui/Marquee";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
-import { CheckSquare, FileText, Calendar, Calculator, StickyNote, Factory } from "lucide-react";
+import { Marquee } from "@repo/ui/Marquee";
+import { Calculator, Calendar, CheckSquare, Factory, FileText, StickyNote } from "lucide-react";
 
 // AGENT-TRACE: Maps database icon identifiers to canonical Lucide React component references
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -81,7 +81,7 @@ export function ToolBanner({ tools }: ToolBannerProps) {
                   <div
                     className={cn(
                       "p-3.5 rounded-xl mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle",
-                      config.iconBg,
+                      config.iconBg
                     )}
                   >
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6" />

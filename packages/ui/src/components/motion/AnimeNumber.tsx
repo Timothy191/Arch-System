@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { animate, useMotionValue } from "framer-motion";
 import { cn } from "@repo/ui/lib/utils";
+import { animate, useMotionValue } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 interface AnimeNumberProps {
   value: number;
@@ -49,4 +49,3 @@ export function AnimeNumber({
     </span>
   );
 }
-

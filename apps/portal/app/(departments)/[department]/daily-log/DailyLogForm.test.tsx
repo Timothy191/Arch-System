@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DailyLogForm } from "./DailyLogForm";
 
 // Mock next/navigation (useRouter, useParams)
@@ -105,7 +105,7 @@ describe("DailyLogForm", () => {
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
         "Daily log saved successfully",
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 

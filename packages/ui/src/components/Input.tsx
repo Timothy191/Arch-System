@@ -14,7 +14,7 @@ export function Input({ variant = "default", className, ...props }: InputProps) 
         variant === "default"
           ? "border-[var(--border-emphasis)] bg-[var(--bg-secondary)]"
           : "border-[var(--border-emphasis)] bg-[var(--bg-tertiary)]",
-        className,
+        className
       )}
       {...props}
     />

@@ -1,8 +1,8 @@
-import { fetchWeather } from "@/lib/weather-api";
-import { logError } from "@/lib/errors/error-logger";
 import { NextResponse } from "next/server";
-import { withAsyncSpan, addEvent, setAttributes } from "@/lib/observability/tracing";
 import { cache } from "react";
+import { logError } from "@/lib/errors/error-logger";
+import { addEvent, setAttributes, withAsyncSpan } from "@/lib/observability/tracing";
+import { fetchWeather } from "@/lib/weather-api";
 
 /**
  * @swagger
@@ -60,7 +60,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return withAsyncSpan("weather_api_route", { context: "weather" }, async () => {
     const startTime = Date.now();
-    
+
     try {
       setAttributes({
         "weather.cache_enabled": "true",
@@ -70,7 +70,7 @@ export async function GET() {
 
       // Try cache first with stale-while-revalidate strategy
       const weather = await getCachedWeather();
-      
+
       const duration = Date.now() - startTime;
       setAttributes({
         "weather.response_time_ms": String(duration),
@@ -93,12 +93,15 @@ export async function GET() {
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Centralized error handling with structured logging
-      const errorId = await logError(error instanceof Error ? error : new Error("Weather fetch failed"), {
-        context: "weather_api_route",
-        duration_ms: duration,
-      });
+      const errorId = await logError(
+        error instanceof Error ? error : new Error("Weather fetch failed"),
+        {
+          context: "weather_api_route",
+          duration_ms: duration,
+        }
+      );
 
       setAttributes({
         "weather.error": "true",

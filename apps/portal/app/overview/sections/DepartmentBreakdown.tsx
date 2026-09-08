@@ -1,4 +1,4 @@
-import { DEPARTMENTS } from "../lib/data";
+import { Badge } from "@repo/ui/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,24 +6,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
-import { Badge } from "@repo/ui/components/ui/badge";
 import {
-  Building2,
-  LayoutDashboard,
-  FileText,
-  Settings,
-  History,
+  AlertTriangle,
   BarChart3,
-  Wrench,
-  Satellite,
+  Building2,
+  Cpu,
+  FileText,
+  History,
   Image,
   Layers,
-  AlertTriangle,
-  Users,
+  LayoutDashboard,
   RefreshCw,
-  Cpu,
+  Satellite,
+  Settings,
   Truck,
+  Users,
+  Wrench,
 } from "lucide-react";
+import { DEPARTMENTS } from "../lib/data";
 
 const routeIcons: Record<string, React.ReactNode> = {
   Dashboard: <LayoutDashboard className="w-4 h-4" />,

@@ -16,8 +16,8 @@
  *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
  */
 
+import { Cpu, Radio, ShieldCheck } from "lucide-react";
 import NextImage from "next/image";
-import { Radio, Cpu, ShieldCheck } from "lucide-react";
 import { Logo } from "./Logo";
 
 export interface TrustLogo {

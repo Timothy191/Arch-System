@@ -42,7 +42,7 @@ export async function seedProduction(supabase: SupabaseClient): Promise<void> {
     {
       daily_log_id: dailyLog.id,
       coal_tonnes: 4250.75,
-      waste_tonnes: 9820.50,
+      waste_tonnes: 9820.5,
     },
   ]);
 
@@ -57,7 +57,7 @@ export async function seedProduction(supabase: SupabaseClient): Promise<void> {
     [
       { material_type: "Coal (ROM)", density_t_per_m3: 1.32, active: true },
       { material_type: "Overburden (Sandstone)", density_t_per_m3: 2.45, active: true },
-      { material_type: "Interburden (Shale)", density_t_per_m3: 2.20, active: true },
+      { material_type: "Interburden (Shale)", density_t_per_m3: 2.2, active: true },
     ],
     { onConflict: "material_type" }
   );

@@ -1,8 +1,8 @@
-import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
 import { Input } from "@repo/ui/Input";
-import { Drill, Clock, AlertTriangle, ClipboardList } from "lucide-react";
+import { SecondaryButton } from "@repo/ui/SecondaryButton";
+import { AlertTriangle, ClipboardList, Clock, Drill } from "lucide-react";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,7 @@ export default async function DrillingReportsPage({
       delay_other,
       status,
       machines!inner(name)
-    `,
+    `
     )
     .eq("department_id", deptId)
     .gte("operation_date", from)

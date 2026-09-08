@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ComponentPropsWithoutRef } from "react";
-import { useInView, useMotionValue, useSpring } from "framer-motion";
-
 import { cn } from "@repo/ui/lib/utils";
+import { useInView, useMotionValue, useSpring } from "framer-motion";
+import { type ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   value: number;
@@ -56,7 +55,7 @@ export function NumberTicker({
           }).format(Number(latest.toFixed(decimalPlaces)));
         }
       }),
-    [springValue, decimalPlaces],
+    [springValue, decimalPlaces]
   );
 
   return (
@@ -64,7 +63,7 @@ export function NumberTicker({
       ref={ref}
       className={cn(
         "inline-block tracking-wider text-[var(--text-heading)] tabular-nums",
-        className,
+        className
       )}
       {...props}
     >

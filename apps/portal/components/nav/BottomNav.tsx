@@ -1,9 +1,9 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
+import { BarChart3, Drill, Factory, LayoutDashboard, Radar } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Drill, Factory, Radar, BarChart3 } from "lucide-react";
-import { cn } from "@repo/ui/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Hub", icon: LayoutDashboard, dept: null },
@@ -50,7 +50,7 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
               "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium transition-colors touch-manipulation",
               isActive
                 ? "text-[var(--accent-emerald)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-body)]",
+                : "text-[var(--text-muted)] hover:text-[var(--text-body)]"
             )}
           >
             <Icon className={cn("h-5 w-5 shrink-0", isActive && "text-[var(--accent-emerald)]")} />

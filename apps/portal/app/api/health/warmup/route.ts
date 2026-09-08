@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { cacheGet, cacheSet } from "@repo/redis/cache";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { cacheSet, cacheGet } from "@repo/redis/cache";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(_req: NextRequest) {
   const startedAt = Date.now();
@@ -35,6 +35,6 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json(
     { status, latencyMs: Date.now() - startedAt, components },
-    { status: degraded ? 503 : 200, headers: { "X-Health-Status": status } },
+    { status: degraded ? 503 : 200, headers: { "X-Health-Status": status } }
   );
 }

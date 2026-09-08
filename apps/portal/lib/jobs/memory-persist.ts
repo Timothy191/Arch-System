@@ -1,8 +1,8 @@
-import { inngest, aiMemoryPersistEvent } from "@repo/utils/inngest";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { aiMemoryPersistEvent, inngest } from "@repo/utils/inngest";
+import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
-import type { InngestFunction } from "inngest";
 
 /**
  * Durable fallback for saving assistant memory after a chat stream completes.
@@ -54,7 +54,7 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
       // The user message was already stored by loadMemoryNode.
       // The assistant response is what we're recovering.
       const assistantMemories = recentMemories?.filter(
-        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:"),
+        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:")
       );
 
       if (!assistantMemories || assistantMemories.length === 0) {
@@ -67,7 +67,7 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
             context: "memory_persist_job",
             sessionId,
             userId,
-          },
+          }
         );
         return { success: true, recovered: false };
       }
@@ -88,5 +88,5 @@ export const memoryPersistFn: InngestFunction.Any = inngest.createFunction(
     } finally {
       recordJobExecution("memory-persist", performance.now() - start, success);
     }
-  },
+  }
 );

@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import { EveLogo } from "@repo/ui/EveLogo";
 import { EveStatusBar } from "@repo/ui/EveStatusBar";
+import { render, screen } from "@testing-library/react";
 
 describe("EveLogo", () => {
   it("renders the official eve wordmark with a lowercase aria-label", () => {

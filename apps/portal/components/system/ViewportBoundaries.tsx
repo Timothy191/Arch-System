@@ -1,25 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useSystemMetrics } from "@/hooks/useSystemMetrics";
-import { useSplitWindow } from "@/hooks/useSplitWindow";
-import { useDockPreferences } from "@/hooks/useDockPreferences";
 import { cn } from "@repo/ui/lib/utils";
 import {
+  Bell,
   Clock,
-  Wifi,
-  WifiOff,
+  Command,
   LayoutDashboard,
   Map as MapIcon,
-  Wrench,
-  Bell,
-  Settings,
-  Command,
   Pin,
   PinOff,
+  Settings,
+  Wifi,
+  WifiOff,
+  Wrench,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDockPreferences } from "@/hooks/useDockPreferences";
+import { useSplitWindow } from "@/hooks/useSplitWindow";
+import { useSystemMetrics } from "@/hooks/useSystemMetrics";
 
 interface ViewportBoundariesProps {
   className?: string;
@@ -112,7 +113,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
     <div
       className={cn(
         "fixed inset-0 pointer-events-none z-40 flex flex-col justify-between p-3 select-none",
-        className,
+        className
       )}
     >
       {/* Top boundary space (Menu bar is at top-0 z-50, we leave this transparent) */}
@@ -151,7 +152,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
               "w-12 h-1 rounded-full bg-black/20 hover:bg-black/40 shadow-sm border border-black/5",
               isRevealed
                 ? "opacity-0 pointer-events-none translate-y-2"
-                : "opacity-100 translate-y-0",
+                : "opacity-100 translate-y-0"
             )}
           />
         )}
@@ -173,7 +174,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
             isRevealed
               ? "translate-y-0 opacity-100 pointer-events-auto"
               : "translate-y-[calc(100%+1.5rem)] opacity-0 pointer-events-none",
-            splitWindowOpen ? "sm:-translate-x-[200px]" : "translate-x-0",
+            splitWindowOpen ? "sm:-translate-x-[200px]" : "translate-x-0"
           )}
         >
           {/* 1. Anchor / Start Button */}
@@ -201,7 +202,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                   href={app.href}
                   className={cn(
                     "group relative flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50",
-                    isActive ? "bg-black/5" : "hover:bg-black/5",
+                    isActive ? "bg-black/5" : "hover:bg-black/5"
                   )}
                 >
                   <Icon
@@ -209,7 +210,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                       "w-4 h-4 transition-transform duration-300 ease-glass group-hover:scale-110 group-hover:-translate-y-0.5",
                       isActive
                         ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]",
+                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
@@ -218,7 +219,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                       "text-xs font-medium transition-colors duration-300",
                       isActive
                         ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]",
+                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]"
                     )}
                   >
                     {app.name}

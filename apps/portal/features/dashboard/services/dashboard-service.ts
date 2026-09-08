@@ -1,12 +1,12 @@
 "use server";
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import { cacheWrap } from "@repo/redis";
-import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { withSpan } from "@repo/supabase";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 
-import { MonolithizedDashboardPayload } from "../types";
+import type { MonolithizedDashboardPayload } from "../types";
 
 async function fetchDashboard(departmentId: string): Promise<MonolithizedDashboardPayload> {
   const supabase = await createServerSupabaseClient();
@@ -45,7 +45,7 @@ async function fetchDashboard(departmentId: string): Promise<MonolithizedDashboa
  * cached for 15 seconds per department.
  */
 export async function getMonolithizedDashboard(
-  departmentId: string,
+  departmentId: string
 ): Promise<MonolithizedDashboardPayload> {
   const cacheKey = `dept:dashboard:monolith:${departmentId}`;
 
@@ -55,8 +55,8 @@ export async function getMonolithizedDashboard(
       cacheWrap<MonolithizedDashboardPayload>(
         cacheKey,
         async () => fetchDashboard(departmentId),
-        15,
+        15
       ),
-    { departmentId },
+    { departmentId }
   );
 }

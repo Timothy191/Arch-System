@@ -1,9 +1,9 @@
-import { inngest } from "@repo/utils/inngest";
-import { InngestFunction } from "inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { getShiftCompleteness } from "@/lib/shift-completeness";
+import { inngest } from "@repo/utils/inngest";
+import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { getShiftCompleteness } from "@/lib/shift-completeness";
 
 /**
  * Shift Completeness Check Job
@@ -58,12 +58,12 @@ export const shiftCompletenessCheckFn: InngestFunction.Any = inngest.createFunct
           department.id,
           null,
           today,
-          shiftType,
+          shiftType
         );
 
         // AGENT-TRACE: Identify machines without entries
         const missingMachines = completeness.statuses.filter(
-          (status) => !status.exempt && !status.hasEntry,
+          (status) => !status.exempt && !status.hasEntry
         );
 
         // AGENT-TRACE: Check if we're >30 minutes into shift
@@ -111,5 +111,5 @@ export const shiftCompletenessCheckFn: InngestFunction.Any = inngest.createFunct
     } finally {
       recordJobExecution("shift-completeness-check", performance.now() - start, success);
     }
-  },
+  }
 );

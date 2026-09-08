@@ -1,4 +1,4 @@
-import type { Fill, Font, Borders } from "exceljs";
+import type { Borders, Fill, Font } from "exceljs";
 
 type Primitive = string | number | boolean | Date | null | undefined;
 
@@ -80,18 +80,18 @@ export async function exportMultiSheetExcel(sheets: ExcelSheetConfig[], fileName
               acc[col.key] = val ?? "";
               return acc;
             },
-            {} as Record<string, Primitive>,
-          ),
+            {} as Record<string, Primitive>
+          )
         );
       } else {
         ws.addRow(
           sheet.columns.map((col) => {
-            let val = row[col.key];
+            const val = row[col.key];
             if (val instanceof Date) {
               return col.type === "date" ? val.toISOString() : val;
             }
             return val ?? "";
-          }),
+          })
         );
       }
     }
@@ -110,7 +110,7 @@ export async function exportStyledExcel(
     headerFontColor?: string;
     currencyFormat?: string;
     dateFormat?: string;
-  },
+  }
 ) {
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
@@ -157,8 +157,8 @@ export async function exportStyledExcel(
             acc[col.key] = row[col.key];
             return acc;
           },
-          {} as Record<string, Primitive>,
-        ),
+          {} as Record<string, Primitive>
+        )
       );
 
       dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {

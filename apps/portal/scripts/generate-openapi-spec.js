@@ -1,8 +1,8 @@
-import swaggerJsdoc from "swagger-jsdoc";
 import { writeFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import prettier from "prettier";
+import swaggerJsdoc from "swagger-jsdoc";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

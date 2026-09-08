@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { AlertTriangle, RefreshCw, Wifi, WifiOff, Activity } from "lucide-react";
+import { Activity, AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface FuxaFrameProps {
   dashboardId?: string;

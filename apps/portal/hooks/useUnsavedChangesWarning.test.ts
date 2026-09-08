@@ -42,7 +42,7 @@ describe("useUnsavedChangesWarning", () => {
     renderHook(() => useUnsavedChangesWarning(true));
 
     const beforeUnloadCall = (window.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "beforeunload",
+      (call) => call[0] === "beforeunload"
     );
     expect(beforeUnloadCall).toBeDefined();
 
@@ -59,7 +59,7 @@ describe("useUnsavedChangesWarning", () => {
     renderHook(() => useUnsavedChangesWarning(true));
 
     const clickCall = (document.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "click" && call[2] === true,
+      (call) => call[0] === "click" && call[2] === true
     );
     expect(clickCall).toBeDefined();
 
@@ -87,7 +87,7 @@ describe("useUnsavedChangesWarning", () => {
     renderHook(() => useUnsavedChangesWarning(true));
 
     const clickCall = (document.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "click" && call[2] === true,
+      (call) => call[0] === "click" && call[2] === true
     );
     const handler = clickCall[1];
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type ComponentType, type CSSProperties } from "react";
-import { Workflow, Bot, ExternalLink, Wifi, WifiOff } from "lucide-react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Bot, ExternalLink, Wifi, WifiOff, Workflow } from "lucide-react";
+import { type ComponentType, type CSSProperties, useState } from "react";
 
 const ICON_MAP: Record<string, ComponentType<{ className?: string; style?: CSSProperties }>> = {
   Workflow,

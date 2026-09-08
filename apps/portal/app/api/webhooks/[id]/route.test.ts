@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { PUT, DELETE } from "./route";
+
 import { NextRequest } from "next/server";
+import { DELETE, PUT } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -20,7 +21,7 @@ function buildMock(
     employee?: unknown;
     existingWebhook?: unknown;
     updateError?: unknown;
-  } = {},
+  } = {}
 ) {
   const user = overrides.user !== undefined ? overrides.user : { id: "user-1" };
   const employee =

@@ -1,8 +1,8 @@
 import {
-  getWeatherDescription,
-  getWeatherAlert,
-  getWindDirection,
   fetchWeather,
+  getWeatherAlert,
+  getWeatherDescription,
+  getWindDirection,
   searchLocation,
   type WeatherData,
 } from "./weather-api";

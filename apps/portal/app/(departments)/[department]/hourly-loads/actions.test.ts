@@ -29,8 +29,8 @@ describe("updateMachineSite", () => {
     await expect(
       updateMachineSite(
         "12345678-1234-4234-8234-1234567890ab",
-        "87654321-4321-4321-8321-ba0987654321",
-      ),
+        "87654321-4321-4321-8321-ba0987654321"
+      )
     ).rejects.toThrow("Unauthorized");
   });
 
@@ -51,8 +51,8 @@ describe("updateMachineSite", () => {
     await expect(
       updateMachineSite(
         "12345678-1234-4234-8234-1234567890ab",
-        "87654321-4321-4321-8321-ba0987654321",
-      ),
+        "87654321-4321-4321-8321-ba0987654321"
+      )
     ).rejects.toThrow("Unauthorized");
   });
 
@@ -86,7 +86,7 @@ describe("updateMachineSite", () => {
 
     const result = await updateMachineSite(
       "12345678-1234-4234-8234-1234567890ab",
-      "87654321-4321-4321-8321-ba0987654321",
+      "87654321-4321-4321-8321-ba0987654321"
     );
 
     expect(result).toEqual({ success: true });
@@ -126,8 +126,8 @@ describe("updateMachineSite", () => {
     await expect(
       updateMachineSite(
         "12345678-1234-4234-8234-1234567890ab",
-        "87654321-4321-4321-8321-ba0987654321",
-      ),
+        "87654321-4321-4321-8321-ba0987654321"
+      )
     ).rejects.toThrow(dbError);
   });
 });

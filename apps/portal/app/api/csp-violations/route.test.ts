@@ -52,7 +52,7 @@ describe("POST /api/csp-violations", () => {
         blockedUri: "https://evil.example.com",
         documentUri: "https://example.com",
         disposition: "enforce",
-      }),
+      })
     );
   });
 
@@ -81,7 +81,7 @@ describe("POST /api/csp-violations", () => {
         blockedUri: "https://evil.example.com",
         documentUri: "https://example.com",
         disposition: "report",
-      }),
+      })
     );
   });
 

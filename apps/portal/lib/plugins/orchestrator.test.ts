@@ -84,7 +84,7 @@ describe("PluginOrchestrator.executeEngine", () => {
     const { NotFoundError } = await import("@/lib/errors/error-classes");
 
     await expect(pluginOrchestrator.executeEngine("nonexistent-plugin")).rejects.toThrow(
-      NotFoundError,
+      NotFoundError
     );
   });
 
@@ -93,7 +93,7 @@ describe("PluginOrchestrator.executeEngine", () => {
     const { pluginOrchestrator } = await import("./orchestrator");
 
     await expect(pluginOrchestrator.executeEngine("some-missing-id")).rejects.toThrow(
-      "some-missing-id",
+      "some-missing-id"
     );
   });
 });
@@ -109,7 +109,7 @@ describe("PluginOrchestrator.triggerHook", () => {
     await pluginOrchestrator.loadAllPlugins(); // ensure loaded state
 
     await expect(
-      pluginOrchestrator.triggerHook("onLogCreated", { shift: "day" }),
+      pluginOrchestrator.triggerHook("onLogCreated", { shift: "day" })
     ).resolves.toBeUndefined();
   });
 });

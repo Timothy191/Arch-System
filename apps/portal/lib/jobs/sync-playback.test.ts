@@ -93,7 +93,7 @@ describe("syncPlaybackFn", () => {
           timeIn: "07:30",
           reason: "hydraulic leak",
         },
-      }),
+      })
     );
 
     expect(result).toEqual({ success: true });
@@ -107,7 +107,7 @@ describe("syncPlaybackFn", () => {
         status: "active",
         idempotency_key: "key-1",
         sync_status: "synced",
-      }),
+      })
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/[department]/breakdowns", "page");
   });
@@ -126,17 +126,16 @@ describe("syncPlaybackFn", () => {
     expect(result).toEqual({ success: true });
     const update = builderFor("breakdowns").update;
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "completed", sync_status: "synced" }),
+      expect.objectContaining({ status: "completed", sync_status: "synced" })
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/[department]/breakdowns", "page");
   });
-
 
   it("inserts a daily log when none exists", async () => {
     const result = await handler(
       makeEvent("ADD_DAILY_LOG", {
         payload: { logDate: "2026-08-17", shift: "day", notes: "steady production" },
-      }),
+      })
     );
 
     expect(result).toEqual({ success: true });
@@ -146,7 +145,7 @@ describe("syncPlaybackFn", () => {
         log_date: "2026-08-17",
         shift: "day",
         idempotency_key: "key-1",
-      }),
+      })
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/[department]/daily-log", "page");
   });
@@ -160,11 +159,11 @@ describe("syncPlaybackFn", () => {
     insertResult = { error: new Error("insert constraint violated") };
 
     await expect(handler(makeEvent("ADD_BREAKDOWN", { payload: {} }))).rejects.toThrow(
-      "insert constraint violated",
+      "insert constraint violated"
     );
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "sync_playback_job" }),
+      expect.objectContaining({ context: "sync_playback_job" })
     );
   });
 });

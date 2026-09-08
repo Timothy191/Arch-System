@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { POST, clearTelemetryCache } from "./route";
+import { clearTelemetryCache, POST } from "./route";
 
 // Redis is disabled in tests — setRedisLastValue/getRedisLastValue catch the
 // rejection and no-op, so the L1 in-memory cache is the effective dedup store.

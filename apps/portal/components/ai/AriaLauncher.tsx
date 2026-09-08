@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type JSX } from "react";
 import { cn } from "@repo/ui/lib/utils";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { AriaAvatar, type AriaState } from "@/components/ai/AriaAvatar";
 
 /**
@@ -71,7 +71,7 @@ export function AriaLauncher(): JSX.Element {
             // AGENT-TRACE: z-[110] keeps the FAB + panel above transient bottom
             // banners (e.g. consent bar at z-[100]) so they stay clickable.
             "fixed bottom-6 right-6 z-[110] transition-all duration-200",
-            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
           <div

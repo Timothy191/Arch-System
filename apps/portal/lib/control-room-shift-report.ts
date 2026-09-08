@@ -1,12 +1,12 @@
 "use server";
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { controlRoomShiftReportSchema } from "@repo/contract/schemas/control-room.schema";
 import type { ControlRoomShiftReportInput } from "@repo/contract/types/control-room.types";
-import { logAuditEvent } from "./audit";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
+import { logAuditEvent } from "./audit";
 
 // AGENT-TRACE: Lookup key for a shift report — (department, date, shift) is the
 // natural key enforced by the UNIQUE constraint on control_room_shift_reports.
@@ -41,7 +41,7 @@ interface ShiftReportRecord {
  * operator can revise a closeout before the shift is locked.
  */
 export async function submitShiftReport(
-  input: ControlRoomShiftReportInput,
+  input: ControlRoomShiftReportInput
 ): Promise<{ success: true; reportId: string }> {
   // AGENT-TRACE: Validate the full report payload at the boundary — the schema
   // mirrors the table columns so a valid payload maps 1:1 to a row.
@@ -140,7 +140,7 @@ export async function submitShiftReport(
 export async function getShiftReport(
   departmentId: string,
   date: string,
-  shift: "day" | "night",
+  shift: "day" | "night"
 ): Promise<ShiftReportRecord | null> {
   const validated = shiftReportLookupSchema.parse({ departmentId, date, shift });
 

@@ -1,6 +1,6 @@
-import { setup, assign, type SnapshotFrom } from "xstate";
+import { assign, type SnapshotFrom, setup } from "xstate";
 import { pluginMachine } from "./plugin.machine";
-import { OrchestratorContext, OrchestratorEvent, HealthReport, PluginActor } from "./types";
+import type { HealthReport, OrchestratorContext, OrchestratorEvent, PluginActor } from "./types";
 
 // =============================================================================
 // Default Installed Plugins (matches current orchestrator)

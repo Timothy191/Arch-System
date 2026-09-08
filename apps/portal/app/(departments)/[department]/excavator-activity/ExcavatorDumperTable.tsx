@@ -71,7 +71,7 @@ export function ExcavatorDumperTable({
 
     // Look up total loads from hourly_loads for this dumper + shift
     const loadEntry = todayDumperLoads.find(
-      (l) => l.machine_id === dumperId && l.shift_type === shiftType,
+      (l) => l.machine_id === dumperId && l.shift_type === shiftType
     );
     const loads = loadEntry?.total_loads || 0;
     const bcm = loads * binFactor;

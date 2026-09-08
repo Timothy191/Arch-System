@@ -35,7 +35,7 @@ describe("ReportTemplate", () => {
     render(<ReportTemplate data={data} />);
     expect(screen.getByText("Executive Production & Fleet Report")).toBeInTheDocument();
     expect(
-      screen.getByText("Generated on 2026-08-17 — Month-to-date analysis"),
+      screen.getByText("Generated on 2026-08-17 — Month-to-date analysis")
     ).toBeInTheDocument();
     expect(screen.getByText("Key Performance Indicators")).toBeInTheDocument();
     expect(screen.getByText("Operational Details")).toBeInTheDocument();

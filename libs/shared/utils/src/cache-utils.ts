@@ -1,11 +1,11 @@
+import { DatabaseError } from "@repo/errors";
 import {
+  buildCacheKey,
+  CACHE_TTL_REGISTRY,
+  type CacheCategory,
   cacheGetWithStats,
   cacheSetWithTags,
-  CacheCategory,
-  CACHE_TTL_REGISTRY,
-  buildCacheKey,
 } from "@repo/redis";
-import { DatabaseError } from "@repo/errors";
 
 interface WithCacheOptions {
   category: CacheCategory;

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Search, Download } from "lucide-react";
+import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Badge } from "@repo/ui/components/ui/badge";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { Pagination } from "@repo/ui/Pagination";
+import { Download, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 
 interface AuditLog {
@@ -68,7 +68,7 @@ export function AuditLogsTab() {
     size: number,
     search: string,
     action: string,
-    table: string,
+    table: string
   ) => {
     setLoading(true);
 

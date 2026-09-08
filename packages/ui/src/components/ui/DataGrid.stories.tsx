@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { DataGrid } from "./data-grid";
 import React from "react";
+import { DataGrid } from "./data-grid";
 
 const meta: Meta<typeof DataGrid> = {
   title: "UI/DataGrid",

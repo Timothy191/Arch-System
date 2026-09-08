@@ -1,10 +1,10 @@
+import { scannerBadgeSchema } from "@repo/contract/schemas/scanner.schema";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { NextResponse } from "next/server";
-import { logError } from "@/lib/errors/error-logger";
-import { validateBody } from "@/lib/api/response";
-import { applyCors } from "@/lib/api/cors";
 import { withBodyLimit } from "@/lib/api/body-limit";
-import { scannerBadgeSchema } from "@repo/contract/schemas/scanner.schema";
+import { applyCors } from "@/lib/api/cors";
+import { validateBody } from "@/lib/api/response";
+import { logError } from "@/lib/errors/error-logger";
 
 /**
  * @swagger
@@ -132,7 +132,7 @@ import { scannerBadgeSchema } from "@repo/contract/schemas/scanner.schema";
  */
 
 const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(",").map((s) =>
-  s.trim(),
+  s.trim()
 ) || ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
 
 export async function OPTIONS(request: Request) {
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
       const response = await handlePost(request);
       return applyCors(request, response);
     },
-    { maxSize: 65536 },
+    { maxSize: 65536 }
   );
 }
 
@@ -160,14 +160,14 @@ async function handlePost(request: Request) {
     if (!expectedToken || token !== expectedToken) {
       return NextResponse.json(
         { success: false, error: "Unauthorized scanner token" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
     if (!ALLOWED_SCANNER_SOURCES.includes(source)) {
       return NextResponse.json(
         { success: false, error: "Unauthorized scanner source" },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -197,30 +197,72 @@ async function handlePost(request: Request) {
     // 1. Find the Badge by QR Code or RFID Chip UID
     const selectQuery = supabase
       .from("badges")
-      .select("id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id");
+      .select(
+        "id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id"
+      );
 
-    const badgeResult = typeof (selectQuery as any).or === "function"
-      ? await (selectQuery as any).or(`qr_code.eq.${code},rfid_code.eq.${code}`).maybeSingle()
-      : await (selectQuery as any).eq("qr_code", code).single();
+    const badgeResult =
+      typeof (selectQuery as any).or === "function"
+        ? await (selectQuery as any).or(`qr_code.eq.${code},rfid_code.eq.${code}`).maybeSingle()
+        : await (selectQuery as any).eq("qr_code", code).single();
 
     const badge = badgeResult?.data;
     const badgeError = badgeResult?.error;
 
     if (badgeError || !badge) {
       // Badge not found in database at all
-      await logAccess(supabase, null, "UNKNOWN", "DENIED - Unrecognized Badge / RFID", gateLocation, false, null, direction, deviceId, operator, alcoholTested);
-      return NextResponse.json({ success: false, name: "Unrecognized Badge / RFID" }, { status: 404 });
+      await logAccess(
+        supabase,
+        null,
+        "UNKNOWN",
+        "DENIED - Unrecognized Badge / RFID",
+        gateLocation,
+        false,
+        null,
+        direction,
+        deviceId,
+        operator,
+        alcoholTested
+      );
+      return NextResponse.json(
+        { success: false, name: "Unrecognized Badge / RFID" },
+        { status: 404 }
+      );
     }
 
     if (!badge.is_active) {
       // Badge revoked
-      await logAccess(supabase, badge.id, badge.entity_type, "DENIED - Badge Revoked", gateLocation, false, badge.department_id, direction, deviceId, operator, alcoholTested);
+      await logAccess(
+        supabase,
+        badge.id,
+        badge.entity_type,
+        "DENIED - Badge Revoked",
+        gateLocation,
+        false,
+        badge.department_id,
+        direction,
+        deviceId,
+        operator,
+        alcoholTested
+      );
       return NextResponse.json({ success: false, name: "Revoked Badge" }, { status: 403 });
     }
 
     if (badge.expires_at && new Date(badge.expires_at) < new Date()) {
       // Credential expired
-      await logAccess(supabase, badge.id, badge.entity_type, "DENIED - Credential Expired", gateLocation, false, badge.department_id, direction, deviceId, operator, alcoholTested);
+      await logAccess(
+        supabase,
+        badge.id,
+        badge.entity_type,
+        "DENIED - Credential Expired",
+        gateLocation,
+        false,
+        badge.department_id,
+        direction,
+        deviceId,
+        operator,
+        alcoholTested
+      );
       return NextResponse.json({ success: false, name: "Expired Credential" }, { status: 403 });
     }
 
@@ -263,7 +305,10 @@ async function handlePost(request: Request) {
           denialReason = `DENIED - Visitor Status: ${visitor.status}`;
         }
       }
-    } else if ((badge.entity_type === "vehicle" || badge.entity_type === "fleet") && badge.fleet_id) {
+    } else if (
+      (badge.entity_type === "vehicle" || badge.entity_type === "fleet") &&
+      badge.fleet_id
+    ) {
       const { data: fleetUnit } = await supabase
         .from("fleet")
         .select("fleet_code, vehicle_type, registration_number, make, model, status")
@@ -271,8 +316,9 @@ async function handlePost(request: Request) {
         .single();
       if (fleetUnit) {
         const isCoalTruck = fleetUnit.vehicle_type?.toLowerCase().includes("coal");
-        const prefix = isCoalTruck ? "Coal Truck" : (fleetUnit.vehicle_type || "Vehicle");
-        entityName = `${prefix}: ${fleetUnit.fleet_code} [${fleetUnit.registration_number || "No Plate"}] (${fleetUnit.make || ""} ${fleetUnit.model || ""})`.trim();
+        const prefix = isCoalTruck ? "Coal Truck" : fleetUnit.vehicle_type || "Vehicle";
+        entityName =
+          `${prefix}: ${fleetUnit.fleet_code} [${fleetUnit.registration_number || "No Plate"}] (${fleetUnit.make || ""} ${fleetUnit.model || ""})`.trim();
         if (fleetUnit.status !== "Active") {
           isAuthorized = false;
           denialReason = `DENIED - Vehicle Status: ${fleetUnit.status}`;
@@ -308,7 +354,7 @@ async function handlePost(request: Request) {
       direction,
       deviceId,
       operator,
-      alcoholTested,
+      alcoholTested
     );
 
     return NextResponse.json({
@@ -337,7 +383,7 @@ async function logAccess(
   direction: string = "IN",
   deviceId: string | null = null,
   operator: string | null = null,
-  alcoholTested: string = "Approved",
+  alcoholTested: string = "Approved"
 ) {
   const { error } = await supabase.from("access_logs").insert([
     {

@@ -28,7 +28,7 @@ const SIZE_CLASSES: Record<number, { container: string; font: string }> = {
 export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   (
     { src, letter, username, title, size = 32, placeholder = false, className, style, ...props },
-    ref,
+    ref
   ) => {
     const [imageFailed, setImageFailed] = React.useState(false);
 
@@ -88,7 +88,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           className={cn(
             "relative rounded-full shrink-0 bg-black/[0.08] dark:bg-white/[0.1] animate-pulse",
             sizeConfig.container,
-            className,
+            className
           )}
           {...props}
         />
@@ -110,7 +110,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           "border border-black/[0.08] dark:border-white/[0.12] shadow-sm",
           "bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200",
           sizeConfig.container,
-          className,
+          className
         )}
         {...props}
       >
@@ -126,7 +126,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           <span
             className={cn(
               "font-medium tracking-wide uppercase leading-none select-none",
-              sizeConfig.font,
+              sizeConfig.font
             )}
           >
             {computedLetter}
@@ -143,7 +143,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 Avatar.displayName = "Avatar";

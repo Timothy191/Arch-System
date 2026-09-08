@@ -1,9 +1,9 @@
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
-import { ViewportBoundaries } from "./ViewportBoundaries";
-import { useSystemMetrics } from "@/hooks/useSystemMetrics";
-import { useSplitWindow } from "@/hooks/useSplitWindow";
 import { useDockPreferences } from "@/hooks/useDockPreferences";
+import { useSplitWindow } from "@/hooks/useSplitWindow";
+import { useSystemMetrics } from "@/hooks/useSystemMetrics";
+import { ViewportBoundaries } from "./ViewportBoundaries";
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/hub",
@@ -28,7 +28,7 @@ describe("ViewportBoundaries component", () => {
       online: true,
     });
     (useSplitWindow as unknown as jest.Mock).mockImplementation((selector: any) =>
-      selector({ isOpen: false }),
+      selector({ isOpen: false })
     );
   });
 
@@ -55,7 +55,7 @@ describe("ViewportBoundaries component", () => {
 
   it("should apply shift class when split window is open", () => {
     (useSplitWindow as unknown as jest.Mock).mockImplementation((selector: any) =>
-      selector({ isOpen: true }),
+      selector({ isOpen: true })
     );
     render(<ViewportBoundaries />);
     const dock = screen.getByTestId("unified-dock");
@@ -155,4 +155,3 @@ describe("ViewportBoundaries component", () => {
     });
   });
 });
-

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ArchPlugin } from "@/lib/plugins/types";
 import { APIError } from "@repo/errors";
+import React, { useEffect, useState } from "react";
+import type { ArchPlugin } from "@/lib/plugins/types";
 
 // Types matching our Rust binary JSON output contract
 interface RustTelemetryData {

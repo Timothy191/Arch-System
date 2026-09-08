@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ControlRoomActivityFeed } from "./ControlRoomActivityFeed";
 
 jest.mock("@repo/supabase/client", () => ({

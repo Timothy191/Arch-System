@@ -1,33 +1,32 @@
-import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import {
-  AlertTicker,
-  ProductionTrendWrapper as ProductionTrend,
-  HeroBackground,
-  HeroRotator,
-  ToolBanner,
-  DepartmentReviews,
-  CoreOperationalModules,
-} from "@/features/hub";
-import type { AlertEvent } from "@/features/hub";
-import type { TrendDataPoint } from "@/features/hub";
-import { getTools } from "@/lib/tools";
 import {
   DEPARTMENTS,
-  fetchLiveDepartmentMetrics,
   type DepartmentLiveMetricsMap,
+  fetchLiveDepartmentMetrics,
 } from "@repo/departments/data-access";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Shield, Activity, Wrench as WrenchIcon, BarChart3, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
-import { withCache } from "@/lib/cache-utils";
-import { cachedRSC } from "@/lib/server-cache";
 import { CacheCategory } from "@repo/redis";
-import { getAccessibleDepartmentNames, getEmployeeRole } from "@/lib/hub-departments";
+import { createReadReplicaClient } from "@repo/supabase/read-replica";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Activity, ArrowUpRight, BarChart3, Shield, Wrench as WrenchIcon } from "lucide-react";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import type { AlertEvent, TrendDataPoint } from "@/features/hub";
+import {
+  AlertTicker,
+  CoreOperationalModules,
+  DepartmentReviews,
+  HeroBackground,
+  HeroRotator,
+  ProductionTrendWrapper as ProductionTrend,
+  ToolBanner,
+} from "@/features/hub";
+import { withCache } from "@/lib/cache-utils";
+import { getAccessibleDepartmentNames, getEmployeeRole } from "@/lib/hub-departments";
+import { cachedRSC } from "@/lib/server-cache";
+import { getTools } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
@@ -37,10 +36,9 @@ export const metadata: Metadata = {
     "Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, and satellite monitoring dashboards.",
 };
 
-
 async function getDashboardCounts(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ) {
   return cachedRSC(
     ["hub", "counts", today],
@@ -66,14 +64,14 @@ async function getDashboardCounts(
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "counts", today],
-          tags: [ "table:breakdowns", "table:machines"],
-        },
+          tags: ["table:breakdowns", "table:machines"],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: [ "table:breakdowns", "table:machines"],
-    },
+      tags: ["table:breakdowns", "table:machines"],
+    }
   );
 }
 
@@ -92,7 +90,7 @@ const FALLBACK_TREND_DATA: TrendDataPoint[] = [
 ];
 
 async function getProductionTrendData(
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<ProductionTrendResult> {
   return cachedRSC(
     ["hub", "production-trend"],
@@ -139,19 +137,19 @@ async function getProductionTrendData(
           category: CacheCategory.METRICS,
           keyParts: ["hub", "production-trend"],
           tags: ["table:hourly_loads", "table:machines"],
-        },
+        }
       );
     },
     {
       revalidate: 300,
       tags: ["table:hourly_loads", "table:machines"],
-    },
+    }
   );
 }
 
 async function getRecentAlertEvents(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<AlertEvent[]> {
   return cachedRSC(
     ["hub", "alerts", today],
@@ -195,14 +193,14 @@ async function getRecentAlertEvents(
         {
           category: CacheCategory.METRICS,
           keyParts: ["hub", "alerts", today],
-          tags: [ "table:breakdowns"],
-        },
+          tags: ["table:breakdowns"],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: [ "table:breakdowns"],
-    },
+      tags: ["table:breakdowns"],
+    }
   );
 }
 
@@ -211,7 +209,7 @@ async function getRecentAlertEvents(
 
 async function getLiveDepartmentMetrics(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<DepartmentLiveMetricsMap> {
   return cachedRSC(
     ["hub", "live-department-metrics", today],
@@ -228,11 +226,11 @@ async function getLiveDepartmentMetrics(
             "table:hourly_loads",
             "table:daily_logs",
             "table:production_logs",
-            
+
             "table:breakdowns",
             "table:machines",
           ],
-        },
+        }
       );
     },
     {
@@ -241,11 +239,11 @@ async function getLiveDepartmentMetrics(
         "table:hourly_loads",
         "table:daily_logs",
         "table:production_logs",
-        
+
         "table:breakdowns",
         "table:machines",
       ],
-    },
+    }
   );
 }
 
@@ -353,12 +351,7 @@ export default async function HubPage() {
           primaryLabel={
             accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
           }
-          secondaryHref={
-            accessibleDeptIds.length > 0
-              ? `/${accessibleDeptIds[0]}`
-              : "/"
-          }
-
+          secondaryHref={accessibleDeptIds.length > 0 ? `/${accessibleDeptIds[0]}` : "/"}
           secondaryLabel="System Guidelines"
           departments={departments}
           incidentCount={incidentCount}

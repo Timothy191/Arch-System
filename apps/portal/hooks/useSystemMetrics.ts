@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { getThreeShift } from "@repo/utils";
+import { useEffect, useState } from "react";
 
 interface SystemMetrics {
   websocketLatency: number; // mock latency in ms

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Download, ChevronDown, FileSpreadsheet, FileText } from "lucide-react";
+import { ChevronDown, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface ExportButtonProps {
   filename: string;
@@ -14,7 +14,7 @@ function rowsToCsv(rows: Record<string, unknown>[]): string {
   const lines = [
     headers.map((h) => `"${h}"`).join(","),
     ...rows.map((row) =>
-      headers.map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","),
+      headers.map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(",")
     ),
   ];
   return lines.join("\n");

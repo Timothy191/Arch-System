@@ -1,11 +1,11 @@
-import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Input } from "@repo/ui/Input";
 import Link from "next/link";
-import { getShiftCompleteness } from "@/lib/shift-completeness";
-import { CopyReportButton } from "./CopyReportButton";
 import { ExportButton } from "@/features/analytics/components/ExportButton";
 import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
+import { getShiftCompleteness } from "@/lib/shift-completeness";
+import { getDepartmentContext } from "~/lib/dept-context";
+import { CopyReportButton } from "./CopyReportButton";
 
 export default async function ReportsPage({
   params,
@@ -57,7 +57,7 @@ export default async function ReportsPage({
       supabase
         .from("excavator_dumper_assignments")
         .select(
-          "total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))",
+          "total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))"
         )
         .eq("excavator_activity.department_id", deptId)
         .gte("excavator_activity.activity_date", fromDateStr)
@@ -208,7 +208,7 @@ export default async function ReportsPage({
       deptId,
       deptSlug,
       todayStr,
-      currentShift,
+      currentShift
     );
 
     if (!completeness.complete) {
@@ -451,7 +451,7 @@ export default async function ReportsPage({
   machineHours?.forEach((m) => {
     machineHoursByLog.set(
       m.daily_log_id,
-      (machineHoursByLog.get(m.daily_log_id) || 0) + (m.hours_worked || 0),
+      (machineHoursByLog.get(m.daily_log_id) || 0) + (m.hours_worked || 0)
     );
   });
 
@@ -459,7 +459,7 @@ export default async function ReportsPage({
   fuelLogs?.forEach((f) => {
     fuelLogsByLog.set(
       f.daily_log_id,
-      (fuelLogsByLog.get(f.daily_log_id) || 0) + (f.diesel_litres || 0),
+      (fuelLogsByLog.get(f.daily_log_id) || 0) + (f.diesel_litres || 0)
     );
   });
 

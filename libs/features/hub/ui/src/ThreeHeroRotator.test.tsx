@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import type { Panel } from "@repo/ui/HeroRotator";
 import { ThreeHeroRotator } from "@repo/ui/ThreeHeroRotator";
 import { ThreeHeroRotatorDynamic } from "@repo/ui/ThreeHeroRotatorDynamic";
-import { Panel } from "@repo/ui/HeroRotator";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@react-three/fiber", () => {
   const React = jest.requireActual("react") as typeof import("react");
@@ -22,7 +22,7 @@ jest.mock("@react-three/drei", () => {
 
 jest.mock("next/dynamic", () => () => {
   const { ThreeHeroRotator: ActualThreeHeroRotator } = jest.requireActual(
-    "@repo/ui/ThreeHeroRotator",
+    "@repo/ui/ThreeHeroRotator"
   );
   return ActualThreeHeroRotator;
 });
@@ -96,7 +96,7 @@ describe("ThreeHeroRotator", () => {
   it("removes inactive CTA links from the tab order", () => {
     const { container } = render(<ThreeHeroRotator panels={mockPanels} />);
     const primaryCtas = Array.from(
-      container.querySelectorAll<HTMLAnchorElement>('[data-cta="primary-hero"]'),
+      container.querySelectorAll<HTMLAnchorElement>('[data-cta="primary-hero"]')
     );
     expect(primaryCtas).toHaveLength(3);
     expect(primaryCtas[0]).toHaveAttribute("tabindex", "0");
@@ -112,13 +112,13 @@ describe("ThreeHeroRotator", () => {
     fireEvent.click(nextBtn);
     expect(screen.getByLabelText("2 of 3: Drilling Operations")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
 
     fireEvent.click(prevBtn);
     expect(screen.getByLabelText("1 of 3: System Overview")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
   });
 
@@ -137,13 +137,13 @@ describe("ThreeHeroRotator", () => {
     fireEvent.keyDown(carousel, { key: "ArrowRight" });
     expect(screen.getByLabelText("2 of 3: Drilling Operations")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
 
     fireEvent.keyDown(carousel, { key: "ArrowLeft" });
     expect(screen.getByLabelText("1 of 3: System Overview")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
 
     // Pause toggle with Space
@@ -165,7 +165,7 @@ describe("ThreeHeroRotator", () => {
     });
     expect(screen.getByLabelText("2 of 3: Drilling Operations")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
 
     // Swipe right to retreat
@@ -177,7 +177,7 @@ describe("ThreeHeroRotator", () => {
     });
     expect(screen.getByLabelText("1 of 3: System Overview")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
   });
 
@@ -188,7 +188,7 @@ describe("ThreeHeroRotator", () => {
         incidentCount={2}
         breakdownCount={1}
         offlineMachineCount={3}
-      />,
+      />
     );
 
     expect(screen.getAllByText("2 Open").length).toBeGreaterThan(0);

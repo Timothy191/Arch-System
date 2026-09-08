@@ -38,7 +38,7 @@ export function useUnsavedChangesWarning(isDirty: boolean) {
           (href.startsWith("/") || href.startsWith(window.location.origin))
         ) {
           const confirmLeave = window.confirm(
-            "You have unsaved changes. Are you sure you want to leave?",
+            "You have unsaved changes. Are you sure you want to leave?"
           );
           if (!confirmLeave) {
             e.preventDefault();
@@ -54,7 +54,7 @@ export function useUnsavedChangesWarning(isDirty: boolean) {
     // 3. Handle browser back/forward buttons (popstate)
     const handlePopState = () => {
       const confirmLeave = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
+        "You have unsaved changes. Are you sure you want to leave?"
       );
       if (!confirmLeave) {
         // Push state again to restore the current URL

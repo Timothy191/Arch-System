@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -50,10 +51,10 @@ function createSupabase(overrides: {
   departmentsQuery?: unknown;
 }) {
   const machinesBuilder = createQueryBuilder(
-    overrides.machinesQuery ?? { data: [], count: 0, error: null },
+    overrides.machinesQuery ?? { data: [], count: 0, error: null }
   );
   const departmentsBuilder = createQueryBuilder(
-    overrides.departmentsQuery ?? { data: null, error: null },
+    overrides.departmentsQuery ?? { data: null, error: null }
   );
 
   const from = jest.fn((table: string) => {
@@ -87,7 +88,7 @@ describe("GET /api/export/machines", () => {
 
   it("returns 400 for invalid query parameters", async () => {
     createServerSupabaseClient.mockResolvedValue(
-      createSupabase({ authUser: { user: { id: "1" } } }),
+      createSupabase({ authUser: { user: { id: "1" } } })
     );
 
     const req = new NextRequest("http://localhost/api/export/machines?limit=bad");
@@ -117,7 +118,7 @@ describe("GET /api/export/machines", () => {
           error: null,
         },
         departmentsQuery: { data: { id: "dept-1" }, error: null },
-      }),
+      })
     );
 
     const req = new NextRequest("http://localhost/api/export/machines?dept=Mining", {
@@ -153,7 +154,7 @@ describe("GET /api/export/machines", () => {
           count: 1,
           error: null,
         },
-      }),
+      })
     );
 
     const req = new NextRequest("http://localhost/api/export/machines", {
@@ -172,7 +173,7 @@ describe("GET /api/export/machines", () => {
       createSupabase({
         authUser: { user: { id: "1" } },
         machinesQuery: { data: null, error: { message: "db error" }, count: 0 },
-      }),
+      })
     );
 
     const req = new NextRequest("http://localhost/api/export/machines");

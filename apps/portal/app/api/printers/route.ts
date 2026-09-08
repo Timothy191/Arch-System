@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient, createBearerSupabaseClient } from "@repo/supabase/server";
+import { createBearerSupabaseClient, createServerSupabaseClient } from "@repo/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 function getClient(request?: NextRequest) {
   const authHeader = request?.headers?.get("authorization");
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       if (error.code === "23505") {
         return NextResponse.json(
           { error: "A printer with this CUPS name is already registered" },
-          { status: 409 },
+          { status: 409 }
         );
       }
       throw error;

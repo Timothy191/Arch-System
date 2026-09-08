@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { GlassCard } from "@repo/ui/GlassCard";
 import {
-  ShieldCheck,
-  FileText,
   AlertTriangle,
-  ClipboardList,
-  History,
-  RefreshCw,
   CheckCircle2,
+  ClipboardList,
+  FileText,
+  History,
   Lock,
   Palette,
+  RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { useEffect, useState } from "react";
 
 interface AuditLogMeta {
   id: string;
@@ -48,7 +48,10 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
   const flushTable = (keyPrefix: string) => {
     if (inTable && tableRows.length > 0) {
       elements.push(
-        <div key={`${keyPrefix}-table`} className="my-4 overflow-x-auto rounded-lg border border-arch-border-subtle shadow-card">
+        <div
+          key={`${keyPrefix}-table`}
+          className="my-4 overflow-x-auto rounded-lg border border-arch-border-subtle shadow-card"
+        >
           <table className="w-full text-left text-sm">
             <thead className="bg-arch-surface-tertiary/70 text-arch-text-primary text-xs font-semibold uppercase tracking-wider border-b border-arch-border-subtle">
               <tr>
@@ -63,7 +66,10 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
               {tableRows.map((row, rIdx) => (
                 <tr key={rIdx} className="hover:bg-arch-surface-secondary/40 transition-colors">
                   {row.map((cell, cIdx) => (
-                    <td key={cIdx} className="px-4 py-2.5 text-arch-text-secondary font-mono text-xs">
+                    <td
+                      key={cIdx}
+                      className="px-4 py-2.5 text-arch-text-secondary font-mono text-xs"
+                    >
                       {cell.trim()}
                     </td>
                   ))}
@@ -71,7 +77,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
               ))}
             </tbody>
           </table>
-        </div>,
+        </div>
       );
       inTable = false;
       tableHeader = [];
@@ -101,43 +107,58 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
 
     if (trimmed.startsWith("# ")) {
       elements.push(
-        <h1 key={idx} className="text-2xl font-bold text-arch-text-primary mt-6 mb-3 flex items-center gap-2 border-b border-arch-border-subtle pb-2">
+        <h1
+          key={idx}
+          className="text-2xl font-bold text-arch-text-primary mt-6 mb-3 flex items-center gap-2 border-b border-arch-border-subtle pb-2"
+        >
           {trimmed.slice(2)}
-        </h1>,
+        </h1>
       );
     } else if (trimmed.startsWith("## ")) {
       elements.push(
-        <h2 key={idx} className="text-lg font-semibold text-arch-text-primary mt-5 mb-2 flex items-center gap-2">
+        <h2
+          key={idx}
+          className="text-lg font-semibold text-arch-text-primary mt-5 mb-2 flex items-center gap-2"
+        >
           {trimmed.slice(3)}
-        </h2>,
+        </h2>
       );
     } else if (trimmed.startsWith("### ")) {
       elements.push(
         <h3 key={idx} className="text-md font-medium text-arch-text-secondary mt-4 mb-1">
           {trimmed.slice(4)}
-        </h3>,
+        </h3>
       );
     } else if (trimmed.startsWith("- [ ]") || trimmed.startsWith("- [x]")) {
       const isChecked = trimmed.startsWith("- [x]");
       const text = trimmed.slice(6);
       elements.push(
-        <div key={idx} className="flex items-start gap-2.5 my-1.5 p-2 rounded-md bg-arch-surface-secondary/60 border border-arch-border-subtle text-sm">
+        <div
+          key={idx}
+          className="flex items-start gap-2.5 my-1.5 p-2 rounded-md bg-arch-surface-secondary/60 border border-arch-border-subtle text-sm"
+        >
           <input
             type="checkbox"
             checked={isChecked}
             readOnly
             className="mt-0.5 rounded border-arch-border-emphasis text-accent-blue focus:ring-accent-blue"
           />
-          <span className={isChecked ? "line-through text-arch-text-tertiary" : "text-arch-text-primary font-medium"}>
+          <span
+            className={
+              isChecked
+                ? "line-through text-arch-text-tertiary"
+                : "text-arch-text-primary font-medium"
+            }
+          >
             {text}
           </span>
-        </div>,
+        </div>
       );
     } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
       elements.push(
         <li key={idx} className="ml-5 list-disc text-sm text-arch-text-secondary my-1">
           {trimmed.slice(2)}
-        </li>,
+        </li>
       );
     } else if (trimmed.startsWith("```")) {
       // Code block boundary handled simply
@@ -180,12 +201,17 @@ export function AuditReportsSection() {
     fetchAuditData(selectedLogId);
   }, [selectedLogId]);
 
-  const activeMeta = data?.manifest?.find((m) => m.id === selectedLogId || m.folderName === selectedLogId) || data?.manifest?.[0];
+  const activeMeta =
+    data?.manifest?.find((m) => m.id === selectedLogId || m.folderName === selectedLogId) ||
+    data?.manifest?.[0];
 
   return (
     <div className="space-y-6">
       {/* Top Header & Log Selector Bar */}
-      <GlassCard variant="default" className="p-6 bg-white/70 border-arch-border-subtle shadow-card">
+      <GlassCard
+        variant="default"
+        className="p-6 bg-white/70 border-arch-border-subtle shadow-card"
+      >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-accent-blue/10 text-accent-blue border border-accent-blue/20">
@@ -201,7 +227,8 @@ export function AuditReportsSection() {
                 )}
               </h2>
               <p className="text-xs text-arch-text-secondary mt-0.5">
-                Versioned security, PostgreSQL RLS policies, and OKLCH design system validation reports
+                Versioned security, PostgreSQL RLS policies, and OKLCH design system validation
+                reports
               </p>
             </div>
           </div>
@@ -218,7 +245,12 @@ export function AuditReportsSection() {
               >
                 <option value="latest">Latest Audit (.audit/latest)</option>
                 {data?.manifest
-                  ?.filter((log, index, self) => self.findIndex((item) => (item.folderName || item.id) === (log.folderName || log.id)) === index)
+                  ?.filter(
+                    (log, index, self) =>
+                      self.findIndex(
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
+                  )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>
                       {log.folderName} — Score: {log.score}% ({log.overallStatus})
@@ -267,7 +299,9 @@ export function AuditReportsSection() {
             </div>
             <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
               <span className="text-xs text-arch-text-tertiary block">Critical Violations</span>
-              <span className={`text-lg font-bold font-mono ${activeMeta.criticalCount > 0 ? "text-accent-red" : "text-arch-text-primary"}`}>
+              <span
+                className={`text-lg font-bold font-mono ${activeMeta.criticalCount > 0 ? "text-accent-red" : "text-arch-text-primary"}`}
+              >
                 {activeMeta.criticalCount}
               </span>
             </div>
@@ -306,7 +340,9 @@ export function AuditReportsSection() {
         >
           <ClipboardList className="w-4 h-4" />
           <span>Required Actions</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">required-actions.md</span>
+          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">
+            required-actions.md
+          </span>
         </button>
 
         <button
@@ -319,7 +355,9 @@ export function AuditReportsSection() {
         >
           <Palette className="w-4 h-4" />
           <span>Design Audit</span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">design-report.md</span>
+          <span className="text-xs px-1.5 py-0.5 rounded bg-white/20 font-mono">
+            design-report.md
+          </span>
         </button>
 
         <button
@@ -337,17 +375,26 @@ export function AuditReportsSection() {
       </div>
 
       {/* Report Content Panel */}
-      <GlassCard variant="default" className="p-6 bg-white/70 border-arch-border-subtle shadow-card min-h-[400px]">
+      <GlassCard
+        variant="default"
+        className="p-6 bg-white/70 border-arch-border-subtle shadow-card min-h-[400px]"
+      >
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <RefreshCw className="w-6 h-6 animate-spin text-accent-blue" />
-            <span className="text-xs text-arch-text-tertiary font-mono">Loading audit report contents...</span>
+            <span className="text-xs text-arch-text-tertiary font-mono">
+              Loading audit report contents...
+            </span>
           </div>
         ) : (
           <div className="prose max-w-none">
             {activeTab === "results" && <SimpleMarkdownRenderer content={data?.results || ""} />}
-            {activeTab === "actions" && <SimpleMarkdownRenderer content={data?.requiredActions || ""} />}
-            {activeTab === "design" && <SimpleMarkdownRenderer content={data?.designReport || ""} />}
+            {activeTab === "actions" && (
+              <SimpleMarkdownRenderer content={data?.requiredActions || ""} />
+            )}
+            {activeTab === "design" && (
+              <SimpleMarkdownRenderer content={data?.designReport || ""} />
+            )}
             {activeTab === "rls" && <SimpleMarkdownRenderer content={data?.rlsReport || ""} />}
           </div>
         )}

@@ -184,12 +184,13 @@
  *       500:
  *         description: Internal server error
  */
-import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { RateLimiter, RedisStore, FixedWindowStrategy } from "@repo/rate-limiter";
+
+import { FixedWindowStrategy, RateLimiter, RedisStore } from "@repo/rate-limiter";
 import { getRedisClient } from "@repo/redis";
+import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServiceRoleClient } from "@repo/supabase/service-role";
+import { type NextRequest, NextResponse } from "next/server";
+import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
 const OPERATIONAL_TABLES = new Set([
   "machines",
@@ -268,7 +269,7 @@ async function assertAdmin() {
 
 async function handleGetRequest(
   _request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -288,7 +289,7 @@ async function handleGetRequest(
   const orderDir = searchParams.get("order_dir") === "asc" ? "asc" : "desc";
 
   const serviceRole = createServiceRoleClient();
-  let query = serviceRole
+  const query = serviceRole
     .from(table)
     .select("*", { count: "exact" })
     .order(orderBy, { ascending: orderDir === "asc" })
@@ -305,14 +306,14 @@ async function handleGetRequest(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   return withRateLimit(request, () => handleGetRequest(request, { params }));
 }
 
 async function handlePutRequest(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -343,7 +344,7 @@ async function handlePutRequest(
             error: "Too many status updates for this machine. Please try again later.",
             retryAfter: rateLimitResult.retryAfter,
           },
-          { status: 429 },
+          { status: 429 }
         );
       }
     }
@@ -373,14 +374,14 @@ async function handlePutRequest(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   return withRateLimit(request, () => handlePutRequest(request, { params }));
 }
 
 async function handleDeleteRequest(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -422,7 +423,7 @@ async function handleDeleteRequest(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> },
+  { params }: { params: Promise<{ table: string }> }
 ) {
   return withRateLimit(request, () => handleDeleteRequest(request, { params }));
 }

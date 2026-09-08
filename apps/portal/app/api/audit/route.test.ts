@@ -1,9 +1,10 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import fs from "node:fs";
 import path from "node:path";
+import { GET } from "./route";
 
 jest.mock("node:fs", () => ({
   existsSync: jest.fn(),
@@ -26,14 +27,14 @@ function buildFsScenario(
     pathJoin?: (..._args: string[]) => string;
     pathDirname?: (_p: string | Buffer | URL) => string;
     pathResolve?: (..._p: string[]) => string;
-  } = {},
+  } = {}
 ) {
   mockFs.existsSync.mockImplementation(overrides.existsSync || (() => false));
   mockFs.readFileSync.mockImplementation(overrides.readFileSync || (() => "{}"));
   mockPath.join.mockImplementation(overrides.pathJoin || ((...args) => args.join("/")));
   mockPath.dirname.mockImplementation(
     overrides.dirname ||
-      ((p) => (typeof p === "string" ? p.slice(0, p.lastIndexOf("/") || 1) : String(p))),
+      ((p) => (typeof p === "string" ? p.slice(0, p.lastIndexOf("/") || 1) : String(p)))
   );
   mockPath.resolve.mockImplementation(overrides.pathResolve || ((...args) => args.join("/")));
 }

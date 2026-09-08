@@ -1,5 +1,5 @@
-import { inngest } from "@repo/utils/inngest";
 import { createServiceRoleClient } from "@repo/supabase/service-role";
+import { inngest } from "@repo/utils/inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -16,7 +16,7 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  * Action: Flag for admin review, create cleanup job
  */
 
-import { InngestFunction } from "inngest";
+import type { InngestFunction } from "inngest";
 
 export const orphanedRecordDetectionFn: InngestFunction.Any = inngest.createFunction(
   {
@@ -71,7 +71,7 @@ export const orphanedRecordDetectionFn: InngestFunction.Any = inngest.createFunc
           type: "hourly_loads_orphaned_machine",
           count: orphanedLoads.length,
           details: orphanedLoads.map(
-            (load) => `ID: ${load.id}, Machine ID: ${load.machine_id}, Date: ${load.load_date}`,
+            (load) => `ID: ${load.id}, Machine ID: ${load.machine_id}, Date: ${load.load_date}`
           ),
         });
 
@@ -129,7 +129,7 @@ export const orphanedRecordDetectionFn: InngestFunction.Any = inngest.createFunc
           type: "invalid_department_id_in_shift_status",
           count: invalidShiftStatus.length,
           details: invalidShiftStatus.map(
-            (shift) => `ID: ${shift.id}, Dept ID: ${shift.department_id}`,
+            (shift) => `ID: ${shift.id}, Dept ID: ${shift.department_id}`
           ),
         });
 
@@ -163,5 +163,5 @@ export const orphanedRecordDetectionFn: InngestFunction.Any = inngest.createFunc
     } finally {
       recordJobExecution("orphaned-record-detection", performance.now() - start, success);
     }
-  },
+  }
 );

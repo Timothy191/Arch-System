@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@repo/logger/next";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const GET = withLogging(
   async (_req: NextRequest, _context: { params: Promise<unknown> }) => {
@@ -12,7 +12,7 @@ export const GET = withLogging(
         latencyMs: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
       },
-      { status: degraded ? 503 : 200 },
+      { status: degraded ? 503 : 200 }
     );
-  },
+  }
 );

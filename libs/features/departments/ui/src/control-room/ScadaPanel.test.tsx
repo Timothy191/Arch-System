@@ -1,4 +1,4 @@
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { ScadaPanel } from "./ScadaPanel";
 
 jest.mock("@repo/supabase/client", () => ({

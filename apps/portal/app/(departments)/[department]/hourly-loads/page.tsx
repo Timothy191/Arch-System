@@ -1,7 +1,7 @@
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { KPIGrid, KPICard } from "@repo/ui/KPI";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import { PageHeader } from "@repo/ui/PageHeader";
 import { getCurrentShift } from "@repo/utils";
+import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 import { HourlyLoadsGrid } from "./HourlyLoadsGrid";
 
 export default async function HourlyLoadsPage({

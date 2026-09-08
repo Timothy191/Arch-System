@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+
 import { NextRequest } from "next/server";
+import { GET } from "./route";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -60,7 +61,7 @@ describe("GET /api/control-room/shift-completeness", () => {
     });
 
     const req = new NextRequest(
-      "http://localhost:3000/api/control-room/shift-completeness?deptId=dept-1&deptSlug=ops&date=2026-09-07&shift=day",
+      "http://localhost:3000/api/control-room/shift-completeness?deptId=dept-1&deptSlug=ops&date=2026-09-07&shift=day"
     );
     const res = await GET(req);
 
@@ -75,7 +76,7 @@ describe("GET /api/control-room/shift-completeness", () => {
       "dept-1",
       "ops",
       "2026-09-07",
-      "day",
+      "day"
     );
   });
 });

@@ -26,7 +26,7 @@ export function GlassSkeleton({
         "relative overflow-hidden rounded-card",
         "border border-[var(--glass-border)] border-t-white/95",
         "bg-white/40 backdrop-blur-xl saturate-[160%]",
-        className,
+        className
       )}
       style={{ boxShadow: "var(--refraction-edge-light)" }}
     >
@@ -65,7 +65,7 @@ export function GlassSkeleton({
             className={cn(
               "rounded bg-[var(--bg-tertiary)]/60",
               heights[i % heights.length],
-              DEFAULT_WIDTHS[i % DEFAULT_WIDTHS.length],
+              DEFAULT_WIDTHS[i % DEFAULT_WIDTHS.length]
             )}
           />
         ))}

@@ -11,8 +11,7 @@ const { Client } = require("pg");
 
 const run = async () => {
   const connectionString =
-    process.env.SUPABASE_DB_URL ||
-    "postgres://postgres:postgres@localhost:54322/postgres";
+    process.env.SUPABASE_DB_URL || "postgres://postgres:postgres@localhost:54322/postgres";
   const client = new Client(connectionString);
   try {
     await client.connect();

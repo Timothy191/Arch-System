@@ -1,11 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import {
+  BatteryStatusRow,
   formatTimeSeconds,
   NetworkStatusRow,
-  BatteryStatusRow,
-  VolumeControlRow,
   NotificationRow,
   ServerHealthRow,
+  VolumeControlRow,
 } from "./SystemTray";
 
 describe("formatTimeSeconds", () => {
@@ -37,7 +37,7 @@ describe("NetworkStatusRow", () => {
         downlink={50}
         rtt={20}
         supported={true}
-      />,
+      />
     );
     expect(screen.getByText("Connected")).toBeInTheDocument();
     expect(screen.getByText("wifi")).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("NetworkStatusRow", () => {
         downlink={undefined}
         rtt={undefined}
         supported={true}
-      />,
+      />
     );
     expect(screen.getByText("Offline")).toBeInTheDocument();
   });
@@ -68,7 +68,7 @@ describe("NetworkStatusRow", () => {
         downlink={undefined}
         rtt={undefined}
         supported={false}
-      />,
+      />
     );
     expect(screen.getByText("Network API unavailable")).toBeInTheDocument();
   });
@@ -83,7 +83,7 @@ describe("BatteryStatusRow", () => {
         chargingTime={Infinity}
         dischargingTime={3600}
         supported={true}
-      />,
+      />
     );
     expect(screen.getByText("85%")).toBeInTheDocument();
     expect(screen.getByText("On Battery")).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe("BatteryStatusRow", () => {
         chargingTime={1800}
         dischargingTime={Infinity}
         supported={true}
-      />,
+      />
     );
     expect(screen.getByText("Charging")).toBeInTheDocument();
     expect(screen.getByText("30m to full")).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("BatteryStatusRow", () => {
         chargingTime={Infinity}
         dischargingTime={Infinity}
         supported={false}
-      />,
+      />
     );
     expect(screen.getByText("Battery status unavailable")).toBeInTheDocument();
   });
@@ -166,7 +166,7 @@ describe("ServerHealthRow", () => {
         fuxa="ok"
         responseTime={42}
         loading={false}
-      />,
+      />
     );
     expect(screen.getByText("Server Health")).toBeInTheDocument();
     expect(screen.getByText("Healthy")).toBeInTheDocument();
@@ -182,7 +182,7 @@ describe("ServerHealthRow", () => {
         fuxa="disabled"
         responseTime={120}
         loading={false}
-      />,
+      />
     );
     expect(screen.getByText("Degraded")).toBeInTheDocument();
     expect(screen.getByText("Redis")).toBeInTheDocument();
@@ -199,7 +199,7 @@ describe("ServerHealthRow", () => {
         fuxa="unavailable"
         responseTime={0}
         loading={true}
-      />,
+      />
     );
     expect(screen.getByText("Error")).toBeInTheDocument();
     expect(screen.getByText("Checking…")).toBeInTheDocument();

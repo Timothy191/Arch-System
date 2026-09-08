@@ -1,6 +1,8 @@
+"use client";
+
+import { Check, Minus } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { Check, Minus } from "lucide-react";
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   checked?: boolean;
@@ -26,7 +28,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -50,7 +52,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         className={cn(
           "inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium",
           disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-          className,
+          className
         )}
       >
         <input
@@ -70,7 +72,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900 dark:peer-focus-visible:ring-neutral-100",
             isChecked
               ? "bg-neutral-900 border-neutral-900 text-white dark:bg-neutral-100 dark:border-neutral-100 dark:text-neutral-900"
-              : "bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600",
+              : "bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600"
           )}
           aria-hidden="true"
         >
@@ -87,7 +89,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         )}
       </label>
     );
-  },
+  }
 );
 
 Checkbox.displayName = "Checkbox";

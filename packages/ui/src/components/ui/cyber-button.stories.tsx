@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { CyberButton } from "./cyber-button";
 import { Terminal } from "lucide-react";
 import React from "react";
+import { CyberButton } from "./cyber-button";
 
 const meta: Meta<typeof CyberButton> = {
   title: "UI/CyberButton",

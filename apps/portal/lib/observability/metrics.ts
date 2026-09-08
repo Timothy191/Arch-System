@@ -1,5 +1,5 @@
-import promClient from "prom-client";
 import { getCacheStats } from "@repo/redis";
+import promClient from "prom-client";
 
 // AGENT-TRACE: Performance metrics for Control Room operations
 // Uses prom-client for Prometheus-compatible metrics

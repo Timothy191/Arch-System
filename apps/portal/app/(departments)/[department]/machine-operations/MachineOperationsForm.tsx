@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { getCurrentShift } from "@repo/utils";
-import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
-import { DelayEntriesForm } from "./DelayEntriesForm";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { DelayEntriesForm } from "./DelayEntriesForm";
 
 interface Machine {
   id: string;

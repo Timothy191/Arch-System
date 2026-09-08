@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Settings as SettingsIcon, Upload, Loader2, Image as ImageIcon } from "lucide-react";
+import { Checkbox } from "@repo/ui/components/Checkbox";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Checkbox } from "@repo/ui/components/Checkbox";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Image as ImageIcon, Loader2, Settings as SettingsIcon, Upload } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { uploadCardTemplate } from "../actions/card-templates";
 

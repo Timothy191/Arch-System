@@ -1,8 +1,8 @@
-import { join, dirname } from "node:path";
-import type { StorybookConfig } from "@storybook/react-vite";
+import { dirname, join } from "node:path";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
-import { mergeConfig } from "vite";
+import type { StorybookConfig } from "@storybook/react-vite";
 import react from "@vitejs/plugin-react";
+import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
   stories: [

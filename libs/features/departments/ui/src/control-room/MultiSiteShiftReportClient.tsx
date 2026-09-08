@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { MapPin, Pickaxe, Truck, Wrench, Shield, AlertCircle } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { AlertCircle, MapPin, Pickaxe, Shield, Truck, Wrench } from "lucide-react";
+import { useState } from "react";
 
 interface MultiSiteShiftReportClientProps {
   initialReport: MultiSiteShiftReport;
@@ -50,7 +50,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                 "rounded-md px-3 py-1 text-xs font-medium transition-all",
                 activeSite === site
                   ? "bg-white text-arch-text-primary shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  : "text-arch-text-tertiary hover:text-arch-text-secondary"
               )}
             >
               {site}
@@ -146,7 +146,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       )}
                     </div>
                   </GlassCard>
-                )),
+                ))
               )}
           </div>
         </div>

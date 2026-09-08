@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
+import * as React from "react";
 
 interface RevealLoaderProps {
   className?: string;
@@ -26,7 +26,7 @@ export function RevealLoader({ className, rows = 3, columns = 1, gap = 12 }: Rev
           className={cn(
             "relative overflow-hidden rounded-xl",
             "bg-[var(--bg-tertiary)]/50 border border-[var(--border-default)]/30",
-            "h-24",
+            "h-24"
           )}
         >
           {/* Shimmer sweep */}

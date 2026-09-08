@@ -1,14 +1,14 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { LoginForm } from "@/features/auth/components/LoginForm";
-import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
-import { LoginClock } from "@/features/auth/components/LoginClock";
-import { AlertTriangle, Lock, AlertCircle, ChevronDown } from "lucide-react";
-import { Logo } from "@repo/ui/Logo";
+import { Clock } from "@repo/ui/Clock";
 import { EveLogo } from "@repo/ui/EveLogo";
 import { EveStatusBar } from "@repo/ui/EveStatusBar";
-import { Clock } from "@repo/ui/Clock";
+import { Logo } from "@repo/ui/Logo";
+import { AlertCircle, AlertTriangle, ChevronDown, Lock } from "lucide-react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { LoginClock } from "@/features/auth/components/LoginClock";
+import { LoginForm } from "@/features/auth/components/LoginForm";
+import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
       (c) =>
         c.name === "sb-access-token" ||
         ((c.name.startsWith("sb-") || c.name.includes("sb-")) &&
-          (c.name.includes("-auth-token") || c.name.includes("-access-token"))),
+          (c.name.includes("-auth-token") || c.name.includes("-access-token")))
     );
 
   let authenticated = false;

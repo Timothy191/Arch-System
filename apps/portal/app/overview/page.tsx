@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, Suspense, lazy } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
 import { Logo } from "@repo/ui/Logo";
 import {
-  Network,
-  Building2,
-  Layers,
-  Database,
-  Server,
   BookOpen,
-  ShieldCheck,
   Bot,
+  Building2,
+  Database,
+  Layers,
+  Network,
+  Server,
+  ShieldCheck,
 } from "lucide-react";
+import { lazy, Suspense, useState } from "react";
 
 // Lazy load sections for better performance
 const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
@@ -53,7 +53,8 @@ export default function OverviewPage() {
                 </span>
               </h1>
               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                Opencast Coal Mine Operations Portal — Interactive React Flow Topology & Audit Intelligence
+                Opencast Coal Mine Operations Portal — Interactive React Flow Topology & Audit
+                Intelligence
               </p>
             </div>
           </div>

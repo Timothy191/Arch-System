@@ -4,12 +4,12 @@ import {
   ConflictError,
   DatabaseError,
   ForbiddenError,
-  NotFoundError,
-  ValidationError,
   isAppError,
   isAuthError,
   isNotFoundError,
   isValidationError,
+  NotFoundError,
+  ValidationError,
 } from "./error-classes";
 
 describe("AppError (base class behavior via subclasses)", () => {

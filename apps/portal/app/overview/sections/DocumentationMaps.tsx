@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Map,
-  FileText,
-  ShieldCheck,
-  Layers,
-  GitBranch,
-  Database,
-  History,
-  RefreshCw,
-  Bot,
-} from "lucide-react";
-import { Card } from "@repo/ui/components/ui/card";
 import { Book } from "@repo/ui";
+import { Card } from "@repo/ui/components/ui/card";
+import {
+  Bot,
+  Database,
+  FileText,
+  GitBranch,
+  History,
+  Layers,
+  Map,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface MapFileMeta {
   key: string;
@@ -127,8 +127,8 @@ export default function DocumentationMaps() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
-                      ) === index,
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>

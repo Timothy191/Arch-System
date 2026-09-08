@@ -1,8 +1,8 @@
 "use client";
 
-import { useShiftCoverage } from "@/hooks/useDashboardQueries";
 import { getCurrentShift } from "@repo/utils";
 import { ShiftCoverageWidget } from "@/features/departments";
+import { useShiftCoverage } from "@/hooks/useDashboardQueries";
 
 interface ShiftCoverageSectionClientProps {
   deptId: string;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Workflow, Bot, ExternalLink, Wifi, WifiOff } from "lucide-react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Bot, ExternalLink, Wifi, WifiOff, Workflow } from "lucide-react";
+import { useState } from "react";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Workflow,

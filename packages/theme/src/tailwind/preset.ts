@@ -1,6 +1,6 @@
+import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
-import typography from "@tailwindcss/typography";
 
 const archTheme: Config = {
   content: [
@@ -52,11 +52,7 @@ const archTheme: Config = {
           "Consolas",
           "monospace",
         ],
-        heading: [
-          "Anurati",
-          "var(--font-sans)",
-          "sans-serif",
-        ],
+        heading: ["Anurati", "var(--font-sans)", "sans-serif"],
       },
       colors: {
         // Arch palette — direct CSS variable references

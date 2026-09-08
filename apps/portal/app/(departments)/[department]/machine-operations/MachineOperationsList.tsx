@@ -1,8 +1,8 @@
 "use client";
 
-import { memo, useState } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Clock, AlertCircle } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
+import { memo, useState } from "react";
 
 interface DelayEntry {
   id: string;
@@ -197,7 +197,7 @@ function OperationCard({
   const machineBreakdown = activeBreakdowns?.find(
     (b) =>
       b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number),
+      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
   );
 
   // AGENT-TRACE: Calculate delay totals by category and status
@@ -220,7 +220,7 @@ function OperationCard({
       acc[categoryName] += delay.duration_hours;
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<string, number>
   );
 
   const [showDelays, setShowDelays] = useState(false);
@@ -367,4 +367,5 @@ function OperationCard({
 // AGENT-TRACE: Memoize MachineOperationsList — props (operations, todayLoads,
 // activeBreakdowns) are stable across renders from parent state changes.
 const MemoizedMachineOperationsList = memo(MachineOperationsList);
+
 export { MemoizedMachineOperationsList as MachineOperationsList };

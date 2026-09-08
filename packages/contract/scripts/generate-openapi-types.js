@@ -40,10 +40,10 @@ async function fetchOpenAPISpec() {
   } catch (error) {
     console.error("Error fetching OpenAPI spec:", error.message);
     console.error(
-      "\nMake sure the dev server is running or provide a SPEC_FILE environment variable.",
+      "\nMake sure the dev server is running or provide a SPEC_FILE environment variable."
     );
     console.error(
-      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`,
+      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`
     );
     process.exit(1);
   }

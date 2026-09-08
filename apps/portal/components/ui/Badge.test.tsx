@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import { Badge, badgeVariants } from "@repo/ui/components/ui/badge";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Badge Primitive", () => {
   it("renders with default gray variant and medium size", () => {
@@ -50,7 +50,7 @@ describe("Geist Badge Primitive", () => {
     const { rerender } = render(
       <Badge variant="green" contrast="low">
         Green Subtle
-      </Badge>,
+      </Badge>
     );
     // Green subtle class
     expect(screen.getByText("Green Subtle").closest("div")).toHaveClass("bg-emerald-50");
@@ -59,7 +59,7 @@ describe("Geist Badge Primitive", () => {
     rerender(
       <Badge variant="red" contrast="low">
         Red Subtle
-      </Badge>,
+      </Badge>
     );
     expect(screen.getByText("Red Subtle").closest("div")).toHaveClass("bg-red-50");
     expect(screen.getByText("Red Subtle").closest("div")).toHaveClass("text-red-700");
@@ -67,7 +67,7 @@ describe("Geist Badge Primitive", () => {
     rerender(
       <Badge variant="amber" contrast="low">
         Amber Subtle
-      </Badge>,
+      </Badge>
     );
     expect(screen.getByText("Amber Subtle").closest("div")).toHaveClass("bg-amber-50");
     expect(screen.getByText("Amber Subtle").closest("div")).toHaveClass("text-amber-700");
@@ -75,7 +75,7 @@ describe("Geist Badge Primitive", () => {
     rerender(
       <Badge variant="blue" contrast="low">
         Blue Subtle
-      </Badge>,
+      </Badge>
     );
     expect(screen.getByText("Blue Subtle").closest("div")).toHaveClass("bg-blue-50");
     expect(screen.getByText("Blue Subtle").closest("div")).toHaveClass("text-blue-700");
@@ -107,7 +107,7 @@ describe("Geist Badge Primitive", () => {
     render(
       <Badge variant="green" contrast="low" icon={<span data-testid="status-icon">●</span>}>
         Verified
-      </Badge>,
+      </Badge>
     );
 
     const iconEl = screen.getByTestId("status-icon");
@@ -121,7 +121,7 @@ describe("Geist Badge Primitive", () => {
     render(
       <Badge ref={ref} className="custom-class" data-testid="badge-ref">
         Custom
-      </Badge>,
+      </Badge>
     );
 
     expect(ref.current).not.toBeNull();

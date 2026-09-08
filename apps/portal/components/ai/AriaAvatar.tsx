@@ -56,10 +56,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         <ellipse cx="60" cy="154" rx="30" ry="4" fill="rgba(0,0,0,0.10)" />
 
         {/* Pony tail */}
-        <path
-          d="M 78 58 q 14 4 12 18 q -3 10 -12 8 q -8 -6 -4 -14 z"
-          fill={HAIR_DARK}
-        />
+        <path d="M 78 58 q 14 4 12 18 q -3 10 -12 8 q -8 -6 -4 -14 z" fill={HAIR_DARK} />
 
         {/* Hair back + bob */}
         <path
@@ -87,8 +84,20 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
 
         {/* Brows */}
         <g transform={browTilt} opacity={state === "error" ? 1 : undefined}>
-          <path d="M 42 40 Q 47 37 52 39" stroke={HAIR_DARK} strokeWidth="2" fill="none" strokeLinecap="round" />
-          <path d="M 68 39 Q 73 37 78 40" stroke={HAIR_DARK} strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path
+            d="M 42 40 Q 47 37 52 39"
+            stroke={HAIR_DARK}
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 68 39 Q 73 37 78 40"
+            stroke={HAIR_DARK}
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+          />
         </g>
 
         {/* Eyes */}
@@ -103,16 +112,46 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         {state === "speaking" ? (
           <ellipse cx="60" cy="60" rx="5" ry="4" fill={HAIR_DARK} />
         ) : state === "happy" ? (
-          <path d="M 52 58 Q 60 67 68 58" stroke={HAIR_DARK} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          <path
+            d="M 52 58 Q 60 67 68 58"
+            stroke={HAIR_DARK}
+            strokeWidth="2.4"
+            fill="none"
+            strokeLinecap="round"
+          />
         ) : state === "error" ? (
-          <path d="M 56 60 Q 60 58 64 60" stroke={HAIR_DARK} strokeWidth="2.2" fill="none" strokeLinecap="round" />
+          <path
+            d="M 56 60 Q 60 58 64 60"
+            stroke={HAIR_DARK}
+            strokeWidth="2.2"
+            fill="none"
+            strokeLinecap="round"
+          />
         ) : (
-          <path d="M 55 59 Q 60 63 65 59" stroke={HAIR_DARK} strokeWidth="2.2" fill="none" strokeLinecap="round" />
+          <path
+            d="M 55 59 Q 60 63 65 59"
+            stroke={HAIR_DARK}
+            strokeWidth="2.2"
+            fill="none"
+            strokeLinecap="round"
+          />
         )}
 
         {/* Ear detail */}
-        <path d="M 37 46 q -2.5 6 0 10" stroke={SKIN_SHADOW} strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        <path d="M 83 46 q 2.5 6 0 10" stroke={SKIN_SHADOW} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <path
+          d="M 37 46 q -2.5 6 0 10"
+          stroke={SKIN_SHADOW}
+          strokeWidth="1.5"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 83 46 q 2.5 6 0 10"
+          stroke={SKIN_SHADOW}
+          strokeWidth="1.5"
+          fill="none"
+          strokeLinecap="round"
+        />
 
         {/* Body: blouse + blazer */}
         <path d="M 44 70 Q 40 92 42 104 L 78 104 Q 80 92 76 70 Z" fill={SKIRT} />
@@ -132,10 +171,30 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         {/* Arm idle (left, holds tablet) */}
         {state !== "happy" && (
           <>
-            <path d="M 45 84 Q 34 94 36 106" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 51 100 Q 40 104 40 112 L 56 114 Q 58 104 51 100 Z" fill={BLOUSE} stroke="#cbd5e1" strokeWidth="0.8" />
+            <path
+              d="M 45 84 Q 34 94 36 106"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d="M 51 100 Q 40 104 40 112 L 56 114 Q 58 104 51 100 Z"
+              fill={BLOUSE}
+              stroke="#cbd5e1"
+              strokeWidth="0.8"
+            />
             {/* Tablet */}
-            <rect x="38" y="106" width="22" height="18" rx="2" fill="#1f2937" stroke="#e5e7eb" strokeWidth="1" />
+            <rect
+              x="38"
+              y="106"
+              width="22"
+              height="18"
+              rx="2"
+              fill="#1f2937"
+              stroke="#e5e7eb"
+              strokeWidth="1"
+            />
             <rect x="40" y="108" width="18" height="11" rx="1" fill="#4ade80" opacity="0.85" />
             <rect x="40" y="113" width="18" height="2.5" rx="1" fill="#134e4a" opacity="0.6" />
             <rect x="47.5" y="122.5" width="5" height="1.6" rx="0.8" fill="#9ca3af" />
@@ -144,13 +203,25 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
 
         {/* Arm right idle */}
         {state === "idle" && (
-          <path d="M 75 84 Q 86 94 84 108" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
+          <path
+            d="M 75 84 Q 86 94 84 108"
+            stroke={BLAZER}
+            strokeWidth="7"
+            fill="none"
+            strokeLinecap="round"
+          />
         )}
 
         {/* Thinking: hand to chin */}
         {state === "thinking" && (
           <>
-            <path d="M 76 84 Q 88 90 82 102" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
+            <path
+              d="M 76 84 Q 88 90 82 102"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
             <circle cx="83" cy="103" r="3.4" fill={SKIN} />
           </>
         )}
@@ -158,9 +229,20 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         {/* Speaking: hand gesturing out */}
         {state === "speaking" && (
           <>
-            <path d="M 75 84 Q 90 86 96 72" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
+            <path
+              d="M 75 84 Q 90 86 96 72"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
             <g transform="translate(94 70) rotate(-25)">
-              <path d="M 0 0 L -3.4 -6 M 0 0 L 0 -7 M 0 0 L 3.4 -6" stroke={SKIN} strokeWidth="2.4" strokeLinecap="round" />
+              <path
+                d="M 0 0 L -3.4 -6 M 0 0 L 0 -7 M 0 0 L 3.4 -6"
+                stroke={SKIN}
+                strokeWidth="2.4"
+                strokeLinecap="round"
+              />
             </g>
           </>
         )}
@@ -168,17 +250,40 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         {/* Happy: thumbs up with right arm */}
         {state === "happy" && (
           <>
-            <path d="M 75 84 Q 90 86 84 92" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
+            <path
+              d="M 75 84 Q 90 86 84 92"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
             <path d="M 86 89 q -1 -6 3 -8 q 5 -2 6 4 q 1 6 -3 7 z" fill={SKIN} />
-            <path d="M 100 80 l 5 -12 M 98 82 l 4 -10" stroke={SKIN} strokeWidth="4.4" strokeLinecap="round" />
+            <path
+              d="M 100 80 l 5 -12 M 98 82 l 4 -10"
+              stroke={SKIN}
+              strokeWidth="4.4"
+              strokeLinecap="round"
+            />
           </>
         )}
 
         {/* Error: bracing both hands together */}
         {state === "error" && (
           <>
-            <path d="M 45 92 Q 42 104 52 108" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
-            <path d="M 75 92 Q 78 104 68 108" stroke={BLAZER} strokeWidth="7" fill="none" strokeLinecap="round" />
+            <path
+              d="M 45 92 Q 42 104 52 108"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d="M 75 92 Q 78 104 68 108"
+              stroke={BLAZER}
+              strokeWidth="7"
+              fill="none"
+              strokeLinecap="round"
+            />
             <circle cx="52" cy="109" r="3.4" fill={SKIN} />
             <circle cx="68" cy="109" r="3.4" fill={SKIN} />
           </>
@@ -189,11 +294,25 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         <path d="M 70 72 L 74 92 L 68 108 L 68 74 Z" fill={VEST} />
         <path d="M 52 74 L 68 74 Q 72 88 68 100 L 52 100 Q 48 88 52 74 Z" fill={VEST} />
         {/* Chest reflective band */}
-        <path d="M 48 82 L 72 82 L 71 87 L 49 87 Z" fill={REFLECT} stroke={REFLECT_EDGE} strokeWidth="0.4" />
+        <path
+          d="M 48 82 L 72 82 L 71 87 L 49 87 Z"
+          fill={REFLECT}
+          stroke={REFLECT_EDGE}
+          strokeWidth="0.4"
+        />
         <path d="M 48.5 84 L 71.5 84 L 71 85 L 49 85 Z" fill={VEST_DARK} opacity="0.35" />
         {/* Waist reflective band */}
-        <path d="M 49 98 L 71 98 L 72 103 L 48 103 Z" fill={REFLECT} stroke={REFLECT_EDGE} strokeWidth="0.4" />
-        <path d="M 49.5 100.5 L 70.5 100.5 L 71 101.5 L 49 101.5 Z" fill={VEST_DARK} opacity="0.35" />
+        <path
+          d="M 49 98 L 71 98 L 72 103 L 48 103 Z"
+          fill={REFLECT}
+          stroke={REFLECT_EDGE}
+          strokeWidth="0.4"
+        />
+        <path
+          d="M 49.5 100.5 L 70.5 100.5 L 71 101.5 L 49 101.5 Z"
+          fill={VEST_DARK}
+          opacity="0.35"
+        />
         {/* Vest side buttons */}
         <path d="M 50 92 L 52 108 L 50 106 L 48 92 Z" fill={VEST_DARK} opacity="0.7" />
         <path d="M 68 92 L 70 108 L 72 106 L 70 92 Z" fill={VEST_DARK} opacity="0.7" />

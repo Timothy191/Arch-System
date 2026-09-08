@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BookInForm } from "./BookInForm";
 import type { Breakdown, Machine } from "./types";
 
@@ -78,7 +78,7 @@ describe("BookInForm", () => {
         departmentId="dept-eng"
         activeBreakdowns={[ACTIVE_BREAKDOWN]}
         machines={MOCK_MACHINES}
-      />,
+      />
     );
 
     expect(screen.getByText("FL-001")).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("BookInForm", () => {
         departmentId="dept-eng"
         activeBreakdowns={[ACTIVE_BREAKDOWN]}
         machines={MOCK_MACHINES}
-      />,
+      />
     );
     expect(screen.getByText("1 machines")).toBeInTheDocument();
   });
@@ -145,7 +145,7 @@ describe("BookInForm", () => {
           machine_name: "CAT 320D",
           machine_type: "Excavator",
           reason: "Hydraulic pump failure",
-        }),
+        })
       );
     });
 

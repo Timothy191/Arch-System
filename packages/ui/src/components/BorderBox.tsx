@@ -1,6 +1,7 @@
 "use client";
 
-import React, { forwardRef } from "react";
+import type React from "react";
+import { forwardRef } from "react";
 import { cn } from "../lib/utils";
 
 export type BorderVariant =
@@ -80,14 +81,14 @@ export const BorderBox = forwardRef<HTMLDivElement, BorderBoxProps>(
           variant !== "handdrawn" && roundedStyles,
           paddingStyles,
           variantStyles[variant],
-          className,
+          className
         )}
         {...props}
       >
         {children}
       </div>
     );
-  },
+  }
 );
 
 BorderBox.displayName = "BorderBox";

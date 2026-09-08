@@ -1,6 +1,6 @@
+import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 import { render, screen } from "@testing-library/react";
 import { ProductionSummaryCard } from "./ProductionSummaryCard";
-import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 
 const mockProduction: UnifiedShiftReport["production"] = {
   total_loads: 142,

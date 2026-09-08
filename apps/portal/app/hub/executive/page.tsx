@@ -1,26 +1,26 @@
-import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
+import { CacheCategory } from "@repo/redis";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
+import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { GlassCard } from "@repo/ui/GlassCard";
 import type { KPIColor } from "@repo/ui/KPI";
+import { KPICard, KPIGrid } from "@repo/ui/KPI";
 import {
-  TrendingUp,
-  BarChart3,
-  ShieldAlert,
-  Truck,
   Activity,
   AlertCircle,
+  BarChart3,
   Scale,
+  ShieldAlert,
+  TrendingUp,
+  Truck,
 } from "lucide-react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ExportButton } from "@/features/analytics/components/ExportButton";
 import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
 import { ProductionTrendChart } from "@/features/analytics/components/ProductionTrendChartWrapper";
+import { withCache } from "@/lib/cache-utils";
 import { classifyReconciliationDrift, RECONCILIATION_UI } from "@/lib/production-reconciliation";
 import { cachedRSC } from "@/lib/server-cache";
-import { withCache } from "@/lib/cache-utils";
-import { CacheCategory } from "@repo/redis";
 
 export const dynamic = "force-dynamic";
 
@@ -176,13 +176,13 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
           category: CacheCategory.METRICS,
           keyParts: ["hub", "executive"],
           tags: ["table:machines", "table:employees", "table:breakdowns"],
-        },
+        }
       );
     },
     {
       revalidate: 300,
       tags: ["table:machines", "table:employees", "table:breakdowns"],
-    },
+    }
   );
 }
 

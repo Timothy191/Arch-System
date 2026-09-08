@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Input } from "@repo/ui/components/ui/input";
+import { Loader2, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { searchEmployees } from "../actions";
-import { Search, Loader2 } from "lucide-react";
 
 type Employee = Awaited<ReturnType<typeof searchEmployees>>["employees"][0];
 

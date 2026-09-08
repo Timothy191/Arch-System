@@ -1,4 +1,4 @@
-import { IStore } from "../interfaces";
+import type { IStore } from "../interfaces";
 
 interface MemoryEntry {
   value: string;

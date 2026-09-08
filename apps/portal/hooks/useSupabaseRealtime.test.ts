@@ -1,5 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
 import { useSupabaseRealtime } from "@repo/shared/hooks";
+import { act, renderHook } from "@testing-library/react";
 
 describe("useSupabaseRealtime hook", () => {
   let mockRemoveChannel: jest.Mock;
@@ -35,7 +35,7 @@ describe("useSupabaseRealtime hook", () => {
       useSupabaseRealtime({
         supabaseClient: mockSupabaseClient,
         table: "drill_operations",
-      }),
+      })
     );
 
     expect(mockChannel).toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe("useSupabaseRealtime hook", () => {
         onUpdate,
         onDelete,
         onChange,
-      }),
+      })
     );
 
     // Simulate INSERT
@@ -106,7 +106,7 @@ describe("useSupabaseRealtime hook", () => {
       useSupabaseRealtime({
         supabaseClient: mockSupabaseClient,
         table: "breakdowns",
-      }),
+      })
     );
 
     act(() => {
@@ -123,7 +123,7 @@ describe("useSupabaseRealtime hook", () => {
       useSupabaseRealtime({
         supabaseClient: mockSupabaseClient,
         table: "breakdowns",
-      }),
+      })
     );
 
     unmount();

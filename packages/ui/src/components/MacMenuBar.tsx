@@ -1,57 +1,57 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { cn } from "../lib/utils";
-import { getServiceUrls } from "../lib/urls";
-import { useFocusMode } from "../lib/useFocusMode";
-import { Logo } from "./Logo";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuItem,
-} from "./ui/dropdown-menu";
-import { Avatar } from "./ui/avatar";
-import {
-  // Departments
-  Pickaxe,
-  TrendingUp,
-  ScanFace,
-  CreditCard,
-  Wrench,
-  TowerControl,
-  HardHat,
-  GraduationCap,
-  Orbit,
-  // Tools
-  CheckSquare,
-  FileText,
-  CalendarDays,
-  Calculator,
-  StickyNote,
-  // Automation
-  Workflow,
-  Bot,
-  // General
-  ExternalLink,
-  User,
-  Shield,
-  Search,
-  // Menu: View
-  RotateCcw,
-  Maximize2,
   // Menu: Help
   BookOpen,
-  ScrollText,
-  MailOpen,
-  Info,
+  Bot,
+  Calculator,
+  CalendarDays,
+  // Tools
+  CheckSquare,
   // Menu: Operations dropdown icons (same as dept)
   ChevronRight,
+  CreditCard,
+  // General
+  ExternalLink,
+  FileText,
+  GraduationCap,
+  HardHat,
+  Info,
+  MailOpen,
+  Maximize2,
+  Orbit,
+  // Departments
+  Pickaxe,
+  // Menu: View
+  RotateCcw,
+  ScanFace,
+  ScrollText,
+  Search,
+  Shield,
+  StickyNote,
+  TowerControl,
+  TrendingUp,
+  User,
+  // Automation
+  Workflow,
+  Wrench,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import * as React from "react";
+import { getServiceUrls } from "../lib/urls";
+import { useFocusMode } from "../lib/useFocusMode";
+import { cn } from "../lib/utils";
+import { Logo } from "./Logo";
+import { Avatar } from "./ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface MacMenuBarProps {
   menuItems?: readonly string[];
@@ -180,7 +180,7 @@ export function MacMenuBar({
     window.open(
       `https://www.google.com/search?q=${encodeURIComponent(q)}`,
       "_blank",
-      "noopener,noreferrer",
+      "noopener,noreferrer"
     );
     setSearchQuery("");
   }
@@ -197,7 +197,7 @@ export function MacMenuBar({
       className={cn(
         "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
         "liquid-glass-light border border-white/20 shadow-window rounded-full",
-        className,
+        className
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
@@ -220,7 +220,7 @@ export function MacMenuBar({
             sideOffset={5}
             className={cn(
               "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
-              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl",
+              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl"
             )}
           >
             {/* ── Left Column: Departments ── */}
@@ -240,7 +240,7 @@ export function MacMenuBar({
                       <div
                         className={cn(
                           "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
-                          dept.bgColor,
+                          dept.bgColor
                         )}
                       >
                         <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
@@ -317,7 +317,7 @@ export function MacMenuBar({
                       window.dispatchEvent(
                         new CustomEvent("open-split-view", {
                           detail: { service: "whatsapp", action: "toggle" },
-                        }),
+                        })
                       );
                     }}
                     className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
@@ -393,7 +393,7 @@ export function MacMenuBar({
             window.dispatchEvent(
               new CustomEvent("open-split-view", {
                 detail: { service: "whatsapp", action: "toggle" },
-              }),
+              })
             );
           }}
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
@@ -432,7 +432,7 @@ export function MacMenuBar({
                           <div
                             className={cn(
                               "w-6 h-6 rounded-md flex items-center justify-center mr-2.5 shrink-0",
-                              dept.bgColor,
+                              dept.bgColor
                             )}
                           >
                             <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
@@ -482,7 +482,7 @@ export function MacMenuBar({
                       window.dispatchEvent(
                         new CustomEvent("open-split-view", {
                           detail: { service: "github" },
-                        }),
+                        })
                       );
                     }}
                   >

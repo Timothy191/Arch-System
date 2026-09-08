@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { NextResponse } from "next/server";
 import { logError } from "@/lib/errors/error-logger";
 
 /**
@@ -136,7 +136,7 @@ export async function GET(request: Request) {
         totalCostZAR,
         totalRequests: usage.length,
         avgLatency: Math.round(
-          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1),
+          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1)
         ),
         byModel: modelBreakdown,
         recentUsage,
@@ -149,7 +149,7 @@ export async function GET(request: Request) {
         success: false,
         error: error instanceof Error ? error.message : "Failed to fetch metrics",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

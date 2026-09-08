@@ -1,6 +1,6 @@
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { BreakdownsDashboard } from "@/features/departments";
 import type { Breakdown, BreakdownMetrics, Machine } from "@/features/departments";
+import { BreakdownsDashboard } from "@/features/departments";
+import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
 
 export default async function BreakdownsPage({
   params,
@@ -33,7 +33,7 @@ export default async function BreakdownsPage({
   const allBreakdowns = (breakdowns ?? []) as Breakdown[];
   const active = allBreakdowns.filter((b) => b.status === "active").length;
   const completedToday = allBreakdowns.filter(
-    (b) => b.status === "completed" && b.date_out === today,
+    (b) => b.status === "completed" && b.date_out === today
   ).length;
 
   // Avg repair time for completed breakdowns

@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { submitShiftReport, getShiftReport } from "./control-room-shift-report";
+import { getShiftReport, submitShiftReport } from "./control-room-shift-report";
 
 jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
@@ -66,7 +66,7 @@ function makeBuilder(table: string, resolve: () => { data: unknown; error: unkno
 }
 
 function mockServerClient(
-  overrides: { user?: unknown; employee?: unknown; report?: unknown } = {},
+  overrides: { user?: unknown; employee?: unknown; report?: unknown } = {}
 ) {
   const { user = { id: "user-1" }, employee = { id: "emp-1" }, report = null } = overrides;
   const builders: Record<string, ReturnType<typeof makeBuilder>> = {};
@@ -74,7 +74,7 @@ function mockServerClient(
     if (!builders[table]) {
       builders[table] = makeBuilder(
         table,
-        () => serverResults[table] ?? { data: null, error: null },
+        () => serverResults[table] ?? { data: null, error: null }
       );
     }
     return builders[table];
@@ -95,7 +95,7 @@ function mockServiceClient(existing: unknown = null, writeResult: unknown = null
     if (!builders[table]) {
       builders[table] = makeBuilder(
         table,
-        () => serviceQueues[table]?.shift() ?? { data: null, error: null },
+        () => serviceQueues[table]?.shift() ?? { data: null, error: null }
       );
     }
     return builders[table];

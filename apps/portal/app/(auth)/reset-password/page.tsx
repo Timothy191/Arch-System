@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { createBrowserSupabaseClient } from "@repo/supabase/client";
+import { AnimatedButton } from "@repo/ui/AnimatedButton";
+import { Input } from "@repo/ui/Input";
+import { AlertTriangle, Check, Lock } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Input } from "@repo/ui/Input";
-import { AnimatedButton } from "@repo/ui/AnimatedButton";
-import { Lock, Check, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /**
  * Maps raw Supabase reset password errors to clear, localized user-facing validation and status messages.

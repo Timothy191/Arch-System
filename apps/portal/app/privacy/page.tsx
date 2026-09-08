@@ -1,6 +1,6 @@
-import React from "react";
-import type { Metadata } from "next";
 import { Shield } from "lucide-react";
+import type { Metadata } from "next";
+import type React from "react";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Arch OS",

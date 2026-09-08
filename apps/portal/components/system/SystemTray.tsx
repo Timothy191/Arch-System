@@ -1,37 +1,37 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import * as Popover from "@radix-ui/react-popover";
 import { cn } from "@repo/ui/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Wifi,
-  WifiOff,
-  BatteryFull,
-  BatteryMedium,
-  BatteryLow,
-  BatteryWarning,
+  AlertCircle,
   BatteryCharging,
-  Volume2,
-  Volume1,
-  VolumeX,
+  BatteryFull,
+  BatteryLow,
+  BatteryMedium,
+  BatteryWarning,
   Bell,
   BellDot,
-  SignalHigh,
-  SignalMedium,
-  SignalLow,
-  CheckSquare,
-  Database,
-  HardDrive,
-  Zap,
-  AlertCircle,
   CheckCircle2,
-  MinusCircle,
+  CheckSquare,
   Clock,
   CloudOff,
+  Database,
+  HardDrive,
+  MinusCircle,
   RefreshCw,
+  SignalHigh,
+  SignalLow,
+  SignalMedium,
+  Volume1,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff,
+  Zap,
 } from "lucide-react";
+import Link from "next/link";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useFetchOfflineQueue } from "@/hooks/useFetchOfflineQueue";
 
 /* ------------------------------------------------------------------ */
@@ -44,11 +44,11 @@ interface BatteryManager extends EventTarget {
   dischargingTime: number;
   addEventListener(
     _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
-    _listener: EventListenerOrEventListenerObject,
+    _listener: EventListenerOrEventListenerObject
   ): void;
   removeEventListener(
     _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
-    _listener: EventListenerOrEventListenerObject,
+    _listener: EventListenerOrEventListenerObject
   ): void;
 }
 
@@ -245,7 +245,7 @@ export function useAppVolume() {
       setMuted(m);
       persist(clamped, m);
     },
-    [persist],
+    [persist]
   );
 
   return { volume, muted, toggleMute, adjust };
@@ -288,7 +288,7 @@ interface HealthState {
 // and proper cleanup on unmount. Reduces redundant API calls across tab switches.
 function useServerHealth() {
   const mapServiceStatus = (
-    s: { status: "healthy" | "degraded" | "down" } | null | undefined,
+    s: { status: "healthy" | "degraded" | "down" } | null | undefined
   ): "ok" | "degraded" | "unavailable" => {
     if (!s) return "unavailable";
     if (s.status === "healthy") return "ok";
@@ -373,7 +373,7 @@ export function NetworkStatusRow({
       <ConnQualityIcon
         className={cn(
           "w-4 h-4 shrink-0",
-          online ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]",
+          online ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]"
         )}
       />
       <div className="flex-1 min-w-0">
@@ -724,7 +724,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
         className={cn(
           "flex items-center justify-center w-[26px] h-[26px] rounded-full",
           "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
-          "transition-colors active:scale-[0.97]",
+          "transition-colors active:scale-[0.97]"
         )}
         title="Task Manager"
       >
@@ -740,7 +740,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             className={cn(
               "flex items-center gap-2 h-[26px] px-2.5 rounded-full select-none cursor-default outline-none",
               "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
-              "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
+              "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
             )}
           >
             {/* Server health dot */}
@@ -786,7 +786,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             sideOffset={6}
             className={cn(
               "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-3 z-[120]",
-              "flex flex-col gap-2 select-none focus:outline-none",
+              "flex flex-col gap-2 select-none focus:outline-none"
             )}
           >
             <div className="space-y-3">

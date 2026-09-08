@@ -146,6 +146,7 @@
     "policy:gen": "node tools/apply-project-tags.cjs && node tools/policy-compiler.cjs",
     "policy:security": "node tools/enforce-security-checks.cjs",
     "prepare": "husky",
+    "postinstall": "node scripts/patch-glass-css.mjs",
     "quality": "nx run-many -t lint type-check test lint:tokens lint:css && pnpm lint:root && pnpm lint:styles && pnpm lint:css-perf && pnpm lint:spelling && pnpm format:check && pnpm deps:lint && pnpm knip && pnpm policy:check && pnpm audit:compliance && pnpm html:check",
     "shutdown": "bash scripts/shutdown.sh",
     "sync-assets": "node scripts/sync-assets-smart.cjs",

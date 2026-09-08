@@ -15,7 +15,7 @@ export function cachedRSC<T>(
   options?: {
     revalidate?: number;
     tags?: string[];
-  },
+  }
 ): Promise<T> {
   return unstable_cache(fn, keyParts, {
     revalidate: options?.revalidate,

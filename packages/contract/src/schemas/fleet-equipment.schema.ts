@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, nonEmptyString } from "./common.schema";
+import { nonEmptyString, uuidSchema } from "./common.schema";
 
 export const fleetCategoryEnum = z.enum([
   "truck",

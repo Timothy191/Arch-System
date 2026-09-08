@@ -1,8 +1,9 @@
 /**
  * @jest-environment node
  */
-import { POST } from "./route";
+
 import { NextRequest } from "next/server";
+import { POST } from "./route";
 
 // ---------------------------------------------------------------------------
 // Mocks

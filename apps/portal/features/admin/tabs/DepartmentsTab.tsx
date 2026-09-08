@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Trash2, Plus } from "lucide-react";
-import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
+import { Button } from "@repo/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
 import { Input } from "@repo/ui/components/ui/input";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { Edit2, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 
 interface Department {

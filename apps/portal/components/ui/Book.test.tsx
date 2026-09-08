@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import { Book } from "@repo/ui/components/ui/book";
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("Geist Book Primitive", () => {
   it("renders with default stripe variant and title heading", () => {
@@ -26,7 +26,7 @@ describe("Geist Book Primitive", () => {
 
   it("applies custom background color and text color", () => {
     const { container } = render(
-      <Book title="Custom Color Book" color="#9D2127" textColor="#ece4db" />,
+      <Book title="Custom Color Book" color="#9D2127" textColor="#ece4db" />
     );
 
     const book = container.firstChild as HTMLElement;
@@ -39,7 +39,7 @@ describe("Geist Book Primitive", () => {
         title="Illustrated Book"
         icon={<span data-testid="custom-icon">★</span>}
         illustration={<div data-testid="custom-illustration">Graphic</div>}
-      />,
+      />
     );
 
     const icon = screen.getByTestId("custom-icon");
@@ -70,7 +70,7 @@ describe("Geist Book Primitive", () => {
 
   it("supports responsive width object with breakpoint styles", () => {
     const { container } = render(
-      <Book title="Responsive Width" width={{ sm: 150, md: 196, lg: 240 }} />,
+      <Book title="Responsive Width" width={{ sm: 150, md: 196, lg: 240 }} />
     );
     const book = container.firstChild as HTMLElement;
     expect(book).toHaveStyle({

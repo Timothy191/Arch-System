@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ShiftToggle } from "./ShiftToggle";
 import React, { useState } from "react";
+import { ShiftToggle } from "./ShiftToggle";
 
 const meta: Meta<typeof ShiftToggle> = {
   title: "Components/ShiftToggle",

@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { ActionConfirmDialog } from "@repo/ui/components/ui/action-confirm-dialog";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
-import { Printer, AlertCircle, Info, User } from "lucide-react";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
+import { AlertCircle, Info, Printer, User } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import type { searchEmployees } from "../actions";
+import { QRCodeSection } from "../card-actions/qr-section";
 import { submitPrintJob } from "../printing";
 import { EmployeeSearch } from "./EmployeeSearch";
-import { ActionConfirmDialog } from "@repo/ui/components/ui/action-confirm-dialog";
-import { QRCodeSection } from "../card-actions/qr-section";
-import type { searchEmployees } from "../actions";
 
 type Employee = Awaited<ReturnType<typeof searchEmployees>>["employees"][0];
 
@@ -177,7 +177,7 @@ export function CardActionsTab() {
                         ? "text-blue-500 animate-pulse"
                         : printerStatus === "error"
                           ? "text-red-500"
-                          : "text-green-500",
+                          : "text-green-500"
                     )}
                   />
                   <span className="text-sm font-medium">

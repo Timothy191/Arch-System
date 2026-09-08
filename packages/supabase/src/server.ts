@@ -1,16 +1,16 @@
 /* global RequestInfo, RequestInit */
-import { createServerClient } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import type { User } from "@supabase/supabase-js";
 
 import { serverLogger } from "@repo/logger";
+import { createServerClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 export { createClient };
 
 export async function instrumentedFetch(
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<Response> {
   const start = performance.now();
   let response: Response | null = null;
@@ -54,14 +54,14 @@ export async function instrumentedFetch(
     if (duration > 500) {
       serverLogger.warn(
         logData,
-        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`,
+        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`
       );
     } else if (!success) {
       serverLogger.error(logData, `Database query failed: ${tableName} (${method})`);
     } else {
       serverLogger.debug(
         logData,
-        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`,
+        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`
       );
     }
   }
@@ -106,7 +106,7 @@ export async function createServerSupabaseClient() {
               maxAge: options?.maxAge ?? 34560000,
               path: options?.path ?? "/",
               sameSite: options?.sameSite ?? "lax",
-            }),
+            })
           );
         } catch {
           // The `setAll` method was called from a Server Component.
@@ -120,9 +120,7 @@ export async function createServerSupabaseClient() {
 
 export function createBearerSupabaseClient(token: string) {
   const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.SUPABASE_URL ||
-    "http://127.0.0.1:54321";
+    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "http://127.0.0.1:54321";
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -160,7 +158,7 @@ export function createBearerSupabaseClient(token: string) {
  * Returns null if the user is not authenticated or if token validation fails.
  */
 export async function getUserSafely(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
 ): Promise<User | null> {
   try {
     // Use getUser() for identity verification (recommended by Supabase docs)

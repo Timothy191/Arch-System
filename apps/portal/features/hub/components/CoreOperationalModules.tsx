@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
 import type { Department } from "@repo/departments/data-access";
-import { DepartmentCard } from "@/features/hub";
-import { Boxes, Search, Star } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { Boxes, Search, Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { DepartmentCard } from "@/features/hub";
 
 interface CoreOperationalModulesProps {
   departments: Department[];
@@ -153,7 +153,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "all"
                   ? "bg-white text-arch-text-primary shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  : "text-arch-text-tertiary hover:text-arch-text-secondary"
               )}
             >
               All
@@ -167,7 +167,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                   "px-2.5 py-1 rounded-md transition-all text-xs flex items-center gap-1",
                   activeFilter === "pinned"
                     ? "bg-white text-arch-accent-blue shadow-card font-semibold"
-                    : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                    : "text-arch-text-tertiary hover:text-arch-text-secondary"
                 )}
               >
                 <Star className="w-3 h-3 fill-arch-accent-blue/20" />
@@ -182,7 +182,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "active"
                   ? "bg-white text-accent-green shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  : "text-arch-text-tertiary hover:text-arch-text-secondary"
               )}
             >
               Active
@@ -195,7 +195,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
                 "px-2.5 py-1 rounded-md transition-all text-xs",
                 activeFilter === "critical"
                   ? "bg-white text-accent-amber shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  : "text-arch-text-tertiary hover:text-arch-text-secondary"
               )}
             >
               Alerts

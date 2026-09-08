@@ -1,6 +1,6 @@
+import type { Langfuse, LangfuseTraceClient } from "langfuse";
 import OpenAI from "openai";
 import pLimit from "p-limit";
-import { type Langfuse, type LangfuseTraceClient } from "langfuse";
 import { getLangfuseClient, type LangfuseConfig } from "./langfuse.js";
 
 export interface Subtask {
@@ -127,7 +127,7 @@ export class SubagentCoordinator {
    */
   public async executeSpecialist(
     task: Subtask,
-    parentTrace?: LangfuseTraceClient,
+    parentTrace?: LangfuseTraceClient
   ): Promise<string> {
     const generation = parentTrace?.generation({
       name: `specialist-${task.specialistRole}`,
@@ -221,7 +221,7 @@ ${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ""
         } catch (error: any) {
           return { id: task.id, success: false, result: error.message };
         }
-      }),
+      })
     );
 
     const completed = await Promise.all(promises);
@@ -229,8 +229,7 @@ ${task.workspaceContext ? `<context>\n${task.workspaceContext}\n</context>` : ""
     // 2. Synthesize results
     const reports = completed
       .map(
-        (t) =>
-          `[Subtask ${t.id}] Status: ${t.success ? "SUCCESS" : "FAILED"}\nReport:\n${t.result}`,
+        (t) => `[Subtask ${t.id}] Status: ${t.success ? "SUCCESS" : "FAILED"}\nReport:\n${t.result}`
       )
       .join("\n\n──────────────────────────────────────\n\n");
 
@@ -295,7 +294,7 @@ Keep the layout logical, remove redundant sections, and clearly highlight any fa
   public async evaluateArchitecturalPreFlight(
     architecturalProposal: string,
     targetScope: string[],
-    options?: RunOptions,
+    options?: RunOptions
   ): Promise<{ approved: boolean; benchmarkSummary: string; recommendations: string[] }> {
     const researchSubtask: Subtask = {
       id: "preflight-research-gate",

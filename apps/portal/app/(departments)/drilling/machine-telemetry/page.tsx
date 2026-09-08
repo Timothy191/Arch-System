@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { redirect } from "next/navigation";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,23 +9,23 @@ import {
   TableRow,
 } from "@repo/ui/components/ui/table";
 import { GlassCard } from "@repo/ui/GlassCard";
-import { Button } from "@repo/ui/components/ui/button";
 import {
   Activity,
-  Archive,
-  Calendar,
-  TrendingUp,
   AlertTriangle,
-  Gauge,
-  Thermometer,
-  Droplets,
+  Archive,
   ArrowDown,
-  Layers,
-  Database,
-  Clock,
   BarChart3,
+  Calendar,
+  Clock,
+  Database,
+  Droplets,
+  Gauge,
+  Layers,
+  Thermometer,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { RealtimeDrillTelemetryStream } from "./RealtimeDrillTelemetryStream";
 
 export const dynamic = "force-dynamic";

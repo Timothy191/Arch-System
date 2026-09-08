@@ -45,7 +45,7 @@ describe("GET /api/weather", () => {
     expect(json.conditions).toBe("Sunny");
 
     expect(res.headers.get("cache-control")).toBe(
-      "public, s-maxage=300, stale-while-revalidate=300",
+      "public, s-maxage=300, stale-while-revalidate=300"
     );
     expect(res.headers.get("x-weather-cache")).toBe("hit");
     expect(res.headers.get("x-response-time")).toMatch(/^\d+ms$/);

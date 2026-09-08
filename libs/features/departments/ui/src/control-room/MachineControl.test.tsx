@@ -1,5 +1,5 @@
 // AGENT-TRACE: MachineControl test verifying initial defaults, input updates, parameter configuration application, and default resets.
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MachineControl } from "./MachineControl";
 
 // Mock Lucide icons

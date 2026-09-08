@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Creates a Supabase client for use in Next.js middleware.
@@ -49,7 +49,7 @@ export async function createMiddlewareClient(request: NextRequest) {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-          }),
+          })
         );
       },
     },

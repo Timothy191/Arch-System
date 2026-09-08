@@ -1,5 +1,5 @@
-import { withCache } from "./cache-utils";
 import { cacheGetWithStats, cacheSetWithTags } from "@repo/redis";
+import { withCache } from "./cache-utils";
 
 jest.mock("@repo/redis", () => ({
   cacheGetWithStats: jest.fn(),

@@ -11,7 +11,7 @@ const CookieConsent = dynamic(() => import("@repo/ui/CookieConsent").then((m) =>
 
 const PWAInstallButton = dynamic(
   () => import("@/components/PWAInstallButton").then((m) => m.PWAInstallButton),
-  { ssr: false },
+  { ssr: false }
 );
 
 export function ClientOverlays() {

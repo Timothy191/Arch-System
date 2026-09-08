@@ -1,25 +1,24 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
   addEdge,
+  Background,
   type Connection,
+  Controls,
   type Edge,
+  MiniMap,
   type Node,
   Panel,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
+import React, { useCallback, useState } from "react";
 import "@xyflow/react/dist/style.css";
-import { Play, Save, Loader2 } from "lucide-react";
-
+import { Loader2, Play, Save } from "lucide-react";
+import { FlowEdge } from "./edges/FlowEdge";
 import { PluginNode } from "./nodes/PluginNode";
 import { TriggerNode } from "./nodes/TriggerNode";
-import { FlowEdge } from "./edges/FlowEdge";
 
 // =============================================================================
 // Node & Edge Types
@@ -113,7 +112,7 @@ export function WorkflowBuilder({
       };
       setEdges((eds) => addEdge(edge, eds));
     },
-    [setEdges],
+    [setEdges]
   );
 
   // Add new plugin node

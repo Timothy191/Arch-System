@@ -1,6 +1,6 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 describe("GlassCard", () => {
   it("renders with default variant and children", () => {
@@ -12,7 +12,7 @@ describe("GlassCard", () => {
     render(
       <GlassCard variant="window" title="Test Window">
         Window Content
-      </GlassCard>,
+      </GlassCard>
     );
     expect(screen.getByText("Test Window")).toBeInTheDocument();
     expect(screen.getByText("Window Content")).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe("GlassCard", () => {
     const { container } = render(
       <GlassCard variant="glowborder" animationDuration={10}>
         GlowBorder Content
-      </GlassCard>,
+      </GlassCard>
     );
     expect(screen.getByText("GlowBorder Content")).toBeInTheDocument();
     expect(container.firstChild).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe("GlassCard", () => {
     const { container } = render(
       <GlassCard variant="liquid" hover>
         Liquid Content
-      </GlassCard>,
+      </GlassCard>
     );
 
     const card = container.firstChild;

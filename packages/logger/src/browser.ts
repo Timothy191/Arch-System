@@ -5,7 +5,7 @@ function baseLog(level: LogLevel, msg: string, ...args: unknown[]) {
   // Mask potential PII/sensitive data (basic implementation)
   const safeMsg = msg.replace(
     /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-    "[EMAIL_REDACTED]",
+    "[EMAIL_REDACTED]"
   );
 
   const payloadData = {

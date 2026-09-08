@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { serverLogger as logger } from "@repo/logger";
+import { NextResponse } from "next/server";
 
 // In a real-world scenario, this would import a Zendesk/Jira SDK
 // import { zendesk } from '@integrations/zendesk';

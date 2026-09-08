@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface FocusManagerProps {
   children: React.ReactNode;
@@ -58,7 +59,7 @@ export function FocusManager({
       // Handle Tab key for focus trapping
       if (event.key === "Tab") {
         const focusableElements = containerRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
         );
 
         if (focusableElements.length === 0) return;
@@ -86,14 +87,14 @@ export function FocusManager({
         }
       }
     },
-    [enabled, onEscape],
+    [enabled, onEscape]
   );
 
   // Focus the first focusable element when enabled
   useEffect(() => {
     if (enabled && containerRef.current) {
       const firstFocusable = containerRef.current.querySelector<HTMLElement>(
-        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
       );
       if (firstFocusable) {
         firstFocusable.focus();

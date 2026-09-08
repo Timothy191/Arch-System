@@ -2,7 +2,7 @@
 // initial guard, empty dozers, date display, area calculation, client-side
 // validation, Zod schema validation, successful submission, submission error,
 // and saving indicator.
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DozerRollForm } from "./DozerRollForm";
 
 // --- Mocks ---
@@ -173,12 +173,12 @@ describe("DozerRollForm", () => {
         departmentId={defaultProps.departmentId}
         dozers={defaultProps.dozers}
         today=""
-      />,
+      />
     );
 
     expect(screen.getByTestId("glass-card")).toBeInTheDocument();
     expect(
-      screen.getByText("Operational date is missing or invalid. Please reload the page."),
+      screen.getByText("Operational date is missing or invalid. Please reload the page.")
     ).toBeInTheDocument();
     expect(screen.queryByText("Add Roll")).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("DozerRollForm", () => {
         departmentId={defaultProps.departmentId}
         dozers={[]}
         today={defaultProps.today}
-      />,
+      />
     );
 
     openForm();

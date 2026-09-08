@@ -1,19 +1,19 @@
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import { GlassCard } from "../GlassCard";
 import { FreezeToggle } from "./freeze-toggle";
-import { cn } from "@repo/ui/lib/utils";
 
 interface TelemetryPoint {
   timestamp: string | number;

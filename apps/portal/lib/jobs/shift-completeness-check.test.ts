@@ -28,7 +28,7 @@ function mockDepartments(data: unknown) {
   mockFrom.mockImplementation((table: string) =>
     table === "departments"
       ? { select: mockSelect }
-      : { insert: jest.fn().mockResolvedValue({ error: null }) },
+      : { insert: jest.fn().mockResolvedValue({ error: null }) }
   );
 }
 
@@ -92,7 +92,7 @@ describe("shiftCompletenessCheckFn", () => {
         missing_machine_count: 1,
         missing_machines: "D2",
         resolved: false,
-      }),
+      })
     );
   });
 
@@ -119,7 +119,7 @@ describe("shiftCompletenessCheckFn", () => {
     await expect(handler({ step: {} })).rejects.toThrow("db down");
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "shift_completeness_check_job" }),
+      expect.objectContaining({ context: "shift_completeness_check_job" })
     );
   });
 });

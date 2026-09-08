@@ -1,8 +1,8 @@
 "use client";
 
-import { memo } from "react";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { AutoAnimateList } from "@repo/ui/AnimatedList";
+import { GlassCard } from "@repo/ui/GlassCard";
+import { memo } from "react";
 
 interface EngineeringNote {
   id: string;
@@ -195,4 +195,5 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 // AGENT-TRACE: Memoize EngineeringNotesList — notes prop is stable across renders;
 // prevents re-rendering the entire list + individual GlassCard items.
 const MemoizedEngineeringNotesList = memo(EngineeringNotesList);
+
 export { MemoizedEngineeringNotesList as EngineeringNotesList };

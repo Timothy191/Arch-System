@@ -1,5 +1,5 @@
-import { getTools } from "./tools";
 import { PRODUCTIVITY_TOOLS } from "@repo/departments/data-access";
+import { getTools } from "./tools";
 
 const mockFrom = jest.fn();
 jest.mock("@repo/supabase/read-replica", () => ({

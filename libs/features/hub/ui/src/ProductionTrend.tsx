@@ -1,6 +1,6 @@
 "use client";
 
-import { Title, AreaChart, Text as TremorText } from "@tremor/react";
+import { AreaChart, Title, Text as TremorText } from "@tremor/react";
 import { AlertCircle } from "lucide-react";
 
 export interface TrendDataPoint {

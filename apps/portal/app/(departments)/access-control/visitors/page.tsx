@@ -1,8 +1,5 @@
-import { getDepartmentContext } from "~/lib/dept-context";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { Avatar, Badge } from "@repo/ui";
 import { Pagination } from "@repo/ui/components/ui/pagination";
-import { EmptyState } from "@repo/ui/EmptyState";
 import {
   Table,
   TableBody,
@@ -11,7 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
+import { EmptyState } from "@repo/ui/EmptyState";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { Clock, Inbox } from "lucide-react";
+import { getDepartmentContext } from "~/lib/dept-context";
 import { getVisitorsForDepartment } from "../actions";
 import { VisitorForm } from "./visitor-form";
 

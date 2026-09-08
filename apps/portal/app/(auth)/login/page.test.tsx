@@ -97,7 +97,7 @@ describe("LoginPage Server Component", () => {
     mockGetUserSafely.mockResolvedValue({ id: "user-123" });
 
     await expect(
-      LoginPage({ searchParams: Promise.resolve({ redirect: "/production" }) }),
+      LoginPage({ searchParams: Promise.resolve({ redirect: "/production" }) })
     ).rejects.toThrow("NEXT_REDIRECT:/production");
     expect(mockRedirect).toHaveBeenCalledWith("/production");
   });

@@ -1,12 +1,12 @@
 import type { z } from "zod";
 import type {
-  tireSchema,
-  tireInspectionSchema,
   createTireSchema,
   logTireInspectionSchema,
   replaceTireSchema,
-  tireStatusSchema,
   tireConditionSchema,
+  tireInspectionSchema,
+  tireSchema,
+  tireStatusSchema,
 } from "../schemas/tire-management.schema.js";
 
 export type Tire = z.infer<typeof tireSchema>;

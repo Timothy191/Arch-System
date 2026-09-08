@@ -18,6 +18,6 @@ export const useFocusMode = create<FocusModeState>()(
     }),
     {
       name: "arch-focus-mode",
-    },
-  ),
+    }
+  )
 );

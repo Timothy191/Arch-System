@@ -27,7 +27,9 @@ describe("upsertDrillOperationAction", () => {
   it("returns error when user is unauthorized", async () => {
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: new Error("No session") }),
+        getUser: jest
+          .fn()
+          .mockResolvedValue({ data: { user: null }, error: new Error("No session") }),
       },
     });
 

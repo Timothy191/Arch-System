@@ -1,8 +1,8 @@
-import { BottomNav } from "@/components/nav/BottomNav";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { redirect } from "next/navigation";
-import { getAccessibleDepartmentNames } from "@/lib/hub-departments";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { BottomNav } from "@/components/nav/BottomNav";
+import { getAccessibleDepartmentNames } from "@/lib/hub-departments";
 
 export default async function HubLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();

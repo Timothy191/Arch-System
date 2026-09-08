@@ -8,7 +8,7 @@ const ProductionTrendInner = dynamic(
   {
     ssr: false,
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
-  },
+  }
 );
 
 interface ProductionTrendProps {

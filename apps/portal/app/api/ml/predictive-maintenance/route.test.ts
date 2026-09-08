@@ -103,7 +103,7 @@ describe("GET /api/ml/predictive-maintenance", () => {
     supabase.from
       .mockReturnValueOnce(supabase.from({ select: jest.fn() }))
       .mockReturnValueOnce(
-        machineQuery([{ id: "machine-1", name: "Excavator A", type: "excavator", active: true }]),
+        machineQuery([{ id: "machine-1", name: "Excavator A", type: "excavator", active: true }])
       );
     createServerSupabaseClient.mockResolvedValue(supabase);
 

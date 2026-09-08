@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
-
 import { fetchClient } from "@repo/utils/client";
+import React, { useEffect, useState } from "react";
+import { getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
 
 interface WeatherWidgetProps {
   lat?: number;
@@ -152,7 +151,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
                     "p-2.5 rounded-lg text-xs font-medium border",
                     alert.level === "critical"
                       ? "bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse"
-                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20",
+                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20"
                   )}
                 >
                   {alert.message}

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function withBodyLimit(
   request: Request,
   handler: () => Promise<NextResponse>,
-  options: { maxSize?: number } = {},
+  options: { maxSize?: number } = {}
 ): Promise<NextResponse> {
   const maxSize = options.maxSize ?? 1024 * 1024; // 1 MB default
   const contentLength = request.headers.get("content-length");

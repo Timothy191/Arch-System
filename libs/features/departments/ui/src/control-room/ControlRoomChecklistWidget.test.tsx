@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ControlRoomChecklistWidget } from "./ControlRoomChecklistWidget";
 
 jest.mock("@repo/ui/GlassCard", () => ({
@@ -34,7 +34,7 @@ describe("ControlRoomChecklistWidget", () => {
     render(<ControlRoomChecklistWidget {...defaultProps} />);
 
     const firstItem = screen.getByText(
-      /Verify all monitoring systems \(CCTV, alarms, SCADA\) are online/,
+      /Verify all monitoring systems \(CCTV, alarms, SCADA\) are online/
     );
     expect(firstItem).toBeInTheDocument();
 
@@ -55,7 +55,7 @@ describe("ControlRoomChecklistWidget", () => {
     fireEvent.click(weeklyTab);
 
     expect(
-      screen.getByText(/Perform end-to-end failover test of backup radio and satellite channels/),
+      screen.getByText(/Perform end-to-end failover test of backup radio and satellite channels/)
     ).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe("ControlRoomChecklistWidget", () => {
           shift: "day",
           operatorName: "Alice Operator",
           missedIncidentsCount: 0,
-        }),
+        })
       );
       expect(screen.getByText(/Log Submitted Successfully/)).toBeInTheDocument();
     });

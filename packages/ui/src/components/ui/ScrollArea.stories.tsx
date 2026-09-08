@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 import { ScrollArea } from "./scroll-area";
 import { Separator } from "./separator";
-import React from "react";
 
 const meta: Meta<typeof ScrollArea> = {
   title: "UI/ScrollArea",
@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj<typeof ScrollArea>;
 
 const tags = Array.from({ length: 50 }).map(
-  (_, i, a) => `System Log Event v1.2.0-beta.${a.length - i}`,
+  (_, i, a) => `System Log Event v1.2.0-beta.${a.length - i}`
 );
 
 export const Default: Story = {

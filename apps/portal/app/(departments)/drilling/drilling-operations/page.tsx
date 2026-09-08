@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { getOperationalToday } from "@repo/utils";
 import { redirect } from "next/navigation";
 import { DrillingOperationsTable } from "./DrillingOperationsTable";
-import { getOperationalToday } from "@repo/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ async function getDrillingOpsData() {
     supabase
       .from("drill_operations")
       .select(
-        "id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, comments, status",
+        "id, machine_id, shift_type, operation_date, open_hours, close_hours, total_hours, operator_name, block_drilled, site, external_delays_minutes, standard_delays_hours, production_delays_minutes, engineering_delays_minutes, comments, status"
       )
       .eq("department_id", dept.id)
       .eq("operation_date", today),

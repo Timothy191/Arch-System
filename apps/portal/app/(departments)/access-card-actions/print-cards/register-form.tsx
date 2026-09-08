@@ -1,9 +1,9 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { registerPrinter } from "../actions";
 import { Button } from "@repo/ui/components/ui/button";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { registerPrinter } from "../actions";
 
 interface RegisterFormProps {
   cupsName: string;

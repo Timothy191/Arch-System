@@ -1,9 +1,9 @@
 import type { z } from "zod";
 import type {
-  uuidSchema,
-  dateSchema,
   dateMonthSchema,
+  dateSchema,
   nonEmptyString,
+  uuidSchema,
 } from "../schemas/common.schema.js";
 
 export type Uuid = z.infer<typeof uuidSchema>;
