@@ -325,5 +325,7 @@ AIAssistant chat.
 ### Verification
 
 - `aria-overlay` running under pm2 (`aria-overlay`, id 2): `/assistant/api/health` OK; UI chat streams via `x-vercel-ai-ui-message-stream: v1`.
-- Pending: portal lint/type-check/build, header verification (`curl -I /assistant` shows `SAMEORIGIN`, not `DENY`), full chat → read tool → confirm → write round trip via a real session, kill-sidecar failover, visual check.
+- Portal runtime checks (dev server on :3000): `/assistant` proxied (title "Aria — Operations Assistant"), `/assistant/api/health` → `{"ok":true,"service":"aria-overlay"}`; chat SSE round-trips through the proxy; `/api/ai/actions` returns 401 without a session; `/hub`/`/login` retain `X-Frame-Options: DENY` + `frame-ancestors 'none'`. Sidecar now emits `SAMEORIGIN` + `frame-ancestors 'self'` headers that pass through the proxy (verified via curl).
+- `pnpm --filter portal type-check`, `pnpm --filter portal lint` (changed files), and full `pnpm nx run-many -t lint type-check` pass. New route unit tests: `app/api/ai/actions/route.test.ts` (14 tests) all pass.
+- Pending: visual check of the launcher/iframe in a browser.
 ```
