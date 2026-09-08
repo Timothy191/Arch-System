@@ -81,7 +81,6 @@ describe("LoginForm", () => {
     const signInBtn = screen.getByRole("button", { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
     expect(signInBtn.className).toContain("liquid-glass-button");
-    expect(signInBtn.className).toContain("bg-[var(--color-action-primary)]");
     expect(signInBtn.className).toContain("text-white");
   });
 

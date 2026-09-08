@@ -723,7 +723,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
         href="/drilling/tools?tab=tasks"
         className={cn(
           "flex items-center justify-center w-[26px] h-[26px] rounded-full",
-          "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
+          "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
           "transition-colors active:scale-[0.97]",
         )}
         title="Task Manager"
@@ -739,7 +739,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             title="System status & options"
             className={cn(
               "flex items-center gap-2 h-[26px] px-2.5 rounded-full select-none cursor-default outline-none",
-              "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
+              "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
               "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
             )}
           >
@@ -785,7 +785,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             align="end"
             sideOffset={6}
             className={cn(
-              "w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-3 z-[120]",
+              "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-3 z-[120]",
               "flex flex-col gap-2 select-none focus:outline-none",
             )}
           >

@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
         }
 
         const supabase = await createServerSupabaseClient();
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -215,12 +215,21 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Session cookies are set server-side by Supabase; no need to
-        // expose session tokens in the response body.
+        // Return session data to enable client-side cookie preservation in proxied webview environments
         return NextResponse.json(
           {
             success: true,
             redirectTo: "/",
+            session: data?.session
+              ? {
+                  access_token: data.session.access_token,
+                  refresh_token: data.session.refresh_token,
+                  expires_at: data.session.expires_at,
+                  expires_in: data.session.expires_in,
+                  token_type: data.session.token_type,
+                  user: data.session.user,
+                }
+              : undefined,
           },
           { status: 200 },
         );

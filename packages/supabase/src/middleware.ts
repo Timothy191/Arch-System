@@ -28,7 +28,15 @@ export async function createMiddlewareClient(request: NextRequest) {
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        return request.cookies.getAll();
+        const all = request.cookies.getAll();
+        const normalized = [...all];
+        for (const cookie of all) {
+          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
+          if (match && match[1] && !all.some((c: { name: string }) => c.name === match[1])) {
+            normalized.push({ name: match[1], value: cookie.value });
+          }
+        }
+        return normalized;
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
@@ -36,10 +44,8 @@ export async function createMiddlewareClient(request: NextRequest) {
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, {
             ...options,
-            maxAge: undefined,
-            expires: undefined,
-            // Enforce security: HttpOnly prevents XSS access, Secure ensures HTTPS-only,
-            // SameSite=Lax prevents CSRF while allowing navigation-based auth
+            maxAge: options?.maxAge ?? 34560000,
+            path: options?.path ?? "/",
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",

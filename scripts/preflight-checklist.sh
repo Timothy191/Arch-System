@@ -9,7 +9,12 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORTAL_DIR="$REPO_ROOT/apps/portal"
-DATABASE_DIR="$REPO_ROOT/packages/database"
+ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+  DATABASE_DIR="$ARCH_BASE_DIR"
+else
+  DATABASE_DIR="$REPO_ROOT/packages/database"
+fi
 
 PORT="${PORT:-3000}"
 FIX_MODE=false
@@ -79,8 +84,13 @@ header "2. Repository Structure"
 
 [ -d "$REPO_ROOT/.git" ] && check_pass "Git repository" || check_fail "Not a git repository"
 [ -d "$PORTAL_DIR" ]     && check_pass "apps/portal"   || check_fail "apps/portal missing"
-[ -d "$DATABASE_DIR" ]   && check_pass "packages/database" || check_fail "packages/database missing"
-[ -d "$DATABASE_DIR/migrations" ] && check_pass "Migrations directory" || check_fail "Migrations missing"
+if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+  check_pass "Arch-Base database ($ARCH_BASE_DIR)"
+  ([ -d "$DATABASE_DIR/supabase/migrations" ] || [ -d "$DATABASE_DIR/migrations" ]) && check_pass "Migrations directory (Arch-Base)" || check_fail "Migrations missing"
+else
+  [ -d "$DATABASE_DIR" ]   && check_pass "packages/database" || check_fail "packages/database missing"
+  [ -d "$DATABASE_DIR/migrations" ] && check_pass "Migrations directory" || check_fail "Migrations missing"
+fi
 [ -f "$REPO_ROOT/pnpm-lock.yaml" ] && check_pass "pnpm-lock.yaml" || check_fail "pnpm-lock.yaml missing — run pnpm install"
 
 # ═══════════════════════════════════════════════════════════

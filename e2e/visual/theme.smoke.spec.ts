@@ -13,17 +13,9 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
 
   await page.goto("/hub");
 
-  // 1. Verify the route background tint has the exact color from glass.css
+  // 1. Verify the route background white-wash tint overlay has been removed for crisp video playback
   const bgTint = page.locator(".route-bg-tint");
-  await expect(bgTint).toBeAttached();
-
-  const bgColor = await bgTint.evaluate((el) => getComputedStyle(el).backgroundColor);
-  const viewportSize = page.viewportSize();
-  const isMobileOrTablet = viewportSize && viewportSize.width <= 768;
-  const expectedBgColor = isMobileOrTablet
-    ? "rgba(255, 255, 255, 0.7)"
-    : "rgba(255, 255, 255, 0.5)";
-  expect(bgColor).toBe(expectedBgColor);
+  await expect(bgTint).toHaveCount(0);
 
   // 2. Check that a key token variable (arch0) is defined and used
   const htmlBackground = await page.evaluate(() =>

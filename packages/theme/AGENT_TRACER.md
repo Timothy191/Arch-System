@@ -291,3 +291,22 @@
 - **Purpose**: Fix the `pnpm lint:tokens` "token drift" error introduced by adding Marquee animation keyframes.
 - **Changes**: Added `--gap` and `--duration` to `VENDOR_TOKENS` ignore list in `packages/theme/scripts/validate-tokens.mjs`. These are dynamic inline CSS variables used for Marquee animations, not global design tokens, and thus should not be flagged when referenced in `preset.ts`.
 - **Status**: Completed. Token validation passing successfully.
+
+## 2026-09-08 - Remove White Wash Overlay and Restore Video Wallpaper Clarity
+
+- **Purpose**: Remove the semi-transparent milky white wash scrim (`.route-bg-tint`) between UI panels and the background video wallpaper, restoring full brightness and contrast to the video layer.
+- **Changes**:
+  - `packages/theme/src/css/glass.css`:
+    - Updated `.route-bg-video, .route-bg-focus-video` to `opacity: 1; filter: none;` (and `opacity: 1` on mobile `@media (width <= 768px)`).
+    - Neutralized `.route-bg-tint` with `display: none; background: transparent;`.
+- **Status**: Completed. Theme built and validated.
+
+## 2026-09-08 - Unify Glass Tokens with Liquid Glass Light Specification
+
+- **Purpose**: Align design tokens and glass components with the translucent liquid glass recipe (`linear-gradient(#ffffff26, #ffffff0d) padding-box, var(--glass-border-gradient) border-box`, `border: 1px solid rgba(255, 255, 255, 0.4)`, `shadow-window`, `backdrop-filter: blur(12px) saturate(140%)`).
+- **Changes**:
+  - `packages/theme/tokens.json`: Updated `glass.surface` to `rgba(255, 255, 255, 0.15)`, `glass.surface-hover` to `0.25`, `glass.surface-strong` to `0.35`, `glass.border` to `0.4`, and `glass.border-top` to `0.5`.
+  - `packages/theme/src/css/variables.css`: Synchronized `--glass-surface*` and `--glass-border*` variables.
+  - `packages/theme/src/css/glass.css`: Updated `.glass`, `.glass-card`, and `.layer-signin-card` to match the liquid glass recipe.
+  - Re-ran `pnpm --filter @repo/theme build` to regenerate token maps and CSS variables.
+- **Status**: Completed, verified.

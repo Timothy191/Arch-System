@@ -10,11 +10,10 @@ const level = process.env.LOG_LEVEL ?? (isDev ? "debug" : "info");
 let canUsePretty = false;
 if (isDev && !isVercel && !isTest && process.env.ENABLE_PINO_PRETTY === "true") {
   try {
-    // AGENT-TRACE: Dynamic import resolution avoids Turbopack static AST analysis warnings
-    const req = (
-      typeof module !== "undefined" && module.require ? module.require : require
-    ) as NodeRequire;
-    req.resolve("pino-pretty");
+    // AGENT-TRACE: Dynamic evaluation avoids Turbopack static AST analysis when package is optional
+    const pkg = ["pino", "pretty"].join("-");
+    const dynamicRequire = eval("require") as NodeRequire;
+    dynamicRequire.resolve(pkg);
     canUsePretty = true;
   } catch {
     canUsePretty = false;

@@ -153,6 +153,11 @@ describe("proxy", () => {
     expect(res).toBeDefined();
     // Should return the raw response (not a redirect)
     expect(res.status).not.toBe(307);
+
+    const webpReq = makeRequest("/background/edge-of-the-event-horizon-poster.webp", false);
+    const webpRes = await proxy(webpReq);
+    expect(webpRes).toBeDefined();
+    expect(webpRes.status).not.toBe(307);
   });
 
   it("redirects authenticated user away from /login to /", async () => {

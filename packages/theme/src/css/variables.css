@@ -19,29 +19,46 @@
 
   /* Background range — macOS system grays */
   /* ARCH PALETTE — macOS Ventura/Sonoma Light */
-  --arch0: #ffffff; /* macOS pure white background */
-  --white: #ffffff; /* Primitive token for white color checks */
-  --arch1: #ffffff; /* elevated surface / card */
-  --arch2: #e8e8ed; /* sunken / input bg */
-  --arch3: #d2d2d7; /* pressed / deeply sunken */
+  --arch0: #ffffff;
+  /* macOS pure white background */
+  --white: #ffffff;
+  /* Primitive token for white color checks */
+  --arch1: #ffffff;
+  /* elevated surface / card */
+  --arch2: #e8e8ed;
+  /* sunken / input bg */
+  --arch3: #d2d2d7;
+  /* pressed / deeply sunken */
 
   /* Border range — hairline to emphasis */
-  --arch4: rgba(0, 0, 0, 0.06); /* border subtle */
-  --arch5: rgba(0, 0, 0, 0.12); /* border default */
-  --arch6: rgba(0, 0, 0, 0.2); /* border emphasis */
-  --arch7: rgba(0, 0, 0, 0.3); /* border strong */
+  --arch4: rgba(0, 0, 0, 0.06);
+  /* border subtle */
+  --arch5: rgba(0, 0, 0, 0.12);
+  /* border default */
+  --arch6: rgba(0, 0, 0, 0.2);
+  /* border emphasis */
+  --arch7: rgba(0, 0, 0, 0.3);
+  /* border strong */
 
   /* Text range — macOS type hierarchy */
-  --arch8: #a1a1a6; /* muted / placeholder */
-  --arch9: #6e6e73; /* secondary / caption */
-  --arch10: #3a3a3c; /* body */
-  --arch11: #1d1d1f; /* heading / primary */
+  --arch8: #a1a1a6;
+  /* muted / placeholder */
+  --arch9: #6e6e73;
+  /* secondary / caption */
+  --arch10: #3a3a3c;
+  /* body */
+  --arch11: #1d1d1f;
+  /* heading / primary */
 
   /* Aurora Accents — status colors (unchanged) */
-  --arch12: #d22118; /* red — error / danger (adjusted for 4.5:1 contrast) */
-  --arch13: #1c1c1e; /* deep charcoal — warning */
-  --arch14: #34c759; /* green — success */
-  --arch15: #1c1c1e; /* deep charcoal — macOS system blue / info */
+  --arch12: #d22118;
+  /* red — error / danger (adjusted for 4.5:1 contrast) */
+  --arch13: #1c1c1e;
+  /* deep charcoal — warning */
+  --arch14: #34c759;
+  /* green — success */
+  --arch15: #1c1c1e;
+  /* deep charcoal — macOS system blue / info */
 
   /* ═══════════════════════════════════════════════════════════════
        TIER 2 — SEMANTIC ALIASES
@@ -142,13 +159,20 @@
        Used by MacMenuBar, DepartmentLayout, KPI, and any component
        that renders per-department color accents.
        ═══════════════════════════════════════════════════════════════ */
-  --dept-drilling: #2563eb; /* blue-600 */
-  --dept-production: #34c759; /* green / accent-green */
-  --dept-access-control: #0284c7; /* sky-600 */
-  --dept-access-card-actions: #3b82f6; /* blue-500 */
-  --dept-engineering: #7c3aed; /* violet-600 */
-  --dept-control-room: #dc2626; /* red-600 */
-  --dept-admin: #7c3aed; /* violet-600 */
+  --dept-drilling: #2563eb;
+  /* blue-600 */
+  --dept-production: #34c759;
+  /* green / accent-green */
+  --dept-access-control: #0284c7;
+  /* sky-600 */
+  --dept-access-card-actions: #3b82f6;
+  /* blue-500 */
+  --dept-engineering: #7c3aed;
+  /* violet-600 */
+  --dept-control-room: #dc2626;
+  /* red-600 */
+  --dept-admin: #7c3aed;
+  /* violet-600 */
 
   /* macOS traffic light colors */
   --mac-red: #ff5f56;
@@ -158,33 +182,46 @@
   /* ═══════════════════════════════════════════════════════════════
        SHADCN/UI HSL VARIABLES — macOS Light
        ═══════════════════════════════════════════════════════════════ */
-  --background: 240 5% 96%; /* #f5f5f7 */
-  --foreground: 240 6% 10%; /* #1d1d1f */
-  --card: 0 0% 100%; /* white */
+  --background: 240 5% 96%;
+  /* #f5f5f7 */
+  --foreground: 240 6% 10%;
+  /* #1d1d1f */
+  --card: 0 0% 100%;
+  /* white */
   --card-foreground: 240 6% 10%;
   --popover: 0 0% 100%;
   --popover-foreground: 240 6% 10%;
-  --primary: 240 6% 10%; /* #18181b Slate / Pitch Black */
+  --primary: 240 6% 10%;
+  /* #18181b Slate / Pitch Black */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 5% 91%; /* #e8e8ed */
+  --secondary: 240 5% 91%;
+  /* #e8e8ed */
   --secondary-foreground: 240 6% 10%;
   --muted: 240 5% 91%;
-  --muted-foreground: 240 3% 44%; /* #6e6e73 */
+  --muted-foreground: 240 3% 44%;
+  /* #6e6e73 */
   --accent: 240 5% 91%;
   --accent-foreground: 240 6% 10%;
-  --destructive: 3 78% 46%; /* #d22118 — matches arch12 */
+  --destructive: 3 78% 46%;
+  /* #d22118 — matches arch12 */
   --destructive-foreground: 0 0% 100%;
-  --border: 240 6% 87%; /* rgba-ish light border */
+  --border: 240 6% 87%;
+  /* rgba-ish light border */
   --input: 240 5% 91%;
   --ring: 240 6% 10%;
   --radius: 0.75rem;
 
   /* Charts — macOS system colors */
-  --chart-1: 240 6% 10%; /* Slate / Pitch Black */
-  --chart-2: 142 71% 45%; /* green */
-  --chart-3: 240 5% 45%; /* slate gray */
-  --chart-4: 3 78% 46%; /* red — matches arch12 */
-  --chart-5: 270 60% 55%; /* purple */
+  --chart-1: 240 6% 10%;
+  /* Slate / Pitch Black */
+  --chart-2: 142 71% 45%;
+  /* green */
+  --chart-3: 240 5% 45%;
+  /* slate gray */
+  --chart-4: 3 78% 46%;
+  /* red — matches arch12 */
+  --chart-5: 270 60% 55%;
+  /* purple */
 
   /* ═══════════════════════════════════════════════════════════════
        TREMOR BRAND — macOS Light
@@ -210,16 +247,14 @@
   /* ═══════════════════════════════════════════════════════════════
        GLASS TOKENS — macOS Frosted Glass (always active)
        ═══════════════════════════════════════════════════════════════ */
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-surface-hover: rgba(255, 255, 255, 0.85);
-  --glass-surface-strong: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-border-top: rgba(255, 255, 255, 0.25);
-  --glass-border-gradient: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.3)
-  );
+  --glass-surface: rgba(255, 255, 255, 0.15);
+  --glass-surface-hover: rgba(255, 255, 255, 0.25);
+  --glass-surface-strong: rgba(255, 255, 255, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-border-top: rgba(255, 255, 255, 0.5);
+  --glass-border-gradient: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.3));
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
 
@@ -254,11 +289,9 @@
      (hero panels, drawer headers, command bar backdrop).
      These tokens are intentionally more translucent and vivid
      than the standard --glass-* set to create visual hierarchy. */
-  --glass-premium-bg: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.15) 100%
-  );
+  --glass-premium-bg: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.15) 100%);
   --glass-premium-backdrop: blur(16px) saturate(160%);
   --glass-premium-border: rgba(255, 255, 255, 0.6);
   --glass-premium-radius: 20px;
@@ -398,18 +431,14 @@
   /* Uiverse.io by Spacious74 Button Foundation */
   --bg-button-uiverse: radial-gradient(circle 80px at 80% -10%, #ffffff, #181b1b);
   --bg-button-uiverse-inner: radial-gradient(circle 80px at 80% -50%, #777777, #0f1111);
-  --bg-button-uiverse-blob: radial-gradient(
-    circle 60px at 0% 100%,
-    #3fe9ff,
-    rgba(0, 0, 255, 0.5),
-    transparent
-  );
-  --bg-button-uiverse-inner-before: radial-gradient(
-    circle 60px at 0% 100%,
-    rgba(0, 225, 255, 0.1),
-    rgba(0, 0, 255, 0.06),
-    transparent
-  );
+  --bg-button-uiverse-blob: radial-gradient(circle 60px at 0% 100%,
+      #3fe9ff,
+      rgba(0, 0, 255, 0.5),
+      transparent);
+  --bg-button-uiverse-inner-before: radial-gradient(circle 60px at 0% 100%,
+      rgba(0, 225, 255, 0.1),
+      rgba(0, 0, 255, 0.06),
+      transparent);
   --shadow-button-uiverse-after: 0 0 20px rgba(255, 255, 255, 0.22);
   --shadow-button-uiverse-blob: -10px 10px 30px rgba(0, 81, 255, 0.176);
 
@@ -485,12 +514,14 @@
 .layout-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem; /* 16px mobile gutter */
+  gap: 1rem;
+  /* 16px mobile gutter */
 }
 
-@media (width >= 1024px) {
+@media (width >=1024px) {
   .layout-grid {
-    gap: 1.5rem; /* 24px desktop gutter */
+    gap: 1.5rem;
+    /* 24px desktop gutter */
   }
 }
 
@@ -502,6 +533,7 @@
      We provide a clamping fallback to prevent negative radii. */
   border-radius: max(0px, calc(var(--radius-lg) - 4px));
 }
+
 .card-nested-content-xl {
   border-radius: max(0px, calc(var(--radius-xl) - 4px));
 }

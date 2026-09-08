@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useFocusMode } from "@/hooks/useFocusMode";
-import { FluidCanvas } from "@repo/ui/FluidCanvas";
 
 /**
  * RouteBackground
@@ -30,7 +29,7 @@ export function RouteBackground() {
 
   useEffect(() => {
     if (videoRef.current && !prefersReducedMotion) {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
     }
   }, [prefersReducedMotion]);
 
@@ -46,27 +45,18 @@ export function RouteBackground() {
           ref={videoRef}
           id="route-bg-light-video"
           src="/background/edge-of-the-event-horizon.3840x2160.mp4"
-          poster="/background/macos-27-golden-2560x1764.png"
+          poster="/background/edge-of-the-event-horizon-poster.webp"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          className={`route-bg-video object-cover object-center w-full h-full filter brightness-95 saturate-110 ${
-            prefersReducedMotion ? "" : "transition-opacity duration-300"
-          }`}
-        />
-        {/* Interactive Fluid Simulation Overlay */}
-        <FluidCanvas
-          brushRadius={32}
-          dissipation={0.97}
-          impulseIntensity={1.8}
-          className="absolute inset-0 opacity-45 mix-blend-screen"
-        />
+          className={`route-bg-video object-cover object-center w-full h-full filter brightness-95 saturate-110 ${prefersReducedMotion ? "" : "transition-opacity duration-300"
+            }`}
+        >
+          <source src="/background/edge-of-the-event-horizon.3840x2160.mp4" type="video/mp4" />
+        </video>
       </div>
-
-      {/* ── Tint overlay — legibility scrim for glassmorphism panels ── */}
-      <div className="route-bg-tint" aria-hidden="true" />
 
       {/* ── Ambient Film Grain overlay ── */}
       <div className="route-bg-grain" aria-hidden="true" />

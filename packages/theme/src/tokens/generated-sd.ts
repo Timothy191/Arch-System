@@ -887,12 +887,12 @@ module.exports = {
   glass: {
     surface: {
       key: "{glass.surface}",
-      value: "#ffffffb3",
+      value: "#ffffff26",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.7)",
+        value: "rgba(255, 255, 255, 0.15)",
         type: "color",
         key: "{glass.surface}",
       },
@@ -905,12 +905,12 @@ module.exports = {
     },
     "surface-hover": {
       key: "{glass.surface-hover}",
-      value: "#ffffffd9",
+      value: "#ffffff40",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.85)",
+        value: "rgba(255, 255, 255, 0.25)",
         type: "color",
         key: "{glass.surface-hover}",
       },
@@ -923,12 +923,12 @@ module.exports = {
     },
     "surface-strong": {
       key: "{glass.surface-strong}",
-      value: "#ffffffeb",
+      value: "#ffffff59",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.92)",
+        value: "rgba(255, 255, 255, 0.35)",
         type: "color",
         key: "{glass.surface-strong}",
       },
@@ -941,12 +941,12 @@ module.exports = {
     },
     border: {
       key: "{glass.border}",
-      value: "#ffffff26",
+      value: "#ffffff66",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.15)",
+        value: "rgba(255, 255, 255, 0.4)",
         type: "color",
         key: "{glass.border}",
       },
@@ -959,12 +959,12 @@ module.exports = {
     },
     "border-top": {
       key: "{glass.border-top}",
-      value: "#ffffff40",
+      value: "#ffffff80",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.25)",
+        value: "rgba(255, 255, 255, 0.5)",
         type: "color",
         key: "{glass.border-top}",
       },

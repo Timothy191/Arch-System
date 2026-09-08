@@ -26,7 +26,12 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORTAL_DIR="$REPO_ROOT/apps/portal"
-DATABASE_DIR="$REPO_ROOT/packages/database"
+ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+  DATABASE_DIR="$ARCH_BASE_DIR"
+else
+  DATABASE_DIR="$REPO_ROOT/packages/database"
+fi
 
 # Configuration
 SETUP_LOG="$REPO_ROOT/setup-production-$(date +%Y%m%d-%H%M%S).log"

@@ -235,6 +235,20 @@ show_results() {
   _url_row "Redis"    "redis://localhost:6379" "$redis_suffix"
   _url_row "Studio"   "$studio_url"
   _url_row "API"      "$api_url"
+
+  if [ "${TAILSCALE_ACTIVE:-false}" = "true" ] && [ -n "${TAILSCALE_IP:-}" ]; then
+    echo
+    echo -e "  ${CYAN}${BOLD}Tailscale Network (Remote Devices & RFID Scanners)${NC}"
+    if [ -n "${MAGIC_DNS:-}" ]; then
+      _url_row "HTTPS"      "https://$MAGIC_DNS" "(remote phones & tablets)"
+      _url_row "RFID (SSL)" "https://$MAGIC_DNS/api/c66" "(C66 scanner endpoint)"
+    fi
+    _url_row "Tailnet IP" "http://$TAILSCALE_IP:$PORT" "(direct IP login)"
+    _url_row "RFID (IP)"  "http://$TAILSCALE_IP:$PORT/api/c66" "(hardware scanner hook)"
+    if [ "$HOSTED_MODE" != "true" ]; then
+      _url_row "Auth API"   "http://$TAILSCALE_IP:54321" "(remote supabase auth)"
+    fi
+  fi
   echo
   echo -e "  ${BOLD}${WHITE}Controls${NC}"
   echo -e "  ${DIM}Ctrl+C${NC}  stop services    ${DIM}logs${NC}  run/portal.log    ${DIM}HUD${NC}  separate status terminal"
@@ -343,15 +357,34 @@ while [ $# -gt 0 ]; do
     --e2e)      RUN_E2E=true; shift ;;
     --all)      START_CMS=true; START_OVERVIEW=true; shift ;;
     --strict)   STRICT_MODE=true; shift ;;
+    --tailscale) ENABLE_TAILSCALE=true; shift ;;
     *) shift ;;
   esac
 done
+
+TAILSCALE_ACTIVE=false
+TAILSCALE_IP=""
+MAGIC_DNS=""
+
+if [ "${ENABLE_TAILSCALE:-false}" = "true" ] || (command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1); then
+  _ts_ip=$(tailscale ip -4 2>/dev/null || echo "")
+  if [ -n "$_ts_ip" ]; then
+    TAILSCALE_ACTIVE=true
+    TAILSCALE_IP="$_ts_ip"
+    MAGIC_DNS=$(tailscale status --json 2>/dev/null | grep -oP '"Self":\s*\{\s*"DNSName":\s*"\K[^"]+' | sed 's/\.$//' || true)
+  fi
+fi
 
 if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]]; then
   HOSTED_MODE=true
 fi
 
 banner
+
+if [ "$TAILSCALE_ACTIVE" = "true" ]; then
+  echo -e "  ${CYAN}${BOLD}🔒 Tailscale Mesh Active${NC} — $TAILSCALE_IP ${MAGIC_DNS:+(https://$MAGIC_DNS)}"
+  echo
+fi
 
 if [ "$QUICK_MODE" = "true" ]; then
   echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
@@ -376,6 +409,19 @@ elif [ -f "$REPO_ROOT/scripts/sync-assets.sh" ]; then
   check "Global assets" "pass" "synchronized (legacy)"
 else
   check "Global assets" "fail" "sync script missing"
+fi
+
+# Tailscale Network Serving (Reachability & HTTPS)
+if [ "$TAILSCALE_ACTIVE" = "true" ]; then
+  if [ "$HOSTED_MODE" != "true" ] && [ -f "$REPO_ROOT/scripts/ensure_reachability.py" ]; then
+    python3 "$REPO_ROOT/scripts/ensure_reachability.py" "$TAILSCALE_IP" >/dev/null 2>&1 || true
+    check "Tailnet reachability" "pass" "configured for $TAILSCALE_IP"
+  fi
+  if tailscale serve --bg "$PORT" >/dev/null 2>&1; then
+    check "Tailscale HTTPS" "pass" "https://${MAGIC_DNS:-$TAILSCALE_IP}"
+  else
+    check "Tailscale IP" "pass" "http://$TAILSCALE_IP:$PORT"
+  fi
 fi
 
 portal_healthy() {
@@ -668,18 +714,26 @@ else
   phase 2 "Infrastructure"
 
   if curl -fs "http://127.0.0.1:54321/rest/v1/" > /dev/null 2>&1; then
-    check "Supabase API" "pass" "http://localhost:54321"
+    check "Supabase API" "pass" "http://localhost:54321 (Arch-Base active)"
   else
-    echo -e "  ${INFO} Starting Supabase (Docker)..."
-    cd "$REPO_ROOT/packages/database"
-    mkdir -p "$REPO_ROOT/packages/supabase/supabase/migrations"
-    cp -r migrations/* "$REPO_ROOT/packages/supabase/supabase/migrations/" 2>/dev/null || true
-    pnpx supabase start > /dev/null 2>&1 &
-    SUPAPID=$!
-    spinner "$SUPAPID" "Booting Supabase containers"
-    cd "$REPO_ROOT"
-    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 30; then
-      check "Supabase API" "pass" "http://localhost:54321"
+    ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+    if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+      echo -e "  ${INFO} Starting Arch-Base Supabase (Docker)..."
+      (cd "$ARCH_BASE_DIR" && npx supabase start) > /dev/null 2>&1 &
+      SUPAPID=$!
+      spinner "$SUPAPID" "Booting Arch-Base Supabase containers"
+    else
+      echo -e "  ${INFO} Starting Supabase (Docker)..."
+      cd "$REPO_ROOT/packages/database"
+      mkdir -p "$REPO_ROOT/packages/supabase/supabase/migrations"
+      cp -r migrations/* "$REPO_ROOT/packages/supabase/supabase/migrations/" 2>/dev/null || true
+      pnpx supabase start > /dev/null 2>&1 &
+      SUPAPID=$!
+      spinner "$SUPAPID" "Booting Supabase containers"
+      cd "$REPO_ROOT"
+    fi
+    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 45; then
+      check "Supabase API" "pass" "http://localhost:54321 (Arch-Base active)"
     else
       check "Supabase API" "fail" "timed out — check 'docker ps'"
       exit 1

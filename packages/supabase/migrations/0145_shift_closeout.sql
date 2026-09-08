@@ -10,7 +10,7 @@ ALTER TABLE employees ADD COLUMN IF NOT EXISTS pin_hash TEXT;
 
 -- 3. Create shift_status table
 CREATE TABLE IF NOT EXISTS shift_status (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   department_id UUID NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
   shift_date DATE NOT NULL,
   shift_type TEXT NOT NULL CHECK (shift_type IN ('day', 'night')),

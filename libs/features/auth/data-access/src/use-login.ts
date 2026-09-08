@@ -55,6 +55,10 @@ export function useLogin() {
         return { success: false };
       }
 
+      // Supabase SSR natively sets cookies via Set-Cookie headers in the API response.
+      // We removed the manual client-side cookie assignment (sb-127-auth-token) to prevent 
+      // edge cases where middleware might detect conflicting or outdated tokens.
+
       Sentry.addBreadcrumb({ message: "Auth succeeded", category: "auth", level: "info" });
       void pushTelemetry("auth.success");
       setLoading(false);

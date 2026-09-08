@@ -1,22 +1,20 @@
-# 📋 Required Actions & Remediation Plan — Log #89 (26-09-07)
+# 📋 Required Actions & Remediation Plan — Log #90 (26-09-08)
 
-**Generated:** 9/7/2026, 10:19:56 AM UTC  
-**Associated Audit Log:** `documentation/03-audit-reports/log-89(26-09-07)/`  
-**Total Pending Action Items:** 0 (0 Critical, 0 Warnings)
+**Generated:** 9/8/2026, 7:17:17 AM UTC  
+**Associated Audit Log:** `documentation/03-audit-reports/log-90(26-09-08)/`  
+**Total Pending Action Items:** 1 (1 Critical, 0 Warnings)
 
 ---
 
 ## 🚨 Priority Action Checklist
 
-- [x] **[VERIFIED]** Zero critical violations or warnings detected. All design and RLS security gates are 100% compliant.
-- [ ] **[ROUTINE]** Re-run `pnpm quality` before pushing any new schema migrations or UI components.
+- [ ] **[CRITICAL - DESIGN]** Fix critical design system violations (raw box-shadow, dark: selectors) listed in `design-report.md`.
 
 ---
 
 ## 🛠️ Verification & Next Steps
 
 To verify resolutions after applying fixes, execute the quality suite:
-
 ```bash
 pnpm quality
 ```

@@ -153,13 +153,13 @@ export function ServicesDropdown() {
             title="System Tray (Alt+S)"
             className={cn(
               "relative flex items-center justify-center w-7 h-7 rounded-full",
-              "bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05]",
+              "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
               "text-[var(--text-secondary)]",
               "active:scale-[0.97]",
               "transition-all duration-150 ease-in-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
               "cursor-default select-none",
-              open && "bg-black/[0.06]",
+              open && "bg-white/60",
             )}
           >
             <ChevronDown
@@ -172,7 +172,7 @@ export function ServicesDropdown() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-2"
+          className="w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl py-2"
           align="end"
           sideOffset={5}
         >
@@ -296,9 +296,9 @@ export function ServicesDropdown() {
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
                     if (!document.fullscreenElement) {
-                      document.documentElement.requestFullscreen().catch(() => {});
+                      document.documentElement.requestFullscreen().catch(() => { });
                     } else if (document.exitFullscreen) {
-                      document.exitFullscreen().catch(() => {});
+                      document.exitFullscreen().catch(() => { });
                     }
                   }}
                 >

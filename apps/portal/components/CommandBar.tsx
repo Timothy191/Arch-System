@@ -233,9 +233,9 @@ export function CommandBar() {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden">
+      <div className="relative w-full max-w-lg mx-4 rounded-2xl liquid-glass-light border border-white/20 shadow-window overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/20 bg-transparent">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-transparent">
           <Search className="w-4 h-4 text-arch-text-tertiary shrink-0" />
           <input
             ref={inputRef}

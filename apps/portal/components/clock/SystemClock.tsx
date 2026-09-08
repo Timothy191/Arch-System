@@ -84,7 +84,7 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05] transition-colors select-none cursor-default outline-none active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
         >
           <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
             {timeStr}
@@ -100,7 +100,7 @@ export function SystemClock() {
           align="end"
           sideOffset={6}
           className={cn(
-            "bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-[120]",
+            "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-[120]",
             "flex gap-5 select-none focus:outline-none",
           )}
         >

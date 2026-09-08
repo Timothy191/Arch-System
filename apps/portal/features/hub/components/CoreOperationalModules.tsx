@@ -88,7 +88,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
 
   return (
     <section
-      className="space-y-4 animate-fade-up group/row relative rounded-xl bg-white/70 backdrop-blur-xl border border-black/[0.08] shadow-card p-4 sm:p-6"
+      className="space-y-4 animate-fade-up group/row relative rounded-2xl liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
       style={{ animationDelay: "0.2s", animationFillMode: "both" }}
     >
       {/* Section Header with Live Filtering */}

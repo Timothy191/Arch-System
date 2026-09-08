@@ -441,9 +441,9 @@ export function GlassCard({
 
   const backdropStyle = isLiquid
     ? {
-        WebkitBackdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
-        backdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
-      }
+      WebkitBackdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
+      backdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
+    }
     : undefined;
 
   return (
@@ -481,8 +481,8 @@ export function GlassCard({
       className={cn(
         // Base classes
         "isolate relative overflow-hidden",
-        "shadow-glass-depth border border-arch-border-subtle", // always apply subtle border
-        "group rounded-card animate-window-open",
+        "liquid-glass-light border border-white/20 shadow-window",
+        "group rounded-2xl animate-window-open",
         hover && "liquid-glass-interactive",
 
         // Accent colors for hover
@@ -490,8 +490,8 @@ export function GlassCard({
 
         // Hover focus rings
         hover &&
-          onClick &&
-          "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
+        onClick &&
+        "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
         padding && "p-6",
         className,
       )}
@@ -499,15 +499,15 @@ export function GlassCard({
         {
           ...(intensityTokens
             ? {
-                backdropFilter: `blur(${intensityTokens.blur})`,
-                WebkitBackdropFilter: `blur(${intensityTokens.blur})`,
-                backgroundColor: `rgba(255, 255, 255, ${intensityTokens.opacity})`,
-              }
+              backdropFilter: `blur(${intensityTokens.blur})`,
+              WebkitBackdropFilter: `blur(${intensityTokens.blur})`,
+              backgroundColor: `rgba(255, 255, 255, ${intensityTokens.opacity})`,
+            }
             : {}),
           ...(variant === "glowborder"
             ? {
-                "--glow-animation-duration": `${animationDuration}s`,
-              }
+              "--glow-animation-duration": `${animationDuration}s`,
+            }
             : {}),
           ...props.style,
         } as React.CSSProperties
@@ -536,7 +536,7 @@ export function GlassCard({
 
       {/* macOS window title bar */}
       {isWindow && (
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-arch-border-subtle bg-arch-surface-secondary/60 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10 backdrop-blur-md">
           <MacTrafficLights />
           {title && (
             <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">

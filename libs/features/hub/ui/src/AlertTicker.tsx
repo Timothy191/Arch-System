@@ -71,10 +71,10 @@ export function AlertTicker({ events }: AlertTickerProps) {
   return (
     <div
       className={cn(
-        "w-full rounded-2xl border border-arch-border-subtle bg-white/70 overflow-hidden shadow-card backdrop-blur-xl will-change-[backdrop-filter]",
+        "w-full rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden",
       )}
     >
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-arch-border-subtle bg-arch-surface-secondary/70">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/20 bg-white/10">
         <AlertTriangle className="w-3.5 h-3.5 text-accent-amber" />
         <span className="text-xs font-semibold text-arch-text-primary uppercase tracking-wider">
           Live Alerts

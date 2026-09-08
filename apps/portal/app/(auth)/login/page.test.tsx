@@ -1,17 +1,27 @@
 import { render, screen } from "@testing-library/react";
 import LoginPage from "./page";
 
+// Mock next/navigation
+const mockRedirect = jest.fn();
+jest.mock("next/navigation", () => ({
+  redirect: (target: string) => {
+    mockRedirect(target);
+    throw new Error(`NEXT_REDIRECT:${target}`);
+  },
+}));
+
 // Mock cookies
+const mockCookies = jest.fn();
 jest.mock("next/headers", () => ({
-  cookies: jest.fn(async () => ({
-    getAll: jest.fn(() => []),
-  })),
+  cookies: () => mockCookies(),
 }));
 
 // Mock @repo/supabase/server
+const mockGetUserSafely = jest.fn();
+const mockCreateServerSupabaseClient = jest.fn();
 jest.mock("@repo/supabase/server", () => ({
-  createServerSupabaseClient: jest.fn(),
-  getUserSafely: jest.fn(),
+  createServerSupabaseClient: () => mockCreateServerSupabaseClient(),
+  getUserSafely: (...args: any[]) => mockGetUserSafely(...args),
 }));
 
 // Mock LoginForm
@@ -39,11 +49,43 @@ jest.mock("@repo/utils", () => ({
 }));
 
 describe("LoginPage Server Component", () => {
-  it("renders login page successfully", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCookies.mockResolvedValue({
+      getAll: jest.fn(() => []),
+    });
+  });
+
+  it("renders login page successfully for unauthenticated user", async () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
     expect(screen.getByText("Welcome Back")).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
   });
+
+  it("redirects authenticated user to /hub when no redirect param", async () => {
+    mockCookies.mockResolvedValue({
+      getAll: jest.fn(() => [{ name: "sb-mock-auth-token.0", value: "token" }]),
+    });
+    mockCreateServerSupabaseClient.mockResolvedValue({});
+    mockGetUserSafely.mockResolvedValue({ id: "user-123" });
+
+    await expect(LoginPage()).rejects.toThrow("NEXT_REDIRECT:/hub");
+    expect(mockRedirect).toHaveBeenCalledWith("/hub");
+  });
+
+  it("redirects authenticated user to searchParams.redirect target", async () => {
+    mockCookies.mockResolvedValue({
+      getAll: jest.fn(() => [{ name: "sb-mock-auth-token", value: "token" }]),
+    });
+    mockCreateServerSupabaseClient.mockResolvedValue({});
+    mockGetUserSafely.mockResolvedValue({ id: "user-123" });
+
+    await expect(
+      LoginPage({ searchParams: Promise.resolve({ redirect: "/production" }) }),
+    ).rejects.toThrow("NEXT_REDIRECT:/production");
+    expect(mockRedirect).toHaveBeenCalledWith("/production");
+  });
 });
+

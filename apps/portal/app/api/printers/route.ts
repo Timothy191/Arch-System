@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServerSupabaseClient, createBearerSupabaseClient } from "@repo/supabase/server";
 
-export async function GET() {
+function getClient(request?: NextRequest) {
+  const authHeader = request?.headers?.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    return createBearerSupabaseClient(token);
+  }
+  return null;
+}
+
+export async function GET(request?: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
+    const bearerClient = getClient(request);
+    const supabase = bearerClient || (await createServerSupabaseClient());
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -39,7 +49,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
+    const bearerClient = getClient(request);
+    const supabase = bearerClient || (await createServerSupabaseClient());
     const {
       data: { user },
     } = await supabase.auth.getUser();

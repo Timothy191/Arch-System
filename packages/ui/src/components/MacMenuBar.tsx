@@ -160,7 +160,7 @@ const NAV_BTN =
   "px-2.5 h-6 flex items-center rounded text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default";
 
 const DROPDOWN_CONTENT =
-  "bg-white/95 backdrop-blur-2xl shadow-window border border-black/[0.08] rounded-lg py-1";
+  "liquid-glass-light backdrop-blur-2xl shadow-window border border-white/20 rounded-xl py-1";
 
 export function MacMenuBar({
   menuItems = NAVIGATION_ITEMS,
@@ -195,7 +195,7 @@ export function MacMenuBar({
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
-        "liquid-glass-light rounded-full shadow-window",
+        "liquid-glass-light border border-white/20 shadow-window rounded-full",
         className,
       )}
     >
@@ -208,7 +208,7 @@ export function MacMenuBar({
               <button
                 aria-label="System Menu"
                 aria-haspopup="true"
-                className="relative w-11 h-11 -ml-1 rounded-full bg-white border border-black/10 shadow-window flex items-center justify-center hover:bg-gray-50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
+                className="relative w-11 h-11 -ml-1 rounded-full bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
               >
                 <Logo className="w-7 h-7 text-[var(--accent-blue)]" />
               </button>
@@ -219,7 +219,7 @@ export function MacMenuBar({
             sideOffset={5}
             className={cn(
               "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
-              "bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl",
+              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl",
             )}
           >
             {/* ── Left Column: Departments ── */}
@@ -310,10 +310,10 @@ export function MacMenuBar({
                 <DropdownMenuItem asChild>
                   <button
                     onClick={() => {
-                      window.open(
-                        "https://web.whatsapp.com",
-                        "whatsapp-web",
-                        `width=400,height=${window.innerHeight},left=${window.screen.width - 400},top=0`,
+                      window.dispatchEvent(
+                        new CustomEvent("open-split-view", {
+                          detail: { service: "whatsapp", action: "toggle" },
+                        }),
                       );
                     }}
                     className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
@@ -382,18 +382,18 @@ export function MacMenuBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* WhatsApp Web Window trigger */}
+        {/* WhatsApp Web Split-Screen trigger */}
         <button
           type="button"
           onClick={() => {
-            window.open(
-              "https://web.whatsapp.com",
-              "whatsapp-web",
-              `width=400,height=${window.innerHeight},left=${window.screen.width - 400},top=0`,
+            window.dispatchEvent(
+              new CustomEvent("open-split-view", {
+                detail: { service: "whatsapp", action: "toggle" },
+              }),
             );
           }}
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
-          title="WhatsApp Web"
+          title="WhatsApp Web (Split Screen)"
         >
           <Image
             src="/whatsapp-logo.jpeg"
@@ -546,9 +546,9 @@ export function MacMenuBar({
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                     onClick={() => {
                       if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(() => {});
+                        document.documentElement.requestFullscreen().catch(() => { });
                       } else if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(() => {});
+                        document.exitFullscreen().catch(() => { });
                       }
                     }}
                   >
@@ -651,7 +651,7 @@ export function MacMenuBar({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
-                className="w-full h-6 pl-7 pr-3 rounded-full bg-black/[0.04] hover:bg-black/[0.07] border border-arch-border-emphasis/75 focus:border-[var(--accent-blue)]/50 focus:bg-black/[0.05] focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] transition-colors"
+                className="w-full h-6 pl-7 pr-3 rounded-full bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
               />
             </div>
           </form>

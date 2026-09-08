@@ -36,8 +36,15 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     },
     cookies: {
       getAll() {
-        if (cookieList) return cookieList;
-        return cookieStore ? cookieStore.getAll() : [];
+        const all = cookieList || (cookieStore ? cookieStore.getAll() : []);
+        const normalized = [...all];
+        for (const cookie of all) {
+          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
+          if (match && match[1] && !all.some((c: { name: string }) => c.name === match[1])) {
+            normalized.push({ name: match[1], value: cookie.value });
+          }
+        }
+        return normalized;
       },
       setAll(cookiesToSet) {
         if (cookieList) return;

@@ -87,6 +87,8 @@ export const DEPARTMENTS: Department[] = [
     stats: { label: "On-site", value: "142" },
     trend: [135, 138, 140, 139, 141, 142, 142, 143],
     actions: [
+      { label: "Print Cards", href: "/access-control/print-cards" },
+      { label: "QR & RFID Codes", href: "/access-control/qr-codes" },
       { label: "Access Logs", href: "/access-control/access-logs" },
       { label: "Badges", href: "/access-control/badges" },
     ],
@@ -250,6 +252,8 @@ export const DRILLING_TABS = [
  */
 export const ACCESS_CONTROL_TABS = [
   { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
+  { name: "print-cards", label: "Print Cards", icon: "Printer" },
+  { name: "qr-codes", label: "QR & RFID Codes", icon: "QrCode" },
   { name: "access-logs", label: "Access Logs", icon: "ShieldCheck" },
   { name: "visitors", label: "Visitors", icon: "Users" },
   { name: "badges", label: "Badges", icon: "CreditCard" },

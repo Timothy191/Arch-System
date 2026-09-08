@@ -1,0 +1,16 @@
+/**
+ * Arch System — Typography overrides
+ */
+
+@font-face {
+  font-family: 'Anurati';
+  src: url('/fonts/Anurati-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Apply Anurati exclusively to heading elements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Anurati', var(--font-sans), sans-serif;
+}

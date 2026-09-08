@@ -258,6 +258,64 @@
     border-color: var(--arch-brand-blue) !important;
     box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2) !important;
   }
+
+  /* ── Aria avatar companion animations ── */
+  /* AGENT-TRACE: mirrors aria-overlay/src/app/globals.css so the portal can
+     render the character as an overlay on top of the page (AriaAvatar,
+     AriaLauncher). Keep both files in sync. */
+  .aria-float {
+    animation: aria-float 3.2s ease-in-out infinite;
+  }
+  .aria-float-slow {
+    animation: aria-float 4.2s ease-in-out infinite;
+  }
+  .aria-think-bounce {
+    animation: aria-think 0.9s ease-in-out infinite;
+  }
+  .aria-blink {
+    animation: aria-blink 4s infinite;
+    transform-origin: center;
+  }
+
+  @keyframes aria-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes aria-think {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-2px) rotate(2deg);
+    }
+  }
+  @keyframes aria-blink {
+    0%,
+    46%,
+    54%,
+    100% {
+      transform: scaleY(1);
+    }
+    48%,
+    52% {
+      transform: scaleY(0.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aria-float,
+    .aria-float-slow,
+    .aria-think-bounce,
+    .aria-blink {
+      animation: none;
+    }
+  }
 }
 
 @layer base {

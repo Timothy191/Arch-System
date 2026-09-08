@@ -176,18 +176,20 @@ Glass cards serve as the foundational boundaries of the application layout. They
 
 | Variant                | Spacing/Padding                        | Surface & Lighting                                                            | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
 | :--------------------- | :------------------------------------- | :---------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
-| **Standard GlassCard** | `md` (16px), radius `radius-lg` (8px)  | `bg-white/75 backdrop-blur-2xl`, cool gradient border, top specular rim       | Background shift to `bg-white/82`, top rim strengthens (150ms).    | None on layout; standard hover elevation.                                 | Default container. Used for standard lists, charts, and metrics grouping.                |
-| **SpotlightCard**      | `md` (16px), radius `radius-lg` (8px)  | Frosted base with radial gradient specular sheen following cursor position    | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
-| **GlowBorderCard**     | `md` (16px), radius `radius-lg` (8px)  | Frosted panel with animated cool chromatic gradient perimeter                 | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
-| **MacOSPanelCard**     | `lg` (24px), radius `radius-xl` (12px) | Heavy frosted panel (`bg-white/75 backdrop-blur-2xl`), dual-layer depth stack | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
+| **Standard GlassCard** | `md` (16px), radius `rounded-2xl`      | `liquid-glass-light border border-white/40 shadow-window`, translucent base   | Translucent surface strengthens (`hover:bg-white/20`), top specular rim rises (150ms). | None on layout; standard hover elevation.                                 | Default container. Used for standard lists, charts, and metrics grouping.                |
+| **SpotlightCard**      | `md` (16px), radius `rounded-2xl`      | Frosted base with radial gradient specular sheen following cursor position    | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
+| **GlowBorderCard**     | `md` (16px), radius `rounded-2xl`      | Frosted panel with animated cool chromatic gradient perimeter                 | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
+| **MacOSPanelCard**     | `lg` (24px), radius `rounded-2xl`      | Heavy frosted panel (`liquid-glass-light border border-white/40 shadow-window`), dual-layer depth stack | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
 
-### Frosted Glass Architecture & Specular Lighting Tokens
+### Liquid Glass Architecture & Specular Lighting Tokens
 
-1. **Frosted Panel Surfaces**:
-   - Background: `rgba(255, 255, 255, 0.75)` with `backdrop-filter: blur(20px) saturate(140%)`
-   - Top Specular Highlight: `inset 0 1px 0 0 rgba(255, 255, 255, 0.8)`
-   - Subtle Border Gradient: `linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.2) 40%, rgba(180, 195, 220, 0.15) 100%)`
+1. **Liquid Glass Panel Surfaces**:
+   - Background: `linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) padding-box, var(--glass-border-gradient) border-box` with `backdrop-filter: blur(12px) saturate(140%)`
+   - Border: `1px solid rgba(255, 255, 255, 0.4)` (`border-white/40`)
+   - Top Specular Highlight: `inset 0 1px 0 0 rgba(255, 255, 255, 0.8)` (`--refraction-inner-border`)
+   - Shadow: `var(--shadow-window)` (`0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.03), 0 24px 56px rgba(0,0,0,0.04), 0 40px 96px rgba(0,0,0,0.05), inset 0 0 0 0.5px rgba(255,255,255,0.8)`)
 2. **Volumetric Ambient Occlusion**:
+   - `shadow-window`: Window-level ambient depth and inset specular rim.
    - `shadow-glass-depth`: `0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03)`
    - `shadow-glass-depth-hover`: `0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04)`
 3. **Negative Directives (Enforced)**:
@@ -320,13 +322,13 @@ Overlays and HUD elements overlay layout pages without completely blocking backg
 
 The sign-in interface is a key entry point that demonstrates the peak of the system's "Liquid Glass" visual design language and macOS Sonoma aesthetics.
 
-- **Background Video**: Fixed high-resolution 4K H.264 loop representing active operations (`/background/edge-of-the-event-horizon.3840x2160.mp4` at ~28MB). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/macos-27-golden-2560x1764.png`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
+- **Background Video**: Fixed high-resolution 4K H.264 loop representing active operations (`/background/edge-of-the-event-horizon.3840x2160.mp4` at ~28MB). Preloaded off the critical path (`preload="auto"`) and paired with an optimized poster image (`/background/edge-of-the-event-horizon-poster.webp`). It is overlayed with a subtle 10% dark overlay (`bg-black/10`) to ensure contrast and readability of form elements.
 - **Ambient Film Grain & Glass Filters**: A persistent noise/grain layer overlay (`.route-bg-grain`) is rendered on top of the layout to eliminate color banding in gradients and videos. The background video uses standard Sonoma filters (`brightness-95 saturate-110`) for optimal glass legibility.
 - **Window Geometry (macOS Sign-In Card)**:
-  - **Container**: A `w-[380px]` frosty glassmorphic panel (`.liquid-glass-light` class) with a 1px white border (`border-white/40`), custom shadow (`shadow-window`), and rounded corners (`rounded-xl`).
-  - **Title Bar**: An OS-style header bar with macOS window controls: red, yellow, and green dots (`bg-mac-red`, `bg-mac-yellow`, `bg-mac-green` with subtle borders) and centered status text (`Arch — System Sign In` at `text-[13px] font-medium text-[var(--text-secondary)]`).
-  - **Body Padding**: Spacious interior structure (`px-8 py-10`) separating controls with a vertical stack spacing of `space-y-10`.
-  - **Enterprise Footer**: A bottom bar (`px-4 py-3 bg-black/[0.02] border-t border-arch-border-subtle`) housing a language selector dropdown and the system version/build tags.
+  - **Container**: A `w-[380px]` frosty glassmorphic panel (`.liquid-glass-light` class) with a 1px white border (`border-white/40`), custom shadow (`shadow-window`), and rounded corners (`rounded-2xl`).
+  - **Title Bar**: An OS-style header bar with macOS window controls: red, yellow, and green dots (`bg-mac-red`, `bg-mac-yellow`, `bg-mac-green` with subtle borders) and centered status text (`Arch — System Sign In` at `text-[13px] font-medium text-[var(--text-secondary)]`) over translucent glass (`border-b border-white/20 bg-white/10`).
+  - **Body Padding**: Spacious interior structure (`px-7 py-7`) separating controls with an ergonomic vertical stack spacing of `space-y-5`.
+  - **Enterprise Footer**: A bottom bar (`px-4 py-3 bg-white/10 border-t border-white/20`) housing a language selector dropdown and the system version/build tags.
 - **Form Inputs**:
   - Custom inputs (`variant="login"`) with a background layer (`.liquid-glass-input`) and a slate/charcoal focus ring (`focus-ring-arch-blue` mapping to `focus:border-zinc-800 focus:ring-4 focus:ring-zinc-800/20`).
   - **RFID/NFC Icon**: An animated SVG icon inside the Employee ID field that scales and brightens on hover/focus-within (`group-hover:scale-110 group-focus-within:scale-110`).
@@ -338,7 +340,7 @@ The sign-in interface is a key entry point that demonstrates the peak of the sys
     - **Primary Sign-In**: Filled with deep charcoal/pitch black (`bg-[var(--color-action-primary)] hover:bg-[var(--color-action-primary-hover)] text-white`).
     - **Single Sign-On (SSO)**: A secondary outline button (`border border-black/[0.06] bg-black/[0.02] hover:bg-black/[0.04] text-[var(--text-secondary)]`).
 - **Contextual VPN Notice**:
-  - A subtle alert box (`px-3.5 py-2.5 rounded-lg border border-black/[0.04] bg-black/[0.02] text-[11px]`) informing operators about VPN connection requirements.
+  - A subtle alert box (`px-3.5 py-2 rounded-lg border border-white/30 bg-white/10 text-[11px]`) informing operators about VPN connection requirements.
 
 ---
 

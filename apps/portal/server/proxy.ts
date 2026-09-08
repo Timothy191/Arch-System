@@ -143,7 +143,7 @@ export async function proxy(request: NextRequest) {
 
   // Short-circuit static public file extensions BEFORE any auth calls
   const PUBLIC_FILE_EXTENSIONS =
-    /\.(jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$/i;
+    /\.(jpg|jpeg|png|webp|avif|gif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$/i;
   if (PUBLIC_FILE_EXTENSIONS.test(pathname)) {
     return NextResponse.next();
   }
@@ -175,7 +175,7 @@ export async function proxy(request: NextRequest) {
     const hasSession =
       request.cookies.has("sb-access-token") ||
       [...request.cookies.getAll()].some(
-        (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+        (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
       );
 
     if (!hasSession) {
@@ -214,7 +214,26 @@ export async function proxy(request: NextRequest) {
         recordJobExecution("auth.middleware.check", 0, true);
         // eslint-disable-next-line no-empty
       } catch {}
-      return NextResponse.redirect(new URL("/", request.url));
+      const redirectParam = request.nextUrl.searchParams.get("redirect");
+      const target =
+        redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith("/login")
+          ? redirectParam
+          : "/hub";
+      const redirectRes = NextResponse.redirect(new URL(target, request.url));
+      if (client.response && client.response.cookies) {
+        client.response.cookies.getAll().forEach((cookie) => {
+          redirectRes.cookies.set(cookie.name, cookie.value, {
+            path: cookie.path,
+            domain: cookie.domain,
+            secure: cookie.secure,
+            httpOnly: cookie.httpOnly,
+            sameSite: cookie.sameSite,
+            expires: cookie.expires,
+            maxAge: cookie.maxAge,
+          });
+        });
+      }
+      return redirectRes;
     }
     try {
       recordJobExecution("auth.middleware.check", 0, false);
@@ -228,7 +247,7 @@ export async function proxy(request: NextRequest) {
   const hasSessionCookie =
     request.cookies.has("sb-access-token") ||
     [...request.cookies.getAll()].some(
-      (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
     );
 
   if (!hasSessionCookie) {

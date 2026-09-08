@@ -30,7 +30,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const MIGRATIONS_DIR = path.join(ROOT, "packages", "database", "migrations");
+const ARCH_BASE_MIGRATIONS = path.join(ROOT, "..", "Arch-Base", "supabase", "migrations");
+const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
+  ? ARCH_BASE_MIGRATIONS
+  : path.join(ROOT, "packages", "database", "migrations");
 const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
 const REPORT_PATH = path.join(REPORT_DIR, "rls-report.md");
 
@@ -355,16 +358,16 @@ function renderReport({
     for (const w of warnings) {
       lines.push(
         "| `" +
-          w.table +
-          "` | `" +
-          w.policy +
-          "` | " +
-          w.command +
-          " | `" +
-          w.file +
-          "` | " +
-          w.issues.join("<br>") +
-          " |",
+        w.table +
+        "` | `" +
+        w.policy +
+        "` | " +
+        w.command +
+        " | `" +
+        w.file +
+        "` | " +
+        w.issues.join("<br>") +
+        " |",
       );
     }
     lines.push("");
@@ -427,18 +430,18 @@ function main() {
 
   console.log(
     "OK Scanned " +
-      files.length +
-      " migrations: " +
-      allTableNames.length +
-      " tables, " +
-      enabledTableNames.length +
-      " with RLS, " +
-      critical.length +
-      " critical, " +
-      warnings.length +
-      " warnings (" +
-      suspiciousTableSet.size +
-      " tables).",
+    files.length +
+    " migrations: " +
+    allTableNames.length +
+    " tables, " +
+    enabledTableNames.length +
+    " with RLS, " +
+    critical.length +
+    " critical, " +
+    warnings.length +
+    " warnings (" +
+    suspiciousTableSet.size +
+    " tables).",
   );
   console.log("Report: " + path.relative(ROOT, REPORT_PATH));
   process.exit(0);

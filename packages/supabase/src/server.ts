@@ -1,9 +1,12 @@
 /* global RequestInfo, RequestInit */
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { User } from "@supabase/supabase-js";
 
 import { serverLogger } from "@repo/logger";
+
+export { createClient };
 
 export async function instrumentedFetch(
   input: RequestInfo | URL,
@@ -85,15 +88,24 @@ export async function createServerSupabaseClient() {
     },
     cookies: {
       getAll() {
-        return cookieStore.getAll();
+        const all = cookieStore.getAll();
+        const normalized = [...all];
+        for (const cookie of all) {
+          const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
+          if (match && match[1] && !all.some((c: { name: string }) => c.name === match[1])) {
+            normalized.push({ name: match[1], value: cookie.value });
+          }
+        }
+        return normalized;
       },
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, {
               ...options,
-              maxAge: undefined,
-              expires: undefined,
+              maxAge: options?.maxAge ?? 34560000,
+              path: options?.path ?? "/",
+              sameSite: options?.sameSite ?? "lax",
             }),
           );
         } catch {
@@ -102,6 +114,32 @@ export async function createServerSupabaseClient() {
           // user sessions.
         }
       },
+    },
+  });
+}
+
+export function createBearerSupabaseClient(token: string) {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    "http://127.0.0.1:54321";
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    "";
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      fetch: instrumentedFetch,
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     },
   });
 }
@@ -129,14 +167,12 @@ export async function getUserSafely(
     // This validates the JWT signature and ensures we have the latest user
     const { data, error } = await supabase.auth.getUser();
 
-    if (error || !data.user) {
+    if (error || !data?.user) {
       return null;
     }
 
     return data.user;
   } catch (error) {
-    // Handle token validation errors gracefully
-    // This can happen when the token is invalid, expired, or malformed
     return null;
   }
 }

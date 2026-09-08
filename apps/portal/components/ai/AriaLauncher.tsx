@@ -2,16 +2,21 @@
 
 import { useEffect, useRef, useState, type JSX } from "react";
 import { cn } from "@repo/ui/lib/utils";
+import { AriaAvatar, type AriaState } from "@/components/ai/AriaAvatar";
 
 /**
- * Aria — the operations assistant launcher. Renders a floating button that
- * opens a same-origin iframe to `/assistant`, which the portal server-side
- * proxies to the aria-overlay sidecar (port 3100). The iframe is mounted on
- * first open and kept mounted while hidden so the conversation persists.
+ * Aria — the operations assistant launcher. A floating button opens a compact,
+ * same-origin iframe to `/assistant`, which the portal server-side proxies to
+ * the aria-overlay sidecar (port 3100). While open, the Aria character renders
+ * as an overlay on top of the page, anchored at the window's bottom corner, and
+ * reflects live assistant state (`idle`/`thinking`/`error`) via the sidecar's
+ * `aria-state` postMessage. The iframe stays mounted while hidden so the
+ * conversation persists.
  */
 export function AriaLauncher(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [ariaState, setAriaState] = useState<AriaState>("idle");
   const frameRef = useRef<HTMLIFrameElement>(null);
 
   const openPanel = () => {
@@ -25,9 +30,19 @@ export function AriaLauncher(): JSX.Element {
       openPanel();
     }
     function onMessage(e: MessageEvent) {
-      const data = e.data as { type?: string } | null;
-      if (data && typeof data === "object" && data.type === "aria-close") {
+      const data = e.data as { type?: string; state?: string } | null;
+      if (!data || typeof data !== "object") return;
+      if (data.type === "aria-close") {
         closePanel();
+        return;
+      }
+      if (data.type === "aria-state") {
+        // AGENT-TRACE: drive the character overlay from the sidecar's chat
+        // lifecycle (submitted/streaming -> thinking, error -> error).
+        const state = data.state as AriaState;
+        if (["idle", "thinking", "speaking", "happy", "error"].includes(state)) {
+          setAriaState(state);
+        }
       }
     }
     function onKeyDown(e: KeyboardEvent) {
@@ -44,6 +59,10 @@ export function AriaLauncher(): JSX.Element {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) setAriaState("idle");
+  }, [isOpen]);
+
   return (
     <div className="relative">
       {mounted && (
@@ -56,7 +75,7 @@ export function AriaLauncher(): JSX.Element {
           )}
         >
           <div
-            className="w-[440px] h-[min(720px,76vh)] rounded-2xl overflow-hidden border border-arch-border-subtle shadow-window bg-[var(--bg-primary)]"
+            className="absolute bottom-[88px] right-0 w-[400px] h-[min(620px,70vh)] rounded-2xl overflow-hidden border border-arch-border-subtle shadow-window bg-[var(--bg-primary)]"
             role="dialog"
             aria-label="Aria operations assistant"
             aria-hidden={!isOpen}
@@ -70,6 +89,13 @@ export function AriaLauncher(): JSX.Element {
               onLoad={() => isOpen && frameRef.current?.focus()}
             />
           </div>
+
+          {isOpen && (
+            <AriaAvatar
+              state={ariaState}
+              className="absolute bottom-0 right-0 w-20 h-20 drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]"
+            />
+          )}
         </div>
       )}
 

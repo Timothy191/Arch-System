@@ -15,7 +15,10 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/";
-  const redirectTo = isValidPageRedirect(rawRedirect) ? rawRedirect : "/";
+  const redirectTo =
+    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login")
+      ? rawRedirect
+      : "/";
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
@@ -50,8 +53,13 @@ export function LoginForm() {
 
     const result = await login(employeeId, password);
     if (result?.success) {
-      router.push(redirectTo);
-      router.refresh();
+      if (typeof window !== "undefined" && window.location && process.env.NODE_ENV !== "test") {
+        const destination = redirectTo === "/" ? "/hub" : redirectTo;
+        window.location.assign(destination);
+      } else {
+        router.push(redirectTo);
+        router.refresh();
+      }
     } else {
       setPasswordError("Invalid email/employee ID or password");
     }
@@ -62,7 +70,7 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
+          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
         >
           <span id="email-label">Employee ID / Email</span>
         </label>
@@ -95,7 +103,7 @@ export function LoginForm() {
             aria-describedby="email-hint"
           />
         </div>
-        <p id="email-hint" className="text-[10px] text-arch-text-tertiary select-none">
+        <p id="email-hint" className="text-[10px] text-black select-none">
           Your employee ID is on your badge.
         </p>
       </div>
@@ -103,7 +111,7 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-xs font-medium text-[var(--text-secondary)] transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
+          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
         >
           <span id="password-label">Password</span>
         </label>
@@ -132,7 +140,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-sm"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-sm"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -168,21 +176,29 @@ export function LoginForm() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 group">
         <AnimatedButton
           type="submit"
           disabled={loading || isRateLimited}
-          className="w-full h-12 rounded-md liquid-glass-button bg-[var(--color-action-primary)] hover:bg-[var(--color-action-primary-hover)] text-white font-medium relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-action-primary)]/50 focus-visible:ring-offset-1 transition-colors"
-          hoverScale={1}
+          className="w-full h-14 rounded-lg liquid-glass-button bg-gradient-to-b from-[#c59837] via-[#94611a] to-[#603808] hover:from-[#d4a843] hover:via-[#a36c1e] hover:to-[#6e410b] text-white text-base font-bold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-1 transition-all duration-300 drop-shadow-[0_10px_20px_rgba(90,51,7,0.4)] drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_16px_32px_rgba(90,51,7,0.55)] hover:drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] border border-amber-400/30"
+          hoverScale={1.02}
           tapScale={0.97}
         >
+          {/* Specular top rim shine */}
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-200/75 to-transparent z-10" />
+
+          {/* Sweeping light shine effect */}
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
+
           {loading ? (
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
               <Loader2 className="w-4 h-4 animate-spin shrink-0" />
               <span>Accessing your workspace...</span>
             </span>
           ) : (
-            "Access Arch Systems"
+            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
+              Access Arch Systems
+            </span>
           )}
         </AnimatedButton>
       </div>
@@ -193,11 +209,11 @@ export function LoginForm() {
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
           label="Remember me"
-          className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors liquid-text-lift"
+          className="text-xs text-black/80 hover:text-black transition-colors liquid-text-lift"
         />
         <Link
           href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-          className="text-xs text-[var(--text-muted)] hover:text-[var(--accent-blue)] transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1 py-0.5 -mx-1"
+          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1 py-0.5 -mx-1"
         >
           Forgot password?
         </Link>

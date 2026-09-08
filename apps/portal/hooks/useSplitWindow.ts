@@ -12,6 +12,7 @@ interface SplitWindowState {
   tabs: Tab[];
   activeTabId: string | null;
   openTab: (_service: SplitService) => void;
+  toggleTab: (_service: SplitService) => void;
   closeTab: (_id: string) => void;
   activateTab: (_id: string) => void;
   closeAll: () => void;
@@ -41,6 +42,16 @@ export const useSplitWindow = create<SplitWindowState>((set, get) => ({
       tabs: [...tabs, newTab],
       activeTabId: newTab.id,
     });
+  },
+
+  toggleTab(service) {
+    const { isOpen, tabs, activeTabId } = get();
+    const existing = tabs.find((t) => t.service === service);
+    if (existing && isOpen && activeTabId === existing.id) {
+      set({ isOpen: false });
+      return;
+    }
+    get().openTab(service);
   },
 
   closeTab(id) {

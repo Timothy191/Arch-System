@@ -34,11 +34,11 @@
   --danger-foreground: 0 0% 100%;
   --info: #1c1c1e;
   --info-foreground: 0 0% 100%;
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-surface-hover: rgba(255, 255, 255, 0.85);
-  --glass-surface-strong: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-border-top: rgba(255, 255, 255, 0.25);
+  --glass-surface: rgba(255, 255, 255, 0.15);
+  --glass-surface-hover: rgba(255, 255, 255, 0.25);
+  --glass-surface-strong: rgba(255, 255, 255, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-border-top: rgba(255, 255, 255, 0.5);
   --glass-border-gradient: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.8),

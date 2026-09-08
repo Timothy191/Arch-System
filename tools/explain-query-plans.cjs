@@ -11,7 +11,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const MIGRATIONS_DIR = path.join(ROOT, "packages", "database", "migrations");
+const ARCH_BASE_MIGRATIONS = path.join(ROOT, "..", "Arch-Base", "supabase", "migrations");
+const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
+  ? ARCH_BASE_MIGRATIONS
+  : path.join(ROOT, "packages", "database", "migrations");
 const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
 const REPORT_PATH = path.join(REPORT_DIR, "explain-query-plans-report.md");
 

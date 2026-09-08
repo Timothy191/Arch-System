@@ -234,7 +234,7 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 - **No hardcoded colors** — pull from design tokens (`@repo/theme`) or Tailwind tokens built from `packages/theme/tokens.json`. Hardcoded OKLCH/hex values in components are a CI lint failure.
 - **Light theme only** — `data-theme="light"` is hardcoded in the head script. Do not add a dark-mode toggle, color-scheme overrides, or `prefers-color-scheme: dark` media queries. Dark mode does not exist.
 - **Animation discipline** — animate only `opacity`, `transform`, `background-color`, `border-color`, `color`. Never animate layout properties. Easing is `cubic-bezier(0.16, 1, 0.3, 1)`.
-- **Glass pattern** — `bg-white/70 backdrop-blur-xl border border-black/[0.08]` is the standard surface.
+- **Glass pattern** — `liquid-glass-light border border-white/40 shadow-window rounded-2xl` is the standard surface.
 - **Icon and path aliases** — `@/*` and `~/*` both resolve to `apps/portal/*`. `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*` are conventional sub-cuts.
 - **Server Actions validate first line** — `createServerSupabaseClient()` from `@repo/supabase/server` and validate the user as line one.
 - **Conventional commits** — enforced by commitlint. Husky `commit-msg` hook will reject non-conforming messages.

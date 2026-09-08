@@ -19,7 +19,10 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const MIGRATIONS_DIR = path.join(ROOT, 'packages', 'database', 'migrations');
+const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
+const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
+  ? ARCH_BASE_MIGRATIONS
+  : path.join(ROOT, 'packages', 'database', 'migrations');
 const CONTRACT_DIR = path.join(ROOT, 'packages', 'contract', 'src', 'schemas');
 const REPORT_DIR = path.join(ROOT, 'documentation', '03-audit-reports');
 
@@ -42,7 +45,7 @@ migrationFiles.forEach((file) => {
     const tableName = match[1].trim().toLowerCase();
     // Skip partitioned child partition tables
     if (tableName.includes('_partition_') || tableName.match(/_\d{4}_\d{2}$/)) continue;
-    
+
     if (!dbTables.has(tableName)) {
       dbTables.set(tableName, { file, columns: new Set() });
     }
