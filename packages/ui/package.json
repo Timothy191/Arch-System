@@ -54,6 +54,8 @@
     "./Divider": "./src/components/Divider.tsx",
     "./BorderBox": "./src/components/BorderBox.tsx",
     "./Logo": "./src/components/Logo.tsx",
+    "./EveLogo": "./src/components/EveLogo.tsx",
+    "./EveStatusBar": "./src/components/EveStatusBar.tsx",
     "./GlassCard": "./src/components/GlassCard.tsx",
     "./DepartmentLayout": "./src/components/DepartmentLayout.tsx",
     "./SecondaryButton": "./src/components/SecondaryButton.tsx",

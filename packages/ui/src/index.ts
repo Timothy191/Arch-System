@@ -23,6 +23,8 @@ export * from "./components/ShiftToggle";
 export * from "./components/Divider";
 export * from "./components/BorderBox";
 export * from "./components/Logo";
+export * from "./components/EveLogo";
+export * from "./components/EveStatusBar";
 export * from "./components/EmptyState";
 export * from "./components/CookieConsent";
 export * from "./components/Clock";

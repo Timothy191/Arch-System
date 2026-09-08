@@ -4,8 +4,10 @@ import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
 import { LoginClock } from "@/features/auth/components/LoginClock";
-import { AlertTriangle, Lock, AlertCircle, ChevronDown, Bot, Activity } from "lucide-react";
+import { AlertTriangle, Lock, AlertCircle, ChevronDown } from "lucide-react";
 import { Logo } from "@repo/ui/Logo";
+import { EveLogo } from "@repo/ui/EveLogo";
+import { EveStatusBar } from "@repo/ui/EveStatusBar";
 import { Clock } from "@repo/ui/Clock";
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
@@ -59,9 +61,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     const rawRedirect = params?.redirect;
     const target =
       rawRedirect &&
-        rawRedirect.startsWith("/") &&
-        !rawRedirect.startsWith("//") &&
-        !rawRedirect.startsWith("/login")
+      rawRedirect.startsWith("/") &&
+      !rawRedirect.startsWith("//") &&
+      !rawRedirect.startsWith("/login")
         ? rawRedirect
         : "/hub";
     redirect(target);
@@ -138,46 +140,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                   <Logo className="w-9 h-9 text-[var(--accent-blue)]" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
-                  <h1 className="text-xl font-semibold tracking-tight text-black">
+                  <h1 className="text-xl font-semibold tracking-tight text-[var(--text-heading)]">
                     Arch Systems
                   </h1>
-                  <p className="text-black text-xs">Sign in to your workstation</p>
-                </div>
-              </div>
-
-              {/* Eve Agentic System & Frameworks — Autonomous Platform Oversight */}
-              <div className="p-3 rounded-xl border border-sky-500/25 bg-gradient-to-br from-sky-500/[0.09] via-sky-500/[0.04] to-transparent space-y-2 select-none shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
-                    </span>
-                    <Bot className="w-3.5 h-3.5 text-sky-700 shrink-0" strokeWidth={2.2} />
-                    <span className="font-semibold tracking-wide text-[11px] text-sky-950 uppercase">
-                      Eve Agentic System
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-900 border border-sky-500/25">
-                    EVE·FRAMEWORKS
-                  </span>
-                </div>
-                <p className="text-[10.5px] text-black/75 leading-relaxed font-normal">
-                  Autonomous sentinel online: continuously supervising portal routing, backend databases, Supabase RLS security, and RFID scanning telemetry across all Arch-System operations.
-                </p>
-                <div className="grid grid-cols-3 gap-1 pt-0.5 text-[9px] font-mono text-black/80">
-                  <div className="flex items-center justify-center gap-1 px-1.5 py-0.5 rounded bg-white/50 border border-black/5 text-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Portal Watch</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1 px-1.5 py-0.5 rounded bg-white/50 border border-black/5 text-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Backend Ops</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1 px-1.5 py-0.5 rounded bg-white/50 border border-black/5 text-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>RFID Ingest</span>
-                  </div>
+                  <p className="text-[var(--text-secondary)] text-xs">
+                    Sign in to your workstation
+                  </p>
                 </div>
               </div>
 
@@ -185,10 +153,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
               {/* Contextual System Notice */}
               <div className="px-3.5 py-2 rounded-lg border border-white/15 bg-white/5 text-[11px] text-black leading-relaxed flex items-center gap-2.5 select-none">
-                <AlertCircle
-                  className="w-3.5 h-3.5 text-black shrink-0"
-                  strokeWidth={2}
-                />
+                <AlertCircle className="w-3.5 h-3.5 text-black shrink-0" strokeWidth={2} />
                 <span>
                   <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
                 </span>
@@ -210,11 +175,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
                 <span>v{PORTAL_VERSION}</span>
                 <span className="uppercase tracking-wider font-medium">Arch OS</span>
                 <span className="text-black/30">·</span>
-                <span className="text-sky-800 font-semibold tracking-wider uppercase text-[9px]">Eve Guard</span>
+                <EveLogo className="h-3 w-auto text-sky-800" />
               </div>
             </div>
           </div>
         )}
+
+        {/* eve agentic system — slim status bar below the login card */}
+        <EveStatusBar />
       </div>
     </main>
   );

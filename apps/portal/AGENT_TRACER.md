@@ -11,6 +11,46 @@
 - Surface tokens (`bg-arch-surface-tertiary`, `text-arch-text-secondary`, `border-arch-border-subtle`) used for neutral badges.
 - All 8 fixes requested in the specification were already present in the codebase prior to this audit.
 
+## 2026-09-08: Login page refactor + Geist-compliant eve branding
+
+### Purpose
+
+Refactor the login card layout (remove the tall in-card eve status card that pushed the form down), add a slim eve status bar below the card, and make all eve branding compliant with the Geist brand guidelines (eve always lowercase, official wordmark, required Vercel attribution).
+
+### Changes Made
+
+1. **`apps/portal/app/(auth)/login/page.tsx`**:
+   - Removed the in-card "Eve Agentic System" card (was violating brand rules with "Eve"/"EVE·FRAMEWORKS" capitalization and pushing the form down).
+   - Added `<EveStatusBar />` below the login card as a slim status strip.
+   - Replaced the "Eve Guard" footer text with the official lowercase eve wordmark (`<EveLogo />`).
+   - Migrated the h1 and title text from `text-black` to theme tokens (`text-[var(--text-heading)]`, `text-[var(--text-secondary)]`) — fixes the pre-existing e2e assertion that the h1 must use `text-[var(--text-heading)]`.
+   - Removed unused `Bot`/`Activity` lucide imports.
+
+2. **`apps/portal/app/layout.tsx`**:
+   - Added a global `<footer role="contentinfo">` landmark (resolves the existing TODO) with Arch OS + version, the eve wordmark, and the required Vercel attribution statement.
+
+3. **`apps/portal/jest.config.js`**: Added `moduleNameMapper` entries for `@repo/ui/EveLogo` and `@repo/ui/EveStatusBar`.
+
+4. **`apps/portal/features/auth/components/EveBranding.test.tsx`** (new): Unit tests for `EveLogo` (lowercase aria-label, className forwarding) and `EveStatusBar` (label, ONLINE badge, three chips).
+
+5. **`apps/portal/app/(auth)/login/page.test.tsx`**: Assert the eve status bar renders and the h1 uses the theme token class.
+
+6. **`e2e/visual/login.visual.spec.ts`**: Masked `[data-testid="eve-status-bar"]` (pulsing dot) for deterministic snapshots; regenerated login + layout snapshots.
+
+### Verification
+
+- `pnpm --filter @repo/ui type-check` ✅
+- `pnpm --filter portal type-check` ✅
+- `pnpm --filter portal test` ✅ (125/125 suites, 809/809 tests)
+- `npx eslint` on touched files ✅
+- `pnpm test:e2e:visual` (login + layout specs) ✅ (22/22, snapshots regenerated)
+- `pnpm test:e2e` login spec: 34/37 pass; the 3 failures are the pre-existing "no forbidden raw shadow classes" test (caused by `SplitWindowLayout.tsx` `shadow-sm`/`shadow-2xs`/`shadow-xs`, confirmed failing on the stashed baseline before these changes).
+
+### What the Next Agent Should Know
+
+- eve must always be written lowercase and the official wordmark paths must never be modified (Geist brand rules).
+- The design-audit report still shows 16 pre-existing critical violations in `neo300-print-studio.tsx`, `qr-management-studio.tsx`, `AriaLauncher.tsx`, and `SplitWindowLayout.tsx` — none introduced by this change.
+
 ## 2026-06-16: Wire @repo/logger into Portal Health Endpoints
 
 ### Purpose

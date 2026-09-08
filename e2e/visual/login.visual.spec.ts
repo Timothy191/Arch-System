@@ -38,6 +38,8 @@ test.describe("login page visual regression", () => {
         page.locator('[data-testid="alert-banner"]'),
         page.locator('[data-testid="login-marquees"]'),
         page.locator('[data-testid="footer-date"]'),
+        // eve status bar contains a pulsing status dot — mask for determinism
+        page.locator('[data-testid="eve-status-bar"]'),
       ],
     });
   });

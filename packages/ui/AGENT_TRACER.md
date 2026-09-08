@@ -1,5 +1,16 @@
 # Agent Tracer - @repo/ui
 
+## 2026-09-08 - eve branding components (EveLogo + EveStatusBar)
+
+- **Purpose**: Add Geist-compliant eve branding primitives for the login page and global footer.
+- **Changes**:
+  - `packages/ui/src/components/EveLogo.tsx` (new): Official eve wordmark SVG rendered verbatim from the Geist brand assets (viewBox 0 0 169 53, `fill="currentColor"`), with lowercase `aria-label="eve"` per brand rules.
+  - `packages/ui/src/components/EveStatusBar.tsx` (new): Slim status strip (eve wordmark, lowercase "eve agentic system" label, ONLINE badge, Portal Watch / Backend Ops / RFID Ingest chips). Uses only theme tokens and `shadow-sm`; `data-testid="eve-status-bar"` for visual-spec masking. Label intentionally has no `uppercase` class — CSS text-transform would render "EVE", violating the Geist lowercase rule.
+  - `packages/ui/package.json`: Added `./EveLogo` and `./EveStatusBar` exports.
+  - `packages/ui/src/index.ts`: Re-exported both components.
+- **Verification**: `pnpm --filter @repo/ui type-check` ✅; portal Jest suite 125/125 suites, 809/809 tests ✅; `npx eslint` on touched files ✅.
+- **What the Next Agent Should Know**: eve must always be written lowercase (never "Eve"/"EVE") and the logo paths must never be modified — both are Geist brand requirements.
+
 ## 2026-09-02 - Dependency Consolidation & Framer Motion Standardization
 
 - **Purpose**: Consolidate motion wrappers onto `framer-motion`, eliminate dead dependencies (`animejs` and `@base-ui/react`), and prune workspace catalogs.
@@ -439,7 +450,7 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Status**: Completed. Hand-off: consume via `@repo/ui/Clock`; login wiring lives in `apps/portal`.
 
 ## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit
+
 - **Agent**: Antigravity
 - **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
-

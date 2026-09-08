@@ -54,6 +54,8 @@ module.exports = {
     "^@repo/ui/MacMenuBar$": "<rootDir>/../../packages/ui/src/components/MacMenuBar.tsx",
     "^@repo/ui/MacTitleBar$": "<rootDir>/../../packages/ui/src/components/MacTitleBar.tsx",
     "^@repo/ui/Logo$": "<rootDir>/../../packages/ui/src/components/Logo.tsx",
+    "^@repo/ui/EveLogo$": "<rootDir>/../../packages/ui/src/components/EveLogo.tsx",
+    "^@repo/ui/EveStatusBar$": "<rootDir>/../../packages/ui/src/components/EveStatusBar.tsx",
     "^@repo/utils$": "<rootDir>/../../packages/utils/src/index.ts",
     "^@repo/utils/(.*)$": "<rootDir>/../../packages/utils/src/$1",
     "^@repo/auth/ui$": "<rootDir>/../../libs/features/auth/ui/src/index.ts",

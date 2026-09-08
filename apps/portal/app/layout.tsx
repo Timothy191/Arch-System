@@ -14,6 +14,7 @@ import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
+import { EveLogo } from "@repo/ui/EveLogo";
 import { ClientOverlays } from "@/components/ClientOverlays";
 import { SkipLinks } from "@/components/accessibility/SkipLinks";
 
@@ -63,6 +64,8 @@ const outfit = Outfit({
   display: "swap",
   adjustFontFallback: true,
 });
+
+const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
 export const metadata: Metadata = {
   title: "Arch-Systems | Arch OS",
@@ -169,8 +172,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <ClientOverlays />
               <Toaster />
 
-              {/* Footer landmark - if exists, otherwise contentinfo on body or create footer */}
-              {/* We'll add a proper footer or ensure contentinfo is on appropriate element */}
+              {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}
+              <footer
+                role="contentinfo"
+                aria-label="Site footer"
+                className="relative z-10 mt-4 px-6 py-4 border-t border-[var(--border-subtle)] text-[10px] text-[var(--text-muted)] select-none"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="uppercase tracking-wider font-medium text-[var(--text-secondary)]">
+                      Arch OS
+                    </span>
+                    <span className="text-[var(--text-muted)]/60">·</span>
+                    <span>v{PORTAL_VERSION}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <EveLogo className="h-3 w-auto text-[var(--text-secondary)]" />
+                    <span className="text-[var(--text-muted)]">eve</span>
+                  </div>
+                </div>
+                <p className="mt-2 text-center sm:text-left text-[9px] leading-relaxed text-[var(--text-muted)]/80">
+                  Vercel, the Vercel design, Next.js and related marks, designs and logos are
+                  trademarks or registered trademarks of Vercel, Inc. or its affiliates in the US
+                  and other countries.
+                </p>
+              </footer>
             </FocusModeProvider>
           </ClientProviders>
         </ArchThemeProvider>

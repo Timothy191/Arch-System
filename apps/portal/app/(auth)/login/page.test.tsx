@@ -29,6 +29,11 @@ jest.mock("@/features/auth/components/LoginForm", () => ({
   LoginForm: () => <div data-testid="mock-login-form" />,
 }));
 
+// Mock EveStatusBar
+jest.mock("@repo/ui/EveStatusBar", () => ({
+  EveStatusBar: () => <div data-testid="mock-eve-status-bar" />,
+}));
+
 // Mock GlassCard
 jest.mock("@repo/ui/GlassCard", () => ({
   GlassCard: ({ children, className, style }: any) => (
@@ -62,6 +67,15 @@ describe("LoginPage Server Component", () => {
 
     expect(screen.getByText("Welcome Back")).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-eve-status-bar")).toBeInTheDocument();
+  });
+
+  it("renders the heading with the theme token class", async () => {
+    const pageElement = await LoginPage();
+    render(pageElement);
+
+    const heading = screen.getByRole("heading", { name: "Arch Systems" });
+    expect(heading).toHaveClass("text-[var(--text-heading)]");
   });
 
   it("redirects authenticated user to /hub when no redirect param", async () => {
@@ -88,4 +102,3 @@ describe("LoginPage Server Component", () => {
     expect(mockRedirect).toHaveBeenCalledWith("/production");
   });
 });
-
