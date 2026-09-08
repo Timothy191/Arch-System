@@ -36,11 +36,17 @@ pnpm --filter portal test 2>&1 | tee /tmp/autoresearch-test-output.txt
 test_end_ms=$(date +%s%N)
 test_duration_ms=$(( (test_end_ms - test_start_ms) / 1000000 ))
 
-# Parse Jest summary from filtered portal run
+# Parse Jest summary from filtered portal run.
 # Jest final lines: "Test Suites: N passed, N total" / "Tests: N passed, N total"
-test_suites=$(grep -oE "^Test Suites:\s+[0-9]+ passed, [0-9]+ total" /tmp/autoresearch-test-output.txt | head -1 | grep -oE "[0-9]+(?= total)" || echo "0")
-test_count=$(grep -oE "^Tests:\s+[0-9]+ passed, [0-9]+ total" /tmp/autoresearch-test-output.txt | head -1 | grep -oE "[0-9]+(?= total)" || echo "0")
-pass_count=$(grep -oE "^Tests:\s+[0-9]+ passed" /tmp/autoresearch-test-output.txt | head -1 | grep -oE "[0-9]+" || echo "$test_count")
+# Field layout: "Test Suites: <n> passed, <n> total" -> $3; "Tests: <n> passed, <n> total" -> $3; passed -> $2.
+# Field layout: "Test Suites: <n> passed, <n> total" -> $3 passed, $5 total
+# "Tests: <n> passed, <n> total" -> $2 passed, $4 total
+test_suites=$(grep -E "^Test Suites:" /tmp/autoresearch-test-output.txt | tail -n 1 | awk '{print $5}')
+test_count=$(grep -E "^Tests:" /tmp/autoresearch-test-output.txt | tail -n 1 | awk '{print $4}')
+pass_count=$(grep -E "^Tests:" /tmp/autoresearch-test-output.txt | tail -n 1 | awk '{print $2}')
+test_suites=${test_suites:-0}
+test_count=${test_count:-0}
+pass_count=${pass_count:-0}
 fail_count=$((test_count - pass_count))
 pass_rate="0.0000"
 if [ "$test_count" -gt 0 ] 2>/dev/null; then
