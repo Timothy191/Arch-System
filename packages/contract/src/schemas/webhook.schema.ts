@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema } from "./common.schema.js";
+import { uuidSchema } from "./common.schema";
 
 export const createWebhookSchema = z.object({
   url: z.string().url("Must be a valid URL").max(2048, "URL too long"),

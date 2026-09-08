@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { nonEmptyString } from "./common.schema.js";
+import { nonEmptyString } from "./common.schema";
 
 export const tireStatusSchema = z.enum(["installed", "inventory", "scrapped"]);
 export const tireConditionSchema = z.enum(["good", "warning", "critical"]);
