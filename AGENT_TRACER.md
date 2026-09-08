@@ -4,6 +4,18 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## 2026-09-08 — Nx AI-Agent Configuration for All Supported Agents
+
+- **Purpose**: Resolved the `nx configure-ai-agents` advisory by configuring every supported AI agent (OpenCode, Claude, Codex, Gemini, Copilot) with the Nx rules block, MCP wiring, and generated skills.
+- **Changes**:
+  - `AGENTS.md` & `CLAUDE.md`: Appended the marked Nx rules block (`<!-- nx configuration start/end -->`) with Nx workspace guidelines, scaffolding, and nx_docs usage rules.
+  - `.claude/settings.json` (new): Enabled the `nx@nx-claude-plugins` marketplace plugin (MCP + skills + agents).
+  - `.codex/config.toml` + `.codex/agents/ci-monitor-subagent.toml` (new): nx-mcp server, `multi_agent` feature, CI monitor subagent.
+  - `.gemini/settings.json`: Added `contextFileName: "AGENTS.md"`; `.gemini/commands/monitor-ci.toml` (new).
+  - `.github/agents|prompts|skills/monitor-ci/` (new): Copilot CI-monitor skills, prompt, and subagent.
+  - `.gitignore`: Ignored generated `.opencode/` (and `.nx/polygraph`); `.mcp.json` nx-mcp entry removed (now handled by the Claude plugin).
+- **Verification**: `nx configure-ai-agents --check all` reports all agents up to date except Codex, which is a confirmed upstream nx bug (generator writes bare `[mcp_servers.nx-mcp]` key, detector requires quoted `[mcp_servers."nx-mcp"]`; smol-toml always stringifies to the bare form, so the generator can never satisfy its own check — persists in nx 23.2.0). Commits `03d2d72`, `4901ed5`.
+
 ## 2026-09-02 — Playwright E2E Suite Calibration, Overview Spec & Workspace Quality Gate Pass
 
 - **Purpose**: Verified and calibrated the Playwright E2E testing framework, resolved relative directory resolution in `playwright.config.ts`, added the dedicated `e2e/overview.spec.ts` test suite for the 8 interactive React Flow tabs, verified standalone production build, and executed the full `pnpm quality` validation gate across all 23 monorepo packages and applications.
@@ -38,7 +50,6 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 - **What the Next Agent Should Know**: The entire Arch-Systems application layer is now consolidated into a single unified Next.js 16 portal on port `:3000` with the `/overview` department providing complete live system topology and audit metrics.
 
 ## 2026-09-02 — Multi-Agent Architecture Topology Maps & Full Monorepo Quality Gate Pass
-
 
 - **Purpose**: Generated updated codebase topology maps reflecting the new Multi-Agent Specialist Hierarchy and Architectural Pre-Flight Research Gate, verified zero-drift database compliance, and passed the full monorepo quality gate with 0 errors across all 25 workspace projects.
 - **Changes**:
