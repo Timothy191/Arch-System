@@ -328,4 +328,19 @@ AIAssistant chat.
 - Portal runtime checks (dev server on :3000): `/assistant` proxied (title "Aria — Operations Assistant"), `/assistant/api/health` → `{"ok":true,"service":"aria-overlay"}`; chat SSE round-trips through the proxy; `/api/ai/actions` returns 401 without a session; `/hub`/`/login` retain `X-Frame-Options: DENY` + `frame-ancestors 'none'`. Sidecar now emits `SAMEORIGIN` + `frame-ancestors 'self'` headers that pass through the proxy (verified via curl).
 - `pnpm --filter portal type-check`, `pnpm --filter portal lint` (changed files), and full `pnpm nx run-many -t lint type-check` pass. New route unit tests: `app/api/ai/actions/route.test.ts` (14 tests) all pass.
 - Pending: visual check of the launcher/iframe in a browser.
+
+## [2026-09-08T15:30:00Z] Aria Avatar Visibility Fix & Browser Verification (AGENT-TRACE)
+
+- **RCA (user report)**: "can't visually see no avatar". Root causes found via headless Chromium (Playwright 1.60):
+  1. `components/ai/AriaLauncher.tsx` sat at `z-50`, under a persistent bottom consent banner (`z-[100]`, CookieConsent from `@repo/ui`) that intercepted clicks. Raised launcher + panel to `z-[110]` (AGENT-TRACE comment at AriaLauncher.tsx:52).
+  2. **`aria-overlay` had no Tailwind/PostCSS at all** — `globals.css` was hand-written vanilla CSS, so every utility class (`flex`, `w-14 h-14`, ...) in `ChatClient`/`AriaAvatar`/tool cards was dead. The avatar SVG rendered unsized (measured 438×584, filling the panel) and the chat UI was unstyled — the visual bug the user saw.
+  3. Dev-mode red herring: the portal dev server (running under Node 26.8.1 instead of the volta-pinned Node 24.15.0) serves a page with broken Turbopack/HMR — `ws://.../_next/webpack-hmr` handshake failures, and **zero React interactivity** (neither the launcher nor the CookieConsent buttons respond to synthetic clicks). Verified clean by testing against a production build — the same DOM on `next start` responds normally.
+- **Fix (sidecar, not a git repo)**: added `tailwindcss@4.3.3` + `@tailwindcss/postcss@4.3.3`, `postcss.config.mjs`, and `@import "tailwindcss";` top of `src/app/globals.css`; rebuilt + restarted via `./deploy.sh restart` (pm2 `aria-overlay` healthy, `:3100`).
+- **Verification (production portal build on :3000, headless Chromium)**:
+  - Launcher button renders bottom-right (`box=[1360,820,56,56]`), click hides FAB and mounts the `/assistant` iframe.
+  - Avatar in iframe: `svg[role="img"][aria-label="Aria, the operations assistant"]` present, **computed 56×56 `display:block`**, bounding box `[993,205,56,56]` (was 438×584).
+  - Pixel audit of the avatar crop: 676 unique colors; histogram matches `AriaAvatar` palette exactly (`#F5CFAE` skin, `#1D3468` skirt, `#1F3A93` blazer) → the character is drawn, not a placeholder. Lime hi-vis vest pixels confirmed (`#c6f126` region +6% of header strip).
+  - Chat header text: "Aria | Operations assistant · online", welcome bubble + tool chips ("Shift summary/Active breakdowns") + Send box render.
+  - Screenshots: `/tmp/opencode/aria/01-portal-panel-open.png`, `03-iframe-full.png`.
+- **Status**: Completed. `AriaLauncher.tsx` z-index + this entry committed to `main`. Sidecar config/deploy changes live only in `/home/timothy/orca/aria-overlay/` (not a git repo) — consider committing the sidecar to its own repository.
 ```

@@ -49,7 +49,9 @@ export function AriaLauncher(): JSX.Element {
       {mounted && (
         <div
           className={cn(
-            "fixed bottom-6 right-6 z-50 transition-all duration-200",
+            // AGENT-TRACE: z-[110] keeps the FAB + panel above transient bottom
+            // banners (e.g. consent bar at z-[100]) so they stay clickable.
+            "fixed bottom-6 right-6 z-[110] transition-all duration-200",
             isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
           )}
         >
@@ -74,7 +76,7 @@ export function AriaLauncher(): JSX.Element {
       {!isOpen && (
         <button
           onClick={openPanel}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-electric-blue)] text-white flex items-center justify-center drop-shadow-[0_0_8px_rgba(0,102,255,0.5)] hover:from-[var(--accent-electric-blue)] hover:to-[var(--accent-blue)] hover:scale-110 active:scale-95 transition-all duration-200 z-50"
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[var(--accent-blue)] to-[var(--accent-electric-blue)] text-white flex items-center justify-center drop-shadow-[0_0_8px_rgba(0,102,255,0.5)] hover:from-[var(--accent-electric-blue)] hover:to-[var(--accent-blue)] hover:scale-110 active:scale-95 transition-all duration-200 z-[110]"
           aria-label="Open Aria operations assistant"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
