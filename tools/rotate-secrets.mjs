@@ -5,7 +5,7 @@
  * Rotates production secrets with support for:
  * - Supabase keys (anon, service)
  * - Sentry DSN/token
- * - N8N/Flowise credentials
+ * - Flowise credentials
  * - Redis password
  * - Database connection
  *

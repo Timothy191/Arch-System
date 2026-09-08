@@ -23,7 +23,6 @@ Local Dev (✅ Fully Operational)
 ─────────────────────────────────
 Portal        → localhost:3000
 AI Chat       → via portal
-n8n           → localhost:5678
 Grafana       → localhost:9091
 Prometheus    → localhost:9090
 Redis         → localhost:6379
@@ -70,7 +69,7 @@ Server management via Cockpit → :9090
 - [ ] Configure firewall (UFW / firewalld):
   - Allow: 22 (SSH), 3000 (portal), 9090 (Cockpit), 9091 (Grafana)
   - Block: all other external ports
-- [ ] Create data directories: `sudo mkdir -p /opt/arch-systems/data/{n8n,flowise,redis}`
+- [ ] Create data directories: `sudo mkdir -p /opt/arch-systems/data/{flowise,redis}`
 
 ### Phase B — Cockpit Installation
 
@@ -110,7 +109,6 @@ cp apps/portal/.env.production.example apps/portal/.env
 - [ ] Verify all containers start: `docker compose ps`
 - [ ] Confirm portal accessible on port 3000
 - [ ] Confirm Grafana on port 9091
-- [ ] Confirm n8n on port 5678
 
 ### Phase D — Offline Capability
 
@@ -130,7 +128,6 @@ cp apps/portal/.env.production.example apps/portal/.env
 - [ ] Run: `curl -fs http://localhost:9091` — Grafana responds
 - [ ] Verify all 8 departments load in browser
 - [ ] Confirm AI chat connects to providers (or falls back correctly offline)
-- [ ] Test n8n workflow triggers
 - [ ] Verify Prometheus scraping all targets
 - [ ] Confirm RLS policies block cross-department access
 
@@ -195,5 +192,5 @@ SENTRY_DSN=<dsn>
 - [[deployment|Deployment Runbook]] — Full deployment procedures
 - [[how-to-deploy-production|Q: How do I deploy to production?]] — Step-by-step guide
 - [[monitoring-error-tracking|Monitoring & Error Tracking]] — Grafana/Prometheus setup
-- [[external-tools|External Tools Integration]] — n8n, Redis configuration
+- [[external-tools|External Tools Integration]] — External tools, Redis configuration
 - [[incident-response|Incident Response Playbook]] — Production incident handling

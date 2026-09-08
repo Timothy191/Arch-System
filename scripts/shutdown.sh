@@ -3,7 +3,7 @@
 # Guarantees:
 # 1. Graceful signal drainage (SIGTERM) for Next.js to prevent DB transaction corruption
 # 2. Non-destructive container halting (preserves all postgres tables, schemas, and credentials)
-# 3. Complete CPU/RAM relief for all stack tools (Supabase, Redis, n8n, Flowise, Prometheus, Grafana)
+# 3. Complete CPU/RAM relief for all stack tools (Supabase, Redis, Flowise, Prometheus, Grafana)
 
 set -euo pipefail
 
@@ -102,8 +102,8 @@ fi
 
 # ── Step 3: Stop Secondary Helper Stack ──────────────────
 if [ -f "$TOOLS_COMPOSE" ]; then
-  log "Stopping Redis, n8n, and Flowise (preserving volumes)..."
-  if docker ps --format '{{.Names}}' | grep -E "(plantcor-redis|plantcor-n8n|plantcor-flowise)" > /dev/null 2>&1; then
+  log "Stopping Redis and Flowise (preserving volumes)..."
+  if docker ps --format '{{.Names}}' | grep -E "(plantcor-redis|plantcor-flowise)" > /dev/null 2>&1; then
     $COMPOSE_CMD -f "$TOOLS_COMPOSE" stop || true
     log "Secondary helper tools suspended."
   else

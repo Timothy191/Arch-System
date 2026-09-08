@@ -20,7 +20,7 @@ The portal captures rich operational data across 8 departments. Advanced analyti
 | ------------------------- | ------- | -------------------------- |
 | Charts (avg across depts) | 79%     | 90%+                       |
 | Executive Dashboard       | None    | Full KPI view              |
-| PDF/Excel Export          | None    | Automated via n8n          |
+| PDF/Excel Export          | None    | Automated via Inngest      |
 | Trend Analysis            | Manual  | Automated with forecasts   |
 | Predictive Maintenance    | None    | ML model (XGBoost/Prophet) |
 | Data Export API           | None    | REST endpoints             |
@@ -57,7 +57,7 @@ A new top-level route `/hub/executive` accessible to admin/manager roles showing
 
 ### 2. Automated Report Generation
 
-Use n8n workflows to schedule and generate reports, triggered by time or manually via the portal.
+Use Inngest background jobs to schedule and generate reports, triggered by time or manually via the portal.
 
 #### PDF Reports
 
@@ -68,18 +68,17 @@ Use n8n workflows to schedule and generate reports, triggered by time or manuall
 
 #### Excel Export
 
-- [ ] Add `xlsx` for Excel export (Phase 2 — n8n workflow integration)
+- [ ] Add `xlsx` for Excel export (Phase 2 — Inngest background job integration)
 - [x] `ExportButton` component delivers CSV from any row array
 - [ ] Add export buttons to Control Room and Production table views (next pass)
 
-#### n8n Scheduled Workflow
+#### Inngest Scheduled Workflow
 
-- [ ] Create n8n workflow: "Monthly Report Generator"
-  - Trigger: Schedule (1st of each month, 06:00)
-  - Step 1: Call portal API `/api/reports/monthly`
-  - Step 2: Send PDF via email to management
-  - Step 3: Save copy to Supabase Storage
-- [ ] Import workflow JSON to `scratch/` or `tools/n8n-mcp/workflows/`
+- [x] Create Inngest function: "Monthly Excel Report Generation" (`monthlyExcelReportFn`)
+  - Trigger: Cron schedule (1st of each month, 00:00)
+  - Step 1: Fetch report data
+  - Step 2: Generate report
+  - Step 3: Notify stakeholders
 
 ### 3. Trend Analysis & Forecasting
 
@@ -136,7 +135,7 @@ Use historical machine breakdown data to predict failure probability.
   - 🟢 Low risk (< 0.3)
   - 🟡 Medium risk (0.3–0.7)
   - 🔴 High risk (> 0.7)
-- [ ] Add n8n alert workflow: risk_score > 0.8 → notify maintenance manager
+- [ ] Add Inngest alert function: risk_score > 0.8 → notify maintenance manager
 
 ---
 
@@ -148,7 +147,7 @@ Use historical machine breakdown data to predict failure probability.
 | Week 1, Days 3–5 | PDF/Excel export (portal side)                |
 | Week 2, Days 1–2 | Trend lines + rolling averages on charts      |
 | Week 2, Days 3–4 | Data export API endpoints                     |
-| Week 2, Day 5    | n8n scheduled report workflow                 |
+| Week 2, Day 5    | Inngest scheduled report workflow             |
 | Month 2          | ML predictive maintenance model + integration |
 
 ---
@@ -157,6 +156,6 @@ Use historical machine breakdown data to predict failure probability.
 
 - [[department-features|Department Features]] — Per-department data models
 - [[database-optimization|Database Optimization & Scaling]] — Materialized views powering dashboards
-- [[external-tools|External Tools Integration]] — n8n workflow engine
+- [[external-tools|External Tools Integration]] — External tools & background jobs
 - [[ai-service|AI Service]] — AI-assisted analysis integration
 - [[gittree/visual-graphs-reporting|Visual Graphs for Reporting]] — Chart implementation patterns

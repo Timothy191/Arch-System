@@ -82,7 +82,7 @@
 ### Features
 
 - [[department-features|Department Features]] — Control room, engineering, safety, satellite monitoring capabilities
-- [[external-tools|External Tools Integration]] — n8n, Flowise, Univer embedding, Inngest background jobs, Novu notifications, health checks
+- [[external-tools|External Tools Integration]] — Flowise, Univer embedding, Inngest background jobs, Novu notifications, health checks
 - [[monitoring-error-tracking|Monitoring and Error Tracking]] — Sentry, Highlight session replay, OpenTelemetry tracing, Prometheus/Grafana, real-time subscriptions, satellite monitoring API
 - [[analytics-reporting|Advanced Analytics & Reporting]] — Executive KPI dashboard, PDF/Excel export, trend analysis, ML predictive maintenance
 

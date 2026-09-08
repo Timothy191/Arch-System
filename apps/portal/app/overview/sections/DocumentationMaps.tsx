@@ -13,6 +13,7 @@ import {
   Bot,
 } from "lucide-react";
 import { Card } from "@repo/ui/components/ui/card";
+import { Book } from "@repo/ui";
 
 interface MapFileMeta {
   key: string;
@@ -83,6 +84,8 @@ export default function DocumentationMaps() {
   const activeMeta =
     data?.manifest?.find((m) => m.id === selectedLogId || m.folderName === selectedLogId) ||
     data?.manifest?.[0];
+  const activeFile = MAP_FILES.find((f) => f.key === selectedFileKey) || MAP_FILES[0];
+  const ActiveFileIcon = activeFile?.icon ?? FileText;
 
   return (
     <div className="space-y-6">
@@ -181,14 +184,32 @@ export default function DocumentationMaps() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
-                <FileText className="w-4 h-4 text-[var(--accent-blue)]" />
-                <span>
-                  codebase-maps/{selectedLogId}/{selectedFileKey}
-                </span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+              <div className="flex items-center gap-4">
+                <Book
+                  title={activeFile?.label ?? selectedFileKey}
+                  subtitle={activeMeta?.folderName ?? "Topology"}
+                  variant="stripe"
+                  color="#1e293b"
+                  icon={<ActiveFileIcon className="w-3.5 h-3.5" />}
+                  width={110}
+                />
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
+                    <FileText className="w-4 h-4 text-[var(--accent-blue)]" />
+                    <span>
+                      codebase-maps/{selectedLogId}/{selectedFileKey}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-bold text-[var(--text-heading)] mt-1">
+                    {activeFile?.label}
+                  </h4>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    Archived topology index with structural verification.
+                  </p>
+                </div>
               </div>
-              <span className="px-2 py-0.5 rounded bg-[var(--bg-secondary)] text-[var(--accent-green)] text-xs font-mono">
+              <span className="px-2 py-0.5 rounded bg-[var(--bg-secondary)] text-[var(--accent-green)] text-xs font-mono shrink-0">
                 Verified & Active Index
               </span>
             </div>

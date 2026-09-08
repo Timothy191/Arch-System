@@ -129,7 +129,7 @@ export default function TechStack() {
               </div>
               <div className="flex gap-2">
                 <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
-                  n8n
+                  Inngest
                 </div>
                 <div className="px-4 py-3 bg-accent-amber/10 border border-accent-amber/30 rounded-lg text-accent-amber text-sm font-medium">
                   Flowise

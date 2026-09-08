@@ -236,7 +236,7 @@ async function main() {
       console.log(`${GREEN}✓ Connected & Operational${NC}`);
     } else {
       // If it failed because it doesn't exist yet/needs configuration, report as warning or error
-      const isCritical = name === 'n8n-mcp-server' || name === 'knowledge-rail';
+      const isCritical = name === 'knowledge-rail';
       if (isCritical) {
         console.log(`${RED}✗ Connection failed: ${testResult.error}${NC}`);
         errorsCount++;

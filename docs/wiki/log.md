@@ -18,7 +18,7 @@
   - raw/codebase/migrations.md (database schema from 7 migrations)
   - raw/codebase/portal-app.md (Next.js App Router architecture)
   - raw/codebase/ai-service.md (multi-provider AI chat)
-  - raw/codebase/external-tools.md (n8n, Flowise, Univer)
+  - raw/codebase/external-tools.md (Flowise, Univer)
   - raw/codebase/monitoring.md (Sentry, real-time, satellite API)
   - raw/codebase/auth-middleware.md (auth flow, RLS, middleware)
   - raw/codebase/department-features.md (8 departments, tabs, workflows)
@@ -238,7 +238,7 @@ Based on `project-comprehensive-report.md` §9 — 5 recommended next steps:
 - `concepts/testing-qa-strategy.md` — HIGH: Unit coverage 72%→90%+, E2E flows, Storybook visual regression, k6 load testing, OWASP ZAP scan
 - `concepts/database-optimization.md` — HIGH: Table partitioning (migrations 017–019), PgBouncer, read replicas, materialized views
 - `concepts/mobile-pwa.md` — MEDIUM: PWA manifest, service worker, offline write queue, touch-optimized forms
-- `concepts/analytics-reporting.md` — MEDIUM: Executive KPI dashboard, PDF/Excel export, n8n scheduled reports, ML predictive maintenance
+- `concepts/analytics-reporting.md` — MEDIUM: Executive KPI dashboard, PDF/Excel export, Inngest scheduled reports, ML predictive maintenance
 
 **Updated Pages (7):**
 

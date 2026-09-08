@@ -26,7 +26,9 @@ interface ExternalTool {
  * Fetch productivity tools from database.
  * Falls back to PRODUCTIVITY_TOOLS constant if database query fails.
  */
-export async function getTools(cookieList?: Array<{ name: string; value: string }>): Promise<Tool[]> {
+export async function getTools(
+  cookieList?: Array<{ name: string; value: string }>,
+): Promise<Tool[]> {
   return cachedRSC(
     ["hub", "tools"],
     async () => {
@@ -77,20 +79,19 @@ export async function getTools(cookieList?: Array<{ name: string; value: string 
           category: CacheCategory.METRICS,
           keyParts: ["hub", "tools"],
           tags: ["table:tools"],
-        }
+        },
       );
     },
     {
       revalidate: 3600,
       tags: ["table:tools"],
-    }
+    },
   );
 }
 
 /**
  * External tool configurations.
  * Override URLs via environment variables:
- *   N8N_URL=http://localhost:5678
  *   FLOWISE_URL=http://localhost:3001
  *
  * (Flowise runs on port 3001 in docker-compose.tools.yml;

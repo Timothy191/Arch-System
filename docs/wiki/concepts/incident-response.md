@@ -89,7 +89,7 @@ pnpm dlx vercel --prod --target=PREVIOUS_DEPLOYMENT_ID
 - [ ] Review Vercel function logs
 - [ ] Check Supabase connection limits
 - [ ] Verify AI provider status pages
-- [ ] Check external tools (n8n, Flowise) status
+- [ ] Check external tools (Flowise) status
 
 **Key Metrics to Check**:
 

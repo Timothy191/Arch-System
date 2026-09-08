@@ -68,14 +68,6 @@ services:
     color: "#ec4899"
 
   # Supporting Services
-  - name: n8n (Workflow Automation)
-    url: http://host.docker.internal:5678
-    healthcheck:
-      type: http
-      url: http://host.docker.internal:5678/healthz
-    icon: mdi:robot
-    color: "#6366f1"
-
   - name: Flowise (LLM Flows)
     url: http://host.docker.internal:3001
     healthcheck:

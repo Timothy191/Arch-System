@@ -44,7 +44,7 @@ Implemented the 5 recommended next steps from `project-comprehensive-report.md` 
 
 4. **concepts/mobile-pwa.md** — MEDIUM priority. Responsive layout audit, `next-pwa` service worker, offline write queue, touch-optimized forms, PWA manifest, device testing checklist.
 
-5. **concepts/analytics-reporting.md** — MEDIUM priority. Executive KPI dashboard (`/hub/executive`), PDF/Excel export, n8n scheduled reports, rolling trend analysis + forecasting, data export REST API, ML predictive maintenance (XGBoost).
+5. **concepts/analytics-reporting.md** — MEDIUM priority. Executive KPI dashboard (`/hub/executive`), PDF/Excel export, Inngest scheduled reports, rolling trend analysis + forecasting, data export REST API, ML predictive maintenance (XGBoost).
 
 ### ✅ Files Updated
 

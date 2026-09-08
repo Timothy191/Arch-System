@@ -41,6 +41,10 @@ const envSchema = z.object({
   // ── LLM / AI providers (optional) ──────────────────────────────────
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_API_KEYS: z.string().optional(),
+  GOOGLE_AI_API_KEY: z.string().optional(),
+  GOOGLE_PROJECT_ID: z.string().optional(),
 
   // ── Sentry (optional) ──────────────────────────────────────────────
   SENTRY_ORG: z.string().optional(),

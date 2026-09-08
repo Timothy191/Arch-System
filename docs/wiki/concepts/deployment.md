@@ -365,7 +365,7 @@ docker compose up -d --no-deps --build portal
 
 ```bash
 docker compose ps
-# Expected: portal, supabase, n8n, redis, prometheus, grafana — all "Up"
+# Expected: portal, supabase, redis, prometheus, grafana — all "Up"
 ```
 
 ### Offline / Air-Gapped Update

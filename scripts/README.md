@@ -54,7 +54,7 @@ See `CLAUDE.md` for full Nx configuration details.
 ./dev.sh                    # Standard development mode
 ./dev.sh --quick|-q          # Skip Docker/Supabase, start portal only
 ./dev.sh --force|-f          # Force kill port conflicts
-./dev.sh --tools|-t          # Start Docker tools (Redis, n8n, Flowise)
+./dev.sh --tools|-t          # Start Docker tools (Redis, Flowise)
 ./dev.sh --cms               # Start CMS on :3001
 ./dev.sh --overview         # Start Overview on :3002
 ./dev.sh --all               # Start all apps (portal, cms, overview)
@@ -138,7 +138,7 @@ See `CLAUDE.md` for full Nx configuration details.
 - systemd service setup
 - Environment configuration automation
 - Background process management
-- Docker tools stack (n8n, Flowise, Langfuse, Qdrant)
+- Docker tools stack (Flowise, Langfuse, Qdrant)
 - Monitoring stack (Prometheus, Grafana, cAdvisor)
 - Health checks and monitoring
 - OS detection (Rocky Linux, RHEL, CentOS)
@@ -242,7 +242,6 @@ See `CLAUDE.md` for full Nx configuration details.
 - Next.js Portal API
 - Supabase API
 - Redis
-- n8n (if running)
 - Flowise (if running)
 - Docker containers
 
@@ -354,7 +353,6 @@ DATABASE_URL=postgres://postgres:postgres@127.0.0.1:54322/postgres
 
 # Optional Services
 REDIS_URL=redis://localhost:6379
-N8N_URL=http://localhost:5678
 FLOWISE_URL=http://localhost:3001
 ```
 

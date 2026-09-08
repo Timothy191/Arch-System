@@ -20,7 +20,6 @@
 // Tools Subdirectory Handling:
 // Only specific tools subdirectories are tagged as they contain build-time scripts:
 // - wiki-viewer - Documentation viewer
-// - n8n-mcp - n8n MCP server integration
 // - preflight-mcp - Preflight MCP server integration
 // - policy - Policy compilation and enforcement
 // Other tools/ subdirectories are excluded as they may contain transient files or utilities
@@ -41,7 +40,7 @@ const LIBS_SHARED_DIR = path.join(ROOT, "libs", "shared");
 const TOOLS_DIR = path.join(ROOT, "tools");
 
 // Explicitly tagged tools subdirectories (build-time scripts requiring Nx integration)
-const TAGGED_TOOLS = ["wiki-viewer", "n8n-mcp", "preflight-mcp", "policy"];
+const TAGGED_TOOLS = ["wiki-viewer", "preflight-mcp", "policy"];
 
 /**
  * Derives scope tags for an Nx project based on its path.

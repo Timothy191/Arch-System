@@ -1,39 +1,6 @@
 version: "3.8"
 
 services:
-  n8n:
-    image: n8nio/n8n:1.45.0
-    container_name: plantcor-n8n
-    restart: unless-stopped
-    env_file: ../../.env.tools
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${TOOL_ADMIN_EMAIL}
-      - N8N_BASIC_AUTH_PASSWORD=${TOOL_ADMIN_PASSWORD}
-      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-      - WEBHOOK_URL=http://localhost:5678/
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - N8N_CONCURRENCY_PRODUCTION_LIMIT=16
-      - N8N_LOG_LEVEL=warn
-      - N8N_DIAGNOSTICS_ENABLED=false
-      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
-    volumes:
-      - /home/tim/.n8n:/home/node/.n8n
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz > /dev/null 2>&1 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - plantcor-tools
-
   flowise:
     image: flowiseai/flowise:2.1.2
     container_name: plantcor-flowise

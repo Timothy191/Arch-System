@@ -1,5 +1,6 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { AvatarWithIcon, Badge, Breadcrumb, BreadcrumbItem } from "@repo/ui";
 import { Pagination } from "@repo/ui/components/ui/pagination";
 import {
   Table,
@@ -9,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui/components/ui/table";
-import { ShieldOff, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { getAccessLogsForDepartment } from "../actions";
 
 interface AccessLogWithBadge {
@@ -84,6 +85,12 @@ export default async function AccessLogsPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumb type="text">
+        <BreadcrumbItem href="/">Departments</BreadcrumbItem>
+        <BreadcrumbItem href="/access-control/badges">Access Control</BreadcrumbItem>
+        <BreadcrumbItem active>Access Logs</BreadcrumbItem>
+      </Breadcrumb>
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-heading)]">Access Logs</h2>
@@ -135,7 +142,25 @@ export default async function AccessLogsPage({
                   })}
                 </TableCell>
                 <TableCell className="font-medium text-[var(--text-heading)]">
-                  {log.entityName}
+                  <div className="flex items-center gap-2.5">
+                    <AvatarWithIcon
+                      size={24}
+                      letter={log.entityName
+                        .replace(/[^A-Za-z0-9]/g, "")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                      title={log.entityName}
+                      icon={
+                        log.status === "Granted" ? (
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        )
+                      }
+                      iconBackground
+                    />
+                    <span>{log.entityName}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-[var(--text-secondary)] capitalize">
                   {log.entityType}
@@ -147,22 +172,21 @@ export default async function AccessLogsPage({
                 <TableCell className="text-[var(--text-secondary)]">{log.direction}</TableCell>
                 <TableCell className="text-right">
                   {log.status === "Granted" ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
-                      <span className="badge-pulse-dot bg-emerald-500" />
+                    <Badge variant="green" contrast="low" size="sm">
                       Granted
-                    </span>
+                    </Badge>
                   ) : log.status === "Denied" ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-red-50/70 border-red-200/50 text-red-700">
-                      <ShieldOff className="w-3 h-3" />
+                    <Badge variant="red" contrast="low" size="sm">
                       Denied
-                    </span>
+                    </Badge>
                   ) : log.status === "Expired Credential" ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-amber-50/70 border-amber-200/50 text-amber-700">
-                      <Clock className="w-3 h-3" />
+                    <Badge variant="amber" contrast="low" size="sm">
                       Expired
-                    </span>
+                    </Badge>
                   ) : (
-                    <span className="text-xs text-[var(--text-muted)] font-mono">{log.status}</span>
+                    <Badge variant="gray" contrast="low" size="sm">
+                      {log.status}
+                    </Badge>
                   )}
                 </TableCell>
               </TableRow>

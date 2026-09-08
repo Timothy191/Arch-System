@@ -42,8 +42,8 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           CLIENT LAYER                                       │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Portal     │  │     CMS      │  │  Overview    │  │   N8N MCP    │      │
-│  │  (Next.js)   │  │  (Payload)   │  │   (Next.js)  │  │   (n8n)      │      │
+│  │   Portal     │  │     CMS      │  │  Overview    │  │   Inngest    │      │
+│  │  (Next.js)   │  │  (Payload)   │  │   (Next.js)  │  │   (Jobs)     │      │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
 └─────────┼────────────────┼────────────────┼────────────────┼──────────────┘
           │                │                │                │
@@ -107,8 +107,8 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 │  ████████████████           ████████████████           ████████████████ │
 │        ↓                           ↓                          ↓         │
 │  ████████████████           ████████████████           ████████████████ │
-│  ██ TypeScript   ██         ██   AI Multi   ██         ██    N8N     ██ │
-│  ██              ██         ██   Provider   ██         ██  Workflows ██ │
+│  ██ TypeScript   ██         ██   AI Multi   ██         ██   Inngest    ██ │
+│  ██              ██         ██   Provider   ██         ██    Jobs     ██ │
 │  ████████████████           ████████████████           ████████████████ │
 │        ↓                           ↓                          ↓         │
 │  ████████████████           ████████████████           ████████████████ │
@@ -139,14 +139,14 @@ Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining ope
 │  ✅ AI chat with multi-provider failover                                  │
 │  ✅ Real-time monitoring (Prometheus + Grafana)                           │
 │  ✅ Vector memory & agent orchestration                                   │
-│  ✅ n8n workflows + Redis cache                                           │
+│  ✅ Inngest background jobs + Redis cache                                  │
 │  ✅ 100% identical to future production                                   │
 │                                                                         │
 │       ┌─────────────────────────────────────────────┐                     │
 │       │              LOCALHOST                      │                     │
 │       │  ┌─────────┐ ┌─────────┐ ┌─────────┐       │                     │
-│       │  │ Portal  │ │  AI     │ │  n8n    │       │                     │
-│       │  │ :3000   │ │  Chat   │ │ :5678   │       │                     │
+│       │  │ Portal  │ │  AI     │ │ Inngest │       │                     │
+│       │  │ :3000   │ │  Chat   │ │ :8288   │       │                     │
 │       │  └─────────┘ └─────────┘ └─────────┘       │                     │
 │       │  ┌─────────┐ ┌─────────┐ ┌─────────┐       │                     │
 │       │  │Grafana  │ │Prometheus│ │  Redis  │       │                     │
@@ -743,7 +743,7 @@ Tier 3: Database (L3) - PostgreSQL
 │     ├─ Vector memory system (pgvector)                                  │
 │     ├─ Multi-agent orchestrator (Kiro)                                  │
 │     ├─ MCP registry with 10+ patterns                                   │
-│     ├─ N8N workflow engine integration                                  │
+│     ├─ Workflow engine integration                                      │
 │     ├─ Agent teams with shared task lists                               │
 │     ├─ AI memory layer with Redis caching                               │
 │     ├─ Evaluator-optimizer loop                                         │
@@ -795,7 +795,7 @@ Tier 3: Database (L3) - PostgreSQL
 │  1. ON-PREMISES SERVER SETUP & COCKPIT    [PRIORITY: CRITICAL] ✅ CODE   │
 │     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━         │
 │     ✅ scripts/deploy.sh production — unified stable deploy script      │
-│         pre-flight .env check, systemd-aware, n8n webhook notification   │
+│         pre-flight .env check, systemd-aware                            │
 │     ✅ scripts/deploy.sh production --skip-build — quick update script   │
 │         skip rebuild phase when deploying simple configuration changes   │
 │     ✅ docker-compose.production.yml — production Docker overrides      │
@@ -883,7 +883,7 @@ Tier 3: Database (L3) - PostgreSQL
 │     ✅ ExportButton component — client-side CSV download                │
 │     ✅ Analytics link added to BottomNav mobile navigation              │
 │     ⬜ PDF report generation (@react-pdf/renderer — Phase 2)           │
-│     ⬜ Excel export + n8n scheduled workflow (Phase 2)                  │
+│     ⬜ Excel export + Inngest scheduled workflow (Phase 2)              │
 │     ⬜ ML predictive maintenance model (Month 2)                        │
 │     • Estimated: 2 weeks  ✅ Wiki docs: concepts/analytics-reporting     │
 │     Impact: ████████████████████████████████░░░░░░░░░░░░░░░░░░░  MEDIUM  │
@@ -939,7 +939,7 @@ Tier 3: Database (L3) - PostgreSQL
 │  │       safety-incidents), all routes auth-gated                        │
 │  ├── ✅ ExportButton component — client-side CSV download               │
 │  ├── ⬜ PDF report generation (@react-pdf/renderer — Phase 2)           │
-│  ├── ⬜ Excel export + n8n scheduled workflow (Phase 2)                 │
+│  ├── ⬜ Excel export + Inngest scheduled workflow (Phase 2)             │
 │  └── ⬜ ML predictive maintenance model (deferred — Month 3+)           │
 │       ████████████████████████████████████████████████████████████  │
 │                                                                         │
@@ -964,8 +964,8 @@ Tier 3: Database (L3) - PostgreSQL
                 │               │               │
                 ▼               ▼               ▼
         ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-        │    PORTAL    │ │  AI CHATBOT  │ │     N8N      │
-        │   (Next.js)  │ │  (Multi-LLM) │ │  Workflows   │
+        │    PORTAL    │ │  AI CHATBOT  │ │   INNGEST    │
+        │   (Next.js)  │ │  (Multi-LLM) │ │   (Jobs)     │
         └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
                │                │                │
                └────────┬───────┴────────┬───────┘
@@ -1007,7 +1007,7 @@ Connection Weights (Data Flow Volume):
 
 Portal → API Gateway        ████████████████████████████████████░░░░  85%
 AI Chat → API Gateway       ████████████████████████████░░░░░░░░░░░░  65%
-N8N → API Gateway         ██████████████████░░░░░░░░░░░░░░░░░░░░░░  45%
+Inngest → API Gateway       ██████████████████░░░░░░░░░░░░░░░░░░░░░░  45%
 API → Server Components     ████████████████████████████████████████  100%
 Server → Supabase           ████████████████████████████████████████  100%
 Vector Store → AI          ████████████████████████████░░░░░░░░░░░░  65%

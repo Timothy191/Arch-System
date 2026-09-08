@@ -61,9 +61,9 @@ export function saturated() {
   sleep(0.5);
 }
 
-function runPass(passName: string) {
+function runPass(passName) {
   const start = Date.now();
-  const failures: string[] = [];
+  const failures = [];
 
   for (const path of WARMUP_PATHS) {
     const res = http.get(`${BASE_URL}${path}`);

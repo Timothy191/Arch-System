@@ -12,7 +12,7 @@
   - Gracefully skips projects with malformed configuration files instead of failing the entire script
 - Added comprehensive inline documentation to `apply-project-tags.cjs`:
   - Documented complete tag vocabulary (scope:app, scope:app:<name>, scope:package, scope:package:<name>, scope:package:db, scope:package:db-internal, scope:tool)
-  - Documented tools/ subdirectory handling rationale - explaining why only specific subdirectories (wiki-viewer, n8n-mcp, preflight-mcp, policy) are tagged
+  - Documented tools/ subdirectory handling rationale - explaining why only specific subdirectories (wiki-viewer, preflight-mcp, policy) are tagged
   - Added usage instructions and reference to tools/policy-compiler.cjs for canonical tag vocabulary
 - Integrated automatic tag generation into pre-commit hooks:
   - Added lint-staged configuration in root package.json to run `node tools/apply-project-tags.cjs` whenever project.json files are modified
@@ -38,13 +38,16 @@
 
 **Next agent:** The `pnpm onboard` command is registered as the canonical entry point for local and agent workspace validation. Any new required environment variables in `apps/portal/env/.env.example` will automatically be validated by this tool.
 
-## 2026-09-03T09:26:00Z
+## 2026-09-08T12:35:00Z
 
-**Purpose:** Relocated skill pre-commit validation hook from `.claude/` to `tools/skills-pre-commit.mjs` and updated `.husky/pre-commit`.
+**Purpose:** Integrated Biome fast check/format/lint, Turborepo pipeline tasks, Next.js standalone optimization, and Vercel/Streamdown tooling.
 
 **Changes made:**
 
-- Created `tools/skills-pre-commit.mjs` to maintain Agent Skill pre-commit specification validation.
-- Updated `.husky/pre-commit` to invoke `node tools/skills-pre-commit.mjs`.
+- Root `biome.json` added with sub-second lint and format coverage across all 25 workspace projects.
+- Added `check:fast`, `check:fast:fix`, `lint:fast`, and `format:fast` in `package.json` and `Makefile`.
+- Added `turbo.json` declarative pipeline configuration.
+- Fixed duplicate keys in `packages/supabase/package.json` and type safe `ReturnType<typeof setTimeout>` in `packages/ui/src/components/ui/context-*`.
+- Evaluated and integrated Vercel AI SDK and Streamdown for streaming LLM markdown rendering.
 
-**Next agent:** Skills validation is hosted in `tools/skills-pre-commit.mjs` independent of legacy IDE/agent folders.
+**Next agent:** Use `make check-fast` for sub-second pre-commit formatting and lint sanity across all packages.

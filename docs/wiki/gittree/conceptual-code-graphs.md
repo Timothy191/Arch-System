@@ -128,7 +128,7 @@ Call Graph Example:
 
 - Trace agent orchestrator execution paths
 - Analyze MCP workflow calls
-- Identify hot paths in N8N integration
+- Identify hot paths in Inngest integration
 - Map component rendering chains (React)
 
 ### Code Property Graphs (CPGs)
@@ -233,7 +233,7 @@ Alert: Add input validation middleware
 
 **Call Graphs:**
 
-- N8N workflow step sequencing
+- Inngest workflow step sequencing
 - MCP handler invocations
 - Agent function calling patterns
 - React component render chains

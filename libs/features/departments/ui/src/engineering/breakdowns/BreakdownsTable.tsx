@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Search, RefreshCw } from "lucide-react";
+import { Badge } from "@repo/ui";
 import type { Breakdown } from "./types";
 import { useRouter } from "next/navigation";
 
@@ -161,22 +162,21 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
                     {showStatus && (
                       <td className="px-4 py-3">
                         {b.status === "completed" ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-green bg-transparent border-transparent">
-                            <span className="badge-pulse-dot" />
+                          <Badge variant="green" contrast="low" size="sm">
                             Completed
-                          </span>
+                          </Badge>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-accent-blue/10 border border-accent-blue/20 text-accent-blue font-medium">
+                          <Badge variant="blue" contrast="low" size="sm">
                             Pending
-                          </span>
+                          </Badge>
                         )}
                       </td>
                     )}
                     <td className="px-4 py-3">
                       {b.missing_book_in ? (
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-accent-blue/10 border border-accent-blue/20 text-accent-blue">
+                        <Badge variant="amber" contrast="low" size="sm">
                           Missing Book-In
-                        </span>
+                        </Badge>
                       ) : (
                         <span className="text-[var(--text-secondary)] text-xs">Normal</span>
                       )}

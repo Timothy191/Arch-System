@@ -9,7 +9,7 @@ set -euo pipefail
 #
 # Options:
 #   --no-systemd        Skip systemd service setup
-#   --no-docker-tools   Skip Docker tools stack (n8n, Flowise, Langfuse, Qdrant, ClickHouse)
+#   --no-docker-tools   Skip Docker tools stack (Flowise, Langfuse, Qdrant, ClickHouse)
 #   --no-monitoring     Skip monitoring stack (Prometheus, Grafana, cAdvisor)
 #   --force             Force overwrite existing configuration
 #   --dry-run           Preview changes without executing
@@ -20,7 +20,7 @@ set -euo pipefail
 #     - Supabase Infrastructure (external or local)
 #     - Redis Server
 #   Highly Recommended:
-#     - Docker Tools Stack (n8n, Flowise, Langfuse, Qdrant, ClickHouse)
+#     - Docker Tools Stack (Flowise, Langfuse, Qdrant, ClickHouse)
 #   Optional:
 #     - Monitoring Stack (Prometheus, Grafana, cAdvisor)
 
@@ -194,7 +194,7 @@ check_firewall() {
     if firewall-cmd --state > /dev/null 2>&1; then
       warn "firewalld is active. Ensure required ports are open:"
       warn "  3000/tcp (Next.js Portal)"
-      warn "  5678/tcp (n8n)"
+
       warn "  6333/tcp (Qdrant)"
       warn "  8123/tcp (ClickHouse)"
       warn "  9093/tcp (Prometheus)"
@@ -590,7 +590,7 @@ setup_docker_tools() {
   fi
 
   success "Docker tools stack started"
-  info "Services include: n8n, Flowise, Langfuse, Qdrant, ClickHouse"
+  info "Services include: Flowise, Langfuse, Qdrant, ClickHouse"
   info "To view logs: docker-compose -f $compose_file logs -f"
   info "To stop: docker-compose -f $compose_file down"
 }
@@ -703,7 +703,7 @@ print_summary() {
 
   if [ "$SKIP_DOCKER_TOOLS" = false ]; then
     echo -e "${BOLD}Docker Tools Stack:${NC}"
-    echo -e "  • n8n: ${GREEN}Running${NC} (http://localhost:5678)"
+
     echo -e "  • Flowise: ${GREEN}Running${NC} (http://localhost:3000)"
     echo -e "  • Langfuse: ${GREEN}Running${NC} (http://localhost:3000)"
     echo -e "  • Qdrant: ${GREEN}Running${NC} (http://localhost:6333)"
@@ -725,9 +725,9 @@ print_summary() {
   echo -e "  3. Access the portal at: ${CYAN}http://localhost:3000${NC}"
 
   echo -e "\nLocal services recommendations:"
-  echo -e "  • Flowise, Supabase, n8n, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
+  echo -e "  • Flowise, Supabase, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
   echo -e "  • Open required ports (3000, 3001, 5678, 6333, 8123, 9091, 9093, 8082) in your firewall for internal access."
-  echo -e "  • Confirm .env.tools has correct credentials for services (N8N, FLOWISE, REDIS_PASSWORD)."
+  echo -e "  • Confirm .env.tools has correct credentials for services (FLOWISE, REDIS_PASSWORD)."
   echo -e "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."
   echo
 

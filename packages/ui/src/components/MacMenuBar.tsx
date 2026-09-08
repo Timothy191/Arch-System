@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
+import { Avatar } from "./ui/avatar";
 import {
   // Departments
   Pickaxe,
@@ -263,9 +264,12 @@ export function MacMenuBar({
             <div className="w-[195px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
               {/* User Identity */}
               <div className="px-3.5 py-3 flex items-center gap-2.5 border-b border-black/[0.06]">
-                <div className="w-8 h-8 rounded-full bg-white border border-black/10 shadow-card flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-[var(--text-secondary)]" />
-                </div>
+                <Avatar
+                  size={32}
+                  letter="AO"
+                  title="Arch Operator"
+                  className="border border-black/10 shadow-card shrink-0"
+                />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[12.5px] font-medium text-[var(--text-heading)] truncate leading-tight">
                     Arch Operator
@@ -546,9 +550,9 @@ export function MacMenuBar({
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                     onClick={() => {
                       if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(() => { });
+                        document.documentElement.requestFullscreen().catch(() => {});
                       } else if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(() => { });
+                        document.exitFullscreen().catch(() => {});
                       }
                     }}
                   >

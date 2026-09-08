@@ -63,7 +63,7 @@ Arch-Mk2/
 - Supabase configuration (URLs, keys, database URLs)
 - AI/LLM configuration (OpenAI, Together) [Deprecated]
 - Monitoring/Observability (Sentry, OpenTelemetry)
-- Tools configuration (n8n, Flowise, FUXA, ClickHouse)
+- Tools configuration (Flowise, FUXA, ClickHouse)
 - Redis configuration
 - Notifications/Events (Novu, Inngest)
 - Payload CMS configuration
@@ -88,7 +88,7 @@ Arch-Mk2/
 
 **When to use**:
 
-- Starting Docker tools stack (n8n, Flowise, Redis, Langfuse, Qdrant, ClickHouse)
+- Starting Docker tools stack (Flowise, Redis, Langfuse, Qdrant, ClickHouse)
 - Configuring auxiliary development services
 - Local development with full tooling stack
 
@@ -116,7 +116,7 @@ Arch-Mk2/
 
 **Contains**:
 
-- External tools configuration (n8n, Flowise, FUXA)
+- External tools configuration (Flowise, FUXA)
 - Supabase configuration (URLs, keys)
 - Redis configuration for caching and rate limiting
 - Sentry configuration for error monitoring
@@ -222,7 +222,7 @@ Start → Copy apps/portal/.env.example to apps/portal/.env
 Start → Copy .env.example to .env
      → Copy .env.tools to actual .env.tools or use as reference
      → Fill in all Supabase credentials
-     → Configure all tool credentials (n8n, Flowise, etc.)
+     → Configure all tool credentials (Flowise, etc.)
      → Start Docker tools: docker-compose -f docker-compose.tools.yml up -d
      → Use root .env for main application
 ```
@@ -272,7 +272,7 @@ Start → Use synthetic values from GitHub Secrets
 - **AI Configuration**: Optional OpenAI/Together API keys [Deprecated]
 - **Redis Configuration**: URL for caching and rate limiting
 - **Monitoring**: Sentry DSN for error tracking
-- **Tools Configuration**: n8n, Flowise, FUXA for extended features
+- **Tools Configuration**: Flowise, FUXA for extended features
 
 ### Low Priority (Optional/Development)
 
@@ -329,9 +329,6 @@ Start → Use synthetic values from GitHub Secrets
 
 ### Tool Variables
 
-- `N8N_URL`: n8n workflow automation URL
-- `N8N_USER`: n8n username
-- `N8N_PASSWORD`: n8n password
 - `FLOWISE_URL`: Flowise AI workflow builder URL
 - `FLOWISE_USER`: Flowise username
 - `FLOWISE_PASSWORD`: Flowise password

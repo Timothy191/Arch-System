@@ -1,5 +1,6 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Avatar, Badge } from "@repo/ui";
 import { Pagination } from "@repo/ui/components/ui/pagination";
 import { EmptyState } from "@repo/ui/EmptyState";
 import {
@@ -89,7 +90,16 @@ export default async function VisitorsPage({
                         className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
                       >
                         <TableCell className="font-medium text-[var(--text-heading)]">
-                          {visitor.first_name} {visitor.surname}
+                          <div className="flex items-center gap-2.5">
+                            <Avatar
+                              size={24}
+                              letter={`${visitor.first_name?.[0] ?? ""}${visitor.surname?.[0] ?? ""}`}
+                              title={`${visitor.first_name} ${visitor.surname}`}
+                            />
+                            <span>
+                              {visitor.first_name} {visitor.surname}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-[var(--text-secondary)]">
                           {visitor.company || "—"}
@@ -108,14 +118,13 @@ export default async function VisitorsPage({
                         </TableCell>
                         <TableCell className="text-right">
                           {visitor.status === "Checked In" ? (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
-                              <span className="badge-pulse-dot bg-emerald-500" />
+                            <Badge variant="green" contrast="low" size="sm">
                               Checked In
-                            </span>
+                            </Badge>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]">
-                              {visitor.status || "—"}
-                            </span>
+                            <Badge variant="gray" contrast="low" size="sm">
+                              {visitor.status || "Pre-Registered"}
+                            </Badge>
                           )}
                         </TableCell>
                       </TableRow>

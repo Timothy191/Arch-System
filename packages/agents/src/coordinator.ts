@@ -60,8 +60,8 @@ export class SubagentCoordinator {
     } else if (config.provider === "gemini") {
       apiKey = apiKey || process.env.GEMINI_API_KEY;
       baseURL = baseURL || "https://generativelanguage.googleapis.com/v1beta/openai/";
-      defaultModel = defaultModel || "gemini-2.5-flash";
-      synthesisModel = synthesisModel || "gemini-2.5-flash";
+      defaultModel = defaultModel || "gemini-3.6-flash";
+      synthesisModel = synthesisModel || "gemini-3.6-flash";
     } else if (config.provider === "cohere") {
       apiKey = apiKey || process.env.COHERE_API_KEY;
       baseURL =
@@ -96,7 +96,7 @@ export class SubagentCoordinator {
         defaultModel ||
         process.env.OPENAI_MODEL ||
         (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-          ? "gemini-2.5-flash"
+          ? "gemini-3.6-flash"
           : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
             ? "aion-labs/aion-3.0-mini"
             : "gpt-4o-mini");
@@ -104,7 +104,7 @@ export class SubagentCoordinator {
       synthesisModel =
         synthesisModel ||
         (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
-          ? "gemini-2.5-flash"
+          ? "gemini-3.6-flash"
           : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
             ? "aion-labs/aion-3.0"
             : "gpt-4o");

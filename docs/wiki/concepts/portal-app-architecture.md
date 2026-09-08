@@ -51,7 +51,7 @@ app/
 │       ├── machines/
 │       ├── history/
 │       ├── reports/
-│       ├── tools/         # External tools (n8n, Flowise, Univer)
+│       ├── tools/         # External tools (Flowise, Univer)
 │       ├── hourly-loads/      # Control room only
 │       ├── machine-operations/# Control room only
 │       ├── operational-delays/# Control room only

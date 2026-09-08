@@ -56,7 +56,7 @@ cp apps/portal/.env.example apps/portal/.env
 # Ask team lead for:
 # - Supabase project URL and keys
 # - AI provider API keys (Groq/OpenRouter)
-# - Optional: N8N_URL, FLOWISE_URL for tool integration
+# - Optional: FLOWISE_URL for tool integration
 
 # 3. Start local Supabase (separate terminal)
 cd packages/database

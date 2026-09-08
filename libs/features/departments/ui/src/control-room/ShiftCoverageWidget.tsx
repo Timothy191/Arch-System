@@ -3,6 +3,7 @@
 import { useState, useEffect, memo } from "react";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { EmptyState } from "@repo/ui/EmptyState";
+import { AvatarGroup, Badge } from "@repo/ui";
 import { createBrowserSupabaseClient } from "@repo/supabase/client";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { CloseShiftModal } from "./CloseShiftModal";
@@ -152,12 +153,23 @@ function ShiftCoverageWidgetBase({
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-[var(--text-heading)]">Shift Coverage</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {isClosed && (
-              <span className="text-[10px] uppercase tracking-wider text-accent-green bg-accent-green/10 border border-accent-green/20 px-2 py-0.5 rounded-full font-medium">
+              <Badge variant="green" contrast="low" size="sm">
                 Shift Closed
-              </span>
+              </Badge>
             )}
+            <AvatarGroup
+              size={24}
+              limit={4}
+              overlap="auto"
+              members={[
+                { letter: "CR", title: "Control Room Lead" },
+                { letter: "OP", title: "Shift Operator" },
+                { letter: "SO", title: "Safety Officer" },
+                { letter: "ME", title: "Maintenance Engineer" },
+              ]}
+            />
             <Clock className="w-5 h-5 text-[var(--text-muted)]" />
           </div>
         </div>

@@ -9,7 +9,7 @@ This directory contains configuration files, deployment manifests, and automatio
   - `compose.production.yml`: Production environment override parameters.
   - `compose.redis.yml`: Standalone Redis server config.
   - `compose.security.yml`: Security tools configuration.
-  - `compose.tools.yml`: n8n, Flowise, and secondary workflow tooling.
+  - `compose.tools.yml`: Flowise and secondary workflow tooling.
 - **[monitoring/](file:///home/timothy/Documents/Arch-System/infra/monitoring)**: Contains the core observability stack definitions:
   - `docker-compose.yml`: Launches Prometheus and Grafana instances.
 - **[observability/](file:///home/timothy/Documents/Arch-System/infra/observability)**: Custom metric and diagnostic rules:

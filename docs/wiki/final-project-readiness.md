@@ -171,23 +171,23 @@ LangGraph        █████████████████████
 MCP Registry     ███████████████████████████████████████░░░░░  88%
 Memory Layer     █████████████████████████████████████████░  98%
 Provider Failover ██████████████████████████████████████░░░░  90%
-N8N Workflows    ████████████████████████████████████░░░░░░  82%
+Inngest Jobs     ████████████████████████████████████░░░░░░  82%
 ─────────────────────────────────────────────────────────────────────
 CATEGORY SCORE   ████████████████████████████████████████░░  92%
 ```
 
-| Metric                | Value              | Status             |
-| --------------------- | ------------------ | ------------------ |
-| AI module files       | **19**             | 🟢 Modular         |
-| Exported symbols      | **525**            | 🟢 Rich API        |
-| LangGraph nodes       | **8**              | 🟢 Workflow engine |
-| MCP servers           | Custom n8n + tools | 🟢 Integrated      |
-| Vector embeddings     | ✅                 | 🟢 Qdrant-backed   |
-| Redis AI memory cache | ✅                 | 🟢 L1/L2 tiers     |
-| OpenRouter primary    | ✅                 | 🟢 Configured      |
-| Groq fallback         | ✅                 | 🟢 Failover        |
-| Rate limiter (Redis)  | ✅                 | 🟢 Per-user        |
-| DeepEval eval suite   | ✅                 | 🟢 Python/DeepEval |
+| Metric                | Value        | Status             |
+| --------------------- | ------------ | ------------------ |
+| AI module files       | **19**       | 🟢 Modular         |
+| Exported symbols      | **525**      | 🟢 Rich API        |
+| LangGraph nodes       | **8**        | 🟢 Workflow engine |
+| MCP servers           | Custom tools | 🟢 Integrated      |
+| Vector embeddings     | ✅           | 🟢 Qdrant-backed   |
+| Redis AI memory cache | ✅           | 🟢 L1/L2 tiers     |
+| OpenRouter primary    | ✅           | 🟢 Configured      |
+| Groq fallback         | ✅           | 🟢 Failover        |
+| Rate limiter (Redis)  | ✅           | 🟢 Per-user        |
+| DeepEval eval suite   | ✅           | 🟢 Python/DeepEval |
 
 ---
 

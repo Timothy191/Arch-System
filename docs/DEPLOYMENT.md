@@ -73,7 +73,7 @@ This starts:
 
 - Next.js portal on <http://localhost:3000>
 - Local Supabase on <http://localhost:54321>
-- Redis, n8n, Flowise (via Docker)
+- Redis, Flowise (via Docker)
 - Prometheus & Grafana monitoring
 
 ### Clean Restart
@@ -154,7 +154,7 @@ For first-time production setup, use the automated script:
 **Options**:
 
 - `--no-systemd` — Skip systemd service setup
-- `--no-docker-tools` — Skip Docker tools stack (n8n, Flowise, Langfuse, Qdrant, ClickHouse)
+- `--no-docker-tools` — Skip Docker tools stack (Flowise, Langfuse, Qdrant, ClickHouse)
 - `--no-monitoring` — Skip monitoring stack (Prometheus, Grafana, cAdvisor)
 - `--force` — Force overwrite existing configuration
 - `--dry-run` — Preview changes without executing
@@ -171,7 +171,6 @@ The script automates:
 8. Health check
 
 **Platform Support**: The script includes automatic OS detection and Rocky Linux/RHEL-specific guidance. See [Rocky Linux Compatibility Guide](./ROCKY_LINUX_COMPATIBILITY.md) for platform-specific setup instructions.
-
 
 ### Self-Hosted Production Setup (with Cloud Supabase)
 
@@ -390,7 +389,6 @@ docker compose -f docker-compose.tools.yml -f docker-compose.production.yml up -
 Services included:
 
 - **portal**: Next.js application
-- **n8n**: Workflow automation
 - **flowise**: AI workflow builder
 - **redis**: Caching & session store
 - **prometheus**: Metrics collection

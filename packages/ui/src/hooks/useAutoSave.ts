@@ -14,7 +14,7 @@ interface AutoSaveOptions<T> {
  */
 // AGENT-TRACE: Use onLoadRef to break callback dependency cycles when inline onLoad functions are passed, eliminating "Maximum update depth exceeded" errors.
 export function useAutoSave<T>(data: T, { key, onLoad, debounceMs = 1000 }: AutoSaveOptions<T>) {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
   const onLoadRef = useRef(onLoad);
 

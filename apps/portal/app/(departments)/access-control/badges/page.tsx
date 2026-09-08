@@ -1,5 +1,6 @@
 import { getDepartmentContext } from "~/lib/dept-context";
 import { GlassCard } from "@repo/ui/GlassCard";
+import { Badge } from "@repo/ui";
 import { Button } from "@repo/ui/components/ui/button";
 import { Pagination } from "@repo/ui/components/ui/pagination";
 import {
@@ -114,19 +115,20 @@ export default async function BadgesPage({
                     <TableCell className="font-medium text-[var(--text-heading)]">
                       {badge.entity_name}
                     </TableCell>
-                    <TableCell className="text-[var(--text-secondary)] capitalize">
-                      {badge.entity_type}
+                    <TableCell>
+                      <Badge variant="blue" contrast="low" size="sm" className="capitalize">
+                        {badge.entity_type}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       {badge.is_active ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-emerald-50/70 border-emerald-200/50 text-emerald-700">
-                          <span className="badge-pulse-dot bg-emerald-500" />
+                        <Badge variant="green" contrast="low" size="sm">
                           Active
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border bg-red-50/70 border-red-200/50 text-red-700">
+                        <Badge variant="red" contrast="low" size="sm">
                           Revoked
-                        </span>
+                        </Badge>
                       )}
                     </TableCell>
                   </TableRow>

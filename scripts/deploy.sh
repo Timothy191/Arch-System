@@ -852,12 +852,12 @@ phase_start_infrastructure() {
           if $COMPOSE_CMD -f "$tools_compose" ps --format '{{.Status}}' 2>/dev/null | grep -q 'Up'; then
             success "Docker tools already running - connecting"
           else
-            log "Starting Docker tools (Redis, n8n, Flowise, Langfuse, etc.)..."
+            log "Starting Docker tools (Redis, Flowise, Langfuse, etc.)..."
             run_if_not_dry $COMPOSE_CMD -f "$tools_compose" up -d || warn "Some Docker tools failed to start (non-critical)"
             
             if [ "$DRY_RUN" = false ]; then
               log "Waiting for Docker tools to report healthy..."
-              local services=("plantcor-redis" "plantcor-n8n" "plantcor-flowise" "plantcor-langfuse-db" "plantcor-langfuse" "plantcor-qdrant")
+              local services=("plantcor-redis" "plantcor-flowise" "plantcor-langfuse-db" "plantcor-langfuse" "plantcor-qdrant")
               for service in "${services[@]}"; do
                 info "Gating on $service health..."
                 local attempts=0
@@ -1133,9 +1133,6 @@ if docker ps --format '{{.Names}}' 2>/dev/null | grep -q redis; then
   echo -e "  🟢 Redis:      Running"
 fi
 
-if docker ps --format '{{.Names}}' 2>/dev/null | grep -q n8n; then
-  echo -e "  🟢 n8n:        http://localhost:5678"
-fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q flowise; then
   echo -e "  🟢 Flowise:    http://localhost:3000"
@@ -1237,11 +1234,6 @@ else
   echo -e "  ⚪ \033[1mSupabase:\033[0m     Not running"
 fi
 
-if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-n8n; then
-  echo -e "  ✅ \033[1mn8n:\033[0m          http://localhost:5678 (user: plantcor)"
-else
-  echo -e "  ⚪ \033[1mn8n:\033[0m          Not running"
-fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-flowise; then
   echo -e "  ✅ \033[1mFlowise:\033[0m      http://localhost:3001 (user: plantcor)"
@@ -1371,7 +1363,7 @@ main() {
       echo "  --migrate-only   Only migrations"
       echo "  --rollback       Rollback"
       echo "  --force          Skip confirmation"
-      echo "  --lightweight    Skip n8n, Flowise, Redis tools, and monitoring (portal + Supabase only)"
+      echo "  --lightweight    Skip Flowise, Redis tools, and monitoring (portal + Supabase only)"
       echo "  --no-browser     Don't open browser"
       echo
       exit 1
@@ -1448,7 +1440,7 @@ main() {
   log "Login:      http://localhost:$PORT/login"
   [ -n "$ARCH_BASE_DIR" ] && log "Arch-Base:  http://localhost:3001"
   [ "$DEPLOY_MODE" = "local" ] && log "Supabase:   http://localhost:54321"
-  [ "$DEPLOY_MODE" = "local" ] && log "n8n:        http://localhost:5678"
+
   [ "$DEPLOY_MODE" = "local" ] && log "Grafana:    http://localhost:9091"
   echo
   log "Logs: tail -f $DEPLOY_LOG"

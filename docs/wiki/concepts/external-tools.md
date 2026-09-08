@@ -18,13 +18,11 @@ Tools are defined in `apps/portal/lib/tools.ts` as the `EXTERNAL_TOOLS` array:
 
 | Tool    | Default URL             | Description                                 |
 | ------- | ----------------------- | ------------------------------------------- |
-| n8n     | `http://localhost:5678` | Workflow automation with 400+ integrations  |
 | Flowise | `http://localhost:3000` | Visual AI workflow builder (LangChain)      |
 | Svix    | Dashboard API           | Webhook service for reliable event delivery |
 
 Environment overrides:
 
-- `N8N_URL` — Override n8n endpoint
 - `FLOWISE_URL` — Override Flowise endpoint
 - `SVIX_API_KEY` — Svix dashboard API key for webhook management
 
@@ -45,7 +43,6 @@ Response format:
 
 ```json
 {
-  "n8n": { "status": "online", "responseTime": 120 },
   "flowise": { "status": "offline", "responseTime": null }
 }
 ```
@@ -111,7 +108,7 @@ Located at `(departments)/[department]/tools/page.tsx`.
 
 Renders:
 
-1. External tool cards (n8n, Flowise) with health status
+1. External tool cards (Flowise) with health status
 2. Univer spreadsheet component
 3. Productivity tools (tasks, documents, schedule, calculations, notes)
 

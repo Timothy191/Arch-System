@@ -53,7 +53,6 @@ sudo firewall-cmd --permanent --add-service=https
 
 # Allow application ports
 sudo firewall-cmd --permanent --add-port=3000/tcp   # Next.js Portal
-sudo firewall-cmd --permanent --add-port=5678/tcp   # n8n
 sudo firewall-cmd --permanent --add-port=6333/tcp   # Qdrant
 sudo firewall-cmd --permanent --add-port=8123/tcp   # ClickHouse
 sudo firewall-cmd --permanent --add-port=9090/tcp   # Prometheus

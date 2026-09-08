@@ -42,7 +42,9 @@
     "react-hook-form": "catalog:",
     "recharts": "catalog:",
     "sonner": "catalog:",
+    "streamdown": "^2.6.0",
     "swagger-ui-react": "^5.18.2",
+    "xlsx": "^0.18.5",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"

@@ -51,7 +51,7 @@ All common commands are also available via `make`:
 
 - `make dev` - equivalent to `pnpm dev`
 - `make dev-quick` - dev mode without Docker/Supabase
-- `make dev-tools` - dev with additional tools (Redis, n8n, Flowise)
+- `make dev-tools` - dev with additional tools (Redis, Flowise)
 - `make dev-all` - dev with all apps (portal, CMS, overview)
 - `make build` - build everything
 - `make test` - run unit tests

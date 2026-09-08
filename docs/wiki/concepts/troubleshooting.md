@@ -223,7 +223,7 @@ pnpm --filter portal build
 
 ## External Tools Offline
 
-### Symptom: n8n or Flowise shows "offline" in Tools tab
+### Symptom: Flowise shows "offline" in Tools tab
 
 **Diagnostic**:
 
@@ -232,21 +232,14 @@ pnpm --filter portal build
 curl http://localhost:3000/api/tools/status
 
 # Direct tool check
-curl -I http://localhost:5678  # n8n default
-curl -I http://localhost:3000  # Flowise default
+curl -I http://localhost:3001  # Flowise default
 ```
 
 **Solutions**:
 
-1. **n8n**: Ensure Docker container is running:
+1. **Flowise**: Ensure Flowise server is running and accessible on port 3001.
 
-```bash
-docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n
-```
-
-2. **Flowise**: Check if Flowise server started on correct port
-
-3. **Environment variables**: Verify `N8N_URL` and `FLOWISE_URL` in `.env`
+2. **Environment variables**: Verify `FLOWISE_URL` in `.env`
 
 ---
 

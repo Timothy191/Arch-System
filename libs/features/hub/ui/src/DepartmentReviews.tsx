@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Marquee } from "@repo/ui/Marquee";
+import { Avatar } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors.
@@ -82,8 +83,7 @@ interface ReviewCardProps {
   color: string;
 }
 
-function ReviewCard({ img, name, username, body, color }: ReviewCardProps) {
-  const [imgError, setImgError] = useState(false);
+function ReviewCard({ img, name, username, body }: ReviewCardProps) {
   const initials = name
     .split(" ")
     .map((word) => word[0])
@@ -96,27 +96,13 @@ function ReviewCard({ img, name, username, body, color }: ReviewCardProps) {
       <div className="h-full rounded-2xl bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300">
         <div className="p-4 sm:p-5 flex flex-col justify-between h-full select-none">
           <div className="flex flex-row items-center gap-3">
-            {/* AGENT-TRACE: Local initials fallback replaces broken external avatar URLs */}
-            {imgError ? (
-              <div
-                className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border border-arch-border-subtle shadow-sm shrink-0",
-                  color,
-                )}
-                aria-hidden="true"
-              >
-                {initials}
-              </div>
-            ) : (
-              <img
-                className="rounded-full object-cover bg-arch-surface-tertiary border border-arch-border-subtle shadow-sm shrink-0 w-9 h-9"
-                width={36}
-                height={36}
-                alt={name}
-                src={img}
-                onError={() => setImgError(true)}
-              />
-            )}
+            <Avatar
+              size={36}
+              src={img}
+              letter={initials}
+              title={name}
+              className="shrink-0 shadow-sm"
+            />
             <div className="flex flex-col text-left min-w-0">
               <span className="text-xs sm:text-sm font-semibold text-arch-text-primary truncate">
                 {name}

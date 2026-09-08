@@ -29,14 +29,14 @@ The portal supports 8 departments, each with specialized tabs, data entry forms,
 
 Most departments share these tabs:
 
-| Tab       | Purpose                                                      |
-| --------- | ------------------------------------------------------------ |
-| dashboard | Department overview with KPIs and alerts                     |
-| daily-log | Shift log entry (machine hours, fuel, production)            |
-| machines  | Equipment registry and status                                |
-| history   | Historical data view                                         |
-| reports   | Report generation and templates                              |
-| tools     | External tools (n8n, Flowise, Univer) + productivity widgets |
+| Tab       | Purpose                                                 |
+| --------- | ------------------------------------------------------- |
+| dashboard | Department overview with KPIs and alerts                |
+| daily-log | Shift log entry (machine hours, fuel, production)       |
+| machines  | Equipment registry and status                           |
+| history   | Historical data view                                    |
+| reports   | Report generation and templates                         |
+| tools     | External tools (Flowise, Univer) + productivity widgets |
 
 ## Control Room (Specialized)
 
@@ -69,7 +69,7 @@ Forms use the four-state pattern (`idle`/`submitting`/`success`/`error`) with `c
 | machines   | [[machines]]         | Equipment registry                                      |
 | history    | [[audit-logs]]       | Audit trail for breakdown changes                       |
 | reports    | [[report-templates]] | Report generation                                       |
-| tools      | External tools       | n8n, Flowise, Univer                                    |
+| tools      | External tools       | Flowise, Univer                                         |
 
 ### Breakdown Workflow
 
@@ -89,7 +89,7 @@ All operations are audited. See [[breakdowns-actions]] for server action details
 | machines  | [[machines]]         | Equipment registry                            |
 | history   | [[safety-incidents]] | Incident history with investigation status    |
 | reports   | [[report-templates]] | Compliance reports                            |
-| tools     | External tools       | n8n, Flowise, Univer                          |
+| tools     | External tools       | Flowise, Univer                               |
 
 ### Safety Incident Workflow
 

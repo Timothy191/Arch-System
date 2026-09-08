@@ -119,7 +119,7 @@
 | --------- | ------- | -------------- | ------------------------------------------------------------ |
 | Phase 1   | ✅ Done | 8.0/10         | Coverage 40%+, @repo/errors, quality gates                   |
 | Phase 2   | ✅ Done | 8.3/10         | Bundle CI, Deployment pipeline, @repo/theme token pipeline   |
-| Phase 3   | ✅ Done | 8.5/10         | LangGraph AI, MCP registry, N8N, agent teams                 |
+| Phase 3   | ✅ Done | 8.5/10         | LangGraph AI, MCP registry, Inngest, agent teams             |
 | Phase 4   | ✅ Done | 8.5/10         | Webhooks, partitioning, OTEL, read replica                   |
 | Phase 5   | ✅ Done | 8.5/10         | Light theme, QR access control, Highlight, Inngest, Novu     |
 | Phase 5.1 | ✅ Done | 8.6/10         | Rendering performance: Lenis/blur/rAF/adaptive FPS           |

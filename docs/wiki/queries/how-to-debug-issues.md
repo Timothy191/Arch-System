@@ -152,11 +152,8 @@ curl https://api.groq.com/openai/v1/models \
 **Check**:
 
 ```bash
-# Test n8n
-curl -I http://localhost:5678
-
 # Test Flowise
-curl -I http://localhost:3000
+curl -I http://localhost:3001
 
 # Check status endpoint
 curl http://localhost:3000/api/tools/status

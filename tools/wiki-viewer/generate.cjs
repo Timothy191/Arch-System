@@ -959,7 +959,7 @@ const sysNodes = [
   { id: "backend", label: "Supabase", sub: "Auth + Postgres + RLS", group: "backend", x: 260, y: 160, w: 86, h: 36 },
   { id: "edge", label: "Edge Functions", sub: "Deno Deploy", group: "backend", x: 80, y: 170, w: 92, h: 30 },
   { id: "ai", label: "AI Service", sub: "Groq / OpenRouter / Together", group: "ext", x: 100, y: 230, w: 86, h: 36 },
-  { id: "n8n", label: "n8n", sub: "Workflow Automation", group: "ext", x: 220, y: 230, w: 60, h: 30 },
+  { id: "inngest", label: "Inngest", sub: "Workflow Automation", group: "ext", x: 220, y: 230, w: 60, h: 30 },
   { id: "flowise", label: "Flowise", sub: "AI Flow Builder", group: "ext", x: 300, y: 230, w: 68, h: 30 },
   { id: "univer", label: "Univer SDK", sub: "Spreadsheets", group: "ext", x: 390, y: 230, w: 78, h: 30 },
   { id: "monitor", label: "Monitoring API", sub: "SAR / InSAR / STAC", group: "ext", x: 80, y: 280, w: 96, h: 30 },
@@ -975,7 +975,7 @@ const sysEdges = [
   { from: "portal", to: "hooks" },
   { from: "portal", to: "backend" },
   { from: "portal", to: "ai" },
-  { from: "portal", to: "n8n" },
+  { from: "portal", to: "inngest" },
   { from: "portal", to: "flowise" },
   { from: "portal", to: "univer" },
   { from: "portal", to: "monitor" },
@@ -1046,7 +1046,7 @@ function drawSystemMap() {
   svg.querySelectorAll('.node-box').forEach(g => {
     g.addEventListener('click', () => {
       const id = g.dataset.id;
-      const targets = { portal: 'portal-app-architecture', overview: 'turborepo-monorepo', cms: 'external-tools', ui: 'design-system', theme: 'design-system', supabase: 'supabase-local-dev', db: 'database-schema', types: 'turborepo-monorepo', utils: 'turborepo-monorepo', hooks: 'turborepo-monorepo', backend: 'auth-middleware', edge: 'external-tools', ai: 'ai-service', n8n: 'external-tools', flowise: 'external-tools', univer: 'external-tools', monitor: 'monitoring-error-tracking', weather: 'monitoring-error-tracking', postgres: 'database-schema' };
+      const targets = { portal: 'portal-app-architecture', overview: 'turborepo-monorepo', cms: 'external-tools', ui: 'design-system', theme: 'design-system', supabase: 'supabase-local-dev', db: 'database-schema', types: 'turborepo-monorepo', utils: 'turborepo-monorepo', hooks: 'turborepo-monorepo', backend: 'auth-middleware', edge: 'external-tools', ai: 'ai-service', inngest: 'external-tools', flowise: 'external-tools', univer: 'external-tools', monitor: 'monitoring-error-tracking', weather: 'monitoring-error-tracking', postgres: 'database-schema' };
       if (targets[id] && slugMap[targets[id]]) renderPage(targets[id]);
     });
   });

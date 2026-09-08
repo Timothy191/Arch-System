@@ -15,7 +15,6 @@ This document outlines the environment variables used across the Arch-System mon
 
 ## Third-Party Integrations
 
-- `N8N_URL`: URL to the n8n automation instance.
 - `FLOWISE_URL`: URL to the Flowise LLM orchestration instance.
 - `REDIS_URL`: Connection string for Redis caching.
 

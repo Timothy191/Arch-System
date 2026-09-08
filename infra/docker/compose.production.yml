@@ -6,37 +6,6 @@ version: "3.8"
 # Adds: restart policies, resource limits, health checks, and production-safe env overrides.
 
 services:
-  n8n:
-    restart: always
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin@plantcor.os}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
-      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
-      - WEBHOOK_URL=${N8N_WEBHOOK_BASE_URL:-http://localhost:5678/}
-      - N8N_LOG_LEVEL=warn
-      - N8N_CONCURRENCY_PRODUCTION_LIMIT=32
-    volumes:
-      - /opt/arch-systems/data/n8n:/home/node/.n8n
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 512M
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5678/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "5"
-
   flowise:
     restart: always
     environment:

@@ -15,7 +15,7 @@
 - **Frontend:** Next.js 15 (App Router) + React 19.2.6 + TypeScript
 - **Backend:** Supabase (PostgreSQL + Auth + RLS + Read Replicas)
 - **State:** Zustand 5
-- **Infrastructure:** N8N workflow engine, Payload CMS v3, Docker
+- **Infrastructure:** Inngest workflow engine, Payload CMS v3, Docker
 - **Monitoring:** Sentry, Redis cache, WebSocket subscriptions, Highlight session replay, OpenTelemetry
 - **Tools:** Nx 22 + pnpm workspaces
 
@@ -70,13 +70,13 @@
 - [x] Vector memory system (AI embeddings)
 - [x] Multi-agent orchestrator (Kiro agents)
 - [x] MCP (Model Context Protocol) registry
-- [x] N8N workflow engine integration (10 MCP patterns)
+- [x] Workflow engine integration (10 MCP patterns)
 - [x] Agent Teams pattern with shared task lists
 - [x] AI memory layer with Redis cache
 - [x] Evaluator-optimizer loop
 - [x] Safety system & agentic loop
 - [x] Advanced tooling infrastructure
-- [x] N8N startup & import scripts
+- [x] Agent startup & import scripts
 - [x] Version-controlled agent configs
 - [x] 12 hook scripts for automation
 - [x] UI animations & real-time features
@@ -333,7 +333,7 @@
 - ✅ Fleet & equipment tracking (access-control domain)
 - ✅ Documents (word-processing with storage bucket + version history)
 - ✅ Machine configurations (per-department operational setpoints)
-- ✅ N8N workflow automation
+- ✅ Inngest workflow automation
 - ✅ Style Dictionary token pipeline
 - ✅ Admin data API with lockdown & role elevation security
 - ✅ GitHub Actions production CI/CD pipeline
@@ -367,7 +367,7 @@ Provision the mining site server and deploy the full stack via `./scripts/deploy
 - [ ] Install Cockpit (`port 9090`) for web-based server management
 - [ ] Configure Docker Compose with all services
 - [ ] Test offline-capable deployment workflow
-- [ ] Validate all 8 departments, n8n, Grafana
+- [ ] Validate all 8 departments, Grafana
 
 📖 [[on-premises-deployment|Full guide: On-Premises Deployment & Cockpit]]
 
@@ -419,7 +419,7 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 
 - [ ] Route `/hub/executive` — cross-department KPI dashboard
 - [ ] PDF export via `@react-pdf/renderer` + Excel via `xlsx`
-- [ ] n8n scheduled workflow: monthly report → email
+- [ ] Inngest scheduled workflow: monthly report → email
 - [ ] Rolling 7-day averages + linear forecast on production charts
 - [ ] Data export REST API (`/api/export/production`, `/api/export/machines`)
 - [ ] ML predictive maintenance model (XGBoost on breakdown history)

@@ -408,7 +408,7 @@ cp apps/portal/.env.example apps/portal/.env
 
 ```bash
 docker compose ps
-# portal:3000, n8n:5678, grafana:9091, prometheus:9090, redis:6379 — all Up
+# portal:3000, grafana:9091, prometheus:9090, redis:6379 — all Up
 
 # Access portal
 curl http://localhost:3000  # → HTML response

@@ -45,7 +45,7 @@ export const DEPARTMENTS = [
       {
         path: "/drilling/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["drilling_operator", "supervisor", "admin"],
@@ -95,7 +95,7 @@ export const DEPARTMENTS = [
       {
         path: "/production/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["production_operator", "supervisor", "admin"],
@@ -135,7 +135,7 @@ export const DEPARTMENTS = [
       {
         path: "/access-control/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["access_control_officer", "access_control", "supervisor", "admin"],
@@ -190,7 +190,7 @@ export const DEPARTMENTS = [
       {
         path: "/engineering/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["engineer", "supervisor", "admin"],
@@ -235,7 +235,7 @@ export const DEPARTMENTS = [
       {
         path: "/control-room/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["control_room_operator", "admin", "supervisor", "operator"],
@@ -285,7 +285,7 @@ export const DEPARTMENTS = [
       {
         path: "/access-card-actions/tools",
         name: "Tools",
-        description: "n8n / Flowise embeds",
+        description: "Flowise / tool embeds",
       },
     ],
     roles: ["access_control", "supervisor", "admin"],
@@ -486,9 +486,9 @@ export const TECH_STACK = [
         description: "Real-time OPC-UA and Modbus-TCP machine HMI",
       },
       {
-        name: "n8n",
+        name: "Inngest",
         version: "Latest",
-        description: "Automated event-triggered operational workflows",
+        description: "Automated event-triggered background jobs and scheduled workflows",
       },
       {
         name: "Flowise",

@@ -301,7 +301,7 @@ Query: "Execute Agent A, then B, then C in sequence"
 Use DFS/Topological sort to determine execution order
 ```
 
-### 2. N8N Workflow Engine
+### 2. Inngest Workflow Engine
 
 **Graph Model:**
 

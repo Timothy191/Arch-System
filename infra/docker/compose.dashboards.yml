@@ -5,7 +5,7 @@ version: "3.8"
 #   docker compose -f infra/docker/compose.dashboards.yml up -d
 #   docker compose -f infra/docker/compose.dashboards.yml down
 #
-# These services run alongside the existing tools stack (Redis, n8n, Flowise, etc.)
+# These services run alongside the existing tools stack (Redis, Flowise, etc.)
 # and are embedded into the portal via iframe or linked from the dashboard index.
 #
 # Config files (git-tracked):
