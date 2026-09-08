@@ -75,13 +75,12 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   // IMPORTANT: Do NOT use supabase.auth.getSession() here!
   // Per Supabase docs: "It isn't guaranteed to revalidate the Auth token"
-  // Use getClaims() to verify identity (validates JWT signature)
-  // or getUser() when you need fresh user data from Auth server
+  // Use getUser() when you need fresh user data from Auth server
 
   try {
-    // Refresh the token by calling getClaims()
-    // This validates the JWT signature and refreshes if needed
-    const { error } = await supabase.auth.getClaims();
+    // Refresh the token by calling getUser()
+    // It's recommended by Supabase to use getUser() to ensure token is valid and refreshed
+    const { error } = await supabase.auth.getUser();
 
     if (error) {
       // Token refresh failed - could be expired or invalid

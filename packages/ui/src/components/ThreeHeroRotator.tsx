@@ -61,11 +61,11 @@ function ThreeCardItem({
     <group position={[x, 0, z]} rotation={[0, rotY, 0]}>
       <Html
         transform
-        distanceFactor={7.5}
+        distanceFactor={12.5}
         position={[0, 0, 0]}
         style={{
-          width: `${R3F_CONFIG.cardWidthPx}px`,
-          height: `${R3F_CONFIG.cardHeightPx}px`,
+          width: `720px`,
+          height: `420px`,
           userSelect: "none",
         }}
         className={cn(

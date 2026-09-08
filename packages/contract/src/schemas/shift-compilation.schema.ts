@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, dateSchema, nonEmptyString } from "./common.schema.js";
+import { uuidSchema, dateSchema, nonEmptyString } from "./common.schema";
 
 export const machinePerformanceSchema = z.object({
   machine_id: uuidSchema,

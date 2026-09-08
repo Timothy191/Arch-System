@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import "@repo/ui/globals.css";
 import "@/styles/print-report.css";
 import { ArchThemeProvider } from "@repo/theme/react";
@@ -15,7 +14,6 @@ import { AIAssistantWrapper } from "@/components/ai/AIAssistantWrapper";
 import { FocusModeToggle } from "@/components/FocusModeToggle";
 import { SystemTrayPill } from "@/components/system/SystemTray";
 import { WebVitalsReporter } from "@/components/WebVitalsReporter";
-import { LCPObserver } from "@/components/LCPObserver";
 import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import { ClientOverlays } from "@/components/ClientOverlays";
@@ -196,9 +194,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                 aria-label="Main content"
                 className="relative z-primary-card pt-16"
               >
-                <Suspense fallback={null}>
-                  <LCPObserver />
-                </Suspense>
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
 

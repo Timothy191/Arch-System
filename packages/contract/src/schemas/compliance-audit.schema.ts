@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema } from "./common.schema.js";
+import { uuidSchema } from "./common.schema";
 
 export const complianceAuditRunSchema = z.object({
   id: uuidSchema.optional(),

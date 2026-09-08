@@ -67,9 +67,9 @@ export async function createMiddlewareClient(request: NextRequest) {
  */
 export async function refreshSession(supabase: ReturnType<typeof createServerClient>) {
   try {
-    // Use getClaims() to validate and refresh the token
+    // Use getUser() to validate and refresh the token
     // This is preferred over getSession() which doesn't guarantee revalidation
-    const { error } = await supabase.auth.getClaims();
+    const { error } = await supabase.auth.getUser();
 
     if (error) {
       console.error("Session refresh failed:", error.message);

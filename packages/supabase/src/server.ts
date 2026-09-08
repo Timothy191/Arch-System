@@ -125,15 +125,15 @@ export async function getUserSafely(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
 ): Promise<User | null> {
   try {
-    // Use getClaims() for identity verification (recommended by Supabase docs)
-    // This validates the JWT signature locally without making a network call
-    const { data, error } = await supabase.auth.getClaims();
+    // Use getUser() for identity verification (recommended by Supabase docs)
+    // This validates the JWT signature and ensures we have the latest user
+    const { data, error } = await supabase.auth.getUser();
 
-    if (error || !data) {
+    if (error || !data.user) {
       return null;
     }
 
-    return data as unknown as User;
+    return data.user;
   } catch (error) {
     // Handle token validation errors gracefully
     // This can happen when the token is invalid, expired, or malformed
