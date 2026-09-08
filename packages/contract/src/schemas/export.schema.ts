@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dateSchema, dateMonthSchema } from "./common.schema.js";
+import { dateSchema, dateMonthSchema } from "./common.schema";
 
 export const exportQuerySchema = z.object({
   from: dateSchema.optional(),
