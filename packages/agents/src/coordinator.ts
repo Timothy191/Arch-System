@@ -16,6 +16,8 @@ export interface Subtask {
 
 export interface CoordinatorConfig {
   openaiApiKey?: string;
+  baseURL?: string;
+  provider?: "openai" | "gemini" | "aion" | "cohere" | "ollama";
   defaultModel?: string;
   synthesisModel?: string;
   concurrencyLimit?: number;
@@ -45,11 +47,75 @@ export class SubagentCoordinator {
   private langfuse: Langfuse | null;
 
   constructor(config: CoordinatorConfig = {}) {
+    let apiKey = config.openaiApiKey;
+    let baseURL = config.baseURL;
+    let defaultModel = config.defaultModel;
+    let synthesisModel = config.synthesisModel;
+
+    if (config.provider === "aion") {
+      apiKey = apiKey || process.env.AION_API_KEY;
+      baseURL = baseURL || process.env.AION_BASE_URL || "https://api.aionlabs.ai/v1";
+      defaultModel = defaultModel || "aion-labs/aion-3.0-mini";
+      synthesisModel = synthesisModel || "aion-labs/aion-3.0";
+    } else if (config.provider === "gemini") {
+      apiKey = apiKey || process.env.GEMINI_API_KEY;
+      baseURL = baseURL || "https://generativelanguage.googleapis.com/v1beta/openai/";
+      defaultModel = defaultModel || "gemini-2.5-flash";
+      synthesisModel = synthesisModel || "gemini-2.5-flash";
+    } else if (config.provider === "cohere") {
+      apiKey = apiKey || process.env.COHERE_API_KEY;
+      baseURL =
+        baseURL ||
+        process.env.COHERE_OPENAI_COMPAT_URL ||
+        "https://api.cohere.com/compatibility/v1";
+      defaultModel = defaultModel || "command-r7b-12-2024";
+      synthesisModel = synthesisModel || "command-a-reasoning-08-2025";
+    } else if (config.provider === "ollama") {
+      apiKey = apiKey || "ollama";
+      baseURL = baseURL || process.env.OPENAI_BASE_URL || "http://127.0.0.1:11434/v1";
+      defaultModel = defaultModel || "qwen2.5:3b";
+      synthesisModel = synthesisModel || "qwen2.5:3b";
+    } else {
+      apiKey =
+        apiKey ||
+        process.env.OPENAI_API_KEY ||
+        process.env.GEMINI_API_KEY ||
+        process.env.AION_API_KEY ||
+        "ollama";
+
+      baseURL =
+        baseURL ||
+        process.env.OPENAI_BASE_URL ||
+        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+          ? "https://generativelanguage.googleapis.com/v1beta/openai/"
+          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+            ? "https://api.aionlabs.ai/v1"
+            : undefined);
+
+      defaultModel =
+        defaultModel ||
+        process.env.OPENAI_MODEL ||
+        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+          ? "gemini-2.5-flash"
+          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+            ? "aion-labs/aion-3.0-mini"
+            : "gpt-4o-mini");
+
+      synthesisModel =
+        synthesisModel ||
+        (process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY
+          ? "gemini-2.5-flash"
+          : process.env.AION_API_KEY && !process.env.OPENAI_API_KEY
+            ? "aion-labs/aion-3.0"
+            : "gpt-4o");
+    }
+
     this.openai = new OpenAI({
-      apiKey: config.openaiApiKey || process.env.OPENAI_API_KEY,
+      apiKey,
+      baseURL,
     });
-    this.defaultModel = config.defaultModel || "gpt-4o-mini";
-    this.synthesisModel = config.synthesisModel || "gpt-4o";
+    this.defaultModel = defaultModel;
+    this.synthesisModel = synthesisModel;
     this.limit = pLimit(config.concurrencyLimit || 3);
     this.temperature = config.temperature ?? 0.2;
     this.langfuse = getLangfuseClient(config.langfuse);
@@ -242,11 +308,12 @@ Analyze:
 1. Real-world industry precedents (e.g. Netflix, Uber, Shopify, Airbnb, Google, Meta).
 2. Potential failure modes, circular dependencies, or schema drift risks.
 3. Recommended fitness function checks and minimal non-breaking seams.`,
-      expectation: "Return a structured JSON evaluation with fields: approved (boolean), benchmarkSummary (string), and recommendations (array of strings).",
+      expectation:
+        "Return a structured JSON evaluation with fields: approved (boolean), benchmarkSummary (string), and recommendations (array of strings).",
       constraints: [
         "Must verify zero-risk rollback compatibility.",
         "Must reject any proposals introducing unvetted third-party bloat.",
-        "Output valid JSON only."
+        "Output valid JSON only.",
       ],
     };
 
@@ -288,4 +355,3 @@ Analyze:
     }
   }
 }
-
