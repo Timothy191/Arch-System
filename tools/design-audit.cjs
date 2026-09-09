@@ -57,9 +57,15 @@ try {
   // Combine with standard allowed Tailwind/Tremor shadows that aren't explicit tokens
   ALLOWED_SHADOWS = new Set([
     ...tokenShadows,
+    "shadow-2xs",
+    "shadow-xs",
     "shadow-sm",
     "shadow-md",
     "shadow-lg",
+    "shadow-xl",
+    "shadow-2xl",
+    "shadow-card",
+    "shadow-window",
     "shadow-none",
     "shadow-inner",
     "shadow-tremor-input",

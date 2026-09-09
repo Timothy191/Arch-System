@@ -66,7 +66,7 @@ export class QualityGate {
 
       // 3. Forbidden Raw Tailwind Shadow Check
       const shadowMatch = line.match(
-        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo|2xl|xl|2xs|xs)-[0-9]+\b|\bshadow-(2xl|xl)\b/,
+        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo)-[0-9]+\b/,
       );
       if (shadowMatch) {
         violations.push({
@@ -74,7 +74,7 @@ export class QualityGate {
           lineNumber: lineNum,
           ruleId: "FORBIDDEN_TAILWIND_SHADOW",
           severity: "CRITICAL",
-          description: `Raw shadow class '${shadowMatch[0]}' is forbidden. Use OKLCH theme tokens (shadow-card, shadow-window, shadow-diffusion-*).`,
+          description: `Raw colored shadow class '${shadowMatch[0]}' is forbidden. Use OKLCH theme tokens (shadow-card, shadow-window, shadow-diffusion-*).`,
           remediationSnippet:
             "Replace with 'shadow-card' or approved shadow token from @repo/theme.",
         });
