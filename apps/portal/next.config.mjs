@@ -9,7 +9,8 @@ const { version: PORTAL_VERSION } = require("./package.json");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const workspaceRoot = path.resolve(__dirname, "../..");
+// Root includes both Arch-System and Arch-Base so Turbopack allows cross-repo symlinked packages
+const workspaceRoot = path.resolve(__dirname, "../../..");
 
 const isProduction = process.env.NODE_ENV === "production";
 const isCI = process.env.CI === "true";
