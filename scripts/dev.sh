@@ -723,14 +723,9 @@ else
       SUPAPID=$!
       spinner "$SUPAPID" "Booting Arch-Base Supabase containers"
     else
-      echo -e "  ${INFO} Starting Supabase (Docker)..."
-      cd "$REPO_ROOT/packages/database"
-      mkdir -p "$REPO_ROOT/packages/supabase/supabase/migrations"
-      cp -r migrations/* "$REPO_ROOT/packages/supabase/supabase/migrations/" 2>/dev/null || true
-      pnpx supabase start > /dev/null 2>&1 &
-      SUPAPID=$!
-      spinner "$SUPAPID" "Booting Supabase containers"
-      cd "$REPO_ROOT"
+      echo -e "  ${FAIL} Arch-Base not found at $ARCH_BASE_DIR or missing supabase/config.toml."
+      echo -e "  ${INFO} Arch-System requires Arch-Base as the single source of truth for the database."
+      exit 1
     fi
     if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 45; then
       check "Supabase API" "pass" "http://localhost:54321 (Arch-Base active)"

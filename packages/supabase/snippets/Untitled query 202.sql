@@ -1,1 +1,0 @@
-SELECT email_confirmed_at, confirmed_at, is_super_admin FROM auth.users WHERE email = 'admin@plantcor.os';

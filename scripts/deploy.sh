@@ -23,9 +23,9 @@ if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
   SUPABASE_DIR="$ARCH_BASE_DIR/supabase"
   ARCH_BASE_WEB_DIR="$ARCH_BASE_DIR/apps/web"
 else
-  DATABASE_DIR="$REPO_ROOT/packages/database"
-  SUPABASE_DIR="$REPO_ROOT/packages/supabase"
-  ARCH_BASE_WEB_DIR=""
+  echo -e "\n\033[31m\033[1m[ERR] Arch-Base not found at $ARCH_BASE_DIR or missing supabase/config.toml.\033[0m"
+  echo -e "\033[34m\033[1m[INFO] Arch-System requires Arch-Base as the single source of truth for the database.\033[0m"
+  exit 1
 fi
 
 # Define portal directory

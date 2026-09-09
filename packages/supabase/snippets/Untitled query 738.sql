@@ -1,1 +1,0 @@
-SELECT id, auth_id, full_name, role FROM public.employees;

@@ -34,14 +34,14 @@ import { createRequire } from "node:module";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
 
-function findGlassCss() {
+async function findGlassCss() {
   // Try direct resolution from workspace root
   const root = resolve(__dirname, "..");
   const candidates = [
     resolve(root, "node_modules/@liqui-design/glass/dist/glass.css"),
     resolve(
       root,
-      "node_modules/.pnpm/@liqui-design+glass@0.2.2_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/@liqui-design/glass/dist/glass.css"
+      "node_modules/.pnpm/@liqui-design+glass@0.2.2_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/@liqui-design/glass/dist/glass.css",
     ),
   ];
 
@@ -54,7 +54,7 @@ function findGlassCss() {
     const { execSync } = await import("node:child_process");
     const result = execSync(
       'find node_modules/.pnpm -name "glass.css" -path "*liqui-design*" 2>/dev/null | head -1',
-      { cwd: root, encoding: "utf-8" }
+      { cwd: root, encoding: "utf-8" },
     ).trim();
     if (result && existsSync(result)) return result;
   } catch {

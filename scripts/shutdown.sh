@@ -11,7 +11,8 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORTAL_PID_FILE="$REPO_ROOT/run/.portal.pid"
 TOOLS_COMPOSE="$REPO_ROOT/infra/docker/compose.tools.yml"
 MONITOR_COMPOSE="$REPO_ROOT/infra/monitoring/docker-compose.yml"
-DATABASE_DIR="$REPO_ROOT/packages/database"
+ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+DATABASE_DIR="$ARCH_BASE_DIR"
 
 # Colors
 CLR_RESET="\033[0m"
