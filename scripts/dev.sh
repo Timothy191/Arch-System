@@ -236,17 +236,12 @@ show_results() {
   _url_row "Studio"   "$studio_url"
   _url_row "API"      "$api_url"
 
-  if [ "${TAILSCALE_ACTIVE:-false}" = "true" ] && [ -n "${TAILSCALE_IP:-}" ]; then
+  if [ "${CLOUDFLARE_ACTIVE:-false}" = "true" ]; then
     echo
-    echo -e "  ${CYAN}${BOLD}Tailscale Network (Remote Devices & RFID Scanners)${NC}"
-    if [ -n "${MAGIC_DNS:-}" ]; then
-      _url_row "HTTPS"      "https://$MAGIC_DNS" "(remote phones & tablets)"
-      _url_row "RFID (SSL)" "https://$MAGIC_DNS/api/c66" "(C66 scanner endpoint)"
-    fi
-    _url_row "Tailnet IP" "http://$TAILSCALE_IP:$PORT" "(direct IP login)"
-    _url_row "RFID (IP)"  "http://$TAILSCALE_IP:$PORT/api/c66" "(hardware scanner hook)"
-    if [ "$HOSTED_MODE" != "true" ]; then
-      _url_row "Auth API"   "http://$TAILSCALE_IP:54321" "(remote supabase auth)"
+    echo -e "  ${CYAN}${BOLD}Cloudflare Edge Network (Domain & Webhooks)${NC}"
+    if [ -n "${CLOUDFLARE_URL:-}" ]; then
+      _url_row "HTTPS Domain" "${CLOUDFLARE_URL}" "(Cloudflare Edge WAF)"
+      _url_row "RFID (SSL)"    "${CLOUDFLARE_URL}/api/c66" "(C66 scanner endpoint)"
     fi
   fi
   echo
@@ -357,21 +352,20 @@ while [ $# -gt 0 ]; do
     --e2e)      RUN_E2E=true; shift ;;
     --all)      START_CMS=true; START_OVERVIEW=true; shift ;;
     --strict)   STRICT_MODE=true; shift ;;
-    --tailscale) ENABLE_TAILSCALE=true; shift ;;
+    --cloudflare|--cf) ENABLE_CLOUDFLARE=true; shift ;;
     *) shift ;;
   esac
 done
 
-TAILSCALE_ACTIVE=false
-TAILSCALE_IP=""
-MAGIC_DNS=""
+CLOUDFLARE_ACTIVE=false
+CLOUDFLARE_URL=""
 
-if [ "${ENABLE_TAILSCALE:-false}" = "true" ] || (command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1); then
-  _ts_ip=$(tailscale ip -4 2>/dev/null || echo "")
-  if [ -n "$_ts_ip" ]; then
-    TAILSCALE_ACTIVE=true
-    TAILSCALE_IP="$_ts_ip"
-    MAGIC_DNS=$(tailscale status --json 2>/dev/null | grep -oP '"Self":\s*\{\s*"DNSName":\s*"\K[^"]+' | sed 's/\.$//' || true)
+if [ "${ENABLE_CLOUDFLARE:-false}" = "true" ] || command -v cloudflared >/dev/null 2>&1; then
+  if pgrep -x cloudflared >/dev/null 2>&1; then
+    CLOUDFLARE_ACTIVE=true
+    if [ -f "$REPO_ROOT/run/cloudflared.log" ]; then
+      CLOUDFLARE_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$REPO_ROOT/run/cloudflared.log" | head -n 1 || echo "")
+    fi
   fi
 fi
 
@@ -381,8 +375,8 @@ fi
 
 banner
 
-if [ "$TAILSCALE_ACTIVE" = "true" ]; then
-  echo -e "  ${CYAN}${BOLD}🔒 Tailscale Mesh Active${NC} — $TAILSCALE_IP ${MAGIC_DNS:+(https://$MAGIC_DNS)}"
+if [ "$CLOUDFLARE_ACTIVE" = "true" ]; then
+  echo -e "  ${CYAN}${BOLD}🔒 Cloudflare Tunnel Active${NC} ${CLOUDFLARE_URL:+— $CLOUDFLARE_URL}"
   echo
 fi
 
@@ -411,17 +405,9 @@ else
   check "Global assets" "fail" "sync script missing"
 fi
 
-# Tailscale Network Serving (Reachability & HTTPS)
-if [ "$TAILSCALE_ACTIVE" = "true" ]; then
-  if [ "$HOSTED_MODE" != "true" ] && [ -f "$REPO_ROOT/scripts/ensure_reachability.py" ]; then
-    python3 "$REPO_ROOT/scripts/ensure_reachability.py" "$TAILSCALE_IP" >/dev/null 2>&1 || true
-    check "Tailnet reachability" "pass" "configured for $TAILSCALE_IP"
-  fi
-  if tailscale serve --bg "$PORT" >/dev/null 2>&1; then
-    check "Tailscale HTTPS" "pass" "https://${MAGIC_DNS:-$TAILSCALE_IP}"
-  else
-    check "Tailscale IP" "pass" "http://$TAILSCALE_IP:$PORT"
-  fi
+# Cloudflare Network Serving (Edge Tunnel & HTTPS)
+if [ "$CLOUDFLARE_ACTIVE" = "true" ]; then
+  check "Cloudflare Tunnel" "pass" "${CLOUDFLARE_URL:-active}"
 fi
 
 portal_healthy() {

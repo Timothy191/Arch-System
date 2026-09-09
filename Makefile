@@ -7,7 +7,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help outline info onboard maps-gen \
-        install dev dev-quick dev-tools dev-all dev-nx dev-tailscale dev-hosted inngest-dev \
+        install dev dev-quick dev-tools dev-all dev-nx dev-cloudflare dev-hosted inngest-dev \
         build analyze bundlesize sync-assets \
         test test-e2e test-watch test-coverage test-unit pentest \
         quality lint lint-fix lint-root lint-styles lint-spelling type-check format format-check md-lint md-fix html-check \
@@ -15,7 +15,7 @@
         mcp-sync mcp-validate tags-apply \
         db-start db-push db-gen db-reset db-seed db-backup db-restore db-docs \
         monitor monitor-grafana monitor-stop monitor-bundle watchdog \
-        deploy-local deploy-tailscale deploy-staging deploy-production deploy-rollback deploy-dashboards deploy-dashboards-stop fresh-start shutdown \
+        deploy-local deploy-cloudflare deploy-staging deploy-production deploy-rollback deploy-dashboards deploy-dashboards-stop fresh-start shutdown \
         clean clean-cache clean-docker hooks-install deps-check deps-fix deps-lint knip knip-fix ui workspace-list workspace-graph
 
 # ==============================================================================
@@ -96,8 +96,8 @@ dev-all: ## Start development server with all apps and packages
 dev-nx: ## Start Next.js portal application directly via Nx
 	pnpm dev:nx
 
-dev-tailscale: ## Start dev stack bound for Tailscale mesh network access
-	pnpm dev:tailscale
+dev-cloudflare: ## Start dev stack bound for Cloudflare Tunnel network access
+	pnpm dev:cloudflare
 
 dev-hosted: ## Start dev stack against hosted cloud backend
 	pnpm dev:hosted
@@ -299,8 +299,8 @@ watchdog: ## Launch background system health watchdog
 deploy-local: ## Deploy stack to local environment
 	pnpm deploy:local
 
-deploy-tailscale: ## Deploy and expose stack over Tailscale network
-	pnpm deploy:tailscale
+deploy-cloudflare: ## Deploy and expose stack over Cloudflare Tunnel edge network
+	pnpm deploy:cloudflare
 
 deploy-staging: ## Deploy stack to staging environment
 	pnpm deploy:staging

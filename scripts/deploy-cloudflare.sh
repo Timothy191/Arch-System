@@ -2,17 +2,16 @@
 set -euo pipefail
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Arch-Systems — Tailscale Deployment & Live Serving Orchestrator
+# Arch-Systems — Cloudflare Tunnel & Edge CDN Deployment Orchestrator
 # ─────────────────────────────────────────────────────────────────────────────
-# Turns this Linux workstation into an encrypted, private, high-performance
-# operations server accessible across your Tailscale mesh network (Tailnet).
+# Exposes Arch-System Next.js Portal and SCADA endpoints securely over your
+# custom domain via Cloudflare Edge CDN & Cloudflare Tunnels (cloudflared).
 #
 # Features:
-# - Automatic Tailscale status & IP/MagicDNS detection
-# - Instant Hot-Reload (Dev Mode) or Standalone (Production Mode)
+# - Automatic cloudflared status & ingress verification
+# - Choice of Development (TryCloudflare ad-hoc tunnel) or Production (Named Tunnel)
 # - Automatic Supabase Docker stack orchestration (Arch-Base / Arch-System)
-# - Environment reachability configuration for mobile & remote tablets
-# - Automatic HTTPS termination via Tailscale Serve
+# - Automatic HTTPS termination & DDoS protection via Cloudflare Edge WAF
 # ─────────────────────────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,6 +31,7 @@ fi
 ENV_FILE="$PORTAL_DIR/.env"
 ENV_BAK="$PORTAL_DIR/.env.bak"
 PORT="${PORT:-3000}"
+TUNNEL_CONFIG="$REPO_ROOT/infra/cloudflared/production-tunnel.yml.example"
 
 # ANSI Colors
 CLR_RESET="\033[0m"
@@ -44,56 +44,32 @@ CLR_CYAN="\033[0;36m"
 CLR_WHITE="\033[0;37m"
 CLR_BOLD="\033[1m"
 
-log() { echo -e "${CLR_GREEN}[tailscale-host]${CLR_RESET} $*"; }
+log() { echo -e "${CLR_GREEN}[cloudflare-host]${CLR_RESET} $*"; }
 info() { echo -e "${CLR_BLUE}[info]${CLR_RESET} $*"; }
 warn() { echo -e "${CLR_YELLOW}[warn]${CLR_RESET} $*"; }
 error() { echo -e "${CLR_RED}[error]${CLR_RESET} $*"; }
 fatal() { error "$*"; exit 1; }
 
 echo -e "\n${CLR_CYAN}┌────────────────────────────────────────────────────────────┐${CLR_RESET}"
-echo -e "${CLR_CYAN}│          ARCH-SYSTEMS — TAILSCALE SERVE ORCHESTRATOR       │${CLR_RESET}"
+echo -e "${CLR_CYAN}│       ARCH-SYSTEMS — CLOUDFLARE TUNNEL & EDGE ORCHESTRATOR │${CLR_RESET}"
 echo -e "${CLR_CYAN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
-echo -e "${CLR_CYAN}│${CLR_RESET} Secure, Zero-Trust WireGuard hosting for mobile & desktop. ${CLR_CYAN}│${CLR_RESET}"
-echo -e "${CLR_CYAN}│${CLR_RESET} Connects Arch-System + Arch-Base over your private Tailnet. ${CLR_CYAN}│${CLR_RESET}"
+echo -e "${CLR_CYAN}│${CLR_RESET} Encrypted Cloudflare Edge CDN hosting for domain access.   ${CLR_CYAN}│${CLR_RESET}"
+echo -e "${CLR_CYAN}│${CLR_RESET} Connects Arch-System + Arch-Base over Cloudflare WAF.      ${CLR_CYAN}│${CLR_RESET}"
 echo -e "${CLR_CYAN}└────────────────────────────────────────────────────────────┘${CLR_RESET}\n"
 
-# ── Step 1: Verify Tailscale Daemon & Network ─────────────────────────────
-info "Checking Tailscale installation..."
-if ! command -v tailscale >/dev/null 2>&1; then
-  fatal "Tailscale is not installed on this system. Install via: pacman -S tailscale"
+# ── Step 1: Verify Cloudflared Binary ─────────────────────────────────────
+info "Checking Cloudflare Tunnel daemon (cloudflared)..."
+if ! command -v cloudflared >/dev/null 2>&1; then
+  fatal "cloudflared is not installed on this system. Install via: pacman -S cloudflared"
 fi
 
-# Check if tailscaled is active
-if ! systemctl is-active --quiet tailscaled 2>/dev/null; then
-  warn "The Tailscale background daemon (tailscaled) is not running."
-  echo -e "Starting tailscaled via sudo..."
-  sudo systemctl start tailscaled || fatal "Failed to start tailscaled. Run: sudo systemctl start tailscaled"
-fi
-
-# Check Tailscale login status
-tailscale_status=$(tailscale status 2>&1 || true)
-if echo "$tailscale_status" | grep -q "Logged out"; then
-  warn "Tailscale is logged out. Please authenticate:"
-  tailscale up
-fi
-
-TAILSCALE_IP=$(tailscale ip -4 2>/dev/null || echo "")
-if [ -z "$TAILSCALE_IP" ]; then
-  fatal "Could not determine Tailscale IPv4 address. Is Tailscale connected? (Run: tailscale up)"
-fi
-
-# Determine MagicDNS domain if available
-MAGIC_DNS=$(tailscale status --json 2>/dev/null | grep -oP '"Self":\s*\{\s*"DNSName":\s*"\K[^"]+' | sed 's/\.$//' || true)
-
-info "Tailscale IPv4 detected: ${CLR_CYAN}${CLR_BOLD}$TAILSCALE_IP${CLR_RESET}"
-if [ -n "$MAGIC_DNS" ]; then
-  info "Tailscale MagicDNS detected: ${CLR_CYAN}${CLR_BOLD}$MAGIC_DNS${CLR_RESET}"
-fi
+CF_VERSION=$(cloudflared --version 2>&1 | head -n 1)
+info "Cloudflared version: ${CLR_CYAN}${CLR_BOLD}$CF_VERSION${CLR_RESET}"
 
 # ── Step 2: Choose Operation Mode ─────────────────────────────────────────
 echo -e "\n${CLR_WHITE}Choose serving mode:${CLR_RESET}"
-echo -e "  [1] ${CLR_GREEN}${CLR_BOLD}Development Mode${CLR_RESET} (Instant Hot-Reload: edits to code reflect live on devices)"
-echo -e "  [2] ${CLR_BLUE}${CLR_BOLD}Production Mode${CLR_RESET}  (Precompiled, standalone Node.js server for maximum speed)"
+echo -e "  [1] ${CLR_GREEN}${CLR_BOLD}Development Mode${CLR_RESET} (TryCloudflare ad-hoc HTTPS tunnel: instant hot-reload)"
+echo -e "  [2] ${CLR_BLUE}${CLR_BOLD}Production Mode${CLR_RESET}  (Precompiled standalone server via Production Tunnel config)"
 read -p "Select mode [1/2] (Default: 1): " mode_choice
 mode_choice=${mode_choice:-1}
 
@@ -128,12 +104,7 @@ if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
   fi
 fi
 
-# ── Step 4: Configure Reachability for Tailnet ────────────────────────────
-info "Configuring portal environment for Tailscale IP: $TAILSCALE_IP..."
-python3 "$REPO_ROOT/scripts/ensure_reachability.py" "$TAILSCALE_IP" "$anon_key" "$service_key"
-
-# ── Step 5: Clear Port & Launch Portal ─────────────────────────────────────
-# Kill any existing process on port 3000
+# ── Step 4: Clear Port & Launch Portal ─────────────────────────────────────
 stray_pids=$(ss -tunlp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K\d+' | sort -u || true)
 if [ -n "$stray_pids" ]; then
   info "Freeing port $PORT..."
@@ -159,7 +130,7 @@ else
   echo $! > "$REPO_ROOT/run/.portal.pid"
 fi
 
-# ── Step 5b: Start Arch-Base Web App ─────────────────────────
+# ── Step 5: Start Arch-Base Web App ───────────────────────────────────────
 if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
   if curl -fs "http://localhost:3001" > /dev/null 2>&1; then
     info "Arch-Base web app already running on port 3001."
@@ -196,42 +167,57 @@ else
   log "Portal health check verified (200 OK)."
 fi
 
-# ── Step 7: Configure Tailscale Serve (HTTPS) ──────────────────────────────
-info "Configuring Tailscale Serve reverse proxy..."
-if tailscale serve --bg "$PORT" >/dev/null 2>&1; then
-  log "Tailscale Serve activated on port $PORT with automatic HTTPS."
+# ── Step 7: Configure Cloudflare Tunnel (HTTPS) ───────────────────────────
+info "Configuring Cloudflare Tunnel reverse proxy..."
+
+if [ "$mode_choice" -eq 1 ]; then
+  info "Starting TryCloudflare ad-hoc tunnel for http://localhost:$PORT..."
+  cloudflared tunnel --url "http://localhost:$PORT" --no-autoupdate > "$REPO_ROOT/run/cloudflared.log" 2>&1 &
+  echo $! > "$REPO_ROOT/run/.cloudflared.pid"
+
+  CF_URL=""
+  for i in {1..15}; do
+    CF_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$REPO_ROOT/run/cloudflared.log" | head -n 1 || true)
+    if [ -n "$CF_URL" ]; then break; fi
+    sleep 1
+  done
+
+  if [ -n "$CF_URL" ]; then
+    log "TryCloudflare tunnel active: ${CLR_CYAN}${CLR_BOLD}$CF_URL${CLR_RESET}"
+  else
+    warn "Tunnel started, check logs at $REPO_ROOT/run/cloudflared.log"
+  fi
 else
-  warn "Could not configure 'tailscale serve' (may require 'sudo tailscale serve' or admin rights)."
-  info "Direct HTTP access via Tailscale IP is still fully functional."
+  info "Validating production Cloudflare Tunnel configuration..."
+  cloudflared tunnel --config "$TUNNEL_CONFIG" ingress validate
+  info "Starting named production Cloudflare Tunnel..."
+  cloudflared tunnel --config "$TUNNEL_CONFIG" run > "$REPO_ROOT/run/cloudflared.log" 2>&1 &
+  echo $! > "$REPO_ROOT/run/.cloudflared.pid"
+  log "Production Cloudflare Tunnel process started."
 fi
 
 # ── Step 8: Deployment Summary ────────────────────────────────────────────
 echo -e "\n${CLR_GREEN}┌────────────────────────────────────────────────────────────┐${CLR_RESET}"
-echo -e "${CLR_GREEN}│          ARCH-SYSTEMS IS NOW SERVING VIA TAILSCALE        │${CLR_RESET}"
+echo -e "${CLR_GREEN}│       ARCH-SYSTEMS IS NOW SERVING VIA CLOUDFLARE TUNNEL    │${CLR_RESET}"
 echo -e "${CLR_GREEN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
-if [ -n "$MAGIC_DNS" ]; then
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}HTTPS Domain (Tailnet):${CLR_RESET}                                    ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}https://${MAGIC_DNS}${CLR_RESET}                                ${CLR_GREEN}│${CLR_RESET}"
+if [ -n "${CF_URL:-}" ]; then
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}Public Cloudflare HTTPS URL:${CLR_RESET}                              ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}${CF_URL}${CLR_RESET}             ${CLR_GREEN}│${CLR_RESET}"
 echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
 fi
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}Direct Tailscale IP URL:${CLR_RESET}                                   ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}http://${TAILSCALE_IP}:${PORT}${CLR_RESET}                                  ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}Local Portal Endpoint:${CLR_RESET}                                    ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}http://localhost:${PORT}${CLR_RESET}                                     ${CLR_GREEN}│${CLR_RESET}"
 echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase API:${CLR_RESET}       http://${TAILSCALE_IP}:54321                 ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase Studio:${CLR_RESET}    http://${TAILSCALE_IP}:54323                 ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}FUXA SCADA:${CLR_RESET}         http://${TAILSCALE_IP}:1881                  ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase API:${CLR_RESET}       http://localhost:54321                    ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase Studio:${CLR_RESET}    http://localhost:54323                    ${CLR_GREEN}│${CLR_RESET}"
 echo -e "${CLR_GREEN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
 if [ "$mode_choice" -eq 1 ]; then
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_YELLOW}Mode:${CLR_RESET} ${CLR_BOLD}Development (Hot-Reloading ON)${CLR_RESET}                        ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} Code edits saved in editor will update connected devices.   ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_YELLOW}Mode:${CLR_RESET} ${CLR_BOLD}Development (TryCloudflare Tunnel + Hot Reload)${CLR_RESET}       ${CLR_GREEN}│${CLR_RESET}"
 else
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BLUE}Mode:${CLR_RESET} ${CLR_BOLD}Production Standalone${CLR_RESET}                                 ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} Optimized standalone binary running in background.          ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BLUE}Mode:${CLR_RESET} ${CLR_BOLD}Production Standalone (Named Cloudflare Tunnel)${CLR_RESET}       ${CLR_GREEN}│${CLR_RESET}"
 fi
 echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
 echo -e "${CLR_GREEN}│${CLR_RESET} To halt stack: ${CLR_YELLOW}./scripts/shutdown.sh${CLR_RESET}                       ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} To stop Tailscale serve: ${CLR_YELLOW}tailscale serve reset${CLR_RESET}             ${CLR_GREEN}│${CLR_RESET}"
 echo -e "${CLR_GREEN}└────────────────────────────────────────────────────────────┘${CLR_RESET}\n"
 
-log "Tailscale deployment sequence completed successfully."
-
+log "Cloudflare deployment sequence completed successfully."
