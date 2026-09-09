@@ -13,11 +13,10 @@ ingress:
       noTLSVerify: false
       keepAliveTimeout: 90s
       http2Origin: true
-      webSocket: true
 
   # Route 2: SCADA Telematics REST & OPC-UA Proxy Endpoint
   - hostname: fuxa-api.production-mining.com
-    service: http://10.0.4.12:8088/api
+    service: http://10.0.4.12:8088
     originRequest:
       connectTimeout: 15s
       keepAliveConnections: 100
