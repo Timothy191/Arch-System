@@ -11,23 +11,19 @@ const buttonVariants = cva(
       variant: {
         // Geist core variants
         default:
-          "bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200 shadow-xs border border-transparent",
+          "bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs border border-transparent",
         secondary:
-          "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200/80 dark:hover:bg-neutral-700/80 shadow-2xs",
+          "bg-neutral-100 text-neutral-900 border border-neutral-200 hover:bg-neutral-200/80 shadow-2xs",
         tertiary:
-          "bg-transparent text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100 border border-transparent",
-        error:
-          "bg-red-600 text-white hover:bg-red-700 border border-transparent shadow-xs dark:bg-red-600 dark:hover:bg-red-700",
-        warning:
-          "bg-amber-500 text-black hover:bg-amber-600 border border-transparent shadow-xs dark:bg-amber-400 dark:hover:bg-amber-500",
+          "bg-transparent text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 border border-transparent",
+        error: "bg-red-600 text-white hover:bg-red-700 border border-transparent shadow-xs",
+        warning: "bg-amber-500 text-black hover:bg-amber-600 border border-transparent shadow-xs",
 
         // Shadcn backward-compatible
         destructive: "bg-red-600 text-white hover:bg-red-700 shadow-xs border border-transparent",
-        outline:
-          "border border-neutral-200 dark:border-neutral-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100",
-        ghost:
-          "bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-transparent",
-        link: "text-neutral-900 dark:text-neutral-100 underline-offset-4 hover:underline border border-transparent bg-transparent",
+        outline: "border border-neutral-200 bg-transparent hover:bg-neutral-100 text-neutral-900",
+        ghost: "bg-transparent hover:bg-neutral-100 text-neutral-900 border border-transparent",
+        link: "text-neutral-900 underline-offset-4 hover:underline border border-transparent bg-transparent",
       },
       size: {
         // Geist sizes
@@ -52,7 +48,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "medium",
     },
-  }
+  },
 );
 
 export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
@@ -94,7 +90,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Resolve variant: if `variant` is provided, use it; otherwise check if `type` was passed as a variant name
     let resolvedVariant: ButtonVariant = variant ?? "default";
@@ -138,7 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className
+          className,
         )}
         {...props}
       >
@@ -156,7 +152,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </Comp>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";
@@ -190,7 +186,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <a
@@ -199,7 +195,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
           buttonVariants({ variant, size, shape }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className
+          className,
         )}
         {...props}
       >
@@ -216,7 +212,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
         )}
       </a>
     );
-  }
+  },
 );
 
 ButtonLink.displayName = "ButtonLink";
@@ -254,14 +250,14 @@ export const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProp
           hover?.background && `hover:bg-[${hover.background}]`,
           hover?.foreground && `hover:text-[${hover.foreground}]`,
           hover?.border && `hover:border-[${hover.border}]`,
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </Button>
     );
-  }
+  },
 );
 
 CustomButton.displayName = "CustomButton";

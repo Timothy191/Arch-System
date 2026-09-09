@@ -79,6 +79,7 @@
   "packageManager": "pnpm@9.15.9",
   "private": true,
   "scripts": {
+    "agent:swarm": "node tools/run-swarm.cjs",
     "analyze": "ANALYZE=true pnpm --filter portal build",
     "bundlesize": "node tools/check-bundle-size.cjs",
     "audit:suite": "node tools/run-audit.cjs",

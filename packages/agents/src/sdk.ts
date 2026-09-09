@@ -10,6 +10,7 @@ import {
   type Subtask,
   type TaskRunResult,
 } from "./coordinator.js";
+import { AgentFleetRunner, type AgentSwarmReport } from "./fleet-runner.js";
 import { AgentPillarEnvelope, type AgentPillarConfig } from "./prompt-envelope.js";
 import { QualityGate, type QualityAuditResult } from "./quality-gate.js";
 import {
@@ -18,8 +19,14 @@ import {
   type ReflectionEngineOptions,
 } from "./reflection-engine.js";
 
-export { AgentPillarEnvelope, QualityGate, ReflectionEngine };
-export type { AgentPillarConfig, QualityAuditResult, VerifiedTaskResult, ReflectionEngineOptions };
+export { AgentFleetRunner, AgentPillarEnvelope, QualityGate, ReflectionEngine };
+export type {
+  AgentSwarmReport,
+  AgentPillarConfig,
+  QualityAuditResult,
+  VerifiedTaskResult,
+  ReflectionEngineOptions,
+};
 
 export interface AgentSDKOptions {
   coordinatorConfig?: CoordinatorConfig;
@@ -57,6 +64,13 @@ export class AgentQualitySDK {
    */
   public buildPillarPrompt(config: AgentPillarConfig, extraContext?: string): string {
     return AgentPillarEnvelope.compileSystemPrompt(config, extraContext);
+  }
+
+  /**
+   * Executes multi-agent swarm audit across file payloads.
+   */
+  public runSwarmAudit(files: Array<{ filePath: string; content: string }>): AgentSwarmReport {
+    return AgentFleetRunner.runSwarmAudit(files);
   }
 
   /**
