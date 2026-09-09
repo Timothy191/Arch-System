@@ -1,12 +1,14 @@
 # Living Agentic System Wiki
 
 ## Overview
+
 The **Agentic System Wiki** defines the protocols, governance models, tool integrations, and execution contracts for autonomous AI agents operating within the Arch-Systems monorepo.
 
 ---
 
 ## Agentic System Directory
 
+- **[Agent Output Quality SDK & Framework](./agent-quality-sdk.md)**: 9 Core Agent Setup Pillars, automated `QualityGate` output auditing, and `ReflectionEngine` self-remediation loop.
 - **[Multi-Agent Protocols & 4-Agent Critique Council](./multi-agent-protocols.md)**: 100-Point scoring model, 98% quality threshold, sequential thinking protocols, and atomic handovers.
 - **[Specialist Agent Personas & Focus Areas](./specialist-agent-personas.md)**: Roster of 8 technical specialist agent roles, narrowing constraints, and domain boundaries.
 - **[MCP Tool Integration Contracts](./mcp-tool-contracts.md)**: Model Context Protocol definitions, eager vs lazy tool routing, DevTools, Postgres, Redis, and Memory MCP servers.
