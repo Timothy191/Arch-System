@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 
 async function getDashboardCounts(
   today: string,
-  cookieList: Array<{ name: string; value: string }>
+  cookieList: Array<{ name: string; value: string }>,
 ) {
   return cachedRSC(
     ["hub", "counts", today],
@@ -65,13 +65,13 @@ async function getDashboardCounts(
           category: CacheCategory.METRICS,
           keyParts: ["hub", "counts", today],
           tags: ["table:breakdowns", "table:machines"],
-        }
+        },
       );
     },
     {
       revalidate: 300,
       tags: ["table:breakdowns", "table:machines"],
-    }
+    },
   );
 }
 
@@ -90,7 +90,7 @@ const FALLBACK_TREND_DATA: TrendDataPoint[] = [
 ];
 
 async function getProductionTrendData(
-  cookieList: Array<{ name: string; value: string }>
+  cookieList: Array<{ name: string; value: string }>,
 ): Promise<ProductionTrendResult> {
   return cachedRSC(
     ["hub", "production-trend"],
@@ -137,19 +137,19 @@ async function getProductionTrendData(
           category: CacheCategory.METRICS,
           keyParts: ["hub", "production-trend"],
           tags: ["table:hourly_loads", "table:machines"],
-        }
+        },
       );
     },
     {
       revalidate: 300,
       tags: ["table:hourly_loads", "table:machines"],
-    }
+    },
   );
 }
 
 async function getRecentAlertEvents(
   today: string,
-  cookieList: Array<{ name: string; value: string }>
+  cookieList: Array<{ name: string; value: string }>,
 ): Promise<AlertEvent[]> {
   return cachedRSC(
     ["hub", "alerts", today],
@@ -194,13 +194,13 @@ async function getRecentAlertEvents(
           category: CacheCategory.METRICS,
           keyParts: ["hub", "alerts", today],
           tags: ["table:breakdowns"],
-        }
+        },
       );
     },
     {
       revalidate: 300,
       tags: ["table:breakdowns"],
-    }
+    },
   );
 }
 
@@ -209,7 +209,7 @@ async function getRecentAlertEvents(
 
 async function getLiveDepartmentMetrics(
   today: string,
-  cookieList: Array<{ name: string; value: string }>
+  cookieList: Array<{ name: string; value: string }>,
 ): Promise<DepartmentLiveMetricsMap> {
   return cachedRSC(
     ["hub", "live-department-metrics", today],
@@ -230,7 +230,7 @@ async function getLiveDepartmentMetrics(
             "table:breakdowns",
             "table:machines",
           ],
-        }
+        },
       );
     },
     {
@@ -243,7 +243,7 @@ async function getLiveDepartmentMetrics(
         "table:breakdowns",
         "table:machines",
       ],
-    }
+    },
   );
 }
 
@@ -251,7 +251,7 @@ export default async function HubPage() {
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 
-  if (!user || !user.id) {
+  if (!user?.id) {
     redirect("/login");
   }
 

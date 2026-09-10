@@ -1,8 +1,8 @@
-import { createRequire } from "module";
-import { fileURLToPath } from "url";
-import path from "path";
-import { withSentryConfig } from "@sentry/nextjs";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const require = createRequire(import.meta.url);
 const { version: PORTAL_VERSION } = require("./package.json");
@@ -131,7 +131,7 @@ const nextConfig = {
       "@radix-ui/react-popover",
     ],
     // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
-    inlineCss: true,
+    inlineCss: false,
     // AGENT-TRACE: Injects detailed attribution info (elements, network events) into useReportWebVitals
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
   },

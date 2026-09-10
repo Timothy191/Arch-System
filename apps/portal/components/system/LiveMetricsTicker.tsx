@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import React from "react";
 import { useSystemMetrics } from "@/hooks/useSystemMetrics";
 
 interface LiveMetricsTickerProps {
@@ -22,7 +21,7 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
       data-testid="live-metrics-ticker"
       className={cn(
         "flex items-center gap-2 font-mono text-[10px] tracking-wider text-black/45 select-none",
-        className
+        className,
       )}
     >
       <div className="flex items-center gap-1">
@@ -30,7 +29,7 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
           data-testid="pulsing-indicator"
           className={cn(
             "w-1.5 h-1.5 rounded-full animate-pulse",
-            online ? "bg-emerald-500" : "bg-rose-500"
+            online ? "bg-emerald-500" : "bg-rose-500",
           )}
         />
         <span className="font-semibold">{online ? "SYS_OK" : "SYS_OFF"}</span>

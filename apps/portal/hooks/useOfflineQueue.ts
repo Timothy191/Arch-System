@@ -78,7 +78,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             } else {
               failCount++;
             }
-          } catch (e) {
+          } catch (_e) {
             failCount++;
           }
         }
@@ -95,8 +95,8 @@ export const useOfflineQueue = create<OfflineQueueState>()(
     }),
     {
       name: "arch-offline-queue",
-    }
-  )
+    },
+  ),
 );
 
 // We need a way to initialize the listeners

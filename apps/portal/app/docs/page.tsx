@@ -28,7 +28,7 @@ const DOCUMENTATION_VOLUMES = [
     title: "Arch Architecture Manual",
     subtitle: "Enterprise Topology",
     description:
-      "Comprehensive system diagrams, Nx 22 monorepo topology, Next.js 16 app router specifications, and reactive state trees.",
+      "Comprehensive system diagrams, Turborepo 2.x monorepo topology, Next.js 16 app router specifications, and reactive state trees.",
     variant: "stripe" as const,
     color: "#006fee",
     textColor: "#ffffff",

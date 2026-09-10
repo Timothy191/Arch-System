@@ -1,6 +1,5 @@
 import { Pagination } from "@repo/ui/Pagination";
 import { fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
 import "@testing-library/jest-dom";
 
 describe("Pagination Component", () => {
@@ -13,13 +12,13 @@ describe("Pagination Component", () => {
         onPageChange={handlePageChange}
         pageSize={10}
         totalCount={45}
-      />
+      />,
     );
 
     expect(
-      screen.getByText((content, element) => {
+      screen.getByText((_content, element) => {
         return element?.textContent === "Showing 11 to 20 of 45 entries";
-      })
+      }),
     ).toBeInTheDocument();
     expect(screen.getByText("2")).toHaveClass("bg-[var(--accent-blue)]");
   });
@@ -33,7 +32,7 @@ describe("Pagination Component", () => {
         onPageChange={handlePageChange}
         pageSize={10}
         totalCount={45}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByText("3"));
@@ -48,7 +47,7 @@ describe("Pagination Component", () => {
         onPageChange={jest.fn()}
         pageSize={10}
         totalCount={45}
-      />
+      />,
     );
 
     const prevBtn = screen.getByRole("button", { name: /Previous page/i });
@@ -63,7 +62,7 @@ describe("Pagination Component", () => {
         onPageChange={jest.fn()}
         pageSize={10}
         totalCount={45}
-      />
+      />,
     );
 
     const nextBtn = screen.getByRole("button", { name: /Next page/i });
@@ -80,7 +79,7 @@ describe("Pagination Component", () => {
         pageSize={10}
         onPageSizeChange={handlePageSizeChange}
         totalCount={45}
-      />
+      />,
     );
 
     const select = screen.getByLabelText(/Show/i);

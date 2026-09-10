@@ -29,7 +29,7 @@ export function PDFDownloadButton({ reportData, departmentId }: PDFDownloadButto
       } else {
         toast.error("Failed to generate PDF report.");
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error("An error occurred while generating the PDF.");
     } finally {
       setLoading(false);

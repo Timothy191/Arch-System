@@ -115,7 +115,7 @@ async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
           count: 1,
           firstAttempt: now,
         }),
-        { EX: 15 * 60 }
+        { EX: 15 * 60 },
       );
     }
   } catch (error) {
@@ -128,7 +128,7 @@ async function validateShiftData(
   supabase: SupabaseClient,
   departmentId: string,
   date: string,
-  shiftType: "day" | "night"
+  shiftType: "day" | "night",
 ): Promise<string[]> {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift validation
   return withAsyncSpan(
@@ -159,7 +159,7 @@ async function validateShiftData(
         departmentId,
         null,
         date,
-        shiftType
+        shiftType,
       );
 
       setAttributes({ machine_count: completeness.statuses.length });
@@ -216,13 +216,13 @@ async function validateShiftData(
         const machine = machineMap.get(machineId);
         if (machine && loads.total_loads && completeness.statuses) {
           const status = completeness.statuses.find((s) => s.machineId === machineId);
-          if (status && status.hoursWorked) {
+          if (status?.hoursWorked) {
             const consistencyErrors = validateShiftDataIntegrity(
               machineId,
               status.hoursWorked,
               loads.total_loads,
               machine.bin_factor,
-              shiftType
+              shiftType,
             );
             errors.push(...consistencyErrors.map((e) => `Machine '${machine.name}': ${e.message}`));
           }
@@ -236,7 +236,7 @@ async function validateShiftData(
       });
 
       return errors;
-    }
+    },
   );
 }
 
@@ -350,7 +350,7 @@ export async function closeShift(
   approvedById: string,
   pin: string,
   validateOnly: boolean = false,
-  departmentSlug?: string
+  departmentSlug?: string,
 ) {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift closeout
   return withAsyncSpan(
@@ -423,7 +423,7 @@ export async function closeShift(
         .eq("id", approvedById)
         .single();
 
-      if (!approver || !approver.pin_hash) {
+      if (!approver?.pin_hash) {
         return {
           success: false,
           errors: ["Approving supervisor not found or has no PIN set"],
@@ -480,6 +480,6 @@ export async function closeShift(
       }
 
       return { success: true, shiftStatusId: inserted.id };
-    }
+    },
   );
 }

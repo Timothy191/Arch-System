@@ -52,7 +52,7 @@ export function LCPObserver() {
       const entries = entryList.getEntries();
       const lastEntry = entries[entries.length - 1];
       const entry = lastEntry as any;
-      if (!entry || !entry.element) return;
+      if (!entry?.element) return;
 
       const element = entry.element;
 
@@ -113,7 +113,7 @@ export function LCPObserver() {
     observer.observe({ type: "largest-contentful-paint", buffered: true });
 
     return () => observer.disconnect();
-  }, []);
+  }, [highlightLCPElement]);
 
   // Visual highlight for LCP element (development only)
   function highlightLCPElement(element: Element) {

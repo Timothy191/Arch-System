@@ -1,5 +1,4 @@
 import { act, render, screen } from "@testing-library/react";
-import React from "react";
 import { Announcer, LiveRegion } from "../LiveRegion";
 
 describe("LiveRegion", () => {
@@ -7,7 +6,7 @@ describe("LiveRegion", () => {
     render(
       <LiveRegion live="polite" atomic>
         <span>Test content</span>
-      </LiveRegion>
+      </LiveRegion>,
     );
 
     const region = screen.getByText("Test content").parentElement;
@@ -20,7 +19,7 @@ describe("LiveRegion", () => {
     render(
       <LiveRegion live="assertive">
         <span>Important message</span>
-      </LiveRegion>
+      </LiveRegion>,
     );
 
     const region = screen.getByText("Important message").parentElement;

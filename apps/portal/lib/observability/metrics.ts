@@ -167,7 +167,7 @@ export async function getMetrics(): Promise<string> {
   try {
     const stats = await getCacheStats();
     xFetchTriggersTotal.set(stats.xFetchTriggers || 0);
-  } catch (e) {
+  } catch (_e) {
     // Ignore error
   }
 

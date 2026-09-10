@@ -42,7 +42,7 @@ export function detectContentType(text: string): ContentType {
   ];
 
   const codeScore = codeIndicators.filter((r) =>
-    typeof r === "boolean" ? r : r.test(text)
+    typeof r === "boolean" ? r : r.test(text),
   ).length;
 
   if (codeScore >= 2) return "code";
@@ -333,7 +333,7 @@ export function mergeSmallChunks(chunks: Chunk[], maxTokens = 512): Chunk[] {
     if (!current) {
       current = { ...chunk };
     } else if (current.text.length + chunk.text.length + 2 <= maxChars) {
-      current.text += "\n\n" + chunk.text;
+      current.text += `\n\n${chunk.text}`;
       current.endChar = chunk.endChar;
       current.tokenEstimate = Math.ceil(current.text.length / CHARS_PER_TOKEN);
     } else {

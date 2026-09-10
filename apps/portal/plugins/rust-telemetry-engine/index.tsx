@@ -1,7 +1,7 @@
 "use client";
 
 import { APIError } from "@repo/errors";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ArchPlugin } from "@/lib/plugins/types";
 
 // Types matching our Rust binary JSON output contract
@@ -14,13 +14,13 @@ interface RustTelemetryData {
   isNative?: boolean;
 }
 
+// Sensor telemetry inputs (simulated)
+const DEFAULT_SENSORS = { hours: 220.0, temp: 72.5, rpm: 1150.0 };
+
 // React UI Dashboard component
 function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: string }) {
   const [data, setData] = useState<RustTelemetryData | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Sensor telemetry inputs (simulated)
-  const sensors = { hours: 220.0, temp: 72.5, rpm: 1150.0 };
 
   useEffect(() => {
     async function fetchRustTelemetry() {
@@ -28,7 +28,7 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
         const response = await fetch("/api/plugins/rust-telemetry", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(sensors),
+          body: JSON.stringify(DEFAULT_SENSORS),
         });
 
         if (response.ok) {

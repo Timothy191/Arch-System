@@ -93,7 +93,7 @@ function redirectWithError(request: NextRequest, error: string, clientResponse?:
   const url = new URL("/", request.url);
   url.searchParams.set("error", error);
   const res = NextResponse.redirect(url);
-  if (clientResponse && clientResponse.cookies) {
+  if (clientResponse?.cookies) {
     clientResponse.cookies.getAll().forEach((cookie) => {
       res.cookies.set(cookie.name, cookie.value, {
         path: cookie.path,
@@ -111,7 +111,7 @@ function redirectWithError(request: NextRequest, error: string, clientResponse?:
 
 async function resolveDeptUuid(
   supabase: Awaited<ReturnType<typeof createMiddlewareClient>>["supabase"],
-  slug: string
+  slug: string,
 ): Promise<string | null> {
   const cacheKey = `dept:uuid:${slug}`;
   const cached = await cacheGet<string>(cacheKey);
@@ -176,7 +176,7 @@ export async function proxy(request: NextRequest) {
       request.cookies.has("sb-access-token") ||
       [...request.cookies.getAll()].some(
         (c) =>
-          (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token")
+          (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
       );
 
     if (!hasSession) {
@@ -221,7 +221,7 @@ export async function proxy(request: NextRequest) {
           ? redirectParam
           : "/hub";
       const redirectRes = NextResponse.redirect(new URL(target, request.url));
-      if (client.response && client.response.cookies) {
+      if (client.response?.cookies) {
         client.response.cookies.getAll().forEach((cookie) => {
           redirectRes.cookies.set(cookie.name, cookie.value, {
             path: cookie.path,
@@ -248,7 +248,7 @@ export async function proxy(request: NextRequest) {
   const hasSessionCookie =
     request.cookies.has("sb-access-token") ||
     [...request.cookies.getAll()].some(
-      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token")
+      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
     );
 
   if (!hasSessionCookie) {
@@ -291,7 +291,7 @@ export async function proxy(request: NextRequest) {
     }
     const redirectResponse = NextResponse.redirect(redirectUrl);
     // Copy cookies from client.response to the redirectResponse
-    if (client.response && client.response.cookies) {
+    if (client.response?.cookies) {
       client.response.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value, {
           path: cookie.path,

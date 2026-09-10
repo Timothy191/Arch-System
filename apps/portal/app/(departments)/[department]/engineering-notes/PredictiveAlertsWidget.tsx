@@ -27,7 +27,7 @@ export function PredictiveAlertsWidget() {
           const data = await res.json();
           setPredictions(data.predictions || []);
         }
-      } catch (err) {
+      } catch (_err) {
         // Silently handle error or report to telemetry
       } finally {
         setLoading(false);

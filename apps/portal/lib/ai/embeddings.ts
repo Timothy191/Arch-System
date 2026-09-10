@@ -1,5 +1,5 @@
+import crypto from "node:crypto";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import crypto from "crypto";
 import { APIError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
 
@@ -105,7 +105,7 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
 async function _saveDbCachedEmbedding(
   hash: string,
   userId: string,
-  vector: number[]
+  vector: number[],
 ): Promise<void> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -172,7 +172,7 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
  */
 export async function batchGenerateEmbeddings(
   texts: string[],
-  userId: string
+  userId: string,
 ): Promise<number[][]> {
   if (texts.length === 0) return [];
 
@@ -246,7 +246,7 @@ export async function batchGenerateEmbeddings(
       {
         statusCode: 503,
         context: { userId, missingIndices, reason: "generation_disabled" },
-      }
+      },
     );
   }
 

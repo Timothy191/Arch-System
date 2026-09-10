@@ -222,7 +222,7 @@ describe("chunkText – conversation with long message", () => {
 
   it("hard-splits a sentence that alone exceeds maxChunkSize", () => {
     // A single sentence longer than maxChars so hard-split triggers
-    const hugeSentence = "x".repeat(300) + ". The end";
+    const hugeSentence = `${"x".repeat(300)}. The end`;
     const result = chunkText(hugeSentence, {
       contentType: "conversation",
       maxChunkSize: 16,
@@ -275,7 +275,7 @@ describe("chunkText – document sentence boundary", () => {
 describe("chunkText – code with large function", () => {
   it("uses splitByLines when a code block exceeds maxChars", () => {
     // Build code with multiple function boundaries but each is huge
-    const bigFn = `export function bigFunc() {\n` + "  const x = 1;\n".repeat(50) + `}\n\n`;
+    const bigFn = `export function bigFunc() {\n${"  const x = 1;\n".repeat(50)}}\n\n`;
     const code = bigFn.repeat(3);
     const result = chunkText(code, { contentType: "code", maxChunkSize: 16 });
     expect(result.length).toBeGreaterThan(1);
@@ -293,7 +293,7 @@ describe("chunkText – code with large function", () => {
 
   it("handles a single line longer than maxChars via hard-split", () => {
     // Single very long line so the while loop in splitByLines triggers
-    const veryLongLine = "a".repeat(500) + " = 1;";
+    const veryLongLine = `${"a".repeat(500)} = 1;`;
     const result = chunkText(veryLongLine, {
       contentType: "code",
       maxChunkSize: 16,

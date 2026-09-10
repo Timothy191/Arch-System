@@ -1,11 +1,11 @@
 "use server";
 
+import { exec } from "node:child_process";
+import os from "node:os";
+import path from "node:path";
+import { promisify } from "node:util";
 import { renderToFile } from "@react-pdf/renderer";
-import { exec } from "child_process";
-import os from "os";
-import path from "path";
 import React from "react";
-import { promisify } from "util";
 import { CardDocument } from "./card-actions/card-pdf";
 
 const execAsync = promisify(exec);
@@ -46,7 +46,7 @@ export async function submitPrintJob(spec: CardPrintSpec) {
       // eslint-disable-next-line no-console
       console.warn(
         "CUPS 'lp' command failed or not found, falling back to mock success. Error:",
-        e
+        e,
       );
     }
 

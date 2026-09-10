@@ -8,7 +8,6 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import StatusBadge, { type AccessStatus } from "@/features/access-control/components/StatusBadge";
 
 interface ActivityEntry {

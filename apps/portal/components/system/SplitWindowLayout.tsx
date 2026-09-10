@@ -111,7 +111,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
           "transition-all duration-300 ease-glass transform",
           isOpen
             ? "translate-x-0 opacity-100 pointer-events-auto"
-            : "translate-x-full opacity-0 pointer-events-none"
+            : "translate-x-full opacity-0 pointer-events-none",
         )}
       >
         {/* Tab Bar & Split Controls */}
@@ -131,7 +131,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                     "transition-colors select-none whitespace-nowrap",
                     isActive
                       ? "bg-white border border-black/[0.08] shadow-card text-[var(--text-heading)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-black/[0.03]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-black/[0.03]",
                   )}
                 >
                   <button
@@ -169,7 +169,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "50"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Split 50% in half"
               >
@@ -183,7 +183,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "70"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Wide Split (70%)"
               >
@@ -197,7 +197,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "35"
                     ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Compact Sidebar (35%)"
               >
@@ -289,7 +289,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "code"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]"
+              : "border-transparent hover:text-[var(--text-secondary)]",
           )}
         >
           Commits
@@ -301,7 +301,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "pulls"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]"
+              : "border-transparent hover:text-[var(--text-secondary)]",
           )}
         >
           Pull Requests (1)
@@ -313,7 +313,7 @@ function GitHubMockView() {
             "pb-2 px-3 border-b-2 transition-all",
             tab === "issues"
               ? "border-[var(--accent-blue)] text-[var(--accent-blue)]"
-              : "border-transparent hover:text-[var(--text-secondary)]"
+              : "border-transparent hover:text-[var(--text-secondary)]",
           )}
         >
           Issues (2)
@@ -463,7 +463,7 @@ function WhatsAppWebView() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView?.({ behavior: "smooth" });
-  }, [messages]);
+  }, []);
 
   const handleSendMessage = (textToSend?: string) => {
     const content = (textToSend || inputText).trim();
@@ -493,7 +493,7 @@ function WhatsAppWebView() {
   };
 
   const filteredMessages = messages.filter(
-    (m) => m.channel === selectedChannel || m.channel === "all"
+    (m) => m.channel === selectedChannel || m.channel === "all",
   );
   const currentChannelObj = CHANNELS.find((c) => c.id === selectedChannel);
 
@@ -535,7 +535,7 @@ function WhatsAppWebView() {
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
                 activeTab === "chat"
                   ? "bg-white text-emerald-800 shadow-sm"
-                  : "text-emerald-200 hover:text-white"
+                  : "text-emerald-200 hover:text-white",
               )}
             >
               <MessageSquare className="w-3 h-3" />
@@ -548,7 +548,7 @@ function WhatsAppWebView() {
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
                 activeTab === "link"
                   ? "bg-white text-emerald-800 shadow-sm"
-                  : "text-emerald-200 hover:text-white"
+                  : "text-emerald-200 hover:text-white",
               )}
             >
               <QrCode className="w-3 h-3" />
@@ -572,7 +572,7 @@ function WhatsAppWebView() {
                   "px-2 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 shrink-0",
                   selectedChannel === ch.id
                     ? "bg-[#008069] text-white shadow-sm font-semibold"
-                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80"
+                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80",
                 )}
               >
                 <span>{ch.icon}</span>
@@ -601,7 +601,7 @@ function WhatsAppWebView() {
                 key={msg.id}
                 className={cn(
                   "flex items-end gap-1.5 max-w-[85%]",
-                  msg.isSelf ? "ml-auto flex-row-reverse" : "mr-auto"
+                  msg.isSelf ? "ml-auto flex-row-reverse" : "mr-auto",
                 )}
               >
                 {!msg.isSelf && (
@@ -614,7 +614,7 @@ function WhatsAppWebView() {
                     "px-3 py-2 rounded-2xl shadow-sm text-[12.5px] leading-relaxed relative",
                     msg.isSelf
                       ? "bg-[#d9fdd3] text-slate-800 rounded-tr-none border border-emerald-200/40"
-                      : "bg-white text-slate-800 rounded-tl-none border border-slate-200/60"
+                      : "bg-white text-slate-800 rounded-tl-none border border-slate-200/60",
                   )}
                 >
                   {!msg.isSelf && (
@@ -627,7 +627,7 @@ function WhatsAppWebView() {
                       <CheckCheck
                         className={cn(
                           "w-3 h-3",
-                          msg.status === "read" ? "text-sky-500" : "text-slate-400"
+                          msg.status === "read" ? "text-sky-500" : "text-slate-400",
                         )}
                       />
                     )}
@@ -663,7 +663,7 @@ function WhatsAppWebView() {
               type="button"
               onClick={() =>
                 handleSendMessage(
-                  "🛡️ Security Alert: Contractor badge verification required at Boom A"
+                  "🛡️ Security Alert: Contractor badge verification required at Boom A",
                 )
               }
               className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
@@ -709,7 +709,7 @@ function WhatsAppWebView() {
                 "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
                 inputText.trim()
                   ? "bg-[#008069] text-white shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-slate-200 text-slate-400 cursor-not-allowed",
               )}
               title="Send Message"
             >

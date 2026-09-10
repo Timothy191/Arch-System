@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/compo
 import { Input } from "@repo/ui/components/ui/input";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Edit2, Search, Trash2, UserPlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 
 interface Employee {
@@ -31,11 +31,7 @@ export function UsersTab() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const supabase = createBrowserSupabaseClient();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const [empData, deptData] = await Promise.all([
       supabase
         .from("employees")
@@ -47,7 +43,11 @@ export function UsersTab() {
     if (empData.data) setEmployees(empData.data);
     if (deptData.data) setDepartments(deptData.data);
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleEdit = (employee: Employee) => {
     setEditingEmployee(employee);
@@ -83,7 +83,7 @@ export function UsersTab() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
@@ -251,7 +251,7 @@ function EditEmployeeForm({
   const [role, setRole] = useState(employee?.role || "operator");
   const [departmentId, setDepartmentId] = useState(employee?.department_id || "");
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
-    employee?.accessible_departments || []
+    employee?.accessible_departments || [],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -265,7 +265,7 @@ function EditEmployeeForm({
 
   const toggleAccessibleDept = (deptId: string) => {
     setAccessibleDepts((prev) =>
-      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId]
+      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId],
     );
   };
 

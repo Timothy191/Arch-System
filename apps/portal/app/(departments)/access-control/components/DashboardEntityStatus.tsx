@@ -1,5 +1,4 @@
 import { Car, ChevronRight, type LucideIcon, Users, Wrench } from "lucide-react";
-import React from "react";
 
 interface EntityRow {
   type: string;

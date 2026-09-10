@@ -261,7 +261,7 @@ async function assertAdmin() {
     .select("id, role")
     .eq("auth_id", user.id)
     .single();
-  if (!employee || employee.role !== "admin") {
+  if (employee?.role !== "admin") {
     return { error: "Forbidden", status: 403 } as const;
   }
   return { employee, user };
@@ -269,7 +269,7 @@ async function assertAdmin() {
 
 async function handleGetRequest(
   _request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -283,8 +283,8 @@ async function handleGetRequest(
   }
 
   const { searchParams } = _request.nextUrl;
-  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 200);
-  const offset = parseInt(searchParams.get("offset") ?? "0");
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50", 10), 200);
+  const offset = parseInt(searchParams.get("offset") ?? "0", 10);
   const orderBy = searchParams.get("order_by") ?? "created_at";
   const orderDir = searchParams.get("order_dir") === "asc" ? "asc" : "desc";
 
@@ -306,14 +306,14 @@ async function handleGetRequest(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   return withRateLimit(request, () => handleGetRequest(request, { params }));
 }
 
 async function handlePutRequest(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -344,7 +344,7 @@ async function handlePutRequest(
             error: "Too many status updates for this machine. Please try again later.",
             retryAfter: rateLimitResult.retryAfter,
           },
-          { status: 429 }
+          { status: 429 },
         );
       }
     }
@@ -374,14 +374,14 @@ async function handlePutRequest(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   return withRateLimit(request, () => handlePutRequest(request, { params }));
 }
 
 async function handleDeleteRequest(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) {
@@ -423,7 +423,7 @@ async function handleDeleteRequest(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ table: string }> }
+  { params }: { params: Promise<{ table: string }> },
 ) {
   return withRateLimit(request, () => handleDeleteRequest(request, { params }));
 }

@@ -63,7 +63,7 @@ describe("withRateLimit", () => {
         makeRequest("http://localhost/api/ai/chat", {
           "x-forwarded-for": "10.0.0.1",
         }),
-        handler
+        handler,
       );
     }
 
@@ -91,7 +91,7 @@ describe("withRateLimit", () => {
         "x-forwarded-for": "10.0.0.2",
       }),
       handler,
-      { customLimit }
+      { customLimit },
     );
 
     expect(res.status).toBe(429);
@@ -144,7 +144,7 @@ describe("withRateLimit", () => {
 
   it("halves request limits when system is under high load", async () => {
     process.env.ENABLE_LOAD_ADAPTIVE_TEST = "true";
-    const os = require("os");
+    const os = require("node:os");
     const originalLoadavg = os.loadavg;
     const originalCpus = os.cpus;
 

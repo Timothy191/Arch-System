@@ -85,7 +85,7 @@ class PluginOrchestrator {
    */
   public async executeEngine(
     pluginId: string,
-    params?: Record<string, any>
+    params?: Record<string, any>,
   ): Promise<Record<string, any>> {
     // Find plugin from XState context
     const snapshot = this.actor.getSnapshot();
@@ -109,7 +109,7 @@ class PluginOrchestrator {
     const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
       .plugin;
 
-    if (!plugin || !plugin.engine || !plugin.engine.execute) {
+    if (!plugin?.engine?.execute) {
       throw new NotFoundError(`Plugin [${pluginId}] has no executable engine.`, {
         resource: "plugin_engine",
         id: pluginId,
@@ -154,7 +154,7 @@ class PluginOrchestrator {
     }
 
     const hookPromises = plugins
-      .filter((plugin) => plugin.hooks && plugin.hooks[hookName])
+      .filter((plugin) => plugin.hooks?.[hookName])
       .map(async (plugin) => {
         try {
           const hookFn = plugin.hooks![hookName];
@@ -191,7 +191,7 @@ class PluginOrchestrator {
       const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
         .plugin;
 
-      if (plugin && plugin.widgets && plugin.widgets.length > 0) {
+      if (plugin?.widgets && plugin.widgets.length > 0) {
         widgets.push(...plugin.widgets);
       }
     }

@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 export type AccessStatus =
   | "Granted"
   | "Denied"
@@ -77,7 +75,7 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
-  const config = statusConfig[status] ?? statusConfig["Draft"];
+  const config = statusConfig[status] ?? statusConfig.Draft;
   const sizeClass = size === "sm" ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1";
   return (
     <span

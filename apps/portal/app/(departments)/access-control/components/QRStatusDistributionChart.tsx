@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { RadialBar, RadialBarChart, ResponsiveContainer, Tooltip } from "recharts";
 
 interface QRStatusDistributionChartProps {

@@ -135,7 +135,7 @@ Exposing Prometheus metrics without authentication can leak operational statisti
 - Updated `CardActionsTab.tsx` to invoke `submitPrintJob`.
 - Authored a Jest unit test in `printing.test.ts` to mock and verify the backend spooler integration.
 - Written a Playwright E2E test in `e2e/access-card-actions/printing.spec.ts` which thoroughly tests the Card Actions dashboard, data display, and initiating print processes.
-- Verified CI/CD pipelines correctly run Jest unit tests (`pnpm nx affected -t test`) and Playwright E2E (`pnpm test:e2e`).
+- Verified CI/CD pipelines correctly run Jest unit tests (`pnpm turbo run -t test`) and Playwright E2E (`pnpm test:e2e`).
   **Next Agent Notes:** For a production deployment on Windows, `printing.ts` might be expanded to interact with the `MagAPI.dll` using an FFI library or a dedicated print microservice.
 
 ## 2026-08-19: Production Dashboard and Form Enhancement
@@ -246,7 +246,7 @@ Eliminate the full-page reload that fired on every Hourly Loads edit, and guaran
 - **Purpose**: Execute complete packaging and deployment readiness milestone under fail-closed ultragoal constraints.
 - **Changes & Verifications**:
   1. **Pre-flight Tests**: Ran `pnpm --filter portal test -- --testPathPatterns="hooks"` → 14/14 suites, 75/75 tests passed in 0.934s.
-  2. **Production Build**: Executed `pnpm nx build portal` compiling Turbopack standalone outputs and generating OpenAPI spec (26 paths) in 19.5s.
+  2. **Production Build**: Executed `pnpm turbo build portal` compiling Turbopack standalone outputs and generating OpenAPI spec (26 paths) in 19.5s.
   3. **Bundle Size Audit**: Executed `pnpm bundlesize` validating 266 assets within budget thresholds (0 failures).
   4. **Compliance & Boundaries**: Executed `pnpm audit:compliance` (109 database migrations with 0 rollback errors) and `pnpm policy:check` (0 boundary violations).
   5. **Infrastructure Verification**: Verified 12 local Supabase Docker containers and Prometheus/cAdvisor/Grafana monitoring containers healthy. Verified `apps/portal/.next/standalone/apps/portal/server.js`.
@@ -366,7 +366,7 @@ AIAssistant chat.
 
 - `aria-overlay` running under pm2 (`aria-overlay`, id 2): `/assistant/api/health` OK; UI chat streams via `x-vercel-ai-ui-message-stream: v1`.
 - Portal runtime checks (dev server on :3000): `/assistant` proxied (title "Aria — Operations Assistant"), `/assistant/api/health` → `{"ok":true,"service":"aria-overlay"}`; chat SSE round-trips through the proxy; `/api/ai/actions` returns 401 without a session; `/hub`/`/login` retain `X-Frame-Options: DENY` + `frame-ancestors 'none'`. Sidecar now emits `SAMEORIGIN` + `frame-ancestors 'self'` headers that pass through the proxy (verified via curl).
-- `pnpm --filter portal type-check`, `pnpm --filter portal lint` (changed files), and full `pnpm nx run-many -t lint type-check` pass. New route unit tests: `app/api/ai/actions/route.test.ts` (14 tests) all pass.
+- `pnpm --filter portal type-check`, `pnpm --filter portal lint` (changed files), and full `pnpm turbo run -t lint type-check` pass. New route unit tests: `app/api/ai/actions/route.test.ts` (14 tests) all pass.
 - Pending: visual check of the launcher/iframe in a browser.
 
 ## [2026-09-08T15:30:00Z] Aria Avatar Visibility Fix & Browser Verification (AGENT-TRACE)

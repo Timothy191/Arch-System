@@ -12,7 +12,7 @@ async function loadPluginModule(pluginName: string): Promise<ArchPlugin> {
   const module = await import(`../../plugins/${pluginName}/index`);
   const plugin: ArchPlugin = module.default;
 
-  if (!plugin || !plugin.metadata || !plugin.metadata.id) {
+  if (!plugin?.metadata?.id) {
     throw new ValidationError(`Plugin ${pluginName} is missing valid metadata contract`, {
       field: "metadata",
       value: pluginName,

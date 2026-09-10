@@ -7,14 +7,14 @@ jest.mock("@react-pdf/renderer", () => ({
   StyleSheet: {
     create: (styles: any) => styles,
   },
-  renderToFile: jest.fn().mockImplementation(async (element: any, filePath: string) => {
-    const fs = require("fs/promises");
+  renderToFile: jest.fn().mockImplementation(async (_element: any, filePath: string) => {
+    const fs = require("node:fs/promises");
     await fs.writeFile(filePath, "mock pdf content");
   }),
 }));
 
-import { exec } from "child_process";
-import fs from "fs/promises";
+import { exec } from "node:child_process";
+import fs from "node:fs/promises";
 import { submitPrintJob } from "./printing";
 
 jest.mock("fs/promises", () => ({
@@ -22,7 +22,7 @@ jest.mock("fs/promises", () => ({
 }));
 
 jest.mock("child_process", () => ({
-  exec: jest.fn((cmd, cb) => {
+  exec: jest.fn((_cmd, cb) => {
     // Mock successful lp execution
     cb(null, {
       stdout: "request id is Magicard_300NEO-123 (1 file(s))",
@@ -58,7 +58,7 @@ describe("Card Printing Backend Logic", () => {
 
   it("should handle printer errors gracefully", async () => {
     const execMock = jest.requireMock("child_process").exec;
-    execMock.mockImplementationOnce((cmd: string, cb: any) => {
+    execMock.mockImplementationOnce((_cmd: string, cb: any) => {
       cb(new Error("Printer not found"), {
         stdout: "",
         stderr: "Printer not found",

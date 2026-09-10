@@ -217,7 +217,7 @@ export function MachineOperationsForm({
       toast.success("Machine operation logged successfully");
       // Refresh page to show new data
       router.refresh();
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to save. Please try again.");
       setErrors({ submit: "Failed to save. Please try again." });
     } finally {

@@ -1,5 +1,5 @@
+import { createHmac } from "node:crypto";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { createHmac } from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 
@@ -20,7 +20,7 @@ function base64UrlEncode(str: string): string {
 function createMetabaseToken(
   dashboardId: number,
   params: Record<string, unknown>,
-  secret: string
+  secret: string,
 ): string {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const dashboardId = parseInt(dashboardIdStr, 10);
-    if (isNaN(dashboardId)) {
+    if (Number.isNaN(dashboardId)) {
       return NextResponse.json({ error: "Invalid dashboardId parameter" }, { status: 400 });
     }
 

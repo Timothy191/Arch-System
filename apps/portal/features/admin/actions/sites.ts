@@ -18,7 +18,7 @@ async function assertAdmin() {
     .eq("auth_id", user.id)
     .single();
 
-  if (!employee || employee.role !== "admin") {
+  if (employee?.role !== "admin") {
     return { error: "Forbidden: admin role required", status: 403 as const };
   }
 
@@ -63,7 +63,7 @@ export async function adminUpdateSite(
     name?: string;
     site_code?: string;
     active?: boolean;
-  }
+  },
 ) {
   const parseResult = adminUpdateSiteSchema.safeParse(rawInput);
   if (!parseResult.success) {

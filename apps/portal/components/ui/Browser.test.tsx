@@ -1,13 +1,12 @@
 import { Browser } from "@repo/ui/components/ui/browser";
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 describe("Geist Browser Primitive", () => {
   it("renders with address bar and middle truncation for long urls", () => {
     render(
       <Browser address="https://www.vercel.com/docs/guides/deployments">
         <div data-testid="browser-content">Screenshot Content</div>
-      </Browser>
+      </Browser>,
     );
 
     expect(screen.getByTestId("browser-content")).toBeInTheDocument();
@@ -20,7 +19,7 @@ describe("Geist Browser Primitive", () => {
     const { container } = render(
       <Browser address="https://arch.coal">
         <div>Content</div>
-      </Browser>
+      </Browser>,
     );
 
     const chromeBar = container.querySelector("[aria-hidden='true']");
@@ -34,7 +33,7 @@ describe("Geist Browser Primitive", () => {
     const { container } = render(
       <Browser address="https://example.com" aspectRatio="16/9" className="custom-browser">
         <div>Locked</div>
-      </Browser>
+      </Browser>,
     );
 
     const root = container.firstChild as HTMLElement;

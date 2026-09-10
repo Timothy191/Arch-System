@@ -118,9 +118,9 @@ export default async function ReportsPage() {
           value={successRate}
           color={
             successRate !== "—"
-              ? Number.parseInt(successRate) >= 80
+              ? Number.parseInt(successRate, 10) >= 80
                 ? "green"
-                : Number.parseInt(successRate) >= 50
+                : Number.parseInt(successRate, 10) >= 50
                   ? "default"
                   : "red"
               : "default"

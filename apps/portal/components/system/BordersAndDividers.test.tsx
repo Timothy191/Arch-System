@@ -1,7 +1,6 @@
 import { BorderBox } from "@repo/ui/BorderBox";
 import { Divider } from "@repo/ui/Divider";
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 describe("Borders and Dividers Design Techniques", () => {
   describe("Divider Component", () => {
@@ -43,7 +42,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="dotted" data-testid="box-dotted">
           Dotted Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-dotted");
       expect(el).toHaveClass("border-arch-dotted");
@@ -53,7 +52,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="double" data-testid="box-double">
           Double Border Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-double");
       expect(el).toHaveClass("border-arch-double");
@@ -63,7 +62,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="gradient" data-testid="box-gradient">
           Gradient Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-gradient");
       expect(el).toHaveClass("border-arch-gradient");
@@ -73,7 +72,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="bevelled" data-testid="box-bevelled">
           Bevelled Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-bevelled");
       expect(el).toHaveClass("border-arch-bevelled");
@@ -83,7 +82,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="handdrawn" data-testid="box-handdrawn">
           Hand-Drawn Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-handdrawn");
       expect(el).toHaveClass("border-arch-handdrawn");
@@ -93,7 +92,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="patterned" data-testid="box-patterned">
           Patterned Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-patterned");
       expect(el).toHaveClass("border-arch-patterned");
@@ -103,7 +102,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="thick-transparent" data-testid="box-thick-glass">
           Thick Glass Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-thick-glass");
       expect(el).toHaveClass("border-arch-thick-transparent");
@@ -113,7 +112,7 @@ describe("Borders and Dividers Design Techniques", () => {
       render(
         <BorderBox variant="fading" data-testid="box-fading">
           Fading Edge Content
-        </BorderBox>
+        </BorderBox>,
       );
       const el = screen.getByTestId("box-fading");
       expect(el).toHaveClass("border-arch-fading");

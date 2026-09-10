@@ -111,7 +111,7 @@ export function ServicesDropdown() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
 
-  const shift = useMemo(() => getShiftInfo(), [open]);
+  const shift = useMemo(() => getShiftInfo(), []);
   const safety = useSafetyAlerts();
 
   useEffect(() => {
@@ -159,13 +159,13 @@ export function ServicesDropdown() {
               "transition-all duration-150 ease-in-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
               "cursor-default select-none",
-              open && "bg-white/60"
+              open && "bg-white/60",
             )}
           >
             <ChevronDown
               className={cn(
                 "w-3.5 h-3.5 transition-transform duration-200 ease-out",
-                open && "rotate-180"
+                open && "rotate-180",
               )}
             />
           </button>
@@ -252,7 +252,7 @@ export function ServicesDropdown() {
                       ? "text-[var(--accent-red)]"
                       : safety.warningCount > 0
                         ? "text-[var(--accent-orange)]"
-                        : "text-[var(--accent-green)]"
+                        : "text-[var(--accent-green)]",
                   )}
                 />
                 <span className="text-[12px] text-[var(--text-heading)] flex-1">

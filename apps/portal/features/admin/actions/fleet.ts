@@ -17,7 +17,7 @@ async function assertAdmin() {
     .eq("auth_id", user.id)
     .single();
 
-  if (!employee || employee.role !== "admin") {
+  if (employee?.role !== "admin") {
     return { error: "Forbidden: admin role required", status: 403 as const };
   }
 
@@ -77,7 +77,7 @@ export async function adminUpdateMachine(
     site_id?: string | null;
     active?: boolean;
     report_exempt?: boolean;
-  }
+  },
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };

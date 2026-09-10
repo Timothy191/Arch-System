@@ -10,7 +10,6 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import React from "react";
 import type { AccessControlMetrics } from "../actions";
 
 interface KPICardProps {

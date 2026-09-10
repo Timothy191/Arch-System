@@ -75,7 +75,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         setDateIn(new Date().toISOString().slice(0, 10));
         setTimeIn(new Date().toTimeString().slice(0, 5));
         setReason("");
-      } catch (err) {
+      } catch (_err) {
         setMessage({ type: "error", text: "Failed to book in machine." });
       }
     });

@@ -18,14 +18,13 @@ import {
   MenuSection,
 } from "@repo/ui/components/ui/menu";
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 describe("Geist Batch 4 Components", () => {
   it("renders Drawer correctly", () => {
     render(
       <Drawer show={true} onDismiss={() => {}}>
         Drawer Content
-      </Drawer>
+      </Drawer>,
     );
     expect(screen.getByText("Drawer Content")).toBeInTheDocument();
   });
@@ -48,7 +47,7 @@ describe("Geist Batch 4 Components", () => {
         <Folder name="src">
           <File name="index.ts" />
         </Folder>
-      </Tree>
+      </Tree>,
     );
     expect(screen.getByText("src")).toBeInTheDocument();
   });
@@ -63,7 +62,7 @@ describe("Geist Batch 4 Components", () => {
       <Grid columns={3}>
         <GridCell columnSpan={2}>Main</GridCell>
         <GridCross />
-      </Grid>
+      </Grid>,
     );
     expect(screen.getByText("Main")).toBeInTheDocument();
   });
@@ -106,7 +105,7 @@ describe("Geist Batch 4 Components", () => {
             <MenuItemLocked>Delete</MenuItemLocked>
           </MenuSection>
         </Menu>
-      </MenuContainer>
+      </MenuContainer>,
     );
     expect(screen.getByText("Actions")).toBeInTheDocument();
   });

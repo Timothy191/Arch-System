@@ -2,7 +2,6 @@
 
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
 import dynamic from "next/dynamic";
-import React from "react";
 import type { BadgeStatusDistribution, HourlyAccessPoint } from "../actions";
 
 const HourlyAccessChart = dynamic(() => import("./HourlyAccessChart"), {

@@ -3,7 +3,6 @@ import { AvatarGroup } from "@repo/ui/components/ui/avatar-group";
 import { AvatarWithIcon } from "@repo/ui/components/ui/avatar-with-icon";
 import { GitHubAvatar } from "@repo/ui/components/ui/git-avatar";
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 describe("Geist Avatar Primitives", () => {
   describe("Avatar", () => {
@@ -77,7 +76,7 @@ describe("Geist Avatar Primitives", () => {
   describe("AvatarWithIcon", () => {
     it("renders custom status icon badge", () => {
       render(
-        <AvatarWithIcon letter="JD" size={32} icon={<span data-testid="status-dot">●</span>} />
+        <AvatarWithIcon letter="JD" size={32} icon={<span data-testid="status-dot">●</span>} />,
       );
 
       expect(screen.getByText("JD")).toBeInTheDocument();

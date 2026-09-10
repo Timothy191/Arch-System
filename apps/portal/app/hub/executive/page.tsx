@@ -84,7 +84,7 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
         async () => {
           const db = await createReadReplicaClient(cookieList);
           const today = new Date().toISOString().split("T")[0]!;
-          const monthStart = today.slice(0, 7) + "-01";
+          const monthStart = `${today.slice(0, 7)}-01`;
           const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
 
           // Step 1: Fetch Unified Production Summary (RPC)
@@ -176,13 +176,13 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
           category: CacheCategory.METRICS,
           keyParts: ["hub", "executive"],
           tags: ["table:machines", "table:employees", "table:breakdowns"],
-        }
+        },
       );
     },
     {
       revalidate: 300,
       tags: ["table:machines", "table:employees", "table:breakdowns"],
-    }
+    },
   );
 }
 
@@ -190,7 +190,7 @@ export default async function ExecutiveDashboardPage() {
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 
-  if (!user || !user.id) {
+  if (!user?.id) {
     redirect("/login");
   }
 
@@ -230,7 +230,7 @@ export default async function ExecutiveDashboardPage() {
     chartData,
   } = data;
 
-  const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES["red"]!;
+  const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES.red!;
   const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? "red";
 
   // CSV export payload

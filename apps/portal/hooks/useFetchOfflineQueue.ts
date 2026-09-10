@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 export function useFetchOfflineQueue() {
   const [pendingQueue, setPendingQueue] = useState<QueuedFetchRequest[]>([]);
   const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== "undefined" ? navigator.onLine : true
+    typeof navigator !== "undefined" ? navigator.onLine : true,
   );
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -18,6 +18,17 @@ export function useFetchOfflineQueue() {
       setPendingQueue([]);
     }
   }, []);
+
+  const flushQueue = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetchClient.flushOfflineQueue();
+      await refreshQueue();
+      return res;
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [refreshQueue]);
 
   useEffect(() => {
     refreshQueue();
@@ -42,18 +53,7 @@ export function useFetchOfflineQueue() {
         window.removeEventListener("offline", handleOffline);
       }
     };
-  }, [refreshQueue]);
-
-  const flushQueue = async () => {
-    setIsSyncing(true);
-    try {
-      const res = await fetchClient.flushOfflineQueue();
-      await refreshQueue();
-      return res;
-    } finally {
-      setIsSyncing(false);
-    }
-  };
+  }, [refreshQueue, flushQueue]);
 
   return {
     pendingQueue,

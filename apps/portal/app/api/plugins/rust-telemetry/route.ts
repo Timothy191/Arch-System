@@ -1,9 +1,9 @@
+import { execFile } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { promisify } from "node:util";
 import { createServerSupabaseClient } from "@repo/supabase/server";
-import { execFile } from "child_process";
-import fs from "fs";
 import { type NextRequest, NextResponse } from "next/server";
-import path from "path";
-import { promisify } from "util";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
 import { logError } from "@/lib/errors/error-logger";
 
@@ -96,7 +96,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       "rust-telemetry-engine",
       "target",
       "release",
-      "rust-telemetry-engine"
+      "rust-telemetry-engine",
     );
 
     if (fs.existsSync(binaryPath)) {

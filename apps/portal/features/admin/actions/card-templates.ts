@@ -17,7 +17,7 @@ async function assertAdminRole() {
     .eq("auth_id", user.id)
     .single();
 
-  if (!employee || employee.role !== "admin") {
+  if (employee?.role !== "admin") {
     throw new ForbiddenError("Forbidden: admin role required");
   }
 

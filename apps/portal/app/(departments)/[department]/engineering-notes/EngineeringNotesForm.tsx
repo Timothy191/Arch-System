@@ -54,7 +54,7 @@ function matchMachineId(machines: Machine[], machineName: string | null): string
     (m) =>
       m.name.toLowerCase() === needle ||
       m.name.toLowerCase().includes(needle) ||
-      needle.includes(m.name.toLowerCase())
+      needle.includes(m.name.toLowerCase()),
   );
   return match?.id ?? "";
 }
@@ -182,7 +182,7 @@ export function EngineeringNotesForm({
       toast.success("Engineering issue logged successfully");
 
       router.refresh();
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to save. Please try again.");
       setErrors({ submit: "Failed to save. Please try again." });
     } finally {

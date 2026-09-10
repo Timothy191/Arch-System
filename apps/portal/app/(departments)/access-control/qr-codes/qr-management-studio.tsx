@@ -50,7 +50,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
   // Form State for Quick Issue
   const [formEntityType, setFormEntityType] = useState<CredentialEntityType>(
-    "employee" as unknown as CredentialEntityType
+    "employee" as unknown as CredentialEntityType,
   );
   const [selectedEntityId, setSelectedEntityId] = useState<string>("");
   const [isCustomEntity, setIsCustomEntity] = useState(false);
@@ -93,7 +93,6 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       case "equipment":
         setQrCodeInput(`EQP-${randomSuffix}`);
         break;
-      case "personnel":
       default:
         setQrCodeInput(`EMP-${randomSuffix}`);
         break;
@@ -105,7 +104,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       try {
         await revokeBadgeCredential(badgeId);
         setBadges((prev) =>
-          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: "Revoked" } : b))
+          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: "Revoked" } : b)),
         );
         toast.success("Credential revoked successfully");
       } catch {

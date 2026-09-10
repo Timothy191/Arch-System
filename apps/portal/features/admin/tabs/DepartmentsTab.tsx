@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/compo
 import { Input } from "@repo/ui/components/ui/input";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Edit2, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { logError } from "@/lib/errors/error-logger";
 
 interface Department {
@@ -40,15 +40,15 @@ export function DepartmentsTab() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const supabase = createBrowserSupabaseClient();
 
-  useEffect(() => {
-    loadDepartments();
-  }, []);
-
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     const { data } = await supabase.from("departments").select("*").order("display_name");
     if (data) setDepartments(data);
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    loadDepartments();
+  }, [loadDepartments]);
 
   const handleEdit = (dept: Department) => {
     setEditingDept(dept);

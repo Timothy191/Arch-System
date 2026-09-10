@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 /**
  * SkipLinks provides keyboard navigation shortcuts for accessibility.
  * Allows keyboard users to skip repetitive navigation and go directly to main content.

@@ -55,13 +55,14 @@ async function assertAccessControlRole() {
  */
 export async function getBadgesInventory(
   filterType?: string,
-  search?: string
+  search?: string,
 ): Promise<BadgeInventoryItem[]> {
   const { supabase } = await assertAccessControlRole();
 
   let query = supabase
     .from("badges")
-    .select(`
+    .select(
+      `
       id,
       qr_code,
       rfid_code,
@@ -77,7 +78,8 @@ export async function getBadgesInventory(
       visitor:visitor_id(id, first_name, surname, company, status),
       fleet:fleet_id(id, fleet_code, vehicle_type, registration_number, make, model, status),
       equipment:equipment_id(id, equip_code, equipment_type, status)
-    `)
+    `,
+    )
     .order("issued_at", { ascending: false })
     .limit(100);
 
@@ -388,7 +390,6 @@ export async function createBadgeCredential(payload: CreateBadgePayload) {
       case "equipment":
         qrCode = `EQP-${randomSuffix}`;
         break;
-      case "personnel":
       default:
         qrCode = `EMP-${randomSuffix}`;
         break;

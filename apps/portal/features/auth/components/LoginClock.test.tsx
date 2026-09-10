@@ -1,5 +1,4 @@
 import { act, render, screen } from "@testing-library/react";
-import * as React from "react";
 import "@testing-library/jest-dom";
 import { LoginClock } from "./LoginClock";
 
@@ -45,7 +44,7 @@ describe("LoginClock", () => {
     });
     // No "Can't perform a React state update on an unmounted component" warning.
     const offending = spy.mock.calls.find((c) =>
-      String(c[0] ?? "").includes("unmounted component")
+      String(c[0] ?? "").includes("unmounted component"),
     );
     expect(offending).toBeUndefined();
     spy.mockRestore();

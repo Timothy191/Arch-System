@@ -8,12 +8,12 @@
 
   /* Reset & hide interactive UI elements */
   body {
-    background: var(--bg-primary) !important;
-    color: var(--text-heading) !important;
-    font-size: 9pt !important;
-    line-height: 1.3 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    background: var(--bg-primary);
+    color: var(--text-heading);
+    font-size: 9pt;
+    line-height: 1.3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   nav,
@@ -23,17 +23,17 @@
   button,
   .no-print,
   [role="navigation"] {
-    display: none !important;
+    display: none;
   }
 
   /* Report Document Container */
   .print-document {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: var(--shadow-none, none) !important;
-    border: none !important;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: var(--shadow-none, none);
+    border: none;
   }
 
   /* Page Break Controls */
@@ -61,7 +61,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background-color: var(--bg-tertiary) !important;
+    background-color: var(--bg-tertiary);
     border-left: 3px solid var(--text-heading);
     padding: 2px 6px;
     margin-top: 8px;
@@ -77,8 +77,8 @@
   }
 
   table.print-table th {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-body) !important;
+    background-color: var(--bg-secondary);
+    color: var(--text-body);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 7pt;
@@ -101,7 +101,7 @@
   /* Signature Sign-off & Verification Stamp */
   .signature-box {
     border: 1px solid var(--text-muted);
-    background-color: var(--bg-primary) !important;
+    background-color: var(--bg-primary);
     padding: 6px 10px;
     margin-top: 10px;
     border-radius: 4px;
@@ -112,7 +112,7 @@
 
   .watermark-verified {
     border: 2px solid var(--accent-green);
-    color: var(--accent-green) !important;
+    color: var(--accent-green);
     font-weight: 800;
     font-size: 8pt;
     text-align: center;

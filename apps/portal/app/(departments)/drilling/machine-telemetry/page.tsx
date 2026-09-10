@@ -165,7 +165,7 @@ function formatDate(dateStr: string): string {
 function formatMonth(yearMonth: string): string {
   const [year, month] = yearMonth.split("-");
   if (!year || !month) return yearMonth;
-  const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+  const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 

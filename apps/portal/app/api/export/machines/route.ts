@@ -83,11 +83,10 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { validateBody as _validateBody } from "@/lib/api/response";
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
-  const sanitized = dangerous.test(value) ? "'" + value : value;
+  const sanitized = dangerous.test(value) ? `'${value}` : value;
   return `"${sanitized.replace(/"/g, '""')}"`;
 }
 
@@ -108,8 +107,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       req,
       NextResponse.json(
         { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
   }
   const { dept, limit, offset } = parsed.data;
@@ -120,7 +119,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     .from("machines")
     .select(
       "id, name, machine_type, serial_number, bin_factor, active, department_id, site_id, created_at",
-      { count: "estimated" }
+      { count: "estimated" },
     )
     .order("name")
     .range(offset, offset + limit - 1);

@@ -97,11 +97,10 @@ import { createServerSupabaseClient } from "@repo/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { applyCors } from "@/lib/api/cors";
 import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { validateBody as _validateBody } from "@/lib/api/response";
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
-  const sanitized = dangerous.test(value) ? "'" + value : value;
+  const sanitized = dangerous.test(value) ? `'${value}` : value;
   return `"${sanitized.replace(/"/g, '""')}"`;
 }
 
@@ -122,8 +121,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       req,
       NextResponse.json(
         { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 }
-      )
+        { status: 400 },
+      ),
     );
   }
   const { from, to, dept, limit, offset } = parsed.data;
@@ -137,7 +136,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     .from("daily_logs")
     .select(
       "id, log_date, shift, department_id, fuel_logs(id, diesel_litres, machine_id, machines(name, machine_type))",
-      { count: "estimated" }
+      { count: "estimated" },
     )
     .gte("log_date", fromDate)
     .lte("log_date", toDate)
@@ -195,7 +194,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r] ?? ""))).join(",")
+        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r] ?? ""))).join(","),
       ),
     ].join("\n");
     const response = new NextResponse(csv, {

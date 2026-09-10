@@ -10,7 +10,7 @@ jest.mock("@repo/supabase/server", () => ({
 }));
 
 jest.mock("@/lib/api/rate-limit-middleware", () => ({
-  withRateLimit: jest.fn((req, handler) => handler()),
+  withRateLimit: jest.fn((_req, handler) => handler()),
 }));
 
 const { getUserSafely } = require("@repo/supabase/server");
@@ -46,7 +46,7 @@ describe("GET /api/metabase/embed", () => {
     getUserSafely.mockResolvedValueOnce({ id: "usr_123" });
 
     const req = new NextRequest(
-      "http://localhost:3000/api/metabase/embed?dashboardId=42&departmentId=dept_drilling"
+      "http://localhost:3000/api/metabase/embed?dashboardId=42&departmentId=dept_drilling",
     );
 
     const res = await GET(req);

@@ -68,7 +68,7 @@ export function AuditLogsTab() {
     size: number,
     search: string,
     action: string,
-    table: string
+    table: string,
   ) => {
     setLoading(true);
 
@@ -103,7 +103,7 @@ export function AuditLogsTab() {
 
   useEffect(() => {
     loadLogs(currentPage, pageSize, debouncedSearch, actionFilter, tableFilter);
-  }, [currentPage, pageSize, debouncedSearch, actionFilter, tableFilter]);
+  }, [currentPage, pageSize, debouncedSearch, actionFilter, tableFilter, loadLogs]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 

@@ -21,10 +21,10 @@ body,
 #app,
 .fuxa-app,
 .main-content {
-  background-color: var(--fuxa-bg-primary) !important;
-  color: var(--fuxa-text-primary) !important;
+  background-color: var(--fuxa-bg-primary);
+  color: var(--fuxa-text-primary);
   font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Outfit", "Segoe UI", sans-serif !important;
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Outfit", "Segoe UI", sans-serif;
 }
 
 /* Sidebars and headers - Frosted Glass effect */
@@ -36,11 +36,11 @@ header,
 .header,
 .navbar,
 .nav-container {
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-color: var(--fuxa-border) !important;
-  color: var(--fuxa-text-primary) !important;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: var(--fuxa-border);
+  color: var(--fuxa-text-primary);
 }
 
 /* Cards & Panel Widgets - Glass aesthetic */
@@ -48,12 +48,12 @@ header,
 .panel,
 .widget-container,
 .fuxa-panel {
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid var(--fuxa-border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--fuxa-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
 }
 
 /* Inputs & Forms */
@@ -61,51 +61,51 @@ input,
 select,
 textarea,
 .fuxa-input {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-  border: 1px solid var(--fuxa-border) !important;
-  border-radius: var(--radius-button) !important;
-  color: var(--fuxa-text-primary) !important;
-  padding: 6px 12px !important;
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--fuxa-border);
+  border-radius: var(--radius-button);
+  color: var(--fuxa-text-primary);
+  padding: 6px 12px;
 }
 
 input:focus,
 select:focus,
 .fuxa-input:focus {
-  border-color: var(--fuxa-accent) !important;
-  outline: none !important;
-  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2) !important;
+  border-color: var(--fuxa-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.2);
 }
 
 /* Buttons */
 button,
 .btn-primary {
-  background-color: var(--fuxa-accent) !important;
-  color: #ffffff !important;
-  border-radius: var(--radius-button) !important;
-  font-weight: 500 !important;
-  border: none !important;
-  transition: background-color 0.2s ease-in-out !important;
+  background-color: var(--fuxa-accent);
+  color: #ffffff;
+  border-radius: var(--radius-button);
+  font-weight: 500;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
 }
 
 button:hover,
 .btn-primary:hover {
-  background-color: #2c2c2e !important;
+  background-color: #2c2c2e;
 }
 
 /* Status Indicators */
 .status-active,
 .status-ok,
 .tag-ok {
-  color: var(--fuxa-success) !important;
+  color: var(--fuxa-success);
 }
 
 .status-warning,
 .tag-warn {
-  color: var(--fuxa-warning) !important;
+  color: var(--fuxa-warning);
 }
 
 .status-error,
 .status-danger,
 .tag-error {
-  color: var(--fuxa-danger) !important;
+  color: var(--fuxa-danger);
 }

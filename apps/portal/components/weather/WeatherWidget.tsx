@@ -15,8 +15,8 @@ interface WeatherWidgetProps {
 }
 
 export const WeatherWidget = React.memo(function WeatherWidget({
-  lat = -26.35914,
-  lon = 28.79267,
+  lat: _lat = -26.35914,
+  lon: _lon = 28.79267,
   locationName = "Delmas, Mpumalanga",
   variant = "full",
 }: WeatherWidgetProps) {
@@ -32,7 +32,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
         const data = await fetchClient.get<WeatherData>("/api/weather");
         setWeather(data);
         setError(null);
-      } catch (err) {
+      } catch (_err) {
         setError("Failed to load weather");
       } finally {
         setLoading(false);
@@ -43,7 +43,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
     // Refresh every 10 minutes
     const interval = setInterval(loadWeather, 600000);
     return () => clearInterval(interval);
-  }, [lat, lon, locationName]);
+  }, []);
 
   if (loading) {
     return (
@@ -151,7 +151,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
                     "p-2.5 rounded-lg text-xs font-medium border",
                     alert.level === "critical"
                       ? "bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse"
-                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20"
+                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20",
                   )}
                 >
                   {alert.message}

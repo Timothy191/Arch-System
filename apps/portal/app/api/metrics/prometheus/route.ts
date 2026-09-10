@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
         "Content-Type": "text/plain",
       },
     });
-  } catch (error) {
+  } catch (_error) {
     return new NextResponse("Error generating metrics", {
       status: 500,
       headers: {

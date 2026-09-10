@@ -1,15 +1,16 @@
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { registerOTel } from "@vercel/otel";
+export async function register() {
+  if (process.env.NEXT_RUNTIME === "nodejs" && process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+    const { OTLPTraceExporter } = await import("@opentelemetry/exporter-trace-otlp-http");
+    const { BatchSpanProcessor } = await import("@opentelemetry/sdk-trace-base");
+    const { registerOTel } = await import("@vercel/otel");
 
-export function register() {
-  const exporter = new OTLPTraceExporter({
-    // Standard OTEL collector endpoint
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318/v1/traces",
-  });
+    const exporter = new OTLPTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318/v1/traces",
+    });
 
-  registerOTel({
-    serviceName: "portal-ui",
-    spanProcessors: [new BatchSpanProcessor(exporter)],
-  });
+    registerOTel({
+      serviceName: "portal-ui",
+      spanProcessors: [new BatchSpanProcessor(exporter)],
+    });
+  }
 }

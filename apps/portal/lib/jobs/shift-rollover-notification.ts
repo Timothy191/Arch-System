@@ -58,8 +58,7 @@ export const shiftRolloverNotificationFn: InngestFunction.Any = inngest.createFu
           continue;
         }
 
-        const isClosed =
-          shiftLogs && shiftLogs.some((l) => l.status === "closed" || l.status === "verified");
+        const isClosed = shiftLogs?.some((l) => l.status === "closed" || l.status === "verified");
 
         if (!isClosed) {
           // Log audit reminder event for handover
@@ -105,5 +104,5 @@ export const shiftRolloverNotificationFn: InngestFunction.Any = inngest.createFu
     } finally {
       recordJobExecution("shift-rollover-notifications", performance.now() - start, success);
     }
-  }
+  },
 );
