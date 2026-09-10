@@ -10,13 +10,13 @@ confidence: high
 
 # Portal App Architecture
 
-The portal is a Next.js 15 application using the App Router with React Server Components (RSC) as the default rendering strategy. It sits in `apps/portal/` within the Nx monorepo.
+The portal is a Next.js 16 application using the App Router with React Server Components (RSC) as the default rendering strategy. It sits in `apps/portal/` within the Turborepo monorepo.
 
 ## Tech Stack
 
 | Layer           | Technology                                                     |
 | --------------- | -------------------------------------------------------------- |
-| Framework       | Next.js 15 (App Router)                                        |
+| Framework       | Next.js 16 (App Router)                                        |
 | React           | React 19                                                       |
 | Language        | TypeScript                                                     |
 | Styling         | Tailwind CSS + CSS variables (light-only theme)                |
@@ -192,4 +192,4 @@ Department-specific logic lives in `features/departments/components/<dept>/`:
 
 Hub components are in `features/hub/components/`.
 
-Related pages: [[nx-monorepo]], [[design-system]], [[rls-policy]], [[supabase-local-dev]]
+Related pages: [[turbo-monorepo]], [[design-system]], [[rls-policy]], [[supabase-local-dev]]

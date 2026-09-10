@@ -54,7 +54,7 @@ The monorepo is a **Turborepo + pnpm workspaces** project (`turbo run` is the en
 
 | Path                | Purpose                                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal`       | Next.js 15+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
+| `apps/portal`       | Next.js 16+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
 | `apps/cms`          | Payload CMS v3 headless content service.                                                                                   |
 | `apps/overview`     | Standalone architecture visualization (React Flow).                                                                        |
 | `apps/ci-observer`  | CI observation helper app.                                                                                                 |
@@ -108,7 +108,7 @@ If your change drops coverage, either add tests or explicitly raise the threshol
 
 ## Adding a new package
 
-The workspace uses pnpm's `catalog:` indirection and Nx project tags. New packages must participate in both.
+The workspace uses pnpm's `catalog:` indirection and project tags. New packages must participate in both.
 
 ### 1. Scaffold the package
 
@@ -136,7 +136,7 @@ node tools/apply-project-tags.cjs
 
 This auto-tags every project under `apps/`, `packages/`, and `tools/` with the canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `tools/*`). It writes/updates each `project.json` deterministically — review the diff before committing.
 
-### 4. Register Nx targets
+### 4. Configure package scripts
 
 Add a `project.json` next to `package.json` (the tag script will create one if missing) and declare `build`, `lint`, `type-check`, and (for apps) `test` targets using the workspace executors. Look at `packages/ui/project.json` for a clean reference.
 
@@ -325,7 +325,7 @@ Most common cause: a generated file is missing or stale. Run `pnpm policy:gen &&
 
 ### Circular dependency detected
 
-`tools/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `pnpm graph` (Nx) or `madge --circular packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
+`tools/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `turbo query` or `madge --circular packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
 
 ### Husky hook skipped with `--no-verify`
 

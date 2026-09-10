@@ -1,13 +1,13 @@
 # ⚡ Technology Stack & Catalog Map
 
-**Generated:** 9/2/2026, 11:13:16 AM UTC  
-**Architecture:** Nx Monorepo + Next.js 16 + Supabase
+**Generated:** 9/10/2026, 4:33:15 AM UTC  
+**Architecture:** Turborepo Monorepo + Next.js 16 + Supabase
 
 ---
 
 ## 🛠️ Stack Catalog
 
-- **Monorepo Manager**: Nx 22 + pnpm 9.15.9 workspace
+- **Monorepo Manager**: Turborepo 2 + pnpm 9.15.9 workspace
 - **Frontend Core**: Next.js 16 (App Router), React 19, Tailwind CSS
 - **Design System**: OKLCH Palette (`@repo/theme`), Glass surfaces, Named shadows only
 - **Database Layer**: Supabase PostgreSQL + Drizzle ORM / Kysely

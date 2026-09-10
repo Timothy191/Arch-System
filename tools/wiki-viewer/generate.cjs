@@ -948,7 +948,7 @@ function drawGraph() {
 
 /* System Map */
 const sysNodes = [
-  { id: "portal", label: "Portal App", sub: "Next.js 15 App Router", group: "app", x: 260, y: 60, w: 90, h: 36 },
+  { id: "portal", label: "Portal App", sub: "Next.js 16 App Router", group: "app", x: 260, y: 60, w: 90, h: 36 },
   { id: "overview", label: "Overview App", sub: "Static Next.js", group: "app", x: 80, y: 40, w: 86, h: 32 },
   { id: "cms", label: "CMS App", sub: "Payload v3", group: "app", x: 80, y: 90, w: 78, h: 32 },
   { id: "ui", label: "@repo/ui", sub: "Shared UI", group: "pkg", x: 380, y: 30, w: 74, h: 30 },

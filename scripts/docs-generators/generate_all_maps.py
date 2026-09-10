@@ -318,7 +318,7 @@ def generate_flows_dark():
     container_draw = ImageDraw.Draw(img)
     container_draw.rounded_rectangle([820, 160, 1160, 980], radius=16, fill=(20, 28, 48, 200), outline=(59, 130, 246, 80), width=2)
     container_draw.rounded_rectangle([820, 160, 1160, 164], radius=16, fill=ACCENT_BLUE)
-    container_draw.text((840, 175), "Next.js 15 App Router", fill=COLOR_TEXT_PRIMARY, font=font_node_header)
+    container_draw.text((840, 175), "Next.js 16 App Router", fill=COLOR_TEXT_PRIMARY, font=font_node_header)
     
     draw_sub_pill(img, 840, 220, 300, 48, title="Public Auth", subtitle="/login, /reset-password, /update-password", border_color=ACCENT_CYAN)
     draw_sub_pill(img, 840, 285, 300, 48, title="Executive Hub", subtitle="/ (Hub landing dashboard), /executive", border_color=ACCENT_BLUE)
@@ -403,7 +403,7 @@ def generate_flows_dark():
                         "• Zero-auth telemetry viewer"
                     ])
 
-    draw_header_title(draw, "ARCH-SYSTEMS MINING PORTAL (DARK MODE)", "Architecture Flow & Data Caching Map • Next.js 15 Monorepo (Turborepo & pnpm workspace)")
+    draw_header_title(draw, "ARCH-SYSTEMS MINING PORTAL (DARK MODE)", "Architecture Flow & Data Caching Map • Next.js 16 Monorepo (Turborepo & pnpm workspace)")
     
     legend_items = [
         ("User / Clients", ACCENT_CYAN),

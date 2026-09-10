@@ -1,6 +1,6 @@
 # 🤖 Multi-Agent Architecture & Pre-Flight Research Gate Map
 
-**Generated:** 9/2/2026, 11:13:16 AM UTC  
+**Generated:** 9/10/2026, 4:33:15 AM UTC  
 **Package:** `@repo/agents`  
 **Orchestration:** Multi-Agent Specialist Hierarchy + Langfuse Tracing
 
@@ -45,6 +45,7 @@ flowchart TD
 ---
 
 ## 🔬 Architectural Pre-Flight Research Gate Mandate
+
 - **Rule Source**: Codified in `docs/GEMINI.md` and `docs/AGENTS.md`.
 - **Implementation**: `SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)`.
 - **Benchmark Evaluation Surface**:

@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: concept
 tags: [onboarding, team, getting-started, docs]
-sources: [CLAUDE.md, docs/wiki/concepts/nx-monorepo.md]
+sources: [CLAUDE.md, docs/wiki/concepts/turbo-monorepo.md]
 confidence: high
 ---
 
@@ -96,8 +96,8 @@ Arch-Mk2/
 Read these wiki pages in order:
 
 1. **[[arch-systems]]** — What we're building
-2. **[[nx-monorepo]]** — How the codebase is organized
-3. **[[portal-app-architecture]]** — Next.js 15 App Router patterns
+2. **[[turbo-monorepo]]** — How the codebase is organized
+3. **[[portal-app-architecture]]** — Next.js 16 App Router patterns
 4. **[[design-system]]** — How to build UI components
 
 ### Running the Application
@@ -310,5 +310,5 @@ import { Component } from "@repo/ui";
 
 - [[troubleshooting]] — When things go wrong
 - [[deployment]] — How to ship code
-- [[nx-monorepo]] — Workspace conventions
+- [[turbo-monorepo]] — Workspace conventions
 - [[design-system]] — UI guidelines

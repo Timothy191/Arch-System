@@ -12,7 +12,7 @@ confidence: high
 
 ## What is Being Compared
 
-Selection of unit testing framework for a Next.js 15 + React 19 application with Server Components and client-side interactivity.
+Selection of unit testing framework for a Next.js 16 + React 19 application with Server Components and client-side interactivity.
 
 ## Dimensions of Comparison
 

@@ -86,7 +86,7 @@ Lexical is Meta's framework (used in Facebook). While excellent:
 
 ## Verdict
 
-**Novel is the correct choice** for rapid implementation of a Notion-style editor in a Next.js 15 application. Tiptap would be reconsidered for a custom editing experience requiring deep ProseMirror control.
+**Novel is the correct choice** for rapid implementation of a Notion-style editor in a Next.js 16 application. Tiptap would be reconsidered for a custom editing experience requiring deep ProseMirror control.
 
 ## Related
 

@@ -12,7 +12,7 @@ confidence: high
 
 ## What is Being Compared
 
-Selection of state management approach for a Next.js 15 App Router application with React Server Components (RSC) as the default pattern.
+Selection of state management approach for a Next.js 16 App Router application with React Server Components (RSC) as the default pattern.
 
 ## Dimensions of Comparison
 

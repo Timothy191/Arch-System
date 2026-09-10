@@ -16,7 +16,7 @@ Selection of React application architecture for a data-heavy operational portal 
 
 ## Dimensions of Comparison
 
-| Dimension             | Next.js 15 App Router (RSC)                  | Next.js Pages Router              | Traditional SPA (Vite/CRA) |
+| Dimension             | Next.js 16 App Router (RSC)                  | Next.js Pages Router              | Traditional SPA (Vite/CRA) |
 | --------------------- | -------------------------------------------- | --------------------------------- | -------------------------- |
 | **Default Rendering** | Server Components (RSC)                      | Client-side (CSR)                 | Client-side (CSR)          |
 | **Data Fetching**     | Server (zero JS payload)                     | getServerSideProps/getStaticProps | useEffect + fetch          |
@@ -31,7 +31,7 @@ Selection of React application architecture for a data-heavy operational portal 
 
 ## Project Implementation
 
-The portal uses **Next.js 15 App Router with RSC as default**:
+The portal uses **Next.js 16 App Router with RSC as default**:
 
 ```typescript
 // Server Component (default) — zero client JS
@@ -100,7 +100,7 @@ For a multi-tenant operational portal, framework-level features are essential.
 
 ## Verdict
 
-**Next.js 15 App Router is optimal** for a data-heavy operational portal where most UI is read-only displays with isolated interactive components.
+**Next.js 16 App Router is optimal** for a data-heavy operational portal where most UI is read-only displays with isolated interactive components.
 
 ## Related
 

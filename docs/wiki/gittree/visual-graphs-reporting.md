@@ -209,7 +209,7 @@ Legend: `░` = Low, `▒` = Medium, `▓` = High, `█` = Very High
 
 ### For Arch-Mk2 Architecture
 
-Given the React 19 + Next.js 15 stack:
+Given the React 19 + Next.js 16 stack:
 
 - **Primary:** Recharts (React-native, lightweight)
 - **Advanced:** D3.js (via Skill: d3-viz) for custom reports

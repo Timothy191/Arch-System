@@ -328,7 +328,7 @@ def main():
     container_draw.rounded_rectangle([820, 160, 1160, 980], radius=16, fill=(255, 255, 255, 180), outline=(59, 130, 246, 80), width=2)
     # Accent header
     container_draw.rounded_rectangle([820, 160, 1160, 164], radius=16, fill=ACCENT_BLUE)
-    container_draw.text((840, 175), "Next.js 15 App Router", fill=COLOR_TEXT_PRIMARY, font=font_node_header)
+    container_draw.text((840, 175), "Next.js 16 App Router", fill=COLOR_TEXT_PRIMARY, font=font_node_header)
     
     # Sub-pills (routes and pages)
     draw_sub_pill(img, 840, 220, 300, 48, title="Public Auth", subtitle="/login, /reset-password, /update-password", border_color=ACCENT_CYAN)
@@ -418,7 +418,7 @@ def main():
     # Left decorative bar
     draw.rectangle([90, 48, 96, 122], fill=ACCENT_BLUE)
     draw.text((112, 44), "ARCH-SYSTEMS MINING PORTAL", fill=COLOR_TEXT_PRIMARY, font=font_title)
-    draw.text((114, 98), "Architecture Flow & Data Caching Map • Next.js 15 Monorepo (Turborepo & pnpm workspace)", fill=COLOR_TEXT_SECONDARY, font=font_subtitle)
+    draw.text((114, 98), "Architecture Flow & Data Caching Map • Next.js 16 Monorepo (Turborepo & pnpm workspace)", fill=COLOR_TEXT_SECONDARY, font=font_subtitle)
     
     # 7. Legend & Footer
     draw.rectangle([90, 978, WIDTH - 90, 980], fill=COLOR_GRID)

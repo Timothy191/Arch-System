@@ -14,9 +14,9 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 
 ## Technology Stack
 
-- **Frontend:** Next.js 15 (App Router, React 19.2.6), Tailwind CSS 3.4, shadcn/ui
+- **Frontend:** Next.js 16 (App Router, React 19.2.7), Tailwind CSS 3.4, shadcn/ui
 - **Backend:** Supabase (PostgreSQL, Auth, Storage, Read Replicas)
-- **Build/Orchestration:** Turborepo 2.x.7.5 + pnpm 9.15.9 workspaces
+- **Build/Orchestration:** Turborepo 2.10.12 + pnpm 9.15.9 workspaces
 - **Testing:** Jest 30 (unit), Playwright 1.60 (E2E)
 - **3D:** @react-three/fiber 8 + @react-three/drei 9
 - **Maps:** react-map-gl 8 + maplibre-gl 5
@@ -25,11 +25,11 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 
 ## Monorepo Structure
 
-- `apps/portal/` → Next.js 15 app with App Router, React 19 (main mining portal)
+- `apps/portal/` → Next.js 16 app with App Router, React 19 (main mining portal)
 - `packages/ui/` → [[turbo-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
 - `packages/theme/` → [[design-system|@repo/theme]] — design tokens, Style Dictionary pipeline, Tailwind preset
 - `packages/supabase/` → [[supabase-local-dev|@repo/supabase]] — client wrappers (browser, server, middleware, read-replica) and database types
-- `packages/database/` → [[database-schema|@repo/database]] — SQL migrations (61 migrations, source of truth)
+- `packages/database/` → [[database-schema|@repo/database]] — SQL migrations (111 migrations, source of truth)
 - `packages/hooks/` → @repo/hooks — useLocalStorage, useDebounce
 - `packages/utils/` → @repo/utils — cn(), formatDate(), getCurrentShift(), excel utilities
 - `packages/errors/` → @repo/errors — standardized custom error handler classes
@@ -90,8 +90,8 @@ Specialized routes:
 | --------------------- | --------------------- |
 | Departments           | 8/8 operational       |
 | Database tables       | 40+ with full RLS     |
-| Database migrations   | 61 migrations         |
+| Database migrations   | 111 migrations        |
 | Test coverage         | ~40%+ (target: 90%)   |
 | Mobile responsiveness | 68% avg (target: 85%) |
 | Security posture      | 100% (P0 fixes done)  |
-| Wiki pages            | 61                    |
+| Wiki pages            | 87                    |

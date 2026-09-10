@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Arch-Systems monorepo is a sophisticated multi-departmental mining operations portal built on **Nx 22 + pnpm workspaces**. After comprehensive analysis and fixes, the codebase is now in a healthy state.
+The Arch-Systems monorepo is a sophisticated multi-departmental mining operations portal built on **Turborepo 2 + pnpm workspaces**. After comprehensive analysis and fixes, the codebase is now in a healthy state.
 
 ### **Overall Health Score: 92/100** (Improved from 72/100)
 

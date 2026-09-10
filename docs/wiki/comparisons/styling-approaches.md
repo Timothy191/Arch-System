@@ -83,7 +83,7 @@ styled-components/emotion would require:
 - ThemeProvider cascade complexity
 - Duplicate style generation across monorepo packages
 
-For a Next.js 15 App Router application, CSS-in-JS is an anti-pattern.
+For a Next.js 16 App Router application, CSS-in-JS is an anti-pattern.
 
 ## Why Not CSS Modules
 
@@ -103,4 +103,4 @@ Tailwind's utility-first approach fit the rapid iteration needs better.
 
 - [[design-system]] — Full design system documentation
 - [[deepeval-integration]] — Automated enforcement via DesignSystemComplianceMetric
-- [[nx-monorepo]] — How @repo/theme is shared across packages
+- [[turbo-monorepo]] — How @repo/theme is shared across packages

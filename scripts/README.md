@@ -611,7 +611,7 @@ Current project requirements (from CLAUDE.md):
 
 - **Node.js**: >= 22.0.0 (Volta-managed, pinned to 24.15.0)
 - **pnpm**: 9.15.9 (Volta-managed)
-- **Nx**: 22.7.5 (monorepo orchestration)
+- **Turborepo**: 2.10.12 (monorepo orchestration)
 - **Docker**: Latest stable version
 - **PostgreSQL**: 15+ (via Supabase local)
 

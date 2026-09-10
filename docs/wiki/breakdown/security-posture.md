@@ -110,18 +110,18 @@ is_active(record) → boolean
 | Clickjacking      | Next.js default `X-Frame-Options`             | ✅ Active                            |
 | Sensitive headers | No API keys in client bundles                 | ✅ `passThroughEnv` prevents caching |
 
-**CSRF note**: Next.js 15 server actions include built-in CSRF protection via origin checking for same-origin requests. Third-party API routes (`app/api/`) do not have explicit CSRF tokens — this is the partial coverage.
+**CSRF note**: Next.js 16 server actions include built-in CSRF protection via origin checking for same-origin requests. Third-party API routes (`app/api/`) do not have explicit CSRF tokens — this is the partial coverage.
 
 ### Layer 5 — CI/CD Security
 
-| Aspect                   | Implementation                                        | Status             |
-| ------------------------ | ----------------------------------------------------- | ------------------ |
-| GitHub token permissions | `contents: read` only (minimal)                       | ✅ Least privilege |
-| Secrets in CI            | Dummy env vars only — no real secrets                 | ✅ Safe            |
-| Secrets management       | Real secrets in `.env` (gitignored)                   | ✅ Not committed   |
-| `passThroughEnv` in Nx   | `SENTRY_AUTH_TOKEN`, `ANALYZE` — not cache-busting    | ✅ Correct pattern |
-| Dependency linting       | syncpack in CI — prevents unexpected version upgrades | ✅ Active          |
-| Dead code scanning       | knip in CI — detects unused exports                   | ✅ Active          |
+| Aspect                        | Implementation                                        | Status             |
+| ----------------------------- | ----------------------------------------------------- | ------------------ |
+| GitHub token permissions      | `contents: read` only (minimal)                       | ✅ Least privilege |
+| Secrets in CI                 | Dummy env vars only — no real secrets                 | ✅ Safe            |
+| Secrets management            | Real secrets in `.env` (gitignored)                   | ✅ Not committed   |
+| `passThroughEnv` in Turborepo | `SENTRY_AUTH_TOKEN`, `ANALYZE` — not cache-busting    | ✅ Correct pattern |
+| Dependency linting            | syncpack in CI — prevents unexpected version upgrades | ✅ Active          |
+| Dead code scanning            | knip in CI — detects unused exports                   | ✅ Active          |
 
 ### Layer 6 — Dependency Security
 
@@ -266,4 +266,3 @@ Layer 5: Data Protection
 - [`../concepts/monitoring-error-tracking.md`](../concepts/monitoring-error-tracking.md) — error tracking
 - [`scripts/setup-production-environment.sh`](../../../scripts/setup-production-environment.sh) — production security configuration
 - [`packages/database/migrations/012_rls_refinement.sql`](../../../packages/database/migrations/012_rls_refinement.sql) — RLS policies
-

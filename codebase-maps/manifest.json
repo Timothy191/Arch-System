@@ -1,5 +1,98 @@
 [
   {
+    "id": "log-4(26-09-10)",
+    "logNumber": 4,
+    "folderName": "log-4(26-09-10)",
+    "folderDate": "26-09-10",
+    "isoDate": "2026-09-10T04:33:15.108Z",
+    "displayDate": "9/10/2026, 4:33:15 AM UTC",
+    "mapCount": 9,
+    "status": "Verified & Active",
+    "maps": [
+      {
+        "key": "route-feature",
+        "filename": "route-feature-architecture.md",
+        "title": "Route & Feature Architecture Map",
+        "category": "Routing & Features",
+        "summary": "Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/route-feature-architecture.md",
+        "sizeBytes": 1431
+      },
+      {
+        "key": "database-schema",
+        "filename": "database-schema.md",
+        "title": "Database Schema & Topology Map",
+        "category": "Database & Security",
+        "summary": "Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/database-schema.md",
+        "sizeBytes": 751
+      },
+      {
+        "key": "ci-cd-pipeline",
+        "filename": "ci-cd-pipeline.md",
+        "title": "CI/CD Pipeline & Quality Gate Map",
+        "category": "DevOps & CI/CD",
+        "summary": "GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/ci-cd-pipeline.md",
+        "sizeBytes": 924
+      },
+      {
+        "key": "technology-stack",
+        "filename": "technology-stack.md",
+        "title": "Technology Stack & Catalog Map",
+        "category": "Architecture & Stack",
+        "summary": "Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/technology-stack.md",
+        "sizeBytes": 563
+      },
+      {
+        "key": "project-dependencies",
+        "filename": "project-dependencies.md",
+        "title": "Project Dependencies & Monorepo Graph Map",
+        "category": "Workspace Graph",
+        "summary": "Dependency relationships between applications and shared packages in the monorepo.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/project-dependencies.md",
+        "sizeBytes": 729
+      },
+      {
+        "key": "turbo-graph",
+        "filename": "turbo-graph.md",
+        "title": "Turborepo Project Graph & Task Pipeline Map",
+        "category": "Monorepo Orchestration",
+        "summary": "Visual Mermaid diagram of Turborepo task execution graph, caching pipelines, and project hierarchy.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/turbo-graph.md",
+        "sizeBytes": 2510
+      },
+      {
+        "key": "dependencies-graph",
+        "filename": "dependencies-graph.md",
+        "title": "Monorepo Dependencies & Topology Graph Map",
+        "category": "Workspace Architecture",
+        "summary": "Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/dependencies-graph.md",
+        "sizeBytes": 2284
+      },
+      {
+        "key": "package-structure",
+        "filename": "package-structure.md",
+        "title": "Package Structure & Module Map",
+        "category": "Monorepo Packages",
+        "summary": "Directory layout and workspace modularization rules.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/package-structure.md",
+        "sizeBytes": 668
+      },
+      {
+        "key": "multi-agent-architecture",
+        "filename": "multi-agent-architecture.md",
+        "title": "Multi-Agent Architecture & Pre-Flight Research Gate Map",
+        "category": "Agent Orchestration",
+        "summary": "Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.",
+        "relativePath": "codebase-maps/log-4(26-09-10)/multi-agent-architecture.md",
+        "sizeBytes": 2006
+      }
+    ]
+  },
+  {
     "id": "log-3(26-09-02)",
     "logNumber": 3,
     "folderName": "log-3(26-09-02)",
@@ -57,9 +150,9 @@
       {
         "key": "nx-graph",
         "filename": "nx-graph.md",
-        "title": "Nx 22 Project Graph & Task Pipeline Map",
+        "title": "Turborepo 2 Project Graph & Task Pipeline Map",
         "category": "Monorepo Orchestration",
-        "summary": "Visual Mermaid diagram of Nx 22 task execution graph, caching pipelines, and project tag hierarchy.",
+        "summary": "Visual Mermaid diagram of Turborepo 2 task execution graph, caching pipelines, and project tag hierarchy.",
         "relativePath": "codebase-maps/log-3(26-09-02)/nx-graph.md",
         "sizeBytes": 2385
       },
@@ -150,9 +243,9 @@
       {
         "key": "nx-graph",
         "filename": "nx-graph.md",
-        "title": "Nx 22 Project Graph & Task Pipeline Map",
+        "title": "Turborepo 2 Project Graph & Task Pipeline Map",
         "category": "Monorepo Orchestration",
-        "summary": "Visual Mermaid diagram of Nx 22 task execution graph, caching pipelines, and project tag hierarchy.",
+        "summary": "Visual Mermaid diagram of Turborepo 2 task execution graph, caching pipelines, and project tag hierarchy.",
         "relativePath": "codebase-maps/log-2(26-09-02)/nx-graph.md",
         "sizeBytes": 2484
       },
@@ -243,9 +336,9 @@
       {
         "key": "nx-graph",
         "filename": "nx-graph.md",
-        "title": "Nx 22 Project Graph & Task Pipeline Map",
+        "title": "Turborepo 2 Project Graph & Task Pipeline Map",
         "category": "Monorepo Orchestration",
-        "summary": "Visual Mermaid diagram of Nx 22 task execution graph, caching pipelines, and project tag hierarchy.",
+        "summary": "Visual Mermaid diagram of Turborepo 2 task execution graph, caching pipelines, and project tag hierarchy.",
         "relativePath": "codebase-maps/log-1(26-08-24)/nx-graph.md",
         "sizeBytes": 2485
       },

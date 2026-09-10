@@ -7,18 +7,18 @@
 
 ## Quick Stats
 
-| Metric                | Score                  | Status |
-| --------------------- | ---------------------- | ------ |
-| Build System (Nx)     | 9/10                   | 🟢 A+  |
-| CI/CD Pipeline        | 9/10                   | 🟢 A+  |
-| Dependency Management | 10/10                  | 🟢 A+  |
-| Code Quality          | 8/10                   | 🟢 A   |
-| Error Handling        | 7/10                   | 🟡 B   |
-| Documentation         | 8/10                   | 🟢 A   |
-| Test Coverage         | 6/10 (40%+ target met) | 🟡 B   |
-| Observability         | 9/10                   | 🟢 A+  |
+| Metric                   | Score                  | Status |
+| ------------------------ | ---------------------- | ------ |
+| Build System (Turborepo) | 9/10                   | 🟢 A+  |
+| CI/CD Pipeline           | 9/10                   | 🟢 A+  |
+| Dependency Management    | 10/10                  | 🟢 A+  |
+| Code Quality             | 8/10                   | 🟢 A   |
+| Error Handling           | 7/10                   | 🟡 B   |
+| Documentation            | 8/10                   | 🟢 A   |
+| Test Coverage            | 6/10 (40%+ target met) | 🟡 B   |
+| Observability            | 9/10                   | 🟢 A+  |
 
-**Gap Closed**: Phase 5.2 complete — Nx monorepo orchestration, local Ollama execution (`gemma4` + 768-dim nomic-embed-text), database-backed embedding cache, LLM-driven tool dispatch with confidence scoring, RLS security triggers hardened (P0 resolved), 61 migrations, all quality gates passing.
+**Gap Closed**: Phase 5.2 complete — Turborepo monorepo orchestration, local Ollama execution (`gemma4` + 768-dim nomic-embed-text), database-backed embedding cache, LLM-driven tool dispatch with confidence scoring, RLS security triggers hardened (P0 resolved), 111 migrations, all quality gates passing.
 
 ---
 
@@ -26,7 +26,7 @@
 
 ### Build & Monorepo ✅
 
-- **Nx Migration**: Transitioned build orchestration from Turborepo to Nx 22.7.5 to stabilize Jest unit testing and resolve parallel runner environment timeouts.
+- **Turborepo Migration**: Transitioned build orchestration from Nx to Turborepo 2.10.12 to stabilize Jest unit testing and resolve parallel runner environment timeouts.
 - **Dependency Integrity**: pnpm 9.15.9 workspace catalogs avoid version drift, centralizing React 19 and common packages.
 - **Task Pipelines**: Partitioned caches and target defaults defined for builds, type-checking, CSS/token lints, and code generation.
 
@@ -71,15 +71,15 @@
 
 ## Industry Standards Comparison
 
-| Category                          | Arch Systems | Industry | Grade |
-| --------------------------------- | ------------ | -------- | ----- |
-| Build System (Nx Orchestration)   | 9/10         | 7/10     | 🟢 A+ |
-| CI/CD (Quality gates & pipelines) | 9/10         | 7/10     | 🟢 A+ |
-| Dependencies (pnpm catalogs)      | 10/10        | 6/10     | 🟢 A+ |
-| Code Quality (ESLint + Prettier)  | 8/10         | 7/10     | 🟢 A  |
-| Test Coverage                     | 40%+         | 70%      | 🟡 C  |
-| Error Handling                    | 7/10         | 6/10     | 🟢 B  |
-| Documentation                     | 8/10         | 5/10     | 🟢 A  |
+| Category                               | Arch Systems | Industry | Grade |
+| -------------------------------------- | ------------ | -------- | ----- |
+| Build System (Turborepo Orchestration) | 9/10         | 7/10     | 🟢 A+ |
+| CI/CD (Quality gates & pipelines)      | 9/10         | 7/10     | 🟢 A+ |
+| Dependencies (pnpm catalogs)           | 10/10        | 6/10     | 🟢 A+ |
+| Code Quality (ESLint + Prettier)       | 8/10         | 7/10     | 🟢 A  |
+| Test Coverage                          | 40%+         | 70%      | 🟡 C  |
+| Error Handling                         | 7/10         | 6/10     | 🟢 B  |
+| Documentation                          | 8/10         | 5/10     | 🟢 A  |
 
 **Verdict**: Arch Systems has **best-in-class local orchestration and offline capability**, with test coverage as the primary remaining gap.
 
@@ -95,7 +95,7 @@
 ### 2. Dependency Management & Build Orchestration (9/10)
 
 - Single source of truth versions via pnpm catalogs.
-- Unified task pipeline caches built and managed under Nx 22.
+- Unified task pipeline caches built and managed under Turborepo 2.x.
 
 ---
 
@@ -115,15 +115,15 @@
 
 ## Phase Completion
 
-| Phase     | Status  | Score Achieved | Key Deliverables                                             |
-| --------- | ------- | -------------- | ------------------------------------------------------------ |
-| Phase 1   | ✅ Done | 8.0/10         | Coverage 40%+, @repo/errors, quality gates                   |
-| Phase 2   | ✅ Done | 8.3/10         | Bundle CI, Deployment pipeline, @repo/theme token pipeline   |
-| Phase 3   | ✅ Done | 8.5/10         | LangGraph AI, MCP registry, Inngest, agent teams             |
-| Phase 4   | ✅ Done | 8.5/10         | Webhooks, partitioning, OTEL, read replica                   |
-| Phase 5   | ✅ Done | 8.5/10         | Light theme, QR access control, Highlight, Inngest, Novu     |
-| Phase 5.1 | ✅ Done | 8.6/10         | Rendering performance: Lenis/blur/rAF/adaptive FPS           |
-| Phase 5.2 | ✅ Done | 8.7/10         | Nx migration, local Ollama AI offline capabilities, P0 fixes |
+| Phase     | Status  | Score Achieved | Key Deliverables                                                    |
+| --------- | ------- | -------------- | ------------------------------------------------------------------- |
+| Phase 1   | ✅ Done | 8.0/10         | Coverage 40%+, @repo/errors, quality gates                          |
+| Phase 2   | ✅ Done | 8.3/10         | Bundle CI, Deployment pipeline, @repo/theme token pipeline          |
+| Phase 3   | ✅ Done | 8.5/10         | LangGraph AI, MCP registry, Inngest, agent teams                    |
+| Phase 4   | ✅ Done | 8.5/10         | Webhooks, partitioning, OTEL, read replica                          |
+| Phase 5   | ✅ Done | 8.5/10         | Light theme, QR access control, Highlight, Inngest, Novu            |
+| Phase 5.1 | ✅ Done | 8.6/10         | Rendering performance: Lenis/blur/rAF/adaptive FPS                  |
+| Phase 5.2 | ✅ Done | 8.7/10         | Turborepo migration, local Ollama AI offline capabilities, P0 fixes |
 
 ---
 
@@ -146,7 +146,7 @@
 ## Resources
 
 - **Stability Analysis**: `docs/wiki/project-stability-analysis.md`
-- **Nx Monorepo Structure**: `docs/wiki/concepts/nx-monorepo.md`
+- **Turborepo Monorepo Structure**: `docs/wiki/concepts/turbo-monorepo.md`
 - **AI Service**: `docs/wiki/concepts/ai-service.md`
 - **Error Package**: `@repo/errors` (ready to use)
 - **Quality Tools**: knip, markdownlint, reviewdog, syncpack (all configured)
@@ -155,4 +155,4 @@
 
 ## Last Updated
 
-June 3, 2026 — Phase 5.2 complete: Nx workspaces adopted, local Ollama integrations established, RLS security P0 vulnerabilities resolved, embedding cache added, 61 migrations completed, and all tests green.
+June 3, 2026 — Phase 5.2 complete: Turborepo workspaces adopted, local Ollama integrations established, RLS security P0 vulnerabilities resolved, embedding cache added, 111 migrations completed, and all tests green.

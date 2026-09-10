@@ -1,6 +1,6 @@
 # Arch-Systems Portal: Cohesive System Architecture & Flow Map
 
-This document presents the detailed architectural breakdown and data flows of the Next.js 15 monorepo system. To visualize these interactions, refer to the high-resolution architecture diagrams in the carousel below.
+This document presents the detailed architectural breakdown and data flows of the Next.js 16 monorepo system. To visualize these interactions, refer to the high-resolution architecture diagrams in the carousel below.
 
 ```carousel
 ![System Flows Map (Dark Mode)](system_flows_dark.png)
@@ -16,7 +16,7 @@ This document presents the detailed architectural breakdown and data flows of th
 
 ## 🏗️ Architectural Overview & Caching Mechanics
 
-The Arch-Systems Mining Operations Portal is built as a highly scalable Next.js 15 monorepo running on Node.js (via Turborepo and `pnpm` workspaces). The application enforces strict security bounds, isolated department contexts, and sub-millisecond response guarantees through a multi-tier database and caching topology.
+The Arch-Systems Mining Operations Portal is built as a highly scalable Next.js 16 monorepo running on Node.js (via Turborepo and `pnpm` workspaces). The application enforces strict security bounds, isolated department contexts, and sub-millisecond response guarantees through a multi-tier database and caching topology.
 
 ### ⚡ Caching Tier Breakdown
 

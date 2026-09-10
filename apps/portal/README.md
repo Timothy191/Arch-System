@@ -1,6 +1,6 @@
 # Arch-Systems Portal
 
-Next.js 15 App Router application for the Arch-Systems (Plantcor) mining operations portal.
+Next.js 16 App Router application for the Arch-Systems (Plantcor) mining operations portal.
 
 ## Quick Start
 

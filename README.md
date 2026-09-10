@@ -9,7 +9,7 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 ### Applications (`apps/`)
 
-- **`portal`**: The main Next.js 15+ (App Router) application. High-density dashboards, real-time monitoring, and data entry forms.
+- **`portal`**: The main Next.js 16+ (App Router) application. High-density dashboards, real-time monitoring, and data entry forms.
 - **`cms`**: Payload CMS v3 (headless) for managing system content and documentation.
 - **`overview`**: A standalone Next.js application for architectural visualization and system-wide monitoring.
 

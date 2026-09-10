@@ -3,7 +3,7 @@
 > Content catalog for the Arch-Systems (Plantcor) company knowledge base.
 > Read this first to find relevant pages for any query.
 > Last updated: 2026-06-18 | Total pages: 60 (16 concepts + 9 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
-> Current project version: Phase 5.2 (Localisation & Nx) | Next.js 15 | React 19.2.6 | Supabase | Light Theme | 61 Migrations
+> Current project version: Phase 5.2 (Localisation & Turborepo) | Next.js 16 | React 19.2.7 | Supabase | Light Theme | 111 Migrations
 
 ## Quick Reference
 
@@ -12,7 +12,7 @@
 | Understand project history    | [[gittree/README\|Git Tree & Branches]]               |
 | View project structure        | [[arch-systems]]                                      |
 | Understand system & stack     | [[project-overview]]                                  |
-| Start developing              | [[nx-monorepo]] → [[supabase-local-dev]]              |
+| Start developing              | [[turbo-monorepo]] → [[supabase-local-dev]]           |
 | Build a department feature    | [[department-features]] → [[portal-app-architecture]] |
 | Add UI components             | [[design-system]]                                     |
 | Work with database            | [[database-schema]] → [[rls-policy]]                  |
@@ -37,7 +37,7 @@
 
 ## Entities (9)
 
-- [[arch-systems|Arch-Systems (Plantcor)]] — Multi-departmental mining operations portal built as an Nx monorepo
+- [[arch-systems|Arch-Systems (Plantcor)]] — Multi-departmental mining operations portal built as an Turborepo monorepo
 - [[drilling-department|Drilling Department]] — Drill rig operations & bit depth telemetry
 - [[production-department|Production Department]] — Coal yield, tonnage & extraction tracking
 - [[access-control-department|Access Control Department]] — Site access, badging & security
@@ -49,9 +49,9 @@
 ### Architecture & Setup
 
 - [[project-overview|Project Overview & Tech Stack]] — Authoritative entry point for system architecture, the technology stack, design decisions, and development workflow
-- [[nx-monorepo|Nx Monorepo Structure]] — Workspace layout, target configuration defaults, and build commands (migrated from Turborepo)
+- [[turbo-monorepo|Turborepo Monorepo Structure]] — Workspace layout, target configuration defaults, and build commands (migrated from Turborepo)
 - [[supabase-local-dev|Supabase Local Development]] — Local DB, auth, and storage setup with remote sync
-- [[portal-app-architecture|Portal App Architecture]] — Next.js 15 App Router, RSC, server actions, and feature organization
+- [[portal-app-architecture|Portal App Architecture]] — Next.js 16 App Router, RSC, server actions, and feature organization
 
 #### Architecture Decision Records (ADRs)
 
@@ -62,7 +62,7 @@
 - [[adr-005-zustand-state-management|ADR-005]] — Zustand for client state
 - [[adr-006-multi-provider-ai|ADR-006 (Superseded)]] — Multi-provider AI with failover
 - [[adr-007-react-19-adoption|ADR-007]] — React 19 adoption strategy
-- [[adr-008-nx-monorepo|ADR-008]] — Nx for Monorepo Management (supersedes ADR-003)
+- [[adr-008-turbo-monorepo|ADR-008]] — Turborepo for Monorepo Management (supersedes ADR-003)
 
 #### Operational Guides
 
@@ -74,7 +74,7 @@
 
 ### Database & Security
 
-- [[database-schema|Database Schema]] — Full PostgreSQL schema (61 migrations) with RLS policies, tables, and views
+- [[database-schema|Database Schema]] — Full PostgreSQL schema (111 migrations) with RLS policies, tables, and views
 - [[rls-policy|RLS Policy Standards]] — Row Level Security requirements and auth helpers
 - [[auth-middleware|Auth and Middleware]] — Supabase auth flow, middleware, role-based access, cross-department permissions
 - [[database-optimization|Database Optimization & Scaling]] — Partitioning, PgBouncer, read replicas, materialized views
@@ -105,7 +105,7 @@
 - [[testing-frameworks|Testing Framework Comparison]] — Jest vs Vitest vs Node.js Test Runner for React 19
 - [[state-management|State Management Comparison]] — Zustand vs Redux Toolkit vs React Context for RSC architecture
 - [[rich-text-editors|Rich Text Editor Comparison]] — Novel vs Tiptap vs Slate.js vs Lexical
-- [[monorepo-tools|Monorepo Tool Comparison]] — Nx vs Turborepo vs pnpm workspaces
+- [[monorepo-tools|Monorepo Tool Comparison]] — Turborepo vs Nx vs pnpm workspaces
 - [[database-backend|Database/Backend Comparison]] — Supabase vs Firebase vs self-hosted PostgreSQL
 - [[map-libraries|Map/GIS Library Comparison]] — react-map-gl + MapLibre vs Google Maps vs Leaflet
 - [[styling-approaches|Styling Approach Comparison]] — Tailwind CSS vs CSS-in-JS vs CSS Modules

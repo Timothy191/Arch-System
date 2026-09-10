@@ -54,7 +54,7 @@ The monorepo is a **Turborepo + pnpm workspaces** project (`turbo run` is the en
 
 | Path                | Purpose                                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `apps/portal`       | Next.js 15+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
+| `apps/portal`       | Next.js 16+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
 | `apps/cms`          | Payload CMS v3 headless content service.                                                                                   |
 | `apps/overview`     | Standalone architecture visualization (React Flow).                                                                        |
 | `apps/ci-observer`  | CI observation helper app.                                                                                                 |
@@ -325,7 +325,7 @@ Most common cause: a generated file is missing or stale. Run `pnpm policy:gen &&
 
 ### Circular dependency detected
 
-`tools/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `pnpm graph` (Nx) or `madge --circular packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
+`tools/circular-dep-detect.cjs` exits non-zero on cycles. Identify the cycle with `pnpm graph` (Turborepo) or `madge --circular packages/<pkg>`, then break it by moving the shared code into a new package or by introducing an interface at the boundary.
 
 ### Husky hook skipped with `--no-verify`
 

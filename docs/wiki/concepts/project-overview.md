@@ -4,7 +4,7 @@ created: 2026-06-15
 updated: 2026-06-15
 type: concept
 tags: [architecture, overview, documentation, system, stack]
-sources: [package.json, pnpm-workspace.yaml, nx.json, CLAUDE.md, PRODUCT.md, DESIGN.md]
+sources: [package.json, pnpm-workspace.yaml, turbo.json, CLAUDE.md, PRODUCT.md, DESIGN.md]
 confidence: high
 ---
 
@@ -59,12 +59,12 @@ Operational and employee data is sacred. Security cannot rely solely on frontend
 
 ## 3. Monorepo Architecture
 
-The codebase is organized as an **Nx Monorepo** using **pnpm workspaces** for strict dependency management. Nx manages task pipeline caching (builds, linting, tests) while pnpm workspace catalogs prevent dependency version drift.
+The codebase is organized as an **Turborepo Monorepo** using **pnpm workspaces** for strict dependency management. Turborepo manages task pipeline caching (builds, linting, tests) while pnpm workspace catalogs prevent dependency version drift.
 
 ```
 Arch-System/
 ├── apps/
-│   ├── portal/             # Main Next.js 15 App Router application (port 3000)
+│   ├── portal/             # Main Next.js 16 App Router application (port 3000)
 │   ├── cms/                # Headless Payload CMS v3 for system docs (port 3001)
 │   └── overview/           # Standalone Next.js 18 React Flow visualization (port 3002)
 ├── packages/
@@ -79,13 +79,13 @@ Arch-System/
 │   └── eval/               # Python & DeepEval LLM evaluation compliance harness
 ```
 
-### Why Nx?
+### Why Turborepo?
 
-Previously managed under Turborepo, the monorepo was migrated to **Nx** to:
+Previously managed under Turborepo, the monorepo was migrated to **Turborepo** to:
 
-1. **Stabilize Jest Unit Testing**: Nx partitions Jest caches cleanly, preventing environment leakage across package boundaries.
-2. **Fine-Grained Task Orchestration**: Nx targets depend directly on compile-order pipelines (e.g., `@repo/theme:build` runs token code generation via Style Dictionary, which `@repo/ui:build` consumes, which `apps/portal:build` depends on).
-3. **Optimized Build Cache**: Nx computes SHA hashes of project source files, dependencies, and environment configurations to skip redundant compilations, saving significant development and CI compile time.
+1. **Stabilize Jest Unit Testing**: Turborepo partitions Jest caches cleanly, preventing environment leakage across package boundaries.
+2. **Fine-Grained Task Orchestration**: Turborepo targets depend directly on compile-order pipelines (e.g., `@repo/theme:build` runs token code generation via Style Dictionary, which `@repo/ui:build` consumes, which `apps/portal:build` depends on).
+3. **Optimized Build Cache**: Turborepo computes SHA hashes of project source files, dependencies, and environment configurations to skip redundant compilations, saving significant development and CI compile time.
 
 ---
 
@@ -95,8 +95,8 @@ Previously managed under Turborepo, the monorepo was migrated to **Nx** to:
 
 | Technology                   | Role          | Why It Was Chosen                                                                                                                                                                                                                           |
 | :--------------------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Next.js 15 (App Router)**  | Framework     | Next.js App Router enforces clean routing patterns (Route Groups). It separates client-side interactivity from server-side data fetching via React Server Components (RSC), drastically reducing JavaScript bundle sizes sent to clients.   |
-| **React 19.2.6**             | UI Library    | Leverages the latest React compiler features, unified hooks (`useActionState`, `useFormStatus`), and native hydration error recovery, critical for complex state transitions.                                                               |
+| **Next.js 16 (App Router)**  | Framework     | Next.js App Router enforces clean routing patterns (Route Groups). It separates client-side interactivity from server-side data fetching via React Server Components (RSC), drastically reducing JavaScript bundle sizes sent to clients.   |
+| **React 19.2.7**             | UI Library    | Leverages the latest React compiler features, unified hooks (`useActionState`, `useFormStatus`), and native hydration error recovery, critical for complex state transitions.                                                               |
 | **Tailwind CSS 3.4 (OKLCH)** | Styling       | Allows standard utility usage mapped directly to design tokens. The OKLCH color space ensures uniform perceptual contrast in color scales (essential for status indicators).                                                                |
 | **Zustand 5**                | Client State  | Provides a lightweight, boilerplate-free state manager that runs outside the React render tree. Ideal for non-persisted global portal states, such as the active Shift Selector or layout Focus Mode.                                       |
 | **Framer Motion & GSAP**     | Motion        | Framer Motion handles dynamic React state transitions and spring physics (such as active button presses). GSAP handles high-performance layout animations (like background wave patterns and heavy panel transitions) without causing jank. |
@@ -163,6 +163,5 @@ On-premises deployments target **Rocky Linux / RHEL** architectures.
 - **[DESIGN.md](../../../DESIGN.md)** — Tokens, HSL mapping, and typography.
 - **[PRODUCT.md](../../../PRODUCT.md)** — User personas and product objectives.
 - **[DEPLOYMENT.md](../../../DEPLOYMENT.md)** — Local and production deploy instructions.
-- **[nx-monorepo](./nx-monorepo.md)** — Workspace and build configs.
+- **[turbo-monorepo](./turbo-monorepo.md)** — Workspace and build configs.
 - **[supabase-local-dev](./supabase-local-dev.md)** — Supabase local configuration.
-

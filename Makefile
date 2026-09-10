@@ -35,7 +35,7 @@ outline: ## Print visual overview of projects, apps, and packages in workspace
 	@echo 'Arch-Systems Project Architecture Outline'
 	@echo '========================================='
 	@echo 'Apps:'
-	@echo '  • apps/portal           - Main operational mining portal (Next.js 15 App Router)'
+	@echo '  • apps/portal           - Main operational mining portal (Next.js 16 App Router)'
 	@echo '  • apps/aria-overlay     - Real-time accessibility and assistive HUD layer'
 	@echo ''
 	@echo 'Packages & Shared Libs:'

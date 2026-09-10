@@ -1,21 +1,21 @@
-# Wiki Update Summary - 2026-06-03 (Nx & Ollama Migration)
+# Wiki Update Summary - 2026-06-03 (Turborepo & Ollama Migration)
 
 ## Changes Made — 2026-06-03 10:25 UTC
 
-Refreshed the wiki to document the completed Phase 5.2. This includes migrating build orchestration to Nx and transitioning the AI service to local, offline-capable Ollama models.
+Refreshed the wiki to document the completed Phase 5.2. This includes migrating build orchestration to Turborepo and transitioning the AI service to local, offline-capable Ollama models.
 
 ### ✅ Files Created (New)
 
-1. **concepts/adr-008-nx-monorepo.md** — Documents the transition from Turborepo to Nx 22 to resolve test runner hangs and enable fine-grained cache rules.
+1. **concepts/adr-008-turbo-monorepo.md** — Documents the transition from Nx to Turborepo 2.x to resolve test runner hangs and enable fine-grained cache rules.
 2. **concepts/adr-009-local-ollama-ai.md** — [Deleted] Details the migration of chat/embeddings to local Ollama (subsequently removed as AI features are discontinued).
 
 ### ✅ Files Renamed & Updated
 
-1. **concepts/nx-monorepo.md** (Renamed from `concepts/turborepo-monorepo.md`) — Updated to explain the Nx workspace layouts, commands, and target default pipelines.
+1. **concepts/turbo-monorepo.md** (Renamed from `concepts/turborepo-monorepo.md`) — Updated to explain the Turborepo workspace layouts, commands, and target default pipelines.
 
 ### ✅ Files Updated
 
-1. **STATUS.md** — Upgraded project status to Phase 5.2. Added details for Local AI execution, Nx pipelines, security hardening, 61 completed migrations, and the stabilized Jest testing gate.
+1. **STATUS.md** — Upgraded project status to Phase 5.2. Added details for Local AI execution, Turborepo pipelines, security hardening, 61 completed migrations, and the stabilized Jest testing gate.
 2. **PROJECT_STATUS_SUMMARY.md** — Updated overall score, stats tables, cumulative accomplishments, and priorities.
 3. **index.md** — Added new ADR links, renamed concept page reference, and bumped version to Phase 5.2.
 4. **entities/arch-systems.md** — Refreshed technology stack, monorepo structure, current metrics, and status narrative.
@@ -23,7 +23,7 @@ Refreshed the wiki to document the completed Phase 5.2. This includes migrating 
 6. **concepts/ai-service.md** — [Deleted] Rewritten to document the local Ollama provider, agent graph state machine, LLM-driven tool dispatch, persistent embedding cache, and tool caching logic (subsequently removed as AI features are discontinued).
 7. **concepts/adr-003-turborepo-monorepo.md** — Marked as superseded by ADR-008.
 8. **concepts/adr-006-multi-provider-ai.md** — Marked as superseded by ADR-009.
-9. **comparisons/monorepo-tools.md** — Updated tool dimension analysis and verdict in favor of Nx.
+9. **comparisons/monorepo-tools.md** — Updated tool dimension analysis and verdict in favor of Turborepo.
 10. **log.md** — Appended activities log Turn.
 
 ---
@@ -144,7 +144,7 @@ Total: 59 pages
    - Gantt Charts for timelines
    - Scatter Plots for correlations
    - Heatmaps for density/patterns
-   - Implementation recommendations for React 19/Next.js 15
+   - Implementation recommendations for React 19/Next.js 16
 
 4. **gittree/conceptual-code-graphs.md** — Program analysis (258 lines)
    - Abstract Syntax Trees (ASTs)

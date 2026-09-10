@@ -443,8 +443,8 @@ export const TECH_STACK = [
         description: "In-memory session, department UUID cache, and Redlock distributed locks",
       },
       {
-        name: "Nx 22 + Turborepo",
-        version: "22.7.5",
+        name: "Turborepo 2.x",
+        version: "2.10.12",
         description: "Affected task graph, cached pipeline execution & monorepo enforcement",
       },
       {

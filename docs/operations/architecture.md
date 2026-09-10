@@ -47,7 +47,7 @@ The Control Room system is a real-time operational dashboard for monitoring and 
 
 **Technology Stack:**
 
-- Next.js 15+ with App Router
+- Next.js 16+ with App Router
 - React 19
 - TypeScript
 - Tailwind CSS

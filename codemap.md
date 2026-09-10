@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Multi-departmental industrial mining operations portal monorepo (Nx 22 + pnpm workspaces) serving high-vigilance dashboards for drilling, production, engineering, access control, badging, and SCADA control room operations.
+Multi-departmental industrial mining operations portal monorepo (Turborepo 2 + pnpm workspaces) serving high-vigilance dashboards for drilling, production, engineering, access control, badging, and SCADA control room operations.
 
 ## Design
 

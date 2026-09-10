@@ -8,16 +8,16 @@
 
 ## 🎯 Project Overview
 
-**Arch-Systems (Plantcor)** — Multi-departmental mining operations portal built as a full-stack Nx monorepo with local AI-powered agent orchestration, real-time monitoring, and enterprise security.
+**Arch-Systems (Plantcor)** — Multi-departmental mining operations portal built as a full-stack Turborepo monorepo with local AI-powered agent orchestration, real-time monitoring, and enterprise security.
 
 ### Technology Stack
 
-- **Frontend:** Next.js 15 (App Router) + React 19.2.6 + TypeScript
+- **Frontend:** Next.js 16 (App Router) + React 19.2.7 + TypeScript
 - **Backend:** Supabase (PostgreSQL + Auth + RLS + Read Replicas)
 - **State:** Zustand 5
 - **Infrastructure:** Inngest workflow engine, Payload CMS v3, Docker
 - **Monitoring:** Sentry, Redis cache, WebSocket subscriptions, Highlight session replay, OpenTelemetry
-- **Tools:** Nx 22 + pnpm workspaces
+- **Tools:** Turborepo 2.x + pnpm workspaces
 
 ---
 
@@ -30,7 +30,7 @@
 
 **Deliverables:**
 
-- [x] Next.js 15 + React 19.2.6 setup
+- [x] Next.js 16 + React 19.2.7 setup
 - [x] Supabase local dev environment
 - [x] Login page with video backgrounds
 - [x] Department navigation system
@@ -157,10 +157,10 @@
 
 **Deliverables:**
 
-- [x] **Nx Migration**: Replaced Turborepo with Nx 22.7.5 to stabilize Jest unit testing runner and environment
+- [x] **Turborepo Migration**: Replaced Nx with Turborepo 2.10.12 to stabilize Jest unit testing runner and environment
 - [x] **Security Hardening**: Hardened `handle_new_user` triggers (ignoring user-supplied metadata roles), locked down employee update self-elevation rules, and added dozer roll authoritativeness constraints (migration 057)
 - [x] **Performance Optimization**: Created `access_control_metrics_jsonb` RPC (migration 055) replacing 22 separate database queries with a single query, and indexed missing FK columns (migration 060)
-- [x] `pnpm quality` fully passing under Nx orchestration
+- [x] `pnpm quality` fully passing under Turborepo orchestration
 
 ## 📊 Database Schema Status
 
@@ -221,7 +221,7 @@
 
 **Concepts (12):** ✅
 
-- Nx Monorepo Structure
+- Turborepo Monorepo Structure
 - Supabase Local Development
 - Portal App Architecture
 - Database Schema
@@ -243,7 +243,7 @@
 - ADR-005: Zustand State Management
 - ADR-006: Multi-Provider AI (Superseded)
 - ADR-007: React 19.2.6 Adoption
-- ADR-008: Nx for Monorepo Management (New)
+- ADR-008: Turborepo for Monorepo Management (New)
 
 **Operational Guides (4):** ✅
 
@@ -324,7 +324,7 @@
 ### What's Ready
 
 - ✅ Full portal application (departments: drilling, production, access-control, access-card-actions, engineering, control-room)
-- ✅ Production authentication & RLS (61 migrations)
+- ✅ Production authentication & RLS (111 migrations)
 - ✅ Real-time dashboards & monitoring
 - ✅ Light-only theme (macOS Sonoma palette, design system compliant)
 - ✅ Highlight + OTEL observability (session replay, server tracing)
@@ -337,7 +337,7 @@
 - ✅ Style Dictionary token pipeline
 - ✅ Admin data API with lockdown & role elevation security
 - ✅ GitHub Actions production CI/CD pipeline
-- ✅ `pnpm quality` gate passing under Nx orchestration
+- ✅ `pnpm quality` gate passing under Turborepo orchestration
 
 ### Current Quality Gate (2026-06-03)
 
@@ -457,7 +457,7 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 - ~~Read replica client~~ → Done (@repo/supabase)
 - ~~Admin data API security~~ → Done (migration 043, superadmin lockdown)
 - ~~Vulnerability cleanup~~ → Done (migration 057, ignore client role metadata)
-- ~~Test runner stabilization~~ → Done (migrated from Turborepo to Nx)
+- ~~Test runner stabilization~~ → Done (migrated from Nx to Turborepo)
 
 ### Remaining Future Work
 
@@ -479,7 +479,7 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 
 **Project Knowledge:**
 
-- Architecture: See [[nx-monorepo]]
+- Architecture: See [[turbo-monorepo]]
 - Database: See [[database-schema]]
 - Authentication: See [[auth-middleware]]
 - Deployment: See [[how-to-deploy-production]]
@@ -488,6 +488,6 @@ Executive KPI dashboard, PDF/Excel report generation, trend forecasting, data ex
 
 ## Summary
 
-**Arch-Systems (Plantcor)** has completed Phase 5.2 with a production-ready multi-departmental portal, full light-theme UI, Highlight + OTEL observability, Inngest background jobs, QR access control, 61 database migrations, and a passing `pnpm quality` gate. Phase 5.2 added the migration to Nx build orchestration, resolving test-runner instability. The project is well-documented, secure, and ready for on-premises deployment.
+**Arch-Systems (Plantcor)** has completed Phase 5.2 with a production-ready multi-departmental portal, full light-theme UI, Highlight + OTEL observability, Inngest background jobs, QR access control, 61 database migrations, and a passing `pnpm quality` gate. Phase 5.2 added the migration to Turborepo build orchestration, resolving test-runner instability. The project is well-documented, secure, and ready for on-premises deployment.
 
-**Project Health:** 🟢 **Excellent** — Phase 5.2 complete, 61 migrations, Nx build system, `pnpm quality` passing.
+**Project Health:** 🟢 **Excellent** — Phase 5.2 complete, 111 migrations, Turborepo build system, `pnpm quality` passing.
