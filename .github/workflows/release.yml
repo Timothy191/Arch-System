@@ -11,7 +11,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # This makes Actions fetch all Git history so Changesets can generate changelogs with the correct commits
           fetch-depth: 0
