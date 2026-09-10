@@ -15,10 +15,11 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 ```bash
 pnpm install
 cp apps/portal/env/.env.example apps/portal/.env          # fill Supabase + Sentry keys
-pnpm --filter @repo/database supabase:dev                 # local Postgres + Auth (:54321), separate terminal
-pnpm dev                                                  # portal on :3000 (scripts/dev.sh)
+pnpm dev                                                  # portal on :3000; auto-starts local Supabase (scripts/dev.sh)
 pnpm quality                                              # full quality gate — run before push
 ```
+
+`pnpm quality` runs: `turbo run lint type-check test lint:tokens lint:css` + `lint:root`, `lint:styles`, `lint:css-perf`, `lint:spelling`, `format:check`, `deps:lint` (syncpack), `knip`, `policy:check`, `audit:compliance`, `html:check`.
 
 ### Development Targets
 
@@ -40,11 +41,11 @@ pnpm quality                                              # full quality gate �
 | Rollback production deploy         | `pnpm deploy:rollback` (`deploy.sh production --rollback`)                   |
 | Dev server exposed via tunnel      | `pnpm dev:cloudflare` · `pnpm dev:hosted`                                    |
 | Verify prod env + standalone build | `./scripts/verify-prod-env.sh .env.production`                               |
-| Generate DB types                  | `pnpm db-gen`                                                                |
-| Push DB migrations                 | `pnpm db-push`                                                               |
-| Reset local DB                     | `pnpm db-reset` (destructive)                                                |
-| Start local Supabase               | `pnpm db-start`                                                              |
-| Generate DB docs                   | `pnpm db-docs`                                                               |
+| Generate DB types                  | `pnpm --filter @repo/database supabase:gen`                                  |
+| Push DB migrations                 | `pnpm --filter @repo/database supabase:push`                                 |
+| Reset local DB                     | `pnpm --filter @repo/database supabase:reset` (destructive)                  |
+| Start local Supabase               | `pnpm dev` (auto) or `cd packages/supabase && npx supabase start`            |
+| Generate DB docs                   | `pnpm db:docs`                                                               |
 | Start monitoring HUD               | `pnpm monitor`                                                               |
 | Start Grafana stack                | `pnpm monitor:grafana`                                                       |
 | Stop Grafana stack                 | `pnpm monitor:grafana-stop`                                                  |
@@ -109,6 +110,10 @@ packages/
 ├── utils/           # Date/formatting/shift helper functions
 └── types/           # Shared TypeScript interfaces & types
 
+libs/
+├── features/<domain>/   # Domain modules: <domain>/ui (components) + <domain>/data-access (hooks/services) — auth, departments, hub
+└── shared/              # Cross-cutting: data-access, utils, hooks
+
 tools/
 ├── repo/policy-compiler.cjs      # SSoT policy compiler → generates rules + eslint boundaries
 ├── audits/design-audit.cjs        # Validates OKLCH color usage & theme compliance
@@ -132,6 +137,63 @@ scripts/
 8. **Migrations SSoT**: Only `packages/database/migrations/NNN_description.sql` is source of truth. NEVER edit `packages/supabase/supabase/migrations/` — it's a deploy-time copy (a PreToolUse hook blocks edits there).
 9. **Policy SSoT**: `tools/repo/policy-compiler.cjs` generates `tools/repo/policy/*.json` + `tools/repo/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI fails on drift (`pnpm policy:check`).
 10. **Generated output**: Never hand-edit generated files (`packages/theme/src/tokens/generated.ts`, `variables-generated.css`, generated DB types). Regenerate via their source commands instead.
+
+## Key Conventions
+
+### Error Handling
+
+- All errors subclass `@repo/errors` (`AppError` base: `ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, …). Never throw generic `Error`.
+- Server Actions / API routes catch via `isAppError(err)` and return `{ success, error, code }`.
+
+### Server Actions
+
+- Declare `"use server"` and call `createServerSupabaseClient()` on line 1; validate the user immediately.
+- Mutating actions must call `revalidatePath()` / `revalidateTag()`.
+
+### Client State
+
+- **Zustand 5**: UI chrome only (menus, modals, toggles) — never server data.
+- **TanStack React Query**: all server-side data.
+- **XState**: complex async workflows (`apps/portal/lib/plugins/machines/`).
+
+### Design System (`@repo/theme`)
+
+- Light theme only (`data-theme="light"`). No dark mode.
+- Semantic tokens only — never hardcode OKLCH/hex colors.
+- Forbidden: raw `box-shadow` and Tailwind `shadow-*`; use tokenized shadows (`shadow-card`, `shadow-window`, `shadow-diffusion-*`).
+- Merge classes with `cn()` from `@repo/ui/lib/utils`; import icons as named imports (`import { Drill } from "lucide-react"`, never `import * as Icons`).
+- Animate only `opacity`, `transform`, `background-color`, `border-color`, `color`; easing `cubic-bezier(0.16, 1, 0.3, 1)`.
+- Standard glass surface: `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
+
+### TypeScript
+
+- Strict mode; no `any`, no `// @ts-ignore`. Use `unknown` + type guards or Zod at boundaries.
+
+### Tests
+
+- Mock at the network boundary (Supabase, Redis), never at the function call. Redis uses a global in-memory `Map` mock in `apps/portal/setupTests.ts`.
+- Add explicit `moduleNameMapper` entries in `apps/portal/jest.config.js` for any new `@repo/*` import or subpath export.
+- UI invariant: always light mode (`#f3f4f6` background, luminance > 200).
+
+### Agent Tracing
+
+- Every package has an `AGENT_TRACER.md` — append an ISO 8601 timestamped entry after changes.
+- Annotate non-obvious logic with `// AGENT-TRACE: <explanation>`.
+
+### Git & Review
+
+- One commit per task; never `--no-verify` (Husky runs lint-staged + commitlint).
+- Pause for human review before merging any DB schema, RLS, or auth/authorization change.
+
+### Portal Paths & Routing
+
+- Path aliases `~/*` and `@/*` both resolve to `apps/portal/*` (sub-cuts: `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*`).
+- App Router groups: `(auth)/`, `(departments)/[department]/`, `(hub)/`, `admin/`. Static department sub-pages export their own `layout.tsx` re-exporting `DepartmentLayout`.
+
+### Dependencies & Runtime
+
+- Shared deps use `catalog:` / `catalog:react19` prefixes from `pnpm-workspace.yaml`.
+- Turbopack only (dev + production). Bun is not supported for the portal app.
 
 ## Deployment (Cloudflare Tunnel + Edge CDN)
 
@@ -168,8 +230,8 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 #### Database Changes
 
 1. Modify SQL in `packages/database/migrations/`
-2. Run `pnpm db-push` to apply to local Supabase
-3. Run `pnpm db-gen` to regenerate TypeScript types
+2. Run `pnpm --filter @repo/database supabase:push` to apply to local Supabase
+3. Run `pnpm --filter @repo/database supabase:gen` to regenerate TypeScript types
 4. Commit both migration files and generated types
 
 #### UI/Component Development
@@ -189,15 +251,15 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 
 #### Supabase Setup
 
-1. Requires Docker: `pnpm db-start` launches Supabase stack
+1. Requires Docker: `pnpm dev` auto-starts the stack, or `cd packages/supabase && npx supabase start`
 2. Studio available at <http://localhost:54323>
 3. Anonymous API: <http://localhost:54321>
 4. Service role key available for server-side operations
-5. Database resets: `pnpm db-reset` (WARNING: destructive)
+5. Database resets: `pnpm --filter @repo/database supabase:reset` (WARNING: destructive)
 
 ### Testing Strategy
 
-- **Unit Tests**: Vitest (via Turborepo test pipeline) - co-located with implementation
+- **Unit Tests**: Jest (@swc/jest) via Turborepo test pipeline - co-located with implementation
 - **E2E Tests**: Playwright - requires dev server running on :3000
 - **Visual Tests**: Playwright image snapshots for UI regression detection
 - **Accessibility**: axe-core automated scanning (`pnpm test:a11y`)
@@ -206,7 +268,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 ### Code Generation
 
 1. **Design Tokens**: `pnpm turbo run codegen --filter=theme` converts CSS variables to TypeScript
-2. **Database Types**: `pnpm db-gen` generates TS from Supabase schema
+2. **Database Types**: `pnpm --filter @repo/database supabase:gen` generates TS from Supabase schema
 3. **Token Validation**: `pnpm turbo run lint:tokens --filter=theme` validates design token usage
 4. **CSS Linting**: `pnpm turbo run lint:css --filter=theme` ensures Stylelint compliance
 
@@ -220,7 +282,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 ### Troubleshooting
 
 - **Port Conflicts**: If :3000 is busy, kill existing Next.js processes
-- **Supabase Connection**: Verify `pnpm db-start` running and .env credentials
+- **Supabase Connection**: Verify local Supabase is running (`npx supabase status` in `packages/supabase/`) and .env credentials
 - **Type Errors**: Run `pnpm type-check` to catch TS issues early
 - **Lint Failures**: Use `pnpm lint --fix` for auto-fixable issues
 - **Tests Flaky**: Check for missing awaits or race conditions in test setup
@@ -234,7 +296,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 - **Tests**: `.test.ts` or `.test.tsx` files co-located with source
 - **Styles**: CSS modules (`*.module.css`) or Tailwind utility classes
 - **Env Vars**: Prefixed with `NEXT_PUBLIC_` for client-side exposure
-- **Database**: SQL migrations in `packages/database/migrations/` with timestamp prefix
+- **Database**: SQL migrations in `packages/database/migrations/` with zero-padded `NNN_` prefix
 - **Config**: Environment-specific in `/env/` directories, never committed raw
 
 ## When in Doubt
