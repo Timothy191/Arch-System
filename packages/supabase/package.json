@@ -29,7 +29,6 @@
     "@opentelemetry/api": "catalog:",
     "@repo/logger": "1.0.0",
     "@supabase/ssr": "catalog:",
-    "@supabase/server": "catalog:",
     "@supabase/supabase-js": "catalog:",
     "kysely": "catalog:",
     "pg": "catalog:"

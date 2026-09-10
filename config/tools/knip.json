@@ -23,7 +23,7 @@
     "swagger-jsdoc",
     "vite-tsconfig-paths"
   ],
-  "ignoreBinaries": ["python3", "psql", "wait-on", "serve"],
+  "ignoreBinaries": ["python3", "psql", "wait-on", "serve", "biome", "poetry", "uv"],
   "ignore": [
     "**/jest.config.*",
     "**/postcss.config.*",
@@ -38,7 +38,8 @@
   "workspaces": {
     ".": {
       "entry": ["scripts/**/*.{ts,js}", ".eslintrc.{js,cjs}"],
-      "project": ["scripts/**/*.{ts,js}"]
+      "project": ["scripts/**/*.{ts,js}"],
+      "ignore": ["tsconfig.base.json"]
     },
     "apps/portal": {
       "entry": [
