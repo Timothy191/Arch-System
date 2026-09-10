@@ -20,7 +20,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
   - Database schema migrations (`packages/database`).
   - Data mutation logic (Server Actions, API routes).
   - Changes to authentication or authorization rules (RLS).
-- **Mandatory Migration Rollback Testing**: Whenever creating or editing any SQL migration under `packages/database/migrations/`, I MUST run `pnpm turbo run test:migration-rollback --filter=@repo/database` to guarantee rollback safety invariants before applying changes to the database.
+- **Mandatory Migration Rollback Testing**: Whenever creating or editing any SQL migration under `packages/database/migrations/`, I MUST run `pnpm --filter @repo/database test` to guarantee rollback safety invariants before applying changes to the database.
 
 ### Artifact Auto-Approval (MANDATORY RULE)
 
