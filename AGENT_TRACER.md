@@ -4,6 +4,20 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## 2026-09-10 — Turborepo Migration Cleanup: Policy Paths, Tool Paths, knip, Quality Gate
+
+- **Author**: Claude Code (claude.ai/code)
+- **Mandate**: Resolve the pre-existing WIP worktree (58 files) left over from the Nx→Turborepo migration — fix every consumer of the reorganized `tools/` layout and the relocated policy compiler, then land the full quality gate.
+- **Changes**:
+  - `tools/repo/policy-compiler.cjs` + `tools/repo/policy/*` (regenerated): Canonical policy output now lives at `tools/repo/policy/`; stale `tools/policy/*` deleted (git detected the rename).
+  - `tools/audits/enforce-security-checks.cjs`, `config/tools/eslint.boundaries.cjs`, `tools/repo/onboard.cjs`: Pointed at `tools/repo/policy/` instead of the old `tools/policy/` / `tools/audits/policy/` paths.
+  - `tools/audits/run-audit.cjs`, `Makefile`, and usage comments across `tools/audits/*`, `tools/ops/*`, `tools/repo/*`, `tools/scripts/run-swarm.cjs`: Updated stale `node tools/X` references after the audits/ops/repo/scripts reorganization; removed the deleted Nx-specific `apply-project-tags.cjs` flow from docs.
+  - `config/tools/knip.json`, `packages/supabase/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`: Dropped unused `@supabase/server`; ignored external binaries; lockfile re-resolved catalog ranges (react 19.3.0, @playwright/test 1.63.0, @supabase/supabase-js 2.112.3, stylelint 17.15.0).
+  - `stylelint.config.mjs`, `packages/theme/.stylelintrc.mjs`: Disabled `at-rule-prelude-no-invalid` (cannot validate Tailwind `@apply` preludes).
+  - `docs/SUPPORT.md`: Documented `TURBO_REMOTE_CACHE_URL` / `TURBO_REMOTE_CACHE_SIGNATURE_KEY`.
+  - `documentation/03-audit-reports/*`: Refreshed audit reports from the quality-gate runs.
+- **Verification**: `pnpm quality` passes (exit 0); markdownlint + prettier clean on all changed files; 5 conventional commits pushed to `origin/main` (`8a9d783..61ebec2`); worktree clean, remote tracking synchronized.
+
 ## 2026-09-08 — Nx AI-Agent Configuration for All Supported Agents
 
 - **Purpose**: Resolved the `nx configure-ai-agents` advisory by configuring every supported AI agent (OpenCode, Claude, Codex, Gemini, Copilot) with the Nx rules block, MCP wiring, and generated skills.
