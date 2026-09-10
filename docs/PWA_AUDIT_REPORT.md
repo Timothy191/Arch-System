@@ -123,12 +123,12 @@
 
 ## Phase 5 Plan Assessment (Docker Build Caching)
 
-**Original Plan:** Use `@nx-tools/nx-container` for Docker layer caching
+**Original Plan:** Use `@turbo-tools/turbo-container` for Docker layer caching
 
 **Assessment:**
 
-- ✅ Nx already configured (`nx.json` present)
-- ✅ Good alignment with existing Nx task orchestration
+- ✅ Turborepo already configured (`turbo.json` present)
+- ✅ Good alignment with existing Turborepo task orchestration
 - ⚠️ Requires cache registry setup (MinIO or GitHub Actions cache)
 - ⚠️ Will need to modify existing Docker Compose workflows
 
@@ -163,9 +163,9 @@
    - Validate against `@repo/contract`
 
 3. **Medium-term (Phase 5):**
-   - Evaluate `@nx-tools/nx-container`
+   - Evaluate `@turbo-tools/turbo-container`
    - Set up layer cache registry
-   - Integrate into Nx task graph
+   - Integrate into Turborepo task graph
 
 4. **Long-term (Phase 6):**
    - Assess Ollama resource requirements
@@ -266,9 +266,9 @@ Due to Turbopack incompatibility with PWA plugins, a manual service worker appro
    - Validate against `@repo/contract`
 
 3. **Medium-term (Phase 5):**
-   - Evaluate `@nx-tools/nx-container`
+   - Evaluate `@turbo-tools/turbo-container`
    - Set up layer cache registry
-   - Integrate into Nx task graph
+   - Integrate into Turborepo task graph
 
 4. **Long-term (Phase 6):**
    - Assess Ollama resource requirements

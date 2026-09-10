@@ -20,7 +20,7 @@ graph TD
 
 ### Current Status
 
-- **Unit/Integration Tests**: Run via `pnpm nx run-many -t test`. Test suites exist for packages and applications.
+- **Unit/Integration Tests**: Run via `pnpm turbo run test`. Test suites exist for packages and applications.
 - **Component Testing**: Storybook is integrated into `@repo/ui`.
 - **E2E Testing**: Active Playwright E2E suite under [e2e/](file:///home/timoty/Desktop/project/Arch-System/e2e).
 - **Accessibility**: [e2e/accessibility.spec.ts](file:///home/timoty/Desktop/project/Arch-System/e2e/accessibility.spec.ts) is configured for landing and general paths. Automated Storybook A11y tests run in CI/CD via `test:a11y`.
@@ -138,7 +138,7 @@ Foster easier onboarding, consistent development patterns, and a robust document
 
 - **Workspace Guides**: [docs/DOCUMENTATION_INDEX.md](file:///home/timoty/Desktop/project/Arch-System/docs/DOCUMENTATION_INDEX.md) and [CLAUDE.md](file:///home/timoty/Desktop/project/Arch-System/CLAUDE.md) are available as quick-reference indexes.
 - **Rules**: Consolidated in [CLAUDE.md](../../CLAUDE.md) (Conventions) and [CONTRIBUTING.md](../../CONTRIBUTING.md).
-- **Code Scaffolding**: Nx generators are configured to speed up creation.
+- **Code Scaffolding**: New packages are scaffolded manually following the existing `packages/` layout (no generator CLI in the Turbo setup).
 
 ### Action Plan & Recommendations
 
@@ -176,12 +176,12 @@ Foster easier onboarding, consistent development patterns, and a robust document
   [What is the impact on security, performance, database migrations, and testing?]
   ```
 
-#### 4. Custom Nx Scaffolding Generators
+#### 4. Custom Scaffolding
 
 - Utilize the `feature-scaffolder` skill logic to generate custom generator schemas.
-- Run standard Nx generator paths for library creation, then apply custom tags:
+- Scaffold new packages manually following the existing `packages/` layout, then apply custom tags:
   ```bash
-  pnpm nx g @nx/react:library libs/features/my-new-feature --directory=libs/features
+  mkdir -p libs/features/my-new-feature
   node tools/apply-project-tags.cjs
   ```
 
@@ -196,7 +196,7 @@ Minimize CI build times, maximize build cache efficiency, and automate target de
 ### Current Status
 
 - **CI Tooling**: Parallel CI jobs defined in [.github/workflows/ci.yml](file:///home/timoty/Desktop/project/Arch-System/.github/workflows/ci.yml).
-- **Caching**: Nx remote caching integrated using MinIO.
+- **Caching**: Turborepo remote caching integrated using MinIO.
 - **Linting gates**: Lint-staged, prettier, eslint, stylelint, and syncpack are integrated into git pre-commit hooks.
 
 ### Action Plan & Recommendations
@@ -204,23 +204,23 @@ Minimize CI build times, maximize build cache efficiency, and automate target de
 ```
 [GitHub Actions Trigger]
     ├── pnpm install (with cached node_modules)
-    ├── nx affected -t lint type-check test
-    ├── nx affected -t build (remote caching via MinIO)
+    ├── turbo run lint type-check test --filter=...[origin/main]
+    ├── turbo run build --filter=...[origin/main] (remote caching via MinIO)
     └── Playwright / Lighthouse CI runs on affected targets
 ```
 
-#### 1. Optimizing Nx Affected Runs
+#### 1. Optimizing Turbo Affected Runs
 
-- Standardize the use of target dependencies in `nx.json` to ensure dependent builds are resolved in correct order.
-- Ensure all developers commit their changes to distinct feature branches so that `nx affected` commands can accurately calculate SHAs using:
+- Standardize the use of `dependsOn` in `turbo.json` to ensure dependent builds are resolved in correct order.
+- Ensure all developers commit their changes to distinct feature branches so that `turbo run ... --filter=...[origin/main]` can accurately calculate SHAs using:
   ```bash
-  pnpm nx affected -t lint type-check test build
+  pnpm turbo run lint type-check test build --filter=...[origin/main]
   ```
 
 #### 2. Maximize Build Cache Utility
 
 - Continuously audit build cache hit rates on the MinIO bucket.
-- Configure `namedInputs` inside `nx.json` to ignore unimportant files (such as local `.md` modifications, local test output files) from triggering cache invalidation.
+- Configure per-task `inputs` inside `turbo.json` to ignore unimportant files (such as local `.md` modifications, local test output files) from triggering cache invalidation.
 
 #### 3. Streamlined Automated Deployments
 

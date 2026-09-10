@@ -14,7 +14,7 @@ After auditing the Arch-Systems monorepo against official documentation for each
 
 | Technology           | Score  | Status           |
 | -------------------- | ------ | ---------------- |
-| **Nx 22**            | 92/100 | ✅ Excellent     |
+| **Turborepo 2**      | 92/100 | ✅ Excellent     |
 | **pnpm 9**           | 90/100 | ✅ Excellent     |
 | **Next.js 16**       | 88/100 | ✅ Good          |
 | **React 19**         | 85/100 | ✅ Good          |
@@ -25,35 +25,35 @@ After auditing the Arch-Systems monorepo against official documentation for each
 
 ---
 
-## 1. Nx 22 Workspace Compliance
+## 1. Turborepo 2 Workspace Compliance
 
 **Score: 92/100** ✅
 
 ### ✅ Compliant Areas
 
-| Requirement                 | Status | Evidence                                             |
-| --------------------------- | ------ | ---------------------------------------------------- |
-| `nx.json` with `$schema`    | ✅     | Present at workspace root                            |
-| `namedInputs` defined       | ✅     | `sharedGlobals`, `default`, `production` defined     |
-| `targetDefaults` configured | ✅     | `build`, `test`, `lint`, `type-check` configured     |
-| `cache: true` on targets    | ✅     | All appropriate targets cached                       |
-| `dependsOn` for build       | ✅     | `"dependsOn": ["^build", "^codegen", "sync-assets"]` |
-| Project tagging             | ✅     | `scope:app`, `scope:package`, `scope:feature` tags   |
-| `dependencyConstraints`     | ✅     | Enforced in `nx.json`                                |
-| Remote caching (S3)         | ✅     | `nx-remotecache-s3` configured                       |
-| `defaultBase: main`         | ✅     | Set correctly                                        |
+| Requirement                 | Status | Evidence                                           |
+| --------------------------- | ------ | -------------------------------------------------- |
+| `turbo.json` with `$schema` | ✅     | Present at workspace root                          |
+| `globalDependencies`        | ✅     | `tsconfig.json`, `pnpm-workspace.yaml`, `.npmrc`   |
+| `globalEnv` defined         | ✅     | `NODE_ENV`, `CI`, `SITE_URL`, etc.                 |
+| Per-task `inputs`           | ✅     | `build`, `test`, `lint`, `type-check` configured   |
+| `cache: true` on targets    | ✅     | All appropriate targets cached                     |
+| `dependsOn` for build       | ✅     | `"dependsOn": ["^build", "^codegen", "codegen"]`   |
+| Project tagging             | ✅     | `scope:app`, `scope:package`, `scope:feature` tags |
+| Boundary enforcement        | ✅     | `eslint-plugin-boundaries` (via `pnpm policy:gen`) |
+| Remote caching (S3/MinIO)   | ✅     | Turborepo remote cache configured                  |
+| Affected runs               | ✅     | `--filter=...[origin/main]` for CI                 |
 
 ### ⚠️ Minor Issues
 
-| Issue                     | Severity | Recommendation                                     |
-| ------------------------- | -------- | -------------------------------------------------- |
-| Missing `@nx/next/plugin` | Low      | Consider adding for Next.js-specific optimizations |
-| `analytics: true`         | Low      | Consider disabling in CI for privacy               |
+| Issue                  | Severity | Recommendation                                     |
+| ---------------------- | -------- | -------------------------------------------------- |
+| Remote cache not in CI | Low      | Wire `TURBO_REMOTE_CACHE` into `.github/workflows` |
 
 ### Official Documentation Reference
 
-- Source: <https://nx.dev/docs/kb/adding-to-monorepo>
-- Pattern: `targetDefaults` with `dependsOn`, `cache`, `outputs` ✅
+- Source: <https://turbo.build/reference/docs>
+- Pattern: per-task `inputs` with `dependsOn`, `cache`, `outputs` ✅
 
 ---
 
@@ -109,10 +109,9 @@ After auditing the Arch-Systems monorepo against official documentation for each
 
 ### ⚠️ Issues Found
 
-| Issue                      | Severity | Evidence                              | Fix             |
-| -------------------------- | -------- | ------------------------------------- | --------------- |
-| `experimental.turbo` alias | Info     | Using top-level `turbopack` (correct) | None needed     |
-| Missing `@nx/next/plugin`  | Low      | Not using Nx Next.js plugin           | Consider adding |
+| Issue                      | Severity | Evidence                              | Fix         |
+| -------------------------- | -------- | ------------------------------------- | ----------- |
+| `experimental.turbo` alias | Info     | Using top-level `turbopack` (correct) | None needed |
 
 ### Official Documentation Reference
 
@@ -326,7 +325,7 @@ After auditing the Arch-Systems monorepo against official documentation for each
 
 ### 🟢 Low Priority (Optimization)
 
-6. **Consider `@nx/next/plugin** for Next.js-specific optimizations
+6. **Wire Turborepo remote cache into CI** for cross-run cache hits
 7. **Enable `noUnusedLocals`** and `noUnusedParameters` in TypeScript
 8. **Add `@tailwindcss/typography`** plugin for prose content
 
@@ -334,7 +333,7 @@ After auditing the Arch-Systems monorepo against official documentation for each
 
 ## Verification Checklist
 
-- [x] Nx workspace follows official configuration patterns
+- [x] Turborepo workspace follows official configuration patterns
 - [x] pnpm catalogs and workspace protocol used correctly
 - [x] Next.js 16 Turbopack configured per official docs
 - [x] React 19 Server Components used correctly
@@ -348,4 +347,4 @@ After auditing the Arch-Systems monorepo against official documentation for each
 ---
 
 _Report generated by Buffy (Codebuff Agent)_  
-_Sources: Official documentation from nx.dev, nextjs.org, pnpm.io, react.dev, supabase.com_
+_Sources: Official documentation from turbo.build, nextjs.org, pnpm.io, react.dev, supabase.com_

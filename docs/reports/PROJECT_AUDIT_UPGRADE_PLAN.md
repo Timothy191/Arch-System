@@ -52,15 +52,15 @@
 
 ---
 
-## 5. Nx Workspace Optimizations
+## 5. Turborepo Workspace Optimizations
 
-- [x] `nx-remotecache-s3` implemented for shared caching (MinIO)
-- [ ] Transition from `run-many` to `affected` in CI
+- [x] `turbo-remotecache-s3` implemented for shared caching (MinIO)
+- [ ] Use `--filter=...[origin/main]` for affected runs in CI
 - [ ] Utilize `namedInputs.production`
-- [ ] Convert `sync-assets.sh` into Nx target
+- [ ] Convert `sync-assets.sh` into Turborepo target
 - [ ] Clean stale Turborepo config keys
-- [ ] Adopt `nrwl-nx-action` for CI simplification
-- [ ] Integrate `nx-stylelint`
+- [ ] Adopt `nrwl-turbo-action` for CI simplification
+- [ ] Integrate `turbo-stylelint`
 
 **Status:** Remote cache is live; other improvements ready for implementation.
 
@@ -69,9 +69,9 @@
 ## 6. External Tool Evaluations
 
 - [x] Syncpack – already configured; value confirmed
-- [x] Nx Rocks – no opportunity (JVM/Flutter only)
-- [x] nx-dotnet – no opportunity (no .NET)
-- [x] `nrwl-nx-action` – valuable for CI simplification (pending adoption)
+- [x] Turborepo Rocks – no opportunity (JVM/Flutter only)
+- [x] turbo-dotnet – no opportunity (no .NET)
+- [x] `nrwl-turbo-action` – valuable for CI simplification (pending adoption)
 - [x] Keadex – valuable for architecture diagrams (optional adoption)
 - [x] inovex/elements – niche value for control‑room dashboards (optional)
 - [x] nest-vue – irrelevant (different stack)
@@ -81,11 +81,11 @@
 ## 7. Phased Upgrade Roadmap
 
 - [ ] **Phase 0 – Trivy & tflint:** Security scanning for Docker images and Terraform
-- [ ] **Phase 1 – Playwright:** E2E tests with Nx integration
+- [ ] **Phase 1 – Playwright:** E2E tests with Turborepo integration
 - [ ] **Phase 2 – Storybook + Chromatic:** Visual regression tests
 - [x] **Phase 3 – PWA with Serwist:** Completed (see below)
 - [ ] **Phase 4 – OpenAPI / Swagger:** API documentation
-- [ ] **Phase 5 – `@nx-tools/nx-container`:** Docker layer caching in Nx
+- [ ] **Phase 5 – `@turbo-tools/turbo-container`:** Docker layer caching in Turborepo
 - [ ] **Phase 6 – Open WebUI:** AI operator interface (partially integrated via `dev.sh`)
 
 ---
@@ -132,7 +132,7 @@
 
 ## 12. Production Hardening (New)
 
-- [ ] **MinIO Cache Bucket Security**: Tighten bucket policies on MinIO. Restrict access specifically to Nx cache operations via dedicated, read/write‑limited IAM policies instead of wide‑open permissions.
+- [ ] **MinIO Cache Bucket Security**: Tighten bucket policies on MinIO. Restrict access specifically to Turborepo cache operations via dedicated, read/write‑limited IAM policies instead of wide‑open permissions.
 - [ ] **PWA Icon Validation**: Validate presence, resolution formats (PNG), and size constraints (e.g., 72x72 up to 512x512) of all referenced icons in `public/icons/` to guarantee compliant application installations across Android/iOS browsers.
 - [ ] **Service Worker Cache Versioning**: Implement build‑specific service worker versioning using git commit hashes or build timestamps. Prevents user browsers from serving stale cache versions after portal updates.
 - [ ] **`dev.sh` Process & File Cleanup**: Clean temporary files, pid trackers, and ensure rigorous SIGTERM/SIGINT cleanup of Ollama and Open WebUI background processes.
@@ -174,15 +174,15 @@
 - [x] `errors` separate
 - [x] Entry point audit done
 
-### Nx
+### Turborepo
 
 - [x] Remote cache live
 - [ ] `affected` in CI
 - [ ] `namedInputs.production`
-- [ ] `sync-assets` Nx target
+- [ ] `sync-assets` Turborepo target
 - [ ] Turborepo cleanup
-- [ ] `nrwl-nx-action`
-- [ ] `nx-stylelint`
+- [ ] `nrwl-turbo-action`
+- [ ] `turbo-stylelint`
 
 ### CI & Testing
 
@@ -218,9 +218,9 @@
 ### Tools
 
 - [x] Syncpack
-- [x] Nx Rocks (none)
-- [x] nx-dotnet (none)
-- [x] nrwl-nx-action (pending)
+- [x] Turborepo Rocks (none)
+- [x] turbo-dotnet (none)
+- [x] nrwl-turbo-action (pending)
 - [x] Keadex (optional)
 - [x] inovex/elements (optional)
 - [x] nest-vue (none)

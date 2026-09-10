@@ -4,7 +4,7 @@ created: 2026-05-14
 updated: 2026-06-03
 type: entity
 tags: [system, application, company]
-sources: [nx.json, packages/database/migrations/, package.json]
+sources: [turbo.json, packages/database/migrations/, package.json]
 confidence: high
 ---
 
@@ -16,7 +16,7 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 
 - **Frontend:** Next.js 15 (App Router, React 19.2.6), Tailwind CSS 3.4, shadcn/ui
 - **Backend:** Supabase (PostgreSQL, Auth, Storage, Read Replicas)
-- **Build/Orchestration:** Nx 22.7.5 + pnpm 9.15.9 workspaces
+- **Build/Orchestration:** Turborepo 2.x.7.5 + pnpm 9.15.9 workspaces
 - **Testing:** Jest 30 (unit), Playwright 1.60 (E2E)
 - **3D:** @react-three/fiber 8 + @react-three/drei 9
 - **Maps:** react-map-gl 8 + maplibre-gl 5
@@ -26,7 +26,7 @@ Arch-Systems (Plantcor) is a multi-departmental mining operations portal built a
 ## Monorepo Structure
 
 - `apps/portal/` → Next.js 15 app with App Router, React 19 (main mining portal)
-- `packages/ui/` → [[nx-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
+- `packages/ui/` → [[turbo-monorepo|@repo/ui]] — shared components, Radix/shadcn primitives
 - `packages/theme/` → [[design-system|@repo/theme]] — design tokens, Style Dictionary pipeline, Tailwind preset
 - `packages/supabase/` → [[supabase-local-dev|@repo/supabase]] — client wrappers (browser, server, middleware, read-replica) and database types
 - `packages/database/` → [[database-schema|@repo/database]] — SQL migrations (61 migrations, source of truth)
@@ -79,10 +79,10 @@ Specialized routes:
 - React version divergence: `apps/overview` uses React 18, `apps/portal` uses React 19 — no cross-app component sharing
 - All Tailwind config originates from `@repo/theme` — never add theme values directly in portal
 
-## Current Status (Nx Era)
+## Current Status (Turborepo Era)
 
 - **Previous milestones:** Foundation → Phase 2 (Safety & Agentic Loop) → Phase 3 (Advanced Agent Infrastructure) → Phase 5.1 (Performance) — all complete.
-- **Nx Migration complete:** Migrated workspace task runner to Nx to stabilize Jest unit tests and partition caches. Removed generative AI features and Ollama service from deployment stack.
+- **Turborepo Migration complete:** Migrated workspace task runner to Turborepo to stabilize Jest unit tests and partition caches. Removed generative AI features and Ollama service from deployment stack.
 
 ### Current Metrics
 
