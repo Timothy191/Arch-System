@@ -2,7 +2,6 @@ import "@repo/ui/globals.css";
 import "@/styles/print-report.css";
 import { ArchThemeProvider } from "@repo/theme/react";
 import { EveLogo } from "@repo/ui/EveLogo";
-import { MacMenuBar } from "@repo/ui/MacMenuBar";
 import { Toaster } from "@repo/ui/Toaster";
 import type { Metadata, Viewport } from "next";
 import dynamic from "next/dynamic";
@@ -30,11 +29,24 @@ const HeaderWidgets = dynamic(
         <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
       </div>
     ),
-  }
+  },
 );
 
 const CommandBar = dynamic(() =>
-  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar }))
+  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
+);
+
+// AGENT-TRACE: MacMenuBar deferred via next/dynamic to remove framer-motion
+// from the shared layout chunk. Without this, framer-motion lands in every
+// page's bundle (including error.tsx, global-error.tsx) because MacMenuBar
+// is synchronously imported in a Server Component layout boundary.
+const MacMenuBar = dynamic(
+  () => import("@repo/ui/MacMenuBar").then((m) => ({ default: m.MacMenuBar })),
+  {
+    loading: () => (
+      <div className="h-9 w-full animate-pulse rounded-lg bg-white/10" aria-hidden="true" />
+    ),
+  },
 );
 
 import { RouteBackground } from "@/components/RouteBackground";
@@ -140,14 +152,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <AriaLauncher />
 
               {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
-              <header
-                role="banner"
-                aria-label="Global navigation"
-                className="flex items-center gap-3"
-              >
+              <header aria-label="Global navigation" className="flex items-center gap-3">
                 <MacMenuBar
                   rightSlot={
-                    <nav id="navigation" role="navigation" aria-label="Main menu">
+                    <nav id="navigation" aria-label="Main menu">
                       <div className="flex items-center gap-3">
                         <SystemTrayPill />
                         <HeaderWidgets />
@@ -160,7 +168,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               {/* Content wrapper with main landmark (WCAG 1.3.1) */}
               <main
                 id="main-content"
-                role="main"
                 aria-label="Main content"
                 className="relative z-primary-card pt-16"
               >

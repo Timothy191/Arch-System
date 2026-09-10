@@ -8,7 +8,7 @@ export default async function HubLayout({ children }: { children: React.ReactNod
   const supabase = await createServerSupabaseClient();
   const user = await getUserSafely(supabase);
 
-  if (!user || !user.id) {
+  if (!user?.id) {
     redirect("/login");
   }
 

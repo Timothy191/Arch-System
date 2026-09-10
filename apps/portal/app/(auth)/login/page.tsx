@@ -6,9 +6,20 @@ import { Logo } from "@repo/ui/Logo";
 import { AlertCircle, AlertTriangle, ChevronDown, Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import nextDynamic from "next/dynamic";
 import { LoginClock } from "@/features/auth/components/LoginClock";
 import { LoginForm } from "@/features/auth/components/LoginForm";
-import { RefractionGlow } from "@/features/auth/components/RefractionGlow";
+
+// AGENT-TRACE: RefractionGlow is a pure framer-motion CSS animation (no content,
+// no interactivity). Deferring it via next/dynamic keeps it out of the login page's
+// critical JS chunk and removes ~180 kB of framer-motion from first-paint parsing.
+const RefractionGlow = nextDynamic(
+  () =>
+    import("@/features/auth/components/RefractionGlow").then((m) => ({
+      default: m.RefractionGlow,
+    })),
+  { loading: () => null },
+);
 
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
 
@@ -26,7 +37,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
       (c) =>
         c.name === "sb-access-token" ||
         ((c.name.startsWith("sb-") || c.name.includes("sb-")) &&
-          (c.name.includes("-auth-token") || c.name.includes("-access-token")))
+          (c.name.includes("-auth-token") || c.name.includes("-access-token"))),
     );
 
   let authenticated = false;
@@ -60,8 +71,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     const params = await searchParams;
     const rawRedirect = params?.redirect;
     const target =
-      rawRedirect &&
-      rawRedirect.startsWith("/") &&
+      rawRedirect?.startsWith("/") &&
       !rawRedirect.startsWith("//") &&
       !rawRedirect.startsWith("/login")
         ? rawRedirect
