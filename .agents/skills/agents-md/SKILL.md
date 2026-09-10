@@ -39,6 +39,7 @@ A compliant `AGENTS.md` file must provide concise, non-obvious operational instr
 ## 3. Monorepo Multi-Package Strategy
 
 In large monorepos with diverse apps and libraries:
+
 - **Root `AGENTS.md`**: Global monorepo guidelines, workspace scripts, toolchain versions (Node, pnpm, Nx), global architecture boundaries, and quality gate commands.
 - **Subpackage Guidelines**: Specific subproject instructions can be placed in subdirectories or referenced via packages without duplication.
 - **Agent Tracing (`AGENT_TRACER.md`)**: Maintained in each package root to record chronological changelogs for seamless handoffs between autonomous agents.
@@ -48,6 +49,7 @@ In large monorepos with diverse apps and libraries:
 ## 4. References & Bundled Standard Repository
 
 The official upstream specification repository is mirrored locally in this skill:
+
 - **Upstream Repository**: [`references/agents-md-repo`](./references/agents-md-repo)
 - **Specification Documentation**: [`references/agents-md-repo/README.md`](./references/agents-md-repo/README.md)
 - **Upstream Example**: [`references/agents-md-repo/AGENTS.md`](./references/agents-md-repo/AGENTS.md)

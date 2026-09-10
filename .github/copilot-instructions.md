@@ -1,40 +1,40 @@
 # Copilot instructions for Arch-Mk2
 
-Concise, repository-specific guidance for Copilot-style assistants and automated agents working in this Nx + pnpm monorepo. For deeper rules, consult the authoritative docs listed in section 5.
+Concise, repository-specific guidance for Copilot-style assistants and automated agents working in this Turborepo + pnpm monorepo. For deeper rules, consult the authoritative docs listed in section 5.
 
 ---
 
 ## 1) Build, test and lint commands
 
-All tasks run through Nx (`nx run-many`). Use pnpm as the package manager (Volta pins `node@24.15.0` and `pnpm@9.15.9`).
+All tasks run through Turborepo (`turbo run`). Use pnpm as the package manager (Volta pins `node@24.15.0` and `pnpm@9.15.9`).
 
 ### Daily commands
 
-| Action                                     | Command                                                                |
-| ------------------------------------------ | ---------------------------------------------------------------------- |
-| Install deps                               | `pnpm install`                                                         |
-| Dev server (portal on `:3000`)             | `pnpm dev`                                                             |
-| Minimal dev server (headless, no Docker)   | `pnpm dev:quick`                                                       |
-| Bootstrap everything (all dev targets)     | `pnpm dev:all:nx`                                                      |
-| Local Supabase (Docker, separate terminal) | `pnpm --filter @repo/database supabase:dev`                            |
-| Build all                                  | `pnpm build`                                                           |
-| Build one package/app                      | `pnpm --filter @repo/<name> build` or `pnpm nx build <name>`           |
-| Lint all                                   | `pnpm lint`                                                            |
-| Lint one project                           | `pnpm --filter @repo/<name> lint` or `pnpm nx lint <name>`             |
-| Type-check all                             | `pnpm type-check`                                                      |
-| Type-check one project                     | `pnpm --filter @repo/<name> type-check` or `pnpm nx type-check <name>` |
-| Run all unit tests                         | `pnpm test`                                                            |
-| Run one portal test file                   | `pnpm --filter portal test -- --testPathPatterns=<file>`               |
-| Run E2E                                    | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)   |
-| Visual E2E snapshots                       | `pnpm test:e2e:visual`                                                 |
-| Storybook UI / a11y                        | `pnpm ui`, `pnpm test:a11y`                                            |
-| Format code                                | `pnpm format`                                                          |
-| Full local quality gate                    | `pnpm quality`                                                         |
+| Action                                     | Command                                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Install deps                               | `pnpm install`                                                                         |
+| Dev server (portal on `:3000`)             | `pnpm dev`                                                                             |
+| Minimal dev server (headless, no Docker)   | `pnpm dev:quick`                                                                       |
+| Bootstrap everything (all dev targets)     | `pnpm dev`                                                                             |
+| Local Supabase (Docker, separate terminal) | `pnpm --filter @repo/database supabase:dev`                                            |
+| Build all                                  | `pnpm build`                                                                           |
+| Build one package/app                      | `pnpm --filter @repo/<name> build` or `pnpm turbo run build --filter=<name>`           |
+| Lint all                                   | `pnpm lint`                                                                            |
+| Lint one project                           | `pnpm --filter @repo/<name> lint` or `pnpm turbo run lint --filter=<name>`             |
+| Type-check all                             | `pnpm type-check`                                                                      |
+| Type-check one project                     | `pnpm --filter @repo/<name> type-check` or `pnpm turbo run type-check --filter=<name>` |
+| Run all unit tests                         | `pnpm test`                                                                            |
+| Run one portal test file                   | `pnpm --filter portal test -- --testPathPatterns=<file>`                               |
+| Run E2E                                    | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)                   |
+| Visual E2E snapshots                       | `pnpm test:e2e:visual`                                                                 |
+| Storybook UI / a11y                        | `pnpm ui`, `pnpm test:a11y`                                                            |
+| Format code                                | `pnpm format`                                                                          |
+| Full local quality gate                    | `pnpm quality`                                                                         |
 
 ### What `pnpm quality` actually runs
 
 ```
-nx run-many -t lint type-check test lint:tokens lint:css
+turbo run lint type-check test lint:tokens lint:css
 pnpm lint:root
 pnpm lint:styles
 pnpm format:check
@@ -55,7 +55,7 @@ Run `pnpm quality` before proposing a merge.
 
 ## 2) High-level architecture
 
-- **Monorepo**: pnpm workspaces + Nx 22 (`nx run-many` is the entry point; `nx.json` orchestrates the pipeline).
+- **Monorepo**: pnpm workspaces + Turborepo 2.x (`turbo run` is the entry point; `turbo.json` orchestrates the pipeline).
 - **Apps**:
   - `apps/portal` — Next.js 15+ (App Router), React 19. Server Actions and API routes co-located with features. `:3000`.
   - `apps/cms` — Payload CMS v3 (headless content service).
@@ -66,7 +66,7 @@ Run `pnpm quality` before proposing a merge.
 - **Middleware**: `apps/portal/proxy.ts` handles session refresh, department slug → UUID resolution (Redis cached), and route gating.
 - **Migrations source of truth**: `packages/database/migrations/NNN_description.sql`. Never edit `packages/supabase/supabase/migrations/` (deploy-time copy; PreToolUse hook blocks edits there).
 - **Policy Single Source of Truth**: `tools/policy-compiler.cjs` generates `tools/policy/*.json` and `tools/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI runs `pnpm policy:check` and fails on drift.
-- **Dependency constraints**: `nx.json` enforces `scope:app` → `scope:package`, etc. Run `node tools/apply-project-tags.cjs` after adding a new project.
+- **Dependency constraints**: `turbo.json` configures tasks and `scope:app` → `scope:package`, etc. Run `node tools/apply-project-tags.cjs` after adding a new project.
 
 ### Codegen pipelines (never edit generated output)
 
@@ -172,7 +172,7 @@ Domain rules (architecture, portal, auth, design-system, testing, code review) a
 - When adding a new `@repo/*` import to portal code, update `apps/portal/jest.config.js` `moduleNameMapper`.
 - When adding a new project, run `node tools/apply-project-tags.cjs` and update `tools/policy-compiler.cjs`.
 - If `pnpm policy:check` fails, run `pnpm policy:gen`, inspect the diff, and commit generated files atomically with the source change.
-- Prefer `nx run` / `nx run-many` over invoking underlying tools directly; prefix with `pnpm nx` (e.g., `pnpm nx run portal:build`).
+- Prefer `turbo run` over invoking underlying tools directly; prefix with `pnpm turbo run` (e.g., `pnpm turbo run build --filter=portal`).
 
 ---
 

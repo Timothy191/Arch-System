@@ -7,6 +7,7 @@ This rule is permanently and autonomously active across all agent sessions opera
 ## 1. Automated Compliance & Drift Mandate
 
 Before marking any task, feature, or refactor complete, the agent **MUST autonomously execute**:
+
 1. `pnpm audit:drift`: Verifies that database schema definitions and `@repo/contract` Zod schemas remain 100% synchronized.
 2. `pnpm audit:compliance`: Verifies all 110 SQL migrations, RLS policies, rollback safety (`@repo/database:test:migration-rollback`), and design tokens.
 

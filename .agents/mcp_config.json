@@ -2,38 +2,19 @@
   "mcpServers": {
     "codebase-memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@sourcery/codebase-memory-mcp"
-      ]
+      "args": ["-y", "@sourcery/codebase-memory-mcp"]
     },
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@context7/mcp-server"
-      ]
+      "args": ["-y", "@context7/mcp-server"]
     },
     "knowledge-rail": {
       "command": "npx",
-      "args": [
-        "-y",
-        "knowledge-rail-mcp"
-      ]
+      "args": ["-y", "knowledge-rail-mcp"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp"
-      ]
-    },
-    "nx-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "nx-mcp"
-      ]
+      "args": ["-y", "next-devtools-mcp"]
     },
     "postgres": {
       "command": "npx",
