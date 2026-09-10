@@ -23,6 +23,34 @@
         "@modelcontextprotocol/server-postgres",
         "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
       ]
+    },
+    "AgentsRoom-MCP": {
+      "command": "node",
+      "args": ["/opt/AgentsRoom/resources/app-mcp-server.cjs"],
+      "env": {
+        "AR_PROJECT_ID": "proj-1788803548784-lh3ald",
+        "AR_PROJECT_PATH": "/home/timothy/Projects/Arch-System",
+        "AR_API_BASE_URL": "https://agentsroom.dev",
+        "AR_SETTINGS_FILE": "/home/timothy/.agentsroom/settings.json",
+        "AR_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json"
+      }
+    },
+    "AgentsRoom-Test-Runner": {
+      "command": "node",
+      "args": ["/opt/AgentsRoom/resources/test-runner-mcp-server.cjs"],
+      "env": {
+        "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
+        "AR_BROWSER_PROJECT_ID": "proj-1789041070197-8ld1sx",
+        "AR_PROJECT_PATH": "/home/timothy/Projects/Arch-System"
+      }
+    },
+    "AgentsRoom-QA-Tester": {
+      "command": "node",
+      "args": ["/opt/AgentsRoom/resources/qa-tester-mcp-server.cjs"],
+      "env": {
+        "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
+        "AR_BROWSER_PROJECT_ID": "proj-1789041070197-8ld1sx"
+      }
     }
   }
 }
