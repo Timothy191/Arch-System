@@ -9,11 +9,11 @@
  *
  * This compiler is the direct Single Source of Truth (SSoT) for architectural boundaries and rules,
  * generating:
- *   - tools/policy/dependency.rules.json
- *   - tools/policy/architecture.rules.json
- *   - tools/policy/security.checks.json
- *   - tools/policy/intent-map.json
- *   - tools/policy/eslint-boundaries.generated.cjs
+ *   - tools/repo/policy/dependency.rules.json
+ *   - tools/repo/policy/architecture.rules.json
+ *   - tools/repo/policy/security.checks.json
+ *   - tools/repo/policy/intent-map.json
+ *   - tools/repo/policy/eslint-boundaries.generated.cjs
  *
  * Run via: pnpm policy:gen
  * Check via: pnpm policy:check (fails if drift detected)

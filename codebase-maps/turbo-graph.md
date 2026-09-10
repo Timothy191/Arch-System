@@ -50,7 +50,7 @@ flowchart TD
 
 ---
 
-## 🏷️ Nx Scope Tagging Hierarchy
+## 🏷️ Turborepo Scope Tagging Hierarchy
 
 ```mermaid
 graph TD

@@ -65,8 +65,8 @@ Run `pnpm quality` before proposing a merge.
 - **Database**: Supabase/Postgres. The `employees` table is the source of truth for authorization (role + department). Row-Level Security must be enabled on every new table.
 - **Middleware**: `apps/portal/proxy.ts` handles session refresh, department slug → UUID resolution (Redis cached), and route gating.
 - **Migrations source of truth**: `packages/database/migrations/NNN_description.sql`. Never edit `packages/supabase/supabase/migrations/` (deploy-time copy; PreToolUse hook blocks edits there).
-- **Policy Single Source of Truth**: `tools/policy-compiler.cjs` generates `tools/policy/*.json` and `tools/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI runs `pnpm policy:check` and fails on drift.
-- **Dependency constraints**: `turbo.json` configures tasks and `scope:app` → `scope:package`, etc. Run `node tools/apply-project-tags.cjs` after adding a new project.
+- **Policy Single Source of Truth**: `tools/repo/policy-compiler.cjs` generates `tools/repo/policy/*.json` and `tools/repo/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI runs `pnpm policy:check` and fails on drift.
+- **Dependency constraints**: `turbo.json` configures tasks and `scope:app` → `scope:package`, etc. Add a `DEPENDENCY_RULES` entry to `tools/repo/policy-compiler.cjs` after adding a new project, then run `pnpm policy:gen`.
 
 ### Codegen pipelines (never edit generated output)
 
@@ -84,8 +84,8 @@ Commit both source and generated files in the same atomic change.
 ### Package management
 
 - Workspace-wide catalogs live in `pnpm-workspace.yaml`. Use `catalog:` or `catalog:react19` for shared dependencies.
-- New packages must be named `@repo/<name>`, export a public API from `src/index.ts`, have a `project.json`, and be tagged via `node tools/apply-project-tags.cjs`.
-- New packages must also get a `DEPENDENCY_RULES` entry in `tools/policy-compiler.cjs`; regenerate with `pnpm policy:gen`.
+- New packages must be named `@repo/<name>`, export a public API from `src/index.ts`, and have a `project.json`.
+- New packages must also get a `DEPENDENCY_RULES` entry in `tools/repo/policy-compiler.cjs`; regenerate with `pnpm policy:gen`.
 
 ### Portal routing and layout
 
@@ -170,7 +170,7 @@ Domain rules (architecture, portal, auth, design-system, testing, code review) a
 - Small, targeted edits (≤5 files) can be done directly. Larger cross-cutting changes should be planned and validated with `pnpm quality`.
 - For DB migrations, RLS changes, and auth changes: stop and request explicit human confirmation.
 - When adding a new `@repo/*` import to portal code, update `apps/portal/jest.config.js` `moduleNameMapper`.
-- When adding a new project, run `node tools/apply-project-tags.cjs` and update `tools/policy-compiler.cjs`.
+- When adding a new project, add a `DEPENDENCY_RULES` entry to `tools/repo/policy-compiler.cjs` and run `pnpm policy:gen`.
 - If `pnpm policy:check` fails, run `pnpm policy:gen`, inspect the diff, and commit generated files atomically with the source change.
 - Prefer `turbo run` over invoking underlying tools directly; prefix with `pnpm turbo run` (e.g., `pnpm turbo run build --filter=portal`).
 

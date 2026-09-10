@@ -40,7 +40,7 @@ A compliant `AGENTS.md` file must provide concise, non-obvious operational instr
 
 In large monorepos with diverse apps and libraries:
 
-- **Root `AGENTS.md`**: Global monorepo guidelines, workspace scripts, toolchain versions (Node, pnpm, Nx), global architecture boundaries, and quality gate commands.
+- **Root `AGENTS.md`**: Global monorepo guidelines, workspace scripts, toolchain versions (Node, pnpm, Turborepo), global architecture boundaries, and quality gate commands.
 - **Subpackage Guidelines**: Specific subproject instructions can be placed in subdirectories or referenced via packages without duplication.
 - **Agent Tracing (`AGENT_TRACER.md`)**: Maintained in each package root to record chronological changelogs for seamless handoffs between autonomous agents.
 

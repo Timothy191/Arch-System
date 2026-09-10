@@ -5,7 +5,7 @@ A high-performance, multi-departmental mining operations portal built as a monor
 
 ## 🏗️ Architecture
 
-This project is organized as an **Nx** monorepo using **pnpm** for workspace management.
+This project is organized as a **Turborepo** monorepo using **pnpm** for workspace management.
 
 ### Applications (`apps/`)
 
@@ -68,7 +68,7 @@ This project is organized as an **Nx** monorepo using **pnpm** for workspace man
 
 - **[documentation/README.md](documentation/README.md)**: New unified documentation center with consolidated structure
   - **[documentation/03-audit-reports/](documentation/03-audit-reports/)**: Audit reports, RLS analysis, and quality compliance
-  - **[documentation/04-codebase-maps/](documentation/04-codebase-maps/)**: Codebase visualization and architecture maps
+  - **[codebase-maps/](codebase-maps/)**: Codebase visualization and architecture maps
   - **[documentation/05-wiki/](documentation/05-wiki/)**: Comprehensive technical wiki and knowledge base
 
 ### Core Documentation
