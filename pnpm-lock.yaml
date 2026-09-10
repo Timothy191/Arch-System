@@ -64,8 +64,8 @@ catalogs:
       specifier: ~3.6.2
       version: 3.6.2
     react-hook-form:
-      specifier: ^7.79.0
-      version: 7.79.0
+      specifier: ^7.87.0
+      version: 7.87.0
     recharts:
       specifier: ^3.8.1
       version: 3.8.1
@@ -227,7 +227,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: ^5.2.2
-        version: 5.2.2(react-hook-form@7.79.0(react@19.2.7))
+        version: 5.2.2(react-hook-form@7.87.0(react@19.2.7))
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1
@@ -326,7 +326,7 @@ importers:
         version: 19.2.7(react@19.2.7)
       react-hook-form:
         specifier: 'catalog:'
-        version: 7.79.0(react@19.2.7)
+        version: 7.87.0(react@19.2.7)
       recharts:
         specifier: 'catalog:'
         version: 3.8.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)(redux@5.0.1)
@@ -10203,8 +10203,8 @@ packages:
     peerDependencies:
       react: ^19.3.0
 
-  react-hook-form@7.79.0:
-    resolution: {integrity: sha512-mhYp/MTmXvzYX6AJcJVko0rktoIhhmRnEouObj4wF5i/tCttgJvnp1+9wRkpITZjDTqpo4IOSJqu0dBlPlV/Lw==}
+  react-hook-form@7.87.0:
+    resolution: {integrity: sha512-zhFzWvLxNHH+8839OnZcUxgMZw88ah2jZWDWvKWgF3Tpbnd0vKL+dlcuU3nZVWESZQjd81EW8K+wU+cYfYAc0w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -13271,10 +13271,10 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  '@hookform/resolvers@5.2.2(react-hook-form@7.79.0(react@19.2.7))':
+  '@hookform/resolvers@5.2.2(react-hook-form@7.87.0(react@19.2.7))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.79.0(react@19.2.7)
+      react-hook-form: 7.87.0(react@19.2.7)
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -25180,7 +25180,7 @@ snapshots:
       react: 19.3.0
       scheduler: 0.28.0
 
-  react-hook-form@7.79.0(react@19.2.7):
+  react-hook-form@7.87.0(react@19.2.7):
     dependencies:
       react: 19.2.7
 
