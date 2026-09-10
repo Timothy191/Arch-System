@@ -103,13 +103,12 @@ export default {
     return commands;
   },
 
-  // JSON / CSS / MJS / YAML / SQL / TOML → prettier only (excluding package.json which has syncpack, and project.json which has its own chain)
+  // JSON / CSS / MJS / YAML / SQL / TOML → prettier only (excluding package.json which has syncpack)
   "*.{json,css,mjs,yaml,yml}": (files) => {
     const filtered = files.filter(
       (f) =>
         matchesAny(f, PRETTIER_GLOBS) &&
         !f.endsWith("package.json") &&
-        !f.endsWith("project.json") &&
         !f.endsWith(".css") &&
         !f.endsWith(".scss"),
     );
@@ -130,7 +129,7 @@ export default {
   // Database migrations → rollback safety & contract drift
   "packages/database/migrations/*.sql": (files) => {
     if (files.length === 0) return [];
-    return ["pnpm nx run @repo/database:test:migration-rollback", "pnpm audit:drift"];
+    return ["pnpm --filter @repo/database test:migration-rollback", "pnpm audit:drift"];
   },
 
   // Contract schemas → contract drift
@@ -143,57 +142,5 @@ export default {
   ".agents/**/*": (files) => {
     if (files.length === 0) return [];
     return ["pnpm audit:agents"];
-  },
-
-  // project.json files → apply project tags then prettier format
-  "**/project.json": (files) => {
-    if (files.length === 0) return [];
-    const commands = ["node tools/apply-project-tags.cjs"];
-    for (const batch of chunk(files, 30)) {
-      commands.push(`prettier --write ${batch.join(" ")}`);
-    }
-    return commands;
-  },
-
-  // Everything else → secretlint (skip .env*, lockfiles, config files, already-handled exts)
-  "*": (files) => {
-    const skippedExts = new Set([
-      ".js",
-      ".ts",
-      ".tsx",
-      ".json",
-      ".md",
-      ".css",
-      ".scss",
-      ".mjs",
-      ".yaml",
-      ".yml",
-      ".sql",
-      ".toml",
-      ".d.ts",
-    ]);
-    const skippedNames = new Set([
-      ".secretlintignore",
-      ".secretlintrc.json",
-      ".secretlintrc.js",
-      ".secretlintrc.cjs",
-      "pnpm-lock.yaml",
-      "package-lock.json",
-    ]);
-    const filtered = files.filter((f) => {
-      const base = f.split("/").pop();
-      if (base.startsWith(".env")) return false;
-      if (skippedNames.has(base)) return false;
-      const ext = f.slice(f.lastIndexOf("."));
-      return !skippedExts.has(ext);
-    });
-    if (filtered.length === 0) return [];
-    const commands = [];
-    for (const batch of chunk(filtered, 30)) {
-      commands.push(
-        `secretlint --secretlintrc config/tools/.secretlintrc.json --secretlintignore config/tools/.secretlintignore ${batch.join(" ")}`,
-      );
-    }
-    return commands;
   },
 };
