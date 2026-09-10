@@ -8,6 +8,10 @@ export default {
     "apps/portal/public/css/fuxa-light-theme.css",
   ],
   rules: {
+    // Tailwind's @apply preludes (e.g. `@apply border-border`) are not valid
+    // CSS grammar — stylelint cannot validate them. Disable the prelude check.
+    "at-rule-prelude-no-invalid": null,
+
     // Flag un-accelerated CSS properties in animations/transitions
     "plugin/no-low-performance-animation-properties": [
       true,

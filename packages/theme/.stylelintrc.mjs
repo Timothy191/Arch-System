@@ -86,6 +86,10 @@ export default {
       },
     ],
 
+    // Tailwind's @apply preludes (e.g. `@apply border-border`) are not valid
+    // CSS grammar — stylelint cannot validate them. Disable the prelude check.
+    "at-rule-prelude-no-invalid": null,
+
     // Allow CSS vars that start with -- (they don't need to be defined locally)
     "custom-property-no-missing-var-function": null,
 

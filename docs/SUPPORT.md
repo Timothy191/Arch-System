@@ -40,7 +40,8 @@
 #### Remote Cache (Self-hosted)
 
 - If you see unexpectedly slow builds, verify your local MinIO bucket
-  is reachable and the environment variables `NXCACHE_S3_*` are set.
+  is reachable and the environment variables `TURBO_REMOTE_CACHE_URL`
+  and `TURBO_REMOTE_CACHE_SIGNATURE_KEY` are set.
 - Run `rm -rf .turbo/cache` to clear local cache and force remote retrieval testing.
 
 #### Database Issues
