@@ -1,17 +1,17 @@
-# ⚡ Nx 22 Project Graph & Task Pipeline Map
+# ⚡ Turborepo Project Graph & Task Pipeline Map
 
-**Generated:** 9/2/2026, 11:13:16 AM UTC  
-**Orchestration Engine:** Nx 22.7.5 + pnpm Workspaces
+**Generated:** ${dateInfo.displayDate}  
+**Orchestration Engine:** Turborepo 2.x + pnpm Workspaces
 
 ---
 
-## 🎨 Visual Nx Task Execution Pipeline
+## 🎨 Visual Turborepo Task Execution Pipeline
 
 ```mermaid
 flowchart TD
     subgraph Inputs ["Inputs & Inputs Hashing"]
-        SG["sharedGlobals (tsconfig.json, pnpm-workspace.yaml, .env)"]
-        PR["{projectRoot}/**/*"]
+        SG["globalDependencies (tsconfig.json, pnpm-workspace.yaml, .env)"]
+        PR["$TURBO_DEFAULT$"]
     end
 
     subgraph Codegen ["Phase 1: Code & Asset Generation"]
@@ -20,14 +20,14 @@ flowchart TD
     end
 
     subgraph Execution ["Phase 2: Parallel Task Execution"]
-        BUILD["nx run-many -t build"]
-        LINT["nx run-many -t lint"]
-        TC["nx run-many -t type-check"]
-        TEST["nx run-many -t test"]
+        BUILD["turbo run build"]
+        LINT["turbo run lint"]
+        TC["turbo run type-check"]
+        TEST["turbo run test"]
     end
 
     subgraph Cache ["Phase 3: Cache Storage & Hashing"]
-        CACHE[".nx/cache / Local & S3 Cache"]
+        CACHE[".turbo/cache / Local & Remote Cache"]
     end
 
     SG --> CG
@@ -92,8 +92,9 @@ graph TD
 
 ---
 
-## ⚙️ Nx Configuration Overview (`nx.json`)
-- **Default Base**: `master`
-- **Task Hashing**: Inputs hash includes `sharedGlobals` + project files
+## ⚙️ Turborepo Configuration Overview (`turbo.json`)
+
+- **Task Pipelines**: `build`, `lint`, `type-check`, `test`, `codegen`, `sync-assets`
+- **Task Hashing**: Inputs hash includes `globalDependencies`, `globalEnv`, and `$TURBO_DEFAULT$`
 - **Caching**: `build`, `lint`, `type-check`, `test`, `codegen` set to `cache: true`
-- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals
+- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via `eslint-plugin-boundaries`

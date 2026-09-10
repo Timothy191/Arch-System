@@ -9,9 +9,9 @@ Welcome to the Arch-Systems monorepo. This document outlines the structure, tool
 - `tools/`: Build, analysis, and audit scripts (`policy-compiler.cjs`, `design-audit.cjs`, `enforce-security-checks.cjs`).
 - `scripts/`: Local dev and deployment utility scripts (e.g. `sync-assets-smart.cjs`, `ensure_reachability.py`).
 
-## Nx Targets
+## Turbo Targets
 
-The workspace is managed by [Nx](https://nx.dev/). Important targets configured in `nx.json`:
+The workspace is managed by [Turborepo](https://turbo.build/). Important targets configured in `turbo.json`:
 
 - `build`: Builds the project and its dependencies. Cacheable.
 - `test`: Runs the Jest/Vitest unit tests. Cacheable.

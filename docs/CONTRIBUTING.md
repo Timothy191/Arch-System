@@ -50,7 +50,7 @@ If `pnpm test` is green and the portal loads at `http://localhost:3000`, you are
 
 ## Architecture overview
 
-The monorepo is an **Nx + pnpm workspaces** project (Turbo is a transitive dependency, but `nx run-many` is the entry point for every task). Top-level layout:
+The monorepo is a **Turborepo + pnpm workspaces** project (`turbo run` is the entry point for every task). Top-level layout:
 
 | Path                | Purpose                                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -75,22 +75,22 @@ Deep dives live in `CLAUDE.md` and `AGENTS.md` — link at the end of this docum
 
 CI runs every gate on every PR. The order matters — each step is a hard fail.
 
-| Order | Step                          | Command                                    | Blocks PR?  |
-| ----- | ----------------------------- | ------------------------------------------ | ----------- |
-| 1     | Dependency version lint       | `pnpm deps:lint` (syncpack)                | ✅          |
-| 2     | Security audit                | `pnpm audit --audit-level=high --prod`     | ✅          |
-| 3     | Dead-code detection           | `pnpm knip`                                | ✅          |
-| 4     | Circular-dependency detection | `node tools/circular-dep-detect.cjs`       | ✅          |
-| 5     | **Policy SSoT drift**         | `pnpm policy:check`                        | ✅          |
-| 6     | Markdown lint                 | `pnpm md:lint`                             | ✅          |
-| 7     | Secret scan (gitleaks)        | `gitleaks/gitleaks-action@v2`              | ✅          |
-| 8     | Lint + Type-check             | `pnpm nx run-many -t lint type-check`      | ✅          |
-| 9     | Token + CSS lint              | `pnpm nx run-many -t lint:tokens lint:css` | ✅          |
-| 10    | Test with coverage            | `pnpm nx run-many -t test -- --coverage`   | ✅          |
-| 11    | Build                         | `pnpm nx run-many -t build`                | ✅          |
-| 12    | Bundle size check             | `pnpm bundlesize`                          | ✅          |
-| 13    | Lighthouse CI (preview)       | `npx @lhci/cli@0.14.x autorun`             | ✅          |
-| 14    | Self-healing CI               | `pnpm exec nx fix-ci` (best-effort)        | ⚠️ advisory |
+| Order | Step                          | Command                                                 | Blocks PR?  |
+| ----- | ----------------------------- | ------------------------------------------------------- | ----------- |
+| 1     | Dependency version lint       | `pnpm deps:lint` (syncpack)                             | ✅          |
+| 2     | Security audit                | `pnpm audit --audit-level=high --prod`                  | ✅          |
+| 3     | Dead-code detection           | `pnpm knip`                                             | ✅          |
+| 4     | Circular-dependency detection | `node tools/circular-dep-detect.cjs`                    | ✅          |
+| 5     | **Policy SSoT drift**         | `pnpm policy:check`                                     | ✅          |
+| 6     | Markdown lint                 | `pnpm md:lint`                                          | ✅          |
+| 7     | Secret scan (gitleaks)        | `gitleaks/gitleaks-action@v2`                           | ✅          |
+| 8     | Lint + Type-check             | `pnpm turbo run lint type-check`                        | ✅          |
+| 9     | Token + CSS lint              | `pnpm turbo run lint:tokens lint:css`                   | ✅          |
+| 10    | Test with coverage            | `pnpm turbo run test --coverage`                        | ✅          |
+| 11    | Build                         | `pnpm turbo run build`                                  | ✅          |
+| 12    | Bundle size check             | `pnpm bundlesize`                                       | ✅          |
+| 13    | Lighthouse CI (preview)       | `npx @lhci/cli@0.14.x autorun`                          | ✅          |
+| 14    | Self-healing CI               | `pnpm turbo run lint --filter=...[origin/main] --force` | ⚠️ advisory |
 
 **Local fast lane** (most changes do not need steps 12–14):
 
@@ -108,7 +108,7 @@ If your change drops coverage, either add tests or explicitly raise the threshol
 
 ## Adding a new package
 
-The workspace uses pnpm's `catalog:` indirection and Nx project tags. New packages must participate in both.
+The workspace uses pnpm's `catalog:` indirection and project tags. New packages must participate in both.
 
 ### 1. Scaffold the package
 
@@ -136,7 +136,7 @@ node tools/apply-project-tags.cjs
 
 This auto-tags every project under `apps/`, `packages/`, and `tools/` with the canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `tools/*`). It writes/updates each `project.json` deterministically — review the diff before committing.
 
-### 4. Register Nx targets
+### 4. Register targets
 
 Add a `project.json` next to `package.json` (the tag script will create one if missing) and declare `build`, `lint`, `type-check`, and (for apps) `test` targets using the workspace executors. Look at `packages/ui/project.json` for a clean reference.
 
@@ -205,7 +205,7 @@ Edit `tools/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
 pnpm policy:gen
 ```
 
-This writes `tools/policy/dependency.rules.json` and `tools/policy/eslint-boundaries.generated.cjs` (which `@nx/enforce-module-boundaries` consumes).
+This writes `tools/policy/dependency.rules.json` and `tools/policy/eslint-boundaries.generated.cjs` (which `eslint-plugin-boundaries` consumes).
 
 ### Step 3 — Verify drift-free
 
@@ -217,7 +217,7 @@ The check must report no drift. If it reports drift, you edited the SSoT but for
 
 ### Step 4 — Confirm the rule actually fires
 
-Add a temporary import in any file under `packages/ui` of `@repo/supabase/client` and run `pnpm nx run-many -t lint`. You should see the rule fire with your `reason` string in the error. Revert the import before committing.
+Add a temporary import in any file under `packages/ui` of `@repo/supabase/client` and run `pnpm turbo run lint`. You should see the rule fire with your `reason` string in the error. Revert the import before committing.
 
 ### Step 5 — Commit
 
@@ -248,7 +248,7 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 | E2E (Playwright)            | `pnpm test:e2e`                                          | Requires dev server on `:3000` and Chromium at `/usr/bin/google-chrome` (see `playwright.config.ts`). |
 | Visual snapshots            | `e2e/visual/__snapshots__/`                              | Update with `playwright test --update-snapshots`.                                                     |
 | AI compliance               | `packages/eval/`                                         | Python/DeepEval, separate Poetry env, not in `pnpm quality`.                                          |
-| Coverage                    | `pnpm nx run-many -t test -- --coverage`                 | Thresholds: 40/30/35/40.                                                                              |
+| Coverage                    | `pnpm turbo run test --coverage`                         | Thresholds: 40/30/35/40.                                                                              |
 
 ### Adding a new `@repo/*` import to a portal test
 

@@ -26,7 +26,7 @@ function getFormattedDate() {
   return {
     folderDate: `${yy}-${mm}-${dd}`,
     isoDate: now.toISOString(),
-    displayDate: now.toLocaleString("en-US", { timeZone: "UTC" }) + " UTC",
+    displayDate: `${now.toLocaleString("en-US", { timeZone: "UTC" })} UTC`,
   };
 }
 
@@ -67,7 +67,8 @@ function buildCodebaseMaps(dateInfo) {
       filename: "route-feature-architecture.md",
       title: "Route & Feature Architecture Map",
       category: "Routing & Features",
-      summary: "Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.",
+      summary:
+        "Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.",
       content: `# 🗺️ Route & Feature Architecture Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -105,7 +106,8 @@ function buildCodebaseMaps(dateInfo) {
       filename: "database-schema.md",
       title: "Database Schema & Topology Map",
       category: "Database & Security",
-      summary: "Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.",
+      summary:
+        "Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.",
       content: `# 🔒 Database Schema & Topology Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -132,7 +134,8 @@ function buildCodebaseMaps(dateInfo) {
       filename: "ci-cd-pipeline.md",
       title: "CI/CD Pipeline & Quality Gate Map",
       category: "DevOps & CI/CD",
-      summary: "GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.",
+      summary:
+        "GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.",
       content: `# 🚀 CI/CD Pipeline & Quality Gate Topology Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -142,9 +145,9 @@ function buildCodebaseMaps(dateInfo) {
 
 ## 🧪 Quality Gate Suite (\`pnpm quality\`)
 
-1. \`nx run-many -t lint\` (ESLint code linting across workspace)
-2. \`nx run-many -t type-check\` (Strict TypeScript check)
-3. \`nx run-many -t test\` (Jest unit & integration tests)
+1. \`turbo run lint\` (ESLint code linting across workspace)
+2. \`turbo run type-check\` (Strict TypeScript check)
+3. \`turbo run test\` (Jest unit & integration tests)
 4. \`pnpm lint:root\` & \`pnpm lint:styles\` (Stylelint CSS OKLCH check)
 5. \`pnpm lint:spelling\` (Cspell spell checking)
 6. \`pnpm deps:lint\` (Syncpack package version consistency)
@@ -164,7 +167,8 @@ function buildCodebaseMaps(dateInfo) {
       filename: "technology-stack.md",
       title: "Technology Stack & Catalog Map",
       category: "Architecture & Stack",
-      summary: "Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.",
+      summary:
+        "Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.",
       content: `# ⚡ Technology Stack & Catalog Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -174,7 +178,7 @@ function buildCodebaseMaps(dateInfo) {
 
 ## 🛠️ Stack Catalog
 
-- **Monorepo Manager**: Nx 22 + pnpm 9.15.9 workspace
+- **Monorepo Manager**: Turborepo 2.x + pnpm 9.15.9 workspace
 - **Frontend Core**: Next.js 16 (App Router), React 19, Tailwind CSS
 - **Design System**: OKLCH Palette (\`@repo/theme\`), Glass surfaces, Named shadows only
 - **Database Layer**: Supabase PostgreSQL + Drizzle ORM / Kysely
@@ -209,25 +213,26 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "nx-graph",
-      filename: "nx-graph.md",
-      title: "Nx 22 Project Graph & Task Pipeline Map",
+      key: "turbo-graph",
+      filename: "turbo-graph.md",
+      title: "Turborepo Project Graph & Task Pipeline Map",
       category: "Monorepo Orchestration",
-      summary: "Visual Mermaid diagram of Nx 22 task execution graph, caching pipelines, and project tag hierarchy.",
-      content: `# ⚡ Nx 22 Project Graph & Task Pipeline Map
+      summary:
+        "Visual Mermaid diagram of Turborepo task execution graph, caching pipelines, and project hierarchy.",
+      content: `# ⚡ Turborepo Project Graph & Task Pipeline Map
 
-**Generated:** ${dateInfo.displayDate}  
-**Orchestration Engine:** Nx 22.7.5 + pnpm Workspaces
+**Generated:** \${dateInfo.displayDate}  
+**Orchestration Engine:** Turborepo 2.x + pnpm Workspaces
 
 ---
 
-## 🎨 Visual Nx Task Execution Pipeline
+## 🎨 Visual Turborepo Task Execution Pipeline
 
 \`\`\`mermaid
 flowchart TD
     subgraph Inputs ["Inputs & Inputs Hashing"]
-        SG["sharedGlobals (tsconfig.json, pnpm-workspace.yaml, .env)"]
-        PR["{projectRoot}/**/*"]
+        SG["globalDependencies (tsconfig.json, pnpm-workspace.yaml, .env)"]
+        PR["$TURBO_DEFAULT$"]
     end
 
     subgraph Codegen ["Phase 1: Code & Asset Generation"]
@@ -236,14 +241,14 @@ flowchart TD
     end
 
     subgraph Execution ["Phase 2: Parallel Task Execution"]
-        BUILD["nx run-many -t build"]
-        LINT["nx run-many -t lint"]
-        TC["nx run-many -t type-check"]
-        TEST["nx run-many -t test"]
+        BUILD["turbo run build"]
+        LINT["turbo run lint"]
+        TC["turbo run type-check"]
+        TEST["turbo run test"]
     end
 
     subgraph Cache ["Phase 3: Cache Storage & Hashing"]
-        CACHE[".nx/cache / Local & S3 Cache"]
+        CACHE[".turbo/cache / Local & Remote Cache"]
     end
 
     SG --> CG
@@ -308,11 +313,11 @@ graph TD
 
 ---
 
-## ⚙️ Nx Configuration Overview (\`nx.json\`)
-- **Default Base**: \`master\`
-- **Task Hashing**: Inputs hash includes \`sharedGlobals\` + project files
+## ⚙️ Turborepo Configuration Overview (\`turbo.json\`)
+- **Task Pipelines**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\`, \`sync-assets\`
+- **Task Hashing**: Inputs hash includes \`globalDependencies\`, \`globalEnv\`, and \`$TURBO_DEFAULT$\`
 - **Caching**: \`build\`, \`lint\`, \`type-check\`, \`test\`, \`codegen\` set to \`cache: true\`
-- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals
+- **Boundary Rules**: Enforces zero illegal imports from UI to Database internals via \`eslint-plugin-boundaries\`
 `,
     },
     {
@@ -320,11 +325,12 @@ graph TD
       filename: "dependencies-graph.md",
       title: "Monorepo Dependencies & Topology Graph Map",
       category: "Workspace Architecture",
-      summary: "Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.",
+      summary:
+        "Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.",
       content: `# 🕸️ Monorepo Dependencies & Topology Graph Map
 
 **Generated:** ${dateInfo.displayDate}  
-**Architecture:** Nx 22 Monorepo Topology
+**Architecture:** Turborepo Monorepo Topology
 
 ---
 
@@ -422,7 +428,8 @@ graph LR
       filename: "multi-agent-architecture.md",
       title: "Multi-Agent Architecture & Pre-Flight Research Gate Map",
       category: "Agent Orchestration",
-      summary: "Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.",
+      summary:
+        "Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.",
       content: `# 🤖 Multi-Agent Architecture & Pre-Flight Research Gate Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -474,7 +481,7 @@ flowchart TD
 - **Implementation**: \`SubagentCoordinator.evaluateArchitecturalPreFlight(proposal, scope)\`.
 - **Benchmark Evaluation Surface**:
   - **Airbnb / PayPal**: Semantic Data Contracts (Zero database-to-contract drift).
-  - **Netflix / ThoughtWorks**: Architecture-as-Code Fitness Functions (Drift Health Index $\ge 90\\%$).
+  - **Netflix / ThoughtWorks**: Architecture-as-Code Fitness Functions (Drift Health Index $ge 90\\%$).
   - **Uber / Sourcegraph**: AST Codebase Maps & Topology Graphs.
   - **Meta / Google**: Perceptual visual diffing & synthetic navigation canaries.
 `,
@@ -515,7 +522,9 @@ function main() {
       sizeBytes: Buffer.byteLength(map.content, "utf-8"),
     });
 
-    console.log(`   ├── ${map.filename} (${(Buffer.byteLength(map.content, "utf-8") / 1024).toFixed(1)} KB)`);
+    console.log(
+      `   ├── ${map.filename} (${(Buffer.byteLength(map.content, "utf-8") / 1024).toFixed(1)} KB)`
+    );
   }
 
   // Update codebase-maps/latest/ directory

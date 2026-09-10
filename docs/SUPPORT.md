@@ -32,16 +32,16 @@
 #### Build & Performance
 
 - Run `pnpm quality` to check for linting, type checking, and dependency issues.
-- Clear local Nx cache safely: `nx reset` (or `rm -rf .nx/cache`).
+- Clear local Turbo cache safely: `rm -rf .turbo/cache`.
 - For selective checks on changed files:
-  `nx affected --target=lint,test,build` or `pnpm quality`.
+  `pnpm turbo run lint test build --filter=...[origin/main]` or `pnpm quality`.
 - Update dependencies safely: `pnpm deps:lint` and then `pnpm deps:fix`.
 
 #### Remote Cache (Self-hosted)
 
 - If you see unexpectedly slow builds, verify your local MinIO bucket
   is reachable and the environment variables `NXCACHE_S3_*` are set.
-- Run `nx reset` to clear local cache and force remote retrieval testing.
+- Run `rm -rf .turbo/cache` to clear local cache and force remote retrieval testing.
 
 #### Database Issues
 
@@ -82,7 +82,7 @@
 
 #### Official Documentation
 
-- [Nx Documentation](https://nx.dev)
+- [Turborepo Documentation](https://turbo.build/repo/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
 - [pnpm Documentation](https://pnpm.io)

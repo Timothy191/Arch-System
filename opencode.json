@@ -42,11 +42,6 @@
       "command": ["npx", "-y", "@mikusnuz/npm-mcp"],
       "enabled": true
     },
-    "nx-mcp": {
-      "type": "local",
-      "command": ["npx", "nx", "mcp"],
-      "enabled": true
-    },
     "playwright": {
       "type": "local",
       "command": ["npx", "-y", "@playwright/mcp@0.0.76"],

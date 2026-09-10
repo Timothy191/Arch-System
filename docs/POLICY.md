@@ -8,8 +8,8 @@ All policy enforcement is consolidated into `tools/policy-compiler.cjs` and `too
 To add a new dependency rule (e.g., "UI packages cannot depend on API packages"):
 
 1. Open `tools/apply-project-tags.cjs` to ensure the relevant project directories get the correct `scope:*` tags.
-2. Open `nx.json` and update the `dependencyConstraints` array with the new `sourceTag` and `onlyDependOnLibsWithTags`.
-3. Run `pnpm policy:gen` to compile the `nx.json` rules into `.eslintrc.cjs` boundaries.
+2. Open `tools/policy-compiler.cjs` and update the dependency constraints with the new `sourceTag` and `onlyDependOnLibsWithTags`.
+3. Run `pnpm policy:gen` to compile the rules into `tools/policy/eslint-boundaries.generated.cjs`.
 
 ## 2. Design System Rules
 

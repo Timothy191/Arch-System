@@ -7,7 +7,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help outline info onboard maps-gen \
-        install dev dev-quick dev-tools dev-all dev-nx dev-cloudflare dev-hosted inngest-dev \
+        install dev dev-quick dev-tools dev-all dev-turbo dev-cloudflare dev-hosted inngest-dev \
         build analyze bundlesize sync-assets \
         test test-e2e test-watch test-coverage test-unit pentest \
         quality lint lint-fix lint-root lint-styles lint-spelling type-check format format-check md-lint md-fix html-check \
@@ -59,7 +59,7 @@ info: ## Show environment, tool versions, and system information
 	@echo '============================'
 	@echo 'Node.js:           $(shell node --version 2>/dev/null || echo "N/A")'
 	@echo 'pnpm:              $(shell pnpm --version 2>/dev/null || echo "N/A")'
-	@echo 'Nx:                $(shell npx nx --version 2>/dev/null || echo "N/A")'
+	@echo 'Turbo:             $(shell pnpm turbo --version 2>/dev/null || echo "N/A")'
 	@echo 'Working directory: $(shell pwd)'
 
 onboard: ## Run the interactive monorepo onboarding diagnostic CLI
@@ -91,10 +91,10 @@ dev-tools: ## Start development server with tools stack (Redis, Flowise, etc.)
 	pnpm dev -- -t
 
 dev-all: ## Start development server with all apps and packages
-	pnpm dev:all:nx
+	pnpm dev:all:turbo
 
-dev-nx: ## Start Next.js portal application directly via Nx
-	pnpm dev:nx
+dev-turbo: ## Start Next.js portal application directly via Turbo
+	pnpm dev:turbo
 
 dev-cloudflare: ## Start dev stack bound for Cloudflare Tunnel network access
 	pnpm dev:cloudflare
@@ -353,12 +353,12 @@ clean: ## Clean build artifacts, temporary caches, and node_modules
 	rm -rf apps/*/node_modules
 	rm -rf packages/*/node_modules
 	rm -rf apps/*/.next
-	rm -rf .nx/cache
+	rm -rf .turbo
 	rm -rf .next
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
-clean-cache: ## Clean Nx and compiler caches only
-	rm -rf .nx/cache
+clean-cache: ## Clean Turbo and compiler caches only
+	rm -rf .turbo
 	rm -rf apps/*/.next/cache
 
 clean-docker: ## Stop and remove all Docker containers, networks, and volumes

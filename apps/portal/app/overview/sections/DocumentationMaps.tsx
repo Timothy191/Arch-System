@@ -45,7 +45,7 @@ interface CodebaseMapsData {
 }
 
 const MAP_FILES = [
-  { key: "nx-graph.md", label: "Nx 22 Project Graph & Pipeline", icon: Layers },
+  { key: "turbo-graph.md", label: "Turbo Project Graph & Pipeline", icon: Layers },
   { key: "dependencies-graph.md", label: "Monorepo Dependencies Topology Graph", icon: GitBranch },
   { key: "route-feature-architecture.md", label: "Route & Feature Architecture", icon: Map },
   { key: "database-schema.md", label: "Database Schema & Topology", icon: Database },
@@ -79,7 +79,7 @@ export default function DocumentationMaps() {
 
   useEffect(() => {
     fetchMapsData(selectedLogId, selectedFileKey);
-  }, [selectedLogId, selectedFileKey]);
+  }, [selectedLogId, selectedFileKey, fetchMapsData]);
 
   const activeMeta =
     data?.manifest?.find((m) => m.id === selectedLogId || m.folderName === selectedLogId) ||
@@ -127,8 +127,8 @@ export default function DocumentationMaps() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
-                      ) === index
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
+                      ) === index,
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>

@@ -34,6 +34,7 @@ pnpm onboard
 ```
 
 The `pnpm onboard` diagnostic suite checks:
+
 1. Node engine & Volta toolchain compatibility.
 2. pnpm workspace catalog integrity.
 3. Docker & local Supabase container health.
@@ -65,13 +66,14 @@ Before making changes, inspect the interactive dependency graph to understand mo
 
 ```bash
 # Launch interactive graph visualizer
-pnpm nx:graph
+pnpm turbo run build --graph
 
 # View affected projects based on your local branch diff
 pnpm dev:graph
 ```
 
 ### Key Architectural Boundaries
+
 - `apps/portal`: Next.js 16 App Router interface (must not import DB internals directly).
 - `packages/contract`: Canonical Zod schemas and entity definitions (Single Source of Truth).
 - `libs/features/*`: Domain-specific UI and data-access modules (`scope:feature`).
@@ -82,6 +84,7 @@ pnpm dev:graph
 ## 5. Development Workflow & Quality Gates
 
 ### A. Sub-Second Inner-Loop Feedback
+
 Do not wait for the entire monorepo test suite on every change. Use targeted test runners:
 
 ```bash
@@ -90,6 +93,7 @@ pnpm --filter portal test -- --testPathPatterns="<hook-or-component-name>"
 ```
 
 ### B. Pre-Commit Quality Gate
+
 Before opening a PR or merging, execute the complete quality suite:
 
 ```bash

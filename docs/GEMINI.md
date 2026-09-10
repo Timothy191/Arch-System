@@ -4,7 +4,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
 
 ## 🏗️ Architecture & Tech Stack
 
-- **Monorepo**: Turborepo + pnpm 9.15.9 + Nx 22.
+- **Monorepo**: Turborepo 2.x + pnpm 9.15.9.
 - **Frontend**: Next.js 16 (App Router), React 19, Tailwind (OKLCH).
 - **Backend**: Supabase (PostgreSQL, Auth, RLS), Payload CMS v3.
 - **Quality**: Strict TypeScript, Jest, Playwright, DeepEval.
@@ -20,7 +20,7 @@ Industrial operations portal built for high-scale vigilance and operational prec
   - Database schema migrations (`packages/database`).
   - Data mutation logic (Server Actions, API routes).
   - Changes to authentication or authorization rules (RLS).
-- **Mandatory Migration Rollback Testing**: Whenever creating or editing any SQL migration under `packages/database/migrations/`, I MUST run `pnpm nx run @repo/database:test:migration-rollback` to guarantee rollback safety invariants before applying changes to the database.
+- **Mandatory Migration Rollback Testing**: Whenever creating or editing any SQL migration under `packages/database/migrations/`, I MUST run `pnpm turbo run test:migration-rollback --filter=@repo/database` to guarantee rollback safety invariants before applying changes to the database.
 
 ### Artifact Auto-Approval (MANDATORY RULE)
 

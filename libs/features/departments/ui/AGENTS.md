@@ -6,10 +6,10 @@ Domain feature package housing departmental UI presentational components, intera
 
 ## Inner Loop Commands
 
-- **Run all unit tests**: `pnpm nx test features-departments-ui`
+- **Run all unit tests**: `pnpm turbo run test --filter=@repo/departments/ui`
 - **Run targeted component spec**: `pnpm --filter @repo/departments/ui test -- -t "<ComponentName>"`
-- **Type-check package**: `pnpm nx type-check features-departments-ui`
-- **Lint package**: `pnpm nx lint features-departments-ui`
+- **Type-check package**: `pnpm turbo run type-check --filter=@repo/departments/ui`
+- **Lint package**: `pnpm turbo run lint --filter=@repo/departments/ui`
 
 ## Architectural Invariants
 

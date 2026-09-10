@@ -22,14 +22,14 @@ pnpm dev                    # Quick portal development only
 
 ## 🏗️ Build System
 
-This project uses **Nx** (not turborepo) for monorepo task orchestration:
+This project uses **Turborepo** for monorepo task orchestration:
 
-- **Nx config**: `nx.json` in project root
-- **Cache location**: `.nx/cache` (cleaned by scripts)
-- **Task orchestration**: All package tasks run via `nx run-many`
-- **Version**: 22.7.5
+- **Turbo config**: `turbo.json` in project root
+- **Cache location**: `.turbo/cache` (cleaned by scripts)
+- **Task orchestration**: All package tasks run via `turbo run`
+- **Version**: 2.x
 
-See `CLAUDE.md` for full Nx configuration details.
+See `CLAUDE.md` for full Turbo configuration details.
 
 ## 📋 Available Scripts
 
@@ -582,7 +582,7 @@ When modifying scripts:
 3. Ensure proper error handling and exit codes
 4. Document new flags or features in this README
 5. Test with clean environment (no existing Docker containers)
-6. **Note**: Project uses Nx (`.nx/cache`), not Turborepo (`.turbo`)
+6. **Note**: Project uses Turborepo (`.turbo/cache`)
 
 ## 🗄️ Archived Scripts
 
@@ -670,5 +670,5 @@ See `DELAY_TRACKING_TEST_PLAN.md` for full test coverage including:
 
 **Last Updated**: June 18, 2026
 **Script Count**: 15 active scripts (12 shell + 3 Python)
-**Build System**: Nx 22.7.5 (not Turborepo)
+**Build System**: Turborepo 2.x
 **Removed Scripts**: 5 redundant scripts removed in this cleanup (deploy-dev.sh, dev-minimal.sh, dev-warmup.sh, setup-desktop-shortcuts.sh, docs-generators/generate_video.py)

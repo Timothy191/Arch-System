@@ -22,32 +22,32 @@ pnpm quality                                              # full quality gate �
 
 ### Development Targets
 
-| Action                             | Command                                                      |
-| ---------------------------------- | ------------------------------------------------------------ |
-| Build all                          | `pnpm build`                                                 |
-| Build one project                  | `pnpm nx build <name>` or `pnpm --filter @repo/<name> build` |
-| Lint all / one                     | `pnpm lint` · `pnpm nx lint <name>`                          |
-| Type-check all / one               | `pnpm type-check` · `pnpm nx type-check <name>`              |
-| All unit tests                     | `pnpm test`                                                  |
-| Single portal test file            | `pnpm --filter portal test -- --testPathPatterns=<file>`     |
-| E2E (needs portal on :3000)        | `pnpm test:e2e`                                              |
-| Visual E2E snapshots               | `pnpm test:e2e:visual`                                       |
-| Storybook                          | `pnpm ui` (opens `@repo/ui` Storybook)                       |
-| Storybook a11y                     | `pnpm test:a11y`                                             |
-| Format                             | `pnpm format`                                                |
-| Deploy (local/staging/production)  | `pnpm deploy:local` / `:staging` / `:production`             |
-| Deploy via Cloudflare Tunnel       | `pnpm deploy:cloudflare` (interactive; dev/production modes) |
-| Rollback production deploy         | `pnpm deploy:rollback` (`deploy.sh production --rollback`)   |
-| Dev server exposed via tunnel      | `pnpm dev:cloudflare` · `pnpm dev:hosted`                    |
-| Verify prod env + standalone build | `./scripts/verify-prod-env.sh .env.production`               |
-| Generate DB types                  | `pnpm db-gen`                                                |
-| Push DB migrations                 | `pnpm db-push`                                               |
-| Reset local DB                     | `pnpm db-reset` (destructive)                                |
-| Start local Supabase               | `pnpm db-start`                                              |
-| Generate DB docs                   | `pnpm db-docs`                                               |
-| Start monitoring HUD               | `pnpm monitor`                                               |
-| Start Grafana stack                | `pnpm monitor:grafana`                                       |
-| Stop Grafana stack                 | `pnpm monitor:grafana-stop`                                  |
+| Action                             | Command                                                                      |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| Build all                          | `pnpm build`                                                                 |
+| Build one project                  | `pnpm turbo run build --filter=<name>` or `pnpm --filter @repo/<name> build` |
+| Lint all / one                     | `pnpm lint` · `pnpm turbo run lint --filter=<name>`                          |
+| Type-check all / one               | `pnpm type-check` · `pnpm turbo run type-check --filter=<name>`              |
+| All unit tests                     | `pnpm test`                                                                  |
+| Single portal test file            | `pnpm --filter portal test -- --testPathPatterns=<file>`                     |
+| E2E (needs portal on :3000)        | `pnpm test:e2e`                                                              |
+| Visual E2E snapshots               | `pnpm test:e2e:visual`                                                       |
+| Storybook                          | `pnpm ui` (opens `@repo/ui` Storybook)                                       |
+| Storybook a11y                     | `pnpm test:a11y`                                                             |
+| Format                             | `pnpm format`                                                                |
+| Deploy (local/staging/production)  | `pnpm deploy:local` / `:staging` / `:production`                             |
+| Deploy via Cloudflare Tunnel       | `pnpm deploy:cloudflare` (interactive; dev/production modes)                 |
+| Rollback production deploy         | `pnpm deploy:rollback` (`deploy.sh production --rollback`)                   |
+| Dev server exposed via tunnel      | `pnpm dev:cloudflare` · `pnpm dev:hosted`                                    |
+| Verify prod env + standalone build | `./scripts/verify-prod-env.sh .env.production`                               |
+| Generate DB types                  | `pnpm db-gen`                                                                |
+| Push DB migrations                 | `pnpm db-push`                                                               |
+| Reset local DB                     | `pnpm db-reset` (destructive)                                                |
+| Start local Supabase               | `pnpm db-start`                                                              |
+| Generate DB docs                   | `pnpm db-docs`                                                               |
+| Start monitoring HUD               | `pnpm monitor`                                                               |
+| Start Grafana stack                | `pnpm monitor:grafana`                                                       |
+| Stop Grafana stack                 | `pnpm monitor:grafana-stop`                                                  |
 
 ### Makefile Shortcuts
 
@@ -110,7 +110,7 @@ packages/
 └── types/           # Shared TypeScript interfaces & types
 
 tools/
-├── policy-compiler.cjs      # Enforces architectural boundaries (nx.json)
+├── policy-compiler.cjs      # Enforces architectural boundaries (turbo.json)
 ├── design-audit.cjs         # Validates OKLCH color usage & theme compliance
 ├── enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
 └── apply-project-tags.cjs   # Applies Nx scope tags to new projects
@@ -126,7 +126,7 @@ scripts/
 2. **Design System**: All colors must use OKLCH format from `@repo/theme` (validated by `pnpm audit:design`)
 3. **Security**: Static analysis blocks `eval()`, string-concatenated SQL, and hardcoded secrets
 4. **Data Access**: All Supabase interactions go through `@repo/supabase` layer with proper RLS policies
-5. **Type Safety**: End-to-end TypeScript with strict `nx.json` boundary rules
+5. **Type Safety**: End-to-end TypeScript with strict `turbo.json` boundary rules
 6. **Authorization SSoT**: The `employees` table is the source of truth for role + department. RLS must be enabled on every new table.
 7. **Auth Middleware**: `apps/portal/middleware.ts` is a thin edge shim delegating to `apps/portal/server/proxy.ts` (session refresh, role/department route gating, Redis-cached department slug → UUID resolution). API routes `/api/c66`, `/api/health`, `/api/metrics` and static assets are exempt.
 8. **Migrations SSoT**: Only `packages/database/migrations/NNN_description.sql` is source of truth. NEVER edit `packages/supabase/supabase/migrations/` — it's a deploy-time copy (a PreToolUse hook blocks edits there).
@@ -205,10 +205,10 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 
 ### Code Generation
 
-1. **Design Tokens**: `pnpm nx run theme:codegen` converts CSS variables to TypeScript
+1. **Design Tokens**: `pnpm turbo run codegen --filter=theme` converts CSS variables to TypeScript
 2. **Database Types**: `pnpm db-gen` generates TS from Supabase schema
-3. **Token Validation**: `pnpm nx run theme:lint:tokens` validates design token usage
-4. **CSS Linting**: `pnpm nx run theme:lint:css` ensures Stylelint compliance
+3. **Token Validation**: `pnpm turbo run lint:tokens --filter=theme` validates design token usage
+4. **CSS Linting**: `pnpm turbo run lint:css --filter=theme` ensures Stylelint compliance
 
 ### Pre-Commit & CI
 
@@ -247,26 +247,19 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 6. Validate design system usage with `pnpm audit:design`
 7. Test boundary violations with `pnpm policy:check`
 
-<!-- nx configuration start-->
+<!-- turbo configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
-## General Guidelines for working with Nx
+## General Guidelines for working with Turbo
 
-- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
-- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
-- You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
-- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
+- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `turbo` (i.e. `turbo run <task>`, `turbo run <task> --filter=<name>`) instead of using the underlying tooling directly
+- Prefix turbo commands with the workspace's package manager (e.g., `pnpm turbo run build`) - avoids using globally installed CLI
+- Use `--filter=<name>` to scope a task to a single app/package (e.g. `pnpm turbo run lint --filter=portal`)
+- Use `--filter=...[HEAD~1]` for affected-only runs (e.g. `pnpm turbo run test --filter=...[HEAD~1]`)
+- NEVER guess CLI flags - always check `pnpm turbo run <task> --help` first when unsure
 
 ## Scaffolding & Generators
 
-- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
+- For scaffolding tasks (creating apps, libs, project structure, setup), follow the existing package layout in `packages/` and `apps/`; there is no generator CLI in the Turbo setup
 
-## When to use nx_docs
-
-- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
-- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
-- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
-
-<!-- nx configuration end-->
+<!-- turbo configuration end-->

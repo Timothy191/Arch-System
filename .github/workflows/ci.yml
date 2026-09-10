@@ -154,9 +154,9 @@ jobs:
       - name: Run Markdown Lint
         run: pnpm md:lint
 
-  # Nx Agents Distributed Work: Lint, Type Check, Build & Test
-  nx-agents:
-    name: Distributed Nx Tasks (Nx Agents)
+  # Turbo Distributed Work: Lint, Type Check, Build & Test
+  quality:
+    name: Quality Gates (Lint, Type Check, Build & Test)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -203,9 +203,6 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
       - name: Next.js Cache
         uses: actions/cache@v4
         with:
@@ -249,8 +246,13 @@ jobs:
           poetry run deepeval test run tests/
         working-directory: packages/eval
 
-      - name: Run Nx Tasks
-        run: pnpm nx affected -t lint type-check lint:tokens lint:css build test --coverage --passWithNoTests
+      - name: Run Turbo Tasks
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            pnpm turbo run lint type-check lint:tokens lint:css build test --coverage --passWithNoTests
+          else
+            pnpm turbo run lint type-check lint:tokens lint:css build test --filter=...[origin/main] --coverage --passWithNoTests
+          fi
         env:
           CI: true
 
@@ -265,11 +267,11 @@ jobs:
           path: apps/portal/coverage/
           retention-days: 14
 
-  # E2E job - depends on nx-agents
+  # E2E job - depends on quality
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [nx-agents]
+    needs: [quality]
     permissions:
       contents: read
       issues: write
@@ -305,9 +307,6 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
       - name: Next.js Cache
         uses: actions/cache@v4
         with:
@@ -322,7 +321,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm nx affected -t build
+        run: pnpm turbo run build --filter=portal
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
@@ -330,11 +329,11 @@ jobs:
       - name: Run Playwright E2E Tests (Visual Regression)
         run: pnpm test:e2e
 
-  # Lighthouse job - depends on nx-agents
+  # Lighthouse job - depends on quality
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
-    needs: [nx-agents]
+    needs: [quality]
     permissions:
       contents: read
       issues: write
@@ -370,9 +369,6 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Derive base and head SHAs for Nx affected
-        uses: nrwl/nx-set-shas@v4
-
       - name: Next.js Cache
         uses: actions/cache@v4
         with:
@@ -387,7 +383,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm nx affected -t build
+        run: pnpm turbo run build --filter=portal
 
       - name: Run Lighthouse CI
         run: npx @lhci/cli@0.14.x autorun
@@ -422,7 +418,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Storybook
-        run: pnpm nx run @repo/ui:build-storybook
+        run: pnpm turbo run build-storybook --filter=@repo/ui
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
@@ -446,7 +442,7 @@ jobs:
         policy-check,
         html-meta-check,
         md-lint,
-        nx-agents,
+        quality,
         e2e,
         lighthouse,
         a11y,
@@ -478,4 +474,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Self-Healing CI
-        run: pnpm exec nx fix-ci
+        run: pnpm turbo run lint --filter=...[origin/main] --force

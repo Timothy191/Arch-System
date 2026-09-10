@@ -122,4 +122,4 @@ See individual `package.json` files for the complete export configuration.
 
 - Run `pnpm knip` to detect dead code and dependency issues
 - Run `pnpm deps:lint` to check for dependency version inconsistencies
-- Run `pnpm nx run-many -t lint type-check` to verify all packages type-check correctly
+- Run `pnpm turbo run lint type-check` to verify all packages type-check correctly

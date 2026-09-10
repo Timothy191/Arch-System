@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal — an **Nx 22 + pnpm** workspaces monorepo serving authenticated, department-specific dashboards. Enforces strict role and department-based authorization.
+Arch-Systems (Plantcor) is a multi-departmental mining operations portal — a **Turborepo 2.x + pnpm** workspaces monorepo serving authenticated, department-specific dashboards. Enforces strict role and department-based authorization.
 
 ---
 
@@ -114,24 +114,24 @@ pnpm quality
 
 ### Build, Test, and Lint Tasks
 
-Nx handles target execution and caching. Prefer `pnpm nx run` over underlying tools:
+Turbo handles target execution and caching. Prefer `pnpm turbo run` over underlying tools:
 
-| Task Goal                        | Command                                                        |
-| :------------------------------- | :------------------------------------------------------------- |
-| Build all workspaces             | `pnpm build`                                                   |
-| Build single app/package         | `pnpm nx build <name>` (e.g. `pnpm nx build portal`)           |
-| Run all unit tests               | `pnpm test`                                                    |
-| Run single Jest spec file        | `pnpm --filter portal test -- --testPathPatterns=<file_path>`  |
-| Run all Playwright E2E           | `pnpm test:e2e` (requires portal dev server active on `:3000`) |
-| Run visual spec tests            | `pnpm test:e2e:visual`                                         |
-| Spin up Storybook UI             | `pnpm ui`                                                      |
-| Execute accessibility checks     | `pnpm test:a11y`                                               |
-| Regenerate architecture policies | `pnpm policy:gen`                                              |
-| Run Python eval suite            | `pnpm --filter @repo/eval test`                                |
-| Type-check all workspaces        | `pnpm type-check`                                              |
-| Lint all workspaces              | `pnpm lint`                                                    |
-| Check dependency mismatches      | `pnpm deps:check`                                              |
-| Find unused exports/deps         | `pnpm knip`                                                    |
+| Task Goal                        | Command                                                                              |
+| :------------------------------- | :----------------------------------------------------------------------------------- |
+| Build all workspaces             | `pnpm build`                                                                         |
+| Build single app/package         | `pnpm turbo run build --filter=<name>` (e.g. `pnpm turbo run build --filter=portal`) |
+| Run all unit tests               | `pnpm test`                                                                          |
+| Run single Jest spec file        | `pnpm --filter portal test -- --testPathPatterns=<file_path>`                        |
+| Run all Playwright E2E           | `pnpm test:e2e` (requires portal dev server active on `:3000`)                       |
+| Run visual spec tests            | `pnpm test:e2e:visual`                                                               |
+| Spin up Storybook UI             | `pnpm ui`                                                                            |
+| Execute accessibility checks     | `pnpm test:a11y`                                                                     |
+| Regenerate architecture policies | `pnpm policy:gen`                                                                    |
+| Run Python eval suite            | `pnpm --filter @repo/eval test`                                                      |
+| Type-check all workspaces        | `pnpm type-check`                                                                    |
+| Lint all workspaces              | `pnpm lint`                                                                          |
+| Check dependency mismatches      | `pnpm deps:check`                                                                    |
+| Find unused exports/deps         | `pnpm knip`                                                                          |
 
 ### Deployment Commands
 
@@ -232,7 +232,7 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 - `apps/portal/next.config.mjs` — Next.js configuration (Turbopack, standalone output, transpile packages, Sentry, bundle analyzer).
 - `apps/portal/docker/Dockerfile` — Multi-stage Docker build (pruner → deps → builder → distroless production).
 - `tools/policy-compiler.cjs` — Architecture rules compiler and SSoT.
-- `tools/apply-project-tags.cjs` — Nx project tagging script mapping folders to scope tags.
+- `tools/apply-project-tags.cjs` — Project tagging script mapping folders to scope tags.
 - `tools/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.
 - `packages/database/tests/migration-rollback-safety.mjs` — Validates migration SQL naming and checks rollback (`DROP TABLE IF EXISTS`) requirements.
 - `packages/errors/src/index.ts` — AppError base classes and type guards.
@@ -243,7 +243,7 @@ Nx handles target execution and caching. Prefer `pnpm nx run` over underlying to
 - `packages/ui/.stylelintrc.mjs` — Stylelint config with Tailwind at-rule allowances.
 - `packages/eslint-config/library.js` — Base ESLint config (restricts direct Zod imports; use `@repo/contract`).
 - `tsconfig.base.json` — Root TypeScript config with path aliases for all packages and feature modules.
-- `nx.json` — Nx workspace configuration (target defaults, dependency constraints, plugins).
+- `turbo.json` — Turborepo workspace configuration (task pipelines, global env, cache settings).
 - `pnpm-workspace.yaml` — Workspace packages and shared dependency catalogs.
 - `infra/docker/compose.portal.yml` — Portal Docker Compose (portal + nginx with healthchecks).
 - `infra/docker/compose.production.yml` — Production overrides (resource limits, restart policies).
@@ -346,5 +346,5 @@ Enforced via Jest in `apps/portal/jest.config.js`:
 | Python             | DeepEval, Pytest (Poetry)                                   |
 | Deployment         | Docker, Docker Compose, Nginx, systemd                      |
 | Package Management | pnpm 9.15.9 with catalogs                                   |
-| Build System       | Nx 22 with caching and remote cache (S3)                    |
+| Build System       | Turborepo 2.x with caching and remote cache                 |
 | Node.js            | >=22 (Volta-pinned to 24.15.0)                              |

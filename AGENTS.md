@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-Arch-Systems (Plantcor) — multi-departmental mining operations portal. **Nx 22 + pnpm** monorepo with Next.js 16 App Router, PostgreSQL/RLS, Redis caching, and Python LLM eval suite.
+Arch-Systems (Plantcor) — multi-departmental mining operations portal. **Turborepo 2.x + pnpm** monorepo with Next.js 16 App Router, PostgreSQL/RLS, Redis caching, and Python LLM eval suite.
 
 ---
 
@@ -71,7 +71,7 @@ pnpm dev:minimal              # Minimal dev server
 pnpm dev:up --all             # Bootstrap everything (Supabase + portal + cms)
 pnpm --filter @repo/database supabase:dev  # Local Supabase Docker
 pnpm build                    # Build all workspaces
-pnpm nx build <name>          # Build single app/package
+pnpm turbo run build --filter=<name>  # Build single app/package
 pnpm test                     # Run all unit tests (Jest + @swc/jest)
 pnpm --filter portal test -- --testPathPatterns=<file>  # Single test file
 pnpm test:e2e                 # Playwright E2E (requires :3000)
@@ -150,29 +150,29 @@ pnpm --filter @repo/eval test # Python eval suite
 
 ## Important Files
 
-| File                             | Purpose                                                            |
-| -------------------------------- | ------------------------------------------------------------------ |
-| `apps/portal/proxy.ts`           | Edge middleware: session refresh, dept gating, Redis cache         |
-| `apps/portal/server/proxy.ts`    | Server proxy: cached auth lookups, redirect validation             |
-| `apps/portal/next.config.mjs`    | Next.js config (Turbopack, standalone, Sentry, bundle analyzer)    |
-| `apps/portal/jest.config.js`     | Jest config with 40+ moduleNameMapper, JSDOM, coverage thresholds  |
-| `apps/portal/setupTests.ts`      | Global test setup (Redis Map mock, Supabase mocks)                 |
-| `e2e/playwright.config.ts`       | Playwright config with chromium/mobile/tablet projects             |
-| `e2e/global.setup.ts`            | E2E auth via cached credentials                                    |
-| `tsconfig.base.json`             | Root TS config with 30+ path aliases                               |
-| `nx.json`                        | Nx 22 config with targetDefaults, dependency constraints, S3 cache |
-| `pnpm-workspace.yaml`            | Workspace packages + dependency catalogs                           |
-| `tools/policy-compiler.cjs`      | SSoT policy compiler → generates rules + eslint boundaries         |
-| `tools/apply-project-tags.cjs`   | Nx project tagging script                                          |
-| `tools/audit-rls.cjs`            | Static RLS policy auditor                                          |
-| `packages/database/migrations/`  | 110+ SQL migration files (001*initial.sql → 153*\*.sql)            |
-| `packages/errors/src/index.ts`   | AppError base classes + type guards                                |
-| `packages/contract/src/index.ts` | Canonical Zod schemas + derived types                              |
-| `packages/redis/src/index.ts`    | Cache registry, buildCacheKey, Redis client                        |
-| `packages/supabase/src/index.ts` | Supabase client factories + manual table types                     |
-| `packages/ui/src/index.ts`       | @repo/ui public API (80+ named exports)                            |
-| `packages/theme/src/index.ts`    | @repo/theme tokens, ArchThemeProvider, useArchTheme                |
-| `.mcp.json`                      | MCP server configs (nx-mcp, postgres)                              |
+| File                             | Purpose                                                              |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `apps/portal/proxy.ts`           | Edge middleware: session refresh, dept gating, Redis cache           |
+| `apps/portal/server/proxy.ts`    | Server proxy: cached auth lookups, redirect validation               |
+| `apps/portal/next.config.mjs`    | Next.js config (Turbopack, standalone, Sentry, bundle analyzer)      |
+| `apps/portal/jest.config.js`     | Jest config with 40+ moduleNameMapper, JSDOM, coverage thresholds    |
+| `apps/portal/setupTests.ts`      | Global test setup (Redis Map mock, Supabase mocks)                   |
+| `e2e/playwright.config.ts`       | Playwright config with chromium/mobile/tablet projects               |
+| `e2e/global.setup.ts`            | E2E auth via cached credentials                                      |
+| `tsconfig.base.json`             | Root TS config with 30+ path aliases                                 |
+| `turbo.json`                     | Turborepo 2.x config with task pipelines, global env, cache settings |
+| `pnpm-workspace.yaml`            | Workspace packages + dependency catalogs                             |
+| `tools/policy-compiler.cjs`      | SSoT policy compiler → generates rules + eslint boundaries           |
+| `tools/apply-project-tags.cjs`   | Project tagging script                                               |
+| `tools/audit-rls.cjs`            | Static RLS policy auditor                                            |
+| `packages/database/migrations/`  | 110+ SQL migration files (001*initial.sql → 153*\*.sql)              |
+| `packages/errors/src/index.ts`   | AppError base classes + type guards                                  |
+| `packages/contract/src/index.ts` | Canonical Zod schemas + derived types                                |
+| `packages/redis/src/index.ts`    | Cache registry, buildCacheKey, Redis client                          |
+| `packages/supabase/src/index.ts` | Supabase client factories + manual table types                       |
+| `packages/ui/src/index.ts`       | @repo/ui public API (80+ named exports)                              |
+| `packages/theme/src/index.ts`    | @repo/theme tokens, ArchThemeProvider, useArchTheme                  |
+| `.mcp.json`                      | MCP server configs (postgres)                                        |
 
 ---
 
@@ -227,7 +227,7 @@ Runs: lint → type-check → test → lint:tokens → lint:css → policy:check
 
 ## CI/CD
 
-- **CI**: `.github/workflows/ci.yml` — parallel jobs for deps-lint, security-audit, knip, policy-check, nx-agents (CodeQL, Trivy, SBOM, DeepEval), e2e, lighthouse
+- **CI**: `.github/workflows/ci.yml` — parallel jobs for deps-lint, security-audit, knip, policy-check, html-meta-check, md-lint, quality, e2e, lighthouse, a11y, self-healing
 - **Deploy**: `.github/workflows/deploy.yml` — quality-check → staging (Vercel/SSH/Docker) → production
 - **Release**: Changesets-based via `.github/workflows/release.yml`
 - **Canary**: `.github/workflows/deploy-canary.yml` — kubectl, 10% traffic, smoke tests
@@ -244,29 +244,3 @@ Runs: lint → type-check → test → lint:tokens → lint:css → policy:check
 | `packages/database/migrations/` | `pnpm --filter @repo/database supabase:push && ... supabase:gen` | `packages/supabase/src/database.types.ts` |
 
 Commit both source and generated files in the same atomic change.
-
----
-
-<!-- nx configuration start-->
-<!-- Leave the start & end comments to automatically receive updates. -->
-
-## General Guidelines for working with Nx
-
-- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
-- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
-- You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
-- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
-
-## Scaffolding & Generators
-
-- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
-
-## When to use nx_docs
-
-- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
-- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
-- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
-
-<!-- nx configuration end-->
