@@ -8,7 +8,6 @@ This directory contains all project documentation organized by purpose and audie
 - **`01-operations/`** - Operational procedures, runbooks, and monitoring guides
 - **`02-system-wiki/`** - System knowledge base and department-specific documentation
 - **`03-audit-reports/`** - Audit reports, RLS analysis, and system health checks
-- **`04-codebase-maps/`** - Codebase visualization, dependency maps, and architecture diagrams
 - **`05-wiki/`** - Comprehensive wiki with entities, queries, concepts, and project reports
 - **`06-archives/`** - Historical documentation and archived content
 - **`07-agentic-systems/`** - Agentic system documentation and MCP environment state
@@ -34,11 +33,12 @@ For the main documentation index, see [`docs/DOCUMENTATION_INDEX.md`](../docs/DO
 ## Contributing
 
 When adding new documentation, place it in the appropriate numbered directory based on its purpose:
+
 - Use `00-core/` for essential project documentation
 - Use `01-operations/` for operational procedures
 - Use `02-system-wiki/` for domain knowledge
 - Use `03-audit-reports/` for audits and health checks
-- Use `04-codebase-maps/` for architecture and dependency documentation
+- Use `codebase-maps/` (repo root) for architecture and dependency documentation
 - Use `05-wiki/` for comprehensive knowledge base content
 - Use `06-archives/` for historical content
 - Use `07-agentic-systems/` for AI/agent systems

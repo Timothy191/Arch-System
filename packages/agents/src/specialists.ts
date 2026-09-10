@@ -115,7 +115,7 @@ Your sole focus is generating structured architectural maps, auditing database-t
 You provide zero-drift transparency across the entire monorepo.`,
     recommendedTools: ["run_command", "view_file", "write_to_file"],
     constraints: [
-      "Generate versioned codebase maps inside codebase-maps/ and documentation/04-codebase-maps/.",
+      "Generate versioned codebase maps inside codebase-maps/.",
       "Audit 100% of database migrations against @repo/contract schemas.",
       "Ensure OpenAPI specifications stay continuously in sync with route handlers.",
     ],

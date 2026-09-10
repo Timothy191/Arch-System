@@ -30,7 +30,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Architecture & Visualization
 
-- **[codebase-maps/README.md](../documentation/04-codebase-maps/README.md)** - Codebase visualization maps
+- **[codebase-maps/README.md](../codebase-maps/README.md)** - Codebase visualization maps
   - Project dependencies map with dependency graphs
   - Package structure overview
   - Route/feature architecture mapping
@@ -128,7 +128,6 @@ Arch-System/
 │ ├── 01-operations/ # Operational procedures and runbooks
 │ ├── 02-system-wiki/ # System knowledge base
 │ ├── 03-audit-reports/ # Audit reports and RLS analysis
-│ ├── 04-codebase-maps/ # Codebase visualization and maps
 │ ├── 04-specifications/ # API and contract blueprints
 │ ├── 05-wiki/ # Comprehensive technical wiki
 │ ├── 06-archives/ # Historical documentation
@@ -150,10 +149,10 @@ Arch-System/
 
 - **Understand the system architecture & stack**: Read [wiki/concepts/project-overview.md](./wiki/concepts/project-overview.md)
 - **Browse the complete developer wiki**: Check [wiki/index.md](./wiki/index.md)
-- **Visualize the codebase structure**: Explore [04-codebase-maps/README.md](../documentation/04-codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
+- **Visualize the codebase structure**: Explore [codebase-maps/README.md](../codebase-maps/README.md) for dependency graphs, architecture diagrams, and visual maps
 - **Review audit reports and quality status**: Check [documentation/03-audit-reports/](../documentation/03-audit-reports/) for RLS and design compliance reports
 - **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](../CLAUDE.md)
-- **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section or view [codebase-maps](../documentation/04-codebase-maps/)
+- **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section or view [codebase-maps](../codebase-maps/)
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
 - **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)
