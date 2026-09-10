@@ -62,7 +62,7 @@ export function CommandMenu({
         setActiveIndex(0);
       }
     },
-    [setOpen, onOpenChange]
+    [setOpen, onOpenChange],
   );
 
   const close = React.useCallback(() => {
@@ -73,6 +73,15 @@ export function CommandMenu({
     setItems((prev) => {
       const idx = prev.findIndex((i) => i.id === item.id);
       if (idx >= 0) {
+        const existing = prev[idx];
+        if (
+          existing &&
+          existing.text === item.text &&
+          existing.disabled === item.disabled &&
+          existing.callback === item.callback
+        ) {
+          return prev;
+        }
         const next = [...prev];
         next[idx] = item;
         return next;
@@ -128,7 +137,7 @@ export function CommandMenu({
         <div
           className={cn(
             "w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 transition-all text-neutral-900 dark:text-neutral-100",
-            className
+            className,
           )}
         >
           {children}
@@ -164,7 +173,8 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       const activeItems = items.filter(
-        (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase()))
+        (i) =>
+          !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
       );
 
       if (e.key === "ArrowDown") {
@@ -173,7 +183,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setActiveIndex((prev) =>
-          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length
+          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length,
         );
       } else if (e.key === "Enter") {
         e.preventDefault();
@@ -196,7 +206,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           placeholder={placeholder}
           className={cn(
             "flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
-            className
+            className,
           )}
           {...props}
         />
@@ -205,7 +215,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
         </kbd>
       </div>
     );
-  }
+  },
 );
 
 CommandMenuInput.displayName = "CommandMenuInput";
@@ -224,8 +234,13 @@ export function CommandMenuList({
   const { search, items } = useCommandMenu();
 
   const matchingCount = items.filter(
-    (i) => search === "" || i.text.toLowerCase().includes(search.toLowerCase())
+    (i) => search === "" || i.text.toLowerCase().includes(search.toLowerCase()),
   ).length;
+
+  // Always render children so registered items stay mounted (their effects populate
+  // `items`). Unmounting them to show the empty message would remove the items and
+  // flip the empty-state condition back, causing an infinite mount/unmount loop.
+  const showEmpty = items.length > 0 && matchingCount === 0;
 
   return (
     <div
@@ -234,12 +249,11 @@ export function CommandMenuList({
       aria-live="polite"
       {...props}
     >
-      {items.length > 0 && matchingCount === 0 ? (
+      {children}
+      {showEmpty && (
         <div className="py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
           {emptyMessage}
         </div>
-      ) : (
-        children
       )}
     </div>
   );
@@ -269,10 +283,12 @@ export function CommandMenuGroup({
       const items = groupRef.current.querySelectorAll('[data-command-item="true"]');
       setHasVisibleChildren(items.length > 0);
     }
-  }, [search, children]);
+  }, [search]);
 
-  if (!hasVisibleChildren) return null;
-
+  // Keep children mounted even when none are visible: unmounting them would run
+  // their unregisterItem cleanup, removing them from the shared `items` array and
+  // flipping CommandMenuList's empty-state condition back — an infinite loop.
+  // Non-matching CommandMenuItems already return null, so only the heading hides.
   return (
     <div
       ref={groupRef}
@@ -280,7 +296,7 @@ export function CommandMenuGroup({
       role="group"
       {...props}
     >
-      {heading && (
+      {heading && hasVisibleChildren && (
         <div className="px-2 pb-1.5 text-xs font-semibold text-neutral-500 dark:text-neutral-400 select-none">
           {heading}
         </div>
@@ -318,12 +334,15 @@ export function CommandMenuItem({
     return String(children);
   }, [children]);
 
+  const selectRef = React.useRef({ callback, onSelect, close, disabled });
+  selectRef.current = { callback, onSelect, close, disabled };
+
   const handleSelect = React.useCallback(() => {
-    if (disabled) return;
-    callback?.();
-    onSelect?.();
-    close();
-  }, [disabled, callback, onSelect, close]);
+    if (selectRef.current.disabled) return;
+    selectRef.current.callback?.();
+    selectRef.current.onSelect?.();
+    selectRef.current.close();
+  }, []);
 
   React.useEffect(() => {
     registerItem({
@@ -344,7 +363,7 @@ export function CommandMenuItem({
 
   // Check if this item is currently active in the filtered list
   const activeItems = items.filter(
-    (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase()))
+    (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
   );
   const isActive = activeItems[activeIndex]?.id === id;
 
@@ -361,7 +380,7 @@ export function CommandMenuItem({
           ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
           : "text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800/60",
         disabled && "pointer-events-none opacity-50",
-        className
+        className,
       )}
       {...props}
     >

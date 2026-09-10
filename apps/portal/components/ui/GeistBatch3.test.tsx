@@ -21,9 +21,8 @@ import {
 } from "@repo/ui/components/ui/context-menu";
 import { CopyButton } from "@repo/ui/components/ui/copy-button";
 import { Description } from "@repo/ui/components/ui/description";
-import { DotsMenu, MenuItem } from "@repo/ui/components/ui/dots-menu";
+import { DotsMenu, DotsMenuItem } from "@repo/ui/components/ui/dots-menu";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
 
 describe("Geist Batch 3 Components", () => {
   describe("CommandMenu", () => {
@@ -43,7 +42,7 @@ describe("Geist Batch 3 Components", () => {
               <CommandMenuItem callback={jest.fn()}>Settings</CommandMenuItem>
             </CommandMenuGroup>
           </CommandMenuList>
-        </CommandMenu>
+        </CommandMenu>,
       );
 
       expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -65,7 +64,7 @@ describe("Geist Batch 3 Components", () => {
               <CommandMenuItem>Beta Option</CommandMenuItem>
             </CommandMenuGroup>
           </CommandMenuList>
-        </CommandMenu>
+        </CommandMenu>,
       );
 
       const input = screen.getByPlaceholderText("Search...");
@@ -87,7 +86,7 @@ describe("Geist Batch 3 Components", () => {
           <CommandMenuList>
             <CommandMenuItem>Hidden</CommandMenuItem>
           </CommandMenuList>
-        </CommandMenu>
+        </CommandMenu>,
       );
 
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -107,7 +106,7 @@ describe("Geist Batch 3 Components", () => {
               Germany
             </ComboboxOption>
           </ComboboxList>
-        </Combobox>
+        </Combobox>,
       );
 
       const input = screen.getByPlaceholderText("Choose...");
@@ -128,7 +127,7 @@ describe("Geist Batch 3 Components", () => {
           <ComboboxList>
             <ComboboxOption value="us">United States</ComboboxOption>
           </ComboboxList>
-        </Combobox>
+        </Combobox>,
       );
 
       const clearBtn = screen.getByLabelText("Clear selection");
@@ -150,7 +149,7 @@ describe("Geist Batch 3 Components", () => {
               </div>
             </ComboboxOption>
           </ComboboxList>
-        </Combobox>
+        </Combobox>,
       );
 
       fireEvent.click(screen.getByRole("textbox"));
@@ -177,7 +176,7 @@ describe("Geist Batch 3 Components", () => {
           delay={150}
         >
           <span>Hover Me</span>
-        </ContextCardTrigger>
+        </ContextCardTrigger>,
       );
 
       const trigger = screen.getByText("Hover Me");
@@ -201,7 +200,7 @@ describe("Geist Batch 3 Components", () => {
               Documentation
             </a>
           }
-        />
+        />,
       );
 
       const link = screen.getByTestId("custom-link");
@@ -226,7 +225,7 @@ describe("Geist Batch 3 Components", () => {
               Delete Entry
             </ContextMenuItem>
           </ContextMenuContent>
-        </ContextMenu>
+        </ContextMenu>,
       );
 
       const zone = screen.getByTestId("trigger-zone");
@@ -253,7 +252,7 @@ describe("Geist Batch 3 Components", () => {
               Disabled Option
             </ContextMenuItem>
           </ContextMenuContent>
-        </ContextMenu>
+        </ContextMenu>,
       );
 
       fireEvent.contextMenu(screen.getByText("Right click"));
@@ -299,7 +298,7 @@ describe("Geist Batch 3 Components", () => {
           title="Deployment ID"
           content="dpl_7x92KmL4"
           tooltip="Unique identifier for deployment."
-        />
+        />,
       );
 
       expect(screen.getByRole("term")).toHaveTextContent("Deployment ID");
@@ -308,7 +307,7 @@ describe("Geist Batch 3 Components", () => {
 
     it("applies right-alignment and ellipsis classes", () => {
       const { container } = render(
-        <Description title="Status" content="Active and Healthy" right ellipsis />
+        <Description title="Status" content="Active and Healthy" right ellipsis />,
       );
 
       const dl = container.querySelector("dl");
@@ -325,9 +324,9 @@ describe("Geist Batch 3 Components", () => {
       const onClick = jest.fn();
       render(
         <DotsMenu buttonAriaLabel="Row actions">
-          <MenuItem onClick={onClick}>View Details</MenuItem>
-          <MenuItem disabled>Export PDF</MenuItem>
-        </DotsMenu>
+          <DotsMenuItem onClick={onClick}>View Details</DotsMenuItem>
+          <DotsMenuItem disabled>Export PDF</DotsMenuItem>
+        </DotsMenu>,
       );
 
       const button = screen.getByLabelText("Row actions");
