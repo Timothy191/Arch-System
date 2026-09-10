@@ -1,5 +1,41 @@
 [
   {
+    "id": "log-96(26-09-10)",
+    "logNumber": 96,
+    "folderName": "log-96(26-09-10)",
+    "folderDate": "26-09-10",
+    "isoDate": "2026-09-10T10:11:41.494Z",
+    "displayDate": "9/10/2026, 10:11:41 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  },
+  {
+    "id": "log-95(26-09-10)",
+    "logNumber": 95,
+    "folderName": "log-95(26-09-10)",
+    "folderDate": "26-09-10",
+    "isoDate": "2026-09-10T10:11:16.091Z",
+    "displayDate": "9/10/2026, 10:11:16 AM UTC",
+    "score": 100,
+    "overallStatus": "PASS",
+    "criticalCount": 0,
+    "warningCount": 0
+  },
+  {
+    "id": "log-94(26-09-10)",
+    "logNumber": 94,
+    "folderName": "log-94(26-09-10)",
+    "folderDate": "26-09-10",
+    "isoDate": "2026-09-10T10:07:58.246Z",
+    "displayDate": "9/10/2026, 10:07:58 AM UTC",
+    "score": 70,
+    "overallStatus": "FAIL",
+    "criticalCount": 2,
+    "warningCount": 0
+  },
+  {
     "id": "log-93(26-09-10)",
     "logNumber": 93,
     "folderName": "log-93(26-09-10)",
