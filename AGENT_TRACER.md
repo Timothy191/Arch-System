@@ -4,6 +4,19 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## 2026-09-10 — Stale Content Verification & Cleanup (Nx→Turbo Migration)
+
+- **Author**: Claude Code (claude.ai/code)
+- **Mandate**: Confirm the repository contains no incomplete, out-of-date, conflicting, or stale content after the Nx→Turborepo migration — sweep living docs, configs, audit tooling, and generated artifacts; fix every stale survivor; land the full quality gate.
+- **Changes**:
+  - Living docs & configs: Replaced the last Nx-era command/path references with Turborepo equivalents (`README.md`, `.github/copilot-instructions.md`, `.agents/rules/execution-guardrails.md`, `.agents/skills/agents-md/*`, `docs/POLICY.md`, `codebase-maps/turbo-graph.md`, `tools/repo/policy-compiler.cjs` header).
+  - Audit tooling: Corrected self-referencing generator paths in `tools/audits/audit-rls.cjs` and `tools/audits/design-audit.cjs`, then regenerated the full report suite; repaired the broken `UX_UI_AUDIT.md` symlink.
+  - Ignore files: Removed stale `.nx/` cache/workspace-data entries from `.prettierignore`, `.dockerignore`, `config/tools/.secretlintignore`.
+  - Codebase maps: Removed the Nx-era `documentation/04-codebase-maps/` duplicate (dated snapshots + `nx-graph.md`), relocated `generate-svg.sh` to `tools/scripts/`, deleted the broken `scripts/regenerate-codebase-maps.sh`, added `codebase-maps/README.md`, and repointed all references to the canonical root `codebase-maps/`.
+  - Config & commands: Fixed the package.json `markdownlint` config path to `config/tools/.markdownlint.json`; corrected `audit:compliance` to run `pnpm --filter @repo/database test` (migration-rollback-safety.mjs) instead of the non-existent `test:migration-rollback`; updated `docs/GEMINI.md` to match; removed the stale `tools/documentation/` duplicate full of `[MISSING_*]` markers.
+  - Agent config: Registered the AgentsRoom MCP, test-runner, and QA-tester servers in `.agents/mcp_config.json`.
+- **Verification**: `pnpm quality` passes (exit 0, 52/52 tasks); migration-rollback safety test now runs inside `audit:compliance` (111 migrations, 0 errors); 7 conventional commits pushed to `origin/main` (`ef0eb06..2bb927a`); worktree clean, remote tracking synchronized.
+
 ## 2026-09-10 — Turborepo Migration Cleanup: Policy Paths, Tool Paths, knip, Quality Gate
 
 - **Author**: Claude Code (claude.ai/code)
