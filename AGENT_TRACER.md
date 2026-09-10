@@ -4,6 +4,18 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## 2026-09-10 — Antidrift Guardian: Origin ↔ Continuum Test & Agent
+
+- **Author**: Claude Code (claude.ai/code)
+- **Mandate**: Reverse-engineer Alyssa Solen's Origin ↔ Continuum framework (alyssadata/alyssadata, non-drift-measurement-test, ai-foundations-origin-boundary-test) into one complex functional Antidrift test plus a guardian agent, set up in the global config and this repo.
+- **Changes**:
+  - `tools/audits/antidrift-test.cjs` (new): Functional test defining the 7-invariant governing line (Origin), running real repo checks across the seven non-drift capabilities (Source Retention, Boundary Retention, Concept Stability, Unauthorized Merge Detection, Authorization Drift Detection, Repair Accuracy, Pressure Resistance), computing confidence % per capability and overall, and deciding drift status against a 90% threshold. Read-only: restores `rls-report.md` after running `audit-rls.cjs`; excludes itself from the Nx scan (self-reference).
+  - `package.json`: Registered `audit:antidrift` script.
+  - `documentation/07-agentic-systems/antidrift-guardian.md` (new): Project-side reference for the test, the governing line, and the when-to-test logic.
+  - Global config: `~/.claude/agents/antidrift-guardian.md` + `~/.agents/agents/antidrift-guardian/agent.md` (9 Core Agent Setup Pillars); memory entries in `~/.claude/projects/-home-timothy-Projects-Arch-System/memory/`.
+  - Drift remediation: The test's first run caught a stale unmerged branch (`Timothy191/Main`, 1 docs commit ahead). Cherry-picked `e1e2878` onto main (resolved AGENT_TRACER.md conflict, reverse-chronological ordering), verified content preserved, deleted the branch.
+- **Verification**: `node tools/audits/antidrift-test.cjs` passes all 7 capabilities at 100% except Pressure Resistance (untracked test file + unpushed commit — both resolve on commit/push); eslint + markdownlint clean; worktree clean, remote tracking synchronized.
+
 ## 2026-09-10 — Stale Content Verification & Cleanup (Nx→Turbo Migration)
 
 - **Author**: Claude Code (claude.ai/code)
