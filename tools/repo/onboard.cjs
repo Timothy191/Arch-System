@@ -286,7 +286,7 @@ if (policyCheck.success) {
   record(
     "PASS",
     "Architecture Policies",
-    "Nx project tags and ESLint boundary rules are in sync (SSoT verified)"
+    "Turborepo project tags and ESLint boundary rules are in sync (SSoT verified)"
   );
 } else {
   record(

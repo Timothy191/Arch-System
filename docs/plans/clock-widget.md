@@ -12,7 +12,7 @@ natural occupant of the macOS-style `MacMenuBar` `rightSlot` already exported by
 `@repo/ui`. This plan delivers the missing native component.
 
 Non-goal: porting the QML/KDE widget. QML + `KPlugin` packaging has no path into an
-Nx + Next.js + Payload + Supabase portal; a from-scratch React component is cheaper
+Turborepo + Next.js + Payload + Supabase portal; a from-scratch React component is cheaper
 and correct.
 
 ## Conformance targets (from AGENTS.md)

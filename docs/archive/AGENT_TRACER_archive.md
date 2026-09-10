@@ -159,9 +159,9 @@ with no repo impact have been removed during the 2026-08-31 tracer cleanup.
   - `apps/overview/lib/data.ts`: `BACKEND_SERVICES` + `BACKEND_CONNECTIONS`.
   - `apps/overview/app/page.tsx`: `Backend Connections` tab.
 
-## 2026-08-18: Nx AI Agent Config Sync
+## 2026-08-18: Turborepo AI Agent Config Sync
 
-- **Changes**: `pnpm nx configure-ai-agents` — all agents (claude, codex, copilot, cursor, gemini, opencode) synchronized with Nx 22.7.5.
+- **Changes**: `pnpm turbo configure-ai-agents` — all agents (claude, codex, copilot, cursor, gemini, opencode) synchronized with Turborepo 2.x.7.5.
 
 ## 2026-08-18: cSpell Integration & Domain Vocabulary
 
@@ -197,7 +197,7 @@ with no repo impact have been removed during the 2026-08-31 tracer cleanup.
   - `pnpm install`: 32 workspace projects, 2966 packages. `packages/contract/package.json` drift resolved.
   - `.env` + `apps/portal/.env`: Materialized from templates.
   - `node tools/apply-project-tags.cjs`: 31 `project.json` files written; scope tags applied.
-- **Verification**: `format:check`, `lint:root`, `deps:lint`, `nx show projects` all exit 0.
+- **Verification**: `format:check`, `lint:root`, `deps:lint`, `turbo show projects` all exit 0.
 
 ## 2026-08-17: Langfuse Tracing & Agent Instrumentation
 

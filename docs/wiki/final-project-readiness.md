@@ -52,7 +52,7 @@ CATEGORY SCORE   █████████████████████
 | ESLint errors (portal)     | 0      | 🟢 Clean      |
 | Prettier compliance        | 100%   | 🟢 Clean      |
 | Portal build time          | 18.7s  | 🟢 Fast       |
-| Nx cache hit               | Active | 🟢 Enabled    |
+| Turborepo cache hit        | Active | 🟢 Enabled    |
 | pnpm lockfile              | Frozen | 🟢 Consistent |
 
 ---

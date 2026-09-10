@@ -502,7 +502,7 @@ if [ "$FORCE_RESTART" = "true" ]; then
   # NOTE: .remember holds cross-session agent memory (now.md, today-*.md) read
   # by the SessionStart hook — do NOT delete it. Only the transient .kilo run
   # cache is purged.
-  smart_cache_cleanup # Smart Nx cache cleanup + Python bytecode
+  smart_cache_cleanup # Smart Turborepo cache cleanup + Python bytecode
   clean_dir_cache "$REPO_ROOT/.venv" "Python virtual environment (.venv)"
   clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
 

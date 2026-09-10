@@ -8,7 +8,7 @@ sources:
   [
     docs/wiki/concepts/department-features.md,
     docs/wiki/concepts/database-schema.md,
-    docs/wiki/concepts/nx-monorepo.md,
+    docs/wiki/concepts/turbo-monorepo.md,
   ]
 confidence: high
 ---

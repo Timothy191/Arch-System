@@ -388,6 +388,6 @@ See [[on-premises-deployment]] for full provisioning checklist, Cockpit setup, a
 
 - [[troubleshooting]] — General development issues
 - [[supabase-local-dev]] — Database setup
-- [[nx-monorepo]] — Build system
+- [[turbo-monorepo]] — Build system
 - [[monitoring-error-tracking]] — Sentry and observability
 - [[on-premises-deployment]] — Full on-premises server setup & Cockpit guide

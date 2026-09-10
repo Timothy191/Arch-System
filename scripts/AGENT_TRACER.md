@@ -144,7 +144,7 @@ Provide lightweight, high-efficiency development options by adding headless exec
    - Added automated cleanup of orphan MCP worker processes on shutdown.
 3. **`config/tools/mcp.json`**:
    - Pruned dormant MCP servers (`memory`, `github`, `inngest`, `npm-mcp`, `playwright`, `redis`).
-   - Synchronized core servers (`codebase-memory`, `context7`, `knowledge-rail`, `next-devtools`, `nx-mcp`, `postgres`).
+   - Synchronized core servers (`codebase-memory`, `context7`, `knowledge-rail`, `next-devtools`, `turbo-mcp`, `postgres`).
 4. **`package.json`**:
    - Added `dev:quick` and `dev:hosted` convenience scripts.
 
@@ -190,11 +190,11 @@ Prevent system lockups/freezes during dev script and deploy script startups by o
 ### Changes Made
 
 1. **`scripts/dev.sh`**:
-   - Optimized the `find` command that clears `__pycache__` directories by pruning `node_modules`, `.next`, `.nx`, `.git`, and `.turbo` subtrees.
+   - Optimized the `find` command that clears `__pycache__` directories by pruning `node_modules`, `.next`, `.turbo`, `.git`, and `.turbo` subtrees.
    - Added `NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=4096}"` to the portal start process to prevent out-of-memory crashes during Turbopack compilation.
 
 2. **`scripts/deploy.sh`**:
-   - Optimized the `find` command that clears `__pycache__` directories in the pre-flight phase by pruning `node_modules`, `.next`, `.nx`, `.git`, and `.turbo` subtrees.
+   - Optimized the `find` command that clears `__pycache__` directories in the pre-flight phase by pruning `node_modules`, `.next`, `.turbo`, `.git`, and `.turbo` subtrees.
 
 ### Verification
 
@@ -203,7 +203,7 @@ Prevent system lockups/freezes during dev script and deploy script startups by o
 
 ### What the Next Agent Should Know
 
-- Future cleanup find commands MUST explicitly ignore standard build/workspace folders (`node_modules`, `.next`, `.nx`, `.git`, `.turbo`) to avoid locking up client systems with I/O bottlenecks.
+- Future cleanup find commands MUST explicitly ignore standard build/workspace folders (`node_modules`, `.next`, `.turbo`, `.git`, `.turbo`) to avoid locking up client systems with I/O bottlenecks.
 - Next.js portal uses `--turbopack` by default which runs multi-threaded and is extremely memory intensive. The memory cap of 4GB prevents swap-thrashing system freezes.
 
 ## 2026-08-18: Integrated MCP servers configuration sync and validation & Removed Flowise and Langfuse requirements

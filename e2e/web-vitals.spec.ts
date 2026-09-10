@@ -8,17 +8,19 @@ test.describe("Core Web Vitals", () => {
     await page.waitForLoadState("networkidle");
 
     const metrics = (await page.evaluate(async () => {
-      return new Promise(async (resolve) => {
+      return new Promise((resolve) => {
         const results: any = {};
-        try {
-          const { onLCP, onFID, onCLS } = await import("web-vitals");
-          onLCP((m) => (results.lcp = m.value));
-          onFID((m) => (results.fid = m.value));
-          onCLS((m) => (results.cls = m.value));
-        } catch {
-          results.vitalsUnavailable = true;
-        }
-        setTimeout(() => resolve(results), 1200);
+        (async () => {
+          try {
+            const { onLCP, onFID, onCLS } = await import("web-vitals");
+            onLCP((m) => (results.lcp = m.value));
+            onFID((m) => (results.fid = m.value));
+            onCLS((m) => (results.cls = m.value));
+          } catch {
+            results.vitalsUnavailable = true;
+          }
+          setTimeout(() => resolve(results), 1200);
+        })();
       });
     })) as any;
 
@@ -47,17 +49,19 @@ test.describe("Core Web Vitals", () => {
     await page.waitForLoadState("networkidle");
 
     const metrics = (await page.evaluate(async () => {
-      return new Promise(async (resolve) => {
+      return new Promise((resolve) => {
         const results: any = {};
-        try {
-          const { onLCP, onFID, onCLS } = await import("web-vitals");
-          onLCP((m) => (results.lcp = m.value));
-          onFID((m) => (results.fid = m.value));
-          onCLS((m) => (results.cls = m.value));
-        } catch {
-          results.vitalsUnavailable = true;
-        }
-        setTimeout(() => resolve(results), 1200);
+        (async () => {
+          try {
+            const { onLCP, onFID, onCLS } = await import("web-vitals");
+            onLCP((m) => (results.lcp = m.value));
+            onFID((m) => (results.fid = m.value));
+            onCLS((m) => (results.cls = m.value));
+          } catch {
+            results.vitalsUnavailable = true;
+          }
+          setTimeout(() => resolve(results), 1200);
+        })();
       });
     })) as any;
 

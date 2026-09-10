@@ -261,7 +261,7 @@ pnpm dlx vercel --prod
 
 ### Issue: "Module not found: @repo/ui"
 
-**Cause**: Nx build order issue.
+**Cause**: Turborepo build order issue.
 
 **Fix**:
 
@@ -433,4 +433,4 @@ See [[on-premises-deployment]] for full provisioning checklist, firewall rules, 
 - [[on-premises-deployment]] — On-premises server setup & Cockpit guide
 - [[incident-response]] — If deploy causes issues
 - [[troubleshooting]] — Common issues
-- [[nx-monorepo]] — Build system
+- [[turbo-monorepo]] — Build system

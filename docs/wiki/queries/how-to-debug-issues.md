@@ -123,7 +123,7 @@ SELECT * FROM employees WHERE auth_id = 'user-id';
 
 ```bash
 # Clean rebuild
-rm -rf **/node_modules **/.nx **/dist **/.next
+rm -rf **/node_modules **/.turbo **/dist **/.next
 pnpm install
 pnpm build
 ```
@@ -257,7 +257,7 @@ If completely stuck:
 
 ```bash
 # 1. Clean everything
-pnpm clean  # or: rm -rf **/node_modules **/.nx **/dist **/.next
+pnpm clean  # or: rm -rf **/node_modules **/.turbo **/dist **/.next
 
 # 2. Fresh install
 pnpm install

@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining operations portal** built as a full-stack Nx monorepo. Currently configured for **local development and testing** with Docker Compose. All 8 departments, AI orchestration, and monitoring stacks run locally via `./scripts/deploy.sh local`. Production deployment via Cockpit is ready when needed.
+Arch-Systems (Plantcor) is an **on-premises ready, multi-departmental mining operations portal** built as a full-stack Turborepo monorepo. Currently configured for **local development and testing** with Docker Compose. All 8 departments, AI orchestration, and monitoring stacks run locally via `./scripts/deploy.sh local`. Production deployment via Cockpit is ready when needed.
 
 ### Project Health Dashboard
 
@@ -723,7 +723,7 @@ Tier 3: Database (L3) - PostgreSQL
 │                                                                         │
 │  ✅ PHASE 1: Foundation (COMPLETE)                                      │
 │     ├─ Next.js 15 + React 19 architecture                               │
-│     ├─ Nx monorepo setup                                                │
+│     ├─ Turborepo monorepo setup                                                │
 │     ├─ Supabase integration with RLS                                    │
 │     ├─ Login system with video backgrounds                              │
 │     ├─ Department navigation framework                                  │

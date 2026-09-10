@@ -4,7 +4,7 @@ created: 2026-05-15
 updated: 2026-05-15
 type: concept
 tags: [troubleshooting, ops, support, how-to]
-sources: [CLAUDE.md, docs/wiki/concepts/nx-monorepo.md]
+sources: [CLAUDE.md, docs/wiki/concepts/turbo-monorepo.md]
 confidence: high
 ---
 
@@ -194,13 +194,13 @@ import "@univerjs/preset-sheets-core/lib/index.css"; // Once only here
 
 ### Error: "Module not found: @repo/ui" or workspace packages
 
-**Cause**: Nx dependency graph out of sync.
+**Cause**: Turborepo dependency graph out of sync.
 
 **Solution**:
 
 ```bash
 # Clean build
-pnpm clean  # or rm -rf **/node_modules **/.nx **/dist
+pnpm clean  # or rm -rf **/node_modules **/.turbo **/dist
 pnpm install
 pnpm build
 ```
@@ -307,7 +307,7 @@ pnpm deploy:local  # Seeds test data
 ## Still Stuck?
 
 1. Check [[supabase-local-dev]] for database setup issues
-2. Review [[nx-monorepo]] for workspace problems
+2. Review [[turbo-monorepo]] for workspace problems
 3. Consult [[design-system]] for UI/styling questions
 4. Check [[auth-middleware]] for auth flow details
 

@@ -12,7 +12,7 @@
     "node_modules/**",
     "dist/**",
     ".next/**",
-    ".nx/**",
+    ".turbo/**",
     "coverage/**",
     "*.min.js",
     "*.min.css",

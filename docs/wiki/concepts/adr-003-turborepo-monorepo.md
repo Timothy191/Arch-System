@@ -12,11 +12,11 @@ confidence: high
 # ADR-003: Turborepo for Monorepo Management
 
 > [!WARNING]
-> This decision has been **superseded** by [[adr-008-nx-monorepo]]. The project has migrated to Nx for workspace task orchestration and stabilized test runners.
+> This decision has been **superseded** by [[adr-008-turbo-monorepo]]. The project has migrated to Turborepo for workspace task orchestration and stabilized test runners.
 
 ## Status
 
-**Superseded** by [[adr-008-nx-monorepo]] (June 2026)
+**Superseded** by [[adr-008-turbo-monorepo]] (June 2026)
 
 ## Context
 
@@ -63,7 +63,7 @@ We will use **Turborepo 2.1 with pnpm 9.12.0 workspaces**.
 
 ## Alternatives Considered
 
-### Nx (REJECTED)
+### Turborepo (REJECTED)
 
 - More powerful but overkill for our scale (3 apps, 8 packages)
 - Steeper learning curve

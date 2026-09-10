@@ -172,7 +172,7 @@ function buildCodebaseMaps(dateInfo) {
       content: `# ⚡ Technology Stack & Catalog Map
 
 **Generated:** ${dateInfo.displayDate}  
-**Architecture:** Nx Monorepo + Next.js 16 + Supabase
+**Architecture:** Turborepo Monorepo + Next.js 16 + Supabase
 
 ---
 
@@ -195,7 +195,7 @@ function buildCodebaseMaps(dateInfo) {
       content: `# 🕸️ Project Dependencies & Monorepo Graph Map
 
 **Generated:** ${dateInfo.displayDate}  
-**Workspace:** Nx Monorepo Workspace
+**Workspace:** Turborepo Monorepo Workspace
 
 ---
 
@@ -271,7 +271,7 @@ flowchart TD
 
 ---
 
-## 🏷️ Nx Scope Tagging Hierarchy
+## 🏷️ Turborepo Scope Tagging Hierarchy
 
 \`\`\`mermaid
 graph TD

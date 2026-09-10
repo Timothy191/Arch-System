@@ -84,4 +84,4 @@ We adopt **Next.js 16 with the App Router**, using **React Server Components (RS
 
 - [[portal-app-architecture]] — Full architecture details
 - [[comparisons/react-patterns]] — Comparison with alternatives
-- [[nx-monorepo]] — How this fits in monorepo
+- [[turbo-monorepo]] — How this fits in monorepo

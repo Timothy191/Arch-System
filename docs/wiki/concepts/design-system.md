@@ -70,4 +70,4 @@ The login interface implements the absolute peak of the system's "Liquid Glass" 
 
 - [[arch-systems]] — the product using this design system
 - [[auth-middleware]] — auth proxy rules for role gates
-- [[nx-monorepo]] — monorepo structure for UI and Theme packages
+- [[turbo-monorepo]] — monorepo structure for UI and Theme packages

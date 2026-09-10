@@ -7,34 +7,33 @@
     "preflight",
     "@repo/eslint-config",
     "@typescript-eslint/parser",
-    "@nx/eslint-plugin",
-    // CI/CD tooling
+    "eslint-plugin-boundaries",
+    "eslint-plugin-only-warn",
+    "turbo",
     "bundlesize",
     "wait-on",
     "serve",
-    // E2E testing
     "web-vitals",
-    // Commitlint packages (used via config files, not direct imports)
     "@commitlint/cli",
     "@commitlint/config-conventional",
-    // pnpm npm: protocol aliases (partial names truncated by knip)
     "commitlint-config-.",
     "commitlint-config-",
-    "tslib"
+    "tslib",
+    "vitepress",
+    "swagger-jsdoc",
+    "vite-tsconfig-paths"
   ],
-  "ignoreBinaries": [
-    // External tools
-    "python3",
-    "psql",
-    // CI/CD tools
-    "wait-on",
-    "serve"
-  ],
+  "ignoreBinaries": ["python3", "psql", "wait-on", "serve"],
   "ignore": [
     "**/jest.config.*",
     "**/postcss.config.*",
     "packages/contract/scripts/generate-spec-local.js",
-    "packages/ui/storybook-static/**"
+    "packages/ui/storybook-static/**",
+    "k6/**",
+    "docs/examples/**",
+    "e2e/helpers/**",
+    "config/tools/**",
+    "services/integrations/**"
   ],
   "workspaces": {
     ".": {
@@ -75,7 +74,21 @@
       "ignore": [
         "lib/observability/metrics.ts",
         "features/analytics/components/ReportTemplate.tsx",
-        "lib/feature-flags.ts"
+        "lib/feature-flags.ts",
+        "app/overview/AuditReportsSection.tsx",
+        "components/dynamic/LazyHeavyComponents.tsx",
+        "components/FocusModeToggle.tsx",
+        "components/LCPObserver.tsx",
+        "components/PitConnectivityBanner.tsx",
+        "components/WebVitalsReporter.tsx",
+        "hooks/useDockPreferences.ts",
+        "lib/ai/embeddings.ts",
+        "lib/api/rate-limit-middleware.ts",
+        "lib/performance-analyzer.ts",
+        "api/codebase-maps/route.ts",
+        "api/scada/tags/route.ts",
+        "plugins/rust-telemetry-engine/index.tsx",
+        "server/proxy.ts"
       ]
     },
     "apps/cms": {

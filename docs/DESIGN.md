@@ -174,12 +174,12 @@ Glass cards serve as the foundational boundaries of the application layout. They
 
 ### Card Variants Matrix
 
-| Variant                | Spacing/Padding                        | Surface & Lighting                                                            | Hover Behavior                                                     | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
-| :--------------------- | :------------------------------------- | :---------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
-| **Standard GlassCard** | `md` (16px), radius `rounded-2xl`      | `liquid-glass-light border border-white/40 shadow-window`, translucent base   | Translucent surface strengthens (`hover:bg-white/20`), top specular rim rises (150ms). | None on layout; standard hover elevation.                                 | Default container. Used for standard lists, charts, and metrics grouping.                |
-| **SpotlightCard**      | `md` (16px), radius `rounded-2xl`      | Frosted base with radial gradient specular sheen following cursor position    | Radial gradient glow following cursor positions (GPU-accelerated). | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
-| **GlowBorderCard**     | `md` (16px), radius `rounded-2xl`      | Frosted panel with animated cool chromatic gradient perimeter                 | Linear gradient moving border animation active on hover.           | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
-| **MacOSPanelCard**     | `lg` (24px), radius `rounded-2xl`      | Heavy frosted panel (`liquid-glass-light border border-white/40 shadow-window`), dual-layer depth stack | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.   | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
+| Variant                | Spacing/Padding                   | Surface & Lighting                                                                                      | Hover Behavior                                                                         | Motion & Animation                                                        | Usage Limits & Guidelines                                                                |
+| :--------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------- |
+| **Standard GlassCard** | `md` (16px), radius `rounded-2xl` | `liquid-glass-light border border-white/40 shadow-window`, translucent base                             | Translucent surface strengthens (`hover:bg-white/20`), top specular rim rises (150ms). | None on layout; standard hover elevation.                                 | Default container. Used for standard lists, charts, and metrics grouping.                |
+| **SpotlightCard**      | `md` (16px), radius `rounded-2xl` | Frosted base with radial gradient specular sheen following cursor position                              | Radial gradient glow following cursor positions (GPU-accelerated).                     | RequestAnimationFrame throttled. Degrades to standard hover on touch.     | **Hero highlights only**. Maximum **1** card per viewport (e.g. core telemetry summary). |
+| **GlowBorderCard**     | `md` (16px), radius `rounded-2xl` | Frosted panel with animated cool chromatic gradient perimeter                                           | Linear gradient moving border animation active on hover.                               | Border glows on hover (`400ms ease-out-expo`), resets instantly on leave. | **Action call-outs or warnings**. Maximum **2** cards per viewport page.                 |
+| **MacOSPanelCard**     | `lg` (24px), radius `rounded-2xl` | Heavy frosted panel (`liquid-glass-light border border-white/40 shadow-window`), dual-layer depth stack | 3D lift (`translateZ`, `rotateX/Y`), layered shadow enhancement.                       | `250ms ease-out-expo` elevation transition.                               | **Floating Tooltips & Sidebars**. Use for elements requiring physical panel depth.       |
 
 ### Liquid Glass Architecture & Specular Lighting Tokens
 
@@ -444,7 +444,7 @@ All interactive buttons, chevrons, weather icons, and tray selectors must have a
 
 ### 1.3 Dependencies
 
-- **Monorepo tooling**: `pnpm` workspaces, Nx.
+- **Monorepo tooling**: `pnpm` workspaces, Turborepo.
 - **Theme package build**: `packages/theme` must be buildable (`tsup`, `vite`, or custom script).
 - **UI package**: React 18+, Tailwind CSS 3.3+.
 - **Testing**: Vitest + React Testing Library (unit), Playwright/Cypress (E2E), Chromatic/Percy (visual).

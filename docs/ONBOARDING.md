@@ -1,6 +1,6 @@
 # Developer Onboarding Guide
 
-Welcome to the Arch-Systems (Plantcor) project! This guide will help you set up, validate your workspace environment, and start contributing to our Nx monorepo.
+Welcome to the Arch-Systems (Plantcor) project! This guide will help you set up, validate your workspace environment, and start contributing to our Turborepo monorepo.
 
 ---
 
@@ -23,7 +23,7 @@ Clone the repository and run the setup sequence:
 git clone git@github.com:arch-systems/portal.git
 cd Arch-System
 
-# 1. Install dependencies across all Nx workspace projects
+# 1. Install dependencies across all Turborepo workspace projects
 pnpm install
 
 # 2. Provision environment configuration

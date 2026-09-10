@@ -12,8 +12,7 @@ title = "Arch-Mk2 Secret Scanner"
     '''dist''',
     '''build''',
     '''coverage''',
-    '''.nx/cache''',
-    '''.nx/workspace-data''',
+    '''.turbo/cache''',
     '''pnpm-lock\.yaml''',
     '''wiki/logs/.*''',
   ]

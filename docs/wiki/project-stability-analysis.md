@@ -17,7 +17,7 @@
 
 ## Build System Health
 
-### Nx Configuration
+### Turborepo Configuration
 
 ```json
 ✅ Properly configured with:
@@ -64,7 +64,7 @@
 
 **Strengths**:
 
-- Nx cache with lockfile hash
+- Turborepo cache with lockfile hash
 - Concurrency control prevents duplicate runs
 - TURBO_SUMMARIZE for debugging
 - Reviewdog for PR visibility
@@ -422,7 +422,7 @@ Month 3 (target): █████████░ 9.0/10
 | ---------------- | ---------------- | -------- | ------------------------------- |
 | Typical Startup  | npm + CRA        | 30%      | Our tooling is superior         |
 | Mid-size Company | yarn + custom    | 50%      | Our deps management             |
-| Enterprise       | Nx/Rush          | 70%      | Our agility vs their complexity |
+| Enterprise       | Turborepo/Rush   | 70%      | Our agility vs their complexity |
 | **Arch Systems** | **pnpm + Turbo** | **14%**  | **Coverage is the gap**         |
 
 ---

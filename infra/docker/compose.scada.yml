@@ -30,10 +30,19 @@ services:
       # settings, alarms) survive container recreation. FUXA's default data dir is
       # <cwd>/_appdata (ephemeral in the image); userDir moves it onto fuxa_data.
       - userDir=/root/.fuxa
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
-      interval: 15s
-      timeout: 10s
+      interval: 30s
+      timeout: 5s
       retries: 3
 
 volumes:

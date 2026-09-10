@@ -139,5 +139,5 @@ import { Chart } from "@repo/ui"; // React 19 compatible
 ## Related
 
 - [[portal-app-architecture]] — React 19 patterns used
-- [[nx-monorepo]] — Workspace version management
+- [[turbo-monorepo]] — Workspace version management
 - [[comparisons/react-patterns]] — Why App Router + RSC

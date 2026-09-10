@@ -26,7 +26,7 @@ Quick navigation guide for Arch-Systems documentation.
 
 ### Workflow & Quality
 
-- **[AGENTS.md](AGENTS.md)** - Slim agent contract index (tracing, phases, Nx tags; links to rules)
+- **[AGENTS.md](AGENTS.md)** - Slim agent contract index (tracing, phases, Turborepo tags; links to rules)
 
 ### Architecture & Visualization
 
@@ -108,38 +108,40 @@ Quick navigation guide for Arch-Systems documentation.
   - Troubleshooting for Rocky Linux environments
 
 ## 📊 Document```text
+
 Arch-System/
-├── README.md                          # Project overview
-├── CLAUDE.md                          # Technical guide (authoritative)
-├── AGENTS.md                          # Workflow rules
-├── DEPLOYMENT.md                      # Deployment guide
-├── DESIGN.md                          # Design system reference
-├── PRODUCT.md                         # Product strategy
-├── GEMINI.md                          # AI conventions
-├── SECURITY.md                        # Security policy
-├── DOCUMENTATION_INDEX.md             # This file
-├── system-wiki/                       # Living system architecture & runtime guidelines (Rule 10)
-├── packages/agents/docs/              # Living agentic protocols & tool contracts (Rule 10)
-├── storybook/                         # UI component states & accessibility contracts (Rule 10)
-├── documentation/                     # Unified documentation center
-│   ├── README.md                      # Documentation center index
-│   ├── 00-core/                       # Core project documentation
-│   ├── 01-operations/                 # Operational procedures and runbooks
-│   ├── 02-system-wiki/                # System knowledge base
-│   ├── 03-audit-reports/              # Audit reports and RLS analysis
-│   ├── 04-codebase-maps/              # Codebase visualization and maps
-│   ├── 04-specifications/             # API and contract blueprints
-│   ├── 05-wiki/                       # Comprehensive technical wiki
-│   ├── 06-archives/                   # Historical documentation
-│   ├── 07-agentic-systems/            # Agentic system documentation
-│   ├── 08-guides/                     # Operational guides and handbooks
-│   ├── 09-tools/                      # Documentation tools and generators
-│   └── 10-references/                 # Reference materials
-└── docs/                              # Detailed documentation
-    ├── archive/                       # Historical checklists, phase plans, and reports
-    ├── operations/                    # Control room procedures, FUXA integrations, and runbooks
-    ├── reports/                       # Project audits and upgrade plans
-    └── wiki/                          # Detailed technical wiki and domain concept docs
+├── README.md # Project overview
+├── CLAUDE.md # Technical guide (authoritative)
+├── AGENTS.md # Workflow rules
+├── DEPLOYMENT.md # Deployment guide
+├── DESIGN.md # Design system reference
+├── PRODUCT.md # Product strategy
+├── GEMINI.md # AI conventions
+├── SECURITY.md # Security policy
+├── DOCUMENTATION_INDEX.md # This file
+├── system-wiki/ # Living system architecture & runtime guidelines (Rule 10)
+├── packages/agents/docs/ # Living agentic protocols & tool contracts (Rule 10)
+├── storybook/ # UI component states & accessibility contracts (Rule 10)
+├── documentation/ # Unified documentation center
+│ ├── README.md # Documentation center index
+│ ├── 00-core/ # Core project documentation
+│ ├── 01-operations/ # Operational procedures and runbooks
+│ ├── 02-system-wiki/ # System knowledge base
+│ ├── 03-audit-reports/ # Audit reports and RLS analysis
+│ ├── 04-codebase-maps/ # Codebase visualization and maps
+│ ├── 04-specifications/ # API and contract blueprints
+│ ├── 05-wiki/ # Comprehensive technical wiki
+│ ├── 06-archives/ # Historical documentation
+│ ├── 07-agentic-systems/ # Agentic system documentation
+│ ├── 08-guides/ # Operational guides and handbooks
+│ ├── 09-tools/ # Documentation tools and generators
+│ └── 10-references/ # Reference materials
+└── docs/ # Detailed documentation
+├── archive/ # Historical checklists, phase plans, and reports
+├── operations/ # Control room procedures, FUXA integrations, and runbooks
+├── reports/ # Project audits and upgrade plans
+└── wiki/ # Detailed technical wiki and domain concept docs
+
 ```
 
 ## 🔍 Quick Lookup
@@ -176,5 +178,6 @@ Arch-System/
 
 ---
 
-**Last Updated**: 2026-09-01  
+**Last Updated**: 2026-09-01
 **Maintained by**: Arch-Systems Development Team & Documentation Specialist Agent
+```

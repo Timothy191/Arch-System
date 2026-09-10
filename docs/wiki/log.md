@@ -526,16 +526,16 @@ Root-caused and fixed blurry rendering across the entire portal. Three categorie
 
 **Verification:** 51 test suites / 480 tests pass, lint 0 errors, TypeScript 0 errors.
 
-## [2026-06-03] update | Nx and Local Ollama Migration (commit `f04974e`)
+## [2026-06-03] update | Turborepo and Local Ollama Migration (commit `f04974e`)
 
-Documented the migration from Turborepo to Nx build orchestration and the AI service transition to local Ollama for air-gapped offline support.
+Documented the migration from Nx to Turborepo build orchestration and the AI service transition to local Ollama for air-gapped offline support.
 
-**Nx Migration:**
+**Turborepo Migration:**
 
-- Created [[nx-monorepo]] detailing Nx layout, target configuration caches, pnpm workspace catalogs, and commands.
-- Created [[adr-008-nx-monorepo]] to justify Turborepo -> Nx 22 migration.
+- Created [[turbo-monorepo]] detailing Turborepo layout, target configuration caches, pnpm workspace catalogs, and commands.
+- Created [[adr-008-turbo-monorepo]] to justify Turborepo -> Turborepo 2.x migration.
 - Marked [[adr-003-turborepo-monorepo]] as superseded.
-- Updated [[comparisons/monorepo-tools]] with Nx as primary tool choice.
+- Updated [[comparisons/monorepo-tools]] with Turborepo as primary tool choice.
 
 **AI Localisation:**
 
@@ -552,7 +552,7 @@ Documented the migration from Turborepo to Nx build orchestration and the AI ser
 ## [2026-06-15] lint | Wiki stale content cleanup
 
 - Deleted 10 auto-generated noise files from `docs/wiki/questions/` and `docs/wiki/archived/`
-- Fixed staleness in [[portal-app-architecture]]: Turborepo→Nx, dark theme→light-only, added Zustand
+- Fixed staleness in [[portal-app-architecture]]: Turborepo→Turborepo, dark theme→light-only, added Zustand
 - Fixed [[STATUS]]: Phase 5.1→5.2, Next.js version contradiction
-- Swept Turborepo→Nx references in 7 files (onboarding, troubleshooting, how-to-deploy-production, security-posture, final-project-readiness, project-comprehensive-report, project-stability-analysis)
+- Swept Turborepo→Turborepo references in 7 files (onboarding, troubleshooting, how-to-deploy-production, security-posture, final-project-readiness, project-comprehensive-report, project-stability-analysis)
 - Added frontmatter to `breakdown/*.md` files

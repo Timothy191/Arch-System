@@ -49,7 +49,7 @@ This plan establishes a resilient client-side network fetch architecture for low
 
 ### Unit 4: Pre-Context Optimization & Rule Enforcement (`docs/`, `.agents/`)
 
-- Streamline `CLAUDE.md` and `docs/AGENTS.md` to remove duplicated Nx configuration text.
+- Streamline `CLAUDE.md` and `docs/AGENTS.md` to remove duplicated Turborepo configuration text.
 - Enforce graph-first exploration via `.agents/rules/codebase-memory-advisor.md`.
 
 ## 4. Verification & Quality Gates

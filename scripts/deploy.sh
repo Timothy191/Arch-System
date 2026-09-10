@@ -763,7 +763,7 @@ phase_stop_services() {
 phase_build() {
   [ "$SKIP_BUILD" = true ] && return 0
   
-  phase "5. BUILDING APPLICATION (Nx Pipeline)"
+  phase "5. BUILDING APPLICATION (Turborepo Pipeline)"
   
   run_if_not_dry cd "$REPO_ROOT"
   
