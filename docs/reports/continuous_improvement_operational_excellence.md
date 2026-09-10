@@ -179,10 +179,11 @@ Foster easier onboarding, consistent development patterns, and a robust document
 #### 4. Custom Scaffolding
 
 - Utilize the `feature-scaffolder` skill logic to generate custom generator schemas.
-- Scaffold new packages manually following the existing `packages/` layout, then apply custom tags:
+- Scaffold new packages manually following the existing `packages/` layout, then register them with the policy compiler:
   ```bash
   mkdir -p libs/features/my-new-feature
-  node tools/apply-project-tags.cjs
+  # add a DEPENDENCY_RULES entry to tools/repo/policy-compiler.cjs, then:
+  pnpm policy:gen
   ```
 
 ---

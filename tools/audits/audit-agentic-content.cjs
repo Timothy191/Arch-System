@@ -13,7 +13,7 @@
  *   4. AGENT_TRACER.md coverage across all workspace packages, apps, and libraries
  *   5. Root agent directives (AGENTS.md, GEMINI.md, CLAUDE.md)
  *
- * Run: node tools/audit-agentic-content.cjs
+ * Run: node tools/audits/audit-agentic-content.cjs
  * Exit code: 0 (pass) or 1 (fail)
  */
 

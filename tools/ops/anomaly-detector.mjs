@@ -1,6 +1,6 @@
 /**
  * Anomaly Detection Script
- * Usage: node tools/anomaly-detector.mjs [--notify]
+ * Usage: node tools/ops/anomaly-detector.mjs [--notify]
  *
  * Detects anomalies in key metrics using statistical methods
  * - Z-score: for normally distributed metrics

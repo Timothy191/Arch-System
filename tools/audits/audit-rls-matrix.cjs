@@ -8,7 +8,7 @@
  *   2. Policy Coverage Matrix across all 4 CRUD primitives (SELECT, INSERT, UPDATE, DELETE)
  *   3. Privilege escalation barriers (enforcing auth.uid() / role boundaries)
  *
- * Run: node tools/audit-rls-matrix.cjs
+ * Run: node tools/audits/audit-rls-matrix.cjs
  * Exit code: 0 (pass) or 1 (fail)
  */
 
@@ -130,10 +130,10 @@ console.log("📊 4-Operation RLS Coverage Matrix Results");
 console.log("==================================================");
 console.log(`Total Database Tables: ${totalTables}`);
 console.log(
-  `Tables with RLS Enabled: ${totalTables - missingRlsCount}/${totalTables} (100% Target)`
+  `Tables with RLS Enabled: ${totalTables - missingRlsCount}/${totalTables} (100% Target)`,
 );
 console.log(
-  `Tables with Active Operations: ${matrixRows.filter((r) => r.sel === "🟢" || r.ins === "🟢").length}`
+  `Tables with Active Operations: ${matrixRows.filter((r) => r.sel === "🟢" || r.ins === "🟢").length}`,
 );
 
 if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });

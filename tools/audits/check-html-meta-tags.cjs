@@ -11,7 +11,7 @@
  *
  * 3. Language attribute (lang="en") - Accessibility and SEO requirement
  *
- * Usage: node tools/check-html-meta-tags.cjs
+ * Usage: node tools/audits/check-html-meta-tags.cjs
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -65,7 +65,7 @@ for (const layoutPath of layoutFiles) {
     // Conservative check: ensure charset appears early in the head section
     if (bytesFromHead > 800) {
       issues.push(
-        `Charset declaration is ${bytesFromHead} bytes into <head> (should be <1024 bytes from start)`
+        `Charset declaration is ${bytesFromHead} bytes into <head> (should be <1024 bytes from start)`,
       );
     }
   }

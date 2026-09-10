@@ -11,7 +11,7 @@
  *   2. Contract Schema Coverage (Zod schemas matching domain entities)
  *   3. Field-level contract alignment and unvalidated table warnings
  *
- * Run: node tools/audit-contract-drift.cjs
+ * Run: node tools/audits/audit-contract-drift.cjs
  * Exit code: 0 (pass) or 1 (fail)
  */
 
@@ -27,7 +27,7 @@ const CONTRACT_DIR = path.join(ROOT, "packages", "contract", "src", "schemas");
 const REPORT_DIR = path.join(ROOT, "documentation", "03-audit-reports");
 
 console.log(
-  "\n🔍 Initiating Schema & Contract Drift Audit (@repo/database <-> @repo/contract)...\n"
+  "\n🔍 Initiating Schema & Contract Drift Audit (@repo/database <-> @repo/contract)...\n",
 );
 
 // ── 1. Extract Database Tables from Migrations ────────────────────────────────
@@ -56,7 +56,7 @@ migrationFiles.forEach((file) => {
 });
 
 console.log(
-  `1️⃣  Extracted ${dbTables.size} active database tables from ${migrationFiles.length} migrations.`
+  `1️⃣  Extracted ${dbTables.size} active database tables from ${migrationFiles.length} migrations.`,
 );
 
 // ── 2. Extract Zod Schemas from @repo/contract ────────────────────────────────
@@ -76,7 +76,7 @@ contractFiles.forEach((file) => {
 });
 
 console.log(
-  `2️⃣  Found ${contractSchemas.size} Zod contract schemas across ${contractFiles.length} schema files in @repo/contract.`
+  `2️⃣  Found ${contractSchemas.size} Zod contract schemas across ${contractFiles.length} schema files in @repo/contract.`,
 );
 
 // ── 3. Evaluate Mapping & Drift Alignment ─────────────────────────────────────
@@ -188,14 +188,14 @@ const telemetryPayload = {
 fs.writeFileSync(
   path.join(REPORT_DIR, "contract-drift-summary.json"),
   JSON.stringify(telemetryPayload, null, 2),
-  "utf8"
+  "utf8",
 );
 
 console.log(
-  `📄 Markdown Report written to: documentation/03-audit-reports/contract-drift-report.md`
+  `📄 Markdown Report written to: documentation/03-audit-reports/contract-drift-report.md`,
 );
 console.log(
-  `📊 JSON Telemetry written to: documentation/03-audit-reports/contract-drift-summary.json`
+  `📊 JSON Telemetry written to: documentation/03-audit-reports/contract-drift-summary.json`,
 );
 console.log("🎯 Contract Drift Audit: 100% COMPLETE & PASS\n");
 process.exit(0);

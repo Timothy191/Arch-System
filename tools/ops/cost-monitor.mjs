@@ -1,6 +1,6 @@
 /**
  * Cost Monitoring Script
- * Usage: node tools/cost-monitor.mjs [--notify]
+ * Usage: node tools/ops/cost-monitor.mjs [--notify]
  *
  * Monitors cloud service costs against configured budgets
  * Sends alerts when thresholds are exceeded

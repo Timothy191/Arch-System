@@ -9,7 +9,7 @@
  *   3. results.md
  *   4. required-actions.md
  *
- * Usage: node tools/run-audit.cjs
+ * Usage: node tools/audits/run-audit.cjs
  */
 
 const fs = require("node:fs");
@@ -81,7 +81,7 @@ function main() {
   console.log("🔒 Running Row Level Security (RLS) Audit...");
   let rlsExitCode = 0;
   try {
-    execSync("node tools/audit-rls.cjs", {
+    execSync("node tools/audits/audit-rls.cjs", {
       cwd: ROOT,
       env: { ...process.env, AUDIT_DIR: targetDir },
       stdio: "inherit",
@@ -94,7 +94,7 @@ function main() {
   console.log("\n🎨 Running Design System Compliance Audit...");
   let designExitCode = 0;
   try {
-    execSync("node tools/design-audit.cjs", {
+    execSync("node tools/audits/design-audit.cjs", {
       cwd: ROOT,
       env: { ...process.env, AUDIT_DIR: targetDir },
       stdio: "inherit",
@@ -215,31 +215,31 @@ function main() {
 
   if (rlsCriticals > 0) {
     actionItemsList.push(
-      `- [ ] **[CRITICAL - RLS]** Enable Row Level Security on unprotected database tables identified in \`rls-report.md\`.`
+      `- [ ] **[CRITICAL - RLS]** Enable Row Level Security on unprotected database tables identified in \`rls-report.md\`.`,
     );
   }
   if (rlsWarnings > 0) {
     actionItemsList.push(
-      `- [ ] **[MEDIUM - RLS]** Review overly permissive \`USING (true)\` policies on department-scoped tables in \`rls-report.md\`.`
+      `- [ ] **[MEDIUM - RLS]** Review overly permissive \`USING (true)\` policies on department-scoped tables in \`rls-report.md\`.`,
     );
   }
   if (designCriticals > 0) {
     actionItemsList.push(
-      `- [ ] **[CRITICAL - DESIGN]** Fix critical design system violations (raw box-shadow, dark: selectors) listed in \`design-report.md\`.`
+      `- [ ] **[CRITICAL - DESIGN]** Fix critical design system violations (raw box-shadow, dark: selectors) listed in \`design-report.md\`.`,
     );
   }
   if (designWarnings > 0) {
     actionItemsList.push(
-      `- [ ] **[LOW - DESIGN]** Standardize shadow utilities and icon imports identified in \`design-report.md\`.`
+      `- [ ] **[LOW - DESIGN]** Standardize shadow utilities and icon imports identified in \`design-report.md\`.`,
     );
   }
 
   if (actionItemsList.length === 0) {
     actionItemsList.push(
-      `- [x] **[VERIFIED]** Zero critical violations or warnings detected. All design and RLS security gates are 100% compliant.`
+      `- [x] **[VERIFIED]** Zero critical violations or warnings detected. All design and RLS security gates are 100% compliant.`,
     );
     actionItemsList.push(
-      `- [ ] **[ROUTINE]** Re-run \`pnpm quality\` before pushing any new schema migrations or UI components.`
+      `- [ ] **[ROUTINE]** Re-run \`pnpm quality\` before pushing any new schema migrations or UI components.`,
     );
   }
 

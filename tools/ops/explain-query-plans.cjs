@@ -4,7 +4,7 @@
  * @fileoverview Audits PostgreSQL query execution plan heuristics and composite
  * foreign key constraint alignment across partitioned time-series tables.
  *
- * Usage: node tools/explain-query-plans.cjs
+ * Usage: node tools/ops/explain-query-plans.cjs
  */
 
 const fs = require("node:fs");
@@ -52,7 +52,7 @@ function auditPartitionedTables() {
 
     // Find PARTITION BY RANGE (column_name)
     const partitionMatches = sql.matchAll(
-      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi
+      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi,
     );
 
     for (const match of partitionMatches) {
@@ -76,7 +76,7 @@ function auditPartitionedTables() {
 
     // Find Composite Foreign Keys referencing partitioned tables
     const fkMatches = sql.matchAll(
-      /CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi
+      /CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi,
     );
 
     for (const match of fkMatches) {
@@ -136,7 +136,7 @@ function generateReport() {
   fs.writeFileSync(REPORT_PATH, markdown, "utf-8");
 
   console.log(
-    `OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`
+    `OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`,
   );
   console.log(`Report generated at: ${path.relative(ROOT, REPORT_PATH)}`);
   return 0;

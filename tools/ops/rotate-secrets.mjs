@@ -1,6 +1,6 @@
 /**
  * Secrets Rotation Script
- * Usage: node tools/rotate-secrets.mjs [--dry-run]
+ * Usage: node tools/ops/rotate-secrets.mjs [--dry-run]
  *
  * Rotates production secrets with support for:
  * - Supabase keys (anon, service)

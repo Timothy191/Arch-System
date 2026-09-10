@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Detects circular dependencies within the monorepo packages and apps.
- * Usage: node tools/circular-dep-detect.cjs
+ * Usage: node tools/audits/circular-dep-detect.cjs
  */
 //
 // Detect circular dependencies in the workspace dependency graph.
@@ -11,7 +11,7 @@
 // workspace:* dependencies, and prints any cycle found. Exits non-zero
 // on cycles (CI gate).
 //
-// Usage: node tools/circular-dep-detect.cjs
+// Usage: node tools/audits/circular-dep-detect.cjs
 //
 
 const fs = require("node:fs");

@@ -80,7 +80,7 @@ CI runs every gate on every PR. The order matters — each step is a hard fail.
 | 1     | Dependency version lint       | `pnpm deps:lint` (syncpack)                             | ✅          |
 | 2     | Security audit                | `pnpm audit --audit-level=high --prod`                  | ✅          |
 | 3     | Dead-code detection           | `pnpm knip`                                             | ✅          |
-| 4     | Circular-dependency detection | `node tools/circular-dep-detect.cjs`                    | ✅          |
+| 4     | Circular-dependency detection | `node tools/audits/circular-dep-detect.cjs`             | ✅          |
 | 5     | **Policy SSoT drift**         | `pnpm policy:check`                                     | ✅          |
 | 6     | Markdown lint                 | `pnpm md:lint`                                          | ✅          |
 | 7     | Secret scan (gitleaks)        | `gitleaks/gitleaks-action@v2`                           | ✅          |
@@ -128,13 +128,9 @@ pnpm init
 
 `pnpm-workspace.yaml` already globs `packages/*`; no edit is needed for the package to be discoverable. Add an explicit entry only if the package lives outside the standard layout.
 
-### 3. Tag the project for the policy compiler
+### 3. Register the project with the policy compiler
 
-```bash
-node tools/apply-project-tags.cjs
-```
-
-This auto-tags every project under `apps/`, `packages/`, and `tools/` with the canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `tools/*`). It writes/updates each `project.json` deterministically — review the diff before committing.
+Add a `DEPENDENCY_RULES` entry to `tools/repo/policy-compiler.cjs` describing what your package can and cannot import (see "Adding a new dependency rule" below). The canonical `scope:*` vocabulary (`scope:app`, `scope:app:my-feature`, `scope:package`, `scope:package:my-feature`, `scope:package:db-internal` for `database`, `scope:tool` for `tools/*`) is defined there. Run `pnpm policy:gen` to regenerate the boundary rules.
 
 ### 4. Register targets
 
@@ -142,7 +138,7 @@ Add a `project.json` next to `package.json` (the tag script will create one if m
 
 ### 5. Declare dependency rules
 
-Open `tools/policy-compiler.cjs` and add a `DEPENDENCY_RULES` entry that describes what your package can and cannot import (see "Adding a new dependency rule" below). Run `pnpm policy:gen` to regenerate `tools/policy/*.json` and the ESLint boundaries config.
+Open `tools/repo/policy-compiler.cjs` and add a `DEPENDENCY_RULES` entry that describes what your package can and cannot import (see "Adding a new dependency rule" below). Run `pnpm policy:gen` to regenerate `tools/repo/policy/*.json` and the ESLint boundaries config.
 
 ### 6. Verify
 
@@ -159,25 +155,25 @@ pnpm quality
 All cross-cutting rules — dependency boundaries, required CI checks, intent capabilities, security patterns — flow from a **Single Source of Truth (SSoT)** into deterministic outputs.
 
 ```
-tools/policy-compiler.cjs       (runtime CJS & Single Source of Truth)
+tools/repo/policy-compiler.cjs       (runtime CJS & Single Source of Truth)
         ↓ generates
-tools/policy/dependency.rules.json
-tools/policy/architecture.rules.json
-tools/policy/security.checks.json
-tools/policy/intent-map.json
-tools/policy/eslint-boundaries.generated.cjs
+tools/repo/policy/dependency.rules.json
+tools/repo/policy/architecture.rules.json
+tools/repo/policy/security.checks.json
+tools/repo/policy/intent-map.json
+tools/repo/policy/eslint-boundaries.generated.cjs
 ```
 
 The compiler has two modes:
 
-- `pnpm policy:gen` — writes outputs to `tools/policy/`.
+- `pnpm policy:gen` — writes outputs to `tools/repo/policy/`.
 - `pnpm policy:check` — verifies outputs are in sync; **exits non-zero on drift**. CI runs this on every PR.
 
 ### Workflow
 
-1. Edit only `tools/policy-compiler.cjs` (the Single Source of Truth).
-2. Run `pnpm policy:gen` locally. Inspect the diff under `tools/policy/`.
-3. Commit `tools/policy-compiler.cjs` and every regenerated JSON/CJS file as a single atomic change.
+1. Edit only `tools/repo/policy-compiler.cjs` (the Single Source of Truth).
+2. Run `pnpm policy:gen` locally. Inspect the diff under `tools/repo/policy/`.
+3. Commit `tools/repo/policy-compiler.cjs` and every regenerated JSON/CJS file as a single atomic change.
 4. Push. The CI drift check will fail if the generated files are out of sync — that is by design.
 
 If the SSoT is wrong (you cannot express your rule), extend the data model in `policy-compiler.cjs` first, regenerate, and only then add a new rule. The compiler is the contract.
@@ -188,7 +184,7 @@ Concrete example: forbid `packages/ui` from importing any of the Supabase client
 
 ### Step 1 — Express the rule in the SSoT
 
-Edit `tools/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
+Edit `tools/repo/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
 
 ```js
 {
@@ -205,7 +201,7 @@ Edit `tools/policy-compiler.cjs` and add to the `DEPENDENCY_RULES` array:
 pnpm policy:gen
 ```
 
-This writes `tools/policy/dependency.rules.json` and `tools/policy/eslint-boundaries.generated.cjs` (which `eslint-plugin-boundaries` consumes).
+This writes `tools/repo/policy/dependency.rules.json` and `tools/repo/policy/eslint-boundaries.generated.cjs` (which `eslint-plugin-boundaries` consumes).
 
 ### Step 3 — Verify drift-free
 
@@ -221,7 +217,7 @@ Add a temporary import in any file under `packages/ui` of `@repo/supabase/client
 
 ### Step 5 — Commit
 
-Stage `tools/policy-compiler.cjs`, `tools/policy/dependency.rules.json`, and `tools/policy/eslint-boundaries.generated.cjs` together. Use a conventional commit (`feat(policy): forbid ui → supabase imports`).
+Stage `tools/repo/policy-compiler.cjs`, `tools/repo/policy/dependency.rules.json`, and `tools/repo/policy/eslint-boundaries.generated.cjs` together. Use a conventional commit (`feat(policy): forbid ui → supabase imports`).
 
 ## Code conventions
 
@@ -285,7 +281,7 @@ The **`employees` table is the source of truth** for authorization (role and dep
 ### RLS requirements
 
 - Every new table must have Row-Level Security enabled (`ALTER TABLE … ENABLE ROW LEVEL SECURITY`).
-- The `no-raw-rls-disable` security check (see `tools/policy-compiler.cjs`) will fail CI if any migration disables RLS.
+- The `no-raw-rls-disable` security check (see `tools/repo/policy-compiler.cjs`) will fail CI if any migration disables RLS.
 - Authorization policies should consult `employees.role` and `employees.department_id`, not `auth.uid()` alone.
 - SQL privilege-escalation and index-coverage tests live in `packages/database/tests/`. Add tests for new tables that introduce new RLS roles or new index patterns.
 
@@ -301,7 +297,7 @@ Run `pnpm install --no-frozen-lockfile` locally, then commit the updated `pnpm-l
 
 ### `pnpm policy:check` reports drift
 
-You (or a previous commit) edited `tools/policy-compiler.cjs` without regenerating. Run `pnpm policy:gen` and commit the output under `tools/policy/`.
+You (or a previous commit) edited `tools/repo/policy-compiler.cjs` without regenerating. Run `pnpm policy:gen` and commit the output under `tools/repo/policy/`.
 
 ### Supabase types are stale after a migration
 

@@ -227,10 +227,10 @@ audit-explain: ## Analyze database query execution plans and index utilization
 	pnpm audit:explain
 
 circular-dep: ## Detect circular dependencies across packages
-	node tools/circular-dep-detect.cjs
+	node tools/audits/circular-dep-detect.cjs
 
 secrets-rotate: ## Rotate application and service secrets
-	node tools/rotate-secrets.mjs
+	node tools/ops/rotate-secrets.mjs
 
 # ==============================================================================
 # 7. Model Context Protocol (MCP) & Tags
@@ -241,9 +241,6 @@ mcp-sync: ## Generate and synchronize user-specific MCP configurations
 
 mcp-validate: ## Validate connectivity and tool readiness of MCP servers
 	node scripts/validate-mcp-servers.js
-
-tags-apply: ## Synchronize and enforce Nx project tags from directory structure
-	node tools/apply-project-tags.cjs
 
 # ==============================================================================
 # 8. Database & Supabase Operations

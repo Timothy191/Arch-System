@@ -110,10 +110,10 @@ packages/
 └── types/           # Shared TypeScript interfaces & types
 
 tools/
-├── policy-compiler.cjs      # Enforces architectural boundaries (turbo.json)
-├── design-audit.cjs         # Validates OKLCH color usage & theme compliance
-├── enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
-└── apply-project-tags.cjs   # Applies Turborepo scope tags to new projects
+├── repo/policy-compiler.cjs      # SSoT policy compiler → generates rules + eslint boundaries
+├── audits/design-audit.cjs        # Validates OKLCH color usage & theme compliance
+├── audits/enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
+└── audits/audit-rls.cjs          # Static RLS policy auditor
 
 scripts/
 ├── sync-assets-smart.cjs    # Asset synchronization utility
@@ -130,7 +130,7 @@ scripts/
 6. **Authorization SSoT**: The `employees` table is the source of truth for role + department. RLS must be enabled on every new table.
 7. **Auth Middleware**: `apps/portal/middleware.ts` is a thin edge shim delegating to `apps/portal/server/proxy.ts` (session refresh, role/department route gating, Redis-cached department slug → UUID resolution). API routes `/api/c66`, `/api/health`, `/api/metrics` and static assets are exempt.
 8. **Migrations SSoT**: Only `packages/database/migrations/NNN_description.sql` is source of truth. NEVER edit `packages/supabase/supabase/migrations/` — it's a deploy-time copy (a PreToolUse hook blocks edits there).
-9. **Policy SSoT**: `tools/policy-compiler.cjs` generates `tools/policy/*.json` + `tools/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI fails on drift (`pnpm policy:check`).
+9. **Policy SSoT**: `tools/repo/policy-compiler.cjs` generates `tools/repo/policy/*.json` + `tools/repo/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI fails on drift (`pnpm policy:check`).
 10. **Generated output**: Never hand-edit generated files (`packages/theme/src/tokens/generated.ts`, `variables-generated.css`, generated DB types). Regenerate via their source commands instead.
 
 ## Deployment (Cloudflare Tunnel + Edge CDN)
@@ -224,7 +224,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 - **Type Errors**: Run `pnpm type-check` to catch TS issues early
 - **Lint Failures**: Use `pnpm lint --fix` for auto-fixable issues
 - **Tests Flaky**: Check for missing awaits or race conditions in test setup
-- **Policy Violations**: Review `tools/policy-compiler.cjs` for boundary rules
+- **Policy Violations**: Review `tools/repo/policy-compiler.cjs` for boundary rules
 
 ## File Conventions
 
@@ -241,7 +241,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 
 1. Check `MONOREPO.md` for detailed workspace structure
 2. Consult `README.md` for department-specific dashboard info
-3. Review `tools/policy-compiler.cjs` for architectural boundaries
+3. Review `tools/repo/policy-compiler.cjs` for architectural boundaries
 4. Look at existing similar features for patterns
 5. Run `pnpm lint` and `pnpm type-check` before complex changes
 6. Validate design system usage with `pnpm audit:design`

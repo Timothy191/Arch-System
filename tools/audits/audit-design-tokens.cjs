@@ -14,7 +14,7 @@
  *   6. Strict Light Mode Invariant (Zero 'dark:' classes across monorepo)
  *   7. Approved Shadow Token Validation (Tokens vs Raw Tailwind & CSS)
  *
- * Run: node tools/audit-design-tokens.cjs
+ * Run: node tools/audits/audit-design-tokens.cjs
  * Exit code: 0 (pass) or 1 (fail)
  */
 
@@ -146,7 +146,7 @@ REQUIRED_ASSETS.forEach((assetName) => {
   }
 });
 console.log(
-  `   ✓ Verified ${assetsFound}/${REQUIRED_ASSETS.length} essential brand assets & logos`
+  `   ✓ Verified ${assetsFound}/${REQUIRED_ASSETS.length} essential brand assets & logos`,
 );
 
 // ── 4. Validate Animation Constraints ─────────────────────────────────────────
@@ -289,7 +289,7 @@ files.forEach((relPath) => {
         shadowMatches.forEach((shadow) => {
           const isColorShadow =
             /^shadow-(blue|emerald|red|amber|purple|indigo|cyan|rose|sky|teal|zinc|neutral|slate|green|orange|yellow|violet|fuchsia|pink|lime)-[0-9]+$/.test(
-              shadow
+              shadow,
             );
           if (!ALLOWED_SHADOWS.has(shadow) && !isColorShadow) {
             violations.push({
@@ -347,7 +347,7 @@ if (violations.length > 0) {
   });
 } else {
   console.log(
-    "✅  0 Critical Violations. Design, tokens, fonts, animations, and assets 100% verified!"
+    "✅  0 Critical Violations. Design, tokens, fonts, animations, and assets 100% verified!",
   );
 }
 

@@ -6,7 +6,7 @@
  * Maintains a manifest.json metadata index and a codebase-maps/latest/ directory for zero-regex loading
  * in Server Components and overview dashboards.
  *
- * Usage: node tools/generate-codebase-maps.cjs
+ * Usage: node tools/repo/generate-codebase-maps.cjs
  */
 
 const fs = require("node:fs");
@@ -523,7 +523,7 @@ function main() {
     });
 
     console.log(
-      `   ├── ${map.filename} (${(Buffer.byteLength(map.content, "utf-8") / 1024).toFixed(1)} KB)`
+      `   ├── ${map.filename} (${(Buffer.byteLength(map.content, "utf-8") / 1024).toFixed(1)} KB)`,
     );
   }
 

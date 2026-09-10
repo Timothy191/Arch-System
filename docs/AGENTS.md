@@ -195,8 +195,8 @@ Turbo handles target execution and caching. Prefer `pnpm turbo run` over underly
 
 ### Architectural Boundary Enforcement
 
-- `tools/policy-compiler.cjs` is the Single Source of Truth (SSoT) for package boundaries.
-- Run `pnpm policy:gen` to synchronize policies. This script invokes `tools/apply-project-tags.cjs` to tag folders (e.g. `scope:app`, `scope:package:ui`, `scope:package:db`) and generates the ESLint import rules in `tools/policy/eslint-boundaries.generated.cjs`.
+- `tools/repo/policy-compiler.cjs` is the Single Source of Truth (SSoT) for package boundaries.
+- Run `pnpm policy:gen` to synchronize policies. The compiler reads the `DEPENDENCY_RULES` (keyed by `scope:*` tags such as `scope:app`, `scope:package:ui`, `scope:package:db`) and generates the ESLint import rules in `tools/repo/policy/eslint-boundaries.generated.cjs`.
 - **Constraints**:
   - UI components (`scope:package:ui`) must remain pure: they are prohibited from importing data packages (`@repo/supabase`, `@repo/redis`, `@repo/database`).
   - Theme (`scope:package:theme`) cannot depend on UI components.
@@ -231,9 +231,8 @@ Turbo handles target execution and caching. Prefer `pnpm turbo run` over underly
 - `apps/portal/server/proxy.ts` — Proxy implementation containing cached Redis auth profile lookups, redirect validation, and department route gating.
 - `apps/portal/next.config.mjs` — Next.js configuration (Turbopack, standalone output, transpile packages, Sentry, bundle analyzer).
 - `apps/portal/docker/Dockerfile` — Multi-stage Docker build (pruner → deps → builder → distroless production).
-- `tools/policy-compiler.cjs` — Architecture rules compiler and SSoT.
-- `tools/apply-project-tags.cjs` — Project tagging script mapping folders to scope tags.
-- `tools/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.
+- `tools/repo/policy-compiler.cjs` — Architecture rules compiler and SSoT.
+- `tools/audits/enforce-security-checks.cjs` — Pre-commit script auditing codebase for eval, SQL concatenation, or disabled RLS.
 - `packages/database/tests/migration-rollback-safety.mjs` — Validates migration SQL naming and checks rollback (`DROP TABLE IF EXISTS`) requirements.
 - `packages/errors/src/index.ts` — AppError base classes and type guards.
 - `packages/contract/src/index.ts` — Canonical Zod schemas re-exports and derived types.

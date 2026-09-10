@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Audits design system compliance across the codebase (e.g., verifying OKLCH tokens and shadow usage).
- * Usage: node tools/design-audit.cjs
+ * Usage: node tools/audits/design-audit.cjs
  */
 /**
  * Static Design System Compliance Auditor
@@ -14,7 +14,7 @@
  *   3. Named Lucide icon imports (no wildcard 'import * as Icons' from 'lucide-react')
  *   4. Safe animations constraint (no animating layout properties: width, height, top, bottom, left, right, margin, padding)
  *
- * Usage: node tools/design-audit.cjs
+ * Usage: node tools/audits/design-audit.cjs
  * Output: documentation/03-audit-reports/design-report.md
  * Exit Code: 0 on clean run, 1 if critical violations found (CI gate).
  */
@@ -170,7 +170,7 @@ function auditFile(filePath) {
         shadowMatches.forEach((shadow) => {
           const isColorShadow =
             /^shadow-(blue|emerald|red|amber|purple|indigo|cyan|rose|sky|teal|zinc|neutral|slate|green|orange|yellow|violet|fuchsia|pink|lime)-[0-9]+$/.test(
-              shadow
+              shadow,
             );
           if (!ALLOWED_SHADOWS.has(shadow) && !isColorShadow) {
             violations.push({
@@ -303,7 +303,7 @@ function generateReport() {
     lines.push("| --- | --- | --- | --- | --- |");
     critical.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
       );
     });
     lines.push("");
@@ -321,7 +321,7 @@ function generateReport() {
     lines.push("| --- | --- | --- | --- | --- |");
     warnings.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
       );
     });
     lines.push("");
@@ -352,7 +352,7 @@ function main() {
 
   console.log(`Scan Complete. Scanned ${filesScanned} files.`);
   console.log(
-    `Found ${violations.filter((v) => v.severity === "CRITICAL").length} critical violations and ${violations.filter((v) => v.severity === "WARNING").length} warnings.`
+    `Found ${violations.filter((v) => v.severity === "CRITICAL").length} critical violations and ${violations.filter((v) => v.severity === "WARNING").length} warnings.`,
   );
   console.log(`Report written to: ${path.relative(ROOT, REPORT_PATH)}`);
 

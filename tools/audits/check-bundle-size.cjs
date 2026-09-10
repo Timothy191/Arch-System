@@ -8,7 +8,7 @@
  * size must stay under its `maxSize` — but uses Node's built-in `zlib`, so it
  * works on any supported Node version with zero native deps.
  *
- * Usage: node tools/check-bundle-size.cjs   (after `pnpm --filter portal build`)
+ * Usage: node tools/audits/check-bundle-size.cjs   (after `pnpm --filter portal build`)
  */
 const fs = require("node:fs");
 const path = require("node:path");

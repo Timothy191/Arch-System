@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview CLI runner for multi-agent swarm quality audit and fine-tuning.
- * Usage: node tools/run-swarm.cjs
+ * Usage: node tools/scripts/run-swarm.cjs
  */
 
 const fs = require("node:fs");
@@ -52,13 +52,13 @@ filesToAudit.forEach(({ filePath, content }) => {
     }
     if (/\bdark:[a-zA-Z0-9_-]+/.test(line)) {
       console.log(
-        `❌ [DARK_MODE_PROHIBITED] ${filePath}:${idx + 1} - Prohibited dark: responsive class`
+        `❌ [DARK_MODE_PROHIBITED] ${filePath}:${idx + 1} - Prohibited dark: responsive class`,
       );
       totalViolations++;
     }
     if (/(SELECT|INSERT|UPDATE|DELETE)\s+.*\+\s*[a-zA-Z0-9_]+/i.test(line)) {
       console.log(
-        `❌ [DYNAMIC_SQL] ${filePath}:${idx + 1} - Dynamic SQL string concatenation detected`
+        `❌ [DYNAMIC_SQL] ${filePath}:${idx + 1} - Dynamic SQL string concatenation detected`,
       );
       totalViolations++;
     }
@@ -68,7 +68,7 @@ filesToAudit.forEach(({ filePath, content }) => {
 console.log("--------------------------------------------------");
 if (totalViolations === 0) {
   console.log(
-    "🟢 SWARM VERDICT: 100% PASS. Zero critical defects detected across audited domain files."
+    "🟢 SWARM VERDICT: 100% PASS. Zero critical defects detected across audited domain files.",
   );
 } else {
   console.log(`🔴 SWARM VERDICT: ${totalViolations} critical violations detected.`);
