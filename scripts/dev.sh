@@ -58,7 +58,7 @@ watchdog() {
   if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
     echo -e "\n${RED}${BOLD}  [ERR] Watchdog timeout: Boot hung or exceeded ${WATCHDOG_TIMEOUT} seconds.${NC}"
     touch "$REPO_ROOT/run/.dev_timeout"
-    node "$REPO_ROOT/tools/generate-dev-report.js" "TIMEOUT (stuck > ${WATCHDOG_TIMEOUT}s)"
+    node "$REPO_ROOT/tools/repo/generate-dev-report.js" "TIMEOUT (stuck > ${WATCHDOG_TIMEOUT}s)"
     # Shutdown background PIDs that we started
     for pidfile in .portal.pid .cms.pid .overview.pid; do
       [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
@@ -271,7 +271,7 @@ cleanup() {
       rm -f "$REPO_ROOT/run/.dev_timeout"
       exit 1
     else
-      node "$REPO_ROOT/tools/generate-dev-report.js" "FAILURE"
+      node "$REPO_ROOT/tools/repo/generate-dev-report.js" "FAILURE"
       exit 1
     fi
   fi
@@ -1191,7 +1191,7 @@ if [ -n "${WATCHDOG_PID:-}" ]; then
   kill "$WATCHDOG_PID" 2>/dev/null || true
 fi
 # Generate successful markdown report
-node "$REPO_ROOT/tools/generate-dev-report.js" "SUCCESS"
+node "$REPO_ROOT/tools/repo/generate-dev-report.js" "SUCCESS"
 
 # ── E2E Test Runner ─────────────────────────
 if [ "$RUN_E2E" = "true" ]; then

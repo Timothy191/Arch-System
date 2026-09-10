@@ -26,13 +26,13 @@
  *   (also called automatically by pnpm postinstall via package.json)
  */
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const require = createRequire(import.meta.url);
+const _require = createRequire(import.meta.url);
 
 async function findGlassCss() {
   // Try direct resolution from workspace root

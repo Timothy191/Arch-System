@@ -10,9 +10,9 @@
  *
  * Usage: node tools/check-bundle-size.cjs   (after `pnpm --filter portal build`)
  */
-const fs = require("fs");
-const path = require("path");
-const zlib = require("zlib");
+const fs = require("node:fs");
+const path = require("node:path");
+const zlib = require("node:zlib");
 const { globSync } = require("glob");
 
 const ROOT = path.join(__dirname, "..");

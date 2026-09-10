@@ -1,7 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
 import { seedControlRoom } from "./generators/control-room";
 import { seedDrilling } from "./generators/drilling";
 import { seedProduction } from "./generators/production";

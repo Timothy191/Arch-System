@@ -14,10 +14,10 @@
  *   node scripts/sync-assets-smart.cjs
  */
 
-const { execSync } = require("child_process");
-const { createHash } = require("crypto");
-const { readdirSync, statSync, readFileSync, writeFileSync, existsSync } = require("fs");
-const path = require("path");
+const { execSync } = require("node:child_process");
+const { createHash } = require("node:crypto");
+const { readdirSync, statSync, readFileSync, writeFileSync, existsSync } = require("node:fs");
+const path = require("node:path");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const ASSETS_DIR = path.join(REPO_ROOT, "apps", "portal", "assets");
@@ -61,7 +61,7 @@ if (currentChecksum === previousChecksum) {
 }
 
 console.log(
-  `🔄 Assets changed (Old: ${previousChecksum || "none"} -> New: ${currentChecksum}). Synchronizing...`,
+  `🔄 Assets changed (Old: ${previousChecksum || "none"} -> New: ${currentChecksum}). Synchronizing...`
 );
 
 try {

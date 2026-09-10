@@ -21,17 +21,6 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { execSync } = require("node:child_process");
-
-// Automatically apply Nx project tags based on directory paths before policy checks
-try {
-  const applyTagsScript = path.join(__dirname, "apply-project-tags.cjs");
-  if (fs.existsSync(applyTagsScript)) {
-    execSync(`node "${applyTagsScript}"`, { stdio: "inherit" });
-  }
-} catch (tagErr) {
-  console.warn("⚠️ Warning: Failed to auto-apply project tags:", tagErr.message);
-}
 
 const POLICY_VERSION = "1.0.0";
 
@@ -209,7 +198,8 @@ const SECURITY_CHECKS = [
   {
     id: "require-extension-schema",
     rule: "Extensions created in migrations must specify SCHEMA extensions",
-    pattern: "CREATE\\s+EXTENSION\\s+(?!.*SCHEMA\\s+extensions)(?!.*(uuid-ossp|vector|pg_cron|vectorscale|pgcrypto|pg_net|pg_stat_statements))",
+    pattern:
+      "CREATE\\s+EXTENSION\\s+(?!.*SCHEMA\\s+extensions)(?!.*(uuid-ossp|vector|pg_cron|vectorscale|pgcrypto|pg_net|pg_stat_statements))",
     paths: ["packages/database/migrations/*.sql"],
     severity: "warning",
     enforceAt: ["ci", "local"],
@@ -264,7 +254,7 @@ function writeOrCheck(filePath, content) {
   }
 }
 
-const JSON_FILES = [
+const _JSON_FILES = [
   "dependency.rules.json",
   "architecture.rules.json",
   "security.checks.json",
@@ -305,20 +295,33 @@ for (const cap of INTENT_CAPABILITIES) {
 }
 allOk &= writeOrCheck(
   path.join(OUTPUT_DIR, "intent-map.json"),
-  generateJson({ capabilities: intentMap }),
+  generateJson({ capabilities: intentMap })
 );
 
-const depConstraints = DEPENDENCY_RULES.map((r) => {
-  const targetTag = r.targetTag;
+const elementTypes = [
+  { type: "scope:app", pattern: "apps/*", mode: "folder" },
+  { type: "scope:package:db-internal", pattern: "packages/database/**", mode: "folder" },
+  { type: "scope:package:db", pattern: "packages/database", mode: "folder" },
+  { type: "scope:package:supabase", pattern: "packages/supabase", mode: "folder" },
+  { type: "scope:package:ui", pattern: "packages/ui", mode: "folder" },
+  { type: "scope:package:theme", pattern: "packages/theme", mode: "folder" },
+  { type: "scope:package", pattern: "packages/*", mode: "folder" },
+  { type: "scope:feature", pattern: "libs/features/*/*", mode: "folder" },
+  { type: "scope:package", pattern: "libs/shared/*", mode: "folder" },
+  { type: "scope:tool", pattern: "tools/*", mode: "folder" },
+];
+
+const boundaryRules = DEPENDENCY_RULES.map((r) => {
   if (r.allowed) {
     return {
-      sourceTag: r.sourceTag,
-      onlyDependOnLibsWithTags: [targetTag],
+      from: r.sourceTag,
+      allow: [r.targetTag],
     };
   }
   return {
-    sourceTag: r.sourceTag,
-    notDependOnLibsWithTags: [targetTag],
+    from: r.sourceTag,
+    disallow: [r.targetTag],
+    message: r.reason,
   };
 });
 
@@ -326,16 +329,24 @@ const eslintContent = `// GENERATED FROM tools/policy-compiler.cjs — DO NOT ED
 // Run 'pnpm policy:gen' to regenerate.
 
 module.exports = {
-  plugins: ['@nx'],
+  plugins: ['boundaries'],
+  settings: {
+    'boundaries/elements': ${JSON.stringify(elementTypes, null, 6)},
+    'boundaries/ignore': [
+      '**/*.test.{ts,tsx,js,jsx}',
+      '**/*.spec.{ts,tsx,js,jsx}',
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '**/.turbo/**'
+    ]
+  },
   rules: {
-    '@nx/enforce-module-boundaries': [
+    'boundaries/element-types': [
       'error',
       {
-        enforceBuildableLibDependency: true,
-        allowCircularSelfDependency: false,
-        banTransitiveDependencies: true,
-        checkDynamicDependenciesExceptions: ['^@repo/.*$'],
-        depConstraints: ${JSON.stringify(depConstraints, null, 2)},
+        default: 'allow',
+        rules: ${JSON.stringify(boundaryRules, null, 8)},
       },
     ],
   },

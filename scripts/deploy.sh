@@ -634,9 +634,9 @@ phase_validate() {
   
   # Pre-launch Project-wide Cache Cleanup
   log "Performing pre-launch project-wide cache cleanup..."
-  run_if_not_dry rm -rf "$REPO_ROOT"/.kilo "$REPO_ROOT"/.remember "$REPO_ROOT"/.nx/cache "$REPO_ROOT"/.venv "$REPO_ROOT"/.vercel "$REPO_ROOT"/.vscode "$REPO_ROOT"/skills-lock.json "$REPO_ROOT"/deployment-logs
+  run_if_not_dry rm -rf "$REPO_ROOT"/.kilo "$REPO_ROOT"/.remember "$REPO_ROOT"/.turbo/cache "$REPO_ROOT"/.venv "$REPO_ROOT"/.vercel "$REPO_ROOT"/.vscode "$REPO_ROOT"/skills-lock.json "$REPO_ROOT"/deployment-logs
   run_if_not_dry rm -rf "$REPO_ROOT"/apps/portal/.next/cache "$REPO_ROOT"/apps/cms/.next/cache "$REPO_ROOT"/apps/overview/.next/cache "$REPO_ROOT"/packages/eval/.pytest_cache
-  run_if_not_dry find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .nx -o -name .git -o -name .turbo \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+  run_if_not_dry find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .git -o -name .turbo \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
   
   # Clean old logs and temporary status/monitor scripts, keeping the current DEPLOY_LOG
   if [ -n "${DEPLOY_LOG:-}" ] && [ -f "$DEPLOY_LOG" ]; then
@@ -771,18 +771,18 @@ phase_build() {
   run_if_not_dry pnpm install --frozen-lockfile
   success "Dependencies installed"
   
-  # AGENT-TRACE: Run Nx quality gates before build — lint, type-check, and
-  # dependency graph validation are cached by Nx and only re-run on change.
-  log "Running Nx quality gates (lint + type-check)..."
-  run_if_not_dry pnpm nx run-many -t lint type-check --exclude=portal
+  # AGENT-TRACE: Run Turborepo quality gates before build — lint, type-check, and
+  # dependency graph validation are cached by Turbo and only re-run on change.
+  log "Running Turbo quality gates (lint + type-check)..."
+  run_if_not_dry pnpm turbo run lint type-check --filter=!portal
   success "Quality gates passed"
   
-  log "Building all workspace packages via Nx..."
-  run_if_not_dry pnpm nx run-many -t build --exclude=portal --parallel
+  log "Building all workspace packages via Turbo..."
+  run_if_not_dry pnpm turbo run build --filter=!portal
   success "Workspace packages built"
   
   log "Building portal..."
-  run_if_not_dry pnpm nx build portal
+  run_if_not_dry pnpm turbo run build --filter=portal
   success "Build complete"
 }
 

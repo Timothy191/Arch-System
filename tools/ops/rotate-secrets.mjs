@@ -12,16 +12,16 @@
  * Requires: SUPABASE_ACCESS_TOKEN, environment variables set
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
-const SECRET_ROTATION_CONFIG = {
+const _SECRET_ROTATION_CONFIG = {
   supabase: {
     required: ["SUPABASE_SERVICE_KEY"],
     description: "Rotating Supabase service role key",
@@ -110,7 +110,7 @@ async function rotateInngestKey() {
 
 function updateEnvFile(updates) {
   const envPath = join(rootDir, ".env");
-  const envExamplePath = join(rootDir, ".env.example");
+  const _envExamplePath = join(rootDir, ".env.example");
 
   if (!existsSync(envPath)) {
     log(".env file not found, skipping update", "WARN");

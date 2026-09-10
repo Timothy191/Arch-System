@@ -5,8 +5,8 @@
  * Zero dependencies. Zero impact on the main project.
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const WIKI_ROOT = path.resolve(__dirname, "../../docs/wiki");
 const OUT_FILE = path.resolve(__dirname, "viewer.html");
@@ -101,7 +101,7 @@ function mdToHtml(md, slugMap) {
   html = html.replace(/<\/blockquote>\n<blockquote>/g, "<br>");
 
   // Tables (simple parser)
-  html = html.replace(/(\|.*\|[ \t]*\n)(\|[-:\| \t]+\|[ \t]*\n)((?:\|.*\|[ \t]*\n)+)/g, (match) => {
+  html = html.replace(/(\|.*\|[ \t]*\n)(\|[-:| \t]+\|[ \t]*\n)((?:\|.*\|[ \t]*\n)+)/g, (match) => {
     const lines = match.trim().split("\n");
     if (lines.length < 3) return match;
     let out = "<table><thead><tr>";
@@ -128,7 +128,7 @@ function mdToHtml(md, slugMap) {
   // Lists
   html = html.replace(/(^|\n)((?:\s*[-*+] .+\n?)+)/g, (_, pre, block) => {
     const items = block.trim().split(/\n(?=\s*[-*+] )/);
-    let out = pre + "<ul>";
+    let out = `${pre}<ul>`;
     for (const item of items) {
       const content = item.replace(/^\s*[-*+]\s+/, "").trim();
       if (content) out += `<li>${content}</li>`;
@@ -139,7 +139,7 @@ function mdToHtml(md, slugMap) {
 
   html = html.replace(/(^|\n)((?:\s*\d+\. .+\n?)+)/g, (_, pre, block) => {
     const items = block.trim().split(/\n(?=\s*\d+\. )/);
-    let out = pre + "<ol>";
+    let out = `${pre}<ol>`;
     for (const item of items) {
       const content = item.replace(/^\s*\d+\.\s+/, "").trim();
       if (content) out += `<li>${content}</li>`;
@@ -151,7 +151,7 @@ function mdToHtml(md, slugMap) {
   // External links
   html = html.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener">$1</a>',
+    '<a href="$2" target="_blank" rel="noopener">$1</a>'
   );
 
   // Bold / italic
@@ -165,7 +165,7 @@ function mdToHtml(md, slugMap) {
   // Restore code blocks
   html = html.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
     const { lang, code } = codeBlocks[+idx];
-    return `<pre class="code-block${lang ? " language-" + lang : ""}"><code>${code}</code></pre>`;
+    return `<pre class="code-block${lang ? ` language-${lang}` : ""}"><code>${code}</code></pre>`;
   });
 
   // Paragraphs
@@ -280,16 +280,16 @@ const groups = {
   other: pageData.filter(
     (p) =>
       !["index", "SCHEMA", "log", "entity", "concept", "comparison", "query"].includes(p.type) &&
-      !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
+      !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/"))
   ),
 };
 
-function groupHtml(key, label, arr) {
+function groupHtml(_key, label, arr) {
   if (!arr.length) return "";
   const lis = arr
     .map(
       (p) =>
-        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`,
+        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`
     )
     .join("");
   return `<details open><summary>${label} <span class="count">${arr.length}</span></summary><ul>${lis}</ul></details>`;
@@ -309,7 +309,7 @@ const sidebarGroups = [
   .filter(Boolean)
   .join("");
 
-const allTags = [...new Set(pageData.flatMap((p) => p.tags))].sort();
+const _allTags = [...new Set(pageData.flatMap((p) => p.tags))].sort();
 
 const html = `<!DOCTYPE html>
 <html lang="en">

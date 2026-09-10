@@ -1,5 +1,4 @@
-import { execSync } from "child_process";
-import * as fs from "fs";
+import { execSync } from "node:child_process";
 
 function run(cmd, capture = true) {
   try {
@@ -17,7 +16,7 @@ function run(cmd, capture = true) {
 async function main() {
   console.log("Starting Autonomous Delegation Loop...");
   let score = 0;
-  let maxTurns = 3;
+  const maxTurns = 3;
   let currentTurn = 1;
   let feedback =
     "Initial task: Fix the HeroRotator sizing scaling issue in packages/ui/src/components/HeroCardContent.tsx and ThreeHeroRotator.tsx where the panel only shows a tiny piece. Remember to keep all effects and animations intact.";
@@ -25,7 +24,7 @@ async function main() {
   // Create a base worktree for the task
   console.log("Creating worktree for the task...");
   const wt = run(`orca worktree create --name fix-hero-rotator-${Date.now()}`);
-  if (!wt || !wt.id) {
+  if (!wt?.id) {
     console.error("Failed to create worktree. Exiting.");
     process.exit(1);
   }
@@ -41,7 +40,7 @@ async function main() {
     const refactorCmd = `orca terminal create --worktree ${worktreeSelector} --command 'orca-cli worktree create --agent frontend-refactor-agent --prompt "${feedback.replace(/"/g, '\\"')}"'`;
     const refactorTerm = run(refactorCmd);
 
-    if (refactorTerm && refactorTerm.handle) {
+    if (refactorTerm?.handle) {
       console.log(`Waiting for refactoring to complete (Terminal ${refactorTerm.handle})...`);
       run(
         `orca terminal wait --terminal ${refactorTerm.handle} --for exit --timeout-ms 300000`,
@@ -53,13 +52,13 @@ async function main() {
     const evalCmd = `orca terminal create --worktree ${worktreeSelector} --command 'orca-cli worktree create --agent ui-evaluator-agent --prompt "Evaluate the recent changes to the HeroRotator components in packages/ui/src/components/"'`;
     const evalTerm = run(evalCmd);
 
-    if (evalTerm && evalTerm.handle) {
+    if (evalTerm?.handle) {
       console.log(`Waiting for evaluation (Terminal ${evalTerm.handle})...`);
       run(`orca terminal wait --terminal ${evalTerm.handle} --for exit --timeout-ms 180000`, false);
 
       // Read the terminal output to extract the JSON payload
       const output = run(`orca terminal read --terminal ${evalTerm.handle}`);
-      if (output && output.content) {
+      if (output?.content) {
         const text = output.content;
         const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
         if (jsonMatch) {
@@ -69,7 +68,7 @@ async function main() {
             feedback = result.feedback || "No specific feedback provided.";
             console.log(`\nEvaluator gave score: ${score}/10`);
             console.log(`Feedback: ${feedback}`);
-          } catch (e) {
+          } catch (_e) {
             console.log("Could not parse evaluator output");
           }
         } else {

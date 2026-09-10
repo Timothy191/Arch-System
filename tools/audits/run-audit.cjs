@@ -30,7 +30,7 @@ function getFormattedDate() {
   return {
     folderDate: `${yy}-${mm}-${dd}`,
     isoDate: now.toISOString(),
-    displayDate: now.toLocaleString("en-US", { timeZone: "UTC" }) + " UTC",
+    displayDate: `${now.toLocaleString("en-US", { timeZone: "UTC" })} UTC`,
   };
 }
 
@@ -105,7 +105,7 @@ function main() {
 
   // 3. Run Vulnerability Audit (CI Gate)
   console.log("\n🛡️ Running Dependency Vulnerability Audit (CI Gate)...");
-  let auditExitCode = 0;
+  let _auditExitCode = 0;
   try {
     execSync("pnpm audit --audit-level=high --ignore-decls", {
       cwd: ROOT,
@@ -117,7 +117,7 @@ function main() {
     if (err.code === "ETIMEDOUT") {
       console.log("   ⚠️ Vulnerability check skipped (network registry request timed out).");
     } else {
-      auditExitCode = err.status || 1;
+      _auditExitCode = err.status || 1;
       console.log("   ✓ Dependency vulnerability audit evaluated.");
     }
   }
@@ -134,22 +134,37 @@ function main() {
     : "# Design Report\n\nReport unavailable.";
 
   // Extract metrics from RLS content
-  const rlsCriticalMatch = rlsContent.match(/CRITICAL table\(s\) missing RLS:\s*(\d+)/i) || rlsContent.match(/Critical Issues:\s*(\d+)/i);
-  const rlsWarningMatch = rlsContent.match(/suspicious policy warning\(s\):\s*(\d+)/i) || rlsContent.match(/Warnings:\s*(\d+)/i);
-  const rlsCriticals = rlsCriticalMatch ? parseInt(rlsCriticalMatch[1], 10) : (rlsExitCode !== 0 ? 1 : 0);
+  const rlsCriticalMatch =
+    rlsContent.match(/CRITICAL table\(s\) missing RLS:\s*(\d+)/i) ||
+    rlsContent.match(/Critical Issues:\s*(\d+)/i);
+  const rlsWarningMatch =
+    rlsContent.match(/suspicious policy warning\(s\):\s*(\d+)/i) ||
+    rlsContent.match(/Warnings:\s*(\d+)/i);
+  const rlsCriticals = rlsCriticalMatch
+    ? parseInt(rlsCriticalMatch[1], 10)
+    : rlsExitCode !== 0
+      ? 1
+      : 0;
   const rlsWarnings = rlsWarningMatch ? parseInt(rlsWarningMatch[1], 10) : 0;
 
   // Extract metrics from Design content
-  const designCriticalMatch = designContent.match(/CRITICAL:\s*(\d+)/i) || designContent.match(/Critical Violations:\s*(\d+)/i);
-  const designWarningMatch = designContent.match(/WARNINGS:\s*(\d+)/i) || designContent.match(/Warnings:\s*(\d+)/i);
-  const designCriticals = designCriticalMatch ? parseInt(designCriticalMatch[1], 10) : (designExitCode !== 0 ? 1 : 0);
+  const designCriticalMatch =
+    designContent.match(/CRITICAL:\s*(\d+)/i) ||
+    designContent.match(/Critical Violations:\s*(\d+)/i);
+  const designWarningMatch =
+    designContent.match(/WARNINGS:\s*(\d+)/i) || designContent.match(/Warnings:\s*(\d+)/i);
+  const designCriticals = designCriticalMatch
+    ? parseInt(designCriticalMatch[1], 10)
+    : designExitCode !== 0
+      ? 1
+      : 0;
   const designWarnings = designWarningMatch ? parseInt(designWarningMatch[1], 10) : 0;
 
   const totalCriticals = rlsCriticals + designCriticals;
   const totalWarnings = rlsWarnings + designWarnings;
 
   // Compute audit score (100 base, -15 per critical, -2 per warning)
-  let score = 100 - (totalCriticals * 15) - (totalWarnings * 2);
+  let score = 100 - totalCriticals * 15 - totalWarnings * 2;
   if (score < 0) score = 0;
 
   let overallStatus = "PASS";
@@ -188,7 +203,7 @@ function main() {
 ---
 
 ## 🛡️ Quality Gate & System Hygiene Compliance
-* **XDG Base Directory**: Compliant (\`\$HOME/.config\`, \`\$HOME/.cache\`, \`\$HOME/.local\`).
+* **XDG Base Directory**: Compliant (\`$HOME/.config\`, \`$HOME/.cache\`, \`$HOME/.local\`).
 * **Design Palette**: Light-only (OKLCH tokens, glass surfaces, named shadows).
 * **Security & RLS**: All active tables guarded with Postgres RLS policies.
 `;
@@ -196,24 +211,36 @@ function main() {
   fs.writeFileSync(path.join(targetDir, "results.md"), resultsContent);
 
   // 5. Generate required-actions.md
-  let actionItemsList = [];
+  const actionItemsList = [];
 
   if (rlsCriticals > 0) {
-    actionItemsList.push(`- [ ] **[CRITICAL - RLS]** Enable Row Level Security on unprotected database tables identified in \`rls-report.md\`.`);
+    actionItemsList.push(
+      `- [ ] **[CRITICAL - RLS]** Enable Row Level Security on unprotected database tables identified in \`rls-report.md\`.`
+    );
   }
   if (rlsWarnings > 0) {
-    actionItemsList.push(`- [ ] **[MEDIUM - RLS]** Review overly permissive \`USING (true)\` policies on department-scoped tables in \`rls-report.md\`.`);
+    actionItemsList.push(
+      `- [ ] **[MEDIUM - RLS]** Review overly permissive \`USING (true)\` policies on department-scoped tables in \`rls-report.md\`.`
+    );
   }
   if (designCriticals > 0) {
-    actionItemsList.push(`- [ ] **[CRITICAL - DESIGN]** Fix critical design system violations (raw box-shadow, dark: selectors) listed in \`design-report.md\`.`);
+    actionItemsList.push(
+      `- [ ] **[CRITICAL - DESIGN]** Fix critical design system violations (raw box-shadow, dark: selectors) listed in \`design-report.md\`.`
+    );
   }
   if (designWarnings > 0) {
-    actionItemsList.push(`- [ ] **[LOW - DESIGN]** Standardize shadow utilities and icon imports identified in \`design-report.md\`.`);
+    actionItemsList.push(
+      `- [ ] **[LOW - DESIGN]** Standardize shadow utilities and icon imports identified in \`design-report.md\`.`
+    );
   }
 
   if (actionItemsList.length === 0) {
-    actionItemsList.push(`- [x] **[VERIFIED]** Zero critical violations or warnings detected. All design and RLS security gates are 100% compliant.`);
-    actionItemsList.push(`- [ ] **[ROUTINE]** Re-run \`pnpm quality\` before pushing any new schema migrations or UI components.`);
+    actionItemsList.push(
+      `- [x] **[VERIFIED]** Zero critical violations or warnings detected. All design and RLS security gates are 100% compliant.`
+    );
+    actionItemsList.push(
+      `- [ ] **[ROUTINE]** Re-run \`pnpm quality\` before pushing any new schema migrations or UI components.`
+    );
   }
 
   const requiredActionsContent = `# 📋 Required Actions & Remediation Plan — Log #${logNum} (${dateInfo.folderDate})

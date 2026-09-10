@@ -6,9 +6,9 @@
  * Sends alerts when thresholds are exceeded
  */
 
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
@@ -58,7 +58,7 @@ function checkThresholds(category, costs, config) {
         service,
         current: current.toFixed(2),
         limit: limit.toFixed(2),
-        ratio: (ratio * 100).toFixed(1) + "%",
+        ratio: `${(ratio * 100).toFixed(1)}%`,
         severity: ratio >= 0.9 ? "critical" : "warning",
       });
     }

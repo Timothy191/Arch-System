@@ -13,14 +13,14 @@
  * Usage: node tools/enforce-security-checks.cjs [--ci]
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 let globSync;
 try {
   // glob v9+ uses globSync, v8 uses glob.sync
   const glob = require("glob");
   globSync = glob.globSync || glob.sync;
-} catch (e) {
+} catch (_e) {
   console.error("❌ 'glob' package not found. Run pnpm install.");
   process.exit(1);
 }
@@ -58,7 +58,7 @@ for (const check of checks) {
       cwd: REPO_ROOT,
       absolute: true,
       nodir: true,
-      ignore: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/.nx/**"],
+      ignore: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/.turbo/**"],
     });
     filesToScan = filesToScan.concat(matched);
   }

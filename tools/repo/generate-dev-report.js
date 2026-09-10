@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 const status = process.argv[2] || "UNKNOWN";
 const repoRoot = path.resolve(import.meta.dirname, "..");
@@ -10,7 +10,7 @@ const reportPath = path.join(repoRoot, "dev-report.md");
 let logText = "";
 try {
   logText = fs.readFileSync(logPath, "utf8");
-} catch (e) {
+} catch (_e) {
   logText = "No dev log found.";
 }
 
@@ -52,10 +52,10 @@ try {
   const pnpmPkg = fs.readFileSync(path.join(repoRoot, "package.json"), "utf8");
   const pkg = JSON.parse(pnpmPkg);
   pnpmVersion = pkg.packageManager ? pkg.packageManager.split("@")[1] : "Unknown";
-} catch (e) {}
+} catch (_e) {}
 
 let md = `# Development Boot Report\n\n`;
-md += `- **Status**: ${status === "SUCCESS" ? "✅ SUCCESS" : "❌ " + status}\n`;
+md += `- **Status**: ${status === "SUCCESS" ? "✅ SUCCESS" : `❌ ${status}`}\n`;
 md += `- **Timestamp**: ${new Date().toISOString()}\n`;
 md += `- **Node.js**: ${nodeVersion}\n`;
 md += `- **pnpm**: ${pnpmVersion}\n\n`;
@@ -90,7 +90,7 @@ if (status !== "SUCCESS") {
 
   md += `### Last 50 lines of dev.log\n\`\`\`text\n`;
   const devLogLines = cleanText.split("\n").slice(-50).join("\n");
-  md += devLogLines + `\n\`\`\`\n\n`;
+  md += `${devLogLines}\n\`\`\`\n\n`;
 
   if (fs.existsSync(portalLogPath)) {
     try {
@@ -98,8 +98,8 @@ if (status !== "SUCCESS") {
       const cleanPortal = portalLog.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
       md += `### Last 50 lines of portal.log\n\`\`\`text\n`;
       const portalLogLines = cleanPortal.split("\n").slice(-50).join("\n");
-      md += portalLogLines + `\n\`\`\`\n\n`;
-    } catch (e) {}
+      md += `${portalLogLines}\n\`\`\`\n\n`;
+    } catch (_e) {}
   }
 }
 

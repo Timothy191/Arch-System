@@ -6,11 +6,11 @@ The Single Source of Truth (SSoT) for all canonical Zod schemas, validation cont
 
 ## Inner Loop Commands
 
-- **Run all unit tests**: `pnpm nx test @repo/contract`
+- **Run all unit tests**: `pnpm turbo run test --filter=@repo/contract`
 - **Run targeted schema test**: `pnpm --filter @repo/contract test -- -t "<schemaName>"`
-- **Compile contract package**: `pnpm nx build @repo/contract` _(runs `tsc` producing `./dist/`)_
-- **Type-check package**: `pnpm nx type-check @repo/contract`
-- **Lint package**: `pnpm nx lint @repo/contract`
+- **Compile contract package**: `pnpm turbo run build --filter=@repo/contract` _(runs `tsc` producing `./dist/`)_
+- **Type-check package**: `pnpm turbo run type-check --filter=@repo/contract`
+- **Lint package**: `pnpm turbo run lint --filter=@repo/contract`
 - **Verify schema drift**: `pnpm audit:drift` _(audits `@repo/database` migrations vs `@repo/contract` Zod schemas)_
 
 ## Architectural Invariants
@@ -25,7 +25,7 @@ The Single Source of Truth (SSoT) for all canonical Zod schemas, validation cont
     export type WebhookConfig = z.infer<typeof webhookConfigSchema>;
     ```
   - Re-export schemas, DTOs, and inferred types through barrel exports in `src/index.ts`.
-  - Deep path exports are configured in `package.json` (`./schemas/*`, `./types/*`, `./validation`) and mapped in root `tsconfig.base.json`. Always run `pnpm nx build @repo/contract` after adding or updating schemas so consumer packages resolve `./dist/` types.
+  - Deep path exports are configured in `package.json` (`./schemas/*`, `./types/*`, `./validation`) and mapped in root `tsconfig.base.json`. Always run `pnpm turbo run build --filter=@repo/contract` after adding or updating schemas so consumer packages resolve `./dist/` types.
 
 ## Agent Tracing
 

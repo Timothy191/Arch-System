@@ -131,10 +131,10 @@ pnpm --filter @repo/eval test # Python eval suite
 
 ### Architectural Boundaries
 
-- `tools/policy-compiler.cjs` is the SSoT for package boundaries
+- `tools/repo/policy-compiler.cjs` is the SSoT for package boundaries
 - `pnpm policy:gen` regenerates `tools/policy/*.json` and `tools/policy/eslint-boundaries.generated.cjs`
 - **Constraints**: `scope:package:ui` cannot import `@repo/supabase`, `@repo/redis`, `@repo/database`; `scope:app` cannot import `@repo/database-internal`; `scope:feature` cannot depend on `scope:app`
-- After adding a new project: run `node tools/apply-project-tags.cjs` and update `tools/policy-compiler.cjs`
+- After adding a new project: run `node tools/apply-project-tags.cjs` and update `tools/repo/policy-compiler.cjs`
 
 ### Agent Tracing
 
@@ -144,7 +144,7 @@ pnpm --filter @repo/eval test # Python eval suite
 ### Dependency Management
 
 - Workspace catalogs in `pnpm-workspace.yaml`; use `catalog:` or `catalog:react19` prefix
-- New packages must be `@repo/<name>`, have `project.json`, get tags via `node tools/apply-project-tags.cjs`, and add `DEPENDENCY_RULES` to `tools/policy-compiler.cjs`
+- New packages must be `@repo/<name>`, have `project.json`, get tags via `node tools/apply-project-tags.cjs`, and add `DEPENDENCY_RULES` to `tools/repo/policy-compiler.cjs`
 
 ---
 
@@ -162,9 +162,9 @@ pnpm --filter @repo/eval test # Python eval suite
 | `tsconfig.base.json`             | Root TS config with 30+ path aliases                                 |
 | `turbo.json`                     | Turborepo 2.x config with task pipelines, global env, cache settings |
 | `pnpm-workspace.yaml`            | Workspace packages + dependency catalogs                             |
-| `tools/policy-compiler.cjs`      | SSoT policy compiler → generates rules + eslint boundaries           |
+| `tools/repo/policy-compiler.cjs` | SSoT policy compiler → generates rules + eslint boundaries           |
 | `tools/apply-project-tags.cjs`   | Project tagging script                                               |
-| `tools/audit-rls.cjs`            | Static RLS policy auditor                                            |
+| `tools/audits/audit-rls.cjs`     | Static RLS policy auditor                                            |
 | `packages/database/migrations/`  | 110+ SQL migration files (001*initial.sql → 153*\*.sql)              |
 | `packages/errors/src/index.ts`   | AppError base classes + type guards                                  |
 | `packages/contract/src/index.ts` | Canonical Zod schemas + derived types                                |

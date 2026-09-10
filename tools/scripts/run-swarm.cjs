@@ -34,7 +34,7 @@ for (const relPath of SAMPLE_FILES) {
 
 // Basic static QualityGate check inline for zero-dependency CLI execution
 let totalViolations = 0;
-let totalWarnings = 0;
+const _totalWarnings = 0;
 
 console.log(`Auditing ${filesToAudit.length} key domain files with 5 Specialist Personas:`);
 console.log("  1. 🗄️ Database & Storage Architect");
@@ -51,11 +51,15 @@ filesToAudit.forEach(({ filePath, content }) => {
       totalViolations++;
     }
     if (/\bdark:[a-zA-Z0-9_-]+/.test(line)) {
-      console.log(`❌ [DARK_MODE_PROHIBITED] ${filePath}:${idx + 1} - Prohibited dark: responsive class`);
+      console.log(
+        `❌ [DARK_MODE_PROHIBITED] ${filePath}:${idx + 1} - Prohibited dark: responsive class`
+      );
       totalViolations++;
     }
     if (/(SELECT|INSERT|UPDATE|DELETE)\s+.*\+\s*[a-zA-Z0-9_]+/i.test(line)) {
-      console.log(`❌ [DYNAMIC_SQL] ${filePath}:${idx + 1} - Dynamic SQL string concatenation detected`);
+      console.log(
+        `❌ [DYNAMIC_SQL] ${filePath}:${idx + 1} - Dynamic SQL string concatenation detected`
+      );
       totalViolations++;
     }
   });
@@ -63,7 +67,9 @@ filesToAudit.forEach(({ filePath, content }) => {
 
 console.log("--------------------------------------------------");
 if (totalViolations === 0) {
-  console.log("🟢 SWARM VERDICT: 100% PASS. Zero critical defects detected across audited domain files.");
+  console.log(
+    "🟢 SWARM VERDICT: 100% PASS. Zero critical defects detected across audited domain files."
+  );
 } else {
   console.log(`🔴 SWARM VERDICT: ${totalViolations} critical violations detected.`);
 }

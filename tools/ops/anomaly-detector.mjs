@@ -8,9 +8,9 @@
  * - Percentile: for comparing against historical distribution
  */
 
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
@@ -33,7 +33,7 @@ function mean(arr) {
 
 function stddev(arr) {
   const m = mean(arr);
-  const squaredDiffs = arr.map((x) => Math.pow(x - m, 2));
+  const squaredDiffs = arr.map((x) => (x - m) ** 2);
   return Math.sqrt(mean(squaredDiffs));
 }
 
@@ -53,7 +53,7 @@ function percentile(arr, p) {
 }
 
 // Simulated metric fetch - in production, query Prometheus/Datadog
-function getMetricData(metricName, window) {
+function getMetricData(metricName, _window) {
   // Mock data - replace with actual metric queries
   const mockData = {
     api_latency_ms: [120, 135, 110, 125, 140, 130, 115, 145, 125, 120, 180, 130, 125, 140],

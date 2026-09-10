@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { spawn } from "child_process";
-import fs from "fs";
-import net from "net";
-import path from "path";
-import { fileURLToPath } from "url";
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import net from "node:net";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +42,7 @@ async function checkHttp(url) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch(url, {
+    const _res = await fetch(url, {
       method: "GET",
       signal: controller.signal,
     });
@@ -129,12 +129,12 @@ function testStdioServer(command, args, env = {}) {
 
     try {
       child.stdin.write(
-        JSON.stringify({
+        `${JSON.stringify({
           jsonrpc: "2.0",
           method: "tools/list",
           params: {},
           id: 1,
-        }) + "\n"
+        })}\n`
       );
     } catch (err) {
       if (!resolved) {
@@ -174,7 +174,7 @@ async function main() {
     process.stdout.write(`  • ${CYAN}${name}${NC} ... `);
 
     // 1. HTTP/SSE Servers
-    if (server.type === "http" || (server.url && server.url.startsWith("http"))) {
+    if (server.type === "http" || server.url?.startsWith("http")) {
       const isOnline = await checkHttp(server.url);
       if (isOnline) {
         console.log(`${GREEN}✓ Reachable (${server.url})${NC}`);

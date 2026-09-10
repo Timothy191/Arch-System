@@ -16,7 +16,7 @@ SCORE=0
 # Angle 1: Architectural Integrity & System Boundaries (25 pts)
 echo "[Angle 1: Architectural Integrity & Monorepo Boundaries]"
 CIRCULAR_FAIL=0
-node "${REPO_ROOT}/tools/circular-dep-detect.cjs" >/dev/null 2>&1 || CIRCULAR_FAIL=1
+node "${REPO_ROOT}/tools/audits/circular-dep-detect.cjs" >/dev/null 2>&1 || CIRCULAR_FAIL=1
 
 if [ "$CIRCULAR_FAIL" -eq 0 ]; then
   echo "  • Monorepo circular dependency analysis... PASS (Zero circular references)"
@@ -36,7 +36,7 @@ echo ""
 
 # Angle 2: Performance, Latency & Anti-Bloat (25 pts)
 echo "[Angle 2: Performance, Latency & Bundle Integrity]"
-if node "${REPO_ROOT}/tools/check-css-performance.cjs" >/dev/null 2>&1; then
+if node "${REPO_ROOT}/tools/audits/check-css-performance.cjs" >/dev/null 2>&1; then
   echo "  • CSS animation & layout performance... PASS (Zero layout-thrashing animations)"
   SCORE=$((SCORE + 15))
 else
@@ -57,7 +57,7 @@ echo ""
 # Angle 3: Security, Robustness & Error Boundaries (25 pts)
 echo "[Angle 3: Security, RLS & Error Boundaries]"
 RLS_FAIL=0
-node "${REPO_ROOT}/tools/audit-rls.cjs" >/dev/null 2>&1 || RLS_FAIL=1
+node "${REPO_ROOT}/tools/audits/audit-rls.cjs" >/dev/null 2>&1 || RLS_FAIL=1
 
 if [ "$RLS_FAIL" -eq 0 ]; then
   echo "  • Row-Level Security (RLS) database policies... PASS (100% tables protected)"
@@ -66,7 +66,7 @@ else
   echo "  • Row-Level Security audit... FAIL"
 fi
 
-if node "${REPO_ROOT}/tools/check-html-meta-tags.cjs" >/dev/null 2>&1; then
+if node "${REPO_ROOT}/tools/audits/check-html-meta-tags.cjs" >/dev/null 2>&1; then
   echo "  • HTML meta tags & security headers... PASS (Verified)"
   SCORE=$((SCORE + 10))
 else
@@ -79,7 +79,7 @@ echo ""
 # Angle 4: Maintainability, Typings & Design Compliance (25 pts)
 echo "[Angle 4: Maintainability, Type Safety & Design Compliance]"
 DESIGN_FAIL=0
-node "${REPO_ROOT}/tools/design-audit.cjs" >/dev/null 2>&1 || DESIGN_FAIL=1
+node "${REPO_ROOT}/tools/audits/design-audit.cjs" >/dev/null 2>&1 || DESIGN_FAIL=1
 
 if [ "$DESIGN_FAIL" -eq 0 ]; then
   echo "  • Design System token & accessibility compliance... PASS (0 violations)"

@@ -14,7 +14,7 @@ export async function seedControlRoom(supabase: SupabaseClient): Promise<void> {
     return;
   }
 
-  const { data: machine, error: machineError } = await supabase
+  const { data: machine } = await supabase
     .from("machines")
     .select("id, name")
     .eq("department_id", dept.id)

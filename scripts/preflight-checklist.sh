@@ -311,7 +311,7 @@ fi
 header "10. Cache & Temp Files"
 
 CLEAN_TARGETS=(
-  "$REPO_ROOT/.nx/cache"
+  "$REPO_ROOT/.turbo/cache"
   "$REPO_ROOT/apps/portal/.next/cache"
   "$REPO_ROOT/apps/cms/.next/cache"
   "$REPO_ROOT/apps/overview/.next/cache"

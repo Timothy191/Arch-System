@@ -23,7 +23,7 @@ const REPORT_PATH = path.join(REPORT_DIR, "explain-query-plans-report.md");
  */
 function listMigrations() {
   if (!fs.existsSync(MIGRATIONS_DIR)) {
-    console.error("Migration directory not found: " + MIGRATIONS_DIR);
+    console.error(`Migration directory not found: ${MIGRATIONS_DIR}`);
     process.exit(2);
   }
   return fs
@@ -51,7 +51,9 @@ function auditPartitionedTables() {
     const sql = stripComments(fs.readFileSync(fullPath, "utf-8"));
 
     // Find PARTITION BY RANGE (column_name)
-    const partitionMatches = sql.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi);
+    const partitionMatches = sql.matchAll(
+      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi
+    );
 
     for (const match of partitionMatches) {
       const tableName = match[1];
@@ -73,7 +75,9 @@ function auditPartitionedTables() {
     }
 
     // Find Composite Foreign Keys referencing partitioned tables
-    const fkMatches = sql.matchAll(/CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi);
+    const fkMatches = sql.matchAll(
+      /CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi
+    );
 
     for (const match of fkMatches) {
       const constraintName = match[1];
@@ -104,11 +108,11 @@ function generateReport() {
   markdown += `| Table | Partition Key | Primary Key | PK Partition Aligned | Migration |\n`;
   markdown += `| --- | --- | --- | --- | --- |\n`;
 
-  let totalPartitioned = partitionedTables.length;
-  let alignedPKs = 0;
+  const _totalPartitioned = partitionedTables.length;
+  let _alignedPKs = 0;
 
   for (const t of partitionedTables) {
-    if (t.hasPartitionKeyInPK) alignedPKs++;
+    if (t.hasPartitionKeyInPK) _alignedPKs++;
     markdown += `| \`${t.tableName}\` | \`${t.partitionKey}\` | \`(${t.primaryKeyCols.join(", ")})\` | ${t.hasPartitionKeyInPK ? "✅ Yes" : "❌ No"} | \`${t.file}\` |\n`;
   }
 
@@ -131,7 +135,9 @@ function generateReport() {
 
   fs.writeFileSync(REPORT_PATH, markdown, "utf-8");
 
-  console.log(`OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`);
+  console.log(
+    `OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`
+  );
   console.log(`Report generated at: ${path.relative(ROOT, REPORT_PATH)}`);
   return 0;
 }

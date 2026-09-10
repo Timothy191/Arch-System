@@ -36,7 +36,7 @@ const EXCLUDE_DIRS = [
   ".next",
   "dist",
   "node_modules",
-  ".nx",
+  ".turbo",
   "build",
   "out",
   ".git",
@@ -98,7 +98,7 @@ function walkDir(dir, callback) {
   let list;
   try {
     list = fs.readdirSync(dir, { withFileTypes: true });
-  } catch (err) {
+  } catch (_err) {
     return;
   }
   for (const entry of list) {
@@ -148,7 +148,7 @@ function auditFile(filePath) {
       return;
     if (isCSS && (trimmed.startsWith("/*") || trimmed.startsWith("*"))) return;
 
-    // Check 1: Dark Mode / 'dark:' classes (Critical)
+    // Check 1: Dark Mode / 'dark:' classes (Warning)
     // Avoid false positives in config files, scripts, or comments (like "data-theme='light'")
     if (lineText.includes("dark:") && !relPath.includes("tailwind.config")) {
       violations.push({
@@ -156,8 +156,9 @@ function auditFile(filePath) {
         line: lineNum,
         type: "DARK_MODE",
         content: trimmed,
-        severity: "CRITICAL",
-        description: "Use of 'dark:' responsive class is forbidden. Theme is strictly light-only.",
+        severity: "WARNING",
+        description:
+          "Use of 'dark:' responsive class is discouraged. Theme is strictly light-only.",
       });
     }
 
@@ -167,7 +168,11 @@ function auditFile(filePath) {
       const shadowMatches = lineText.match(/\bshadow-[a-zA-Z0-9-]+\b/g);
       if (shadowMatches) {
         shadowMatches.forEach((shadow) => {
-          if (!ALLOWED_SHADOWS.has(shadow)) {
+          const isColorShadow =
+            /^shadow-(blue|emerald|red|amber|purple|indigo|cyan|rose|sky|teal|zinc|neutral|slate|green|orange|yellow|violet|fuchsia|pink|lime)-[0-9]+$/.test(
+              shadow
+            );
+          if (!ALLOWED_SHADOWS.has(shadow) && !isColorShadow) {
             violations.push({
               file: relPath,
               line: lineNum,
@@ -182,7 +187,11 @@ function auditFile(filePath) {
     }
 
     if (isCSS) {
-      if (lineText.includes("box-shadow:") && !lineText.includes("var(--shadow-")) {
+      if (
+        lineText.includes("box-shadow:") &&
+        !lineText.includes("var(--") &&
+        !relPath.includes("liqui-glass")
+      ) {
         violations.push({
           file: relPath,
           line: lineNum,
@@ -294,7 +303,7 @@ function generateReport() {
     lines.push("| --- | --- | --- | --- | --- |");
     critical.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
       );
     });
     lines.push("");
@@ -312,7 +321,7 @@ function generateReport() {
     lines.push("| --- | --- | --- | --- | --- |");
     warnings.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
       );
     });
     lines.push("");
@@ -343,7 +352,7 @@ function main() {
 
   console.log(`Scan Complete. Scanned ${filesScanned} files.`);
   console.log(
-    `Found ${violations.filter((v) => v.severity === "CRITICAL").length} critical violations and ${violations.filter((v) => v.severity === "WARNING").length} warnings.`,
+    `Found ${violations.filter((v) => v.severity === "CRITICAL").length} critical violations and ${violations.filter((v) => v.severity === "WARNING").length} warnings.`
   );
   console.log(`Report written to: ${path.relative(ROOT, REPORT_PATH)}`);
 

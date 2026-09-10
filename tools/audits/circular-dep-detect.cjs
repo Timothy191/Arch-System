@@ -5,14 +5,13 @@
  * Usage: node tools/circular-dep-detect.cjs
  */
 //
-// Detect circular dependencies in the Nx project graph.
+// Detect circular dependencies in the workspace dependency graph.
 //
-// Walks apps/*/project.json and packages/*/project.json, follows
+// Walks apps/*/package.json and packages/*/package.json, follows
 // workspace:* dependencies, and prints any cycle found. Exits non-zero
 // on cycles (CI gate).
 //
 // Usage: node tools/circular-dep-detect.cjs
-//        pnpm nx run graph:no-cycles (after wiring in tools/nx-plugins/)
 //
 
 const fs = require("node:fs");
@@ -112,12 +111,12 @@ const graph = buildGraph();
 const cycles = findCycles(graph);
 
 if (cycles.length === 0) {
-  console.log("OK No circular dependencies found across " + graph.size + " projects.");
+  console.log(`OK No circular dependencies found across ${graph.size} projects.`);
   process.exit(0);
 }
 
-console.error("FAIL " + cycles.length + " circular dependency cycle(s) detected:\n");
+console.error(`FAIL ${cycles.length} circular dependency cycle(s) detected:\n`);
 for (const cycle of cycles) {
-  console.error("  " + cycle.join(" -> "));
+  console.error(`  ${cycle.join(" -> ")}`);
 }
 process.exit(1);
