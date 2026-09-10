@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 import { BorderTrail } from "./border-trail";
 
 const meta: Meta<typeof BorderTrail> = {

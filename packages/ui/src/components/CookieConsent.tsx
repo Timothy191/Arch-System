@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function CookieConsent() {
   // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the

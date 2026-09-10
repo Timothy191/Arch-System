@@ -11,7 +11,6 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import React from "react";
 import { Button } from "./button";
 import {
   DropdownMenu,

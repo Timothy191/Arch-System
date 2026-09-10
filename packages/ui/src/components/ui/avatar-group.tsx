@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "../../lib/utils";
-import { Avatar, type AvatarProps } from "./avatar";
+import { Avatar } from "./avatar";
 
 export interface AvatarMember {
   username?: string;
@@ -76,7 +76,7 @@ export function AvatarGroup({
               letter={member.letter}
               username={member.username}
               title={member.title ?? member.username}
-              className="ring-2 ring-white dark:ring-neutral-950"
+              className="ring-2 ring-white"
             />
           </div>
         );
@@ -93,9 +93,9 @@ export function AvatarGroup({
           }}
           className={cn(
             "relative rounded-full shrink-0 select-none flex items-center justify-center font-medium",
-            "ring-2 ring-white dark:ring-neutral-950 border border-black/[0.08] dark:border-white/[0.12]",
-            "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300",
-            size <= 24 ? "text-[10px]" : "text-xs"
+            "ring-2 ring-white border border-black/[0.08]",
+            "bg-neutral-100 text-neutral-600",
+            size <= 24 ? "text-[10px]" : "text-xs",
           )}
           title={`+${overflowCount} more`}
           aria-label={`+${overflowCount} more members`}

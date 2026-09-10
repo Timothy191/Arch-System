@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Background, ReactFlow } from "@xyflow/react";
 import { TriggerNode } from "./TriggerNode";
 import "@xyflow/react/dist/style.css";
-import React from "react";
 
 const meta: Meta<typeof TriggerNode> = {
   title: "Industrial/Nodes/TriggerNode",

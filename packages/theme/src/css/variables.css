@@ -252,9 +252,11 @@
   --glass-surface-strong: rgba(255, 255, 255, 0.35);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-border-top: rgba(255, 255, 255, 0.5);
-  --glass-border-gradient: linear-gradient(to bottom,
-      rgba(255, 255, 255, 0.8),
-      rgba(255, 255, 255, 0.3));
+  --glass-border-gradient: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.3)
+  );
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
 
@@ -289,9 +291,11 @@
      (hero panels, drawer headers, command bar backdrop).
      These tokens are intentionally more translucent and vivid
      than the standard --glass-* set to create visual hierarchy. */
-  --glass-premium-bg: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.45) 0%,
-      rgba(255, 255, 255, 0.15) 100%);
+  --glass-premium-bg: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
   --glass-premium-backdrop: blur(16px) saturate(160%);
   --glass-premium-border: rgba(255, 255, 255, 0.6);
   --glass-premium-radius: 20px;
@@ -431,14 +435,18 @@
   /* Uiverse.io by Spacious74 Button Foundation */
   --bg-button-uiverse: radial-gradient(circle 80px at 80% -10%, #ffffff, #181b1b);
   --bg-button-uiverse-inner: radial-gradient(circle 80px at 80% -50%, #777777, #0f1111);
-  --bg-button-uiverse-blob: radial-gradient(circle 60px at 0% 100%,
-      #3fe9ff,
-      rgba(0, 0, 255, 0.5),
-      transparent);
-  --bg-button-uiverse-inner-before: radial-gradient(circle 60px at 0% 100%,
-      rgba(0, 225, 255, 0.1),
-      rgba(0, 0, 255, 0.06),
-      transparent);
+  --bg-button-uiverse-blob: radial-gradient(
+    circle 60px at 0% 100%,
+    #3fe9ff,
+    rgba(0, 0, 255, 0.5),
+    transparent
+  );
+  --bg-button-uiverse-inner-before: radial-gradient(
+    circle 60px at 0% 100%,
+    rgba(0, 225, 255, 0.1),
+    rgba(0, 0, 255, 0.06),
+    transparent
+  );
   --shadow-button-uiverse-after: 0 0 20px rgba(255, 255, 255, 0.22);
   --shadow-button-uiverse-blob: -10px 10px 30px rgba(0, 81, 255, 0.176);
 
@@ -518,7 +526,7 @@
   /* 16px mobile gutter */
 }
 
-@media (width >=1024px) {
+@media (width >= 1024px) {
   .layout-grid {
     gap: 1.5rem;
     /* 24px desktop gutter */

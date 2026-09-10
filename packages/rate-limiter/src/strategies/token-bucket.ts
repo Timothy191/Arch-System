@@ -61,7 +61,7 @@ export class TokenBucketStrategy implements IStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: IStore
+    store: IStore,
   ): Promise<RateLimitResult> {
     const now = Date.now();
 
@@ -71,7 +71,7 @@ export class TokenBucketStrategy implements IStrategy {
         const resultString = (await store.eval(
           LUA_TOKEN_BUCKET,
           [key],
-          [limit.toString(), windowMs.toString(), now.toString(), "1"]
+          [limit.toString(), windowMs.toString(), now.toString(), "1"],
         )) as string;
 
         const res = JSON.parse(resultString);
@@ -150,5 +150,5 @@ export class TokenBucketStrategy implements IStrategy {
 
 function tonumberOr(val: any, fallback: number): number {
   const parsed = Number(val);
-  return isNaN(parsed) ? fallback : parsed;
+  return Number.isNaN(parsed) ? fallback : parsed;
 }

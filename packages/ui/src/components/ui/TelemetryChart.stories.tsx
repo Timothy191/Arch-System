@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TelemetryChart } from "./telemetry-chart";
 
 const meta: Meta<typeof TelemetryChart> = {
@@ -40,7 +40,7 @@ export const LiveDemo: Story = {
         setData((prev) => {
           const nextValue = Math.max(
             0,
-            Math.min(100, (prev[prev.length - 1]?.value || 50) + (Math.random() * 20 - 10))
+            Math.min(100, (prev[prev.length - 1]?.value || 50) + (Math.random() * 20 - 10)),
           );
           return [...prev.slice(1), { timestamp: Date.now(), value: nextValue }];
         });

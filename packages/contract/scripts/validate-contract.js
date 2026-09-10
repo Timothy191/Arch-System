@@ -15,8 +15,8 @@
  *   - Generate types: pnpm --filter @repo/contract openapi:generate
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const SPEC_FILE = path.join(__dirname, "../openapi.generated.json");
 const GENERATED_TYPES_FILE = path.join(__dirname, "..", "src", "generated", "openapi.types.ts");

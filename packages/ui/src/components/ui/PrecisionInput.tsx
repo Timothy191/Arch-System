@@ -15,7 +15,7 @@ export interface PrecisionInputProps
 export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputProps>(
   function PrecisionInput(
     { label, suffix, className, value, onChange, min, max, step = 1, ...props },
-    ref
+    ref,
   ) {
     const internalRef = React.useRef<HTMLInputElement>(null);
 
@@ -40,7 +40,7 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
         return;
       }
       const val = Number(valStr);
-      if (!isNaN(val)) {
+      if (!Number.isNaN(val)) {
         onChange?.(e, val);
       }
     };
@@ -62,7 +62,7 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
           <div
             className={cn(
               "flex items-center rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] hover:border-[#424242] transition-all overflow-hidden focus-within:ring-1 focus-within:ring-[#3ecf8e] focus-within:border-[#3ecf8e]/50",
-              className
+              className,
             )}
           >
             <input
@@ -108,5 +108,5 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
         </div>
       </div>
     );
-  }
+  },
 );

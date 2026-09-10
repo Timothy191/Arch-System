@@ -33,7 +33,7 @@ function buildFormatter(
   format: ClockFormat,
   locale: string,
   hour12: boolean,
-  showSeconds: boolean
+  showSeconds: boolean,
 ): Intl.DateTimeFormat {
   switch (format) {
     case "date":
@@ -51,7 +51,6 @@ function buildFormatter(
         minute: "2-digit",
         hour12,
       });
-    case "time":
     default:
       return new Intl.DateTimeFormat(locale, {
         hour: "numeric",
@@ -97,16 +96,16 @@ export function Clock({
     };
     scheduleNext();
     return () => clearTimeout(timer);
-  }, [showSeconds, format, locale, hour12]);
+  }, [showSeconds]);
 
   const formatter = React.useMemo(
     () => buildFormatter(format, locale, hour12, showSeconds),
-    [format, locale, hour12, showSeconds]
+    [format, locale, hour12, showSeconds],
   );
 
   const display = time ? formatter.format(time) : "";
   const ariaText = time
-    ? `${ariaLabel ? ariaLabel + " " : ""}${new Intl.DateTimeFormat(locale, {
+    ? `${ariaLabel ? `${ariaLabel} ` : ""}${new Intl.DateTimeFormat(locale, {
         weekday: "long",
         year: "numeric",
         month: "long",
@@ -126,7 +125,7 @@ export function Clock({
       className={cn(
         // AGENT-TRACE: reads theme tokens only — no hardcoded colors, preserves light-mode invariant
         "tabular-nums select-none text-[var(--text-secondary)]",
-        className
+        className,
       )}
       suppressHydrationWarning
     >

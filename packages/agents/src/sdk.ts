@@ -4,29 +4,24 @@
  * Provides unified entrypoints for pillar prompt assembly, output quality auditing, and reflection engine execution.
  */
 
-import {
-  SubagentCoordinator,
-  type CoordinatorConfig,
-  type Subtask,
-  type TaskRunResult,
-} from "./coordinator.js";
+import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from "./coordinator.js";
 import { AgentFleetRunner, type AgentSwarmReport } from "./fleet-runner.js";
-import { AgentPillarEnvelope, type AgentPillarConfig } from "./prompt-envelope.js";
-import { QualityGate, type QualityAuditResult } from "./quality-gate.js";
+import { type AgentPillarConfig, AgentPillarEnvelope } from "./prompt-envelope.js";
+import { type QualityAuditResult, QualityGate } from "./quality-gate.js";
 import {
   ReflectionEngine,
-  type VerifiedTaskResult,
   type ReflectionEngineOptions,
+  type VerifiedTaskResult,
 } from "./reflection-engine.js";
 
-export { AgentFleetRunner, AgentPillarEnvelope, QualityGate, ReflectionEngine };
 export type {
-  AgentSwarmReport,
   AgentPillarConfig,
+  AgentSwarmReport,
   QualityAuditResult,
-  VerifiedTaskResult,
   ReflectionEngineOptions,
+  VerifiedTaskResult,
 };
+export { AgentFleetRunner, AgentPillarEnvelope, QualityGate, ReflectionEngine };
 
 export interface AgentSDKOptions {
   coordinatorConfig?: CoordinatorConfig;
@@ -34,7 +29,7 @@ export interface AgentSDKOptions {
 }
 
 export class AgentQualitySDK {
-  private coordinator: SubagentCoordinator;
+  public coordinator: SubagentCoordinator;
   private reflectionEngine: ReflectionEngine;
 
   constructor(options: AgentSDKOptions = {}) {

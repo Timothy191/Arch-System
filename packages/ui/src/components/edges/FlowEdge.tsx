@@ -1,7 +1,7 @@
 "use client";
 
 import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from "@xyflow/react";
-import React, { memo } from "react";
+import { memo } from "react";
 
 // =============================================================================
 // Flow Edge Component

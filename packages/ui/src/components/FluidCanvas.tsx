@@ -163,7 +163,7 @@ export function FluidCanvas({
               y * cellH + cellH * 0.5,
               cellW * (0.8 + d * 0.8),
               0,
-              Math.PI * 2
+              Math.PI * 2,
             );
             ctx.fill();
           }
@@ -189,10 +189,6 @@ export function FluidCanvas({
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={cn("pointer-events-none w-full h-full block", className)}
-      aria-hidden="true"
-    />
+    <canvas ref={canvasRef} className={cn("pointer-events-none w-full h-full block", className)} />
   );
 }

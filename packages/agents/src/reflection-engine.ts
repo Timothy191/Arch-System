@@ -4,9 +4,9 @@
  * Wraps specialist subagents in a QualityGate verification loop to guarantee high quality output.
  */
 
-import { SubagentCoordinator, type CoordinatorConfig, type Subtask } from "./coordinator.js";
-import { AgentPillarEnvelope, type AgentPillarConfig } from "./prompt-envelope.js";
-import { QualityGate, type QualityAuditResult } from "./quality-gate.js";
+import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from "./coordinator.js";
+import { type AgentPillarConfig, AgentPillarEnvelope } from "./prompt-envelope.js";
+import { type QualityAuditResult, QualityGate } from "./quality-gate.js";
 
 export interface VerifiedTaskResult {
   subtaskId: string;

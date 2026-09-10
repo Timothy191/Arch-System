@@ -28,13 +28,13 @@ const SIZE_CLASSES: Record<number, { container: string; font: string }> = {
 export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   (
     { src, letter, username, title, size = 32, placeholder = false, className, style, ...props },
-    ref
+    ref,
   ) => {
     const [imageFailed, setImageFailed] = React.useState(false);
 
     React.useEffect(() => {
       setImageFailed(false);
-    }, [src]);
+    }, []);
 
     // Format initials: uppercase, max 2 chars, alphanumeric only
     const computedLetter = React.useMemo(() => {
@@ -86,9 +86,9 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           aria-label="Loading avatar"
           style={{ ...customSizeStyle, ...style }}
           className={cn(
-            "relative rounded-full shrink-0 bg-black/[0.08] dark:bg-white/[0.1] animate-pulse",
+            "relative rounded-full shrink-0 bg-black/[0.08] animate-pulse",
             sizeConfig.container,
-            className
+            className,
           )}
           {...props}
         />
@@ -107,10 +107,10 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         style={{ ...customSizeStyle, ...style }}
         className={cn(
           "relative rounded-full shrink-0 select-none flex items-center justify-center overflow-hidden",
-          "border border-black/[0.08] dark:border-white/[0.12] shadow-sm",
-          "bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200",
+          "border border-black/[0.08] shadow-sm",
+          "bg-white text-neutral-800",
           sizeConfig.container,
-          className
+          className,
         )}
         {...props}
       >
@@ -126,14 +126,14 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           <span
             className={cn(
               "font-medium tracking-wide uppercase leading-none select-none",
-              sizeConfig.font
+              sizeConfig.font,
             )}
           >
             {computedLetter}
           </span>
         ) : (
           <svg
-            className="w-1/2 h-1/2 text-neutral-400 dark:text-neutral-500"
+            className="w-1/2 h-1/2 text-neutral-400"
             fill="currentColor"
             viewBox="0 0 24 24"
             aria-hidden="true"
@@ -143,7 +143,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Avatar.displayName = "Avatar";

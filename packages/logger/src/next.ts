@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { createChildLogger } from "./server";
 
@@ -33,8 +33,8 @@ export function withLogging<T>(
       log: ReturnType<typeof createRouteLogger>["logger"];
     },
     // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-    context: { params: Promise<unknown> }
-  ) => Promise<T> | T
+    context: { params: Promise<unknown> },
+  ) => Promise<T> | T,
 ) {
   return async (request: NextRequest, routeContext: { params: Promise<unknown> }) => {
     const { logger } = createRouteLogger(request);
@@ -47,7 +47,7 @@ export function withLogging<T>(
       const duration = Date.now() - start;
       logger.info(
         { duration, status: result instanceof Response ? result.status : 200 },
-        "request completed"
+        "request completed",
       );
       return result;
     } catch (error) {

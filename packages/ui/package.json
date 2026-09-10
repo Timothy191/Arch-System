@@ -38,7 +38,7 @@
     "postcss": "^8.4.47",
     "postcss-load-config": "^6",
     "react": "catalog:react19",
-    "stylelint": "^17.11.1",
+    "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"

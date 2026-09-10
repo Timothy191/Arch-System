@@ -2,7 +2,7 @@
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { Puzzle, Settings } from "lucide-react";
-import React, { memo } from "react";
+import { memo } from "react";
 
 // =============================================================================
 // Plugin Node Data Type

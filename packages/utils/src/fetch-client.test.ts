@@ -1,13 +1,4 @@
-import {
-  APIError,
-  AuthError,
-  FetchTimeoutError,
-  ForbiddenError,
-  NetworkError,
-  NotFoundError,
-  RateLimitError,
-  ValidationError,
-} from "@repo/errors";
+import { AuthError, NetworkError, NotFoundError } from "@repo/errors";
 import { createFetchClient, FetchClient } from "./fetch-client";
 
 describe("FetchClient", () => {
@@ -45,7 +36,7 @@ describe("FetchClient", () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.archsystem.local/v1/telemetry",
-      expect.objectContaining({ method: "GET" })
+      expect.objectContaining({ method: "GET" }),
     );
   });
 
@@ -137,7 +128,7 @@ describe("FetchClient", () => {
       "/health",
       expect.objectContaining({
         headers: expect.any(Headers),
-      })
+      }),
     );
   });
 });

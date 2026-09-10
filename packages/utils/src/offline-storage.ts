@@ -38,7 +38,7 @@ export class IDBOfflineStorage {
     if (!this.isSupported()) return null;
     if (this.db) return this.db;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       try {
         const request = window.indexedDB.open(this.dbName, this.dbVersion);
 
@@ -72,7 +72,7 @@ export class IDBOfflineStorage {
   }
 
   public async enqueue(
-    request: Omit<QueuedFetchRequest, "id" | "status" | "retryCount" | "createdAt">
+    request: Omit<QueuedFetchRequest, "id" | "status" | "retryCount" | "createdAt">,
   ): Promise<QueuedFetchRequest> {
     const fullItem: QueuedFetchRequest = {
       ...request,
@@ -87,7 +87,7 @@ export class IDBOfflineStorage {
       return fullItem;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const tx = db.transaction(this.queueStore, "readwrite");
       const store = tx.objectStore(this.queueStore);
       const req = store.add(fullItem);
@@ -146,7 +146,7 @@ export class IDBOfflineStorage {
   public async updateStatus(
     id: number,
     status: QueuedFetchRequest["status"],
-    errorMessage?: string
+    errorMessage?: string,
   ): Promise<void> {
     const db = await this.getDB();
     if (!db) {
@@ -184,7 +184,7 @@ export class IDBOfflineStorage {
   public async cacheResponse<T>(
     cacheKey: string,
     data: T,
-    ttlMs: number = 86400000
+    ttlMs: number = 86400000,
   ): Promise<void> {
     const item: CachedFetchResponse<T> = {
       cacheKey,

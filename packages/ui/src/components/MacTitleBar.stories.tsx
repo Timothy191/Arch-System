@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { MoreHorizontal, Search } from "lucide-react";
-import React from "react";
 import { MacTitleBar } from "./MacTitleBar";
 
 const meta: Meta<typeof MacTitleBar> = {

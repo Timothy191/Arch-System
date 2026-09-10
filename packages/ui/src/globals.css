@@ -255,8 +255,8 @@
   }
   .focus-ring-arch-blue {
     outline: none;
-    border-color: var(--arch-brand-blue) !important;
-    box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2) !important;
+    border-color: var(--arch-brand-blue);
+    box-shadow: 0 0 0 4px rgba(28, 28, 30, 0.2);
   }
 
   /* ── Aria avatar companion animations ── */
@@ -326,7 +326,7 @@
 
   .hide-cursor,
   .hide-cursor :where(*) {
-    cursor: none !important;
+    cursor: none;
   }
 }
 
@@ -445,7 +445,7 @@
   }
 
   :is(body.focus-mode) [class*="motion-reduce:hidden"] {
-    display: none !important;
+    display: none;
   }
 
   :is(body.focus-mode) .shadow-window,
@@ -474,20 +474,20 @@
 
   /* RevoGrid visible table grid lines overrides */
   revo-grid .rgCell {
-    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   revo-grid .rgHeaderCell {
-    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 }
 
 @media print {
   body {
-    background: white !important;
-    color: black !important;
+    background: white;
+    color: black;
   }
 
   /* Hide navigation, sidebars, and non-printable elements */
@@ -496,15 +496,15 @@
   footer,
   button,
   .no-print {
-    display: none !important;
+    display: none;
   }
 
   /* Remove backgrounds and shadows for cleaner print */
   *,
   ::before,
   ::after {
-    box-shadow: none !important;
-    background-color: transparent !important;
+    box-shadow: none;
+    background-color: transparent;
   }
 
   /* Make grid/flex layouts break properly */
@@ -515,7 +515,7 @@
 
   /* Specifically for the shift compilation layout */
   main {
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 0;
+    margin: 0;
   }
 }

@@ -14,9 +14,9 @@
  *   SPEC_FILE: Path to a local OpenAPI spec JSON file (optional, skips API fetch)
  */
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+const { execSync } = require("node:child_process");
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 const SPEC_FILE = process.env.SPEC_FILE;

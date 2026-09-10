@@ -13,7 +13,7 @@ import {
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { Loader2, Play, Save } from "lucide-react";
 import { FlowEdge } from "./edges/FlowEdge";
@@ -112,7 +112,7 @@ export function WorkflowBuilder({
       };
       setEdges((eds) => addEdge(edge, eds));
     },
-    [setEdges]
+    [setEdges],
   );
 
   // Add new plugin node

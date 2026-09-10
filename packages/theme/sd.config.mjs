@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
-import StyleDictionary from "style-dictionary";
-import { readFileSync, writeFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import prettier from "prettier";
+import StyleDictionary from "style-dictionary";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

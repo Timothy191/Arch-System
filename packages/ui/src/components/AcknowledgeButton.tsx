@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import * as React from "react";
 import { useState } from "react";
 import { ActionConfirmDialog } from "./ui/action-confirm-dialog";
 
@@ -36,7 +35,7 @@ export function AcknowledgeButton({
         }}
         className={cn(
           "px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]",
-          className
+          className,
         )}
       >
         {label}

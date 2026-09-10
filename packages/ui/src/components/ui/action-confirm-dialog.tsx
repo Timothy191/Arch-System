@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { AnimatedDialog } from "./animated-dialog";
 import { Button } from "./button";
 

@@ -8,7 +8,7 @@ import {
   RateLimitError,
   ValidationError,
 } from "@repo/errors";
-import { offlineStorage, type QueuedFetchRequest } from "./offline-storage";
+import { offlineStorage } from "./offline-storage";
 
 export interface FetchClientOptions {
   /**
@@ -140,7 +140,7 @@ export class FetchClient {
     error: unknown,
     response: Response | null,
     method: string,
-    retryOnPostOverride?: boolean
+    retryOnPostOverride?: boolean,
   ): boolean {
     const isIdempotent = IDEMPOTENT_METHODS.has(method.toUpperCase());
     const allowRetry = isIdempotent || (retryOnPostOverride ?? this.config.retryOnPost);
@@ -250,7 +250,7 @@ export class FetchClient {
         } else if (err instanceof TypeError && err.message.includes("fetch")) {
           caughtError = new NetworkError(
             `Network error when requesting ${fullUrl}: ${err.message}`,
-            { url: fullUrl, method, cause: err }
+            { url: fullUrl, method, cause: err },
           );
         } else {
           caughtError = err;
@@ -299,7 +299,7 @@ export class FetchClient {
 
           throw new NetworkError(
             `Connection lost. Request enqueued offline for replay (${idempotencyKey})`,
-            { url: fullUrl, method, enqueued: true, idempotencyKey }
+            { url: fullUrl, method, enqueued: true, idempotencyKey },
           );
         }
 
@@ -319,7 +319,7 @@ export class FetchClient {
 
     try {
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         body = await response.json();
         if (body && typeof body === "object" && body.message) {
           message = body.message;
@@ -389,7 +389,7 @@ export class FetchClient {
   public async post<T = unknown>(
     url: string,
     body?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     const isJsonBody = body !== undefined && !(body instanceof FormData) && !(body instanceof Blob);
     const headers = new Headers(options?.headers);
@@ -423,7 +423,7 @@ export class FetchClient {
   public async patch<T = unknown>(
     url: string,
     body?: unknown,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<T> {
     const isJsonBody = body !== undefined && !(body instanceof FormData) && !(body instanceof Blob);
     const headers = new Headers(options?.headers);

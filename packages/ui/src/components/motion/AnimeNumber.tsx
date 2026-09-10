@@ -41,7 +41,7 @@ export function AnimeNumber({
     });
 
     return () => controls.stop();
-  }, [value, duration, round, displayPrefix, displaySuffix]);
+  }, [value, duration, round, displayPrefix, displaySuffix, count]);
 
   return (
     <span ref={nodeRef} className={cn("tabular-nums", className)}>

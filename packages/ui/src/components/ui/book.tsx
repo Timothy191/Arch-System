@@ -44,7 +44,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
       style,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Calculate style variables for responsive width
     const customStyles: React.CSSProperties & Record<string, string | number> = { ...style };
@@ -118,7 +118,6 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
               {content}
             </span>
           );
-        case "h3":
         default:
           return (
             <h3 className={headingClasses} style={headingStyle}>
@@ -138,7 +137,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
           "shadow-[0_4px_16px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.12),-2px_0_4px_rgba(0,0,0,0.08),2px_0_6px_rgba(0,0,0,0.06)]",
           "border-r-2 border-r-white/20 border-y border-y-black/10",
           widthClasses,
-          className
+          className,
         )}
         style={{
           backgroundColor: color,
@@ -237,7 +236,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Book.displayName = "Book";

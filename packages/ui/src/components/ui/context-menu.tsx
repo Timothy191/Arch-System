@@ -117,7 +117,6 @@ export function ContextMenuTrigger({ children, className, ...props }: ContextMen
       onKeyDown={handleKeyDown}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      tabIndex={0}
       className={cn("outline-none select-none", className)}
       {...props}
     >
@@ -168,7 +167,7 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
       }}
       className={cn(
         "z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/95 text-neutral-900 dark:text-neutral-100 animate-in fade-in-0 zoom-in-95 duration-100",
-        className
+        className,
       )}
       {...props}
     >
@@ -203,7 +202,7 @@ export function ContextMenuItem({
 }: ContextMenuItemProps) {
   const { closeMenu } = useContextMenu();
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (_e: React.MouseEvent) => {
     if (disabled) return;
     onClick?.(value);
     closeMenu();
@@ -225,7 +224,7 @@ export function ContextMenuItem({
       ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
       : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100",
     disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className
+    className,
   );
 
   if (href && !disabled) {

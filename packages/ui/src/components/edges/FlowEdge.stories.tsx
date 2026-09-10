@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Background, Position, ReactFlow } from "@xyflow/react";
+import { Background, ReactFlow } from "@xyflow/react";
 import { PluginNode } from "../nodes/PluginNode";
 import { TriggerNode } from "../nodes/TriggerNode";
 import { FlowEdge } from "./FlowEdge";
 import "@xyflow/react/dist/style.css";
-import React from "react";
 
 const meta: Meta<typeof FlowEdge> = {
   title: "Industrial/Edges/FlowEdge",

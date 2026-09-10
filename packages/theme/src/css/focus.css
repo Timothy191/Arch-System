@@ -8,8 +8,8 @@
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.8),
     0 0 0 4px var(--accent-electric-blue-subtle),
-    0 12px 24px rgba(0, 0, 0, 0.05) !important;
-  border-color: var(--accent-electric-blue-border) !important;
+    0 12px 24px rgba(0, 0, 0, 0.05);
+  border-color: var(--accent-electric-blue-border);
 }
 
 /* Apply premium focus glow globally to keyboard focusable elements for comprehensive compliance */
@@ -20,18 +20,18 @@ select:focus-visible,
 textarea:focus-visible,
 [role="button"]:focus-visible,
 [tabindex="0"]:focus-visible {
-  outline: none !important;
+  outline: none;
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.8),
     0 0 0 4px var(--accent-electric-blue-subtle),
-    0 12px 24px rgba(0, 0, 0, 0.05) !important;
-  border-color: var(--accent-electric-blue-border) !important;
+    0 12px 24px rgba(0, 0, 0, 0.05);
+  border-color: var(--accent-electric-blue-border);
 }
 
 /* Remove default focus for non-keyboard navigation */
 :focus:not(:focus-visible) {
-  outline: none !important;
-  box-shadow: var(--shadow-none, none) !important;
+  outline: none;
+  box-shadow: var(--shadow-none, none);
 }
 
 /* ── Screen Reader Contrast Reinforcement ── */
@@ -48,5 +48,5 @@ textarea:focus-visible,
 .interactive-element:focus-visible li {
   text-shadow:
     0 0 4px rgba(255, 255, 255, 0.9),
-    0 1px 1px rgba(255, 255, 255, 0.8) !important;
+    0 1px 1px rgba(255, 255, 255, 0.8);
 }

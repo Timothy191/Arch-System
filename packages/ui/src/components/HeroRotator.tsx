@@ -8,20 +8,9 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-  Power,
-  Wrench,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../lib/utils";
-import { TrustLogos } from "./TrustLogos";
 
 export interface Panel {
   id: string;
@@ -109,20 +98,20 @@ function InteractiveGlassCard({
       className={cn(
         "relative h-full w-full rounded-2xl overflow-hidden",
         "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
-        "transition-[shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group/card",
+        "transition-[shadow,transform] duration-500 ease-out group/card",
         isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-        isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+        isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
       {isActive && (
         <>
           <motion.div
-            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:opacity-100 z-50 mix-blend-overlay"
+            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-out group-hover/card:opacity-100 z-50 mix-blend-overlay"
             style={{ background }}
           />
           <motion.div
-            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:opacity-100 z-40"
+            className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 ease-out group-hover/card:opacity-100 z-40"
             style={{ background: glow }}
           />
         </>
@@ -338,7 +327,7 @@ export function HeroRotator({
       if (diff < -total / 2) diff += total;
       carouselIndex.set(current + diff);
     },
-    [carouselIndex, total]
+    [carouselIndex, total],
   );
 
   const handleImageError = useCallback((src: string) => {
@@ -367,7 +356,7 @@ export function HeroRotator({
         prevSlide();
       }
     },
-    [total, nextSlide, prevSlide]
+    [total, nextSlide, prevSlide],
   );
 
   return (
@@ -376,7 +365,6 @@ export function HeroRotator({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
       aria-roledescription="carousel"
       aria-label="Department Hero Highlights"
     >
@@ -449,7 +437,7 @@ export function HeroRotator({
                   "h-1.5 rounded-full transition-all duration-300",
                   idx === activeIndex
                     ? "w-6 bg-[var(--accent-blue)]"
-                    : "w-1.5 bg-black/20 hover:bg-black/40"
+                    : "w-1.5 bg-black/20 hover:bg-black/40",
                 )}
               />
             ))}

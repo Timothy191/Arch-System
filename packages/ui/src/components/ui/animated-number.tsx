@@ -2,7 +2,7 @@
 
 import { cn } from "@repo/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AnimatedNumberProps {
   value: number;
@@ -50,7 +50,7 @@ function SingleDigit({
 }) {
   const [height, setHeight] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isSymbol = isNaN(Number.parseInt(value));
+  const isSymbol = Number.isNaN(Number.parseInt(value, 10));
 
   useEffect(() => {
     if (containerRef.current) {
@@ -98,11 +98,11 @@ function DigitStrip({
   value: string;
   duration: number;
 }) {
-  const heightInNumber = Number.parseInt(eleHeight?.replace("px", "") || "48");
+  const heightInNumber = Number.parseInt(eleHeight?.replace("px", "") || "48", 10);
   const prev = useRef(value);
 
-  const currentVal = parseInt(value);
-  const prevVal = parseInt(prev.current);
+  const currentVal = parseInt(value, 10);
+  const prevVal = parseInt(prev.current, 10);
   const diff = prevVal - currentVal;
   const dir = currentVal > prevVal ? heightInNumber * diff * -1 : heightInNumber * diff;
 

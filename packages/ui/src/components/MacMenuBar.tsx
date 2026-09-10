@@ -15,12 +15,9 @@ import {
   // General
   ExternalLink,
   FileText,
-  GraduationCap,
-  HardHat,
   Info,
   MailOpen,
   Maximize2,
-  Orbit,
   // Departments
   Pickaxe,
   // Menu: View
@@ -32,9 +29,6 @@ import {
   StickyNote,
   TowerControl,
   TrendingUp,
-  User,
-  // Automation
-  Workflow,
   Wrench,
 } from "lucide-react";
 import Image from "next/image";
@@ -180,7 +174,7 @@ export function MacMenuBar({
     window.open(
       `https://www.google.com/search?q=${encodeURIComponent(q)}`,
       "_blank",
-      "noopener,noreferrer"
+      "noopener,noreferrer",
     );
     setSearchQuery("");
   }
@@ -197,7 +191,7 @@ export function MacMenuBar({
       className={cn(
         "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
         "liquid-glass-light border border-white/20 shadow-window rounded-full",
-        className
+        className,
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
@@ -220,7 +214,7 @@ export function MacMenuBar({
             sideOffset={5}
             className={cn(
               "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
-              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl"
+              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl",
             )}
           >
             {/* ── Left Column: Departments ── */}
@@ -240,7 +234,7 @@ export function MacMenuBar({
                       <div
                         className={cn(
                           "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
-                          dept.bgColor
+                          dept.bgColor,
                         )}
                       >
                         <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
@@ -317,7 +311,7 @@ export function MacMenuBar({
                       window.dispatchEvent(
                         new CustomEvent("open-split-view", {
                           detail: { service: "whatsapp", action: "toggle" },
-                        })
+                        }),
                       );
                     }}
                     className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
@@ -393,7 +387,7 @@ export function MacMenuBar({
             window.dispatchEvent(
               new CustomEvent("open-split-view", {
                 detail: { service: "whatsapp", action: "toggle" },
-              })
+              }),
             );
           }}
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
@@ -432,7 +426,7 @@ export function MacMenuBar({
                           <div
                             className={cn(
                               "w-6 h-6 rounded-md flex items-center justify-center mr-2.5 shrink-0",
-                              dept.bgColor
+                              dept.bgColor,
                             )}
                           >
                             <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
@@ -482,7 +476,7 @@ export function MacMenuBar({
                       window.dispatchEvent(
                         new CustomEvent("open-split-view", {
                           detail: { service: "github" },
-                        })
+                        }),
                       );
                     }}
                   >

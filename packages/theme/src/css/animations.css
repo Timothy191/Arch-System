@@ -539,8 +539,8 @@
   .animate-gradient-shift,
   .animate-marquee,
   .animate-marquee-vertical {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
+    animation: none;
+    transition: none;
+    transform: none;
   }
 }

@@ -6,7 +6,7 @@
 - **Changes**:
   - `packages/theme/src/tailwind/preset.ts`: Added `fluid-2xs` through `fluid-6xl` font size tokens utilizing dynamic viewport calculation and `clamp()` boundaries for smooth mobile to ultra-wide scaling.
 - **Verification**:
-  - `pnpm nx run @repo/theme:lint` / type-check.
+  - `pnpm turbo run @repo/theme:lint` / type-check.
 - **Next Steps**: Components across apps/portal and packages/ui can now use `text-fluid-*` classes for seamless responsive scaling without abrupt media-query jumps.
 
 ## 2026-08-24 - Hub Page Performance: Grain Overlay & Focus Background
@@ -19,8 +19,8 @@
     - Reduced-motion block now includes `.route-bg-grain` (animation disabled for `prefers-reduced-motion`).
     - `.route-bg-focus` background-image updated to `/background/macos-27-golden-2560x1764.png` (downscaled poster, 7MB → ~1.5MB).
 - **Verification**:
-  - `pnpm nx run @repo/theme:lint:css --skip-nx-cache` ✅
-  - `pnpm nx run @repo/theme:lint:tokens --skip-nx-cache` ✅ (278 tokens, 161 references)
+  - `pnpm turbo run @repo/theme:lint:css --skip-turbo-cache` ✅
+  - `pnpm turbo run @repo/theme:lint:tokens --skip-turbo-cache` ✅ (278 tokens, 161 references)
   - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
 - **What the Next Agent Should Know**: The grain layer is a full-viewport element — any non-compositor animation on it repaints the whole screen. Keep `grain-dance` transform-only.
 

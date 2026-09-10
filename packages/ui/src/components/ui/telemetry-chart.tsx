@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
   Area,

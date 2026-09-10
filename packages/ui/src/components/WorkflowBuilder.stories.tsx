@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 import { WorkflowBuilder } from "./WorkflowBuilder";
 
 const meta: Meta<typeof WorkflowBuilder> = {

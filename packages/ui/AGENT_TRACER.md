@@ -36,25 +36,25 @@
   - `packages/ui/package.json`: Exported `./FluidCanvas`.
   - `apps/portal/components/RouteBackground.tsx`: Integrated `<FluidCanvas />` overlay layer above the 4K video background.
 - **Verification**:
-  - `pnpm nx run @repo/ui:type-check` ✅ (0 errors)
-  - `pnpm nx run portal:type-check` ✅ (0 errors)
+  - `pnpm turbo run @repo/ui:type-check` ✅ (0 errors)
+  - `pnpm turbo run portal:type-check` ✅ (0 errors)
   - `pnpm --filter portal test` ✅ (95/95 suites passed)
 - **What the Next Agent Should Know**: Fluid dynamics interactions are decoupled from React state renders and run purely within a bounded rAF loop.
 
 ## 2026-08-26 - R3F Hero Rotator Production Hardening & Pure Component Modularization
 
-- **Purpose**: Complete production-hardening of the React Three Fiber migration and fluid typography implementation, eliminate UI duplication, add dynamic client-only SSR guarding, add multi-touch swipe support, and purge all Nx Cloud dependencies.
+- **Purpose**: Complete production-hardening of the React Three Fiber migration and fluid typography implementation, eliminate UI duplication, add dynamic client-only SSR guarding, add multi-touch swipe support, and purge all Turborepo Cloud dependencies.
 - **Changes**:
   - `packages/ui/src/components/HeroCardContent.tsx`: Extracted pure, shared card content component to eliminate markup duplication between DOM `HeroRotator` and 3D WebGL `ThreeHeroRotator`.
   - `packages/ui/src/components/ThreeHeroRotatorDynamic.tsx`: Created `next/dynamic({ ssr: false })` wrapper preventing ~600KB Three.js bundle from executing during Next.js SSR passes.
   - `packages/ui/src/components/ThreeHeroRotator.tsx`: Integrated `HeroCardContent`, added Pointer & Touch swipe gesture handlers (`onTouchStart`, `onTouchEnd`, `onPointerDown`, `onPointerUp`), keyboard navigation (ArrowLeft/Right/Space), and screen reader ARIA live region announcements.
   - `packages/ui/src/components/KPI.tsx`, `PageHeader.tsx`, `EmptyState.tsx`: Propagated `text-fluid-*` typography tokens for fluid responsive scaling.
   - `packages/ui/package.json`: Switched `three`, `@types/three`, `@react-three/fiber`, `@react-three/drei` to `catalog:` references; added exports for `./ThreeHeroRotatorDynamic` and `./HeroCardContent`.
-  - `nx.json`, `package.json`, `.github/workflows/ci.yml`: Completely purged Nx Cloud configuration (`nxCloudId`, `nxCloudAccessToken`, `nx-cloud` CI steps) and set `neverConnectToCloud: true`.
+  - `turbo.json`, `package.json`, `.github/workflows/ci.yml`: Completely purged Turborepo Cloud configuration (`nxCloudId`, `nxCloudAccessToken`, `turbo-cloud` CI steps) and set `neverConnectToCloud: true`.
 - **Verification**:
-  - `pnpm nx test features-hub-ui` ✅ (25/25 tests passed)
+  - `pnpm turbo test features-hub-ui` ✅ (25/25 tests passed)
   - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
-  - `pnpm nx lint ui` ✅
+  - `pnpm turbo lint ui` ✅
 - **What the Next Agent Should Know**: The active hub hero rotator is `@repo/ui/ThreeHeroRotatorDynamic` with SSR safety, zero code duplication, full gesture support, and 100% offline local workspace execution.
 
 ## 2026-08-26 - HeroRotator Horizontal Extension & Slimmed Vertical Profile
@@ -68,7 +68,7 @@
     - Compacted internal padding to `px-5 py-3.5 sm:px-7 sm:py-4` with streamlined vertical margins.
     - Updated panoramic preview image container to a sleek `h-24 sm:h-28` letterbox.
 - **Verification**:
-  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm turbo test features-hub-ui` ✅ (16/16 tests passed)
   - `pnpm --filter @repo/ui type-check` ✅
 - **What the Next Agent Should Know**: The card is now in a wide 60% format (min 720px) with a slim vertical height (390–490px).
 
@@ -84,7 +84,7 @@
     - Configured responsive container dimensions (`cardWidth: min(620px, 52%)`, `cardLeft: calc((100% - min(620px, 52%)) / 2)`, `minHeight: clamp(460px, 52vw, 620px)`, `perspective: 1600px`).
     - Adjusted preview image banner container height to `h-32 sm:h-40` for balanced card proportions.
 - **Verification**:
-  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm turbo test features-hub-ui` ✅ (16/16 tests passed)
   - `pnpm --filter @repo/ui type-check` ✅
 - **What the Next Agent Should Know**: The active card is backed with `bg-white/85 backdrop-blur-2xl`, cylinder radius is `920px` providing distinct card separation with 10° subtle tilt, and distant orbital slides are smoothly culled beyond an offset of 1.8.
 
@@ -100,7 +100,7 @@
     - Added inline `// AGENT-TRACE` comments.
 - **Verification**:
   - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
-  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm turbo test features-hub-ui` ✅ (16/16 tests passed)
 - **What the Next Agent Should Know**: The HeroRotator now renders in a true 3D cylinder ring where all department panels populate the circle in 3D space, rotating smoothly in a continuous orbit.
 
 ## 2026-08-26 - HeroRotator Middle Card Width Expansion to 70%
@@ -113,7 +113,7 @@
     - Active center card scale retained at `0.98`. Added inline `// AGENT-TRACE` comment.
 - **Verification**:
   - `pnpm --filter @repo/ui type-check` ✅ (0 errors)
-  - `pnpm nx test features-hub-ui` ✅ (16/16 tests passed)
+  - `pnpm turbo test features-hub-ui` ✅ (16/16 tests passed)
 - **What the Next Agent Should Know**: The HeroRotator active card is 70% track width centered at 15% left offset.
 
 ## 2026-08-25 - Workspace Dependency Link
@@ -139,8 +139,8 @@
   - `packages/ui/src/globals.css`:
     - `@keyframes aurora-shadow` now animates `opacity` + `transform` (compositor-only) instead of `box-shadow`. The box-shadow is static on the `::after` pseudo-element, painted once.
 - **Verification**:
-  - `pnpm nx run-many -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
-  - `pnpm nx run-many -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
+  - `pnpm turbo run -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-turbo-cache` ✅
+  - `pnpm turbo run -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-turbo-cache` ✅
   - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
 - **What the Next Agent Should Know**: The marquee off-screen pause uses an inline style so it always wins over `group-hover:[animation-play-state:paused]`. The aurora-shadow `::after` keeps a static box-shadow — never move it back into the keyframes (forces a full repaint every frame on the hub page).
 
@@ -324,10 +324,10 @@
 - **Purpose**: UX/UI Design phase initiation.
 - **Changes**:
   - Installed Storybook v8.6.14 at workspace root.
-  - Generated Storybook configuration for `@repo/ui` using Nx.
+  - Generated Storybook configuration for `@repo/ui` using Turborepo.
   - Integrated Tailwind CSS and OKLCH theme via `packages/ui/src/globals.css`.
   - Created sample story for `KPICard` at `packages/ui/src/components/KPI.stories.tsx`.
-- **Status**: Build verified with `pnpm nx run @repo/ui:build-storybook`.
+- **Status**: Build verified with `pnpm turbo run @repo/ui:build-storybook`.
 - **Next Steps**:
   - Inventory remaining components in `packages/ui/src/components`.
   - Create stories for `GlassCard`, `DataGrid`, `WorkflowBuilder`, etc.
@@ -440,13 +440,13 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 
 ## 2026-08-28 - Add native Clock widget (replaces discarded QML modernclock)
 
-- **Purpose**: Provide a system-native, hydration-safe live time/date component. Supersedes the discarded `new-content/modernclock-1.0.0.tar.gz` KDE Plasma QML widget, which had no path into the Nx + Next.js stack. Satisfies the pre-existing `e2e/visual/login.visual.spec.ts` mask contract for `[data-testid="login-clock"]` and `[data-testid="footer-date"]`, which previously masked a component that did not exist.
+- **Purpose**: Provide a system-native, hydration-safe live time/date component. Supersedes the discarded `new-content/modernclock-1.0.0.tar.gz` KDE Plasma QML widget, which had no path into the Turborepo + Next.js stack. Satisfies the pre-existing `e2e/visual/login.visual.spec.ts` mask contract for `[data-testid="login-clock"]` and `[data-testid="footer-date"]`, which previously masked a component that did not exist.
 - **Changes**:
   - `src/components/Clock.tsx` (new): Pure `"use client"` component. `useState(null)` + `useEffect` so SSR emits an empty `<span>` and hydration matches before the client effect runs (no Next.js hydration mismatch). `Intl.DateTimeFormat` with fixed `en-US` default locale for snapshot determinism. Minute-aligned `setTimeout` loop (1s when `showSeconds`). Reads theme tokens only (`var(--text-secondary)`) — preserves light-mode invariant. Props: `format`, `locale`, `hour12`, `showSeconds`, `testId`, `ariaLabel`, `className`. `role="timer"` + full localized `aria-label`.
   - `src/components/Clock.stories.tsx` (new): Stories for Time12h, Time24h, TimeWithSeconds, DateOnly, DateTime — covered by the existing `@storybook/test-runner` axe hook.
   - `package.json`: Added `"./Clock": "./src/components/Clock.tsx"` to `exports`.
 - **Policy**: `scope:package:ui` purity maintained — no imports from `@repo/supabase`, `@repo/redis`, or `@repo/database`.
-- **Verification**: `pnpm nx run @repo/ui:type-check` clean; `pnpm --filter @repo/ui lint` clean.
+- **Verification**: `pnpm turbo run @repo/ui:type-check` clean; `pnpm --filter @repo/ui lint` clean.
 - **Status**: Completed. Hand-off: consume via `@repo/ui/Clock`; login wiring lives in `apps/portal`.
 
 ## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit

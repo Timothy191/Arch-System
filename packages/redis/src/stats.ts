@@ -142,7 +142,7 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
       const latencyStrs = await redis.lRange("stats:latencies", 0, 999);
       const sorted = latencyStrs
         .map(Number)
-        .filter((v) => !isNaN(v))
+        .filter((v) => !Number.isNaN(v))
         .sort((a, b) => a - b);
 
       const avg = sorted.length > 0 ? sorted.reduce((sum, v) => sum + v, 0) / sorted.length : 0;

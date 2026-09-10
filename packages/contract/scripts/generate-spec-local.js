@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { createSwaggerSpec } from "next-swagger-doc";
-import { join } from "path";
 
 // Read the actual API routes to generate spec
 const apiFolder = join(__dirname, "../../../apps/portal/app/api");

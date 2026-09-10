@@ -1,12 +1,5 @@
-/**
- * @file fleet-runner.ts
- * @description Swarm Fleet Runner for Multi-Agent Quality Audit and Codebase Fine-Tuning.
- * Coordinates technical specialist subagents to evaluate and report on architectural quality across Arch-Base and Arch-System.
- */
-
+import { QualityGate } from "./quality-gate.js";
 import { SPECIALIST_PERSONAS, type SpecialistPersona } from "./specialists.js";
-import { QualityGate, type QualityAuditResult } from "./quality-gate.js";
-import { AgentPillarEnvelope } from "./prompt-envelope.js";
 
 export interface AgentSwarmReport {
   timestamp: string;
