@@ -18,7 +18,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 const ARCH_BASE_MIGRATIONS = path.join(ROOT, "..", "Arch-Base", "supabase", "migrations");
 const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
   ? ARCH_BASE_MIGRATIONS

@@ -22,7 +22,7 @@ const { execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const ROOT_DIR = path.resolve(__dirname, "..");
+const ROOT_DIR = path.resolve(__dirname, "..", "..");
 const PORTAL_ENV_EXAMPLE = path.join(ROOT_DIR, "apps/portal/env/.env.example");
 const PORTAL_ENV_ACTUAL = path.join(ROOT_DIR, "apps/portal/.env");
 const ROOT_ENV_ACTUAL = path.join(ROOT_DIR, ".env");

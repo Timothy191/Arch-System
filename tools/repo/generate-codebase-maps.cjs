@@ -12,7 +12,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 const MAPS_ROOT = path.join(ROOT, "codebase-maps");
 
 /**

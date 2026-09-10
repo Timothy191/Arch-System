@@ -29,7 +29,6 @@ apps/*/.next/
 .claude/hooks/scripts/search/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
-.agents/
 # Vendored agent plugin checkouts (e.g. compound-engineering) — not project source
 .agent-plugins/
 
@@ -242,7 +241,7 @@ apps/portal/docs/
 documentation/03-audit-reports/log-*/
 
 
-.opencode/
 
 # Third-party tool clones (own git repos)
 tools/agentic
+.slim/

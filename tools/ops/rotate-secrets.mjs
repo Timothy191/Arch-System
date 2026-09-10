@@ -17,7 +17,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const rootDir = join(__dirname, "..");
+const rootDir = join(__dirname, "..", "..");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 

@@ -8,7 +8,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 
 // Sample key codebase files to audit across domain areas
 const SAMPLE_FILES = [

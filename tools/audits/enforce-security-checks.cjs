@@ -26,7 +26,7 @@ try {
 }
 
 const POLICY_PATH = path.join(__dirname, "policy", "security.checks.json");
-const REPO_ROOT = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
 if (!fs.existsSync(POLICY_PATH)) {
   console.error(`❌ Policy file not found: ${POLICY_PATH}`);

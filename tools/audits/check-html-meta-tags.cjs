@@ -17,7 +17,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { globSync } = require("glob");
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "..");
 const layoutFiles = globSync("apps/*/app/layout.{tsx,jsx}", { cwd: ROOT });
 
 const REQUIRED_PATTERNS = {

@@ -15,7 +15,7 @@ const path = require("node:path");
 const zlib = require("node:zlib");
 const { globSync } = require("glob");
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "..");
 const configPath = path.join(ROOT, "config", "tools", ".bundlesize-config.json");
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 

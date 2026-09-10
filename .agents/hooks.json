@@ -1,0 +1,6 @@
+{
+  "agent-execution-guardrails": {
+    "enabled": true,
+    "description": "Autonomously active guardrails enforcing compliance, security policies, and AGENTS.md standards."
+  }
+}

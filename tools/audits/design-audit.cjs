@@ -22,7 +22,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
 const REPORT_PATH = path.join(REPORT_DIR, "design-report.md");
 

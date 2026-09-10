@@ -16,7 +16,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execSync } = require("node:child_process");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 const AUDIT_ROOT = path.join(ROOT, "documentation", "03-audit-reports");
 
 /**

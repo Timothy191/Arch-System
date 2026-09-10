@@ -21,7 +21,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const glob = require("glob");
 
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "..", "..");
 const AGENTS_DIR = path.join(ROOT, ".agents");
 const REPORT_DIR = path.join(ROOT, "documentation", "03-audit-reports");
 

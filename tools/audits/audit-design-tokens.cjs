@@ -22,7 +22,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const glob = require("glob");
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "..");
 const TOKENS_PATH = path.join(ROOT, "packages", "theme", "tokens.json");
 const PORTAL_PUBLIC = path.join(ROOT, "apps", "portal", "public");
 
