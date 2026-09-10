@@ -8,7 +8,7 @@
   - `libs/features/hub/ui/src/ThreeHeroRotator.test.tsx`: Added full unit test suite for R3F 3D hero rotator covering mounting, 3D projections, dot indicators, touch swipe gestures, urgency badges, keyboard shortcuts, and dynamic wrapper rendering.
   - `libs/features/hub/ui/src/HeroRotator.test.tsx`: Updated tests to mock `@react-three/fiber`, `@react-three/drei`, and `next/dynamic`.
 - **Verification**:
-  - `pnpm nx test features-hub-ui` ✅ (25/25 tests passing)
+  - `pnpm turbo test features-hub-ui` ✅ (25/25 tests passing)
 - **What the Next Agent Should Know**: The hub feature now runs the WebGL-powered 3D hero carousel safely in client-only mode with zero server-side overhead and complete test coverage.
 
 ## 2026-08-25 - Workspace Dependency Link
@@ -110,10 +110,10 @@
     - Added `distanceFromActive` circular-distance helper. Panels 2+ slides away get `content-visibility: auto` + `contain-intrinsic-size: auto 200px` so the browser skips their layout/paint while the slide track keeps them in the DOM for the `translate3d(-activeIndex * 100%)` math.
     - Non-active panels are now `inert` + `aria-hidden` — their links/buttons are no longer tabbable and they leave the a11y tree (previously all 9 panels' controls were keyboard-reachable).
 - **Verification**:
-  - `pnpm nx run-many -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
-  - `pnpm nx run-many -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-nx-cache` ✅
-  - `pnpm nx run @repo/theme:lint:css --skip-nx-cache` ✅
-  - `pnpm nx run @repo/theme:lint:tokens --skip-nx-cache` ✅ (278 tokens, 161 references)
+  - `pnpm turbo run -t type-check --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-turbo-cache` ✅
+  - `pnpm turbo run -t lint --projects=features-hub-ui,@repo/ui,@repo/theme,portal --skip-turbo-cache` ✅
+  - `pnpm turbo run @repo/theme:lint:css --skip-turbo-cache` ✅
+  - `pnpm turbo run @repo/theme:lint:tokens --skip-turbo-cache` ✅ (278 tokens, 161 references)
   - `node tools/check-css-performance.cjs` ✅ (9 pre-existing warnings only)
 - **What the Next Agent Should Know**: The carousel slide track must keep all panels mounted (the translate3d math depends on it); `content-visibility` + `inert` are the correct levers, not lazy-mounting. The sparkline pulse is now motion-safe. Adjacent panels stay fully rendered so the 500ms slide transition never shows a blank pop.
 
@@ -129,7 +129,7 @@
 - **What the Next Agent Should Know**: The hero carousel cards and top taskbar share identical macOS Sonoma liquid glass surfaces, department icon color definitions, and semantic design tokens.
 
 ## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit
+
 - **Agent**: Antigravity
 - **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
-

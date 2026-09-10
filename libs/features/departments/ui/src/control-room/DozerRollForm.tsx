@@ -78,7 +78,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               pushCount,
               hoursOperated,
               shiftType,
-            })
+            }),
           );
         } else {
           localStorage.removeItem(draftKey);
@@ -131,6 +131,17 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
   useUnsavedChangesWarning(isDirty);
 
+  const selectedDozer = useMemo(() => dozers.find((d) => d.id === machineId), [machineId, dozers]);
+
+  const siteName = selectedDozer?.sites?.[0]?.name ?? "—";
+
+  const area = useMemo(() => {
+    const l = parseFloat(lengthM);
+    const w = parseFloat(widthM);
+    if (Number.isNaN(l) || Number.isNaN(w)) return 0;
+    return l * w;
+  }, [lengthM, widthM]);
+
   if (!today || !/^\d{4}-\d{2}-\d{2}$/.test(today)) {
     return (
       <GlassCard className="border-accent-red/30 bg-accent-red/5 text-accent-red p-6">
@@ -140,17 +151,6 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
       </GlassCard>
     );
   }
-
-  const selectedDozer = useMemo(() => dozers.find((d) => d.id === machineId), [machineId, dozers]);
-
-  const siteName = selectedDozer?.sites?.[0]?.name ?? "—";
-
-  const area = useMemo(() => {
-    const l = parseFloat(lengthM);
-    const w = parseFloat(widthM);
-    if (isNaN(l) || isNaN(w)) return 0;
-    return l * w;
-  }, [lengthM, widthM]);
 
   const reset = () => {
     setMachineId("");

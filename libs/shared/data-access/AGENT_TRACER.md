@@ -27,6 +27,6 @@
   - `package.json`: Added `test` script and dev dependencies for `jest`, `@types/jest`, `@swc/jest`.
   - `src/monitoring-api.test.ts` [NEW]: 8 unit tests covering empty input, grouping, velocity derivation, deformation-level classification, risk-level fallback, area inference, chronological history, and the no-fabrication invariant.
 - **Verification**:
-  - `pnpm nx type-check shared-data-access` ✅
-  - `pnpm nx test shared-data-access` ✅ (8/8)
+  - `pnpm turbo type-check shared-data-access` ✅
+  - `pnpm turbo test shared-data-access` ✅ (8/8)
 - **What the Next Agent Should Know**: This package now owns the canonical `satellite_deformations` → `DeformationReading` mapping. Any future schema change to `satellite_deformations` must update both `DeformationDbRow` and the test factory in `monitoring-api.test.ts`.

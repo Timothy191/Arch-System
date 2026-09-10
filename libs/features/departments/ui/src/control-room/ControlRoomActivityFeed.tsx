@@ -54,14 +54,14 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
             },
             ...prev.slice(0, 49),
           ]);
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [departmentId]);
+  }, [departmentId, setActivities]);
 
   const filtered = filter === "all" ? activities : activities.filter((a) => a.type === filter);
 

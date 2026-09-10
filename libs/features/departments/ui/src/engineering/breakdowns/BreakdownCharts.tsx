@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart, Card, type Color, DonutChart, Title } from "@tremor/react";
-import { Activity, AlertTriangle, CheckCircle2, Clock, ShieldAlert, Wrench } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import type { MTBFDataPoint, ServiceTrigger } from "./types";
 
 interface BreakdownChartsProps {

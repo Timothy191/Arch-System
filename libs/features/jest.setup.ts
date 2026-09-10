@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { TextDecoder, TextEncoder } from "util";
+import { TextDecoder, TextEncoder } from "node:util";
 
 global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || (TextDecoder as any);
@@ -18,7 +18,7 @@ global.Response =
   global.Response ||
   class Response {
     status: number;
-    constructor(body?: BodyInit | null, _init?: ResponseInit) {
+    constructor(_body?: BodyInit | null, _init?: ResponseInit) {
       this.status = _init?.status ?? 200;
     }
   };

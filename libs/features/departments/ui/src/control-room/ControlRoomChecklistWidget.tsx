@@ -273,14 +273,14 @@ export function ControlRoomChecklistWidget({
   // AGENT-TRACE: Restore persisted checklist state on mount so a partially
   // completed closeout survives reloads. Falls back to the default SOP list.
   const [items, setItems] = useState<ControlRoomChecklistItem[]>(
-    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS
+    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS,
   );
   const [operatorName, setOperatorName] = useState(
-    initialReport?.operatorName ?? initialOperatorName
+    initialReport?.operatorName ?? initialOperatorName,
   );
   const [summaryNotes, setSummaryNotes] = useState(initialReport?.summaryNotes ?? "");
   const [supervisorSignature, setSupervisorSignature] = useState(
-    initialReport?.supervisorSignature ?? ""
+    initialReport?.supervisorSignature ?? "",
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(!!initialReport);
@@ -289,7 +289,7 @@ export function ControlRoomChecklistWidget({
   // Live KPI metrics — editable, defaults matching wiki SLAs, restored from an
   // existing report so a revision starts from the last submitted values.
   const [alarmResponseSec, setAlarmResponseSec] = useState(
-    initialReport?.alarmResponseAvgSeconds ?? 42
+    initialReport?.alarmResponseAvgSeconds ?? 42,
   );
   const [incidentAckSec, setIncidentAckSec] = useState(initialReport?.incidentAckAvgSeconds ?? 18);
   const [systemUptime, setSystemUptime] = useState(initialReport?.systemUptimePercent ?? 99.98);
@@ -390,10 +390,10 @@ export function ControlRoomChecklistWidget({
 
   // AGENT-TRACE: SLA badges reflect the live editable values so operators see
   // compliance drift as they adjust KPIs before submitting the closeout.
-  const alarmInSla = alarmResponseSec <= 60;
-  const ackInSla = incidentAckSec <= 30;
-  const uptimeInSla = systemUptime >= 99.9;
-  const missedInSla = missedIncidents === 0;
+  const _alarmInSla = alarmResponseSec <= 60;
+  const _ackInSla = incidentAckSec <= 30;
+  const _uptimeInSla = systemUptime >= 99.9;
+  const _missedInSla = missedIncidents === 0;
 
   const toggleItem = (id: string) => {
     setItems((prev) =>
@@ -408,7 +408,7 @@ export function ControlRoomChecklistWidget({
           };
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -477,7 +477,7 @@ export function ControlRoomChecklistWidget({
       setSubmitted(true);
     } catch (err) {
       setValidationError(
-        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry."
+        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry.",
       );
     } finally {
       setIsSubmitting(false);
@@ -538,7 +538,7 @@ export function ControlRoomChecklistWidget({
               setItems(
                 initialReport?.checklistItems?.length
                   ? initialReport.checklistItems
-                  : DEFAULT_CHECKLIST_ITEMS
+                  : DEFAULT_CHECKLIST_ITEMS,
               );
               setOperatorName(initialReport?.operatorName ?? initialOperatorName);
               setSummaryNotes(initialReport?.summaryNotes ?? "");
@@ -631,7 +631,7 @@ export function ControlRoomChecklistWidget({
               const Icon = cat.icon;
               const isActive = activeCategory === cat.key;
               const catCompleted = items.filter(
-                (i) => i.category === cat.key && i.completed
+                (i) => i.category === cat.key && i.completed,
               ).length;
               const catTotal = items.filter((i) => i.category === cat.key).length;
 

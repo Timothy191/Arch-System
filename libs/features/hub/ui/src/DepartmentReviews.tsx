@@ -1,9 +1,7 @@
 "use client";
 
 import { Avatar } from "@repo/ui";
-import { cn } from "@repo/ui/lib/utils";
 import { Marquee } from "@repo/ui/Marquee";
-import { useState } from "react";
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors.
 // Each review includes a `color` for the initials-based avatar fallback, which renders

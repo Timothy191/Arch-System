@@ -67,7 +67,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
       try {
         localStorage.setItem(
           DRAFT_KEY,
-          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason })
+          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason }),
         );
         setHasDraft(true);
       } catch {
@@ -91,7 +91,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
 
   const selectedMachine = useMemo(
     () => machines.find((m) => m.id === selectedMachineId),
-    [machines, selectedMachineId]
+    [machines, selectedMachineId],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -143,7 +143,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             })
             .catch(() => {});
         });
-      } catch (err) {
+      } catch (_err) {
         setMessage({ type: "error", text: "Failed to book in machine." });
       }
     });

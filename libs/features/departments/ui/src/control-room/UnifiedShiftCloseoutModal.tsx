@@ -13,7 +13,7 @@ interface UnifiedShiftCloseoutModalProps {
   shiftDate: string;
   shiftType: "day" | "night";
   onSignShift: (
-    payload: LockAndSignShiftInput & { departmentSlug?: string }
+    payload: LockAndSignShiftInput & { departmentSlug?: string },
   ) => Promise<{ success: boolean; error?: string }>;
   onSuccess: () => void;
 }
@@ -124,7 +124,6 @@ export function UnifiedShiftCloseoutModal({
                 placeholder="Enter 4-digit or supervisor PIN"
                 className="w-full pl-9 pr-3 py-2 rounded-lg border border-black/[0.1] bg-white text-neutral-900 font-mono tracking-widest outline-hidden focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 disabled={loading}
-                autoFocus
               />
             </div>
           </div>

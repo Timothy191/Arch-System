@@ -20,7 +20,7 @@ interface AlertTickerProps {
 function timeAgo(dateString: string): string {
   // Supabase timestamps are UTC but may lack a Z suffix — force UTC parsing
   const hasTz = /[Zz]|[+-]\d{2}:?\d{2}$/.test(dateString);
-  const utcString = hasTz ? dateString : dateString + "Z";
+  const utcString = hasTz ? dateString : `${dateString}Z`;
   const date = new Date(utcString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -71,7 +71,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
   return (
     <div
       className={cn(
-        "w-full rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden"
+        "w-full rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden",
       )}
     >
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/20 bg-white/10">
@@ -95,7 +95,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
               href={event.href}
               className={cn(
                 "flex items-start gap-3 px-4 py-3",
-                "hover:bg-arch-surface-secondary/50 transition-colors duration-150"
+                "hover:bg-arch-surface-secondary/50 transition-colors duration-150",
               )}
             >
               <div className={cn("mt-0.5 p-1.5 rounded-lg shrink-0", config.iconBg)}>
@@ -110,7 +110,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
                   <span
                     className={cn(
                       "shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wider",
-                      config.iconBg
+                      config.iconBg,
                     )}
                   >
                     {config.label}

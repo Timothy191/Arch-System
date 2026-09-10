@@ -39,15 +39,15 @@ function matchesShortcut(event: KeyboardEvent, shortcut: string): boolean {
 
   // Filter out modifier names to isolate the target key
   const targetKeyParts = parts.filter(
-    (p) => !["ctrl", "control", "cmd", "meta", "alt", "shift"].includes(p)
+    (p) => !["ctrl", "control", "cmd", "meta", "alt", "shift"].includes(p),
   );
 
   const targetKey = targetKeyParts[0];
 
-  const ctrlMatches = requireCtrl ? event.ctrlKey : !event.ctrlKey || parts.includes("cmd");
-  const metaMatches = requireCmd ? event.metaKey : !event.metaKey || parts.includes("ctrl");
-  const altMatches = requireAlt ? event.altKey : !event.altKey;
-  const shiftMatches = requireShift ? event.shiftKey : !event.shiftKey;
+  const _ctrlMatches = requireCtrl ? event.ctrlKey : !event.ctrlKey || parts.includes("cmd");
+  const _metaMatches = requireCmd ? event.metaKey : !event.metaKey || parts.includes("ctrl");
+  const _altMatches = requireAlt ? event.altKey : !event.altKey;
+  const _shiftMatches = requireShift ? event.shiftKey : !event.shiftKey;
 
   // Handle Ctrl or Meta interchangeably if specified as 'mod'
   if (parts.includes("mod")) {

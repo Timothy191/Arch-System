@@ -3,9 +3,7 @@
 import { GlassCard } from "@repo/ui/GlassCard";
 import {
   AlertTriangle,
-  CheckCircle2,
   CircleDot,
-  ClipboardList,
   Download,
   Filter,
   Layers,
@@ -14,7 +12,6 @@ import {
   Search,
   ShieldAlert,
   TrendingDown,
-  Wrench,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { TireInspectionModal } from "./TireInspectionModal";
@@ -31,7 +28,7 @@ export function TireManagementDashboard({
   tires: initialTires,
   machines,
 }: TireManagementDashboardProps) {
-  const [tires, setTires] = useState<TireWithInspections[]>(initialTires);
+  const [tires, _setTires] = useState<TireWithInspections[]>(initialTires);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("installed");
   const [conditionFilter, setConditionFilter] = useState<string>("all");
@@ -108,7 +105,7 @@ export function TireManagementDashboard({
     useMemo(() => {
       if (selectedCurveTireId !== "aggregate") {
         const target = tires.find((t) => t.id === selectedCurveTireId);
-        if (target && target.inspections && target.inspections.length > 0) {
+        if (target?.inspections && target.inspections.length > 0) {
           const points: WearCurvePoint[] = target.inspections.map((insp) => ({
             date: insp.inspection_date,
             hours: target.installed_hours,

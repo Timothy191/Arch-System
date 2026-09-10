@@ -1,7 +1,7 @@
 "use client";
 
 import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, ArrowRight, PlusCircle, RefreshCw, ShieldX, X } from "lucide-react";
+import { AlertTriangle, PlusCircle, RefreshCw, ShieldX, X } from "lucide-react";
 import { useState, useTransition } from "react";
 import { replaceTire } from "./actions";
 import type { TireWithInspections } from "./types";
@@ -32,7 +32,7 @@ export function TireReplacementModal({
   const [isPending, startTransition] = useTransition();
   const [removalDate, setRemovalDate] = useState(new Date().toISOString().split("T")[0] ?? "");
   const [removedHours, setRemovedHours] = useState<number>(
-    tire ? tire.installed_hours + 1200 : 2500
+    tire ? tire.installed_hours + 1200 : 2500,
   );
   const [scrappedReason, setScrappedReason] = useState<string>(SCRAP_REASONS[0] ?? "");
   const [customReason, setCustomReason] = useState("");

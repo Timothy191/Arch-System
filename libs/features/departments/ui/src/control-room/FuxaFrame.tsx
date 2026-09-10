@@ -153,7 +153,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
 
     try {
       const iframe = document.getElementById("fuxa-iframe") as HTMLIFrameElement;
-      if (iframe && iframe.contentDocument) {
+      if (iframe?.contentDocument) {
         const link = iframe.contentDocument.createElement("link");
         link.rel = "stylesheet";
         link.href = "/css/fuxa-light-theme.css";
