@@ -475,3 +475,14 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - `apps/portal/app/api/metabase/embed/route.test.ts`: Fixed `getUserSafely` and `createServerSupabaseClient` mock signatures.
   - `project-words.txt`: Added domain words (`xfetch`, `distroless`, `httpx`, `smol`) for zero-warning CSpell validation.
 - **Verification**: `pnpm quality` executed across all 27 monorepo projects with 100% passing tests and exit code 0.
+
+## 2026-09-10 — CLAUDE.md Deployment-Focused Onboarding Update (Claude Code)
+
+- **Author**: Claude Code (claude.ai/code)
+- **Mandate**: `/init` onboarding with deployment focus — audit existing CLAUDE.md against ground truth (docs/DEPLOYMENT.md, scripts/deploy-cloudflare.sh, infra/cloudflared/, .github/copilot-instructions.md) and correct/improve it.
+- **Changes**:
+  - `CLAUDE.md` (UPDATED): Corrected portal to Next.js 16 (was "15+"), added `ci-observer` app and `redis`/`rate-limiter`/`errors`/`logger`/`eval`/`contract` packages to the workspace tree.
+  - `CLAUDE.md` (UPDATED): Added 5 missing architectural constraints — employees-table authorization SSoT, `middleware.ts` → `server/proxy.ts` delegation chain, migrations SSoT (`packages/database/migrations/` only; `packages/supabase/supabase/migrations/` blocked by PreToolUse hook), policy-compiler drift workflow (`pnpm policy:gen`), and never-edit-generated-output rule.
+  - `CLAUDE.md` (UPDATED): Added "Deployment (Cloudflare Tunnel + Edge CDN)" section — unified `deploy.sh` orchestrator (modes/flags), `deploy-cloudflare.sh`, `infra/cloudflared/` ingress topology (portal :3000, FUXA SCADA :8088, optional Supabase :54321), standalone build + static/public asset sync, `verify-prod-env.sh`, `deploy-*.log` debugging, and 4 new deploy commands in the targets table (`deploy:cloudflare`, `deploy:rollback`, `dev:cloudflare`/`dev:hosted`).
+  - `CLAUDE.md` (UPDATED): Added enforced coverage thresholds to the Testing Strategy section.
+- **Verification**: markdownlint passes with repo config; diff reviewed via `rtk git diff`; facts cross-checked against `apps/portal/package.json` (next@16.2.6), `apps/portal/next.config.mjs` (`output: "standalone"`), `apps/portal/middleware.ts`, and `package.json` root scripts.

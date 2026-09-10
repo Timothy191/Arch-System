@@ -22,28 +22,32 @@ pnpm quality                                              # full quality gate �
 
 ### Development Targets
 
-| Action                            | Command                                                      |
-| --------------------------------- | ------------------------------------------------------------ |
-| Build all                         | `pnpm build`                                                 |
-| Build one project                 | `pnpm nx build <name>` or `pnpm --filter @repo/<name> build` |
-| Lint all / one                    | `pnpm lint` · `pnpm nx lint <name>`                          |
-| Type-check all / one              | `pnpm type-check` · `pnpm nx type-check <name>`              |
-| All unit tests                    | `pnpm test`                                                  |
-| Single portal test file           | `pnpm --filter portal test -- --testPathPatterns=<file>`     |
-| E2E (needs portal on :3000)       | `pnpm test:e2e`                                              |
-| Visual E2E snapshots              | `pnpm test:e2e:visual`                                       |
-| Storybook                         | `pnpm ui` (opens `@repo/ui` Storybook)                       |
-| Storybook a11y                    | `pnpm test:a11y`                                             |
-| Format                            | `pnpm format`                                                |
-| Deploy (local/staging/production) | `pnpm deploy:local` / `:staging` / `:production`             |
-| Generate DB types                 | `pnpm db-gen`                                                |
-| Push DB migrations                | `pnpm db-push`                                               |
-| Reset local DB                    | `pnpm db-reset` (destructive)                                |
-| Start local Supabase              | `pnpm db-start`                                              |
-| Generate DB docs                  | `pnpm db-docs`                                               |
-| Start monitoring HUD              | `pnpm monitor`                                               |
-| Start Grafana stack               | `pnpm monitor:grafana`                                       |
-| Stop Grafana stack                | `pnpm monitor:grafana-stop`                                  |
+| Action                             | Command                                                      |
+| ---------------------------------- | ------------------------------------------------------------ |
+| Build all                          | `pnpm build`                                                 |
+| Build one project                  | `pnpm nx build <name>` or `pnpm --filter @repo/<name> build` |
+| Lint all / one                     | `pnpm lint` · `pnpm nx lint <name>`                          |
+| Type-check all / one               | `pnpm type-check` · `pnpm nx type-check <name>`              |
+| All unit tests                     | `pnpm test`                                                  |
+| Single portal test file            | `pnpm --filter portal test -- --testPathPatterns=<file>`     |
+| E2E (needs portal on :3000)        | `pnpm test:e2e`                                              |
+| Visual E2E snapshots               | `pnpm test:e2e:visual`                                       |
+| Storybook                          | `pnpm ui` (opens `@repo/ui` Storybook)                       |
+| Storybook a11y                     | `pnpm test:a11y`                                             |
+| Format                             | `pnpm format`                                                |
+| Deploy (local/staging/production)  | `pnpm deploy:local` / `:staging` / `:production`             |
+| Deploy via Cloudflare Tunnel       | `pnpm deploy:cloudflare` (interactive; dev/production modes) |
+| Rollback production deploy         | `pnpm deploy:rollback` (`deploy.sh production --rollback`)   |
+| Dev server exposed via tunnel      | `pnpm dev:cloudflare` · `pnpm dev:hosted`                    |
+| Verify prod env + standalone build | `./scripts/verify-prod-env.sh .env.production`               |
+| Generate DB types                  | `pnpm db-gen`                                                |
+| Push DB migrations                 | `pnpm db-push`                                               |
+| Reset local DB                     | `pnpm db-reset` (destructive)                                |
+| Start local Supabase               | `pnpm db-start`                                              |
+| Generate DB docs                   | `pnpm db-docs`                                               |
+| Start monitoring HUD               | `pnpm monitor`                                               |
+| Start Grafana stack                | `pnpm monitor:grafana`                                       |
+| Stop Grafana stack                 | `pnpm monitor:grafana-stop`                                  |
 
 ### Makefile Shortcuts
 
@@ -86,15 +90,22 @@ All common commands are also available via `make`:
 
 ```
 apps/
-├── portal/          # Main Next.js 15+ app (App Router) - user dashboards
+├── portal/          # Main Next.js 16 app (App Router, React 19) - user dashboards
 ├── cms/             # Payload CMS v3 (headless) - content management
-└── overview/        # Standalone Next.js app - system architecture visualization
+├── overview/        # Standalone Next.js app - system architecture visualization
+└── ci-observer/     # CI observation helper app
 
 packages/
 ├── theme/           # Design tokens (OKLCH), Tailwind config (SSOT)
 ├── ui/              # Shared React components (Radix UI, shadcn/ui)
 ├── supabase/        # Supabase clients (browser/server/middleware) + auth
-├── database/        # SQL migrations & Supabase schema management
+├── database/        # SQL migrations & SSoT for all schema changes
+├── redis/           # Redis caching & rate-limiting clients
+├── rate-limiter/    # Rate limiting primitives
+├── errors/          # Shared error types & handling
+├── logger/          # Structured logging
+├── eval/            # Evaluation utilities
+├── contract/        # API contract tests / drift detection
 ├── utils/           # Date/formatting/shift helper functions
 └── types/           # Shared TypeScript interfaces & types
 
@@ -116,6 +127,41 @@ scripts/
 3. **Security**: Static analysis blocks `eval()`, string-concatenated SQL, and hardcoded secrets
 4. **Data Access**: All Supabase interactions go through `@repo/supabase` layer with proper RLS policies
 5. **Type Safety**: End-to-end TypeScript with strict `nx.json` boundary rules
+6. **Authorization SSoT**: The `employees` table is the source of truth for role + department. RLS must be enabled on every new table.
+7. **Auth Middleware**: `apps/portal/middleware.ts` is a thin edge shim delegating to `apps/portal/server/proxy.ts` (session refresh, role/department route gating, Redis-cached department slug → UUID resolution). API routes `/api/c66`, `/api/health`, `/api/metrics` and static assets are exempt.
+8. **Migrations SSoT**: Only `packages/database/migrations/NNN_description.sql` is source of truth. NEVER edit `packages/supabase/supabase/migrations/` — it's a deploy-time copy (a PreToolUse hook blocks edits there).
+9. **Policy SSoT**: `tools/policy-compiler.cjs` generates `tools/policy/*.json` + `tools/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI fails on drift (`pnpm policy:check`).
+10. **Generated output**: Never hand-edit generated files (`packages/theme/src/tokens/generated.ts`, `variables-generated.css`, generated DB types). Regenerate via their source commands instead.
+
+## Deployment (Cloudflare Tunnel + Edge CDN)
+
+Primary edge topology (post-Tailscale migration): **Cloudflare Edge WAF → cloudflared tunnel → local services**. No inbound ports are opened on the host. Full guide: `docs/DEPLOYMENT.md`; config: `infra/cloudflared/`.
+
+| Concern                                                                                                                                       | Where                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Unified deploy orchestrator (pre-flight checks, backups, rollback, deploy lock, `--dry-run`, `--skip-build`/`--skip-tests`, `--migrate-only`) | `scripts/deploy.sh` (`local`/`staging`/`production`) |
+| Tunnel orchestrator (interactive dev/production modes, Supabase stack orchestration, ingress validation)                                      | `scripts/deploy-cloudflare.sh`                       |
+| Production tunnel ingress (portal `:3000`, FUXA SCADA UI `:8088`, `fuxa-api`, optional Supabase REST `:54321`, catch-all 404)                 | `infra/cloudflared/production-tunnel.yml.example`    |
+| SCADA tunnel config                                                                                                                           | `infra/cloudflared/fuxa-tunnel.yml`                  |
+| Prod setup (systemd unit, Docker tools/monitoring stacks, Rocky/RHEL guidance)                                                                | `scripts/setup-production-environment.sh`            |
+
+### Production serving mode
+
+Portal is built with `output: "standalone"` (`apps/portal/next.config.mjs`) — the deploy artifact is `apps/portal/.next/standalone/apps/portal/server.js`. Post-build you must sync static/public assets into the standalone bundle:
+
+```bash
+pnpm --filter portal build
+cp -r apps/portal/public apps/portal/.next/standalone/apps/portal/public
+cp -r apps/portal/.next/static apps/portal/.next/standalone/apps/portal/.next/static
+```
+
+After editing the tunnel ingress YAML, validate before running:
+
+```bash
+cloudflared tunnel --config infra/cloudflared/production-tunnel.yml.example ingress validate
+```
+
+Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` to debug.
 
 ### Critical Development Flows
 
@@ -155,7 +201,7 @@ scripts/
 - **E2E Tests**: Playwright - requires dev server running on :3000
 - **Visual Tests**: Playwright image snapshots for UI regression detection
 - **Accessibility**: axe-core automated scanning (`pnpm test:a11y`)
-- **Coverage**: `pnpm --filter portal test -- --coverage`
+- **Coverage**: `pnpm --filter portal test -- --coverage` (thresholds enforced: lines 40%, branches 30%, functions 35%, statements 40%)
 
 ### Code Generation
 

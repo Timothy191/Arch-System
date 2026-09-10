@@ -114,7 +114,7 @@
   "private": true,
   "scripts": {
     "build-storybook": "storybook build -o dist/storybook",
-    "clean": "rm -rf .nx",
+    "clean": "rm -rf dist .turbo",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:css": "stylelint 'src/**/*.css'",
     "storybook": "storybook dev -p 6006",
