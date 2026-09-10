@@ -164,6 +164,10 @@ metadata.json
 .audit/
 documentation/03-audit-reports/logs/
 
+# Transient tooling artifacts (failed npx runs, scratch notes)
+biome_output.json
+files_to_update.txt
+
 # Submodules (tools/devdocs not properly configured)
 tools/devdocs
 .codebuddy

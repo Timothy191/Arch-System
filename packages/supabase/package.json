@@ -1,0 +1,44 @@
+{
+  "name": "@repo/supabase",
+  "description": "Supabase clients and Kysely query builder for type-safe database operations",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts",
+    "./middleware": "./src/middleware.ts",
+    "./proxy": "./src/proxy.ts",
+    "./read-replica": "./src/read-replica.ts",
+    "./kysely": "./src/kysely.ts",
+    "./service-role": "./src/service-role.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:status": "supabase status",
+    "supabase:gen-types": "supabase gen types typescript --local > src/database.types.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "catalog:",
+    "@repo/logger": "1.0.0",
+    "@supabase/ssr": "catalog:",
+    "@supabase/server": "catalog:",
+    "@supabase/supabase-js": "catalog:",
+    "kysely": "catalog:",
+    "pg": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "next": "^16.2.6",
+    "typescript": "catalog:",
+    "supabase": "catalog:"
+  }
+}
