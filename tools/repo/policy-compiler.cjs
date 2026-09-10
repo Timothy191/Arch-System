@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Compiles architectural and dependency boundary policies into ESLint configurations.
- * Usage: node tools/policy-compiler.cjs [--check]
+ * Usage: node tools/repo/policy-compiler.cjs [--check]
  */
 /**
  * Policy SSoT Compiler (CommonJS runtime)
@@ -295,7 +295,7 @@ for (const cap of INTENT_CAPABILITIES) {
 }
 allOk &= writeOrCheck(
   path.join(OUTPUT_DIR, "intent-map.json"),
-  generateJson({ capabilities: intentMap })
+  generateJson({ capabilities: intentMap }),
 );
 
 const elementTypes = [
@@ -325,7 +325,7 @@ const boundaryRules = DEPENDENCY_RULES.map((r) => {
   };
 });
 
-const eslintContent = `// GENERATED FROM tools/policy-compiler.cjs — DO NOT EDIT
+const eslintContent = `// GENERATED FROM tools/repo/policy-compiler.cjs — DO NOT EDIT
 // Run 'pnpm policy:gen' to regenerate.
 
 module.exports = {
@@ -378,5 +378,7 @@ if (CHECK_MODE && !allOk) {
 
 if (!CHECK_MODE) {
   console.log(`\n✅ All 5 policy files generated.`);
-  console.log("Next: git add tools/policy/ tools/policy-compiler.cjs package.json and commit.");
+  console.log(
+    "Next: git add tools/repo/policy/ tools/repo/policy-compiler.cjs package.json and commit.",
+  );
 }

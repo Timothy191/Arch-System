@@ -2,15 +2,15 @@
 
 /**
  * @fileoverview Enforces critical security checks across the codebase to prevent vulnerabilities.
- * Usage: node tools/enforce-security-checks.cjs [--ci]
+ * Usage: node tools/audits/enforce-security-checks.cjs [--ci]
  */
 /**
  * Security Checks Enforcer
  *
- * Runs the regex patterns defined in tools/policy/security.checks.json against
+ * Runs the regex patterns defined in tools/repo/policy/security.checks.json against
  * the codebase to prevent common vulnerabilities (eval, sql concat, secrets).
  *
- * Usage: node tools/enforce-security-checks.cjs [--ci]
+ * Usage: node tools/audits/enforce-security-checks.cjs [--ci]
  */
 
 const fs = require("node:fs");
@@ -25,7 +25,7 @@ try {
   process.exit(1);
 }
 
-const POLICY_PATH = path.join(__dirname, "policy", "security.checks.json");
+const POLICY_PATH = path.join(__dirname, "..", "repo", "policy", "security.checks.json");
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
 if (!fs.existsSync(POLICY_PATH)) {
@@ -66,8 +66,8 @@ for (const check of checks) {
   for (const file of filesToScan) {
     // Skip checking this script itself and the policy compiler
     if (
-      file.endsWith("tools/enforce-security-checks.cjs") ||
-      file.endsWith("tools/policy-compiler.cjs")
+      file.endsWith("tools/audits/enforce-security-checks.cjs") ||
+      file.endsWith("tools/repo/policy-compiler.cjs")
     ) {
       continue;
     }

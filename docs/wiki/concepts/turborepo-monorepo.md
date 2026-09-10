@@ -58,7 +58,7 @@ Turborepo tracks global workspace files (`tsconfig.json`, `pnpm-workspace.yaml`,
 
 ## Architectural Boundaries
 
-Enforced via `eslint-plugin-boundaries` generated dynamically from `tools/policy-compiler.cjs`.
+Enforced via `eslint-plugin-boundaries` generated dynamically from `tools/repo/policy-compiler.cjs`.
 Verification gate: `pnpm policy:check`.
 
 ## Commands

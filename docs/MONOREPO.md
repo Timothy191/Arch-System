@@ -15,7 +15,7 @@ The workspace is managed by [Turborepo](https://turbo.build/). Important targets
 
 - `build`: Builds the project and its dependencies. Cacheable.
 - `test`: Runs the Jest/Vitest unit tests. Cacheable.
-- `lint`: Runs ESLint with boundary rules enforced by `tools/policy-compiler.cjs`. Cacheable.
+- `lint`: Runs ESLint with boundary rules enforced by `tools/repo/policy-compiler.cjs`. Cacheable.
 - `type-check`: Runs the TypeScript compiler without emitting files. Cacheable.
 - `lint:tokens`: Validates design system tokens in `@repo/theme`. Cacheable.
 - `lint:css`: Lints CSS against Stylelint. Cacheable.

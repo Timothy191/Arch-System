@@ -5,7 +5,7 @@ updated: 2026-09-10
 type: decision
 status: accepted
 tags: [adr, monorepo, build, decision, turborepo, boundaries]
-sources: [turbo.json, package.json, tools/policy-compiler.cjs]
+sources: [turbo.json, package.json, tools/repo/policy-compiler.cjs]
 confidence: high
 ---
 
@@ -37,7 +37,7 @@ We migrate the monorepo task orchestration from **Turborepo** to **Turborepo 2.x
    - Eliminates all 24 `project.json` files and `turbo.json`.
 
 2. **Architectural Boundaries (`eslint-plugin-boundaries`)**:
-   - The Policy SSoT compiler (`tools/policy-compiler.cjs`) compiles `DEPENDENCY_RULES` directly into `eslint-plugin-boundaries` `element-types` configuration.
+   - The Policy SSoT compiler (`tools/repo/policy-compiler.cjs`) compiles `DEPENDENCY_RULES` directly into `eslint-plugin-boundaries` `element-types` configuration.
    - Preserves 100% of architectural barriers (UI purity, database isolation, theme unidirectional dependency).
 
 3. **Test Stability Guard**:

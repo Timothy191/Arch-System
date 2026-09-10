@@ -1,15 +1,14 @@
 # Policy & Architectural Rules Guide
 
 This monorepo uses custom tools to enforce architectural boundaries and code consistency.
-All policy enforcement is consolidated into `tools/policy-compiler.cjs` and `tools/design-audit.cjs`.
+All policy enforcement is consolidated into `tools/repo/policy-compiler.cjs` and `tools/design-audit.cjs`.
 
 ## 1. Adding Architectural Boundaries
 
 To add a new dependency rule (e.g., "UI packages cannot depend on API packages"):
 
-1. Open `tools/apply-project-tags.cjs` to ensure the relevant project directories get the correct `scope:*` tags.
-2. Open `tools/policy-compiler.cjs` and update the dependency constraints with the new `sourceTag` and `onlyDependOnLibsWithTags`.
-3. Run `pnpm policy:gen` to compile the rules into `tools/policy/eslint-boundaries.generated.cjs`.
+1. Open `tools/repo/policy-compiler.cjs` and update the dependency constraints with the new `sourceTag` and `onlyDependOnLibsWithTags`.
+2. Run `pnpm policy:gen` to compile the rules into `tools/repo/policy/eslint-boundaries.generated.cjs`.
 
 ## 2. Design System Rules
 

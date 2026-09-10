@@ -14,7 +14,7 @@
  *
  * Usage:
  *   pnpm onboard
- *   node tools/onboard.cjs [--fix] [--json]
+ *   node tools/repo/onboard.cjs [--fix] [--json]
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -92,13 +92,13 @@ function safeExec(cmd, opts = {}) {
 }
 
 console.log(
-  `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`
+  `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`,
 );
 console.log(
-  `${colors.bold}${colors.cyan} 🛠️  Arch-Systems Monorepo Onboarding Diagnostic Suite${colors.reset}`
+  `${colors.bold}${colors.cyan} 🛠️  Arch-Systems Monorepo Onboarding Diagnostic Suite${colors.reset}`,
 );
 console.log(
-  `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`
+  `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`,
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ if (majorNode >= 22) {
   record(
     "PASS",
     "Node.js",
-    `Active version ${nodeVersion} satisfies engine requirement (${targetNode})`
+    `Active version ${nodeVersion} satisfies engine requirement (${targetNode})`,
   );
 } else {
   record(
@@ -127,7 +127,7 @@ if (majorNode >= 22) {
     "Node.js",
     `Active version ${nodeVersion} is below minimum requirement (${targetNode})`,
     null,
-    'Run "volta install node@24.15.0" or update your Node environment.'
+    'Run "volta install node@24.15.0" or update your Node environment.',
   );
 }
 
@@ -140,7 +140,7 @@ if (voltaCheck.success) {
     "Volta Toolchain",
     "Volta is not detected in PATH",
     "Volta ensures pinned Node/pnpm versions across team members.",
-    "Install Volta via: curl https://get.volta.sh | bash"
+    "Install Volta via: curl https://get.volta.sh | bash",
   );
 }
 
@@ -155,7 +155,7 @@ if (pnpmCheck.success) {
       "pnpm Manager",
       `Active version is ${pnpmVer} (expected 9.15.9)`,
       null,
-      'Run "volta install pnpm@9.15.9"'
+      'Run "volta install pnpm@9.15.9"',
     );
   }
 } else {
@@ -164,7 +164,7 @@ if (pnpmCheck.success) {
     "pnpm Manager",
     "pnpm is not installed or not in PATH",
     null,
-    "Install pnpm via: npm install -g pnpm@9.15.9 or volta install pnpm@9.15.9"
+    "Install pnpm via: npm install -g pnpm@9.15.9 or volta install pnpm@9.15.9",
   );
 }
 
@@ -179,14 +179,14 @@ if (dockerCheck.success) {
 
   // Check Supabase containers
   const supabaseContainerCheck = safeExec(
-    'docker ps --filter "name=supabase" --format "{{.Names}}: {{.Status}}"'
+    'docker ps --filter "name=supabase" --format "{{.Names}}: {{.Status}}"',
   );
   if (supabaseContainerCheck.success && supabaseContainerCheck.stdout.length > 0) {
     const running = supabaseContainerCheck.stdout.split("\n").filter(Boolean);
     record(
       "PASS",
       "Supabase Local Stack",
-      `${running.length} Supabase containers currently running`
+      `${running.length} Supabase containers currently running`,
     );
   } else {
     record(
@@ -194,7 +194,7 @@ if (dockerCheck.success) {
       "Supabase Local Stack",
       "No local Supabase containers currently active",
       "Local database services (Postgres, Studio, Auth) are offline.",
-      "Start local database stack via: pnpm --filter @repo/database supabase:dev"
+      "Start local database stack via: pnpm --filter @repo/database supabase:dev",
     );
   }
 } else {
@@ -203,7 +203,7 @@ if (dockerCheck.success) {
     "Docker Engine",
     "Docker daemon is not accessible on docker.sock",
     "Required for local Supabase database development and E2E testing.",
-    "Ensure Docker Desktop or dockerd daemon is running."
+    "Ensure Docker Desktop or dockerd daemon is running.",
   );
 }
 
@@ -241,7 +241,7 @@ if (fs.existsSync(PORTAL_ENV_ACTUAL)) {
     record(
       "PASS",
       "Portal .env",
-      `apps/portal/.env is present and all ${exampleKeys.size} example keys are defined`
+      `apps/portal/.env is present and all ${exampleKeys.size} example keys are defined`,
     );
   } else {
     record(
@@ -249,7 +249,7 @@ if (fs.existsSync(PORTAL_ENV_ACTUAL)) {
       "Portal .env",
       `apps/portal/.env is missing ${missingKeys.length} keys from .env.example`,
       `Missing keys: ${missingKeys.slice(0, 5).join(", ")}${missingKeys.length > 5 ? "..." : ""}`,
-      "Sync keys from apps/portal/env/.env.example to apps/portal/.env"
+      "Sync keys from apps/portal/env/.env.example to apps/portal/.env",
     );
   }
 } else {
@@ -258,7 +258,7 @@ if (fs.existsSync(PORTAL_ENV_ACTUAL)) {
     "Portal .env",
     "apps/portal/.env does not exist",
     null,
-    "Run: cp apps/portal/env/.env.example apps/portal/.env"
+    "Run: cp apps/portal/env/.env.example apps/portal/.env",
   );
 }
 
@@ -270,7 +270,7 @@ if (fs.existsSync(ROOT_ENV_ACTUAL)) {
     "Root .env",
     "Root .env not found (optional for certain shared tool tasks)",
     null,
-    "Copy root .env template if running monorepo integration scripts."
+    "Copy root .env template if running monorepo integration scripts.",
   );
 }
 
@@ -279,14 +279,12 @@ if (fs.existsSync(ROOT_ENV_ACTUAL)) {
 // ─────────────────────────────────────────────────────────────────────────────
 console.log(`\n${colors.bold}4. Monorepo Boundaries & Architecture Policies${colors.reset}`);
 
-const policyCheck = safeExec(
-  "node tools/apply-project-tags.cjs && node tools/policy-compiler.cjs --check"
-);
+const policyCheck = safeExec("node tools/repo/policy-compiler.cjs --check");
 if (policyCheck.success) {
   record(
     "PASS",
     "Architecture Policies",
-    "Turborepo project tags and ESLint boundary rules are in sync (SSoT verified)"
+    "Turborepo project tags and ESLint boundary rules are in sync (SSoT verified)",
   );
 } else {
   record(
@@ -294,7 +292,7 @@ if (policyCheck.success) {
     "Architecture Policies",
     "Boundary policy verification failed",
     policyCheck.stderr.slice(0, 200),
-    "Run: pnpm policy:gen"
+    "Run: pnpm policy:gen",
   );
 }
 
@@ -312,7 +310,7 @@ if (hookTest.success) {
     "Feature Hook Tests",
     "Feature hook tests encountered failures or open handles",
     hookTest.stderr.slice(0, 200),
-    'Run: pnpm --filter portal test -- --testPathPatterns="hook" to inspect.'
+    'Run: pnpm --filter portal test -- --testPathPatterns="hook" to inspect.',
   );
 }
 
@@ -320,33 +318,33 @@ if (hookTest.success) {
 // Summary & Actionable Recommendations
 // ─────────────────────────────────────────────────────────────────────────────
 console.log(
-  `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`
+  `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`,
 );
 console.log(
-  `${colors.bold} Diagnostic Summary: ${colors.green}${results.passed} Passed${colors.reset} | ${colors.yellow}${results.warned} Warnings${colors.reset} | ${colors.red}${results.failed} Failures${colors.reset}`
+  `${colors.bold} Diagnostic Summary: ${colors.green}${results.passed} Passed${colors.reset} | ${colors.yellow}${results.warned} Warnings${colors.reset} | ${colors.red}${results.failed} Failures${colors.reset}`,
 );
 console.log(
-  `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`
+  `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`,
 );
 
 if (results.failed === 0) {
   console.log(
-    `${colors.green}${colors.bold}🚀 Your monorepo workspace environment is healthy and ready for development!${colors.reset}\n`
+    `${colors.green}${colors.bold}🚀 Your monorepo workspace environment is healthy and ready for development!${colors.reset}\n`,
   );
   console.log(`Recommended Next Commands:`);
   console.log(
-    `  ${colors.cyan}pnpm dev${colors.reset}               - Launch local Next.js portal & Turbopack`
+    `  ${colors.cyan}pnpm dev${colors.reset}               - Launch local Next.js portal & Turbopack`,
   );
   console.log(
-    `  ${colors.cyan}pnpm turbo:graph${colors.reset}       - Visualize interactive architectural dependency graph`
+    `  ${colors.cyan}pnpm turbo:graph${colors.reset}       - Visualize interactive architectural dependency graph`,
   );
   console.log(
-    `  ${colors.cyan}pnpm audit:compliance${colors.reset}  - Verify database migrations & data contract integrity\n`
+    `  ${colors.cyan}pnpm audit:compliance${colors.reset}  - Verify database migrations & data contract integrity\n`,
   );
   process.exit(0);
 } else {
   console.log(
-    `${colors.red}${colors.bold}⚠️ Some critical onboarding requirements need attention before proceeding.${colors.reset}\n`
+    `${colors.red}${colors.bold}⚠️ Some critical onboarding requirements need attention before proceeding.${colors.reset}\n`,
   );
   process.exit(1);
 }
