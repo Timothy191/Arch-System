@@ -80,6 +80,7 @@
     "audit:drift": "node tools/audits/audit-contract-drift.cjs",
     "audit:rls-matrix": "node tools/audits/audit-rls-matrix.cjs",
     "audit:agents": "node tools/audits/audit-agentic-content.cjs",
+    "audit:antidrift": "node tools/audits/antidrift-test.cjs",
     "audit:compliance": "pnpm audit:suite && node tools/audits/audit-design-tokens.cjs && node tools/audits/audit-contract-drift.cjs && node tools/audits/audit-rls-matrix.cjs && node tools/audits/audit-agentic-content.cjs && pnpm --filter @repo/database test",
     "audit:explain": "node tools/ops/explain-query-plans.cjs",
     "audit:rls": "node tools/audits/audit-rls.cjs",
