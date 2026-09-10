@@ -18,6 +18,7 @@ module.exports = {
     "dist/**",
     "build/**",
     "report/**",
+    "coverage/**",
     "commitlint.config.mjs"
   ],
   rules: {

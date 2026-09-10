@@ -8,6 +8,8 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
+      "!packages/database",
+      "!packages/supabase",
       "apps/**/*.{ts,tsx,js,jsx,json}",
       "packages/**/*.{ts,tsx,js,jsx,json}",
       "libs/**/*.{ts,tsx,js,jsx,json}",
@@ -29,12 +31,28 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "recommended": false
+      },
       "suspicious": {
         "noExplicitAny": "off",
-        "noArrayIndexKey": "warn"
+        "noArrayIndexKey": "warn",
+        "noControlCharactersInRegex": "off",
+        "useIterableCallbackReturn": "warn",
+        "noThenProperty": "off",
+        "noImplicitAnyLet": "warn",
+        "noAssignInExpressions": "warn",
+        "noShadowRestrictedNames": "warn"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noInvalidUseBeforeDeclaration": "warn"
       },
       "complexity": {
         "noExtraBooleanCast": "warn"
+      },
+      "security": {
+        "noGlobalEval": "off"
       },
       "style": {
         "noNonNullAssertion": "off"

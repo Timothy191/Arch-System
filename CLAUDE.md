@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as an **Nx 22 + pnpm** monorepo. It serves authenticated, department-specific dashboards (drilling, production, access control, engineering, control room, safety, training, satellite monitoring).
+Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as an **Turborepo 2.x + pnpm** monorepo. It serves authenticated, department-specific dashboards (drilling, production, access control, engineering, control room, safety, training, satellite monitoring).
 
 ## Environment
 
@@ -81,7 +81,7 @@ All common commands are also available via `make`:
 - `make fresh-start` - clean rebuild from scratch
 - `make shutdown` - stop all services
 - `make clean` - remove build artifacts & caches
-- `make clean-cache` - clear Nx cache only
+- `make clean-cache` - clear Turborepo cache only
 - `make clean-docker` - stop & remove Docker containers/volumes
 
 ## Architecture Overview
@@ -113,7 +113,7 @@ tools/
 ├── policy-compiler.cjs      # Enforces architectural boundaries (turbo.json)
 ├── design-audit.cjs         # Validates OKLCH color usage & theme compliance
 ├── enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
-└── apply-project-tags.cjs   # Applies Nx scope tags to new projects
+└── apply-project-tags.cjs   # Applies Turborepo scope tags to new projects
 
 scripts/
 ├── sync-assets-smart.cjs    # Asset synchronization utility
@@ -197,7 +197,7 @@ Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` t
 
 ### Testing Strategy
 
-- **Unit Tests**: Vitest (via Nx test target) - co-located with implementation
+- **Unit Tests**: Vitest (via Turborepo test pipeline) - co-located with implementation
 - **E2E Tests**: Playwright - requires dev server running on :3000
 - **Visual Tests**: Playwright image snapshots for UI regression detection
 - **Accessibility**: axe-core automated scanning (`pnpm test:a11y`)

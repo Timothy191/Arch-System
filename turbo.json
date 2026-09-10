@@ -1,24 +1,99 @@
 {
-  "$schema": "https://turborepo.dev/schema.json",
-  "ui": "tui",
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["tsconfig.json", "pnpm-workspace.yaml", ".npmrc"],
+  "globalEnv": [
+    "NODE_ENV",
+    "VERCEL_ENV",
+    "CI",
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "INNGEST_EVENT_KEY",
+    "NOVU_API_KEY",
+    "OTEL_SERVICE_NAME",
+    "PORTAL_VERSION",
+    "RATE_LIMIT_IP_WHITELIST",
+    "ENABLE_LOAD_ADAPTIVE_TEST",
+    "DISABLE_RATE_LIMIT",
+    "ANALYZE",
+    "USERPROFILE",
+    "COHERE_API_KEY",
+    "OPENROUTER_API_KEY",
+    "SITE_URL",
+    "SITE_NAME",
+    "SKILL_VALIDATOR"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**", "build/**"]
+      "dependsOn": ["^build", "^codegen", "codegen"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/__tests__/**",
+        "!**/*.stories.*",
+        "!**/.storybook/**",
+        "!**/tsconfig.storybook.json"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "cache": true
     },
-    "lint": {
-      "dependsOn": ["^lint"]
+    "build-storybook": {
+      "dependsOn": ["^build", "^codegen", "codegen"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.*",
+        "!**/*.spec.*",
+        "!**/__tests__/**",
+        "!**/*.stories.*",
+        "!**/.storybook/**",
+        "!**/tsconfig.storybook.json"
+      ],
+      "outputs": ["storybook-static/**", "dist/**"],
+      "cache": true
     },
-    "type-check": {
-      "dependsOn": ["^type-check"]
+    "clean": {
+      "cache": false
     },
-    "test": {
-      "dependsOn": ["^build"]
+    "codegen": {
+      "inputs": [
+        "src/css/variables.css",
+        "scripts/generate-tokens.mjs",
+        "sd.config.mjs",
+        "tokens.json"
+      ],
+      "outputs": ["src/tokens/generated.ts", "src/css/index.css"],
+      "cache": true
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "lint": {
+      "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "!pnpm-lock.yaml"],
+      "outputs": ["node_modules/.cache/.eslintcache"],
+      "cache": true
+    },
+    "lint:css": {
+      "inputs": ["src/**/*.css", ".stylelintrc.*"],
+      "cache": true
+    },
+    "lint:tokens": {
+      "inputs": ["src/css/variables.css", "src/tailwind/preset.ts", "scripts/validate-tokens.mjs"],
+      "cache": true
+    },
+    "sync-assets": {
+      "inputs": ["assets/**/*", "scripts/sync-assets-smart.cjs"],
+      "outputs": ["public/background/**", "public/error-pages/**", "public/large/**"],
+      "cache": true
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*", "playwright.config.*"],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "type-check": {
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "tsconfig.*.json"],
+      "outputs": ["**/*.tsbuildinfo"],
+      "cache": true
     }
   }
 }
