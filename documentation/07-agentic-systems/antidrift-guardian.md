@@ -37,15 +37,15 @@ Runs real checks across the **seven non-drift capabilities**, computes a
 confidence % per capability and overall, and decides drift status against a
 **90% threshold** (exit code 1 = drift detected):
 
-| Capability                    | What drift looks like                                       |
-| ----------------------------- | ----------------------------------------------------------- |
-| Source Retention              | Surviving Nx references in living docs/configs              |
-| Boundary Retention            | SSoT locations relocated or shadowed by duplicates          |
-| Concept Stability             | Nx/Turbo conflation; deploy-time copy treated as editable   |
-| Unauthorized Merge Detection  | Generated artifacts or protected paths hand-edited          |
-| Authorization Drift Detection | RLS detached from `auth.uid()`; UI importing DB/Supabase    |
-| Repair Accuracy               | A "fix" that re-introduces drift; phantom script references |
-| Pressure Resistance           | Incomplete work, stale branches, unsynced remote            |
+| Capability                    | What drift looks like                                                             |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| Source Retention              | Surviving Nx references in living docs/configs                                    |
+| Boundary Retention            | SSoT locations relocated or shadowed by duplicates                                |
+| Concept Stability             | Nx and Turborepo treated as interchangeable; deploy-time copy treated as editable |
+| Unauthorized Merge Detection  | Generated artifacts or protected paths hand-edited                                |
+| Authorization Drift Detection | RLS detached from `auth.uid()`; UI importing DB/Supabase                          |
+| Repair Accuracy               | A "fix" that re-introduces drift; phantom script references                       |
+| Pressure Resistance           | Incomplete work, stale branches, unsynced remote                                  |
 
 The test is **read-only**: it restores `documentation/03-audit-reports/rls-report.md`
 after running `audit-rls.cjs` (which regenerates it as a side effect), and it
