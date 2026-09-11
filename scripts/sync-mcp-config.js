@@ -42,9 +42,12 @@ function resolvePath(p) {
 function main() {
   console.log("Syncing MCP configurations...");
 
-  const mcpJsonPath = path.join(REPO_ROOT, "config/tools/mcp.json");
+  let mcpJsonPath = path.join(REPO_ROOT, "config/tools/mcp.json");
   if (!fs.existsSync(mcpJsonPath)) {
-    console.error(`Base MCP config not found at ${mcpJsonPath}`);
+    mcpJsonPath = path.join(REPO_ROOT, ".mcp.json");
+  }
+  if (!fs.existsSync(mcpJsonPath)) {
+    console.error(`Base MCP config not found at config/tools/mcp.json or .mcp.json`);
     process.exit(1);
   }
 

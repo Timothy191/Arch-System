@@ -454,3 +454,9 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Agent**: Antigravity
 - **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
+
+## 2026-09-11T08:32:00Z
+- **Agent**: Antigravity (acting as nextjs-fullstack-engineer)
+- **Changes**: 
+  - Refactored `AcknowledgeButton` to use non-blocking optimistic UI with an Undo toast action (via `sonner`), replacing the blocking `ActionConfirmDialog`.
+  - **Reason**: Implement Heuristic #2 from UX_UI_AUDIT.md and follow Next.js modern UI guidelines for optimistic updates.

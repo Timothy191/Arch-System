@@ -1,0 +1,34 @@
+{
+  "tools": {
+    "sandbox": "docker",
+    "enableHooks": true,
+    "enableMessageBusIntegration": true
+  },
+  "mcpServers": {
+    "omg_cli_tools": {
+      "command": "oh-my-antigravity",
+      "args": [
+        "tools",
+        "serve"
+      ],
+      "description": "oh-my-antigravity CLI tools MCP server (file/git/http/process)",
+      "cwd": "${extensionPath}"
+    },
+    "omp_cli_tools": {
+      "command": "oh-my-antigravity",
+      "args": [
+        "tools",
+        "serve"
+      ],
+      "cwd": "${extensionPath}",
+      "description": "oh-my-antigravity CLI tools MCP server compatibility alias (file/git/http/process)"
+    }
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "hooksConfig": {
+    "enabled": true,
+    "notifications": true
+  }
+}

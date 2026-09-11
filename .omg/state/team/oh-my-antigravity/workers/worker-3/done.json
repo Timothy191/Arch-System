@@ -1,0 +1,11 @@
+{
+  "teamName": "oh-my-antigravity",
+  "workerName": "worker-3",
+  "status": "completed",
+  "completedAt": "2026-09-11T06:54:45.558Z",
+  "summary": "Worker worker-3 completed task for team oh-my-antigravity",
+  "metadata": {
+    "wrapperPid": 1197823,
+    "signalForwardingMode": "wrapper-forward"
+  }
+}

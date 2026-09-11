@@ -78,7 +78,11 @@ const RESTRICTED_ROUTES: Record<string, string[]> = {
 };
 
 export function normalizeRole(role: unknown): string {
-  return typeof role === "string" && role.length > 0 ? role : "operator";
+  if (typeof role === "string") {
+    const trimmed = role.trim();
+    if (trimmed.length > 0) return trimmed;
+  }
+  return "operator";
 }
 
 export function isTokenExpiredError(error: unknown): boolean {
@@ -307,13 +311,30 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  // Fetch authoritative role/department from employees table (cached)
+  // Fetch authoritative role/department from employees table (cached with resilient fallback)
   const employeeCacheKey = `arch:auth:employee:${user.id}`;
-  let employee = await cacheGet<{
+  let employee: {
     role: string;
     department_id: string;
     accessible_departments: string[];
-  } | null>(employeeCacheKey);
+  } | null = null;
+
+  try {
+    const cachePromise = cacheGet<{
+      role: string;
+      department_id: string;
+      accessible_departments: string[];
+    }>(employeeCacheKey);
+
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error("Redis cache timeout")), 150),
+    );
+
+    employee = await Promise.race([cachePromise, timeoutPromise]);
+  } catch (err) {
+    // Redis offline or timeout — fall through to direct DB fetch
+    employee = null;
+  }
 
   if (!employee) {
     const { data } = await client.supabase

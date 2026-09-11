@@ -105,7 +105,7 @@ if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
 fi
 
 # ── Step 4: Clear Port & Launch Portal ─────────────────────────────────────
-stray_pids=$(ss -tunlp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K\d+' | sort -u || true)
+stray_pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
 if [ -n "$stray_pids" ]; then
   info "Freeing port $PORT..."
   echo "$stray_pids" | xargs kill -9 2>/dev/null || true

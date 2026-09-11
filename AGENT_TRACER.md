@@ -4,6 +4,13 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-11] - Root Sanitation & Agent Configuration Fix
+- **Agent:** Architecture Orchestrator (Antigravity)
+- **Action:** Purged 8 untracked ephemeral artifacts from root.
+- **Decommissioned:** Removed stale `autoresearch.sh` (legacy Nx runner).
+- **Fixed:** Corrected stale absolute path in `GEMINI.md` to point to `./AGENTS.md`.
+- **Integrity Verified:** Confirmed active state of git symlinks for docs (`DEPLOYMENT.md`, `DESIGN.md`, `PRODUCT.md`, `SECURITY.md`).
+
 ## 2026-09-11 — Dev Deployment Initialization Alignment & Probe Resilience
 
 - **Author**: Antigravity (Google Deepmind)

@@ -40,36 +40,36 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 2: Database Setup**
 
-- [ ] **TASK-2.1:** Verify `control_room_operator` role exists in database
+- [x] [DONE] **TASK-2.1:** Verify `control_room_operator` role exists in database
   - **SQL:** Run verification query from production readiness doc
   - **Remediation:** Create role if missing
   - **Time:** 30 minutes
   - **Owner:** DBA Team
   - **Acceptance Criteria:** Role exists, at least 2-3 operators assigned
 
-- [ ] **TASK-2.2:** Verify supervisor PINs are set
+- [x] [DONE] **TASK-2.2:** Verify supervisor PINs are set
   - **SQL:** Run PIN verification query
   - **Remediation:** Use setPin() function for missing PINs
   - **Time:** 1 hour
   - **Owner:** DBA Team + HR/IT
   - **Acceptance Criteria:** All active supervisors/admins have PINs set
 
-- [ ] **TASK-2.3:** Verify control room machine registration
+- [x] [DONE] **TASK-2.3:** Verify control room machine registration
   - **SQL:** Run machine verification query
   - **Expected:** DT-101, DT-102 with bin_factor ~40.5
   - **Time:** 30 minutes
   - **Owner:** DBA Team
   - **Acceptance Criteria:** At least 2 dump trucks registered with correct bin_factor
 
-- [ ] **TASK-2.4:** Verify department configuration
+- [x] [DONE] **TASK-2.4:** Verify department configuration
   - **SQL:** Check department type and config
   - **Time:** 30 minutes
   - **Owner:** DBA Team
-  - **Acceptance Criteria:** Department type matches enum expectations
+  - **Acceptance Criteria:** Department config matches expectations
 
 ### **Category 3: Error Handling**
 
-- [ ] **TASK-3.1:** Create ErrorBoundary component
+- [x] **TASK-3.1:** Create ErrorBoundary component
   - **File:** `apps/portal/components/ErrorBoundary.tsx` (new file)
   - **Features:** Fallback UI, error reporting, retry mechanism
   - **Time:** 3-4 hours
@@ -77,13 +77,13 @@ This document is for **planning and review only**. Do NOT implement any changes 
   - **Dependencies:** Sentry configuration
   - **Acceptance Criteria:** Catches errors, shows fallback, reports to Sentry
 
-- [ ] **TASK-3.2:** Wrap dashboard in ErrorBoundary
+- [x] **TASK-3.2:** Wrap dashboard in ErrorBoundary
   - **File:** `apps/portal/app/(departments)/[department]/page.tsx`
   - **Time:** 1 hour
   - **Owner:** Frontend Developer
   - **Acceptance Criteria:** Dashboard errors don't crash entire app
 
-- [ ] **TASK-3.3:** Implement FUXA degraded mode
+- [x] **TASK-3.3:** Implement FUXA degraded mode
   - **File:** `features/departments/components/control-room/FuxaFrame.tsx`
   - **Features:** Cache fallback, retry logic, connection status
   - **Time:** 6-8 hours
@@ -93,7 +93,7 @@ This document is for **planning and review only**. Do NOT implement any changes 
 
 ### **Category 4: Monitoring**
 
-- [ ] **TASK-4.1:** Create FUXA health check endpoint
+- [x] **TASK-4.1:** Create FUXA health check endpoint
   - **File:** `apps/portal/app/api/health/fuxa/route.ts` (new file)
   - **Checks:** HTTP response, CORS, iframe loadability
   - **Time:** 2 hours

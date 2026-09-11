@@ -41,3 +41,42 @@ export const controlRoomShiftReportSchema = z.object({
   checklistItems: z.array(controlRoomChecklistItemSchema).optional().default([]),
   supervisorSignature: nonEmptyString.max(100).optional().nullable(),
 });
+
+export const shiftCloseoutSchema = z.object({
+  shiftId: uuidSchema,
+  department: z.literal("control_room"),
+  supervisorId: uuidSchema,
+  supervisorPin: z.string().regex(/^\d{4,6}$/, "Supervisor PIN must be 4 to 6 digits"),
+  totalLoads: z.number().int().nonnegative(),
+  totalOperatingHours: z.number().min(0).max(24),
+  breakdownHours: z.number().min(0).max(24),
+  operatorNotes: z.string().max(1000).optional(),
+});
+
+export const healthCheckResponseSchema = z.object({
+  status: z.enum(["healthy", "degraded", "unhealthy"]),
+  timestamp: z.string(),
+  latencyMs: z.number().nonnegative(),
+  services: z.object({
+    supabase: z.object({
+      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      latencyMs: z.number().nonnegative(),
+      error: z.string().optional(),
+    }),
+    redis: z.object({
+      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      latencyMs: z.number().nonnegative(),
+      error: z.string().optional(),
+    }),
+    fuxa: z.object({
+      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      latencyMs: z.number().nonnegative(),
+      statusCode: z.number().optional().nullable(),
+      error: z.string().optional(),
+    }),
+  }),
+});
+
+export type ShiftCloseoutInput = z.infer<typeof shiftCloseoutSchema>;
+export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
+

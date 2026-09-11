@@ -1,0 +1,32 @@
+# Role Output: build-fixer
+
+- worker: worker-3
+- status: completed
+- summary: build-fixer completed assignment 3/3 for task "implement-phase-2-3" in deterministic simulated mode.
+
+```json
+{
+  "subagentId": "build-fixer",
+  "roleId": "build-fixer",
+  "workerId": "worker-3",
+  "skill": "team",
+  "skills": [
+    "team"
+  ],
+  "status": "completed",
+  "summary": "build-fixer completed assignment 3/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
+  "simulated": true,
+  "completionProvenance": "deterministic-simulated",
+  "artifacts": {
+    "json": ".omg/state/team/oh-my-antigravity/artifacts/roles/worker-3/build-fixer.json",
+    "markdown": ".omg/state/team/oh-my-antigravity/artifacts/roles/worker-3/build-fixer.md"
+  },
+  "implementation": {
+    "changeSummary": "Implemented scoped changes for \"implement-phase-2-3\" in deterministic runtime mode.",
+    "commands": [
+      "npm run typecheck",
+      "npm run test:reliability"
+    ]
+  }
+}
+```

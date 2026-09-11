@@ -2,10 +2,11 @@
 
 import { cn } from "@repo/ui/lib/utils";
 import { useState } from "react";
-import { ActionConfirmDialog } from "./ui/action-confirm-dialog";
+import { toast } from "sonner";
 
 interface AcknowledgeButtonProps {
   onAcknowledge: () => void;
+  onUndo?: () => void;
   className?: string;
   label?: string;
   confirmTitle?: string;
@@ -13,42 +14,50 @@ interface AcknowledgeButtonProps {
 }
 
 /**
- * A specialized button for acknowledging alarms/alerts with a confirmation gate.
- * Reduces accidental dismissals of critical system status notifications.
+ * A specialized button for acknowledging alarms/alerts with a toast undo gate.
+ * Reduces accidental dismissals of critical system status notifications without blocking UI.
  */
 export function AcknowledgeButton({
   onAcknowledge,
+  onUndo,
   className,
   label = "Acknowledge",
-  confirmTitle = "Confirm Acknowledgment",
-  confirmDescription = "Are you sure you want to acknowledge this alert? This action will mark the status as reviewed.",
+  confirmTitle = "Alarm Acknowledged",
+  confirmDescription = "This action will mark the status as reviewed.",
 }: AcknowledgeButtonProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Optimistic UI updates
+    setAcknowledged(true);
+    onAcknowledge();
+    
+    toast.success(confirmTitle, {
+      description: confirmDescription,
+      action: onUndo ? {
+        label: "Undo",
+        onClick: () => {
+          setAcknowledged(false);
+          onUndo();
+        }
+      } : undefined,
+    });
+  };
+
+  if (acknowledged) return null;
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsDialogOpen(true);
-        }}
-        className={cn(
-          "px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]",
-          className,
-        )}
-      >
-        {label}
-      </button>
-
-      <ActionConfirmDialog
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onConfirm={onAcknowledge}
-        title={confirmTitle}
-        description={confirmDescription}
-        confirmText="Acknowledge"
-      />
-    </>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={cn(
+        "px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]",
+        className,
+      )}
+    >
+      {label}
+    </button>
   );
 }

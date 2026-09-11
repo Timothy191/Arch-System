@@ -19,7 +19,8 @@
     "OPENROUTER_API_KEY",
     "SITE_URL",
     "SITE_NAME",
-    "SKILL_VALIDATOR"
+    "SKILL_VALIDATOR",
+    "NEXT_PUBLIC_FUXA_URL"
   ],
   "tasks": {
     "build": {

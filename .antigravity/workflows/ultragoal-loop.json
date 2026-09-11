@@ -1,0 +1,9 @@
+{
+  "name": "ultragoal-verification-loop",
+  "steps": [
+    { "name": "maker_generate", "agent": "gemini-2.5-flash", "role": "maker" },
+    { "name": "apply_changes", "action": "execute_harness" },
+    { "name": "verifier_check", "agent": "gemini-2.5-pro", "role": "verifier", "temperature": 0.0, "subshell": true },
+    { "name": "parse_result", "script": "scripts/ultragoal-transition.sh" }
+  ]
+}

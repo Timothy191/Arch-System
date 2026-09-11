@@ -52,6 +52,8 @@ export {
   controlRoomChecklistItemSchema,
   controlRoomChecklistSchema,
   controlRoomShiftReportSchema,
+  healthCheckResponseSchema,
+  shiftCloseoutSchema,
   shiftCompletenessSchema,
 } from "./schemas/control-room.schema.js";
 export { drillOperationSchema, drillTelemetryIngestSchema } from "./schemas/drill.schema.js";
@@ -144,6 +146,10 @@ export type {
   ControlRoomShiftReportInput,
   ShiftCompletenessInput,
 } from "./types/control-room.types.js";
+export type {
+  HealthCheckResponse,
+  ShiftCloseoutInput,
+} from "./schemas/control-room.schema.js";
 export type { ExportQueryInput } from "./types/export.types.js";
 export type {
   BookOutInput,
@@ -187,3 +193,4 @@ export type {
   TireStatus,
 } from "./types/tire-management.types.js";
 export type { CreateWebhookInput, UpdateWebhookInput } from "./types/webhook.types.js";
+export * from './ultragoal';

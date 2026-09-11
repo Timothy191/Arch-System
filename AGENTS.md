@@ -243,3 +243,21 @@ Runs: lint → type-check → test → lint:tokens → lint:css → policy:check
 | `packages/database/migrations/` | `pnpm --filter @repo/database supabase:push && ... supabase:gen` | `packages/supabase/src/database.types.ts` |
 
 Commit both source and generated files in the same atomic change.
+
+---
+
+## Mandatory Phased Action Plan & Real-World Review Framework
+
+All agents, CLI tools, and automated workflows operating in this repository MUST follow the strict phased execution pipeline before modifying code logic:
+
+1. **Phased Documentation Sequence (`temp/`)**:
+   - `temp/outline.md`: High-level strategic vision, problem framing, real-world Council viewpoints, and scope breakdown.
+   - `temp/requirements.md`: Functional scope, user stories, and precise acceptance criteria formatted in **EARS** notation (`WHEN [condition] THE SYSTEM SHALL [behavior]`), explicitly detailing normal behavior, error paths, and edge cases. (For bug fixes, replaced by `bugfix.md`).
+   - `temp/design.md`: Technical architecture, data models, API contracts, sequence diagrams, and testing strategies ensuring feasibility.
+   - `temp/tasks.md`: Executable task breakdown organized into logical execution waves with sub-tasks linked back to `requirements.md`.
+
+2. **Real-World Scoring & Phase Gate Auditing**:
+   - Before executing code changes in each wave, review `outline.md`, `requirements.md`, `design.md`, and `tasks.md` using the **Real-World Quality Score**:
+     $$\text{Real-World Score} = \frac{\text{Feasibility} + \text{Maintainability} + \text{Security} + \text{Performance} + \text{Reliability}}{5}$$
+   - Only proceed to wave execution when the score achieves $\ge 90/100$.
+

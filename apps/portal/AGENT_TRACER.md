@@ -384,3 +384,19 @@ AIAssistant chat.
   - Screenshots: `/tmp/opencode/aria/01-portal-panel-open.png`, `03-iframe-full.png`.
 - **Status**: Completed. `AriaLauncher.tsx` z-index + this entry committed to `main`. Sidecar config/deploy changes live only in `/home/timothy/orca/aria-overlay/` (not a git repo) — consider committing the sidecar to its own repository.
 ```
+
+## 2026-09-11T08:32:00Z
+- **Agent**: Antigravity (acting as nextjs-fullstack-engineer)
+- **Changes**: 
+  - Added `autoSaveShiftReportDraft` Server Action in `lib/control-room-shift-report.ts` implementing a 150ms bounded debounced Redis cache write.
+  - **Reason**: Implement Heuristic #5 from UX_UI_AUDIT.md to prevent data loss during shift closeouts.
+
+## 2026-09-11T09:14:00Z
+- **Agent**: Antigravity
+- **Changes**:
+  - Control Room Hardening & Pre-Production Readiness implementation:
+    1. Global error boundary in `components/ErrorBoundary.tsx` supporting configurable title/message, rose theme styling, and state reset.
+    2. SCADA resilient container `features/departments/components/control-room/FuxaFrame.tsx` with health polling, sandboxed iframe rendering, and degraded mode fallback.
+    3. Aggregated health probe `/api/health/route.ts` with 2.5s FUXA timeout and Supabase/Redis status checks.
+    4. Rate-limited shift closeout server action in `lib/actions/shift-closeout.ts` using canonical Zod contract, Redis rate-limiting (5/min), and `verify_supervisor_pin` RPC call.
+

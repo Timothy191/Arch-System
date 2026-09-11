@@ -13,6 +13,8 @@ interface ErrorBoundaryProps {
   fallback?: ReactNode;
   onError?: (_error: Error, _errorInfo: React.ErrorInfo) => void;
   context?: string;
+  title?: string;
+  message?: string;
 }
 
 interface ErrorBoundaryState {
@@ -56,8 +58,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     // AGENT-TRACE: Report to Sentry with additional context
-    // Sentry integration is configured in instrumentation.ts
-    // Additional context includes component stack and custom context prop
     try {
       if (typeof window !== "undefined" && (window as any).Sentry) {
         (window as any).Sentry.captureException(error, {
@@ -98,40 +98,45 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
-      // Default fallback UI
+      const displayTitle = this.props.title || "Control Room Component Interrupted";
+      const displayMessage =
+        this.props.message ||
+        (this.props.context
+          ? `An error occurred in ${this.props.context}. Telemetry recorded message.`
+          : "Telemetry recorded message. Attempting component recovery.");
+
+      // Default fallback UI with rose theme
       return (
         <div className="min-h-[400px] flex items-center justify-center p-4">
-          <GlassCard className="max-w-md w-full">
+          <GlassCard className="max-w-md w-full border-rose-200 bg-rose-50/50">
             <div className="space-y-6">
               {/* Error Icon */}
               <div className="flex justify-center">
-                <div className="p-4 rounded-full bg-accent-red/10 border border-accent-red/20">
-                  <AlertTriangle className="w-8 h-8 text-accent-red" />
+                <div className="p-4 rounded-full bg-rose-100 border border-rose-300">
+                  <AlertTriangle className="w-8 h-8 text-rose-600" />
                 </div>
               </div>
 
               {/* Error Message */}
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium text-[var(--text-heading)]">
-                  Something went wrong
+                <h3 className="text-lg font-medium text-rose-900">
+                  {displayTitle}
                 </h3>
-                <p className="text-[var(--text-secondary)] text-sm">
-                  {this.props.context
-                    ? `An error occurred in ${this.props.context}.`
-                    : "An unexpected error occurred."}
+                <p className="text-rose-700 text-sm">
+                  {displayMessage}
                 </p>
-                <p className="text-[var(--text-muted)] text-xs">
+                <p className="text-rose-500 text-xs font-mono">
                   {this.state.error?.message || "Unknown error"}
                 </p>
               </div>
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button onClick={this.handleReset} variant="outline" className="flex-1">
+                <Button onClick={this.handleReset} variant="outline" className="flex-1 border-rose-300 text-rose-900 hover:bg-rose-100">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                <Button onClick={this.handleGoHome} variant="default" className="flex-1">
+                <Button onClick={this.handleGoHome} variant="default" className="flex-1 bg-rose-600 hover:bg-rose-700 text-white">
                   <Home className="w-4 h-4 mr-2" />
                   Go Home
                 </Button>

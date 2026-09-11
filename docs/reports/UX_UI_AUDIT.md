@@ -131,8 +131,8 @@ _SidebarNav, HeaderBar, MacTitleBar_
 1. [DONE] **Fix high-priority accessibility TODOs** (alert token contrast, `MacTitleBar` labels, `WorkflowBuilder` context).
 2. [DONE] **Integrate automated a11y audits in CI**.
 3. [TODO] **Implement “freeze” mode** on telemetry charts (Heuristic #1).
-4. [TODO] **Add confirmation/undo to alarm acknowledgment** (Heuristic #2).
-5. [TODO] **Auto-save shift closeout notes** (Heuristic #5).
+4. [DONE] **Add confirmation/undo to alarm acknowledgment** (Heuristic #2).
+5. [DONE] **Auto-save shift closeout notes** (Heuristic #5).
 6. [TODO] **Standardize `GlassCard` variants** in theme tokens (Heuristic #6).
 
 ---

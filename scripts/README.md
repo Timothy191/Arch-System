@@ -454,7 +454,7 @@ sudo systemctl start arch-portal
 ./dev.sh --force
 
 # Manual port check
-lsof -i :3000
+lsof -ti:3000
 ```
 
 ### Docker Issues

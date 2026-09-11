@@ -6,33 +6,24 @@ set -euo pipefail
 #
 # Validates the local environment before deploying the portal.
 # Safe to run anytime — all fixes are idempotent and require --fix to apply.
+# Uses: scripts/lib/common.sh
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PORTAL_DIR="$REPO_ROOT/apps/portal"
-ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-  DATABASE_DIR="$ARCH_BASE_DIR"
-else
-  DATABASE_DIR="$REPO_ROOT/packages/database"
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
 PORT="${PORT:-3000}"
 FIX_MODE=false
 WARNINGS=()
 ERRORS=()
 
-# ── Colors ────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
-
+# ── Script-specific check display ───────────────────────────
+# These use ✓/⚠/✗ icons unique to this script's output format,
+# but share the unified color palette from common.sh.
 check_pass() { echo -e "  ${GREEN}✓${NC} $*"; }
 check_warn() { echo -e "  ${YELLOW}⚠${NC} $*"; WARNINGS+=("$*"); }
 check_fail() { echo -e "  ${RED}✗${NC} $*"; ERRORS+=("$*"); }
+
 header() {
   echo
   echo -e "${CYAN}${BOLD}$*${NC}"
@@ -53,9 +44,9 @@ echo "Repo: $REPO_ROOT"
 # ═══════════════════════════════════════════════════════════
 header "1. Environment"
 
-if command -v node >/dev/null 2>&1; then
+if command -v node > /dev/null 2>&1; then
   NODE_VER=$(node -v | sed 's/v//')
-  if printf '%s\n' "20.17.0" "$NODE_VER" | sort -V | head -n1 | grep -q "20.17.0"; then
+  if version_ge "$NODE_VER" "20.17.0"; then
     check_pass "Node.js v$NODE_VER"
   else
     check_fail "Node.js >= 20.17.0 required (found $NODE_VER)"
@@ -64,15 +55,24 @@ else
   check_fail "Node.js not found"
 fi
 
-if command -v pnpm >/dev/null 2>&1; then
+if command -v pnpm > /dev/null 2>&1; then
   PNPM_VER=$(pnpm -v)
   check_pass "pnpm v$PNPM_VER"
 else
   check_fail "pnpm not found — install: npm install -g pnpm@9.12.0"
 fi
 
-if docker info >/dev/null 2>&1; then
+ENV_FILE="$PORTAL_DIR/.env"
+[ ! -f "$ENV_FILE" ] && [ -f "$REPO_ROOT/.env" ] && ENV_FILE="$REPO_ROOT/.env"
+IS_CLOUD_SUPABASE=false
+if [ -f "$ENV_FILE" ] && grep -qE '^NEXT_PUBLIC_SUPABASE_URL=https?://.*supabase\.(co|in)' "$ENV_FILE"; then
+  IS_CLOUD_SUPABASE=true
+fi
+
+if docker info > /dev/null 2>&1; then
   check_pass "Docker daemon running"
+elif [ "$IS_CLOUD_SUPABASE" = true ]; then
+  check_pass "Docker daemon not running (optional — Cloud Supabase active)"
 else
   check_warn "Docker daemon not running (required for local Supabase)"
 fi
@@ -84,7 +84,7 @@ header "2. Repository Structure"
 
 [ -d "$REPO_ROOT/.git" ] && check_pass "Git repository" || check_fail "Not a git repository"
 [ -d "$PORTAL_DIR" ]     && check_pass "apps/portal"   || check_fail "apps/portal missing"
-if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
   check_pass "Arch-Base database ($ARCH_BASE_DIR)"
   ([ -d "$DATABASE_DIR/supabase/migrations" ] || [ -d "$DATABASE_DIR/migrations" ]) && check_pass "Migrations directory (Arch-Base)" || check_fail "Migrations missing"
 else
@@ -100,7 +100,7 @@ header "3. Environment Files"
 
 if [ -f "$PORTAL_DIR/.env" ]; then
   check_pass "apps/portal/.env exists"
-  SUPA_URL=$(grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$PORTAL_DIR/.env" | cut -d= -f2- | tr -d '"' || true)
+  SUPA_URL=$(get_env_var "$PORTAL_DIR/.env" "NEXT_PUBLIC_SUPABASE_URL")
   if [ -n "$SUPA_URL" ]; then
     check_pass "NEXT_PUBLIC_SUPABASE_URL set"
     if [[ "$SUPA_URL" == *localhost* ]] || [[ "$SUPA_URL" == *127.0.0.1* ]]; then
@@ -130,14 +130,13 @@ header "4. Port Conflicts"
 
 check_port() {
   local port="$1" name="$2"
-  if lsof -i :"$port" -t >/dev/null 2>&1; then
+  if is_port_in_use "$port"; then
     local pid proc
-    pid=$(lsof -i :"$port" -t | head -n1)
-    local proc
+    pid=$(get_port_pid "$port")
     proc=$(ps -p "$pid" -o comm= 2>/dev/null || echo "unknown")
-    if [[ "$proc" == *"docker"* ]]; then
-       check_pass "$name port $port (Docker)"
-       return 0
+    if is_port_held_by_docker "$port"; then
+      check_pass "$name port $port (Docker)"
+      return 0
     fi
     check_warn "$name port $port occupied by native $proc (PID $pid)"
     if [ "$FIX_MODE" = true ]; then
@@ -152,16 +151,14 @@ check_port() {
   fi
 }
 
-check_port "$PORT"        "Portal"
-check_port 54321          "Supabase API"
-check_port 54322          "Supabase DB"
-check_port 6379           "Redis"
-
-
-check_port 6333           "Qdrant"
-check_port 9091           "Grafana"
-check_port 9092           "Prometheus"
-check_port 1881           "Fuxa"
+check_port "$PORT" "Portal"
+check_port 54321 "Supabase API"
+check_port 54322 "Supabase DB"
+check_port 6379  "Redis"
+check_port 6333  "Qdrant"
+check_port 9091  "Grafana"
+check_port 9092  "Prometheus"
+check_port 1881  "Fuxa"
 
 # ═══════════════════════════════════════════════════════════
 # 5. STALE PROCESSES
@@ -189,27 +186,29 @@ fi
 # ═══════════════════════════════════════════════════════════
 header "6. Docker Containers"
 
-if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+if command -v docker > /dev/null 2>&1 && docker info > /dev/null 2>&1; then
   check_container() {
     local name="$1"
     local status
-    status=$(docker inspect --format='{{.State.Health.Status}}' "$name" 2>/dev/null || docker inspect --format='{{.State.Status}}' "$name" 2>/dev/null || echo "missing")
+    status=$(docker inspect --format='{{.State.Health.Status}}' "$name" 2>/dev/null || true)
+    if [ -z "$status" ] || [ "$status" = "<no value>" ]; then
+      status=$(docker inspect --format='{{.State.Status}}' "$name" 2>/dev/null || echo "missing")
+    fi
+    [ -z "$status" ] && status="missing"
     if [ "$status" = "healthy" ] || [ "$status" = "running" ]; then
       check_pass "$name container ($status)"
     elif [ "$status" = "missing" ]; then
-      check_warn "$name container missing"
+      check_warn "$name container not running (starts during deployment)"
     else
-      check_fail "$name container ($status)"
+      check_warn "$name container ($status)"
     fi
   }
 
   check_container "plantcor-redis"
-
-
   check_container "plantcor-qdrant"
   check_container "plantcor-prometheus"
   check_container "plantcor-fuxa"
-  
+
   SUPABASE_UP=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -c "supabase" || echo "0")
   if [ "$SUPABASE_UP" -gt 0 ]; then
     check_pass "Supabase containers running ($SUPABASE_UP)"
@@ -227,7 +226,9 @@ header "7. Build Artifacts"
 
 if [ -d "$PORTAL_DIR/.next/standalone" ]; then
   check_pass ".next/standalone exists"
-  if [ -f "$PORTAL_DIR/.next/standalone/apps/portal/server.js" ]; then
+  if [ -f "$PORTAL_DIR/.next/standalone/apps/portal/server.js" ] || \
+     [ -f "$PORTAL_DIR/.next/standalone/Arch-System/apps/portal/server.js" ] || \
+     [ -f "$PORTAL_DIR/.next/standalone/server.js" ]; then
     check_pass "Standalone server.js present"
   else
     check_fail "Standalone server.js missing — rebuild with ENABLE_HEAVY_PLUGINS=true"
@@ -281,22 +282,32 @@ done
 # ═══════════════════════════════════════════════════════════
 header "9. Systemd Service"
 
-SERVICE_FILE="$HOME/.config/infra/systemd/user/arch-systems.service"
-if [ -f "$SERVICE_FILE" ]; then
-  check_pass "Service file exists"
-  if grep -q "standalone/apps/portal/server.js" "$SERVICE_FILE"; then
+# Check both possible service file locations
+SERVICE_FILE=""
+for candidate in \
+  "$HOME/.config/systemd/user/arch-systems.service" \
+  "$HOME/.config/infra/systemd/user/arch-systems.service"; do
+  if [ -f "$candidate" ]; then
+    SERVICE_FILE="$candidate"
+    break
+  fi
+done
+
+if [ -n "$SERVICE_FILE" ]; then
+  check_pass "Service file exists ($SERVICE_FILE)"
+  if grep -qE "standalone/(apps/portal/server|Arch-System/apps/portal/server|server)\.js" "$SERVICE_FILE"; then
     check_pass "ExecStart uses standalone server.js"
   else
     check_fail "ExecStart does NOT use standalone server.js — fix required"
     if [ "$FIX_MODE" = true ]; then
       NODE_BIN=$(command -v node)
-      sed -i "s|ExecStart=.*|ExecStart=$NODE_BIN $REPO_ROOT/apps/portal/.next/standalone/apps/portal/server.js|" "$SERVICE_FILE"
+      sed -i "s|ExecStart=.*|ExecStart=$NODE_BIN $PORTAL_DIR/.next/standalone/Arch-System/apps/portal/server.js|" "$SERVICE_FILE"
       systemctl --user daemon-reload 2>/dev/null || true
       echo -e "    ${GREEN}→ Fixed ExecStart to use standalone server.js${NC}"
     fi
   fi
 
-  if systemctl --user is-active arch-systems.service >/dev/null 2>&1; then
+  if systemctl --user is-active arch-systems.service > /dev/null 2>&1; then
     check_pass "Service is active"
   else
     check_warn "Service is inactive"
@@ -317,24 +328,29 @@ CLEAN_TARGETS=(
   "$REPO_ROOT/apps/overview/.next/cache"
 )
 
+CLEAN_COUNT=0
 for target in "${CLEAN_TARGETS[@]}"; do
-  [ -d "$target" ] || continue
-  size=$(du -sh "$target" 2>/dev/null | cut -f1)
-  check_warn "Stale cache: $(basename "$target") ($size)"
-  if [ "$FIX_MODE" = true ]; then
-    rm -rf "$target"
-    echo -e "    ${GREEN}→ Removed${NC}"
+  if [ -d "$target" ]; then
+    size=$(du -sh "$target" 2>/dev/null | cut -f1)
+    check_warn "Stale cache: $(basename "$target") ($size)"
+    if [ "$FIX_MODE" = true ]; then
+      rm -rf "$target"
+      echo -e "    ${GREEN}→ Removed${NC}"
+    fi
+    CLEAN_COUNT=$((CLEAN_COUNT + 1))
   fi
 done
 
-[ ${#CLEAN_TARGETS[@]} -eq 0 ] && check_pass "No stale caches"
+if [ "$CLEAN_COUNT" -eq 0 ]; then
+  check_pass "No stale caches"
+fi
 
 # ═══════════════════════════════════════════════════════════
 # 11. MCP SERVERS
 # ═══════════════════════════════════════════════════════════
 header "11. MCP Servers"
 
-if node "$REPO_ROOT/scripts/sync-mcp-config.js" >/dev/null 2>&1; then
+if node "$REPO_ROOT/scripts/sync-mcp-config.js" > /dev/null 2>&1; then
   check_pass "MCP configurations synchronized (.mcp.json, .agents/mcp_config.json, .vscode/mcp.json)"
 else
   check_fail "Failed to synchronize MCP configurations"

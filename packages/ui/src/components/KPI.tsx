@@ -12,7 +12,7 @@ const colorMap: Record<KPIColor, string> = {
   blue: "text-dept-drilling",
   red: "text-[var(--accent-red)]",
   cyan: "text-[var(--accent-green)]",
-  indigo: "text-dept-satellite",
+  indigo: "text-dept-engineering",
   alert: "text-[var(--accent-red)]",
 };
 
@@ -44,7 +44,7 @@ export function KPICard({
           <div
             className={cn(
               "opacity-20 group-hover:opacity-40 transition-opacity duration-300",
-              colorMap[color]
+              colorMap[color],
             )}
           >
             {icon}

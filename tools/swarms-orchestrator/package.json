@@ -1,0 +1,8 @@
+{
+  "name": "@repo/swarms-orchestrator",
+  "version": "1.0.0",
+  "scripts": {
+    "check-types": "cargo check",
+    "build": "cargo build --release"
+  }
+}

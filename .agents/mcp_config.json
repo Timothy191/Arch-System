@@ -2,19 +2,31 @@
   "mcpServers": {
     "codebase-memory": {
       "command": "npx",
-      "args": ["-y", "@sourcery/codebase-memory-mcp"]
+      "args": [
+        "-y",
+        "codebase-memory-mcp"
+      ]
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@context7/mcp-server"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
     },
     "knowledge-rail": {
       "command": "npx",
-      "args": ["-y", "knowledge-rail-mcp"]
+      "args": [
+        "-y",
+        "knowledge-rail"
+      ]
     },
     "next-devtools": {
       "command": "npx",
-      "args": ["-y", "next-devtools-mcp"]
+      "args": [
+        "-y",
+        "next-devtools-mcp"
+      ]
     },
     "postgres": {
       "command": "npx",
@@ -24,9 +36,37 @@
         "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
       ]
     },
+    "api-ninjas": {
+      "type": "http",
+      "url": "https://mcp.api-ninjas.com/mcp",
+      "headers": {
+        "X-Api-Key": "****************************************"
+      },
+      "serverUrl": "https://mcp.api-ninjas.com/mcp"
+    },
+    "tab-browser": {
+      "type": "http",
+      "url": "http://127.0.0.1:43110/mcp",
+      "headers": {
+        "Authorization": "Bearer d89b9e23f9b5459183c46a10adda35c3a7bf6d5259cb43e3945d10fb1499be7f"
+      },
+      "serverUrl": "http://127.0.0.1:43110/mcp"
+    },
+    "slim-tools": {
+      "type": "http",
+      "url": "https://slim.tools/mcp",
+      "serverUrl": "https://slim.tools/mcp"
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching",
+      "serverUrl": "https://mcp.supabase.com/mcp?project_ref=mrwhtxbhrzyttlsyuofc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+    },
     "AgentsRoom-MCP": {
       "command": "node",
-      "args": ["/opt/AgentsRoom/resources/app-mcp-server.cjs"],
+      "args": [
+        "/opt/AgentsRoom/resources/app-mcp-server.cjs"
+      ],
       "env": {
         "AR_PROJECT_ID": "proj-1788803548784-lh3ald",
         "AR_PROJECT_PATH": "/home/timothy/Projects/Arch-System",
@@ -37,19 +77,23 @@
     },
     "AgentsRoom-Test-Runner": {
       "command": "node",
-      "args": ["/opt/AgentsRoom/resources/test-runner-mcp-server.cjs"],
+      "args": [
+        "/opt/AgentsRoom/resources/test-runner-mcp-server.cjs"
+      ],
       "env": {
         "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
-        "AR_BROWSER_PROJECT_ID": "proj-1789041070197-8ld1sx",
+        "AR_BROWSER_PROJECT_ID": "proj-1788803548784-lh3ald",
         "AR_PROJECT_PATH": "/home/timothy/Projects/Arch-System"
       }
     },
     "AgentsRoom-QA-Tester": {
       "command": "node",
-      "args": ["/opt/AgentsRoom/resources/qa-tester-mcp-server.cjs"],
+      "args": [
+        "/opt/AgentsRoom/resources/qa-tester-mcp-server.cjs"
+      ],
       "env": {
         "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
-        "AR_BROWSER_PROJECT_ID": "proj-1789041070197-8ld1sx"
+        "AR_BROWSER_PROJECT_ID": "proj-1788803548784-lh3ald"
       }
     }
   }

@@ -198,7 +198,7 @@ fi
 # ── Step 7: Launch Server ────────────────────────────────────
 info "Starting Next.js server bound to 0.0.0.0..."
 # Clear any process on port 3000
-stray_pids=$(ss -tunlp 2>/dev/null | grep ":$PORT " | grep -oP 'pid=\K\d+' | sort -u || true)
+stray_pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
 if [ -n "$stray_pids" ]; then
   info "Clearing port $PORT..."
   echo "$stray_pids" | xargs kill -9 2>/dev/null || true

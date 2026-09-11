@@ -2,13 +2,27 @@ import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
+/**
+ * Wraps a CSS custom property so Tailwind opacity modifiers (`bg-dept-drilling/10`)
+ * generate valid CSS. Plain token strings are opaque to Tailwind v3 — alpha
+ * modifiers on them are silently dropped. color-mix keeps the token as the SSOT.
+ */
+const withAlpha = (token: string): string =>
+  (({ opacityValue }: { opacityValue?: number | string }) =>
+    opacityValue === undefined
+      ? `var(${token})`
+      : `color-mix(in srgb, var(${token}) calc(${opacityValue} * 100%), transparent)`) as unknown as string;
+
 const archTheme: Config = {
   content: [
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
+    "./features/**/*.{ts,tsx}",
+    "./hooks/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "../../packages/ui/src/**/*.{ts,tsx}",
     "../../packages/theme/src/**/*.{ts,tsx}",
+    "../../libs/**/*.{ts,tsx}",
     "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "",
@@ -101,12 +115,12 @@ const archTheme: Config = {
         "brand-blue-hover": "var(--arch-brand-blue-hover)",
 
         // macOS system accent colors
-        "accent-charcoal": "var(--accent-charcoal)",
-        "accent-blue": "var(--accent-blue)",
-        "accent-red": "var(--accent-red)",
-        "accent-green": "var(--accent-green)",
-        "accent-amber": "var(--accent-amber)",
-        "accent-emerald": "var(--accent-green)",
+        "accent-charcoal": withAlpha("--accent-charcoal"),
+        "accent-blue": withAlpha("--accent-blue"),
+        "accent-red": withAlpha("--accent-red"),
+        "accent-green": withAlpha("--accent-green"),
+        "accent-amber": withAlpha("--accent-amber"),
+        "accent-emerald": withAlpha("--accent-green"),
 
         // macOS traffic light colors
         "mac-red": "var(--mac-red)",
@@ -133,25 +147,25 @@ const archTheme: Config = {
         // Arch semantic namespace — for production-ready theme consistency
         arch: {
           surface: {
-            primary: "var(--bg-primary)", // --arch0 #ffffff
-            secondary: "var(--bg-secondary)", // --arch1 #ffffff
-            tertiary: "var(--bg-tertiary)", // --arch2 #e8e8ed
+            primary: withAlpha("--bg-primary"), // --arch0 #ffffff
+            secondary: withAlpha("--bg-secondary"), // --arch1 #ffffff
+            tertiary: withAlpha("--bg-tertiary"), // --arch2 #e8e8ed
           },
           text: {
-            primary: "var(--text-heading)", // --arch11 #1d1d1f
-            secondary: "var(--text-body)", // --arch10 #3a3a3c
-            tertiary: "var(--text-muted)", // --arch8 #a1a1a6
+            primary: withAlpha("--text-heading"), // --arch11 #1d1d1f
+            secondary: withAlpha("--text-body"), // --arch10 #3a3a3c
+            tertiary: withAlpha("--text-muted"), // --arch8 #a1a1a6
           },
           border: {
-            primary: "var(--border-default)", // --arch5
-            subtle: "var(--border-subtle)", // --arch4
-            emphasis: "var(--border-emphasis)", // --arch6
+            primary: withAlpha("--border-default"), // --arch5
+            subtle: withAlpha("--border-subtle"), // --arch4
+            emphasis: withAlpha("--border-emphasis"), // --arch6
           },
           accent: {
-            charcoal: "var(--accent-charcoal)", // --arch13 #1c1c1e
-            blue: "var(--accent-blue)", // deprecated alias → charcoal
-            red: "var(--accent-red)", // --arch12 #d22118
-            green: "var(--accent-green)", // --arch14 #34c759
+            charcoal: withAlpha("--accent-charcoal"), // --arch13 #1c1c1e
+            blue: withAlpha("--accent-blue"), // deprecated alias → charcoal
+            red: withAlpha("--accent-red"), // --arch12 #d22118
+            green: withAlpha("--accent-green"), // --arch14 #34c759
           },
         },
 
@@ -265,13 +279,13 @@ const archTheme: Config = {
 
         // Department-specific accent colors
         dept: {
-          drilling: "var(--dept-drilling)",
-          production: "var(--dept-production)",
-          "access-control": "var(--dept-access-control)",
-          "access-card-actions": "var(--dept-access-card-actions)",
-          engineering: "var(--dept-engineering)",
-          "control-room": "var(--dept-control-room)",
-          admin: "var(--dept-admin)",
+          drilling: withAlpha("--dept-drilling"),
+          production: withAlpha("--dept-production"),
+          "access-control": withAlpha("--dept-access-control"),
+          "access-card-actions": withAlpha("--dept-access-card-actions"),
+          engineering: withAlpha("--dept-engineering"),
+          "control-room": withAlpha("--dept-control-room"),
+          admin: withAlpha("--dept-admin"),
         },
       },
       opacity: {

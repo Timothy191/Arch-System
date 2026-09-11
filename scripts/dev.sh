@@ -14,36 +14,32 @@ curl() {
 # Connects to hosted Supabase + optional Redis, starts Next.js HMR,
 # runs 4-phase health check, then opens browser to login page.
 # DOCKER / LOCAL SUPABASE REQUIREMENT REMOVED — all infra is SaaS.
+#
+# Uses: scripts/lib/common.sh (shared colors, compose detection, env
+#   parsing, port utilities, browser/terminal launching, health checks)
 # ──────────────────────────────────────────────────────────
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+LOG_LABEL="[dev]"
+
 PORT="${PORT:-3000}"
-
-# ── Colors ───────────────────────────────────────────────
-DIM='\033[2m'
-RED='\033[31m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-BLUE='\033[34m'
-MAGENTA='\033[35m'
-CYAN='\033[36m'
-WHITE='\033[37m'
-NC='\033[0m'
-BOLD='\033[1m'
-
-# Icons
-PASS="${GREEN}${BOLD}OK${NC}"
-FAIL="${RED}${BOLD}ERR${NC}"
-SKIP="${DIM}${BOLD}SKIP${NC}"
-WARN="${YELLOW}${BOLD}WARN${NC}"
-INFO="${BLUE}${BOLD}INFO${NC}"
-SUPABASE_URL=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
-REDIS_URL=$(grep '^REDIS_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
-# Anon key: .env defines NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (per Supabase docs).
-# Fall back to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility.
-# Never log the value — only presence/absence.
-SUPABASE_ANON_KEY=$(grep '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_PUBLISHABLE_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || grep '^SUPABASE_ANON_KEY=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
 HOSTED_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
+
+# Read environment variables from .env via shared get_env_var (safe, no eval)
+ENV_FILE="$PORTAL_DIR/.env"
+[ ! -f "$ENV_FILE" ] && [ -f "$REPO_ROOT/.env" ] && ENV_FILE="$REPO_ROOT/.env"
+
+SUPABASE_URL=$(get_env_var "$ENV_FILE" "SUPABASE_URL")
+[ -z "$SUPABASE_URL" ] && SUPABASE_URL=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_URL")
+REDIS_URL=$(get_env_var "$ENV_FILE" "REDIS_URL")
+# SUPABASE_ANON_KEY: never log the value — only presence/absence.
+SUPABASE_ANON_KEY=$(get_env_var_fallback "$ENV_FILE" \
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  "SUPABASE_PUBLISHABLE_KEY" \
+  "SUPABASE_ANON_KEY")
 
 # ── Redirect & Watchdog Setup ───────────────────────────
 mkdir -p "$REPO_ROOT/run"
@@ -72,69 +68,51 @@ watchdog() {
 watchdog $$ &
 WATCHDOG_PID=$!
 
-# ── Helpers ──────────────────────────────────────────────
+# ── Dev-specific Display Helpers ──────────────────────────
+# Note: phase() and check() below OVERRIDE the common.sh versions because
+# dev.sh uses a unique multi-column badge format (OK/ERR/SKIP/WARN/INFO).
+# The shared spinner() from common.sh is used directly.
+
 # phase N TITLE — lightweight section header (colored tag + thin rule).
 phase() {
   local n="$1" title="$2"
   echo
   echo -e "  ${BLUE}${BOLD}PHASE ${n}${NC} ${DIM}›${NC} ${BOLD}${WHITE}${title}${NC}"
-  echo -e "  ${DIM}────────────────────────────────────────────────────────${NC}"
+  echo -e "  ${DIM}────────────────────────${NC}"
 }
 
 # check LABEL STATUS [DETAIL] — two-column row: icon+label (fixed width) | detail.
-# Color tokens are '\033[...' literals, so the padded label is built on the PLAIN
-# text first, then the assembled colored string is rendered with `echo -e`.
 check() {
   local label="$1" status="$2" detail="${3:-}"
   local pad
   printf -v pad '%-25s' "$label"
-  if [ "$status" = "pass" ]; then
-    echo -e "  [${PASS}] ${pad}${detail:+${DIM}${detail}${NC}}"
-  elif [ "$status" = "fail" ]; then
-    echo -e "  [${FAIL}] ${pad}${detail:+${RED}${detail}${NC}}"
-  elif [ "$status" = "warn" ]; then
-    echo -e "  [${WARN}] ${pad}${detail:+${YELLOW}${detail}${NC}}"
-  elif [ "$status" = "skip" ]; then
-    echo -e "  [${SKIP}] ${pad}${detail:+${DIM}${detail}${NC}}"
-  elif [ "$status" = "info" ]; then
-    echo -e "  [${INFO}] ${pad}${detail:+${DIM}${detail}${NC}}"
-  fi
+  case "$status" in
+    pass) echo -e "  [${PASS}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+    fail) echo -e "  [${FAIL}] ${pad}${detail:+${RED}${detail}${NC}}" ;;
+    warn) echo -e "  [${WARN}] ${pad}${detail:+${YELLOW}${detail}${NC}}" ;;
+    skip) echo -e "  [${SKIP}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+    info) echo -e "  [${INFO}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+  esac
 }
 
-spinner() {
-  local pid=$1 msg="$2"
-  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-  local i=0
-  while kill -0 "$pid" 2>/dev/null; do
-    printf "\r  ${CYAN}${frames[$i]}${NC} ${msg}... "
-    i=$(((i + 1) % 10))
-    sleep 0.1
-  done
-  printf "\r  ${PASS} ${msg}       \n"
-}
+# Dev-specific icon definitions (common.sh provides colors; these add the badge text)
+PASS="${GREEN}${BOLD}OK${NC}"
+FAIL="${RED}${BOLD}ERR${NC}"
+SKIP="${DIM}${BOLD}SKIP${NC}"
+WARN="${YELLOW}${BOLD}WARN${NC}"
+INFO="${BLUE}${BOLD}INFO${NC}"
 
 wait_for() {
   local url="$1" label="$2" max="${3:-60}" delay="${4:-2}"
-  for i in $(seq 1 "$max"); do
-    if curl -fs "$url" >/dev/null 2>&1; then
+  local i
+  for ((i = 1; i <= max; i++)); do
+    if curl -fs "$url" > /dev/null 2>&1; then
       return 0
     fi
     sleep "$delay"
   done
   return 1
 }
-
-detect_compose_cmd() {
-  if docker compose version >/dev/null 2>&1; then
-    echo "docker compose"
-  elif command -v docker-compose >/dev/null 2>&1; then
-    echo "docker-compose"
-  else
-    echo "docker compose"
-  fi
-}
-
-COMPOSE_CMD=$(detect_compose_cmd)
 
 banner() {
   clear 2>/dev/null || true
@@ -155,53 +133,17 @@ banner() {
 }
 
 # ── Browser / Status Terminal ────────────────────────────
-open_browser() {
+# open_browser and detect_terminal are provided by scripts/lib/common.sh
+# Launch a browser to the login page with cache-busting timestamp
+open_login_browser() {
   local login_url="http://localhost:$PORT/login?_=$(date +%s)"
-  if command -v google-chrome >/dev/null 2>&1; then
-    google-chrome --new-window "$login_url" 2>/dev/null &
-  elif command -v chromium >/dev/null 2>&1; then
-    chromium --new-window "$login_url" 2>/dev/null &
-  elif command -v firefox >/dev/null 2>&1; then
-    firefox --new-window "$login_url" 2>/dev/null &
-  elif command -v xdg-open >/dev/null 2>&1; then
-    xdg-open "$login_url" 2>/dev/null &
-  elif command -v open >/dev/null 2>&1; then
-    open "$login_url"
-  fi
-}
-
-detect_terminal() {
-  if command -v kitty >/dev/null 2>&1; then
-    echo "kitty"
-  elif command -v gnome-terminal >/dev/null 2>&1; then
-    echo "gnome"
-  elif command -v konsole >/dev/null 2>&1; then
-    echo "konsole"
-  elif command -v alacritty >/dev/null 2>&1; then
-    echo "alacritty"
-  elif command -v xfce4-terminal >/dev/null 2>&1; then
-    echo "xfce4"
-  elif command -v xterm >/dev/null 2>&1; then
-    echo "xterm"
-  else
-    echo "none"
-  fi
+  open_browser "$login_url"
 }
 
 launch_status_terminal() {
-  local term
-  term=$(detect_terminal)
   local hud_script="$REPO_ROOT/scripts/monitor-hud.sh"
   chmod +x "$hud_script" 2>/dev/null || true
-
-  case "$term" in
-  kitty) kitty --title "Arch-Systems SysOps HUD" bash "$hud_script" & ;;
-  gnome) gnome-terminal --title="Arch-Systems SysOps HUD" -- bash "$hud_script" & ;;
-  konsole) konsole --title "Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
-  alacritty) alacritty -t "Arch-Systems SysOps HUD" -e bash "$hud_script" & ;;
-  xfce4) xfce4-terminal --title="Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
-  xterm) xterm -title "Arch-Systems SysOps HUD" -e "bash $hud_script" & ;;
-  esac
+  launch_in_terminal "Arch-Systems SysOps HUD" "$hud_script"
 }
 
 # _url_row LABEL URL [SUFFIX] — one aligned row in the status panel.
@@ -577,77 +519,70 @@ else
 fi
 
 # 1b. Check & Fix Port Conflicts
+# Uses shared port utilities from common.sh (is_port_in_use, get_port_pid,
+# is_port_held_by_docker, kill_port) for the low-level port operations.
 check_and_fix_port() {
   local port="$1" name="$2" service="$3"
-  if ss -tlnH | grep -q -E ":$port "; then
-    # If the port is mapped by a running Docker container, it's fine
-    if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q -E "(0\.0\.0\.0|\[::\]|localhost|127\.0\.0\.1):$port->"; then
-      return 0
-    fi
 
-    # If it's Redis and it responds to PING (even with NOAUTH or WRONGPASS), it's a valid native service
-    if [ "$name" = "Redis" ] && [ "$port" = "6379" ]; then
-      if command -v redis-cli >/dev/null 2>&1 && redis-cli -p "$port" PING 2>&1 | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
-        return 0
-      fi
-    fi
-
-    local pid
-    pid=$(lsof -i :"$port" -sTCP:LISTEN -t | head -n1 2>/dev/null || true)
-    if [ -z "$pid" ]; then
-      pid=$(lsof -i :"$port" -t | head -n1 2>/dev/null || true)
-    fi
-
-    local proc="unknown"
-    if [ -n "$pid" ]; then
-      proc=$(ps -p "$pid" -o comm= 2>/dev/null || echo "unknown")
-      if [[ "$proc" == *"docker"* ]]; then
-        return 0
-      fi
-    else
-      # If we can't find the PID, it's likely a system daemon we don't have access to
-      check "Port $port ($name)" "fail" "occupied by a system/native service (PID inaccessible)"
-      env_pass=false
-      return 0
-    fi
-
-    # Prompt before killing unless FORCE_KILL is set
-    if [ "$FORCE_KILL" = "true" ]; then
-      echo -e "  ${INFO} Force-clearing port $port ($name) PID $pid ($proc)..."
-    elif [ -t 0 ]; then
-      echo -n -e "  ${YELLOW}⚠ Port $port ($name) occupied by native $proc (PID $pid). Kill it? [y/N]: ${NC}"
-      # Redirect stdin to terminal to ensure we can read input when running in interactive terminal
-      read -r response </dev/tty || response="n"
-      if [[ ! "$response" =~ ^[Yy]$ ]]; then
-        check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid)"
-        env_pass=false
-        return 0
-      fi
-    else
-      check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid) — run with --force to clear"
-      env_pass=false
-      return 0
-    fi
-
-    if [ -n "$service" ] && command -v systemctl >/dev/null 2>&1 && sudo systemctl stop "$service" >/dev/null 2>&1; then
-      sleep 1
-      if ! ss -tlnH | grep -q -E ":$port "; then
-        check "Port $port ($name)" "pass" "freed native service"
-        return 0
-      fi
-    fi
-    if sudo kill -9 "$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null; then
-      sleep 1
-      if ! ss -tlnH | grep -q -E ":$port "; then
-        check "Port $port ($name)" "pass" "killed conflicting process"
-        return 0
-      fi
-    fi
-    check "Port $port ($name)" "fail" "in use by PID $pid"
-    env_pass=false
-  else
-    check "Port $port ($name)" "pass" "free"
+  # If the port is mapped by a running Docker container, it's fine
+  if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q -E "(0\.0\.0\.0|\[::\]|localhost|127\.0\.0\.1):$port->"; then
+    return 0
   fi
+
+  # If it's Redis and it responds to PING, it's a valid native service
+  if [ "$name" = "Redis" ] && [ "$port" = "6379" ]; then
+    if command -v redis-cli >/dev/null 2>&1 && redis-cli -p "$port" PING 2>&1 | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
+      check "Port $port ($name)" "pass" "redis responding"
+      return 0
+    fi
+  fi
+
+  is_port_in_use "$port" || { check "Port $port ($name)" "pass" "free"; return 0; }
+
+  local pid proc
+  pid=$(get_port_pid "$port")
+  if [ -z "$pid" ]; then
+    check "Port $port ($name)" "fail" "occupied by a system/native service (PID inaccessible)"
+    env_pass=false
+    return 0
+  fi
+
+  proc=$(ps -p "$pid" -o comm= 2>/dev/null || echo "unknown")
+  if [[ "$proc" == *"docker"* ]]; then
+    return 0
+  fi
+
+  # Prompt before killing unless FORCE_KILL is set
+  if [ "$FORCE_KILL" = "true" ]; then
+    echo -e "  ${INFO} Force-clearing port $port ($name) PID $pid ($proc)..."
+  elif [ -t 0 ]; then
+    echo -n -e "  ${YELLOW}⚠ Port $port ($name) occupied by native $proc (PID $pid). Kill it? [y/N]: ${NC}"
+    read -r response </dev/tty || response="n"
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid)"
+      env_pass=false
+      return 0
+    fi
+  else
+    check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid) — run with --force to clear"
+    env_pass=false
+    return 0
+  fi
+
+  # Try stopping the named systemd service first, then force-kill
+  if [ -n "$service" ] && command -v systemctl > /dev/null 2>&1 && sudo systemctl stop "$service" > /dev/null 2>&1; then
+    sleep 1
+    is_port_in_use "$port" || { check "Port $port ($name)" "pass" "freed native service"; return 0; }
+  fi
+  if kill_port "$port" 9; then
+    sleep 1
+    if ! is_port_in_use "$port"; then
+      check "Port $port ($name)" "pass" "killed conflicting process"
+      return 0
+    fi
+  fi
+  check "Port $port ($name)" "fail" "in use by PID $pid"
+  env_pass=false
 }
 
 if [ "$QUICK_MODE" = "true" ]; then
@@ -754,24 +689,26 @@ else
   phase 2 "Infrastructure"
 
   if curl -fs "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
-    check "Supabase API" "pass" "http://localhost:54321 (Arch-Base active)"
+    check "Supabase API" "pass" "http://localhost:54321 (local Supabase active)"
   else
     ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-    if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+    if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
       echo -e "  ${INFO} Starting Arch-Base Supabase (Docker)..."
       (cd "$ARCH_BASE_DIR" && npx supabase start) >/dev/null 2>&1 &
       SUPAPID=$!
       spinner "$SUPAPID" "Booting Arch-Base Supabase containers"
+    elif [ -d "$REPO_ROOT/packages/database" ]; then
+      echo -e "  ${INFO} Starting local Supabase (Docker)..."
+      (cd "$REPO_ROOT/packages/database" && pnpx supabase start) >/dev/null 2>&1 &
+      SUPAPID=$!
+      spinner "$SUPAPID" "Booting local Supabase containers"
     else
-      echo -e "  ${FAIL} Arch-Base not found at $ARCH_BASE_DIR or missing supabase/config.toml."
-      echo -e "  ${INFO} Arch-System requires Arch-Base as the single source of truth for the database."
-      exit 1
+      check "Supabase API" "skip" "no local Supabase configured — use --hosted for Cloud Supabase"
     fi
-    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 45; then
-      check "Supabase API" "pass" "http://localhost:54321 (Arch-Base active)"
+    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 15; then
+      check "Supabase API" "pass" "http://localhost:54321 active"
     else
-      check "Supabase API" "fail" "timed out — check 'docker ps'"
-      exit 1
+      check "Supabase API" "warn" "local Supabase not responding — use --hosted for Cloud Supabase"
     fi
   fi
 
@@ -788,21 +725,20 @@ else
       echo -e "  ${INFO} Starting Docker Tools..."
       $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1
 
-      local services=("plantcor-redis" "plantcor-qdrant")
+      services=("plantcor-redis" "plantcor-qdrant")
       for service in "${services[@]}"; do
         printf "  ${CYAN}⏳${NC} Gating on $service health... "
-        local attempts=0
-        while [ $attempts -lt 30 ]; do
-          local status
-          status=$(docker inspect --format='{{.State.Health.Status}}' "$service" 2>/dev/null || echo "starting")
-          if [ "$status" = "healthy" ]; then
+        svc_attempts=0
+        while [ $svc_attempts -lt 30 ]; do
+          svc_status=$(docker inspect --format='{{.State.Health.Status}}' "$service" 2>/dev/null || echo "starting")
+          if [ "$svc_status" = "healthy" ]; then
             echo -e "${GREEN}healthy${NC}"
             break
           fi
           sleep 2
-          ((attempts++))
+          ((svc_attempts++))
         done
-        if [ $attempts -eq 30 ]; then
+        if [ $svc_attempts -eq 30 ]; then
           echo -e "${YELLOW}timeout (continuing)${NC}"
         fi
       done
@@ -1216,7 +1152,7 @@ if [ "$RUN_E2E" = "true" ]; then
 fi
 
 if [ "$HEADLESS_MODE" != "true" ]; then
-  open_browser
+  open_login_browser
   launch_status_terminal
 else
   check "Browser & Status Terminal" "skip" "headless mode"

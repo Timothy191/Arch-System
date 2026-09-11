@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
-# Arch-Systems Production Environment Setup Script v1.0
+# Arch-Systems Production Environment Setup Script v1.1
 # Usage: ./scripts/setup-production-environment.sh [options]
 #
 # This script automates the setup of a production environment for Arch-Systems,
-# including environment configuration, systemd service setup, and background process management.
+# including environment configuration, systemd service setup, and background
+# process management.
 #
 # Options:
 #   --no-systemd        Skip systemd service setup
@@ -13,6 +12,8 @@ set -euo pipefail
 #   --no-monitoring     Skip monitoring stack (Prometheus, Grafana, cAdvisor)
 #   --force             Force overwrite existing configuration
 #   --dry-run           Preview changes without executing
+#   --supabase-push     Apply migrations + regenerate types after Supabase starts
+#   --help              Show usage information
 #
 # Production Environment Components:
 #   Essential:
@@ -23,54 +24,37 @@ set -euo pipefail
 #     - Docker Tools Stack (Flowise, Langfuse, Qdrant, ClickHouse)
 #   Optional:
 #     - Monitoring Stack (Prometheus, Grafana, cAdvisor)
+#
+# Uses: scripts/lib/common.sh
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PORTAL_DIR="$REPO_ROOT/apps/portal"
-ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-  DATABASE_DIR="$ARCH_BASE_DIR"
-else
-  echo -e "\n\033[31m\033[1m[ERR] Arch-Base not found at $ARCH_BASE_DIR or missing supabase/config.toml.\033[0m"
-  echo -e "\033[34m\033[1m[INFO] Arch-System requires Arch-Base as the single source of truth for the database.\033[0m"
-  exit 1
-fi
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
 # Configuration
 SETUP_LOG="$REPO_ROOT/setup-production-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="$SETUP_LOG"
 ENV_TEMPLATE="$PORTAL_DIR/.env.production.example"
 ENV_TARGET="$PORTAL_DIR/.env"
 
-# OS Detection
-detect_os() {
-  if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    OS="${ID:-unknown}"
-    OS_VERSION="${VERSION_ID:-unknown}"
-    OS_NAME="${PRETTY_NAME:-Unknown OS}"
-  else
-    OS="unknown"
-    OS_VERSION="unknown"
-    OS_NAME="Unknown OS"
-  fi
-}
-detect_os
-
-# Parse arguments
+# ── Parse Arguments ─────────────────────────────────────────────────────────────
 SKIP_SYSTEMD=false
 SKIP_DOCKER_TOOLS=false
 SKIP_MONITORING=false
 FORCE=false
 DRY_RUN=false
-SUPABASE_PUSH=false  # If true, run supabase:push (apply migrations) after Supabase is available
+SUPABASE_PUSH=false
 
-for arg in "${@}"; do
+for arg in "$@"; do
   case $arg in
-    --no-systemd) SKIP_SYSTEMD=true ;;
-    --no-docker-tools) SKIP_DOCKER_TOOLS=true ;;
-    --no-monitoring) SKIP_MONITORING=true ;;
-    --force) FORCE=true ;;
-    --dry-run) DRY_RUN=true ;;
-    --supabase-push) SUPABASE_PUSH=true ;;
+    --no-systemd)       SKIP_SYSTEMD=true ;;
+    --no-docker-tools)  SKIP_DOCKER_TOOLS=true ;;
+    --no-monitoring)    SKIP_MONITORING=true ;;
+    --force)            FORCE=true ;;
+    --dry-run)          DRY_RUN=true ;;
+    --supabase-push)    SUPABASE_PUSH=true ;;
     --help)
       echo "Usage: $0 [options]"
       echo "Options:"
@@ -79,6 +63,7 @@ for arg in "${@}"; do
       echo "  --no-monitoring     Skip monitoring stack"
       echo "  --force             Force overwrite existing configuration"
       echo "  --dry-run           Preview changes without executing"
+      echo "  --supabase-push     Apply migrations and regenerate types"
       echo "  --help              Show this help message"
       exit 0
       ;;
@@ -90,118 +75,28 @@ for arg in "${@}"; do
   esac
 done
 
-# ── Colorized Logging ─────────────────────────────────────
-colors() {
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  CYAN='\033[0;36m'
-  MAGENTA='\033[0;35m'
-  NC='\033[0m'
-  BOLD='\033[1m'
-}
-colors
+# ── Error Collection ────────────────────────────────────────────────────────────
+ERRORS=()
+ERROR_COLLECTION_VAR="ERRORS"
 
-log() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${GREEN}[SETUP]${NC} $msg"
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
+# ── Firewall Check ──────────────────────────────────────────────────────────────
+REQUIRED_PORTS=(
+  "3000/tcp  (Next.js Portal)"
+  "6333/tcp  (Qdrant)"
+  "8123/tcp  (ClickHouse)"
+  "9093/tcp  (Prometheus)"
+  "9091/tcp  (Grafana)"
+  "8082/tcp  (cAdvisor)"
+)
 
-info() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${BLUE}[INFO]${NC} $msg"
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
-
-warn() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${YELLOW}[WARN]${NC} $msg"
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
-
-phase() {
-  local msg="[$(date '+%H:%M:%S')] PHASE: $*"
-  echo
-  echo -e "${MAGENTA}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-  echo -e "${MAGENTA}${BOLD}  $msg${NC}"
-  echo -e "${MAGENTA}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-  echo
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
-
-error() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${RED}[ERROR]${NC} $msg" >&2
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
-
-fatal() {
-  error "$*"
-  exit 1
-}
-
-success() {
-  local msg="[$(date '+%H:%M:%S')] ✅ $*"
-  echo -e "${GREEN}${BOLD}✅ $*${NC}"
-  echo "$msg" >> "$SETUP_LOG" 2>/dev/null || true
-}
-
-# ── Error Collection ────────────────────────────────────
-SETUP_ERRORS=()
-
-collect_error() {
-  local msg="$*"
-  SETUP_ERRORS+=("$msg")
-  error "$msg"
-}
-
-report_errors_and_exit() {
-  if [ ${#SETUP_ERRORS[@]} -eq 0 ]; then
-    return 0
-  fi
-
-  echo
-  echo -e "${RED}${BOLD}╔════════════════════════════════════════════════════════════════╗${NC}"
-  echo -e "${RED}${BOLD}║         SETUP FAILED — ERRORS FOUND                            ║${NC}"
-  echo -e "${RED}${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}"
-  echo
-  echo -e "${RED}${BOLD}Found ${#SETUP_ERRORS[@]} error(s) — setup cannot proceed:${NC}"
-  echo
-  local i=1
-  for err in "${SETUP_ERRORS[@]}"; do
-    echo -e "  ${RED}${BOLD}$i.${NC} ${RED}$err${NC}"
-    ((i++))
-  done
-  echo
-  echo -e "${YELLOW}Fix all errors above, then re-run setup.${NC}"
-  echo
-  exit 1
-}
-
-# ── Dry Run Helper ───────────────────────────────────────
-run_if_not_dry() {
-  if [ "$DRY_RUN" = true ]; then
-    echo -e "${CYAN}[DRY-RUN]${NC} Would execute: $*"
-  else
-    "$@"
-  fi
-}
-
-# ── Firewall Check ────────────────────────────────────────
 check_firewall() {
   log "Checking firewall status..."
   if command -v firewall-cmd > /dev/null 2>&1; then
     if firewall-cmd --state > /dev/null 2>&1; then
       warn "firewalld is active. Ensure required ports are open:"
-      warn "  3000/tcp (Next.js Portal)"
-
-      warn "  6333/tcp (Qdrant)"
-      warn "  8123/tcp (ClickHouse)"
-      warn "  9093/tcp (Prometheus)"
-      warn "  9091/tcp (Grafana)"
-      warn "  8082/tcp (cAdvisor)"
+      for port_desc in "${REQUIRED_PORTS[@]}"; do
+        warn "  $port_desc"
+      done
       info "Run: sudo firewall-cmd --permanent --add-port=3000/tcp && sudo firewall-cmd --reload"
     else
       success "firewalld installed but not running"
@@ -218,22 +113,22 @@ check_firewall() {
   fi
 }
 
-# ── SELinux Check ─────────────────────────────────────────
+# ── SELinux Check ─�────────────────────────────────────────────────────────────
 check_selinux() {
   log "Checking SELinux status..."
   if command -v getenforce > /dev/null 2>&1; then
     local selinux_status
     selinux_status=$(getenforce 2>/dev/null || echo "unknown")
     case "$selinux_status" in
-      "Enforcing")
+      Enforcing)
         warn "SELinux is enforcing. This may interfere with service operations."
         warn "Consider setting to permissive mode for setup: sudo setenforce 0"
         warn "For production, create proper SELinux policies instead."
         ;;
-      "Permissive")
+      Permissive)
         info "SELinux is permissive (warnings only)"
         ;;
-      "Disabled")
+      Disabled)
         success "SELinux is disabled"
         ;;
       *)
@@ -245,12 +140,12 @@ check_selinux() {
   fi
 }
 
-# ── Rocky Linux Specific Guidance ────────────────────────
+# ── Rocky Linux / RHEL Guidance ─────────────────────────────────────────────────
 show_rocky_linux_guidance() {
-  if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+  if is_redhat_family; then
     echo
     echo -e "${YELLOW}${BOLD}═════════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}${BOLD}  ROCKY LINUX / RHEL DETECTED - IMPORTANT SETUP NOTES${NC}"
+    echo -e "${YELLOW}${BOLD}  ROCKY LINUX / RHEL DETECTED — IMPORTANT SETUP NOTES${NC}"
     echo -e "${YELLOW}${BOLD}═════════════════════════════════════════════════════════════════${NC}"
     echo
     echo -e "${BOLD}Before running this script, ensure you have:${NC}"
@@ -276,28 +171,28 @@ show_rocky_linux_guidance() {
     echo -e "     sudo firewall-cmd --permanent --add-port=3000/tcp"
     echo -e "     sudo firewall-cmd --reload"
     echo
-    echo -e "${BOLD}See: ${CYAN}scripts/ROCKY_LINUX_COMPATIBILITY.md${NC} for detailed guide"
+    echo -e "${BOLD}See: ${CYAN}scripts/ROCKY_LINUX_COMPATIBILITY.md${NC} for detailed guide${NC}"
     echo
     read -p "Press Enter to continue or Ctrl+C to abort..."
     echo
   fi
 }
 
-# ── Prerequisites Check ───────────────────────────────────
+# ── Prerequisites Check ─────────────────────────────────────────────────────────
 check_prerequisites() {
   phase "1. PREREQUISITES CHECK"
-  SETUP_ERRORS=()
+  ERRORS=()
 
   info "Detected OS: $OS_NAME"
-  
+
   # Show Rocky Linux guidance if detected
   show_rocky_linux_guidance
 
   log "Checking Node.js..."
   local node_version
   node_version=$(node -v 2>/dev/null | sed 's/v//' || echo "0.0.0")
-  if [ "$(printf '%s\n' "22.0.0" "$node_version" | sort -V | head -n1)" != "22.0.0" ]; then
-    if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+  if ! version_ge "$node_version" "22.0.0"; then
+    if is_redhat_family; then
       collect_error "Node.js >= 22.0.0 required. Found: $node_version. Install via NodeSource: curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash - && sudo dnf install -y nodejs"
     else
       collect_error "Node.js >= 22.0.0 required. Found: $node_version"
@@ -318,7 +213,7 @@ check_prerequisites() {
   log "Checking Docker..."
   if ! docker info > /dev/null 2>&1; then
     if [ "$SKIP_DOCKER_TOOLS" = false ]; then
-      if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+      if is_redhat_family; then
         warn "Docker is not running. Install Docker CE: sudo dnf install -y docker-ce docker-ce-cli containerd.io && sudo systemctl enable --now docker"
       fi
       warn "Docker is not running. Docker tools stack will be skipped."
@@ -350,12 +245,12 @@ check_prerequisites() {
   log "Checking required directories..."
   [ ! -d "$PORTAL_DIR" ] && collect_error "Portal directory missing: $PORTAL_DIR"
   [ ! -d "$DATABASE_DIR" ] && collect_error "Database directory missing: $DATABASE_DIR"
-  if [ ${#SETUP_ERRORS[@]} -eq 0 ]; then
+  if [ ${#ERRORS[@]} -eq 0 ]; then
     success "Required directories OK"
   fi
 
   # Check firewall and SELinux on Rocky Linux/RHEL
-  if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+  if is_redhat_family; then
     check_firewall
     check_selinux
   fi
@@ -364,7 +259,7 @@ check_prerequisites() {
   success "Prerequisites check passed"
 }
 
-# ── Environment Configuration ─────────────────────────────
+# ── Environment Configuration ───────────────────────────────────────────────────
 setup_environment() {
   phase "2. ENVIRONMENT CONFIGURATION"
 
@@ -378,8 +273,10 @@ setup_environment() {
   if [ -f "$ENV_TARGET" ]; then
     if [ "$FORCE" = true ]; then
       warn "Existing .env file will be overwritten (--force)"
-      run_if_not_dry cp "$ENV_TARGET" "$ENV_TARGET.backup.$(date +%Y%m%d-%H%M%S)"
-      info "Backed up existing .env to .env.backup.$(date +%Y%m%d-%H%M%S)"
+      local backup_ts
+      backup_ts=$(date +%Y%m%d-%H%M%S)
+      run_if_not_dry cp "$ENV_TARGET" "$ENV_TARGET.backup.$backup_ts"
+      info "Backed up existing .env to .env.backup.$backup_ts"
     else
       warn "Environment file already exists. Use --force to overwrite."
       info "Current file will be used. Review and update manually if needed."
@@ -392,8 +289,6 @@ setup_environment() {
   success "Environment file created: $ENV_TARGET"
 
   log "Verifying environment variables..."
-  # Per Supabase docs: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is preferred
-  # Fall back to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   local required_vars=(
     "NEXT_PUBLIC_SUPABASE_URL"
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
@@ -421,7 +316,7 @@ setup_environment() {
   fi
 }
 
-# ── Systemd Service Setup ───────────────────────────────
+# ── Systemd Service Setup ─────────────────────────────────────────────────────
 setup_systemd() {
   if [ "$SKIP_SYSTEMD" = true ]; then
     info "Skipping systemd service setup (--no-systemd)"
@@ -431,7 +326,8 @@ setup_systemd() {
   phase "3. SYSTEMD SERVICE SETUP"
 
   local service_file="/etc/systemd/system/arch-systems.service"
-  local user="$(whoami)"
+  local user
+  user="$(whoami)"
 
   log "Creating systemd service file..."
   cat <<EOF | run_if_not_dry sudo tee "$service_file" > /dev/null
@@ -474,14 +370,15 @@ EOF
   fi
 }
 
-# ── Essential Services Setup ─────────────────────────────
+# ── Essential Services Setup ─────────────────────────────────────────────────────
 setup_essential_services() {
   phase "4. ESSENTIAL SERVICES SETUP"
 
   # Supabase
   log "Checking Supabase configuration..."
   local supa_url
-  supa_url=$(grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$PORTAL_DIR/.env" 2>/dev/null | cut -d= -f2- | tr -d '"' || true)
+  supa_url=$(get_env_var "$ENV_TARGET" "NEXT_PUBLIC_SUPABASE_URL")
+  [ -z "$supa_url" ] && supa_url=$(get_env_var "$ENV_TARGET" "SUPABASE_URL")
 
   if [[ "$supa_url" == *localhost* ]] || [[ "$supa_url" == *127.0.0.1* ]]; then
     warn "Using local Supabase instance"
@@ -490,7 +387,6 @@ setup_essential_services() {
     success "Local Supabase started"
 
     if [ "$SUPABASE_PUSH" = true ]; then
-      # Confirm before applying migrations in production-like environments
       echo
       read -p "Run 'pnpm --filter @repo/database supabase:push' now to apply migrations and generate types? (y/N): " resp
       resp=${resp:-N}
@@ -513,15 +409,14 @@ setup_essential_services() {
   if ! redis-cli ping > /dev/null 2>&1; then
     warn "Redis is not running"
     info "Starting Redis server..."
-    
-    # Try different methods based on OS
-    if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+
+    if is_redhat_family; then
       # Rocky Linux/RHEL typically use systemd service named 'redis'
       if command -v systemctl > /dev/null 2>&1; then
-        if systemctl list-unit-files | grep -q "^redis.service"; then
+        if systemctl list-unit-files | grep -q "^redis\.service"; then
           run_if_not_dry sudo systemctl start redis
           success "Redis service started via systemd (redis)"
-        elif systemctl list-unit-files | grep -q "^redis-server.service"; then
+        elif systemctl list-unit-files | grep -q "^redis-server\.service"; then
           run_if_not_dry sudo systemctl start redis-server
           success "Redis service started via systemd (redis-server)"
         else
@@ -545,7 +440,7 @@ setup_essential_services() {
     else
       warn "Redis not found. Install Redis or configure DISABLE_RATE_LIMIT=true in .env"
     fi
-    
+
     # Verify Redis started successfully
     if redis-cli ping > /dev/null 2>&1; then
       success "Redis is now running"
@@ -557,7 +452,7 @@ setup_essential_services() {
   fi
 }
 
-# ── Docker Tools Stack Setup ─────────────────────────────
+# ── Docker Tools Stack Setup ───────────────────────────────────────────────────
 setup_docker_tools() {
   if [ "$SKIP_DOCKER_TOOLS" = true ]; then
     info "Skipping Docker tools stack (--no-docker-tools)"
@@ -597,7 +492,7 @@ setup_docker_tools() {
   info "To stop: docker-compose -f $compose_file down"
 }
 
-# ── Monitoring Stack Setup ───────────────────────────────
+# ── Monitoring Stack Setup ───────────────────────────────────────────────────────
 setup_monitoring() {
   if [ "$SKIP_MONITORING" = true ]; then
     info "Skipping monitoring stack (--no-monitoring)"
@@ -631,7 +526,7 @@ setup_monitoring() {
   info "To stop: docker-compose -f $monitoring_file down"
 }
 
-# ── Build and Start Portal ──────────────────────────────
+# ── Build and Start Portal ───────────────────────────────────────────────────────
 build_and_start_portal() {
   phase "7. BUILD AND START PORTAL"
 
@@ -645,7 +540,6 @@ build_and_start_portal() {
 
   if [ "$SKIP_SYSTEMD" = true ]; then
     log "Starting portal in background..."
-    # Start portal from its directory so pnpm start runs the portal package's "start" script
     run_if_not_dry bash -lc "cd '$PORTAL_DIR' && \"$(which pnpm)\" start > '$REPO_ROOT/run/portal.log' 2>&1 & echo \$! > '$REPO_ROOT/run/.portal.pid'"
     if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
       local portal_pid
@@ -662,7 +556,7 @@ build_and_start_portal() {
   fi
 }
 
-# ── Health Check ─────────────────────────────────────────
+# ── Health Check ─────────────────────────────────────────────────────────────────
 health_check() {
   phase "8. HEALTH CHECK"
 
@@ -670,17 +564,18 @@ health_check() {
   local delay=2
 
   log "Checking portal health (max ${max_attempts}s)..."
-  for i in $(seq 1 $max_attempts); do
+  local i
+  for ((i = 1; i <= max_attempts; i++)); do
     if curl -fs "http://localhost:3000/api/health" > /dev/null 2>&1; then
       success "Portal is healthy"
       return 0
     fi
 
-    if [ $((i % 5)) -eq 0 ]; then
+    if (( i % 5 == 0 )); then
       echo -n "⏳ "
     fi
 
-    sleep $delay
+    sleep "$delay"
   done
 
   warn "Portal health check failed after ${max_attempts} attempts"
@@ -688,7 +583,7 @@ health_check() {
   info "If using systemd: sudo journalctl -u arch-systems -n 50"
 }
 
-# ── Summary and Next Steps ──────────────────────────────
+# ── Summary and Next Steps ───────────────────────────────────────────────────────
 print_summary() {
   phase "SETUP COMPLETE"
 
@@ -705,7 +600,6 @@ print_summary() {
 
   if [ "$SKIP_DOCKER_TOOLS" = false ]; then
     echo -e "${BOLD}Docker Tools Stack:${NC}"
-
     echo -e "  • Flowise: ${GREEN}Running${NC} (http://localhost:3000)"
     echo -e "  • Langfuse: ${GREEN}Running${NC} (http://localhost:3000)"
     echo -e "  • Qdrant: ${GREEN}Running${NC} (http://localhost:6333)"
@@ -725,12 +619,13 @@ print_summary() {
   echo -e "  1. Review and update $ENV_TARGET with production values"
   echo -e "  2. Verify Supabase connection and run migrations: pnpm --filter @repo/database supabase:push"
   echo -e "  3. Access the portal at: ${CYAN}http://localhost:3000${NC}"
+  echo
 
-  echo -e "\nLocal services recommendations:"
-  echo -e "  • Flowise, Supabase, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
-  echo -e "  • Open required ports (3000, 3001, 5678, 6333, 8123, 9091, 9093, 8082) in your firewall for internal access."
-  echo -e "  • Confirm .env.tools has correct credentials for services (FLOWISE, REDIS_PASSWORD)."
-  echo -e "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."
+  echo -e "\033[1mLocal services recommendations:\033[0m"
+  echo "  • Flowise, Supabase, Qdrant are expected to be hosted locally on this server or LAN. Ensure .env.tools and .env are configured to point to localhost or LAN IPs."
+  echo "  • Open required ports (3000, 3001, 5678, 6333, 8123, 9091, 9093, 8082) in your firewall for internal access."
+  echo "  • Confirm .env.tools has correct credentials for services (FLOWISE, REDIS_PASSWORD)."
+  echo "  • For production, consider placing these services behind internal network controls (VLANs, firewalls) and not exposing them publicly."
   echo
 
   if [ "$SKIP_SYSTEMD" = false ]; then
@@ -753,19 +648,22 @@ print_summary() {
   echo -e "  • Environment files: ${CYAN}ENVIRONMENT_FILES_GUIDE.md${NC}"
   echo -e "  • Setup log: ${CYAN}$SETUP_LOG${NC}"
   echo
-  if [ "$OS" = "rocky" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+
+  if is_redhat_family; then
     echo -e "${BOLD}Rocky Linux/RHEL Notes:${NC}"
     echo -e "  • Compatibility guide: ${CYAN}scripts/ROCKY_LINUX_COMPATIBILITY.md${NC}"
-    echo -e "  • Ensure firewalld ports are open"
-    echo -e "  • Consider SELinux policies for production"
+    echo "  • Ensure firewalld ports are open"
+    echo "  • Consider SELinux policies for production"
     echo
   fi
+
   echo -e "${YELLOW}⚠️  IMPORTANT: Never commit the .env file to git. It contains production secrets.${NC}"
   echo
 }
 
-# ── Main Execution ───────────────────────────────────────
+# ── Main Execution ─────────────────────────────────────────────────────────────────
 main() {
+  LOG_LABEL="[SETUP]"
   echo
   echo -e "${CYAN}${BOLD}Arch-Systems Production Environment Setup${NC}"
   echo

@@ -1,5 +1,20 @@
 # Scripts Agent Tracer
 
+## 2026-09-11: Non-root Port Checking (`lsof -ti`)
+
+### Purpose
+
+Standardized port conflict checking across all dev, deployment, preflight, and shutdown scripts to non-root `lsof -ti:"$port"`.
+
+### Changes
+
+- Updated `scripts/dev.sh`, `scripts/deploy.sh`, `scripts/deploy-cloudflare.sh`, `scripts/deploy-live-local.sh`, `scripts/shutdown.sh`, `scripts/preflight-checklist.sh`, and `scripts/README.md`.
+- Replaced `ss -tlnH`, `ss -tunlp`, `sudo lsof`, and `lsof -i` invocations with non-root `lsof -ti:"$port"` checks as established in `scripts/dev.sh`.
+
+### Verification
+
+- Syntax validation of bash scripts and manual test runs.
+
 ## 2026-08-28: FUXA Gauge-Grid Generator (`fuxa-gauge-grid.py`)
 
 ### Purpose
@@ -256,3 +271,36 @@ Ensure seamless dev deployment initialization without spurious warnings caused b
 
 - Validated syntax and options in `scripts/dev.sh`.
 - Verified quality gate compliance with `pnpm quality`.
+
+## 2026-09-11T07:41:00Z: Removed Arch-Base Requirement and Aligned Dev & Deployment Scripts to Cloud Mode Supabase
+
+### Purpose
+Remove the external repository requirement on `Arch-Base` (`../Arch-Base`), making `Arch-System` self-contained using internal `@repo/database` and `@repo/supabase`, and aligning all deployment and development scripts (`deploy.sh`, `dev.sh`, `preflight-checklist.sh`, `setup-production-environment.sh`) to default to cloud-mode hosted Supabase (`https://mrwhtxbhrzyttlsyuofc.supabase.co`).
+
+### Changes Made
+1. **`scripts/deploy.sh`**:
+   - Converted `ARCH_BASE_DIR` from mandatory to optional with graceful fallback to `packages/database` and `packages/supabase`.
+   - Auto-detected hosted cloud Supabase from `.env` and added `--cloud`/`--hosted` flags.
+   - Updated Phase 0 (validation) and Phase 6 (infrastructure) to check cloud Supabase reachability without requiring local Docker containers in cloud mode.
+   - Replaced interactive `sudo` calls in port conflict resolution with non-blocking checks.
+   - Fixed shell redirection in dry-run backup generation.
+   - Supported monorepo standalone server entrypoint (`apps/portal/.next/standalone/Arch-System/apps/portal/server.js`).
+2. **`scripts/dev.sh`**:
+   - Removed fatal exit when `Arch-Base` directory is absent.
+   - Added graceful fallback to `packages/database` or cloud-first mode.
+3. **`scripts/setup-production-environment.sh`**:
+   - Removed mandatory `Arch-Base` existence check and fatal exit; set `DATABASE_DIR` default to `packages/database`.
+4. **`scripts/preflight-checklist.sh`**:
+   - Updated repository structure check to evaluate `packages/database` when `Arch-Base` is not present.
+   - Made Docker check acknowledge cloud-mode Supabase without reporting error/warning.
+   - Added support for monorepo standalone server path.
+   - Installed user systemd service file and synchronized MCP configs.
+5. **`scripts/sync-mcp-config.js`**:
+   - Added fallback to `.mcp.json` when `config/tools/mcp.json` is missing.
+
+### Verification
+- `./scripts/deploy.sh local --dry-run` passed 100% with exit code 0.
+- `./scripts/deploy.sh production --dry-run` passed 100% with exit code 0.
+- `./scripts/preflight-checklist.sh` passed 100% with exit code 0 (0 errors).
+- `bash scripts/dev.sh --quick --headless` successfully compiled and started dev server in cloud mode.
+

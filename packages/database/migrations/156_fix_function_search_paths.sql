@@ -1,0 +1,33 @@
+-- Migration: 156_fix_function_search_paths.sql
+-- Description: Secures PL/pgSQL functions against mutable search_path risks by explicitly setting search_path = public, pg_temp
+
+ALTER FUNCTION public.user_department_id() SET search_path = public, pg_temp;
+ALTER FUNCTION public.is_admin() SET search_path = public, pg_temp;
+ALTER FUNCTION public.has_department_access(UUID) SET search_path = public, pg_temp;
+ALTER FUNCTION public.handle_new_user() SET search_path = public, pg_temp;
+ALTER FUNCTION public.process_audit_log() SET search_path = public, pg_temp;
+ALTER FUNCTION public.is_active(TIMESTAMPTZ) SET search_path = public, pg_temp;
+ALTER FUNCTION public.ensure_updated_at_trigger(TEXT) SET search_path = public, pg_temp;
+ALTER FUNCTION public.submit_user_feedback(UUID, TEXT, TEXT, INT) SET search_path = public, pg_temp;
+ALTER FUNCTION public.submit_quick_feedback(UUID, TEXT, INT) SET search_path = public, pg_temp;
+ALTER FUNCTION public.trigger_webhook_delivery() SET search_path = public, pg_temp;
+ALTER FUNCTION public.queue_webhook_delivery() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_monolithized_department_dashboard_payload(UUID) SET search_path = public, pg_temp;
+ALTER FUNCTION public.update_updated_at_column() SET search_path = public, pg_temp;
+ALTER FUNCTION public.create_next_month_partitions() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_dept_production_summary() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_machine_utilization_weekly() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_safety_incident_monthly() SET search_path = public, pg_temp;
+ALTER FUNCTION public.update_drill_operations_updated_at() SET search_path = public, pg_temp;
+ALTER FUNCTION public.archive_telemetry_month(DATE) SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_telemetry_summary(UUID, TIMESTAMPTZ, TIMESTAMPTZ) SET search_path = public, pg_temp;
+ALTER FUNCTION public.check_and_archive_telemetry() SET search_path = public, pg_temp;
+ALTER FUNCTION public.archive_monthly_drill_operations() SET search_path = public, pg_temp;
+ALTER FUNCTION public.search_memories_hybrid(TEXT, vector, FLOAT, INT) SET search_path = public, pg_temp;
+ALTER FUNCTION public.search_memories_semantic(vector, FLOAT, INT) SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_user_daily_spend(UUID, DATE) SET search_path = public, pg_temp;
+ALTER FUNCTION public.archive_weekly_access_logs() SET search_path = public, pg_temp;
+ALTER FUNCTION public.set_updated_at() SET search_path = public, pg_temp;
+ALTER FUNCTION public.archive_monthly_control_room_shifts() SET search_path = public, pg_temp;
+ALTER FUNCTION public.notify_telemetry_webhook() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_avg_tire_lifespan() SET search_path = public, pg_temp;
