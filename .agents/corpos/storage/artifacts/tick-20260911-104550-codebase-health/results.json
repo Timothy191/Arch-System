@@ -1,0 +1,15 @@
+{
+  "allPass": false,
+  "results": [
+    {
+      "command": "pnpm type-check",
+      "status": "FAIL",
+      "log": "/home/timothy/Projects/Arch-System/.agents/corpos/storage/artifacts/tick-20260911-104550-codebase-health/cmd_1789116350384_0.log"
+    },
+    {
+      "command": "pnpm policy:check",
+      "status": "PASS",
+      "log": "/home/timothy/Projects/Arch-System/.agents/corpos/storage/artifacts/tick-20260911-104550-codebase-health/cmd_1789116361374_1.log"
+    }
+  ]
+}

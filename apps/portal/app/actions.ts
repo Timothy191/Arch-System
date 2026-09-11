@@ -3,7 +3,7 @@
 import { monthlyReportInputSchema } from "@repo/contract/schemas/form.schema";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { aiGenerateEmbeddingEvent, inngest } from "@repo/utils/inngest";
-import { revalidateTag } from "next/cache";
+import { updateTagInAction } from "@/lib/server-cache";
 import { redirect } from "next/navigation";
 import { logError } from "@/lib/errors/error-logger";
 
@@ -54,7 +54,7 @@ export async function revalidateRSC(tags: string[]) {
   }
 
   for (const tag of tags) {
-    revalidateTag(tag, "max");
+    updateTagInAction(tag);
   }
   return { success: true };
 }

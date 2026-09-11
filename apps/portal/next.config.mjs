@@ -134,6 +134,24 @@ const nextConfig = {
     inlineCss: false,
     // AGENT-TRACE: Injects detailed attribution info (elements, network events) into useReportWebVitals
     webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
+    // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
+    cacheLife: {
+      telemetry: {
+        stale: 5,
+        revalidate: 10,
+        expire: 30,
+      },
+      departments: {
+        stale: 300,
+        revalidate: 3600,
+        expire: 86400,
+      },
+      reports: {
+        stale: 60,
+        revalidate: 300,
+        expire: 1800,
+      },
+    },
   },
   async headers() {
     return [

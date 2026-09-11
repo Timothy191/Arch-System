@@ -1,0 +1,358 @@
+
+> arch-systems@1.5.1 policy:check /home/timothy/Projects/Arch-System
+> node tools/repo/policy-compiler.cjs --check && pnpm policy:security --ci
+
+✓ /home/timothy/Projects/Arch-System/tools/repo/policy/dependency.rules.json
+✓ /home/timothy/Projects/Arch-System/tools/repo/policy/architecture.rules.json
+✓ /home/timothy/Projects/Arch-System/tools/repo/policy/security.checks.json
+✓ /home/timothy/Projects/Arch-System/tools/repo/policy/intent-map.json
+✓ /home/timothy/Projects/Arch-System/tools/repo/policy/eslint-boundaries.generated.cjs
+
+> arch-systems@1.5.1 policy:security /home/timothy/Projects/Arch-System
+> node tools/audits/enforce-security-checks.cjs --ci
+
+
+🛡️  Running Security Checks (Env: ci)...
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/20260911_control_room_hardening.sql:32
+   Line: CREATE OR REPLACE FUNCTION public.verify_supervisor_pin(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/150_update_unified_shift_compilation_smu.sql:7
+   Line: CREATE OR REPLACE FUNCTION get_unified_shift_compilation(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/149_machine_operations_smr_and_drilling.sql:39
+   Line: CREATE OR REPLACE FUNCTION validate_delay_entry_time()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/149_machine_operations_smr_and_drilling.sql:104
+   Line: CREATE OR REPLACE FUNCTION sync_to_drill_operations()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/149_machine_operations_smr_and_drilling.sql:216
+   Line: CREATE OR REPLACE FUNCTION sync_delays_to_drill_operations()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/148_multi_site_production_report.sql:254
+   Line: CREATE OR REPLACE FUNCTION get_multi_site_shift_compilation(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/147_unified_shift_compilation.sql:31
+   Line: CREATE OR REPLACE FUNCTION get_unified_shift_compilation(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/092_feature_flags.sql:72
+   Line: CREATE OR REPLACE FUNCTION evaluate_feature_flag(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/091_slo_monitoring.sql:51
+   Line: CREATE OR REPLACE FUNCTION record_slo_measurement(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/084_performance_monitoring.sql:30
+   Line: CREATE OR REPLACE FUNCTION public.get_slow_queries(p_limit INT DEFAULT 20)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/081_access_control_employees_rls.sql:4
+   Line: CREATE OR REPLACE FUNCTION is_access_control()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/080_employee_profile_fields.sql:23
+   Line: CREATE OR REPLACE FUNCTION public.enforce_employee_update_constraints()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/078_satellite_insar_deformations.sql:28
+   Line: CREATE OR REPLACE FUNCTION update_satellite_deformations_updated_at()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/077_engineering_breakdown_sharing.sql:23
+   Line: CREATE OR REPLACE FUNCTION auto_share_breakdown_with_control_room()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/074_hourly_production_trend.sql:63
+   Line: CREATE OR REPLACE FUNCTION refresh_hourly_production()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/074_hourly_production_trend.sql:72
+   Line: CREATE OR REPLACE FUNCTION public.get_production_trend(p_hours_back INT DEFAULT 24)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/073_production_summary_view.sql:150
+   Line: CREATE OR REPLACE FUNCTION refresh_production_summary()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/073_production_summary_view.sql:158
+   Line: CREATE OR REPLACE FUNCTION public.get_production_summary(p_start_date DATE, p_end_date DATE)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/071_operational_immutability.sql:101
+   Line: CREATE OR REPLACE FUNCTION check_shift_immutable()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/068_delay_entries_table.sql:99
+   Line: CREATE OR REPLACE FUNCTION check_delay_hours_max_12_hours()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/068_delay_entries_table.sql:328
+   Line: CREATE OR REPLACE FUNCTION update_updated_at_column()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/068_delay_entries_table.sql:347
+   Line: CREATE OR REPLACE FUNCTION validate_delay_entry_time()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/066_fix_health_check_functions.sql:11
+   Line: CREATE OR REPLACE FUNCTION public.check_mv_freshness(p_view_name TEXT, p_max_age_minutes INT DEFAULT 30)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/066_fix_health_check_functions.sql:59
+   Line: CREATE OR REPLACE FUNCTION public.get_mv_refresh_stats(p_view_name TEXT DEFAULT NULL, p_days INT DEFAULT 7)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:64
+   Line: CREATE OR REPLACE FUNCTION public.log_mv_refresh_start(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:87
+   Line: CREATE OR REPLACE FUNCTION public.log_mv_refresh_end(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:112
+   Line: CREATE OR REPLACE FUNCTION public.refresh_dept_production_summary_smart()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:175
+   Line: CREATE OR REPLACE FUNCTION public.refresh_machine_utilization_weekly_smart()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:229
+   Line: CREATE OR REPLACE FUNCTION public.refresh_safety_incident_monthly_smart()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:326
+   Line: CREATE OR REPLACE FUNCTION public.check_mv_freshness(p_view_name TEXT, p_max_age_minutes INT DEFAULT 30)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/065_materialized_view_refresh_optimization.sql:374
+   Line: CREATE OR REPLACE FUNCTION public.get_mv_refresh_stats(p_view_name TEXT DEFAULT NULL, p_days INT DEFAULT 7)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:39
+   Line: CREATE OR REPLACE FUNCTION search_memories_hybrid(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:125
+   Line: CREATE OR REPLACE FUNCTION search_memories_semantic(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:228
+   Line: CREATE OR REPLACE FUNCTION public.generate_vector_search_cache_key(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:247
+   Line: CREATE OR REPLACE FUNCTION public.get_cached_vector_search(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:265
+   Line: CREATE OR REPLACE FUNCTION public.cache_vector_search_results(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:301
+   Line: CREATE OR REPLACE FUNCTION public.cleanup_vector_search_cache()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/064_vector_search_query_optimization.sql:372
+   Line: CREATE OR REPLACE FUNCTION public.record_vector_search_performance(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/063_partition_pruning_optimization.sql:22
+   Line: CREATE OR REPLACE FUNCTION public.add_partition_check_constraints()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/063_partition_pruning_optimization.sql:129
+   Line: CREATE OR REPLACE FUNCTION public.create_next_month_partitions()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/063_partition_pruning_optimization.sql:203
+   Line: CREATE OR REPLACE FUNCTION public.archive_old_partitions(months_to_keep INT DEFAULT 12)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/058_embedding_provider_ollama.sql:28
+   Line: CREATE OR REPLACE FUNCTION search_memories_hybrid(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/058_embedding_provider_ollama.sql:95
+   Line: CREATE OR REPLACE FUNCTION search_memories_semantic(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/057_security_p0_fixes.sql:10
+   Line: CREATE OR REPLACE FUNCTION public.handle_new_user()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/057_security_p0_fixes.sql:30
+   Line: CREATE OR REPLACE FUNCTION public.enforce_employee_update_constraints()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/056_drill_operations_v2.sql:34
+   Line: CREATE OR REPLACE FUNCTION get_drill_monthly_summary(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/055_access_control_metrics_rpc.sql:6
+   Line: CREATE OR REPLACE FUNCTION get_access_control_metrics_jsonb(p_department_id uuid)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/054_validate_dozer_roll_date.sql:7
+   Line: CREATE OR REPLACE FUNCTION validate_dozer_roll_date()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/053_machine_telemetry_webhook.sql:11
+   Line: CREATE OR REPLACE FUNCTION notify_telemetry_webhook()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/046_control_room_archiving.sql:120
+   Line: CREATE OR REPLACE FUNCTION archive_monthly_control_room_shifts()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/036_documents.sql:39
+   Line: CREATE OR REPLACE FUNCTION public.set_updated_at()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/033_access_logs_weekly_archival.sql:27
+   Line: CREATE OR REPLACE FUNCTION archive_weekly_access_logs()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/032_ai_usage_logs.sql:68
+   Line: CREATE OR REPLACE FUNCTION get_user_daily_spend(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/030_vector_index_optimization.sql:81
+   Line: CREATE OR REPLACE FUNCTION search_memories_hybrid(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/030_vector_index_optimization.sql:148
+   Line: CREATE OR REPLACE FUNCTION search_memories_semantic(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/027_drill_shifts_and_archiving.sql:32
+   Line: CREATE OR REPLACE FUNCTION archive_monthly_drill_operations()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/025_machine_telemetry.sql:155
+   Line: CREATE OR REPLACE FUNCTION archive_telemetry_month(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/025_machine_telemetry.sql:230
+   Line: CREATE OR REPLACE FUNCTION get_telemetry_summary(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/025_machine_telemetry.sql:298
+   Line: CREATE OR REPLACE FUNCTION check_and_archive_telemetry()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/024_drill_operations.sql:65
+   Line: CREATE OR REPLACE FUNCTION update_drill_operations_updated_at()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/022_materialized_views.sql:116
+   Line: CREATE OR REPLACE FUNCTION public.get_dept_production_summary()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/022_materialized_views.sql:132
+   Line: CREATE OR REPLACE FUNCTION public.get_machine_utilization_weekly()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/022_materialized_views.sql:148
+   Line: CREATE OR REPLACE FUNCTION public.get_safety_incident_monthly()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/020_partition_time_series.sql:125
+   Line: CREATE OR REPLACE FUNCTION update_updated_at_column()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/020_partition_time_series.sql:244
+   Line: CREATE OR REPLACE FUNCTION public.create_next_month_partitions()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/019_sync_metadata.sql:25
+   Line: CREATE OR REPLACE FUNCTION get_monolithized_department_dashboard_payload(dept_id UUID)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/018_webhook_triggers.sql:5
+   Line: CREATE OR REPLACE FUNCTION queue_webhook_delivery()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/017_webhooks.sql:143
+   Line: CREATE OR REPLACE FUNCTION trigger_webhook_delivery()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/015_user_feedback.sql:53
+   Line: CREATE OR REPLACE FUNCTION submit_user_feedback(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/015_user_feedback.sql:74
+   Line: CREATE OR REPLACE FUNCTION submit_quick_feedback(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/014_schema_refinement.sql:108
+   Line: CREATE OR REPLACE FUNCTION ensure_updated_at_trigger(p_table_name TEXT) RETURNS void AS $$
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/0146_tire_management.sql:105
+   Line: CREATE OR REPLACE FUNCTION get_avg_tire_lifespan()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/012_rls_refinement.sql:6
+   Line: CREATE OR REPLACE FUNCTION public.is_active(record_deleted_at TIMESTAMPTZ)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/011_automated_auditing.sql:6
+   Line: CREATE OR REPLACE FUNCTION public.process_audit_log()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/010_schema_optimization.sql:68
+   Line: -- CREATE OR REPLACE FUNCTION public.is_not_deleted()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/009_ai_memory.sql:118
+   Line: CREATE OR REPLACE FUNCTION search_memories_hybrid(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/009_ai_memory.sql:189
+   Line: CREATE OR REPLACE FUNCTION search_memories_semantic(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/009_ai_memory.sql:230
+   Line: CREATE OR REPLACE FUNCTION get_conversation_history(
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/004_breakdowns.sql:103
+   Line: CREATE OR REPLACE FUNCTION update_breakdowns_updated_at()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/003_control_room_revisions.sql:236
+   Line: CREATE OR REPLACE FUNCTION update_updated_at_column()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/002_control_room_tables.sql:542
+   Line: CREATE OR REPLACE FUNCTION update_updated_at_column()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/001_initial.sql:308
+   Line: CREATE OR REPLACE FUNCTION public.user_department_id()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/001_initial.sql:318
+   Line: CREATE OR REPLACE FUNCTION public.is_admin()
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/001_initial.sql:330
+   Line: CREATE OR REPLACE FUNCTION public.has_department_access(dept_id UUID)
+
+⚠️ [no-mutable-search-path] PL/pgSQL functions must explicitly set search_path
+   File: packages/database/migrations/001_initial.sql:351
+   Line: CREATE OR REPLACE FUNCTION public.handle_new_user()
+
+
+🟡 Security audit passed with 85 warnings.

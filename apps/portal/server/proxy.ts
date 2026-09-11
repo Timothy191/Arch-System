@@ -189,7 +189,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Has a session cookie — verify it and redirect if valid
-    const client = await createMiddlewareClient(request);
+    const client = await createMiddlewareClient(request as any);
     let sessionUser = null;
     let shouldSignOut = false;
     try {
@@ -263,7 +263,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  const client = await createMiddlewareClient(request);
+  const client = await createMiddlewareClient(request as any);
   let user = null;
   let shouldSignOut = false;
   try {
@@ -359,7 +359,7 @@ export async function proxy(request: NextRequest) {
   // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
     if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
-      return redirectWithError(request, "unauthorized_department", client.response);
+      return redirectWithError(request as any, "unauthorized_department", client.response as any);
     }
   }
 
@@ -369,7 +369,7 @@ export async function proxy(request: NextRequest) {
     RESTRICTED_ROUTES.tools &&
     !RESTRICTED_ROUTES.tools.includes(userRole)
   ) {
-    return redirectWithError(request, "unauthorized_department", client.response);
+    return redirectWithError(request as any, "unauthorized_department", client.response as any);
   }
 
   // Check department isolation
@@ -378,12 +378,12 @@ export async function proxy(request: NextRequest) {
 
     const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
     if (!deptUuid) {
-      return redirectWithError(request, "unknown_department", client.response);
+      return redirectWithError(request as any, "unknown_department", client.response as any);
     }
 
     const hasAccess = isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
     if (!hasAccess) {
-      return redirectWithError(request, "unauthorized_department", client.response);
+      return redirectWithError(request as any, "unauthorized_department", client.response as any);
     }
   }
 

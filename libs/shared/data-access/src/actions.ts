@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabaseClient } from "@repo/supabase/server";
+import { cacheInvalidateTags } from "@repo/redis";
 import { revalidateTag } from "next/cache";
 
 export async function revalidateRSC(tags: string[]) {
@@ -15,7 +16,23 @@ export async function revalidateRSC(tags: string[]) {
   }
 
   for (const tag of tags) {
-    revalidateTag(tag, "max");
+    try {
+      const nextCache = require("next/cache");
+      if (typeof nextCache.updateTag === "function") {
+        nextCache.updateTag(tag);
+      } else {
+        (revalidateTag as any)(tag, "max");
+      }
+    } catch {
+      // Outside request context
+    }
   }
+
+  try {
+    await cacheInvalidateTags(tags);
+  } catch {
+    // Gracefully handle Redis offline
+  }
+  
   return { success: true };
 }
