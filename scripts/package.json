@@ -1,0 +1,13 @@
+{
+  "name": "scripts",
+  "private": true,
+  "scripts": {
+    "migrate:hooks": "ts-node codemods/migrate-to-shared-hooks.ts",
+    "migrate:hooks:dry": "ts-node codemods/migrate-to-shared-hooks.ts --dry-run"
+  },
+  "devDependencies": {
+    "ts-morph": "^20.0.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.1"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "portal-hooks-migration",
+  "steps": [
+    { "name": "maker", "agent": "gemini-2.5-flash", "role": "codemod_executor" },
+    { "name": "checker", "agent": "gemini-2.5-pro", "role": "verifier" }
+  ]
+}

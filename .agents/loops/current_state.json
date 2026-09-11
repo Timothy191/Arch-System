@@ -1,0 +1,15 @@
+{
+  "loop_id": "loop-1789114498",
+  "goal": "Test verification gate",
+  "phase": "COLLECT",
+  "runner": "antigravity",
+  "budget": {
+    "max_steps": 10,
+    "current_step": 0,
+    "timeout_seconds": 600
+  },
+  "created_at": "2026-09-11T08:14:58Z",
+  "verification_gates": [
+    "pnpm --filter @repo/shared/hooks type-check"
+  ]
+}

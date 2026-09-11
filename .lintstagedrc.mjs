@@ -143,4 +143,14 @@ export default {
     if (files.length === 0) return [];
     return ["pnpm audit:agents"];
   },
+
+  // Agent governance checks
+  "*.{ts,tsx}": (files) => {
+    if (files.length === 0) return [];
+    return [
+      "bash .agents/hooks/pre-tool-guard.sh",
+      "pnpm --filter @repo/shared/hooks type-check"
+    ];
+  },
+
 };

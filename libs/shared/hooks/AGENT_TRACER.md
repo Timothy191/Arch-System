@@ -13,3 +13,16 @@ Fix TypeScript build failure (`TS2580: Cannot find name 'process'`) in `src/clie
 ### What the Next Agent Should Know
 
 - `shared-hooks` requires `@types/node` for accessing `process.env` in client telemetry logging.
+
+## 2026-09-11: Universal Shared React Hooks Implementation
+
+### Purpose
+Extract and formalize 16 zero-dependency React 19 application hooks within `@repo/shared/hooks` alongside agent governance guardrails in `.agents/hooks/`.
+
+### Changes Made
+1. Added `types.ts` defining contract interfaces (`DebounceOptions`, `ThrottleOptions`, `PollingOptions`, `StorageOptions`, `ClipboardState`).
+2. Implemented `useDebounce`, `useDebounceFn`, `useThrottle`, `useThrottleFn`.
+3. Implemented `useLocalStorage`, `useSessionStorage` using `useSyncExternalStore`.
+4. Implemented `useOnlineStatus`, `usePolling`, `useClickOutside`, `useCopyToClipboard`, `useMediaQuery`.
+5. Implemented `useLatest`, `usePrevious`, `useMount`, `useUnmount`, `useUpdateEffect`.
+6. Barrel-exported all hooks in `src/index.ts`.

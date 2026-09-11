@@ -1,0 +1,109 @@
+{
+  "$schema": "./schema.json",
+  "company_name": "Plantcor Mining Operations (Arch-Systems)",
+  "version": "1.0.0",
+  "description": "Autonomous Corporate Business Loop Operating System combining win.sh, CorpOS, and ai-company",
+  "tiers": {
+    "tier_0": {
+      "name": "Executive & Strategic Brain",
+      "description": "High-level goal prioritization, cross-department arbitration, token/compute budgeting",
+      "departments": ["executive"]
+    },
+    "tier_1": {
+      "name": "Core Business Operations",
+      "description": "Domain-specific execution units responsible for system health, plant telemetry, and security",
+      "departments": ["engineering", "control-room", "compliance-safety"]
+    }
+  },
+  "departments": {
+    "executive": {
+      "id": "executive",
+      "name": "Executive Strategy & Resource Management",
+      "lead_role": "Chief Operating Executive",
+      "authority_ceiling": "L3",
+      "spec_path": "departments/executive.md",
+      "assigned_loops": []
+    },
+    "engineering": {
+      "id": "engineering",
+      "name": "Software Engineering & Architecture",
+      "lead_role": "Principal Systems Engineer",
+      "authority_ceiling": "L2",
+      "spec_path": "departments/engineering.md",
+      "assigned_loops": ["codebase-health"]
+    },
+    "control-room": {
+      "id": "control-room",
+      "name": "Mining Plant Operations & SCADA Control Room",
+      "lead_role": "Operations Shift Lead",
+      "authority_ceiling": "L2",
+      "spec_path": "departments/control-room.md",
+      "assigned_loops": ["shift-integrity"]
+    },
+    "compliance-safety": {
+      "id": "compliance-safety",
+      "name": "Compliance, Governance & Security",
+      "lead_role": "Chief Security & Safety Auditor",
+      "authority_ceiling": "L3",
+      "spec_path": "departments/compliance-safety.md",
+      "assigned_loops": ["security-compliance"]
+    }
+  },
+  "authority_matrix": {
+    "L0": {
+      "level": 0,
+      "title": "Observer",
+      "description": "Read-only telemetry inspection, static analysis, log viewing. No mutations.",
+      "permissions": ["read_file", "list_dir", "view_telemetry", "git_status"],
+      "requires_human_approval": false
+    },
+    "L1": {
+      "level": 1,
+      "title": "Advisor",
+      "description": "Generates strategic briefs, recommendations, documentation, and draft PR summaries.",
+      "permissions": ["generate_brief", "write_docs", "format_proposal", "recommend_patch"],
+      "requires_human_approval": false
+    },
+    "L2": {
+      "level": 2,
+      "title": "Operator",
+      "description": "Autonomous code mutation, test execution, worktree branches, and verification asserts.",
+      "permissions": ["modify_code", "run_tests", "create_worktree", "git_commit_branch"],
+      "requires_human_approval": false,
+      "sandboxed": true
+    },
+    "L3": {
+      "level": 3,
+      "title": "Executive/Admin",
+      "description": "Production database migrations, secret changes, main branch merges, deploy triggers.",
+      "permissions": ["db_migrations", "secrets_alter", "merge_to_main", "deploy_prod"],
+      "requires_human_approval": true,
+      "approval_channel": "storage/approvals"
+    }
+  },
+  "scheduler_defaults": {
+    "min_interval_minutes": 15,
+    "max_interval_minutes": 240,
+    "backoff_factor": 2.0,
+    "jitter_seconds": 30,
+    "quiet_hours": {
+      "enabled": true,
+      "start_hour_utc": 22,
+      "end_hour_utc": 5,
+      "deferred_authority_levels": ["L2", "L3"]
+    }
+  },
+  "safety_fences": {
+    "forbidden_paths": [
+      "/usr/share/omarchy/**",
+      ".env*",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.pfx"
+    ],
+    "max_turn_budget_per_tick": 15,
+    "max_cost_tokens_per_tick": 50000,
+    "max_correction_iterations": 2,
+    "rollback_on_failure": true
+  }
+}

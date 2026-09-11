@@ -1,0 +1,7 @@
+{
+  "name": "agent-governance-audit",
+  "steps": [
+    { "name": "lint_check", "agent": "gemini-2.5-flash", "role": "static_analysis" },
+    { "name": "verify_diff", "agent": "gemini-2.5-pro", "role": "deep_verifier" }
+  ]
+}

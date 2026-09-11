@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgenticLoopState",
+  "description": "Contract for local-first autonomous agent loops synthesized from Omnius and Agentic Loops patterns",
+  "type": "object",
+  "required": ["loop_id", "goal", "phase", "runner", "budget"],
+  "properties": {
+    "loop_id": {
+      "type": "string",
+      "description": "Unique identifier for the loop execution instance"
+    },
+    "goal": {
+      "type": "string",
+      "description": "Deterministic, measurable objective for this execution cycle"
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["COLLECT", "PLAN", "DISPATCH", "VERIFY", "REVIEW", "TERMINATE"],
+      "description": "Current lifecycle phase of the loop"
+    },
+    "runner": {
+      "type": "string",
+      "enum": ["antigravity", "claude", "codex", "gemini", "orca"],
+      "default": "antigravity",
+      "description": "Target AI agent orchestrator executing the task"
+    },
+    "budget": {
+      "type": "object",
+      "required": ["max_steps", "current_step", "timeout_seconds"],
+      "properties": {
+        "max_steps": { "type": "integer", "minimum": 1, "default": 10 },
+        "current_step": { "type": "integer", "minimum": 0, "default": 0 },
+        "timeout_seconds": { "type": "integer", "minimum": 10, "default": 600 },
+        "token_ceiling": { "type": "integer", "default": 100000 }
+      }
+    },
+    "worktree": {
+      "type": "string",
+      "description": "Path to isolated git worktree for execution"
+    },
+    "verification_gates": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["pnpm --filter @repo/shared/hooks type-check", "pnpm type-check"]
+    },
+    "audit_trail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "action", "status"],
+        "properties": {
+          "timestamp": { "type": "string" },
+          "action": { "type": "string" },
+          "status": { "type": "string", "enum": ["SUCCESS", "FAILED", "BLOCKED", "INFO"] },
+          "details": { "type": "string" }
+        }
+      }
+    }
+  }
+}

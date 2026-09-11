@@ -1,11 +1,8 @@
-# Ultragoal: Scaffold Swarms-rs Orchestrator
+# Ultragoal: Complete migration of apps/portal to @repo/shared/hooks with zero regression
+State: COMPLETED
 
-**Status:** COMPLETED
-**Created:** 2026-09-11
-
-## Rubric (EARS Notation)
-
-- [ ] WHEN the orchestrator is built, THE SYSTEM SHALL compile successfully.
-  - **Evidence Check:** `cd tools/swarms-orchestrator && cargo check`
-- [ ] WHEN initialized, THE SYSTEM SHALL define a ConcurrentWorkflow.
-  - **Evidence Check:** `grep ConcurrentWorkflow tools/swarms-orchestrator/src/main.rs`
+## Verifier Rubric
+- [x] Rubric Check 1: Zero direct imports from legacy hook files.
+- [x] Rubric Check 2: pnpm --filter portal type-check passes with 0 errors.
+- [x] Rubric Check 3: pnpm check:fast passes with 0 warnings.
+- [x] Rubric Check 4: Playwright smoke tests for Control Room pass.

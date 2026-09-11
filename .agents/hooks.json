@@ -1,6 +1,13 @@
 {
-  "agent-execution-guardrails": {
-    "enabled": true,
-    "description": "Autonomously active guardrails enforcing compliance, security policies, and AGENTS.md standards."
+  "hooks": {
+    "PreInvocation": "bash .agents/hooks/pre-invocation-inject.sh",
+    "PreToolUse": "bash .agents/hooks/pre-tool-guard.sh",
+    "PostToolUse": "bash .agents/hooks/post-tool-tracer.sh",
+    "Stop": "bash .agents/hooks/worktree-guard.sh"
+  },
+  "timeouts": {
+    "PreToolUse": 5,
+    "PostToolUse": 120,
+    "Stop": 300
   }
 }

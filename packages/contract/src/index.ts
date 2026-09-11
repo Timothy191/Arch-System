@@ -194,3 +194,5 @@ export type {
 } from "./types/tire-management.types.js";
 export type { CreateWebhookInput, UpdateWebhookInput } from "./types/webhook.types.js";
 export * from './ultragoal';
+export * from './agent-governance';
+export * from './codemod';
