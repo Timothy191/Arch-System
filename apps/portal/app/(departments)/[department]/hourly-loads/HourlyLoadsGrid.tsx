@@ -275,6 +275,10 @@ function HourlyLoadsGrid({
     [applyLoadState, persistLoad, revertField, departmentId],
   );
 
+  // Performance optimization: Pre-index sites and machines into memoized Maps to avoid O(N * M) repeated .find() lookups during render and import/export operations
+  const sitesById = useMemo(() => new Map(sites.map((s) => [s.id, s.name])), [sites]);
+  const machinesByName = useMemo(() => new Map(machines.map((m) => [m.name, m])), [machines]);
+
   // Check if any machine in this department has a bin_factor set
   const hasBinFactors = machines.some((m) => m.bin_factor != null && m.bin_factor > 0);
 
@@ -284,8 +288,7 @@ function HourlyLoadsGrid({
       const totalLoads = getMachineTotal(machine.id);
       const binFactor = machine.bin_factor ?? 0;
       const assignedSiteId = siteAssignments[machine.id];
-      const siteName =
-        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
+      const siteName = (assignedSiteId && sitesById.get(assignedSiteId)) || "No Site";
       const row: Record<string, string | number> = {
         machineName: machine.name,
         siteName,
@@ -304,7 +307,7 @@ function HourlyLoadsGrid({
     });
   }, [
     machines,
-    sites,
+    sitesById,
     siteAssignments,
     getHourValue,
     getMachineTotal,
@@ -713,8 +716,7 @@ function HourlyLoadsGrid({
   const handleExport = async () => {
     const exportData = machines.map((machine) => {
       const assignedSiteId = siteAssignments[machine.id];
-      const siteName =
-        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
+      const siteName = (assignedSiteId && sitesById.get(assignedSiteId)) || "No Site";
       const data: any = {
         Machine: machine.name,
         Site: siteName,
@@ -742,7 +744,7 @@ function HourlyLoadsGrid({
 
       for (const row of data) {
         const machineName = row.Machine;
-        const machine = machines.find((m) => m.name === machineName);
+        const machine = machinesByName.get(machineName);
         if (!machine) continue;
 
         const patch: Partial<HourlyLoad> = {};
