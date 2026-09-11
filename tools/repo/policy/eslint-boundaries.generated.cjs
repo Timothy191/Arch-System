@@ -7,53 +7,43 @@ module.exports = {
     'boundaries/elements': [
       {
             "type": "scope:app",
-            "pattern": "apps/*",
-            "mode": "folder"
+            "pattern": "apps/*"
       },
       {
             "type": "scope:package:db-internal",
-            "pattern": "packages/database/**",
-            "mode": "folder"
+            "pattern": "packages/database/**"
       },
       {
             "type": "scope:package:db",
-            "pattern": "packages/database",
-            "mode": "folder"
+            "pattern": "packages/database"
       },
       {
             "type": "scope:package:supabase",
-            "pattern": "packages/supabase",
-            "mode": "folder"
+            "pattern": "packages/supabase"
       },
       {
             "type": "scope:package:ui",
-            "pattern": "packages/ui",
-            "mode": "folder"
+            "pattern": "packages/ui"
       },
       {
             "type": "scope:package:theme",
-            "pattern": "packages/theme",
-            "mode": "folder"
+            "pattern": "packages/theme"
       },
       {
             "type": "scope:package",
-            "pattern": "packages/*",
-            "mode": "folder"
+            "pattern": "packages/*"
       },
       {
             "type": "scope:feature",
-            "pattern": "libs/features/*/*",
-            "mode": "folder"
+            "pattern": "libs/features/*/*"
       },
       {
             "type": "scope:package",
-            "pattern": "libs/shared/*",
-            "mode": "folder"
+            "pattern": "libs/shared/*"
       },
       {
             "type": "scope:tool",
-            "pattern": "tools/*",
-            "mode": "folder"
+            "pattern": "tools/*"
       }
 ],
     'boundaries/ignore': [

@@ -349,7 +349,16 @@ function capabilityRepairAccuracy() {
     .filter(Boolean);
   let reintroduced = 0;
   for (const f of recentNx) {
-    if (!f || f.startsWith("documentation/06-archives") || f.startsWith("docs/archive") || f.startsWith("codebase-maps/log-") || f === "AGENT_TRACER.md") continue;
+    if (
+      !f ||
+      f.startsWith("documentation/06-archives") ||
+      f.startsWith("docs/archive") ||
+      f.startsWith("codebase-maps/log-") ||
+      f === "AGENT_TRACER.md" ||
+      f === "tools/audits/antidrift-test.cjs" ||
+      f === "documentation/07-agentic-systems/antidrift-guardian.md"
+    )
+      continue;
     if (/\bNx\b/.test(readFile(f))) reintroduced += 1;
   }
   checks.push(

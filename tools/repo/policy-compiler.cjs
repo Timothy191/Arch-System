@@ -299,16 +299,16 @@ allOk &= writeOrCheck(
 );
 
 const elementTypes = [
-  { type: "scope:app", pattern: "apps/*", mode: "folder" },
-  { type: "scope:package:db-internal", pattern: "packages/database/**", mode: "folder" },
-  { type: "scope:package:db", pattern: "packages/database", mode: "folder" },
-  { type: "scope:package:supabase", pattern: "packages/supabase", mode: "folder" },
-  { type: "scope:package:ui", pattern: "packages/ui", mode: "folder" },
-  { type: "scope:package:theme", pattern: "packages/theme", mode: "folder" },
-  { type: "scope:package", pattern: "packages/*", mode: "folder" },
-  { type: "scope:feature", pattern: "libs/features/*/*", mode: "folder" },
-  { type: "scope:package", pattern: "libs/shared/*", mode: "folder" },
-  { type: "scope:tool", pattern: "tools/*", mode: "folder" },
+  { type: "scope:app", pattern: "apps/*" },
+  { type: "scope:package:db-internal", pattern: "packages/database/**" },
+  { type: "scope:package:db", pattern: "packages/database" },
+  { type: "scope:package:supabase", pattern: "packages/supabase" },
+  { type: "scope:package:ui", pattern: "packages/ui" },
+  { type: "scope:package:theme", pattern: "packages/theme" },
+  { type: "scope:package", pattern: "packages/*" },
+  { type: "scope:feature", pattern: "libs/features/*/*" },
+  { type: "scope:package", pattern: "libs/shared/*" },
+  { type: "scope:tool", pattern: "tools/*" },
 ];
 
 const boundaryRules = DEPENDENCY_RULES.map((r) => {
