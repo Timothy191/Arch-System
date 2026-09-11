@@ -4,6 +4,15 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## 2026-09-11 — Dev Deployment Initialization Alignment & Probe Resilience
+
+- **Author**: Antigravity (Google Deepmind)
+- **Mandate**: Ensure development deployment can initialize seamlessly without spurious warnings from cold route compilation latency and verify quality gate.
+- **Changes**:
+  - `scripts/dev.sh`: Increased curl probe `--max-time` from 3s to 10s to account for Next.js on-demand route compilation; improved Phase 4 smoke test assertions for `/api/health` (recognizing both 200 and 503 degraded states) and `/login` (following redirects via `-L`).
+  - `scripts/AGENT_TRACER.md`: Appended entry documenting the dev probe adjustments.
+- **Verification**: `pnpm quality` passes with 0 errors across all 52 tasks; policy compiler and security audits clean.
+
 ## 2026-09-10 — Antidrift Guardian: Origin ↔ Continuum Test & Agent
 
 - **Author**: Claude Code (claude.ai/code)

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const status = process.argv[2] || "UNKNOWN";
-const repoRoot = path.resolve(import.meta.dirname, "..");
+const repoRoot = path.resolve(import.meta.dirname, "../..");
 const logPath = path.join(repoRoot, "run/dev.log");
 const portalLogPath = path.join(repoRoot, "run/portal.log");
 const reportPath = path.join(repoRoot, "dev-report.md");

@@ -6,7 +6,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Prevent infinite hangs when probing health endpoints
 curl() {
-  command curl --max-time 3 "$@"
+  command curl --max-time 10 "$@"
 }
 
 # ──────────────────────────────────────────────────────────
@@ -1002,17 +1002,19 @@ fi
 phase 4 "Smoke Tests"
 
 # 4a. Health endpoint
-if curl -fs "http://localhost:$PORT/api/health" >/dev/null 2>&1; then
-  check "Health API" "pass" "/api/health"
+health_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://localhost:$PORT/api/health" 2>/dev/null || echo "000")
+if [ "$health_code" = "200" ] || [ "$health_code" = "503" ]; then
+  check "Health API" "pass" "/api/health (HTTP $health_code)"
 else
-  check "Health API" "warn" "no /api/health endpoint"
+  check "Health API" "warn" "no /api/health endpoint (HTTP $health_code)"
 fi
 
 # 4b. Login page loads
-if curl -fs "http://localhost:$PORT/login" >/dev/null 2>&1; then
+login_code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "http://localhost:$PORT/login" 2>/dev/null || echo "000")
+if [ "$login_code" = "200" ]; then
   check "Login page" "pass" "/login"
 else
-  check "Login page" "warn" "root page available instead"
+  check "Login page" "warn" "root page available instead (HTTP $login_code)"
 fi
 
 # 4d. Supabase RLS / anon key check

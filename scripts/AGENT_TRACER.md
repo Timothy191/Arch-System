@@ -239,3 +239,20 @@ To dynamically generate/update local and remote MCP servers configurations for t
 - Run `node scripts/validate-mcp-servers.js` validates all base servers in under 3 seconds, exiting with code 0.
 - Run `bash scripts/preflight-checklist.sh` executes the environment checks without failing or warning on `flowise` or `langfuse` states.
 - Run `bash scripts/dev.sh --quick` successfully synchronizes and validates MCP servers in the developer environment.
+
+## 2026-09-11: Strengthened dev.sh probe timeouts and HTTP smoke test resilience
+
+### Purpose
+
+Ensure seamless dev deployment initialization without spurious warnings caused by Next.js on-demand compilation latency during cold route requests.
+
+### Changes Made
+
+1. **`scripts/dev.sh`**:
+   - Increased default curl function `--max-time` from 3s to 10s to accommodate on-demand Next.js route compilation latency.
+   - Refined Phase 4 smoke tests for `/api/health` and `/login` to inspect HTTP status codes directly (`200` or `503` for health, following redirects `-L` for login) with a 15s timeout ceiling.
+
+### Verification
+
+- Validated syntax and options in `scripts/dev.sh`.
+- Verified quality gate compliance with `pnpm quality`.
