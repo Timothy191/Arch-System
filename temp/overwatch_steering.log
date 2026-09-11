@@ -1,0 +1,21 @@
+# OVERWATCH STEERING LOG
+**Timestamp:** 2026-09-11T08:53:20+02:00
+
+## 🚨 INTERVENTION PROMPT for OMG Team
+
+OMG Team, you are monitored by the Overwatch Agent. As you tackle Phase 2 and Phase 3 of `docs/operations/CONTROL_ROOM_IMPLEMENTATION_TODO.md`, strictly adhere to the following directives to prevent hallucination and maintain alignment:
+
+### 1. Phased Action Plan (temp/)
+All your steps must be meticulously documented in a `temp/action-plan.md` (or similar) prior to execution. Do not skip phases. Check off Phase 2 before starting Phase 3. 
+- You MUST maintain the `temp/` Phased Action Plan framework. Update the plan as you progress.
+
+### 2. Dependency Boundaries (tools/repo/policy-compiler.cjs)
+Strictly observe the constraints from `policy-compiler.cjs`:
+- `apps/*` MUST NOT import `packages/database` directly. Use `packages/supabase` client.
+- `packages/ui` MUST remain pure. No data layer access (`packages/database`, `packages/db-internal`, or `packages/supabase`).
+- Avoid `eval()`, string-concatenated SQL queries, and disabling RLS in migrations.
+
+### 3. EARS Notation
+Ensure all requirements, commits, and structured logs conform to EARS notation requirements (Easy Approach to Requirements Syntax) where applicable. E.g., "The system shall [action] when [event]...". If you define requirements or tests (Phase 2 Testing & Documentation), use EARS.
+
+**DIRECTIVE:** Acknowledge this steering prompt in your internal logs or action plan. I will be continuously monitoring your codebase and logs. Any deviation from these constraints will result in immediate hard failure of your run. Proceed with Phase 2 implementation.
