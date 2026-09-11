@@ -15,7 +15,7 @@ signals:
     threshold: "> 0"
 verification:
   commands:
-    - "node -e 'console.log(\"Validating SCADA telemetry contracts and shift states...\");'"
+    - node -e "console.log('Validating SCADA telemetry contracts and shift states...');"
 ---
 
 # Business Loop: Control Room Shift Integrity & SCADA Monitor

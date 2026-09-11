@@ -87,6 +87,7 @@
     "maps:gen": "node tools/repo/generate-codebase-maps.cjs",
     "build": "node scripts/sync-assets-smart.cjs && turbo run build",
     "commitlint": "commitlint --edit",
+    "corpos": "bash .agents/corpos/bin/corpos",
     "db:docs": "bash scripts/generate-db-docs.sh",
     "db:schema-reload": "pnpm --filter scripts-seeds run schema-reload",
     "db:seed": "pnpm --filter scripts-seeds run seed",

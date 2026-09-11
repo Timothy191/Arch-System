@@ -261,3 +261,12 @@ All agents, CLI tools, and automated workflows operating in this repository MUST
      $$\text{Real-World Score} = \frac{\text{Feasibility} + \text{Maintainability} + \text{Security} + \text{Performance} + \text{Reliability}}{5}$$
    - Only proceed to wave execution when the score achieves $\ge 90/100$.
 
+
+## Compound Engineering & Sequential Thinking Workflow
+**CRITICAL RULE:** All agents MUST integrate Compound Engineering (CE) and Sequential Thinking tools to deliberate complex architectures and implementations.
+1. **Sequential Thinking**: Before writing any implementation code for complex features, agents MUST invoke the MCP `sequential-thinking` tool (`call_mcp_tool`) to trace out dependencies, side-effects, and edge cases.
+2. **Compound Engineering**: Agents MUST utilize the Compound Engineering Plugin flows (`ce-plan`, `ce-work`, `ce-simplify-code`, `ce-code-review`) to ensure iterative dual-mind verification and safe incremental delivery.
+
+## Permanently Deployed Agents
+The following agents must ALWAYS be deployed (e.g. running as a daemon or continuous subagent):
+- **Responder**: The `responder` agent must be permanently active to generate responses making full use of command references, delegating tasks to specialized agentic agents, and advising until the system goal is reached.

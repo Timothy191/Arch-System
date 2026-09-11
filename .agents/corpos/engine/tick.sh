@@ -152,37 +152,9 @@ if [[ "${STATUS}" == "PENDING_EXECUTION" ]]; then
   else
     echo "⚙️  Executing Verification Gates from LOOP.md..."
     
-    # Extract verification commands
-    VERIF_CMDS=$(node -e '
-      const fs = require("fs");
-      const content = fs.readFileSync("'"${LOOP_SPEC}"'", "utf8");
-      const verifSection = content.split("verification:")[1] || "";
-      const lines = verifSection.split("\n");
-      const cmds = [];
-      for (const line of lines) {
-        const m = line.match(/^\s*-\s*["\x27]?([^"\x27\r\n]+)["\x27]?/);
-        if (m) cmds.push(m[1].trim());
-      }
-      console.log(cmds.join(";;;"));
-    ')
-
-    IFS=";;;" read -ra CMDS <<< "${VERIF_CMDS}"
-    for cmd in "${CMDS[@]}"; do
-      if [[ -n "${cmd}" ]]; then
-        echo "   ▶️ Running: ${cmd}"
-        CMD_LOG="${ARTIFACTS_DIR}/cmd_$(date +%s).log"
-        if eval "${cmd}" > "${CMD_LOG}" 2>&1; then
-          echo "      ✅ PASS"
-          VERIFICATION_LOGS+=("{\"command\": \"${cmd}\", \"status\": \"PASS\"}")
-        else
-          echo "      ❌ FAIL (see ${CMD_LOG})"
-          VERIFICATION_LOGS+=("{\"command\": \"${cmd}\", \"status\": \"FAIL\"}")
-          OVERALL_SUCCESS=false
-        fi
-      fi
-    done
-
-    if [[ "${OVERALL_SUCCESS}" == "true" ]]; then
+    VERIF_EXIT=0
+    node "${SCRIPT_DIR}/verify.cjs" "${LOOP_SPEC}" "${ARTIFACTS_DIR}" || VERIF_EXIT=$?
+    if [[ ${VERIF_EXIT} -eq 0 ]]; then
       STATUS="SUCCESS"
     else
       STATUS="FAILED"
@@ -212,14 +184,23 @@ timestamp: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 - **Brief Reference:** \`${BRIEF_FILE}\`
 
 ## Verification Assessment
-$(if [[ ${#VERIFICATION_LOGS[@]} -gt 0 ]]; then
-  echo "Commands executed:"
-  for entry in "${VERIFICATION_LOGS[@]}"; do
-    echo "- \`${entry}\`"
-  done
-else
-  echo "No active verification commands run (dry run or paused state)."
-fi)
+$(node -e '
+  const fs = require("fs");
+  const resFile = "'"${ARTIFACTS_DIR}/results.json"'";
+  if (fs.existsSync(resFile)) {
+    const data = JSON.parse(fs.readFileSync(resFile, "utf8"));
+    if (data.results && data.results.length > 0) {
+      console.log("Executed Verification Commands:");
+      for (const r of data.results) {
+        console.log(`- **${r.status}**: \`${r.command}\` (log: \`${r.log}\`)`);
+      }
+    } else {
+      console.log("No verification commands defined.");
+    }
+  } else {
+    console.log("No active verification commands run (dry run or paused state).");
+  }
+')
 EOF
 
 echo "📊 Outcome Recorded: ${OUTCOME_FILE}"
