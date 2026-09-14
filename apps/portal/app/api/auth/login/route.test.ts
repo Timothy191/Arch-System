@@ -62,22 +62,40 @@ describe("POST /api/auth/login", () => {
     expect(json.error).toBe("Email and password are required");
   });
 
-  it("returns 200 on successful credentials", async () => {
+  it("returns 400 when credentials are not strings", async () => {
+    const req = createRequest({ email: { value: "admin@plantcor.os" }, password: 1234 });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toBe("Email and password are required");
+    expect(mockSignInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it("returns 200 on successful credentials without exposing session tokens", async () => {
     mockSignInWithPassword.mockResolvedValueOnce({
-      data: { user: { id: "user-123", email: "admin@plantcor.os" } },
+      data: {
+        session: {
+          access_token: "access-token-must-never-be-returned",
+          refresh_token: "refresh-token-must-never-be-returned",
+          expires_at: 1234567890,
+        },
+        user: { id: "user-123", email: "admin@plantcor.os" },
+      },
       error: null,
     });
 
     const req = createRequest({
       email: "admin@plantcor.os",
-      password: "Yugioh@123#",
+      password: "test-password",
     });
 
     const res = await POST(req);
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.success).toBe(true);
-    expect(json.redirectTo).toBe("/");
+    expect(json).toEqual({ success: true, redirectTo: "/" });
+    expect(JSON.stringify(json)).not.toContain("access-token-must-never-be-returned");
+    expect(JSON.stringify(json)).not.toContain("refresh-token-must-never-be-returned");
+    expect(json.session).toBeUndefined();
   });
 
   it("returns 401 on invalid login credentials", async () => {
@@ -91,7 +109,7 @@ describe("POST /api/auth/login", () => {
 
     const req = createRequest({
       email: "admin@plantcor.os",
-      password: "WrongPassword",
+      password: "wrong-password",
     });
 
     const res = await POST(req);
@@ -111,7 +129,7 @@ describe("POST /api/auth/login", () => {
 
     const req = createRequest({
       email: "admin@plantcor.os",
-      password: "Yugioh@123#",
+      password: "test-password",
     });
 
     const res = await POST(req);
@@ -131,7 +149,7 @@ describe("POST /api/auth/login", () => {
 
     const req = createRequest({
       email: "admin@plantcor.os",
-      password: "Yugioh@123#",
+      password: "test-password",
     });
 
     const res = await POST(req);
@@ -142,12 +160,12 @@ describe("POST /api/auth/login", () => {
 
   it("returns 503 when network connection throws an unhandled error", async () => {
     mockSignInWithPassword.mockRejectedValueOnce(
-      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321")
+      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321"),
     );
 
     const req = createRequest({
       email: "admin@plantcor.os",
-      password: "Yugioh@123#",
+      password: "test-password",
     });
 
     const res = await POST(req);
