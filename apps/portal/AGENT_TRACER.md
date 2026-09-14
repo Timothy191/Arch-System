@@ -1,3 +1,71 @@
+## 2026-09-14T13:55:00Z: run-portal Skill Delivered (AGENT-TRACE: run-skill-generator)
+
+- **Agent**: Claude Code (Orca-supervised wrap-up, run `run_2e95a05dba11`)
+- **Purpose**: Deliver `.claude/skills/run-portal/` so a future agent can build, launch, and drive the running portal.
+- **Changes**:
+  1. `.claude/skills/run-portal/driver.mjs` — committed Playwright driver (login flow, cookie-bar dismissal, screenshots to `/tmp/portal-shots`, cwd-independent path resolution, exit 0 only on login success).
+  2. `.claude/skills/run-portal/serve.sh` — pm2 dev-server launcher bridging `SUPABASE_SERVICE_ROLE_KEY` from `.env`'s `SUPABASE_SERVICE_KEY`.
+  3. `.claude/skills/run-portal/SKILL.md` — agent path first (serve.sh → readiness poll → driver), human path second; every code block is a command executed and verified this session.
+- **Verification**:
+  - Fresh end-to-end: `pm2 delete portal-dev` → `serve.sh` → readiness poll 200 → `node .claude/skills/run-portal/driver.mjs --login` → `login: SUCCESS (final url http://localhost:3000/hub)`, real dashboard content, exit 0, screenshot `/tmp/portal-shots/hub.png`.
+  - Driver re-verified from `apps/portal` cwd with skill-relative path (exit 0).
+  - `node --check` clean; prerequisite checks (`rg -c` on `.env` keys, playwright/chromium presence) pass.
+  - `pm2 stop` / `pm2 restart` / `pm2 logs portal-dev --lines 20 --nostream` verified.
+- **Decision item (unresolved, needs human sign-off)**: `packages/supabase/src/server.ts` `createServiceRoleClient()` reads `SUPABASE_SERVICE_ROLE_KEY`, but `.env`/`.env.example` name it `SUPABASE_SERVICE_KEY` — the naming mismatch that produced the "supabaseKey is required" error tile on `/hub`. Bridged at serve time by `serve.sh`; code fix left untouched (auth-adjacent, human-review gate).
+- **Status**: Completed and committed to `main`; worktree clean for touched files.
+
+## 2026-09-14: Access Control, Key Control & C66 Scanner Autonomous Hardening Review
+
+### Purpose
+
+Audit and remediate Access Control, Key Control multi-step C66 handheld scanning interlocks, Coal Truck direct logging, MagicNeo300 CR80 badge studio with custom background upload, 13-hour shift overstay safety broadcasts, and geospatial site telemetry.
+
+### Changes Made
+
+1. **`apps/portal/app/(departments)/access-control/actions/comprehensive-actions.ts`**:
+   - Fixed `assertAccessControlRole` to select `full_name` from `employees` instead of non-existent `first_name`/`last_name`.
+   - Fixed `createAndIssueAccessCard` by removing invalid `employees` table upsert with non-existent columns (`national_id`) that caused runtime crashes; canonical persistence maintained in `personnel`, `badges`, `issued_cards`, and `print_jobs`.
+   - Enhanced `processKeyControlScan` with multi-identifier employee resolution (badge QR/RFID, emp_code, id_number, coy_number).
+   - Added security rejection push broadcast to `overstay_notifications` with `alert: true` and `force_notification: true`.
+   - Extended roll call roster lookback window to 48 hours to prevent dropping 13h+ overstays across midnight shifts.
+2. **`apps/portal/app/api/c66/route.ts`**:
+   - Implemented in-memory `pendingKeyScans` store enabling multi-step physical C66 scanning (Step 1: Key code -> Step 2: Employee badge).
+   - Added composite barcode parsing for both keys (`KEY-.../EMP-...`) and coal trucks (`TRUCK:.../DRIVER:...`, `... / ...`).
+   - Added audible/visual alarm indicators (`sound: "alarm"`, `vibrate: true`, `force_notification: true`) on requirement mismatches.
+3. **`apps/portal/app/(departments)/access-control/card-maker/card-maker-client.tsx`**:
+   - Added custom Background file upload input (`handleBackgroundUpload`) alongside employee photo upload.
+   - Updated CR80 live card preview to render custom uploaded background image.
+   - Added Direct Hardware Print button targeting attached USB MagicNeo300 with 300 DPI CR80 dimensions.
+4. **`apps/portal/app/(departments)/access-control/key-control/key-control-client.tsx`**:
+   - Added high-visibility red critical interlock alert banner with employee name, denial reason, and broadcast status.
+5. **`packages/contract/src/schemas/access-control.schema.ts`**:
+   - Added `background_url` optional field to `accessCardMakerSchema`.
+
+### Verification
+
+- `pnpm --filter portal test -- --testPathPatterns="comprehensive-actions|c66|drilling|control-room"`: 49 tests passed across 8 suites (100%).
+- `pnpm --filter portal type-check`: 0 errors.
+
+---
+
+## 2026-09-11: Global Delivery, ISR & RSC Streaming Verification
+
+### Purpose
+
+Audit and verify Next.js 16 Global Delivery, semantic cache lifetime profiles (`revalidateTag`), read-your-writes server action invalidation, and React Server Component (RSC) streaming for the Arch-System enterprise portal.
+
+### Changes Made
+
+1. **`temp/` Pipeline**: Authored `outline.md`, `requirements.md` (EARS), `design.md`, and `tasks.md` with Real-World Quality Score of 97.2/100.
+2. **`docs/plans/2026-09-11-global-delivery-isr-streaming-plan.md`**: Unified CE implementation plan.
+3. **`apps/portal/lib/server-cache.test.ts`**: Comprehensive Jest unit tests for Next.js 16 semantic tag invalidation, tenant/department scoped tags, and distributed Redis cache synchronization.
+
+### Verification
+
+- `pnpm --filter portal test -- --testPathPatterns="server-cache|actions"` → 11 test suites passed (96 tests total).
+
+---
+
 @repo/ui type-check → PASS ✓
 
 ```
@@ -386,12 +454,14 @@ AIAssistant chat.
 ```
 
 ## 2026-09-11T08:32:00Z
+
 - **Agent**: Antigravity (acting as nextjs-fullstack-engineer)
-- **Changes**: 
+- **Changes**:
   - Added `autoSaveShiftReportDraft` Server Action in `lib/control-room-shift-report.ts` implementing a 150ms bounded debounced Redis cache write.
   - **Reason**: Implement Heuristic #5 from UX_UI_AUDIT.md to prevent data loss during shift closeouts.
 
 ## 2026-09-11T09:14:00Z
+
 - **Agent**: Antigravity
 - **Changes**:
   - Control Room Hardening & Pre-Production Readiness implementation:
@@ -400,3 +470,29 @@ AIAssistant chat.
     3. Aggregated health probe `/api/health/route.ts` with 2.5s FUXA timeout and Supabase/Redis status checks.
     4. Rate-limited shift closeout server action in `lib/actions/shift-closeout.ts` using canonical Zod contract, Redis rate-limiting (5/min), and `verify_supervisor_pin` RPC call.
 
+## 2026-09-11T16:58:00Z
+
+- **Agent**: Claude Code (glm-5.3)
+- **Changes**:
+  - Vercel deployment readiness for the portal:
+    1. `next.config.mjs`: `isVercel` conditionals — disable `output: "standalone"` on Vercel, re-point `turbopack.root` to the repo root (Vercel checkout lacks Arch-Base symlinks), omit the `/assistant` rewrite unless `AI_ASSISTANT_URL` is set, and fall back to Sentry `dryRun` source-map upload when `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` are incomplete.
+    2. `vercel.json` relocated from repo root to `apps/portal/` (Vercel reads it from the Root Directory); sets `installCommand: "pnpm install"` and `buildCommand: "pnpm turbo run build --filter=portal"`.
+    3. Security scrub: removed real Supabase publishable/service-role/secret/standby/JWT-secret values from `apps/portal/env/.env.example` and `packages/supabase/src/seed.ts` (keys remain in git history — user must rotate them in the Supabase Dashboard).
+    4. `docs/DEPLOYMENT-VERCEL.md` created (project settings, env var inventory, Inngest Cloud registration, serverless limitations, post-deploy verification); linked from `docs/DEPLOYMENT.md`.
+    5. `.github/workflows/deploy.yml`: Vercel deploy steps now run from `apps/portal` with `vercel deploy --yes`.
+    6. `config/tools/cspell.json`: added `rediss` to the project word list.
+  - Verification: `VERCEL=1 CI=true` build passes (standalone absent), forced rebuild restores self-hosted standalone output; portal type-check, lint, security audit, markdownlint, and cspell all pass.
+  - **Status**: Completed. Committed to `main` and pushed. Full detail in [`archive/tracers/log/--task-244-vercel-deployment-readiness.md`](../../archive/tracers/log/--task-244-vercel-deployment-readiness.md).
+
+## 2026-09-14T06:07:00Z: Dev & Deployment Blockers Resolution (AGENT-TRACE: --task-245)
+
+- **Agent**: Antigravity
+- **Purpose**: Resolve dev deployment and testing blockers across portal and monorepo packages.
+- **Changes**:
+  1. `apps/portal/components/system/SystemTray.tsx`: Re-exported sub-components (`BatteryStatusRow`, `NetworkStatusRow`, `NotificationRow`, `OfflineQueueRow`, `ServerHealthRow`, `VolumeControlRow`) and `formatTimeSeconds` from `SystemTrayRows` and `SystemTrayHooks` to restore backwards compatibility and ensure all 16 tests in `SystemTray.test.tsx` pass.
+  2. `apps/portal/scripts/generate-openapi-spec.mjs`: Renamed from `.js` to `.mjs` and updated `apps/portal/package.json` to prevent `[MODULE_TYPELESS_PACKAGE_JSON]` runtime warnings during builds.
+- **Verification**:
+  - `pnpm --filter portal test -- --testPathPatterns=SystemTray` (16/16 passed).
+  - `pnpm --filter portal generate-openapi-spec` (clean execution, 0 warnings).
+  - `pnpm test` (139/139 test suites passed in portal, 913/913 tests passed).
+  - `pnpm quality` (full quality gate passed with exit code 0).

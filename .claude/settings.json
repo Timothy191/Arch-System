@@ -1,6 +1,49 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(turbo:*)",
+      "Bash(make:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(pm2:*)",
+      "Bash(curl:*)",
+      "Bash(rg:*)",
+      "Bash(ag:*)",
+      "Bash(rtk:*)",
+      "Bash(orca-ide:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(cat:*)",
+      "Bash(tee:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(diff:*)",
+      "Bash(wc:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(kill:*)",
+      "Bash(pgrep:*)",
+      "Bash(sha256sum:*)",
+      "Bash(echo:*)",
+      "Bash(cd:*)",
+      "Bash(which:*)",
+      "Bash(trip:*)",
+      "Bash(websocat:*)",
+      "Bash(fastfetch:*)",
+      "Bash(export:*)"
+    ]
+  },
   "enabledPlugins": {
-    "supabase@claude-plugins-official": true
+    "supabase@claude-plugins-official": true,
+    "notion@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {}
 }
