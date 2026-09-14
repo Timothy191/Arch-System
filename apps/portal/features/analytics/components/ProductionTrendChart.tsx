@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AreaChart, Text } from "@tremor/react";
 import { linearForecast } from "@/lib/analytics/forecast";
 
@@ -15,36 +16,51 @@ export interface ProductionTrendChartProps {
 }
 
 export function ProductionTrendChart({ data, showForecast = true }: ProductionTrendChartProps) {
-  const coalValues = data.map((d) => d.coal);
-  const forecast: number[] = showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
+  // Memoize forecast computations, date mapping, and categories array creation
+  // to avoid recalculations and maintain referential equality across parent re-renders.
+  const { chartData, categories, hasForecast } = useMemo(() => {
+    if (data.length === 0) {
+      return { chartData: [], categories: ["Coal (t)", "Waste (t)"], hasForecast: false };
+    }
 
-  const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
+    const coalValues = data.map((d) => d.coal);
+    const forecast: number[] =
+      showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
 
-  const forecastPoints = forecast.map((val: number, i: number) => {
-    const d = new Date(lastDate);
-    d.setDate(d.getDate() + i + 1);
+    const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
+
+    const forecastPoints = forecast.map((val: number, i: number) => {
+      const d = new Date(lastDate);
+      d.setDate(d.getDate() + i + 1);
+      return {
+        date: d.toISOString().split("T")[0]!,
+        coal: undefined,
+        waste: undefined,
+        "Coal Forecast": Math.max(0, Math.round(val)),
+      };
+    });
+
+    const computedChartData = [
+      ...data.map((d) => ({
+        date: d.date,
+        "Coal (t)": Math.round(d.coal),
+        "Waste (t)": Math.round(d.waste),
+        "Coal Forecast": undefined,
+      })),
+      ...forecastPoints,
+    ];
+
+    const computedCategories =
+      showForecast && forecast.length > 0
+        ? ["Coal (t)", "Waste (t)", "Coal Forecast"]
+        : ["Coal (t)", "Waste (t)"];
+
     return {
-      date: d.toISOString().split("T")[0]!,
-      coal: undefined,
-      waste: undefined,
-      "Coal Forecast": Math.max(0, Math.round(val)),
+      chartData: computedChartData,
+      categories: computedCategories,
+      hasForecast: forecast.length > 0,
     };
-  });
-
-  const chartData = [
-    ...data.map((d) => ({
-      date: d.date,
-      "Coal (t)": Math.round(d.coal),
-      "Waste (t)": Math.round(d.waste),
-      "Coal Forecast": undefined,
-    })),
-    ...forecastPoints,
-  ];
-
-  const categories =
-    showForecast && forecast.length > 0
-      ? ["Coal (t)", "Waste (t)", "Coal Forecast"]
-      : ["Coal (t)", "Waste (t)"];
+  }, [data, showForecast]);
 
   if (data.length === 0) {
     return (
@@ -65,7 +81,7 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
           <span className="w-2 h-2 rounded-full bg-accent-blue inline-block" />
           Waste Removed
         </span>
-        {forecast.length > 0 && (
+        {hasForecast && (
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block" />
             7-day Forecast
