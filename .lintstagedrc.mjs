@@ -77,9 +77,12 @@ export default {
       );
       return !isIgnored;
     });
-    if (filtered.length === 0) return [];
+    if (files.length === 0) return [];
+    // Agent governance check — single JS/TS owner so each staged file matches exactly one task set.
+    // NOTE: pre-tool-guard.sh is a PreToolUse stdin hook and must NOT run here (it would block on
+    // `cat -`); only the shared package type-check is a valid lint-staged governance task.
+    const commands = ["pnpm --filter @repo/shared/hooks type-check"];
     // Process in chunks of 20 to keep memory low
-    const commands = [];
     for (const batch of chunk(filtered, 20)) {
       commands.push(
         `eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern ${batch.join(" ")}`,
@@ -143,14 +146,4 @@ export default {
     if (files.length === 0) return [];
     return ["pnpm audit:agents"];
   },
-
-  // Agent governance checks
-  "*.{ts,tsx}": (files) => {
-    if (files.length === 0) return [];
-    return [
-      "bash .agents/hooks/pre-tool-guard.sh",
-      "pnpm --filter @repo/shared/hooks type-check"
-    ];
-  },
-
 };

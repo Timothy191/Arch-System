@@ -24,7 +24,7 @@
     },
     "knowledge-rail": {
       "type": "local",
-      "command": ["/home/tim/.local/bin/knowledge-rail"],
+      "command": ["npx", "-y", "knowledge-rail"],
       "enabled": true
     },
     "memory": {
@@ -53,7 +53,7 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres.mrwhtxbhrzyttlsyuofc:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
+        "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
       ],
       "enabled": true
     },

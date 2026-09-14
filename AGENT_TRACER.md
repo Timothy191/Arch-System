@@ -5,6 +5,7 @@ Operational-only actions (server restarts, read-only audits, image asset drops) 
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
 ## [2026-09-11] - Root Sanitation & Agent Configuration Fix
+
 - **Agent:** Architecture Orchestrator (Antigravity)
 - **Action:** Purged 8 untracked ephemeral artifacts from root.
 - **Decommissioned:** Removed stale `autoresearch.sh` (legacy Nx runner).
@@ -185,7 +186,7 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 
 ## 2026-09-02 — Specialized Engineering Agents & Shared Industrial Hooks Suite
 
-- **Purpose**: Created 3 specialized domain subagents and implemented 4 high-impact shared hooks in `@repo/shared/hooks` ([libs/shared/hooks](file:///home/tim/Documents/Arch-System/libs/shared/hooks)) with full unit test coverage.
+- **Purpose**: Created 3 specialized domain subagents and implemented 4 high-impact shared hooks in `@repo/shared/hooks` ([libs/shared/hooks](file:///home/timothy/Projects/Arch-System/libs/shared/hooks)) with full unit test coverage.
 - **Created Agents**:
   - `realtime-engineer-agent`: Specializes in Supabase Realtime CDC channels and telemetry.
   - `mutation-engineer-agent`: Specializes in React 19 `useOptimistic` transitions and Server Action lifecycles.
