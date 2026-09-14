@@ -4,6 +4,16 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-14] - Makefile / CLAUDE.md Shortcut Reconciliation
+
+- **Agent:** Claude Code (claude.ai/code)
+- **Action:** Closed the desync where CLAUDE.md documented ~30 `make` workflow shortcuts that did not exist in the (Docker-only) Makefile.
+- **Constraint discovered:** GNU make cannot define a target name containing a colon (`make test:e2e:` → "target pattern contains no '%'"), so every `:`-named shortcut was unbuildable. Exposed them as **dash-named** make targets delegating to the matching pnpm script (`make test-e2e` → `pnpm test:e2e`).
+- **`Makefile`:** Added a "Dev / Quality Workflow Shortcuts" section with 29 `.PHONY` targets (dev, dev-quick, dev-tools, dev-all, build, test, test-e2e, test-watch, test-coverage, lint, lint-fix, type-check, format, format-check, quality, deps-lint, deps-fix, knip, knip-fix, md-lint, md-fix, policy-gen, policy-check, audit-rls, audit-design, fresh-start, shutdown, clean, clean-cache, clean-docker). `clean*` targets implemented inline (turbo cache / artifacts+volumes / docker teardown). Updated `help` to list them.
+- **`package.json`:** Added the 4 backing scripts the shortcuts needed but that had no existing equivalent: `dev:tools` (tools Docker stack + dev), `lint:fix` (`turbo run lint -- --fix`), `test:watch`, `test:coverage`.
+- **`CLAUDE.md`:** Rewrote the "Makefile Shortcuts" section to dash-named targets, documented the `:`→`-` rule, and confirmed no stale `make x:y` references remain in tracked docs.
+- **Verified:** all 29 `make` targets resolve via `make -n`; new pnpm scripts registered; `package.json` parses.
+
 ## [2026-09-14] - Root File Audit & Lint-Staged Blocker Fix
 
 - **Agent:** Claude Code (claude.ai/code)

@@ -52,33 +52,33 @@ pnpm quality                                              # full quality gate â€
 
 ### Makefile Shortcuts
 
-All common commands are also available via `make`:
+All common commands are also available via `make`. Targets are **dash-separated** because GNU make cannot define a target name containing a colon (`make test:e2e` is a parse error); each maps to the matching pnpm script (e.g. `make test-e2e` â†’ `pnpm test:e2e`).
 
 - `make dev` - equivalent to `pnpm dev`
 - `make dev-quick` - dev mode without Docker/Supabase
-- `make dev-tools` - dev with additional tools (Redis, Flowise)
+- `make dev-tools` - dev with the tools Docker stack up (Redis, Flowise, Langfuse, Qdrant)
 - `make dev-all` - dev with all apps (portal, CMS, overview)
 - `make build` - build everything
 - `make test` - run unit tests
-- `make test:e2e` - run E2E tests
-- `make test:watch` - test watch mode
-- `make test:coverage` - test with coverage
+- `make test-e2e` - run E2E tests (`pnpm test:e2e`)
+- `make test-watch` - test watch mode (`pnpm test:watch`)
+- `make test-coverage` - test with coverage (`pnpm test:coverage`)
 - `make lint` - run ESLint
-- `make lint:fix` - auto-fix lint issues
+- `make lint-fix` - auto-fix lint issues (`pnpm lint:fix`)
 - `make type-check` - TypeScript checking
 - `make format` - Prettier formatting
-- `make format:check` - check formatting only
+- `make format-check` - check formatting only (`pnpm format:check`)
 - `make quality` - full quality gate (lint + type-check + test + format + deps + knip + policy)
-- `make deps:lint` - check dependency versions
-- `make deps:fix` - auto-fix dependency versions
+- `make deps-lint` - check dependency versions (`pnpm deps:lint`)
+- `make deps-fix` - auto-fix dependency versions (`pnpm deps:fix`)
 - `make knip` - check for unused exports/deps
-- `make knip:fix` - remove unused exports/deps
-- `make md:lint` - lint markdown
-- `make md:fix` - auto-fix markdown
-- `make policy:gen` - generate policy files
-- `make policy:check` - validate architectural boundaries
-- `make audit:rls` - audit Row-Level Security policies
-- `make audit:design` - run design system audit
+- `make knip-fix` - remove unused exports/deps (`pnpm knip:fix`)
+- `make md-lint` - lint markdown (`pnpm md:lint`)
+- `make md-fix` - auto-fix markdown (`pnpm md:fix`)
+- `make policy-gen` - generate policy files (`pnpm policy:gen`)
+- `make policy-check` - validate architectural boundaries (`pnpm policy:check`)
+- `make audit-rls` - audit Row-Level Security policies (`pnpm audit:rls`)
+- `make audit-design` - run design system audit (`pnpm audit:design`)
 - `make fresh-start` - clean rebuild from scratch
 - `make shutdown` - stop all services
 - `make clean` - remove build artifacts & caches
