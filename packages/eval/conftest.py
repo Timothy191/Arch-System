@@ -1,13 +1,39 @@
 """DeepEval pytest configuration for Arch-Systems evaluation suite."""
 
 import os
+from pathlib import Path
+
 import pytest
 
+
+def _load_root_dotenv() -> None:
+    """Load KEY=VALUE pairs from the gitignored repo-root .env into os.environ.
+
+    DeepEval reads provider keys (OPENAI_API_KEY / GEMINI_API_KEY) from the
+    process environment only, so a key sitting in `.env` is invisible unless
+    exported. This zero-dependency loader makes the eval honor the repo's
+    `.env` on every run without a manual `export`, and never overrides an
+    already-set environment variable.
+    """
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if key and value and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_root_dotenv()
+
 # DeepEval configuration
-# Set OPENAI_API_KEY in your environment before running tests:
-#   export OPENAI_API_KEY=sk-...
-# Or create a .env file in this directory with:
-#   OPENAI_API_KEY=sk-...
+# Keys are read from the process environment (populated from the repo-root
+# `.env` above) — OPENAI_API_KEY for the default OpenAI judge, or
+# GEMINI_API_KEY to route the judge through GeminiModel (see helpers.py).
 
 _HAS_REAL_OPENAI_KEY = (
     os.environ.get("OPENAI_API_KEY", "").startswith("sk-")

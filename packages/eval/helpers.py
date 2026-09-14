@@ -102,3 +102,38 @@ def call_ai_service_sync(prompt_type: str, user_input: str, use_cache: bool = Tr
             return future.result()
     else:
         return asyncio.run(call_ai_service(prompt_type, user_input, use_cache))
+
+
+def get_judge_model():
+    """Resolve the LLM judge for DeepEval metrics, most beneficial first.
+
+    Priority:
+      1. Gemini — driven by GEMINI_API_KEY (from env / repo `.env`). High-quality
+         judge, works without a local daemon, generous free tier.
+      2. Ollama — local daemon, used when OPENAI_BASE_URL points at :11434.
+      3. None — DeepEval default (OpenAI) as a final fallback.
+
+    Returns:
+        A DeepEvalBaseLLM instance for the resolved provider, or None to use
+        DeepEval's default judge.
+    """
+    import os
+
+    from deepeval.models import GeminiModel, OllamaModel
+
+    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if gemini_key:
+        return GeminiModel(
+            model=os.environ.get("GEMINI_JUDGE_MODEL", "gemini-3.8-flash"),
+            api_key=gemini_key,
+            use_vertexai=False,
+        )
+
+    ollama_base = os.environ.get("OPENAI_BASE_URL", "").strip()
+    if ollama_base and ":11434" in ollama_base:
+        return OllamaModel(
+            model=os.environ.get("OLLAMA_JUDGE_MODEL", "qwen2.5:3b"),
+            base_url=ollama_base,
+        )
+
+    return None
