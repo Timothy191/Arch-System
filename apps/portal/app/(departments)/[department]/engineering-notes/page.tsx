@@ -37,12 +37,17 @@ export default async function EngineeringNotesPage({
       .order("created_at", { ascending: false }),
   ]);
 
-  // Calculate statistics
-  const criticalCount = todayNotes?.filter((n) => n.severity === "critical").length || 0;
-  const openCount =
-    todayNotes?.filter((n) => n.status === "open" || n.status === "in_progress").length || 0;
-  const resolvedCount = todayNotes?.filter((n) => n.status === "resolved").length || 0;
-  const followUpCount = todayNotes?.filter((n) => n.requires_follow_up).length || 0;
+  // Compute all KPI counts in one pass instead of scanning todayNotes four times.
+  const noteStats = (todayNotes ?? []).reduce(
+    (stats, note) => {
+      if (note.severity === "critical") stats.critical += 1;
+      if (note.status === "open" || note.status === "in_progress") stats.open += 1;
+      if (note.status === "resolved") stats.resolved += 1;
+      if (note.requires_follow_up) stats.followUp += 1;
+      return stats;
+    },
+    { critical: 0, open: 0, resolved: 0, followUp: 0 },
+  );
 
   return (
     <div className="space-y-6">
@@ -51,23 +56,23 @@ export default async function EngineeringNotesPage({
       <PredictiveAlertsWidget />
 
       <KPIGrid cols={4}>
-        <KPICard label="Critical" value={criticalCount} color="red" />
-        <KPICard label="Open" value={openCount} color="blue" />
-        <KPICard label="Resolved" value={resolvedCount} color="green" />
-        <KPICard label="Follow-up" value={followUpCount} color="blue" />
+        <KPICard label="Critical" value={noteStats.critical} color="red" />
+        <KPICard label="Open" value={noteStats.open} color="blue" />
+        <KPICard label="Resolved" value={noteStats.resolved} color="green" />
+        <KPICard label="Follow-up" value={noteStats.followUp} color="blue" />
       </KPIGrid>
 
       <EngineeringNotesForm
         departmentId={deptId}
-        machines={machines || []}
-        breakdownDrafts={engBreakdowns || []}
+        machines={machines ?? []}
+        breakdownDrafts={engBreakdowns ?? []}
       />
 
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-[var(--text-heading)]">
           Today&apos;s Engineering Issues
         </h3>
-        <EngineeringNotesList notes={todayNotes || []} />
+        <EngineeringNotesList notes={todayNotes ?? []} />
       </div>
     </div>
   );
