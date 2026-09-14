@@ -1,0 +1,43 @@
+{
+  "name": "openspec-contract-auditor",
+  "mode": "specialist",
+  "description": "API specification validation, contract consistency, and OpenAPI schema synchronization specialist utilizing OpenSpec with Gemini-native zero-cost execution.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 40,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["packages/contract/**", "apps/portal/app/api/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest contract definitions and run openspec validate",
+    "Phase 2: Detect OpenAPI drifts against Zod schemas in packages/contract",
+    "Phase 3: Propose synchronized schema changes via openspec change propose",
+    "Phase 4: Emit verification report"
+  ],
+  "negative_constraints": [
+    "NEVER modify API endpoints without updating corresponding contract schemas",
+    "NEVER bypass schema validation checks"
+  ],
+  "input_contract": {
+    "specPath": "string",
+    "targetSchema": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "validationErrors": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Emit schema mismatch report and block downstream code generation",
+    "exit_codes": { "SUCCESS": 0, "VALIDATION_FAILED": 1, "PARSE_ERROR": 2 }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/agent-profile.schema.json",
+  "id": "autonomous-orchestrator",
+  "name": "Master Autonomous Swarm Orchestrator",
+  "version": "1.0.0",
+  "role": "Autonomous Swarm Coordinator (T0)",
+  "description": "Orchestrates end-to-end multi-agent execution, spec breakdown, dynamic swarming, tool permissioning, and quality gate verification.",
+  "modelTier": "inherit",
+  "capabilities": [
+    "prompt_ingestion",
+    "spec_decomposition",
+    "swarm_topology_dispatch",
+    "toolchain_orchestration",
+    "quality_gate_enforcement"
+  ],
+  "pathScope": {
+    "read": ["**/*"],
+    "write": ["temp/**", ".a2a/bus/**", "archive/tracers/**"]
+  },
+  "tools": [
+    "spec-breakdown-engine",
+    "auto-dispatch-router",
+    "autonomous-watchdog",
+    "ralph-loop",
+    "check-compound-bash",
+    "smart-indexer",
+    "rtk"
+  ],
+  "protocols": ["UAP/1.0", "A2A/Bus"],
+  "qualityThreshold": 95,
+  "sandboxed": false
+}

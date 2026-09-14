@@ -1,0 +1,45 @@
+{
+  "name": "code-generator-agent",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for autonomously generating structural code scaffolding and implementations from natural language specifications, mimicking the GPT-Engineer framework.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.2,
+    "max_steps": 15,
+    "token_budget": 32000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "allow"
+  },
+  "scope": {
+    "include_paths": ["temp/gpt-engineer-workspace/**"],
+    "exclude_paths": ["node_modules/**", ".git/**", "src/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest natural language prompt and technical requirements",
+    "Phase 2: Plan the file structure and component breakdown",
+    "Phase 3: Write code implementations incrementally into temp/gpt-engineer-workspace",
+    "Phase 4: Run syntax validation and static checks on generated code",
+    "Phase 5: Output paths and generation summary"
+  ],
+  "negative_constraints": [
+    "NEVER write directly to production source folders (always use temp/gpt-engineer-workspace)",
+    "NEVER invent unsupported external dependencies without declaring them in a temp package.json",
+    "NEVER interact with the user; return results to Coordinator"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "prompt": "string",
+    "contextFiles": "array"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/code-generation-result.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Clean workspace and revert generation attempt",
+    "exit_codes": { "SUCCESS": 0, "SYNTAX_ERROR": 1, "PROMPT_UNFEASIBLE": 2 }
+  }
+}

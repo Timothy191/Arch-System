@@ -1,0 +1,43 @@
+{
+  "name": "compound-bash-auditor",
+  "mode": "specialist",
+  "description": "AST-based compound command safety parser, subshell risk analyzer, and execution approval specialist.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 20,
+    "token_budget": 8000
+  },
+  "permissions": {
+    "filesystem": "read_only",
+    "tools": ["view_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["tools/scripts/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest compound shell command string",
+    "Phase 2: Parse AST segments across boolean operators (&&, ||, ;, |)",
+    "Phase 3: Validate against forbidden system rules and destruction patterns",
+    "Phase 4: Emit approval verdict with explanation"
+  ],
+  "negative_constraints": [
+    "NEVER approve commands containing unverified destructive system mutations",
+    "NEVER bypass AST segment splitting"
+  ],
+  "input_contract": {
+    "commandString": "string"
+  },
+  "output_contract": {
+    "approved": "boolean",
+    "totalSegments": "number",
+    "reason": "string"
+  },
+  "recovery_protocol": {
+    "on_failure": "Reject execution and mandate single-command breakdown",
+    "exit_codes": { "APPROVED": 0, "BLOCKED": 1, "PARSE_ERROR": 2 }
+  }
+}

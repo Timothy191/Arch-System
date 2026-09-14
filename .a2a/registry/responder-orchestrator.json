@@ -1,0 +1,51 @@
+{
+  "name": "responder-orchestrator",
+  "mode": "orchestrator",
+  "description": "Permanently deployed T0 orchestrator agent. Decomposes high-level user goals, deliberates architecture with sequentialthinking, delegates to specialist subagents via the A2A protocol, and asserts empirical completion.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.1,
+    "max_steps": 100,
+    "token_budget": 64000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": [
+      "view_file",
+      "replace_file_content",
+      "write_to_file",
+      "grep_search",
+      "run_command",
+      "call_mcp_tool"
+    ],
+    "forbidden_tools": ["git push --force"],
+    "bash": "full"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Strategic Deliberation — Invoke sequentialthinking to decompose goals",
+    "Phase 2: Protocol Delegation — Dispatch tasks to specialist subagents via .a2a/",
+    "Phase 3: Dual-Mind Verification — Enforce Maker-Checker review before state commits",
+    "Phase 4: Sanity Check — Run full pnpm quality verification suite",
+    "Phase 5: Contract Assembly — Commit event to .a2a/bus/ and emit completion artifact"
+  ],
+  "negative_constraints": [
+    "NEVER execute large refactors directly without delegating to Maker and Checker specialists",
+    "NEVER claim completion without empirical proof (tests passing, zero lint warnings)",
+    "NEVER bypass the 9 Core Agent Setup Pillars when deploying subagents"
+  ],
+  "input_contract": {
+    "goal": "string",
+    "context": "object"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/task-handoff.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Invoke ReflectionEngine auto-remediation or escalate to human user",
+    "exit_codes": { "SUCCESS": 0, "TASK_BLOCKED": 1, "VERIFICATION_FAILURE": 2 }
+  }
+}

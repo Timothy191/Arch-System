@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "A2AStatusHeartbeat",
+  "description": "Standardized heartbeat payload contract for agent liveness and resource monitoring.",
+  "type": "object",
+  "required": ["agentId", "status", "activeTasks", "memoryUsageMb", "timestamp"],
+  "properties": {
+    "agentId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["IDLE", "ACTIVE", "DEGRADED", "ERROR"]
+    },
+    "activeTasks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "memoryUsageMb": {
+      "type": "number"
+    },
+    "lastError": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

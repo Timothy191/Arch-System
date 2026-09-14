@@ -1,0 +1,49 @@
+{
+  "name": "telemetry-codebase-architect",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for generating automated codebase topology maps, auditing contract drift between database migrations and @repo/contract, and maintaining OpenAPI specs.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 10,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [
+      "codebase-maps/**",
+      "documentation/**",
+      "packages/contract/src/**/*.ts",
+      "apps/portal/app/api/**/*.ts"
+    ],
+    "exclude_paths": ["node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest active routes, database tables, and shared schemas",
+    "Phase 2: Audit database columns against Zod contract schemas",
+    "Phase 3: Generate structured Markdown topology maps in codebase-maps/",
+    "Phase 4: Run contract alignment verification script",
+    "Phase 5: Assemble A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER allow contract schema types to deviate from database table definitions",
+    "NEVER leave codebase maps outdated after major database migrations",
+    "NEVER generate non-standard Markdown formats"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "changedMigrations": "array"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Re-run automated contract generators",
+    "exit_codes": { "SUCCESS": 0, "CONTRACT_DRIFT": 1, "MAP_GENERATION_FAILED": 2 }
+  }
+}

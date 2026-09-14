@@ -1,0 +1,53 @@
+{
+  "name": "kiro-claude-orchestrator",
+  "mode": "orchestrator",
+  "description": "Unified orchestrator combining Kiro-CLI specialized agent topologies with Claude-Code plan-first execution, worktree isolation, and verification loops.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.1,
+    "max_steps": 100,
+    "token_budget": 64000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": [
+      "view_file",
+      "replace_file_content",
+      "write_to_file",
+      "grep_search",
+      "run_command",
+      "call_mcp_tool"
+    ],
+    "forbidden_tools": ["git push --force", "rm -rf /"],
+    "bash": "full"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Maintain temp/ phased documentation (outline, requirements, design, tasks)",
+    "Phase 2: Submit plan to critique-council-reviewer for blast-radius contained review",
+    "Phase 3: Dispatch atomic sub-tasks to Player/Implementer specialists",
+    "Phase 4: Run Two-Layer Code Standards verification (pnpm quality + real-world interlocks)",
+    "Phase 5: Log error retrospectives to .memory_base/ and index in archive/tracers/"
+  ],
+  "negative_constraints": [
+    "NEVER modify code before requirements and design pass Real-World Quality Score >= 90",
+    "NEVER ignore pre-existing errors or skip verification gates",
+    "NEVER perform concurrent edits without worktree isolation"
+  ],
+  "input_contract": {
+    "goal": "string",
+    "parameters": "object"
+  },
+  "output_contract": {
+    "status": "string",
+    "artifacts": "array",
+    "qualityScore": "number"
+  },
+  "recovery_protocol": {
+    "on_failure": "Record error retrospective in .memory_base/ and auto-remediate",
+    "exit_codes": { "SUCCESS": 0, "PLAN_REJECTED": 1, "VERIFICATION_FAILED": 2 }
+  }
+}

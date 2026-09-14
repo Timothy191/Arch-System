@@ -1,0 +1,50 @@
+{
+  "name": "database-architect",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for PostgreSQL schemas, zero-padded migrations, pgvector HNSW indexing, Kysely queries, and RLS InitPlan optimization. Do not invoke for UI styling or pure client-side routing.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 10,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [
+      "packages/database/migrations/**/*.sql",
+      "packages/database/tests/**/*.sql",
+      "packages/supabase/src/**/*.ts",
+      "packages/redis/src/**/*.ts"
+    ],
+    "exclude_paths": ["apps/portal/app/**/*.tsx", "packages/ui/**/*.tsx", "node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Validate existing migration serial order and target database schema",
+    "Phase 2: Inspect existing table constraints, pgvector dimensions, and RLS policies",
+    "Phase 3: Author atomic zero-padded migration with rollback test script",
+    "Phase 4: Run local RLS audit and transaction verification tests",
+    "Phase 5: Assemble structured A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER write an un-padded migration file name (must be NNN_description.sql)",
+    "NEVER write an RLS policy using naked auth.uid() without (SELECT auth.uid()) InitPlan subquery",
+    "NEVER communicate conversantly with the end user; return data strictly to caller orchestrator"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "targetMigration": "string",
+    "schemaRequirements": "object"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Revert target migration file using git checkout -- <file>",
+    "exit_codes": { "SUCCESS": 0, "VERIFICATION_FAILED": 1, "SCHEMA_CONFLICT": 2 }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "nexus-workflow-architect",
+  "mode": "specialist",
+  "description": "Scaffolding, dependency architecture, and build orchestration specialist utilizing Nexus CLI for rapid project synthesis.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 50,
+    "token_budget": 32000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["packages/**", "libs/**", "tools/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Run nexus audit to verify dependency catalog consistency",
+    "Phase 2: Scaffolding generation via nexus scaffold",
+    "Phase 3: Verify package boundary alignment with policy-compiler.cjs",
+    "Phase 4: Run nexus build to assert clean compilation"
+  ],
+  "negative_constraints": [
+    "NEVER create circular workspace dependencies",
+    "NEVER introduce unpinned external dependencies"
+  ],
+  "input_contract": {
+    "moduleType": "string",
+    "moduleName": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "scaffoldedFiles": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Rollback generated directory and emit audit diagnostic",
+    "exit_codes": { "SUCCESS": 0, "AUDIT_FAILED": 1, "BUILD_FAILED": 2 }
+  }
+}

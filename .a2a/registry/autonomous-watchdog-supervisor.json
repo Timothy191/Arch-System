@@ -1,0 +1,24 @@
+{
+  "$schema": "../schemas/agent-profile.schema.json",
+  "id": "autonomous-watchdog-supervisor",
+  "name": "Autonomous Watchdog & Health Supervisor",
+  "version": "1.0.0",
+  "role": "Background Health & Lifecycle Loop Supervisor (T1)",
+  "description": "Monitors codebase health, executes periodic memory indexing, audits AST command rules, verifies tracer integrity, and guards quality gates.",
+  "modelTier": "inherit",
+  "capabilities": [
+    "background_watchdog_supervision",
+    "memory_index_reconciliation",
+    "ast_command_audit",
+    "tracer_integrity_verification",
+    "corpos_loop_execution"
+  ],
+  "pathScope": {
+    "read": ["**/*"],
+    "write": [".agents/corpos/storage/**", ".memory_base/**", ".a2a/bus/**"]
+  },
+  "tools": ["autonomous-watchdog", "check-compound-bash", "smart-indexer", "rtk"],
+  "protocols": ["UAP/1.0", "A2A/Bus"],
+  "qualityThreshold": 95,
+  "sandboxed": false
+}

@@ -1,0 +1,43 @@
+{
+  "name": "metabase-analytics-specialist",
+  "mode": "specialist",
+  "description": "Metabase analytics, automated query execution, dashboard management, and collection synchronization specialist utilizing metabase-cli.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 40,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["apps/portal/server/analytics/**", "packages/utils/src/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Validate active Metabase profile connectivity via metabase doctor",
+    "Phase 2: Execute target queries or CRUD operations via metabase query/question",
+    "Phase 3: Synchronize collections and export dashboard schemas",
+    "Phase 4: Emit structured telemetry report"
+  ],
+  "negative_constraints": [
+    "NEVER run destructive DDL queries via metabase-cli",
+    "NEVER expose unmasked credentials in telemetry outputs"
+  ],
+  "input_contract": {
+    "operation": "string",
+    "parameters": "object"
+  },
+  "output_contract": {
+    "status": "string",
+    "results": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report connection error and fallback to direct read replica queries",
+    "exit_codes": { "SUCCESS": 0, "PROFILE_ERROR": 1, "QUERY_FAILED": 2 }
+  }
+}

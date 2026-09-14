@@ -1,0 +1,44 @@
+{
+  "name": "core-coordinator",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for multi-agent task decomposition, RISEN prompt orchestration, context token budget allocation, and Langfuse trace management.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.1,
+    "max_steps": 12,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "deny"
+  },
+  "scope": {
+    "include_paths": ["packages/agents/src/**/*.ts", ".a2a/**"],
+    "exclude_paths": ["node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest overarching user goal and execution constraints",
+    "Phase 2: Decompose goal into atomic, isolated subtasks linked to specialist roles",
+    "Phase 3: Wrap prompts with persona constraints, context ceilings, and tool whitelists",
+    "Phase 4: Run execution schedule through pLimit concurrency limiter",
+    "Phase 5: Assemble A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER allow subagent context windows to exceed 80% capacity",
+    "NEVER dispatch unconstrained prompts without explicit negative guards",
+    "NEVER omit trace IDs when dispatching tasks across agents"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "compositeTask": "string"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Throttle concurrency and re-partition subtasks into smaller chunks",
+    "exit_codes": { "SUCCESS": 0, "DECOMPOSITION_ERROR": 1, "TOKEN_LIMIT_EXCEEDED": 2 }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "ralph-loop-driver",
+  "mode": "orchestrator",
+  "description": "Autonomous development cycle driver managing atomic iterations, clean session refreshes, and quality gate rollbacks.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.1,
+    "max_steps": 50,
+    "token_budget": 32000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "full"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Split overarching feature goal into discrete atomic jobs",
+    "Phase 2: Execute single job per iteration with clean agent context",
+    "Phase 3: Run monorepo quality gate (pnpm quality)",
+    "Phase 4: Auto-commit passing work or auto-stash broken work on failure",
+    "Phase 5: Emit loop progress telemetry"
+  ],
+  "negative_constraints": [
+    "NEVER combine multiple major tasks into a single unverified iteration",
+    "NEVER commit work without passing quality verification"
+  ],
+  "input_contract": {
+    "featureGoal": "string",
+    "maxIterations": "number"
+  },
+  "output_contract": {
+    "status": "string",
+    "completedIterations": "number",
+    "commits": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Stash broken work, log retrospective to .memory_base/, and resume next cycle",
+    "exit_codes": { "SUCCESS": 0, "GATE_FAILED": 1, "LOOP_EXHAUSTED": 2 }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodeGenerationResult",
+  "description": "Standardized output contract for code generator agent executing scaffolding and implementations.",
+  "type": "object",
+  "required": ["taskId", "status", "summary", "generatedFiles", "syntaxValid", "timestamp"],
+  "properties": {
+    "taskId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILED", "BLOCKED"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "generatedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "syntaxValid": {
+      "type": "boolean"
+    },
+    "artifacts": {
+      "type": "object"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_recommended_action": {
+      "type": "string",
+      "enum": ["RUN_TESTS", "TERMINATE", "ESCALATE"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

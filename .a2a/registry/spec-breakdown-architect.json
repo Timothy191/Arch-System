@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/agent-profile.schema.json",
+  "id": "spec-breakdown-architect",
+  "name": "Spec Breakdown & EARS Requirements Architect",
+  "version": "1.0.0",
+  "role": "Specification & Real-World Quality Architect (T1)",
+  "description": "Translates ambiguous user prompts into structured EARS specifications, designs, and computes 5-pillar Real-World Quality Scores.",
+  "modelTier": "pro",
+  "capabilities": [
+    "ears_specification_generation",
+    "real_world_quality_scoring",
+    "domain_entity_extraction",
+    "phased_task_matrix_design"
+  ],
+  "pathScope": {
+    "read": ["**/*"],
+    "write": ["temp/**"]
+  },
+  "tools": ["spec-breakdown-engine", "smart-indexer", "rtk"],
+  "protocols": ["UAP/1.0"],
+  "qualityThreshold": 95,
+  "sandboxed": false
+}

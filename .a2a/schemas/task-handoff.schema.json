@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "A2ATaskHandoff",
+  "description": "Standardized payload contract for agent-to-agent task delegation and handoff.",
+  "type": "object",
+  "required": [
+    "taskId",
+    "senderAgent",
+    "recipientAgent",
+    "phase",
+    "targetFiles",
+    "inputPayload",
+    "timestamp"
+  ],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-_]+$"
+    },
+    "senderAgent": {
+      "type": "string"
+    },
+    "recipientAgent": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["INGESTION", "DISCOVERY", "EXECUTION", "VERIFICATION", "COMPLETION"]
+    },
+    "targetFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "inputPayload": {
+      "type": "object"
+    },
+    "constraints": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

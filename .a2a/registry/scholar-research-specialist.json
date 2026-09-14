@@ -1,0 +1,44 @@
+{
+  "name": "scholar-research-specialist",
+  "mode": "specialist",
+  "description": "Scientific reference resolution, DOI citation formatting, and paper retraction verification specialist utilizing scholar-sidekick.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 30,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["docs/**", "packages/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest academic identifiers (DOI, PMID, arXiv)",
+    "Phase 2: Resolve citation metadata via scholar resolve",
+    "Phase 3: Run retraction and fabrication checks via scholar check",
+    "Phase 4: Export formatted citation to BibTeX/APA format"
+  ],
+  "negative_constraints": [
+    "NEVER cite retracted or unverified academic sources",
+    "NEVER alter canonical DOI identifiers"
+  ],
+  "input_contract": {
+    "identifier": "string",
+    "format": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "citation": "string",
+    "integrityCheck": "object"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report identifier resolution failure and query alternative index",
+    "exit_codes": { "SUCCESS": 0, "RESOLUTION_FAILED": 1, "RETRACTED_PAPER": 2 }
+  }
+}

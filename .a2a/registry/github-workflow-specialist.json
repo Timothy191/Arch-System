@@ -1,0 +1,44 @@
+{
+  "name": "github-workflow-specialist",
+  "mode": "specialist",
+  "description": "GitHub repository management, PR automation, issue tracking, and GitHub Actions CI/CD monitoring specialist utilizing gh CLI.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 40,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "full"
+  },
+  "scope": {
+    "include_paths": [".github/**", "archive/tracers/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Check authentication and repository status via gh auth status",
+    "Phase 2: Create or update PRs via gh pr create with verified change logs",
+    "Phase 3: Watch and assert GitHub Actions workflow execution via gh run watch",
+    "Phase 4: Emit verification report"
+  ],
+  "negative_constraints": [
+    "NEVER force-push or merge PRs with failing quality gates",
+    "NEVER expose GitHub access tokens in public logs"
+  ],
+  "input_contract": {
+    "action": "string",
+    "prTitle": "string",
+    "prBody": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "prUrl": "string"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report PR or workflow failure and rollback branch changes",
+    "exit_codes": { "SUCCESS": 0, "PR_CREATION_FAILED": 1, "WORKFLOW_FAILED": 2 }
+  }
+}
