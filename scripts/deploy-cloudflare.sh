@@ -7,71 +7,64 @@ set -euo pipefail
 # Exposes Arch-System Next.js Portal and SCADA endpoints securely over your
 # custom domain via Cloudflare Edge CDN & Cloudflare Tunnels (cloudflared).
 #
-# Features:
-# - Automatic cloudflared status & ingress verification
-# - Choice of Development (TryCloudflare ad-hoc tunnel) or Production (Named Tunnel)
-# - Automatic Supabase Docker stack orchestration (Arch-Base / Arch-System)
-# - Automatic HTTPS termination & DDoS protection via Cloudflare Edge WAF
+# Uses: scripts/lib/common.sh
 # ─────────────────────────────────────────────────────────────────────────────
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PORTAL_DIR="$REPO_ROOT/apps/portal"
-ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-
-if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-  DATABASE_DIR="$ARCH_BASE_DIR"
-  SUPABASE_DIR="$ARCH_BASE_DIR/supabase"
-  ARCH_BASE_WEB_DIR="$ARCH_BASE_DIR/apps/web"
-else
-  DATABASE_DIR="$REPO_ROOT/packages/database"
-  SUPABASE_DIR="$REPO_ROOT/packages/supabase"
-  ARCH_BASE_WEB_DIR=""
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+LOG_LABEL="[cloudflare]"
 
 ENV_FILE="$PORTAL_DIR/.env"
 ENV_BAK="$PORTAL_DIR/.env.bak"
 PORT="${PORT:-3000}"
 TUNNEL_CONFIG="$REPO_ROOT/infra/cloudflared/production-tunnel.yml.example"
 
-# ANSI Colors
-CLR_RESET="\033[0m"
-CLR_RED="\033[0;31m"
-CLR_GREEN="\033[0;32m"
-CLR_YELLOW="\033[0;33m"
-CLR_BLUE="\033[0;34m"
-CLR_MAGENTA="\033[0;35m"
-CLR_CYAN="\033[0;36m"
-CLR_WHITE="\033[0;37m"
-CLR_BOLD="\033[1m"
+# ── Cleanup Trap ─────────────────────────────────────────────────────────────
+cleanup() {
+  trap - EXIT INT TERM
+  info "Cleaning up background processes..."
+  for pidfile in .portal.pid .cloudflared.pid; do
+    if [ -f "$RUN_DIR/$pidfile" ]; then
+      local pid
+      pid=$(cat "$RUN_DIR/$pidfile" 2>/dev/null || true)
+      if [ -n "$pid" ] && pid_running "$pid"; then
+        kill -TERM "$pid" 2>/dev/null || true
+      fi
+      rm -f "$RUN_DIR/$pidfile"
+    fi
+  done
+}
+# Only register trap if executed directly and user interrupts
+trap cleanup INT TERM
 
-log() { echo -e "${CLR_GREEN}[cloudflare-host]${CLR_RESET} $*"; }
-info() { echo -e "${CLR_BLUE}[info]${CLR_RESET} $*"; }
-warn() { echo -e "${CLR_YELLOW}[warn]${CLR_RESET} $*"; }
-error() { echo -e "${CLR_RED}[error]${CLR_RESET} $*"; }
-fatal() { error "$*"; exit 1; }
-
-echo -e "\n${CLR_CYAN}┌────────────────────────────────────────────────────────────┐${CLR_RESET}"
-echo -e "${CLR_CYAN}│       ARCH-SYSTEMS — CLOUDFLARE TUNNEL & EDGE ORCHESTRATOR │${CLR_RESET}"
-echo -e "${CLR_CYAN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
-echo -e "${CLR_CYAN}│${CLR_RESET} Encrypted Cloudflare Edge CDN hosting for domain access.   ${CLR_CYAN}│${CLR_RESET}"
-echo -e "${CLR_CYAN}│${CLR_RESET} Connects Arch-System + Arch-Base over Cloudflare WAF.      ${CLR_CYAN}│${CLR_RESET}"
-echo -e "${CLR_CYAN}└────────────────────────────────────────────────────────────┘${CLR_RESET}\n"
+echo -e "\n${CYAN}┌────────────────────────────────────────────────────────────┐${NC}"
+echo -e "${CYAN}│       ARCH-SYSTEMS — CLOUDFLARE TUNNEL & EDGE ORCHESTRATOR │${NC}"
+echo -e "${CYAN}├────────────────────────────────────────────────────────────┤${NC}"
+echo -e "${CYAN}│${NC} Encrypted Cloudflare Edge CDN hosting for domain access.   ${CYAN}│${NC}"
+echo -e "${CYAN}│${NC} Connects Arch-System + Arch-Base over Cloudflare WAF.      ${CYAN}│${NC}"
+echo -e "${CYAN}└────────────────────────────────────────────────────────────┘${NC}\n"
 
 # ── Step 1: Verify Cloudflared Binary ─────────────────────────────────────
 info "Checking Cloudflare Tunnel daemon (cloudflared)..."
 if ! command -v cloudflared >/dev/null 2>&1; then
-  fatal "cloudflared is not installed on this system. Install via: pacman -S cloudflared"
+  fatal "cloudflared is not installed on this system. Install via: pacman -S cloudflared (or yay -S cloudflared)"
 fi
 
 CF_VERSION=$(cloudflared --version 2>&1 | head -n 1)
-info "Cloudflared version: ${CLR_CYAN}${CLR_BOLD}$CF_VERSION${CLR_RESET}"
+info "Cloudflared version: ${CYAN}${BOLD}$CF_VERSION${NC}"
 
 # ── Step 2: Choose Operation Mode ─────────────────────────────────────────
-echo -e "\n${CLR_WHITE}Choose serving mode:${CLR_RESET}"
-echo -e "  [1] ${CLR_GREEN}${CLR_BOLD}Development Mode${CLR_RESET} (TryCloudflare ad-hoc HTTPS tunnel: instant hot-reload)"
-echo -e "  [2] ${CLR_BLUE}${CLR_BOLD}Production Mode${CLR_RESET}  (Precompiled standalone server via Production Tunnel config)"
-read -p "Select mode [1/2] (Default: 1): " mode_choice
-mode_choice=${mode_choice:-1}
+echo -e "\n${WHITE}Choose serving mode:${NC}"
+echo -e "  [1] ${GREEN}${BOLD}Development Mode${NC} (TryCloudflare ad-hoc HTTPS tunnel: instant hot-reload)"
+echo -e "  [2] ${BLUE}${BOLD}Production Mode${NC}  (Precompiled standalone server via Production Tunnel config)"
+
+if [ -t 0 ]; then
+  read -p "Select mode [1/2] (Default: 1): " mode_choice
+  mode_choice=${mode_choice:-1}
+else
+  mode_choice="${CF_MODE:-1}"
+fi
 
 # ── Step 3: Check and Launch Database (Supabase) ──────────────────────────
 info "Checking local Supabase database..."
@@ -99,26 +92,24 @@ service_key=$(echo "$status_out" | grep "service_role key:" | awk '{print $3}' |
 
 if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
   if [ -f "$ENV_FILE" ]; then
-    anon_key=$(grep -E '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d ' "' || true)
-    service_key=$(grep -E '^SUPABASE_SERVICE_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d ' "' || true)
+    anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
   fi
 fi
 
 # ── Step 4: Clear Port & Launch Portal ─────────────────────────────────────
-stray_pids=$(lsof -ti:"$PORT" 2>/dev/null || true)
-if [ -n "$stray_pids" ]; then
+if is_port_in_use "$PORT"; then
   info "Freeing port $PORT..."
-  echo "$stray_pids" | xargs kill -9 2>/dev/null || true
-  sleep 1
+  kill_port "$PORT" 9
 fi
 
-mkdir -p "$REPO_ROOT/run"
+mkdir -p "$RUN_DIR"
 
 if [ "$mode_choice" -eq 1 ]; then
   info "Launching in Development Mode (Hot-Reloading active)..."
   cd "$PORTAL_DIR"
-  HOSTNAME=0.0.0.0 PORT=$PORT pnpm dev > "$REPO_ROOT/run/portal.log" 2>&1 &
-  echo $! > "$REPO_ROOT/run/.portal.pid"
+  HOSTNAME=0.0.0.0 PORT=$PORT pnpm dev > "$RUN_DIR/portal.log" 2>&1 &
+  echo $! > "$RUN_DIR/.portal.pid"
 else
   info "Building production standalone bundle..."
   cd "$REPO_ROOT"
@@ -126,8 +117,8 @@ else
 
   info "Launching Production Standalone server..."
   cd "$PORTAL_DIR"
-  HOSTNAME=0.0.0.0 PORT=$PORT node .next/standalone/apps/portal/server.js > "$REPO_ROOT/run/portal.log" 2>&1 &
-  echo $! > "$REPO_ROOT/run/.portal.pid"
+  HOSTNAME=0.0.0.0 PORT=$PORT node .next/standalone/apps/portal/server.js > "$RUN_DIR/portal.log" 2>&1 &
+  echo $! > "$RUN_DIR/.portal.pid"
 fi
 
 # ── Step 5: Start Arch-Base Web App ───────────────────────────────────────
@@ -162,7 +153,7 @@ for i in {1..30}; do
 done
 
 if [ "$health_ok" = false ]; then
-  warn "Portal started, but /api/health did not return 200 within 60s. Check: tail -n 20 $REPO_ROOT/run/portal.log"
+  warn "Portal started, but /api/health did not return 200 within 60s. Check: tail -n 20 $RUN_DIR/portal.log"
 else
   log "Portal health check verified (200 OK)."
 fi
@@ -172,52 +163,61 @@ info "Configuring Cloudflare Tunnel reverse proxy..."
 
 if [ "$mode_choice" -eq 1 ]; then
   info "Starting TryCloudflare ad-hoc tunnel for http://localhost:$PORT..."
-  cloudflared tunnel --url "http://localhost:$PORT" --no-autoupdate > "$REPO_ROOT/run/cloudflared.log" 2>&1 &
-  echo $! > "$REPO_ROOT/run/.cloudflared.pid"
+  cloudflared tunnel --url "http://localhost:$PORT" --no-autoupdate > "$RUN_DIR/cloudflared.log" 2>&1 &
+  echo $! > "$RUN_DIR/.cloudflared.pid"
 
   CF_URL=""
   for i in {1..15}; do
-    CF_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$REPO_ROOT/run/cloudflared.log" | head -n 1 || true)
+    CF_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$RUN_DIR/cloudflared.log" 2>/dev/null | head -n 1 || true)
     if [ -n "$CF_URL" ]; then break; fi
     sleep 1
   done
 
   if [ -n "$CF_URL" ]; then
-    log "TryCloudflare tunnel active: ${CLR_CYAN}${CLR_BOLD}$CF_URL${CLR_RESET}"
+    log "TryCloudflare tunnel active: ${CYAN}${BOLD}$CF_URL${NC}"
   else
-    warn "Tunnel started, check logs at $REPO_ROOT/run/cloudflared.log"
+    warn "Tunnel started, check logs at $RUN_DIR/cloudflared.log"
   fi
 else
   info "Validating production Cloudflare Tunnel configuration..."
   cloudflared tunnel --config "$TUNNEL_CONFIG" ingress validate
   info "Starting named production Cloudflare Tunnel..."
-  cloudflared tunnel --config "$TUNNEL_CONFIG" run > "$REPO_ROOT/run/cloudflared.log" 2>&1 &
-  echo $! > "$REPO_ROOT/run/.cloudflared.pid"
+  cloudflared tunnel --config "$TUNNEL_CONFIG" run > "$RUN_DIR/cloudflared.log" 2>&1 &
+  echo $! > "$RUN_DIR/.cloudflared.pid"
   log "Production Cloudflare Tunnel process started."
 fi
 
 # ── Step 8: Deployment Summary ────────────────────────────────────────────
-echo -e "\n${CLR_GREEN}┌────────────────────────────────────────────────────────────┐${CLR_RESET}"
-echo -e "${CLR_GREEN}│       ARCH-SYSTEMS IS NOW SERVING VIA CLOUDFLARE TUNNEL    │${CLR_RESET}"
-echo -e "${CLR_GREEN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
+echo -e "\n${GREEN}┌────────────────────────────────────────────────────────────┐${NC}"
+echo -e "${GREEN}│       ARCH-SYSTEMS IS NOW SERVING VIA CLOUDFLARE TUNNEL    │${NC}"
+echo -e "${GREEN}├────────────────────────────────────────────────────────────┤${NC}"
 if [ -n "${CF_URL:-}" ]; then
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}Public Cloudflare HTTPS URL:${CLR_RESET}                              ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}${CF_URL}${CLR_RESET}             ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${GREEN}│${NC} ${BOLD}Public Cloudflare HTTPS URL:${NC}                              ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} ${CYAN}${BOLD}${CF_URL}${NC}             ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
 fi
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BOLD}Local Portal Endpoint:${CLR_RESET}                                    ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_CYAN}${CLR_BOLD}http://localhost:${PORT}${CLR_RESET}                                     ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase API:${CLR_RESET}       http://localhost:54321                    ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_WHITE}Supabase Studio:${CLR_RESET}    http://localhost:54323                    ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}├────────────────────────────────────────────────────────────┤${CLR_RESET}"
+echo -e "${GREEN}│${NC} ${BOLD}Local Portal Endpoint:${NC}                                    ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} ${CYAN}${BOLD}http://localhost:${PORT}${NC}                                     ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} ${WHITE}Supabase API:${NC}       http://localhost:54321                    ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} ${WHITE}Supabase Studio:${NC}    http://localhost:54323                    ${GREEN}│${NC}"
+echo -e "${GREEN}├────────────────────────────────────────────────────────────┤${NC}"
 if [ "$mode_choice" -eq 1 ]; then
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_YELLOW}Mode:${CLR_RESET} ${CLR_BOLD}Development (TryCloudflare Tunnel + Hot Reload)${CLR_RESET}       ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${GREEN}│${NC} ${YELLOW}Mode:${NC} ${BOLD}Development (TryCloudflare Tunnel + Hot Reload)${NC}       ${GREEN}│${NC}"
 else
-echo -e "${CLR_GREEN}│${CLR_RESET} ${CLR_BLUE}Mode:${CLR_RESET} ${CLR_BOLD}Production Standalone (Named Cloudflare Tunnel)${CLR_RESET}       ${CLR_GREEN}│${CLR_RESET}"
+echo -e "${GREEN}│${NC} ${BLUE}Mode:${NC} ${BOLD}Production Standalone (Named Cloudflare Tunnel)${NC}       ${GREEN}│${NC}"
 fi
-echo -e "${CLR_GREEN}│${CLR_RESET}                                                            ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}│${CLR_RESET} To halt stack: ${CLR_YELLOW}./scripts/shutdown.sh${CLR_RESET}                       ${CLR_GREEN}│${CLR_RESET}"
-echo -e "${CLR_GREEN}└────────────────────────────────────────────────────────────┘${CLR_RESET}\n"
+echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} To halt stack: ${YELLOW}./scripts/shutdown.sh${NC}                       ${GREEN}│${NC}"
+echo -e "${GREEN}└────────────────────────────────────────────────────────────┘${NC}\n"
 
 log "Cloudflare deployment sequence completed successfully."
+
+# --- Arch-CorpOS Business Loop Trigger ---
+log "Triggering Post-Deployment Self-Improving Validation..."
+if [ -x "$REPO_ROOT/.agents/corpos/bin/corpos" ]; then
+  "$REPO_ROOT/.agents/corpos/bin/corpos" tick deployment-learning-loop || true
+else
+  log "CorpOS binary not found, skipping autonomous validation."
+fi
+

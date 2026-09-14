@@ -30,7 +30,7 @@
       "lead_role": "Principal Systems Engineer",
       "authority_ceiling": "L2",
       "spec_path": "departments/engineering.md",
-      "assigned_loops": ["codebase-health"]
+      "assigned_loops": ["codebase-health", "deployment-learning-loop"]
     },
     "control-room": {
       "id": "control-room",
@@ -94,13 +94,7 @@
     }
   },
   "safety_fences": {
-    "forbidden_paths": [
-      "/usr/share/omarchy/**",
-      ".env*",
-      "**/*.pem",
-      "**/*.key",
-      "**/*.pfx"
-    ],
+    "forbidden_paths": ["/usr/share/omarchy/**", ".env*", "**/*.pem", "**/*.key", "**/*.pfx"],
     "max_turn_budget_per_tick": 15,
     "max_cost_tokens_per_tick": 50000,
     "max_correction_iterations": 2,

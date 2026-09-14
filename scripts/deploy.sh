@@ -16,33 +16,28 @@ set -euo pipefail
 #   staging     - Production-like on staging environment
 #   production  - Production deployment (external Supabase)
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-  DATABASE_DIR="$ARCH_BASE_DIR"
-  SUPABASE_DIR="$ARCH_BASE_DIR/supabase"
-  ARCH_BASE_WEB_DIR="$ARCH_BASE_DIR/apps/web"
-else
-  ARCH_BASE_DIR=""
-  DATABASE_DIR="$REPO_ROOT/packages/database"
-  SUPABASE_DIR="$REPO_ROOT/packages/supabase"
-  ARCH_BASE_WEB_DIR=""
-fi
-
-# Define portal directory
-PORTAL_DIR="$REPO_ROOT/apps/portal"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+LOG_LABEL="[DEPLOY]"
 
 # Load environment configuration for Supabase detection
 ENV_FILE="$PORTAL_DIR/.env"
 [ ! -f "$ENV_FILE" ] && [ -f "$REPO_ROOT/.env" ] && ENV_FILE="$REPO_ROOT/.env"
 
-SUPABASE_URL=$(grep -E '^SUPABASE_URL=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '"\r' || grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '"\r' || echo '')
-SUPABASE_ANON_KEY=$(grep -E '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '"\r' || grep -E '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '"\r' || grep -E '^SUPABASE_ANON_KEY=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '"\r' || echo '')
+SUPABASE_URL=$(get_env_var "$ENV_FILE" "SUPABASE_URL")
+[ -z "$SUPABASE_URL" ] && SUPABASE_URL=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_ANON_KEY=$(get_env_var_fallback "$ENV_FILE" \
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  "SUPABASE_PUBLISHABLE_KEY" \
+  "SUPABASE_ANON_KEY")
 
 # Configuration
 PORT="${PORT:-3000}"
 DEPLOY_MODE="${1:-local}"
 DEPLOY_LOG="$REPO_ROOT/deploy-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="$DEPLOY_LOG"
 LOCK_FILE="$REPO_ROOT/.deploy.lock"
 BACKUP_DIR="$REPO_ROOT/.deploy-backups"
 PID_FILE="$REPO_ROOT/.deploy-monitor.pid"
@@ -80,88 +75,11 @@ for arg in "${@:2}"; do
   esac
 done
 
-# ── Terminal Detection ────────────────────────────────────
-detect_terminal() {
-  if command -v kitty > /dev/null 2>&1; then
-    echo "kitty"
-  elif command -v gnome-terminal > /dev/null 2>&1; then
-    echo "gnome"
-  elif command -v konsole > /dev/null 2>&1; then
-    echo "konsole"
-  elif command -v alacritty > /dev/null 2>&1; then
-    echo "alacritty"
-  elif command -v xfce4-terminal > /dev/null 2>&1; then
-    echo "xfce4"
-  elif command -v xterm > /dev/null 2>&1; then
-    echo "xterm"
-  else
-    echo "none"
-  fi
-}
-
 TERMINAL_TYPE=$(detect_terminal)
-
-# ── Colorized Logging ─────────────────────────────────────
-colors() {
-  RED='\033[0;31m'
-  GREEN='\033[0;32m'
-  YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'
-  CYAN='\033[0;36m'
-  MAGENTA='\033[0;35m'
-  NC='\033[0m'
-  BOLD='\033[1m'
-}
-colors
-
-log() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${GREEN}[DEPLOY]${NC} $msg"
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
-
-info() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${BLUE}[INFO]${NC} $msg"
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
-
-warn() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${YELLOW}[WARN]${NC} $msg"
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
-
-phase() {
-  local msg="[$(date '+%H:%M:%S')] PHASE: $*"
-  echo
-  echo -e "${MAGENTA}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-  echo -e "${MAGENTA}${BOLD}  $msg${NC}"
-  echo -e "${MAGENTA}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-  echo
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
-
-error() {
-  local msg="[$(date '+%H:%M:%S')] $*"
-  echo -e "${RED}[ERROR]${NC} $msg" >&2
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
-
-fatal() {
-  error "$*"
-  cleanup_lock
-  exit 1
-}
-
-success() {
-  local msg="[$(date '+%H:%M:%S')] ✅ $*"
-  echo -e "${GREEN}${BOLD}✅ $*${NC}"
-  echo "$msg" >> "$DEPLOY_LOG" 2>/dev/null || true
-}
 
 # ── Error Collection ────────────────────────────────────
 DEPLOY_ERRORS=()
+ERROR_COLLECTION_VAR="DEPLOY_ERRORS"
 
 collect_error() {
   local msg="$*"
@@ -240,7 +158,7 @@ error_trap() {
   
   if [[ "$last_command" == *"supabase"* ]]; then
     echo -e "${RED}║${NC} ${YELLOW}→ Check Docker: docker ps | grep supabase${NC}"
-    echo -e "${RED}║${NC} ${YELLOW}→ Reset: pnpx supabase stop && pnpx supabase start${NC}"
+    echo -e "${RED}║${NC} ${YELLOW}→ Reset: npx supabase stop && npx supabase start${NC}"
   elif [[ "$last_command" == *"pnpm"* ]] || [[ "$last_command" == *"build"* ]]; then
     echo -e "${RED}║${NC} ${YELLOW}→ Try: pnpm install && pnpm build${NC}"
     echo -e "${RED}║${NC} ${YELLOW}→ Check: pnpm lint${NC}"
@@ -1023,7 +941,7 @@ phase_migrations() {
       ;;
     staging|production)
       log "Pushing migrations to $DEPLOY_MODE..."
-      run_if_not_dry cd "$DATABASE_DIR" && pnpx supabase db push
+      run_if_not_dry cd "$DATABASE_DIR" && npx supabase db push
       success "Migrations complete"
       ;;
   esac
@@ -1156,7 +1074,7 @@ phase_launch_monitoring() {
   
   # Create monitoring script
   local monitor_script="$REPO_ROOT/.monitor-$$.sh"
-  cat > "$monitor_script" << 'EOF'
+  cat > "$monitor_script" << EOF
 #!/bin/bash
 clear
 echo -e "\033[0;35m╔════════════════════════════════════════════════════════════════╗\033[0m"
@@ -1174,16 +1092,10 @@ else
 fi
 
 # Check services
-if curl -fs http://localhost:3000 > /dev/null 2>&1; then
-  echo -e "  🟢 Portal:     http://localhost:3000"
+if curl -fs "http://localhost:$PORT" > /dev/null 2>&1; then
+  echo -e "  🟢 Portal:     http://localhost:$PORT"
 else
   echo -e "  🔴 Portal:     NOT RESPONDING"
-fi
-
-if curl -fs http://localhost:3001 > /dev/null 2>&1; then
-  echo -e "  🟢 Arch-Base:  http://localhost:3001"
-else
-  echo -e "  ⚪ Arch-Base:  Not running"
 fi
 
 if curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
@@ -1195,7 +1107,6 @@ fi
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q redis; then
   echo -e "  🟢 Redis:      Running"
 fi
-
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q flowise; then
   echo -e "  🟢 Flowise:    http://localhost:3000"
@@ -1215,36 +1126,16 @@ echo "Live Logs (Ctrl+C to exit):"
 echo ""
 
 # Tail logs
-if [ -f DEPLOY_LOG ]; then
-  tail -f DEPLOY_LOG portal.log 2>/dev/null | head -100
+if [ -f "$DEPLOY_LOG" ]; then
+  tail -f "$DEPLOY_LOG" "$REPO_ROOT/run/portal.log" 2>/dev/null
 else
-  tail -f portal.log 2>/dev/null
+  tail -f "$REPO_ROOT/run/portal.log" 2>/dev/null
 fi
 EOF
   chmod +x "$monitor_script"
   
   log "Launching $TERMINAL_TYPE terminal..."
-  
-  case "$TERMINAL_TYPE" in
-    kitty)
-      kitty --title "Arch-Systems Monitor" bash "$monitor_script" &
-      ;;
-    gnome)
-      gnome-terminal --title="Arch-Systems Monitor" -- bash "$monitor_script" &
-      ;;
-    konsole)
-      konsole --title "Arch-Systems Monitor" -e "bash $monitor_script" &
-      ;;
-    alacritty)
-      alacritty -t "Arch-Systems Monitor" -e bash "$monitor_script" &
-      ;;
-    xfce4)
-      xfce4-terminal --title="Arch-Systems Monitor" -e "bash $monitor_script" &
-      ;;
-    xterm)
-      xterm -title "Arch-Systems Monitor" -e "bash $monitor_script" &
-      ;;
-  esac
+  launch_in_terminal "Arch-Systems Monitor" "$monitor_script"
   
   # Save monitor PID for cleanup
   echo $! > "$PID_FILE"
@@ -1278,7 +1169,7 @@ echo "────────────────────────�
 echo ""
 
 # Check each service and show status
-if curl -fs http://localhost:$PORT > /dev/null 2>&1; then
+if curl -fs "http://localhost:$PORT" > /dev/null 2>&1; then
   echo -e "  ✅ \033[1mPortal:\033[0m       http://localhost:$PORT"
   echo -e "  ✅ \033[1mLogin Page:\033[0m   http://localhost:$PORT/login"
 else
@@ -1300,7 +1191,6 @@ elif curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
 else
   echo -e "  ⚪ \033[1mSupabase:\033[0m     Not running"
 fi
-
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-flowise; then
   echo -e "  ✅ \033[1mFlowise:\033[0m      http://localhost:3001 (user: plantcor)"
@@ -1335,43 +1225,24 @@ echo -e "\033[0;35m────────────────────�
 echo ""
 echo -e "\033[1m🔧 Quick Commands:\033[0m"
 echo "  Stop:      ./scripts/deploy.sh local --clean"
-echo "  Logs:      tail -f deploy-*.log portal.log"
+echo "  Logs:      tail -f deploy-*.log run/portal.log"
 echo "  Monitor:   docker ps | grep plantcor"
 echo ""
 echo -e "\033[0;35m────────────────────────────────────────────────────────────────\033[0m"
 echo ""
 echo -e "\033[1m📁 Log Files:\033[0m"
 ls -t deploy-*.log 2>/dev/null | head -1 | xargs -I {} echo "  {}"
-echo "  portal.log"
+echo "  run/portal.log"
 echo ""
 echo -e "\033[0;32m\033[1mPress Enter to close this window...\033[0m"
-read
+read -r
 date
 RESULTSEOF
   chmod +x "$results_script"
   
   # Launch results terminal
   log "Opening deployment results terminal..."
-  case "$TERMINAL_TYPE" in
-    kitty)
-      kitty --title "Arch-Systems Deployment Results" bash "$results_script" &
-      ;;
-    gnome)
-      gnome-terminal --title="Arch-Systems Deployment Results" -- bash "$results_script" &
-      ;;
-    konsole)
-      konsole --title "Arch-Systems Deployment Results" -e "bash $results_script" &
-      ;;
-    alacritty)
-      alacritty -t "Arch-Systems Deployment Results" -e bash "$results_script" &
-      ;;
-    xfce4)
-      xfce4-terminal --title="Arch-Systems Deployment Results" -e "bash $results_script" &
-      ;;
-    xterm)
-      xterm -title "Arch-Systems Deployment Results" -e "bash $results_script" &
-      ;;
-  esac
+  launch_in_terminal "Arch-Systems Deployment Results" "$results_script"
   success "Results terminal launched"
   
   # Also open browser if not disabled
@@ -1386,26 +1257,8 @@ RESULTSEOF
   fi
   
   log "Opening browser to: $login_url"
-  
-  if command -v google-chrome > /dev/null 2>&1; then
-    google-chrome --new-window "$login_url" 2>/dev/null &
-    success "Chrome opened"
-  elif command -v chromium > /dev/null 2>&1; then
-    chromium --new-window "$login_url" 2>/dev/null &
-    success "Chromium opened"
-  elif command -v firefox > /dev/null 2>&1; then
-    firefox --new-window "$login_url" 2>/dev/null &
-    success "Firefox opened"
-  elif command -v xdg-open > /dev/null 2>&1; then
-    xdg-open "$login_url" 2>/dev/null &
-    success "Browser opened via xdg-open"
-  elif command -v open > /dev/null 2>&1; then
-    open "$login_url"
-    success "Browser opened (macOS)"
-  else
-    warn "No browser launcher found"
-    log "Please manually open: $login_url"
-  fi
+  open_browser "$login_url"
+  success "Browser launched to $login_url"
 }
 
 # ── Main ────────────────────────────────────────────────
@@ -1517,6 +1370,14 @@ main() {
   log "Logs: tail -f $DEPLOY_LOG"
   log "Stop: $0 $DEPLOY_MODE --clean"
   echo
+
+  # --- Arch-CorpOS Business Loop Trigger ---
+  log "Triggering Post-Deployment Self-Improving Validation..."
+  if [ -x "$REPO_ROOT/.agents/corpos/bin/corpos" ]; then
+    "$REPO_ROOT/.agents/corpos/bin/corpos" tick deployment-learning-loop || true
+  else
+    log "CorpOS binary not found, skipping autonomous validation."
+  fi
 }
 
 # Run

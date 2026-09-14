@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { type HealthCheckResponse, healthCheckResponseSchema } from "@repo/contract";
 import { getRedisClient } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
@@ -81,8 +82,8 @@ export async function GET() {
     supabaseStatus === "unhealthy"
       ? "unhealthy"
       : supabaseStatus === "degraded" || redisStatus === "degraded" || fuxaStatus === "degraded"
-      ? "degraded"
-      : "healthy";
+        ? "degraded"
+        : "healthy";
 
   const responsePayload: HealthCheckResponse = {
     status: overallStatus,
