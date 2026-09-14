@@ -57,7 +57,7 @@ node --check .claude/skills/run-portal/driver.mjs
    # -> READY (200)
    ```
 
-3. Drive the app — log in with the smoke-test creds from `.env` (never printed) and
+3. Drive the app — log in with the smoke-test credentials from `.env` (never printed) and
    screenshot `/hub`. Exit 0 means login succeeded and the hub rendered. Add plain
    paths (e.g. `/hub/executive`) to visit more pages; omit `--login` to browse
    anonymously (`/` and `/hub`):
@@ -97,8 +97,11 @@ pm2 restart portal-dev   # -> back to 200 on :3000 within ~2s on warm cache
   `packages/supabase/src/server.ts` reads `process.env.SUPABASE_SERVICE_ROLE_KEY`, but
   `.env` (and `env/.env.example`) name the key `SUPABASE_SERVICE_KEY`. Without the
   bridge, `/hub` renders an error tile: "Something went wrong — supabaseKey is
-  required". `serve.sh` bridges the value at launch. Fixing the naming mismatch in code
-  is pending a human decision (auth-adjacent change).
+  required". `serve.sh` bridges the value at launch. Decision recorded 2026-09-14
+  (see `AGENT_TRACER.md`): left as-is — renaming either side is deferred to a human
+  because `SUPABASE_SERVICE_KEY` is referenced by deploy scripts and CI, and the
+  service-role client code is uncommitted, auth-adjacent work awaiting review. When
+  that lands, align the naming and drop the `serve.sh` bridge.
 - **Login rate limit: 10 requests per 15 minutes** on `/api/auth/login` (429 with
   `X-RateLimit-Reset`). A driver retry loop can lock itself out — the driver performs
   exactly one login per run; do not wrap it in a retry loop.

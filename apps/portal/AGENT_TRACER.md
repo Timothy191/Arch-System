@@ -1,3 +1,24 @@
+## 2026-09-14T11:55:00Z: Service-Role Key Naming — Decision Recorded (AGENT-TRACE: run-skill-generator close-out)
+
+- **Agent**: Claude Code (Orca-supervised, run `run_2e95a05dba11`)
+- **Decision**: `packages/supabase/src/server.ts` `createServiceRoleClient()` reads
+  `SUPABASE_SERVICE_ROLE_KEY`, while `.env`/`env/.env.example` name the key
+  `SUPABASE_SERVICE_KEY`. Resolved with the **safest option: no code or env change**.
+- **Rationale**:
+  1. `createServiceRoleClient()` itself is currently **uncommitted work** in
+     `packages/supabase/src/server.ts` — auth-adjacent, gated on human review per
+     project convention; editing it here would mix into uncommitted third-party work.
+  2. `SUPABASE_SERVICE_KEY` is the canonical name across deploy scripts, CI
+     (`.github/workflows/deploy.yml`), and env-validation scripts — renaming either
+     side would sweep CI secrets and multiple scripts into the change.
+  3. The runtime path already works and was verified 3× this session:
+     `.claude/skills/run-portal/serve.sh` bridges the value at launch (`login: SUCCESS`,
+     real `/hub` dashboard, exit 0).
+- **Status**: Open item intentionally left to a human: when the service-role client
+  work is reviewed and committed, align the naming in one place (code fallback chain
+  `SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_SERVICE_KEY`, or rename the env var) and drop
+  the `serve.sh` bridge. Until then, `serve.sh` remains the working mechanism.
+
 ## 2026-09-14T13:55:00Z: run-portal Skill Delivered (AGENT-TRACE: run-skill-generator)
 
 - **Agent**: Claude Code (Orca-supervised wrap-up, run `run_2e95a05dba11`)

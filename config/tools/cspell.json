@@ -76,6 +76,8 @@
     "panaversity",
     "adrs",
     "addyosmani",
-    "toolsets"
+    "toolsets",
+    "nostream",
+    "ENOENT"
   ]
 }
