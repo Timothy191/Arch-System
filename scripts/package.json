@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "ts-morph": "^20.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^26.5.0",
     "ts-node": "^10.9.1"
   }
 }
