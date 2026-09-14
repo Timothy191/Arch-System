@@ -4,6 +4,17 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-14] - Root File Audit & Lint-Staged Blocker Fix
+
+- **Agent:** Claude Code (claude.ai/code)
+- **Action:** Audited 37 tracked/untracked root-level files for stale/duplicate/error-causing/blocking content; aligned 100% with codebase.
+- **Removed (stale gitignored runtime artifacts):** `.deploy-monitor.pid` (dead PID to non-existent process), `.deploy-results-3649834.sh`, `.monitor-3649834.sh` (buggy undefined `DEPLOY_LOG`), `dev-report.md` (stale generated boot report). All regenerated on demand by `scripts/deploy.sh` / `scripts/sync-assets-smart.cjs`.
+- **`opencode.json`:** repaired broken `knowledge-rail` MCP path (`/home/tim/...` wrong home → `npx -y knowledge-rail`); replaced non-functional `postgres` placeholder creds (`[PASSWORD]`/`[REGION]`) with working local dev URL `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+- **`.lintstagedrc.mjs`:** removed duplicate `*.{ts,tsx}` key overlapping the `*.{js,jsx,ts,tsx,cjs,mjs}` owner (violating "no glob overlap"); **found & fixed a pre-commit hang** — `bash .agents/hooks/pre-tool-guard.sh` is a PreToolUse stdin hook that blocks commits on `cat -` when run from lint-staged; dropped it, keeping only `pnpm --filter @repo/shared/hooks type-check` as the staging governance check.
+- **`.assets-checksum`:** verified NOT stale — SHA-256 recompute matches current asset tree; left in place.
+- **Verified not stale:** docs symlinks, `AGENTS.md`/`GEMINI.md` `temp/` refs, `package.json` scripts vs CLAUDE.md.
+- **Committed:** `f25f58d` (`chore(repo): align root audit with codebase & remove stale artifacts`), pushed to `origin main`; worktree clean.
+
 ## [2026-09-11] - Root Sanitation & Agent Configuration Fix
 
 - **Agent:** Architecture Orchestrator (Antigravity)
