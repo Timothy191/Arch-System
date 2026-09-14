@@ -27,6 +27,7 @@ Quick navigation guide for Arch-Systems documentation.
 ### Workflow & Quality
 
 - **[AGENTS.md](AGENTS.md)** - Slim agent contract index (tracing, phases, Turborepo tags; links to rules)
+- **[Strategic Framework: Swarming & Orchestration for Test Engineers](strategic-frameworks/test-engineer-swarming-orchestration.md)** - Comprehensive framework for deploying swarming (rapid defect resolution) and orchestration (test execution workflow management) methodologies in the SDLC, tailored for Test Engineers' skills in exploratory testing, automation design, and defect analysis
 
 ### Architecture & Visualization
 

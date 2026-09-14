@@ -25,6 +25,18 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
 - **Verified not stale:** docs symlinks, `AGENTS.md`/`GEMINI.md` `temp/` refs, `package.json` scripts vs CLAUDE.md.
 - **Committed:** `f25f58d` (`chore(repo): align root audit with codebase & remove stale artifacts`), pushed to `origin main`; worktree clean.
 
+## [2026-09-14] - Test Engineer Swarming & Orchestration Framework
+
+- **Agent:** Claude Code (claude.ai/code)
+- **Action:** Created comprehensive strategic framework document for deploying swarming and orchestration methodologies within the SDLC, specifically tailored for Test Engineers.
+- **New file:** `docs/strategic-frameworks/test-engineer-swarming-orchestration.md` (726 lines, ~4,600 words) - covers:
+  - Foundational concepts of swarming (convergent problem-solving) vs orchestration (divergent workflow management)
+  - How Test Engineers' specialized skills (exploratory testing, automation design, defect analysis) drive these patterns
+  - Orchestration blueprint for test execution workflows (pipeline patterns, environment/data orchestration, quality gates)
+  - Swarm formation protocol, execution cycle, roles, and knowledge capture for quality bottleneck resolution
+- **Updated:** `docs/DOCUMENTATION_INDEX.md` - added link in Workflow & Quality section.
+- **Verified:** Document reviewed for completeness; all 10 sections present with 38 headings, 23 subsections, 26 tables, and 22 code blocks.
+
 ## [2026-09-11] - Root Sanitation & Agent Configuration Fix
 
 - **Agent:** Architecture Orchestrator (Antigravity)
