@@ -23,6 +23,10 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
+    "^react$": "<rootDir>/../../../../apps/portal/node_modules/react",
+    "^react/(.*)$": "<rootDir>/../../../../apps/portal/node_modules/react/$1",
+    "^react-dom$": "<rootDir>/../../../../apps/portal/node_modules/react-dom",
+    "^react-dom/(.*)$": "<rootDir>/../../../../apps/portal/node_modules/react-dom/$1",
     // The lib tsconfig maps `@/lib/*` → `apps/portal/lib/*`; mirror that so
     // `@/lib/shift-closeout` (imported by CloseShiftModal) and the test's
     // `~/lib/shift-closeout` resolve to the same module — the test's factory

@@ -31,36 +31,40 @@ export async function fetchLiveDepartmentMetrics(
   const result: DepartmentLiveMetricsMap = {};
 
   try {
-    const [hourlyLoadsRes, productionRes, breakdownsRes, machinesRes] = await Promise.all([
-      // 1. Control Room Hourly Loads for today
-      db
-        .from("hourly_loads")
-        .select(
-          "hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads",
-        )
-        .eq("load_date", today)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+    const [hourlyLoadsRes, productionRes, breakdownsRes, machinesRes, badgesRes] =
+      await Promise.all([
+        // 1. Control Room Hourly Loads for today
+        db
+          .from("hourly_loads")
+          .select(
+            "hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads",
+          )
+          .eq("load_date", today)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
 
-      // 2. Production & Processing Extraction Tonnage
-      db
-        .from("daily_logs")
-        .select("id, shift, production_logs(coal_tonnes, waste_tonnes)")
-        .eq("log_date", today)
-        .limit(1)
-        .maybeSingle(),
+        // 2. Production & Processing Extraction Tonnage
+        db
+          .from("daily_logs")
+          .select("id, shift, production_logs(coal_tonnes, waste_tonnes)")
+          .eq("log_date", today)
+          .limit(1)
+          .maybeSingle(),
 
-      // 3. Equipment breakdowns (active)
-      db
-        .from("breakdowns")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "active")
-        .is("deleted_at", null),
+        // 3. Equipment breakdowns (active)
+        db
+          .from("breakdowns")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "active")
+          .is("deleted_at", null),
 
-      // 4. Engineering Machines
-      db.from("machines").select("id, name, status").is("deleted_at", null),
-    ]);
+        // 4. Engineering Machines
+        db.from("machines").select("id, name, status").is("deleted_at", null),
+
+        // 5. Access Control active badges on-site
+        db.from("badges").select("id", { count: "exact", head: true }).eq("status", "active"),
+      ]);
 
     // --- Control Room Overlay ---
     if (hourlyLoadsRes?.data) {
@@ -140,6 +144,17 @@ export async function fetchLiveDepartmentMetrics(
       status: activeBreakdowns > 0 ? "maintenance" : "active",
       trend: [95, 96, 96, 97, 98, 98, availabilityRate],
     };
+
+    // --- Access Control Overlay ---
+    if (badgesRes?.count !== undefined && badgesRes?.count !== null) {
+      result["access-control"] = {
+        stats: {
+          label: "On-site",
+          value: `${badgesRes.count}`,
+        },
+        status: "active",
+      };
+    }
   } catch (err) {
     console.warn("fetchLiveDepartmentMetrics warning (using default overlays):", err);
   }

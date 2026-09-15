@@ -68,10 +68,6 @@ describe("LoginForm", () => {
     global.fetch = jest.fn();
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   it("renders employee ID and password inputs", () => {
     render(<LoginForm />);
 
@@ -107,7 +103,7 @@ describe("LoginForm", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({ email: "PC-12345", password: "testpass" }),
-        })
+        }),
       );
     });
 
@@ -185,7 +181,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Accessing your workspace\.\.\.$|^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        })
+        }),
       ).toBeDisabled();
     });
 
@@ -196,7 +192,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        })
+        }),
       ).not.toBeDisabled();
     });
   });
@@ -308,6 +304,10 @@ describe("LoginForm", () => {
       // clean up for next iteration
       unmount();
       jest.clearAllMocks();
+      useRouter.mockReturnValue({
+        push: mockPush,
+        refresh: mockRefresh,
+      });
     };
 
     // Test external domain redirect

@@ -56,9 +56,6 @@ SHIFT_HANDOFF_INPUTS = [
     },
 ]
 
-    },
-]
-
 EQUIPMENT_MANUAL_INPUTS = [
     {
         "input": "What is the recommended hydraulic oil filter change interval for a CAT-320 excavator operating in dusty conditions?",

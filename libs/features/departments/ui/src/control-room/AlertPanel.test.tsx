@@ -68,10 +68,8 @@ describe("AlertPanel", () => {
       expect(screen.getByText(/Conveyor 1 is offline/)).toBeInTheDocument();
     });
 
-    // Click the acknowledge button in the list to open the dialog
-    fireEvent.click(screen.getAllByText("Acknowledge")[0]!);
-    // Click the acknowledge button in the dialog to confirm
-    fireEvent.click(screen.getAllByText("Acknowledge")[1]!);
+    // Click the acknowledge button in the list
+    fireEvent.click(screen.getByText("Acknowledge"));
 
     await waitFor(() => {
       expect(screen.queryByText("Acknowledge")).not.toBeInTheDocument();

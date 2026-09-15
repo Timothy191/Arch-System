@@ -23,6 +23,13 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
+    "^next/navigation$": "<rootDir>/node_modules/next/navigation.js",
+    "^next/navigation\\.js$": "<rootDir>/node_modules/next/navigation.js",
+    "^react$": "<rootDir>/node_modules/react",
+    "^react/(.*)$": "<rootDir>/node_modules/react/$1",
+    "^react-dom$": "<rootDir>/node_modules/react-dom",
+    "^react-dom/(.*)$": "<rootDir>/node_modules/react-dom/$1",
+    "^sonner$": "<rootDir>/node_modules/sonner",
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/$1",
     "^~/(.*)$": "<rootDir>/$1",

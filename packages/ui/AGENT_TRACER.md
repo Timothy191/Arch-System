@@ -1,5 +1,13 @@
 # Agent Tracer - @repo/ui
 
+## 2026-09-15 - UI Hook Dependency & Jest Resolution Alignment (--task-257)
+
+- **Purpose**: Fix React Hook dependency in `collapse.tsx` to clear ESLint warnings, and verify `@repo/ui` test resolution across monorepo packages.
+- **Changes**:
+  - `packages/ui/src/components/ui/collapse.tsx`: Included `group` in `React.useEffect` dependencies array.
+- **Verification**: `pnpm --filter @repo/ui lint` ✅ (0 errors, 0 warnings); `pnpm --filter @repo/ui type-check` ✅.
+- **What the Next Agent Should Know**: UI components must strictly adhere to zero ESLint warnings and pass `--max-warnings 0`.
+
 ## 2026-09-08 - eve branding components (EveLogo + EveStatusBar)
 
 - **Purpose**: Add Geist-compliant eve branding primitives for the login page and global footer.
@@ -456,7 +464,8 @@ Added a new repository‑wide `docs/UX_Design_Rules.md` file that documents 18 c
 - **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
 
 ## 2026-09-11T08:32:00Z
+
 - **Agent**: Antigravity (acting as nextjs-fullstack-engineer)
-- **Changes**: 
+- **Changes**:
   - Refactored `AcknowledgeButton` to use non-blocking optimistic UI with an Undo toast action (via `sonner`), replacing the blocking `ActionConfirmDialog`.
   - **Reason**: Implement Heuristic #2 from UX_UI_AUDIT.md and follow Next.js modern UI guidelines for optimistic updates.

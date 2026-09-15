@@ -20,12 +20,15 @@ jest.mock("@react-three/drei", () => {
   };
 });
 
-jest.mock("next/dynamic", () => () => {
-  const { ThreeHeroRotator: ActualThreeHeroRotator } = jest.requireActual(
-    "@repo/ui/ThreeHeroRotator",
-  );
-  return ActualThreeHeroRotator;
-});
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () => {
+    const { ThreeHeroRotator: ActualThreeHeroRotator } = jest.requireActual(
+      "@repo/ui/ThreeHeroRotator",
+    );
+    return ActualThreeHeroRotator;
+  },
+}));
 
 const mockPanels: Panel[] = [
   {
@@ -199,8 +202,8 @@ describe("ThreeHeroRotator", () => {
     expect(screen.getAllByText("Nominal").length).toBeGreaterThan(0);
   });
 
-  it("renders via ThreeHeroRotatorDynamic wrapper", () => {
+  it("renders via ThreeHeroRotatorDynamic wrapper", async () => {
     render(<ThreeHeroRotatorDynamic panels={mockPanels} />);
-    expect(screen.getByText("System Overview")).toBeInTheDocument();
+    expect(await screen.findByText("System Overview")).toBeInTheDocument();
   });
 });
