@@ -183,14 +183,7 @@ show_results() {
   _url_row "Studio" "$studio_url"
   _url_row "API" "$api_url"
 
-  if [ "${CLOUDFLARE_ACTIVE:-false}" = "true" ]; then
-    echo
-    echo -e "  ${CYAN}${BOLD}Cloudflare Edge Network (Domain & Webhooks)${NC}"
-    if [ -n "${CLOUDFLARE_URL:-}" ]; then
-      _url_row "HTTPS Domain" "${CLOUDFLARE_URL}" "(Cloudflare Edge WAF)"
-      _url_row "RFID (SSL)" "${CLOUDFLARE_URL}/api/c66" "(C66 scanner endpoint)"
-    fi
-  fi
+
   echo
   echo -e "  ${BOLD}${WHITE}Controls${NC}"
   echo -e "  ${DIM}Ctrl+C${NC}  stop services    ${DIM}logs${NC}  run/portal.log    ${DIM}HUD${NC}  separate status terminal"
@@ -330,36 +323,16 @@ while [ $# -gt 0 ]; do
     STRICT_MODE=true
     shift
     ;;
-  --cloudflare | --cf)
-    ENABLE_CLOUDFLARE=true
-    shift
-    ;;
+
   *) shift ;;
   esac
 done
-
-CLOUDFLARE_ACTIVE=false
-CLOUDFLARE_URL=""
-
-if [ "${ENABLE_CLOUDFLARE:-false}" = "true" ] || command -v cloudflared >/dev/null 2>&1; then
-  if pgrep -x cloudflared >/dev/null 2>&1; then
-    CLOUDFLARE_ACTIVE=true
-    if [ -f "$REPO_ROOT/run/cloudflared.log" ]; then
-      CLOUDFLARE_URL=$(grep -o 'https://[-0-9a-z]*\.trycloudflare\.com' "$REPO_ROOT/run/cloudflared.log" | head -n 1 || echo "")
-    fi
-  fi
-fi
 
 if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]]; then
   HOSTED_MODE=true
 fi
 
 banner
-
-if [ "$CLOUDFLARE_ACTIVE" = "true" ]; then
-  echo -e "  ${CYAN}${BOLD}🔒 Cloudflare Tunnel Active${NC} ${CLOUDFLARE_URL:+— $CLOUDFLARE_URL}"
-  echo
-fi
 
 if [ "$QUICK_MODE" = "true" ]; then
   echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
@@ -386,10 +359,7 @@ else
   check "Global assets" "fail" "sync script missing"
 fi
 
-# Cloudflare Network Serving (Edge Tunnel & HTTPS)
-if [ "$CLOUDFLARE_ACTIVE" = "true" ]; then
-  check "Cloudflare Tunnel" "pass" "${CLOUDFLARE_URL:-active}"
-fi
+
 
 portal_healthy() {
   curl -fs "http://localhost:$PORT/login" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200
@@ -873,7 +843,7 @@ else
       compiled=true
       break
     fi
-    if grep -qiE "Failed to compile|Module not found|Cannot find module" "$REPO_ROOT/run/portal.log" 2>/dev/null; then
+    if grep -qiE "Failed to compile|Module not found|Cannot find module|EADDRINUSE|Failed to start server" "$REPO_ROOT/run/portal.log" 2>/dev/null; then
       break
     fi
     sleep 2
