@@ -13,8 +13,6 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  * Delivery: Email to supervisors, dashboard for admins
  */
 
-import type { InngestFunction } from "inngest";
-
 /**
  * Operational timezone for the mine. All shift windows are defined in SAST.
  */
@@ -40,7 +38,7 @@ export function addDays(dateStr: string, days: number): string {
 export function timeAtOperationalZone(
   dateStr: string,
   time: string,
-  timeZone: string = OPERATIONAL_TIMEZONE
+  timeZone: string = OPERATIONAL_TIMEZONE,
 ): Date {
   const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
   const [hour = 0, minute = 0] = time.split(":").map(Number);
@@ -52,14 +50,14 @@ export function timeAtOperationalZone(
     hourCycle: "h23",
   });
   const zoneHour = Number(
-    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value
+    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value,
   );
   const utcHour = new Date(utcGuess).getUTCHours();
   // Shift the guess by the zone's offset so the result is `time` in that zone.
   return new Date(utcGuess - (zoneHour - utcHour) * 3600000);
 }
 
-export const shiftIntegrityReportFn: InngestFunction.Any = inngest.createFunction(
+export const shiftIntegrityReportFn = inngest.createFunction(
   {
     id: "shift-integrity-report",
     triggers: [{ cron: "0 3 * * 0" }],
@@ -210,5 +208,5 @@ export const shiftIntegrityReportFn: InngestFunction.Any = inngest.createFunctio
     } finally {
       recordJobExecution("shift-integrity-report", performance.now() - start, success);
     }
-  }
+  },
 );

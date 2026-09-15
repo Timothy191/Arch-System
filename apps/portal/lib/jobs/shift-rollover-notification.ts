@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { inngest, shiftRolloverNotificationEvent } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -10,7 +9,7 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  * Runs 15 minutes before shift end (05:45 and 17:45) or upon event dispatch
  * to alert supervisors and dispatchers of pending shift closeouts and handover checklists.
  */
-export const shiftRolloverNotificationFn: InngestFunction.Any = inngest.createFunction(
+export const shiftRolloverNotificationFn = inngest.createFunction(
   {
     id: "shift-rollover-notifications",
     name: "Shift Rollover Notifications",

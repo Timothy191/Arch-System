@@ -1,5 +1,4 @@
 import { inngest, machineBreakdownEvent } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -8,7 +7,7 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  *
  * Processes breakdown log events for engineering fleet maintenance.
  */
-export const machineBreakdownNotificationFn: InngestFunction.Any = inngest.createFunction(
+export const machineBreakdownNotificationFn = inngest.createFunction(
   {
     id: "machine-breakdown-notifications",
     name: "Machine Breakdown Notifications",
@@ -38,5 +37,5 @@ export const machineBreakdownNotificationFn: InngestFunction.Any = inngest.creat
       });
       throw err;
     }
-  }
+  },
 );

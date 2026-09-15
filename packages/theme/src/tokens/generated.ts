@@ -114,7 +114,7 @@ export const tokens = {
     archBrandBlueHover: "#2c2c2e",
   },
   hsl: {
-    background: "240 5% 96%",
+    background: "220 14% 96%",
     foreground: "240 6% 10%",
     card: "0 0% 100%",
     cardForeground: "240 6% 10%",

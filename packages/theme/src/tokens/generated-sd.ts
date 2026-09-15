@@ -1193,12 +1193,12 @@ module.exports = {
   },
   background: {
     key: "{background}",
-    value: "240 5% 96%",
+    value: "220 14% 96%",
     type: "color",
     filePath: "tokens.json",
     isSource: true,
     original: {
-      value: "240 5% 96%",
+      value: "220 14% 96%",
       type: "color",
       key: "{background}",
     },

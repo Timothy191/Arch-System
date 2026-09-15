@@ -14,6 +14,7 @@ const withAlpha = (token: string): string =>
       : `color-mix(in srgb, var(${token}) calc(${opacityValue} * 100%), transparent)`) as unknown as string;
 
 const archTheme: Config = {
+  darkMode: "class",
   content: [
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",

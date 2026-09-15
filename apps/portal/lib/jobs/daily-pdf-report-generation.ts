@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from "@repo/supabase/service-role";
 import { dailyPdfReportEvent, inngest } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
@@ -16,7 +15,7 @@ interface DailyPdfReportEventData {
   shiftType?: "day" | "night";
 }
 
-export const dailyPdfReportGenerationFn: InngestFunction.Any = inngest.createFunction(
+export const dailyPdfReportGenerationFn = inngest.createFunction(
   {
     id: "daily-pdf-report-generation",
     name: "Automated Daily PDF & Shift Report Generation",
@@ -71,11 +70,11 @@ export const dailyPdfReportGenerationFn: InngestFunction.Any = inngest.createFun
         const totalCoal = (productionLogs || []).reduce((sum, p) => sum + (p.coal_tonnes ?? 0), 0);
         const totalWaste = (productionLogs || []).reduce(
           (sum, p) => sum + (p.waste_tonnes ?? 0),
-          0
+          0,
         );
         const totalHours = (machineHours || []).reduce(
           (sum, m) => sum + (m.hours_operated ?? 0),
-          0
+          0,
         );
 
         const reportSummary = {
@@ -140,5 +139,5 @@ export const dailyPdfReportGenerationFn: InngestFunction.Any = inngest.createFun
     } finally {
       recordJobExecution("daily-pdf-report-generation", performance.now() - start, success);
     }
-  }
+  },
 );

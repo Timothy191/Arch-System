@@ -1,10 +1,9 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { inngest } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
-export const generateReportFn: InngestFunction.Any = inngest.createFunction(
+export const generateReportFn = inngest.createFunction(
   { id: "generate-shift-report", triggers: [{ event: "reports/generate" }] },
   async ({ event }) => {
     const { departmentId, dateFrom, dateTo } = event.data;
@@ -58,5 +57,5 @@ export const generateReportFn: InngestFunction.Any = inngest.createFunction(
     } finally {
       recordJobExecution("generate-shift-report", performance.now() - start, success);
     }
-  }
+  },
 );

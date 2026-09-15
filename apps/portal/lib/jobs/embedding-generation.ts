@@ -1,10 +1,9 @@
 import { aiGenerateEmbeddingEvent, inngest } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { batchGenerateEmbeddings, generateEmbedding } from "@/lib/ai/embeddings";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
-export const generateEmbeddingFn: InngestFunction.Any = inngest.createFunction(
+export const generateEmbeddingFn = inngest.createFunction(
   { id: "generate-embedding", triggers: [{ event: aiGenerateEmbeddingEvent }] },
   async ({ event }) => {
     const { text, texts, userId } = event.data;
@@ -30,5 +29,5 @@ export const generateEmbeddingFn: InngestFunction.Any = inngest.createFunction(
     } finally {
       recordJobExecution("generate-embedding", performance.now() - start, success);
     }
-  }
+  },
 );

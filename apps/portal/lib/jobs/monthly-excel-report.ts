@@ -1,5 +1,4 @@
 import { inngest } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import * as XLSX from "xlsx";
 
 /**
@@ -8,7 +7,7 @@ import * as XLSX from "xlsx";
  * This job manages the scheduled workflow for Excel exports.
  * It is triggered via a cron schedule (e.g., first day of the month).
  */
-export const monthlyExcelReportFn: InngestFunction.Any = inngest.createFunction(
+export const monthlyExcelReportFn = inngest.createFunction(
   {
     id: "monthly-excel-report",
     name: "Monthly Excel Report Generation",
@@ -59,5 +58,5 @@ export const monthlyExcelReportFn: InngestFunction.Any = inngest.createFunction(
     });
 
     return { success: true, report: reportMeta };
-  }
+  },
 );

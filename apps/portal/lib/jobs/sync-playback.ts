@@ -1,14 +1,16 @@
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { inngest } from "@repo/utils/inngest";
-import type { InngestFunction } from "inngest";
 import { revalidatePath } from "next/cache";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
 
-export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
+import type { SyncPlaybackInput } from "@repo/contract/types/sync.types";
+
+export const syncPlaybackFn = inngest.createFunction(
   { id: "sync-playback", triggers: [{ event: "sync/playback" }] },
   async ({ event }) => {
-    const { idempotencyKey, actionType, payload, departmentId } = event.data;
+    const { idempotencyKey, actionType, payload, departmentId } =
+      event.data as unknown as SyncPlaybackInput;
     const supabase = await createServerSupabaseClient();
     const start = performance.now();
     let success = true;
@@ -91,5 +93,5 @@ export const syncPlaybackFn: InngestFunction.Any = inngest.createFunction(
     } finally {
       recordJobExecution("sync-playback", performance.now() - start, success);
     }
-  }
+  },
 );

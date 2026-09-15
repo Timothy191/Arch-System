@@ -56,6 +56,7 @@ MAGENTA="$CLR_MAGENTA"
 WHITE="$CLR_WHITE"
 NC="$CLR_RESET"
 BOLD="$CLR_BOLD"
+DIM="$CLR_DIM"
 
 # ── Log File Support ───────────────────────────────────────────────────────────
 # If LOG_FILE is set, log/info/warn/error/success output is appended there.
@@ -223,7 +224,7 @@ COMPOSE_CMD="${COMPOSE_CMD:-$(detect_compose_cmd)}"
 get_env_var() {
   local file="$1" key="$2"
   [ -f "$file" ] || return 0
-  grep -E "^${key}=" "$file" 2>/dev/null | head -n1 | cut -d= -f2- | tr -d '"\r'
+  (grep -E "^${key}=" "$file" 2>/dev/null || true) | head -n1 | cut -d= -f2- | tr -d '"\r'
 }
 
 # get_env_var_fallback: tries multiple key names for backward compatibility.
@@ -243,14 +244,18 @@ get_env_var_fallback() {
 
 # ── Terminal Detection ─────────────────────────────────────────────────────────
 detect_terminal() {
-  if command -v kitty > /dev/null 2>&1; then
+  if command -v ghostty > /dev/null 2>&1; then
+    echo "ghostty"
+  elif command -v kitty > /dev/null 2>&1; then
     echo "kitty"
+  elif command -v foot > /dev/null 2>&1; then
+    echo "foot"
+  elif command -v alacritty > /dev/null 2>&1; then
+    echo "alacritty"
   elif command -v gnome-terminal > /dev/null 2>&1; then
     echo "gnome"
   elif command -v konsole > /dev/null 2>&1; then
     echo "konsole"
-  elif command -v alacritty > /dev/null 2>&1; then
-    echo "alacritty"
   elif command -v xfce4-terminal > /dev/null 2>&1; then
     echo "xfce4"
   elif command -v xterm > /dev/null 2>&1; then
@@ -268,13 +273,15 @@ launch_in_terminal() {
   term=$(detect_terminal)
 
   case "$term" in
-    kitty)    kitty --title "$title" bash "$script" & ;;
-    gnome)    gnome-terminal --title="$title" -- bash "$script" & ;;
-    konsole)  konsole --title "$title" -e "bash $script" & ;;
+    ghostty)   ghostty -e bash "$script" & ;;
+    kitty)     kitty --title "$title" bash "$script" & ;;
+    foot)      foot -T "$title" bash "$script" & ;;
     alacritty) alacritty -t "$title" -e bash "$script" & ;;
-    xfce4)    xfce4-terminal --title="$title" -e "bash $script" & ;;
-    xterm)    xterm -title "$title" -e "bash $script" & ;;
-    none)     warn "No compatible terminal emulator found for: $title" ;;
+    gnome)     gnome-terminal --title="$title" -- bash "$script" & ;;
+    konsole)   konsole --title "$title" -e "bash $script" & ;;
+    xfce4)     xfce4-terminal --title="$title" -e "bash $script" & ;;
+    xterm)     xterm -title "$title" -e "bash $script" & ;;
+    none)      warn "No compatible terminal emulator found for: $title" ;;
   esac
 }
 
@@ -466,7 +473,7 @@ start_local_supabase() {
     spinner "$pid" "Booting Arch-Base Supabase containers"
   elif [ -d "$DATABASE_DIR" ]; then
     log "Starting local Supabase..."
-    (cd "$DATABASE_DIR" && pnpx supabase start) > /dev/null 2>&1 &
+    (cd "$DATABASE_DIR" && npx supabase start) > /dev/null 2>&1 &
     local pid=$!
     spinner "$pid" "Booting local Supabase containers"
   else
