@@ -1,7 +1,7 @@
 ---
-description: Universal Autonomous Execution and Compound Engineering Protocol
-globs: ["**/*"]
-alwaysApply: true
+name: universal-agentic-execution
+description: >-
+  Use this skill to execute full compound engineering cycles (Research -> Plan -> Swarm -> Work -> Simplify -> Review -> Verify & Ship) autonomously.
 ---
 
 # Universal Autonomous Execution & Compound Protocol

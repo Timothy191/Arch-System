@@ -1,7 +1,7 @@
 ---
-name: "adaptive-real-world-reasoning"
-trigger: "always_on"
-description: "Adaptive Real-World Reasoning (ARWR) Workflow and empirical validation rules governing all agent actions, thoughts, and claims across the codebase."
+name: real-world-checker
+description: >-
+  Use this skill to execute the Adaptive Real-World Reasoning (ARWR) Workflow and empirical validation checklists. Invoked to verify reality and validate assumptions against the live repository before claiming task completion.
 version: "2.0.0"
 ---
 
