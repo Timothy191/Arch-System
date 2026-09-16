@@ -26,7 +26,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -44,7 +44,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         // Synthesize native change event so React form handlers work
         const nativeSetter = Object.getOwnPropertyDescriptor(
           window.HTMLInputElement.prototype,
-          "value"
+          "value",
         )?.set;
         nativeSetter?.call(inputRef.current, "");
 
@@ -62,7 +62,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         if (inputRef.current) {
           const nativeSetter = Object.getOwnPropertyDescriptor(
             window.HTMLInputElement.prototype,
-            "value"
+            "value",
           )?.set;
           nativeSetter?.call(inputRef.current, "");
           const event = new Event("input", { bubbles: true });
@@ -74,11 +74,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
 
     return (
       <div className="w-full space-y-1">
-        {label && (
-          <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
-            {label}
-          </label>
-        )}
+        {label && <label className="block text-xs font-medium text-neutral-700">{label}</label>}
         <div className="relative flex items-center">
           <input
             ref={inputRef}
@@ -89,17 +85,17 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
             onChange={onChange}
             onKeyDown={handleKeyDown}
             className={cn(
-              "w-full rounded-md border border-neutral-300 dark:border-neutral-700",
-              "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400",
-              "transition-colors focus:outline-none focus:border-neutral-900 dark:focus:border-neutral-100 focus:ring-1 focus:ring-neutral-900 dark:focus:ring-neutral-100",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100 dark:disabled:bg-neutral-800",
+              "w-full rounded-md border border-neutral-300",
+              "bg-white text-neutral-900 placeholder:text-neutral-400",
+              "transition-colors focus:outline-none focus:border-neutral-900:border-neutral-100 focus:ring-1 focus:ring-neutral-900:ring-neutral-100",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100:bg-neutral-800",
               size === "small"
                 ? "h-8 px-2.5 text-xs"
                 : size === "large"
                   ? "h-11 px-3.5 text-base"
                   : "h-9 px-3 text-sm",
               hasValue || cmdk ? "pr-14" : "",
-              className
+              className,
             )}
             {...props}
           />
@@ -112,7 +108,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
                 tabIndex={-1}
                 onClick={handleClear}
                 aria-label="Clear input"
-                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700:text-neutral-200 hover:bg-neutral-100:bg-neutral-800 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -120,7 +116,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
 
             {/* CMD-K or Esc Badge */}
             {cmdk && (
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-[10px] font-mono text-neutral-500 select-none">
+              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-neutral-200 bg-neutral-100 text-[10px] font-mono text-neutral-500 select-none">
                 {hasValue ? "Esc" : "⌘K"}
               </kbd>
             )}
@@ -128,7 +124,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
         </div>
       </div>
     );
-  }
+  },
 );
 
 ClearableInput.displayName = "ClearableInput";

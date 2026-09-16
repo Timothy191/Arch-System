@@ -132,8 +132,6 @@ const nextConfig = {
     ],
     // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
     inlineCss: false,
-    // AGENT-TRACE: Injects detailed attribution info (elements, network events) into useReportWebVitals
-    webVitalsAttribution: ["CLS", "LCP", "FCP", "TTFB", "INP"],
     // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
     cacheLife: {
       telemetry: {
@@ -244,15 +242,6 @@ const nextConfig = {
       // traffic. Per-user and per-session routes explicitly opt out.
       ...(isProduction
         ? [
-            {
-              source: "/_next/static/:path*",
-              headers: [
-                {
-                  key: "Cache-Control",
-                  value: "public, max-age=31536000, immutable",
-                },
-              ],
-            },
             {
               source: "/manifest.webmanifest",
               headers: [

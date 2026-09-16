@@ -22,7 +22,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
       onClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [copied, setCopied] = React.useState(false);
 
@@ -63,11 +63,10 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
         title={copied ? "Copied" : label}
         onClick={handleCopy}
         className={cn(
-          "inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-600 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100",
+          "inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white text-neutral-600 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900 active:scale-95:bg-neutral-800:text-neutral-100",
           sizeClasses,
-          copied &&
-            "border-green-500/50 text-green-600 dark:border-green-500/50 dark:text-green-400",
-          className
+          copied && "border-green-500/50 text-green-600",
+          className,
         )}
         {...props}
       >
@@ -78,7 +77,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
         )}
       </button>
     );
-  }
+  },
 );
 
 CopyButton.displayName = "CopyButton";

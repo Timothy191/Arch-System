@@ -1,5 +1,6 @@
 {
   "name": "scripts",
+  "type": "module",
   "private": true,
   "scripts": {
     "migrate:hooks": "ts-node codemods/migrate-to-shared-hooks.ts",

@@ -20,3 +20,12 @@ version: "1.0.0"
 5. **Exit:** Break the loop only when the evaluation passes or a hard limit of 3 iterations is reached (to prevent infinite looping).
 
 By moving evaluation from a human review step to an autonomous inner loop, we achieve deterministic quality output.
+
+## Dev Server & Route Health Refinement Loop
+
+When validating runtime portal deployments:
+
+1. **Launch:** Run `pnpm dev:turbo` as a background daemon.
+2. **Probe:** Query endpoints (`curl -sI http://localhost:3000/login`, `curl -sI http://localhost:3000/<dept>`).
+3. **Analyze:** Verify HTTP 200 on public entry points and 307 on auth-gated department routes.
+4. **Refine:** If runtime crashes occur, capture stdout/stderr from process logs, resolve the underlying module or syntax issue, and re-evaluate without user escalation.

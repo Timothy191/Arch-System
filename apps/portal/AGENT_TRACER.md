@@ -512,8 +512,16 @@ AIAssistant chat.
 - **Changes**:
   1. `apps/portal/components/system/SystemTray.tsx`: Re-exported sub-components (`BatteryStatusRow`, `NetworkStatusRow`, `NotificationRow`, `OfflineQueueRow`, `ServerHealthRow`, `VolumeControlRow`) and `formatTimeSeconds` from `SystemTrayRows` and `SystemTrayHooks` to restore backwards compatibility and ensure all 16 tests in `SystemTray.test.tsx` pass.
   2. `apps/portal/scripts/generate-openapi-spec.mjs`: Renamed from `.js` to `.mjs` and updated `apps/portal/package.json` to prevent `[MODULE_TYPELESS_PACKAGE_JSON]` runtime warnings during builds.
+
+## 2026-09-16T17:15:00Z: Vercel React Best Practices Implementation (AGENT-TRACE: --task-246)
+
+- **Agent**: Antigravity
+- **Purpose**: Implement architectural recommendations from Vercel React Best Practices review.
+- **Changes**:
+  1. `apps/portal/app/actions.ts`: Standardized Server Actions to return `{ success: boolean, data?: T, url?: string, error?: string, code?: string }` payload, integrated with `@repo/errors` (`AuthError`, `ForbiddenError`, `ValidationError`) and Zod schema validation to eliminate unhandled server exceptions on the client.
+  2. `apps/portal/app/actions.test.ts`: Updated test suite to verify standardized Server Action response payloads and error codes.
+  3. `apps/portal/app/(departments)/[department]/ControlRoomWidgets.tsx`: Created consolidated dynamic island for control room widgets (`ScadaPanel`, `AlertPanel`, `ControlRoomActivityFeed`, `ControlRoomChecklistWidget`, `ShiftCoverageSectionClient`) with granular Suspense skeletons.
+  4. `apps/portal/app/(departments)/[department]/page.tsx`: Replaced fragmented route-level dynamic imports with a single dynamic import for `ControlRoomWidgets`, reducing chunk fragmentation and React tree reconciliation passes on non-control room pages.
 - **Verification**:
-  - `pnpm --filter portal test -- --testPathPatterns=SystemTray` (16/16 passed).
-  - `pnpm --filter portal generate-openapi-spec` (clean execution, 0 warnings).
-  - `pnpm test` (139/139 test suites passed in portal, 913/913 tests passed).
-  - `pnpm quality` (full quality gate passed with exit code 0).
+  - `pnpm --filter portal test -- app/actions.test.ts` (7/7 passed).
+  - `pnpm type-check` (21/21 packages successful across the monorepo).

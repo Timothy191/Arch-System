@@ -1,3 +1,4 @@
+from conftest import requires_openai
 from deepeval import assert_test
 from deepeval.test_case import LLMTestCase
 from deepeval.metrics import FaithfulnessMetric, HallucinationMetric
@@ -5,6 +6,7 @@ from deepeval.metrics import FaithfulnessMetric, HallucinationMetric
 from helpers import get_judge_model
 
 
+@requires_openai
 def test_ai_response_factual_consistency():
     # Example input and output for a critical AI-generated shift report
     input_text = "Summarize the pump failure from shift A."

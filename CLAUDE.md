@@ -1,327 +1,133 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 0. Purpose & Placement
 
-Arch-Systems (Plantcor) is a multi-departmental mining operations portal built as an **Turborepo 2.x + pnpm** monorepo. It serves authenticated, department-specific dashboards (drilling, production, access control, engineering, control room, safety, training, satellite monitoring).
+- **Placement:** root (depth 0), beside `Requirements.md` and `Plan.md`. Hot-path — always loaded.
+- **Filename:** `AGENTS.md` (mirror to `.cursorrules` / `CLAUDE.md` if required).
+- **Hard cap:** ≤150 lines, ≤16 rules. Exceeding it means the rules are wrong, not the file.
+- **Scope:** this file governs _how_. `Requirements.md` = _what_. `Plan.md` = _when_.
 
-## Environment
+---
 
-- **Node** `>=22` (Volta pins `24.15.0`), **pnpm** `9.15.9`, ESM (`"type": "module"`).
-- Docker required for local Supabase. Husky hooks install on `pnpm install`.
-- Follows XDG Base Directory specification - all user files stay in appropriate `~/.config`, `~/.local/share`, etc.
+## 1. Rule Format
 
-## Common Commands
-
-```bash
-pnpm install
-cp apps/portal/env/.env.example apps/portal/.env          # fill Supabase + Sentry keys
-pnpm dev                                                  # portal on :3000; auto-starts local Supabase (scripts/dev.sh)
-pnpm quality                                              # full quality gate — run before push
+```text
+ID        P3
+Rule      <one-sentence imperative>
+Why       <the failure it prevents>
+Enforce   <the gate that catches violations>
 ```
 
-`pnpm quality` runs: `turbo run lint type-check test lint:tokens lint:css` + `lint:root`, `lint:styles`, `lint:css-perf`, `lint:spelling`, `format:check`, `deps:lint` (syncpack), `knip`, `policy:check`, `audit:compliance`, `html:check`.
+A rule without a gate is a wish. Delete it.
 
-### Development Targets
+---
 
-| Action                             | Command                                                                      |
-| ---------------------------------- | ---------------------------------------------------------------------------- |
-| Build all                          | `pnpm build`                                                                 |
-| Build one project                  | `pnpm turbo run build --filter=<name>` or `pnpm --filter @repo/<name> build` |
-| Lint all / one                     | `pnpm lint` · `pnpm turbo run lint --filter=<name>`                          |
-| Type-check all / one               | `pnpm type-check` · `pnpm turbo run type-check --filter=<name>`              |
-| All unit tests                     | `pnpm test`                                                                  |
-| Single portal test file            | `pnpm --filter portal test -- --testPathPatterns=<file>`                     |
-| E2E (needs portal on :3000)        | `pnpm test:e2e`                                                              |
-| Visual E2E snapshots               | `pnpm test:e2e:visual`                                                       |
-| Storybook                          | `pnpm ui` (opens `@repo/ui` Storybook)                                       |
-| Storybook a11y                     | `pnpm test:a11y`                                                             |
-| Format                             | `pnpm format`                                                                |
-| Deploy (local/staging/production)  | `pnpm deploy:local` / `:staging` / `:production`                             |
-| Deploy via Cloudflare Tunnel       | `pnpm deploy:cloudflare` (interactive; dev/production modes)                 |
-| Rollback production deploy         | `pnpm deploy:rollback` (`deploy.sh production --rollback`)                   |
-| Dev server exposed via tunnel      | `pnpm dev:cloudflare` · `pnpm dev:hosted`                                    |
-| Verify prod env + standalone build | `./scripts/verify-prod-env.sh .env.production`                               |
-| Generate DB types                  | `pnpm --filter @repo/database supabase:gen`                                  |
-| Push DB migrations                 | `pnpm --filter @repo/database supabase:push`                                 |
-| Reset local DB                     | `pnpm --filter @repo/database supabase:reset` (destructive)                  |
-| Start local Supabase               | `pnpm dev` (auto) or `cd packages/supabase && npx supabase start`            |
-| Generate DB docs                   | `pnpm db:docs`                                                               |
-| Start monitoring HUD               | `pnpm monitor`                                                               |
-| Start Grafana stack                | `pnpm monitor:grafana`                                                       |
-| Stop Grafana stack                 | `pnpm monitor:grafana-stop`                                                  |
+## 2. Primary Rules (P1–P10) — Non-Negotiable
 
-### Makefile Shortcuts
+**P1 — One Constitution File.** All agent behavior governed here; patterns, exclusions, constraints live nowhere else.
+_Why:_ scattered rules drift and contradict. _Enforce:_ lint fails if missing, >150 lines, or duplicated.
 
-All common commands are also available via `make`. Targets are **dash-separated** because GNU make cannot define a target name containing a colon (`make test:e2e` is a parse error); each maps to the matching pnpm script (e.g. `make test-e2e` → `pnpm test:e2e`).
+**P2 — Fix the Rule, Not Just the Bug.** Every mistake yields a rule edit or a recorded "no rule needed" decision.
+_Why:_ same error recurs otherwise. _Enforce:_ post-task review requires rule diff or waiver.
 
-- `make dev` - equivalent to `pnpm dev`
-- `make dev-quick` - dev mode without Docker/Supabase
-- `make dev-tools` - dev with the tools Docker stack up (Redis, Flowise, Langfuse, Qdrant)
-- `make dev-all` - dev with all apps (portal, CMS, overview)
-- `make build` - build everything
-- `make test` - run unit tests
-- `make test-e2e` - run E2E tests (`pnpm test:e2e`)
-- `make test-watch` - test watch mode (`pnpm test:watch`)
-- `make test-coverage` - test with coverage (`pnpm test:coverage`)
-- `make lint` - run ESLint
-- `make lint-fix` - auto-fix lint issues (`pnpm lint:fix`)
-- `make type-check` - TypeScript checking
-- `make format` - Prettier formatting
-- `make format-check` - check formatting only (`pnpm format:check`)
-- `make quality` - full quality gate (lint + type-check + test + format + deps + knip + policy)
-- `make deps-lint` - check dependency versions (`pnpm deps:lint`)
-- `make deps-fix` - auto-fix dependency versions (`pnpm deps:fix`)
-- `make knip` - check for unused exports/deps
-- `make knip-fix` - remove unused exports/deps (`pnpm knip:fix`)
-- `make md-lint` - lint markdown (`pnpm md:lint`)
-- `make md-fix` - auto-fix markdown (`pnpm md:fix`)
-- `make policy-gen` - generate policy files (`pnpm policy:gen`)
-- `make policy-check` - validate architectural boundaries (`pnpm policy:check`)
-- `make audit-rls` - audit Row-Level Security policies (`pnpm audit:rls`)
-- `make audit-design` - run design system audit (`pnpm audit:design`)
-- `make fresh-start` - clean rebuild from scratch
-- `make shutdown` - stop all services
-- `make clean` - remove build artifacts & caches
-- `make clean-cache` - clear Turborepo cache only
-- `make clean-docker` - stop & remove Docker containers/volumes
+**P3 — Plan Before Code (Non-Trivial Only).** Trivial = ≤1 file, ≤30 LOC, no new dep, no schema/API change. Else: written plan first.
+_Why:_ unbounded exploration burns context. _Enforce:_ no plan + non-trivial diff = reject.
 
-## Architecture Overview
+**P4 — Validation Is the Agent's Job.** Agent runs lint, tests, build _before_ presenting, and pastes raw output.
+_Why:_ offloads verification to humans. _Enforce:_ PR requires command + exit code; no output, no review.
 
-### Monorepo Structure
+**P5 — Closed Feedback Loop.** Every change ships with a test that fails without it and passes with it.
+_Why:_ "looks correct" is not evidence. _Enforce:_ coverage delta on changed lines; fail-to-pass required.
 
+**P6 — Scope Is Explicit.** Every task declares `allow:` and `deny:` paths before work starts. Deny-hit halts.
+_Why:_ agents wander into CI, infra, secrets. _Enforce:_ path policy in CI; deny-hit blocks merge.
+
+**P7 — Dependency Changes Require Approval.** No new runtime dep without written justification and human sign-off.
+_Why:_ supply chain and bloat. _Enforce:_ lockfile diff without approval token fails build.
+
+**P8 — Risk-Tiered Human Review.** Tiers: 0 Docs/tests (auto) | 1 Features (1 reviewer) | 2 Auth/infra/deps (2 reviewers + security).
+_Why:_ blanket review kills velocity; none kills codebase. _Enforce:_ tier derived from changed paths; Tier 2 requires labeled approval.
+
+**P9 — Context Reset at Task Boundaries.** Clear context between unrelated tasks; write handoff note first (state, decisions, threads, next).
+_Why:_ polluted context degrades reasoning. _Enforce:_ handoff note required before `/clear`.
+
+**P10 — Reproducibility.** Pin model, tools, and seeds per run; record in task artifact.
+_Why:_ non-reproducible failures can't be debugged. _Enforce:_ run manifest required; missing = invalid run.
+
+---
+
+## 3. Secondary Rules (S1–S6) — Warm Path
+
+**S1 — Cost & Token Budget.** Per-task ceiling; 80% = checkpoint, 100% = halt and escalate.
+_Why:_ runaway loops are the #1 hidden cost. _Enforce:_ telemetry counter with hard stop.
+
+**S2 — Observability by Default.** New components emit traces, metrics, structured logs on first commit.
+_Why:_ retrofits never happen. _Enforce:_ OTel check in CI for new modules.
+
+**S3 — Concurrency & Locking.** One writer per path; long-running work holds a TTL lease with fencing token.
+_Why:_ parallel agents clobber each other. _Enforce:_ lease required before write; stale writes rejected.
+
+**S4 — Secrets & Data Hygiene.** No secrets, tokens, or PII in prompts, context, logs, or commits. Reference by handle.
+_Why:_ irreversible exposure. _Enforce:_ pre-commit scan + redaction filter on telemetry sinks.
+
+**S5 — Skill Reuse Over Improvisation.** Recurring workflows become versioned skills; invoke the skill, don't re-improvise.
+_Why:_ unversioned improvisation is inconsistent. _Enforce:_ registry entry required for workflows invoked ≥3 times.
+
+**S6 — Maintainability Budget.** No module >400 LOC or >depth 4 without a written exception. Refactor before extending.
+_Why:_ code is cheap; support is not. _Enforce:_ CI size/complexity gate; exception needs linked justification.
+
+---
+
+## 4. Hard Stops (Denylist + Escalation)
+
+**Always prohibited — no approval path:**
+
+- No edits to secrets, credentials, or key material.
+- No force-push, history rewrite, or branch deletion.
+- No disabling, skipping, or weakening tests, linters, or gates.
+- No production data access from agent context.
+- No writes outside the declared `allow:` list (P6).
+- No new runtime dependency without approval (P7).
+- No edits to CI/CD pipelines without Tier 2 approval (P8).
+- No silent retries on destructive operations.
+
+**Halt and escalate when:**
+
+- A denylist action is required or rule conflict is unresolvable.
+- Cost reaches 100% (S1) or 2 consecutive validation failures occur.
+- Plan touches `deny:` path (P6) or Tier 2 change lacks second reviewer.
+
+---
+
+## 5. Change Control & Precedence
+
+- Rule edits = Tier 1; denylist edits = Tier 2. Rules unused for 90 days are deletion candidates.
+- Precedence: Hard Stops (§4) > Primary (P1–P10) > Secondary (S1–S6) > lower ID > human (logged waiver).
+
+---
+
+## 6. Definition of Done
+
+- [ ] Plan artifact exists (P3, if non-trivial)
+- [ ] Scope declared and respected (P6)
+- [ ] Fail-to-pass test added (P5)
+- [ ] Lint / tests / build run by agent, raw output pasted (P4)
+- [ ] Run manifest recorded (P10)
+- [ ] Review tier satisfied (P8)
+- [ ] Handoff note written (P9)
+- [ ] Rule diff or waiver recorded (P2)
+
+---
+
+## 7. At-a-Glance Card
+
+```text
+# AGENTS.md (≤150 lines)
+P1 One constitution | P2 Fix rule, not just bug | P3 Plan before code | P4 Validate & paste output
+P5 Fail-to-pass test | P6 allow/deny scope | P7 Approval for deps | P8 Tiers: 0 auto / 1 / 2 security
+P9 Clean context + handoff | P10 Pin model/seed + manifest
+S1 Token budget | S2 OTel by default | S3 Lease locks | S4 No secrets/PII | S5 Versioned skills | S6 ≤400 LOC
+Hard Stops: Secrets · force-push · disabled gates · prod data · deny-path · unapproved deps · silent retries
+Precedence: Hard Stops > Primary > Secondary > lower ID > human (logged)
+Done: Plan · Scope · Test · Validation · Manifest · Review · Handoff · Rule diff
 ```
-apps/
-├── portal/          # Main Next.js 16 app (App Router, React 19) - user dashboards
-├── cms/             # Payload CMS v3 (headless) - content management
-├── overview/        # Standalone Next.js app - system architecture visualization
-└── ci-observer/     # CI observation helper app
-
-packages/
-├── theme/           # Design tokens (OKLCH), Tailwind config (SSOT)
-├── ui/              # Shared React components (Radix UI, shadcn/ui)
-├── supabase/        # Supabase clients (browser/server/middleware) + auth
-├── database/        # SQL migrations & SSoT for all schema changes
-├── redis/           # Redis caching & rate-limiting clients
-├── rate-limiter/    # Rate limiting primitives
-├── errors/          # Shared error types & handling
-├── logger/          # Structured logging
-├── eval/            # Evaluation utilities
-├── contract/        # API contract tests / drift detection
-├── utils/           # Date/formatting/shift helper functions
-└── types/           # Shared TypeScript interfaces & types
-
-libs/
-├── features/<domain>/   # Domain modules: <domain>/ui (components) + <domain>/data-access (hooks/services) — auth, departments, hub
-└── shared/              # Cross-cutting: data-access, utils, hooks
-
-tools/
-├── repo/policy-compiler.cjs      # SSoT policy compiler → generates rules + eslint boundaries
-├── audits/design-audit.cjs        # Validates OKLCH color usage & theme compliance
-├── audits/enforce-security-checks.cjs # Blocks eval, hardcoded secrets, SQL concat
-└── audits/audit-rls.cjs          # Static RLS policy auditor
-
-scripts/
-├── sync-assets-smart.cjs    # Asset synchronization utility
-└── ensure_reachability.py   # Network connectivity validation
-```
-
-### Key Architectural Constraints
-
-1. **Boundary Enforcement**: UI packages cannot import from database or Supabase packages directly (checked via `pnpm policy:check`)
-2. **Design System**: All colors must use OKLCH format from `@repo/theme` (validated by `pnpm audit:design`)
-3. **Security**: Static analysis blocks `eval()`, string-concatenated SQL, and hardcoded secrets
-4. **Data Access**: All Supabase interactions go through `@repo/supabase` layer with proper RLS policies
-5. **Type Safety**: End-to-end TypeScript with strict `turbo.json` boundary rules
-6. **Authorization SSoT**: The `employees` table is the source of truth for role + department. RLS must be enabled on every new table.
-7. **Auth Middleware**: `apps/portal/middleware.ts` is a thin edge shim delegating to `apps/portal/server/proxy.ts` (session refresh, role/department route gating, Redis-cached department slug → UUID resolution). API routes `/api/c66`, `/api/health`, `/api/metrics` and static assets are exempt.
-8. **Migrations SSoT**: Only `packages/database/migrations/NNN_description.sql` is source of truth. NEVER edit `packages/supabase/supabase/migrations/` — it's a deploy-time copy (a PreToolUse hook blocks edits there).
-9. **Policy SSoT**: `tools/repo/policy-compiler.cjs` generates `tools/repo/policy/*.json` + `tools/repo/policy/eslint-boundaries.generated.cjs`. Edit the compiler, then run `pnpm policy:gen`; CI fails on drift (`pnpm policy:check`).
-10. **Generated output**: Never hand-edit generated files (`packages/theme/src/tokens/generated.ts`, `variables-generated.css`, generated DB types). Regenerate via their source commands instead.
-
-## Key Conventions
-
-### Error Handling
-
-- All errors subclass `@repo/errors` (`AppError` base: `ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, …). Never throw generic `Error`.
-- Server Actions / API routes catch via `isAppError(err)` and return `{ success, error, code }`.
-
-### Server Actions
-
-- Declare `"use server"` and call `createServerSupabaseClient()` on line 1; validate the user immediately.
-- Mutating actions must call `revalidatePath()` / `revalidateTag()`.
-
-### Client State
-
-- **Zustand 5**: UI chrome only (menus, modals, toggles) — never server data.
-- **TanStack React Query**: all server-side data.
-- **XState**: complex async workflows (`apps/portal/lib/plugins/machines/`).
-
-### Design System (`@repo/theme`)
-
-- Light theme only (`data-theme="light"`). No dark mode.
-- Semantic tokens only — never hardcode OKLCH/hex colors.
-- Forbidden: raw `box-shadow` and Tailwind `shadow-*`; use tokenized shadows (`shadow-card`, `shadow-window`, `shadow-diffusion-*`).
-- Merge classes with `cn()` from `@repo/ui/lib/utils`; import icons as named imports (`import { Drill } from "lucide-react"`, never `import * as Icons`).
-- Animate only `opacity`, `transform`, `background-color`, `border-color`, `color`; easing `cubic-bezier(0.16, 1, 0.3, 1)`.
-- Standard glass surface: `bg-white/70 backdrop-blur-xl border border-black/[0.08]`.
-
-### TypeScript
-
-- Strict mode; no `any`, no `// @ts-ignore`. Use `unknown` + type guards or Zod at boundaries.
-
-### Tests
-
-- Mock at the network boundary (Supabase, Redis), never at the function call. Redis uses a global in-memory `Map` mock in `apps/portal/setupTests.ts`.
-- Add explicit `moduleNameMapper` entries in `apps/portal/jest.config.js` for any new `@repo/*` import or subpath export.
-- UI invariant: always light mode (`#f3f4f6` background, luminance > 200).
-
-### Agent Tracing
-
-- Every package has an `AGENT_TRACER.md` — append an ISO 8601 timestamped entry after changes.
-- Annotate non-obvious logic with `// AGENT-TRACE: <explanation>`.
-
-### Git & Review
-
-- One commit per task; never `--no-verify` (Husky runs lint-staged + commitlint).
-- Pause for human review before merging any DB schema, RLS, or auth/authorization change.
-
-### Portal Paths & Routing
-
-- Path aliases `~/*` and `@/*` both resolve to `apps/portal/*` (sub-cuts: `@/app/*`, `@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*`).
-- App Router groups: `(auth)/`, `(departments)/[department]/`, `(hub)/`, `admin/`. Static department sub-pages export their own `layout.tsx` re-exporting `DepartmentLayout`.
-
-### Dependencies & Runtime
-
-- Shared deps use `catalog:` / `catalog:react19` prefixes from `pnpm-workspace.yaml`.
-- Turbopack only (dev + production). Bun is not supported for the portal app.
-
-## Deployment (Cloudflare Tunnel + Edge CDN)
-
-Primary edge topology (post-Tailscale migration): **Cloudflare Edge WAF → cloudflared tunnel → local services**. No inbound ports are opened on the host. Full guide: `docs/DEPLOYMENT.md`; config: `infra/cloudflared/`.
-
-| Concern                                                                                                                                       | Where                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Unified deploy orchestrator (pre-flight checks, backups, rollback, deploy lock, `--dry-run`, `--skip-build`/`--skip-tests`, `--migrate-only`) | `scripts/deploy.sh` (`local`/`staging`/`production`) |
-| Tunnel orchestrator (interactive dev/production modes, Supabase stack orchestration, ingress validation)                                      | `scripts/deploy-cloudflare.sh`                       |
-| Production tunnel ingress (portal `:3000`, FUXA SCADA UI `:8088`, `fuxa-api`, optional Supabase REST `:54321`, catch-all 404)                 | `infra/cloudflared/production-tunnel.yml.example`    |
-| SCADA tunnel config                                                                                                                           | `infra/cloudflared/fuxa-tunnel.yml`                  |
-| Prod setup (systemd unit, Docker tools/monitoring stacks, Rocky/RHEL guidance)                                                                | `scripts/setup-production-environment.sh`            |
-
-### Production serving mode
-
-Portal is built with `output: "standalone"` (`apps/portal/next.config.mjs`) — the deploy artifact is `apps/portal/.next/standalone/apps/portal/server.js`. Post-build you must sync static/public assets into the standalone bundle:
-
-```bash
-pnpm --filter portal build
-cp -r apps/portal/public apps/portal/.next/standalone/apps/portal/public
-cp -r apps/portal/.next/static apps/portal/.next/standalone/apps/portal/.next/static
-```
-
-After editing the tunnel ingress YAML, validate before running:
-
-```bash
-cloudflared tunnel --config infra/cloudflared/production-tunnel.yml.example ingress validate
-```
-
-Deploy failures leave a `deploy-*.log` at repo root — `tail -f deploy-*.log` to debug.
-
-### Critical Development Flows
-
-#### Database Changes
-
-1. Modify SQL in `packages/database/migrations/`
-2. Run `pnpm --filter @repo/database supabase:push` to apply to local Supabase
-3. Run `pnpm --filter @repo/database supabase:gen` to regenerate TypeScript types
-4. Commit both migration files and generated types
-
-#### UI/Component Development
-
-1. Develop in `packages/ui/` with Storybook (`pnpm ui`)
-2. Follow shadcn/ui + Radix UI patterns
-3. Use tokens from `@repo/theme` exclusively
-4. Test accessibility with `pnpm test:a11y`
-
-#### Feature Development (Portal)
-
-1. Create route in `apps/portal/app/` using Next.js App Router
-2. Access data via `@repo/supabase` clients (browser/server)
-3. Use shared components from `@repo/ui`
-4. Apply layouts from `@repo/ui` (DepartmentLayout, etc.)
-5. Validate with `pnpm --filter portal test -- --testPathPatterns=<feature>`
-
-#### Supabase Setup
-
-1. Requires Docker: `pnpm dev` auto-starts the stack, or `cd packages/supabase && npx supabase start`
-2. Studio available at <http://localhost:54323>
-3. Anonymous API: <http://localhost:54321>
-4. Service role key available for server-side operations
-5. Database resets: `pnpm --filter @repo/database supabase:reset` (WARNING: destructive)
-
-### Testing Strategy
-
-- **Unit Tests**: Jest (@swc/jest) via Turborepo test pipeline - co-located with implementation
-- **E2E Tests**: Playwright - requires dev server running on :3000
-- **Visual Tests**: Playwright image snapshots for UI regression detection
-- **Accessibility**: axe-core automated scanning (`pnpm test:a11y`)
-- **Coverage**: `pnpm --filter portal test -- --coverage` (thresholds enforced: lines 40%, branches 30%, functions 35%, statements 40%)
-
-### Code Generation
-
-1. **Design Tokens**: `pnpm turbo run codegen --filter=theme` converts CSS variables to TypeScript
-2. **Database Types**: `pnpm --filter @repo/database supabase:gen` generates TS from Supabase schema
-3. **Token Validation**: `pnpm turbo run lint:tokens --filter=theme` validates design token usage
-4. **CSS Linting**: `pnpm turbo run lint:css --filter=theme` ensures Stylelint compliance
-
-### Pre-Commit & CI
-
-- Husky runs `pnpm lint --fix` and `pnpm format` on commit
-- Commitlint enforces conventional commits (`feat:`, `fix:`, `docs:`, etc.)
-- CI runs full `pnpm quality` gate on all PRs
-- Never use `--no-verify` - fixes must pass local quality checks
-
-### Troubleshooting
-
-- **Port Conflicts**: If :3000 is busy, kill existing Next.js processes
-- **Supabase Connection**: Verify local Supabase is running (`npx supabase status` in `packages/supabase/`) and .env credentials
-- **Type Errors**: Run `pnpm type-check` to catch TS issues early
-- **Lint Failures**: Use `pnpm lint --fix` for auto-fixable issues
-- **Tests Flaky**: Check for missing awaits or race conditions in test setup
-- **Policy Violations**: Review `tools/repo/policy-compiler.cjs` for boundary rules
-
-## File Conventions
-
-- **Component Files**: PascalCase with `.tsx` extension
-- **Hook Files**: `use*` prefix in `packages/utils/hooks/` or feature-specific
-- **Utils**: Pure functions in `packages/utils/` with descriptive names
-- **Tests**: `.test.ts` or `.test.tsx` files co-located with source
-- **Styles**: CSS modules (`*.module.css`) or Tailwind utility classes
-- **Env Vars**: Prefixed with `NEXT_PUBLIC_` for client-side exposure
-- **Database**: SQL migrations in `packages/database/migrations/` with zero-padded `NNN_` prefix
-- **Config**: Environment-specific in `/env/` directories, never committed raw
-
-## When in Doubt
-
-1. Check `MONOREPO.md` for detailed workspace structure
-2. Consult `README.md` for department-specific dashboard info
-3. Review `tools/repo/policy-compiler.cjs` for architectural boundaries
-4. Look at existing similar features for patterns
-5. Run `pnpm lint` and `pnpm type-check` before complex changes
-6. Validate design system usage with `pnpm audit:design`
-7. Test boundary violations with `pnpm policy:check`
-
-<!-- turbo configuration start-->
-<!-- Leave the start & end comments to automatically receive updates. -->
-
-## General Guidelines for working with Turbo
-
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `turbo` (i.e. `turbo run <task>`, `turbo run <task> --filter=<name>`) instead of using the underlying tooling directly
-- Prefix turbo commands with the workspace's package manager (e.g., `pnpm turbo run build`) - avoids using globally installed CLI
-- Use `--filter=<name>` to scope a task to a single app/package (e.g. `pnpm turbo run lint --filter=portal`)
-- Use `--filter=...[HEAD~1]` for affected-only runs (e.g. `pnpm turbo run test --filter=...[HEAD~1]`)
-- NEVER guess CLI flags - always check `pnpm turbo run <task> --help` first when unsure
-
-## Scaffolding & Generators
-
-- For scaffolding tasks (creating apps, libs, project structure, setup), follow the existing package layout in `packages/` and `apps/`; there is no generator CLI in the Turbo setup
-
-<!-- turbo configuration end-->

@@ -27,7 +27,7 @@ export interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
   (
     { children, showChevron, variant = "default", size, svgOnly, shape, className, ...props },
-    ref
+    ref,
   ) => {
     if (variant === "unstyled") {
       return (
@@ -53,7 +53,7 @@ export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
         </Button>
       </DropdownMenuTrigger>
     );
-  }
+  },
 );
 MenuButton.displayName = "MenuButton";
 
@@ -108,9 +108,8 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         onClick={onClick}
         className={cn(
           "cursor-pointer flex items-center w-full",
-          type === "error" &&
-            "text-red-600 focus:bg-red-100 focus:text-red-700 dark:focus:bg-red-900/30",
-          className
+          type === "error" && "text-red-600 focus:bg-red-100 focus:text-red-700:bg-red-900/30",
+          className,
         )}
         {...props}
       >
@@ -121,12 +120,12 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         </Component>
       </DropdownMenuItem>
     );
-  }
+  },
 );
 MenuItem.displayName = "MenuItem";
 
 export const MenuLink = React.forwardRef<React.ElementRef<typeof DropdownMenuItem>, MenuItemProps>(
-  (props, ref) => <MenuItem ref={ref} {...props} />
+  (props, ref) => <MenuItem ref={ref} {...props} />,
 );
 MenuLink.displayName = "MenuLink";
 

@@ -3,16 +3,12 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 
 export function getMapsRoot() {
-  let current = process.cwd();
-  while (current !== "/" && current !== path.dirname(current)) {
-    // Tell Turbopack to ignore this highly dynamic path traversal
-    const candidate = path.join(/*turbopackIgnore: true*/ current, "codebase-maps");
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-    current = path.dirname(current);
+  const portalRoot = process.cwd();
+  const mapsInPortal = path.join(portalRoot, "codebase-maps");
+  if (fs.existsSync(mapsInPortal)) {
+    return mapsInPortal;
   }
-  return path.resolve(/*turbopackIgnore: true*/ process.cwd(), "../../codebase-maps");
+  return path.resolve(portalRoot, "../../codebase-maps");
 }
 
 export async function GET(request: Request, options?: { mapsRoot?: string }) {

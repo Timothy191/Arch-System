@@ -1,46 +1,32 @@
 import { Divider } from "@repo/ui/Divider";
-import { getCurrentShift } from "@repo/utils";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
 import { getDepartmentContext } from "~/lib/dept-context";
-
-const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-});
-
-const AlertPanel = dynamic(() => import("@/features/departments").then((m) => m.AlertPanel), {
-  loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-});
-
-const ControlRoomActivityFeed = dynamic(
-  () => import("@/features/departments").then((m) => m.ControlRoomActivityFeed),
-  {
-    loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  }
-);
-
-const ControlRoomChecklistWidget = dynamic(
-  () => import("@/features/departments").then((m) => m.ControlRoomChecklistWidget),
-  {
-    loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  }
-);
 
 import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
 
 import { ControlRoomSummaryGridClient } from "./ControlRoomSummaryGridClient";
 import { NonControlRoomSummaryGridClient } from "./NonControlRoomSummaryGridClient";
 
-// AGENT-TRACE: ShiftCoverageSectionClient lazy-loaded — only used on control room pages.
-// Imports ShiftCoverageWidget from @repo/departments/ui barrel which pulls in
-// control-room dependencies. Dynamic import prevents non-control-room pages from
-// loading this chunk.
-const ShiftCoverageSectionClient = dynamic(
-  () => import("./ShiftCoverageSectionClient").then((m) => m.ShiftCoverageSectionClient),
+// AGENT-TRACE: ControlRoomWidgets consolidated dynamic island — co-locates all control-room
+// specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage) to prevent
+// bundle fragmentation and reduce React reconciliation passes on non-control room pages.
+const ControlRoomWidgets = dynamic(
+  () => import("./ControlRoomWidgets").then((m) => m.ControlRoomWidgets),
   {
-    loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  }
+    loading: () => (
+      <div className="space-y-6">
+        <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+          <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+        </div>
+        <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
+      </div>
+    ),
+  },
 );
 
 export default async function DepartmentDashboard({
@@ -58,7 +44,7 @@ export default async function DepartmentDashboard({
       <Suspense
         fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
-            <div className="w-8 h-8 border-2 border-[var(--accent-blue)]/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-blue-500/20 border-t-[var(--accent-blue)] rounded-full animate-spin" />
           </div>
         }
       >
@@ -128,48 +114,8 @@ export default async function DepartmentDashboard({
               </a>
             </div>
 
-            {/* Shift Coverage - Client-side with React Query */}
-            <Suspense
-              fallback={<div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-            >
-              <ShiftCoverageSectionClient deptId={deptId} deptSlug={deptSlug} today={today} />
-            </Suspense>
-
-            {/* Control Room Shift Checklist & Operational KPIs */}
-            <Suspense
-              fallback={<div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />}
-            >
-              <ControlRoomChecklistWidget
-                departmentId={deptId}
-                departmentSlug={deptSlug}
-                date={today}
-                shift={getCurrentShift()}
-              />
-            </Suspense>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Suspense
-                fallback={
-                  <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                }
-              >
-                <ScadaPanel departmentId={deptId} />
-              </Suspense>
-              <Suspense
-                fallback={
-                  <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-                }
-              >
-                <AlertPanel departmentId={deptId} />
-              </Suspense>
-            </div>
-            <Suspense
-              fallback={
-                <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
-              }
-            >
-              <ControlRoomActivityFeed departmentId={deptId} />
-            </Suspense>
+            {/* Consolidated Dynamic Control Room Widgets */}
+            <ControlRoomWidgets deptId={deptId} deptSlug={deptSlug} today={today} />
           </>
         ) : (
           <>

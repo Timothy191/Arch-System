@@ -209,6 +209,7 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/portal/.next/cache
             ${{ github.workspace }}/apps/overview/.next/cache
+            **/.turbo
           key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-
@@ -313,6 +314,7 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/portal/.next/cache
             ${{ github.workspace }}/apps/overview/.next/cache
+            **/.turbo
           key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-
@@ -375,6 +377,7 @@ jobs:
           path: |
             ${{ github.workspace }}/apps/portal/.next/cache
             ${{ github.workspace }}/apps/overview/.next/cache
+            **/.turbo
           key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}-

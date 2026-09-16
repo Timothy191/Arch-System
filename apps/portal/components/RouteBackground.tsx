@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useFocusMode } from "@/hooks/useFocusMode";
 
+import dynamic from "next/dynamic";
+
+const FluidCanvas = dynamic(() => import("@repo/ui/FluidCanvas").then((mod) => mod.FluidCanvas), {
+  ssr: false,
+});
+
 /**
  * RouteBackground
  *
@@ -38,28 +44,19 @@ export function RouteBackground() {
       {/* ── Full-Screen Event Horizon Video Background ── */}
       {/* AGENT-TRACE: 4K (3840x2160) H.264 video background asset — preload=auto ensures early loading. ── */}
       <div
-        className="fixed inset-0 overflow-hidden -z-10 route-bg-video-container"
+        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container"
         aria-hidden="true"
       >
-        <video
-          ref={videoRef}
-          id="route-bg-light-video"
-          src="/background/edge-of-the-event-horizon.3840x2160.mp4"
-          poster="/background/edge-of-the-event-horizon-poster.webp"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          className={`route-bg-video object-cover object-center w-full h-full filter brightness-95 saturate-110 ${
-            prefersReducedMotion ? "" : "transition-opacity duration-300"
-          }`}
-        >
-          <source src="/background/edge-of-the-event-horizon.3840x2160.mp4" type="video/mp4" />
-        </video>
+        <img
+          id="route-bg-light-image"
+          src="/background/macos-27-golden-4480x3088-26626.png"
+          alt="macOS Golden Background"
+          className="route-bg-image object-cover object-center w-full h-full filter brightness-105"
+        />
       </div>
 
       {/* ── Ambient Film Grain overlay ── */}
+      <FluidCanvas />
       <div className="route-bg-grain" aria-hidden="true" />
 
       {/* ── Focus Mode Scrim ── */}

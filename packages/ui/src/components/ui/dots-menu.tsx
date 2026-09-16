@@ -79,8 +79,8 @@ export function DotsMenu({
           aria-expanded={isOpen}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            "inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
-            disabled && "cursor-not-allowed opacity-50 pointer-events-none"
+            "inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors:bg-neutral-800:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
+            disabled && "cursor-not-allowed opacity-50 pointer-events-none",
           )}
         >
           <MoreHorizontal style={{ width: iconSize, height: iconSize }} />
@@ -90,8 +90,8 @@ export function DotsMenu({
           <div
             role="menu"
             className={cn(
-              "absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg dark:border-neutral-800 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 animate-in fade-in-0 zoom-in-95 duration-100",
-              alignClasses
+              "absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100",
+              alignClasses,
             )}
           >
             {children}
@@ -135,10 +135,10 @@ export function DotsMenuItem({
   const sharedClasses = cn(
     "flex w-full cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors",
     destructive
-      ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
-      : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100",
+      ? "text-red-600 hover:bg-red-50:bg-red-950/40"
+      : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100",
     disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className
+    className,
   );
 
   const content = (

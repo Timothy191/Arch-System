@@ -166,7 +166,7 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
         top: adjustedPos.y,
       }}
       className={cn(
-        "z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/95 text-neutral-900 dark:text-neutral-100 animate-in fade-in-0 zoom-in-95 duration-100",
+        "z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100",
         className,
       )}
       {...props}
@@ -221,8 +221,8 @@ export function ContextMenuItem({
   const sharedClasses = cn(
     "relative flex cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors",
     destructive
-      ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
-      : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100",
+      ? "text-red-600 hover:bg-red-50:bg-red-950/40"
+      : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100",
     disabled && "pointer-events-none opacity-40 cursor-not-allowed",
     className,
   );
@@ -255,11 +255,5 @@ export function ContextMenuItem({
 }
 
 export function ContextMenuDivider({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      role="separator"
-      className={cn("my-1 h-px bg-neutral-200 dark:bg-neutral-800", className)}
-      {...props}
-    />
-  );
+  return <div role="separator" className={cn("my-1 h-px bg-neutral-200", className)} {...props} />;
 }

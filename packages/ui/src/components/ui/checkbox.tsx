@@ -28,7 +28,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -52,7 +52,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         className={cn(
           "inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium",
           disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-          className
+          className,
         )}
       >
         <input
@@ -69,10 +69,10 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           className={cn(
             "flex items-center justify-center shrink-0 rounded border transition-all duration-150",
             size === "small" ? "w-3.5 h-3.5 text-[10px]" : "w-4 h-4 text-xs",
-            "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900 dark:peer-focus-visible:ring-neutral-100",
+            "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900:ring-neutral-100",
             isChecked
-              ? "bg-neutral-900 border-neutral-900 text-white dark:bg-neutral-100 dark:border-neutral-100 dark:text-neutral-900"
-              : "bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600"
+              ? "bg-neutral-900 border-neutral-900 text-white"
+              : "bg-white border-neutral-300 hover:border-neutral-400:border-neutral-600",
           )}
           aria-hidden="true"
         >
@@ -83,13 +83,11 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           ) : null}
         </span>
         {(children || label) && (
-          <span className="text-neutral-900 dark:text-neutral-100 leading-none">
-            {children || label}
-          </span>
+          <span className="text-neutral-900 leading-none">{children || label}</span>
         )}
       </label>
     );
-  }
+  },
 );
 
 Checkbox.displayName = "Checkbox";

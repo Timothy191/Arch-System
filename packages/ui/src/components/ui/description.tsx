@@ -29,14 +29,14 @@ export function Description({
       className={cn(
         "flex text-sm font-sans",
         right ? "flex-row items-baseline justify-between gap-4" : "flex-col gap-1",
-        className
+        className,
       )}
       {...props}
     >
       <dt
         className={cn(
-          "flex items-center gap-1.5 font-medium text-xs text-neutral-500 dark:text-neutral-400 select-none",
-          right && "shrink-0"
+          "flex items-center gap-1.5 font-medium text-xs text-neutral-500 select-none",
+          right && "shrink-0",
         )}
       >
         <span>{title}</span>
@@ -51,11 +51,11 @@ export function Description({
             role="button"
             aria-label={`More information about ${typeof title === "string" ? title : "this field"}`}
           >
-            <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 transition-colors cursor-help" />
+            <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600:text-neutral-300 transition-colors cursor-help" />
             {showTooltip && (
               <span
                 role="tooltip"
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-50 w-max max-w-xs rounded-md bg-neutral-900 px-2 py-1 text-xs text-neutral-100 shadow-md dark:bg-neutral-100 dark:text-neutral-900 pointer-events-none animate-in fade-in-0 duration-150"
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-50 w-max max-w-xs rounded-md bg-neutral-900 px-2 py-1 text-xs text-neutral-100 shadow-md pointer-events-none animate-in fade-in-0 duration-150"
               >
                 {tooltip}
               </span>
@@ -65,9 +65,9 @@ export function Description({
       </dt>
       <dd
         className={cn(
-          "text-sm text-neutral-900 dark:text-neutral-100 m-0",
+          "text-sm text-neutral-900 m-0",
           right && "text-right",
-          ellipsis && "truncate max-w-full"
+          ellipsis && "truncate max-w-full",
         )}
       >
         {content}
