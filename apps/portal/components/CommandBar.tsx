@@ -3,7 +3,7 @@
 import { getServiceUrls } from "@repo/ui/lib/urls";
 import { cn } from "@repo/ui/lib/utils";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { logout } from "~/app/actions";
 
 const urls = getServiceUrls();
@@ -147,25 +147,17 @@ export function CommandBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Performance optimization: Memoize search filtering, category grouping, flatList, and O(1) index map.
-  // Avoids re-filtering and O(N) array allocation on every keyboard navigation / highlight re-render.
-  const { grouped, flatList, itemIndexMap } = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    const filtered = q
-      ? ALL_COMMANDS.filter((cmd) => cmd.label.toLowerCase().includes(q))
-      : ALL_COMMANDS;
+  const filtered = ALL_COMMANDS.filter((cmd) =>
+    cmd.label.toLowerCase().includes(query.toLowerCase()),
+  );
 
-    const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
-      const list = (acc[cmd.category] ??= []);
-      list.push(cmd);
-      return acc;
-    }, {});
+  const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
+    const list = (acc[cmd.category] ??= []);
+    list.push(cmd);
+    return acc;
+  }, {});
 
-    const flatList = Object.values(grouped).flat();
-    const itemIndexMap = new Map<string, number>(flatList.map((cmd, idx) => [cmd.id, idx]));
-
-    return { grouped, flatList, itemIndexMap };
-  }, [query]);
+  const flatList = Object.values(grouped).flat();
 
   const handleSelect = useCallback(
     (item: CommandItem) => {
@@ -197,18 +189,10 @@ export function CommandBar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Reset selectedIndex whenever query changes
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, []);
 
-  const selectedIndexRef = useRef(selectedIndex);
-  useEffect(() => {
-    selectedIndexRef.current = selectedIndex;
-  }, [selectedIndex]);
-
-  // Performance optimization: Keep listener attached during keyboard navigation without
-  // tearing down and re-registering event listener on every arrow key press / index update.
   useEffect(() => {
     if (!open || flatList.length === 0) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -220,13 +204,13 @@ export function CommandBar() {
         setSelectedIndex((i) => (i - 1 + flatList.length) % flatList.length);
       } else if (e.key === "Enter") {
         e.preventDefault();
-        const item = flatList[selectedIndexRef.current];
+        const item = flatList[selectedIndex];
         if (item) handleSelect(item);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, flatList, handleSelect]);
+  }, [open, flatList, selectedIndex, handleSelect]);
 
   useEffect(() => {
     if (open && inputRef.current) {
@@ -283,8 +267,7 @@ export function CommandBar() {
                   {category}
                 </div>
                 {items.map((item) => {
-                  // O(1) Map lookup replacing O(N) array indexOf search inside render loop
-                  const globalIndex = itemIndexMap.get(item.id) ?? 0;
+                  const globalIndex = flatList.indexOf(item);
                   const isSelected = globalIndex === selectedIndex;
                   return (
                     <button
