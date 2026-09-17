@@ -2,7 +2,7 @@
 
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AlertCircle, Clock } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 
 interface DelayEntry {
   id: string;
@@ -73,6 +73,26 @@ function MachineOperationsList({
     );
   }
 
+  // Pre-index total loads by machine_id to optimize row calculations from O(N * L) to O(1) lookups
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const load of todayLoads || []) {
+      map.set(load.machine_id, (map.get(load.machine_id) || 0) + (load.total_loads || 0));
+    }
+    return map;
+  }, [todayLoads]);
+
+  // Pre-index active breakdowns by fleet_id to optimize breakdown matching from O(N * B) to O(1) lookups
+  const breakdownByFleetId = useMemo(() => {
+    const map = new Map<string, Breakdown>();
+    for (const breakdown of activeBreakdowns || []) {
+      if (breakdown.fleet_id) {
+        map.set(breakdown.fleet_id, breakdown);
+      }
+    }
+    return map;
+  }, [activeBreakdowns]);
+
   // Group by site_id, then by shift
   const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
 
@@ -98,9 +118,7 @@ function MachineOperationsList({
         const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
           const bf = op.machine?.bin_factor || 0;
-          const loads = todayLoads
-            .filter((l) => l.machine_id === op.machine_id)
-            .reduce((s, l) => s + (l.total_loads || 0), 0);
+          const loads = loadsByMachine.get(op.machine_id) || 0;
           return sum + loads * bf;
         }, 0);
 
@@ -138,8 +156,8 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
-                      activeBreakdowns={activeBreakdowns}
+                      loadsByMachine={loadsByMachine}
+                      breakdownByFleetId={breakdownByFleetId}
                     />
                   ))}
                 </div>
@@ -157,8 +175,8 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
-                      activeBreakdowns={activeBreakdowns}
+                      loadsByMachine={loadsByMachine}
+                      breakdownByFleetId={breakdownByFleetId}
                     />
                   ))}
                 </div>
@@ -171,34 +189,31 @@ function MachineOperationsList({
   );
 }
 
-function OperationCard({
+const OperationCard = memo(function OperationCard({
   operation,
-  todayLoads,
-  activeBreakdowns,
+  loadsByMachine,
+  breakdownByFleetId,
 }: {
   operation: MachineOperation;
-  todayLoads: HourlyLoadSummary[];
-  activeBreakdowns: Breakdown[];
+  loadsByMachine: Map<string, number>;
+  breakdownByFleetId: Map<string, Breakdown>;
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
-  // Calculate BCM metrics
+  // Calculate BCM metrics with O(1) lookup
   const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads =
-    todayLoads
-      ?.filter((l) => l.machine_id === operation.machine_id)
-      ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+  const machineLoads = loadsByMachine.get(operation.machine_id) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
 
-  // AGENT-TRACE: Match breakdown by serial_number or machine_id
-  const machineBreakdown = activeBreakdowns?.find(
-    (b) =>
-      b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
-  );
+  // Match breakdown by machine_id or serial_number with O(1) lookup
+  const machineBreakdown =
+    breakdownByFleetId.get(operation.machine_id) ||
+    (operation.machine?.serial_number
+      ? breakdownByFleetId.get(operation.machine.serial_number)
+      : undefined);
 
   // AGENT-TRACE: Calculate delay totals by category and status
   const delayEntries = operation.delay_entries || [];
@@ -362,7 +377,7 @@ function OperationCard({
       </div>
     </GlassCard>
   );
-}
+});
 
 // AGENT-TRACE: Memoize MachineOperationsList — props (operations, todayLoads,
 // activeBreakdowns) are stable across renders from parent state changes.
