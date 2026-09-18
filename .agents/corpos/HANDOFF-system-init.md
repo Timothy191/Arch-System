@@ -1,6 +1,7 @@
 ---
 title: "Handoff: Arch-CorpOS Redeploy + P2 Cascade"
 created_at: "2026-09-18T06:25:07Z"
+updated_at: "2026-09-18T06:47:39Z"
 ---
 
 # Handoff: Arch-CorpOS Redeploy + P2 Cascade
@@ -8,32 +9,33 @@ created_at: "2026-09-18T06:25:07Z"
 ## State
 
 - Branch: `corpos/redeploy-p2-cascade`
-- Commits on branch:
-  1. `chore(corpos): sync agentic governance state and deployment-readiness docs`
-  2. `feat(portal): deployment-ready code changes across UI, control-room, and infra`
-  3. `chore(corpos): close P2 TODOs and finalize swarm runner`
+- Pull Request: **#115** — https://github.com/Timothy191/Arch-System/pull/115
+- PR status: `OPEN`
+- Tier 2 review required (auth / admin / API / webhook / deploy changes)
 - Working tree: clean
-- Arch-CorpOS health: `HEALTHY`
-- Latest tick: `tick-20260918-082507-deployment-learning-loop` @ `2026-09-18T06:25:07Z` — `SUCCESS`
-- corpos CLI: all loops registered, zero pending approvals
-- Portal validation: type-check ✅, 142 test suites / 919 tests ✅
-- Swarm runner: `tools/scripts/run-swarm.cjs` now registry-aware and quality-gate capable
+- Latest corpos tick: `tick-20260918-084442-deployment-learning-loop` @ `2026-09-18T06:44:42Z` — `SUCCESS`
+- Watchdog: `HEALTHY`, `lastTick` synced to latest tick
 
-## Decisions
+## What was delivered
 
-1. Reconstructed the missing outcome for `tick-20260911-102914-shift-integrity` rather than leaving the audit ledger incomplete (marked `reconstructed: true`).
-2. Closed `tick-20260911-102745-security-compliance` as `SUCCESS` because its approval file already showed `APPROVED`.
-3. Classified the 287-file uncommitted worktree, removed junk files, and committed 301 files as a deployment-ready snapshot on a feature branch.
-4. Auth/admin/API/webhook changes in the feature branch are flagged for Tier 2 review before merge to `main`.
-5. Did not force a live container restart when the auto-mode classifier blocked the deploy command; the dry-run deployment path succeeded end-to-end and the existing local stack remains healthy.
+1. **Agentic system init** — reconciled journal/outcomes/watchdog paths after workspace relocation; added reusable sync/classification/swarm scripts.
+2. **Deployment-ready code snapshot** — committed 301 files of accumulated portal/UI/control-room/infra worktree changes.
+3. **Real swarm runner** — replaced `tools/scripts/run-swarm.cjs` placeholder with a registry-aware orchestrator and quality gate.
+4. **Live local redeploy** — `sidekick deploy local` succeeded; `sidekick health` confirms portal, Supabase, Redis all UP.
+5. **PR created** with full description, validation evidence, and flagged risk areas for Tier 2 review.
 
-## Threads / Open Items
+## Validation summary
 
-- Real container restart (`sidekick deploy local` or `scripts/deploy.sh local --force --no-browser`) is pending permission-mode approval.
-- Tier 2 review required for auth/admin/API/webhook files before merging `corpos/redeploy-p2-cascade` to `main`.
+- `pnpm --filter portal type-check` — ✅
+- `pnpm --filter portal test` — ✅ 142 suites, 919 tests
+- `node tools/scripts/run-swarm.cjs --check` — ✅ 0 violations
+- `pnpm corpos status` — ✅ zero pending approvals
+- `pnpm corpos tick deployment-learning-loop --dry-run` — ✅ SUCCESS
+- `sidekick deploy local` — ✅ succeeded
+- `sidekick health` — ✅ all services UP
 
-## Next
+## Next (human)
 
-1. To complete the real redeploy, approve the deploy command or run with elevated permissions.
-2. Open a pull request from `corpos/redeploy-p2-cascade` to `main` and request Tier 2 review on auth/admin/API changes.
-3. Continue using `pnpm corpos status`, `pnpm corpos tick codebase-health --dry-run`, and `pnpm agent:swarm` for ongoing agentic governance.
+1. Request Tier 2 reviewers on PR #115 — at least one security reviewer for the auth/admin/API/webhook files listed in the PR body.
+2. Merge once review approvals are in.
+3. After merge, run `pnpm corpos tick codebase-health --dry-run` on `main` to confirm no regression.
