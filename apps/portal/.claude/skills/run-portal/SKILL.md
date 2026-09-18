@@ -26,7 +26,7 @@ All paths below are relative to `apps/portal/`. The harness works from any cwd.
   system Chromium is the browser executable (no Playwright browser cache exists):
 
   ```bash
-  ls /home/timothy/.local/share/mise/installs/npm-playwright/latest/node_modules/playwright/index.mjs >/dev/null && test -x /usr/bin/chromium && echo "playwright + chromium present"
+  ls ~/.local/share/mise/installs/npm-playwright/latest/node_modules/playwright/index.mjs >/dev/null && test -x /usr/bin/chromium && echo "playwright + chromium present"
   # -> playwright + chromium present
   ```
 
@@ -105,6 +105,13 @@ pm2 restart portal-dev   # -> back to 200 on :3000 within ~2s on warm cache
 - **Login rate limit: 10 requests per 15 minutes** on `/api/auth/login` (429 with
   `X-RateLimit-Reset`). A driver retry loop can lock itself out — the driver performs
   exactly one login per run; do not wrap it in a retry loop.
+- **One dev server per project (Next.js 16).** If a `next-server` already listens on
+  :3000 for this project dir, `serve.sh`'s pm2 instance boots then exits with
+  "Another next dev server is already running" and crash-loops. Use the existing
+  server instead (`ss -tlnp | grep 3000`), or stop it first.
+- **Smoke credentials are per-machine.** `SMOKE_TEST_EMAIL`/`SMOKE_TEST_PASSWORD`
+  live only in the gitignored `apps/portal/.env` and are not migrated with the repo.
+  Without them the driver can only browse anonymously (`--login` omitted).
 - **Cookie-consent bar overlays the login page** and blocks clicks. The driver dismisses
   it ("Decline Optional", then "Accept All") before filling the form. If you write your
   own script, you must do the same.

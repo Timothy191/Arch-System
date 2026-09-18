@@ -11,14 +11,7 @@
 
 ## 1. Rule Format
 
-```text
-ID        P3
-Rule      <one-sentence imperative>
-Why       <the failure it prevents>
-Enforce   <the gate that catches violations>
-```
-
-A rule without a gate is a wish. Delete it.
+`ID` / `Rule` (one-sentence imperative) / `Why` (the failure it prevents) / `Enforce` (the gate that catches violations) — a rule without a gate is a wish: delete it.
 
 ---
 
@@ -56,7 +49,7 @@ _Why:_ non-reproducible failures can't be debugged. _Enforce:_ run manifest requ
 
 ---
 
-## 3. Secondary Rules (S1–S6) — Warm Path
+## 3. Secondary Rules (S1–S7) — Warm Path
 
 **S1 — Cost & Token Budget.** Per-task ceiling; 80% = checkpoint, 100% = halt and escalate.
 _Why:_ runaway loops are the #1 hidden cost. _Enforce:_ telemetry counter with hard stop.
@@ -75,6 +68,9 @@ _Why:_ unversioned improvisation is inconsistent. _Enforce:_ registry entry requ
 
 **S6 — Maintainability Budget.** No module >400 LOC or >depth 4 without a written exception. Refactor before extending.
 _Why:_ code is cheap; support is not. _Enforce:_ CI size/complexity gate; exception needs linked justification.
+
+**S7 — UI Architecture and Frontend Swarms.** STRICTLY follow the Light-Only Vibrancy and Liquid Glass rules in `docs/DESIGN.md`. Use `ui-engineer` and specialized subagents for frontend tasks.
+_Why:_ To maintain compliance with the Arch OS design system and ensure high-quality UI delivery. _Enforce:_ PR requires UI validation and swarm orchestration logging.
 
 ---
 
@@ -102,7 +98,7 @@ _Why:_ code is cheap; support is not. _Enforce:_ CI size/complexity gate; except
 ## 5. Change Control & Precedence
 
 - Rule edits = Tier 1; denylist edits = Tier 2. Rules unused for 90 days are deletion candidates.
-- Precedence: Hard Stops (§4) > Primary (P1–P10) > Secondary (S1–S6) > lower ID > human (logged waiver).
+- Precedence: Hard Stops (§4) > Primary (P1–P10) > Secondary (S1–S7) > lower ID > human (logged waiver).
 
 ---
 
@@ -119,15 +115,32 @@ _Why:_ code is cheap; support is not. _Enforce:_ CI size/complexity gate; except
 
 ---
 
-## 7. At-a-Glance Card
+## 7. Codebase Guide (what & where)
 
-```text
-# AGENTS.md (≤150 lines)
-P1 One constitution | P2 Fix rule, not just bug | P3 Plan before code | P4 Validate & paste output
-P5 Fail-to-pass test | P6 allow/deny scope | P7 Approval for deps | P8 Tiers: 0 auto / 1 / 2 security
-P9 Clean context + handoff | P10 Pin model/seed + manifest
-S1 Token budget | S2 OTel by default | S3 Lease locks | S4 No secrets/PII | S5 Versioned skills | S6 ≤400 LOC
-Hard Stops: Secrets · force-push · disabled gates · prod data · deny-path · unapproved deps · silent retries
-Precedence: Hard Stops > Primary > Secondary > lower ID > human (logged)
-Done: Plan · Scope · Test · Validation · Manifest · Review · Handoff · Rule diff
-```
+**Stack:** Turborepo + pnpm 9.15.9 (Node ≥22) · Next.js 16 App Router / React 19 · TypeScript strict · Supabase (Postgres, RLS, Auth) · Jest + Testing Library · Playwright · Biome + ESLint.
+
+**Commands** (from root):
+
+- `pnpm dev` — portal dev server (starts Supabase local stack via Docker, resolves port conflicts). Env: copy `apps/portal/env/.env.example` → `apps/portal/.env` first.
+- `pnpm build` / `pnpm lint` / `pnpm type-check` / `pnpm test` — Turbo across the workspace.
+- Single Jest test: `pnpm --filter portal test -- <path/to.test.ts> -t "<name>"`.
+- `pnpm test:e2e` — Playwright from `e2e/` (use `pnpm test:e2e:visual` for theme smoke only).
+- `pnpm check:fast:fix` — Biome lint+format autofix · `pnpm knip` dead code · `pnpm deps:lint` version sync · `pnpm quality` full local gate.
+
+**Layout:**
+
+- `apps/portal` — the product. Routes: `app/(auth)` login · `app/(departments)/[department]` + fixed dept folders (drilling, engineering, access-control, access-card-actions) · `app/hub` executive dashboards · `app/overview` · `app/api` (exports, webhooks, metabase embed, telemetry).
+- `packages/*` — `@repo/*` shared code: `contract` (Zod schemas — the API/action validation source of truth), `database` (migrations = canonical schema), `supabase` (clients + Kysely types), `theme` (OKLCH tokens + Tailwind preset), `ui` (glass components), `errors`, `redis`, `rate-limiter`, `utils`.
+- `e2e/` Playwright · `infra/` Docker compose (`pnpm dev:tools`) · `tools/audits/` compliance scripts · `scripts/` deploy/dev orchestration.
+
+**Key flows:**
+
+- Mutations = Server Actions (`app/actions.ts`, dept-level `actions.ts`) validated against `@repo/contract` Zod schemas; Postgres access is RLS-guarded.
+- Schema change: add SQL in `packages/database/migrations/` → `pnpm --filter @repo/database supabase:push` → `supabase:gen` → commit migration + regenerated `packages/supabase/src/database.types.ts`. Never edit `packages/supabase/supabase/migrations/` directly.
+- Token change: edit `packages/theme/tokens.json` → `pnpm --filter @repo/theme build` → commit `tokens/generated.ts`. Components consume semantic tokens only — never raw hex (see `docs/DESIGN.md`, S7).
+
+---
+
+## 8. At-a-Glance Card
+
+`P1` constitution · `P2` fix rules · `P3` plan-first · `P4` validate+paste · `P5` fail-to-pass test · `P6` allow/deny scope · `P7` dep approval · `P8` tiers 0/1/2 · `P9` context reset · `P10` manifest — `S1` budget · `S2` OTel · `S3` leases · `S4` no secrets · `S5` skills · `S6` ≤400 LOC · `S7` UI/DESIGN.md — Hard Stops: secrets · force-push · gates · prod data · deny-path · deps · silent retries — Precedence: Hard Stops > Primary > Secondary > human (logged) — Done: plan · scope · test · validation · manifest · review · handoff · rule diff

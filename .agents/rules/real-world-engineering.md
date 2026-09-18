@@ -27,9 +27,15 @@ Every implementation must satisfy two distinct layers of verification:
 
 ### Layer 1: Structural & Syntactic Gate
 
-- **TypeScript**: 100% strict mode, zero `any`, zero `@ts-ignore`.
+- **TypeScript**: 100% strict mode, zero `any`, zero `@ts-ignore`. Full compliance with `.agents/rules/code-refactoring.md` (REFAC-08 & REFAC-09); dynamic data uses `unknown`, Zod schema parsing, or type predicates (`val is Type`) instead of unsafe `as Type` casts.
 - **Architectural Boundaries**: Full compliance with `@repo/eslint-config` and `tools/repo/policy-compiler.cjs`.
 - **Unit & Integration Tests**: 100% pass rate across all Jest test suites with coverage meeting monorepo thresholds.
+- **Zero Magic Numbers**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-01); all numeric values backed by unit-annotated constants or schema constraints.
+- **Parameter Object Pattern**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-06); functions accepting $\ge 3$ parameters or ambiguous primitive types use a single typed options object.
+- **DRY & Duplicate Code Extraction**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-07); repeated logic extracted into canonical helper functions, custom hooks, or shared monorepo packages.
+- **Runtime Data Validation**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-09); all external API responses, local storage data, and IPC payloads parsed via canonical Zod schemas from `@repo/contract`.
+- **Domain State Modeling**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-10); invalid or required domain states modeled with discriminated unions or handled with typed errors instead of being swallowed by optional chaining (`?.`).
+- **Focused Composable Types**: Full compliance with `.agents/rules/code-refactoring.md` (REFAC-11); monolithic interfaces (>25 fields) decomposed into focused building blocks, intersection types (`&`), or utility types (`Pick`, `Omit`).
 - **Lexical Integrity**: Full compliance with CSpell dictionary.
 
 ### Layer 2: Real-World Usability & Fault Tolerance

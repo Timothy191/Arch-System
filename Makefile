@@ -97,13 +97,6 @@ validate:
 status:
 	docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-.PHONY: status-caches clean-caches
-status-caches:
-	node scripts/manage-runtime-caches.mjs --status
-
-clean-caches:
-	node scripts/manage-runtime-caches.mjs --clean
-
 # ==============================================================================
 # Dev / Quality Workflow Shortcuts
 #
@@ -205,8 +198,7 @@ shutdown:
 
 .PHONY: clean clean-cache clean-docker
 clean:
-	node scripts/manage-runtime-caches.mjs --clean \
-	  && rm -rf .turbo node_modules/.cache/turbo \
+	rm -rf .turbo node_modules/.cache/turbo \
 	  apps/*/.next apps/*/dist packages/*/dist libs/*/*/dist
 
 clean-cache:

@@ -1,20 +1,71 @@
-# Requirements: Vercel React Best Practices Refinement (EARS Notation)
+# Deployment Readiness Requirements
 
-## 1. Server Actions Response & Error Handling
+## 1. Purpose
 
-- **REQ-SA-01**: _WHEN_ an unauthenticated client invokes any Server Action _THE SYSTEM SHALL_ return a typed failure response `{ success: false, error: "Unauthorized", code: "UNAUTHORIZED" }` without throwing unhandled server exceptions.
-- **REQ-SA-02**: _WHEN_ an unauthorized role attempts to invoke `generateMonthlyReport` _THE SYSTEM SHALL_ return `{ success: false, error: "Forbidden: insufficient permissions", code: "FORBIDDEN" }`.
-- **REQ-SA-03**: _WHEN_ invalid payload parameters are submitted to a Server Action _THE SYSTEM SHALL_ catch Zod schema validation errors and return `{ success: false, error: string, code: "VALIDATION_ERROR" }`.
-- **REQ-SA-04**: _WHEN_ a Server Action executes successfully _THE SYSTEM SHALL_ return `{ success: true, ...data }` conforming to the server action response contract.
-- **REQ-SA-05**: _WHEN_ `logout` is invoked _THE SYSTEM SHALL_ sign out from Supabase and perform `redirect("/login")` (preserving Next.js standard redirect behavior).
+This document defines the functional and operational requirements for determining whether this repository is ready for a Vercel deployment or is better treated as a local/on-prem deployment project.
 
-## 2. Dynamic Widget Consolidation
+## 2. System context
 
-- **REQ-WIDGET-01**: _WHEN_ a control room department dashboard renders _THE SYSTEM SHALL_ load the control room widgets (`ScadaPanel`, `AlertPanel`, `ControlRoomActivityFeed`, `ControlRoomChecklistWidget`, `ShiftCoverageSectionClient`) through a consolidated feature component boundary.
-- **REQ-WIDGET-02**: _WHEN_ any individual widget is loading or resolving its bundle _THE SYSTEM SHALL_ display fluid pulse skeletons with light-mode token styling (`bg-[var(--bg-tertiary)]`).
-- **REQ-WIDGET-03**: _WHEN_ a non-control room department dashboard renders _THE SYSTEM SHALL_ exclude all control room widget chunks from the client bundle.
+The system is a monorepo application stack centered on the Next.js portal in `apps/portal`. It includes shared packages, local tooling, deployment automation, and environment-based configuration for backend services.
 
-## 3. Monorepo Quality & Invariant Standards
+## 3. Requirements
 
-- **REQ-QA-01**: _WHEN_ `pnpm --filter portal test` or `pnpm type-check` is executed _THE SYSTEM SHALL_ pass 100% of test suites and type checks without TypeScript errors or `@ts-ignore` suppressions.
-- **REQ-QA-02**: _WHEN_ UI elements are rendered _THE SYSTEM SHALL_ strictly adhere to light-mode styling invariants (`#f3f4f6` background luminance > 200) and OKLCH design tokens.
+### REQ-DEPLOY-001: Exact deployment target must be explicit
+
+When the application is deployed,
+The system shall define whether the target is Vercel, a self-hosted Linux server, or a local Docker environment.
+
+### REQ-DEPLOY-002: Runtime URLs must be environment-driven
+
+When the application is configured for production,
+The system shall use environment-provided endpoints rather than hardcoded local network values such as `127.0.0.1` or `localhost`.
+
+### REQ-DEPLOY-003: Local dependencies must be isolated from cloud runtime
+
+When a runtime dependency is not provided by the deployment target,
+The system shall not assume that localhost services are available.
+
+### REQ-DEPLOY-004: Supabase environment must match the intended runtime
+
+When the application requires database access,
+The system shall use the public production Supabase URL and keys appropriate for the deployment target, not local development addresses.
+
+### REQ-DEPLOY-005: Redis must be explicitly provisioned for the target environment
+
+When Redis is required,
+The system shall provide a valid production Redis endpoint or an equivalent managed alternative.
+
+### REQ-DEPLOY-006: Platform-specific config must not hide local assumptions
+
+When deployment configuration is described in repo files,
+The system shall not use local-only service defaults that would break in a cloud runtime.
+
+### REQ-DEPLOY-007: Docs must match actual deployment reality
+
+When deployment behavior is documented,
+The system shall align the docs with the actual infrastructure model instead of mixing on-prem and cloud assumptions.
+
+### REQ-DEPLOY-008: Vercel readiness must be proven by env and runtime configuration
+
+When the app is intended for Vercel,
+The system shall verify that all required runtime services are internet-reachable and configured via environment variables.
+
+### REQ-DEPLOY-009: Local/on-prem mode must remain clearly separated
+
+When the repo is designed for local or self-hosted deployment,
+The system shall keep that mode distinct from cloud deployment and not imply cloud readiness without evidence.
+
+## 4. Acceptance criteria
+
+The deployment-readiness effort is successful when all of the following are true:
+
+- deployment target is explicit
+- localhost assumptions are removed or isolated from production config
+- environment variables reflect the real production target
+- external services are reachable from the intended runtime
+- docs match the actual deployment model
+- the app is either clearly Vercel-ready or clearly local/on-prem oriented
+
+## 5. Non-goals
+
+This effort does not assume that a Vercel config file alone makes the app deployable. It requires actual runtime configuration and deployment architecture alignment.

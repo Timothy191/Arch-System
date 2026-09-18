@@ -1,60 +1,66 @@
-# Design: Vercel React Best Practices Refinement
+# Design Specification: Global White with Silver Tint UI Panel System
 
-## 1. Technical Architecture & Data Model
+## 1. Architectural Overview
 
-### 1.1 Standard Server Action Return Contract
+The **Globally White with Silver Tint** panel enhancement updates the foundational CSS token layers and component wrappers across `@repo/theme` and `@repo/ui`.
 
-```typescript
-export interface ServerActionResult<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  code?: string;
-  url?: string;
+```
+┌────────────────────────────────────────────────────────┐
+│                   @repo/theme                          │
+│                                                        │
+│   variables.css        glass.css          cards.css    │
+│   (--silver-tint,      (.glass-card,      (.uiverse-   │
+│    --silver-border,     .glass-panel,      card)       │
+│    --silver-glow)       .glass)                        │
+└───────────────────────────┬────────────────────────────┘
+                            │ imports / consumes
+┌───────────────────────────▼────────────────────────────┐
+│                    @repo/ui                            │
+│                                                        │
+│   Card.tsx             GlassCard.tsx      globals.css  │
+│   (white + silver      (silver sheen      (silver-     │
+│    tint border)         refraction)        tint utils) │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Design Tokens
+
+### CSS Variables (`variables.css` & `glass.css`)
+
+```css
+:root {
+  /* Silver Tint Palette */
+  --silver-tint: #f8fafc;
+  --silver-tint-subtle: rgba(241, 245, 249, 0.6);
+  --silver-border: rgba(203, 213, 225, 0.5);
+  --silver-border-light: rgba(226, 232, 240, 0.6);
+  --silver-glow: 0 8px 30px -4px rgba(203, 213, 225, 0.35);
+  --silver-border-gradient: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(226, 232, 240, 0.7) 45%,
+    rgba(203, 213, 225, 0.4) 100%
+  );
+
+  /* White-Silver Glass Panel Surface */
+  --panel-bg-white: rgba(255, 255, 255, 0.88);
+  --panel-bg-white-hover: rgba(255, 255, 255, 0.96);
+  --panel-border-silver: var(--silver-border-light);
+  --panel-shadow-silver: var(--silver-glow);
 }
 ```
 
-Server Actions in `apps/portal/app/actions.ts`:
+---
 
-- `logout()`: `Promise<never>` (calls `supabase.auth.signOut()` + `redirect("/login")`).
-- `speculativeEmbedShiftLog(text: string)`: `Promise<ServerActionResult<{ queued: boolean }>>`.
-- `revalidateRSC(tags: string[])`: `Promise<ServerActionResult>`.
-- `generateMonthlyReport(rawReportData: unknown, departmentId?: string)`: `Promise<ServerActionResult<{ url: string }>>`.
+## 3. Component Patterns
 
-### 1.2 Error Boundary & Mapping
+- **`Card` Component (`card.tsx`)**:
+  Updated base styling to `bg-white/90 backdrop-blur-2xl border border-slate-200/60 shadow-sm shadow-slate-200/50 hover:border-slate-300/80 hover:shadow-md hover:shadow-slate-300/40`.
 
-- `AuthError` / Missing user $\to$ `{ success: false, error: "Unauthorized", code: "UNAUTHORIZED" }`
-- `ForbiddenError` / Invalid role $\to$ `{ success: false, error: "Unauthorized: Insufficient permissions", code: "FORBIDDEN" }`
-- `ZodError` / `ValidationError` $\to$ `{ success: false, error: err.message, code: "VALIDATION_ERROR" }`
-- Unexpected system error $\to$ Logged via `logError` and returning `{ success: false, error: err.message, code: "INTERNAL_ERROR" }`
+- **`GlassCard` & Glass Variants (`glassVariants`)**:
+  Standardized glass intensity options (`subtle`, `moderate`, `intense`, `glossy`) to use white surface opacity paired with silver border highlight sheen (`rgba(226, 232, 240, 0.6)`).
 
-### 1.3 Consolidated Dynamic Widgets Pattern
-
-Create `apps/portal/app/(departments)/[department]/ControlRoomWidgets.tsx`:
-
-- Groups control room components into a cohesive container (`ControlRoomWidgets`) while preserving progressive `<Suspense>` streaming for sub-sections.
-- In `page.tsx`, import `ControlRoomWidgets` via `dynamic()` with a consolidated skeleton fallback for non-control room isolation.
-
-```mermaid
-graph TD
-    Page["[department]/page.tsx (Server Component)"] --> IsCR{isControlRoom?}
-    IsCR -->|Yes| CRWidgets["ControlRoomWidgets (next/dynamic)"]
-    IsCR -->|No| NonCR["NonControlRoomSummaryGridClient"]
-
-    subgraph ControlRoomBoundary ["ControlRoomWidgets Island"]
-        CRWidgets --> S1["<Suspense> ShiftCoverageSectionClient"]
-        CRWidgets --> S2["<Suspense> ControlRoomChecklistWidget"]
-        CRWidgets --> S3["<Suspense> ScadaPanel & AlertPanel"]
-        CRWidgets --> S4["<Suspense> ControlRoomActivityFeed"]
-    end
-```
-
-## 2. Real-World Quality Score
-
-$$\text{Real-World Score} = \frac{96 + 95 + 98 + 96 + 95}{5} = 96/100 \ge 90/100$$
-
-- **Feasibility**: 96/100
-- **Maintainability**: 95/100
-- **Security**: 98/100
-- **Performance**: 96/100
-- **Reliability**: 95/100
+- **`uiverse-card` (`cards.css`)**:
+  Updated background from low-contrast translucency to high-clarity white glass (`rgba(255, 255, 255, 0.88)`) with silver specular border (`rgba(203, 213, 225, 0.4)`).

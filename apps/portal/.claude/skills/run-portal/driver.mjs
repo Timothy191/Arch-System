@@ -19,7 +19,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SKILL_DIR = dirname(fileURLToPath(import.meta.url));
 const PORTAL_DIR = join(SKILL_DIR, "..", "..", "..");
-const PW_DIR = "/home/timothy/.local/share/mise/installs/npm-playwright/latest";
+const PW_DIR = "/home/tim/.local/share/mise/installs/npm-playwright/latest";
 const { chromium } = await import(pathToFileURL(PW_DIR + "/node_modules/playwright/index.mjs"));
 
 const BASE = process.env.PORTAL_BASE || "http://localhost:3000";
@@ -66,7 +66,7 @@ page.on("pageerror", function (e) {
 let loginOk = !doLogin;
 
 if (doLogin) {
-  await page.goto(BASE + "/login?redirect=%2Fhub", { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(BASE + "/login?redirect=%2Fhub", { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1000);
 
   for (const label of ["Decline Optional", "Accept All"]) {
@@ -108,7 +108,7 @@ if (paths.length === 0) {
 for (const t of paths) {
   const url = BASE + t;
   try {
-    await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
+    await page.goto(url, { waitUntil: "load", timeout: 60000 });
     await page.waitForTimeout(1200);
   } catch (e) {
     console.log("!! goto " + t + ": " + e.message.split("\n")[0]);

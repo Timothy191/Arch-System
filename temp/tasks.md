@@ -1,19 +1,54 @@
-# Tasks: Vercel React Best Practices Implementation
+# Deployment Readiness Tasks
 
-## Wave 1: Server Actions Standardisation (Linked to REQ-SA-01..05)
+## 1. Objective
 
-- [x] Refactor `apps/portal/app/actions.ts` to return standard typed `{ success, data, error, code }` payloads and handle errors using `@repo/errors`.
-- [x] Update `apps/portal/app/actions.test.ts` to match standard return signatures and verify rejection/error-handling behaviors.
-- [x] Run `pnpm --filter portal test -- app/actions.test.ts` to verify unit test green status.
+Determine whether the project is deployable to Vercel without a large architecture mismatch or whether it should be treated as a local/on-prem application with separate deployment constraints.
 
-## Wave 2: Dynamic Widget Consolidation (Linked to REQ-WIDGET-01..03)
+## 2. Task list
 
-- [x] Create `apps/portal/app/(departments)/[department]/ControlRoomWidgets.tsx` wrapping control room sub-widgets with granular Suspense skeletons.
-- [x] Refactor `apps/portal/app/(departments)/[department]/page.tsx` to use `ControlRoomWidgets` dynamic import, cleaning up individual top-level dynamic imports.
-- [x] Verify light mode invariants and layout integrity.
+### Task 1 — Audit deployment model
 
-## Wave 3: Quality Verification & Audit (Linked to REQ-QA-01..02)
+- Confirm whether the repo is fundamentally local/on-prem or cloud-first.
+- Review root config, docs, and environment assumptions.
 
-- [x] Run `pnpm --filter portal test -- app/actions.test.ts` and related department tests.
-- [x] Run `pnpm type-check` across the monorepo.
-- [x] Document changes in `AGENT_TRACER.md`.
+### Task 2 — Trace runtime dependencies
+
+- Identify every service dependency that is expected to be available in production.
+- Check whether those dependencies are local-only or internet-reachable.
+
+### Task 3 — Inspect environment and config files
+
+- Review `vercel.json`
+- Review `apps/portal/next.config.mjs`
+- Review `apps/portal/env/.env.production.example`
+- Assess whether defaults are local-only.
+
+### Task 4 — Evaluate Vercel blockers
+
+- Catalog localhost assumptions.
+- Identify local sidecar/service dependencies.
+- Determine if the app is cloud-ready as written.
+
+### Task 5 — Document the real recommendation
+
+- Recommend either a Vercel-native refactor or a self-hosted deployment model.
+- Keep the recommendation grounded in the actual repo architecture.
+
+## 3. Current findings
+
+- The repo has a Vercel config but also local-first runtime assumptions.
+- The app includes local service URLs such as `127.0.0.1`.
+- Deployment documentation points toward local/on-prem production hosting.
+- Vercel compatibility is not smooth out of the box without further configuration changes.
+
+## 4. Status
+
+- [x] repo architecture reviewed
+- [x] deployment assumptions checked
+- [x] environment config inspected
+- [x] Vercel blockers identified
+- [x] recommendation documented in temp docs
+
+## 5. Completion principle
+
+This task is successful when the repo documentation accurately reflects the actual deployment reality and does not claim cloud readiness without the required environment and architecture changes.
