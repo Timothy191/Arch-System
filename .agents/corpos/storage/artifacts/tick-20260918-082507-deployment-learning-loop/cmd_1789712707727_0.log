@@ -1,0 +1,6 @@
+
+🐳 Sidekick Active Containers & Port Binding Status:
+  CONTAINER ID   NAME               STATUS          PORTS
+  a1b2c3d4e5f6   arch-portal        Up 4 hours      0.0.0.0:3000->3000/tcp
+  b2c3d4e5f6a1   arch-supabase-db   Up 4 hours      0.0.0.0:54322->5432/tcp
+

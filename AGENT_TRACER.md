@@ -4,6 +4,12 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-18] - n8n and Langfuse Runtime Swarm Verification
+
+- **Action:** Coordinated live checks for the external n8n engine and local tool fleet. Pointed active portal env files at `http://192.168.1.79:5678`, retained Redis at `redis://127.0.0.1:6379`, and replaced the invalid local Langfuse encryption placeholder with a valid 64-character hexadecimal key.
+- **Verification:** n8n `/healthz`, Flowise, Redis, Qdrant, ClickHouse, Prometheus, and portal liveness passed. Langfuse was restarted and rechecked after configuration repair.
+- **Known boundary:** No repository n8n workflow export or outbound webhook delivery worker exists; authenticated workflow execution remains an external verification task.
+
 ## [2026-09-16] - Frontend Autonomous Overwatch Audit & Production Hardening (Score: 98/100)
 
 - **Agent:** Antigravity IDE (Gemini) + Critique Council Overwatch Reviewer (`c96ea384-d5f7-4c93-8a1a-ab9e11737434`)
