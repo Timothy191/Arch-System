@@ -6,8 +6,9 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        "isolate relative rounded-xl border border-white/50 bg-white/75 backdrop-blur-2xl backdrop-saturate-[1.35] text-card-foreground shadow-glass-depth glass-depth-card",
-        "transition-all duration-300 ease-glass hover:scale-[1.008] hover:shadow-glass-depth-hover hover:border-white/70 active:scale-[0.995] active:shadow-glass-depth-active",
+        // Anti-Drift: Maintain 'White with silver tint' light-mode invariant here. Do not introduce dark mode classes.
+        "isolate relative rounded-xl border border-slate-200/60 bg-white/90 backdrop-blur-2xl backdrop-saturate-[1.35] text-card-foreground shadow-sm shadow-slate-200/50 glass-depth-card",
+        "transition-all duration-300 ease-glass hover:scale-[1.008] hover:shadow-md hover:shadow-slate-300/50 hover:border-slate-300/80 active:scale-[0.995]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
         "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100",
         className

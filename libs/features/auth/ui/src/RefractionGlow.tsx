@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 
+// Zero-Magic Invariant (REFAC-01)
+const GLOW_CYCLE_DURATION_SEC = 10;
+
 export function RefractionGlow() {
   return (
     <motion.div
@@ -15,7 +18,7 @@ export function RefractionGlow() {
         ],
       }}
       transition={{
-        duration: 10,
+        duration: GLOW_CYCLE_DURATION_SEC,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
       }}

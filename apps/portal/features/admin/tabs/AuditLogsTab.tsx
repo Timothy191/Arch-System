@@ -68,7 +68,7 @@ export function AuditLogsTab() {
     size: number,
     search: string,
     action: string,
-    table: string,
+    table: string
   ) => {
     setLoading(true);
 

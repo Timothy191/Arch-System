@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@novu/node": "^2.6.6",
+    "@repo/contract": "1.0.0",
     "@repo/errors": "1.0.0",
     "exceljs": "^4.4.0",
     "inngest": "^4.4.0"
@@ -12,6 +13,8 @@
     "@repo/typescript-config": "1.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
+    "@swc/jest": "^0.2.39",
+    "jest": "^30.0.0",
     "typescript": "catalog:"
   },
   "exports": {
@@ -26,6 +29,7 @@
   "scripts": {
     "clean": "rm -rf dist .turbo",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "test": "jest --passWithNoTests",
     "type-check": "tsc --noEmit"
   }
 }

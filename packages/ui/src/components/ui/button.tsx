@@ -48,7 +48,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "medium",
     },
-  },
+  }
 );
 
 export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
@@ -90,7 +90,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Resolve variant: if `variant` is provided, use it; otherwise check if `type` was passed as a variant name
     let resolvedVariant: ButtonVariant = variant ?? "default";
@@ -134,7 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className,
+          className
         )}
         {...props}
       >
@@ -152,7 +152,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </Comp>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";
@@ -186,7 +186,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <a
@@ -195,7 +195,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
           buttonVariants({ variant, size, shape }),
           shadow && "shadow-lg hover:shadow-xl",
           svgOnly && "aspect-square p-0",
-          className,
+          className
         )}
         {...props}
       >
@@ -212,7 +212,7 @@ export const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
         )}
       </a>
     );
-  },
+  }
 );
 
 ButtonLink.displayName = "ButtonLink";
@@ -250,14 +250,14 @@ export const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProp
           hover?.background && `hover:bg-[${hover.background}]`,
           hover?.foreground && `hover:text-[${hover.foreground}]`,
           hover?.border && `hover:border-[${hover.border}]`,
-          className,
+          className
         )}
         {...props}
       >
         {children}
       </Button>
     );
-  },
+  }
 );
 
 CustomButton.displayName = "CustomButton";

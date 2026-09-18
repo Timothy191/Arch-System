@@ -107,8 +107,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       req,
       NextResponse.json(
         { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 },
-      ),
+        { status: 400 }
+      )
     );
   }
   const { dept, limit, offset } = parsed.data;
@@ -119,7 +119,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     .from("machines")
     .select(
       "id, name, machine_type, serial_number, bin_factor, active, department_id, site_id, created_at",
-      { count: "estimated" },
+      { count: "estimated" }
     )
     .order("name")
     .range(offset, offset + limit - 1);

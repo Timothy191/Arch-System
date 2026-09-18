@@ -108,7 +108,7 @@ export function AnimatedDialog({
         }
       }
     },
-    [onClose],
+    [onClose]
   );
 
   return (
@@ -148,7 +148,7 @@ export function AnimatedDialog({
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
             className={cn(
               "relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 backdrop-blur-xl p-6 outline-none",
-              className,
+              className
             )}
           >
             {/* Close button */}

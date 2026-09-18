@@ -44,7 +44,7 @@ export function KPICard({
           <div
             className={cn(
               "opacity-20 group-hover:opacity-40 transition-opacity duration-300",
-              colorMap[color],
+              colorMap[color]
             )}
           >
             {icon}

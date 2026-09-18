@@ -1,0 +1,14 @@
+{
+  "name": "@repo/bench",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CodSpeed benchmark harness for @repo/contract and @repo/utils hot paths",
+  "scripts": {
+    "bench": "vitest bench --run"
+  },
+  "devDependencies": {
+    "@codspeed/vitest-plugin": "^5.7.1",
+    "vitest": "^3.2.4"
+  }
+}

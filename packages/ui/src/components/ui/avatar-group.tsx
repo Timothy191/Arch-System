@@ -95,7 +95,7 @@ export function AvatarGroup({
             "relative rounded-full shrink-0 select-none flex items-center justify-center font-medium",
             "ring-2 ring-white border border-black/[0.08]",
             "bg-neutral-100 text-neutral-600",
-            size <= 24 ? "text-[10px]" : "text-xs",
+            size <= 24 ? "text-[10px]" : "text-xs"
           )}
           title={`+${overflowCount} more`}
           aria-label={`+${overflowCount} more members`}

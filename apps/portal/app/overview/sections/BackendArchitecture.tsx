@@ -171,7 +171,7 @@ function getLiveTagValue(
   tag: ScadaTelemetryTag,
   tick: number,
   isLive: boolean,
-  index: number,
+  index: number
 ): string {
   if (typeof tag.baseValue === "boolean") {
     return tag.baseValue ? "TRIGGERED (ALARM)" : "NORMAL (OK)";
@@ -558,7 +558,7 @@ export default function BackendArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -585,7 +585,7 @@ export default function BackendArchitecture() {
   const relatedConnections = useMemo(() => {
     if (!activeService) return [];
     return BACKEND_CONNECTIONS.filter(
-      (c) => c.source === activeService.id || c.target === activeService.id,
+      (c) => c.source === activeService.id || c.target === activeService.id
     );
   }, [activeService]);
 

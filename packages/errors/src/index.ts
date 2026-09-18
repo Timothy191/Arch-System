@@ -389,3 +389,63 @@ export function isFetchTimeoutError(error: unknown): error is FetchTimeoutError 
 export function isNetworkError(error: unknown): error is NetworkError {
   return error instanceof NetworkError;
 }
+
+export class CircuitBreakerOpenError extends AppError {
+  constructor(
+    message: string,
+    options?: {
+      circuitName?: string;
+      resetTimeoutMs?: number;
+      cause?: Error;
+      context?: Record<string, unknown>;
+    }
+  ) {
+    const { circuitName, resetTimeoutMs, cause, context } = options || {};
+    super(message, {
+      code: "CIRCUIT_BREAKER_OPEN",
+      statusCode: 503,
+      cause,
+      context: {
+        ...context,
+        ...(circuitName && { circuitName }),
+        ...(resetTimeoutMs !== undefined && { resetTimeoutMs }),
+      },
+    });
+    this.name = "CircuitBreakerOpenError";
+  }
+}
+
+export class BulkheadRejectedError extends AppError {
+  constructor(
+    message: string,
+    options?: {
+      poolName?: string;
+      activeCount?: number;
+      queueCapacity?: number;
+      cause?: Error;
+      context?: Record<string, unknown>;
+    }
+  ) {
+    const { poolName, activeCount, queueCapacity, cause, context } = options || {};
+    super(message, {
+      code: "BULKHEAD_REJECTED",
+      statusCode: 429,
+      cause,
+      context: {
+        ...context,
+        ...(poolName && { poolName }),
+        ...(activeCount !== undefined && { activeCount }),
+        ...(queueCapacity !== undefined && { queueCapacity }),
+      },
+    });
+    this.name = "BulkheadRejectedError";
+  }
+}
+
+export function isCircuitBreakerOpenError(error: unknown): error is CircuitBreakerOpenError {
+  return error instanceof CircuitBreakerOpenError;
+}
+
+export function isBulkheadRejectedError(error: unknown): error is BulkheadRejectedError {
+  return error instanceof BulkheadRejectedError;
+}

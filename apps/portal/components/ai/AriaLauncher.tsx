@@ -71,7 +71,7 @@ export function AriaLauncher(): JSX.Element {
             // AGENT-TRACE: z-[110] keeps the FAB + panel above transient bottom
             // banners (e.g. consent bar at z-[100]) so they stay clickable.
             "fixed bottom-6 right-6 z-[110] transition-all duration-200",
-            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
           <div

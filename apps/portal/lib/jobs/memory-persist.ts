@@ -53,7 +53,7 @@ export const memoryPersistFn = inngest.createFunction(
       // The user message was already stored by loadMemoryNode.
       // The assistant response is what we're recovering.
       const assistantMemories = recentMemories?.filter(
-        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:"),
+        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:")
       );
 
       if (!assistantMemories || assistantMemories.length === 0) {
@@ -66,7 +66,7 @@ export const memoryPersistFn = inngest.createFunction(
             context: "memory_persist_job",
             sessionId,
             userId,
-          },
+          }
         );
         return { success: true, recovered: false };
       }
@@ -87,5 +87,5 @@ export const memoryPersistFn = inngest.createFunction(
     } finally {
       recordJobExecution("memory-persist", performance.now() - start, success);
     }
-  },
+  }
 );

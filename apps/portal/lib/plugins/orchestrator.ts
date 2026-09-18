@@ -85,7 +85,7 @@ class PluginOrchestrator {
    */
   public async executeEngine(
     pluginId: string,
-    params?: Record<string, any>,
+    params?: Record<string, any>
   ): Promise<Record<string, any>> {
     // Find plugin from XState context
     const snapshot = this.actor.getSnapshot();

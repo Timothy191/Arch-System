@@ -52,7 +52,7 @@ describe("X-Fetch Cache Wrapper", () => {
     expect(mockRedisSetEx).toHaveBeenCalledWith(
       "test-key",
       10,
-      expect.stringContaining('"__isXFetchWrapper":true'),
+      expect.stringContaining('"__isXFetchWrapper":true')
     );
   });
 
@@ -92,7 +92,7 @@ describe("X-Fetch Cache Wrapper", () => {
     expect(mockRedisSetEx).toHaveBeenCalledWith(
       "test-key",
       10,
-      expect.stringContaining('"value":"fresh-data"'),
+      expect.stringContaining('"value":"fresh-data"')
     );
   });
 

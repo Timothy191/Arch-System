@@ -112,7 +112,7 @@ export function WorkflowBuilder({
       };
       setEdges((eds) => addEdge(edge, eds));
     },
-    [setEdges],
+    [setEdges]
   );
 
   // Add new plugin node

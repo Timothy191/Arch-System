@@ -1,5 +1,3 @@
-"use client";
-
 import type { ShiftTireEvent } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AlertTriangle, CheckCircle2, Disc, Gauge, Ruler } from "lucide-react";

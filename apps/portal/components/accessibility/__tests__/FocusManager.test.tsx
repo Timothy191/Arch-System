@@ -6,7 +6,7 @@ describe("FocusManager", () => {
     render(
       <FocusManager>
         <button>Test Button</button>
-      </FocusManager>,
+      </FocusManager>
     );
 
     expect(screen.getByText("Test Button")).toBeInTheDocument();
@@ -18,7 +18,7 @@ describe("FocusManager", () => {
         <button>First</button>
         <button>Second</button>
         <button>Third</button>
-      </FocusManager>,
+      </FocusManager>
     );
 
     const firstButton = screen.getByText("First");
@@ -33,7 +33,7 @@ describe("FocusManager", () => {
     render(
       <FocusManager onEscape={onEscape}>
         <button>Test</button>
-      </FocusManager>,
+      </FocusManager>
     );
 
     fireEvent.keyDown(document.activeElement!, { key: "Escape" });
@@ -45,7 +45,7 @@ describe("FocusManager", () => {
     const { unmount } = render(
       <FocusManager restoreFocus>
         <button>Test</button>
-      </FocusManager>,
+      </FocusManager>
     );
 
     unmount();

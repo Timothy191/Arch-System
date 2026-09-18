@@ -29,7 +29,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
       style,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Format address display
     const cleanAddress = address.replace(/^https?:\/\//, "");
@@ -41,7 +41,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         className={cn(
           "w-full overflow-hidden rounded-xl border border-neutral-200",
           "bg-white shadow-xl select-none",
-          className,
+          className
         )}
         style={{
           aspectRatio,
@@ -82,7 +82,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         <div className="relative w-full h-full overflow-hidden bg-neutral-50">{children}</div>
       </div>
     );
-  },
+  }
 );
 
 Browser.displayName = "Browser";

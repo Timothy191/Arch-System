@@ -1,29 +1,23 @@
 export * from "./client-telemetry";
 export * from "./types";
-
-// Timing & Throttle
-export * from "./useDebounce";
-export * from "./useThrottle";
-
-// Storage & Persistence
-export * from "./useLocalStorage";
-
-// Network & Realtime
-export * from "./useOnlineStatus";
-export * from "./usePolling";
-
 // DOM & Interactions
 export * from "./useClickOutside";
+// Arch-System Operational Hooks
+export * from "./useCommandScope";
 export * from "./useCopyToClipboard";
-export * from "./useMediaQuery";
-
+// Timing & Throttle
+export * from "./useDebounce";
 // References & Lifecycle
 export * from "./useLatest";
 export * from "./useLifecycle";
-
-// Arch-System Operational Hooks
-export * from "./useCommandScope";
+// Storage & Persistence
+export * from "./useLocalStorage";
+export * from "./useMediaQuery";
+// Network & Realtime
+export * from "./useOnlineStatus";
 export * from "./useOptimisticAction";
 export * from "./usePitConnectivity";
+export * from "./usePolling";
 export * from "./useSupabaseRealtime";
+export * from "./useThrottle";
 export * from "./useThrottledState";

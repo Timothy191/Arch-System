@@ -122,7 +122,7 @@ describe("HeroRotator", () => {
   it("removes inactive CTA links from the tab order", () => {
     const { container } = render(<HeroRotator {...baseProps} departments={mockDepartments} />);
     const primaryCtas = Array.from(
-      container.querySelectorAll<HTMLAnchorElement>('[data-cta="primary-hero"]'),
+      container.querySelectorAll<HTMLAnchorElement>('[data-cta="primary-hero"]')
     );
     expect(primaryCtas).toHaveLength(3);
     expect(primaryCtas[0]).toHaveAttribute("tabindex", "0");
@@ -141,7 +141,7 @@ describe("HeroRotator", () => {
     // Drilling is now active (second slide)
     expect(screen.getByLabelText("2 of 3: Drilling Operations")).toHaveAttribute(
       "aria-hidden",
-      "false",
+      "false"
     );
   });
 
@@ -182,7 +182,7 @@ describe("HeroRotator", () => {
         incidentCount={2}
         breakdownCount={1}
         offlineMachineCount={3}
-      />,
+      />
     );
     // Badges render once per slide; assert at least one is present.
     expect(screen.getAllByText("2 Open").length).toBeGreaterThan(0);

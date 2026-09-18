@@ -57,12 +57,12 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
           department.id,
           null,
           today,
-          shiftType,
+          shiftType
         );
 
         // AGENT-TRACE: Identify machines without entries
         const missingMachines = completeness.statuses.filter(
-          (status) => !status.exempt && !status.hasEntry,
+          (status) => !status.exempt && !status.hasEntry
         );
 
         // AGENT-TRACE: Check if we're >30 minutes into shift
@@ -110,5 +110,5 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
     } finally {
       recordJobExecution("shift-completeness-check", performance.now() - start, success);
     }
-  },
+  }
 );

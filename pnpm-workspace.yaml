@@ -37,7 +37,9 @@ catalog:
   "@opentelemetry/api": ^1.9.1
 catalogs:
   react19:
-    react: ^19.2.7
-    react-dom: ^19.2.7
+    # Exact pins: Next.js 16 hard-errors when react and react-dom resolve to
+    # different versions, and independent ^-ranges let dedupe split them.
+    react: 19.3.0
+    react-dom: 19.3.0
     "@types/react": ^19.2.17
     "@types/react-dom": ^19.2.3

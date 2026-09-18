@@ -117,8 +117,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
       req,
       NextResponse.json(
         { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 },
-      ),
+        { status: 400 }
+      )
     );
   }
   const { from, to, dept, limit, offset } = parsed.data;
@@ -184,7 +184,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r]))).join(","),
+        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r]))).join(",")
       ),
     ].join("\n");
     const response = new NextResponse(csv, {

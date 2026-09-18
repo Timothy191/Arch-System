@@ -111,21 +111,41 @@ export const accentEmerald = arch14;
 // GLASSMORPHISM TOKENS (RGBA for runtime use)
 // ═══════════════════════════════════════════════════════════════
 
+export const silver = {
+  tint: "#f8fafc",
+  tintSubtle: "rgba(241, 245, 249, 0.6)",
+  border: "rgba(203, 213, 225, 0.5)",
+  borderLight: "rgba(226, 232, 240, 0.6)",
+  glow: "0 8px 30px -4px rgba(203, 213, 225, 0.35)",
+  borderGradient:
+    "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
+  tintGradient: "linear-gradient(135deg, #f8fafc 0%, rgba(241, 245, 249, 0.6) 100%)",
+} as const;
+
 export const glass = {
-  surface: "rgba(255, 255, 255, 0.72)",
-  surfaceHover: "rgba(255, 255, 255, 0.88)",
-  surfaceStrong: "rgba(255, 255, 255, 0.92)",
-  border: "rgba(255, 255, 255, 0.15)",
-  borderTop: "rgba(255, 255, 255, 0.25)",
+  surface: "rgba(255, 255, 255, 0.88)",
+  surfaceHover: "rgba(255, 255, 255, 0.95)",
+  surfaceStrong: "rgba(255, 255, 255, 0.98)",
+  border: "rgba(226, 232, 240, 0.6)",
+  borderTop: "rgba(255, 255, 255, 0.9)",
+  borderGradient:
+    "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
+  silverBorder: "rgba(203, 213, 225, 0.5)",
+  silverBorderLight: "rgba(226, 232, 240, 0.6)",
+  silverBorderGradient:
+    "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
+  silverTint: "#f8fafc",
+  silverTintSubtle: "rgba(241, 245, 249, 0.6)",
+  silverGlow: "0 8px 30px -4px rgba(203, 213, 225, 0.35)",
   text: "rgba(10, 10, 20, 0.92)",
   textMuted: "rgba(10, 10, 20, 0.55)",
-  vibrancy: "rgba(246, 246, 250, 0.82)",
+  vibrancy: "rgba(248, 250, 252, 0.92)",
   /** @deprecated use top-level properties */
   light: {
-    surface: "rgba(255, 255, 255, 0.72)",
-    surfaceHover: "rgba(255, 255, 255, 0.88)",
-    border: "rgba(255, 255, 255, 0.15)",
-    borderTop: "rgba(255, 255, 255, 0.25)",
+    surface: "rgba(255, 255, 255, 0.88)",
+    surfaceHover: "rgba(255, 255, 255, 0.95)",
+    border: "rgba(226, 232, 240, 0.6)",
+    borderTop: "rgba(255, 255, 255, 0.9)",
     text: "rgba(10, 10, 20, 0.92)",
     textMuted: "rgba(10, 10, 20, 0.55)",
   },

@@ -177,7 +177,12 @@ export function DepartmentsTab() {
                     <td className="px-6 py-4">
                       <Badge
                         variant="outline"
-                        className={`bg-${dept.color}-500/10 text-${dept.color}-400 border-${dept.color}-500/20`}
+                        style={
+                          {
+                            "--dept-accent": `var(--accent-${dept.color}, var(--accent-charcoal))`,
+                          } as React.CSSProperties
+                        }
+                        className="text-[var(--dept-accent)] bg-[color-mix(in_srgb,var(--dept-accent)_10%,transparent)] border-[color-mix(in_srgb,var(--dept-accent)_20%,transparent)]"
                       >
                         {dept.color}
                       </Badge>

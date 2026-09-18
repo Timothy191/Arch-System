@@ -167,7 +167,7 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
       }}
       className={cn(
         "z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100",
-        className,
+        className
       )}
       {...props}
     >
@@ -224,7 +224,7 @@ export function ContextMenuItem({
       ? "text-red-600 hover:bg-red-50:bg-red-950/40"
       : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100",
     disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className,
+    className
   );
 
   if (href && !disabled) {

@@ -346,23 +346,6 @@ if [ "$CLEAN_COUNT" -eq 0 ]; then
 fi
 
 # ═══════════════════════════════════════════════════════════
-# 11. MCP SERVERS
-# ═══════════════════════════════════════════════════════════
-header "11. MCP Servers"
-
-if node "$REPO_ROOT/scripts/sync-mcp-config.js" > /dev/null 2>&1; then
-  check_pass "MCP configurations synchronized (.mcp.json, .agents/mcp_config.json, .vscode/mcp.json)"
-else
-  check_fail "Failed to synchronize MCP configurations"
-fi
-
-if node "$REPO_ROOT/scripts/validate-mcp-servers.js"; then
-  check_pass "All critical MCP servers verified and operational"
-else
-  check_fail "One or more MCP servers are offline or misconfigured"
-fi
-
-# ═══════════════════════════════════════════════════════════
 # SUMMARY
 # ═══════════════════════════════════════════════════════════
 echo

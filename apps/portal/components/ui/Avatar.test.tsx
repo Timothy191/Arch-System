@@ -76,7 +76,7 @@ describe("Geist Avatar Primitives", () => {
   describe("AvatarWithIcon", () => {
     it("renders custom status icon badge", () => {
       render(
-        <AvatarWithIcon letter="JD" size={32} icon={<span data-testid="status-dot">●</span>} />,
+        <AvatarWithIcon letter="JD" size={32} icon={<span data-testid="status-dot">●</span>} />
       );
 
       expect(screen.getByText("JD")).toBeInTheDocument();

@@ -53,7 +53,7 @@ const badgeVariants = cva(
       variant: "gray",
       size: "md",
     },
-  },
+  }
 );
 
 export type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
@@ -91,7 +91,7 @@ export const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         <span>{children}</span>
       </div>
     );
-  },
+  }
 );
 
 Badge.displayName = "Badge";

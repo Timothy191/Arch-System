@@ -54,7 +54,7 @@ function matchMachineId(machines: Machine[], machineName: string | null): string
     (m) =>
       m.name.toLowerCase() === needle ||
       m.name.toLowerCase().includes(needle) ||
-      needle.includes(m.name.toLowerCase()),
+      needle.includes(m.name.toLowerCase())
   );
   return match?.id ?? "";
 }

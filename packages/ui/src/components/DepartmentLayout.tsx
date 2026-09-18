@@ -20,6 +20,8 @@ import {
   Layers,
   Monitor,
   Pickaxe,
+  Printer,
+  QrCode,
   Radio,
   Satellite,
   Search,
@@ -61,6 +63,8 @@ const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>
   Settings,
   CircleDot: Circle,
   Monitor,
+  Printer,
+  QrCode,
   HardHat,
   GraduationCap,
 };

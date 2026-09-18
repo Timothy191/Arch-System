@@ -22,7 +22,7 @@ import { logAuditEvent } from "@/lib/audit";
 export async function getUnifiedShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): Promise<{ data?: UnifiedShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -73,7 +73,7 @@ export async function getUnifiedShiftReport(
 export async function getMultiSiteShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: "day" | "night"
 ): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -122,7 +122,7 @@ export async function getMultiSiteShiftReport(
 
 // AGENT-TRACE: Server action locking and signing the unified shift closeout with supervisor PIN verification.
 export async function lockAndSignUnifiedShift(
-  payload: LockAndSignShiftInput & { departmentSlug?: string },
+  payload: LockAndSignShiftInput & { departmentSlug?: string }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const validated = lockAndSignShiftSchema.parse(payload);
@@ -201,7 +201,7 @@ export async function lockAndSignUnifiedShift(
         },
         {
           onConflict: "department_id,shift_date,shift_type",
-        },
+        }
       )
       .select("id")
       .single();

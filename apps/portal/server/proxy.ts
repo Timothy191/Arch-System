@@ -115,7 +115,7 @@ function redirectWithError(request: NextRequest, error: string, clientResponse?:
 
 async function resolveDeptUuid(
   supabase: Awaited<ReturnType<typeof createMiddlewareClient>>["supabase"],
-  slug: string,
+  slug: string
 ): Promise<string | null> {
   const cacheKey = `dept:uuid:${slug}`;
   const cached = await cacheGet<string>(cacheKey);
@@ -180,7 +180,7 @@ export async function proxy(request: NextRequest) {
       request.cookies.has("sb-access-token") ||
       [...request.cookies.getAll()].some(
         (c) =>
-          (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
+          (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token")
       );
 
     if (!hasSession) {
@@ -252,7 +252,7 @@ export async function proxy(request: NextRequest) {
   const hasSessionCookie =
     request.cookies.has("sb-access-token") ||
     [...request.cookies.getAll()].some(
-      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
+      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token")
     );
 
   if (!hasSessionCookie) {
@@ -327,7 +327,7 @@ export async function proxy(request: NextRequest) {
     }>(employeeCacheKey);
 
     const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error("Redis cache timeout")), 150),
+      setTimeout(() => reject(new Error("Redis cache timeout")), 150)
     );
 
     employee = await Promise.race([cachePromise, timeoutPromise]);

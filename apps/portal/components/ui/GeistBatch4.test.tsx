@@ -24,7 +24,7 @@ describe("Geist Batch 4 Components", () => {
     render(
       <Drawer show={true} onDismiss={() => {}}>
         Drawer Content
-      </Drawer>,
+      </Drawer>
     );
     expect(screen.getByText("Drawer Content")).toBeInTheDocument();
   });
@@ -47,7 +47,7 @@ describe("Geist Batch 4 Components", () => {
         <Folder name="src">
           <File name="index.ts" />
         </Folder>
-      </Tree>,
+      </Tree>
     );
     expect(screen.getByText("src")).toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe("Geist Batch 4 Components", () => {
       <Grid columns={3}>
         <GridCell columnSpan={2}>Main</GridCell>
         <GridCross />
-      </Grid>,
+      </Grid>
     );
     expect(screen.getByText("Main")).toBeInTheDocument();
   });
@@ -105,7 +105,7 @@ describe("Geist Batch 4 Components", () => {
             <MenuItemLocked>Delete</MenuItemLocked>
           </MenuSection>
         </Menu>
-      </MenuContainer>,
+      </MenuContainer>
     );
     expect(screen.getByText("Actions")).toBeInTheDocument();
   });

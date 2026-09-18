@@ -1,5 +1,3 @@
-"use client";
-
 import { GlassCard } from "@repo/ui/GlassCard";
 
 const SHIFT_HOURS = 12;

@@ -9,8 +9,9 @@ const { version: PORTAL_VERSION } = require("./package.json");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Advisor Note: Setting workspaceRoot to "../.." accommodates the monorepo structure, ensuring Turbopack correctly resolves cross-repo symlinked packages.
 // Root includes both Arch-System and Arch-Base so Turbopack allows cross-repo symlinked packages
-const workspaceRoot = path.resolve(__dirname, "../../..");
+const workspaceRoot = path.resolve(__dirname, "../..");
 
 const isProduction = process.env.NODE_ENV === "production";
 const isCI = process.env.CI === "true";
@@ -79,6 +80,7 @@ const nextConfig = {
     // AGENT-TRACE: @liqui-design/glass ships glass.css with @layer base which
     // requires @tailwind base to be present in the same PostCSS pass.
     // transpiling it ensures Turbopack runs it through our full PostCSS pipeline.
+    // Advisor Note: Patching PostCSS layers by transpiling this package is necessary to prevent CSS compilation errors when @layer base is encountered outside of standard Tailwind processing.
     "@liqui-design/glass",
   ],
   images: {
@@ -132,23 +134,23 @@ const nextConfig = {
     ],
     // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
     inlineCss: false,
-    // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
-    cacheLife: {
-      telemetry: {
-        stale: 5,
-        revalidate: 10,
-        expire: 30,
-      },
-      departments: {
-        stale: 300,
-        revalidate: 3600,
-        expire: 86400,
-      },
-      reports: {
-        stale: 60,
-        revalidate: 300,
-        expire: 1800,
-      },
+  },
+  // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
+  cacheLife: {
+    telemetry: {
+      stale: 5,
+      revalidate: 10,
+      expire: 30,
+    },
+    departments: {
+      stale: 300,
+      revalidate: 3600,
+      expire: 86400,
+    },
+    reports: {
+      stale: 60,
+      revalidate: 300,
+      expire: 1800,
     },
   },
   async headers() {

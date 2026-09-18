@@ -1,5 +1,3 @@
-"use client";
-
 import type { ShiftBreakdownSummary } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AlertOctagon, CheckCircle2, Clock, Wrench } from "lucide-react";

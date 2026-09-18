@@ -96,7 +96,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
       "rust-telemetry-engine",
       "target",
       "release",
-      "rust-telemetry-engine",
+      "rust-telemetry-engine"
     );
 
     if (fs.existsSync(binaryPath)) {

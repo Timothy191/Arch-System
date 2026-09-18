@@ -52,7 +52,7 @@ function roundedRectSDF(
   y: number,
   width: number,
   height: number,
-  radius: number,
+  radius: number
 ): number {
   const absWidth = Math.abs(width);
   const absHeight = Math.abs(height);
@@ -69,7 +69,7 @@ function createDisplacementFragment(
   depth: number,
   shapeWidth: number,
   shapeHeight: number,
-  roundness: number,
+  roundness: number
 ) {
   const ix = uv.x - 0.5;
   const iy = uv.y - 0.5;
@@ -105,7 +105,7 @@ const generateDisplacementData = (
   shapeWidth = 0.35,
   shapeHeight = 0.35,
   depth = 1.2,
-  roundness = 0.1,
+  roundness = 0.1
 ) => {
   const w = Math.floor(width);
   const h = Math.floor(height);
@@ -125,7 +125,7 @@ const generateDisplacementData = (
       depth,
       shapeWidth,
       shapeHeight,
-      roundness,
+      roundness
     );
     const dx = pos.x * w - x;
     const dy = pos.y * h - y;
@@ -158,7 +158,7 @@ const ACCENT_COLORS = {
   indigo: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
   violet: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
   alert: "hover:border-[var(--accent-red)]/40 hover:shadow-card-hover",
-  none: "hover:border-black/[0.12] hover:shadow-card-hover",
+  none: "hover:border-slate-300/80 hover:shadow-slate-200/50",
 };
 
 const colorPresets: Record<string, string[]> = {
@@ -280,7 +280,7 @@ export function GlassCard({
 
   useEffect(() => {
     setIsTouch(
-      typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0),
+      typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0)
     );
   }, []);
 
@@ -303,7 +303,7 @@ export function GlassCard({
       mouseX.set(e.clientX - rect.left);
       mouseY.set(e.clientY - rect.top);
     },
-    [prefersReduced, isTouch, isSpotlight, mouseX, mouseY],
+    [prefersReduced, isTouch, isSpotlight, mouseX, mouseY]
   );
 
   // GlowBorder colors setup
@@ -354,7 +354,7 @@ export function GlassCard({
           if (pending) {
             const next = pending;
             setSize((prev) =>
-              prev.width === next.width && prev.height === next.height ? prev : next,
+              prev.width === next.width && prev.height === next.height ? prev : next
             );
             pending = null;
           }
@@ -409,7 +409,7 @@ export function GlassCard({
         sw,
         sh,
         1.2, // depth
-        roundness,
+        roundness
       );
 
       if (data.length >= 4 && typeof ImageData !== "undefined") {
@@ -481,7 +481,8 @@ export function GlassCard({
       className={cn(
         // Base classes
         "isolate relative overflow-hidden",
-        "liquid-glass-light border border-white/20 shadow-window",
+        // Anti-Drift: Maintain 'White with silver tint' light-mode invariant here. Do not introduce dark mode classes.
+        "liquid-glass-light border border-slate-200/60 bg-white/90 backdrop-blur-2xl backdrop-saturate-[1.35] shadow-sm shadow-slate-200/50",
         "group rounded-2xl animate-window-open",
         hover && "liquid-glass-interactive",
 
@@ -493,7 +494,7 @@ export function GlassCard({
           onClick &&
           "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
         padding && "p-6",
-        className,
+        className
       )}
       style={
         {
@@ -519,7 +520,7 @@ export function GlassCard({
         <div
           className={cn(
             "absolute inset-[-2px] -z-10 rounded-[inherit]",
-            !isGlowPaused && "animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]",
+            !isGlowPaused && "animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]"
           )}
           style={{
             background: `conic-gradient(from 0deg, ${glowColors.join(", ")})`,
@@ -536,7 +537,7 @@ export function GlassCard({
 
       {/* macOS window title bar */}
       {isWindow && (
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-200/60 bg-white/40 backdrop-blur-md">
           <MacTrafficLights />
           {title && (
             <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">

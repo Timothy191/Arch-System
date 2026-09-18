@@ -29,20 +29,22 @@ export function AcknowledgeButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // Optimistic UI updates
     setAcknowledged(true);
     onAcknowledge();
-    
+
     toast.success(confirmTitle, {
       description: confirmDescription,
-      action: onUndo ? {
-        label: "Undo",
-        onClick: () => {
-          setAcknowledged(false);
-          onUndo();
-        }
-      } : undefined,
+      action: onUndo
+        ? {
+            label: "Undo",
+            onClick: () => {
+              setAcknowledged(false);
+              onUndo();
+            },
+          }
+        : undefined,
     });
   };
 
@@ -54,7 +56,7 @@ export function AcknowledgeButton({
       onClick={handleClick}
       className={cn(
         "px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]",
-        className,
+        className
       )}
     >
       {label}

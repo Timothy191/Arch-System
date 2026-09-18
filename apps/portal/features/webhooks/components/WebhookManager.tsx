@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimeStagger } from "@repo/ui/AnimeStagger";
-import { GlassCard } from "@repo/ui/GlassCard";
 import { Checkbox } from "@repo/ui/Checkbox";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
+import { GlassCard } from "@repo/ui/GlassCard";
 import { fetchClient } from "@repo/utils/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, Plus, RefreshCw, Trash2, XCircle } from "lucide-react";

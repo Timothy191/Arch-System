@@ -2,7 +2,7 @@
 
 import { shiftCloseoutSchema } from "@repo/contract/schemas/shift-compilation.schema";
 import type { ShiftCloseoutInput } from "@repo/contract/types/shift-compilation.types";
-import { AuthError, RateLimitError, ValidationError, isAppError } from "@repo/errors";
+import { AuthError, isAppError, RateLimitError, ValidationError } from "@repo/errors";
 import { getRedisClient } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 
@@ -52,7 +52,7 @@ async function checkRateLimit(supervisorId: string): Promise<boolean> {
  * Redis rate-limiting (5 req/min), and pgcrypto supervisor PIN verification RPC.
  */
 export async function submitShiftCloseout(
-  rawInput: ShiftCloseoutInput,
+  rawInput: ShiftCloseoutInput
 ): Promise<ShiftCloseoutResult> {
   try {
     // 1. Validate input payload against canonical Zod schema
@@ -71,7 +71,7 @@ export async function submitShiftCloseout(
         "Rate limit exceeded. Maximum 5 shift closeout attempts allowed per minute.",
         {
           context: { supervisorId: payload.supervisorId },
-        },
+        }
       );
     }
 
@@ -115,7 +115,7 @@ export async function submitShiftCloseout(
           total_checklist_count: payload.totalLoads,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "department_id,report_date,shift_type" },
+        { onConflict: "department_id,report_date,shift_type" }
       )
       .select()
       .single();

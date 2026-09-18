@@ -68,8 +68,8 @@ Before making changes, inspect the interactive dependency graph to understand mo
 # Launch interactive graph visualizer
 pnpm turbo run build --graph
 
-# View affected projects based on your local branch diff
-pnpm dev:graph
+# View the workspace task graph
+pnpm turbo:graph
 ```
 
 ### Key Architectural Boundaries

@@ -87,6 +87,7 @@ export {
   lockAndSignShiftSchema,
   machinePerformanceSchema,
   shiftBreakdownSummarySchema,
+  shiftCloseoutSchema as shiftCompilationCloseoutSchema,
   shiftTireEventSchema,
   unifiedShiftReportSchema,
 } from "./schemas/shift-compilation.schema";
@@ -108,10 +109,13 @@ export { createWebhookSchema, updateWebhookSchema } from "./schemas/webhook.sche
 // Derived types (inferred from schemas)
 // ---------------------------------------------------------------------------
 
+export * from "./agent-governance";
+export * from "./codemod";
 export type {
   ComplianceAuditRun,
   CreateComplianceAuditRunInput,
 } from "./schemas/compliance-audit.schema";
+export type { HealthCheckResponse, ShiftCloseoutInput } from "./schemas/control-room.schema";
 export type { DrillOperationInput, DrillTelemetryIngestInput } from "./schemas/drill.schema";
 export type {
   Equipment,
@@ -141,7 +145,6 @@ export type {
   ControlRoomShiftReportInput,
   ShiftCompletenessInput,
 } from "./types/control-room.types";
-export type { HealthCheckResponse, ShiftCloseoutInput } from "./schemas/control-room.schema";
 export type { ExportQueryInput } from "./types/export.types";
 export type {
   BookOutInput,
@@ -170,6 +173,7 @@ export type {
   LockAndSignShiftInput,
   MachinePerformance,
   ShiftBreakdownSummary,
+  ShiftCloseoutInput as ShiftCompilationCloseoutInput,
   ShiftTireEvent,
   UnifiedShiftReport,
 } from "./types/shift-compilation.types";
@@ -186,5 +190,3 @@ export type {
 } from "./types/tire-management.types";
 export type { CreateWebhookInput, UpdateWebhookInput } from "./types/webhook.types";
 export * from "./ultragoal";
-export * from "./agent-governance";
-export * from "./codemod";

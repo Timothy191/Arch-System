@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { APIError } from "@/lib/errors/error-classes";
 import { logError } from "@/lib/errors/error-logger";
+import { embeddingProviderRegistry } from "./provider-registry";
 
 /**
  * Embedding cache service.
@@ -105,7 +106,7 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
 async function _saveDbCachedEmbedding(
   hash: string,
   userId: string,
-  vector: number[],
+  vector: number[]
 ): Promise<void> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -145,7 +146,11 @@ async function _saveDbCachedEmbedding(
  *
  * @throws {APIError} If embedding is not found in cache
  */
-export async function generateEmbedding(text: string, userId: string): Promise<number[]> {
+export async function generateEmbedding(
+  text: string,
+  userId: string,
+  allowFallbackGeneration = true
+): Promise<number[]> {
   const hash = computeHash(text);
   const cached = getCachedEmbedding(hash, userId);
   if (cached !== undefined) return cached;
@@ -157,22 +162,28 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
     return dbCached;
   }
 
-  // Embedding not found in cache and generation is disabled
-  throw new APIError("Embedding not found in cache. Generation has been disabled.", {
+  if (allowFallbackGeneration) {
+    const provider = embeddingProviderRegistry.getActiveProvider();
+    const vector = await provider.generateEmbedding(text);
+    setCachedEmbedding(hash, userId, vector);
+    await _saveDbCachedEmbedding(hash, userId, vector);
+    return vector;
+  }
+
+  // Embedding not found in cache and generation fallback disabled
+  throw new APIError("Embedding not found in cache.", {
     statusCode: 503,
     context: { hash, userId, reason: "generation_disabled" },
   });
 }
 
 /**
- * Retrieve embeddings for multiple texts from cache.
- * NOTE: This function only retrieves cached embeddings. Generation has been removed.
- *
- * @throws {APIError} If any embedding is not found in cache
+ * Retrieve embeddings for multiple texts from cache with provider fallback.
  */
 export async function batchGenerateEmbeddings(
   texts: string[],
   userId: string,
+  allowFallbackGeneration = true
 ): Promise<number[][]> {
   if (texts.length === 0) return [];
 
@@ -239,18 +250,36 @@ export async function batchGenerateEmbeddings(
     }
   }
 
-  // If any embeddings are missing, throw an error
-  if (missingIndices.length > 0) {
-    throw new APIError(
-      `${missingIndices.length} embedding(s) not found in cache. Generation has been disabled.`,
-      {
-        statusCode: 503,
-        context: { userId, missingIndices, reason: "generation_disabled" },
-      },
-    );
+  if (missingIndices.length === 0) {
+    return results;
   }
 
-  return results;
+  if (allowFallbackGeneration) {
+    const provider = embeddingProviderRegistry.getActiveProvider();
+    const missingTexts = missingIndices.map((idx) => texts[idx]!);
+    const generatedVectors = await provider.batchGenerateEmbeddings(missingTexts);
+
+    for (let i = 0; i < missingIndices.length; i++) {
+      const idx = missingIndices[i]!;
+      const hash = hashes[idx]!;
+      const vector = generatedVectors[i]!;
+
+      results[idx] = vector;
+      setCachedEmbedding(hash, userId, vector);
+      await _saveDbCachedEmbedding(hash, userId, vector);
+    }
+
+    return results;
+  }
+
+  // If any embeddings are missing and fallback disabled, throw an error
+  throw new APIError(
+    `${missingIndices.length} embedding(s) not found in cache. Generation disabled.`,
+    {
+      statusCode: 503,
+      context: { userId, missingIndices, reason: "generation_disabled" },
+    }
+  );
 }
 
 export { EMBEDDING_DIMENSIONS };

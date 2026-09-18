@@ -83,7 +83,7 @@ export function UsersTab() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
+    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
@@ -251,7 +251,7 @@ function EditEmployeeForm({
   const [role, setRole] = useState(employee?.role || "operator");
   const [departmentId, setDepartmentId] = useState(employee?.department_id || "");
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
-    employee?.accessible_departments || [],
+    employee?.accessible_departments || []
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -265,7 +265,7 @@ function EditEmployeeForm({
 
   const toggleAccessibleDept = (deptId: string) => {
     setAccessibleDepts((prev) =>
-      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId],
+      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId]
     );
   };
 

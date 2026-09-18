@@ -2,17 +2,8 @@ import { CacheCategory } from "@repo/redis";
 import { createReadReplicaClient } from "@repo/supabase/read-replica";
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { GlassCard } from "@repo/ui/GlassCard";
-import type { KPIColor } from "@repo/ui/KPI";
 import { KPICard, KPIGrid } from "@repo/ui/KPI";
-import {
-  Activity,
-  AlertCircle,
-  BarChart3,
-  Scale,
-  ShieldAlert,
-  TrendingUp,
-  Truck,
-} from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ExportButton } from "@/features/analytics/components/ExportButton";
@@ -21,6 +12,7 @@ import { ProductionTrendChart } from "@/features/analytics/components/Production
 import { withCache } from "@/lib/cache-utils";
 import { classifyReconciliationDrift, RECONCILIATION_UI } from "@/lib/production-reconciliation";
 import { cachedRSC } from "@/lib/server-cache";
+import { TonnageLedger } from "./TonnageLedger";
 
 export const dynamic = "force-dynamic";
 
@@ -62,14 +54,6 @@ const DRIFT_ALERT_STYLES: Record<string, { container: string; icon: string }> = 
     container: "bg-accent-red/10 border-accent-red/30",
     icon: "text-accent-red",
   },
-};
-
-// Map reconciliation color names to KPIColor values accepted by <KPICard>.
-const RECON_COLOR_TO_KPI: Record<string, KPIColor> = {
-  emerald: "green",
-  amber: "alert",
-  orange: "alert",
-  red: "red",
 };
 
 function toNumber(v: number | string): number {
@@ -176,13 +160,13 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
           category: CacheCategory.METRICS,
           keyParts: ["hub", "executive"],
           tags: ["table:machines", "table:employees", "table:breakdowns"],
-        },
+        }
       );
     },
     {
       revalidate: 300,
       tags: ["table:machines", "table:employees", "table:breakdowns"],
-    },
+    }
   );
 }
 
@@ -231,7 +215,6 @@ export default async function ExecutiveDashboardPage() {
   } = data;
 
   const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES.red!;
-  const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? "red";
 
   // CSV export payload
   const exportRows = chartData.map((r) => ({
@@ -264,16 +247,13 @@ export default async function ExecutiveDashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium text-[var(--text-heading)] flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-[var(--accent-blue)]" />
-            Executive Dashboard
-          </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Cross-department KPIs — month-to-date as of {today}
+          <h1 className="text-2xl font-medium text-[var(--text-heading)]">Executive dashboard</h1>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
+            Month to date as of <span className="font-mono tabular-nums">{today}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -282,47 +262,36 @@ export default async function ExecutiveDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Row 1 — Production &amp; Reconciliation */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <TrendingUp className="w-3.5 h-3.5" /> Production &amp; Reconciliation (MTD)
-        </h2>
-        <KPIGrid cols={4}>
-          <KPICard label="Total Tonnage" value={`${totalTonnageMtd.toFixed(0)} t`} color="green" />
-          <KPICard label="Coal Removed" value={`${totalCoalMtd.toFixed(0)} t`} color="green" />
-          <KPICard
-            label="Reconciliation Drift"
-            value={`${avgDriftPct.toFixed(1)}%`}
-            color={driftKpiColor}
-            sub={driftUi.label}
-            icon={<Scale className="w-4 h-4" />}
-          />
-          <KPICard
-            label="Fuel Efficiency"
-            value={`${fuelPerTonne} L/t`}
-            color="blue"
-            icon={<Activity className="w-4 h-4" />}
-          />
-        </KPIGrid>
+      {/* Hero — material ledger (strip-ratio composition) */}
+      <TonnageLedger
+        totalTonnage={totalTonnageMtd}
+        totalCoal={totalCoalMtd}
+        totalWaste={totalWasteMtd}
+        avgDriftPct={avgDriftPct}
+        driftLabel={driftUi.label}
+        driftColor={driftUi.color}
+        fuelPerTonne={fuelPerTonne}
+        totalFuelLitres={totalFuelMtd}
+        totalHours={totalHoursMtd}
+      />
 
-        {/* Drift Alert (only if not stable) */}
-        {driftLevel !== "stable" && (
-          <div
-            className={`p-3 rounded-lg border flex items-start gap-3 ${driftAlertStyle.container} text-sm`}
-          >
-            <AlertCircle className={`w-5 h-5 ${driftAlertStyle.icon} mt-0.5 shrink-0`} />
-            <div>
-              <p className="font-medium">Operational Drift Warning</p>
-              <p className="text-[var(--text-muted)]">{driftUi.description}</p>
-            </div>
+      {/* Drift warning — only when the month is drifting (semantic status, not decoration) */}
+      {driftLevel !== "stable" && (
+        <div
+          className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${driftAlertStyle.container}`}
+        >
+          <AlertCircle className={`mt-0.5 h-5 w-5 shrink-0 ${driftAlertStyle.icon}`} />
+          <div>
+            <p className="font-medium">Operational drift warning</p>
+            <p className="text-[var(--text-muted)]">{driftUi.description}</p>
           </div>
-        )}
-      </section>
+        </div>
+      )}
 
-      {/* KPI Row 2 — Fleet &amp; Personnel */}
+      {/* Operations band — fleet, personnel, safety */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <Truck className="w-3.5 h-3.5" /> Fleet &amp; Personnel
+        <h2 className="text-[13px] font-medium text-[var(--text-muted)]">
+          Fleet, personnel and safety
         </h2>
         <KPIGrid cols={4}>
           <KPICard
@@ -332,44 +301,23 @@ export default async function ExecutiveDashboardPage() {
             sub={`${activeMachines} / ${totalMachines} machines`}
           />
           <KPICard
-            label="Machine Hours (MTD)"
-            value={`${totalHoursMtd.toFixed(0)} h`}
-            color="blue"
-          />
-          <KPICard
             label="Active Breakdowns"
             value={openBreakdowns}
             color={openBreakdowns > 5 ? "red" : openBreakdowns > 2 ? "blue" : "green"}
           />
           <KPICard label="Active Personnel" value={activeEmployees} color="default" />
-        </KPIGrid>
-      </section>
-
-      {/* KPI Row 3 — Safety &amp; Environment */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <ShieldAlert className="w-3.5 h-3.5" /> Safety &amp; Resource Usage
-        </h2>
-        <KPIGrid cols={4}>
           <KPICard
             label="Open Incidents"
             value={openIncidents}
             color={openIncidents > 0 ? "red" : "green"}
           />
-          <KPICard
-            label="Diesel Consumed (MTD)"
-            value={`${totalFuelMtd.toFixed(0)} L`}
-            color="blue"
-          />
-          <KPICard label="Waste Removed" value={`${totalWasteMtd.toFixed(0)} t`} color="default" />
-          <KPICard label="Reporting Date" value={today} color="default" />
         </KPIGrid>
       </section>
 
-      {/* 30-Day Production Trend Chart */}
+      {/* 30-day production trend */}
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5" /> 30-Day Production Trend
+        <h2 className="text-[13px] font-medium text-[var(--text-muted)]">
+          30-day production trend
         </h2>
         <GlassCard>
           <ProductionTrendChart data={chartData} />

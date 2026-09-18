@@ -1,5 +1,3 @@
-"use client";
-
 import type { Department } from "@repo/departments/data-access";
 import type { Panel } from "@repo/ui/HeroRotator";
 import { Logo } from "@repo/ui/Logo";
@@ -15,7 +13,6 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
-import { useMemo } from "react";
 
 export interface HeroRotatorProps {
   defaultTitle: string;
@@ -74,67 +71,57 @@ export function HeroRotator({
   breakdownCount = 0,
   offlineMachineCount = 0,
 }: HeroRotatorProps) {
-  const panels = useMemo<Panel[]>(() => {
-    const arrowIcon = <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />;
+  const arrowIcon = <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />;
 
-    const overviewPanel: Panel = {
-      id: "overview",
-      name: "overview",
-      title: defaultTitle,
-      description: defaultDescription,
-      category: "Central Command",
-      image: "/images/departments/overview.jpg",
-      stats: { label: "System Health", value: "100% Optimal" },
-      status: "active",
-      icon: <Logo className="w-4 h-4 text-[var(--accent-blue)]" />,
-      iconBgColor: "bg-[var(--accent-blue)]/10",
-      primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
-      secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
+  const overviewPanel: Panel = {
+    id: "overview",
+    name: "overview",
+    title: defaultTitle,
+    description: defaultDescription,
+    category: "Central Command",
+    image: "/images/departments/overview.jpg",
+    stats: { label: "System Health", value: "100% Optimal" },
+    status: "active",
+    icon: <Logo className="w-4 h-4 text-[var(--accent-blue)]" />,
+    iconBgColor: "bg-[var(--accent-blue)]/10",
+    primary: { href: primaryHref, label: primaryLabel, icon: arrowIcon },
+    secondary: { href: secondaryHref, label: secondaryLabel, icon: arrowIcon },
+  };
+
+  const deptPanels = departments.map((dept): Panel => {
+    const style = DEPT_STYLE_MAP[dept.name] || {
+      icon: Layers,
+      iconColor: "text-[var(--accent-blue)]",
+      bgColor: "bg-[var(--accent-blue)]/10",
     };
+    const DeptIcon = style.icon;
 
-    const deptPanels = departments.map((dept): Panel => {
-      const style = DEPT_STYLE_MAP[dept.name] || {
-        icon: Layers,
-        iconColor: "text-[var(--accent-blue)]",
-        bgColor: "bg-[var(--accent-blue)]/10",
-      };
-      const DeptIcon = style.icon;
+    return {
+      id: dept.name,
+      name: dept.name,
+      title: dept.displayName,
+      description: dept.description,
+      category:
+        dept.type === "control_room"
+          ? "SCADA & Telemetry"
+          : dept.type === "satellite"
+            ? "Orbital Intelligence"
+            : "Field Operations",
+      image: `/images/departments/${dept.name}.jpg`,
+      stats: dept.stats || { label: "Telemetry", value: "Online" },
+      status: dept.status || "active",
+      icon: <DeptIcon className={cn("w-4 h-4", style.iconColor)} />,
+      iconBgColor: style.bgColor,
+      primary: dept.actions?.[0]
+        ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
+        : { href: `/${dept.name}`, label: `Launch ${dept.displayName}`, icon: arrowIcon },
+      secondary: dept.actions?.[1]
+        ? { href: dept.actions[1].href, label: dept.actions[1].label, icon: arrowIcon }
+        : undefined,
+    };
+  });
 
-      return {
-        id: dept.name,
-        name: dept.name,
-        title: dept.displayName,
-        description: dept.description,
-        category:
-          dept.type === "control_room"
-            ? "SCADA & Telemetry"
-            : dept.type === "satellite"
-              ? "Orbital Intelligence"
-              : "Field Operations",
-        image: `/images/departments/${dept.name}.jpg`,
-        stats: dept.stats || { label: "Telemetry", value: "Online" },
-        status: dept.status || "active",
-        icon: <DeptIcon className={cn("w-4 h-4", style.iconColor)} />,
-        iconBgColor: style.bgColor,
-        primary: dept.actions?.[0]
-          ? { href: dept.actions[0].href, label: dept.actions[0].label, icon: arrowIcon }
-          : { href: `/${dept.name}`, label: `Launch ${dept.displayName}`, icon: arrowIcon },
-        secondary: dept.actions?.[1]
-          ? { href: dept.actions[1].href, label: dept.actions[1].label, icon: arrowIcon }
-          : undefined,
-      };
-    });
-
-    return [overviewPanel, ...deptPanels];
-  }, [
-    defaultTitle,
-    defaultDescription,
-    primaryHref,
-    primaryLabel,
-    secondaryHref,
-    secondaryLabel,
-    departments,
-  ]);
+  const panels = [overviewPanel, ...deptPanels];
 
   return (
     <GenericHeroRotator

@@ -20,7 +20,7 @@ function base64UrlEncode(str: string): string {
 function createMetabaseToken(
   dashboardId: number,
   params: Record<string, unknown>,
-  secret: string,
+  secret: string
 ): string {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);

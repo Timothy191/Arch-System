@@ -57,5 +57,5 @@ export const generateReportFn = inngest.createFunction(
     } finally {
       recordJobExecution("generate-shift-report", performance.now() - start, success);
     }
-  },
+  }
 );

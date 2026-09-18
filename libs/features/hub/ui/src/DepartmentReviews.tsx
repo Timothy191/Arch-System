@@ -1,5 +1,3 @@
-"use client";
-
 import { Avatar } from "@repo/ui";
 import { Marquee } from "@repo/ui/Marquee";
 

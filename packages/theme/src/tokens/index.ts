@@ -26,6 +26,7 @@ export {
   generateThemerColorSet,
   glass,
   hsl,
+  silver,
 } from "./colors";
 export type {
   ColorTokens,

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
-import { LoginForm } from "./LoginForm";
+import { LoginForm, LoginFormSkeleton } from "./LoginForm";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
@@ -103,7 +103,7 @@ describe("LoginForm", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({ email: "PC-12345", password: "testpass" }),
-        }),
+        })
       );
     });
 
@@ -181,7 +181,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Accessing your workspace\.\.\.$|^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        }),
+        })
       ).toBeDisabled();
     });
 
@@ -192,7 +192,7 @@ describe("LoginForm", () => {
       expect(
         screen.getByRole("button", {
           name: /^Access Arch Systems$|^Sign In$|^Signing in\.\.\.$/i,
-        }),
+        })
       ).not.toBeDisabled();
     });
   });
@@ -319,5 +319,103 @@ describe("LoginForm", () => {
     await testRedirect("/image.png", "/");
     // Test valid pages
     await testRedirect("/drilling/operations", "/drilling/operations");
+  });
+
+  it("validates email format on blur when '@' is present", () => {
+    render(<LoginForm />);
+    const emailInput = screen.getByPlaceholderText("Employee ID or email");
+
+    // Case 1: Badge / Employee ID without '@' - no error
+    fireEvent.change(emailInput, { target: { value: "EMP-44021" } });
+    fireEvent.blur(emailInput);
+    expect(toast.error).not.toHaveBeenCalled();
+
+    // Case 2: Incomplete/invalid email with '@' - triggers validation toast
+    fireEvent.change(emailInput, { target: { value: "user@invalid" } });
+    fireEvent.blur(emailInput);
+    expect(toast.error).toHaveBeenCalledWith("Please enter a valid email address");
+
+    // Case 3: Valid RFC format email - no error
+    jest.clearAllMocks();
+    fireEvent.change(emailInput, { target: { value: "worker@archsystems.io" } });
+    fireEvent.blur(emailInput);
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it("provides accessible ARIA attributes for screen readers and assistive technology", async () => {
+    render(<LoginForm />);
+    const passwordInput = screen.getByPlaceholderText("Enter your password");
+    const toggleButton = screen.getByRole("button", { name: /show password/i });
+
+    // Initial toggle button ARIA state
+    expect(toggleButton).toHaveAttribute("aria-controls", "password");
+    expect(toggleButton).toHaveAttribute("aria-pressed", "false");
+
+    // Click toggle button
+    fireEvent.click(toggleButton);
+    expect(toggleButton).toHaveAttribute("aria-pressed", "true");
+
+    // Initial password input has no error
+    expect(passwordInput).toHaveAttribute("aria-invalid", "false");
+
+    // Submit with too-short password (< 6 chars)
+    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+      target: { value: "PC-12345" },
+    });
+    fireEvent.change(passwordInput, { target: { value: "123" } });
+    fireEvent.submit(screen.getByTestId("login-form"));
+
+    // Should indicate invalid and reference password-error
+    await waitFor(() => {
+      expect(passwordInput).toHaveAttribute("aria-invalid", "true");
+      expect(passwordInput).toHaveAttribute(
+        "aria-describedby",
+        expect.stringContaining("password-error")
+      );
+    });
+  });
+
+  it("configures virtual keyboard and mobile inputs defensively", () => {
+    render(<LoginForm />);
+    const emailInput = screen.getByPlaceholderText("Employee ID or email");
+    const passwordInput = screen.getByPlaceholderText("Enter your password");
+
+    expect(emailInput).toHaveAttribute("autoCapitalize", "none");
+    expect(emailInput).toHaveAttribute("autoCorrect", "off");
+    expect(emailInput).toHaveAttribute("spellCheck", "false");
+
+    expect(passwordInput).toHaveAttribute("autoCapitalize", "none");
+    expect(passwordInput).toHaveAttribute("autoCorrect", "off");
+    expect(passwordInput).toHaveAttribute("spellCheck", "false");
+  });
+
+  it("renders LoginFormSkeleton matching form geometry for zero-CLS Suspense streaming", () => {
+    render(<LoginFormSkeleton />);
+    const skeleton = screen.getByTestId("login-form-skeleton");
+    expect(skeleton).toBeInTheDocument();
+    expect(skeleton.className).toContain("animate-pulse");
+    expect(skeleton).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("prioritizes initialRedirect prop from server component over searchParams", async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue({}),
+    });
+
+    render(<LoginForm initialRedirect="/control-room" />);
+
+    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+      target: { value: "PC-12345" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+      target: { value: "testpass" },
+    });
+    fireEvent.submit(screen.getByTestId("login-form"));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/control-room");
+    });
   });
 });

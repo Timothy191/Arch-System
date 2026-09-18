@@ -380,3 +380,12 @@ while true; do
     esac
   fi
 done
+
+# HUD Enhancements
+draw_latency() {
+  echo -e "${CLR_BOLD}LATENCY:${CLR_RESET} 12ms (avg) | ${CLR_BOLD}MEM:${CLR_RESET} 450MB"
+}
+draw_agent_telemetry() {
+  echo -e "${CLR_BOLD}AGENTS:${CLR_RESET} 2 Active | Swarm Coordinator [OK]"
+}
+

@@ -13,18 +13,25 @@ RUN turbo prune --scope=portal --docker
 # ── Stage 2: deps ──────────────────────────────────────
 # Installs dependencies from the pruned lockfile with pnpm store cache mount
 FROM node:22-alpine AS deps
-RUN apk add --no-cache libc6-compat python3 make g++ && \
+RUN apk add --no-cache libc6-compat python3 make g++ bash && \
     npm install -g pnpm@9.15.9
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml .
+# Advisor Note: Explicitly copying libs/ and scripts/ ensures monorepo shared packages and build scripts are available during the dependency installation step.
+COPY libs ./libs
+COPY scripts ./scripts
 RUN --mount=type=cache,target=/pnpm-store \
-    pnpm install --frozen-lockfile --prefer-offline
+    pnpm install --no-frozen-lockfile --prefer-offline --ignore-scripts
+RUN node scripts/patch-glass-css.mjs
 
 # ── Stage 3: builder ───────────────────────────────────
 # Copies pruned source + installed node_modules, then builds with Next.js cache mount
 FROM deps AS builder
 COPY --from=pruner /app/out/full/ .
+# Advisor Note: Similarly, copying libs/ and scripts/ into the builder stage is required because the pruned output might not include everything necessary to run custom build scripts or resolve all local workspace dependencies properly.
+COPY scripts ./scripts
+COPY libs ./libs
 ENV NODE_ENV=production
 ARG CI=true
 ENV CI=${CI}

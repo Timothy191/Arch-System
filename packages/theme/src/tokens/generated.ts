@@ -87,6 +87,14 @@ export const tokens = {
       premiumBorder: "var(--glass-premium-border)",
       premiumRadius: "var(--glass-premium-radius)",
     },
+    silver: {
+      tint: "var(--silver-tint)",
+      tintSubtle: "var(--silver-tint-subtle)",
+      border: "var(--silver-border)",
+      borderLight: "var(--silver-border-light)",
+      glow: "var(--silver-glow)",
+      tintGradient: "var(--silver-tint-gradient)",
+    },
     vibrancy: {
       surface: "var(--vibrancy-surface)",
       border: "var(--vibrancy-border)",

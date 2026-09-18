@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { type RefObject, useEffect } from "react";
 
 /**
  * Hook to handle click or touch events occurring outside specified element target.

@@ -62,7 +62,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
             () => {
               setAlerts((prev) => {
                 const acknowledged = new Set(
-                  prev.filter((a) => a.acknowledged).map((a) => a.machineId),
+                  prev.filter((a) => a.acknowledged).map((a) => a.machineId)
                 );
                 return newAlerts.map((a) => ({
                   ...a,
@@ -74,10 +74,10 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               department_id: departmentId,
               offline_count: newAlerts.length,
               total_machines: machines.length,
-            },
+            }
           );
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
@@ -95,7 +95,7 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
         },
         () => {
           fetchMachines();
-        },
+        }
       )
       .subscribe();
 

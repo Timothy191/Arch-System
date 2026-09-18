@@ -200,32 +200,40 @@ export async function autoSaveShiftReportDraft(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       return { success: false, error: "Unauthorized" };
     }
 
     const { getRedisClient } = await import("@repo/redis");
     const redis = await getRedisClient();
-    
+
     const key = `arch:autosave:shift:${departmentId}:${date}:${shift}:${user.id}`;
-    
+
     // Fire and forget (Promise.race for 150ms timeout)
-    const savePromise = redis.set(key, JSON.stringify({
-      ...draftContent,
-      _updatedAt: new Date().toISOString()
-    }), { EX: 60 * 60 * 24 }); // 24 hour expiry
+    const savePromise = redis.set(
+      key,
+      JSON.stringify({
+        ...draftContent,
+        _updatedAt: new Date().toISOString(),
+      }),
+      { EX: 60 * 60 * 24 }
+    ); // 24 hour expiry
 
     await Promise.race([
       savePromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 150))
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 150)),
     ]);
 
     return { success: true };
   } catch (err) {
     // Silently catch so we don't interrupt the user's typing
-    await logError(err instanceof Error ? err : new Error(String(err)), { action: "autoSaveShiftReportDraft" });
+    await logError(err instanceof Error ? err : new Error(String(err)), {
+      action: "autoSaveShiftReportDraft",
+    });
     return { success: false, error: "Failed to auto-save draft" };
   }
 }

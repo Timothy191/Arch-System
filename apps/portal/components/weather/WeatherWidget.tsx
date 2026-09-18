@@ -151,7 +151,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
                     "p-2.5 rounded-lg text-xs font-medium border",
                     alert.level === "critical"
                       ? "bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse"
-                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20",
+                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20"
                   )}
                 >
                   {alert.message}

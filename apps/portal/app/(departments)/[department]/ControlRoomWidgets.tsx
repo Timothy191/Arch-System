@@ -9,14 +9,14 @@ const ShiftCoverageSectionClient = dynamic(
   () => import("./ShiftCoverageSectionClient").then((m) => m.ShiftCoverageSectionClient),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const ControlRoomChecklistWidget = dynamic(
   () => import("@/features/departments").then((m) => m.ControlRoomChecklistWidget),
   {
     loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
@@ -31,7 +31,7 @@ const ControlRoomActivityFeed = dynamic(
   () => import("@/features/departments").then((m) => m.ControlRoomActivityFeed),
   {
     loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 interface ControlRoomWidgetsProps {

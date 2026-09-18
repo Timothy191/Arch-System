@@ -46,7 +46,7 @@ export async function submitPrintJob(spec: CardPrintSpec) {
       // eslint-disable-next-line no-console
       console.warn(
         "CUPS 'lp' command failed or not found, falling back to mock success. Error:",
-        e,
+        e
       );
     }
 

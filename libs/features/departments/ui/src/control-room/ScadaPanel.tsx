@@ -41,7 +41,7 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
           setMachines(data || []);
           setLoading(false);
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
@@ -78,9 +78,9 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
             {
               department_id: departmentId,
               event_type: payload.eventType,
-            },
+            }
           );
-        },
+        }
       )
       .subscribe();
 

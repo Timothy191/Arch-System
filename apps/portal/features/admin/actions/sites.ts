@@ -63,7 +63,7 @@ export async function adminUpdateSite(
     name?: string;
     site_code?: string;
     active?: boolean;
-  },
+  }
 ) {
   const parseResult = adminUpdateSiteSchema.safeParse(rawInput);
   if (!parseResult.success) {

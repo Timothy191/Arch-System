@@ -87,8 +87,6 @@
     "maps:gen": "node tools/repo/generate-codebase-maps.cjs",
     "build": "node scripts/sync-assets-smart.cjs && turbo run build",
     "commitlint": "commitlint --edit",
-    "clean:caches": "node scripts/manage-runtime-caches.mjs --clean",
-    "status:caches": "node scripts/manage-runtime-caches.mjs --status",
     "corpos": "bash .agents/corpos/bin/corpos",
     "db:docs": "bash scripts/generate-db-docs.sh",
     "db:schema-reload": "pnpm --filter scripts-seeds run schema-reload",
@@ -109,7 +107,6 @@
     "dev:turbo": "node scripts/sync-assets-smart.cjs && pnpm turbo run dev --filter=portal",
     "dev:tools": "docker compose -f infra/docker/compose.tools.yml up -d && pnpm dev",
     "dev:all:turbo": "node scripts/sync-assets-smart.cjs && pnpm turbo run dev",
-    "dev:graph": "pnpm turbo run build --graph",
     "turbo:graph": "pnpm turbo run build --graph",
     "turbo:affected:lint": "pnpm turbo run lint --filter=...[HEAD~1]",
     "turbo:affected:test": "pnpm turbo run test --filter=...[HEAD~1]",
@@ -124,10 +121,10 @@
     "inngest:dev": "bash scripts/inngest-dev.sh",
     "knip": "knip --config config/tools/knip.json --no-config-hints",
     "knip:fix": "knip --config config/tools/knip.json --fix --no-config-hints",
-    "check:fast": "biome check --max-diagnostics=1000 apps packages libs services tools scripts",
-    "check:fast:fix": "biome check --max-diagnostics=1000 --write apps packages libs services tools scripts",
-    "format:fast": "biome format --write apps packages libs services tools scripts",
-    "lint:fast": "biome lint apps packages libs services tools scripts",
+    "check:fast": "npx @biomejs/biome check --max-diagnostics=1000 apps packages libs services tools scripts",
+    "check:fast:fix": "npx @biomejs/biome check --max-diagnostics=1000 --write apps packages libs services tools scripts",
+    "format:fast": "npx @biomejs/biome format --write apps packages libs services tools scripts",
+    "lint:fast": "npx @biomejs/biome lint apps packages libs services tools scripts",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "lint:css-perf": "node tools/audits/check-css-performance.cjs",
@@ -167,5 +164,11 @@
   "volta": {
     "node": "24.15.0",
     "pnpm": "9.15.9"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": ["react", "react-dom", "vite", "esbuild", "storybook"],
+      "allowAny": ["react", "react-dom", "vite", "esbuild", "storybook"]
+    }
   }
 }

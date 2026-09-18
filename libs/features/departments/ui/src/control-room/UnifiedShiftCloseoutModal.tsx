@@ -13,7 +13,7 @@ interface UnifiedShiftCloseoutModalProps {
   shiftDate: string;
   shiftType: "day" | "night";
   onSignShift: (
-    payload: LockAndSignShiftInput & { departmentSlug?: string },
+    payload: LockAndSignShiftInput & { departmentSlug?: string }
   ) => Promise<{ success: boolean; error?: string }>;
   onSuccess: () => void;
 }

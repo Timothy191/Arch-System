@@ -46,7 +46,7 @@ function mockExecCommand(commands: Record<string, string>): void {
     (
       cmd: string,
       _opts: unknown,
-      cb: (_err: Error | null, _result: { stdout: string; stderr: string } | null) => void,
+      cb: (_err: Error | null, _result: { stdout: string; stderr: string } | null) => void
     ) => {
       for (const [match, stdout] of Object.entries(commands)) {
         if (cmd.includes(match)) {
@@ -55,7 +55,7 @@ function mockExecCommand(commands: Record<string, string>): void {
         }
       }
       cb(new Error(`Command not mocked: ${cmd}`), null);
-    },
+    }
   );
 }
 
@@ -89,7 +89,7 @@ describe("scanCupsPrinters()", () => {
     mockExec.mockImplementation(
       (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found: lpstat"), undefined);
-      },
+      }
     );
 
     const result = await scanCupsPrinters();
@@ -199,7 +199,7 @@ describe("getPrinterStatus()", () => {
     mockExec.mockImplementation(
       (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found"), undefined);
-      },
+      }
     );
 
     const result = await getPrinterStatus("printer1");
@@ -217,7 +217,7 @@ describe("getPrinterQueue()", () => {
     mockExec.mockImplementation(
       (_cmd: unknown, _opts: unknown, cb: (_err: Error | null, _result: undefined) => void) => {
         cb(new Error("Command not found"), undefined);
-      },
+      }
     );
 
     const result = await getPrinterQueue("printer1");

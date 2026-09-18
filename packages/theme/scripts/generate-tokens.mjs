@@ -75,6 +75,7 @@ function extractTokens(cssText) {
       accent: {},
       mac: {},
       glass: {},
+      silver: {},
       vibrancy: {},
     },
     primitives: {},
@@ -117,6 +118,9 @@ function extractTokens(cssText) {
     } else if (name.startsWith("--glass-")) {
       const key = name.replace("--glass-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.glass[key] = `var(${name})`;
+    } else if (name.startsWith("--silver-")) {
+      const key = name.replace("--silver-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      tokens.color.silver[key] = `var(${name})`;
     } else if (name === "--vibrancy-surface" || name === "--vibrancy-border") {
       const key = name.replace("--vibrancy-", "").replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       tokens.color.vibrancy[key] = `var(${name})`;

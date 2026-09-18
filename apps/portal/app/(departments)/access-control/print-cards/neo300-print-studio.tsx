@@ -35,7 +35,7 @@ export function Neo300PrintStudio({
   const [printer] = useState<Neo300Printer>(initialPrinter);
   const [employees, setEmployees] = useState<EmployeeCardProfile[]>(initialEmployees);
   const [selectedEmp, setSelectedEmp] = useState<EmployeeCardProfile | null>(
-    initialEmployees[0] ?? null,
+    initialEmployees[0] ?? null
   );
   const [jobs, setJobs] = useState<CardPrintJob[]>(initialJobs);
   const [search, setSearch] = useState("");
@@ -59,7 +59,7 @@ export function Neo300PrintStudio({
         const result = await sendNeo300PrintJob(employeeId);
         if (result.success && result.job) {
           toast.success(
-            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`,
+            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`
           );
           setJobs((prev) => [result.job as CardPrintJob, ...prev]);
         }

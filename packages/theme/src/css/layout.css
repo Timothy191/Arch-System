@@ -1,0 +1,30 @@
+/* Layout & Grids (layout.css) per Arch OS Architecture Add-On */
+#root, #app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* Rigid, non-scrollable desktop metaphor */
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-pane {
+  flex: 1;
+  overflow: hidden auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Split Panes boundaries */
+.split-window-layout {
+  display: flex;
+  gap: var(--space-md, 16px);
+  width: 100%;
+  height: 100%;
+}
+
+.split-window-pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}

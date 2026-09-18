@@ -78,7 +78,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               pushCount,
               hoursOperated,
               shiftType,
-            }),
+            })
           );
         } else {
           localStorage.removeItem(draftKey);

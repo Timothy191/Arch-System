@@ -62,7 +62,7 @@ export function CommandMenu({
         setActiveIndex(0);
       }
     },
-    [setOpen, onOpenChange],
+    [setOpen, onOpenChange]
   );
 
   const close = React.useCallback(() => {
@@ -137,7 +137,7 @@ export function CommandMenu({
         <div
           className={cn(
             "w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl transition-all text-neutral-900",
-            className,
+            className
           )}
         >
           {children}
@@ -173,8 +173,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       const activeItems = items.filter(
-        (i) =>
-          !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
+        (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase()))
       );
 
       if (e.key === "ArrowDown") {
@@ -183,7 +182,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setActiveIndex((prev) =>
-          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length,
+          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length
         );
       } else if (e.key === "Enter") {
         e.preventDefault();
@@ -206,7 +205,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           placeholder={placeholder}
           className={cn(
             "flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
-            className,
+            className
           )}
           {...props}
         />
@@ -215,7 +214,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
         </kbd>
       </div>
     );
-  },
+  }
 );
 
 CommandMenuInput.displayName = "CommandMenuInput";
@@ -234,7 +233,7 @@ export function CommandMenuList({
   const { search, items } = useCommandMenu();
 
   const matchingCount = items.filter(
-    (i) => search === "" || i.text.toLowerCase().includes(search.toLowerCase()),
+    (i) => search === "" || i.text.toLowerCase().includes(search.toLowerCase())
   ).length;
 
   // Always render children so registered items stay mounted (their effects populate
@@ -359,7 +358,7 @@ export function CommandMenuItem({
 
   // Check if this item is currently active in the filtered list
   const activeItems = items.filter(
-    (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
+    (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase()))
   );
   const isActive = activeItems[activeIndex]?.id === id;
 
@@ -376,7 +375,7 @@ export function CommandMenuItem({
           ? "bg-neutral-100 text-neutral-900"
           : "text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60",
         disabled && "pointer-events-none opacity-50",
-        className,
+        className
       )}
       {...props}
     >

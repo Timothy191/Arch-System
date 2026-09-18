@@ -40,8 +40,23 @@
 
 **Handoff**: Changes improve user experience by reducing interaction friction, providing better feedback, and following accessibility best practices. All changes maintain backward compatibility with existing authentication flow.
 
-## [2026-09-01T06:25:22Z] System Diagnostics & Dependency Audit
-- **Agent**: Antigravity
-- **Summary**: Conducted a full system health check, dependency optimization, and compliance audit. Unused packages were pruned, dead code removed, and syncpack highest-semver mismatches (e.g., @repo/logger in @repo/supabase) were resolved. Evaluated system using pnpm type-check, deps:check, and lint.
-- **Handoff**: Repository is fully green. All compliance checks passing. Ready for next feature development or architectural drill-down.
-
+## [2026-09-17T19:07:00Z] LoginForm Industry Best Practices Refactoring & Hardening
+- **Agent**: Antigravity (frontend-developer)
+- **Scope**: `libs/features/auth/ui/src/LoginForm.tsx`, `apps/portal/features/auth/components/LoginForm.test.tsx`
+- **Summary**:
+  1. **Validation Logic Inversion Fix**: Resolved dead-code condition on email blur validation. Now validates RFC email format when `@` is typed while allowing badge/employee IDs without `@`. Added `noValidate` on form element to avoid native browser popup blocking valid non-email employee IDs.
+  2. **WCAG 2.2 AA Accessibility**: Linked error alerts to password field using `aria-invalid` and dynamic `aria-describedby` (including `password-error`, `caps-lock-warning`, `rate-limit-warning`). Added `aria-controls="password"` and `aria-pressed={showPassword}` to the password visibility toggle button.
+  3. **Industrial & Mobile Keyboard Ergonomics**: Added `autoCapitalize="none"`, `autoCorrect="off"`, and `spellCheck={false}` to both employee ID and password inputs to prevent unwanted auto-capitalization on mobile devices and barcode/RFID scanner tablets.
+  4. **Zero-Magic Named Invariants (REFAC-01)**: Extracted all inline numeric constraints into unit-suffixed, top-of-file constants (`MIN_EMPLOYEE_ID_LENGTH`, `MAX_EMAIL_LENGTH`, `MIN_PASSWORD_LENGTH`, `MAX_PASSWORD_LENGTH`, `BUTTON_HOVER_SCALE`, `BUTTON_TAP_SCALE`, `DEFAULT_AUTH_REDIRECT`, `AUTHENTICATED_HOME_REDIRECT`).
+  5. **Tailwind CSS Clean-Up**: Removed invalid opacity modifier on CSS variable hex token (`hover:brightness-95 active:brightness-90`) and cleaned up focus classes.
+  6. **Test Parity**: Expanded unit tests from 9 to 12 passing tests, covering ARIA accessibility attributes, mobile keyboard attributes, and email blur validation.
+## [2026-09-17T19:22:00Z] Vercel React Best Practices Refactoring & Suspense Optimization
+- **Agent**: Antigravity (frontend-developer)
+- **Scope**: `apps/portal/app/(auth)/layout.tsx`, `apps/portal/app/(auth)/login/page.tsx`, `libs/features/auth/ui/src/LoginForm.tsx`, `libs/features/auth/ui/src/RefractionGlow.tsx`, `apps/portal/features/auth/components/LoginForm.test.tsx`
+- **Summary**:
+  1. **RSC Default**: Converted `apps/portal/app/(auth)/layout.tsx` from `"use client"` to a pure React Server Component (RSC), eliminating unnecessary client boundary wrapping and trimming auth chunk bundle size.
+  2. **Suspense & Streaming Boundary**: Designed and exported `LoginFormSkeleton` matching form layout for zero-CLS streaming. Wrapped `<LoginForm />` inside `<Suspense fallback={<LoginFormSkeleton />}>` in `login/page.tsx` adhering to Vercel's App Router `useSearchParams()` guidance.
+  3. **Server-to-Client Parameter Flow**: Passed server-resolved redirect parameters into `<LoginForm initialRedirect={rawRedirect} />`, avoiding client search parameter parsing delays.
+  4. **Zero-Magic Invariants (REFAC-01)**: Extracted `GLOW_CYCLE_DURATION_SEC = 10` in `RefractionGlow.tsx`.
+  5. **Test Parity**: Expanded unit tests to 14 passing tests, verifying `LoginFormSkeleton` rendering and `initialRedirect` prop priority.
+- **Handoff**: Zero regressions, all tests passing cleanly.

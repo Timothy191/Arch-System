@@ -3,6 +3,7 @@ import type {
   lockAndSignShiftSchema,
   machinePerformanceSchema,
   shiftBreakdownSummarySchema,
+  shiftCloseoutSchema,
   shiftTireEventSchema,
   unifiedShiftReportSchema,
 } from "../schemas/shift-compilation.schema.js";
@@ -12,3 +13,4 @@ export type ShiftBreakdownSummary = z.infer<typeof shiftBreakdownSummarySchema>;
 export type ShiftTireEvent = z.infer<typeof shiftTireEventSchema>;
 export type UnifiedShiftReport = z.infer<typeof unifiedShiftReportSchema>;
 export type LockAndSignShiftInput = z.infer<typeof lockAndSignShiftSchema>;
+export type ShiftCloseoutInput = z.infer<typeof shiftCloseoutSchema>;

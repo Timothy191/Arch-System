@@ -103,5 +103,5 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
     } finally {
       recordJobExecution("shift-rollover-notifications", performance.now() - start, success);
     }
-  },
+  }
 );

@@ -28,7 +28,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -52,7 +52,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         className={cn(
           "inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium",
           disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-          className,
+          className
         )}
       >
         <input
@@ -72,7 +72,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900:ring-neutral-100",
             isChecked
               ? "bg-neutral-900 border-neutral-900 text-white"
-              : "bg-white border-neutral-300 hover:border-neutral-400:border-neutral-600",
+              : "bg-white border-neutral-300 hover:border-neutral-400:border-neutral-600"
           )}
           aria-hidden="true"
         >
@@ -87,7 +87,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         )}
       </label>
     );
-  },
+  }
 );
 
 Checkbox.displayName = "Checkbox";

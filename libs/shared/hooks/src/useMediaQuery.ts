@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * Hook to reactively evaluate media query strings using useSyncExternalStore.

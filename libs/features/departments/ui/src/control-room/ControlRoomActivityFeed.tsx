@@ -54,7 +54,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
             },
             ...prev.slice(0, 49),
           ]);
-        },
+        }
       )
       .subscribe();
 

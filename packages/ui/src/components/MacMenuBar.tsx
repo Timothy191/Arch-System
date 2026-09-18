@@ -47,11 +47,13 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-interface MacMenuBarProps {
+export interface MacMenuBarProps {
   menuItems?: readonly string[];
   centerSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
   className?: string;
+  /** When provided, replaces the default system dropdown with a custom panel. */
+  appMenu?: (ctx: { close: () => void }) => React.ReactNode;
 }
 
 const NAVIGATION_ITEMS: readonly string[] = [];
@@ -162,8 +164,10 @@ export function MacMenuBar({
   centerSlot,
   rightSlot,
   className,
+  appMenu,
 }: MacMenuBarProps) {
   const isFocusMode = useFocusMode();
+  const [systemMenuOpen, setSystemMenuOpen] = React.useState(false);
   // Navigation text labels intentionally removed; only logo + search + tray remain
   const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -174,7 +178,7 @@ export function MacMenuBar({
     window.open(
       `https://www.google.com/search?q=${encodeURIComponent(q)}`,
       "_blank",
-      "noopener,noreferrer",
+      "noopener,noreferrer"
     );
     setSearchQuery("");
   }
@@ -189,15 +193,15 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
-        "liquid-glass-light border border-white/20 shadow-window rounded-full",
-        className,
+        "fixed top-3 left-4 right-4 z-navigation h-12 flex items-center justify-between px-6",
+        "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-elevated rounded-full",
+        className
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
       <nav className="flex items-center gap-0.5 shrink-0" aria-label="Main Navigation">
         {/* ── System Logo Dropdown ── */}
-        <DropdownMenu>
+        <DropdownMenu open={systemMenuOpen} onOpenChange={setSystemMenuOpen}>
           <div className="flex items-center gap-2">
             <DropdownMenuTrigger asChild>
               <button
@@ -209,175 +213,185 @@ export function MacMenuBar({
               </button>
             </DropdownMenuTrigger>
           </div>
-          <DropdownMenuContent
-            align="start"
-            sideOffset={5}
-            className={cn(
-              "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
-              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl",
-            )}
-          >
-            {/* ── Left Column: Departments ── */}
-            <div className="flex-1 p-3.5 space-y-2.5">
-              <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
-                System Departments
-              </p>
-              <div className="grid grid-cols-1 gap-0.5">
-                {DEPARTMENTS_LIST.map((dept) => {
-                  const Icon = dept.icon;
-                  return (
-                    <Link
-                      key={dept.name}
-                      href={`/${dept.name}`}
-                      className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
-                    >
-                      <div
-                        className={cn(
-                          "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
-                          dept.bgColor,
-                        )}
+          {appMenu ? (
+            <DropdownMenuContent
+              align="start"
+              sideOffset={5}
+              className="p-0 border-none bg-transparent shadow-none"
+            >
+              {appMenu({ close: () => setSystemMenuOpen(false) })}
+            </DropdownMenuContent>
+          ) : (
+            <DropdownMenuContent
+              align="start"
+              sideOffset={5}
+              className={cn(
+                "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
+                "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl"
+              )}
+            >
+              {/* ── Left Column: Departments ── */}
+              <div className="flex-1 p-3.5 space-y-2.5">
+                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest">
+                  System Departments
+                </p>
+                <div className="grid grid-cols-1 gap-0.5">
+                  {DEPARTMENTS_LIST.map((dept) => {
+                    const Icon = dept.icon;
+                    return (
+                      <Link
+                        key={dept.name}
+                        href={`/${dept.name}`}
+                        className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                       >
-                        <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[13px] font-medium text-[var(--text-body)] group-hover:text-[var(--text-heading)] truncate leading-tight">
-                          {dept.displayName}
-                        </span>
-                        <span className="text-[10.5px] text-[var(--text-muted)] truncate leading-tight">
-                          {dept.description}
-                        </span>
-                      </div>
-                      <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ── Right Column: User + Tools + Admin ── */}
-            <div className="w-[195px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
-              {/* User Identity */}
-              <div className="px-3.5 py-3 flex items-center gap-2.5 border-b border-black/[0.06]">
-                <Avatar
-                  size={32}
-                  letter="AO"
-                  title="Arch Operator"
-                  className="border border-black/10 shadow-card shrink-0"
-                />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[12.5px] font-medium text-[var(--text-heading)] truncate leading-tight">
-                    Arch Operator
-                  </span>
-                  <span className="text-[10px] text-[var(--text-muted)] truncate leading-tight">
-                    admin@arch-systems.com
-                  </span>
+                        <div
+                          className={cn(
+                            "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
+                            dept.bgColor
+                          )}
+                        >
+                          <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[13px] font-medium text-[var(--text-body)] group-hover:text-[var(--text-heading)] truncate leading-tight">
+                            {dept.displayName}
+                          </span>
+                          <span className="text-[10.5px] text-[var(--text-muted)] truncate leading-tight">
+                            {dept.description}
+                          </span>
+                        </div>
+                        <ChevronRight className="w-3 h-3 text-[var(--text-muted)] opacity-0 group-hover:opacity-60 ml-auto shrink-0 transition-opacity" />
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Tools */}
-              <div className="px-2.5 pt-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1">
-                  Tools
-                </p>
-                {PRODUCTIVITY_LIST.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <Link
-                      key={tool.name}
-                      href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
-                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
-                    >
-                      <Icon
-                        className={cn("w-3.5 h-3.5 shrink-0 transition-colors", tool.colorClass)}
-                      />
-                      <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
-                        {tool.displayName}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
-
-              {/* Split View */}
-              <div className="px-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
-                  Split View
-                </p>
-                <DropdownMenuItem asChild>
-                  <button
-                    onClick={() => {
-                      window.dispatchEvent(
-                        new CustomEvent("open-split-view", {
-                          detail: { service: "whatsapp", action: "toggle" },
-                        }),
-                      );
-                    }}
-                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5 shrink-0 text-dept-engineering"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <line x1="12" y1="3" x2="12" y2="21" />
-                    </svg>
-                    <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
-                      New Split Tab
+              {/* ── Right Column: User + Tools + Admin ── */}
+              <div className="w-[195px] bg-black/[0.015] border-l border-black/[0.05] flex flex-col shrink-0">
+                {/* User Identity */}
+                <div className="px-3.5 py-3 flex items-center gap-2.5 border-b border-black/[0.06]">
+                  <Avatar
+                    size={32}
+                    letter="AO"
+                    title="Arch Operator"
+                    className="border border-black/10 shadow-card shrink-0"
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[12.5px] font-medium text-[var(--text-heading)] truncate leading-tight">
+                      Arch Operator
                     </span>
-                  </button>
-                </DropdownMenuItem>
-              </div>
+                    <span className="text-[10px] text-[var(--text-muted)] truncate leading-tight">
+                      admin@arch-systems.com
+                    </span>
+                  </div>
+                </div>
 
-              <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
-
-              {/* Automation */}
-              <div className="px-2.5 pb-1 space-y-0.5">
-                <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
-                  Automation
-                </p>
-                {EXTERNAL_LIST.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <a
-                      key={tool.name}
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Icon className={cn("w-3.5 h-3.5 shrink-0", tool.colorClass)} />
+                {/* Tools */}
+                <div className="px-2.5 pt-2.5 pb-1 space-y-0.5">
+                  <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1">
+                    Tools
+                  </p>
+                  {PRODUCTIVITY_LIST.map((tool) => {
+                    const Icon = tool.icon;
+                    return (
+                      <Link
+                        key={tool.name}
+                        href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
+                        className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                      >
+                        <Icon
+                          className={cn("w-3.5 h-3.5 shrink-0 transition-colors", tool.colorClass)}
+                        />
                         <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                           {tool.displayName}
                         </span>
-                      </div>
-                      <ExternalLink className="w-2.5 h-2.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  );
-                })}
-              </div>
+                      </Link>
+                    );
+                  })}
+                </div>
 
-              {/* Admin Panel */}
-              <div className="mt-auto px-2.5 py-2.5 border-t border-black/[0.06]">
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-dept-admin/10 active:bg-dept-admin/15 transition-all group"
-                >
-                  <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
-                  <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
-                    Admin Panel
-                  </span>
-                </Link>
+                <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
+
+                {/* Split View */}
+                <div className="px-2.5 pb-1 space-y-0.5">
+                  <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
+                    Split View
+                  </p>
+                  <DropdownMenuItem asChild>
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent("open-split-view", {
+                            detail: { service: "whatsapp", action: "toggle" },
+                          })
+                        );
+                      }}
+                      className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
+                    >
+                      <svg
+                        className="w-3.5 h-3.5 shrink-0 text-dept-engineering"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <line x1="12" y1="3" x2="12" y2="21" />
+                      </svg>
+                      <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                        New Split Tab
+                      </span>
+                    </button>
+                  </DropdownMenuItem>
+                </div>
+
+                <DropdownMenuSeparator className="bg-black/[0.06] mx-2.5" />
+
+                {/* Automation */}
+                <div className="px-2.5 pb-1 space-y-0.5">
+                  <p className="px-2 text-[10.5px] font-medium text-[var(--text-muted)] uppercase tracking-widest mb-1 pt-1">
+                    Automation
+                  </p>
+                  {EXTERNAL_LIST.map((tool) => {
+                    const Icon = tool.icon;
+                    return (
+                      <a
+                        key={tool.name}
+                        href={tool.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Icon className={cn("w-3.5 h-3.5 shrink-0", tool.colorClass)} />
+                          <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
+                            {tool.displayName}
+                          </span>
+                        </div>
+                        <ExternalLink className="w-2.5 h-2.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    );
+                  })}
+                </div>
+
+                {/* Admin Panel */}
+                <div className="mt-auto px-2.5 py-2.5 border-t border-black/[0.06]">
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-dept-admin/10 active:bg-dept-admin/15 transition-all group"
+                  >
+                    <Shield className="w-3.5 h-3.5 text-dept-admin shrink-0" />
+                    <span className="text-[12.5px] font-medium text-[var(--text-secondary)] group-hover:text-dept-admin">
+                      Admin Panel
+                    </span>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </DropdownMenuContent>
+            </DropdownMenuContent>
+          )}
         </DropdownMenu>
 
         {/* WhatsApp Web Split-Screen trigger */}
@@ -387,7 +401,7 @@ export function MacMenuBar({
             window.dispatchEvent(
               new CustomEvent("open-split-view", {
                 detail: { service: "whatsapp", action: "toggle" },
-              }),
+              })
             );
           }}
           className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
@@ -426,7 +440,7 @@ export function MacMenuBar({
                           <div
                             className={cn(
                               "w-6 h-6 rounded-md flex items-center justify-center mr-2.5 shrink-0",
-                              dept.bgColor,
+                              dept.bgColor
                             )}
                           >
                             <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
@@ -476,7 +490,7 @@ export function MacMenuBar({
                       window.dispatchEvent(
                         new CustomEvent("open-split-view", {
                           detail: { service: "github" },
-                        }),
+                        })
                       );
                     }}
                   >
@@ -641,15 +655,15 @@ export function MacMenuBar({
           centerSlot
         ) : (
           <form onSubmit={handleSearch} className="w-full flex justify-center">
-            <div className="relative w-full max-w-2xl">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)] pointer-events-none" />
+            <div className="relative w-full max-w-xl">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search"
-                className="w-full h-6 pl-7 pr-3 rounded-full bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[12px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
+                className="w-full h-8 pl-9 pr-4 rounded-full bg-white/35 hover:bg-white/50 focus:bg-white/70 backdrop-blur-md border border-black/[0.08] focus:border-black/20 focus:outline-none text-[13px] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] shadow-diffusion-sm transition-all"
               />
             </div>
           </form>

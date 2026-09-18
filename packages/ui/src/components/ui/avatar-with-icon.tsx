@@ -38,7 +38,7 @@ export function AvatarWithIcon({
           "absolute flex items-center justify-center rounded-full z-10 select-none",
           positionClass,
           iconSizeClass,
-          iconBackground && "bg-white ring-2 ring-white border border-black/10 shadow-sm",
+          iconBackground && "bg-white ring-2 ring-white border border-black/10 shadow-sm"
         )}
         aria-hidden="true"
       >

@@ -29,5 +29,5 @@ export const generateEmbeddingFn = inngest.createFunction(
     } finally {
       recordJobExecution("generate-embedding", performance.now() - start, success);
     }
-  },
+  }
 );

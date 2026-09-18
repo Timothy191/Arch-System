@@ -10,6 +10,6 @@ export async function GET(_req: NextRequest) {
       latencyMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     },
-    { status: degraded ? 503 : 200 },
+    { status: degraded ? 503 : 200 }
   );
 }

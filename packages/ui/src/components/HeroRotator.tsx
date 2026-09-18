@@ -100,7 +100,7 @@ function InteractiveGlassCard({
         "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
         "transition-[shadow,transform] duration-500 ease-out group/card",
         isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-        isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+        isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
@@ -327,7 +327,7 @@ export function HeroRotator({
       if (diff < -total / 2) diff += total;
       carouselIndex.set(current + diff);
     },
-    [carouselIndex, total],
+    [carouselIndex, total]
   );
 
   const handleImageError = useCallback((src: string) => {
@@ -356,7 +356,7 @@ export function HeroRotator({
         prevSlide();
       }
     },
-    [total, nextSlide, prevSlide],
+    [total, nextSlide, prevSlide]
   );
 
   return (
@@ -437,7 +437,7 @@ export function HeroRotator({
                   "h-1.5 rounded-full transition-all duration-300",
                   idx === activeIndex
                     ? "w-6 bg-[var(--accent-blue)]"
-                    : "w-1.5 bg-black/20 hover:bg-black/40",
+                    : "w-1.5 bg-black/20 hover:bg-black/40"
                 )}
               />
             ))}

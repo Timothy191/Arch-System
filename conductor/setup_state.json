@@ -1,0 +1,33 @@
+{
+  "status": "in_progress",
+  "project_type": "brownfield",
+  "current_section": "workflow",
+  "current_question": 2,
+  "completed_sections": [
+    "product",
+    "guidelines",
+    "tech_stack"
+  ],
+  "answers": {
+    "product_name": "Arch-Systems (Plantcor)",
+    "description": "Industrial mining-operations portal and operations dashboard",
+    "problem_statement": "Fragmentation and latency across industrial mining departments (drilling, production, safety, plant control) needing unified real-time operational dashboards",
+    "target_users": "Mining operators, control room engineers, safety officers, and department managers across Plantcor facilities",
+    "key_goals": "1. Real-time telemetry & operational status across 8 departments; 2. Robust zero-trust role/department access control via Supabase RLS; 3. Sub-second dashboard interactions with high reliability",
+    "voice_and_tone": "Concise, direct, and mission-critical / industrial",
+    "design_principles": "Reliability & User Safety, Strict Data Boundaries (RLS/Auth), Performance First (Sub-second latency)",
+    "languages": "TypeScript 5.7, JavaScript, SQL, Python",
+    "frontend_framework": "Next.js 16 (App Router) + React 19 + Tailwind CSS",
+    "backend_framework": "NestJS 11 on Fastify 5 + Next.js Route Handlers / Server Actions + Payload CMS v3",
+    "database": "PostgreSQL (Supabase with mandatory RLS) + Kysely query builder + Redis",
+    "infrastructure": "Docker (Local dev & production containers) / Self-hosted Linux & Cloud services",
+    "tdd_strictness": "Moderate - tests encouraged, required before merging / closing tracks"
+  },
+  "files_created": [
+    "conductor/product.md",
+    "conductor/product-guidelines.md",
+    "conductor/tech-stack.md"
+  ],
+  "started_at": "2026-09-17T09:48:30+02:00",
+  "last_updated": "2026-09-17T09:57:10+02:00"
+}

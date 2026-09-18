@@ -71,7 +71,7 @@ export function HeroCardContent({
               <div
                 className={cn(
                   "w-6 h-6 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
-                  panel.iconBgColor,
+                  panel.iconBgColor
                 )}
               >
                 {panel.icon}

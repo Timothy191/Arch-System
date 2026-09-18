@@ -34,61 +34,60 @@ import { fileURLToPath } from "node:url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const _require = createRequire(import.meta.url);
 
-async function findGlassCss() {
-  // Try direct resolution from workspace root
+async function findAllGlassCss() {
   const root = resolve(__dirname, "..");
   const candidates = [
+    // Direct resolution from workspace root
     resolve(root, "node_modules/@liqui-design/glass/dist/glass.css"),
-    resolve(
-      root,
-      "node_modules/.pnpm/@liqui-design+glass@0.2.2_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/@liqui-design/glass/dist/glass.css",
-    ),
   ];
 
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
-  }
-
-  // Fallback: glob search for pnpm virtual store path
+  // Every pnpm virtual-store variant. Peer-dep suffixes differ per consumer,
+  // and the build compiles whichever variant the app links — patching only
+  // one (e.g. `head -1`) leaves the live variant broken after a relink.
   try {
     const { execSync } = await import("node:child_process");
-    const result = execSync(
-      'find node_modules/.pnpm -name "glass.css" -path "*liqui-design*" 2>/dev/null | head -1',
+    const found = execSync(
+      'find node_modules/.pnpm -name "glass.css" -path "*liqui-design*" 2>/dev/null',
       { cwd: root, encoding: "utf-8" },
     ).trim();
-    if (result && existsSync(result)) return result;
+    if (found) candidates.push(...found.split("\n"));
   } catch {
     // ignore
   }
 
-  return null;
+  return [...new Set(candidates.filter((candidate) => existsSync(candidate)))];
 }
 
 async function patch() {
-  const glassCssPath = await findGlassCss();
+  const glassCssPaths = await findAllGlassCss();
 
-  if (!glassCssPath) {
+  if (glassCssPaths.length === 0) {
     console.warn("[patch-glass-css] glass.css not found — skipping patch.");
     return;
   }
 
-  const content = readFileSync(glassCssPath, "utf-8");
+  let patchedCount = 0;
+  for (const glassCssPath of glassCssPaths) {
+    const content = readFileSync(glassCssPath, "utf-8");
 
-  if (!content.includes("@layer base")) {
-    console.log("[patch-glass-css] Already patched — no @layer base found.");
-    return;
+    if (!content.includes("@layer base")) {
+      continue; // already patched
+    }
+
+    // Remove @layer base { ... } — extract inner content only
+    const patched = content.replace(/@layer base \{\s*\n(.*?)\n\}/gs, (_, inner) => inner);
+
+    if (patched === content) {
+      console.warn(`[patch-glass-css] Regex did not match — check glass.css format: ${glassCssPath}`);
+      continue;
+    }
+
+    writeFileSync(glassCssPath, patched, "utf-8");
+    patchedCount++;
+    console.log(`[patch-glass-css] ✓ Patched: ${glassCssPath}`);
   }
 
-  // Remove @layer base { ... } — extract inner content only
-  const patched = content.replace(/@layer base \{\s*\n(.*?)\n\}/gs, (_, inner) => inner);
-
-  if (patched === content) {
-    console.warn("[patch-glass-css] Regex did not match — check glass.css format.");
-    return;
-  }
-
-  writeFileSync(glassCssPath, patched, "utf-8");
-  console.log(`[patch-glass-css] ✓ Patched: ${glassCssPath}`);
+  console.log(`[patch-glass-css] ${patchedCount} patched of ${glassCssPaths.length} found.`);
 }
 
 patch().catch((err) => {

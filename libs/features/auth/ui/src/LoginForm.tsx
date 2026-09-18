@@ -6,17 +6,40 @@ import { AnimatedButton } from "@repo/ui/AnimatedButton";
 import { Checkbox } from "@repo/ui/Checkbox";
 import { Input } from "@repo/ui/Input";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import NextImage from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function LoginForm() {
+// Named constraints & Zero-Magic Invariants (REFAC-01)
+const MIN_EMPLOYEE_ID_LENGTH = 3;
+const MAX_EMAIL_LENGTH = 254;
+const MIN_PASSWORD_LENGTH = 6;
+const MAX_PASSWORD_LENGTH = 128;
+const BUTTON_HOVER_SCALE = 1.02;
+const BUTTON_TAP_SCALE = 0.97;
+const DEFAULT_AUTH_REDIRECT = "/";
+const AUTHENTICATED_HOME_REDIRECT = "/hub";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmailFormat(val: string): boolean {
+  return EMAIL_REGEX.test(val);
+}
+
+export interface LoginFormProps {
+  initialRedirect?: string;
+}
+
+export function LoginForm({ initialRedirect }: LoginFormProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get("redirect") || "/";
+  const rawRedirect = initialRedirect || searchParams.get("redirect") || DEFAULT_AUTH_REDIRECT;
   const redirectTo =
-    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login") ? rawRedirect : "/";
+    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login")
+      ? rawRedirect
+      : DEFAULT_AUTH_REDIRECT;
 
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +48,7 @@ export function LoginForm() {
   const [rememberMe, setRememberMe] = useState(true);
   const [passwordError, setPasswordError] = useState("");
 
-  const { login, loading, rateLimitCountdown, setRateLimitCountdown } = useLogin();
+  const { login, loading, rateLimitCountdown } = useLogin();
   const isRateLimited = rateLimitCountdown !== null && rateLimitCountdown > 0;
 
   useEffect(() => {
@@ -33,42 +56,61 @@ export function LoginForm() {
     if (emailParam) setEmployeeId(emailParam);
   }, [searchParams]);
 
-  function handleCapsLockKey(e: React.KeyboardEvent) {
+  const handleCapsLockKey = useCallback((e: React.KeyboardEvent) => {
     setCapsLock(e.getModifierState("CapsLock"));
-  }
+  }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setPasswordError("");
-
-    if (isRateLimited) return;
-
-    // Client-side length sanity checks only
-    if (password.length < 6) {
-      setPasswordError("Invalid email/employee ID or password");
-      return;
+  const handleEmailBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+    if (value.includes("@") && !isValidEmailFormat(value)) {
+      toast.error("Please enter a valid email address");
     }
+  }, []);
 
-    const result = await login(employeeId, password);
-    if (result?.success) {
-      if (typeof window !== "undefined" && window.location && process.env.NODE_ENV !== "test") {
-        const destination = redirectTo === "/" ? "/hub" : redirectTo;
-        window.location.assign(destination);
-      } else {
-        router.push(redirectTo);
-        router.refresh();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setPasswordError("");
+
+      if (isRateLimited) return;
+
+      if (!employeeId.trim() || password.length < MIN_PASSWORD_LENGTH) {
+        setPasswordError("Invalid email/employee ID or password");
+        return;
       }
-    } else {
-      setPasswordError("Invalid email/employee ID or password");
-    }
-  }
+
+      const result = await login(employeeId, password);
+      if (result?.success) {
+        if (typeof window !== "undefined" && window.location && process.env.NODE_ENV !== "test") {
+          const destination =
+            redirectTo === DEFAULT_AUTH_REDIRECT ? AUTHENTICATED_HOME_REDIRECT : redirectTo;
+          window.location.assign(destination);
+        } else {
+          router.push(redirectTo);
+          router.refresh();
+        }
+      } else {
+        setPasswordError("Invalid email/employee ID or password");
+      }
+    },
+    [employeeId, isRateLimited, login, password, redirectTo, router]
+  );
+
+  const passwordDescribedBy =
+    [
+      passwordError ? "password-error" : null,
+      capsLock ? "caps-lock-warning" : null,
+      rateLimitCountdown !== null ? "rate-limit-warning" : null,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   return (
-    <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-8">
+    <form data-testid="login-form" noValidate onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <label
           htmlFor="email"
-          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
+          className="block text-xs font-semibold text-[var(--text-heading,#1d1d1f)] select-none cursor-pointer"
         >
           <span id="email-label">Employee ID / Email</span>
         </label>
@@ -78,30 +120,28 @@ export function LoginForm() {
             type="email"
             required
             autoFocus
-            minLength={3}
-            maxLength={254}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            minLength={MIN_EMPLOYEE_ID_LENGTH}
+            maxLength={MAX_EMAIL_LENGTH}
             disabled={loading || isRateLimited}
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             onFocus={(e) => e.target.select()}
-            onBlur={(e) => {
-              if (e.target.value && !e.target.value.includes("@")) {
-                // Allow employee IDs without @, but validate email format if @ is present
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (e.target.value.includes("@") && !emailRegex.test(e.target.value)) {
-                  toast.error("Please enter a valid email address");
-                }
-              }
-            }}
+            onBlur={handleEmailBlur}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 py-3.5 pr-10 text-sm text-[var(--text-heading,#1d1d1f)] bg-white/70 backdrop-blur-md border border-black/15 rounded-xl shadow-inner transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:outline focus:outline-2 focus:outline-[var(--accent-blue,#0066ff)]"
             placeholder="Employee ID or email"
             aria-labelledby="email-label"
             autoComplete="username"
             aria-describedby="email-hint"
           />
         </div>
-        <p id="email-hint" className="text-[10px] text-black select-none">
+        <p
+          id="email-hint"
+          className="text-[11px] font-medium text-[var(--text-secondary,#6e6e73)] select-none"
+        >
           Your employee ID is on your badge.
         </p>
       </div>
@@ -109,7 +149,7 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
+          className="block text-xs font-semibold text-[var(--text-heading,#1d1d1f)] select-none cursor-pointer"
         >
           <span id="password-label">Password</span>
         </label>
@@ -118,8 +158,11 @@ export function LoginForm() {
             id="password"
             type={showPassword ? "text" : "password"}
             required
-            minLength={6}
-            maxLength={128}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            minLength={MIN_PASSWORD_LENGTH}
+            maxLength={MAX_PASSWORD_LENGTH}
             disabled={loading || isRateLimited}
             value={password}
             onChange={(e) => {
@@ -130,23 +173,28 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 py-3.5 pr-10 text-sm text-[var(--text-heading,#1d1d1f)] bg-white/70 backdrop-blur-md border border-black/15 rounded-xl shadow-inner transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:outline focus:outline-2 focus:outline-[var(--accent-blue,#0066ff)]"
             placeholder="Enter your password"
             aria-labelledby="password-label"
+            aria-invalid={Boolean(passwordError)}
+            aria-describedby={passwordDescribedBy}
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-sm"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary,#6e6e73)] hover:text-[var(--text-heading,#1d1d1f)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue,#0066ff)] rounded-sm"
             aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-controls="password"
+            aria-pressed={showPassword}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
         {passwordError && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-red animate-fade-up"
+            id="password-error"
+            className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--palette-semantic-danger,#d22118)] animate-fade-up"
             role="alert"
             aria-live="assertive"
           >
@@ -155,7 +203,8 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
+            id="caps-lock-warning"
+            className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--palette-semantic-warning,#d97706)] animate-fade-up"
             role="alert"
             aria-live="polite"
           >
@@ -165,7 +214,8 @@ export function LoginForm() {
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
+            id="rate-limit-warning"
+            className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--palette-semantic-warning,#d97706)] animate-fade-up"
             role="alert"
             aria-live="polite"
           >
@@ -178,54 +228,81 @@ export function LoginForm() {
         <AnimatedButton
           type="submit"
           disabled={loading || isRateLimited}
-          className="w-full h-14 rounded-lg liquid-glass-button bg-gradient-to-b from-[#c59837] via-[#94611a] to-[#603808] hover:from-[#d4a843] hover:via-[#a36c1e] hover:to-[#6e410b] text-white text-base font-bold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-1 transition-all duration-300 drop-shadow-[0_10px_20px_rgba(90,51,7,0.4)] drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_16px_32px_rgba(90,51,7,0.55)] hover:drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] border border-amber-400/30"
-          hoverScale={1.02}
-          tapScale={0.97}
+          className="w-full h-12 rounded-xl liquid-glass-button bg-[var(--accent-blue,#0066ff)] hover:brightness-95 active:brightness-90 text-white text-sm font-semibold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue,#0066ff)] transition-all duration-200 shadow-md border border-white/30"
+          hoverScale={BUTTON_HOVER_SCALE}
+          tapScale={BUTTON_TAP_SCALE}
         >
-          {/* Specular top rim shine */}
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-200/75 to-transparent z-10" />
-
-          {/* Sweeping light shine effect */}
-          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/60 to-transparent z-10" />
           {loading ? (
             <span className="flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
               <Loader2 className="w-4 h-4 animate-spin shrink-0" />
               <span>Accessing your workspace...</span>
             </span>
           ) : (
-            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
+            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20 font-semibold">
               Access Arch Systems
             </span>
           )}
         </AnimatedButton>
       </div>
 
-      <div className="flex items-center justify-between pt-3">
+      <div className="flex items-center justify-between pt-1">
         <Checkbox
           id="remember-me"
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
           label="Remember me"
-          className="text-xs text-black/80 hover:text-black transition-colors liquid-text-lift"
+          className="text-xs font-medium text-[var(--text-secondary,#6e6e73)] hover:text-[var(--text-heading,#1d1d1f)] transition-colors"
         />
         <Link
           href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1 py-0.5 -mx-1"
+          className="text-xs font-medium text-[var(--text-secondary,#6e6e73)] hover:text-[var(--accent-blue,#0066ff)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue,#0066ff)] rounded px-1 py-0.5 -mx-1"
         >
           Forgot password?
         </Link>
       </div>
 
-      <div className="flex items-center justify-center gap-2 pt-2 border-t border-black/10 text-[11px] text-black/60 select-none">
-        <span className="font-mono text-[10px] tracking-wider uppercase">AI Engine</span>
+      <div className="flex items-center justify-center gap-2 pt-2 border-t border-black/10 text-[11px] text-[var(--text-secondary,#6e6e73)] select-none">
+        <span className="font-mono text-[10px] tracking-wider uppercase font-medium">
+          AI Engine
+        </span>
         <span className="opacity-40">•</span>
-        <img
+        <NextImage
           src="/images/ai-sdk/ai-sdk-logotype-light.svg"
           alt="Powered by Vercel AI SDK"
-          className="h-4 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity"
+          width={78}
+          height={16}
+          className="h-4 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
         />
       </div>
     </form>
+  );
+}
+
+/**
+ * High-fidelity zero-CLS skeleton matching LoginForm layout.
+ * Used inside Suspense boundaries for streaming SSR per Vercel React Best Practices.
+ */
+export function LoginFormSkeleton() {
+  return (
+    <div data-testid="login-form-skeleton" className="space-y-6 animate-pulse" aria-hidden="true">
+      <div className="space-y-2">
+        <div className="h-3 w-28 rounded bg-[var(--text-heading,#1d1d1f)]/10" />
+        <div className="h-11 w-full rounded-xl bg-white/50 border border-black/10" />
+        <div className="h-2.5 w-44 rounded bg-[var(--text-secondary,#6e6e73)]/10" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 w-16 rounded bg-[var(--text-heading,#1d1d1f)]/10" />
+        <div className="h-11 w-full rounded-xl bg-white/50 border border-black/10" />
+      </div>
+      <div className="h-12 w-full rounded-xl bg-[var(--accent-blue,#0066ff)]/20" />
+      <div className="flex items-center justify-between pt-1">
+        <div className="h-4 w-24 rounded bg-[var(--text-secondary,#6e6e73)]/10" />
+        <div className="h-4 w-24 rounded bg-[var(--text-secondary,#6e6e73)]/10" />
+      </div>
+      <div className="flex items-center justify-center gap-2 pt-2 border-t border-black/10">
+        <div className="h-3 w-28 rounded bg-[var(--text-secondary,#6e6e73)]/10" />
+      </div>
+    </div>
   );
 }

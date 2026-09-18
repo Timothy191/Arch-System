@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { Activity, AlertCircle, RefreshCw, Server, WifiOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface FuxaFrameProps {
   scadaUrl?: string;
@@ -69,9 +69,7 @@ export function FuxaFrame({
           <div className="flex items-center gap-2">
             <span
               className={`h-2.5 w-2.5 rounded-full ${
-                isDegraded
-                  ? "bg-amber-500 animate-pulse"
-                  : "bg-emerald-500"
+                isDegraded ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
               }`}
             />
             <span className="text-xs font-medium text-gray-700">
@@ -113,7 +111,8 @@ export function FuxaFrame({
                   SCADA Telemetry Unresponsive
                 </h4>
                 <p className="text-xs text-amber-800">
-                  The upstream FUXA SCADA server at <span className="font-mono">{scadaUrl}</span> is currently unreachable or slow to respond.
+                  The upstream FUXA SCADA server at <span className="font-mono">{scadaUrl}</span> is
+                  currently unreachable or slow to respond.
                 </p>
               </div>
 
@@ -123,7 +122,8 @@ export function FuxaFrame({
                   Database Mirror Active
                 </div>
                 <p className="text-amber-800">
-                  Control Room operations are operating via local PostgreSQL state cache. Real-time controls will automatically reconnect once the FUXA probe recovers.
+                  Control Room operations are operating via local PostgreSQL state cache. Real-time
+                  controls will automatically reconnect once the FUXA probe recovers.
                 </p>
               </div>
 

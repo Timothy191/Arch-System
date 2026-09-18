@@ -1,10 +1,9 @@
+import type { SyncPlaybackInput } from "@repo/contract/types/sync.types";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { inngest } from "@repo/utils/inngest";
 import { revalidatePath } from "next/cache";
 import { logError } from "@/lib/errors/error-logger";
 import { recordJobExecution } from "@/lib/observability/simple-metrics";
-
-import type { SyncPlaybackInput } from "@repo/contract/types/sync.types";
 
 export const syncPlaybackFn = inngest.createFunction(
   { id: "sync-playback", triggers: [{ event: "sync/playback" }] },
@@ -93,5 +92,5 @@ export const syncPlaybackFn = inngest.createFunction(
     } finally {
       recordJobExecution("sync-playback", performance.now() - start, success);
     }
-  },
+  }
 );

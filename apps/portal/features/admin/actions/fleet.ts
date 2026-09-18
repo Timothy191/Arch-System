@@ -55,7 +55,7 @@ export async function adminAddMachine(data: {
   });
 
   if (error) return { error: "Failed to add machine" };
- 
+
   await updateTags(["table:fleet", "table:equipment", "table:machines"]);
   revalidatePath("/admin");
   return { success: true };
@@ -72,7 +72,7 @@ export async function adminUpdateMachine(
     site_id?: string | null;
     active?: boolean;
     report_exempt?: boolean;
-  },
+  }
 ) {
   const auth = await assertAdmin();
   if ("error" in auth) return { error: auth.error };

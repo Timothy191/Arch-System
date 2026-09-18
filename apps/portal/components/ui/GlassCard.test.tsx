@@ -11,7 +11,7 @@ describe("GlassCard", () => {
     render(
       <GlassCard variant="window" title="Test Window">
         Window Content
-      </GlassCard>,
+      </GlassCard>
     );
     expect(screen.getByText("Test Window")).toBeInTheDocument();
     expect(screen.getByText("Window Content")).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe("GlassCard", () => {
     const { container } = render(
       <GlassCard variant="glowborder" animationDuration={10}>
         GlowBorder Content
-      </GlassCard>,
+      </GlassCard>
     );
     expect(screen.getByText("GlowBorder Content")).toBeInTheDocument();
     expect(container.firstChild).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("GlassCard", () => {
     const { container } = render(
       <GlassCard variant="liquid" hover>
         Liquid Content
-      </GlassCard>,
+      </GlassCard>
     );
 
     const card = container.firstChild;

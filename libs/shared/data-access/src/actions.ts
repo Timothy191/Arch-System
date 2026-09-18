@@ -1,7 +1,7 @@
 "use server";
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
 import { cacheInvalidateTags } from "@repo/redis";
+import { createServerSupabaseClient } from "@repo/supabase/server";
 import { revalidateTag } from "next/cache";
 
 export async function revalidateRSC(tags: string[]) {
@@ -33,6 +33,6 @@ export async function revalidateRSC(tags: string[]) {
   } catch {
     // Gracefully handle Redis offline
   }
-  
+
   return { success: true };
 }

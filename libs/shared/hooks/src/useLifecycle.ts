@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type DependencyList, type EffectCallback } from "react";
+import { type DependencyList, type EffectCallback, useEffect, useRef } from "react";
 
 /**
  * Hook executing callback exclusively on component initial mount.
@@ -40,6 +40,6 @@ export function useUpdateEffect(effect: EffectCallback, deps?: DependencyList): 
       return;
     }
     return effect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, deps);
 }

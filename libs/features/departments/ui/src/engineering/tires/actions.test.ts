@@ -45,7 +45,7 @@ function buildSupabaseMock(
     updateError?: unknown;
     selectData?: unknown;
     selectError?: unknown;
-  } = {},
+  } = {}
 ) {
   const user = overrides.getUser !== undefined ? overrides.getUser : { id: "user-123" };
 

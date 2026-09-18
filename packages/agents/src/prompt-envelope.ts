@@ -128,7 +128,7 @@ ${JSON.stringify(
     errors: ["string"],
   },
   null,
-  2,
+  2
 )}
 
 ### 9. ERROR & RECOVERY PROTOCOL

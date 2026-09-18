@@ -2,9 +2,8 @@ import { Divider } from "@repo/ui/Divider";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ErrorBoundary } from "~/components/ErrorBoundary";
-import { getDepartmentContext } from "~/lib/dept-context";
-
 import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
+import { getDepartmentContext } from "~/lib/dept-context";
 
 import { ControlRoomSummaryGridClient } from "./ControlRoomSummaryGridClient";
 import { NonControlRoomSummaryGridClient } from "./NonControlRoomSummaryGridClient";
@@ -26,7 +25,7 @@ const ControlRoomWidgets = dynamic(
         <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
       </div>
     ),
-  },
+  }
 );
 
 export default async function DepartmentDashboard({

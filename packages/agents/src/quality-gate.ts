@@ -66,7 +66,7 @@ export class QualityGate {
 
       // 3. Forbidden Raw Tailwind Shadow Check
       const shadowMatch = line.match(
-        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo)-[0-9]+\b/,
+        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo)-[0-9]+\b/
       );
       if (shadowMatch) {
         violations.push({

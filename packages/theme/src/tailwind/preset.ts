@@ -23,7 +23,7 @@ const archTheme: Config = {
     "./src/**/*.{ts,tsx}",
     "../../packages/ui/src/**/*.{ts,tsx}",
     "../../packages/theme/src/**/*.{ts,tsx}",
-    "../../libs/**/*.{ts,tsx}",
+    "../../libs/**/src/**/*.{ts,tsx}",
     "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "",

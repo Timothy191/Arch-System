@@ -19,7 +19,7 @@ export class AgentFleetRunner {
    * Orchestrates a multi-agent review pass across domain areas.
    */
   public static runSwarmAudit(
-    filesToAudit: Array<{ filePath: string; content: string }>,
+    filesToAudit: Array<{ filePath: string; content: string }>
   ): AgentSwarmReport {
     const domainAudits: AgentSwarmReport["domainAudits"] = [];
     const recommendations: string[] = [];
@@ -49,14 +49,14 @@ export class AgentFleetRunner {
           agentPassed = false;
           auditResult.criticalViolations.forEach((v) => {
             findings.push(
-              `Critical: [${v.ruleId}] in ${filePath}:${v.lineNumber || 0} - ${v.description}`,
+              `Critical: [${v.ruleId}] in ${filePath}:${v.lineNumber || 0} - ${v.description}`
             );
           });
         }
 
         auditResult.warnings.forEach((w) => {
           findings.push(
-            `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`,
+            `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`
           );
         });
       });
@@ -86,10 +86,10 @@ export class AgentFleetRunner {
       recommendations.push("Execute ReflectionEngine auto-remediation loop on failing modules.");
     }
     recommendations.push(
-      "Maintain 100% InitPlan RLS policy subquery optimization on all PostgreSQL tables.",
+      "Maintain 100% InitPlan RLS policy subquery optimization on all PostgreSQL tables."
     );
     recommendations.push(
-      "Enforce OKLCH theme design tokens and light-mode layout constraints on pure UI packages.",
+      "Enforce OKLCH theme design tokens and light-mode layout constraints on pure UI packages."
     );
 
     return {

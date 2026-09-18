@@ -73,7 +73,7 @@ export class AgentQualitySDK {
    */
   public async runTask(
     task: Subtask,
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult> {
     return this.reflectionEngine.executeTaskWithReflection(task, options);
   }
@@ -83,7 +83,7 @@ export class AgentQualitySDK {
    */
   public async runPlan(
     plan: Subtask[],
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult[]> {
     const results: VerifiedTaskResult[] = [];
     for (const task of plan) {

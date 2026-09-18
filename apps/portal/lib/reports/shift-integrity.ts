@@ -38,7 +38,7 @@ export function addDays(dateStr: string, days: number): string {
 export function timeAtOperationalZone(
   dateStr: string,
   time: string,
-  timeZone: string = OPERATIONAL_TIMEZONE,
+  timeZone: string = OPERATIONAL_TIMEZONE
 ): Date {
   const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
   const [hour = 0, minute = 0] = time.split(":").map(Number);
@@ -50,7 +50,7 @@ export function timeAtOperationalZone(
     hourCycle: "h23",
   });
   const zoneHour = Number(
-    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value,
+    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value
   );
   const utcHour = new Date(utcGuess).getUTCHours();
   // Shift the guess by the zone's offset so the result is `time` in that zone.
@@ -208,5 +208,5 @@ export const shiftIntegrityReportFn = inngest.createFunction(
     } finally {
       recordJobExecution("shift-integrity-report", performance.now() - start, success);
     }
-  },
+  }
 );

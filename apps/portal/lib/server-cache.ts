@@ -1,8 +1,5 @@
-import {
-  unstable_cache,
-  revalidateTag as nextRevalidateTag,
-} from "next/cache";
 import { cacheInvalidateTags } from "@repo/redis";
+import { revalidateTag as nextRevalidateTag, unstable_cache } from "next/cache";
 
 /**
  * Standard Next.js 16 semantic cache lifetime profiles.
@@ -100,10 +97,7 @@ export async function updateTags(tags: string[]): Promise<void> {
  * @param tag The cache tag to invalidate
  * @param profile The cache life profile ('max', 'hours', 'minutes', etc.)
  */
-export function refreshTag(
-  tag: string,
-  profile: CacheProfile = "max"
-): void {
+export function refreshTag(tag: string, profile: CacheProfile = "max"): void {
   (nextRevalidateTag as any)(tag, profile);
 }
 

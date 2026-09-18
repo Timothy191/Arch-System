@@ -79,4 +79,3 @@ export const healthCheckResponseSchema = z.object({
 
 export type ShiftCloseoutInput = z.infer<typeof shiftCloseoutSchema>;
 export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
-

@@ -37,5 +37,5 @@ export const machineBreakdownNotificationFn = inngest.createFunction(
       });
       throw err;
     }
-  },
+  }
 );

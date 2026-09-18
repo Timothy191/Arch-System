@@ -70,11 +70,11 @@ export const dailyPdfReportGenerationFn = inngest.createFunction(
         const totalCoal = (productionLogs || []).reduce((sum, p) => sum + (p.coal_tonnes ?? 0), 0);
         const totalWaste = (productionLogs || []).reduce(
           (sum, p) => sum + (p.waste_tonnes ?? 0),
-          0,
+          0
         );
         const totalHours = (machineHours || []).reduce(
           (sum, m) => sum + (m.hours_operated ?? 0),
-          0,
+          0
         );
 
         const reportSummary = {
@@ -139,5 +139,5 @@ export const dailyPdfReportGenerationFn = inngest.createFunction(
     } finally {
       recordJobExecution("daily-pdf-report-generation", performance.now() - start, success);
     }
-  },
+  }
 );

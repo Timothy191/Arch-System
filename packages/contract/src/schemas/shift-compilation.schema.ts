@@ -76,3 +76,13 @@ export const lockAndSignShiftSchema = z.object({
   pin: nonEmptyString.max(20),
   approvedById: uuidSchema.optional(),
 });
+
+export const shiftCloseoutSchema = z.object({
+  shiftId: uuidSchema,
+  supervisorId: uuidSchema,
+  supervisorPin: nonEmptyString.max(20),
+  totalLoads: z.number().int().nonnegative(),
+  totalOperatingHours: z.number().nonnegative(),
+  breakdownHours: z.number().nonnegative(),
+  operatorNotes: z.string().max(2000).optional().nullable(),
+});

@@ -27,7 +27,7 @@ describe("ViewportBoundaries component", () => {
       online: true,
     });
     (useSplitWindow as unknown as jest.Mock).mockImplementation((selector: any) =>
-      selector({ isOpen: false }),
+      selector({ isOpen: false })
     );
   });
 
@@ -54,7 +54,7 @@ describe("ViewportBoundaries component", () => {
 
   it("should apply shift class when split window is open", () => {
     (useSplitWindow as unknown as jest.Mock).mockImplementation((selector: any) =>
-      selector({ isOpen: true }),
+      selector({ isOpen: true })
     );
     render(<ViewportBoundaries />);
     const dock = screen.getByTestId("unified-dock");

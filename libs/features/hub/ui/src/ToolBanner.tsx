@@ -1,5 +1,3 @@
-"use client";
-
 import { GlassCard } from "@repo/ui/GlassCard";
 import { cn } from "@repo/ui/lib/utils";
 import { Marquee } from "@repo/ui/Marquee";
@@ -7,11 +5,11 @@ import { Calculator, Calendar, CheckSquare, Factory, FileText, StickyNote } from
 
 // AGENT-TRACE: Maps database icon identifiers to canonical Lucide React component references
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  tasks: CheckSquare,
-  documents: FileText,
-  schedule: Calendar,
-  calculations: Calculator,
-  notes: StickyNote,
+  CheckSquare: CheckSquare,
+  FileText: FileText,
+  Calendar: Calendar,
+  Calculator: Calculator,
+  StickyNote: StickyNote,
 };
 
 // AGENT-TRACE: Canonical design tokens mapped to specific alert/accent colors for glass spotlights

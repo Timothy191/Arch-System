@@ -1,0 +1,85 @@
+image: node:22
+
+variables:
+  PNPM_VERSION: 9.15.9
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pnpm-store
+    - node_modules/
+    - .turbo/
+  policy: pull-push
+
+stages:
+  - setup
+  - validate
+  - test
+  - build
+  - deploy
+
+.pnpm_setup: &pnpm_setup
+  before_script:
+    - npm i -g pnpm@$PNPM_VERSION
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
+
+install:
+  stage: setup
+  <<: *pnpm_setup
+  script:
+    - echo "Dependencies installed"
+
+quality:
+  stage: validate
+  <<: *pnpm_setup
+  script:
+    - pnpm quality
+  needs:
+    - install
+
+test:
+  stage: test
+  <<: *pnpm_setup
+  script:
+    - pnpm test
+  needs:
+    - install
+
+build:
+  stage: build
+  <<: *pnpm_setup
+  script:
+    - pnpm build
+  artifacts:
+    paths:
+      - apps/portal/.next/
+    expire_in: 1 day
+  needs:
+    - quality
+    - test
+
+deploy:staging:
+  stage: deploy
+  <<: *pnpm_setup
+  script:
+    - pnpm deploy:staging
+  environment:
+    name: staging
+  only:
+    - develop
+  needs:
+    - build
+
+deploy:production:
+  stage: deploy
+  <<: *pnpm_setup
+  script:
+    - pnpm deploy:production
+  environment:
+    name: production
+  when: manual
+  only:
+    - main
+  needs:
+    - build

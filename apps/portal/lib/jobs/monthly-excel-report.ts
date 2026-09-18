@@ -58,5 +58,5 @@ export const monthlyExcelReportFn = inngest.createFunction(
     });
 
     return { success: true, report: reportMeta };
-  },
+  }
 );

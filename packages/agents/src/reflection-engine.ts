@@ -42,7 +42,7 @@ export class ReflectionEngine {
    */
   public async executeTaskWithReflection(
     task: Subtask,
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult> {
     const maxRetries = options.maxReflectionIterations ?? this.maxIterations;
     const filePath = options.targetFilePath;
@@ -73,7 +73,7 @@ export class ReflectionEngine {
 
     const pillarPrompt = AgentPillarEnvelope.compileSystemPrompt(
       pillarConfig,
-      task.workspaceContext,
+      task.workspaceContext
     );
 
     let currentInstructions = task.instructions;

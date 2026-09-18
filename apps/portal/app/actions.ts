@@ -1,10 +1,10 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { monthlyReportInputSchema } from "@repo/contract/schemas/form.schema";
-import { AuthError, ForbiddenError, ValidationError, isAppError } from "@repo/errors";
+import { AuthError, ForbiddenError, isAppError, ValidationError } from "@repo/errors";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 import { aiGenerateEmbeddingEvent, inngest } from "@repo/utils/inngest";
+import { redirect } from "next/navigation";
 import { logError } from "@/lib/errors/error-logger";
 import { updateTagInAction } from "@/lib/server-cache";
 
@@ -23,7 +23,7 @@ export async function logout(): Promise<never> {
 }
 
 export async function speculativeEmbedShiftLog(
-  text: string,
+  text: string
 ): Promise<ServerActionResponse<{ queued: boolean }>> {
   try {
     // Validate that the user is authenticated
@@ -97,7 +97,7 @@ export async function revalidateRSC(tags: string[]): Promise<ServerActionRespons
 
 export async function generateMonthlyReport(
   rawReportData: unknown,
-  departmentId?: string,
+  departmentId?: string
 ): Promise<ServerActionResponse<{ url: string }>> {
   try {
     // Validate that the user is authenticated

@@ -1,6 +1,8 @@
 module.exports = {
   testEnvironment: "jsdom",
   forceExit: true,
+  // Advisor Note: workerIdleMemoryLimit is set to "512MB" to prevent Jest memory leaks from crashing the CI environment during large test runs.
+  workerIdleMemoryLimit: "512MB",
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
   transform: {

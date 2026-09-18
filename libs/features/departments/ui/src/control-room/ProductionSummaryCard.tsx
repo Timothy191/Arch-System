@@ -1,5 +1,3 @@
-"use client";
-
 import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
 import { GlassCard } from "@repo/ui/GlassCard";
 import { BarChart2, Layers, Truck } from "lucide-react";

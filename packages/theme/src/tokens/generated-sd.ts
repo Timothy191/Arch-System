@@ -887,12 +887,12 @@ module.exports = {
   glass: {
     surface: {
       key: "{glass.surface}",
-      value: "#ffffff26",
+      value: "#ffffffe0",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.15)",
+        value: "rgba(255, 255, 255, 0.88)",
         type: "color",
         key: "{glass.surface}",
       },
@@ -905,12 +905,12 @@ module.exports = {
     },
     "surface-hover": {
       key: "{glass.surface-hover}",
-      value: "#ffffff40",
+      value: "#fffffff2",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.25)",
+        value: "rgba(255, 255, 255, 0.95)",
         type: "color",
         key: "{glass.surface-hover}",
       },
@@ -923,12 +923,12 @@ module.exports = {
     },
     "surface-strong": {
       key: "{glass.surface-strong}",
-      value: "#ffffff59",
+      value: "#fffffffa",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.35)",
+        value: "rgba(255, 255, 255, 0.98)",
         type: "color",
         key: "{glass.surface-strong}",
       },
@@ -941,12 +941,12 @@ module.exports = {
     },
     border: {
       key: "{glass.border}",
-      value: "#ffffff66",
+      value: "#e2e8f099",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.4)",
+        value: "rgba(226, 232, 240, 0.6)",
         type: "color",
         key: "{glass.border}",
       },
@@ -959,12 +959,12 @@ module.exports = {
     },
     "border-top": {
       key: "{glass.border-top}",
-      value: "#ffffff80",
+      value: "#ffffffe6",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "rgba(255, 255, 255, 0.5)",
+        value: "rgba(255, 255, 255, 0.9)",
         type: "color",
         key: "{glass.border-top}",
       },
@@ -977,12 +977,14 @@ module.exports = {
     },
     "border-gradient": {
       key: "{glass.border-gradient}",
-      value: "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
+      value:
+        "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
       type: "color",
       filePath: "tokens.json",
       isSource: true,
       original: {
-        value: "linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3))",
+        value:
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
         type: "color",
         key: "{glass.border-gradient}",
       },
@@ -1067,6 +1069,127 @@ module.exports = {
       },
       path: ["glass", "shadow"],
     },
+  },
+  "silver-tint": {
+    key: "{silver-tint}",
+    value: "#f8fafc",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "#f8fafc",
+      type: "color",
+      key: "{silver-tint}",
+    },
+    name: "SilverTint",
+    attributes: {
+      category: "silver-tint",
+    },
+    path: ["silver-tint"],
+  },
+  "silver-tint-subtle": {
+    key: "{silver-tint-subtle}",
+    value: "#f1f5f999",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(241, 245, 249, 0.6)",
+      type: "color",
+      key: "{silver-tint-subtle}",
+    },
+    name: "SilverTintSubtle",
+    attributes: {
+      category: "silver-tint-subtle",
+    },
+    path: ["silver-tint-subtle"],
+  },
+  "silver-border": {
+    key: "{silver-border}",
+    value: "#cbd5e180",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(203, 213, 225, 0.5)",
+      type: "color",
+      key: "{silver-border}",
+    },
+    name: "SilverBorder",
+    attributes: {
+      category: "silver-border",
+    },
+    path: ["silver-border"],
+  },
+  "silver-border-light": {
+    key: "{silver-border-light}",
+    value: "#e2e8f099",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "rgba(226, 232, 240, 0.6)",
+      type: "color",
+      key: "{silver-border-light}",
+    },
+    name: "SilverBorderLight",
+    attributes: {
+      category: "silver-border-light",
+    },
+    path: ["silver-border-light"],
+  },
+  "silver-glow": {
+    key: "{silver-glow}",
+    value: "0 8px 30px -4px rgba(203, 213, 225, 0.35)",
+    type: "shadow",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "0 8px 30px -4px rgba(203, 213, 225, 0.35)",
+      type: "shadow",
+      key: "{silver-glow}",
+    },
+    name: "SilverGlow",
+    attributes: {
+      category: "silver-glow",
+    },
+    path: ["silver-glow"],
+  },
+  "silver-border-gradient": {
+    key: "{silver-border-gradient}",
+    value:
+      "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value:
+        "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.7) 45%, rgba(203, 213, 225, 0.4) 100%)",
+      type: "color",
+      key: "{silver-border-gradient}",
+    },
+    name: "SilverBorderGradient",
+    attributes: {
+      category: "silver-border-gradient",
+    },
+    path: ["silver-border-gradient"],
+  },
+  "silver-tint-gradient": {
+    key: "{silver-tint-gradient}",
+    value: "linear-gradient(135deg, #f8fafc 0%, rgba(241, 245, 249, 0.6) 100%)",
+    type: "color",
+    filePath: "tokens.json",
+    isSource: true,
+    original: {
+      value: "linear-gradient(135deg, #f8fafc 0%, rgba(241, 245, 249, 0.6) 100%)",
+      type: "color",
+      key: "{silver-tint-gradient}",
+    },
+    name: "SilverTintGradient",
+    attributes: {
+      category: "silver-tint-gradient",
+    },
+    path: ["silver-tint-gradient"],
   },
   "text-on-glass": {
     key: "{text-on-glass}",

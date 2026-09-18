@@ -1,5 +1,23 @@
 # Scripts Agent Tracer
 
+## 2026-09-18: Remove Dead and Duplicate Script Wiring
+
+### Purpose
+
+Remove unreferenced helper scripts, obsolete MCP preflight wiring, stale runtime-cache commands, and the duplicate graph command.
+
+### Changes
+
+- Removed `autonomous-ui-delegator.mjs`, `codebase_compliance_audit.sh`, `dev-login.sh`, `sync-mcp-config.js`, and `validate-mcp-servers.js`.
+- Removed the obsolete MCP section from `preflight-checklist.sh`.
+- Removed root and Makefile references to the missing `manage-runtime-caches.mjs` helper.
+- Kept `turbo:graph` as the single graph command and updated onboarding documentation.
+
+### Verification
+
+- Confirmed all removed helpers had no active runtime callers, except obsolete MCP references removed in the same change.
+- Validated the remaining script references with repository-wide search.
+
 ## 2026-09-11: Non-root Port Checking (`lsof -ti`)
 
 ### Purpose

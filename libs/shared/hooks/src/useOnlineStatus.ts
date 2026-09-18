@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 function subscribe(callback: () => void): () => void {
   window.addEventListener("online", callback);

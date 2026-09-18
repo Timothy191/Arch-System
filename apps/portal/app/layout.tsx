@@ -29,20 +29,17 @@ const HeaderWidgets = dynamic(
         <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
       </div>
     ),
-  },
+  }
 );
 
 const CommandBar = dynamic(() =>
-  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
+  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar }))
 );
 
-// AGENT-TRACE: MacMenuBar deferred via next/dynamic to remove framer-motion
-// from the shared layout chunk. Without this, framer-motion lands in every
-// page's bundle (including error.tsx, global-error.tsx) because MacMenuBar
-// is synchronously imported in a Server Component layout boundary.
-import { MacMenuBar } from "@repo/ui/MacMenuBar";
-
 import { RouteBackground } from "@/components/RouteBackground";
+import { ArchLockOverlay } from "@/components/system/ArchLockOverlay";
+import { ArchMacMenuBar } from "@/components/system/ArchMacMenuBar";
+import { BrowserCompatibilityBanner } from "@/components/system/BrowserCompatibilityBanner";
 import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
 import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
 
@@ -109,7 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         {/* Preload primary LCP background asset off critical path */}
         <link
           rel="preload"
-          href="/background/edge-of-the-event-horizon-poster.webp"
+          href="/background/ps3-wave-poster.webp"
           as="image"
           type="image/webp"
           fetchPriority="high"
@@ -141,12 +138,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <RouteBackground />
               {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
               <WebVitalsReporter />
+              <BrowserCompatibilityBanner />
               <OfflineBanner />
               <AriaLauncher />
 
               {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
               <header aria-label="Global navigation" className="flex items-center gap-3">
-                <MacMenuBar
+                <ArchMacMenuBar
                   rightSlot={
                     <nav id="navigation" aria-label="Main menu">
                       <div className="flex items-center gap-3">
@@ -170,6 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <CommandBar />
               <ViewportBoundaries />
               <ClientOverlays />
+              <ArchLockOverlay />
               <Toaster />
 
               {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}

@@ -15,14 +15,14 @@ export const Code = React.forwardRef<HTMLElement, CodeProps>(
         className={cn(
           "font-mono text-xs px-1.5 py-0.5 rounded",
           "bg-neutral-100 text-neutral-900 border border-neutral-200",
-          className,
+          className
         )}
         {...props}
       >
         {children}
       </code>
     );
-  },
+  }
 );
 
 Code.displayName = "Code";

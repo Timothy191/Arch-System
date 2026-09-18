@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, CheckCircle, Clock, Lock, Moon, Printer, Sun } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface ShiftCompilationHeaderProps {
   departmentSlug: string;
@@ -21,18 +21,13 @@ export function ShiftCompilationHeader({
   onOpenCloseoutModal,
 }: ShiftCompilationHeaderProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleDateChange = (newDate: string) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.set("date", newDate);
-    router.push(`/${departmentSlug}/shift-compilation?${params.toString()}`);
+    router.push(`/${departmentSlug}/shift-compilation?date=${newDate}&shift=${shiftType}`);
   };
 
   const handleShiftChange = (newShift: "day" | "night") => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.set("shift", newShift);
-    router.push(`/${departmentSlug}/shift-compilation?${params.toString()}`);
+    router.push(`/${departmentSlug}/shift-compilation?date=${shiftDate}&shift=${newShift}`);
   };
 
   const isClosed = status === "closed";

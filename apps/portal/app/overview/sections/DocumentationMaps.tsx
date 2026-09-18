@@ -127,8 +127,8 @@ export default function DocumentationMaps() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
-                      ) === index,
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>
