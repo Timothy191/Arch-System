@@ -41,7 +41,7 @@ function checkPort(port, host = "127.0.0.1") {
 async function checkHttp(url) {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     const _res = await fetch(url, {
       method: "GET",
       signal: controller.signal,

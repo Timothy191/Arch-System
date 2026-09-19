@@ -138,7 +138,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-sm"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -178,7 +178,7 @@ export function LoginForm() {
         <AnimatedButton
           type="submit"
           disabled={loading || isRateLimited}
-          className="w-full h-14 rounded-lg liquid-glass-button bg-gradient-to-b from-[#c59837] via-[#94611a] to-[#603808] hover:from-[#d4a843] hover:via-[#a36c1e] hover:to-[#6e410b] text-white text-base font-bold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-1 transition-all duration-300 drop-shadow-[0_10px_20px_rgba(90,51,7,0.4)] drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_16px_32px_rgba(90,51,7,0.55)] hover:drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] border border-amber-400/30"
+          className="w-full h-14 rounded-button liquid-glass-button bg-gradient-to-b from-[#c59837] via-[#94611a] to-[#603808] hover:from-[#d4a843] hover:via-[#a36c1e] hover:to-[#6e410b] text-white text-base font-bold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-1 transition-all duration-300 drop-shadow-[0_10px_20px_rgba(90,51,7,0.4)] drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_16px_32px_rgba(90,51,7,0.55)] hover:drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] border border-amber-400/30"
           hoverScale={1.02}
           tapScale={0.97}
         >
@@ -211,7 +211,7 @@ export function LoginForm() {
         />
         <Link
           href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1 py-0.5 -mx-1"
+          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md px-1 py-0.5 -mx-1"
         >
           Forgot password?
         </Link>

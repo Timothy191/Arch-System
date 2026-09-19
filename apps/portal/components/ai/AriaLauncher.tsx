@@ -87,14 +87,9 @@ export function AriaLauncher(): JSX.Element {
                   Powered by
                 </span>
                 <img
-                  src="/images/ai-sdk/ai-sdk-logotype-dark.svg"
-                  alt="Vercel AI SDK"
-                  className="h-3.5 w-auto object-contain dark:block hidden"
-                />
-                <img
                   src="/images/ai-sdk/ai-sdk-logotype-light.svg"
                   alt="Vercel AI SDK text logo"
-                  className="h-3.5 w-auto object-contain dark:hidden block invert"
+                  className="h-3.5 w-auto object-contain block"
                 />
               </div>
             </div>

@@ -49,8 +49,8 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
                       className={cn(
                         "select-none shrink-0",
                         type === "menu"
-                          ? "text-neutral-400 dark:text-neutral-600 text-xs mx-0.5"
-                          : "text-neutral-400 dark:text-neutral-500 font-mono text-xs",
+                          ? "text-neutral-400 text-xs mx-0.5"
+                          : "text-neutral-400 font-mono text-xs",
                       )}
                     >
                       {separator}
@@ -84,16 +84,16 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
       contentClasses = cn(
         "inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors border select-none",
         active
-          ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 border-transparent shadow-xs font-semibold"
-          : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200/80 dark:border-neutral-700/60 hover:bg-neutral-200/70 dark:hover:bg-neutral-700/60 hover:text-neutral-900 dark:hover:text-white",
+          ? "bg-neutral-900 text-white border-transparent shadow-xs font-semibold"
+          : "bg-neutral-100 text-neutral-600 border-neutral-200/80 hover:bg-neutral-200/70:bg-neutral-700/60 hover:text-neutral-900:text-white",
         disabled && "opacity-40 pointer-events-none cursor-not-allowed border-transparent",
       );
     } else {
       contentClasses = cn(
         "inline-flex items-center text-sm transition-colors",
         active
-          ? "text-neutral-900 dark:text-neutral-100 font-semibold cursor-default"
-          : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100",
+          ? "text-neutral-900 font-semibold cursor-default"
+          : "text-neutral-500 hover:text-neutral-900:text-neutral-100",
         disabled && "opacity-40 pointer-events-none cursor-not-allowed",
       );
     }

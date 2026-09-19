@@ -25,6 +25,7 @@
   --mac-menu-bar-height: 28px;
   --border: 240 6% 87%;
   --accent-red: #d22118;
+  --accent-blue: #007aff;
   --accent-alert: #d22118;
   --success: #34c759;
   --success-foreground: 0 0% 100%;
@@ -107,9 +108,9 @@
   --shadow-elevated:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
     0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
-  --shadow-glow-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-primary: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-electric: 0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
+  --shadow-glow-blue: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
+  --shadow-glow-primary: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
+  --shadow-glow-electric: 0 0 24px rgba(0, 122, 255, 0.28), 0 0 80px rgba(0, 122, 255, 0.1);
   --shadow-window:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
     0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
@@ -155,7 +156,6 @@
   --text-primary: var(--arch10);
   --text-heading: var(--arch11);
   --accent-charcoal: var(--arch13);
-  --accent-blue: var(--arch13);
   --accent-green: var(--arch14);
   --accent-cyan: var(--arch15);
   --accent-emerald: var(--arch14);

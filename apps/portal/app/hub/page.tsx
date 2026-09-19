@@ -368,7 +368,7 @@ export default async function HubPage() {
         >
           <Link
             href="/hub/executive"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-button bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] text-xs font-medium border border-[var(--accent-blue)]/20 hover:bg-[var(--accent-blue)]/20 hover:border-[var(--accent-blue)]/30 transition-all"
           >
             <BarChart3 className="w-3.5 h-3.5" />
             Executive Dashboard
@@ -387,7 +387,7 @@ export default async function HubPage() {
       >
         <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-            <span className="p-1 rounded-md bg-accent-red/10 text-accent-red">
+            <span className="p-1 rounded-lg bg-accent-red/10 text-accent-red">
               <Shield className="w-4 h-4" />
             </span>
             Live System Urgency & Incident Controls
@@ -398,7 +398,7 @@ export default async function HubPage() {
 
       {/* Core Operational Modules - Interactive Filtered Grid */}
       {departments.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center rounded-2xl bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
+        <div className="p-8 sm:p-12 text-center rounded-card bg-arch-surface-secondary/40 border border-arch-border-subtle space-y-3">
           <Shield className="w-8 h-8 mx-auto text-accent-amber" />
           <p className="text-sm font-medium text-arch-text-secondary">
             No departments assigned to your account.
@@ -419,7 +419,7 @@ export default async function HubPage() {
         >
           <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
             <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
-              <span className="p-1 rounded-md bg-arch-accent-blue/10 text-arch-accent-blue">
+              <span className="p-1 rounded-lg bg-arch-accent-blue/10 text-arch-accent-blue">
                 <WrenchIcon className="w-4 h-4" />
               </span>
               Daily Workflow & Efficiency Tools
@@ -427,7 +427,7 @@ export default async function HubPage() {
           </div>
 
           <Suspense
-            fallback={<div className="h-28 animate-pulse bg-arch-surface-tertiary rounded-2xl" />}
+            fallback={<div className="h-28 animate-pulse bg-arch-surface-tertiary rounded-card" />}
           >
             <ToolBanner tools={tools} />
           </Suspense>
@@ -441,7 +441,7 @@ export default async function HubPage() {
       >
         <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
-            <span className="p-1 rounded-md bg-accent-green/10 text-accent-green">
+            <span className="p-1 rounded-lg bg-accent-green/10 text-accent-green">
               <Activity className="w-4 h-4" />
             </span>
             Operational Ingestion Telemetry
@@ -450,10 +450,10 @@ export default async function HubPage() {
         <GlassCard
           variant="default"
           padding
-          className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-2xl p-5 sm:p-6"
+          className="bg-arch-surface-secondary/70 border border-arch-border-subtle rounded-card p-5 sm:p-6"
         >
           <Suspense
-            fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-xl" />}
+            fallback={<div className="h-64 animate-pulse bg-arch-surface-tertiary rounded-card" />}
           >
             <ProductionTrendSection />
           </Suspense>

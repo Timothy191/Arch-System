@@ -1,7 +1,7 @@
 ---
-description: Mandatory Spec-Driven Input Breakdown and Autonomous Swarming Protocol
-globs: ["**/*"]
-alwaysApply: true
+name: spec-driven-swarming
+description: >-
+  Use this skill when you need to decompose complex inputs or goals into EARS specifications and execute autonomous swarming protocols.
 ---
 
 # Spec-Driven Decomposition & Autonomous Swarming Protocol

@@ -1,11 +1,11 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-09-11T04:22:07.302Z
+Generated on 2026-09-16T15:03:57.787Z
 
 ## Fitness Function Telemetry
 
 - **Database Tables Scanned**: 86
-- **Zod Contract Schemas**: 63
+- **Zod Contract Schemas**: 75
 - **Drift Health Index (DHI)**: 31.4%
 - **Contract Coverage Rating**: 🟡 Needs Review
 

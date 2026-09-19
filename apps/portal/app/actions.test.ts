@@ -59,14 +59,17 @@ describe("actions", () => {
   });
 
   describe("speculativeEmbedShiftLog", () => {
-    it("throws error if user is not authenticated", async () => {
+    it("returns unauthorized error result if user is not authenticated", async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
       });
 
-      await expect(speculativeEmbedShiftLog("test shift log note")).rejects.toThrow("Unauthorized");
+      const res = await speculativeEmbedShiftLog("test shift log note");
+      expect(res.success).toBe(false);
+      expect(res.error).toBe("Unauthorized");
+      expect(res.code).toBe("AUTH_ERROR");
       expect(inngest.send).not.toHaveBeenCalled();
     });
 
@@ -79,7 +82,9 @@ describe("actions", () => {
         },
       });
 
-      await speculativeEmbedShiftLog("");
+      const res = await speculativeEmbedShiftLog("");
+      expect(res.success).toBe(true);
+      expect(res.data?.queued).toBe(false);
       expect(inngest.send).not.toHaveBeenCalled();
     });
 
@@ -92,7 +97,9 @@ describe("actions", () => {
         },
       });
 
-      await speculativeEmbedShiftLog("valid log entry");
+      const res = await speculativeEmbedShiftLog("valid log entry");
+      expect(res.success).toBe(true);
+      expect(res.data?.queued).toBe(true);
       expect(inngest.send).toHaveBeenCalledWith({
         name: "ai/generate-embedding",
         data: {
@@ -104,17 +111,20 @@ describe("actions", () => {
   });
 
   describe("generateMonthlyReport", () => {
-    it("throws error if user is not authenticated", async () => {
+    it("returns unauthorized error if user is not authenticated", async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
       });
 
-      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow("Unauthorized");
+      const res = await generateMonthlyReport({ title: "Test" });
+      expect(res.success).toBe(false);
+      expect(res.error).toBe("Unauthorized");
+      expect(res.code).toBe("AUTH_ERROR");
     });
 
-    it("throws error if user is not admin or manager", async () => {
+    it("returns forbidden error if user is not admin or manager", async () => {
       const mockSingle = jest.fn().mockResolvedValue({
         data: { role: "operator", department_id: "dept-1" },
         error: null,
@@ -131,7 +141,9 @@ describe("actions", () => {
         from: jest.fn().mockReturnValue({ select: mockSelect }),
       } as any);
 
-      await expect(generateMonthlyReport({ title: "Test" })).rejects.toThrow("Unauthorized");
+      const res = await generateMonthlyReport({ title: "Test" });
+      expect(res.success).toBe(false);
+      expect(res.code).toBe("FORBIDDEN_ERROR");
     });
 
     it("generates report and returns signed URL for authorized users", async () => {

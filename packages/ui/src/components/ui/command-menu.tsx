@@ -136,7 +136,7 @@ export function CommandMenu({
       >
         <div
           className={cn(
-            "w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 transition-all text-neutral-900 dark:text-neutral-100",
+            "w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl transition-all text-neutral-900",
             className,
           )}
         >
@@ -195,8 +195,8 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
     };
 
     return (
-      <div className="flex items-center border-b border-neutral-200 px-3 dark:border-neutral-800">
-        <Search className="mr-2 h-4 w-4 shrink-0 text-neutral-400 dark:text-neutral-500" />
+      <div className="flex items-center border-b border-neutral-200 px-3">
+        <Search className="mr-2 h-4 w-4 shrink-0 text-neutral-400" />
         <input
           ref={inputRef}
           type="text"
@@ -205,12 +205,12 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={cn(
-            "flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
           {...props}
         />
-        <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-mono font-medium text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400 select-none">
+        <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-[10px] font-mono font-medium text-neutral-500 select-none">
           ESC
         </kbd>
       </div>
@@ -250,11 +250,7 @@ export function CommandMenuList({
       {...props}
     >
       {children}
-      {showEmpty && (
-        <div className="py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
-          {emptyMessage}
-        </div>
-      )}
+      {showEmpty && <div className="py-6 text-center text-sm text-neutral-500">{emptyMessage}</div>}
     </div>
   );
 }
@@ -297,7 +293,7 @@ export function CommandMenuGroup({
       {...props}
     >
       {heading && hasVisibleChildren && (
-        <div className="px-2 pb-1.5 text-xs font-semibold text-neutral-500 dark:text-neutral-400 select-none">
+        <div className="px-2 pb-1.5 text-xs font-semibold text-neutral-500 select-none">
           {heading}
         </div>
       )}
@@ -377,8 +373,8 @@ export function CommandMenuItem({
       className={cn(
         "relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-2 text-sm outline-none transition-colors",
         isActive
-          ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
-          : "text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800/60",
+          ? "bg-neutral-100 text-neutral-900"
+          : "text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60",
         disabled && "pointer-events-none opacity-50",
         className,
       )}
@@ -393,10 +389,6 @@ export function CommandMenuItem({
 
 export function CommandMenuDivider({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      role="separator"
-      className={cn("my-1.5 h-px bg-neutral-200 dark:bg-neutral-800", className)}
-      {...props}
-    />
+    <div role="separator" className={cn("my-1.5 h-px bg-neutral-200", className)} {...props} />
   );
 }

@@ -81,12 +81,27 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
   return (
     <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-center justify-center py-8 px-4 overflow-y-auto bg-transparent">
+      {/* Floating Pill Taskbar */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-lg z-50 flex items-center px-6 justify-between liquid-glass-light">
+        <div className="flex items-center gap-4">
+          <EveLogo className="h-4 w-auto text-sky-800" />
+          <span className="text-xs font-medium text-black">Arch OS</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Clock
+            testId="taskbar-clock"
+            format="time"
+            className="text-xs text-black/80 font-medium"
+          />
+        </div>
+      </div>
+
       {/* Login Card wrapper */}
       <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up flex flex-col justify-center">
         {/* Liquid Refraction Glow (Behind Card) */}
         <RefractionGlow />
         {systemUnavailable ? (
-          <div className="w-full flex flex-col overflow-hidden liquid-glass-light border border-white/20 shadow-window rounded-2xl">
+          <div className="w-full flex flex-col overflow-hidden liquid-glass-light border border-white/20 shadow-window rounded-card">
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10">
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="w-3 h-3 rounded-full bg-mac-red border border-arch-border-subtle" />
@@ -107,7 +122,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               </p>
               <a
                 href="/login"
-                className="inline-block mt-4 px-4 py-2 text-sm font-medium text-black bg-arch-accent-blue hover:opacity-90 rounded-lg transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
+                className="inline-block mt-4 px-4 py-2 text-sm font-medium text-white bg-arch-accent-blue hover:opacity-90 rounded-button transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
               >
                 Retry
               </a>
@@ -116,7 +131,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         ) : (
           <div
             data-testid="login-card"
-            className="w-full flex flex-col overflow-hidden login-card-container layer-signin-card liquid-glass-light border border-white/20 shadow-window rounded-2xl"
+            className="w-full flex flex-col overflow-hidden login-card-container layer-signin-card liquid-glass-light border border-white/20 shadow-window rounded-card"
           >
             {/* Title bar */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/10 bg-white/5">
@@ -146,7 +161,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
               {/* Title */}
               <div className="flex items-center gap-3.5">
-                <div className="p-2 rounded-xl bg-black/[0.04] border border-black/[0.06] shadow-sm shrink-0 flex items-center justify-center">
+                <div className="p-2 rounded-lg bg-black/[0.04] border border-black/[0.06] shadow-sm shrink-0 flex items-center justify-center">
                   <Logo className="w-9 h-9 text-[var(--accent-blue)]" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
@@ -162,7 +177,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               <LoginForm />
 
               {/* Contextual System Notice */}
-              <div className="px-3.5 py-2 rounded-lg border border-white/15 bg-white/5 text-[11px] text-black leading-relaxed flex items-center gap-2.5 select-none">
+              <div className="px-3.5 py-2 rounded-md border border-white/15 bg-white/5 text-[11px] text-black leading-relaxed flex items-center gap-2.5 select-none">
                 <AlertCircle className="w-3.5 h-3.5 text-black shrink-0" strokeWidth={2} />
                 <span>
                   <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
@@ -174,7 +189,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <div className="px-4 py-3 flex items-center justify-between text-[10px] text-black bg-white/5 border-t border-white/10 select-none">
               <button
                 type="button"
-                className="flex items-center gap-1 cursor-pointer hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded px-1.5 py-0.5 -mx-1.5"
+                className="flex items-center gap-1 cursor-pointer hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md px-1.5 py-0.5 -mx-1.5"
                 aria-label="Select Language"
               >
                 <span>English (US)</span>

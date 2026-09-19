@@ -156,7 +156,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
         role="region"
         aria-label="Calendar"
         className={cn(
-          "inline-flex rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-4 shadow-sm select-none",
+          "inline-flex rounded-xl border border-neutral-200 bg-white p-4 shadow-sm select-none",
           horizontalLayout || (!stacked && presets)
             ? "flex-col md:flex-row gap-6"
             : "flex-col gap-4",
@@ -170,9 +170,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
           <div
             className={cn(
               "flex flex-col gap-1 shrink-0",
-              stacked
-                ? "border-b border-neutral-200 dark:border-neutral-800 pb-3"
-                : "border-r border-neutral-200 dark:border-neutral-800 pr-4",
+              stacked ? "border-b border-neutral-200 pb-3" : "border-r border-neutral-200 pr-4",
             )}
           >
             <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
@@ -184,7 +182,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                   key={key}
                   type="button"
                   onClick={() => handlePresetClick(preset)}
-                  className="px-2.5 py-1 text-left rounded-md text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  className="px-2.5 py-1 text-left rounded-md text-xs font-medium text-neutral-600 hover:bg-neutral-100:bg-neutral-800 transition-colors"
                 >
                   {preset.text}
                 </button>
@@ -201,18 +199,18 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
               type="button"
               onClick={handlePrevMonth}
               aria-label="Previous Month"
-              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900:text-white hover:bg-neutral-100:bg-neutral-800 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="font-semibold text-neutral-900 dark:text-neutral-100">
+            <span className="font-semibold text-neutral-900">
               {monthNames[month]} {year}
             </span>
             <button
               type="button"
               onClick={handleNextMonth}
               aria-label="Next Month"
-              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900:text-white hover:bg-neutral-100:bg-neutral-800 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -254,10 +252,10 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                   className={cn(
                     "w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors mx-auto",
                     isStart || isEnd
-                      ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 font-semibold shadow-2xs"
+                      ? "bg-neutral-900 text-white font-semibold shadow-2xs"
                       : isInRange
-                        ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 rounded-none"
-                        : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                        ? "bg-neutral-100 text-neutral-900 rounded-none"
+                        : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800",
                     isDisabled && "opacity-30 pointer-events-none cursor-not-allowed",
                   )}
                 >
@@ -269,7 +267,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
 
           {/* Footer Controls: Allow Clear & Pinned Timezone */}
           {(allowClear || pinnedTimezone) && (
-            <div className="flex items-center justify-between pt-3 border-t border-neutral-200 dark:border-neutral-800 text-xs text-neutral-500">
+            <div className="flex items-center justify-between pt-3 border-t border-neutral-200 text-xs text-neutral-500">
               {pinnedTimezone ? (
                 <span className="flex items-center gap-1 font-mono text-[11px]">
                   <Clock className="w-3 h-3" />
@@ -283,7 +281,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900:text-white transition-colors"
                 >
                   <X className="w-3 h-3" />
                   Clear

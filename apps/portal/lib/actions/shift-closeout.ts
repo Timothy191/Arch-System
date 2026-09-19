@@ -1,7 +1,8 @@
 "use server";
 
-import { type ShiftCloseoutInput, shiftCloseoutSchema } from "@repo/contract";
-import { AppError, AuthError, RateLimitError, ValidationError, isAppError } from "@repo/errors";
+import { shiftCloseoutSchema } from "@repo/contract/schemas/shift-compilation.schema";
+import type { ShiftCloseoutInput } from "@repo/contract/types/shift-compilation.types";
+import { AuthError, RateLimitError, ValidationError, isAppError } from "@repo/errors";
 import { getRedisClient } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";
 
@@ -51,7 +52,7 @@ async function checkRateLimit(supervisorId: string): Promise<boolean> {
  * Redis rate-limiting (5 req/min), and pgcrypto supervisor PIN verification RPC.
  */
 export async function submitShiftCloseout(
-  rawInput: ShiftCloseoutInput
+  rawInput: ShiftCloseoutInput,
 ): Promise<ShiftCloseoutResult> {
   try {
     // 1. Validate input payload against canonical Zod schema
@@ -66,9 +67,12 @@ export async function submitShiftCloseout(
     // 2. Rate limiting check (5 attempts per user per minute)
     const allowed = await checkRateLimit(payload.supervisorId);
     if (!allowed) {
-      throw new RateLimitError("Rate limit exceeded. Maximum 5 shift closeout attempts allowed per minute.", {
-        context: { supervisorId: payload.supervisorId },
-      });
+      throw new RateLimitError(
+        "Rate limit exceeded. Maximum 5 shift closeout attempts allowed per minute.",
+        {
+          context: { supervisorId: payload.supervisorId },
+        },
+      );
     }
 
     // 3. Instantiate Supabase server client
@@ -84,11 +88,15 @@ export async function submitShiftCloseout(
       if (rpcError.message?.includes("temporarily locked")) {
         throw new AuthError(rpcError.message, { context: { supervisorId: payload.supervisorId } });
       }
-      throw new AuthError("Supervisor PIN verification failed.", { cause: new Error(rpcError.message) });
+      throw new AuthError("Supervisor PIN verification failed.", {
+        cause: new Error(rpcError.message),
+      });
     }
 
     if (!isValidPin) {
-      throw new AuthError("Invalid supervisor PIN.", { context: { supervisorId: payload.supervisorId } });
+      throw new AuthError("Invalid supervisor PIN.", {
+        context: { supervisorId: payload.supervisorId },
+      });
     }
 
     // 5. Update shift status to closed in database
@@ -107,7 +115,7 @@ export async function submitShiftCloseout(
           total_checklist_count: payload.totalLoads,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "department_id,report_date,shift_type" }
+        { onConflict: "department_id,report_date,shift_type" },
       )
       .select()
       .single();
@@ -162,7 +170,8 @@ export async function submitShiftCloseout(
       };
     }
 
-    const message = err instanceof Error ? err.message : "An unexpected error occurred during shift closeout";
+    const message =
+      err instanceof Error ? err.message : "An unexpected error occurred during shift closeout";
     return {
       success: false,
       error: message,

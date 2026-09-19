@@ -1,13 +1,11 @@
 {
   "hooks": {
-    "PreInvocation": "bash .agents/hooks/pre-invocation-inject.sh",
-    "PreToolUse": "bash .agents/hooks/pre-tool-guard.sh",
-    "PostToolUse": "bash .agents/hooks/post-tool-tracer.sh",
-    "Stop": "bash .agents/hooks/worktree-guard.sh"
+    "PreInvocation": [
+      { "command": "bash .agents/hooks/pre-invocation-inject.sh", "shell": "bash" }
+    ],
+    "PreToolUse": [{ "command": "bash .agents/hooks/pre-tool-guard.sh", "shell": "bash" }],
+    "PostToolUse": [{ "command": "bash .agents/hooks/post-tool-tracer.sh", "shell": "bash" }],
+    "Stop": [{ "command": "bash .agents/hooks/worktree-guard.sh", "shell": "bash" }]
   },
-  "timeouts": {
-    "PreToolUse": 5,
-    "PostToolUse": 120,
-    "Stop": 300
-  }
+  "timeouts": { "PreToolUse": 5, "PostToolUse": 120, "Stop": 300 }
 }

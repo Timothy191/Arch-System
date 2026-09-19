@@ -9,6 +9,15 @@ module.exports = {
   },
   overrides: [
     {
+      files: ["**/*.cjs"],
+      parserOptions: {
+        project: null,
+      },
+      rules: {
+        "no-undef": "off",
+      },
+    },
+    {
       files: ["scripts/*.js"],
       env: { node: true },
       parserOptions: {
