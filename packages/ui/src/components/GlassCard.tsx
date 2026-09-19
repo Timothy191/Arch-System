@@ -296,15 +296,9 @@ export function GlassCard({
     )
   `;
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (prefersReduced || isTouch || !isSpotlight) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      mouseX.set(e.clientX - rect.left);
-      mouseY.set(e.clientY - rect.top);
-    },
-    [prefersReduced, isTouch, isSpotlight, mouseX, mouseY],
-  );
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Disabled mouse effects
+  }, []);
 
   // GlowBorder colors setup
   const glowColors =
@@ -482,7 +476,7 @@ export function GlassCard({
         // Base classes
         "isolate relative overflow-hidden",
         "liquid-glass-light border border-white/20 shadow-window",
-        "group rounded-2xl animate-window-open",
+        "group rounded-card animate-window-open",
         hover && "liquid-glass-interactive",
 
         // Accent colors for hover

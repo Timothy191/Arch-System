@@ -44,11 +44,11 @@ interface BatteryManager extends EventTarget {
   dischargingTime: number;
   addEventListener(
     _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
-    _listener: EventListenerOrEventListenerObject
+    _listener: EventListenerOrEventListenerObject,
   ): void;
   removeEventListener(
     _type: "chargingchange" | "levelchange" | "chargingtimechange" | "dischargingtimechange",
-    _listener: EventListenerOrEventListenerObject
+    _listener: EventListenerOrEventListenerObject,
   ): void;
 }
 
@@ -245,7 +245,7 @@ export function useAppVolume() {
       setMuted(m);
       persist(clamped, m);
     },
-    [persist]
+    [persist],
   );
 
   return { volume, muted, toggleMute, adjust };
@@ -288,7 +288,7 @@ interface HealthState {
 // and proper cleanup on unmount. Reduces redundant API calls across tab switches.
 function useServerHealth() {
   const mapServiceStatus = (
-    s: { status: "healthy" | "degraded" | "down" } | null | undefined
+    s: { status: "healthy" | "degraded" | "down" } | null | undefined,
   ): "ok" | "degraded" | "unavailable" => {
     if (!s) return "unavailable";
     if (s.status === "healthy") return "ok";
@@ -369,11 +369,11 @@ export function NetworkStatusRow({
           : Wifi;
 
   return (
-    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
+    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
       <ConnQualityIcon
         className={cn(
           "w-4 h-4 shrink-0",
-          online ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]"
+          online ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]",
         )}
       />
       <div className="flex-1 min-w-0">
@@ -417,7 +417,7 @@ export function BatteryStatusRow({
 }: ReturnType<typeof useBatteryStatus>) {
   if (!supported || level === null) {
     return (
-      <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
+      <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
         <BatteryMedium className="w-4 h-4 text-[var(--text-secondary)]" />
         <span className="text-[12px] text-[var(--text-muted)]">Battery status unavailable</span>
       </div>
@@ -451,7 +451,7 @@ export function BatteryStatusRow({
         : "bg-[var(--accent-green)]";
 
   return (
-    <div className="px-2 py-1.5 rounded-md space-y-1.5">
+    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
       <div className="flex items-center gap-2.5">
         <BatteryIcon className={cn("w-4 h-4 shrink-0", batteryColor)} />
         <div className="flex-1 flex items-center justify-between">
@@ -494,13 +494,13 @@ export function VolumeControlRow({
     muted || volume === 0 ? "text-[var(--text-muted)]" : "text-[var(--accent-blue)]";
 
   return (
-    <div className="px-2 py-1.5 rounded-md space-y-1.5">
+    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
       <div className="flex items-center gap-2.5">
         <button
           type="button"
           onClick={toggleMute}
           aria-label={muted ? "Unmute" : "Mute"}
-          className="p-0.5 rounded hover:bg-black/[0.06] transition-colors"
+          className="p-0.5 rounded-md hover:bg-black/[0.06] transition-colors"
         >
           <VolumeIcon className={cn("w-4 h-4", volumeColor)} />
         </button>
@@ -523,7 +523,7 @@ export function VolumeControlRow({
 
 export function NotificationRow({ count, clear }: ReturnType<typeof useNotificationCount>) {
   return (
-    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md">
+    <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
       <div className="relative">
         {count > 0 ? (
           <BellDot className="w-4 h-4 text-[var(--text-secondary)]" />
@@ -611,7 +611,7 @@ export function ServerHealthRow({
   const current = statusConfig[status] ?? statusConfig.healthy;
 
   return (
-    <div className="px-2 py-1.5 rounded-md space-y-1.5">
+    <div className="px-2 py-1.5 rounded-lg space-y-1.5">
       <div className="flex items-center gap-2.5">
         <current.icon className={cn("w-4 h-4 shrink-0", current.color)} />
         <span className="text-[12px] font-medium text-[var(--text-heading)] flex-1">
@@ -642,9 +642,9 @@ function OfflineQueueRow() {
   if (pendingCount === 0 && isOnline) return null;
 
   return (
-    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-accent-amber/10 border border-accent-amber/20">
       <div className="flex items-center gap-2 min-w-0">
-        <CloudOff className="w-4 h-4 text-amber-600 shrink-0" />
+        <CloudOff className="w-4 h-4 text-accent-amber shrink-0" />
         <div className="flex flex-col min-w-0">
           <span className="text-[12px] font-medium text-[var(--text-heading)]">
             {pendingCount > 0
@@ -661,7 +661,7 @@ function OfflineQueueRow() {
           type="button"
           onClick={() => flushQueue()}
           disabled={isSyncing}
-          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-button bg-accent-amber text-white hover:bg-accent-amber-hover transition-colors disabled:opacity-50"
         >
           <RefreshCw className={cn("w-3 h-3", isSyncing && "animate-spin")} />
           {isSyncing ? "Syncing..." : "Sync Now"}
@@ -724,7 +724,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
         className={cn(
           "flex items-center justify-center w-[26px] h-[26px] rounded-full",
           "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
-          "transition-colors active:scale-[0.97]"
+          "transition-colors active:scale-[0.97]",
         )}
         title="Task Manager"
       >
@@ -740,7 +740,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             className={cn(
               "flex items-center gap-2 h-[26px] px-2.5 rounded-full select-none cursor-default outline-none",
               "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
-              "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50"
+              "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
             )}
           >
             {/* Server health dot */}
@@ -770,7 +770,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
               <>
                 <span className="w-[1px] h-3 bg-black/[0.08]" />
                 <div
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 animate-pulse"
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-amber/10 border border-accent-amber/20 text-accent-amber animate-pulse"
                   title={`${offlineQueue.pendingCount} offline actions pending sync`}
                 >
                   <CloudOff className="w-3 h-3" />
@@ -785,8 +785,8 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             align="end"
             sideOffset={6}
             className={cn(
-              "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-3 z-[120]",
-              "flex flex-col gap-2 select-none focus:outline-none"
+              "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card p-3 z-[120]",
+              "flex flex-col gap-2 select-none focus:outline-none",
             )}
           >
             <div className="space-y-3">

@@ -80,15 +80,15 @@
   --text-heading: var(--arch11);
 
   --accent-red: var(--arch12);
-  /* Canonical brand interactive — deep charcoal (not macOS blue) */
+  /* Canonical brand interactive — electric blue CTA accent */
   --accent-charcoal: var(--arch13);
   /** @deprecated use --accent-charcoal — name retained for backward compatibility */
-  --accent-blue: var(--arch13);
+  --accent-blue: var(--accent-electric-blue);
   --accent-green: var(--arch14);
 
   /* Corporate Brand Colors */
-  --arch-brand-blue: #1c1c1e;
-  --arch-brand-blue-hover: #2c2c2e;
+  --arch-brand-blue: #007aff;
+  --arch-brand-blue-hover: #0066eb;
 
   /* ─── Extended Action & Status Palette ────────────────────────────────────
      These complement the macOS system blue with vivid action tokens that
@@ -97,10 +97,10 @@
      ─────────────────────────────────────────────────────────────────────── */
 
   /* Vivid Electric Blue — primary CTA, interactive highlights */
-  --accent-electric-blue: #1c1c1e;
-  --accent-electric-blue-hover: #2c2c2e;
-  --accent-electric-blue-subtle: rgba(28, 28, 30, 0.08);
-  --accent-electric-blue-border: rgba(28, 28, 30, 0.28);
+  --accent-electric-blue: #007aff;
+  --accent-electric-blue-hover: #0066eb;
+  --accent-electric-blue-subtle: rgba(0, 122, 255, 0.08);
+  --accent-electric-blue-border: rgba(0, 122, 255, 0.28);
 
   /* Mint Green — status: optimal / active / healthy */
   --accent-mint: #10b981;
@@ -122,7 +122,7 @@
   --color-status-danger: var(--accent-red);
 
   /* Glow shadows for the extended palette */
-  --shadow-glow-electric-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
+  --shadow-glow-electric-blue: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
   --shadow-glow-mint: 0 0 20px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.07);
   --shadow-glow-amber: 0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
 
@@ -344,9 +344,9 @@
   --shadow-elevated:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 20px rgba(0, 0, 0, 0.03), 0 20px 48px rgba(0, 0, 0, 0.03),
     0 32px 72px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
-  --shadow-glow-blue: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-primary: 0 0 20px rgba(28, 28, 30, 0.18), 0 0 60px rgba(28, 28, 30, 0.06);
-  --shadow-glow-electric: 0 0 24px rgba(28, 28, 30, 0.28), 0 0 80px rgba(28, 28, 30, 0.1);
+  --shadow-glow-blue: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
+  --shadow-glow-primary: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
+  --shadow-glow-electric: 0 0 24px rgba(0, 122, 255, 0.28), 0 0 80px rgba(0, 122, 255, 0.1);
   --shadow-window:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
     0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);

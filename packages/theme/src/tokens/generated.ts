@@ -110,8 +110,8 @@ export const tokens = {
     arch13: "#1c1c1e",
     arch14: "#34c759",
     arch15: "#1c1c1e",
-    archBrandBlue: "#1c1c1e",
-    archBrandBlueHover: "#2c2c2e",
+    archBrandBlue: "#007aff",
+    archBrandBlueHover: "#0066eb",
   },
   hsl: {
     background: "220 14% 96%",

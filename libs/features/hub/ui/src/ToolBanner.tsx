@@ -75,13 +75,13 @@ export function ToolBanner({ tools }: ToolBannerProps) {
               <GlassCard
                 variant="spotlight"
                 spotlightColor={config.glow}
-                className="h-full rounded-2xl bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300 will-change-[backdrop-filter]"
+                className="h-full rounded-card bg-white/75 backdrop-blur-xl border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-arch-accent-blue/30 transition-all duration-300 will-change-[backdrop-filter]"
               >
                 <div className="p-5 sm:p-6 flex flex-col items-center text-center select-none">
                   <div
                     className={cn(
-                      "p-3.5 rounded-xl mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle",
-                      config.iconBg
+                      "p-3.5 rounded-lg mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle",
+                      config.iconBg,
                     )}
                   >
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
