@@ -1,0 +1,22 @@
+{
+  "name": "arch-systems-ralph",
+  "qualityGate": {
+    "commands": [
+      "pnpm --filter @repo/ui type-check",
+      "pnpm --filter @repo/theme type-check",
+      "pnpm --filter @repo/hub/ui type-check",
+      "pnpm --filter @repo/auth/ui type-check",
+      "pnpm --filter @repo/departments/ui type-check",
+      "pnpm --filter @repo/ui lint:css",
+      "pnpm --filter @repo/theme lint:css",
+      "pnpm --filter portal test -- --testPathPatterns='login/page|hub/page|GlassCard|SystemTray|LoginForm' --maxWorkers=2"
+    ]
+  },
+  "commit": {
+    "all": false,
+    "messagePrefix": "ralph:"
+  },
+  "recovery": {
+    "onFailure": "stash broken work, log retrospective, and resume next cycle"
+  }
+}

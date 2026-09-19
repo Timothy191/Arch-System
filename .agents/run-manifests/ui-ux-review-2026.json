@@ -1,0 +1,56 @@
+{
+  "task": "UI/UX review of Arch monorepo frontend against 2026 Next.js world-class standards",
+  "date": "2026-09-19",
+  "model": "claude-sonnet-4",
+  "skills": ["review", "agent-ready", "llm-council"],
+  "scope": {
+    "allow": ["apps/portal", "packages/ui", "packages/theme", "libs/features/**/ui", "shared styling/layout configs", "public frontend assets"],
+    "deny": ["backend API routes", "DB/migrations", "CI/CD", "secrets", "infra"]
+  },
+  "commands": [
+    {
+      "cmd": "pnpm --filter portal build",
+      "result": "failed (exit 137 OOM during TypeScript after compile success; OpenAPI spec generated)"
+    },
+    {
+      "cmd": "pnpm --filter @repo/ui type-check && pnpm --filter @repo/theme type-check && pnpm --filter @repo/hub/ui type-check && pnpm --filter @repo/auth/ui type-check && pnpm --filter @repo/departments/ui type-check",
+      "result": "pass"
+    },
+    {
+      "cmd": "pnpm --filter @repo/ui lint:css && pnpm --filter @repo/theme lint:css",
+      "result": "pass"
+    },
+    {
+      "cmd": "pnpm --filter portal test -- --testPathPatterns='login/page|hub/page|GlassCard|SystemTray|LoginForm' --maxWorkers=2",
+      "result": "pass (42 tests, React act() / async Client Component warnings)"
+    },
+    {
+      "cmd": "agent-ready scan http://localhost:3042/login --json",
+      "result": "98/100 A+, MCP manifest valid, llms.txt present, JSON-LD valid"
+    },
+    {
+      "cmd": "agent-ready scan http://localhost:3042/hub --json",
+      "result": "98/100 A+, MCP manifest valid, llms.txt present, JSON-LD valid"
+    },
+    {
+      "cmd": "agent-ready scan http://localhost:3042/ --json",
+      "result": "98/100 A+, MCP manifest valid, llms.txt present, JSON-LD valid"
+    }
+  ],
+  "deliverables": [
+    ".agents/plans/ui-ux-review-2026.md",
+    ".agents/reports/ui-ux-review-report-2026.md",
+    ".agents/run-manifests/ui-ux-review-2026.json"
+  ],
+  "overall_score": 62.5,
+  "dimension_scores": {
+    "design-tokens": 62,
+    "glassmorphism-visual": 62,
+    "accessibility": 68,
+    "performance": 52,
+    "interaction-motion": 62,
+    "navigation-ia": 68,
+    "mobile-responsive": 64
+  },
+  "blocked": "Full production build OOM-killed; Lighthouse/axe E2E not run because production server could not start."
+}

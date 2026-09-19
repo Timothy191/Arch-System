@@ -24,6 +24,9 @@ const buttonVariants = cva(
         outline: "border border-neutral-200 bg-transparent hover:bg-neutral-100 text-neutral-900",
         ghost: "bg-transparent hover:bg-neutral-100 text-neutral-900 border border-transparent",
         link: "text-neutral-900 underline-offset-4 hover:underline border border-transparent bg-transparent",
+
+        // Glass translucent variant
+        glass: "bg-white/70 backdrop-blur-md text-neutral-900 border border-white/40 hover:bg-white/85 shadow-xs active:scale-[0.98]",
       },
       size: {
         // Geist sizes
@@ -42,6 +45,7 @@ const buttonVariants = cva(
         square: "rounded-md aspect-square p-0",
         circle: "rounded-full aspect-square p-0",
         rounded: "rounded-full px-5",
+        pill: "rounded-full px-5",
       },
     },
     defaultVariants: {
@@ -104,6 +108,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       "outline",
       "ghost",
       "link",
+      "glass",
     ];
     if (!variant && typeof type === "string" && possibleVariants.includes(type as ButtonVariant)) {
       resolvedVariant = type as ButtonVariant;

@@ -61,8 +61,8 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     return (
       <motion.div
         ref={ref}
-        onMouseMove={(e) => mouseX.set(e.pageX)}
-        onMouseLeave={() => mouseX.set(Infinity)}
+        onMouseMove={() => {}}
+        onMouseLeave={() => {}}
         {...props}
         className={cn(dockVariants({ className }), {
           "items-start": direction === "top",

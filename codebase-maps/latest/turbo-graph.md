@@ -50,7 +50,7 @@ flowchart TD
 
 ---
 
-## 🏷️ Nx Scope Tagging Hierarchy
+## 🏷️ Turborepo Scope Tagging Hierarchy
 
 ```mermaid
 graph TD
@@ -93,7 +93,6 @@ graph TD
 ---
 
 ## ⚙️ Turborepo Configuration Overview (`turbo.json`)
-
 - **Task Pipelines**: `build`, `lint`, `type-check`, `test`, `codegen`, `sync-assets`
 - **Task Hashing**: Inputs hash includes `globalDependencies`, `globalEnv`, and `$TURBO_DEFAULT$`
 - **Caching**: `build`, `lint`, `type-check`, `test`, `codegen` set to `cache: true`

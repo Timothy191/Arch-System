@@ -355,7 +355,7 @@ export function ThreeHeroRotator({
       </span>
 
       <div
-        className="relative w-full overflow-hidden touch-pan-y cursor-grab active:cursor-grabbing"
+        className="relative w-full touch-pan-y cursor-grab active:cursor-grabbing"
         style={{ height: "520px" }}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}

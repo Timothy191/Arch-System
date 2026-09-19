@@ -142,6 +142,10 @@ jobs:
         run: |
           ./scripts/staging-local.sh stop || true
 
+      - name: Print Deployment HUD Certificate
+        run: |
+          ./scripts/monitor-hud.sh --mode deploy --single-pass || true
+
       - name: Health Check
         if: vars.STAGING_URL != ''
         run: |
@@ -245,6 +249,10 @@ jobs:
           sleep 15
           curl -f ${{ vars.PRODUCTION_URL }}/api/health || exit 1
           curl -f ${{ vars.PRODUCTION_URL }}/login || exit 1
+
+      - name: Print Deployment HUD Certificate
+        run: |
+          ./scripts/monitor-hud.sh --mode deploy --single-pass || true
 
       - name: Output URL
         id: deploy

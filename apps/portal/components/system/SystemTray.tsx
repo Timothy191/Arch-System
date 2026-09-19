@@ -722,7 +722,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
       <Link
         href="/drilling/tools?tab=tasks"
         className={cn(
-          "flex items-center justify-center w-[26px] h-[26px] rounded-full",
+          "flex items-center justify-center min-w-11 min-h-11 rounded-full",
           "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
           "transition-colors active:scale-[0.97]",
         )}
@@ -736,9 +736,10 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
           <button
             type="button"
             aria-label="System Tray Popover"
+            aria-haspopup="dialog"
             title="System status & options"
             className={cn(
-              "flex items-center gap-2 h-[26px] px-2.5 rounded-full select-none cursor-default outline-none",
+              "flex items-center gap-2 min-h-11 px-2.5 rounded-full select-none cursor-default outline-none",
               "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
               "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
             )}

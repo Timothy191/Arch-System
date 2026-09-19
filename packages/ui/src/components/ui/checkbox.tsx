@@ -67,12 +67,12 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         />
         <span
           className={cn(
-            "flex items-center justify-center shrink-0 rounded border transition-all duration-150",
+            "flex items-center justify-center shrink-0 rounded border transition-colors duration-150",
             size === "small" ? "w-3.5 h-3.5 text-[10px]" : "w-4 h-4 text-xs",
-            "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900:ring-neutral-100",
+            "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900",
             isChecked
               ? "bg-neutral-900 border-neutral-900 text-white"
-              : "bg-white border-neutral-300 hover:border-neutral-400:border-neutral-600",
+              : "bg-white border-neutral-300 hover:border-neutral-400",
           )}
           aria-hidden="true"
         >

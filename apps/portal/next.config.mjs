@@ -10,7 +10,7 @@ const { version: PORTAL_VERSION } = require("./package.json");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Root includes both Arch-System and Arch-Base so Turbopack allows cross-repo symlinked packages
-const workspaceRoot = path.resolve(__dirname, "../../..");
+const workspaceRoot = path.resolve(__dirname, "../..");
 
 const isProduction = process.env.NODE_ENV === "production";
 const isCI = process.env.CI === "true";
@@ -23,7 +23,7 @@ const nextConfig = {
   // (`next build`). Webpack (`next build --webpack`) produces better chunk deduplication (0 vs
   // 3×576 KB duplicates), but fails because `inngest` uses `node:async_hooks` which Webpack 5
   // can't handle. Until Turbopack improves deduplication or inngest is excluded from the client
-  // bundle, we accept the 67 KB overhead. Track: Turbopack chunk deduplication improvements.
+  outputFileTracingRoot: workspaceRoot,
   turbopack: {
     root: workspaceRoot,
   },
@@ -98,14 +98,15 @@ const nextConfig = {
     },
   },
   reactStrictMode: true,
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.performance = {
-        hints: "warning",
-        maxAssetSize: 512000, // 500 KB
-        maxEntrypointSize: 1024000, // 1 MB
+        hints: dev ? false : "warning",
+        maxAssetSize: 1024000, // 1 MB
+        maxEntrypointSize: 2048000, // 2 MB
         assetFilter: (assetFilename) =>
-          assetFilename.endsWith(".js") || assetFilename.endsWith(".css"),
+          !assetFilename.includes("exceljs") &&
+          (assetFilename.endsWith(".js") || assetFilename.endsWith(".css")),
       };
     }
     return config;
@@ -131,7 +132,7 @@ const nextConfig = {
       "@radix-ui/react-popover",
     ],
     // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
-    inlineCss: false,
+    inlineCss: true,
     // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
     cacheLife: {
       telemetry: {

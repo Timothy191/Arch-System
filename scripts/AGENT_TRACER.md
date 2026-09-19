@@ -1,5 +1,33 @@
 # Scripts Agent Tracer
 
+## 2026-09-19: Visual Deployment Terminal Refinement & Animated ASCII HUD
+
+### Purpose
+
+Elevate the terminal deployment experience with high-contrast double-line borders, animated ASCII architectural topology, traveling packet pulse streams, dynamic gauge bars, and a professional deployment results certificate.
+
+### Changes
+
+1. **`scripts/monitor-hud.sh`**:
+   - Upgraded framing to double-line Unicode box drawing (`╔══╗`, `╠══╣`, `╚══╝`) with calibrated 256-color palette.
+   - Implemented animated 8-frame packet pulse streams across data bus conduits (`───━═◆═━──▶`, `────»»────▶`, `──────●───▶`).
+   - Added animated orbital spinner (`⠋⠙⠹⠸...`) and live audio/telemetry waveform spectrum (` ▃▅▇█▇▅▃ `).
+   - Added illustrated service node cards for Client Ingress (Cloudflare Edge CDN/HTTP/2), Next.js 16 Portal Engine with dynamic CPU & RAM gauge bars (`[████░░░░]`), Cloud Supabase PG 15, In-Memory Redis, SCADA/Edge FUXA, and Zero-Trust Security Sandbox.
+   - Added mode detection (`--mode deploy` vs `--mode dev`) with live deployment pipeline tracker (`[✔ BUILD] ──▶ [✔ INFRA] ──▶ [● GATEWAY] ──▶ [○ EDGE CDN]`).
+   - Integrated safe line-clipping on right-pane log streams to prevent curses cursor wrapping or terminal corruption.
+2. **`scripts/deploy.sh`**:
+   - Updated Phase 9 `phase_launch_monitoring` to launch `scripts/monitor-hud.sh --mode deploy` in the monitoring terminal.
+   - Redesigned Phase 10 results script (`.deploy-results-$$.sh`) with stylized double borders, ASCII celebration banner, status matrix pills, and quick-action shortcuts.
+   - Polished deployment startup and completion banners with double-line framing.
+
+### Verification
+
+- Syntax validation via `bash -n scripts/monitor-hud.sh` and `bash -n scripts/deploy.sh`.
+- Single-pass rendering verification in simulated PTY 2D buffer (120x34).
+- Successful dry-run execution via `bash scripts/deploy.sh local --dry-run`.
+
+
+
 ## 2026-09-11: Non-root Port Checking (`lsof -ti`)
 
 ### Purpose

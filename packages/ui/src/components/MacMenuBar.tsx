@@ -152,7 +152,7 @@ const EXTERNAL_LIST = [
 ] as const;
 
 const NAV_BTN =
-  "px-2.5 h-6 flex items-center rounded-button text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default";
+  "px-2.5 min-h-11 flex items-center rounded-button text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default";
 
 const DROPDOWN_CONTENT =
   "liquid-glass-light backdrop-blur-2xl shadow-window border border-white/20 rounded-card py-1";
@@ -390,7 +390,7 @@ export function MacMenuBar({
               }),
             );
           }}
-          className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
+          className="min-w-11 min-h-11 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
           title="WhatsApp Web (Split Screen)"
         >
           <Image

@@ -40,7 +40,12 @@ const CommandBar = dynamic(() =>
 // from the shared layout chunk. Without this, framer-motion lands in every
 // page's bundle (including error.tsx, global-error.tsx) because MacMenuBar
 // is synchronously imported in a Server Component layout boundary.
-import { MacMenuBar } from "@repo/ui/MacMenuBar";
+const MacMenuBar = dynamic(
+  () => import("@repo/ui/MacMenuBar").then((m) => ({ default: m.MacMenuBar })),
+  {
+    ssr: true,
+  },
+);
 
 import { RouteBackground } from "@/components/RouteBackground";
 import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";

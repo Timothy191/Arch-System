@@ -4,6 +4,12 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-18] - n8n Backend Contract and Safe Fleet Verifier
+
+- **Action:** Added `docs/operations/n8n-backend-requirements.md` and `scripts/verify-n8n-stack.sh`, plus the `verify:n8n` package command. Documented n8n OAuth callback requirements, Redis loopback policy, ScrapingBee workflow prerequisites, and external service boundaries.
+- **Verification:** The verifier checks n8n health and unauthenticated API protection without reading or printing credentials, then probes the local automation fleet and Redis protocol.
+- **Known boundary:** OAuth client IDs, n8n API keys, ScrapingBee credentials, and imported workflow activation remain operator-owned configuration.
+
 ## [2026-09-16] - Frontend Autonomous Overwatch Audit & Production Hardening (Score: 98/100)
 
 - **Agent:** Antigravity IDE (Gemini) + Critique Council Overwatch Reviewer (`c96ea384-d5f7-4c93-8a1a-ab9e11737434`)

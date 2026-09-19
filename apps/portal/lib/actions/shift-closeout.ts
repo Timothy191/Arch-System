@@ -1,7 +1,7 @@
 "use server";
 
-import { shiftCloseoutSchema } from "@repo/contract/schemas/shift-compilation.schema";
-import type { ShiftCloseoutInput } from "@repo/contract/types/shift-compilation.types";
+import { shiftCloseoutSchema } from "@repo/contract/schemas/control-room.schema";
+import type { ShiftCloseoutInput } from "@repo/contract/schemas/control-room.schema";
 import { AuthError, RateLimitError, ValidationError, isAppError } from "@repo/errors";
 import { getRedisClient } from "@repo/redis";
 import { createServerSupabaseClient } from "@repo/supabase/server";

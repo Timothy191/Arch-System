@@ -63,14 +63,32 @@ export interface LiquiButtonProps
     VariantProps<typeof buttonVariants> {
   /** Overrides for the underlying glass surface (radius, refraction, bezel…). */
   glass?: Partial<LiquiGlassProps>;
+  /** Render as a full pill shape */
+  pill?: boolean;
 }
 
 export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
-  ({ variant, size, glass, className, children, ...props }, ref) => {
+  ({ variant, size, glass, pill = false, className, children, ...props }, ref) => {
+    const glassConfig = {
+      ...BUTTON_GLASS,
+      ...(pill ? { radius: 9999 } : {}),
+      ...glass,
+    };
+
     return (
-      <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props}>
-        <LiquiGlass {...BUTTON_GLASS} {...glass}>
-          <div className={buttonContentVariants({ size })}>{children}</div>
+      <button
+        ref={ref}
+        className={cn(
+          buttonVariants({ variant, size }),
+          pill && "rounded-full",
+          className,
+        )}
+        {...props}
+      >
+        <LiquiGlass {...glassConfig}>
+          <div className={cn(buttonContentVariants({ size }), pill && "rounded-full px-5")}>
+            {children}
+          </div>
         </LiquiGlass>
       </button>
     );

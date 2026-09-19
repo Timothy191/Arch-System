@@ -20,7 +20,8 @@
     "./fetch-client": "./src/fetch-client.ts",
     "./offline-storage": "./src/offline-storage.ts",
     "./inngest": "./src/inngest.ts",
-    "./novu": "./src/novu.ts"
+    "./novu": "./src/novu.ts",
+    "./n8n": "./src/n8n.ts"
   },
   "private": true,
   "scripts": {

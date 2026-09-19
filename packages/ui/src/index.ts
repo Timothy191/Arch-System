@@ -77,7 +77,6 @@ export * from "./components/ui/glass-skeleton";
 export * from "./components/ui/grid";
 export * from "./components/ui/hero-video-dialog";
 export * from "./components/ui/input";
-export * from "./components/ui/input";
 export * from "./components/ui/json-view";
 export * from "./components/ui/label";
 export {

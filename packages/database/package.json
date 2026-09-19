@@ -8,6 +8,7 @@
     "./migrations/*": "./migrations/*"
   },
   "scripts": {
+    "db:types": "supabase gen types typescript --local > ./types.ts",
     "supabase:gen": "supabase gen types typescript --local > ../supabase/src/database.types.ts",
     "supabase:push": "supabase db push",
     "supabase:reset": "supabase db reset",
