@@ -150,7 +150,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               <AriaLauncher />
 
               {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
-              <header aria-label="Global navigation" className="flex items-center gap-3">
+              <header aria-label="Global navigation">
                 <MacMenuBar
                   rightSlot={
                     <nav id="navigation" aria-label="Main menu">

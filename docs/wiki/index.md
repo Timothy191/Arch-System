@@ -2,8 +2,8 @@
 
 > Content catalog for the Arch-Systems (Plantcor) company knowledge base.
 > Read this first to find relevant pages for any query.
-> Last updated: 2026-06-18 | Total pages: 60 (16 concepts + 9 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
-> Current project version: Phase 5.2 (Localisation & Turborepo) | Next.js 16 | React 19.2.7 | Supabase | Light Theme | 111 Migrations
+> Last updated: 2026-09-18 | Total pages: 87 (16 concepts + 9 entities + 9 comparisons + 8 ADRs + 6 queries + 5 operational + 4 gittree + 2 reports + 1 schema)
+> Current project version: Phase 5.2 (Localisation & Turborepo) | Next.js 16 | React 19.2.7 | Supabase | Light Theme | 113 Migrations
 
 ## Quick Reference
 
@@ -55,7 +55,7 @@
 
 #### Architecture Decision Records (ADRs)
 
-- [[adr-001-nextjs-app-router|ADR-001]] — Next.js 15 App Router adoption
+- [[adr-001-nextjs-app-router|ADR-001]] — Next.js 16 App Router adoption
 - [[adr-002-supabase-backend|ADR-002]] — Supabase as backend platform
 - [[adr-003-turborepo-monorepo|ADR-003 (Superseded)]] — Turborepo for monorepo management
 - [[adr-004-tailwind-design-system|ADR-004]] — Tailwind CSS with design tokens
@@ -74,7 +74,7 @@
 
 ### Database & Security
 
-- [[database-schema|Database Schema]] — Full PostgreSQL schema (111 migrations) with RLS policies, tables, and views
+- [[database-schema|Database Schema]] — Full PostgreSQL schema (113 migrations) with RLS policies, tables, and views
 - [[rls-policy|RLS Policy Standards]] — Row Level Security requirements and auth helpers
 - [[auth-middleware|Auth and Middleware]] — Supabase auth flow, middleware, role-based access, cross-department permissions
 - [[database-optimization|Database Optimization & Scaling]] — Partitioning, PgBouncer, read replicas, materialized views

@@ -9,18 +9,33 @@ This project is organized as a **Turborepo** monorepo using **pnpm** for workspa
 
 ### Applications (`apps/`)
 
-- **`portal`**: The main Next.js 16+ (App Router) application. High-density dashboards, real-time monitoring, and data entry forms.
-- **`cms`**: Payload CMS v3 (headless) for managing system content and documentation.
-- **`overview`**: A standalone Next.js application for architectural visualization and system-wide monitoring.
+- **`portal`**: The main Next.js 16 (App Router) application. High-density dashboards, real-time monitoring, data entry forms, SCADA integration, and architectural visualization (includes the `/overview` route).
 
 ### Packages (`packages/`)
 
-- **`theme`**: Design tokens, OKLCH color system, and Tailwind CSS configuration (Single Source of Truth).
-- **`ui`**: Shared React components (GlassCard, KPI, DepartmentLayout, etc.) built with Radix UI and shadcn/ui.
-- **`supabase`**: Shared Supabase clients (browser, server, middleware) and auth utilities.
-- **`database`**: SQL migrations and schema definitions.
-- **`utils`**: Common utility functions (formatting, dates, shift helpers).
-- **`types`**: Common TypeScript interfaces and types.
+- **`@repo/theme`**: Design tokens, OKLCH color system, and Tailwind CSS configuration (Single Source of Truth).
+- **`@repo/ui`**: Shared React components (GlassCard, KPI, DepartmentLayout, etc.) built with Radix UI and shadcn/ui.
+- **`@repo/supabase`**: Supabase clients (browser, server, middleware, service-role, read-replica) and Kysely query builders.
+- **`@repo/database`**: SQL migrations and schema definitions (source of truth).
+- **`@repo/contract`**: API type definitions and Zod validation schemas (canonical data contracts).
+- **`@repo/errors`**: Structured error classes with context and cause tracking.
+- **`@repo/redis`**: Redis client, caching helpers, cache statistics, and TTL registry.
+- **`@repo/rate-limiter`**: Rate limiting framework with fixed-window, sliding-window, and token-bucket strategies.
+- **`@repo/logger`**: Structured Pino logging for server, browser, and Next.js.
+- **`@repo/utils`**: Utility functions for third-party integrations (Novu, Inngest, Excel exports).
+- **`@repo/eval`**: LLM evaluation suite using DeepEval for AI service quality testing.
+- **`@repo/agents`**: Shared agent coordination engine and specialist modules.
+- **`@repo/eslint-config`**: Shared ESLint configurations.
+- **`@repo/typescript-config`**: Shared TypeScript configuration.
+
+### Libraries (`libs/`)
+
+- **`libs/features/*`**: Domain-specific feature modules (`auth`, `departments`, `hub`, etc.) with UI and data-access layers.
+- **`libs/shared/*`**: Shared utilities, data-access, hooks, and utilities across features.
+
+### Services (`services/`)
+
+- **`services/integrations/`**: Third-party API client integrations (OpenRouter, Cohere, n8n).
 
 ## 🚀 Quick Start
 
@@ -56,11 +71,16 @@ This project is organized as a **Turborepo** monorepo using **pnpm** for workspa
 
 ## 🛠️ Key Commands
 
-- `pnpm dev`: Start the portal development server.
+- `pnpm dev`: Start the portal development server (includes asset sync).
+- `pnpm dev:quick`: Start headless dev server (quick boot).
+- `pnpm dev:turbo`: Start portal dev server via Turborepo.
 - `pnpm build`: Build all applications and packages.
 - `pnpm lint`: Run linting across the entire monorepo.
 - `pnpm test`: Run tests (Jest and Playwright).
+- `pnpm type-check`: Run TypeScript type checking across the monorepo.
+- `pnpm quality`: Run the full quality gate (lint, type-check, tests, token linting, policy checks).
 - `pnpm deploy:local`: Full stack deployment (Supabase + build + start).
+- `pnpm audit:suite`: Run compliance audits (RLS, design tokens, contract drift, agentic content).
 
 ## 📖 Documentation
 
@@ -74,16 +94,18 @@ This project is organized as a **Turborepo** monorepo using **pnpm** for workspa
 ### Core Documentation
 
 - **[CLAUDE.md](CLAUDE.md)**: Authoritative technical guide and conventions.
-- **[DESIGN.md](DESIGN.md)**: Detailed design system, color palette (OKLCH), and component rules.
-- **[PRODUCT.md](PRODUCT.md)**: Product strategy, user personas, and core mission.
+- **[DESIGN.md](docs/DESIGN.md)**: Detailed design system, color palette (OKLCH), and component rules.
+- **[PRODUCT.md](docs/PRODUCT.md)**: Product strategy, user personas, and core mission.
 
 ### Additional Documentation
 
 - **[AGENTS.md](AGENTS.md)**: Development workflow, quality gates, and agent contracts
-- **[DEPLOYMENT.md](DEPLOYMENT.md)**: Deployment guide for all environments
+- **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Deployment guide for all environments
+- **[docs/ONBOARDING.md](docs/ONBOARDING.md)**: Step-by-step developer onboarding guide
+- **[docs/MONOREPO.md](docs/MONOREPO.md)**: Monorepo structure, Turbo targets, and security policies
+- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Comprehensive documentation index
 - **[GEMINI.md](GEMINI.md)**: AI-specific development conventions
-- **[SECURITY.md](SECURITY.md)**: Security policy and vulnerability reporting
-- **[docs/DOCUMENTATION_INDEX.md](docs/DOCUMENTATION_INDEX.md)**: Comprehensive documentation index (legacy during migration)
+- **[SECURITY.md](docs/SECURITY.md)**: Security policy and vulnerability reporting
 
 ---
 

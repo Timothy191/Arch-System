@@ -1,29 +1,25 @@
 # Environment Files Guide
 
-This guide explains the purpose and usage of all environment configuration files in the Arch-Mk2 project.
+This guide explains the purpose and usage of all environment configuration files in the Arch-Systems (Plantcor) project.
 
 ## 📁 File Structure Overview
 
 ```
-Arch-Mk2/
-├── .env.example                        # Root development template
-├── .env                                # Root actual environment (NEVER commit)
-├── .env.tools                          # Docker tools template
+Arch-System/
+├── .env.example                         # Root development template (4.9KB)
+├── .env                                 # Root actual environment (NEVER commit) (8.3KB)
+├── .env.tools                           # Docker tools template (1.9KB)
 ├── apps/
-│   ├── cms/
-│   │   └── .env                        # CMS-specific environment
 │   └── portal/
-│       ├── .env.example                # Portal development template
-│       ├── .env                        # Portal actual environment (NEVER commit)
-│       ├── .env.production.example     # Portal production template
-│       └── .env.portal.compose.example # Portal Docker Compose template
-├── tools/
-│   └── devdocs/
-│       ├── .env.template               # Devdocs tool template
-│       └── .env                        # Devdocs tool actual environment
+│       ├── env/
+│       │   └── .env.example             # Portal development template (4.1KB)
+│       ├── .env                        # Portal actual environment (NEVER commit) (5.6KB)
+│       └── env/
+│           ├── .env.production.example # Portal production template (3.8KB)
+│           └── .env.portal.compose.example # Portal Docker Compose template (972B)
 └── packages/
     └── eval/
-        └── .env                        # Evaluation package environment
+        └── .env                        # Evaluation package environment (Python/DeepEval)
 ```
 
 ## 🔐 Security Rules
@@ -31,14 +27,14 @@ Arch-Mk2/
 ### CRITICAL: NEVER Commit Actual .env Files
 
 - Actual `.env` files contain **REAL SECRETS** (API keys, passwords, tokens)
-- Only `.env.example` and `.env.template` files should be committed
-- The `.gitignore` file is configured to exclude actual .env files
+- Only `.env.example` and `.env.production.example` files should be committed
+- The `.gitignore` file is configured to exclude actual `.env` files
 - If you accidentally commit secrets, **rotate them immediately**
 
 ### Environment File Safety Checklist
 
 - [ ] Never include real API keys, passwords, or tokens in committed files
-- [ ] Always use `.env.example` or `.env.template` as templates
+- [ ] Always use `.env.example` or `.env.production.example` as templates
 - [ ] Test environment changes in development before production
 - [ ] Rotate secrets if accidentally exposed
 - [ ] Use different secrets for development, staging, and production
@@ -47,7 +43,7 @@ Arch-Mk2/
 
 ### Root Level Environment Files
 
-#### `.env.example` (2.9KB)
+#### `.env.example` (4.9KB)
 
 **Purpose**: Template for root-level development environment configuration
 
@@ -61,16 +57,14 @@ Arch-Mk2/
 
 - Server configuration (PORT)
 - Supabase configuration (URLs, keys, database URLs)
-- AI/LLM configuration (OpenAI, Together) [Deprecated]
+- Google AI configuration (Project ID, API key)
 - Monitoring/Observability (Sentry, OpenTelemetry)
-- Tools configuration (Flowise, FUXA, ClickHouse)
+- Tools configuration (Flowise, FUXA)
 - Redis configuration
 - Notifications/Events (Novu, Inngest)
-- Payload CMS configuration
-- Security settings for Docker tools
 - Next.js build configuration
 
-#### `.env` (4.9KB) ⚠️ NEVER COMMIT
+#### `.env` (8.3KB) ⚠️ NEVER COMMIT
 
 **Purpose**: Actual root environment configuration with real secrets
 
@@ -82,7 +76,7 @@ Arch-Mk2/
 
 **Contains**: Same variables as `.env.example` but with real values
 
-#### `.env.tools` (829B)
+#### `.env.tools` (1.9KB)
 
 **Purpose**: Template for Docker-based development tools environment
 
@@ -104,7 +98,7 @@ Arch-Mk2/
 
 #### Portal Application (`apps/portal/`)
 
-##### `.env.example` (2.1KB)
+##### `env/.env.example` (4.1KB)
 
 **Purpose**: Template for portal application development environment
 
@@ -116,14 +110,20 @@ Arch-Mk2/
 
 **Contains**:
 
-- External tools configuration (Flowise, FUXA)
+- External tools configuration (N8N, Flowise, FUXA)
 - Supabase configuration (URLs, keys)
+- Google AI configuration (Project ID, API key)
 - Redis configuration for caching and rate limiting
 - Sentry configuration for error monitoring
-- Hardware scanner configuration
-- OpenTelemetry configuration
+- OpenTelemetry configuration (optional)
 
-##### `.env` (1.3KB) ⚠️ NEVER COMMIT
+Copy command:
+
+```bash
+cp apps/portal/env/.env.example apps/portal/.env
+```
+
+##### `.env` (5.6KB) ⚠️ NEVER COMMIT
 
 **Purpose**: Actual portal environment configuration with real secrets
 
@@ -133,7 +133,7 @@ Arch-Mk2/
 - Portal-specific debugging
 - Portal deployment configuration
 
-##### `.env.production.example` (3.1KB)
+##### `env/.env.production.example` (3.8KB)
 
 **Purpose**: Template for portal production environment
 
@@ -145,7 +145,7 @@ Arch-Mk2/
 
 **Contains**: Production-specific configuration with security-focused defaults
 
-##### `.env.portal.compose.example` (972B)
+##### `env/.env.portal.compose.example` (972B)
 
 **Purpose**: Template for portal Docker Compose deployment
 
@@ -155,48 +155,13 @@ Arch-Mk2/
 - Container-based deployment
 - Understanding Docker environment requirements
 
-#### CMS Application (`apps/cms/`)
-
-##### `.env` (174B) ⚠️ NEVER COMMIT
-
-**Purpose**: CMS-specific environment configuration
-
-**When to use**:
-
-- CMS development and deployment
-- CMS-specific debugging
-- Headless CMS configuration
-
-**Note**: Minimal configuration, CMS primarily uses shared infrastructure
-
 ### Tool-Specific Environment Files
-
-#### Devdocs Tool (`tools/devdocs/`)
-
-##### `.env.template` (1.1KB)
-
-**Purpose**: Template for development documentation tool
-
-**When to use**:
-
-- Setting up devdocs tool environment
-- Development tool configuration
-- Understanding devdocs environment needs
-
-##### `.env` (1.2KB) ⚠️ NEVER COMMIT
-
-**Purpose**: Actual devdocs environment configuration
-
-**When to use**:
-
-- Running devdocs tool locally
-- Devdocs tool development and debugging
 
 #### Evaluation Package (`packages/eval/`)
 
 ##### `.env` (348B) ⚠️ NEVER COMMIT
 
-**Purpose**: Evaluation package environment for AI testing
+**Purpose**: Evaluation package environment for AI testing (DeepEval)
 
 **When to use**:
 
@@ -209,54 +174,54 @@ Arch-Mk2/
 ### 1. Local Development (Portal Focus)
 
 ```
-Start → Copy apps/portal/.env.example to apps/portal/.env
-     → Fill in Supabase credentials (local: http://127.0.0.1:54321)
-     → Add tool URLs if using external tools
-     → Set Redis URL for caching
-     → (Optional) Configure Sentry for error tracking
+Start → Copy apps/portal/env/.env.example to apps/portal/.env
+      → Fill in Supabase credentials (local: http://127.0.0.1:54321)
+      → Add tool URLs if using external tools
+      → Set Redis URL for caching
+      → (Optional) Configure Sentry for error tracking
 ```
 
 ### 2. Local Development (Full Stack with Docker Tools)
 
 ```
 Start → Copy .env.example to .env
-     → Copy .env.tools to actual .env.tools or use as reference
-     → Fill in all Supabase credentials
-     → Configure all tool credentials (Flowise, etc.)
-     → Start Docker tools: docker-compose -f docker-compose.tools.yml up -d
-     → Use root .env for main application
+      → Copy .env.tools to actual .env.tools or use as reference
+      → Fill in all Supabase credentials
+      → Configure all tool credentials (Flowise, etc.)
+      → Start Docker tools: docker-compose.tools.yml up -d
+      → Use root .env for main application
 ```
 
 ### 3. Docker Compose Development
 
 ```
-Start → Use apps/portal/.env.portal.compose.example as template
-     → Configure for containerized deployment
-     → Set up networking between containers
-     → Configure volume mounts for persistence
-     → Start: docker-compose up -d
+Start → Use apps/portal/env/.env.portal.compose.example as template
+      → Configure for containerized deployment
+      → Set up networking between containers
+      → Configure volume mounts for persistence
+      → Start: docker-compose up -d
 ```
 
 ### 4. Production Deployment
 
 ```
-Start → Copy apps/portal/.env.production.example to production .env
-     → Fill in production Supabase credentials
-     → Configure production URLs (not localhost)
-     → Set up production Sentry DSN
-     → Configure production monitoring
-     → Use strong, unique secrets
-     → Enable rate limiting and security features
+Start → Copy apps/portal/env/.env.production.example to .env.production
+      → Fill in production Supabase credentials
+      → Configure production URLs (not localhost)
+      → Set up production Sentry DSN
+      → Configure production monitoring
+      → Use strong, unique secrets
+      → Enable rate limiting and security features
 ```
 
 ### 5. CI/CD Environment
 
 ```
 Start → Use synthetic values from GitHub Secrets
-     → Never commit actual secrets
-     → Configure environment variables in GitHub Actions
-     → Use different secrets for each environment
-     → Rotate secrets regularly
+      → Never commit actual secrets
+      → Configure environment variables in GitHub Actions
+      → Use different secrets for each environment
+      → Rotate secrets regularly
 ```
 
 ## 🔧 Configuration Priorities
@@ -269,7 +234,7 @@ Start → Use synthetic values from GitHub Secrets
 
 ### Medium Priority (Required for Full Features)
 
-- **AI Configuration**: Optional OpenAI/Together API keys [Deprecated]
+- **Google AI Configuration**: API key for Gemini model access
 - **Redis Configuration**: URL for caching and rate limiting
 - **Monitoring**: Sentry DSN for error tracking
 - **Tools Configuration**: Flowise, FUXA for extended features
@@ -297,7 +262,7 @@ Start → Use synthetic values from GitHub Secrets
 
 ### Issue: "Production deployment fails"
 
-**Solution**: Use .env.production.example, ensure all production URLs are set (not localhost)
+**Solution**: Use apps/portal/env/.env.production.example, ensure all production URLs are set (not localhost)
 
 ## 📝 Environment Variable Reference
 
@@ -312,27 +277,28 @@ Start → Use synthetic values from GitHub Secrets
 - `DATABASE_POOLER_URL`: Connection pooler URL (production recommended)
 - `SUPABASE_READ_REPLICA_URL`: Read replica URL (optional, for performance)
 
-### AI/LLM Variables [Deprecated]
+### AI/LLM Variables
 
-- `OPENAI_API_KEY`: OpenAI API key (optional)
-- `TOGETHER_API_KEY`: Together AI API key (optional)
+- `GOOGLE_PROJECT_ID`: Google Cloud project ID for Gemini API access
+- `GOOGLE_AI_API_KEY`: Google AI API key for LLM services
 
 ### Monitoring Variables
 
 - `SENTRY_DSN`: Server-side Sentry DSN
 - `NEXT_PUBLIC_SENTRY_DSN`: Client-side Sentry DSN
-- `SENTRY_ORG`: Sentry organization
-- `SENTRY_PROJECT`: Sentry project name
-- `SENTRY_AUTH_TOKEN`: Sentry authentication token
 - `OTEL_EXPORTER_OTLP_ENDPOINT`: OpenTelemetry endpoint
 - `OTEL_SERVICE_NAME`: Service name for observability
 
 ### Tool Variables
 
+- `N8N_URL`: n8n workflow automation URL
+- `N8N_USER`: n8n username
+- `N8N_PASSWORD`: n8n password
 - `FLOWISE_URL`: Flowise AI workflow builder URL
 - `FLOWISE_USER`: Flowise username
 - `FLOWISE_PASSWORD`: Flowise password
 - `NEXT_PUBLIC_FUXA_URL`: FUXA SCADA/HMI dashboard URL
+- `ALLOWED_SCANNER_SOURCES`: Comma-separated allowed scanner source header values
 
 ## 🔍 Validation Checklist
 
@@ -348,5 +314,5 @@ Before committing or deploying:
 
 ---
 
-**Last Updated**: 2025-06-05  
+**Last Updated**: 2026-09-21
 **Maintained by**: Arch-Systems Development Team

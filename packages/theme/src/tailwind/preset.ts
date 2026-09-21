@@ -1,6 +1,36 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+
+/**
+ * MAINTAINABILITY BUDGET (S6) EXCEPTION:
+ * Module LOC: ~500 (> 400 LOC limit).
+ * Justification: Canonical Tailwind preset serving as the Single Source of Truth (SSOT)
+ * for design tokens, OKLCH scales, animation keyframes, and multi-workspace globs.
+ * Splitting introduces circular build-phase dependencies across Turborepo packages.
+ */
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+// packages/theme/src/tailwind -> repo root is 4 levels up
+const repoRoot = path.resolve(here, "../../../..");
+const at = (p: string) => path.join(repoRoot, p);
+
+const content = [
+  at("apps/*/app/**/*.{ts,tsx}"),
+  at("apps/*/components/**/*.{ts,tsx}"),
+  at("apps/*/features/**/*.{ts,tsx}"),
+  at("apps/*/hooks/**/*.{ts,tsx}"),
+  at("apps/*/src/**/*.{ts,tsx}"),
+  at("packages/ui/src/**/*.{ts,tsx}"),
+  at("packages/theme/src/**/*.{ts,tsx}"),
+  at("libs/**/*.{ts,tsx}"),
+  `!${at("libs/**/node_modules/**/*")}`,
+  `!${at("libs/**/.next/**/*")}`,
+  `!${at("libs/**/.turbo/**/*")}`,
+  at("node_modules/@tremor/**/*.{js,ts,jsx,tsx}"),
+];
 
 /**
  * Wraps a CSS custom property so Tailwind opacity modifiers (`bg-dept-drilling/10`)
@@ -14,20 +44,7 @@ const withAlpha = (token: string): string =>
       : `color-mix(in srgb, var(${token}) calc(${opacityValue} * 100%), transparent)`) as unknown as string;
 
 const archTheme: Config = {
-  content: [
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./features/**/*.{ts,tsx}",
-    "./hooks/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-    "../../packages/ui/src/**/*.{ts,tsx}",
-    "../../packages/theme/src/**/*.{ts,tsx}",
-    "../../libs/**/*.{ts,tsx}",
-    "!../../libs/**/node_modules/**/*",
-    "!../../libs/**/.next/**/*",
-    "!../../libs/**/.turbo/**/*",
-    "../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}",
-  ],
+  content,
   prefix: "",
   theme: {
     container: {
@@ -458,8 +475,14 @@ const archTheme: Config = {
             boxShadow: "0 0 20px rgba(28, 28, 30, 0.6), inset 0 0 10px rgba(28, 28, 30, 0.3)",
           },
         },
+        shine: {
+          "0%": { backgroundPosition: "0% 0%" },
+          "50%": { backgroundPosition: "100% 100%" },
+          to: { backgroundPosition: "0% 0%" },
+        },
       },
       animation: {
+        shine: "shine var(--duration) infinite linear",
         marquee: "marquee var(--duration) infinite linear",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",

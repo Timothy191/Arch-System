@@ -21,7 +21,7 @@ Do not send secrets or sensitive data in public issue threads.
 
 ## Supported Versions
 
-This repository is maintained on the `master` branch. Security fixes are prioritized on the current deployment branch.
+This repository is maintained on the `main` branch. Security fixes are prioritized on the current deployment branch.
 
 ## Security Practices
 

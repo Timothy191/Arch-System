@@ -1,150 +1,122 @@
+/*
+ * MAINTAINABILITY BUDGET (S6) EXCEPTION:
+ * Stylesheet LOC: ~490 (> 400 LOC limit).
+ * Justification: Canonical UI design system entrypoint incorporating accessibility layers,
+ * core animations, custom glass utilities, and focus-mode specificity overrides.
+ */
+
 @import "@repo/theme/css";
 @import "./accessibility.css";
-
-/* AGENT-TRACE: Explicit layer order ensures predictable cascade — reset < base < theme < components < utilities */
-@layer reset, base, theme, components, utilities;
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@theme inline {
-  --animate-shine: shine var(--duration) infinite linear;
-  --animate-marquee: marquee var(--duration) infinite linear;
-  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
-  @keyframes shine {
-    0% {
-      background-position: 0% 0%;
-    }
-    50% {
-      background-position: 100% 100%;
-    }
-    to {
-      background-position: 0% 0%;
-    }
+@keyframes wave-drift {
+  from {
+    transform: translateX(0);
   }
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - var(--gap)));
-    }
+  to {
+    transform: translateX(-50%);
   }
-  @keyframes marquee-vertical {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(calc(-100% - var(--gap)));
-    }
+}
+@keyframes wave-drift-vertical {
+  from {
+    transform: translateY(0);
   }
-  @keyframes wave-drift {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
+  to {
+    transform: translateY(-50%);
   }
-  @keyframes wave-drift-vertical {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(-50%);
-    }
+}
+@keyframes solar-flare {
+  0% {
+    opacity: 0.4;
+    transform: scale(1) translate3d(0, 0, 0);
   }
-  @keyframes solar-flare {
-    0% {
-      opacity: 0.4;
-      transform: scale(1) translate3d(0, 0, 0);
-    }
-    50% {
-      opacity: 0.8;
-      transform: scale(1.15) translate3d(3%, 4%, 0);
-    }
-    100% {
-      opacity: 0.4;
-      transform: scale(1.05) translate3d(-3%, -2%, 0);
-    }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15) translate3d(3%, 4%, 0);
   }
+  100% {
+    opacity: 0.4;
+    transform: scale(1.05) translate3d(-3%, -2%, 0);
+  }
+}
 
-  /* AGENT-TRACE: aurora-shadow animates opacity + transform (compositor) only.
-     The box-shadow is static on the pseudo-element — animating box-shadow
-     forced a full repaint every frame on the hub page. */
-  @keyframes aurora-shadow {
-    0%,
-    100% {
-      opacity: 0.6;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.02);
-    }
+/* AGENT-TRACE: aurora-shadow animates opacity + transform (compositor) only.
+   The box-shadow is static on the pseudo-element — animating box-shadow
+   forced a full repaint every frame on the hub page. */
+@keyframes aurora-shadow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
   }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
 
-  @keyframes glass-shimmer {
-    0% {
-      transform: translateX(-150%) skewX(-45deg);
-    }
-    15% {
-      transform: translateX(350%) skewX(-45deg);
-    }
-    100% {
-      transform: translateX(350%) skewX(-45deg);
-    }
+@keyframes glass-shimmer {
+  0% {
+    transform: translateX(-150%) skewX(-45deg);
   }
+  15% {
+    transform: translateX(350%) skewX(-45deg);
+  }
+  100% {
+    transform: translateX(350%) skewX(-45deg);
+  }
+}
 
-  @keyframes glass-shimmer-ambient {
-    0% {
-      transform: translateX(-100%) skewX(-12deg);
-    }
-    8%,
-    100% {
-      transform: translateX(200%) skewX(-12deg);
-    }
+@keyframes glass-shimmer-ambient {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
   }
+  8%,
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
 
-  @keyframes caustic-wave {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+@keyframes caustic-wave {
+  0% {
+    background-position: 0% 50%;
   }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
-  @keyframes caustic-shadow-optimal {
-    0%,
-    100% {
-      box-shadow: 0 4px 20px -2px rgba(52, 199, 89, 0.05);
-    }
-    50% {
-      box-shadow: 0 6px 30px -2px rgba(52, 199, 89, 0.2);
-    }
+@keyframes caustic-shadow-optimal {
+  0%,
+  100% {
+    box-shadow: 0 4px 20px -2px rgba(52, 199, 89, 0.05);
   }
-  @keyframes caustic-shadow-warning {
-    0%,
-    100% {
-      box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.05);
-    }
-    50% {
-      box-shadow: 0 6px 30px -2px rgba(245, 158, 11, 0.2);
-    }
+  50% {
+    box-shadow: 0 6px 30px -2px rgba(52, 199, 89, 0.2);
   }
-  @keyframes caustic-shadow-critical {
-    0%,
-    100% {
-      box-shadow: 0 4px 20px -2px rgba(255, 59, 48, 0.05);
-    }
-    50% {
-      box-shadow: 0 6px 30px -2px rgba(255, 59, 48, 0.25);
-    }
+}
+@keyframes caustic-shadow-warning {
+  0%,
+  100% {
+    box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.05);
+  }
+  50% {
+    box-shadow: 0 6px 30px -2px rgba(245, 158, 11, 0.2);
+  }
+}
+@keyframes caustic-shadow-critical {
+  0%,
+  100% {
+    box-shadow: 0 4px 20px -2px rgba(255, 59, 48, 0.05);
+  }
+  50% {
+    box-shadow: 0 6px 30px -2px rgba(255, 59, 48, 0.25);
   }
 }
 

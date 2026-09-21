@@ -1,133 +1,192 @@
-# AGENTS.md
+# CLAUDE.md — Arch-Systems Technical Guide
 
-## 0. Purpose & Placement
-
-- **Placement:** root (depth 0), beside `Requirements.md` and `Plan.md`. Hot-path — always loaded.
-- **Filename:** `AGENTS.md` (mirror to `.cursorrules` / `CLAUDE.md` if required).
-- **Hard cap:** ≤150 lines, ≤16 rules. Exceeding it means the rules are wrong, not the file.
-- **Scope:** this file governs _how_. `Requirements.md` = _what_. `Plan.md` = _when_.
+Authoritative technical reference for the Arch-Systems (Plantcor) Mining Operations Portal.
+This file governs **how to work in this codebase**. For agent workflow rules, see `AGENTS.md`.
 
 ---
 
-## 1. Rule Format
+## 1. Project At-a-Glance
 
-```text
-ID        P3
-Rule      <one-sentence imperative>
-Why       <the failure it prevents>
-Enforce   <the gate that catches violations>
+| Concern         | Detail                                           |
+| --------------- | ------------------------------------------------ |
+| Name            | Arch-Systems (Plantcor) Mining Operations Portal |
+| Type            | Turborepo monorepo (pnpm workspaces)             |
+| Primary App     | `apps/portal` — Next.js 16, React 19, App Router |
+| Backend         | Supabase (PostgreSQL + Auth + RLS)               |
+| Package Manager | pnpm 9.15.9 (pinned via `packageManager` field)  |
+| Node Engine     | >=22 (Volta-pinned to 24.15.0)                   |
+| Lint            | Biome + ESLint + Stylelint + cspell              |
+| Testing         | Jest (unit), Playwright (e2e), DeepEval (AI)     |
+
+---
+
+## 2. Workspace Layout
+
+```
+Arch-System/
+├── apps/
+│   └── portal/              # Next.js 16 App Router — the main application
+├── packages/                # Shared publishable packages (@repo/*)
+│   ├── agents/              ├── Agent coordination & specialists (MCP, OpenAI)
+│   ├── contract/            ├── Zod schemas & type definitions (data contracts)
+│   ├── database/            ├── SQL migrations (source of truth) + rollback tests
+│   ├── errors/              ├── Structured error classes with cause tracking
+│   ├── eslint-config/       ├── Shared ESLint configurations
+│   ├── eval/                ├── DeepEval LLM evaluation suite (Python)
+│   ├── logger/              ├── Structured Pino logging (server/browser/Next.js)
+│   ├── rate-limiter/        ├── Rate limiting framework (DI, multiple strategies)
+│   ├── redis/               ├── Redis client, caching helpers, TTL registry
+│   ├── supabase/            ├── Supabase clients + Kysely query builders
+│   ├── theme/               ├── OKLCH design tokens, Tailwind preset, CSS variables
+│   ├── typescript-config/   ├── Shared TypeScript configurations
+│   ├── ui/                  ├── Radix/shadcn UI components (GlassCard, KPI, etc.)
+│   └── utils/               ├── Third-party integration helpers (Novu, Inngest)
+├── libs/
+│   ├── features/            # Domain feature modules (scope:feature)
+│   │   ├── auth/            ├── Auth feature
+│   │   ├── departments/     ├── Department dashboards (drilling, production, etc.)
+│   │   ├── hub/             ├── Central hub navigation
+│   │   └── ...
+│   └── shared/              # Shared utilities, data-access, hooks
+├── services/                # Integration services (third-party API clients)
+│   └── integrations/        ├── OpenRouter, Cohere, n8n clients
+├── tools/                   # Build, analysis, and audit scripts
+├── scripts/                 # Local dev & deployment utility scripts
+├── docs/                    # Documentation (DESIGN.md, DEPLOYMENT.md, etc.)
+├── config/                  # Tool configurations (eslint, turbo, etc.)
+├── infra/                   # Docker compose, monitoring configs
+├── e2e/                     # Playwright end-to-end tests
+├── k6/                      # Load testing scripts
+└── documentation/           # Unified documentation center
 ```
 
-A rule without a gate is a wish. Delete it.
-
 ---
 
-## 2. Primary Rules (P1–P10) — Non-Negotiable
+## 3. Common Commands
 
-**P1 — One Constitution File.** All agent behavior governed here; patterns, exclusions, constraints live nowhere else.
-_Why:_ scattered rules drift and contradict. _Enforce:_ lint fails if missing, >150 lines, or duplicated.
+### Development
 
-**P2 — Fix the Rule, Not Just the Bug.** Every mistake yields a rule edit or a recorded "no rule needed" decision.
-_Why:_ same error recurs otherwise. _Enforce:_ post-task review requires rule diff or waiver.
-
-**P3 — Plan Before Code (Non-Trivial Only).** Trivial = ≤1 file, ≤30 LOC, no new dep, no schema/API change. Else: written plan first.
-_Why:_ unbounded exploration burns context. _Enforce:_ no plan + non-trivial diff = reject.
-
-**P4 — Validation Is the Agent's Job.** Agent runs lint, tests, build _before_ presenting, and pastes raw output.
-_Why:_ offloads verification to humans. _Enforce:_ PR requires command + exit code; no output, no review.
-
-**P5 — Closed Feedback Loop.** Every change ships with a test that fails without it and passes with it.
-_Why:_ "looks correct" is not evidence. _Enforce:_ coverage delta on changed lines; fail-to-pass required.
-
-**P6 — Scope Is Explicit.** Every task declares `allow:` and `deny:` paths before work starts. Deny-hit halts.
-_Why:_ agents wander into CI, infra, secrets. _Enforce:_ path policy in CI; deny-hit blocks merge.
-
-**P7 — Dependency Changes Require Approval.** No new runtime dep without written justification and human sign-off.
-_Why:_ supply chain and bloat. _Enforce:_ lockfile diff without approval token fails build.
-
-**P8 — Risk-Tiered Human Review.** Tiers: 0 Docs/tests (auto) | 1 Features (1 reviewer) | 2 Auth/infra/deps (2 reviewers + security).
-_Why:_ blanket review kills velocity; none kills codebase. _Enforce:_ tier derived from changed paths; Tier 2 requires labeled approval.
-
-**P9 — Context Reset at Task Boundaries.** Clear context between unrelated tasks; write handoff note first (state, decisions, threads, next).
-_Why:_ polluted context degrades reasoning. _Enforce:_ handoff note required before `/clear`.
-
-**P10 — Reproducibility.** Pin model, tools, and seeds per run; record in task artifact.
-_Why:_ non-reproducible failures can't be debugged. _Enforce:_ run manifest required; missing = invalid run.
-
----
-
-## 3. Secondary Rules (S1–S6) — Warm Path
-
-**S1 — Cost & Token Budget.** Per-task ceiling; 80% = checkpoint, 100% = halt and escalate.
-_Why:_ runaway loops are the #1 hidden cost. _Enforce:_ telemetry counter with hard stop.
-
-**S2 — Observability by Default.** New components emit traces, metrics, structured logs on first commit.
-_Why:_ retrofits never happen. _Enforce:_ OTel check in CI for new modules.
-
-**S3 — Concurrency & Locking.** One writer per path; long-running work holds a TTL lease with fencing token.
-_Why:_ parallel agents clobber each other. _Enforce:_ lease required before write; stale writes rejected.
-
-**S4 — Secrets & Data Hygiene.** No secrets, tokens, or PII in prompts, context, logs, or commits. Reference by handle.
-_Why:_ irreversible exposure. _Enforce:_ pre-commit scan + redaction filter on telemetry sinks.
-
-**S5 — Skill Reuse Over Improvisation.** Recurring workflows become versioned skills; invoke the skill, don't re-improvise.
-_Why:_ unversioned improvisation is inconsistent. _Enforce:_ registry entry required for workflows invoked ≥3 times.
-
-**S6 — Maintainability Budget.** No module >400 LOC or >depth 4 without a written exception. Refactor before extending.
-_Why:_ code is cheap; support is not. _Enforce:_ CI size/complexity gate; exception needs linked justification.
-
----
-
-## 4. Hard Stops (Denylist + Escalation)
-
-**Always prohibited — no approval path:**
-
-- No edits to secrets, credentials, or key material.
-- No force-push, history rewrite, or branch deletion.
-- No disabling, skipping, or weakening tests, linters, or gates.
-- No production data access from agent context.
-- No writes outside the declared `allow:` list (P6).
-- No new runtime dependency without approval (P7).
-- No edits to CI/CD pipelines without Tier 2 approval (P8).
-- No silent retries on destructive operations.
-
-**Halt and escalate when:**
-
-- A denylist action is required or rule conflict is unresolvable.
-- Cost reaches 100% (S1) or 2 consecutive validation failures occur.
-- Plan touches `deny:` path (P6) or Tier 2 change lacks second reviewer.
-
----
-
-## 5. Change Control & Precedence
-
-- Rule edits = Tier 1; denylist edits = Tier 2. Rules unused for 90 days are deletion candidates.
-- Precedence: Hard Stops (§4) > Primary (P1–P10) > Secondary (S1–S6) > lower ID > human (logged waiver).
-
----
-
-## 6. Definition of Done
-
-- [ ] Plan artifact exists (P3, if non-trivial)
-- [ ] Scope declared and respected (P6)
-- [ ] Fail-to-pass test added (P5)
-- [ ] Lint / tests / build run by agent, raw output pasted (P4)
-- [ ] Run manifest recorded (P10)
-- [ ] Review tier satisfied (P8)
-- [ ] Handoff note written (P9)
-- [ ] Rule diff or waiver recorded (P2)
-
----
-
-## 7. At-a-Glance Card
-
-```text
-# AGENTS.md (≤150 lines)
-P1 One constitution | P2 Fix rule, not just bug | P3 Plan before code | P4 Validate & paste output
-P5 Fail-to-pass test | P6 allow/deny scope | P7 Approval for deps | P8 Tiers: 0 auto / 1 / 2 security
-P9 Clean context + handoff | P10 Pin model/seed + manifest
-S1 Token budget | S2 OTel by default | S3 Lease locks | S4 No secrets/PII | S5 Versioned skills | S6 ≤400 LOC
-Hard Stops: Secrets · force-push · disabled gates · prod data · deny-path · unapproved deps · silent retries
-Precedence: Hard Stops > Primary > Secondary > lower ID > human (logged)
-Done: Plan · Scope · Test · Validation · Manifest · Review · Handoff · Rule diff
+```bash
+pnpm dev              # Start portal dev server (syncs assets first)
+pnpm dev:quick        # Headless dev (quick boot)
+pnpm dev:turbo        # Portal dev via Turborepo
+pnpm dev:tools        # Start Docker tools stack (Flowise, Redis, etc.)
 ```
+
+### Build & Quality
+
+```bash
+pnpm build            # Build all apps and packages
+pnpm type-check       # TypeScript type-check across workspace
+pnpm lint             # Lint all packages (Biome, ESLint, Stylelint, cspell)
+pnpm quality          # Full quality gate (lint + type-check + tests + policy checks)
+pnpm knip             # Dead code detection
+pnpm deps:lint        # Dependency version consistency (syncpack)
+```
+
+### Database & Migrations
+
+```bash
+pnpm --filter @repo/database supabase:dev     # Start local Supabase stack
+pnpm --filter @repo/database supabase:gen     # Generate database types
+pnpm --filter @repo/database db:types         # Alias for type generation
+pnpm db:seed              # Seed development database
+pnpm db:schema-reload     # Reload schema from migrations
+```
+
+### Testing
+
+```bash
+pnpm test                # Run all tests (Jest + Playwright via Turbo)
+pnpm test:watch          # Watch mode
+pnpm test:coverage       # Coverage report
+pnpm test:e2e            # Playwright E2E tests
+pnpm --filter portal test -- --testPathPatterns="<name>"  # Targeted test
+```
+
+### Audits & Code Generation
+
+```bash
+pnpm audit:suite         # Full compliance audit (RLS, design tokens, contracts)
+pnpm audit:design        # Design system compliance check
+pnpm audit:drift         # API contract drift detection
+pnpm audit:rls           # Row-Level Security audit
+pnpm audit:rls-matrix    # RLS policy coverage matrix
+pnpm maps:gen            # Generate codebase maps (Mermaid diagrams)
+pnpm onboards            # Run workspace diagnostic suite
+```
+
+### Deployment
+
+```bash
+pnpm deploy:local        # Full stack local deployment
+pnpm deploy:staging      # Staging deployment
+pnpm deploy:production   # Production deployment
+pnpm deploy:rollback     # Rollback last deployment
+```
+
+---
+
+## 4. Conventions & Rules
+
+### Code Style
+
+- **TypeScript**: Strict mode throughout. No `any` or `@ts-ignore`.
+- **Imports**: Use `@repo/*` for workspace packages. Feature-scoped imports use `@repo/<pkg>/path`.
+- **Light mode only**: No `dark:` Tailwind classes. Luminance must stay > 200.
+- **Design tokens**: Always use OKLCH tokens from `@repo/theme`. Never raw hex colors (except in documentation).
+- **Shadows**: Use named shadow tokens (`shadow-card`, `shadow-window`, etc.) — never raw `shadow-sm`/`shadow-lg`.
+- **Glass cards**: Use `<GlassCard>` for all card surfaces. Legacy `SpotlightCard` and `GlowBorderCard` are removed.
+
+### Architectural Boundaries
+
+- `apps/portal` must not import DB internals directly; go through `@repo/supabase`.
+- `packages/contract` is the canonical Zod schema source — never hand-edit generated types.
+- `@repo/rate-limiter` does NOT depend on `@repo/redis`; uses dependency injection.
+- Public package APIs must export strictly from `src/index.ts`.
+
+### Environment
+
+- Portal env lives in `apps/portal/.env` (copied from `apps/portal/env/.env.example`).
+- Root `.env` is used for tooling (Docker, monitoring, AI providers).
+- See `docs/ENVIRONMENT_FILES_GUIDE.md` for the full file reference.
+
+---
+
+## 5. Key Files & Entrypoints
+
+| File                             | Purpose                             |
+| -------------------------------- | ----------------------------------- |
+| `apps/portal/app/`               | Next.js App Router routes           |
+| `apps/portal/app/(auth)/`        | Auth routes (login, register, etc.) |
+| `apps/portal/app/api/health`     | Health check endpoint               |
+| `apps/portal/app/layout.tsx`     | Root layout, providers              |
+| `apps/portal/app/page.tsx`       | Hub / department grid               |
+| `packages/database/migrations/`  | SQL migrations (113+ files)         |
+| `packages/contract/src/schemas/` | Zod schemas (canonical data shapes) |
+| `packages/theme/src/tokens/`     | Design tokens (OKLCH, CSS vars)     |
+| `packages/supabase/src/`         | Supabase + Kysely clients           |
+| `libs/features/departments/`     | Department-specific UI & data       |
+
+---
+
+## 6. Debugging Tips
+
+- **Type errors after migration**: Run `pnpm --filter @repo/database supabase:gen` to regenerate types.
+- **RLS issues**: Run `pnpm audit:rls` to check policy coverage.
+- **Design violations**: Run `pnpm audit:design` to catch forbidden patterns.
+- **Port conflicts**: The dev script auto-resolves by killing stale processes.
+- **Auth not working**: Verify `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_KEY` in `.env`.
+- **Cache issues**: Clear `.next/cache/` and restart the dev server.
+
+---
+
+## 7. Tracing & Observability
+
+- **Agent tracing**: Inline `// AGENT-TRACE:` comments in source mark decision points.
+- **AGENT_TRACER.md** files exist in each package — update when modifying that package.
+- **Structured logging**: Use `@repo/logger` — never `console.log` in production code.
+- **Telemetry**: OpenTelemetry is configured via `@vercel/otel`; traces flow to the configured OTLP endpoint.
+- **Error monitoring**: Sentry is configured for both client and server.
+
+Last updated: 2026-09-21
