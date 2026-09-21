@@ -2,7 +2,7 @@
 
 import { GlassCard } from "@repo/ui/GlassCard";
 import { AlertCircle, Clock } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 
 interface DelayEntry {
   id: string;
@@ -63,6 +63,18 @@ function MachineOperationsList({
   todayLoads,
   activeBreakdowns = [],
 }: MachineOperationsListProps) {
+  // BOLT OPTIMIZATION: Pre-index total loads by machine_id to eliminate nested O(N * M)
+  // array filters/reduces during render iteration across site groups and operation cards.
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const load of todayLoads) {
+      if (load.machine_id) {
+        map.set(load.machine_id, (map.get(load.machine_id) || 0) + (load.total_loads || 0));
+      }
+    }
+    return map;
+  }, [todayLoads]);
+
   if (operations.length === 0) {
     return (
       <GlassCard>
@@ -98,9 +110,7 @@ function MachineOperationsList({
         const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
         const siteBcm = siteOps.reduce((sum, op) => {
           const bf = op.machine?.bin_factor || 0;
-          const loads = todayLoads
-            .filter((l) => l.machine_id === op.machine_id)
-            .reduce((s, l) => s + (l.total_loads || 0), 0);
+          const loads = loadsByMachine.get(op.machine_id) || 0;
           return sum + loads * bf;
         }, 0);
 
@@ -138,7 +148,7 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
+                      loadsByMachine={loadsByMachine}
                       activeBreakdowns={activeBreakdowns}
                     />
                   ))}
@@ -157,7 +167,7 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
+                      loadsByMachine={loadsByMachine}
                       activeBreakdowns={activeBreakdowns}
                     />
                   ))}
@@ -173,22 +183,19 @@ function MachineOperationsList({
 
 function OperationCard({
   operation,
-  todayLoads,
+  loadsByMachine,
   activeBreakdowns,
 }: {
   operation: MachineOperation;
-  todayLoads: HourlyLoadSummary[];
+  loadsByMachine: Map<string, number>;
   activeBreakdowns: Breakdown[];
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
-  // Calculate BCM metrics
+  // Calculate BCM metrics using O(1) pre-indexed map lookup
   const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads =
-    todayLoads
-      ?.filter((l) => l.machine_id === operation.machine_id)
-      ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
+  const machineLoads = loadsByMachine.get(operation.machine_id) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
