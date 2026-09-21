@@ -25,7 +25,7 @@ const plan = {
       role: "Security & Quality Gatekeeper",
       agent: "security-quality-gatekeeper",
       modelTier: "flash",
-      focus: "Light mode invariant guard (#f3f4f6 canvas), TypeScript strict checks, Biome validation",
+      focus: "Light mode invariant guard (#f3f4f6 canvas), TypeScript strict checks, ESLint/Prettier validation",
       allowedTools: ["run_command", "grep_search", "view_file"],
     },
     {

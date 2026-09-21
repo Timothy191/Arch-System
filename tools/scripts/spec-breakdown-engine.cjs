@@ -31,7 +31,7 @@ Enhance frontend UI with consistent pill-shaped elements, calibrated transparenc
 2. **Component Library & Asset Verification**: Inspect removed/missing packages or components across \`packages/ui\` and \`apps/portal\`.
 3. **Pill Shapes & Ergonomics**: Reintroduce pill shapes (\`rounded-full\`) for badges, status chips, quick-action buttons, and search filters where ergonomically appropriate.
 4. **Transparency & Glassmorphism Effects**: Apply calibrated background translucency (\`bg-white/80\`, \`backdrop-blur-md\`, light-mode luminance > 200) without violating strict light mode invariants.
-5. **Quality & Regression Guard**: Verify TypeScript compilation, Biome formatting, and monorepo quality suite.
+5. **Quality & Regression Guard**: Verify TypeScript compilation, Prettier formatting, and monorepo quality suite.
 `;
 
 // 2. Requirements (EARS syntax)

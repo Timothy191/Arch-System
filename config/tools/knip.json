@@ -24,7 +24,7 @@
     "vite-tsconfig-paths",
     "@repo/shared/hooks"
   ],
-  "ignoreBinaries": ["python3", "psql", "wait-on", "serve", "biome", "poetry", "uv"],
+  "ignoreBinaries": ["python3", "psql", "wait-on", "serve", "poetry", "uv"],
   "ignore": [
     "**/jest.config.*",
     "**/postcss.config.*",

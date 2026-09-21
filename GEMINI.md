@@ -3,12 +3,14 @@
 You are operating within the Arch-System enterprise monorepo.
 
 ## Directives & Ground Rules
+
 - Refer to the canonical Agent SSoT: [AGENTS.md](./AGENTS.md).
 - Follow Turborepo task conventions: use `pnpm` exclusively.
-- All code changes must satisfy `@repo/eslint-config`, Biome rules, and TypeScript strict checking.
+- All code changes must satisfy `@repo/eslint-config`, Prettier formatting rules, and TypeScript strict checking.
 - Do not edit generated Supabase types manually; use `pnpm --filter @repo/database db:types`.
 
 ## Core Directives & Quality Gates
+
 1. **Always Light Mode**: Invariant UI rule — strictly light mode (#f3f4f6 background, luminance > 200). Never introduce `dark:` Tailwind classes.
 2. **Design Tokens**: Rely on OKLCH tokens from `@repo/theme`. Use only approved shadow tokens.
 3. **Quality Gate**: Always ensure `pnpm quality` passes before completing work.
