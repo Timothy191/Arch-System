@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { TextDecoder, TextEncoder } from "node:util";
 
 global.TextEncoder = global.TextEncoder || TextEncoder;
-global.TextDecoder = global.TextDecoder || (TextDecoder as any);
+global.TextDecoder = global.TextDecoder || (TextDecoder as unknown as typeof global.TextDecoder);
 
 // Override environment variables to prevent local development .env from polluting tests
 process.env.DISABLE_RATE_LIMIT = "false";
@@ -16,6 +16,24 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
   revalidateTag: jest.fn(),
 }));
+
+// next/font/google is rewritten by the Next build pipeline and cannot execute
+// under @swc/jest, so any page that loads a font fails at import time. Each
+// font export resolves to a stub with the same shape (className / variable /
+// style) that the page spreads into its root element.
+//
+// The `variable` here is derived from the font's export name; the real CSS
+// custom property comes from the `variable` option passed at the call site and
+// only has meaning once a stylesheet is applied, which never happens in jsdom.
+jest.mock("next/font/google", () => {
+  const makeStub = (name: string) => () => ({
+    className: `font-${name}`,
+    variable: `--font-${name.toLowerCase().replace(/_/g, "-")}`,
+    style: { fontFamily: name },
+  });
+
+  return new Proxy({}, { get: (_target, name) => makeStub(String(name)) });
+});
 
 global.Request =
   global.Request ||
@@ -70,38 +88,6 @@ jest.mock("@repo/redis", () => {
   };
 });
 
-jest.mock("../../packages/redis/src/client", () => {
-  const mockCache = new Map<string, string>();
-  const mockRedisClient = {
-    get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
-    set: jest.fn(async (key: string, value: string) => {
-      mockCache.set(key, value);
-    }),
-    del: jest.fn(async (key: string) => {
-      mockCache.delete(key);
-    }),
-    incr: jest.fn(async (key: string) => {
-      const val = parseInt(mockCache.get(key) || "0", 10) + 1;
-      mockCache.set(key, val.toString());
-      return val;
-    }),
-    // AGENT-TRACE: Mock expire function - parameters prefixed with underscore to fix ESLint warnings
-    // These are unused in the mock implementation but required for interface compatibility
-    expire: jest.fn(async (_key: string, _seconds: number) => {
-      return true;
-    }),
-    // AGENT-TRACE: Align flushDb name with actual client type
-    flushDb: jest.fn(async () => {
-      mockCache.clear();
-    }),
-    isOpen: true,
-  };
-  return {
-    getRedisClient: jest.fn(async () => mockRedisClient),
-    closeRedis: jest.fn(async () => {}),
-  };
-});
-
 // Mock window.matchMedia and IntersectionObserver only if running in a browser-like environment (jsdom)
 if (typeof window !== "undefined") {
   Object.defineProperty(window, "matchMedia", {
@@ -128,10 +114,10 @@ if (typeof window !== "undefined") {
   Object.defineProperty(window, "IntersectionObserver", {
     writable: true,
     configurable: true,
-    value: MockIntersectionObserver,
+    value: MockIntersectionObserver as unknown as typeof IntersectionObserver,
   });
 
-  global.IntersectionObserver = MockIntersectionObserver as any;
+  global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
   // Mock ResizeObserver
   class MockResizeObserver {
@@ -143,8 +129,8 @@ if (typeof window !== "undefined") {
   Object.defineProperty(window, "ResizeObserver", {
     writable: true,
     configurable: true,
-    value: MockResizeObserver,
+    value: MockResizeObserver as unknown as typeof ResizeObserver,
   });
 
-  global.ResizeObserver = MockResizeObserver as any;
+  global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 }

@@ -1,0 +1,499 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   strata.css — "Core Log" sign-in surface
+   ───────────────────────────────────────────────────────────────────────
+   Token set for the sign-in surface, imported by ./index.css so it ships with
+   the design system. The .slg-* class names are namespaced and do not collide
+   with the existing arch* utilities.
+
+   Ground values clear the luminance > 200 floor (light mode only).
+   Specificity is kept flat — one class per element, no element selectors —
+   so section spacing rules cannot cancel each other out.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.slg {
+  /* ── Ground & surface — cool mineral grey ── */
+  --slg-ground: oklch(95% 0.003 165deg);
+  --slg-surface: oklch(98.7% 0.002 145deg);
+
+  /* ── Lithology ── */
+  --slg-shale: oklch(46% 0.021 238deg);
+  --slg-mudstone: oklch(61.7% 0.02 89deg);
+  --slg-sandstone: oklch(73.3% 0.1 81deg);
+  --slg-ironstone: oklch(52% 0.122 36deg);
+  --slg-ink: oklch(23.8% 0.013 79deg);
+
+  /* ── Derived hairlines ── */
+  --slg-rule: color-mix(in oklch, var(--slg-mudstone) 30%, transparent);
+  --slg-rule-strong: color-mix(in oklch, var(--slg-mudstone) 52%, transparent);
+
+  /* ── Named shadow token (never a raw shadow-* utility) ── */
+  --slg-shadow:
+    0 1px 0 oklch(100% 0 0deg / 80%) inset, 0 24px 48px -28px oklch(46% 0.021 238deg / 40%),
+    0 2px 6px -3px oklch(46% 0.021 238deg / 16%);
+
+  /* ── Type ── */
+  --slg-font: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --slg-font-cond: var(--font-plex-cond), var(--font-plex), sans-serif;
+  --slg-font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: calc(100vh - 28px);
+  background: color-mix(in oklch, var(--slg-ground) 96%, transparent);
+  color: var(--slg-shale);
+  font-family: var(--slg-font);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════ MEASURED SECTION RAIL ═══════════════════════ */
+
+.slg-rail {
+  flex: 0 0 84px;
+  display: flex;
+  align-self: stretch;
+  border-right: 1px solid var(--slg-rule-strong);
+  background: color-mix(in oklch, var(--slg-surface) 62%, transparent);
+}
+
+.slg-scale {
+  flex: 0 0 36px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  border-right: 1px solid var(--slg-rule);
+}
+
+.slg-row {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.slg-row-m {
+  font-family: var(--slg-font-mono);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--slg-mudstone);
+  font-variant-numeric: tabular-nums;
+}
+
+.slg-row-tick {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 1px;
+  background: var(--slg-rule-strong);
+}
+
+.slg-row-major .slg-row-tick {
+  width: 12px;
+  background: var(--slg-mudstone);
+}
+
+.slg-material {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+/*
+  Bands are muted on purpose. At full saturation they read as a stacked bar
+  chart and the ochre band competes with the primary action. A real core log is
+  drawn in low-chroma tints where the *boundary* carries the information, so the
+  contrast lives in the hairline rather than the fill.
+
+  The tints are set explicitly rather than mixed toward the ground: the ground's
+  hue is green-leaning, and a color-mix() with it drags ochre to sage green.
+  These preserve each lithology's own hue at low chroma.
+*/
+.slg-band {
+  flex: var(--h) 1 0;
+  box-shadow: inset 0 -1px 0 var(--slg-rule-strong);
+}
+
+.slg-band-surface {
+  background: oklch(98% 0.002 145deg);
+}
+
+.slg-band-mudstone {
+  background: oklch(84% 0.012 89deg);
+}
+
+.slg-band-sandstone {
+  background: oklch(89% 0.048 81deg);
+}
+
+.slg-band-ironstone {
+  background: oklch(86% 0.045 36deg);
+}
+
+.slg-band-shale {
+  background: oklch(79% 0.014 238deg);
+}
+
+/* ═══════════════════════════════ PANEL STAGE ═══════════════════════════════ */
+
+/*
+  Unequal padding biases the panel left of the field's centre, so it reads as
+  content written onto the log sheet just off the depth scale, rather than an
+  object floating dead-centre and unrelated to the rail. The open right side is
+  the unlogged remainder of the sheet.
+*/
+.slg-stage {
+  flex: 1 1 auto;
+
+  /* Without this the flex item keeps min-width:auto and refuses to shrink below
+     its content, so the panel's max-width:100% resolves against a self-sized box
+     and the whole stage overflows narrow viewports. */
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 220px 40px 88px;
+}
+
+/*
+  The stack carries the panel width so the panel itself can fill it and the eve
+  status bar below lines up with the panel's edges.
+*/
+.slg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 424px;
+  max-width: 100%;
+}
+
+.slg-panel {
+  width: 100%;
+  background: var(--slg-surface);
+  border: 1px solid var(--slg-rule-strong);
+  border-radius: 3px;
+  box-shadow: var(--slg-shadow);
+  overflow: hidden;
+}
+
+.slg-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--slg-rule);
+  background: color-mix(in oklch, var(--slg-mudstone) 11%, var(--slg-surface));
+}
+
+.slg-head-mark {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: var(--slg-shale);
+}
+
+.slg-head-word {
+  flex: 1 1 auto;
+  font-family: var(--slg-font-cond);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.slg-head-time {
+  flex: 0 0 auto;
+  font-family: var(--slg-font-mono);
+  font-size: 10px;
+  color: var(--slg-mudstone);
+  font-variant-numeric: tabular-nums;
+}
+
+.slg-body {
+  padding: 30px 28px 26px;
+}
+
+.slg-title {
+  margin: 0;
+  font-family: var(--slg-font-cond);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--slg-shale);
+  text-wrap: balance;
+}
+
+.slg-sub {
+  margin: 9px 0 0;
+  max-width: 46ch;
+  font-size: 13px;
+  color: var(--slg-mudstone);
+}
+
+/* ═══════════════════════════════ FORM ═══════════════════════════════ */
+
+.slg-form {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slg-field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slg-shale);
+}
+
+.slg-input {
+  width: 100%;
+  padding: 9px 11px;
+  font-family: var(--slg-font);
+  font-size: 13px;
+  color: var(--slg-shale);
+  background: oklch(100% 0 0deg);
+  border: 1px solid var(--slg-rule-strong);
+  border-radius: 2px;
+}
+
+.slg-input::placeholder {
+  color: color-mix(in oklch, var(--slg-mudstone) 78%, transparent);
+}
+
+.slg-input:focus-visible {
+  outline: 2px solid var(--slg-sandstone);
+  outline-offset: 1px;
+  border-color: var(--slg-sandstone);
+}
+
+.slg-submit {
+  margin-top: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  font-family: var(--slg-font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slg-ink);
+  background: var(--slg-sandstone);
+  border: 1px solid color-mix(in oklch, var(--slg-sandstone) 74%, var(--slg-ink));
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.slg-submit:hover {
+  background: color-mix(in oklch, var(--slg-sandstone) 90%, var(--slg-ink));
+}
+
+.slg-submit:focus-visible {
+  outline: 2px solid var(--slg-shale);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════ NOTE ═══════════════════════════════ */
+
+.slg-note {
+  margin: 22px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid var(--slg-rule);
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--slg-mudstone);
+}
+
+.slg-note-icon {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  margin-top: 2px;
+  color: var(--slg-shale);
+}
+
+/* ═══════════════════════════════ FOOTER ═══════════════════════════════ */
+
+.slg-foot {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--slg-rule);
+  background: color-mix(in oklch, var(--slg-mudstone) 7%, var(--slg-surface));
+  font-family: var(--slg-font-mono);
+  font-size: 10px;
+  color: var(--slg-mudstone);
+  font-variant-numeric: tabular-nums;
+}
+
+.slg-foot-tag {
+  justify-self: end;
+  padding: 1px 6px;
+  border: 1px solid var(--slg-rule-strong);
+  border-radius: 2px;
+  color: var(--slg-shale);
+}
+
+/* ═══════════════════════════════ NARROW ═══════════════════════════════ */
+
+@media (width <= 720px) {
+  .slg-rail {
+    display: none;
+  }
+
+  .slg-stage {
+    padding: 24px 20px;
+  }
+
+  .slg-title {
+    font-size: 24px;
+  }
+}
+
+/* ═══════════════════════ FORM SKIN ═══════════════════════
+   `LoginForm` is the real product component and is imported unchanged: it owns
+   the rate limiting, caps-lock detection, show/hide toggle and the
+   `input#email` / `input#password` contracts the e2e suite depends on. It is
+   skinned from here rather than edited, so none of that logic is put at risk.
+
+   These selectors are two classes deep on purpose: the form ships single-class
+   Tailwind utilities (text-black, liquid-glass-input, the gold gradient), and a
+   one-class rule would lose the cascade to them.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Space the form off the subtitle, and tighten the rhythm inside it from
+   the form's own space-y-8 (32px) to 18px. */
+.slg-body form[data-testid="login-form"] {
+  margin-top: 24px;
+}
+
+.slg-body form[data-testid="login-form"] > * + * {
+  margin-top: 18px;
+}
+
+.slg-body form label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slg-shale);
+}
+
+.slg-body form input#email,
+.slg-body form input#password {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--slg-font);
+  font-size: 13px;
+  color: var(--slg-shale);
+  background: oklch(100% 0 0deg);
+  border: 1px solid var(--slg-rule-strong);
+  border-radius: 2px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Keep the show/hide toggle clear of the text. */
+.slg-body form input#password {
+  padding-right: 46px;
+}
+
+.slg-body form input#email::placeholder,
+.slg-body form input#password::placeholder {
+  color: color-mix(in oklch, var(--slg-mudstone) 80%, transparent);
+}
+
+.slg-body form input#email:focus,
+.slg-body form input#password:focus {
+  outline: 2px solid var(--slg-sandstone);
+  outline-offset: 1px;
+  border-color: var(--slg-sandstone);
+  box-shadow: none;
+}
+
+.slg-body form #email-hint {
+  font-size: 11px;
+  color: var(--slg-mudstone);
+}
+
+/* The show/hide toggle is the form's only type="button" control. */
+.slg-body form button[type="button"] {
+  color: var(--slg-mudstone);
+}
+
+.slg-body form button[type="button"]:hover {
+  color: var(--slg-shale);
+}
+
+/* Error copy takes the ironstone accent rather than the legacy red. */
+.slg-body form .text-arch-accent-red {
+  color: var(--slg-ironstone);
+}
+
+/*
+  Submit. AnimatedButton ships a gold gradient, two decorative overlay spans
+  (rim shine + sweeping highlight) and layered drop shadows. The overlays are
+  the only children carrying `pointer-events-none`, which is how they are
+  identified here — the label span never has it.
+*/
+.slg-body form button[type="submit"] {
+  height: 46px;
+  padding: 0 16px;
+  font-family: var(--slg-font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--slg-ink);
+  background: var(--slg-sandstone);
+  border: 1px solid color-mix(in oklch, var(--slg-sandstone) 74%, var(--slg-ink));
+  border-radius: 2px;
+  box-shadow: none;
+  filter: none;
+  text-shadow: none;
+}
+
+.slg-body form button[type="submit"]:hover {
+  background: color-mix(in oklch, var(--slg-sandstone) 90%, var(--slg-ink));
+}
+
+.slg-body form button[type="submit"] > .pointer-events-none {
+  display: none;
+}
+
+.slg-body form button[type="submit"] > span {
+  filter: none;
+  text-shadow: none;
+}
+
+.slg-body form a {
+  color: var(--slg-shale);
+}
+
+/* ═══════════════════════ UNAVAILABLE + FOOTER PARTS ═══════════════════════ */
+
+.slg-note-error {
+  color: var(--slg-ironstone);
+}
+
+.slg-note-error .slg-note-icon {
+  color: var(--slg-ironstone);
+}
+
+/* The retry is an anchor, so it needs the button skin applied explicitly. */
+.slg-submit-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  text-decoration: none;
+}
+
+.slg-foot-date,
+.slg-foot-os {
+  justify-self: end;
+}

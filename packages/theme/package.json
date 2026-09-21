@@ -23,6 +23,7 @@
     ".": "./src/index.ts",
     "./css": "./src/css/index.css",
     "./tokens": "./src/tokens/index.ts",
+    "./tokens/strata": "./src/tokens/strata.ts",
     "./react": "./src/react/index.ts",
     "./tailwind": "./src/tailwind/preset.ts",
     "./motion": "./src/tokens/motion.ts"
