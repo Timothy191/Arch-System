@@ -5,7 +5,7 @@
 *,
 ::before,
 ::after {
-  @apply border-border;
+  @apply border-black/10;
 }
 
 body,
