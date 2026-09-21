@@ -1,7 +1,6 @@
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { Clock } from "@repo/ui/Clock";
 import { EveLogo } from "@repo/ui/EveLogo";
-import { EveStatusBar } from "@repo/ui/EveStatusBar";
 import { Logo } from "@repo/ui/Logo";
 import { AlertTriangle, ChevronDown, Lock } from "lucide-react";
 import { cookies } from "next/headers";
@@ -184,7 +183,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
         )}
 
         {/* eve agentic system — slim status bar below the login card */}
-        <EveStatusBar />
       </div>
     </main>
   );
