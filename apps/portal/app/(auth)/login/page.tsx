@@ -3,7 +3,7 @@ import { Clock } from "@repo/ui/Clock";
 import { EveLogo } from "@repo/ui/EveLogo";
 import { EveStatusBar } from "@repo/ui/EveStatusBar";
 import { Logo } from "@repo/ui/Logo";
-import { AlertCircle, AlertTriangle, ChevronDown, Lock } from "lucide-react";
+import { AlertTriangle, ChevronDown, Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import nextDynamic from "next/dynamic";
@@ -160,14 +160,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               </div>
 
               <LoginForm />
-
-              {/* Contextual System Notice */}
-              <div className="px-3.5 py-2 rounded-md border border-white/15 bg-white/5 text-[11px] text-black leading-relaxed flex items-center gap-2.5 select-none">
-                <AlertCircle className="w-3.5 h-3.5 text-black shrink-0" strokeWidth={2} />
-                <span>
-                  <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
-                </span>
-              </div>
             </div>
 
             {/* Enterprise Footer */}
