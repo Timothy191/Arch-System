@@ -93,25 +93,13 @@ function atomicRun(jobDesc) {
   }
   log("Quality gate passed.");
   try {
-    const status = run("git status --short", { silent: true });
-    if (!status.trim()) {
-      log("No changes to commit.");
-      log("SUCCESS");
+    const staged = run("git diff --cached --name-only", { silent: true });
+    if (!staged.trim()) {
+      log("No staged changes to commit. Stage the files you want to include in this atomic job first.");
+      log("SUCCESS (no commit)");
       return;
     }
-    if (rc.commit?.all) {
-      run(`git add -A && git commit -m "${rc.commit.messagePrefix} ${jobDesc.replace(/"/g, "'")}"`);
-    } else {
-      // Stage only files that were already modified before this run, leaving
-      // unrelated workspace changes untouched.
-      const files = status
-        .split("\n")
-        .map((line) => line.trim().slice(2).trim())
-        .filter(Boolean)
-        .map((file) => `"${file.replace(/"/g, '\\"')}"`)
-        .join(" ");
-      run(`git add ${files} && git commit --no-verify -m "${rc.commit.messagePrefix} ${jobDesc.replace(/"/g, "'")}"`);
-    }
+    run(`git commit --no-verify -m "${rc.commit.messagePrefix} ${jobDesc.replace(/"/g, "'")}"`);
     log("Committed atomic job.");
   } catch (err) {
     log("Commit failed:", err.message);
