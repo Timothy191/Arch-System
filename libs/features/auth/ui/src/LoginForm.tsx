@@ -217,14 +217,22 @@ export function LoginForm() {
         </Link>
       </div>
 
-      <div className="flex items-center justify-center gap-2 pt-2 border-t border-black/10 text-[11px] text-black/60 select-none">
-        <span className="font-mono text-[10px] tracking-wider uppercase">AI Engine</span>
-        <span className="opacity-40">•</span>
-        <img
-          src="/images/ai-sdk/ai-sdk-logotype-light.svg"
-          alt="Powered by Vercel AI SDK"
-          className="h-4 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity"
-        />
+      <div className="flex items-center justify-center gap-3 pt-3 border-t border-black/10 text-[11px] text-black/60 select-none">
+        <span className="font-mono text-[10px] tracking-widest uppercase font-semibold text-black/80">
+          Intelligence Core
+        </span>
+        <span className="opacity-30">•</span>
+        <div className="flex items-center gap-2.5 opacity-80 hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 font-serif text-black">
+            <span className="text-[13px] font-bold tracking-tight leading-none pt-0.5">Claude</span>
+          </div>
+          <span className="opacity-40 text-[9px]">+</span>
+          <img
+            src="/images/ai-sdk/ai-sdk-logotype-light.svg"
+            alt="Powered by Vercel AI SDK"
+            className="h-[13px] w-auto object-contain"
+          />
+        </div>
       </div>
     </form>
   );
