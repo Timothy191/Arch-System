@@ -107,7 +107,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               </p>
               <a
                 href="/login"
-                className="inline-block mt-4 px-4 py-2 text-sm font-medium text-white bg-arch-accent-blue hover:opacity-90 rounded-button transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
+                className="inline-block mt-4 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:opacity-90 rounded-button transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
               >
                 Retry
               </a>
@@ -147,7 +147,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
               {/* Title */}
               <div className="flex items-center gap-3.5">
                 <div className="p-2 rounded-lg bg-black/[0.04] border border-black/[0.06] shadow-sm shrink-0 flex items-center justify-center">
-                  <Logo className="w-9 h-9 text-[var(--accent-blue)]" />
+                  <Logo className="w-9 h-9 text-amber-500" />
                 </div>
                 <div className="space-y-0.5 min-w-0">
                   <h1 className="text-xl font-semibold tracking-tight text-[var(--text-heading)]">
@@ -174,7 +174,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <div className="px-4 py-3 flex items-center justify-between text-[10px] text-black bg-white/5 border-t border-white/10 select-none">
               <button
                 type="button"
-                className="flex items-center gap-1 cursor-pointer hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md px-1.5 py-0.5 -mx-1.5"
+                className="flex items-center gap-1 cursor-pointer hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-md px-1.5 py-0.5 -mx-1.5"
                 aria-label="Select Language"
               >
                 <span>English (US)</span>

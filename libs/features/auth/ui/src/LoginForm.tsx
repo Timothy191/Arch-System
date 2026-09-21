@@ -94,7 +94,7 @@ export function LoginForm() {
               }
             }}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 liquid-glass-input focus-ring-amber-500"
             placeholder="Employee ID or email"
             aria-labelledby="email-label"
             autoComplete="username"
@@ -130,7 +130,7 @@ export function LoginForm() {
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
             variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-arch-accent-blue focus:ring-4 focus:ring-arch-accent-blue/20 liquid-glass-input focus-ring-arch-blue"
+            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 liquid-glass-input focus-ring-amber-500"
             placeholder="Enter your password"
             aria-labelledby="password-label"
             autoComplete="current-password"
@@ -138,7 +138,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md min-w-11 min-h-11 inline-flex items-center justify-center"
+            className="absolute right-1 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-md min-w-11 min-h-11 inline-flex items-center justify-center"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -211,7 +211,7 @@ export function LoginForm() {
         />
         <Link
           href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md px-1 py-0.5 -mx-1"
+          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-md px-1 py-0.5 -mx-1"
         >
           Forgot password?
         </Link>
