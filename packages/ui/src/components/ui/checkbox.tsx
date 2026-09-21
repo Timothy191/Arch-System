@@ -72,7 +72,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900",
             isChecked
               ? "bg-neutral-900 border-neutral-900 text-white"
-              : "bg-white border-neutral-300 hover:border-neutral-400",
+              : "bg-white/5 border-white/10 hover:border-white/20",
           )}
           aria-hidden="true"
         >

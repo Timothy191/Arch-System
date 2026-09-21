@@ -13,8 +13,8 @@ export function Input({ variant = "default", className, ...props }: InputProps) 
         "w-full rounded-lg border text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)] focus:ring-4 focus:ring-[var(--accent-blue)]/20 transition-all duration-200",
         variant === "default"
           ? "border-[var(--border-emphasis)] bg-[var(--bg-secondary)]"
-          : "border-[var(--border-emphasis)] bg-[var(--bg-tertiary)]",
-        className
+          : "border-white/10 bg-white/5 backdrop-blur-md",
+        className,
       )}
       {...props}
     />
