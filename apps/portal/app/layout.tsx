@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         {/* Preload primary LCP background asset off critical path */}
         <link
           rel="preload"
-          href="/background/edge-of-the-event-horizon-poster.webp"
+          href="/background/earth-orbit-poster.webp"
           as="image"
           type="image/webp"
           fetchPriority="high"
