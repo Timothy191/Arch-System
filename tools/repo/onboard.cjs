@@ -5,7 +5,7 @@
  * Arch-Systems (Plantcor) — Monorepo Self-Service Onboarding & Diagnostics CLI
  * ─────────────────────────────────────────────────────────────────────────────
  * Performs automated pre-flight checks across:
- *   1. Node.js & Volta engine requirements
+ *   1. Node.js & Volta engine requirements (.nvmrc / .node-version parity)
  *   2. pnpm package manager & workspace integrity
  *   3. Docker daemon & local Supabase container reachability
  *   4. Environment variable parity against apps/portal/env/.env.example
@@ -27,6 +27,13 @@ const PORTAL_ENV_EXAMPLE = path.join(ROOT_DIR, "apps/portal/env/.env.example");
 const PORTAL_ENV_ACTUAL = path.join(ROOT_DIR, "apps/portal/.env");
 const ROOT_ENV_ACTUAL = path.join(ROOT_DIR, ".env");
 const PACKAGE_JSON_PATH = path.join(ROOT_DIR, "package.json");
+const NVMRC_PATH = path.join(ROOT_DIR, ".nvmrc");
+const NODE_VERSION_PATH = path.join(ROOT_DIR, ".node-version");
+
+// CLI Flags
+const cliArgs = process.argv.slice(2);
+const isJson = cliArgs.includes("--json");
+const isFix = cliArgs.includes("--fix");
 
 // Colors
 const colors = {
@@ -61,13 +68,15 @@ function record(status, category, message, details = null, remediation = null) {
 
   results.checks.push({ status, category, message, details, remediation });
 
-  const badge = status === "PASS" ? symbols.pass : status === "WARN" ? symbols.warn : symbols.fail;
-  console.log(`  [${badge}] ${colors.bold}${category}${colors.reset}: ${message}`);
-  if (details) {
-    console.log(`         ${colors.dim}${details}${colors.reset}`);
-  }
-  if (remediation && status !== "PASS") {
-    console.log(`         ${colors.yellow}👉 Fix: ${remediation}${colors.reset}`);
+  if (!isJson) {
+    const badge = status === "PASS" ? symbols.pass : status === "WARN" ? symbols.warn : symbols.fail;
+    console.log(`  [${badge}] ${colors.bold}${category}${colors.reset}: ${message}`);
+    if (details) {
+      console.log(`         ${colors.dim}${details}${colors.reset}`);
+    }
+    if (remediation && status !== "PASS") {
+      console.log(`         ${colors.yellow}👉 Fix: ${remediation}${colors.reset}`);
+    }
   }
 }
 
@@ -91,35 +100,37 @@ function safeExec(cmd, opts = {}) {
   }
 }
 
-console.log(
-  `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`,
-);
-console.log(
-  `${colors.bold}${colors.cyan} 🛠️  Arch-Systems Monorepo Onboarding Diagnostic Suite${colors.reset}`,
-);
-console.log(
-  `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`,
-);
+if (!isJson) {
+  console.log(
+    `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`,
+  );
+  console.log(
+    `${colors.bold}${colors.cyan} 🛠️  Arch-Systems Monorepo Onboarding Diagnostic Suite${colors.reset}`,
+  );
+  console.log(
+    `${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}\n`,
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. Node.js & Volta Engine Checks
+// 1. Node.js & Volta / Version Pinning Checks
 // ─────────────────────────────────────────────────────────────────────────────
-console.log(`${colors.bold}1. Runtime & Package Manager Environment${colors.reset}`);
+if (!isJson) console.log(`${colors.bold}1. Runtime & Package Manager Environment${colors.reset}`);
 
 const nodeVersion = process.version;
 const majorNode = parseInt(nodeVersion.replace("v", "").split(".")[0], 10);
-let targetNode = ">=22";
+let targetNode = "24.15.0";
 
 try {
   const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf-8"));
-  targetNode = pkg.volta?.node || pkg.engines?.node || ">=22";
+  targetNode = pkg.volta?.node || pkg.engines?.node || "24.15.0";
 } catch (_e) {}
 
 if (majorNode >= 22) {
   record(
     "PASS",
     "Node.js",
-    `Active version ${nodeVersion} satisfies engine requirement (${targetNode})`,
+    `Active version ${nodeVersion} satisfies engine requirement (>=22, target ${targetNode})`,
   );
 } else {
   record(
@@ -127,13 +138,53 @@ if (majorNode >= 22) {
     "Node.js",
     `Active version ${nodeVersion} is below minimum requirement (${targetNode})`,
     null,
-    'Run "volta install node@24.15.0" or update your Node environment.',
+    `Run "nvm use ${targetNode}" or "volta install node@${targetNode}".`,
+  );
+}
+
+// Check .nvmrc and .node-version dotfiles
+if (fs.existsSync(NVMRC_PATH)) {
+  const nvmrcVal = fs.readFileSync(NVMRC_PATH, "utf-8").trim();
+  record("PASS", ".nvmrc Pin", `.nvmrc pins Node ${nvmrcVal}`);
+} else if (isFix) {
+  fs.writeFileSync(NVMRC_PATH, `${targetNode}\n`, "utf-8");
+  record("PASS", ".nvmrc Pin", `Created .nvmrc pinned to ${targetNode}`);
+} else {
+  record(
+    "WARN",
+    ".nvmrc Pin",
+    ".nvmrc not found",
+    "Ensures automatic version switching for NVM / FNM users.",
+    `Create .nvmrc with "${targetNode}"`,
+  );
+}
+
+if (fs.existsSync(NODE_VERSION_PATH)) {
+  const nodeVerVal = fs.readFileSync(NODE_VERSION_PATH, "utf-8").trim();
+  record("PASS", ".node-version Pin", `.node-version pins Node ${nodeVerVal}`);
+} else if (isFix) {
+  fs.writeFileSync(NODE_VERSION_PATH, `${targetNode}\n`, "utf-8");
+  record("PASS", ".node-version Pin", `Created .node-version pinned to ${targetNode}`);
+} else {
+  record(
+    "WARN",
+    ".node-version Pin",
+    ".node-version not found",
+    "Ensures automatic version switching for asdf / mise / nodenv users.",
+    `Create .node-version with "${targetNode}"`,
   );
 }
 
 const voltaCheck = safeExec("volta --version");
 if (voltaCheck.success) {
   record("PASS", "Volta Toolchain", `Volta is installed (v${voltaCheck.stdout})`);
+} else if (fs.existsSync(NVMRC_PATH) && fs.existsSync(NODE_VERSION_PATH)) {
+  record(
+    "PASS",
+    "Toolchain Management",
+    "Runtime version managed via pinned .nvmrc and .node-version",
+    "Volta optional when nvm/fnm/mise dotfiles are active.",
+  );
 } else {
   record(
     "WARN",
@@ -155,7 +206,7 @@ if (pnpmCheck.success) {
       "pnpm Manager",
       `Active version is ${pnpmVer} (expected 9.15.9)`,
       null,
-      'Run "volta install pnpm@9.15.9"',
+      'Run "volta install pnpm@9.15.9" or "npm install -g pnpm@9.15.9"',
     );
   }
 } else {
@@ -171,13 +222,12 @@ if (pnpmCheck.success) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. Docker & Container Stack Health
 // ─────────────────────────────────────────────────────────────────────────────
-console.log(`\n${colors.bold}2. Infrastructure & Local Container Stack${colors.reset}`);
+if (!isJson) console.log(`\n${colors.bold}2. Infrastructure & Local Container Stack${colors.reset}`);
 
 const dockerCheck = safeExec("docker info");
 if (dockerCheck.success) {
   record("PASS", "Docker Engine", "Docker daemon is active and responding");
 
-  // Check Supabase containers
   const supabaseContainerCheck = safeExec(
     'docker ps --filter "name=supabase" --format "{{.Names}}: {{.Status}}"',
   );
@@ -210,7 +260,7 @@ if (dockerCheck.success) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. Environment Variable Alignment Matrix
 // ─────────────────────────────────────────────────────────────────────────────
-console.log(`\n${colors.bold}3. Environment Variable Integrity Matrix${colors.reset}`);
+if (!isJson) console.log(`\n${colors.bold}3. Environment Variable Integrity Matrix${colors.reset}`);
 
 function parseEnvKeys(filePath) {
   if (!fs.existsSync(filePath)) return new Set();
@@ -230,12 +280,28 @@ if (fs.existsSync(PORTAL_ENV_ACTUAL)) {
   const exampleKeys = parseEnvKeys(PORTAL_ENV_EXAMPLE);
   const actualKeys = parseEnvKeys(PORTAL_ENV_ACTUAL);
 
-  const missingKeys = [];
+  let missingKeys = [];
   exampleKeys.forEach((key) => {
     if (!actualKeys.has(key)) {
       missingKeys.push(key);
     }
   });
+
+  if (missingKeys.length > 0 && isFix) {
+    // Auto-fix missing keys by copying default/fallback from example
+    const exampleLines = fs.readFileSync(PORTAL_ENV_EXAMPLE, "utf-8").split("\n");
+    let appendContent = "\n# Auto-added by onboard --fix\n";
+    missingKeys.forEach((key) => {
+      const line = exampleLines.find((l) => l.trim().startsWith(`${key}=`));
+      if (line) {
+        appendContent += `${line}\n`;
+      }
+    });
+    fs.appendFileSync(PORTAL_ENV_ACTUAL, appendContent, "utf-8");
+    // Re-parse
+    const updatedActual = parseEnvKeys(PORTAL_ENV_ACTUAL);
+    missingKeys = missingKeys.filter((k) => !updatedActual.has(k));
+  }
 
   if (missingKeys.length === 0) {
     record(
@@ -249,16 +315,19 @@ if (fs.existsSync(PORTAL_ENV_ACTUAL)) {
       "Portal .env",
       `apps/portal/.env is missing ${missingKeys.length} keys from .env.example`,
       `Missing keys: ${missingKeys.slice(0, 5).join(", ")}${missingKeys.length > 5 ? "..." : ""}`,
-      "Sync keys from apps/portal/env/.env.example to apps/portal/.env",
+      "Sync keys from apps/portal/env/.env.example to apps/portal/.env or run with --fix",
     );
   }
+} else if (isFix && fs.existsSync(PORTAL_ENV_EXAMPLE)) {
+  fs.copyFileSync(PORTAL_ENV_EXAMPLE, PORTAL_ENV_ACTUAL);
+  record("PASS", "Portal .env", "Created apps/portal/.env from .env.example template");
 } else {
   record(
     "FAIL",
     "Portal .env",
     "apps/portal/.env does not exist",
     null,
-    "Run: cp apps/portal/env/.env.example apps/portal/.env",
+    "Run: cp apps/portal/env/.env.example apps/portal/.env or pnpm onboard --fix",
   );
 }
 
@@ -277,7 +346,7 @@ if (fs.existsSync(ROOT_ENV_ACTUAL)) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. Monorepo Architecture & Policy Boundaries
 // ─────────────────────────────────────────────────────────────────────────────
-console.log(`\n${colors.bold}4. Monorepo Boundaries & Architecture Policies${colors.reset}`);
+if (!isJson) console.log(`\n${colors.bold}4. Monorepo Boundaries & Architecture Policies${colors.reset}`);
 
 const policyCheck = safeExec("node tools/repo/policy-compiler.cjs --check");
 if (policyCheck.success) {
@@ -299,7 +368,7 @@ if (policyCheck.success) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. Fast Inner Loop Sanity Check
 // ─────────────────────────────────────────────────────────────────────────────
-console.log(`\n${colors.bold}5. Fast-Feedback Test Sanity Check${colors.reset}`);
+if (!isJson) console.log(`\n${colors.bold}5. Fast-Feedback Test Sanity Check${colors.reset}`);
 
 const hookTest = safeExec('pnpm --filter portal test -- --testPathPatterns="hook"');
 if (hookTest.success) {
@@ -315,8 +384,13 @@ if (hookTest.success) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Summary & Actionable Recommendations
+// Summary & Output
 // ─────────────────────────────────────────────────────────────────────────────
+if (isJson) {
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(results.failed === 0 ? 0 : 1);
+}
+
 console.log(
   `\n${colors.bold}${colors.cyan}═══════════════════════════════════════════════════════════════════════════════${colors.reset}`,
 );

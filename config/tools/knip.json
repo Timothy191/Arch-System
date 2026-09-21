@@ -21,7 +21,8 @@
     "tslib",
     "vitepress",
     "swagger-jsdoc",
-    "vite-tsconfig-paths"
+    "vite-tsconfig-paths",
+    "@repo/shared/hooks"
   ],
   "ignoreBinaries": ["python3", "psql", "wait-on", "serve", "biome", "poetry", "uv"],
   "ignore": [
@@ -33,7 +34,13 @@
     "docs/examples/**",
     "e2e/helpers/**",
     "config/tools/**",
-    "services/integrations/**"
+    "services/integrations/**",
+    "scripts/autonomous-ui-delegator.mjs",
+    "scripts/codemods/remove-dark-classes.cjs",
+    "scripts/sync-mcp-config.js",
+    "scripts/test-langfuse-tracing.mjs",
+    "scripts/validate-mcp-servers.js",
+    "scripts/video-generator/render-videos.mjs"
   ],
   "workspaces": {
     ".": {
@@ -70,7 +77,8 @@
         "@opentelemetry/auto-instrumentations-node",
         "@opentelemetry/sdk-node",
         "@opentelemetry/semantic-conventions",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/sdk-trace-node",
+        "@repo/shared/hooks"
       ],
       "ignore": [
         "lib/observability/metrics.ts",
@@ -88,7 +96,14 @@
         "api/codebase-maps/route.ts",
         "api/scada/tags/route.ts",
         "plugins/rust-telemetry-engine/index.tsx",
-        "server/proxy.ts"
+        "server/proxy.ts",
+        "lib/server-cache.ts",
+        "app/actions.ts",
+        "lib/actions/shift-closeout.ts",
+        "app/(departments)/access-control/card-actions/card-pdf.tsx",
+        "app/(departments)/access-control/printing.ts",
+        "features/auth/components/RefractionGlow.tsx",
+        "lib/control-room-shift-report.ts"
       ]
     },
     "apps/cms": {

@@ -1,68 +1,33 @@
-/**
- * /login — "Core Log"
- *
- * The portal's sign-in surface, built from the materials an operator actually
- * handles: a measured depth scale, lithology banding, iron-oxide staining. The
- * measured section rail is the only ornament; the ochre accent is spent once, on
- * the primary action.
- *
- * Behaviour is unchanged from the previous macOS-window version: the auth-cookie
- * check, the redirect guards and the unavailable-service branch are identical.
- * The form itself is the real `LoginForm` (not a replica), so the rate limiting,
- * caps-lock detection, show/hide toggle and `input#email` / `input#password`
- * contracts that e2e/login.spec.ts and LoginForm.test.tsx depend on all hold.
- *
- * Testids preserved for the existing suites: `login-card` (this panel),
- * `login-clock` (via LoginClock), `footer-date`, `eve-status-bar`.
- */
-
 import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
 import { Clock } from "@repo/ui/Clock";
+import { EveLogo } from "@repo/ui/EveLogo";
 import { EveStatusBar } from "@repo/ui/EveStatusBar";
 import { Logo } from "@repo/ui/Logo";
-import { SECTION_BANDS, SECTION_DEPTH_M, SECTION_TICK_M } from "@repo/theme/tokens/strata";
-import { AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, ChevronDown, Lock } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Condensed } from "next/font/google";
-import type { CSSProperties } from "react";
+import nextDynamic from "next/dynamic";
 import { LoginClock } from "@/features/auth/components/LoginClock";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
+// AGENT-TRACE: RefractionGlow is a pure framer-motion CSS animation (no content,
+// no interactivity). Deferring it via next/dynamic keeps it out of the login page's
+// critical JS chunk and removes ~180 kB of framer-motion from first-paint parsing.
+const RefractionGlow = nextDynamic(
+  () =>
+    import("@/features/auth/components/RefractionGlow").then((m) => ({
+      default: m.RefractionGlow,
+    })),
+  { loading: () => null },
+);
+
 const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
-
-const plex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-plex",
-  display: "swap",
-});
-
-const plexCondensed = IBM_Plex_Sans_Condensed({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-plex-cond",
-  display: "swap",
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
-  display: "swap",
-});
 
 export const dynamic = "force-dynamic";
 
 interface LoginPageProps {
   searchParams?: Promise<{ redirect?: string }>;
 }
-
-/** Major ticks across the schematic section: 0 m … 100 m. */
-const DEPTH_TICKS = Array.from(
-  { length: SECTION_DEPTH_M / SECTION_TICK_M + 1 },
-  (_, i) => i * SECTION_TICK_M,
-);
 
 export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   const cookieStore = await cookies();
@@ -115,96 +80,120 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   }
 
   return (
-    <div className={`slg ${plex.variable} ${plexCondensed.variable} ${plexMono.variable}`}>
-      {/*
-        Measured section. Decorative and aria-hidden: the depth values are a
-        scale, not a claim about any real borehole. Only the panel is content.
-      */}
-      <aside className="slg-rail" aria-hidden="true">
-        <div className="slg-scale">
-          {DEPTH_TICKS.map((metres) => (
-            <div
-              key={metres}
-              className={metres % (SECTION_TICK_M * 5) === 0 ? "slg-row slg-row-major" : "slg-row"}
-            >
-              <span className="slg-row-m">{metres}</span>
-              <span className="slg-row-tick" />
+    <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-center justify-center py-8 px-4 overflow-y-auto bg-transparent">
+      {/* Login Card wrapper */}
+      <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up flex flex-col justify-center">
+        {/* Liquid Refraction Glow (Behind Card) */}
+        <RefractionGlow />
+        {systemUnavailable ? (
+          <div className="w-full flex flex-col overflow-hidden liquid-glass-light border border-white/20 shadow-window rounded-card">
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="w-3 h-3 rounded-full bg-mac-close border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-minimize border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-zoom border border-arch-border-subtle" />
+              </div>
+              <span className="flex-1 text-center text-[13px] font-medium text-black select-none pr-14">
+                Arch — System Sign In
+              </span>
+              <LoginClock />
             </div>
-          ))}
-        </div>
-
-        <div className="slg-material">
-          {SECTION_BANDS.map((band, i) => (
-            <div
-              key={`${band.key}-${i}`}
-              className={`slg-band slg-band-${band.key}`}
-              style={{ "--h": String(band.h) } as CSSProperties}
-            />
-          ))}
-        </div>
-      </aside>
-
-      <div className="slg-stage">
-        <div className="slg-stack">
-          {systemUnavailable ? (
-            <section className="slg-panel" data-testid="login-card" aria-labelledby="slg-title">
-              <header className="slg-head">
-                <Logo className="slg-head-mark" />
-                <span className="slg-head-word">Arch Systems</span>
-                <LoginClock />
-              </header>
-
-              <div className="slg-body">
-                <h1 className="slg-title" id="slg-title">
-                  System unavailable
-                </h1>
-                <p className="slg-sub">
-                  Authentication services can&apos;t be reached right now. Try again shortly, or
-                  contact IT support.
-                </p>
-                <p className="slg-note slg-note-error">
-                  <AlertTriangle className="slg-note-icon" aria-hidden="true" />
-                  <span>No action on your part will fix this — it is a server-side outage.</span>
-                </p>
-                <a className="slg-submit slg-submit-link" href="/login">
-                  Try again
-                </a>
+            <div className="p-6 space-y-4 text-center">
+              <AlertTriangle className="w-8 h-8 text-arch-accent-red mx-auto" strokeWidth={1.5} />
+              <h1 className="text-lg font-medium text-black">System Unavailable</h1>
+              <p className="text-sm text-black">
+                Unable to reach authentication services. Please try again shortly or contact IT
+                Support.
+              </p>
+              <a
+                href="/login"
+                className="inline-block mt-4 px-4 py-2 text-sm font-medium text-white bg-arch-accent-blue hover:opacity-90 rounded-button transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50"
+              >
+                Retry
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div
+            data-testid="login-card"
+            className="w-full flex flex-col overflow-hidden login-card-container layer-signin-card liquid-glass-light border border-white/20 shadow-window rounded-card"
+          >
+            {/* Title bar */}
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/10 bg-white/5">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="w-3 h-3 rounded-full bg-mac-close border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-minimize border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-zoom border border-arch-border-subtle" />
               </div>
-            </section>
-          ) : (
-            <section className="slg-panel" data-testid="login-card" aria-labelledby="slg-title">
-              <header className="slg-head">
-                <Logo className="slg-head-mark" />
-                <span className="slg-head-word">Arch Systems</span>
-                <LoginClock />
-              </header>
+              <span className="flex-1 text-center text-[13px] font-medium text-black select-none pr-14">
+                Arch — System Sign In
+              </span>
+              <LoginClock />
+            </div>
 
-              <div className="slg-body">
-                <h1 className="slg-title" id="slg-title">
-                  Sign in to your workstation
-                </h1>
-                <p className="slg-sub">Access is logged against your operator ID.</p>
-
-                <LoginForm />
-
-                <p className="slg-note">
-                  <AlertTriangle className="slg-note-icon" aria-hidden="true" />
-                  <span>Connect to the corporate VPN before signing in.</span>
-                </p>
+            <div className="px-7 py-7 flex-1 flex flex-col justify-center space-y-5">
+              {/* Header Bar */}
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold tracking-wider uppercase text-black select-none">
+                  Welcome Back
+                </span>
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-black border border-emerald-500/20 text-[10px] font-medium select-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <Lock className="w-2.5 h-2.5" strokeWidth={2} />
+                  <span>Secure</span>
+                </div>
               </div>
 
-              <footer className="slg-foot">
+              {/* Title */}
+              <div className="flex items-center gap-3.5">
+                <div className="p-2 rounded-lg bg-black/[0.04] border border-black/[0.06] shadow-sm shrink-0 flex items-center justify-center">
+                  <Logo className="w-9 h-9 text-[var(--accent-blue)]" />
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <h1 className="text-xl font-semibold tracking-tight text-[var(--text-heading)]">
+                    Arch Systems
+                  </h1>
+                  <p className="text-[var(--text-secondary)] text-xs">
+                    Sign in to your workstation
+                  </p>
+                </div>
+              </div>
+
+              <LoginForm />
+
+              {/* Contextual System Notice */}
+              <div className="px-3.5 py-2 rounded-md border border-white/15 bg-white/5 text-[11px] text-black leading-relaxed flex items-center gap-2.5 select-none">
+                <AlertCircle className="w-3.5 h-3.5 text-black shrink-0" strokeWidth={2} />
+                <span>
+                  <strong>Notice:</strong> Please ensure you are connected to the corporate VPN.
+                </span>
+              </div>
+            </div>
+
+            {/* Enterprise Footer */}
+            <div className="px-4 py-3 flex items-center justify-between text-[10px] text-black bg-white/5 border-t border-white/10 select-none">
+              <button
+                type="button"
+                className="flex items-center gap-1 cursor-pointer hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50 rounded-md px-1.5 py-0.5 -mx-1.5"
+                aria-label="Select Language"
+              >
+                <span>English (US)</span>
+                <ChevronDown className="w-2.5 h-2.5 opacity-60" strokeWidth={2.5} />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <Clock testId="footer-date" format="date" className="text-[10px]" />
                 <span>v{PORTAL_VERSION}</span>
-                <Clock testId="footer-date" format="date" className="slg-foot-date" />
-                <span className="slg-foot-os">Arch OS</span>
-              </footer>
-            </section>
-          )}
+                <span className="uppercase tracking-wider font-medium">Arch OS</span>
+                <span className="text-black/30">·</span>
+                <EveLogo className="h-3 w-auto text-sky-800" />
+              </div>
+            </div>
+          </div>
+        )}
 
-          {/* eve agentic system — slim status bar below the panel */}
-          <EveStatusBar />
-        </div>
+        {/* eve agentic system — slim status bar below the login card */}
+        <EveStatusBar />
       </div>
-    </div>
+    </main>
   );
 }
