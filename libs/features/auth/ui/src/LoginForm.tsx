@@ -216,23 +216,6 @@ export function LoginForm() {
           Forgot password?
         </Link>
       </div>
-
-      <div className="flex flex-col items-center justify-center gap-2.5 pt-3 border-t border-black/10 select-none">
-        <span className="font-mono text-[9px] tracking-[0.2em] uppercase font-bold text-black/50">
-          COGNITIVE ENGINE
-        </span>
-        <div className="flex items-center justify-center gap-3 opacity-75 hover:opacity-100 transition-opacity">
-          <span className="font-sans text-[11px] font-extrabold tracking-widest uppercase text-black">
-            CLAUDE
-          </span>
-          <span className="opacity-30 text-[9px] font-mono">×</span>
-          <img
-            src="/images/ai-sdk/ai-sdk-logotype-light.svg"
-            alt="Vercel AI SDK"
-            className="h-3 w-auto object-contain"
-          />
-        </div>
-      </div>
     </form>
   );
 }
