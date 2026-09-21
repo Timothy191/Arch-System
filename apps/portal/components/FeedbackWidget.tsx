@@ -49,7 +49,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
       <div className="relative inline-block">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] text-[var(--text-heading)] shadow-diffusion-sm transition-all hover:scale-105 active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 h-7 text-xs font-medium rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 text-[var(--text-heading)] shadow-diffusion-sm transition-all hover:scale-105 active:scale-95"
           title="Feedback & Support"
         >
           <span>💬</span>

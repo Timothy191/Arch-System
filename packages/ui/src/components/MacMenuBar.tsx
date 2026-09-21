@@ -178,13 +178,13 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed top-2 left-3 right-3 z-navigation h-9 flex items-center justify-between px-4",
+        "fixed top-2 left-3 right-3 z-navigation h-10 flex items-center justify-between px-3.5",
         "liquid-glass-light border border-white/20 shadow-window rounded-full",
         className,
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
-      <nav className="flex items-center gap-0.5 shrink-0" aria-label="Main Navigation">
+      <nav className="flex items-center gap-1 shrink-0" aria-label="Main Navigation">
         {/* ── System Logo Dropdown ── */}
         <DropdownMenu>
           <div className="flex items-center gap-2">
@@ -192,9 +192,9 @@ export function MacMenuBar({
               <button
                 aria-label="System Menu"
                 aria-haspopup="true"
-                className="relative w-11 h-11 -ml-1 rounded-full bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
+                className="relative w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] transition-all duration-150 ease-in-out cursor-default"
               >
-                <Logo className="w-7 h-7 text-[var(--accent-blue)]" />
+                <Logo className="w-5 h-5 text-[var(--accent-blue)]" />
               </button>
             </DropdownMenuTrigger>
           </div>
@@ -379,14 +379,14 @@ export function MacMenuBar({
               }),
             );
           }}
-          className="min-w-11 min-h-11 rounded-full bg-white/80 hover:bg-white border border-black/[0.08] shadow-card flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-2.5 shrink-0"
+          className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-1 shrink-0"
           title="WhatsApp Web (Split Screen)"
         >
           <Image
             src="/whatsapp-logo.jpeg"
             alt="WhatsApp Logo"
-            width={20}
-            height={20}
+            width={18}
+            height={18}
             className="rounded-full object-cover shrink-0"
           />
         </button>

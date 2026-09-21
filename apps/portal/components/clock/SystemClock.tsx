@@ -84,12 +84,12 @@ export function SystemClock() {
           type="button"
           aria-label="System Clock"
           title="Clock & Calendar"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 h-7 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm transition-colors select-none cursor-default outline-none active:scale-95"
         >
-          <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none">
+          <span className="font-semibold text-[13px] text-[var(--text-heading)] tabular-nums leading-none font-mono">
             {timeStr}
           </span>
-          <span className="text-[10px] text-[var(--text-secondary)] opacity-60 font-medium tracking-wider leading-none uppercase">
+          <span className="text-[9.5px] text-[var(--text-secondary)] opacity-70 font-semibold tracking-wider leading-none uppercase">
             SAST
           </span>
         </button>

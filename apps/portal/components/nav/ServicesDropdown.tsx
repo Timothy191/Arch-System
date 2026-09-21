@@ -153,13 +153,13 @@ export function ServicesDropdown() {
             title="System Tray (Alt+S)"
             className={cn(
               "relative flex items-center justify-center w-7 h-7 rounded-full",
-              "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
+              "bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm",
               "text-[var(--text-secondary)]",
               "active:scale-[0.97]",
               "transition-all duration-150 ease-in-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
               "cursor-default select-none",
-              open && "bg-white/60",
+              open && "bg-[var(--material-thin)]",
             )}
           >
             <ChevronDown
