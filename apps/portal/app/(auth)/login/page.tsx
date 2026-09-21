@@ -81,21 +81,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
 
   return (
     <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-center justify-center py-8 px-4 overflow-y-auto bg-transparent">
-      {/* Floating Pill Taskbar */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-lg z-50 flex items-center px-6 justify-between liquid-glass-light">
-        <div className="flex items-center gap-4">
-          <EveLogo className="h-4 w-auto text-sky-800" />
-          <span className="text-xs font-medium text-black">Arch OS</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Clock
-            testId="taskbar-clock"
-            format="time"
-            className="text-xs text-black/80 font-medium"
-          />
-        </div>
-      </div>
-
       {/* Login Card wrapper */}
       <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up flex flex-col justify-center">
         {/* Liquid Refraction Glow (Behind Card) */}
@@ -104,9 +89,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
           <div className="w-full flex flex-col overflow-hidden liquid-glass-light border border-white/20 shadow-window rounded-card">
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/20 bg-white/10">
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="w-3 h-3 rounded-full bg-mac-red border border-arch-border-subtle" />
-                <span className="w-3 h-3 rounded-full bg-mac-yellow border border-arch-border-subtle" />
-                <span className="w-3 h-3 rounded-full bg-mac-green border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-close border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-minimize border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-zoom border border-arch-border-subtle" />
               </div>
               <span className="flex-1 text-center text-[13px] font-medium text-black select-none pr-14">
                 Arch — System Sign In
@@ -136,9 +121,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             {/* Title bar */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/10 bg-white/5">
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="w-3 h-3 rounded-full bg-mac-red border border-arch-border-subtle" />
-                <span className="w-3 h-3 rounded-full bg-mac-yellow border border-arch-border-subtle" />
-                <span className="w-3 h-3 rounded-full bg-mac-green border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-close border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-minimize border border-arch-border-subtle" />
+                <span className="w-3 h-3 rounded-full bg-mac-zoom border border-arch-border-subtle" />
               </div>
               <span className="flex-1 text-center text-[13px] font-medium text-black select-none pr-14">
                 Arch — System Sign In

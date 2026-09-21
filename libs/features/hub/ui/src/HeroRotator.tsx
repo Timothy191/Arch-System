@@ -7,7 +7,6 @@ import { cn } from "@repo/ui/lib/utils";
 import { ThreeHeroRotatorDynamic as GenericHeroRotator } from "@repo/ui/ThreeHeroRotatorDynamic";
 import {
   ArrowUpRight,
-  CreditCard,
   Layers,
   Pickaxe,
   ScanFace,
@@ -44,11 +43,6 @@ const DEPT_STYLE_MAP: Record<
     icon: ScanFace,
     iconColor: "text-dept-access-control",
     bgColor: "bg-dept-access-control/10",
-  },
-  "access-card-actions": {
-    icon: CreditCard,
-    iconColor: "text-dept-access-card-actions",
-    bgColor: "bg-dept-access-card-actions/10",
   },
   engineering: {
     icon: Wrench,

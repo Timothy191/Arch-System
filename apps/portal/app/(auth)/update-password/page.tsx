@@ -122,9 +122,9 @@ export default function UpdatePasswordPage() {
       <div className="glass-card rounded-xl overflow-hidden animate-window-open glass-top-border">
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--glass-surface-hover)]">
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-red)] border border-[var(--border-subtle)]" />
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-yellow)] border border-[var(--border-subtle)]" />
-            <span className="w-3 h-3 rounded-full bg-[var(--mac-green)] border border-[var(--border-subtle)]" />
+            <span className="w-3 h-3 rounded-full bg-[var(--mac-close)] border border-[var(--border-subtle)]" />
+            <span className="w-3 h-3 rounded-full bg-[var(--mac-minimize)] border border-[var(--border-subtle)]" />
+            <span className="w-3 h-3 rounded-full bg-[var(--mac-zoom)] border border-[var(--border-subtle)]" />
           </div>
           <span className="flex-1 text-center text-[13px] font-medium text-[var(--text-secondary)] select-none pr-14">
             Arch — New Password

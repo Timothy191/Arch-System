@@ -133,6 +133,21 @@ export const DEPARTMENTS = [
         description: "Aggregate data + CSV muster reports",
       },
       {
+        path: "/access-control/card-actions",
+        name: "Card Actions",
+        description: "Card search, badge assignment, and instant printing",
+      },
+      {
+        path: "/access-control/print-cards",
+        name: "Print Cards",
+        description: "Industrial card print jobs and batch queues",
+      },
+      {
+        path: "/access-control/qr-codes",
+        name: "QR Codes",
+        description: "Batch QR generation and encoding",
+      },
+      {
         path: "/access-control/tools",
         name: "Tools",
         description: "Flowise / tool embeds",
@@ -239,56 +254,6 @@ export const DEPARTMENTS = [
       },
     ],
     roles: ["control_room_operator", "admin", "supervisor", "operator"],
-  },
-  {
-    id: "access-card-actions",
-    name: "Access Card Actions",
-    slug: "access-card-actions",
-    description: "RFID badge batch printing, template provisioning, and security chip programming",
-    color: "#f59e0b",
-    routes: [
-      {
-        path: "/access-card-actions",
-        name: "Dashboard",
-        description: "Card print queue and batch status",
-      },
-      {
-        path: "/access-card-actions/print-cards",
-        name: "Print Cards",
-        description: "Industrial card print jobs and batch queues",
-      },
-      {
-        path: "/access-card-actions/qr-codes",
-        name: "QR Codes",
-        description: "Batch QR generation and encoding",
-      },
-      {
-        path: "/access-card-actions/daily-log",
-        name: "Daily Log",
-        description: "Card issuance logs and audit records",
-      },
-      {
-        path: "/access-card-actions/machines",
-        name: "Machines",
-        description: "Evolis & Zebra industrial badge printers",
-      },
-      {
-        path: "/access-card-actions/history",
-        name: "History",
-        description: "Printed cards and badge assignment records",
-      },
-      {
-        path: "/access-card-actions/reports",
-        name: "Reports",
-        description: "Badge provisioning & security audits",
-      },
-      {
-        path: "/access-card-actions/tools",
-        name: "Tools",
-        description: "Flowise / tool embeds",
-      },
-    ],
-    roles: ["access_control", "supervisor", "admin"],
   },
 ];
 

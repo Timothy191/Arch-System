@@ -12,6 +12,30 @@ export default {
     // CSS grammar — stylelint cannot validate them. Disable the prelude check.
     "at-rule-prelude-no-invalid": null,
 
+    // Allow Tailwind at-rules (v3 and v4)
+    "at-rule-no-unknown": [
+      true,
+      {
+        ignoreAtRules: [
+          "tailwind",
+          "apply",
+          "layer",
+          "variants",
+          "responsive",
+          "screen",
+          "config",
+          "plugin",
+          "source",
+          "theme",
+          "utility",
+          "custom-variant",
+          "custom-media",
+          "mixin",
+          "define-mixin",
+        ],
+      },
+    ],
+
     // Flag un-accelerated CSS properties in animations/transitions
     "plugin/no-low-performance-animation-properties": [
       true,

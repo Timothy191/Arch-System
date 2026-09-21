@@ -9,7 +9,6 @@ import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
 import { SkipLinks } from "@/components/accessibility/SkipLinks";
 import { AriaLauncher } from "@/components/ai/AriaLauncher";
 import { ClientOverlays } from "@/components/ClientOverlays";
-import { FocusModeProvider } from "@/components/FocusModeProvider";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { RouteAnnouncer } from "@/components/RouteAnnouncer";
 import { SystemTrayPill } from "@/components/system/SystemTray";
@@ -132,7 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body
         suppressHydrationWarning
-        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent max-w-[1920px] mx-auto shadow-window"
+        className="text-[var(--text-heading)] min-h-screen font-sans antialiased selection:bg-[var(--accent-blue)]/30 selection:text-[var(--accent-blue)] relative overflow-x-hidden bg-transparent"
       >
         {/* Skip navigation links for keyboard users (WCAG 2.4.1) */}
         <SkipLinks />
@@ -142,40 +141,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
 
         <ArchThemeProvider>
           <ClientProviders>
-            <FocusModeProvider>
-              <RouteBackground />
-              {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
-              <WebVitalsReporter />
-              <OfflineBanner />
-              <AriaLauncher />
+            <RouteBackground />
+            {/* Removed PerformanceListener as it causes extreme lag via infinite rAF loops */}
+            <WebVitalsReporter />
+            <OfflineBanner />
+            <AriaLauncher />
 
-              {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
-              <header aria-label="Global navigation">
-                <MacMenuBar
-                  rightSlot={
-                    <nav id="navigation" aria-label="Main menu">
-                      <div className="flex items-center gap-3">
-                        <SystemTrayPill />
-                        <HeaderWidgets />
-                      </div>
-                    </nav>
-                  }
-                />
-              </header>
+            {/* Global Navigation Header with proper landmark (WCAG 1.3.1) */}
+            <header aria-label="Global navigation">
+              <MacMenuBar
+                rightSlot={
+                  <nav id="navigation" aria-label="Main menu">
+                    <div className="flex items-center gap-3">
+                      <SystemTrayPill />
+                      <HeaderWidgets />
+                    </div>
+                  </nav>
+                }
+              />
+            </header>
 
-              {/* Content wrapper with main landmark (WCAG 1.3.1) */}
-              <main
-                id="main-content"
-                aria-label="Main content"
-                className="relative z-primary-card pt-16"
-              >
+            {/* Content wrapper with main landmark (WCAG 1.3.1) */}
+            <div className="relative z-primary-card max-w-[1920px] mx-auto shadow-window">
+              <main id="main-content" aria-label="Main content" className="relative pt-16">
                 <SplitWindowLayout>{children}</SplitWindowLayout>
               </main>
-
-              <CommandBar />
-              <ViewportBoundaries />
-              <ClientOverlays />
-              <Toaster />
 
               {/* Global footer landmark (WCAG 1.3.1) with eve branding + Vercel attribution */}
               <footer
@@ -202,7 +192,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   and other countries.
                 </p>
               </footer>
-            </FocusModeProvider>
+            </div>
+
+            <CommandBar />
+            <ViewportBoundaries />
+            <ClientOverlays />
+            <Toaster />
           </ClientProviders>
         </ArchThemeProvider>
       </body>

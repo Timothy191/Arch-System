@@ -1,10 +1,8 @@
 "use client";
 
-import { useFocusMode } from "@repo/ui/lib/useFocusMode";
 import { useEffect, useState } from "react";
 
 export function HeroBackground() {
-  const enabled = useFocusMode();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -15,8 +13,6 @@ export function HeroBackground() {
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
-
-  if (enabled) return null;
 
   return (
     <div

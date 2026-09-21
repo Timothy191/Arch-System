@@ -108,31 +108,31 @@ const archTheme: Config = {
         arch15: "var(--arch15)",
 
         // Semantic aliases
-        "bg-primary": "var(--bg-primary)",
-        "bg-secondary": "var(--bg-secondary)",
-        "bg-tertiary": "var(--bg-tertiary)",
+        "bg-primary": withAlpha("--bg-primary"),
+        "bg-secondary": withAlpha("--bg-secondary"),
+        "bg-tertiary": withAlpha("--bg-tertiary"),
 
-        "overlay-dim": "var(--overlay-dim)",
-        "overlay-subtle": "var(--overlay-subtle)",
-        "overlay-medium": "var(--overlay-medium)",
+        "overlay-dim": withAlpha("--overlay-dim"),
+        "overlay-subtle": withAlpha("--overlay-subtle"),
+        "overlay-medium": withAlpha("--overlay-medium"),
 
-        "border-subtle": "var(--border-subtle)",
-        "border-default": "var(--border-default)",
-        "border-emphasis": "var(--border-emphasis)",
+        "border-subtle": withAlpha("--border-subtle"),
+        "border-default": withAlpha("--border-default"),
+        "border-emphasis": withAlpha("--border-emphasis"),
 
-        "text-muted": "var(--text-muted)",
-        "text-secondary": "var(--text-secondary)",
-        "text-body": "var(--text-body)",
-        "text-primary": "var(--text-primary)",
-        "text-heading": "var(--text-heading)",
+        "text-muted": withAlpha("--text-muted"),
+        "text-secondary": withAlpha("--text-secondary"),
+        "text-body": withAlpha("--text-body"),
+        "text-primary": withAlpha("--text-primary"),
+        "text-heading": withAlpha("--text-heading"),
 
         // @deprecated Tier 3 aliases — removed after migration to accent-blue
         // accent-cyan, accent-indigo, accent-violet → use accent-blue
         // accent-alert → use accent-red
 
         // Corporate Brand Colors
-        "brand-blue": "var(--arch-brand-blue)",
-        "brand-blue-hover": "var(--arch-brand-blue-hover)",
+        "brand-blue": withAlpha("--arch-brand-blue"),
+        "brand-blue-hover": withAlpha("--arch-brand-blue-hover"),
 
         // macOS system accent colors
         "accent-charcoal": withAlpha("--accent-charcoal"),
@@ -143,26 +143,26 @@ const archTheme: Config = {
         "accent-emerald": withAlpha("--accent-green"),
 
         // macOS traffic light colors
-        "mac-red": "var(--mac-red)",
-        "mac-yellow": "var(--mac-yellow)",
-        "mac-green": "var(--mac-green)",
+        "mac-close": withAlpha("--mac-close"),
+        "mac-minimize": withAlpha("--mac-minimize"),
+        "mac-zoom": withAlpha("--mac-zoom"),
 
         // Glass / vibrancy surface colors
-        "glass-surface": "var(--glass-surface)",
-        "glass-surface-hover": "var(--glass-surface-hover)",
-        "glass-surface-strong": "var(--glass-surface-strong)",
-        "glass-border": "var(--glass-border)",
-        "glass-video": "var(--glass-video-surface)",
-        "glass-video-hover": "var(--glass-video-surface-hover)",
-        "glass-dark": "var(--dark-glass-surface)",
-        "glass-dark-hover": "var(--dark-glass-surface-hover)",
-        "text-on-glass": "var(--text-on-glass)",
-        "text-on-glass-muted": "var(--text-on-glass-muted)",
-        "text-on-glass-video": "var(--text-on-glass-video)",
-        "text-on-glass-video-muted": "var(--text-on-glass-video-muted)",
-        "text-on-dark-glass": "var(--text-on-dark-glass)",
-        "text-on-dark-glass-muted": "var(--text-on-dark-glass-muted)",
-        vibrancy: "var(--vibrancy-surface)",
+        "glass-surface": withAlpha("--glass-surface"),
+        "glass-surface-hover": withAlpha("--glass-surface-hover"),
+        "glass-surface-strong": withAlpha("--glass-surface-strong"),
+        "glass-border": withAlpha("--glass-border"),
+        "glass-video": withAlpha("--glass-video-surface"),
+        "glass-video-hover": withAlpha("--glass-video-surface-hover"),
+        "glass-dark": withAlpha("--dark-glass-surface"),
+        "glass-dark-hover": withAlpha("--dark-glass-surface-hover"),
+        "text-on-glass": withAlpha("--text-on-glass"),
+        "text-on-glass-muted": withAlpha("--text-on-glass-muted"),
+        "text-on-glass-video": withAlpha("--text-on-glass-video"),
+        "text-on-glass-video-muted": withAlpha("--text-on-glass-video-muted"),
+        "text-on-dark-glass": withAlpha("--text-on-dark-glass"),
+        "text-on-dark-glass-muted": withAlpha("--text-on-dark-glass-muted"),
+        vibrancy: withAlpha("--vibrancy-surface"),
 
         // Arch semantic namespace — for production-ready theme consistency
         arch: {
@@ -190,23 +190,23 @@ const archTheme: Config = {
         },
 
         // DESIGN.md Color System Tokens (Phase I Promotion)
-        "color-bg-base": "var(--color-bg-base)",
-        "color-bg-elevated": "var(--color-bg-elevated)",
-        "color-bg-sunken": "var(--color-bg-sunken)",
-        "color-border-subtle": "var(--color-border-subtle)",
-        "color-border-focus": "var(--color-border-focus)",
-        "color-text-primary": "var(--color-text-primary)",
-        "color-text-secondary": "var(--color-text-secondary)",
-        "color-text-tertiary": "var(--color-text-tertiary)",
-        "color-action-primary": "var(--color-action-primary)",
-        "color-action-primary-hover": "var(--color-action-primary-hover)",
-        "color-status-positive": "var(--color-status-positive)",
-        "color-status-warning": "var(--color-status-warning)",
-        "color-status-danger": "var(--color-status-danger)",
-        "color-accent-subtle": "var(--color-accent-subtle)",
+        "color-bg-base": withAlpha("--color-bg-base"),
+        "color-bg-elevated": withAlpha("--color-bg-elevated"),
+        "color-bg-sunken": withAlpha("--color-bg-sunken"),
+        "color-border-subtle": withAlpha("--color-border-subtle"),
+        "color-border-focus": withAlpha("--color-border-focus"),
+        "color-text-primary": withAlpha("--color-text-primary"),
+        "color-text-secondary": withAlpha("--color-text-secondary"),
+        "color-text-tertiary": withAlpha("--color-text-tertiary"),
+        "color-action-primary": withAlpha("--color-action-primary"),
+        "color-action-primary-hover": withAlpha("--color-action-primary-hover"),
+        "color-status-positive": withAlpha("--color-status-positive"),
+        "color-status-warning": withAlpha("--color-status-warning"),
+        "color-status-danger": withAlpha("--color-status-danger"),
+        "color-accent-subtle": withAlpha("--color-accent-subtle"),
 
         // Backdrop token
-        "backdrop-dim": "var(--backdrop-dim)",
+        "backdrop-dim": withAlpha("--backdrop-dim"),
 
         // shadcn/ui HSL variable colors
         border: "hsl(var(--border))",
@@ -243,19 +243,19 @@ const archTheme: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         success: {
-          DEFAULT: "var(--success)",
+          DEFAULT: withAlpha("--success"),
           foreground: "hsl(var(--success-foreground))",
         },
         warning: {
-          DEFAULT: "var(--warning)",
+          DEFAULT: withAlpha("--warning"),
           foreground: "hsl(var(--warning-foreground))",
         },
         danger: {
-          DEFAULT: "var(--danger)",
+          DEFAULT: withAlpha("--danger"),
           foreground: "hsl(var(--danger-foreground))",
         },
         info: {
-          DEFAULT: "var(--info)",
+          DEFAULT: withAlpha("--info"),
           foreground: "hsl(var(--info-foreground))",
         },
 
@@ -302,7 +302,6 @@ const archTheme: Config = {
           drilling: withAlpha("--dept-drilling"),
           production: withAlpha("--dept-production"),
           "access-control": withAlpha("--dept-access-control"),
-          "access-card-actions": withAlpha("--dept-access-card-actions"),
           engineering: withAlpha("--dept-engineering"),
           "control-room": withAlpha("--dept-control-room"),
           admin: withAlpha("--dept-admin"),
@@ -355,6 +354,10 @@ const archTheme: Config = {
         glass: "cubic-bezier(0.2, 0, 0, 1)",
         "liquid-inertia": "cubic-bezier(0.25, 1.15, 0.45, 1)",
         "ease-out-smooth": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "mac-standard": "cubic-bezier(0.2, 0, 0, 1)",
+        "mac-decelerate": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "mac-accelerate": "cubic-bezier(0.32, 0, 0.67, 0)",
+        "mac-fluid": "cubic-bezier(0.25, 1, 0.5, 1)",
       },
       fontSize: {
         "tremor-label": ["0.75rem", { lineHeight: "1rem" }],
@@ -376,11 +379,13 @@ const archTheme: Config = {
         "fluid-6xl": ["clamp(2.75rem, 2rem + 3.75vw, 3.75rem)", { lineHeight: "1.1" }],
       },
       borderRadius: {
+        xs: "var(--radius-xs)",
         sm: "var(--radius-sm)",
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         card: "var(--radius-card)",
+        window: "var(--radius-window)",
         full: "var(--radius-full)",
       },
       keyframes: {
@@ -428,8 +433,12 @@ const archTheme: Config = {
           "100%": { transform: "scale(1) translate(0, 0)" },
         },
         "window-open": {
-          from: { opacity: "0", transform: "scale(0.96) translateY(4px)" },
-          to: { opacity: "1", transform: "scale(1) translateY(0)" },
+          "0%": { transform: "scale(0.96) translateY(4px)", opacity: "0" },
+          "100%": { transform: "scale(1) translateY(0)", opacity: "1" },
+        },
+        "sheet-reveal": {
+          "0%": { transform: "translateY(-8px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
         },
         "traffic-pulse": {
           "0%, 100%": { opacity: "1" },
@@ -496,7 +505,8 @@ const archTheme: Config = {
         "gradient-shift": "gradient-shift 8s ease-in-out infinite",
         "pulse-glow": "pulse-glow 6s ease-in-out infinite",
         float: "float 15s ease-in-out infinite",
-        "window-open": "window-open 0.25s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "window-open": "window-open 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "sheet-reveal": "sheet-reveal 0.24s cubic-bezier(0.2, 0, 0, 1) forwards",
         "traffic-pulse": "traffic-pulse 2s ease-in-out infinite",
         "liquid-swell": "liquid-swell 8s ease-in-out infinite",
         "liquid-sheen": "liquid-sheen 6s cubic-bezier(0.2, 0, 0, 1) infinite",

@@ -9,9 +9,8 @@ import {
   CalendarDays,
   // Tools
   CheckSquare,
-  // Menu: Operations dropdown icons (same as dept)
+  // Menu: Operations dropdown icons
   ChevronRight,
-  CreditCard,
   // General
   ExternalLink,
   FileText,
@@ -35,7 +34,6 @@ import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import { getServiceUrls } from "../lib/urls";
-import { useFocusMode } from "../lib/useFocusMode";
 import { cn } from "../lib/utils";
 import { Logo } from "./Logo";
 import { Avatar } from "./ui/avatar";
@@ -80,14 +78,6 @@ const DEPARTMENTS_LIST = [
     iconColor: "text-dept-access-control",
     bgColor: "bg-dept-access-control/10 hover:bg-dept-access-control/15",
     description: "Personnel badging & visitor logs",
-  },
-  {
-    name: "access-card-actions",
-    displayName: "Access Card Actions",
-    icon: CreditCard,
-    iconColor: "text-dept-access-card-actions",
-    bgColor: "bg-dept-access-card-actions/10 hover:bg-dept-access-card-actions/15",
-    description: "Badge printing & QR generation",
   },
   {
     name: "engineering",
@@ -163,7 +153,6 @@ export function MacMenuBar({
   rightSlot,
   className,
 }: MacMenuBarProps) {
-  const isFocusMode = useFocusMode();
   // Navigation text labels intentionally removed; only logo + search + tray remain
   const [searchQuery, setSearchQuery] = React.useState("");
 
@@ -183,9 +172,9 @@ export function MacMenuBar({
     <motion.div
       initial={false}
       animate={{
-        opacity: isFocusMode ? 0.85 : 1,
-        scale: isFocusMode ? 0.99 : 1,
-        y: isFocusMode ? -2 : 0,
+        opacity: 1,
+        scale: 1,
+        y: 0,
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(

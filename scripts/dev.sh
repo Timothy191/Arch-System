@@ -842,6 +842,12 @@ else
     check "Workspace deps" "pass" "Turbo build cached" ||
     check "Workspace deps" "warn" "build had warnings — proceeding anyway"
 
+  
+  echo -e "  \033[0;34mℹ\033[0m Starting Theme watcher..."
+  cd "$REPO_ROOT/packages/theme"
+  pnpm dev >"$REPO_ROOT/run/theme-watch.log" 2>&1 &
+  echo "$!" > "$REPO_ROOT/run/theme-watch.pid"
+
   cd "$REPO_ROOT/apps/portal"
   PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! >"$REPO_ROOT/run/.portal.pid"

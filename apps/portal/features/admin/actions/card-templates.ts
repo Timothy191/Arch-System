@@ -70,5 +70,5 @@ export async function uploadCardTemplate(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  revalidatePath("/access-card-actions/card-actions");
+  revalidatePath("/access-control/card-actions");
 }

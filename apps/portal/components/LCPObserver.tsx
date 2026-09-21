@@ -130,10 +130,10 @@ export function LCPObserver() {
 
   if (isMinimized) {
     return (
-      <div ref={panelRef} className="fixed bottom-4 right-4 z-[9999]">
+      <div ref={panelRef} className="fixed bottom-4 right-4 z-dev-overlay">
         <button
           onClick={() => setIsMinimized(false)}
-          className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-lg flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
+          className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-window flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
           title="Expand LCP Observer"
         >
           📊 LCP:{" "}
@@ -154,7 +154,7 @@ export function LCPObserver() {
   return (
     <div
       ref={panelRef}
-      className="fixed bottom-4 right-4 z-[9999] bg-[var(--arch0)] text-white p-4 rounded-lg shadow-lg border-2 border-[var(--accent-blue)] max-w-md"
+      className="fixed bottom-4 right-4 z-dev-overlay bg-[var(--arch0)] text-white p-4 rounded-lg shadow-window border-2 border-[var(--accent-blue)] max-w-md"
     >
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-bold text-lg">📊 LCP Element Detected</h3>

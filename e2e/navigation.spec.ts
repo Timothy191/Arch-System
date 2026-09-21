@@ -8,7 +8,6 @@ test.describe("department navigation", () => {
       "engineering",
       "control-room",
       "access-control",
-      "access-card-actions",
     ];
 
     for (const dept of departments) {

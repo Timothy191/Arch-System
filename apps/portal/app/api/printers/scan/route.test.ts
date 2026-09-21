@@ -7,13 +7,13 @@ jest.mock("@repo/supabase/server", () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@/app/(departments)/access-card-actions/lib/printer-detection", () => ({
+jest.mock("@/app/(departments)/access-control/lib/printer-detection", () => ({
   detectAllPrinters: jest.fn(),
 }));
 
 const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
 const { detectAllPrinters } = jest.requireMock(
-  "@/app/(departments)/access-card-actions/lib/printer-detection"
+  "@/app/(departments)/access-control/lib/printer-detection",
 );
 
 describe("GET /api/printers/scan", () => {

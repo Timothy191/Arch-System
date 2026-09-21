@@ -2,7 +2,7 @@ import { DEPARTMENTS, PRODUCTIVITY_TOOLS } from "./departments";
 
 describe("DEPARTMENTS registry", () => {
   it("defines all active departments with valid configurations", () => {
-    expect(DEPARTMENTS.length).toBeGreaterThanOrEqual(8);
+    expect(DEPARTMENTS.length).toBeGreaterThanOrEqual(7);
 
     const names = new Set<string>();
     const routes = new Set<string>();
@@ -48,7 +48,6 @@ describe("DEPARTMENTS registry", () => {
     expect(departmentNames).toContain("drilling");
     expect(departmentNames).toContain("production");
     expect(departmentNames).toContain("access-control");
-    expect(departmentNames).toContain("access-card-actions");
     expect(departmentNames).toContain("engineering");
     expect(departmentNames).toContain("control-room");
     expect(departmentNames).toContain("admin");

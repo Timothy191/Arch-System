@@ -227,9 +227,9 @@ const colorPresets: Record<string, string[]> = {
 function MacTrafficLights() {
   return (
     <div className="flex items-center gap-1.5 shrink-0">
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-red)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-yellow)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
-      <span className="w-3 h-3 rounded-full bg-[var(--mac-green)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
+      <span className="w-3 h-3 rounded-full bg-[var(--mac-close)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
+      <span className="w-3 h-3 rounded-full bg-[var(--mac-minimize)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
+      <span className="w-3 h-3 rounded-full bg-[var(--mac-zoom)] border border-black/[0.06] group-hover/window:opacity-100 opacity-70 transition-opacity" />
     </div>
   );
 }

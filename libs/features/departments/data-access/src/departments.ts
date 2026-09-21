@@ -94,23 +94,6 @@ export const DEPARTMENTS: Department[] = [
     ],
   },
   {
-    name: "access-card-actions",
-    displayName: "Access Card Actions",
-    route: "/access-card-actions",
-    icon: "CreditCard",
-    description: "Manage printed badges, print cards & QR generation",
-    color: "blue",
-    type: "standard",
-    status: "active",
-    gridSpan: "md:col-span-1 xl:col-span-1",
-    stats: { label: "Cards", value: "0" },
-    trend: [0, 0, 0, 0, 0, 0, 0, 0],
-    actions: [
-      { label: "Print Cards", href: "/access-card-actions/print-cards" },
-      { label: "QR Codes", href: "/access-card-actions/qr-codes" },
-    ],
-  },
-  {
     name: "engineering",
     displayName: "Engineering",
     route: "/engineering",
@@ -260,24 +243,12 @@ export const ACCESS_CONTROL_TABS = [
   { name: "reports", label: "Reports", icon: "FileText" },
 ] as const;
 
-/**
- * Access Card Actions specific tabs - focused on badge printing and QR generation
- */
-export const ACCESS_CARD_ACTIONS_TABS = [
-  { name: "dashboard", label: "Dashboard", icon: "BarChart2" },
-  { name: "card-actions", label: "Card Actions", icon: "CreditCard" },
-  { name: "print-cards", label: "Print Cards", icon: "Printer" },
-  { name: "qr-codes", label: "QR Codes", icon: "QrCode" },
-  { name: "reports", label: "Reports", icon: "FileText" },
-] as const;
-
 const DEPARTMENT_TABS_MAP: Record<
   string,
   readonly { name: string; label: string; icon: string }[]
 > = {
   "control-room": CONTROL_ROOM_TABS,
   "access-control": ACCESS_CONTROL_TABS,
-  "access-card-actions": ACCESS_CARD_ACTIONS_TABS,
   engineering: ENGINEERING_TABS,
   drilling: DRILLING_TABS,
 };

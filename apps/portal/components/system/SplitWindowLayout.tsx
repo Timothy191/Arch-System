@@ -105,7 +105,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
       {/* Right side: Split window pane - 50% split screen docked side-by-side */}
       <div
         className={cn(
-          "fixed top-16 right-2 bottom-2 z-40",
+          "fixed top-16 right-2 bottom-2 z-dock",
           getSplitPaneWidthClass(),
           "liquid-glass-light border border-white/20 shadow-window rounded-2xl flex flex-col overflow-hidden",
           "transition-all duration-300 ease-glass transform",
@@ -168,7 +168,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                 className={cn(
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "50"
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-emerald-700 shadow-card"
                     : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Split 50% in half"
@@ -182,7 +182,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                 className={cn(
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "70"
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-emerald-700 shadow-card"
                     : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Wide Split (70%)"
@@ -196,7 +196,7 @@ export const SplitWindowLayout = React.memo(function SplitWindowLayout({
                 className={cn(
                   "px-1.5 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1",
                   splitRatio === "35"
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-emerald-700 shadow-card"
                     : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]",
                 )}
                 title="Compact Sidebar (35%)"
@@ -500,7 +500,7 @@ function WhatsAppWebView() {
   return (
     <div className="w-full h-full flex flex-col bg-[#efeae2] text-slate-800 select-none overflow-hidden relative">
       {/* ── WhatsApp Header Bar ── */}
-      <div className="bg-[#008069] text-white px-3 py-2.5 flex items-center justify-between shadow-md shrink-0">
+      <div className="bg-[#008069] text-white px-3 py-2.5 flex items-center justify-between shadow-window shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
             <svg className="w-4 h-4 text-white fill-current" viewBox="0 0 24 24">
@@ -534,7 +534,7 @@ function WhatsAppWebView() {
               className={cn(
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
                 activeTab === "chat"
-                  ? "bg-white text-emerald-800 shadow-sm"
+                  ? "bg-white text-emerald-800 shadow-card"
                   : "text-emerald-200 hover:text-white",
               )}
             >
@@ -547,7 +547,7 @@ function WhatsAppWebView() {
               className={cn(
                 "px-2 py-1 rounded text-[10.5px] font-semibold transition-all flex items-center gap-1",
                 activeTab === "link"
-                  ? "bg-white text-emerald-800 shadow-sm"
+                  ? "bg-white text-emerald-800 shadow-card"
                   : "text-emerald-200 hover:text-white",
               )}
             >
@@ -571,7 +571,7 @@ function WhatsAppWebView() {
                 className={cn(
                   "px-2 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 shrink-0",
                   selectedChannel === ch.id
-                    ? "bg-[#008069] text-white shadow-sm font-semibold"
+                    ? "bg-[#008069] text-white shadow-card font-semibold"
                     : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80",
                 )}
               >
@@ -605,13 +605,13 @@ function WhatsAppWebView() {
                 )}
               >
                 {!msg.isSelf && (
-                  <div className="w-6 h-6 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-xs shrink-0 mb-1">
+                  <div className="w-6 h-6 rounded-full bg-white shadow-card border border-slate-200 flex items-center justify-center text-xs shrink-0 mb-1">
                     {msg.avatar}
                   </div>
                 )}
                 <div
                   className={cn(
-                    "px-3 py-2 rounded-2xl shadow-sm text-[12.5px] leading-relaxed relative",
+                    "px-3 py-2 rounded-2xl shadow-card text-[12.5px] leading-relaxed relative",
                     msg.isSelf
                       ? "bg-[#d9fdd3] text-slate-800 rounded-tr-none border border-emerald-200/40"
                       : "bg-white text-slate-800 rounded-tl-none border border-slate-200/60",
@@ -648,14 +648,14 @@ function WhatsAppWebView() {
               onClick={() =>
                 handleSendMessage("🚛 Coal Truck CT-01 cleared Weighbridge Outbound Scale")
               }
-              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
+              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-diffusion-sm transition-colors shrink-0"
             >
               🚛 CT-01 Cleared
             </button>
             <button
               type="button"
               onClick={() => handleSendMessage("🚜 Pit Haul Truck CAT-777 inbound on Haul Road 2")}
-              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
+              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-diffusion-sm transition-colors shrink-0"
             >
               🚜 CAT-777 Inbound
             </button>
@@ -666,14 +666,14 @@ function WhatsAppWebView() {
                   "🛡️ Security Alert: Contractor badge verification required at Boom A",
                 )
               }
-              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
+              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-diffusion-sm transition-colors shrink-0"
             >
               🛡️ Gate Verification
             </button>
             <button
               type="button"
               onClick={() => handleSendMessage("⚖️ Weighbridge scale recalibrated and operational")}
-              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-2xs transition-colors shrink-0"
+              className="px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-[10.5px] font-medium border border-slate-200 whitespace-nowrap shadow-diffusion-sm transition-colors shrink-0"
             >
               ⚖️ Scale Ready
             </button>
@@ -708,7 +708,7 @@ function WhatsAppWebView() {
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
                 inputText.trim()
-                  ? "bg-[#008069] text-white shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                  ? "bg-[#008069] text-white shadow-card hover:scale-105 active:scale-95 cursor-pointer"
                   : "bg-slate-200 text-slate-400 cursor-not-allowed",
               )}
               title="Send Message"
@@ -734,7 +734,7 @@ function WhatsAppWebView() {
             </div>
 
             {/* QR Card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-xs">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 shadow-card">
               <div className="w-44 h-44 bg-white p-2.5 rounded-xl border border-slate-300/80 shadow-inner flex items-center justify-center relative group">
                 <svg
                   className="w-full h-full text-slate-800"
@@ -774,7 +774,7 @@ function WhatsAppWebView() {
                   <rect x="82" y="86" width="12" height="8" fill="#111827" />
                 </svg>
                 {/* Center WhatsApp icon */}
-                <div className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center shadow-md">
+                <div className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center shadow-card">
                   <svg className="w-6 h-6 text-white fill-current" viewBox="0 0 24 24">
                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.79-4.896c1.675.993 3.324 1.558 5.207 1.559 5.405 0 9.803-4.375 9.806-9.754.002-2.607-1.002-5.06-2.83-6.892-1.829-1.83-4.263-2.836-6.868-2.837-5.39 0-9.786 4.377-9.79 9.753-.001 2.03.535 3.738 1.555 5.262l-.994 3.63 3.74-.981z" />
                   </svg>
@@ -812,7 +812,7 @@ function WhatsAppWebView() {
               <button
                 type="button"
                 onClick={() => setActiveTab("chat")}
-                className="px-3 py-1.5 rounded-lg bg-[#008069] text-white text-xs font-semibold hover:bg-[#00705a] transition-all shadow-xs"
+                className="px-3 py-1.5 rounded-lg bg-[#008069] text-white text-xs font-semibold hover:bg-[#00705a] transition-all shadow-card"
               >
                 Return to Chat
               </button>

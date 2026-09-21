@@ -14,7 +14,6 @@
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
       "@/hooks/*": ["./hooks/*"],
-      "@/assets/*": ["./assets/*"],
       "@repo/auth/ui": ["../../libs/features/auth/ui/src/index.ts"],
       "@repo/auth/data-access": ["../../libs/features/auth/data-access/src/index.ts"],
       "@repo/auth/utils": ["../../libs/features/auth/utils/src/index.ts"],

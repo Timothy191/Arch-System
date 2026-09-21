@@ -1,10 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
 import { useAdaptivePerformance } from "./useAdaptivePerformance";
-import { useFocusMode } from "./useFocusMode";
-
-jest.mock("./useFocusMode", () => ({
-  useFocusMode: jest.fn(),
-}));
 
 describe("useAdaptivePerformance", () => {
   let rafCallback: ((_time: number) => void) | null = null;
@@ -26,19 +21,11 @@ describe("useAdaptivePerformance", () => {
   });
 
   it("returns false initially when frame rate is fine", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
     expect(result.current).toBe(false);
   });
 
-  it("returns true immediately if Focus Mode is enabled", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: true }));
-    const { result } = renderHook(() => useAdaptivePerformance());
-    expect(result.current).toBe(true);
-  });
-
   it("signals low performance if FPS drops below 30 after warm-up", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
@@ -64,7 +51,6 @@ describe("useAdaptivePerformance", () => {
   });
 
   it("does not trigger fallback if FPS stays high (e.g. 60 FPS)", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
@@ -89,7 +75,6 @@ describe("useAdaptivePerformance", () => {
   });
 
   it("does not trigger fallback at 40 FPS (above 30 threshold)", () => {
-    (useFocusMode as any).mockImplementation((selector: any) => selector({ enabled: false }));
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);

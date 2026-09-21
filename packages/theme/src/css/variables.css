@@ -19,45 +19,29 @@
 
   /* Background range — macOS system grays */
   /* ARCH PALETTE — macOS Ventura/Sonoma Light */
-  --arch0: #ffffff;
   /* macOS pure white background */
   --white: #ffffff;
   /* Primitive token for white color checks */
-  --arch1: #ffffff;
   /* elevated surface / card */
-  --arch2: #e8e8ed;
   /* sunken / input bg */
-  --arch3: #d2d2d7;
   /* pressed / deeply sunken */
 
   /* Border range — hairline to emphasis */
-  --arch4: rgba(0, 0, 0, 0.06);
   /* border subtle */
-  --arch5: rgba(0, 0, 0, 0.12);
   /* border default */
-  --arch6: rgba(0, 0, 0, 0.2);
   /* border emphasis */
-  --arch7: rgba(0, 0, 0, 0.3);
   /* border strong */
 
   /* Text range — macOS type hierarchy */
-  --arch8: #a1a1a6;
   /* muted / placeholder */
-  --arch9: #6e6e73;
   /* secondary / caption */
-  --arch10: #3a3a3c;
   /* body */
-  --arch11: #1d1d1f;
   /* heading / primary */
 
   /* Aurora Accents — status colors (unchanged) */
-  --arch12: #d22118;
   /* red — error / danger (adjusted for 4.5:1 contrast) */
-  --arch13: #1c1c1e;
   /* deep charcoal — warning */
-  --arch14: #34c759;
   /* green — success */
-  --arch15: #1c1c1e;
   /* deep charcoal — macOS system blue / info */
 
   /* ═══════════════════════════════════════════════════════════════
@@ -65,26 +49,10 @@
        These are the only tokens components and utilities should reference.
        They map to primitives above and will be redefined in dark mode.
        ═══════════════════════════════════════════════════════════════ */
-  --bg-primary: var(--arch0);
-  --bg-secondary: var(--arch1);
-  --bg-tertiary: var(--arch2);
 
-  --border-subtle: var(--arch4);
-  --border-default: var(--arch5);
-  --border-emphasis: var(--arch6);
-
-  --text-muted: var(--arch8);
-  --text-secondary: var(--arch9);
-  --text-body: var(--arch10);
-  --text-primary: var(--arch10);
-  --text-heading: var(--arch11);
-
-  --accent-red: var(--arch12);
   /* Canonical brand interactive — electric blue CTA accent */
-  --accent-charcoal: var(--arch13);
   /** @deprecated use --accent-charcoal — name retained for backward compatibility */
   --accent-blue: var(--accent-electric-blue);
-  --accent-green: var(--arch14);
 
   /* Corporate Brand Colors */
   --arch-brand-blue: #007aff;
@@ -127,13 +95,9 @@
   --shadow-glow-amber: 0 0 20px rgba(245, 158, 11, 0.2), 0 0 60px rgba(245, 158, 11, 0.07);
 
   /* Semantic status colors — used by QR access control and similar modules */
-  --success: #34c759;
   --success-foreground: 0 0% 100%;
-  --warning: #1c1c1e;
   --warning-foreground: 0 0% 100%;
-  --danger: var(--arch12);
   --danger-foreground: 0 0% 100%;
-  --info: #1c1c1e;
   --info-foreground: 0 0% 100%;
 
   /* ═══════════════════════════════════════════════════════════════
@@ -182,33 +146,20 @@
   /* ═══════════════════════════════════════════════════════════════
        SHADCN/UI HSL VARIABLES — macOS Light
        ═══════════════════════════════════════════════════════════════ */
-  --background: 220 14% 96%;
   /* #f3f4f6 */
-  --foreground: 240 6% 10%;
   /* #1d1d1f */
   --card: 0 0% 100%;
   /* white */
-  --card-foreground: 240 6% 10%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 6% 10%;
-  --primary: 240 6% 10%;
   /* #18181b Slate / Pitch Black */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 5% 91%;
   /* #e8e8ed */
-  --secondary-foreground: 240 6% 10%;
-  --muted: 240 5% 91%;
-  --muted-foreground: 240 3% 44%;
   /* #6e6e73 */
   --accent: 240 5% 91%;
   --accent-foreground: 240 6% 10%;
-  --destructive: 3 78% 46%;
   /* #d22118 — matches arch12 */
   --destructive-foreground: 0 0% 100%;
-  --border: 240 6% 87%;
   /* rgba-ish light border */
-  --input: 240 5% 91%;
-  --ring: 240 6% 10%;
   --radius: 0.75rem;
 
   /* Charts — macOS system colors */
@@ -252,11 +203,6 @@
   --glass-surface-strong: rgba(255, 255, 255, 0.35);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-border-top: rgba(255, 255, 255, 0.5);
-  --glass-border-gradient: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.3)
-  );
   --text-on-glass: rgba(10, 10, 20, 0.92);
   --text-on-glass-muted: rgba(10, 10, 20, 0.55);
 
@@ -335,9 +281,6 @@
   --shadow-diffusion-md: 0 3px 5px -1px rgba(0, 0, 0, 0.04), 0 14px 18px -5px rgba(0, 0, 0, 0.03);
   --shadow-diffusion-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.03);
   --shadow-diffusion-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 28px 40px -8px rgba(0, 0, 0, 0.04);
-  --shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.03),
-    0 20px 48px rgba(0, 0, 0, 0.04), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7);
   --shadow-card-hover:
     0 2px 4px rgba(0, 0, 0, 0.02), 0 6px 16px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.04),
     0 28px 64px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
@@ -347,16 +290,30 @@
   --shadow-glow-blue: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
   --shadow-glow-primary: 0 0 20px rgba(0, 122, 255, 0.18), 0 0 60px rgba(0, 122, 255, 0.06);
   --shadow-glow-electric: 0 0 24px rgba(0, 122, 255, 0.28), 0 0 80px rgba(0, 122, 255, 0.1);
-  --shadow-window:
-    0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.03), 0 24px 56px rgba(0, 0, 0, 0.04),
-    0 40px 96px rgba(0, 0, 0, 0.05), inset 0 0 0 0.5px rgba(255, 255, 255, 0.8);
+
+  /* Apple HIG Materials */
+  --material-ultra-thin: rgba(255, 255, 255, 0.45);
+  --material-thin: rgba(255, 255, 255, 0.65);
+  --material-regular: rgba(255, 255, 255, 0.82);
+  --material-thick: rgba(255, 255, 255, 0.92);
+
+  /* Backdrop Filters (Vibrancy emulation) */
+  --blur-subtle: blur(20px) saturate(180%);
+  --blur-window: blur(35px) saturate(190%);
+  --blur-dock: blur(50px) saturate(210%);
+
+  /* Specular Light & Edge Refractions */
+  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.45);
+  --glass-border-gradient: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
 
   /* ═══════════════════════════════════════════════════════════════
        REFRACTION SYSTEM
        ═══════════════════════════════════════════════════════════════ */
-  --refraction-inner-border: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
   --refraction-inner-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02);
-  --refraction-edge-light: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
 
   /* ═══════════════════════════════════════════════════════════════
        WAVE TOKENS — Light mode (subtle)

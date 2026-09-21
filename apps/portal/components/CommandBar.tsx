@@ -11,7 +11,6 @@ const urls = getServiceUrls();
 import {
   Activity,
   Bot,
-  CreditCard,
   Factory,
   LayoutDashboard,
   LogOut,
@@ -77,13 +76,6 @@ const DEPARTMENT_COMMANDS: CommandItem[] = [
     href: "/access-control",
     category: "Departments",
     icon: <ShieldCheck className="w-4 h-4" />,
-  },
-  {
-    id: "dept-access-cards",
-    label: "Access Card Actions",
-    href: "/access-card-actions",
-    category: "Departments",
-    icon: <CreditCard className="w-4 h-4" />,
   },
   {
     id: "dept-admin",

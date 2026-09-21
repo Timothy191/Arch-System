@@ -100,8 +100,8 @@ export function SystemClock() {
           align="end"
           sideOffset={6}
           className={cn(
-            "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-[120]",
-            "flex gap-5 select-none focus:outline-none"
+            "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-popover",
+            "flex gap-5 select-none focus:outline-none",
           )}
         >
           {/* Left panel: Calendar */}
@@ -179,7 +179,7 @@ export function SystemClock() {
                       "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
                       isToday
                         ? "bg-[var(--accent-blue)] text-white font-bold shadow-card"
-                        : "text-[var(--text-heading)] hover:bg-black/[0.04]"
+                        : "text-[var(--text-heading)] hover:bg-black/[0.04]",
                     )}
                   >
                     {day}

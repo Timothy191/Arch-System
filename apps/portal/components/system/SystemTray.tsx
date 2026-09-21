@@ -31,6 +31,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useFetchOfflineQueue } from "@/hooks/useFetchOfflineQueue";
 
@@ -717,19 +718,27 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
           ? "text-[var(--accent-amber)]"
           : "text-[var(--accent-green)]";
 
+  const pathname = usePathname();
+  const isAuthRoute =
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/reset-password") ||
+    pathname?.startsWith("/update-password");
+
   return (
     <div className="flex items-center gap-1.5">
-      <Link
-        href="/drilling/tools?tab=tasks"
-        className={cn(
-          "flex items-center justify-center min-w-11 min-h-11 rounded-full",
-          "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
-          "transition-colors active:scale-[0.97]",
-        )}
-        title="Task Manager"
-      >
-        <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-      </Link>
+      {!isAuthRoute && (
+        <Link
+          href="/drilling/tools?tab=tasks"
+          className={cn(
+            "flex items-center justify-center w-7 h-7 rounded-full",
+            "bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm",
+            "transition-colors active:scale-[0.97]",
+          )}
+          title="Task Manager"
+        >
+          <CheckSquare className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+        </Link>
+      )}
 
       <Popover.Root>
         <Popover.Trigger asChild>
@@ -739,8 +748,8 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             aria-haspopup="dialog"
             title="System status & options"
             className={cn(
-              "flex items-center gap-2 min-h-11 px-2.5 rounded-full select-none cursor-default outline-none",
-              "bg-white/35 hover:bg-white/50 backdrop-blur-md border border-black/[0.08] shadow-diffusion-sm",
+              "flex items-center gap-2 h-7 px-2.5 rounded-full select-none cursor-default outline-none",
+              "bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm",
               "transition-colors active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
             )}
           >
@@ -786,7 +795,7 @@ export const SystemTrayPill = React.memo(function SystemTrayPill() {
             align="end"
             sideOffset={6}
             className={cn(
-              "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card p-3 z-[120]",
+              "w-64 liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card p-3 z-popover",
               "flex flex-col gap-2 select-none focus:outline-none",
             )}
           >

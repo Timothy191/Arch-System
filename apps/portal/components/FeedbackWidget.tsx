@@ -59,7 +59,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
         {isOpen && (
           <div
             onKeyDown={handleKeyDown}
-            className="fixed top-12 right-6 z-[9950] w-80 bg-white/95 backdrop-blur-xl border border-black/[0.1] rounded-xl shadow-window p-4 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150"
+            className="fixed top-12 right-6 z-popover w-80 bg-white/95 backdrop-blur-xl border border-black/[0.1] rounded-xl shadow-window p-4 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="flex justify-between items-center pb-2 border-b border-black/[0.06]">
               <h3 className="font-semibold text-sm text-[var(--text-heading)]">
@@ -126,7 +126,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
 
   if (!isVisible) {
     return (
-      <div className="fixed bottom-4 right-4 z-[9900]">
+      <div className="fixed bottom-4 right-4 z-popover">
         <Button
           variant="outline"
           size="sm"
@@ -142,7 +142,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 right-4 z-[9900] flex items-center gap-1">
+      <div className="fixed bottom-4 right-4 z-popover flex items-center gap-1">
         <Button onClick={() => setIsOpen(true)} className="rounded-full shadow-diffusion-md">
           💬 Feedback / Support
         </Button>
@@ -162,7 +162,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
   return (
     <div
       onKeyDown={handleKeyDown}
-      className="fixed bottom-4 right-4 z-[9900] w-80 bg-background border rounded-lg shadow-window p-4 flex flex-col gap-4"
+      className="fixed bottom-4 right-4 z-popover w-80 bg-background border rounded-lg shadow-window p-4 flex flex-col gap-4"
     >
       <div className="flex justify-between items-center">
         <h3 className="font-semibold text-sm">Send Feedback</h3>

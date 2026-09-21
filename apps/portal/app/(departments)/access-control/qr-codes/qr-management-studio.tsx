@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { QRCodeSection } from "../../access-card-actions/card-actions/qr-section";
+import { QRCodeSection } from "../card-actions/qr-section";
 import type {
   BadgeInventoryItem,
   CreateBadgePayload,

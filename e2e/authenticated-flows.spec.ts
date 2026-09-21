@@ -28,7 +28,6 @@ test.describe("Authenticated User Flows", () => {
         "engineering",
         "control-room",
         "access-control",
-        "access-card-actions",
       ];
 
       for (const dept of departments) {

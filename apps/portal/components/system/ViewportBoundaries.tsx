@@ -112,8 +112,8 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 pointer-events-none z-40 flex flex-col justify-between p-3 select-none",
-        className
+        "fixed inset-0 pointer-events-none z-dock flex flex-col justify-between p-3 select-none",
+        className,
       )}
     >
       {/* Top boundary space (Menu bar is at top-0 z-50, we leave this transparent) */}
@@ -135,7 +135,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
         {autoHide && (
           <div
             data-testid="dock-trigger-zone"
-            className="fixed bottom-0 left-0 right-0 h-4 pointer-events-auto z-30"
+            className="fixed bottom-0 left-0 right-0 h-4 pointer-events-auto z-dock-trigger"
             onMouseEnter={handleMouseEnter}
           />
         )}
@@ -149,10 +149,10 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
             aria-label="Reveal dock"
             className={cn(
               "fixed bottom-1.5 pointer-events-auto cursor-pointer transition-all duration-300 ease-glass",
-              "w-12 h-1 rounded-full bg-black/20 hover:bg-black/40 shadow-sm border border-black/5",
+              "w-12 h-1 rounded-full bg-black/20 hover:bg-black/40 shadow-diffusion-sm border border-black/5",
               isRevealed
                 ? "opacity-0 pointer-events-none translate-y-2"
-                : "opacity-100 translate-y-0"
+                : "opacity-100 translate-y-0",
             )}
           />
         )}
@@ -174,7 +174,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
             isRevealed
               ? "translate-y-0 opacity-100 pointer-events-auto"
               : "translate-y-[calc(100%+1.5rem)] opacity-0 pointer-events-none",
-            splitWindowOpen ? "sm:-translate-x-[200px]" : "translate-x-0"
+            splitWindowOpen ? "sm:-translate-x-[200px]" : "translate-x-0",
           )}
         >
           {/* 1. Anchor / Start Button */}
@@ -202,7 +202,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                   href={app.href}
                   className={cn(
                     "group relative flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arch-accent-blue/50",
-                    isActive ? "bg-black/5" : "hover:bg-black/5"
+                    isActive ? "bg-black/5" : "hover:bg-black/5",
                   )}
                 >
                   <Icon
@@ -210,7 +210,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                       "w-4 h-4 transition-transform duration-300 ease-glass group-hover:scale-110 group-hover:-translate-y-0.5",
                       isActive
                         ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]"
+                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]",
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
@@ -219,7 +219,7 @@ export function ViewportBoundaries({ className }: ViewportBoundariesProps) {
                       "text-xs font-medium transition-colors duration-300",
                       isActive
                         ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]"
+                        : "text-[var(--text-secondary)] group-hover:text-[var(--text-heading)]",
                     )}
                   >
                     {app.name}

@@ -81,7 +81,7 @@ export function PWAInstallButton() {
   return (
     <div
       role="alert"
-      className="fixed bottom-4 right-4 z-[9998] flex items-center gap-3 bg-white/90 backdrop-blur-xl border border-black/[0.08] shadow-card rounded-lg p-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
+      className="fixed bottom-4 right-4 z-toast flex items-center gap-3 bg-white/90 backdrop-blur-xl border border-black/[0.08] shadow-card rounded-lg p-4 animate-in slide-in-from-bottom-4 fade-in duration-300"
     >
       <div className="flex-1">
         <p className="text-sm font-medium text-[var(--text-heading)]">Install Arch Portal</p>

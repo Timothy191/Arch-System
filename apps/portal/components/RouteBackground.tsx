@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useFocusMode } from "@/hooks/useFocusMode";
-
 
 /**
  * RouteBackground
@@ -12,7 +10,6 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  * and defers the heavier video to a lazy, off-critical-path element.
  */
 export function RouteBackground() {
-  const focusModeEnabled = useFocusMode((s) => s.enabled);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -51,11 +48,24 @@ export function RouteBackground() {
         />
       </div>
 
+      {/* ── Ambient Video Background ── */}
+      {!prefersReducedMotion && (
+        <div className="route-bg-video-container" aria-hidden="true">
+          <video
+            ref={videoRef}
+            src="/background/edge-of-the-event-horizon.3840x2160.mp4"
+            className="route-bg-video filter brightness-105"
+            autoPlay
+            loop
+            muted
+            playsInline
+            disablePictureInPicture
+          />
+        </div>
+      )}
+
       {/* ── Ambient Film Grain overlay ── */}
       <div className="route-bg-grain" aria-hidden="true" />
-
-      {/* ── Focus Mode Scrim ── */}
-      {focusModeEnabled && <div className="route-bg-focus-scrim" aria-hidden="true" />}
     </>
   );
 }

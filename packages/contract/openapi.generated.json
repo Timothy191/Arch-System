@@ -1046,6 +1046,60 @@
         }
       }
     },
+    "/api/health/n8n": {
+      "get": {
+        "summary": "n8n Workflow Engine health check",
+        "description": "Probes external n8n automation engine. n8n is an optional service; if offline or unreachable, the endpoint returns HTTP 200 with optional flag true and backend status normal so backend functions continue unaffected.",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "n8n health status (always 200 as n8n is an optional integration)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["healthy", "degraded", "unavailable"]
+                    },
+                    "optional": {
+                      "type": "boolean"
+                    },
+                    "backend_status": {
+                      "type": "string"
+                    },
+                    "latency_ms": {
+                      "type": "integer"
+                    },
+                    "last_check": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "details": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "http_status": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "error": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health/fuxa": {
       "get": {
         "summary": "FUXA SCADA health check",

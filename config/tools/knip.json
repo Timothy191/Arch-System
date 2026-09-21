@@ -78,7 +78,6 @@
         "lib/feature-flags.ts",
         "app/overview/AuditReportsSection.tsx",
         "components/dynamic/LazyHeavyComponents.tsx",
-        "components/FocusModeToggle.tsx",
         "components/LCPObserver.tsx",
         "components/PitConnectivityBanner.tsx",
         "components/WebVitalsReporter.tsx",

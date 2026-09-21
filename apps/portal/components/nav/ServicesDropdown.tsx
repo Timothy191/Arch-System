@@ -283,7 +283,7 @@ export function ServicesDropdown() {
               <span>View</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className="w-48 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-1 z-[120]">
+              <DropdownMenuSubContent className="w-48 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-1 z-popover">
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => window.location.reload()}
@@ -319,7 +319,7 @@ export function ServicesDropdown() {
               <span>Safety &amp; Emergency</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent className="w-52 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-1 z-[120]">
+              <DropdownMenuSubContent className="w-52 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl py-1 z-popover">
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
@@ -414,7 +414,7 @@ export function ServicesDropdown() {
         <div
           role="dialog"
           aria-label="Screen locked"
-          className="fixed inset-0 z-[9999] backdrop-blur-xl bg-black/20 flex flex-col items-center justify-center gap-3 cursor-pointer"
+          className="fixed inset-0 z-priority backdrop-blur-xl bg-black/20 flex flex-col items-center justify-center gap-3 cursor-pointer"
           onClick={() => setLocked(false)}
         >
           <Lock className="w-8 h-8 text-white/60" />
@@ -427,7 +427,7 @@ export function ServicesDropdown() {
         <div
           role="dialog"
           aria-label="System sleeping"
-          className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center gap-3 cursor-pointer"
+          className="fixed inset-0 z-priority bg-black flex flex-col items-center justify-center gap-3 cursor-pointer"
           onClick={() => setSleeping(false)}
         >
           <Moon className="w-8 h-8 text-white/40" />
@@ -440,7 +440,7 @@ export function ServicesDropdown() {
         <div
           role="dialog"
           aria-label="System shut down"
-          className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center gap-3"
+          className="fixed inset-0 z-priority bg-black flex flex-col items-center justify-center gap-3"
         >
           <svg
             width="24"

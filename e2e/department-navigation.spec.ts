@@ -118,7 +118,6 @@ test.describe("Department Navigation E2E", () => {
         "drilling",
         "production",
         "access-control",
-        "access-card-actions",
         "engineering",
         "control-room",
         "admin",

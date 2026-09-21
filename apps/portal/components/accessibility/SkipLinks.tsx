@@ -15,13 +15,13 @@ export function SkipLinks() {
     <div className="sr-only focus-within:not-sr-only">
       <a
         href="#main-content"
-        className="fixed top-0 left-0 z-[9999] px-4 py-2 bg-[var(--accent-blue)] text-white font-medium rounded-br-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-2"
+        className="fixed top-0 left-0 z-skip-link px-4 py-2 bg-[var(--accent-blue)] text-white font-medium rounded-br-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-2"
       >
         Skip to main content
       </a>
       <a
         href="#navigation"
-        className="fixed top-0 left-0 z-[9999] px-4 py-2 bg-[var(--accent-blue)] text-white font-medium rounded-br-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-2 ml-48"
+        className="fixed top-0 left-0 z-skip-link px-4 py-2 bg-[var(--accent-blue)] text-white font-medium rounded-br-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-2 ml-48"
       >
         Skip to navigation
       </a>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFocusMode } from "@/hooks/useFocusMode";
 
 /* AGENT-TRACE: Adaptive performance monitor.
    Removed periodic recovery checks to prevent infinite loops of the background 
@@ -11,24 +10,13 @@ import { useFocusMode } from "@/hooks/useFocusMode";
  * useAdaptivePerformance
  *
  * Hooks into the browser's requestAnimationFrame to measure frame render times.
- * If frame rate drops below 30 FPS for a sustained 2-second window, or if Focus Mode
- * is activated, returns true to signal that rendering should be downgraded.
+ * If frame rate drops below 30 FPS for a sustained 2-second window, returns true
+ * to signal that rendering should be downgraded.
  */
 export function useAdaptivePerformance(): boolean {
   const [lowPerf, setLowPerf] = useState(false);
-  const focusMode = useFocusMode((s) => s.enabled);
 
   useEffect(() => {
-    // Focus Mode forces degraded rendering (dark atmospheric mode is lighter)
-    if (focusMode) {
-      setLowPerf(true);
-      return;
-    }
-
-    // When focus mode is toggled OFF, clear the forced degradation so the
-    // rAF loop below gets a fresh chance to measure real performance.
-    setLowPerf(false);
-
     let frameTimes: number[] = [];
     let animationFrameId: number;
     let firstFrameTime: number | null = null;
@@ -87,7 +75,7 @@ export function useAdaptivePerformance(): boolean {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [focusMode]);
+  }, []);
 
   return lowPerf;
 }

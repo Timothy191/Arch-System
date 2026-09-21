@@ -161,17 +161,24 @@ for (const match of cssText.matchAll(/^\s*(--[\w-]+)\s*:\s*(.+?);/gm)) {
   cssValues.set(match[1], match[2].trim());
 }
 
-// Resolve simple references in tokens.json values
-const resolvedJson = new Map();
-for (const [token, rawValue] of jsonTokens) {
-  let val = rawValue;
-  // Resolve {archN} references to the primitive hex values
-  const refs = [...val.matchAll(/\{(arch\d+)\}/g)];
+// Resolve simple references in tokens.json values (recursively, up to 3 levels)
+function resolveJsonValue(value, depth = 0) {
+  if (depth > 3) return value;
+  const refs = [...value.matchAll(/\{([\w-]+)\}/g)];
+  if (refs.length === 0) return value;
+  let resolved = value;
   for (const ref of refs) {
     const primitive = jsonTokens.get(`--${ref[1]}`);
-    if (primitive) val = val.replace(ref[0], primitive);
+    if (primitive) {
+      resolved = resolved.replace(ref[0], resolveJsonValue(primitive, depth + 1));
+    }
   }
-  resolvedJson.set(token, val);
+  return resolved;
+}
+
+const resolvedJson = new Map();
+for (const [token, rawValue] of jsonTokens) {
+  resolvedJson.set(token, resolveJsonValue(rawValue));
 }
 
 // Helper: resolve var(--foo) references in a CSS value using cssValues

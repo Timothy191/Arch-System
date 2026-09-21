@@ -3,7 +3,7 @@
  * /api/health/n8n:
  *   get:
  *     summary: n8n Workflow Engine health check
- *     description: Probes external n8n automation engine. n8n is an optional service; if offline or unreachable, returns HTTP 200 with optional: true and backend_status: normal so the system backend functions like normal.
+ *     description: Probes external n8n automation engine. n8n is an optional service; if offline or unreachable, the endpoint returns HTTP 200 with optional flag true and backend status normal so backend functions continue unaffected.
  *     tags:
  *       - Health
  *     responses:

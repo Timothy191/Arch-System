@@ -91,7 +91,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
           <Popover.Content
             align="end"
             sideOffset={6}
-            className="w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-[120] focus:outline-none select-none"
+            className="w-64 bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-window rounded-xl p-4 z-popover focus:outline-none select-none"
           >
             <div className="space-y-3">
               {/* Header */}

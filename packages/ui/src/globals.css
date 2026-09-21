@@ -2,7 +2,7 @@
  * MAINTAINABILITY BUDGET (S6) EXCEPTION:
  * Stylesheet LOC: ~490 (> 400 LOC limit).
  * Justification: Canonical UI design system entrypoint incorporating accessibility layers,
- * core animations, custom glass utilities, and focus-mode specificity overrides.
+ * core animations, custom glass utilities.
  */
 
 @import "@repo/theme/css";
@@ -125,17 +125,47 @@
   .z-background {
     z-index: var(--z-background);
   }
+  .z-route-bg {
+    z-index: var(--z-route-bg);
+  }
   .z-telemetry {
     z-index: var(--z-telemetry);
   }
   .z-primary-card {
     z-index: var(--z-primary-card);
   }
+  .z-dock {
+    z-index: var(--z-dock);
+  }
+  .z-dock-trigger {
+    z-index: var(--z-dock-trigger);
+  }
   .z-navigation {
     z-index: var(--z-navigation);
   }
+  .z-popover {
+    z-index: var(--z-popover);
+  }
   .z-overlay {
     z-index: var(--z-overlay);
+  }
+  .z-ai-launcher {
+    z-index: var(--z-ai-launcher);
+  }
+  .z-offline-banner {
+    z-index: var(--z-offline-banner);
+  }
+  .z-skip-link {
+    z-index: var(--z-skip-link);
+  }
+  .z-toast {
+    z-index: var(--z-toast);
+  }
+  .z-dev-overlay {
+    z-index: var(--z-dev-overlay);
+  }
+  .z-priority {
+    z-index: var(--z-priority);
   }
 
   .aurora-shadow {
@@ -319,130 +349,6 @@
   .skip-link:active {
     top: 0;
   }
-
-  /* ══════════════════════════════════════════════════════════════════════
-     FOCUS MODE — dark atmospheric theme (active over focused.jpeg)
-     All tokens shift to dark glass palette so every surface reads cleanly
-     against the blue-grey atmospheric background image.
-     ──────────────────────────────────────────────────────────────────────
-     Cosmetic overrides (background, border, color, box-shadow, animation,
-     backdrop-filter) use `:is()` to boost specificity instead of !important.
-     !important is kept only for layout properties (display).
-     ══════════════════════════════════════════════════════════════════════ */
-  :is(body.focus-mode) {
-    --bg-primary: rgba(18, 22, 32, 0);
-    --bg-secondary: rgba(20, 26, 40, 0.55);
-    --bg-tertiary: rgba(24, 30, 46, 0.65);
-
-    --overlay-dim: rgba(255, 255, 255, 0.02);
-    --overlay-subtle: rgba(255, 255, 255, 0.04);
-    --overlay-medium: rgba(255, 255, 255, 0.06);
-
-    --text-heading: rgba(255, 255, 255, 0.96);
-    --text-primary: rgba(255, 255, 255, 0.9);
-    --text-body: rgba(255, 255, 255, 0.82);
-    --text-secondary: rgba(220, 228, 245, 0.72);
-    --text-muted: rgba(180, 195, 220, 0.55);
-
-    --border-default: rgba(255, 255, 255, 0.12);
-    --border-subtle: rgba(255, 255, 255, 0.07);
-    --border-emphasis: rgba(255, 255, 255, 0.2);
-
-    --glass-surface: rgba(20, 28, 45, 0.5);
-    --glass-surface-hover: rgba(24, 34, 56, 0.62);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-border-top: rgba(255, 255, 255, 0.18);
-    --glass-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    --text-on-glass: rgba(255, 255, 255, 0.9);
-
-    --vibrancy-surface: rgba(15, 20, 35, 0.6);
-
-    --accent-blue: #4da6ff;
-    --accent-blue-hover: #67b8ff;
-  }
-
-  :is(body.focus-mode) .fixed.z-\[100\],
-  :is(body.focus-mode) .fixed.z-navigation,
-  :is(body.focus-mode) .z-navigation {
-    background: rgba(12, 16, 28, 0.72);
-    border-color: rgba(255, 255, 255, 0.08);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-  }
-
-  :is(body.focus-mode) .z-navigation button[class*="bg-white"] {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-
-  :is(body.focus-mode) .z-navigation button:hover,
-  :is(body.focus-mode) .z-navigation a:hover,
-  :is(body.focus-mode) .z-navigation [data-state="open"] {
-    background-color: rgba(255, 255, 255, 0.08);
-  }
-
-  :is(body.focus-mode) [data-radix-popper-content-wrapper] [role="menu"],
-  :is(body.focus-mode) .bg-white\/95 {
-    background: rgba(16, 20, 36, 0.88);
-    border-color: rgba(255, 255, 255, 0.1);
-    -webkit-backdrop-filter: blur(32px) saturate(200%);
-    backdrop-filter: blur(32px) saturate(200%);
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  :is(body.focus-mode) [class*="backdrop-blur"] {
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    backdrop-filter: blur(20px) saturate(160%);
-  }
-
-  /* AGENT-TRACE: Removed bg-white/xx and bg-black/[0.xx] focus mode overrides
-     after replacing them with semantic overlay tokens (overlay-dim, overlay-subtle).
-     Components now use CSS variables which are overridden in the root focus-mode block. */
-
-  :is(body.focus-mode) .animate-fade-up,
-  :is(body.focus-mode) .animate-pulse {
-    animation: none;
-  }
-
-  :is(body.focus-mode) .aurora-shadow::after {
-    animation: none;
-    box-shadow: none;
-  }
-
-  :is(body.focus-mode) .caustic-glow-optimal,
-  :is(body.focus-mode) .caustic-glow-warning,
-  :is(body.focus-mode) .caustic-glow-critical {
-    animation: none;
-    background: none;
-  }
-
-  :is(body.focus-mode) [class*="motion-reduce:hidden"] {
-    display: none;
-  }
-
-  :is(body.focus-mode) .shadow-window,
-  :is(body.focus-mode) .shadow-diffusion-sm,
-  :is(body.focus-mode) .shadow-card {
-    box-shadow:
-      0 8px 32px -4px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-
-  /* stylelint-disable selector-class-pattern */
-  :is(body.focus-mode) .bg-arch-surface-secondary\/85,
-  :is(body.focus-mode) .bg-arch-surface-secondary\/70,
-  :is(body.focus-mode) .bg-arch-surface-secondary\/50,
-  :is(body.focus-mode) .bg-arch-surface-tertiary\/40,
-  :is(body.focus-mode) .bg-arch-surface-tertiary\/50,
-  :is(body.focus-mode) .bg-arch-surface-tertiary\/60 {
-    background-color: rgba(20, 28, 45, 0.6);
-  }
-
-  :is(body.focus-mode) .hover\:bg-arch-surface-secondary\/50:hover,
-  :is(body.focus-mode) .hover\:bg-arch-surface-tertiary:hover {
-    background-color: rgba(24, 34, 56, 0.75);
-  }
-  /* stylelint-enable selector-class-pattern */
 
   /* RevoGrid visible table grid lines overrides */
   revo-grid .rgCell {

@@ -21,7 +21,7 @@ import { DEPARTMENTS } from "../lib/data";
 // Custom node components
 function RootNode({ data }: { data: { label: string } }) {
   return (
-    <div className="px-6 py-3 bg-bg-secondary border-2 border-accent-green rounded-xl shadow-lg">
+    <div className="px-6 py-3 bg-bg-secondary border-2 border-accent-green rounded-xl shadow-card">
       <div className="text-accent-green font-semibold text-lg">{data.label}</div>
       <Handle type="source" position={Position.Bottom} className="!bg-accent-green" />
     </div>
@@ -51,7 +51,7 @@ function DepartmentNode({ data }: { data: { label: string; color: string; slug: 
 
   return (
     <div
-      className="w-48 bg-white/70 backdrop-blur-xl border rounded-xl overflow-hidden shadow-lg"
+      className="w-48 bg-white/70 backdrop-blur-xl border rounded-xl overflow-hidden shadow-card"
       style={{ borderColor: data.color }}
     >
       <Handle type="target" position={Position.Top} className="!opacity-0" />
@@ -172,7 +172,7 @@ export default function SystemArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   return (
