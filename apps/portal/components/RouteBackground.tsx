@@ -42,7 +42,7 @@ export function RouteBackground() {
       >
         <img
           id="route-bg-light-image"
-          src="/background/edge-of-the-event-horizon-poster.webp"
+          src="/background/earth-orbit-poster.webp"
           alt=""
           className="route-bg-image object-cover object-center w-full h-full filter brightness-105"
         />
@@ -53,7 +53,7 @@ export function RouteBackground() {
         <div className="route-bg-video-container" aria-hidden="true">
           <video
             ref={videoRef}
-            src="/background/edge-of-the-event-horizon.3840x2160.mp4"
+            src="/background/earth-orbit.mp4"
             className="route-bg-video filter brightness-105"
             autoPlay
             loop
