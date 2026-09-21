@@ -177,7 +177,7 @@ while true; do
 
   # Measure service statuses
   PORTAL_STATUS=$(measure_latency "http://localhost:$PORT/login")
-  SUPABASE_HOST=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | sed 's|https://||; s|\.supabase\.co.*||' || echo "hosted")
+  SUPABASE_HOST=$(grep '^SUPABASE_URL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | sed 's|https://||; s|\.supabase\.co.*||' || echo "cloud")
   REDIS_STATUS=$(measure_tcp_conn 6379)
   FUXA_STATUS=$(measure_tcp_conn 1881)
 
@@ -381,7 +381,7 @@ while true; do
   [ "$SPLIT_MODE" = true ] && { move_cursor 19 "$LEFT_WIDTH"; printf "${CLR_BORDER}║${CLR_RESET}"; }
 
   move_cursor 20 0
-  s_txt="${CLR_EMERALD}HOSTED OK${CLR_RESET}"
+  s_txt="${CLR_EMERALD}CLOUD OK${CLR_RESET}"
   [ "$REDIS_STATUS" = "ACTIVE" ] && r_txt="${CLR_EMERALD}ONLINE   ${CLR_RESET}" || r_txt="${CLR_GRAY}IN-MEM   ${CLR_RESET}"
   [ "$FUXA_STATUS" = "ACTIVE" ] && f_txt="${CLR_EMERALD}ONLINE   ${CLR_RESET}" || f_txt="${CLR_AMBER}READY    ${CLR_RESET}"
   printf "${CLR_BORDER}║${CLR_RESET}  %b║%b [%b] %b║%b   %b║%b [%b] %b║%b   %b║%b [%b] %b║%b" \

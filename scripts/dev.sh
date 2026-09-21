@@ -11,7 +11,7 @@ curl() {
 
 # ──────────────────────────────────────────────────────────
 # Arch-Systems — Lightning Dev Script v4 (Cloud-First, No Docker)
-# Connects to hosted Supabase + optional Redis, starts Next.js HMR,
+# Connects to Cloud Supabase + optional Redis, starts Next.js HMR,
 # runs 4-phase health check, then opens browser to login page.
 # DOCKER / LOCAL SUPABASE REQUIREMENT REMOVED — all infra is SaaS.
 #
@@ -25,7 +25,7 @@ source "$SCRIPT_DIR/lib/common.sh"
 LOG_LABEL="[dev]"
 
 PORT="${PORT:-3000}"
-HOSTED_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
+CLOUD_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
 
 # Read environment variables from .env via shared get_env_var (safe, no eval)
 ENV_FILE="$PORTAL_DIR/.env"
@@ -119,8 +119,8 @@ banner() {
   local branch
   branch=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "—")
   local mode_pill
-  if [ "$HOSTED_MODE" = "true" ]; then
-    mode_pill="${CYAN}${BOLD}CLOUD-FIRST · HOSTED SUPABASE${NC}"
+  if [ "$CLOUD_MODE" = "true" ]; then
+    mode_pill="${CYAN}${BOLD}CLOUD-FIRST · CLOUD SUPABASE${NC}"
   else
     mode_pill="${MAGENTA}${BOLD}LOCAL · DOCKER${NC}"
   fi
@@ -155,9 +155,9 @@ _url_row() {
 
 show_results() {
   local studio_url api_url redis_suffix
-  if [ "$HOSTED_MODE" = "true" ]; then
-    studio_url="https://supabase.com/dashboard/project/$HOSTED_PROJECT_REF"
-    api_url="https://$HOSTED_PROJECT_REF.supabase.co"
+  if [ "$CLOUD_MODE" = "true" ]; then
+    studio_url="https://supabase.com/dashboard/project/$CLOUD_PROJECT_REF"
+    api_url="https://$CLOUD_PROJECT_REF.supabase.co"
     redis_suffix="(local)"
   else
     studio_url="http://localhost:54323"
@@ -274,7 +274,8 @@ START_OVERVIEW=false
 RUN_E2E=false
 STRICT_MODE=false
 HEADLESS_MODE=false
-HOSTED_MODE=false
+CLOUD_MODE=false
+START_FUXA=false
 
 if [ "${HEADLESS:-false}" = "true" ] || [ "${CI:-false}" = "true" ] || [ "${NO_OPEN:-false}" = "true" ]; then
   HEADLESS_MODE=true
@@ -298,8 +299,12 @@ while [ $# -gt 0 ]; do
     HEADLESS_MODE=true
     shift
     ;;
-  --hosted | --no-docker)
-    HOSTED_MODE=true
+  --cloud | --hosted | --no-docker)
+    CLOUD_MODE=true
+    shift
+    ;;
+  --fuxa | --scada)
+    START_FUXA=true
     shift
     ;;
   --cms)
@@ -329,7 +334,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]]; then
-  HOSTED_MODE=true
+  CLOUD_MODE=true
 fi
 
 banner
@@ -337,8 +342,8 @@ banner
 if [ "$QUICK_MODE" = "true" ]; then
   echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
   echo
-elif [ "$HOSTED_MODE" = "true" ]; then
-  echo -e "  ${CYAN}${BOLD}☁️ Hosted mode${NC} — connecting directly to hosted Supabase ($SUPABASE_URL)"
+elif [ "$CLOUD_MODE" = "true" ]; then
+  echo -e "  ${CYAN}${BOLD}☁️ Cloud mode${NC} — connecting directly to Cloud Supabase ($SUPABASE_URL)"
   echo
 fi
 
@@ -455,9 +460,9 @@ pnpm -v >/dev/null 2>&1 && check "pnpm" "pass" "$(pnpm -v)" || {
   env_pass=false
 }
 
-# 1a. Check & Fix Docker (skip in quick mode or hosted cloud mode)
-if [ "$QUICK_MODE" = "true" ] || [ "$HOSTED_MODE" = "true" ]; then
-  check "Docker" "skip" "$([ "$HOSTED_MODE" = "true" ] && echo "hosted cloud mode" || echo "quick mode")"
+# 1a. Check & Fix Docker (skip in quick mode or cloud mode)
+if [ "$QUICK_MODE" = "true" ] || [ "$CLOUD_MODE" = "true" ]; then
+  check "Docker" "skip" "$([ "$CLOUD_MODE" = "true" ] && echo "cloud mode" || echo "quick mode")"
 else
   if ! docker info >/dev/null 2>&1; then
     echo -e "  ${INFO} Docker is not running. Attempting to start docker..."
@@ -632,29 +637,29 @@ if [ "$QUICK_MODE" = "true" ]; then
   check "Supabase API" "skip" "quick mode"
   check "Database" "skip" "quick mode"
   check "Studio" "skip" "quick mode"
-elif [ "$HOSTED_MODE" = "true" ]; then
+elif [ "$CLOUD_MODE" = "true" ]; then
   phase 2 "Infrastructure (Cloud-First)"
-  # Real reachability check against the hosted REST endpoint. 200 = reachable +
+  # Real reachability check against the Cloud REST endpoint. 200 = reachable +
   # anon key accepted; 401/403 = reachable but the anon header was rejected
   # (still proves the endpoint resolves and the project is live). Anything else
   # (incl. 000 = network error / paused project) is a warn, never a boot blocker.
-  hosted_api_code="000"
+  cloud_api_code="000"
   if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ANON_KEY:-}" ]; then
-    hosted_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
+    cloud_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
       "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY}" 2>/dev/null || true)
-    [ -z "$hosted_api_code" ] && hosted_api_code="000"
+    [ -z "$cloud_api_code" ] && cloud_api_code="000"
   fi
-  case "$hosted_api_code" in
+  case "$cloud_api_code" in
   200 | 401 | 403)
-    check "Supabase API" "pass" "${SUPABASE_URL} reachable (HTTP ${hosted_api_code})"
-    check "Database" "pass" "cloud Postgres reachable via REST"
+    check "Supabase API" "pass" "${SUPABASE_URL} reachable (HTTP ${cloud_api_code})"
+    check "Database" "pass" "Cloud Postgres reachable via REST"
     ;;
   *)
-    check "Supabase API" "warn" "${SUPABASE_URL:-<unset>} not reachable (HTTP ${hosted_api_code}) — check network/keys/paused project"
-    check "Database" "warn" "cloud Postgres not verified"
+    check "Supabase API" "warn" "${SUPABASE_URL:-<unset>} not reachable (HTTP ${cloud_api_code}) — check network/keys/paused project"
+    check "Database" "warn" "Cloud Postgres not verified"
     ;;
   esac
-  check "Studio" "skip" "hosted dashboard at supabase.com"
+  check "Studio" "skip" "Cloud dashboard at supabase.com"
 else
   phase 2 "Infrastructure"
 
@@ -673,12 +678,12 @@ else
       SUPAPID=$!
       spinner "$SUPAPID" "Booting local Supabase containers"
     else
-      check "Supabase API" "skip" "no local Supabase configured — use --hosted for Cloud Supabase"
+      check "Supabase API" "skip" "no local Supabase configured — use --cloud for Cloud Supabase"
     fi
     if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 15; then
       check "Supabase API" "pass" "http://localhost:54321 active"
     else
-      check "Supabase API" "warn" "local Supabase not responding — use --hosted for Cloud Supabase"
+      check "Supabase API" "warn" "local Supabase not responding — use --cloud for Cloud Supabase"
     fi
   fi
 
@@ -765,8 +770,8 @@ else
   # fi
 fi
 
-if [ "$QUICK_MODE" != "true" ]; then
-  # 2d. FUXA SCADA dev-sim — always up on dev boot (local and hosted).
+if [ "$START_FUXA" = "true" ] && [ "$QUICK_MODE" != "true" ]; then
+  # FUXA SCADA dev-sim — opt-in via --fuxa (local and cloud).
   # Lightweight local container (frangoteam/fuxa), not real hardware. Heavy tools
   # remain opt-in via -t (compose.tools.yml). Reverse-flow ingest (D2-a): the
   # portal exposes /api/scada/tags which FUXA pulls via host.docker.internal.
@@ -796,21 +801,25 @@ localhost | 127.0.0.1 | 0.0.0.0)
   ;;
 esac
 
-# FUXA SCADA — best-effort auth probe (SCADA controls real devices, so flag open access).
-sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
-sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null || true)
-[ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
-case "$sec_fuxa_code" in
-200 | 301 | 302)
-  check "FUXA SCADA" "warn" "$sec_fuxa_url reachable (HTTP $sec_fuxa_code) — confirm auth is enabled (controls real devices)"
-  ;;
-000)
-  check "FUXA SCADA" "skip" "$sec_fuxa_url not reachable"
-  ;;
-*)
-  check "FUXA SCADA" "info" "$sec_fuxa_url HTTP $sec_fuxa_code"
-  ;;
-esac
+# FUXA SCADA — only probe when explicitly enabled; dev-sim has no auth by design.
+if [ "$START_FUXA" = "true" ]; then
+  sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+  sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null || true)
+  [ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
+  case "$sec_fuxa_code" in
+  200 | 301 | 302)
+    check "FUXA SCADA" "pass" "$sec_fuxa_url reachable (dev-sim, auth disabled by design)"
+    ;;
+  000)
+    check "FUXA SCADA" "warn" "$sec_fuxa_url not reachable"
+    ;;
+  *)
+    check "FUXA SCADA" "info" "$sec_fuxa_url HTTP $sec_fuxa_code"
+    ;;
+  esac
+else
+  check "FUXA SCADA" "skip" "pass --fuxa to start dev-sim"
+fi
 
 # Supabase anon key presence + RLS advisory (read-only reminder, never a mutation).
 if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
@@ -941,12 +950,12 @@ else
   check "Static assets" "skip"
 fi
 
-# 4f. FUXA SCADA — self-heal a stopped container, then health check.
+# 4f. FUXA SCADA — only self-heal and probe when explicitly enabled.
 # AGENT-TRACE: `restart: unless-stopped` never revives an explicitly-stopped
 # container, so a single `docker stop`/`make clean-docker` would leave FUXA dead
 # forever. Detect exited -> start -> wait healthy before probing.
-FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
-if [ "$QUICK_MODE" != "true" ]; then
+if [ "$START_FUXA" = "true" ]; then
+  FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
   fuxa_state="$(docker inspect --format='{{.State.Status}}' plantcor-fuxa 2>/dev/null || true)"
   if [ "$fuxa_state" = "exited" ]; then
     echo -e "  ${INFO} FUXA stopped — self-healing..."
@@ -956,14 +965,14 @@ if [ "$QUICK_MODE" != "true" ]; then
     docker inspect --format='{{.State.Health.Status}}' plantcor-fuxa 2>/dev/null | grep -q healthy && break
     sleep 2
   done
-fi
-if curl -fs "$FUXA_URL" >/dev/null 2>&1; then
-  check "FUXA SCADA" "pass" "$FUXA_URL"
-else
-  check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
+  if curl -fs "$FUXA_URL" >/dev/null 2>&1; then
+    check "FUXA SCADA" "pass" "$FUXA_URL"
+  else
+    check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
+  fi
 fi
 
-# 4g. Database reachability (hosted REST + anon key + RLS end-to-end).
+# 4g. Database reachability (Cloud REST + anon key + RLS end-to-end).
 # 200 = reachable + anon accepted; 401/403 = reachable but RLS-gated (still proves
 # connectivity + auth wiring); 000 = network error / paused project (warn, never block).
 if [ "$QUICK_MODE" = "true" ]; then
@@ -978,13 +987,13 @@ else
   [ -z "$smoke_db_code" ] && smoke_db_code="000"
   case "$smoke_db_code" in
   200)
-    check "Database" "pass" "hosted REST reachable (HTTP 200, anon key accepted)"
+    check "Database" "pass" "Cloud REST reachable (HTTP 200, anon key accepted)"
     ;;
   401 | 403)
-    check "Database" "pass" "hosted REST reachable (HTTP $smoke_db_code, RLS-gated)"
+    check "Database" "pass" "Cloud REST reachable (HTTP $smoke_db_code, RLS-gated)"
     ;;
   *)
-    check "Database" "warn" "hosted REST HTTP $smoke_db_code — check network/keys/paused project"
+    check "Database" "warn" "Cloud REST HTTP $smoke_db_code — check network/keys/paused project"
     ;;
   esac
 fi
@@ -1088,9 +1097,9 @@ fi
 # Portal log — advisory: logs clear on each start; persist with PORTAL_LOG_LEVEL if wanted.
 check "Portal log" "info" "logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence"
 
-# Supabase free-tier keep-alive (hosted only).
-if [ "$HOSTED_MODE" = "true" ]; then
-  check "Free-tier" "info" "hosted free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier"
+# Supabase free-tier keep-alive (Cloud only).
+if [ "$CLOUD_MODE" = "true" ]; then
+  check "Free-tier" "info" "Cloud free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier"
 fi
 
 # ── Done ─────────────────────────────────────────────────

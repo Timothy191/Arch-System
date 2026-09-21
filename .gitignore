@@ -71,6 +71,7 @@ dev_run.log
 
 # Supabase local state (synced from packages/database/migrations/ by deploy-local.sh)
 packages/supabase/supabase/
+packages/supabase/.temp/
 
 # Archive / backup files
 *.zip

@@ -111,6 +111,24 @@ const nextConfig = {
     }
     return config;
   },
+  // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles (moved out of experimental)
+  cacheLife: {
+    telemetry: {
+      stale: 5,
+      revalidate: 10,
+      expire: 30,
+    },
+    departments: {
+      stale: 300,
+      revalidate: 3600,
+      expire: 86400,
+    },
+    reports: {
+      stale: 60,
+      revalidate: 300,
+      expire: 1800,
+    },
+  },
   experimental: {
     // AGENT-TRACE: optimizePackageImports tree-shakes large icon, UI, and animation modules at compile time
     optimizePackageImports: [
@@ -133,24 +151,6 @@ const nextConfig = {
     ],
     // AGENT-TRACE: Inlines critical CSS chunks directly into SSR output to eliminate render-blocking CSS roundtrips
     inlineCss: true,
-    // AGENT-TRACE: Next.js 16 Cache Components custom cacheLife profiles
-    cacheLife: {
-      telemetry: {
-        stale: 5,
-        revalidate: 10,
-        expire: 30,
-      },
-      departments: {
-        stale: 300,
-        revalidate: 3600,
-        expire: 86400,
-      },
-      reports: {
-        stale: 60,
-        revalidate: 300,
-        expire: 1800,
-      },
-    },
   },
   async headers() {
     return [

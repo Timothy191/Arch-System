@@ -54,7 +54,7 @@ LIGHTWEIGHT=false
 NO_BROWSER=false
 CLOUD_MODE=false
 
-# Auto-detect hosted cloud Supabase
+# Auto-detect Cloud Supabase
 if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]] || [ -n "${SUPABASE_URL:-}" -a "${SUPABASE_URL:-#}" != *"localhost"* -a "${SUPABASE_URL:-#}" != *"127.0.0.1"* ]; then
   CLOUD_MODE=true
 fi
@@ -1144,7 +1144,7 @@ if [ -n "$ARCH_BASE_DIR" ]; then
 fi
 
 if [ "$CLOUD_MODE" = true ] && [ -n "$SUPABASE_URL" ]; then
-  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_CYAN}[ ☁ HOSTED ]\${CLR_RESET}  \${CLR_BOLD}Supabase:\${CLR_RESET}     $SUPABASE_URL (Cloud Mode)"
+  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_CYAN}[ ☁ CLOUD ]\${CLR_RESET}  \${CLR_BOLD}Supabase:\${CLR_RESET}     $SUPABASE_URL (Cloud Mode)"
 elif curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
   echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GREEN}[ ✔ ONLINE ]\${CLR_RESET}  \${CLR_BOLD}Supabase:\${CLR_RESET}     http://localhost:54321"
 else

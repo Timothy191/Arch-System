@@ -41,9 +41,14 @@ export async function GET(request?: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ printers: data ?? [] });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const details = (error as { code?: string; details?: string }).details ?? "";
     // eslint-disable-next-line no-console
-    console.error("Failed to list printers:", error);
-    return NextResponse.json({ error: "Failed to list printers", printers: [] }, { status: 500 });
+    console.error("Failed to list printers:", { message, details, error });
+    return NextResponse.json(
+      { error: "Failed to list printers", message, details, printers: [] },
+      { status: 500 },
+    );
   }
 }
 
@@ -97,7 +102,7 @@ export async function POST(request: NextRequest) {
       if (error.code === "23505") {
         return NextResponse.json(
           { error: "A printer with this CUPS name is already registered" },
-          { status: 409 }
+          { status: 409 },
         );
       }
       throw error;
