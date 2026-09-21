@@ -80,7 +80,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   }
 
   return (
-    <main className="relative w-full min-h-[calc(100vh-28px)] flex flex-col items-center justify-center py-8 px-4 overflow-y-auto bg-transparent">
+    <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent">
       {/* Login Card wrapper */}
       <div className="relative z-10 w-[380px] max-w-full my-auto animate-fade-up flex flex-col justify-center">
         {/* Liquid Refraction Glow (Behind Card) */}
