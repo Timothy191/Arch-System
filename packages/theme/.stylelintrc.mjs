@@ -13,107 +13,107 @@
 
 /** @type {import('stylelint').Config} */
 export default {
-  extends: ["stylelint-config-standard"],
-  ignoreFiles: ["node_modules/**", "dist/**", "coverage/**"],
+  extends: ['stylelint-config-standard'],
+  ignoreFiles: ['node_modules/**', 'dist/**', 'coverage/**'],
   overrides: [
     {
       // ── Source-of-truth files: no component-level rules apply ──────────────
-      files: ["src/css/variables.css", "src/css/reset.css"],
+      files: ['src/css/variables.css', 'src/css/reset.css'],
       rules: {
-        "declaration-property-value-no-unknown": null,
-        "custom-property-no-missing-var-function": null,
+        'declaration-property-value-no-unknown': null,
+        'custom-property-no-missing-var-function': null,
       },
     },
     {
       // ── Component CSS files: enforce token usage ────────────────────────────
       files: [
-        "src/css/glass.css",
-        "src/css/animations.css",
-        "src/css/focus.css",
-        "src/css/transitions.css",
-        "src/css/buttons.css",
-        "src/css/tabs.css",
-        "src/css/loaders.css",
-        "src/css/checks.css",
-        "src/css/cards.css",
+        'src/css/glass.css',
+        'src/css/animations.css',
+        'src/css/focus.css',
+        'src/css/transitions.css',
+        'src/css/buttons.css',
+        'src/css/tabs.css',
+        'src/css/loaders.css',
+        'src/css/checks.css',
+        'src/css/cards.css',
       ],
       rules: {
         // Disallow raw box-shadow values — must use var(--shadow-*)
-        "declaration-property-value-disallowed-list": [
+        'declaration-property-value-disallowed-list': [
           {
-            "box-shadow": [
+            'box-shadow': [
               // Match any raw shadow value that isn't a var(--*) reference
               // Allow var()-only values, none, inherit, initial, unset
-              "/^(?!var\\(--).+(?<!\\))$/",
+              '/^(?!var\\(--).+(?<!\\))$/',
             ],
           },
           {
             message: (prop, value) =>
               `Raw \`${prop}: ${value}\` — use a shadow token: \`box-shadow: var(--shadow-card)\` etc. See DECISIONS.md`,
-            severity: "warning",
+            severity: 'warning',
           },
         ],
 
         // Warn on deprecated alias token usage
-        "custom-property-pattern": null,
+        'custom-property-pattern': null,
       },
     },
   ],
   rules: {
     // Allow CSS custom properties (variables)
-    "custom-property-pattern": null,
+    'custom-property-pattern': null,
 
     // Allow unknown pseudo-elements (Tailwind uses them)
-    "selector-pseudo-element-no-unknown": [true, { ignorePseudoElements: ["global", "local"] }],
+    'selector-pseudo-element-no-unknown': [true, { ignorePseudoElements: ['global', 'local'] }],
 
     // Allow unknown at-rules (Tailwind's @apply, @layer, etc.)
-    "at-rule-no-unknown": [
+    'at-rule-no-unknown': [
       true,
       {
         ignoreAtRules: [
-          "tailwind",
-          "apply",
-          "layer",
-          "variants",
-          "responsive",
-          "screen",
-          "config",
-          "plugin",
-          "source",
-          "theme",
-          "utility",
+          'tailwind',
+          'apply',
+          'layer',
+          'variants',
+          'responsive',
+          'screen',
+          'config',
+          'plugin',
+          'source',
+          'theme',
+          'utility',
         ],
       },
     ],
 
     // Tailwind's @apply preludes (e.g. `@apply border-border`) are not valid
     // CSS grammar — stylelint cannot validate them. Disable the prelude check.
-    "at-rule-prelude-no-invalid": null,
+    'at-rule-prelude-no-invalid': null,
 
     // Allow CSS vars that start with -- (they don't need to be defined locally)
-    "custom-property-no-missing-var-function": null,
+    'custom-property-no-missing-var-function': null,
 
     // Colour format: allow rgba() — codebase uses it throughout intentionally
-    "color-named": null,
-    "color-no-invalid-hex": true,
-    "color-function-notation": null,
-    "color-function-alias-notation": null,
-    "alpha-value-notation": null,
+    'color-named': null,
+    'color-no-invalid-hex': true,
+    'color-function-notation': null,
+    'color-function-alias-notation': null,
+    'alpha-value-notation': null,
 
     // Vendor prefixes: -webkit-backdrop-filter required for Safari
-    "property-no-vendor-prefix": null,
+    'property-no-vendor-prefix': null,
 
     // Disable rules that conflict with CSS custom properties
-    "value-keyword-case": null,
-    "property-no-unknown": null,
-    "declaration-property-value-no-unknown": null,
+    'value-keyword-case': null,
+    'property-no-unknown': null,
+    'declaration-property-value-no-unknown': null,
 
     // Cosmetic / compat rules — off to avoid noise
-    "rule-empty-line-before": null,
-    "comment-empty-line-before": null,
-    "custom-property-empty-line-before": null,
-    "import-notation": null,
-    "color-hex-length": null,
-    "property-no-deprecated": null,
+    'rule-empty-line-before': null,
+    'comment-empty-line-before': null,
+    'custom-property-empty-line-before': null,
+    'import-notation': null,
+    'color-hex-length': null,
+    'property-no-deprecated': null,
   },
 };
