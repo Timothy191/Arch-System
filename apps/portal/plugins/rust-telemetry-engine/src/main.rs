@@ -1,4 +1,5 @@
 use std::env;
+use std::process;
 
 fn main() {
     // 1. Collect and parse CLI arguments
@@ -8,20 +9,45 @@ fn main() {
     let mut temp: f64 = 55.0;
     let mut rpm: f64 = 1000.0;
 
-    for i in 1..args.len() {
-        if args[i] == "--hours" && i + 1 < args.len() {
-            if let Ok(v) = args[i + 1].parse::<f64>() {
-                hours = v;
-            }
-        } else if args[i] == "--temp" && i + 1 < args.len() {
-            if let Ok(v) = args[i + 1].parse::<f64>() {
-                temp = v;
-            }
-        } else if args[i] == "--rpm" && i + 1 < args.len() {
-            if let Ok(v) = args[i + 1].parse::<f64>() {
-                rpm = v;
-            }
+    let mut i = 1;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--hours" => {
+                if i + 1 < args.len() {
+                    hours = args[i + 1].parse::<f64>().unwrap_or_else(|_| {
+                        eprintln!("{{\"error\":\"Invalid value for --hours\"}}");
+                        process::exit(1);
+                    });
+                    i += 1;
+                }
+            },
+            "--temp" => {
+                if i + 1 < args.len() {
+                    temp = args[i + 1].parse::<f64>().unwrap_or_else(|_| {
+                        eprintln!("{{\"error\":\"Invalid value for --temp\"}}");
+                        process::exit(1);
+                    });
+                    i += 1;
+                }
+            },
+            "--rpm" => {
+                if i + 1 < args.len() {
+                    rpm = args[i + 1].parse::<f64>().unwrap_or_else(|_| {
+                        eprintln!("{{\"error\":\"Invalid value for --rpm\"}}");
+                        process::exit(1);
+                    });
+                    i += 1;
+                }
+            },
+            _ => {} // Ignore unknown arguments
         }
+        i += 1;
+    }
+
+    // Boundary Validation
+    if hours < 0.0 || temp < -50.0 || temp > 500.0 || rpm < 0.0 {
+         eprintln!("{{\"error\":\"Parameters out of realistic physical bounds\"}}");
+         process::exit(1);
     }
 
     // 2. Perform stress-fatigue multi-variable mathematical regression
@@ -44,12 +70,22 @@ fn main() {
     // 3. Sigmoid Logistic regression to failure probability percentage
     // P(t) = 1 / (1 + e^(- (wear - shift) / scale))
     let z = (wear_index - 45.0) / 10.0;
-    let prob_pct = (1.0 / (1.0 + (-z).exp())) * 100.0;
+    
+    // Prevent overflow/NaN in extreme edge cases
+    let exp_term = (-z).exp();
+    let prob_pct = if exp_term.is_infinite() {
+        0.0
+    } else {
+        (1.0 / (1.0 + exp_term)) * 100.0
+    };
 
     // 4. Project Remaining Useful Life (RUL) in hours
     let max_life = 1200.0;
     let wear_rate = 1.0 + (wear_index * 0.05);
-    let rul_hours = ((max_life - hours) / wear_rate).max(0.0);
+    let mut rul_hours = ((max_life - hours) / wear_rate).max(0.0);
+    if rul_hours.is_nan() || rul_hours.is_infinite() {
+        rul_hours = 0.0;
+    }
 
     // 5. Determine health classification status
     let status = if prob_pct > 75.0 {

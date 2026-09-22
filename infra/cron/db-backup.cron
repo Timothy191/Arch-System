@@ -2,4 +2,4 @@
 # This cron should be installed on the deployment server or run within a scheduler container.
 
 # Run the database backup script every day at 02:00 AM system time.
-0 2 * * * root /usr/bin/env bash /home/tim/Documents/Arch-System/scripts/backup-db.sh >> /home/tim/Documents/Arch-System/scripts/backups/backup.log 2>&1
+0 2 * * * root /usr/bin/env bash /opt/arch-system/scripts/backup-db.sh >> /opt/arch-system/scripts/backups/backup.log 2>&1
