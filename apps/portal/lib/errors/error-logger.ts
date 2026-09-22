@@ -65,7 +65,7 @@ function createErrorLog(
     userId?: string;
     sessionId?: string;
     [key: string]: unknown;
-  }
+  },
 ): ErrorLogEntry {
   const timestamp = new Date().toISOString();
 
@@ -197,7 +197,7 @@ export async function logError(
     userId?: string;
     sessionId?: string;
     [key: string]: unknown;
-  }
+  },
 ): Promise<void> {
   try {
     const entry = createErrorLog(error, context);
@@ -227,19 +227,17 @@ export async function withErrorLogging<T>(
   options?: {
     userId?: string;
     sessionId?: string;
-  }
+  },
 ): Promise<T> {
   try {
     return await handler();
   } catch (error) {
-    if (error instanceof Error) {
-      await logError(error, {
-        url: req.url,
-        method: req.method,
-        userId: options?.userId,
-        sessionId: options?.sessionId,
-      });
-    }
+    await logError(error, {
+      url: req.url,
+      method: req.method,
+      userId: options?.userId,
+      sessionId: options?.sessionId,
+    });
     throw error; // Re-throw for error boundaries
   }
 }
@@ -260,16 +258,14 @@ export async function withErrorLogging<T>(
  */
 export async function withServerActionLogging<T>(
   handler: () => Promise<T>,
-  actionName: string
+  actionName: string,
 ): Promise<T> {
   try {
     return await handler();
   } catch (error) {
-    if (error instanceof Error) {
-      await logError(error, {
-        action: actionName,
-      });
-    }
+    await logError(error, {
+      action: actionName,
+    });
     throw error;
   }
 }

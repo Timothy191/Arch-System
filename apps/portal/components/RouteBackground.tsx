@@ -26,8 +26,15 @@ export function RouteBackground() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
   useEffect(() => {
     if (videoRef.current && !prefersReducedMotion) {
+      // Sometimes onCanPlay doesn't fire if the video is already ready or cached,
+      // so we check readyState.
+      if (videoRef.current.readyState >= 3) {
+        setIsVideoLoaded(true);
+      }
       videoRef.current.play().catch(() => {});
     }
   }, [prefersReducedMotion]);
@@ -37,7 +44,7 @@ export function RouteBackground() {
       {/* ── LCP background: preloaded compressed WebP poster ── */}
       {/* AGENT-TRACE: 86 KB WebP poster is the critical LCP asset. Heavier video is lazy/deferred. */}
       <div
-        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container"
+        className="fixed inset-0 overflow-hidden -z-10 route-bg-image-container pointer-events-none"
         aria-hidden="true"
       >
         <img
@@ -50,16 +57,29 @@ export function RouteBackground() {
 
       {/* ── Ambient Video Background ── */}
       {!prefersReducedMotion && (
-        <div className="route-bg-video-container" aria-hidden="true">
+        <div
+          className="route-bg-video-container fixed inset-0 -z-10 pointer-events-none"
+          aria-hidden="true"
+        >
           <video
             ref={videoRef}
-            src="/background/earth-orbit.mp4"
-            className="route-bg-video filter brightness-105"
+            src="/background/global-background.mp4"
+            className="route-bg-video filter brightness-105 object-cover object-center w-full h-full"
+            style={{
+              opacity: isVideoLoaded ? 1 : 0,
+              transition: "opacity 1.5s ease-in-out",
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+            }}
+            onCanPlay={() => setIsVideoLoaded(true)}
             autoPlay
             loop
             muted
             playsInline
             disablePictureInPicture
+            preload="auto"
+            crossOrigin="anonymous"
           />
         </div>
       )}
