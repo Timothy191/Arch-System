@@ -1,6 +1,7 @@
 "use client";
 
 import { GlassCard } from "@repo/ui/GlassCard";
+import { memo } from "react";
 
 const SHIFT_HOURS = 12;
 
@@ -41,10 +42,22 @@ interface ExcavatorActivityListProps {
   todayAssignments: DumperAssignment[];
 }
 
-export function ExcavatorActivityList({
+function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
+  // Pre-index dumper assignments into a Map keyed by excavator_activity_id
+  // Reduces O(A * T) nested filter loops to O(A + T) lookup complexity.
+  const assignmentsByActivity = new Map<string, DumperAssignment[]>();
+  for (const assignment of todayAssignments) {
+    const list = assignmentsByActivity.get(assignment.excavator_activity_id);
+    if (list) {
+      list.push(assignment);
+    } else {
+      assignmentsByActivity.set(assignment.excavator_activity_id, [assignment]);
+    }
+  }
+
   // Group by site_id, then by shift
   const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
 
@@ -69,8 +82,8 @@ export function ExcavatorActivityList({
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
+        const siteAssignments = activities.flatMap(
+          (a) => assignmentsByActivity.get(a.id) || []
         );
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
@@ -110,9 +123,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivity.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -131,9 +142,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivity.get(activity.id) || []}
                     />
                   ))}
                 </div>
@@ -298,3 +307,8 @@ function ActivityCard({
     </GlassCard>
   );
 }
+
+// Memoize ExcavatorActivityList to prevent unnecessary re-renders when parent state updates.
+const MemoizedExcavatorActivityList = memo(ExcavatorActivityList);
+
+export { MemoizedExcavatorActivityList as ExcavatorActivityList };
