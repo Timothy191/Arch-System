@@ -61,6 +61,11 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
 
       await redis.unlink(tagKey);
     }
+
+    // Broadcast L1 invalidation to all instances
+    if (deleted > 0) {
+      await redis.publish("cache:invalidate:broadcast", JSON.stringify({ action: "tags", tags }));
+    }
   } catch {
     // Silent fail
   }
@@ -99,6 +104,14 @@ export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<numbe
         await redis.unlink(keysToDelete);
         deleted += keysToDelete.length;
       }
+    }
+
+    // Broadcast L1 invalidation to all instances
+    if (deleted > 0) {
+      await redis.publish(
+        "cache:invalidate:broadcast",
+        JSON.stringify({ action: "prefixes", prefixes }),
+      );
     }
   } catch {
     // Silent fail

@@ -9,23 +9,23 @@ import { shouldEarlyExpire, type XFetchWrapper } from "./xfetch";
 const L1_MAX_ENTRIES = 1000;
 
 interface MemoryEntry {
-  value: string;
+  value: any;
   expires: number;
 }
 
 const memoryCache = new Map<string, MemoryEntry>();
 
-function memoryGet<T>(key: string): T | null {
+export function memoryGet<T>(key: string): T | null {
   const item = memoryCache.get(key);
   if (!item) return null;
   if (Date.now() > item.expires) {
     memoryCache.delete(key);
     return null;
   }
-  return JSON.parse(item.value) as T;
+  return item.value as T;
 }
 
-function memorySet<T>(key: string, value: T, ttlSeconds: number): void {
+export function memorySet<T>(key: string, value: T, ttlSeconds: number): void {
   // Evict oldest entry if at capacity (simple LRU: delete first insertion)
   if (memoryCache.size >= L1_MAX_ENTRIES && !memoryCache.has(key)) {
     const firstKey = memoryCache.keys().next().value;
@@ -35,16 +35,16 @@ function memorySet<T>(key: string, value: T, ttlSeconds: number): void {
   }
 
   memoryCache.set(key, {
-    value: JSON.stringify(value),
+    value: value,
     expires: Date.now() + ttlSeconds * 1000,
   });
 }
 
-function memoryDelete(key: string): void {
+export function memoryDelete(key: string): void {
   memoryCache.delete(key);
 }
 
-function memoryDeleteByPrefix(prefix: string): void {
+export function memoryDeleteByPrefix(prefix: string): void {
   for (const key of memoryCache.keys()) {
     if (key.startsWith(prefix)) {
       memoryCache.delete(key);
@@ -56,10 +56,45 @@ function memoryDeleteByPrefix(prefix: string): void {
 // Redis client safe wrapper
 // ------------------------------------------------------------------
 
+let subscriberInitialized = false;
+
 async function getRedisClientSafe() {
   try {
-    const { getRedisClient } = await import("./client");
-    return await getRedisClient();
+    const { getRedisClient, createRedisSubscriber } = await import("./client");
+    const client = await getRedisClient();
+
+    if (!subscriberInitialized && client) {
+      subscriberInitialized = true;
+      createRedisSubscriber()
+        .then((sub) => {
+          sub
+            .subscribe("cache:invalidate:broadcast", (message) => {
+              try {
+                const data = JSON.parse(message);
+                if (data.action === "tags") {
+                  // we don't have a fast way to map tags to memoryCache keys locally without building an index,
+                  // but since L1 is small (1000 items), we can just clear it or let it expire.
+                  // A safer approach: clear entire L1 on tag invalidation to guarantee consistency.
+                  memoryCache.clear();
+                } else if (data.action === "prefixes") {
+                  for (const prefix of data.prefixes) {
+                    memoryDeleteByPrefix(prefix);
+                  }
+                }
+              } catch {
+                // ignore JSON parse errors
+              }
+            })
+            .catch(() => {
+              subscriberInitialized = false;
+            });
+        })
+        .catch(() => {
+          subscriberInitialized = false;
+        });
+    }
+
+    return client;
   } catch {
     return null;
   }
@@ -121,7 +156,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
  * Returns { value, source } where source is "l1", "l2", or null.
  */
 export async function cacheGetWithStats<T>(
-  key: string
+  key: string,
 ): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
   const start = performance.now();
 
@@ -200,7 +235,7 @@ export async function cacheSetWithTags<T>(
   key: string,
   value: T,
   ttlSeconds: number,
-  tags?: string[]
+  tags?: string[],
 ): Promise<void> {
   await cacheSet(key, value, ttlSeconds);
   if (tags && tags.length > 0) {
@@ -218,7 +253,7 @@ const activeFetches = new Map<string, Promise<any>>();
 export async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
-  ttlSeconds: number
+  ttlSeconds: number,
 ): Promise<T> {
   const rawCached = await cacheGetRaw<T>(key);
 
