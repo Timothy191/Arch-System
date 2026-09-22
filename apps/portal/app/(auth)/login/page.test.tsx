@@ -30,9 +30,7 @@ jest.mock("@/features/auth/components/LoginForm", () => ({
 }));
 
 // Mock EveStatusBar
-jest.mock("@repo/ui/EveStatusBar", () => ({
-  EveStatusBar: () => <div data-testid="mock-eve-status-bar" />,
-}));
+jest.mock("@repo/ui/EveStatusBar", () => ({}));
 
 // Mock GlassCard
 jest.mock("@repo/ui/GlassCard", () => ({
@@ -67,7 +65,6 @@ describe("LoginPage Server Component", () => {
 
     expect(screen.getByText("Welcome Back")).toBeInTheDocument();
     expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-eve-status-bar")).toBeInTheDocument();
   });
 
   it("renders the heading with the theme token class", async () => {

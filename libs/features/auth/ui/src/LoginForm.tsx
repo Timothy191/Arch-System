@@ -2,10 +2,7 @@
 
 import { useLogin } from "@repo/auth/data-access";
 import { isValidPageRedirect } from "@repo/auth/utils";
-import { AnimatedButton } from "@repo/ui/AnimatedButton";
-import { Checkbox } from "@repo/ui/Checkbox";
-import { Input } from "@repo/ui/Input";
-import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,7 +22,7 @@ export function LoginForm() {
   const [rememberMe, setRememberMe] = useState(true);
   const [passwordError, setPasswordError] = useState("");
 
-  const { login, loading, rateLimitCountdown, setRateLimitCountdown } = useLogin();
+  const { login, loading, rateLimitCountdown } = useLogin();
   const isRateLimited = rateLimitCountdown !== null && rateLimitCountdown > 0;
 
   useEffect(() => {
@@ -43,7 +40,6 @@ export function LoginForm() {
 
     if (isRateLimited) return;
 
-    // Client-side length sanity checks only
     if (password.length < 6) {
       setPasswordError("Invalid email/employee ID or password");
       return;
@@ -64,16 +60,18 @@ export function LoginForm() {
   }
 
   return (
-    <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-2">
+    <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-5">
+      {/* Email Field */}
+      <div className="space-y-1.5">
         <label
           htmlFor="email"
-          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
+          className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 select-none cursor-pointer"
         >
-          <span id="email-label">Employee ID / Email</span>
+          Email Address
         </label>
-        <div className="relative group">
-          <Input
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
+          <Mail className="w-4 h-4 absolute left-3.5 text-neutral-400 pointer-events-none" />
+          <input
             id="email"
             type="email"
             required
@@ -86,35 +84,38 @@ export function LoginForm() {
             onFocus={(e) => e.target.select()}
             onBlur={(e) => {
               if (e.target.value && !e.target.value.includes("@")) {
-                // Allow employee IDs without @, but validate email format if @ is present
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (e.target.value.includes("@") && !emailRegex.test(e.target.value)) {
                   toast.error("Please enter a valid email address");
                 }
               }
             }}
-            variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 liquid-glass-input focus-ring-amber-500"
-            placeholder="Employee ID or email"
-            aria-labelledby="email-label"
+            placeholder="username@arch-systems.io"
+            className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
             autoComplete="username"
-            aria-describedby="email-hint"
           />
         </div>
-        <p id="email-hint" className="text-[10px] text-black select-none">
-          Your employee ID is on your badge.
-        </p>
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor="password"
-          className="block text-xs font-medium text-black transition-colors duration-200 liquid-text-lift select-none cursor-pointer"
-        >
-          <span id="password-label">Password</span>
-        </label>
-        <div className="relative">
-          <Input
+      {/* Password Field */}
+      <div className="space-y-1.5">
+        <div className="flex justify-between items-center">
+          <label
+            htmlFor="password"
+            className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 select-none cursor-pointer"
+          >
+            Password
+          </label>
+          <Link
+            href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
+            className="text-xs font-medium text-amber-600 hover:text-amber-700 hover:underline transition-colors select-none"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <div className="relative flex items-center bg-white/70 backdrop-blur-md border border-neutral-200/90 rounded-lg overflow-hidden transition-all duration-200 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 shadow-sm">
+          <Lock className="w-4 h-4 absolute left-3.5 text-neutral-400 pointer-events-none" />
+          <input
             id="password"
             type={showPassword ? "text" : "password"}
             required
@@ -129,16 +130,14 @@ export function LoginForm() {
             onFocus={(e) => e.target.select()}
             onKeyDown={handleCapsLockKey}
             onKeyUp={handleCapsLockKey}
-            variant="login"
-            className="px-4 py-3.5 pr-10 transition-all duration-200 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 liquid-glass-input focus-ring-amber-500"
-            placeholder="Enter your password"
-            aria-labelledby="password-label"
+            placeholder="••••••••"
+            className="w-full pl-10 pr-11 py-3 bg-transparent border-none text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
             autoComplete="current-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-black/80 hover:text-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-md min-w-11 min-h-11 inline-flex items-center justify-center"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors p-1 rounded focus:outline-none"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -146,7 +145,7 @@ export function LoginForm() {
         </div>
         {passwordError && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-red animate-fade-up"
+            className="flex items-center gap-1.5 text-xs text-red-600 animate-fade-up mt-1"
             role="alert"
             aria-live="assertive"
           >
@@ -155,7 +154,7 @@ export function LoginForm() {
         )}
         {capsLock && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
+            className="flex items-center gap-1.5 text-xs text-amber-600 animate-fade-up mt-1"
             role="alert"
             aria-live="polite"
           >
@@ -165,7 +164,7 @@ export function LoginForm() {
         )}
         {rateLimitCountdown !== null && (
           <div
-            className="flex items-center gap-1.5 text-[11px] text-arch-accent-amber animate-fade-up"
+            className="flex items-center gap-1.5 text-xs text-amber-600 animate-fade-up mt-1"
             role="alert"
             aria-live="polite"
           >
@@ -174,48 +173,39 @@ export function LoginForm() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 group">
-        <AnimatedButton
-          type="submit"
-          disabled={loading || isRateLimited}
-          className="w-full h-14 rounded-button liquid-glass-button bg-gradient-to-b from-[#c59837] via-[#94611a] to-[#603808] hover:from-[#d4a843] hover:via-[#a36c1e] hover:to-[#6e410b] text-white text-base font-bold tracking-wide relative overflow-hidden flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-1 transition-all duration-300 drop-shadow-[0_10px_20px_rgba(90,51,7,0.4)] drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_16px_32px_rgba(90,51,7,0.55)] hover:drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] border border-amber-400/30"
-          hoverScale={1.02}
-          tapScale={0.97}
-        >
-          {/* Specular top rim shine */}
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-200/75 to-transparent z-10" />
-
-          {/* Sweeping light shine effect */}
-          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-out z-10" />
-
-          {loading ? (
-            <span className="flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-              <span>Accessing your workspace...</span>
-            </span>
-          ) : (
-            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] relative z-20">
-              Access Arch Systems
-            </span>
-          )}
-        </AnimatedButton>
-      </div>
-
-      <div className="flex items-center justify-between pt-3">
-        <Checkbox
-          id="remember-me"
+      {/* Remember Me */}
+      <div className="flex items-center space-x-2 pt-0.5">
+        <input
+          id="remember"
+          name="remember"
+          type="checkbox"
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
-          label="Remember me"
-          className="text-xs text-black/80 hover:text-black transition-colors liquid-text-lift"
+          className="w-4 h-4 rounded border-neutral-300 text-amber-600 focus:ring-amber-500/20 accent-amber-600 cursor-pointer"
         />
-        <Link
-          href={`/reset-password?email=${encodeURIComponent(employeeId)}`}
-          className="text-xs text-black/80 hover:text-black transition-colors duration-200 liquid-text-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-md px-1 py-0.5 -mx-1"
-        >
-          Forgot password?
-        </Link>
+        <label htmlFor="remember" className="text-xs text-neutral-600 select-none cursor-pointer">
+          Remember this device
+        </label>
       </div>
+
+      {/* Sign In Button */}
+      <button
+        type="submit"
+        disabled={loading || isRateLimited}
+        className="w-full py-3.5 bg-gradient-to-b from-[#c59837] via-[#a36c1e] to-[#71440d] hover:from-[#d4a843] hover:via-[#b37824] hover:to-[#814e10] text-white text-xs font-semibold tracking-wider uppercase rounded-lg shadow-md shadow-amber-950/20 border border-amber-400/40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Signing In...</span>
+          </span>
+        ) : (
+          <>
+            <span>Sign In</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </>
+        )}
+      </button>
     </form>
   );
 }
