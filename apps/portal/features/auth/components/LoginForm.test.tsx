@@ -71,12 +71,12 @@ describe("LoginForm", () => {
   it("renders employee ID and password inputs", () => {
     render(<LoginForm />);
 
-    expect(screen.getByPlaceholderText("Employee ID or email")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("username@arch-systems.io")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
 
     const signInBtn = screen.getByRole("button", { name: /^Access Arch Systems$|^Sign In$/i });
     expect(signInBtn).toBeInTheDocument();
-    expect(signInBtn.className).toContain("liquid-glass-button");
+    expect(signInBtn.className).toContain("bg-gradient-to-b");
     expect(signInBtn.className).toContain("text-white");
   });
 
@@ -89,10 +89,10 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+    fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
       target: { value: "PC-12345" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "testpass" },
     });
     fireEvent.submit(screen.getByTestId("login-form"));
@@ -122,10 +122,10 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+    fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
       target: { value: "PC-12345" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "wrongpass" },
     });
     fireEvent.submit(screen.getByTestId("login-form"));
@@ -142,10 +142,10 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+    fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
       target: { value: "PC-12345" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "testpass" },
     });
     fireEvent.submit(screen.getByTestId("login-form"));
@@ -168,10 +168,10 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+    fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
       target: { value: "PC-12345" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "testpass" },
     });
     fireEvent.submit(screen.getByTestId("login-form"));
@@ -211,10 +211,10 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+    fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
       target: { value: "PC-12345" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    fireEvent.change(screen.getByPlaceholderText("••••••••"), {
       target: { value: "testpass" },
     });
     fireEvent.submit(screen.getByTestId("login-form"));
@@ -226,7 +226,7 @@ describe("LoginForm", () => {
 
   it("toggles password visibility when the eye button is clicked", () => {
     render(<LoginForm />);
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
+    const passwordInput = screen.getByPlaceholderText("••••••••");
     const toggleButton = screen.getByRole("button", { name: /show password/i });
 
     expect(passwordInput).toHaveAttribute("type", "password");
@@ -244,7 +244,7 @@ describe("LoginForm", () => {
 
   it("detects Caps Lock key down and up states", () => {
     render(<LoginForm />);
-    const passwordInput = screen.getByPlaceholderText("Enter your password");
+    const passwordInput = screen.getByPlaceholderText("••••••••");
 
     // Press key with CapsLock active
     const keyDownEvent = new KeyboardEvent("keydown", {
@@ -289,10 +289,10 @@ describe("LoginForm", () => {
 
       const { unmount } = render(<LoginForm />);
 
-      fireEvent.change(screen.getByPlaceholderText("Employee ID or email"), {
+      fireEvent.change(screen.getByPlaceholderText("username@arch-systems.io"), {
         target: { value: "PC-12345" },
       });
-      fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+      fireEvent.change(screen.getByPlaceholderText("••••••••"), {
         target: { value: "testpass" },
       });
       fireEvent.submit(screen.getByTestId("login-form"));

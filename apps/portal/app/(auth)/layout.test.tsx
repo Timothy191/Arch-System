@@ -17,7 +17,7 @@ describe("AuthLayout", () => {
     const { getByText } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>
+      </AuthLayout>,
     );
     expect(getByText("Test Child")).toBeInTheDocument();
   });
@@ -26,12 +26,12 @@ describe("AuthLayout", () => {
     const { container } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>
+      </AuthLayout>,
     );
 
     const outerContainer = container.firstChild;
     expect(outerContainer).toHaveClass("relative");
-    expect(outerContainer).toHaveClass("min-h-[calc(100vh-28px)]");
+    expect(outerContainer).toHaveClass("min-h-[calc(100vh-4rem)]");
     expect(outerContainer).toHaveClass("w-full");
     expect(outerContainer).toHaveClass("h-full");
     expect(outerContainer).toHaveClass("flex");
@@ -42,7 +42,7 @@ describe("AuthLayout", () => {
     const { unmount } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>
+      </AuthLayout>,
     );
     expect(() => unmount()).not.toThrow();
   });
