@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - arch-net
+
+  portal:
+    build:
+      context: ../../
+      dockerfile: apps/portal/Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    networks:
+      - arch-net
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - arch-net
+
+  inngest:
+    image: inngest/inngest:latest
+    restart: unless-stopped
+    ports:
+      - "8288:8288"
+    environment:
+      - INNGEST_DEV_SERVER_PORT=8288
+    networks:
+      - arch-net
+
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:latest
+    restart: unless-stopped
+    ports:
+      - "3003:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - NEXTAUTH_SECRET=secret
+      - SALT=secret
+    networks:
+      - arch-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - arch-net
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - arch-net
+
+volumes:
+  caddy_data:
+  caddy_config:
+  redis_data:
+
+networks:
+  arch-net:
+    driver: bridge

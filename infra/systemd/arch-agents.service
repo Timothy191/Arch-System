@@ -1,0 +1,23 @@
+[Unit]
+Description=Arch Systems Autonomous Agent Swarm
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=arch
+Group=arch
+WorkingDirectory=/opt/arch-system
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+# Start the agent swarm in daemon mode
+ExecStart=/usr/local/bin/pnpm agent:swarm --daemon
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=65536
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=arch-agents
+
+[Install]
+WantedBy=multi-user.target
