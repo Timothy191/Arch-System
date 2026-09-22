@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
-import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
+import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-production.types';
+import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
 import {
   BreakdownsShiftWidget,
   ExportPdfButton,
@@ -11,13 +11,13 @@ import {
   ShiftCompilationHeader,
   TireAlertsBanner,
   UnifiedShiftCloseoutModal,
-} from "@repo/departments/ui";
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
-import { cn } from "@repo/ui/lib/utils";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { lockAndSignUnifiedShift } from "./actions";
-import { exportSignedShiftReportPdf } from "./pdf-actions";
+} from '@repo/departments/ui';
+import { KPICard, KPIGrid } from '@repo/ui/KPI';
+import { cn } from '@repo/ui/lib/utils';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { lockAndSignUnifiedShift } from './actions';
+import { exportSignedShiftReportPdf } from './pdf-actions';
 
 interface ShiftCompilationClientProps {
   initialReport: UnifiedShiftReport;
@@ -25,7 +25,7 @@ interface ShiftCompilationClientProps {
   departmentId: string;
   departmentSlug: string;
   shiftDate: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
 }
 
 export function ShiftCompilationClient({
@@ -38,23 +38,23 @@ export function ShiftCompilationClient({
 }: ShiftCompilationClientProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"department" | "multisite">("department");
+  const [activeTab, setActiveTab] = useState<'department' | 'multisite'>('department');
 
   const report = initialReport;
   const activeMachines = report.fleet_performance.length;
   const totalLoads = report.production.total_loads;
-  const activeBreakdowns = report.breakdowns.filter((b) => b.status === "active").length;
+  const activeBreakdowns = report.breakdowns.filter((b) => b.status === 'active').length;
   const avgAvailability =
     activeMachines > 0
       ? (
           report.fleet_performance.reduce(
             (acc, curr) => acc + curr.mechanical_availability_pct,
-            0,
+            0
           ) / activeMachines
         ).toFixed(1)
-      : "100.0";
+      : '100.0';
 
-  const isClosed = report.shift_status.status === "closed";
+  const isClosed = report.shift_status.status === 'closed';
 
   return (
     <div className="space-y-6">
@@ -84,24 +84,24 @@ export function ShiftCompilationClient({
         <div className="flex items-center gap-2 bg-arch-surface-secondary/70 p-1 rounded-lg border border-arch-border-subtle">
           <button
             type="button"
-            onClick={() => setActiveTab("department")}
+            onClick={() => setActiveTab('department')}
             className={cn(
-              "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
-              activeTab === "department"
-                ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary",
+              'px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+              activeTab === 'department'
+                ? 'bg-white text-arch-text-primary shadow-card'
+                : 'text-arch-text-tertiary hover:text-arch-text-secondary'
             )}
           >
             Department Breakdown
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("multisite")}
+            onClick={() => setActiveTab('multisite')}
             className={cn(
-              "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
-              activeTab === "multisite"
-                ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary",
+              'px-3 py-1.5 rounded-md text-xs font-semibold transition-all',
+              activeTab === 'multisite'
+                ? 'bg-white text-arch-text-primary shadow-card'
+                : 'text-arch-text-tertiary hover:text-arch-text-secondary'
             )}
           >
             Multi-Site Operational Report (BKF / EXT / PLANT)
@@ -109,7 +109,7 @@ export function ShiftCompilationClient({
         </div>
       </div>
 
-      {activeTab === "multisite" && multiSiteReport ? (
+      {activeTab === 'multisite' && multiSiteReport ? (
         <MultiSiteShiftReportClient initialReport={multiSiteReport} />
       ) : (
         <>
@@ -124,12 +124,12 @@ export function ShiftCompilationClient({
             <KPICard
               label="Avg Mechanical Availability"
               value={`${avgAvailability}%`}
-              color={Number(avgAvailability) >= 85 ? "green" : "default"}
+              color={Number(avgAvailability) >= 85 ? 'green' : 'default'}
             />
             <KPICard
               label="Active Breakdowns"
               value={`${activeBreakdowns} Units`}
-              color={activeBreakdowns > 0 ? "red" : "green"}
+              color={activeBreakdowns > 0 ? 'red' : 'green'}
             />
           </KPIGrid>
 

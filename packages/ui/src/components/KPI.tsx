@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { cn } from "../lib/utils";
-import { GlassCard } from "./GlassCard";
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { cn } from '../lib/utils';
+import { GlassCard } from './GlassCard';
 
-export type KPIColor = "default" | "green" | "blue" | "red" | "cyan" | "indigo" | "alert";
+export type KPIColor = 'default' | 'green' | 'blue' | 'red' | 'cyan' | 'indigo' | 'alert';
 
 const colorMap: Record<KPIColor, string> = {
-  default: "text-[var(--text-heading)]",
-  green: "text-accent-green",
-  blue: "text-dept-drilling",
-  red: "text-[var(--accent-red)]",
-  cyan: "text-[var(--accent-green)]",
-  indigo: "text-dept-engineering",
-  alert: "text-[var(--accent-red)]",
+  default: 'text-[var(--text-heading)]',
+  green: 'text-accent-green',
+  blue: 'text-dept-drilling',
+  red: 'text-[var(--accent-red)]',
+  cyan: 'text-[var(--accent-green)]',
+  indigo: 'text-dept-engineering',
+  alert: 'text-[var(--accent-red)]',
 };
 
 interface KPICardProps {
@@ -28,9 +28,9 @@ interface KPICardProps {
 export function KPICard({
   label,
   value,
-  color = "default",
+  color = 'default',
   sub,
-  subColor = "default",
+  subColor = 'default',
   icon,
 }: KPICardProps) {
   return (
@@ -38,20 +38,20 @@ export function KPICard({
       <div className="flex items-start justify-between">
         <div>
           <p className="system-label">{label}</p>
-          <p className={cn("text-fluid-2xl font-medium mt-1", colorMap[color])}>{value}</p>
+          <p className={cn('text-fluid-2xl font-medium mt-1', colorMap[color])}>{value}</p>
         </div>
         {icon && (
           <div
             className={cn(
-              "opacity-20 group-hover:opacity-40 transition-opacity duration-300",
-              colorMap[color],
+              'opacity-20 group-hover:opacity-40 transition-opacity duration-300',
+              colorMap[color]
             )}
           >
             {icon}
           </div>
         )}
       </div>
-      {sub && <p className={cn("text-fluid-xs mt-1", colorMap[subColor])}>{sub}</p>}
+      {sub && <p className={cn('text-fluid-xs mt-1', colorMap[subColor])}>{sub}</p>}
     </GlassCard>
   );
 }
@@ -63,11 +63,11 @@ interface KPIGridProps {
 }
 
 export function KPIGrid({ children, cols = 4, className }: KPIGridProps) {
-  const [parent] = useAutoAnimate({ duration: 300, easing: "ease-out" });
+  const [parent] = useAutoAnimate({ duration: 300, easing: 'ease-out' });
   const colClasses: Record<number, string> = {
-    2: "grid grid-cols-2 gap-4",
-    3: "grid grid-cols-1 md:grid-cols-3 gap-4",
-    4: "grid grid-cols-2 md:grid-cols-4 gap-4",
+    2: 'grid grid-cols-2 gap-4',
+    3: 'grid grid-cols-1 md:grid-cols-3 gap-4',
+    4: 'grid grid-cols-2 md:grid-cols-4 gap-4',
   };
 
   return (

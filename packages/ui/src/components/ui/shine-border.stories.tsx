@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { ShineBorder } from "./shine-border";
+import type { Meta, StoryObj } from '@storybook/react';
+import { ShineBorder } from './shine-border';
 
 const meta: Meta<typeof ShineBorder> = {
-  title: "UI/ShineBorder",
+  title: 'UI/ShineBorder',
   component: ShineBorder,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
   argTypes: {
-    borderWidth: { control: { type: "range", min: 1, max: 10 } },
-    duration: { control: { type: "range", min: 1, max: 30 } },
+    borderWidth: { control: { type: 'range', min: 1, max: 10 } },
+    duration: { control: { type: 'range', min: 1, max: 30 } },
   },
 };
 
@@ -27,7 +27,7 @@ export const Default: Story = {
     </div>
   ),
   args: {
-    shineColor: ["#A0A0A0", "#FFFFFF", "#A0A0A0"],
+    shineColor: ['#A0A0A0', '#FFFFFF', '#A0A0A0'],
     borderWidth: 1,
     duration: 14,
   },
@@ -41,7 +41,7 @@ export const CyanGlow: Story = {
     </div>
   ),
   args: {
-    shineColor: ["#00d4aa", "#007aff", "#00d4aa"],
+    shineColor: ['#00d4aa', '#007aff', '#00d4aa'],
     borderWidth: 2,
     duration: 8,
   },

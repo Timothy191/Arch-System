@@ -1,10 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { WeatherData } from "@/lib/weather-api";
-import { WeatherWidget } from "./WeatherWidget";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { WeatherData } from '@/lib/weather-api';
+import { WeatherWidget } from './WeatherWidget';
 
 // Mock Radix Popover
-jest.mock("@radix-ui/react-popover", () => {
-  const React = require("react");
+jest.mock('@radix-ui/react-popover', () => {
+  const React = require('react');
   return {
     Root: ({ children, open, onOpenChange }: any) => {
       const [isOpen, setIsOpen] = React.useState(open || false);
@@ -28,7 +28,7 @@ jest.mock("@radix-ui/react-popover", () => {
       if (asChild) {
         return React.cloneElement(children, {
           onClick: handleClick,
-          "aria-expanded": isOpen ? "true" : "false",
+          'aria-expanded': isOpen ? 'true' : 'false',
         });
       }
       return <button onClick={handleClick}>{children}</button>;
@@ -58,18 +58,18 @@ const mockWeatherData: WeatherData = {
   windSpeed: 15,
   windDirection: 120,
   weatherCode: 0,
-  description: "Clear sky",
-  icon: "☀️",
-  timestamp: "2026-05-29T16:00:00Z",
-  location: { lat: -26.35914, lon: 28.79267, name: "Delmas, Mpumalanga" },
+  description: 'Clear sky',
+  icon: '☀️',
+  timestamp: '2026-05-29T16:00:00Z',
+  location: { lat: -26.35914, lon: 28.79267, name: 'Delmas, Mpumalanga' },
   daily: [],
 };
 
 const mockWeatherDataCritical: WeatherData = {
   ...mockWeatherData,
   weatherCode: 95,
-  description: "Thunderstorm",
-  icon: "⛈️",
+  description: 'Thunderstorm',
+  icon: '⛈️',
 };
 
 // AGENT-TRACE: WeatherWidget calls fetch("/api/weather"), not fetchWeather()
@@ -84,58 +84,58 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe("WeatherWidget - Header Variant Popover", () => {
+describe('WeatherWidget - Header Variant Popover', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders trigger button with weather icon emoji in header variant", async () => {
+  it('renders trigger button with weather icon emoji in header variant', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherData) });
     render(<WeatherWidget variant="header" />);
 
     // Wait for weather data to load
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Weather details' })).toBeInTheDocument();
     });
 
-    const trigger = screen.getByRole("button", { name: "Weather details" });
+    const trigger = screen.getByRole('button', { name: 'Weather details' });
     expect(trigger).toBeInTheDocument();
-    expect(trigger).toHaveTextContent("☀️");
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveTextContent('☀️');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it("toggles the weather popover when trigger is clicked", async () => {
+  it('toggles the weather popover when trigger is clicked', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherData) });
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Weather details' })).toBeInTheDocument();
     });
 
-    const trigger = screen.getByRole("button", { name: "Weather details" });
+    const trigger = screen.getByRole('button', { name: 'Weather details' });
 
     // Initially popover content should not be in the document
-    expect(screen.queryByTestId("popover-content")).not.toBeInTheDocument();
+    expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument();
 
     // Click trigger to open popover
     fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByTestId("popover-content")).toBeInTheDocument();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('popover-content')).toBeInTheDocument();
 
     // Assert weather details
-    expect(screen.getByText("Delmas, Mpumalanga")).toBeInTheDocument();
-    expect(screen.getByText("20°C")).toBeInTheDocument();
-    expect(screen.getByText("Clear sky (Feels: 18°C)")).toBeInTheDocument();
-    expect(screen.getByText("💨 15 km/h ESE")).toBeInTheDocument();
-    expect(screen.getByText("💧 60%")).toBeInTheDocument();
+    expect(screen.getByText('Delmas, Mpumalanga')).toBeInTheDocument();
+    expect(screen.getByText('20°C')).toBeInTheDocument();
+    expect(screen.getByText('Clear sky (Feels: 18°C)')).toBeInTheDocument();
+    expect(screen.getByText('💨 15 km/h ESE')).toBeInTheDocument();
+    expect(screen.getByText('💧 60%')).toBeInTheDocument();
 
     // Click trigger to close popover
     fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByTestId("popover-content")).not.toBeInTheDocument();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument();
   });
 
-  it("displays alert status overlay dot on trigger when critical weather is active", async () => {
+  it('displays alert status overlay dot on trigger when critical weather is active', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(mockWeatherDataCritical),
@@ -143,17 +143,17 @@ describe("WeatherWidget - Header Variant Popover", () => {
     render(<WeatherWidget variant="header" />);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Weather details" })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Weather details' })).toBeInTheDocument();
     });
 
-    const trigger = screen.getByRole("button", { name: "Weather details" });
-    const alertDot = trigger.querySelector(".bg-accent-red");
+    const trigger = screen.getByRole('button', { name: 'Weather details' });
+    const alertDot = trigger.querySelector('.bg-accent-red');
     expect(alertDot).toBeInTheDocument();
 
     // Open popover to see alert message
     fireEvent.click(trigger);
     expect(
-      screen.getByText("⚠️ Thunderstorm - Cease outdoor operations immediately"),
+      screen.getByText('⚠️ Thunderstorm - Cease outdoor operations immediately')
     ).toBeInTheDocument();
   });
 });

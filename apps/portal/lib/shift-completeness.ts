@@ -1,14 +1,14 @@
-import { CacheCategory } from "@repo/redis";
-import type { createServerSupabaseClient } from "@repo/supabase/server";
-import { withCache } from "@/lib/cache-utils";
+import { CacheCategory } from '@repo/redis';
+import type { createServerSupabaseClient } from '@repo/supabase/server';
+import { withCache } from '@/lib/cache-utils';
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
 export type RequiredForm =
-  | "machine-operations"
-  | "excavator-activity"
-  | "roll-over"
-  | "hourly-loads";
+  | 'machine-operations'
+  | 'excavator-activity'
+  | 'roll-over'
+  | 'hourly-loads';
 
 export interface MachineCoverageStatus {
   machineId: string;
@@ -29,9 +29,9 @@ export interface ShiftCompleteness {
   statuses: MachineCoverageStatus[];
 }
 
-const DUMPER_KEYWORDS = ["dump truck", "dumper", "haul truck"];
-const DOZER_KEYWORDS = ["dozer", "bulldozer"];
-const EXCAVATOR_KEYWORDS = ["excavator", "excavation"];
+const DUMPER_KEYWORDS = ['dump truck', 'dumper', 'haul truck'];
+const DOZER_KEYWORDS = ['dozer', 'bulldozer'];
+const EXCAVATOR_KEYWORDS = ['excavator', 'excavation'];
 
 function machineTypeLC(t: string) {
   return t.toLowerCase();
@@ -39,30 +39,30 @@ function machineTypeLC(t: string) {
 
 function requiredFormFor(machineType: string): RequiredForm {
   const t = machineTypeLC(machineType);
-  if (EXCAVATOR_KEYWORDS.some((k) => t.includes(k))) return "excavator-activity";
-  if (DOZER_KEYWORDS.some((k) => t.includes(k))) return "roll-over";
-  if (DUMPER_KEYWORDS.some((k) => t.includes(k))) return "hourly-loads";
-  return "machine-operations";
+  if (EXCAVATOR_KEYWORDS.some((k) => t.includes(k))) return 'excavator-activity';
+  if (DOZER_KEYWORDS.some((k) => t.includes(k))) return 'roll-over';
+  if (DUMPER_KEYWORDS.some((k) => t.includes(k))) return 'hourly-loads';
+  return 'machine-operations';
 }
 
 const FORM_META: Record<RequiredForm, { label: string; path: string }> = {
-  "machine-operations": {
-    label: "Machine Operations",
-    path: "machine-operations",
+  'machine-operations': {
+    label: 'Machine Operations',
+    path: 'machine-operations',
   },
-  "excavator-activity": {
-    label: "Excavator Activity",
-    path: "excavator-activity",
+  'excavator-activity': {
+    label: 'Excavator Activity',
+    path: 'excavator-activity',
   },
-  "roll-over": { label: "Roll-Over (Dozers)", path: "roll-over" },
-  "hourly-loads": { label: "Hourly Loads", path: "hourly-loads" },
+  'roll-over': { label: 'Roll-Over (Dozers)', path: 'roll-over' },
+  'hourly-loads': { label: 'Hourly Loads', path: 'hourly-loads' },
 };
 
 // AGENT-TRACE: Server-side validation utilities for shift data integrity
 interface ValidationError {
   field: string;
   message: string;
-  severity: "error" | "warning";
+  severity: 'error' | 'warning';
 }
 
 /**
@@ -70,16 +70,16 @@ interface ValidationError {
  */
 export function validateMachineHours(
   hours: number,
-  _shiftType: "day" | "night",
+  _shiftType: 'day' | 'night'
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
   // Max 12 hours per shift
   if (hours > 12) {
     errors.push({
-      field: "hours_worked",
+      field: 'hours_worked',
       message: `${hours}h exceeds maximum 12h per shift`,
-      severity: "error",
+      severity: 'error',
     });
   }
 
@@ -87,9 +87,9 @@ export function validateMachineHours(
   // This would require fetching the other shift's data, so we flag as warning
   if (hours > 8) {
     errors.push({
-      field: "hours_worked",
+      field: 'hours_worked',
       message: `${hours}h is high; ensure combined day + night shifts < 16h`,
-      severity: "warning",
+      severity: 'warning',
     });
   }
 
@@ -109,9 +109,9 @@ export function validateBinFactor(binFactor: number | null): ValidationError[] {
   // Valid range: 20-100 for mining equipment (typical 30-50 for dump trucks)
   if (binFactor < 20 || binFactor > 100) {
     errors.push({
-      field: "bin_factor",
+      field: 'bin_factor',
       message: `Bin factor ${binFactor} is outside reasonable range (20-100)`,
-      severity: "error",
+      severity: 'error',
     });
   }
 
@@ -123,7 +123,7 @@ export function validateBinFactor(binFactor: number | null): ValidationError[] {
  */
 export function validateLoadConsistency(
   totalLoads: number,
-  hoursWorked: number | null,
+  hoursWorked: number | null
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -136,17 +136,17 @@ export function validateLoadConsistency(
   // Reasonable range: 5-50 loads per hour for typical mining operations
   if (loadsPerHour < 5) {
     errors.push({
-      field: "total_loads",
+      field: 'total_loads',
       message: `Loads per hour (${loadsPerHour.toFixed(1)}) is unusually low for ${hoursWorked}h worked`,
-      severity: "warning",
+      severity: 'warning',
     });
   }
 
   if (loadsPerHour > 50) {
     errors.push({
-      field: "total_loads",
+      field: 'total_loads',
       message: `Loads per hour (${loadsPerHour.toFixed(1)}) is unusually high for ${hoursWorked}h worked`,
-      severity: "error",
+      severity: 'error',
     });
   }
 
@@ -161,7 +161,7 @@ export function validateShiftDataIntegrity(
   hoursWorked: number | null,
   totalLoads: number | null,
   binFactor: number | null,
-  shiftType: "day" | "night",
+  shiftType: 'day' | 'night'
 ): ValidationError[] {
   const allErrors: ValidationError[] = [];
 
@@ -186,7 +186,7 @@ export async function getShiftCompleteness(
   deptId: string,
   departmentSlug: string | null,
   date: string,
-  shift: "day" | "night",
+  shift: 'day' | 'night'
 ): Promise<ShiftCompleteness> {
   return withCache(
     async () => {
@@ -198,50 +198,50 @@ export async function getShiftCompleteness(
         { data: hourlyLoads },
       ] = await Promise.all([
         supabase
-          .from("machines")
-          .select("id, name, machine_type, report_exempt")
-          .eq("department_id", deptId)
-          .eq("active", true)
-          .order("name"),
+          .from('machines')
+          .select('id, name, machine_type, report_exempt')
+          .eq('department_id', deptId)
+          .eq('active', true)
+          .order('name'),
         supabase
-          .from("machine_operations")
-          .select("machine_id, hours_worked")
-          .eq("department_id", deptId)
-          .eq("shift_date", date)
-          .eq("shift_type", shift),
+          .from('machine_operations')
+          .select('machine_id, hours_worked')
+          .eq('department_id', deptId)
+          .eq('shift_date', date)
+          .eq('shift_type', shift),
         supabase
-          .from("excavator_activity")
-          .select("machine_id")
-          .eq("department_id", deptId)
-          .eq("activity_date", date)
-          .eq("shift_type", shift),
+          .from('excavator_activity')
+          .select('machine_id')
+          .eq('department_id', deptId)
+          .eq('activity_date', date)
+          .eq('shift_type', shift),
         supabase
-          .from("dozer_rolls")
-          .select("machine_id, hours_operated")
-          .eq("department_id", deptId)
-          .eq("roll_date", date)
-          .eq("shift_type", shift),
+          .from('dozer_rolls')
+          .select('machine_id, hours_operated')
+          .eq('department_id', deptId)
+          .eq('roll_date', date)
+          .eq('shift_type', shift),
         supabase
-          .from("hourly_loads")
-          .select("machine_id, total_loads")
-          .eq("department_id", deptId)
-          .eq("load_date", date)
-          .eq("shift_type", shift),
+          .from('hourly_loads')
+          .select('machine_id, total_loads')
+          .eq('department_id', deptId)
+          .eq('load_date', date)
+          .eq('shift_type', shift),
       ]);
 
       const machineOpIds = new Set(
-        (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id),
+        (machineOps ?? []).map((r: { machine_id: string }) => r.machine_id)
       );
       const excavatorIds = new Set(
-        (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id),
+        (excavatorActs ?? []).map((r: { machine_id: string }) => r.machine_id)
       );
       const dozerIds = new Set((dozerRolls ?? []).map((r: { machine_id: string }) => r.machine_id));
       const loadIds = new Set(
         (hourlyLoads ?? [])
           .filter(
-            (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0,
+            (r: { machine_id: string; total_loads: number | null }) => (r.total_loads ?? 0) > 0
           )
-          .map((r: { machine_id: string; total_loads: number | null }) => r.machine_id),
+          .map((r: { machine_id: string; total_loads: number | null }) => r.machine_id)
       );
 
       const machineOpHoursMap = new Map<string, number>();
@@ -267,13 +267,13 @@ export async function getShiftCompleteness(
 
           let hasEntry: boolean;
           switch (requiredForm) {
-            case "excavator-activity":
+            case 'excavator-activity':
               hasEntry = excavatorIds.has(m.id);
               break;
-            case "roll-over":
+            case 'roll-over':
               hasEntry = dozerIds.has(m.id);
               break;
-            case "hourly-loads":
+            case 'hourly-loads':
               hasEntry = loadIds.has(m.id);
               break;
             default:
@@ -281,9 +281,9 @@ export async function getShiftCompleteness(
           }
 
           let hoursWorked: number | null = null;
-          if (requiredForm === "machine-operations") {
+          if (requiredForm === 'machine-operations') {
             hoursWorked = machineOpHoursMap.get(m.id) ?? null;
-          } else if (requiredForm === "roll-over") {
+          } else if (requiredForm === 'roll-over') {
             hoursWorked = dozerHoursMap.get(m.id) ?? null;
           }
 
@@ -298,7 +298,7 @@ export async function getShiftCompleteness(
             exempt: m.report_exempt ?? false,
             hoursWorked,
           };
-        },
+        }
       );
 
       const required = statuses.filter((s) => !s.exempt);
@@ -316,12 +316,12 @@ export async function getShiftCompleteness(
       keyParts: [deptId, date, shift],
       tags: [
         `dept:${deptId}`,
-        "table:machines",
-        "table:machine_operations",
-        "table:excavator_activity",
-        "table:dozer_rolls",
-        "table:hourly_loads",
+        'table:machines',
+        'table:machine_operations',
+        'table:excavator_activity',
+        'table:dozer_rolls',
+        'table:hourly_loads',
       ],
-    },
+    }
   );
 }

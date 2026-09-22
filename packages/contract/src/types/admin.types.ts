@@ -1,11 +1,11 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   adminAddSiteSchema,
   adminDataDeleteSchema,
   adminDataQuerySchema,
   adminDataUpdateSchema,
   adminUpdateSiteSchema,
-} from "../schemas/admin.schema.js";
+} from '../schemas/admin.schema.js';
 
 export type AdminDataQueryInput = z.infer<typeof adminDataQuerySchema>;
 export type AdminDataUpdateInput = z.infer<typeof adminDataUpdateSchema>;

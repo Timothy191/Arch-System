@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
 import {
   ChevronRight,
   File as FileIcon,
   Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
-} from "lucide-react";
-import type React from "react";
-import { createContext, useContext, useState } from "react";
-import { cn } from "../../lib/utils";
+} from 'lucide-react';
+import type React from 'react';
+import { createContext, useContext, useState } from 'react';
+import { cn } from '../../lib/utils';
 
 const TreeContext = createContext<{ level: number }>({ level: 0 });
 
@@ -16,13 +16,13 @@ export interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Tree({ className, children, ...props }: TreeProps) {
   return (
-    <div className={cn("select-none text-sm", className)} {...props}>
+    <div className={cn('select-none text-sm', className)} {...props}>
       <TreeContext.Provider value={{ level: 0 }}>{children}</TreeContext.Provider>
     </div>
   );
 }
 
-export interface FolderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface FolderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   name: string;
   defaultOpen?: boolean;
 }
@@ -32,13 +32,13 @@ export function Folder({ name, defaultOpen = false, className, children, ...prop
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={cn("flex flex-col", className)} {...props}>
+    <div className={cn('flex flex-col', className)} {...props}>
       <div
         className="flex items-center gap-1.5 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <ChevronRight className={cn("h-4 w-4 transition-transform", isOpen && "rotate-90")} />
+        <ChevronRight className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-90')} />
         {isOpen ? (
           <FolderOpenIcon className="h-4 w-4 shrink-0 text-blue-500" />
         ) : (
@@ -61,7 +61,7 @@ export function Folder({ name, defaultOpen = false, className, children, ...prop
   );
 }
 
-export interface FileProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface FileProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   name: string;
   active?: boolean;
   icon?: React.ReactNode;
@@ -73,11 +73,11 @@ export function File({ name, active, icon, className, ...props }: FileProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer transition-colors",
+        'flex items-center gap-1.5 py-1 px-2 hover:bg-muted/50 rounded-md cursor-pointer transition-colors',
         active
-          ? "bg-muted/50 text-foreground font-medium"
-          : "text-muted-foreground hover:text-foreground",
-        className,
+          ? 'bg-muted/50 text-foreground font-medium'
+          : 'text-muted-foreground hover:text-foreground',
+        className
       )}
       style={{ paddingLeft: `${level * 16 + 28}px` }}
       {...props}

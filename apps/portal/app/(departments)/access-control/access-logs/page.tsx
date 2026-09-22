@@ -1,5 +1,5 @@
-import { AvatarWithIcon, Badge, Breadcrumb, BreadcrumbItem } from "@repo/ui";
-import { Pagination } from "@repo/ui/components/ui/pagination";
+import { AvatarWithIcon, Badge, Breadcrumb, BreadcrumbItem } from '@repo/ui';
+import { Pagination } from '@repo/ui/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -7,11 +7,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/ui/table";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Clock } from "lucide-react";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { getAccessLogsForDepartment } from "../actions";
+} from '@repo/ui/components/ui/table';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Clock } from 'lucide-react';
+import { getDepartmentContext } from '~/lib/dept-context';
+import { getAccessLogsForDepartment } from '../actions';
 
 interface AccessLogWithBadge {
   id: string;
@@ -29,7 +29,7 @@ interface AccessLogWithBadge {
   };
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function AccessLogsPage({
   searchParams,
@@ -37,11 +37,11 @@ export default async function AccessLogsPage({
   searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
   const params = await searchParams;
-  const page = parseInt(params.page || "1", 10);
-  const pageSize = parseInt(params.pageSize || "50", 10);
+  const page = parseInt(params.page || '1', 10);
+  const pageSize = parseInt(params.pageSize || '50', 10);
 
   const { deptId } = await getDepartmentContext({
-    department: "access-control",
+    department: 'access-control',
   });
 
   const { logs, totalCount } = await getAccessLogsForDepartment(deptId, page, pageSize);
@@ -50,23 +50,23 @@ export default async function AccessLogsPage({
 
   const resolvedLogs = ((logs ?? []) as unknown as AccessLogWithBadge[]).map((log) => {
     const { badge } = log;
-    let entityName = "Unknown";
-    let entityType: string = badge?.entity_type ?? "Unknown";
+    let entityName = 'Unknown';
+    let entityType: string = badge?.entity_type ?? 'Unknown';
 
     if (badge?.personnel) {
       entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
-      entityType = "Employee";
+      entityType = 'Employee';
     } else if (badge?.visitor) {
       entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
-      entityType = "Visitor";
+      entityType = 'Visitor';
     }
 
-    let status = log.access_granted ? "Granted" : "Denied";
+    let status = log.access_granted ? 'Granted' : 'Denied';
     if (!log.access_granted && log.denial_reason) {
-      if (log.denial_reason.includes("Expired") || log.denial_reason.includes("expired")) {
-        status = "Expired Credential";
-      } else if (log.denial_reason.includes("Tailgate")) {
-        status = "Tailgate Alert";
+      if (log.denial_reason.includes('Expired') || log.denial_reason.includes('expired')) {
+        status = 'Expired Credential';
+      } else if (log.denial_reason.includes('Tailgate')) {
+        status = 'Tailgate Alert';
       }
     }
 
@@ -75,9 +75,9 @@ export default async function AccessLogsPage({
       timestamp: log.scanned_at,
       entityName,
       entityType,
-      qrCodeId: badge?.qr_code ?? "N/A",
+      qrCodeId: badge?.qr_code ?? 'N/A',
       zone: log.gate_location,
-      accessMethod: log.access_type ?? "QR Scan",
+      accessMethod: log.access_type ?? 'QR Scan',
       status,
       direction: log.direction,
     };
@@ -134,10 +134,10 @@ export default async function AccessLogsPage({
                 className="border-b border-[var(--border-default)]/50 hover:bg-[var(--bg-tertiary)] transition-colors"
               >
                 <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
-                  {new Date(log.timestamp).toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
+                  {new Date(log.timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
                     hour12: false,
                   })}
                 </TableCell>
@@ -146,12 +146,12 @@ export default async function AccessLogsPage({
                     <AvatarWithIcon
                       size={24}
                       letter={log.entityName
-                        .replace(/[^A-Za-z0-9]/g, "")
+                        .replace(/[^A-Za-z0-9]/g, '')
                         .slice(0, 2)
                         .toUpperCase()}
                       title={log.entityName}
                       icon={
-                        log.status === "Granted" ? (
+                        log.status === 'Granted' ? (
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         ) : (
                           <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
@@ -171,15 +171,15 @@ export default async function AccessLogsPage({
                 <TableCell className="text-[var(--text-secondary)]">{log.zone}</TableCell>
                 <TableCell className="text-[var(--text-secondary)]">{log.direction}</TableCell>
                 <TableCell className="text-right">
-                  {log.status === "Granted" ? (
+                  {log.status === 'Granted' ? (
                     <Badge variant="green" contrast="low" size="sm">
                       Granted
                     </Badge>
-                  ) : log.status === "Denied" ? (
+                  ) : log.status === 'Denied' ? (
                     <Badge variant="red" contrast="low" size="sm">
                       Denied
                     </Badge>
-                  ) : log.status === "Expired Credential" ? (
+                  ) : log.status === 'Expired Credential' ? (
                     <Badge variant="amber" contrast="low" size="sm">
                       Expired
                     </Badge>
@@ -204,14 +204,14 @@ export default async function AccessLogsPage({
               pageSize={pageSize}
               onPageChange={(newPage) => {
                 const url = new URL(window.location.href);
-                url.searchParams.set("page", newPage.toString());
-                url.searchParams.set("pageSize", pageSize.toString());
+                url.searchParams.set('page', newPage.toString());
+                url.searchParams.set('pageSize', pageSize.toString());
                 window.location.href = url.toString();
               }}
               onPageSizeChange={(newSize) => {
                 const url = new URL(window.location.href);
-                url.searchParams.set("page", "1");
-                url.searchParams.set("pageSize", newSize.toString());
+                url.searchParams.set('page', '1');
+                url.searchParams.set('pageSize', newSize.toString());
                 window.location.href = url.toString();
               }}
             />

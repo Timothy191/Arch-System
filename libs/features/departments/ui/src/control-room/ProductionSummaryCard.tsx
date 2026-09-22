@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import type { UnifiedShiftReport } from "@repo/contract/types/shift-compilation.types";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { BarChart2, Layers, Truck } from "lucide-react";
+import type { UnifiedShiftReport } from '@repo/contract/types/shift-compilation.types';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { BarChart2, Layers, Truck } from 'lucide-react';
 
 interface ProductionSummaryCardProps {
-  production: UnifiedShiftReport["production"];
-  shiftType: "day" | "night";
+  production: UnifiedShiftReport['production'];
+  shiftType: 'day' | 'night';
 }
 
 export function ProductionSummaryCard({ production, shiftType }: ProductionSummaryCardProps) {
   const activeHours =
-    shiftType === "day"
-      ? ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"]
-      : ["18", "19", "20", "21", "22", "23", "00", "01", "02", "03", "04", "05"];
+    shiftType === 'day'
+      ? ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17']
+      : ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
 
   return (
     <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
@@ -47,7 +47,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
             {production.machines.map((machine) => {
               const maxHourly = Math.max(
                 1,
-                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0),
+                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0)
               );
 
               return (
@@ -63,7 +63,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
                       </span>
                     </div>
                     <div className="font-mono font-medium text-neutral-700">
-                      Loads:{" "}
+                      Loads:{' '}
                       <strong className="text-neutral-950 font-bold">{machine.total_loads}</strong>
                     </div>
                   </div>
@@ -83,8 +83,8 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
                             <div
                               className={`w-full rounded-xs transition-all duration-300 ${
                                 loadCount > 0
-                                  ? "bg-neutral-800 hover:bg-neutral-900"
-                                  : "bg-neutral-200"
+                                  ? 'bg-neutral-800 hover:bg-neutral-900'
+                                  : 'bg-neutral-200'
                               }`}
                               style={{ height: `${heightPct}%` }}
                               title={`${h}:00 - ${loadCount} loads`}

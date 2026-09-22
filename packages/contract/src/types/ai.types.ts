@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   aiChatSchema,
   aiHandoffSchema,
@@ -6,7 +6,7 @@ import type {
   aiSafetySchema,
   complianceResultSchema,
   riskAssessmentSchema,
-} from "../schemas/ai.schema.js";
+} from '../schemas/ai.schema.js';
 
 export type AiChatInput = z.infer<typeof aiChatSchema>;
 export type AiSafetyInput = z.infer<typeof aiSafetySchema>;

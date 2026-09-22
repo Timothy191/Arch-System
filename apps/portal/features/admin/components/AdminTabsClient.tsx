@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { AdminTabs } from "./AdminTabs";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AdminTabs } from './AdminTabs';
 
 interface AdminTabsClientProps {
   activeTab: string;
@@ -14,7 +14,7 @@ export function AdminTabsClient({ activeTab, children }: AdminTabsClientProps) {
 
   const handleValueChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", value);
+    params.set('tab', value);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 

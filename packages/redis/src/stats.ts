@@ -1,4 +1,4 @@
-import { getRedisClient } from "./client";
+import { getRedisClient } from './client';
 
 interface CacheStatsSnapshot {
   xFetchTriggers: number;
@@ -55,10 +55,10 @@ function buildSnapshot(): CacheStatsSnapshot {
   };
 }
 
-export function recordCacheHit(source: "l1" | "l2", latencyMs: number): void {
+export function recordCacheHit(source: 'l1' | 'l2', latencyMs: number): void {
   // 1. Local update
   stats.hits++;
-  if (source === "l1") stats.l1Hits++;
+  if (source === 'l1') stats.l1Hits++;
   else stats.l2Hits++;
   addLatency(latencyMs);
 
@@ -66,12 +66,12 @@ export function recordCacheHit(source: "l1" | "l2", latencyMs: number): void {
   getRedisClient()
     .then((redis) => {
       if (redis?.isOpen) {
-        redis.hIncrBy("stats:cache", "hits", 1).catch(() => {});
-        redis.hIncrBy("stats:cache", source === "l1" ? "l1Hits" : "l2Hits", 1).catch(() => {});
+        redis.hIncrBy('stats:cache', 'hits', 1).catch(() => {});
+        redis.hIncrBy('stats:cache', source === 'l1' ? 'l1Hits' : 'l2Hits', 1).catch(() => {});
         redis
-          .lPush("stats:latencies", latencyMs.toString())
+          .lPush('stats:latencies', latencyMs.toString())
           .then(() => {
-            redis.lTrim("stats:latencies", 0, 999).catch(() => {});
+            redis.lTrim('stats:latencies', 0, 999).catch(() => {});
           })
           .catch(() => {});
       }
@@ -87,11 +87,11 @@ export function recordXFetchTrigger(latencyMs: number): void {
   getRedisClient()
     .then((redis) => {
       if (redis?.isOpen) {
-        redis.hIncrBy("stats:cache", "xFetchTriggers", 1).catch(() => {});
+        redis.hIncrBy('stats:cache', 'xFetchTriggers', 1).catch(() => {});
         redis
-          .lPush("stats:xfetch_latencies", latencyMs.toString())
+          .lPush('stats:xfetch_latencies', latencyMs.toString())
           .then(() => {
-            redis.lTrim("stats:xfetch_latencies", 0, 999).catch(() => {});
+            redis.lTrim('stats:xfetch_latencies', 0, 999).catch(() => {});
           })
           .catch(() => {});
       }
@@ -108,11 +108,11 @@ export function recordCacheMiss(latencyMs: number): void {
   getRedisClient()
     .then((redis) => {
       if (redis?.isOpen) {
-        redis.hIncrBy("stats:cache", "misses", 1).catch(() => {});
+        redis.hIncrBy('stats:cache', 'misses', 1).catch(() => {});
         redis
-          .lPush("stats:latencies", latencyMs.toString())
+          .lPush('stats:latencies', latencyMs.toString())
           .then(() => {
-            redis.lTrim("stats:latencies", 0, 999).catch(() => {});
+            redis.lTrim('stats:latencies', 0, 999).catch(() => {});
           })
           .catch(() => {});
       }
@@ -128,7 +128,7 @@ export function recordRedisError(): void {
   getRedisClient()
     .then((redis) => {
       if (redis?.isOpen) {
-        redis.hIncrBy("stats:cache", "redisErrors", 1).catch(() => {});
+        redis.hIncrBy('stats:cache', 'redisErrors', 1).catch(() => {});
       }
     })
     .catch(() => {});
@@ -138,8 +138,8 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
   try {
     const redis = await getRedisClient();
     if (redis?.isOpen) {
-      const data = await redis.hGetAll("stats:cache");
-      const latencyStrs = await redis.lRange("stats:latencies", 0, 999);
+      const data = await redis.hGetAll('stats:cache');
+      const latencyStrs = await redis.lRange('stats:latencies', 0, 999);
       const sorted = latencyStrs
         .map(Number)
         .filter((v) => !Number.isNaN(v))
@@ -148,14 +148,14 @@ export async function getCacheStats(): Promise<CacheStatsSnapshot> {
       const avg = sorted.length > 0 ? sorted.reduce((sum, v) => sum + v, 0) / sorted.length : 0;
 
       return {
-        hits: parseInt(data.hits || "0", 10),
-        misses: parseInt(data.misses || "0", 10),
-        l1Hits: parseInt(data.l1Hits || "0", 10),
-        l2Hits: parseInt(data.l2Hits || "0", 10),
-        redisErrors: parseInt(data.redisErrors || "0", 10),
+        hits: parseInt(data.hits || '0', 10),
+        misses: parseInt(data.misses || '0', 10),
+        l1Hits: parseInt(data.l1Hits || '0', 10),
+        l2Hits: parseInt(data.l2Hits || '0', 10),
+        redisErrors: parseInt(data.redisErrors || '0', 10),
         avgLatencyMs: Math.round(avg * 100) / 100,
         p95LatencyMs: Math.round(computePercentile(sorted, 95) * 100) / 100,
-        xFetchTriggers: parseInt(data.xFetchTriggers || "0", 10),
+        xFetchTriggers: parseInt(data.xFetchTriggers || '0', 10),
       };
     }
   } catch {
@@ -176,8 +176,8 @@ export function resetCacheStats(): void {
   getRedisClient()
     .then((redis) => {
       if (redis?.isOpen) {
-        redis.del("stats:cache").catch(() => {});
-        redis.del("stats:latencies").catch(() => {});
+        redis.del('stats:cache').catch(() => {});
+        redis.del('stats:latencies').catch(() => {});
       }
     })
     .catch(() => {});

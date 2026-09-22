@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { Download, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Download, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 export interface ExportPdfParams {
   departmentId: string;
   shiftDate: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
 }
 
 export interface ExportPdfResult {
@@ -20,7 +20,7 @@ export interface ExportPdfResult {
 interface ExportPdfButtonProps {
   departmentId: string;
   shiftDate: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
   isShiftClosed: boolean;
   onExport?: (params: ExportPdfParams) => Promise<ExportPdfResult>;
 }
@@ -43,13 +43,13 @@ export function ExportPdfButton({
     try {
       const res = await onExport({ departmentId, shiftDate, shiftType });
       if (!res.success) {
-        setErrorMessage(res.error || "Failed to generate report export");
+        setErrorMessage(res.error || 'Failed to generate report export');
         return;
       }
 
       if (res.htmlContent) {
         // Open print view in new window or trigger print
-        const printWindow = window.open("", "_blank");
+        const printWindow = window.open('', '_blank');
         if (printWindow) {
           printWindow.document.write(res.htmlContent);
           printWindow.document.close();
@@ -65,17 +65,17 @@ export function ExportPdfButton({
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
 
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = res.fileName || "Shift_Report.pdf";
+        link.download = res.fileName || 'Shift_Report.pdf';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Export error";
+      const msg = err instanceof Error ? err.message : 'Export error';
       setErrorMessage(`Export failed: ${msg}`);
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export function ExportPdfButton({
         onClick={handleDownload}
         disabled={loading}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-arch-border-subtle bg-arch-surface-secondary text-arch-text-primary text-xs font-semibold shadow-card hover:bg-arch-surface-tertiary transition-all active:scale-95 disabled:opacity-50 min-h-[32px]"
-        title={isShiftClosed ? "Export Signed PDF with Digital Seal" : "Download Draft PDF"}
+        title={isShiftClosed ? 'Export Signed PDF with Digital Seal' : 'Download Draft PDF'}
       >
         {loading ? (
           <>
@@ -99,7 +99,7 @@ export function ExportPdfButton({
         ) : (
           <>
             <Download className="w-3.5 h-3.5 text-arch-brand-blue" />
-            <span>{isShiftClosed ? "Export Signed PDF" : "Download Draft PDF"}</span>
+            <span>{isShiftClosed ? 'Export Signed PDF' : 'Download Draft PDF'}</span>
           </>
         )}
       </button>

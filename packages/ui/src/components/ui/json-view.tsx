@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
-import { cn } from "../../lib/utils";
+import { Check, ChevronDown, ChevronRight, Copy } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { cn } from '../../lib/utils';
 
-export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   value: any;
   defaultExpanded?: boolean;
 }
@@ -13,7 +13,7 @@ export interface JsonViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>
 export function JsonView({ value, defaultExpanded = true, className, ...props }: JsonViewProps) {
   return (
     <div
-      className={cn("font-mono text-sm bg-muted/30 p-4 rounded-md border", className)}
+      className={cn('font-mono text-sm bg-muted/30 p-4 rounded-md border', className)}
       {...props}
     >
       <JsonNode value={value} name="root" defaultExpanded={defaultExpanded} isRoot />
@@ -45,48 +45,48 @@ function JsonNode({
   if (value === null) {
     return (
       <div className="ml-4">
-        <span className="text-muted-foreground">"{name}":</span>{" "}
+        <span className="text-muted-foreground">"{name}":</span>{' '}
         <span className="text-muted-foreground">null</span>
       </div>
     );
   }
 
-  if (typeof value === "boolean") {
+  if (typeof value === 'boolean') {
     return (
       <div className="ml-4">
-        <span className="text-muted-foreground">"{name}":</span>{" "}
+        <span className="text-muted-foreground">"{name}":</span>{' '}
         <span className="text-blue-500">{value.toString()}</span>
       </div>
     );
   }
 
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     return (
       <div className="ml-4">
-        <span className="text-muted-foreground">"{name}":</span>{" "}
+        <span className="text-muted-foreground">"{name}":</span>{' '}
         <span className="text-amber-500">{value}</span>
       </div>
     );
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     return (
       <div className="ml-4">
-        <span className="text-muted-foreground">"{name}":</span>{" "}
+        <span className="text-muted-foreground">"{name}":</span>{' '}
         <span className="text-green-600">"{value}"</span>
       </div>
     );
   }
 
   const isArray = Array.isArray(value);
-  const isObject = typeof value === "object";
+  const isObject = typeof value === 'object';
 
   if (isArray || isObject) {
     const keys = Object.keys(value);
     const isEmpty = keys.length === 0;
 
     return (
-      <div className={cn(!isRoot && "ml-4")}>
+      <div className={cn(!isRoot && 'ml-4')}>
         <div
           className="flex items-center gap-1 cursor-pointer hover:bg-muted/50 w-fit px-1 rounded-sm"
           onClick={() => setExpanded(!expanded)}
@@ -96,8 +96,8 @@ function JsonNode({
           {isEmpty && <span className="w-3" />}
           <span className="text-muted-foreground font-medium">
             {!isRoot && `"${name}": `}
-            {isArray ? "[" : "{"}
-            {isEmpty && (isArray ? "]" : "}")}
+            {isArray ? '[' : '{'}
+            {isEmpty && (isArray ? ']' : '}')}
           </span>
           {!isEmpty && !expanded && (
             <span className="text-muted-foreground text-xs">
@@ -129,7 +129,7 @@ function JsonNode({
         )}
 
         {expanded && !isEmpty && (
-          <div className="ml-1 text-muted-foreground font-medium">{isArray ? "]" : "}"}</div>
+          <div className="ml-1 text-muted-foreground font-medium">{isArray ? ']' : '}'}</div>
         )}
       </div>
     );

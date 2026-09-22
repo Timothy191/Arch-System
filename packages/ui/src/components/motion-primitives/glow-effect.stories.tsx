@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { GlowEffect } from "./glow-effect";
+import type { Meta, StoryObj } from '@storybook/react';
+import { GlowEffect } from './glow-effect';
 
 const meta: Meta<typeof GlowEffect> = {
-  title: "Motion/GlowEffect",
+  title: 'Motion/GlowEffect',
   component: GlowEffect,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
   argTypes: {
     mode: {
-      control: "select",
-      options: ["rotate", "pulse", "breathe", "colorShift", "flowHorizontal", "static"],
+      control: 'select',
+      options: ['rotate', 'pulse', 'breathe', 'colorShift', 'flowHorizontal', 'static'],
     },
     blur: {
-      control: "select",
-      options: ["softest", "soft", "medium", "strong", "stronger", "strongest", "none"],
+      control: 'select',
+      options: ['softest', 'soft', 'medium', 'strong', 'stronger', 'strongest', 'none'],
     },
   },
 };
@@ -31,9 +31,9 @@ export const Default: Story = {
     </div>
   ),
   args: {
-    colors: ["#00d4aa", "#007aff", "#5856d6", "#00d4aa"],
-    mode: "rotate",
-    blur: "strong",
+    colors: ['#00d4aa', '#007aff', '#5856d6', '#00d4aa'],
+    mode: 'rotate',
+    blur: 'strong',
     duration: 5,
   },
 };
@@ -48,9 +48,9 @@ export const Pulse: Story = {
     </div>
   ),
   args: {
-    colors: ["#10b981", "#059669"],
-    mode: "pulse",
-    blur: "medium",
+    colors: ['#10b981', '#059669'],
+    mode: 'pulse',
+    blur: 'medium',
     duration: 3,
   },
 };
@@ -65,9 +65,9 @@ export const Flow: Story = {
     </div>
   ),
   args: {
-    colors: ["#ff3b30", "#ff9500", "#ffcc00"],
-    mode: "flowHorizontal",
-    blur: "soft",
+    colors: ['#ff3b30', '#ff9500', '#ffcc00'],
+    mode: 'flowHorizontal',
+    blur: 'soft',
     duration: 2,
   },
 };

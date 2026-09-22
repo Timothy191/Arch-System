@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Info } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { Info } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface DescriptionProps
-  extends Omit<React.HTMLAttributes<HTMLDListElement>, "title" | "content"> {
+  extends Omit<React.HTMLAttributes<HTMLDListElement>, 'title' | 'content'> {
   title: React.ReactNode;
   content: React.ReactNode;
   tooltip?: string;
@@ -27,16 +27,16 @@ export function Description({
   return (
     <dl
       className={cn(
-        "flex text-sm font-sans",
-        right ? "flex-row items-baseline justify-between gap-4" : "flex-col gap-1",
-        className,
+        'flex text-sm font-sans',
+        right ? 'flex-row items-baseline justify-between gap-4' : 'flex-col gap-1',
+        className
       )}
       {...props}
     >
       <dt
         className={cn(
-          "flex items-center gap-1.5 font-medium text-xs text-neutral-500 select-none",
-          right && "shrink-0",
+          'flex items-center gap-1.5 font-medium text-xs text-neutral-500 select-none',
+          right && 'shrink-0'
         )}
       >
         <span>{title}</span>
@@ -49,7 +49,7 @@ export function Description({
             onBlur={() => setShowTooltip(false)}
             tabIndex={0}
             role="button"
-            aria-label={`More information about ${typeof title === "string" ? title : "this field"}`}
+            aria-label={`More information about ${typeof title === 'string' ? title : 'this field'}`}
           >
             <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600:text-neutral-300 transition-colors cursor-help" />
             {showTooltip && (
@@ -65,9 +65,9 @@ export function Description({
       </dt>
       <dd
         className={cn(
-          "text-sm text-neutral-900 m-0",
-          right && "text-right",
-          ellipsis && "truncate max-w-full",
+          'text-sm text-neutral-900 m-0',
+          right && 'text-right',
+          ellipsis && 'truncate max-w-full'
         )}
       >
         {content}

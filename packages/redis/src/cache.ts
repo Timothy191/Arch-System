@@ -1,6 +1,6 @@
-import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from "./invalidation";
-import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from "./stats";
-import { shouldEarlyExpire, type XFetchWrapper } from "./xfetch";
+import { cacheInvalidatePrefixes, cacheInvalidateTags, indexCacheKeyByTags } from './invalidation';
+import { recordCacheHit, recordCacheMiss, recordRedisError, recordXFetchTrigger } from './stats';
+import { shouldEarlyExpire, type XFetchWrapper } from './xfetch';
 
 // ------------------------------------------------------------------
 // L1 In-Memory Cache with TTL + LRU eviction
@@ -60,7 +60,7 @@ let subscriberInitialized = false;
 
 async function getRedisClientSafe() {
   try {
-    const { getRedisClient, createRedisSubscriber } = await import("./client");
+    const { getRedisClient, createRedisSubscriber } = await import('./client');
     const client = await getRedisClient();
 
     if (!subscriberInitialized && client) {
@@ -68,15 +68,15 @@ async function getRedisClientSafe() {
       createRedisSubscriber()
         .then((sub) => {
           sub
-            .subscribe("cache:invalidate:broadcast", (message) => {
+            .subscribe('cache:invalidate:broadcast', (message) => {
               try {
                 const data = JSON.parse(message);
-                if (data.action === "tags") {
+                if (data.action === 'tags') {
                   // we don't have a fast way to map tags to memoryCache keys locally without building an index,
                   // but since L1 is small (1000 items), we can just clear it or let it expire.
                   // A safer approach: clear entire L1 on tag invalidation to guarantee consistency.
                   memoryCache.clear();
-                } else if (data.action === "prefixes") {
+                } else if (data.action === 'prefixes') {
                   for (const prefix of data.prefixes) {
                     memoryDeleteByPrefix(prefix);
                   }
@@ -105,7 +105,7 @@ async function getRedisClientSafe() {
 // ------------------------------------------------------------------
 
 function unwrap<T>(parsed: any): T {
-  if (parsed && typeof parsed === "object" && parsed.__isXFetchWrapper) {
+  if (parsed && typeof parsed === 'object' && parsed.__isXFetchWrapper) {
     return parsed.value;
   }
   return parsed;
@@ -122,7 +122,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
   // 1. Check L1 Cache (Local Memory) first - speed: < 0.1ms
   const l1Value = memoryGet<any>(key);
   if (l1Value !== null) {
-    recordCacheHit("l1", performance.now() - start);
+    recordCacheHit('l1', performance.now() - start);
     return unwrap<T>(l1Value);
   }
 
@@ -139,7 +139,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 
       // Populate L1 cache with a short TTL (15s) to accelerate subsequent near-term reads
       memorySet(key, parsed, 15);
-      recordCacheHit("l2", performance.now() - start);
+      recordCacheHit('l2', performance.now() - start);
       return unwrap<T>(parsed);
     }
     recordCacheMiss(performance.now() - start);
@@ -156,14 +156,14 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
  * Returns { value, source } where source is "l1", "l2", or null.
  */
 export async function cacheGetWithStats<T>(
-  key: string,
-): Promise<{ value: T | null; source: "l1" | "l2" | null }> {
+  key: string
+): Promise<{ value: T | null; source: 'l1' | 'l2' | null }> {
   const start = performance.now();
 
   const l1Value = memoryGet<any>(key);
   if (l1Value !== null) {
-    recordCacheHit("l1", performance.now() - start);
-    return { value: unwrap<T>(l1Value), source: "l1" };
+    recordCacheHit('l1', performance.now() - start);
+    return { value: unwrap<T>(l1Value), source: 'l1' };
   }
 
   try {
@@ -176,8 +176,8 @@ export async function cacheGetWithStats<T>(
     if (value) {
       const parsed = JSON.parse(value);
       memorySet(key, parsed, 15);
-      recordCacheHit("l2", performance.now() - start);
-      return { value: unwrap<T>(parsed), source: "l2" };
+      recordCacheHit('l2', performance.now() - start);
+      return { value: unwrap<T>(parsed), source: 'l2' };
     }
     recordCacheMiss(performance.now() - start);
     return { value: null, source: null };
@@ -235,7 +235,7 @@ export async function cacheSetWithTags<T>(
   key: string,
   value: T,
   ttlSeconds: number,
-  tags?: string[],
+  tags?: string[]
 ): Promise<void> {
   await cacheSet(key, value, ttlSeconds);
   if (tags && tags.length > 0) {
@@ -253,12 +253,12 @@ const activeFetches = new Map<string, Promise<any>>();
 export async function cacheWrap<T>(
   key: string,
   fn: () => Promise<T>,
-  ttlSeconds: number,
+  ttlSeconds: number
 ): Promise<T> {
   const rawCached = await cacheGetRaw<T>(key);
 
   if (rawCached !== null) {
-    if (typeof rawCached === "object" && (rawCached as any).__isXFetchWrapper) {
+    if (typeof rawCached === 'object' && (rawCached as any).__isXFetchWrapper) {
       const wrapper = rawCached as XFetchWrapper<T>;
       if (shouldEarlyExpire(wrapper)) {
         if (!activeFetches.has(key)) {
@@ -336,7 +336,7 @@ export async function cacheDelete(key: string): Promise<void> {
  */
 export async function cacheDeletePattern(pattern: string): Promise<void> {
   // Delete matching keys from memory cache
-  const prefix = pattern.replace("*", "");
+  const prefix = pattern.replace('*', '');
   memoryDeleteByPrefix(prefix);
 
   // Delegate to safe SCAN-based invalidation

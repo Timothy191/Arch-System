@@ -1,11 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { AlertPanel } from "./AlertPanel";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { AlertPanel } from './AlertPanel';
 
-jest.mock("@repo/supabase/client", () => ({
+jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@repo/ui/GlassCard", () => ({
+jest.mock('@repo/ui/GlassCard', () => ({
   GlassCard: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="glass-card" className={className}>
       {children}
@@ -19,7 +19,7 @@ function createMockSupabase(data: unknown[]) {
     subscribe: jest.fn().mockReturnThis(),
   };
 
-  const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
+  const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
   createBrowserSupabaseClient.mockReturnValue({
     from: jest.fn().mockReturnValue({
@@ -34,11 +34,11 @@ function createMockSupabase(data: unknown[]) {
   return { mockChannel };
 }
 
-describe("AlertPanel", () => {
-  it("renders alerts for inactive machines", async () => {
+describe('AlertPanel', () => {
+  it('renders alerts for inactive machines', async () => {
     createMockSupabase([
-      { id: "1", name: "Conveyor 1", active: false },
-      { id: "2", name: "Conveyor 2", active: true },
+      { id: '1', name: 'Conveyor 1', active: false },
+      { id: '2', name: 'Conveyor 2', active: true },
     ]);
 
     render(<AlertPanel departmentId="dept-1" />);
@@ -50,18 +50,18 @@ describe("AlertPanel", () => {
     expect(screen.queryByText(/Conveyor 2/)).not.toBeInTheDocument();
   });
 
-  it("shows all clear when no inactive machines", async () => {
-    createMockSupabase([{ id: "1", name: "Conveyor 1", active: true }]);
+  it('shows all clear when no inactive machines', async () => {
+    createMockSupabase([{ id: '1', name: 'Conveyor 1', active: true }]);
     render(<AlertPanel departmentId="dept-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("All Systems Operational")).toBeInTheDocument();
-      expect(screen.getByText("No active alerts at this time.")).toBeInTheDocument();
+      expect(screen.getByText('All Systems Operational')).toBeInTheDocument();
+      expect(screen.getByText('No active alerts at this time.')).toBeInTheDocument();
     });
   });
 
-  it("acknowledges an alert", async () => {
-    createMockSupabase([{ id: "1", name: "Conveyor 1", active: false }]);
+  it('acknowledges an alert', async () => {
+    createMockSupabase([{ id: '1', name: 'Conveyor 1', active: false }]);
     render(<AlertPanel departmentId="dept-1" />);
 
     await waitFor(() => {
@@ -69,22 +69,22 @@ describe("AlertPanel", () => {
     });
 
     // Click the acknowledge button in the list
-    fireEvent.click(screen.getByText("Acknowledge"));
+    fireEvent.click(screen.getByText('Acknowledge'));
 
     await waitFor(() => {
-      expect(screen.queryByText("Acknowledge")).not.toBeInTheDocument();
+      expect(screen.queryByText('Acknowledge')).not.toBeInTheDocument();
     });
   });
 
-  it("dismisses an alert", async () => {
-    createMockSupabase([{ id: "1", name: "Conveyor 1", active: false }]);
+  it('dismisses an alert', async () => {
+    createMockSupabase([{ id: '1', name: 'Conveyor 1', active: false }]);
     render(<AlertPanel departmentId="dept-1" />);
 
     await waitFor(() => {
       expect(screen.getByText(/Conveyor 1 is offline/)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText("Dismiss"));
+    fireEvent.click(screen.getByText('Dismiss'));
 
     await waitFor(() => {
       expect(screen.queryByText(/Conveyor 1 is offline/)).not.toBeInTheDocument();

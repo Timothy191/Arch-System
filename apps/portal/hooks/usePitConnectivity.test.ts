@@ -1,7 +1,7 @@
-import { usePitConnectivity } from "@repo/shared/hooks";
-import { act, renderHook } from "@testing-library/react";
+import { usePitConnectivity } from '@repo/shared/hooks';
+import { act, renderHook } from '@testing-library/react';
 
-describe("usePitConnectivity hook", () => {
+describe('usePitConnectivity hook', () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe("usePitConnectivity hook", () => {
     jest.useRealTimers();
   });
 
-  it("should initialize as online when fetch succeeds", async () => {
+  it('should initialize as online when fetch succeeds', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -21,38 +21,38 @@ describe("usePitConnectivity hook", () => {
 
     const { result } = renderHook(() =>
       usePitConnectivity({
-        pingUrl: "/api/health",
+        pingUrl: '/api/health',
         pingIntervalMs: 10000,
         degradedThresholdMs: 1000,
-      }),
+      })
     );
 
     await act(async () => {
       await result.current.checkConnectivity();
     });
 
-    expect(result.current.status).toBe("online");
+    expect(result.current.status).toBe('online');
     expect(result.current.isOnline).toBe(true);
     expect(result.current.isDegraded).toBe(false);
   });
 
-  it("should detect offline when fetch fails", async () => {
-    global.fetch = jest.fn().mockRejectedValue(new Error("Network Error"));
+  it('should detect offline when fetch fails', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network Error'));
 
     const onStatusChange = jest.fn();
     const { result } = renderHook(() =>
       usePitConnectivity({
-        pingUrl: "/api/health",
+        pingUrl: '/api/health',
         onStatusChange,
-      }),
+      })
     );
 
     await act(async () => {
       await result.current.checkConnectivity();
     });
 
-    expect(result.current.status).toBe("offline");
+    expect(result.current.status).toBe('offline');
     expect(result.current.isOnline).toBe(false);
-    expect(onStatusChange).toHaveBeenCalledWith("offline");
+    expect(onStatusChange).toHaveBeenCalledWith('offline');
   });
 });

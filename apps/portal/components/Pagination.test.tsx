@@ -1,9 +1,9 @@
-import { Pagination } from "@repo/ui/Pagination";
-import { fireEvent, render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import { Pagination } from '@repo/ui/Pagination';
+import { fireEvent, render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-describe("Pagination Component", () => {
-  it("renders correctly with total count", () => {
+describe('Pagination Component', () => {
+  it('renders correctly with total count', () => {
     const handlePageChange = jest.fn();
     render(
       <Pagination
@@ -12,18 +12,18 @@ describe("Pagination Component", () => {
         onPageChange={handlePageChange}
         pageSize={10}
         totalCount={45}
-      />,
+      />
     );
 
     expect(
       screen.getByText((_content, element) => {
-        return element?.textContent === "Showing 11 to 20 of 45 entries";
-      }),
+        return element?.textContent === 'Showing 11 to 20 of 45 entries';
+      })
     ).toBeInTheDocument();
-    expect(screen.getByText("2")).toHaveClass("bg-[var(--accent-blue)]");
+    expect(screen.getByText('2')).toHaveClass('bg-[var(--accent-blue)]');
   });
 
-  it("triggers onPageChange when page button is clicked", () => {
+  it('triggers onPageChange when page button is clicked', () => {
     const handlePageChange = jest.fn();
     render(
       <Pagination
@@ -32,14 +32,14 @@ describe("Pagination Component", () => {
         onPageChange={handlePageChange}
         pageSize={10}
         totalCount={45}
-      />,
+      />
     );
 
-    fireEvent.click(screen.getByText("3"));
+    fireEvent.click(screen.getByText('3'));
     expect(handlePageChange).toHaveBeenCalledWith(3);
   });
 
-  it("disables prev button on first page", () => {
+  it('disables prev button on first page', () => {
     render(
       <Pagination
         currentPage={1}
@@ -47,14 +47,14 @@ describe("Pagination Component", () => {
         onPageChange={jest.fn()}
         pageSize={10}
         totalCount={45}
-      />,
+      />
     );
 
-    const prevBtn = screen.getByRole("button", { name: /Previous page/i });
+    const prevBtn = screen.getByRole('button', { name: /Previous page/i });
     expect(prevBtn).toBeDisabled();
   });
 
-  it("disables next button on last page", () => {
+  it('disables next button on last page', () => {
     render(
       <Pagination
         currentPage={5}
@@ -62,14 +62,14 @@ describe("Pagination Component", () => {
         onPageChange={jest.fn()}
         pageSize={10}
         totalCount={45}
-      />,
+      />
     );
 
-    const nextBtn = screen.getByRole("button", { name: /Next page/i });
+    const nextBtn = screen.getByRole('button', { name: /Next page/i });
     expect(nextBtn).toBeDisabled();
   });
 
-  it("triggers onPageSizeChange when selection changes", () => {
+  it('triggers onPageSizeChange when selection changes', () => {
     const handlePageSizeChange = jest.fn();
     render(
       <Pagination
@@ -79,11 +79,11 @@ describe("Pagination Component", () => {
         pageSize={10}
         onPageSizeChange={handlePageSizeChange}
         totalCount={45}
-      />,
+      />
     );
 
     const select = screen.getByLabelText(/Show/i);
-    fireEvent.change(select, { target: { value: "20" } });
+    fireEvent.change(select, { target: { value: '20' } });
     expect(handlePageSizeChange).toHaveBeenCalledWith(20);
   });
 });

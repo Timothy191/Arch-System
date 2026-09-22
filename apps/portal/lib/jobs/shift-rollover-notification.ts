@@ -1,7 +1,7 @@
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { inngest, shiftRolloverNotificationEvent } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { inngest, shiftRolloverNotificationEvent } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 /**
  * Shift Rollover Notification Job
@@ -11,9 +11,9 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  */
 export const shiftRolloverNotificationFn = inngest.createFunction(
   {
-    id: "shift-rollover-notifications",
-    name: "Shift Rollover Notifications",
-    triggers: [{ cron: "45 5,17 * * *" }, { event: shiftRolloverNotificationEvent }],
+    id: 'shift-rollover-notifications',
+    name: 'Shift Rollover Notifications',
+    triggers: [{ cron: '45 5,17 * * *' }, { event: shiftRolloverNotificationEvent }],
   },
   async ({ step: _step }) => {
     const serviceRole = createServiceRoleClient();
@@ -24,64 +24,64 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
     try {
       // AGENT-TRACE: Fetch active operational departments
       const { data: departments, error: deptError } = await serviceRole
-        .from("departments")
-        .select("id, name, slug")
-        .eq("type", "operational")
-        .eq("active", true);
+        .from('departments')
+        .select('id, name, slug')
+        .eq('type', 'operational')
+        .eq('active', true);
 
       if (deptError) throw deptError;
       if (!departments || departments.length === 0) {
-        return { success: true, message: "No active operational departments found" };
+        return { success: true, message: 'No active operational departments found' };
       }
 
       const now = new Date();
       const hour = now.getHours();
-      const currentShift = hour >= 6 && hour < 18 ? "day" : "night";
-      const nextShift = currentShift === "day" ? "night" : "day";
-      const today = now.toISOString().split("T")[0]!;
+      const currentShift = hour >= 6 && hour < 18 ? 'day' : 'night';
+      const nextShift = currentShift === 'day' ? 'night' : 'day';
+      const today = now.toISOString().split('T')[0]!;
 
       for (const dept of departments) {
         // AGENT-TRACE: Check if today's shift log has already been closed out
         const { data: shiftLogs, error: logErrorDb } = await serviceRole
-          .from("daily_logs")
-          .select("id, status")
-          .eq("department_id", dept.id)
-          .eq("date", today)
-          .eq("shift_type", currentShift);
+          .from('daily_logs')
+          .select('id, status')
+          .eq('department_id', dept.id)
+          .eq('date', today)
+          .eq('shift_type', currentShift);
 
         if (logErrorDb) {
           logError(logErrorDb, {
-            context: "shift_rollover_check_log_error",
+            context: 'shift_rollover_check_log_error',
             departmentId: dept.id,
           });
           continue;
         }
 
-        const isClosed = shiftLogs?.some((l) => l.status === "closed" || l.status === "verified");
+        const isClosed = shiftLogs?.some((l) => l.status === 'closed' || l.status === 'verified');
 
         if (!isClosed) {
           // Log audit reminder event for handover
-          await serviceRole.from("audit_logs").insert({
-            action: "shift_rollover_reminder",
-            table_name: "daily_logs",
+          await serviceRole.from('audit_logs').insert({
+            action: 'shift_rollover_reminder',
+            table_name: 'daily_logs',
             department_id: dept.id,
             new_data: {
               date: today,
               current_shift: currentShift,
               next_shift: nextShift,
-              reminder: "Shift closeout pending before handover",
+              reminder: 'Shift closeout pending before handover',
               timestamp: now.toISOString(),
             },
           });
 
           notifications.push({
             department: dept.name,
-            status: "pending_closeout",
+            status: 'pending_closeout',
           });
         } else {
           notifications.push({
             department: dept.name,
-            status: "closed",
+            status: 'closed',
           });
         }
       }
@@ -97,11 +97,11 @@ export const shiftRolloverNotificationFn = inngest.createFunction(
     } catch (err) {
       success = false;
       logError(err, {
-        context: "shift_rollover_notification_job",
+        context: 'shift_rollover_notification_job',
       });
       throw err;
     } finally {
-      recordJobExecution("shift-rollover-notifications", performance.now() - start, success);
+      recordJobExecution('shift-rollover-notifications', performance.now() - start, success);
     }
-  },
+  }
 );

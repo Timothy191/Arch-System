@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { fetchClient } from "@repo/utils/client";
-import { useQuery } from "@tanstack/react-query";
-import { Activity, Bot, Clock, Coins, RefreshCw, TrendingUp, Zap } from "lucide-react";
-import { useState } from "react";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { fetchClient } from '@repo/utils/client';
+import { useQuery } from '@tanstack/react-query';
+import { Activity, Bot, Clock, Coins, RefreshCw, TrendingUp, Zap } from 'lucide-react';
+import { useState } from 'react';
 
 interface AIMetrics {
   totalTokens: number;
@@ -37,17 +37,17 @@ interface AIMetrics {
 }
 
 export default function AIMetricsDashboard() {
-  const [scope, setScope] = useState<"session" | "24h" | "7d" | "30d" | "all-time">("session");
+  const [scope, setScope] = useState<'session' | '24h' | '7d' | '30d' | 'all-time'>('session');
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch AI metrics from API
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["ai-metrics", scope],
+    queryKey: ['ai-metrics', scope],
     queryFn: async () => {
       const json = await fetchClient.get<{ success: boolean; error?: string; metrics: AIMetrics }>(
-        `/api/ai/metrics?scope=${scope}`,
+        `/api/ai/metrics?scope=${scope}`
       );
-      if (!json.success) throw new Error(json.error || "Failed to fetch AI metrics");
+      if (!json.success) throw new Error(json.error || 'Failed to fetch AI metrics');
       return json.metrics;
     },
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -75,7 +75,7 @@ export default function AIMetricsDashboard() {
       <GlassCard accent="red">
         <p className="text-accent-red font-medium">Failed to load AI metrics</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          {error instanceof Error ? error.message : "Unknown error"}
+          {error instanceof Error ? error.message : 'Unknown error'}
         </p>
         <button
           onClick={handleRefresh}
@@ -111,17 +111,17 @@ export default function AIMetricsDashboard() {
           <div className="flex items-center gap-3">
             {/* Scope Toggle */}
             <div className="flex items-center gap-1 bg-[var(--bg-tertiary)] p-1 rounded-lg">
-              {(["session", "24h", "7d", "30d", "all-time"] as const).map((s) => (
+              {(['session', '24h', '7d', '30d', 'all-time'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setScope(s)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                     scope === s
-                      ? "bg-[var(--accent-blue)] text-white shadow-sm"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
+                      ? 'bg-[var(--accent-blue)] text-white shadow-sm'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                   }`}
                 >
-                  {s === "all-time" ? "All-Time" : s.toUpperCase()}
+                  {s === 'all-time' ? 'All-Time' : s.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -132,7 +132,7 @@ export default function AIMetricsDashboard() {
               title="Refresh metrics"
             >
               <RefreshCw
-                className={`w-4 h-4 text-[var(--text-secondary)] ${refreshing ? "animate-spin" : ""}`}
+                className={`w-4 h-4 text-[var(--text-secondary)] ${refreshing ? 'animate-spin' : ''}`}
               />
             </button>
           </div>
@@ -196,7 +196,7 @@ export default function AIMetricsDashboard() {
               {(metrics.totalTokens / 1_000_000).toFixed(2)}M
             </div>
             <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-              {(metrics.totalPromptTokens / 1_000_000).toFixed(2)}M in •{" "}
+              {(metrics.totalPromptTokens / 1_000_000).toFixed(2)}M in •{' '}
               {(metrics.totalCompletionTokens / 1_000_000).toFixed(2)}M out
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function AIMetricsDashboard() {
               <div className="flex items-center gap-3">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    usage.status === "success" ? "bg-accent-green" : "bg-accent-red"
+                    usage.status === 'success' ? 'bg-accent-green' : 'bg-accent-red'
                   }`}
                 />
                 <div>

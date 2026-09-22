@@ -1,4 +1,4 @@
-import { AutoAnimateList } from "@repo/ui/AnimatedList";
+import { AutoAnimateList } from '@repo/ui/AnimatedList';
 import {
   AlertTriangle,
   ArrowRight,
@@ -6,9 +6,9 @@ import {
   Clock,
   type LucideIcon,
   XCircle,
-} from "lucide-react";
-import Link from "next/link";
-import StatusBadge, { type AccessStatus } from "@/features/access-control/components/StatusBadge";
+} from 'lucide-react';
+import Link from 'next/link';
+import StatusBadge, { type AccessStatus } from '@/features/access-control/components/StatusBadge';
 
 interface ActivityEntry {
   id: string;
@@ -23,14 +23,14 @@ interface ActivityEntry {
 const statusIcons: Record<string, LucideIcon> = {
   Granted: CheckCircle2,
   Denied: XCircle,
-  "Expired Credential": Clock,
-  "Tailgate Alert": AlertTriangle,
+  'Expired Credential': Clock,
+  'Tailgate Alert': AlertTriangle,
 };
 
 const entityTypePill: Record<string, string> = {
-  Employee: "bg-primary/10 text-primary",
-  Vehicle: "bg-accent/10 text-accent",
-  Equipment: "bg-secondary text-secondary-foreground",
+  Employee: 'bg-primary/10 text-primary',
+  Vehicle: 'bg-accent/10 text-accent',
+  Equipment: 'bg-secondary text-secondary-foreground',
 };
 
 interface DashboardActivityFeedProps {
@@ -66,11 +66,11 @@ export default function DashboardActivityFeed({ activity }: DashboardActivityFee
                 <StatusIcon
                   size={16}
                   className={
-                    entry.status === "Granted"
-                      ? "text-success"
-                      : entry.status === "Denied" || entry.status === "Expired Credential"
-                        ? "text-danger"
-                        : "text-warning"
+                    entry.status === 'Granted'
+                      ? 'text-success'
+                      : entry.status === 'Denied' || entry.status === 'Expired Credential'
+                        ? 'text-danger'
+                        : 'text-warning'
                   }
                 />
               </div>

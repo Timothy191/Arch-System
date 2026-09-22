@@ -5,11 +5,11 @@
  * with in-memory fallback. Supports different limit types per endpoint category.
  */
 
-import { timingSafeEqual } from "node:crypto";
-import os from "node:os";
-import { getRedisClient } from "@repo/redis";
-import { type NextRequest, NextResponse } from "next/server";
-import { getRateLimitConfig } from "./rate-limit-config";
+import { timingSafeEqual } from 'node:crypto';
+import os from 'node:os';
+import { getRedisClient } from '@repo/redis';
+import { type NextRequest, NextResponse } from 'next/server';
+import { getRateLimitConfig } from './rate-limit-config';
 
 // Simple in-memory store for rate limiting
 class MemoryStore {
@@ -67,7 +67,7 @@ class TokenBucketStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: MemoryStore | RedisStore,
+    store: MemoryStore | RedisStore
   ): Promise<RateLimitResult> {
     const result = await store.increment(key, windowMs);
     const allowed = result.count <= limit;
@@ -89,7 +89,7 @@ class SlidingWindowStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: MemoryStore | RedisStore,
+    store: MemoryStore | RedisStore
   ): Promise<RateLimitResult> {
     const result = await store.increment(key, windowMs);
     const allowed = result.count <= limit;
@@ -114,9 +114,9 @@ interface RateLimitResult {
 }
 
 const WHITELISTED_IPS = new Set(
-  (process.env.RATE_LIMIT_IP_WHITELIST || "127.0.0.1,::1,::ffff:127.0.0.1")
-    .split(",")
-    .map((ip) => ip.trim()),
+  (process.env.RATE_LIMIT_IP_WHITELIST || '127.0.0.1,::1,::ffff:127.0.0.1')
+    .split(',')
+    .map((ip) => ip.trim())
 );
 
 function isIpWhitelisted(ip: string): boolean {
@@ -124,14 +124,14 @@ function isIpWhitelisted(ip: string): boolean {
 }
 
 function getClientIp(request: Request | NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+  const forwarded = request.headers.get('x-forwarded-for');
   const realIp =
-    forwarded?.split(",")[0]?.trim() || ("ip" in request ? (request as any).ip : undefined);
-  return realIp || "unknown";
+    forwarded?.split(',')[0]?.trim() || ('ip' in request ? (request as any).ip : undefined);
+  return realIp || 'unknown';
 }
 
 function isSystemUnderHighLoad(): boolean {
-  if (process.env.NODE_ENV === "test" && !process.env.ENABLE_LOAD_ADAPTIVE_TEST) return false;
+  if (process.env.NODE_ENV === 'test' && !process.env.ENABLE_LOAD_ADAPTIVE_TEST) return false;
   try {
     const load = os.loadavg()[0]; // 1-minute load average
     if (load === undefined) return false;
@@ -155,7 +155,7 @@ const tokenBucketStrategy = new TokenBucketStrategy();
 async function checkRateLimit(
   identifier: string,
   config: { windowMs: number; maxRequests: number },
-  path: string,
+  path: string
 ): Promise<RateLimitResult> {
   let store;
   try {
@@ -169,7 +169,7 @@ async function checkRateLimit(
   }
 
   // Token Bucket Strategy for bursty AI calls, Sliding Window for all others
-  const strategy = path.startsWith("/api/ai/") ? tokenBucketStrategy : slidingWindowStrategy;
+  const strategy = path.startsWith('/api/ai/') ? tokenBucketStrategy : slidingWindowStrategy;
 
   const key = `ratelimit:${identifier}`;
   return strategy.check(key, config.maxRequests, config.windowMs, store);
@@ -180,16 +180,16 @@ async function checkRateLimit(
  */
 function getClientIdentifier(request: Request | NextRequest): string {
   // Try to get real IP, fallback to user ID if authenticated
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIp = forwarded?.split(",")[0]?.trim() || ("ip" in request ? request.ip : undefined);
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIp = forwarded?.split(',')[0]?.trim() || ('ip' in request ? request.ip : undefined);
 
   // For authenticated requests, use user ID for more precise limiting
-  const userId = request.headers.get("x-user-id");
+  const userId = request.headers.get('x-user-id');
   if (userId) {
     return `user:${userId}`;
   }
 
-  return `ip:${realIp || "unknown"}`;
+  return `ip:${realIp || 'unknown'}`;
 }
 
 /**
@@ -201,10 +201,10 @@ export async function withRateLimit(
   options?: {
     customLimit?: { windowMs: number; maxRequests: number };
     skipIf?: (_request: Request | NextRequest) => boolean;
-  },
+  }
 ): Promise<NextResponse> {
   // Allow disabling rate limit for load testing and development
-  if (process.env.DISABLE_RATE_LIMIT === "true") {
+  if (process.env.DISABLE_RATE_LIMIT === 'true') {
     return handler();
   }
 
@@ -236,28 +236,28 @@ export async function withRateLimit(
   if (!result.allowed) {
     return new NextResponse(
       JSON.stringify({
-        error: "Rate limit exceeded",
+        error: 'Rate limit exceeded',
         message: `Too many requests. Try again in ${result.retryAfter || 60} seconds.`,
         retryAfter: result.retryAfter || 60,
       }),
       {
         status: 429,
         headers: {
-          "Content-Type": "application/json",
-          "X-RateLimit-Limit": result.limit.toString(),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": result.resetTime.toString(),
-          "Retry-After": (result.retryAfter || 60).toString(),
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': result.limit.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': result.resetTime.toString(),
+          'Retry-After': (result.retryAfter || 60).toString(),
         },
-      },
+      }
     );
   }
 
   const response = await handler();
 
-  response.headers.set("X-RateLimit-Limit", result.limit.toString());
-  response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
-  response.headers.set("X-RateLimit-Reset", result.resetTime.toString());
+  response.headers.set('X-RateLimit-Limit', result.limit.toString());
+  response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
+  response.headers.set('X-RateLimit-Reset', result.resetTime.toString());
 
   return response;
 }
@@ -269,7 +269,7 @@ export function skipForInternal(request: Request | NextRequest): boolean {
   const expected = process.env.INTERNAL_API_SECRET;
   if (!expected) return false;
 
-  const internalSecret = request.headers.get("x-internal-secret") || "";
+  const internalSecret = request.headers.get('x-internal-secret') || '';
   if (internalSecret.length !== expected.length) return false;
 
   try {

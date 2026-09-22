@@ -1,6 +1,6 @@
-import { createClient, type RedisClientType } from "redis";
+import { createClient, type RedisClientType } from 'redis';
 
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
@@ -26,19 +26,19 @@ export async function getRedisClient(): Promise<RedisClientType> {
         keepAlive: true,
         reconnectStrategy(retries: number) {
           if (retries > 3) {
-            return new Error("Redis connection failed");
+            return new Error('Redis connection failed');
           }
           return Math.min(retries * 50, 500);
         },
       },
     } as any);
 
-    next.on("error", () => {
+    next.on('error', () => {
       if (client === next) client = null;
       connecting = null;
     });
 
-    next.on("end", () => {
+    next.on('end', () => {
       if (client === next) client = null;
       connecting = null;
     });

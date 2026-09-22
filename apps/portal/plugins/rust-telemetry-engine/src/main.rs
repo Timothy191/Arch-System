@@ -4,7 +4,7 @@ use std::process;
 fn main() {
     // 1. Collect and parse CLI arguments
     let args: Vec<String> = env::args().collect();
-    
+
     let mut hours: f64 = 150.0;
     let mut temp: f64 = 55.0;
     let mut rpm: f64 = 1000.0;
@@ -70,7 +70,7 @@ fn main() {
     // 3. Sigmoid Logistic regression to failure probability percentage
     // P(t) = 1 / (1 + e^(- (wear - shift) / scale))
     let z = (wear_index - 45.0) / 10.0;
-    
+
     // Prevent overflow/NaN in extreme edge cases
     let exp_term = (-z).exp();
     let prob_pct = if exp_term.is_infinite() {

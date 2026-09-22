@@ -1,6 +1,6 @@
-import { inngest, machineBreakdownEvent } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { inngest, machineBreakdownEvent } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 /**
  * Machine Breakdown Notification Job
@@ -9,8 +9,8 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  */
 export const machineBreakdownNotificationFn = inngest.createFunction(
   {
-    id: "machine-breakdown-notifications",
-    name: "Machine Breakdown Notifications",
+    id: 'machine-breakdown-notifications',
+    name: 'Machine Breakdown Notifications',
     triggers: [{ event: machineBreakdownEvent }],
   },
   async ({ event }: { event: { data: Record<string, unknown> } }) => {
@@ -21,21 +21,21 @@ export const machineBreakdownNotificationFn = inngest.createFunction(
       const { department_id, fleet_id, machine_type, reason, status } = event.data || {};
 
       const duration = performance.now() - start;
-      recordJobExecution("machine-breakdown-notifications", duration, true);
+      recordJobExecution('machine-breakdown-notifications', duration, true);
 
       return {
         success: true,
-        message: "Machine breakdown notification dispatched",
+        message: 'Machine breakdown notification dispatched',
         payload: { department_id, fleet_id, machine_type, reason, status },
       };
     } catch (err) {
       const duration = performance.now() - start;
-      recordJobExecution("machine-breakdown-notifications", duration, false);
+      recordJobExecution('machine-breakdown-notifications', duration, false);
       logError(err, {
-        context: "machineBreakdownNotificationFn",
+        context: 'machineBreakdownNotificationFn',
         data: event.data,
       });
       throw err;
     }
-  },
+  }
 );

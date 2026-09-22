@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-22T08:01:23.632Z",
-  "databaseTablesCount": 86,
+  "timestamp": "2026-09-22T11:24:03.907Z",
+  "databaseTablesCount": 88,
   "contractSchemasCount": 75,
   "synchronizedTablesCount": 27,
-  "unmappedTablesCount": 59,
-  "driftHealthIndex": 31.4,
+  "unmappedTablesCount": 61,
+  "driftHealthIndex": 30.7,
   "status": "DRIFT_DETECTED",
   "tables": [
     {
@@ -172,35 +172,35 @@
         "aiChatSchema",
         "aiPredictSchema"
       ],
-      "migration": "100_ai_token_usage_tracking.sql"
+      "migration": "102_ai_token_usage_tracking.sql"
     },
     {
       "table": "excavator_haul_logs",
       "schemas": [
         "excavatorHaulSchema"
       ],
-      "migration": "148_multi_site_production_report.sql"
+      "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "excavator_truck_tallies",
       "schemas": [
         "truckTallySchema"
       ],
-      "migration": "148_multi_site_production_report.sql"
+      "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "dozer_rollover_logs",
       "schemas": [
         "dozerRolloverEntrySchema"
       ],
-      "migration": "148_multi_site_production_report.sql"
+      "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "ancillary_shift_logs",
       "schemas": [
         "ancillaryReportEntrySchema"
       ],
-      "migration": "148_multi_site_production_report.sql"
+      "migration": "150_multi_site_production_report.sql"
     },
     {
       "table": "compliance_audit_runs",
@@ -208,7 +208,7 @@
         "complianceAuditRunSchema",
         "createComplianceAuditRunSchema"
       ],
-      "migration": "151_operational_compliance_checks.sql"
+      "migration": "153_operational_compliance_checks.sql"
     }
   ]
 }

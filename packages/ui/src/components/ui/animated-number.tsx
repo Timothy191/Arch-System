@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedNumberProps {
   value: number;
@@ -16,13 +16,13 @@ export function AnimatedNumber({
   value,
   className,
   duration = 0.5,
-  prefix = "",
-  suffix = "",
+  prefix = '',
+  suffix = '',
 }: AnimatedNumberProps) {
-  const digits = value.toString().split("");
+  const digits = value.toString().split('');
 
   return (
-    <div className={cn("flex items-center tabular-nums", className)}>
+    <div className={cn('flex items-center tabular-nums', className)}>
       {prefix && <span>{prefix}</span>}
       <div className="flex relative items-center">
         {digits.map((digit, index) => (
@@ -76,9 +76,9 @@ function SingleDigit({
     <div
       className="relative"
       style={{
-        height: height || "auto",
-        overflow: "hidden",
-        overflowX: "clip",
+        height: height || 'auto',
+        overflow: 'hidden',
+        overflowX: 'clip',
       }}
       ref={containerRef}
     >
@@ -98,7 +98,7 @@ function DigitStrip({
   value: string;
   duration: number;
 }) {
-  const heightInNumber = Number.parseInt(eleHeight?.replace("px", "") || "48", 10);
+  const heightInNumber = Number.parseInt(eleHeight?.replace('px', '') || '48', 10);
   const prev = useRef(value);
 
   const currentVal = parseInt(value, 10);
@@ -117,7 +117,7 @@ function DigitStrip({
         initial={{ y: dir }}
         animate={{ y: 0 }}
         exit={{ y: 0, transition: { duration: 0.1 } }}
-        transition={{ duration, ease: "easeOut" }}
+        transition={{ duration, ease: 'easeOut' }}
         className="flex relative flex-col items-center"
       >
         {/* Numbers smaller than current */}

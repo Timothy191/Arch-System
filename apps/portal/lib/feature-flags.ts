@@ -3,7 +3,7 @@
  * Usage: const { enabled, variant } = await getFeatureFlag('new-dashboard', userId)
  */
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 interface FeatureFlagResult {
   enabled: boolean;
@@ -14,7 +14,7 @@ interface FeatureFlagResult {
 export async function getFeatureFlag(flagKey: string, userId?: string): Promise<FeatureFlagResult> {
   const supabase = await createServerSupabaseClient();
 
-  const { data, error } = await supabase.rpc("evaluate_feature_flag", {
+  const { data, error } = await supabase.rpc('evaluate_feature_flag', {
     p_flag_key: flagKey,
     p_user_id: userId || null,
     p_session_id: null,
@@ -39,11 +39,11 @@ export async function logConversion(
   userId: string,
   variant: string,
   metricName: string,
-  metricValue?: number,
+  metricValue?: number
 ): Promise<void> {
   const supabase = await createServerSupabaseClient();
 
-  await supabase.from("ab_test_results").insert({
+  await supabase.from('ab_test_results').insert({
     flag_key: flagKey,
     user_id: userId,
     variant,

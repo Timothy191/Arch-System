@@ -14,19 +14,19 @@
  *   SPEC_FILE: Path to a local OpenAPI spec JSON file (optional, skips API fetch)
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
-const { execSync } = require("node:child_process");
+const fs = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 
-const API_URL = process.env.API_URL || "http://localhost:3000";
+const API_URL = process.env.API_URL || 'http://localhost:3000';
 const SPEC_FILE = process.env.SPEC_FILE;
-const OUTPUT_DIR = path.join(__dirname, "..", "src", "generated");
-const OUTPUT_FILE = path.join(OUTPUT_DIR, "openapi.types.ts");
+const OUTPUT_DIR = path.join(__dirname, '..', 'src', 'generated');
+const OUTPUT_FILE = path.join(OUTPUT_DIR, 'openapi.types.ts');
 
 async function fetchOpenAPISpec() {
   if (SPEC_FILE) {
     console.log(`Reading OpenAPI spec from local file: ${SPEC_FILE}`);
-    const specContent = fs.readFileSync(SPEC_FILE, "utf-8");
+    const specContent = fs.readFileSync(SPEC_FILE, 'utf-8');
     return JSON.parse(specContent);
   }
 
@@ -38,12 +38,12 @@ async function fetchOpenAPISpec() {
     }
     return await response.json();
   } catch (error) {
-    console.error("Error fetching OpenAPI spec:", error.message);
+    console.error('Error fetching OpenAPI spec:', error.message);
     console.error(
-      "\nMake sure the dev server is running or provide a SPEC_FILE environment variable.",
+      '\nMake sure the dev server is running or provide a SPEC_FILE environment variable.'
     );
     console.error(
-      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`,
+      `Example: SPEC_FILE=./openapi-spec.json pnpm --filter @repo/contract openapi:generate`
     );
     process.exit(1);
   }
@@ -56,13 +56,13 @@ async function generateTypes(spec) {
   }
 
   // Write spec to temporary file
-  const tempSpecFile = path.join(__dirname, "temp-openapi.json");
+  const tempSpecFile = path.join(__dirname, 'temp-openapi.json');
   fs.writeFileSync(tempSpecFile, JSON.stringify(spec, null, 2));
 
   try {
-    console.log("Generating TypeScript types from OpenAPI spec...");
+    console.log('Generating TypeScript types from OpenAPI spec...');
     // Use openapi-typescript CLI
-    execSync(`npx openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`, { stdio: "inherit" });
+    execSync(`npx openapi-typescript ${tempSpecFile} -o ${OUTPUT_FILE}`, { stdio: 'inherit' });
     console.log(`✓ Generated types saved to ${OUTPUT_FILE}`);
   } finally {
     // Clean up temp file
@@ -78,6 +78,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  console.error('Fatal error:', error);
   process.exit(1);
 });

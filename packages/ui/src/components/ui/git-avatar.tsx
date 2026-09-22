@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type * as React from "react";
-import { Avatar, type AvatarProps } from "./avatar";
+import type * as React from 'react';
+import { Avatar, type AvatarProps } from './avatar';
 
-export interface GitAvatarProps extends Omit<AvatarProps, "src"> {
+export interface GitAvatarProps extends Omit<AvatarProps, 'src'> {
   username: string;
 }
 
@@ -14,7 +14,7 @@ export function GitHubAvatar({
   title,
   ...props
 }: GitAvatarProps): React.JSX.Element {
-  const pixelSize = typeof size === "number" ? size * 2 : 64;
+  const pixelSize = typeof size === 'number' ? size * 2 : 64;
   const src = `https://github.com/${username}.png?size=${pixelSize}`;
 
   return (
@@ -57,7 +57,7 @@ export function BitbucketAvatar({
   title,
   ...props
 }: GitAvatarProps): React.JSX.Element {
-  const pixelSize = typeof size === "number" ? size * 2 : 64;
+  const pixelSize = typeof size === 'number' ? size * 2 : 64;
   const src = `https://bitbucket.org/account/${username}/avatar/${pixelSize}/`;
 
   return (
@@ -72,6 +72,6 @@ export function BitbucketAvatar({
   );
 }
 
-GitHubAvatar.displayName = "GitHubAvatar";
-GitLabAvatar.displayName = "GitLabAvatar";
-BitbucketAvatar.displayName = "BitbucketAvatar";
+GitHubAvatar.displayName = 'GitHubAvatar';
+GitLabAvatar.displayName = 'GitLabAvatar';
+BitbucketAvatar.displayName = 'BitbucketAvatar';

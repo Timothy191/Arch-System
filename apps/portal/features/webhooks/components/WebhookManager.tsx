@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import { AnimeStagger } from "@repo/ui/AnimeStagger";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Checkbox } from "@repo/ui/Checkbox";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { fetchClient } from "@repo/utils/client";
-import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle, Plus, RefreshCw, Trash2, XCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { AnimeStagger } from '@repo/ui/AnimeStagger';
+import { Checkbox } from '@repo/ui/Checkbox';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { fetchClient } from '@repo/utils/client';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle, Plus, RefreshCw, Trash2, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 type WebhookEventType =
-  | "daily_log.created"
-  | "daily_log.updated"
-  | "breakdown.created"
-  | "breakdown.updated"
-  | "breakdown.completed"
-  | "production_log.created"
-  | "production_log.updated"
-  | "operational_delay.created"
-  | "operational_delay.updated";
+  | 'daily_log.created'
+  | 'daily_log.updated'
+  | 'breakdown.created'
+  | 'breakdown.updated'
+  | 'breakdown.completed'
+  | 'production_log.created'
+  | 'production_log.updated'
+  | 'operational_delay.created'
+  | 'operational_delay.updated';
 
 interface WebhookEndpoint {
   id: string;
@@ -35,15 +35,15 @@ interface WebhookEndpoint {
 }
 
 const EVENT_TYPES: WebhookEventType[] = [
-  "daily_log.created",
-  "daily_log.updated",
-  "breakdown.created",
-  "breakdown.updated",
-  "breakdown.completed",
-  "production_log.created",
-  "production_log.updated",
-  "operational_delay.created",
-  "operational_delay.updated",
+  'daily_log.created',
+  'daily_log.updated',
+  'breakdown.created',
+  'breakdown.updated',
+  'breakdown.completed',
+  'production_log.created',
+  'production_log.updated',
+  'operational_delay.created',
+  'operational_delay.updated',
 ];
 
 export function WebhookManager() {
@@ -52,18 +52,18 @@ export function WebhookManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookEndpoint | null>(null);
   const [formData, setFormData] = useState({
-    url: "",
-    description: "",
+    url: '',
+    description: '',
     event_types: [] as WebhookEventType[],
     active: true,
   });
 
   const fetchWebhooks = useCallback(async () => {
     try {
-      const data = await fetchClient.get<{ webhooks: WebhookEndpoint[] }>("/api/webhooks");
+      const data = await fetchClient.get<{ webhooks: WebhookEndpoint[] }>('/api/webhooks');
       setWebhooks(data.webhooks);
     } catch (_error) {
-      toast.error("Failed to fetch webhooks");
+      toast.error('Failed to fetch webhooks');
     } finally {
       setLoading(false);
     }
@@ -77,23 +77,23 @@ export function WebhookManager() {
     e.preventDefault();
 
     if (!formData.url || formData.event_types.length === 0) {
-      toast.error("URL and at least one event type are required");
+      toast.error('URL and at least one event type are required');
       return;
     }
 
     try {
-      await fetchClient.post("/api/webhooks", formData);
-      toast.success("Webhook created successfully");
+      await fetchClient.post('/api/webhooks', formData);
+      toast.success('Webhook created successfully');
       setShowForm(false);
       setFormData({
-        url: "",
-        description: "",
+        url: '',
+        description: '',
         event_types: [],
         active: true,
       });
       fetchWebhooks();
     } catch (error: any) {
-      toast.error(error?.message || "Failed to create webhook");
+      toast.error(error?.message || 'Failed to create webhook');
     }
   };
 
@@ -102,29 +102,29 @@ export function WebhookManager() {
 
     try {
       await fetchClient.put(`/api/webhooks/${editingWebhook.id}`, formData);
-      toast.success("Webhook updated successfully");
+      toast.success('Webhook updated successfully');
       setEditingWebhook(null);
       setFormData({
-        url: "",
-        description: "",
+        url: '',
+        description: '',
         event_types: [],
         active: true,
       });
       fetchWebhooks();
     } catch (error: any) {
-      toast.error(error?.message || "Failed to update webhook");
+      toast.error(error?.message || 'Failed to update webhook');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this webhook?")) return;
+    if (!confirm('Are you sure you want to delete this webhook?')) return;
 
     try {
       await fetchClient.delete(`/api/webhooks/${id}`);
-      toast.success("Webhook deleted successfully");
+      toast.success('Webhook deleted successfully');
       fetchWebhooks();
     } catch (error: any) {
-      toast.error(error?.message || "Failed to delete webhook");
+      toast.error(error?.message || 'Failed to delete webhook');
     }
   };
 
@@ -132,7 +132,7 @@ export function WebhookManager() {
     setEditingWebhook(webhook);
     setFormData({
       url: webhook.url,
-      description: webhook.description || "",
+      description: webhook.description || '',
       event_types: webhook.event_types,
       active: webhook.active,
     });
@@ -171,8 +171,8 @@ export function WebhookManager() {
           onClick={() => {
             setEditingWebhook(null);
             setFormData({
-              url: "",
-              description: "",
+              url: '',
+              description: '',
               event_types: [],
               active: true,
             });
@@ -203,7 +203,7 @@ export function WebhookManager() {
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-arch-text-primary mb-6 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-arch-accent-blue animate-pulse"></span>
-                  {editingWebhook ? "Edit Webhook Configuration" : "New Webhook Configuration"}
+                  {editingWebhook ? 'Edit Webhook Configuration' : 'New Webhook Configuration'}
                 </h3>
                 <form onSubmit={editingWebhook ? handleUpdate : handleSubmit} className="space-y-6">
                   <div>
@@ -255,8 +255,8 @@ export function WebhookManager() {
                             onClick={() => toggleEventType(eventType)}
                             className={`text-left px-4 py-3 rounded-xl border transition-all text-xs font-medium relative overflow-hidden ${
                               isSelected
-                                ? "bg-arch-accent-green/10 border-arch-accent-green text-arch-accent-green"
-                                : "bg-white/40 border-white/20 text-arch-text-secondary hover:bg-white/60 hover:border-white/40"
+                                ? 'bg-arch-accent-green/10 border-arch-accent-green text-arch-accent-green'
+                                : 'bg-white/40 border-white/20 text-arch-text-secondary hover:bg-white/60 hover:border-white/40'
                             }`}
                           >
                             {isSelected && (
@@ -293,8 +293,8 @@ export function WebhookManager() {
                         setShowForm(false);
                         setEditingWebhook(null);
                         setFormData({
-                          url: "",
-                          description: "",
+                          url: '',
+                          description: '',
                           event_types: [],
                           active: true,
                         });
@@ -306,7 +306,7 @@ export function WebhookManager() {
                       type="submit"
                       className="bg-arch-accent-blue text-white hover:bg-arch-accent-blue/90 shadow-sm transition-transform active:scale-95"
                     >
-                      {editingWebhook ? "Update Webhook" : "Create Webhook"}
+                      {editingWebhook ? 'Update Webhook' : 'Create Webhook'}
                     </Button>
                   </div>
                 </form>

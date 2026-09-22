@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { NextResponse } from "next/server";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -10,17 +10,17 @@ export async function GET() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get breakdowns from the last 30 days
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
     const { data: breakdowns, error } = await supabase
-      .from("breakdowns")
-      .select("machine_id, date_in")
-      .gte("date_in", thirtyDaysAgo)
-      .is("deleted_at", null);
+      .from('breakdowns')
+      .select('machine_id, date_in')
+      .gte('date_in', thirtyDaysAgo)
+      .is('deleted_at', null);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -46,19 +46,19 @@ export async function GET() {
 
     // Fetch details of those high risk machines
     const { data: machines } = await supabase
-      .from("machines")
-      .select("id, name, type, active")
-      .in("id", highRiskMachineIds);
+      .from('machines')
+      .select('id, name, type, active')
+      .in('id', highRiskMachineIds);
 
     const predictions = (machines || []).map((m) => ({
       machine_id: m.id,
       machine_name: m.name,
       type: m.type,
-      risk_level: "HIGH",
+      risk_level: 'HIGH',
       confidence: 0.85,
       reason: `Machine has experienced ${machineBreakdownCount[m.id]} breakdowns in the last 30 days. Model (mock) predicts an 85% chance of critical failure within 72 hours.`,
       recommended_action:
-        "Schedule immediate preventative maintenance and check hydraulic systems.",
+        'Schedule immediate preventative maintenance and check hydraulic systems.',
     }));
 
     return NextResponse.json({ predictions });

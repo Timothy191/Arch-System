@@ -1,13 +1,13 @@
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
-import { TECH_STACK } from "../lib/data";
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card';
+import { TECH_STACK } from '../lib/data';
 
 const categoryIcons: Record<string, string> = {
-  Frontend: "🎨",
-  Backend: "⚙️",
-  DevOps: "🚀",
-  Testing: "🧪",
-  "Integration Tools": "🔗",
+  Frontend: '🎨',
+  Backend: '⚙️',
+  DevOps: '🚀',
+  Testing: '🧪',
+  'Integration Tools': '🔗',
 };
 
 export default function TechStack() {
@@ -32,7 +32,7 @@ export default function TechStack() {
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                   style={{ backgroundColor: `${category.color}20` }}
                 >
-                  {categoryIcons[category.category] || "📦"}
+                  {categoryIcons[category.category] || '📦'}
                 </div>
                 <div>
                   <CardTitle className="text-lg" style={{ color: category.color }}>
@@ -160,15 +160,15 @@ export default function TechStack() {
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">portal/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 14 application
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{" "}
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{' '}
             <span className="text-text-muted">app/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App Router routes
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{" "}
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{' '}
             <span className="text-text-muted">features/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Co-located components
             <br />
-            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──{" "}
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──{' '}
             <span className="text-text-muted">lib/</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# App constants
             <br />

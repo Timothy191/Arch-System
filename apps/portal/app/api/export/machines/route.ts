@@ -78,11 +78,11 @@
  *         description: Internal server error
  */
 
-import { exportQuerySchema } from "@repo/contract/schemas/export.schema";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { type NextRequest, NextResponse } from "next/server";
-import { applyCors } from "@/lib/api/cors";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
+import { exportQuerySchema } from '@repo/contract/schemas/export.schema';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { applyCors } from '@/lib/api/cors';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
@@ -96,7 +96,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return applyCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    return applyCors(req, NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
   }
 
   const { searchParams } = req.nextUrl;
@@ -106,58 +106,58 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     return applyCors(
       req,
       NextResponse.json(
-        { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 },
-      ),
+        { error: 'Invalid query parameters', details: parsed.error.issues },
+        { status: 400 }
+      )
     );
   }
   const { dept, limit, offset } = parsed.data;
 
-  const format = req.headers.get("accept")?.includes("text/csv") ? "csv" : "json";
+  const format = req.headers.get('accept')?.includes('text/csv') ? 'csv' : 'json';
 
   let query = supabase
-    .from("machines")
+    .from('machines')
     .select(
-      "id, name, machine_type, serial_number, bin_factor, active, department_id, site_id, created_at",
-      { count: "estimated" },
+      'id, name, machine_type, serial_number, bin_factor, active, department_id, site_id, created_at',
+      { count: 'estimated' }
     )
-    .order("name")
+    .order('name')
     .range(offset, offset + limit - 1);
 
   if (dept) {
     const { data: deptRow } = await supabase
-      .from("departments")
-      .select("id")
-      .eq("name", dept)
+      .from('departments')
+      .select('id')
+      .eq('name', dept)
       .single();
-    if (deptRow) query = query.eq("department_id", deptRow.id);
+    if (deptRow) query = query.eq('department_id', deptRow.id);
   }
 
   const { data, error, count } = await query;
   if (error) {
-    return applyCors(req, NextResponse.json({ error: "Database query failed" }, { status: 500 }));
+    return applyCors(req, NextResponse.json({ error: 'Database query failed' }, { status: 500 }));
   }
 
-  if (format === "csv") {
+  if (format === 'csv') {
     const keys = [
-      "id",
-      "name",
-      "machine_type",
-      "serial_number",
-      "bin_factor",
-      "active",
-      "department_id",
-      "site_id",
-      "created_at",
+      'id',
+      'name',
+      'machine_type',
+      'serial_number',
+      'bin_factor',
+      'active',
+      'department_id',
+      'site_id',
+      'created_at',
     ] as const;
     const csv = [
-      keys.join(","),
-      ...(data ?? []).map((r) => keys.map((k) => sanitizeCsvCell(String(r[k] ?? ""))).join(",")),
-    ].join("\n");
+      keys.join(','),
+      ...(data ?? []).map((r) => keys.map((k) => sanitizeCsvCell(String(r[k] ?? ''))).join(',')),
+    ].join('\n');
     const response = new NextResponse(csv, {
       headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="machines.csv"`,
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="machines.csv"`,
       },
     });
     return applyCors(req, response);

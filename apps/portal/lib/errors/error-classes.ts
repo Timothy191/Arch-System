@@ -23,7 +23,7 @@ class AppError extends Error {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   );
   constructor(
     message: string,
@@ -36,16 +36,16 @@ class AppError extends Error {
           cause?: unknown;
           [key: string]: unknown;
         },
-    statusCode?: number,
+    statusCode?: number
   ) {
     super(message);
     this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
 
-    if (typeof codeOrOptions === "string") {
+    if (typeof codeOrOptions === 'string') {
       this.code = codeOrOptions;
       this.statusCode = statusCode ?? 500;
-    } else if (codeOrOptions && typeof codeOrOptions === "object") {
+    } else if (codeOrOptions && typeof codeOrOptions === 'object') {
       this.code = codeOrOptions.code;
       this.statusCode = codeOrOptions.statusCode ?? 500;
       this.context = codeOrOptions.context;
@@ -63,11 +63,11 @@ type AppErrorMeta = {
 
 function mergeExtra(
   base: Record<string, unknown> | undefined,
-  extra: Record<string, unknown>,
+  extra: Record<string, unknown>
 ): Record<string, unknown> {
   const next = { ...base, ...extra };
   for (const key of Object.keys(next)) {
-    if (key === "context" || key === "cause") {
+    if (key === 'context' || key === 'cause') {
       delete (extra as Record<string, unknown>)[key];
       delete next[key];
     }
@@ -89,7 +89,7 @@ export class APIError extends AppError {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   );
   constructor(message: string, responseOrOptions?: Response | AppErrorMeta) {
     let statusCode: number | undefined;
@@ -101,7 +101,7 @@ export class APIError extends AppError {
     if (responseOrOptions) {
       if (
         responseOrOptions instanceof Response &&
-        typeof (responseOrOptions as Response).status === "number"
+        typeof (responseOrOptions as Response).status === 'number'
       ) {
         response = responseOrOptions as Response;
         statusCode = (responseOrOptions as unknown as Response).status;
@@ -114,7 +114,7 @@ export class APIError extends AppError {
         extra = (rest ?? {}) as Record<string, unknown>;
       }
     }
-    super(message, "API_ERROR", statusCode ?? 500);
+    super(message, 'API_ERROR', statusCode ?? 500);
     this.response = response;
     if (context) this.context = context;
     if (cause) this.cause = cause;
@@ -134,14 +134,14 @@ export class ValidationError extends AppError {
       context?: Record<string, unknown>;
       cause?: unknown;
       [key: string]: unknown;
-    },
+    }
   ) {
     const extra = {
       ...(options?.field && { field: options.field }),
       ...(options?.value !== undefined && { value: options.value }),
     };
     super(message, {
-      code: "VALIDATION_ERROR",
+      code: 'VALIDATION_ERROR',
       statusCode: 400,
       cause: options?.cause,
       context: { ...options?.context, ...extra },
@@ -156,15 +156,15 @@ export class ValidationError extends AppError {
 
 export class AuthError extends AppError {
   constructor(
-    message: string = "Authentication failed",
+    message: string = 'Authentication failed',
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
-      code: "AUTH_ERROR",
+      code: 'AUTH_ERROR',
       statusCode: 401,
       cause: options?.cause,
       context: options?.context,
@@ -184,10 +184,10 @@ export class DatabaseError extends AppError {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
-      code: "DATABASE_ERROR",
+      code: 'DATABASE_ERROR',
       statusCode: 500,
       cause: options?.cause,
       context: options?.context,
@@ -202,15 +202,15 @@ export class DatabaseError extends AppError {
 
 export class NotFoundError extends AppError {
   constructor(
-    message: string = "Resource not found",
+    message: string = 'Resource not found',
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
-      code: "NOT_FOUND",
+      code: 'NOT_FOUND',
       statusCode: 404,
       cause: options?.cause,
       context: options?.context,
@@ -225,15 +225,15 @@ export class NotFoundError extends AppError {
 
 export class ConflictError extends AppError {
   constructor(
-    message: string = "Resource conflict",
+    message: string = 'Resource conflict',
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
-      code: "CONFLICT",
+      code: 'CONFLICT',
       statusCode: 409,
       cause: options?.cause,
       context: options?.context,
@@ -248,15 +248,15 @@ export class ConflictError extends AppError {
 
 export class ForbiddenError extends AppError {
   constructor(
-    message: string = "Access forbidden",
+    message: string = 'Access forbidden',
     options?: {
       cause?: unknown;
       context?: Record<string, unknown>;
       [key: string]: unknown;
-    },
+    }
   ) {
     super(message, {
-      code: "FORBIDDEN",
+      code: 'FORBIDDEN',
       statusCode: 403,
       cause: options?.cause,
       context: options?.context,

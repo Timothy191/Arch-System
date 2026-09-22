@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { cn } from "@repo/ui/lib/utils";
-import { AlertCircle, MapPin, Pickaxe, Shield, Truck, Wrench } from "lucide-react";
-import { useState } from "react";
+import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-production.types';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
+import { AlertCircle, MapPin, Pickaxe, Shield, Truck, Wrench } from 'lucide-react';
+import { useState } from 'react';
 
 interface MultiSiteShiftReportClientProps {
   initialReport: MultiSiteShiftReport;
@@ -12,10 +12,10 @@ interface MultiSiteShiftReportClientProps {
 
 // AGENT-TRACE: Production multi-site shift compilation view with BKF, EXT, PLANT, and Bredell filtering.
 export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftReportClientProps) {
-  const [activeSite, setActiveSite] = useState<"ALL" | "BKF" | "EXT" | "PLANT">("ALL");
+  const [activeSite, setActiveSite] = useState<'ALL' | 'BKF' | 'EXT' | 'PLANT'>('ALL');
   const { production, rollover, breakdowns, bredell_workshop, meta } = initialReport;
 
-  const sites = ["ALL", "BKF", "EXT", "PLANT"] as const;
+  const sites = ['ALL', 'BKF', 'EXT', 'PLANT'] as const;
 
   return (
     <div className="space-y-6">
@@ -47,10 +47,10 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
               key={site}
               onClick={() => setActiveSite(site)}
               className={cn(
-                "rounded-md px-3 py-1 text-xs font-medium transition-all",
+                'rounded-md px-3 py-1 text-xs font-medium transition-all',
                 activeSite === site
-                  ? "bg-white text-arch-text-primary shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  ? 'bg-white text-arch-text-primary shadow-card font-semibold'
+                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
               )}
             >
               {site}
@@ -60,7 +60,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
       </GlassCard>
 
       {/* 1. Excavator Production Blocks */}
-      {(activeSite === "ALL" || activeSite === "BKF" || activeSite === "EXT") && (
+      {(activeSite === 'ALL' || activeSite === 'BKF' || activeSite === 'EXT') && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-arch-border-subtle pb-2">
             <Pickaxe className="w-4 h-4 text-arch-accent-blue" />
@@ -70,7 +70,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
           </div>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {Object.entries(production || {})
-              .filter(([site]) => activeSite === "ALL" || activeSite === site)
+              .filter(([site]) => activeSite === 'ALL' || activeSite === site)
               .flatMap(([site, excavators]) =>
                 excavators.map((exc) => (
                   <GlassCard
@@ -98,7 +98,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       </div>
                       <div className="text-right">
                         <span className="text-lg font-mono font-bold text-arch-text-primary">
-                          {exc.material_type === "TOPSOIL"
+                          {exc.material_type === 'TOPSOIL'
                             ? `${exc.total_bcm.toLocaleString()} m³`
                             : `${exc.total_tonnes.toLocaleString()} t`}
                         </span>
@@ -125,13 +125,13 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     {/* Performance Metric Footer */}
                     <div className="mt-3 flex items-center justify-between border-t border-arch-border-subtle/60 pt-2 text-xs">
                       <span className="text-arch-text-secondary">
-                        Operating:{" "}
+                        Operating:{' '}
                         <strong className="text-arch-text-primary">{exc.operating_hours}h</strong>
                       </span>
                       <span className="text-arch-text-secondary">
-                        Rate:{" "}
+                        Rate:{' '}
                         <strong className="text-arch-text-primary">
-                          {exc.rate_per_hour} {exc.material_type === "TOPSOIL" ? "m³/h" : "t/h"}
+                          {exc.rate_per_hour} {exc.material_type === 'TOPSOIL' ? 'm³/h' : 't/h'}
                         </strong>
                       </span>
                       {exc.delays ? (
@@ -146,14 +146,14 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       )}
                     </div>
                   </GlassCard>
-                )),
+                ))
               )}
           </div>
         </div>
       )}
 
       {/* 2. Dozer Rollover Volume Section */}
-      {(activeSite === "ALL" || activeSite === "EXT") &&
+      {(activeSite === 'ALL' || activeSite === 'EXT') &&
         rollover &&
         rollover.entries &&
         rollover.entries.length > 0 && (
@@ -230,8 +230,8 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                     <span
                       className={
                         b.duration_hours >= 10
-                          ? "text-accent-red font-bold"
-                          : "text-arch-text-primary font-medium"
+                          ? 'text-accent-red font-bold'
+                          : 'text-arch-text-primary font-medium'
                       }
                     >
                       {b.duration_hours.toFixed(1)}h

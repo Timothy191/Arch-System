@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { AlertCircle, Inbox, Search } from "lucide-react";
-import { EmptyState } from "./EmptyState";
+import type { Meta, StoryObj } from '@storybook/react';
+import { AlertCircle, Inbox, Search } from 'lucide-react';
+import { EmptyState } from './EmptyState';
 
 const meta: Meta<typeof EmptyState> = {
-  title: "Components/EmptyState",
+  title: 'Components/EmptyState',
   component: EmptyState,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   argTypes: {
-    title: { control: "text" },
-    description: { control: "text" },
+    title: { control: 'text' },
+    description: { control: 'text' },
   },
 };
 
@@ -17,24 +17,24 @@ type Story = StoryObj<typeof EmptyState>;
 
 export const Default: Story = {
   args: {
-    title: "No items found",
-    description: "There are no items to display at this time.",
+    title: 'No items found',
+    description: 'There are no items to display at this time.',
   },
 };
 
 export const WithIcon: Story = {
   args: {
     icon: Inbox,
-    title: "Inbox is empty",
-    description: "You have no new messages. Check back later.",
+    title: 'Inbox is empty',
+    description: 'You have no new messages. Check back later.',
   },
 };
 
 export const WithAction: Story = {
   args: {
     icon: Search,
-    title: "No results",
-    description: "Try adjusting your search criteria.",
+    title: 'No results',
+    description: 'Try adjusting your search criteria.',
     action: (
       <button type="button" className="text-sm text-blue-500 hover:underline">
         Clear filters
@@ -46,7 +46,7 @@ export const WithAction: Story = {
 export const ErrorState: Story = {
   args: {
     icon: AlertCircle,
-    title: "Something went wrong",
+    title: 'Something went wrong',
     description: "We couldn't load the data. Please try again.",
     action: (
       <button type="button" className="text-sm text-blue-500 hover:underline">

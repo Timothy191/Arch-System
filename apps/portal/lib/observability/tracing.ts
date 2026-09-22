@@ -5,9 +5,9 @@
  * for custom business operations that need explicit tracing.
  */
 
-import { type Span, SpanStatusCode, trace } from "@opentelemetry/api";
+import { type Span, SpanStatusCode, trace } from '@opentelemetry/api';
 
-const tracer = trace.getTracer("arch-portal", "1.0.0");
+const tracer = trace.getTracer('arch-portal', '1.0.0');
 
 /**
  * Create a span for an asynchronous operation
@@ -15,7 +15,7 @@ const tracer = trace.getTracer("arch-portal", "1.0.0");
 export async function withAsyncSpan<T>(
   name: string,
   attributes: Record<string, string | number | boolean>,
-  fn: (_span: Span) => Promise<T>,
+  fn: (_span: Span) => Promise<T>
 ): Promise<T> {
   const span = tracer.startSpan(name, {
     attributes,
@@ -42,7 +42,7 @@ export async function withAsyncSpan<T>(
  */
 export function addEvent(
   name: string,
-  attributes?: Record<string, string | number | boolean>,
+  attributes?: Record<string, string | number | boolean>
 ): void {
   const activeSpan = trace.getActiveSpan();
   if (activeSpan) {

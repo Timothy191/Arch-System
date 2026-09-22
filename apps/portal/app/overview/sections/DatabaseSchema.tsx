@@ -1,13 +1,13 @@
-import { Badge } from "@repo/ui/components/ui/badge";
+import { Badge } from '@repo/ui/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { ArrowRight, Key, Lock, Table2 } from "lucide-react";
-import { DATABASE_SCHEMA } from "../lib/data";
+} from '@repo/ui/components/ui/card';
+import { ArrowRight, Key, Lock, Table2 } from 'lucide-react';
+import { DATABASE_SCHEMA } from '../lib/data';
 
 export default function DatabaseSchema() {
   return (
@@ -51,9 +51,9 @@ export default function DatabaseSchema() {
                     key={column}
                     className="flex items-center gap-2 px-2 py-1.5 rounded bg-bg-tertiary text-xs"
                   >
-                    {column.includes("PK") && <Key className="w-3 h-3 text-accent-blue" />}
-                    {column.includes("FK") && <ArrowRight className="w-3 h-3 text-accent-blue" />}
-                    {!column.includes("PK") && !column.includes("FK") && <div className="w-3" />}
+                    {column.includes('PK') && <Key className="w-3 h-3 text-accent-blue" />}
+                    {column.includes('FK') && <ArrowRight className="w-3 h-3 text-accent-blue" />}
+                    {!column.includes('PK') && !column.includes('FK') && <div className="w-3" />}
                     <span className="font-mono text-text-secondary">{column}</span>
                   </div>
                 ))}
@@ -83,7 +83,7 @@ export default function DatabaseSchema() {
 
             {/* Connected tables */}
             <div className="flex flex-wrap gap-4 justify-center">
-              {["employees", "machines", "daily_logs"].map((table) => (
+              {['employees', 'machines', 'daily_logs'].map((table) => (
                 <div key={table} className="flex flex-col items-center">
                   <div className="px-4 py-2 bg-accent-blue/10 border border-accent-blue rounded-lg text-accent-blue font-mono text-sm font-medium">
                     {table}
@@ -99,7 +99,7 @@ export default function DatabaseSchema() {
               Child Tables (reference daily_logs)
             </div>
             <div className="flex flex-wrap justify-center gap-4">
-              {["machine_hours", "fuel_logs", "production_logs"].map((table) => (
+              {['machine_hours', 'fuel_logs', 'production_logs'].map((table) => (
                 <div key={table} className="flex flex-col items-center">
                   <div className="px-4 py-2 bg-accent-amber/10 border border-accent-amber rounded-lg text-accent-amber font-mono text-sm font-medium">
                     {table}

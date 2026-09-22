@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertCircle, CheckCircle, Loader2, Lock, UserCheck, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { closeShift, verifyPin } from "@/lib/shift-closeout";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertCircle, CheckCircle, Loader2, Lock, UserCheck, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { closeShift, verifyPin } from '@/lib/shift-closeout';
 
 interface CloseShiftModalProps {
   open: boolean;
@@ -12,19 +12,19 @@ interface CloseShiftModalProps {
   departmentId: string;
   departmentSlug: string;
   date: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
   onComplete: () => void;
 }
 
 type ModalState =
-  | { type: "validating" }
-  | { type: "has_errors"; errors: string[] }
-  | { type: "pin_entry" }
-  | { type: "verifying" }
-  | { type: "verified"; employeeId: string; employeeName: string }
-  | { type: "submitting" }
-  | { type: "success" }
-  | { type: "api_error"; message: string };
+  | { type: 'validating' }
+  | { type: 'has_errors'; errors: string[] }
+  | { type: 'pin_entry' }
+  | { type: 'verifying' }
+  | { type: 'verified'; employeeId: string; employeeName: string }
+  | { type: 'submitting' }
+  | { type: 'success' }
+  | { type: 'api_error'; message: string };
 
 export function CloseShiftModal({
   open,
@@ -36,63 +36,63 @@ export function CloseShiftModal({
   onComplete,
 }: CloseShiftModalProps) {
   const router = useRouter();
-  const [state, setState] = useState<ModalState>({ type: "validating" });
-  const [employeeCode, setEmployeeCode] = useState("");
-  const [pin, setPin] = useState("");
+  const [state, setState] = useState<ModalState>({ type: 'validating' });
+  const [employeeCode, setEmployeeCode] = useState('');
+  const [pin, setPin] = useState('');
 
   const validate = useCallback(async () => {
-    setState({ type: "validating" });
+    setState({ type: 'validating' });
     try {
-      const result = await closeShift(departmentId, date, shiftType, "", "", true);
+      const result = await closeShift(departmentId, date, shiftType, '', '', true);
       if (result.errors && result.errors.length > 0) {
-        setState({ type: "has_errors", errors: result.errors });
+        setState({ type: 'has_errors', errors: result.errors });
       } else {
-        setState({ type: "pin_entry" });
+        setState({ type: 'pin_entry' });
       }
     } catch (err) {
       setState({
-        type: "api_error",
-        message: err instanceof Error ? err.message : "Validation failed",
+        type: 'api_error',
+        message: err instanceof Error ? err.message : 'Validation failed',
       });
     }
   }, [departmentId, date, shiftType]);
 
   useEffect(() => {
     if (open) {
-      setEmployeeCode("");
-      setPin("");
+      setEmployeeCode('');
+      setPin('');
       validate();
     }
   }, [open, validate]);
 
   const handleVerify = async () => {
     if (!employeeCode || !pin) return;
-    setState({ type: "verifying" });
+    setState({ type: 'verifying' });
     try {
       const result = await verifyPin(employeeCode, pin);
       if (result.valid && result.employee) {
         setState({
-          type: "verified",
+          type: 'verified',
           employeeId: result.employee.id,
           employeeName: result.employee.full_name,
         });
       } else {
         setState({
-          type: "api_error",
-          message: "Invalid employee code or PIN",
+          type: 'api_error',
+          message: 'Invalid employee code or PIN',
         });
       }
     } catch (err) {
       setState({
-        type: "api_error",
-        message: err instanceof Error ? err.message : "Verification failed",
+        type: 'api_error',
+        message: err instanceof Error ? err.message : 'Verification failed',
       });
     }
   };
 
   const handleCloseShift = async () => {
-    if (state.type !== "verified") return;
-    setState({ type: "submitting" });
+    if (state.type !== 'verified') return;
+    setState({ type: 'submitting' });
     try {
       const result = await closeShift(
         departmentId,
@@ -101,10 +101,10 @@ export function CloseShiftModal({
         state.employeeId,
         pin,
         false,
-        departmentSlug,
+        departmentSlug
       );
       if (result.success) {
-        setState({ type: "success" });
+        setState({ type: 'success' });
         router.refresh();
         setTimeout(() => {
           onComplete();
@@ -112,14 +112,14 @@ export function CloseShiftModal({
         }, 2000);
       } else {
         setState({
-          type: "api_error",
-          message: result.errors?.join(", ") || "Failed to close shift",
+          type: 'api_error',
+          message: result.errors?.join(', ') || 'Failed to close shift',
         });
       }
     } catch (err) {
       setState({
-        type: "api_error",
-        message: err instanceof Error ? err.message : "Failed to close shift",
+        type: 'api_error',
+        message: err instanceof Error ? err.message : 'Failed to close shift',
       });
     }
   };
@@ -141,14 +141,14 @@ export function CloseShiftModal({
           </button>
         </div>
 
-        {state.type === "validating" && (
+        {state.type === 'validating' && (
           <div className="flex flex-col items-center py-8 gap-3">
             <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
             <p className="text-[var(--text-muted)] text-sm">Validating shift data...</p>
           </div>
         )}
 
-        {state.type === "has_errors" && (
+        {state.type === 'has_errors' && (
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg">
               <AlertCircle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
@@ -176,7 +176,7 @@ export function CloseShiftModal({
           </div>
         )}
 
-        {(state.type === "pin_entry" || state.type === "verifying") && (
+        {(state.type === 'pin_entry' || state.type === 'verifying') && (
           <div className="space-y-5">
             <div className="flex items-center gap-3 p-3 bg-accent-green/10 border border-accent-green/20 rounded-lg">
               <CheckCircle className="w-5 h-5 text-accent-green shrink-0" />
@@ -210,10 +210,10 @@ export function CloseShiftModal({
             <button
               type="button"
               onClick={handleVerify}
-              disabled={state.type === "verifying" || !employeeCode || !pin}
+              disabled={state.type === 'verifying' || !employeeCode || !pin}
               className="w-full flex items-center justify-center gap-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 rounded-lg transition-colors"
             >
-              {state.type === "verifying" ? (
+              {state.type === 'verifying' ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Verifying...
@@ -228,7 +228,7 @@ export function CloseShiftModal({
           </div>
         )}
 
-        {state.type === "verified" && (
+        {state.type === 'verified' && (
           <div className="space-y-5">
             <div className="flex items-center gap-3 p-3 bg-accent-green/10 border border-accent-green/20 rounded-lg">
               <UserCheck className="w-5 h-5 text-accent-green shrink-0" />
@@ -257,21 +257,21 @@ export function CloseShiftModal({
           </div>
         )}
 
-        {state.type === "submitting" && (
+        {state.type === 'submitting' && (
           <div className="flex flex-col items-center py-8 gap-3">
             <Loader2 className="w-8 h-8 text-[var(--accent-blue)] animate-spin" />
             <p className="text-[var(--text-muted)] text-sm">Closing shift...</p>
           </div>
         )}
 
-        {state.type === "success" && (
+        {state.type === 'success' && (
           <div className="flex flex-col items-center py-8 gap-3">
             <CheckCircle className="w-12 h-12 text-accent-green" />
             <p className="text-accent-green font-medium text-lg">Shift closed successfully</p>
           </div>
         )}
 
-        {state.type === "api_error" && (
+        {state.type === 'api_error' && (
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-3 bg-accent-red/10 border border-accent-red/20 rounded-lg">
               <AlertCircle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />

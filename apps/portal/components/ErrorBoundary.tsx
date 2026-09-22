@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, Home, RefreshCw } from "lucide-react";
-import { Component, type ReactNode } from "react";
+import { Button } from '@repo/ui/components/ui/button';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import { Component, type ReactNode } from 'react';
 
 // AGENT-TRACE: ErrorBoundary provides graceful degradation when React components fail
 // Critical for production stability, especially for external dependencies like FUXA SCADA
@@ -47,9 +47,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     });
 
     // Log to console in development
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
     // Call custom error handler if provided
@@ -59,23 +59,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     // AGENT-TRACE: Report to Sentry with additional context
     try {
-      if (typeof window !== "undefined" && (window as any).Sentry) {
+      if (typeof window !== 'undefined' && (window as any).Sentry) {
         (window as any).Sentry.captureException(error, {
           contexts: {
             react: {
               componentStack: errorInfo.componentStack,
-              customContext: this.props.context || "Unknown",
+              customContext: this.props.context || 'Unknown',
             },
           },
           tags: {
-            error_boundary: "true",
-            context: this.props.context || "unknown",
+            error_boundary: 'true',
+            context: this.props.context || 'unknown',
           },
         });
       }
     } catch (sentryError) {
       // eslint-disable-next-line no-console
-      console.warn("Failed to report to Sentry:", sentryError);
+      console.warn('Failed to report to Sentry:', sentryError);
     }
   }
 
@@ -88,7 +88,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   handleGoHome = () => {
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   render() {
@@ -98,12 +98,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
-      const displayTitle = this.props.title || "Control Room Component Interrupted";
+      const displayTitle = this.props.title || 'Control Room Component Interrupted';
       const displayMessage =
         this.props.message ||
         (this.props.context
           ? `An error occurred in ${this.props.context}. Telemetry recorded message.`
-          : "Telemetry recorded message. Attempting component recovery.");
+          : 'Telemetry recorded message. Attempting component recovery.');
 
       // Default fallback UI with rose theme
       return (
@@ -122,7 +122,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <h3 className="text-lg font-medium text-rose-900">{displayTitle}</h3>
                 <p className="text-rose-700 text-sm">{displayMessage}</p>
                 <p className="text-rose-500 text-xs font-mono">
-                  {this.state.error?.message || "Unknown error"}
+                  {this.state.error?.message || 'Unknown error'}
                 </p>
               </div>
 
@@ -147,7 +147,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </div>
 
               {/* Development Info */}
-              {process.env.NODE_ENV === "development" && this.state.errorInfo && (
+              {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                 <details className="mt-4">
                   <summary className="text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-secondary)]">
                     Error Details (Development Only)
@@ -155,7 +155,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   <pre className="mt-2 p-3 bg-[var(--bg-tertiary)] rounded-lg text-xs overflow-auto max-h-48">
                     <code>
                       {this.state.error?.toString()}
-                      {"\n\n"}
+                      {'\n\n'}
                       {this.state.errorInfo?.componentStack}
                     </code>
                   </pre>

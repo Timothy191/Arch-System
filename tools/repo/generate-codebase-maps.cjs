@@ -9,11 +9,11 @@
  * Usage: node tools/repo/generate-codebase-maps.cjs
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const MAPS_ROOT = path.join(ROOT, "codebase-maps");
+const ROOT = path.resolve(__dirname, '..', '..');
+const MAPS_ROOT = path.join(ROOT, 'codebase-maps');
 
 /**
  * Formats date strings for versioned folder naming and ISO metadata.
@@ -21,12 +21,12 @@ const MAPS_ROOT = path.join(ROOT, "codebase-maps");
 function getFormattedDate() {
   const now = new Date();
   const yy = String(now.getFullYear()).slice(-2);
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
   return {
     folderDate: `${yy}-${mm}-${dd}`,
     isoDate: now.toISOString(),
-    displayDate: `${now.toLocaleString("en-US", { timeZone: "UTC" })} UTC`,
+    displayDate: `${now.toLocaleString('en-US', { timeZone: 'UTC' })} UTC`,
   };
 }
 
@@ -63,12 +63,12 @@ function getNextLogNumber() {
 function buildCodebaseMaps(dateInfo) {
   return [
     {
-      key: "route-feature",
-      filename: "route-feature-architecture.md",
-      title: "Route & Feature Architecture Map",
-      category: "Routing & Features",
+      key: 'route-feature',
+      filename: 'route-feature-architecture.md',
+      title: 'Route & Feature Architecture Map',
+      category: 'Routing & Features',
       summary:
-        "Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.",
+        'Next.js 16 App Router route hierarchy, co-located feature modules, and server actions.',
       content: `# 🗺️ Route & Feature Architecture Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -102,12 +102,12 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "database-schema",
-      filename: "database-schema.md",
-      title: "Database Schema & Topology Map",
-      category: "Database & Security",
+      key: 'database-schema',
+      filename: 'database-schema.md',
+      title: 'Database Schema & Topology Map',
+      category: 'Database & Security',
       summary:
-        "Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.",
+        'Postgres schema topology, migration files, 100% RLS policy enforcement, and replica routing.',
       content: `# 🔒 Database Schema & Topology Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -130,12 +130,12 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "ci-cd-pipeline",
-      filename: "ci-cd-pipeline.md",
-      title: "CI/CD Pipeline & Quality Gate Map",
-      category: "DevOps & CI/CD",
+      key: 'ci-cd-pipeline',
+      filename: 'ci-cd-pipeline.md',
+      title: 'CI/CD Pipeline & Quality Gate Map',
+      category: 'DevOps & CI/CD',
       summary:
-        "GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.",
+        'GitHub Actions workflow topology, quality gate checks, security audits, and deployment automation.',
       content: `# 🚀 CI/CD Pipeline & Quality Gate Topology Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -163,12 +163,12 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "technology-stack",
-      filename: "technology-stack.md",
-      title: "Technology Stack & Catalog Map",
-      category: "Architecture & Stack",
+      key: 'technology-stack',
+      filename: 'technology-stack.md',
+      title: 'Technology Stack & Catalog Map',
+      category: 'Architecture & Stack',
       summary:
-        "Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.",
+        'Inventory of runtime engines, Next.js 16, React 19, OKLCH design system, and infrastructure.',
       content: `# ⚡ Technology Stack & Catalog Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -187,11 +187,11 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "project-dependencies",
-      filename: "project-dependencies.md",
-      title: "Project Dependencies & Monorepo Graph Map",
-      category: "Workspace Graph",
-      summary: "Dependency relationships between applications and shared packages in the monorepo.",
+      key: 'project-dependencies',
+      filename: 'project-dependencies.md',
+      title: 'Project Dependencies & Monorepo Graph Map',
+      category: 'Workspace Graph',
+      summary: 'Dependency relationships between applications and shared packages in the monorepo.',
       content: `# 🕸️ Project Dependencies & Monorepo Graph Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -213,12 +213,12 @@ function buildCodebaseMaps(dateInfo) {
 `,
     },
     {
-      key: "turbo-graph",
-      filename: "turbo-graph.md",
-      title: "Turborepo Project Graph & Task Pipeline Map",
-      category: "Monorepo Orchestration",
+      key: 'turbo-graph',
+      filename: 'turbo-graph.md',
+      title: 'Turborepo Project Graph & Task Pipeline Map',
+      category: 'Monorepo Orchestration',
       summary:
-        "Visual Mermaid diagram of Turborepo task execution graph, caching pipelines, and project hierarchy.",
+        'Visual Mermaid diagram of Turborepo task execution graph, caching pipelines, and project hierarchy.',
       content: `# ⚡ Turborepo Project Graph & Task Pipeline Map
 
 **Generated:** \${dateInfo.displayDate}  
@@ -321,12 +321,12 @@ graph TD
 `,
     },
     {
-      key: "dependencies-graph",
-      filename: "dependencies-graph.md",
-      title: "Monorepo Dependencies & Topology Graph Map",
-      category: "Workspace Architecture",
+      key: 'dependencies-graph',
+      filename: 'dependencies-graph.md',
+      title: 'Monorepo Dependencies & Topology Graph Map',
+      category: 'Workspace Architecture',
       summary:
-        "Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.",
+        'Visual Mermaid diagram of complete monorepo dependency graph and module boundary matrix.',
       content: `# 🕸️ Monorepo Dependencies & Topology Graph Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -401,11 +401,11 @@ graph LR
 `,
     },
     {
-      key: "package-structure",
-      filename: "package-structure.md",
-      title: "Package Structure & Module Map",
-      category: "Monorepo Packages",
-      summary: "Directory layout and workspace modularization rules.",
+      key: 'package-structure',
+      filename: 'package-structure.md',
+      title: 'Package Structure & Module Map',
+      category: 'Monorepo Packages',
+      summary: 'Directory layout and workspace modularization rules.',
       content: `# 📁 Package Structure & Module Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -424,12 +424,12 @@ graph LR
 `,
     },
     {
-      key: "multi-agent-architecture",
-      filename: "multi-agent-architecture.md",
-      title: "Multi-Agent Architecture & Pre-Flight Research Gate Map",
-      category: "Agent Orchestration",
+      key: 'multi-agent-architecture',
+      filename: 'multi-agent-architecture.md',
+      title: 'Multi-Agent Architecture & Pre-Flight Research Gate Map',
+      category: 'Agent Orchestration',
       summary:
-        "Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.",
+        'Role-assigned specialist agents, SubagentCoordinator, and the mandatory Architectural Pre-Flight Research Gate.',
       content: `# 🤖 Multi-Agent Architecture & Pre-Flight Research Gate Map
 
 **Generated:** ${dateInfo.displayDate}  
@@ -493,9 +493,9 @@ flowchart TD
  * Main execution function.
  */
 function main() {
-  console.log("==================================================");
-  console.log("🗺️  Generating Codebase Maps & Metadata Index");
-  console.log("==================================================\n");
+  console.log('==================================================');
+  console.log('🗺️  Generating Codebase Maps & Metadata Index');
+  console.log('==================================================\n');
 
   const logNum = getNextLogNumber();
   const dateInfo = getFormattedDate();
@@ -519,16 +519,16 @@ function main() {
       category: map.category,
       summary: map.summary,
       relativePath: `codebase-maps/${folderName}/${map.filename}`,
-      sizeBytes: Buffer.byteLength(map.content, "utf-8"),
+      sizeBytes: Buffer.byteLength(map.content, 'utf-8'),
     });
 
     console.log(
-      `   ├── ${map.filename} (${(Buffer.byteLength(map.content, "utf-8") / 1024).toFixed(1)} KB)`,
+      `   ├── ${map.filename} (${(Buffer.byteLength(map.content, 'utf-8') / 1024).toFixed(1)} KB)`
     );
   }
 
   // Update codebase-maps/latest/ directory
-  const latestDir = path.join(MAPS_ROOT, "latest");
+  const latestDir = path.join(MAPS_ROOT, 'latest');
   fs.mkdirSync(latestDir, { recursive: true });
 
   for (const map of maps) {
@@ -538,11 +538,11 @@ function main() {
   }
 
   // Update manifest.json
-  const manifestPath = path.join(MAPS_ROOT, "manifest.json");
+  const manifestPath = path.join(MAPS_ROOT, 'manifest.json');
   let manifest = [];
   if (fs.existsSync(manifestPath)) {
     try {
-      manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
     } catch {
       manifest = [];
     }
@@ -559,18 +559,18 @@ function main() {
     isoDate: dateInfo.isoDate,
     displayDate: dateInfo.displayDate,
     mapCount: maps.length,
-    status: "Verified & Active",
+    status: 'Verified & Active',
     maps: mapsCatalog,
   });
 
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(path.join(latestDir, "manifest.json"), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(path.join(latestDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
-  console.log("\n==================================================");
+  console.log('\n==================================================');
   console.log(`✅ Codebase Maps Generated Successfully! Log #${logNum}`);
   console.log(`📋 Metadata Manifest Index: codebase-maps/manifest.json`);
   console.log(`⚡ Instant Active Access: codebase-maps/latest/`);
-  console.log("==================================================\n");
+  console.log('==================================================\n');
 }
 
 main();

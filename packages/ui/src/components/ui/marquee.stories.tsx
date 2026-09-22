@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Marquee } from "./marquee";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Marquee } from './marquee';
 
 const meta: Meta<typeof Marquee> = {
-  title: "UI/Marquee",
+  title: 'UI/Marquee',
   component: Marquee,
   parameters: {
-    layout: "fullscreen",
+    layout: 'fullscreen',
   },
 };
 
@@ -68,6 +68,6 @@ export const FastReverse: Story = {
         ))}
       </div>
     ),
-    className: "[--duration:10s]",
+    className: '[--duration:10s]',
   },
 };

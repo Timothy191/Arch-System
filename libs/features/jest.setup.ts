@@ -1,5 +1,5 @@
-import "@testing-library/jest-dom";
-import { TextDecoder, TextEncoder } from "node:util";
+import '@testing-library/jest-dom';
+import { TextDecoder, TextEncoder } from 'node:util';
 
 global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || (TextDecoder as any);
@@ -10,7 +10,7 @@ global.Request =
   class Request {
     url: string;
     constructor(input: string | Request) {
-      this.url = typeof input === "string" ? input : input.url;
+      this.url = typeof input === 'string' ? input : input.url;
     }
   };
 
@@ -24,8 +24,8 @@ global.Response =
   };
 
 // Provide browser globals that jsdom may not define in all versions.
-if (typeof window !== "undefined") {
-  Object.defineProperty(window, "matchMedia", {
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query: string) => ({
       matches: false,
@@ -45,7 +45,7 @@ if (typeof window !== "undefined") {
     unobserve = jest.fn();
   }
 
-  Object.defineProperty(window, "IntersectionObserver", {
+  Object.defineProperty(window, 'IntersectionObserver', {
     writable: true,
     configurable: true,
     value: MockIntersectionObserver,
@@ -59,7 +59,7 @@ if (typeof window !== "undefined") {
     unobserve = jest.fn();
   }
 
-  Object.defineProperty(window, "ResizeObserver", {
+  Object.defineProperty(window, 'ResizeObserver', {
     writable: true,
     configurable: true,
     value: MockResizeObserver,
@@ -67,7 +67,7 @@ if (typeof window !== "undefined") {
 
   global.ResizeObserver = MockResizeObserver as any;
 
-  if (typeof window.PointerEvent === "undefined") {
+  if (typeof window.PointerEvent === 'undefined') {
     (window as any).PointerEvent = window.MouseEvent;
     (global as any).PointerEvent = window.MouseEvent;
   }

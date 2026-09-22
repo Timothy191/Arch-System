@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string | null;
@@ -14,21 +14,21 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SIZE_CLASSES: Record<number, { container: string; font: string }> = {
-  16: { container: "w-4 h-4", font: "text-[9px]" },
-  20: { container: "w-5 h-5", font: "text-[10px]" },
-  24: { container: "w-6 h-6", font: "text-xs" },
-  32: { container: "w-8 h-8", font: "text-xs font-medium" },
-  36: { container: "w-9 h-9", font: "text-xs font-medium" },
-  40: { container: "w-10 h-10", font: "text-sm font-medium" },
-  48: { container: "w-12 h-12", font: "text-base font-semibold" },
-  64: { container: "w-16 h-16", font: "text-xl font-semibold" },
-  90: { container: "w-[90px] h-[90px]", font: "text-2xl font-bold" },
+  16: { container: 'w-4 h-4', font: 'text-[9px]' },
+  20: { container: 'w-5 h-5', font: 'text-[10px]' },
+  24: { container: 'w-6 h-6', font: 'text-xs' },
+  32: { container: 'w-8 h-8', font: 'text-xs font-medium' },
+  36: { container: 'w-9 h-9', font: 'text-xs font-medium' },
+  40: { container: 'w-10 h-10', font: 'text-sm font-medium' },
+  48: { container: 'w-12 h-12', font: 'text-base font-semibold' },
+  64: { container: 'w-16 h-16', font: 'text-xl font-semibold' },
+  90: { container: 'w-[90px] h-[90px]', font: 'text-2xl font-bold' },
 };
 
 export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   (
     { src, letter, username, title, size = 32, placeholder = false, className, style, ...props },
-    ref,
+    ref
   ) => {
     const [imageFailed, setImageFailed] = React.useState(false);
 
@@ -40,7 +40,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     const computedLetter = React.useMemo(() => {
       if (letter) {
         return letter
-          .replace(/[^A-Za-z0-9]/g, "")
+          .replace(/[^A-Za-z0-9]/g, '')
           .slice(0, 2)
           .toUpperCase();
       }
@@ -49,7 +49,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         const first = words[0];
         const second = words[1];
         if (first && second) {
-          return `${first[0] ?? ""}${second[0] ?? ""}`.toUpperCase();
+          return `${first[0] ?? ''}${second[0] ?? ''}`.toUpperCase();
         }
         if (first) {
           return first.slice(0, 2).toUpperCase();
@@ -62,12 +62,12 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     }, [letter, title, username]);
 
     const sizeConfig =
-      typeof size === "number" && SIZE_CLASSES[size]
+      typeof size === 'number' && SIZE_CLASSES[size]
         ? SIZE_CLASSES[size]
-        : { container: "", font: "text-xs" };
+        : { container: '', font: 'text-xs' };
 
     const customSizeStyle: React.CSSProperties =
-      !SIZE_CLASSES[size as number] && typeof size === "number"
+      !SIZE_CLASSES[size as number] && typeof size === 'number'
         ? { width: `${size}px`, height: `${size}px`, minWidth: `${size}px` }
         : {};
 
@@ -75,7 +75,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       ? title
       : computedLetter
         ? `Avatar with initials: ${computedLetter}`
-        : "Avatar";
+        : 'Avatar';
 
     // 1. Loading Shell / Placeholder state
     if (placeholder && !src && !computedLetter) {
@@ -86,9 +86,9 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           aria-label="Loading avatar"
           style={{ ...customSizeStyle, ...style }}
           className={cn(
-            "relative rounded-full shrink-0 bg-black/[0.08] animate-pulse",
+            'relative rounded-full shrink-0 bg-black/[0.08] animate-pulse',
             sizeConfig.container,
-            className,
+            className
           )}
           {...props}
         />
@@ -101,16 +101,16 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     return (
       <div
         ref={ref}
-        role={canRenderImage ? undefined : "img"}
+        role={canRenderImage ? undefined : 'img'}
         aria-label={canRenderImage ? undefined : ariaLabel}
         title={title}
         style={{ ...customSizeStyle, ...style }}
         className={cn(
-          "relative rounded-full shrink-0 select-none flex items-center justify-center overflow-hidden",
-          "border border-black/[0.08] shadow-sm",
-          "bg-white text-neutral-800",
+          'relative rounded-full shrink-0 select-none flex items-center justify-center overflow-hidden',
+          'border border-black/[0.08] shadow-sm',
+          'bg-white text-neutral-800',
           sizeConfig.container,
-          className,
+          className
         )}
         {...props}
       >
@@ -125,8 +125,8 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         ) : computedLetter ? (
           <span
             className={cn(
-              "font-medium tracking-wide uppercase leading-none select-none",
-              sizeConfig.font,
+              'font-medium tracking-wide uppercase leading-none select-none',
+              sizeConfig.font
             )}
           >
             {computedLetter}
@@ -143,7 +143,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
-Avatar.displayName = "Avatar";
+Avatar.displayName = 'Avatar';

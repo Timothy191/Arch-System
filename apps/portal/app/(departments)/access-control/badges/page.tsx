@@ -1,6 +1,6 @@
-import { Badge } from "@repo/ui";
-import { Button } from "@repo/ui/components/ui/button";
-import { Pagination } from "@repo/ui/components/ui/pagination";
+import { Badge } from '@repo/ui';
+import { Button } from '@repo/ui/components/ui/button';
+import { Pagination } from '@repo/ui/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/ui/table";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Plus, QrCode, ShieldOff, UserCheck } from "lucide-react";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { getBadgesForDepartment } from "../actions";
+} from '@repo/ui/components/ui/table';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Plus, QrCode, ShieldOff, UserCheck } from 'lucide-react';
+import { getDepartmentContext } from '~/lib/dept-context';
+import { getBadgesForDepartment } from '../actions';
 
 interface BadgeWithRelations {
   id: string;
@@ -27,7 +27,7 @@ interface BadgeWithRelations {
   equipment: { equip_code: string; equipment_type: string } | null;
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function BadgesPage({
   searchParams,
@@ -35,11 +35,11 @@ export default async function BadgesPage({
   searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
   const params = await searchParams;
-  const page = parseInt(params.page || "1", 10);
-  const pageSize = parseInt(params.pageSize || "50", 10);
+  const page = parseInt(params.page || '1', 10);
+  const pageSize = parseInt(params.pageSize || '50', 10);
 
   const { deptId } = await getDepartmentContext({
-    department: "access-control",
+    department: 'access-control',
   });
 
   const { badges, totalCount } = await getBadgesForDepartment(deptId, page, pageSize);
@@ -48,7 +48,7 @@ export default async function BadgesPage({
 
   // Resolve entity names from nested relation data
   const resolvedBadges = (badges as unknown as BadgeWithRelations[]).map((b) => {
-    let entityName = "Unknown";
+    let entityName = 'Unknown';
     if (b.personnel) {
       entityName = `${b.personnel.first_name} ${b.personnel.surname}`;
     } else if (b.visitor) {
@@ -146,14 +146,14 @@ export default async function BadgesPage({
                   pageSize={pageSize}
                   onPageChange={(newPage) => {
                     const url = new URL(window.location.href);
-                    url.searchParams.set("page", newPage.toString());
-                    url.searchParams.set("pageSize", pageSize.toString());
+                    url.searchParams.set('page', newPage.toString());
+                    url.searchParams.set('pageSize', pageSize.toString());
                     window.location.href = url.toString();
                   }}
                   onPageSizeChange={(newSize) => {
                     const url = new URL(window.location.href);
-                    url.searchParams.set("page", "1");
-                    url.searchParams.set("pageSize", newSize.toString());
+                    url.searchParams.set('page', '1');
+                    url.searchParams.set('pageSize', newSize.toString());
                     window.location.href = url.toString();
                   }}
                 />

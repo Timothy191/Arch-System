@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import QRCodeStyling from "qr-code-styling";
-import { useEffect, useRef } from "react";
+import QRCodeStyling from 'qr-code-styling';
+import { useEffect, useRef } from 'react';
 
 interface QRCodeSectionProps {
   data: string;
@@ -13,19 +13,19 @@ const qrOptions = {
   height: 160,
   margin: 4,
   dotsOptions: {
-    color: "#1a1a2e",
-    type: "rounded" as const,
+    color: '#1a1a2e',
+    type: 'rounded' as const,
   },
   cornersSquareOptions: {
-    color: "#2563eb",
-    type: "extra-rounded" as const,
+    color: '#2563eb',
+    type: 'extra-rounded' as const,
   },
   cornersDotOptions: {
-    color: "#1e40af",
-    type: "dot" as const,
+    color: '#1e40af',
+    type: 'dot' as const,
   },
   backgroundOptions: {
-    color: "#ffffff",
+    color: '#ffffff',
   },
 };
 

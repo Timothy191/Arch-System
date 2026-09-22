@@ -1,7 +1,7 @@
-import { ChevronDown, Lock } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
-import { Button } from "./button";
+import { ChevronDown, Lock } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
+import { Button } from './button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
+} from './dropdown-menu';
 
 export function MenuContainer({ children }: { children: React.ReactNode }) {
   return <DropdownMenu>{children}</DropdownMenu>;
@@ -18,21 +18,21 @@ export function MenuContainer({ children }: { children: React.ReactNode }) {
 
 export interface MenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   showChevron?: boolean;
-  variant?: "default" | "secondary" | "outline" | "ghost" | "link" | "unstyled";
-  size?: "default" | "small" | "large" | "icon";
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'unstyled';
+  size?: 'default' | 'small' | 'large' | 'icon';
   svgOnly?: boolean;
-  shape?: "square" | "circle";
+  shape?: 'square' | 'circle';
 }
 
 export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
   (
-    { children, showChevron, variant = "default", size, svgOnly, shape, className, ...props },
-    ref,
+    { children, showChevron, variant = 'default', size, svgOnly, shape, className, ...props },
+    ref
   ) => {
-    if (variant === "unstyled") {
+    if (variant === 'unstyled') {
       return (
         <DropdownMenuTrigger asChild>
-          <button ref={ref} className={cn("outline-none", className)} {...props}>
+          <button ref={ref} className={cn('outline-none', className)} {...props}>
             {children}
           </button>
         </DropdownMenuTrigger>
@@ -45,7 +45,7 @@ export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
           ref={ref}
           variant={variant}
           size={size}
-          className={cn(className, svgOnly && "px-2")}
+          className={cn(className, svgOnly && 'px-2')}
           {...props}
         >
           {children}
@@ -53,27 +53,27 @@ export const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(
         </Button>
       </DropdownMenuTrigger>
     );
-  },
+  }
 );
-MenuButton.displayName = "MenuButton";
+MenuButton.displayName = 'MenuButton';
 
 export interface MenuProps {
   children: React.ReactNode;
   width?: number | string;
-  align?: "start" | "center" | "end";
+  align?: 'start' | 'center' | 'end';
   position?: string; // e.g. left-start, converted to side/align
 }
 
-export function Menu({ children, width, align = "start", position }: MenuProps) {
-  let side: "top" | "right" | "bottom" | "left" = "bottom";
+export function Menu({ children, width, align = 'start', position }: MenuProps) {
+  let side: 'top' | 'right' | 'bottom' | 'left' = 'bottom';
   let resolvedAlign = align;
 
   if (position) {
-    const [pSide, pAlign] = position.split("-");
-    if (pSide && ["top", "bottom", "left", "right"].includes(pSide)) {
+    const [pSide, pAlign] = position.split('-');
+    if (pSide && ['top', 'bottom', 'left', 'right'].includes(pSide)) {
       side = pSide as any;
     }
-    if (pAlign && ["start", "center", "end"].includes(pAlign)) {
+    if (pAlign && ['start', 'center', 'end'].includes(pAlign)) {
       resolvedAlign = pAlign as any;
     }
   }
@@ -82,7 +82,7 @@ export function Menu({ children, width, align = "start", position }: MenuProps) 
     <DropdownMenuContent
       align={resolvedAlign}
       side={side}
-      style={{ width: width ? (typeof width === "number" ? `${width}px` : width) : undefined }}
+      style={{ width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined }}
     >
       {children}
     </DropdownMenuContent>
@@ -90,16 +90,16 @@ export function Menu({ children, width, align = "start", position }: MenuProps) 
 }
 
 export interface MenuItemProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof DropdownMenuItem>, "prefix"> {
+  extends Omit<React.ComponentPropsWithoutRef<typeof DropdownMenuItem>, 'prefix'> {
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
   href?: string;
-  type?: "default" | "error";
+  type?: 'default' | 'error';
 }
 
 export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuItem>, MenuItemProps>(
   ({ className, children, prefix, suffix, type, href, onClick, ...props }, ref) => {
-    const Component = href ? "a" : "div";
+    const Component = href ? 'a' : 'div';
 
     return (
       <DropdownMenuItem
@@ -107,9 +107,9 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         asChild={!!href}
         onClick={onClick}
         className={cn(
-          "cursor-pointer flex items-center w-full",
-          type === "error" && "text-red-600 focus:bg-red-100 focus:text-red-700:bg-red-900/30",
-          className,
+          'cursor-pointer flex items-center w-full',
+          type === 'error' && 'text-red-600 focus:bg-red-100 focus:text-red-700:bg-red-900/30',
+          className
         )}
         {...props}
       >
@@ -120,14 +120,14 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         </Component>
       </DropdownMenuItem>
     );
-  },
+  }
 );
-MenuItem.displayName = "MenuItem";
+MenuItem.displayName = 'MenuItem';
 
 export const MenuLink = React.forwardRef<React.ElementRef<typeof DropdownMenuItem>, MenuItemProps>(
-  (props, ref) => <MenuItem ref={ref} {...props} />,
+  (props, ref) => <MenuItem ref={ref} {...props} />
 );
-MenuLink.displayName = "MenuLink";
+MenuLink.displayName = 'MenuLink';
 
 export const MenuItemLocked = React.forwardRef<
   React.ElementRef<typeof DropdownMenuItem>,
@@ -137,7 +137,7 @@ export const MenuItemLocked = React.forwardRef<
     {children}
   </MenuItem>
 ));
-MenuItemLocked.displayName = "MenuItemLocked";
+MenuItemLocked.displayName = 'MenuItemLocked';
 
 export const MenuDivider = DropdownMenuSeparator;
 

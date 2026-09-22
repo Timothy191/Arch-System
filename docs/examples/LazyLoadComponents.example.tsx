@@ -10,7 +10,7 @@
  * these are split into separate chunks loaded only when needed.
  */
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 // ─────────────────────────────────────────────────────────────
 // LAZY LOADED DATA GRID COMPONENT
@@ -19,7 +19,7 @@ import dynamic from "next/dynamic";
 // Use: For admin dashboard, reporting pages, or any data-heavy views
 
 export const LazyDataGrid = dynamic(
-  () => import("@repo/ui").then((mod) => ({ default: mod.DataGrid })),
+  () => import('@repo/ui').then((mod) => ({ default: mod.DataGrid })),
   {
     loading: () => (
       <div className="flex items-center justify-center h-64">
@@ -28,7 +28,7 @@ export const LazyDataGrid = dynamic(
       </div>
     ),
     ssr: false, // Don't SSR this heavy component
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ export const LazyDataGrid = dynamic(
 // Use: For workflow configuration pages, automation builders
 
 export const LazyWorkflowBuilder = dynamic(
-  () => import("@repo/ui").then((mod) => ({ default: mod.WorkflowBuilder })),
+  () => import('@repo/ui').then((mod) => ({ default: mod.WorkflowBuilder })),
   {
     loading: () => (
       <div className="flex items-center justify-center h-64">
@@ -47,7 +47,7 @@ export const LazyWorkflowBuilder = dynamic(
       </div>
     ),
     ssr: false,
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ export const LazyWorkflowBuilder = dynamic(
 // Use: For analytics dashboards, monitoring views
 
 export const LazyTelemetryChart = dynamic(
-  () => import("@repo/ui").then((mod) => ({ default: mod.TelemetryChart })),
+  () => import('@repo/ui').then((mod) => ({ default: mod.TelemetryChart })),
   {
     loading: () => (
       <div className="flex items-center justify-center h-48">
@@ -66,7 +66,7 @@ export const LazyTelemetryChart = dynamic(
       </div>
     ),
     ssr: false,
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ export const WorkflowPage = () => {
   // Preload workflow builder when user hovers over the button
   const handleMouseEnter = () => {
     // This starts loading the component in the background
-    import("@repo/ui").then((mod) => mod.WorkflowBuilder);
+    import('@repo/ui').then((mod) => mod.WorkflowBuilder);
   };
 
   return (

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, CheckCircle2, ClipboardCheck, ShieldAlert, X } from "lucide-react";
-import { useState, useTransition } from "react";
-import { logTireInspection } from "./actions";
-import type { TireWithInspections } from "./types";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, CheckCircle2, ClipboardCheck, ShieldAlert, X } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { logTireInspection } from './actions';
+import type { TireWithInspections } from './types';
 
 interface TireInspectionModalProps {
   isOpen: boolean;
@@ -21,12 +21,12 @@ export function TireInspectionModal({
 }: TireInspectionModalProps) {
   const [isPending, startTransition] = useTransition();
   const [inspectionDate, setInspectionDate] = useState(
-    new Date().toISOString().split("T")[0] ?? "",
+    new Date().toISOString().split('T')[0] ?? ''
   );
   const [pressurePsi, setPressurePsi] = useState<number>(100);
   const [treadDepthMm, setTreadDepthMm] = useState<number>(50);
-  const [conditionStatus, setConditionStatus] = useState<"good" | "warning" | "critical">("good");
-  const [notes, setNotes] = useState("");
+  const [conditionStatus, setConditionStatus] = useState<'good' | 'warning' | 'critical'>('good');
+  const [notes, setNotes] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen || !tire) return null;
@@ -34,11 +34,11 @@ export function TireInspectionModal({
   const handleTreadChange = (val: number) => {
     setTreadDepthMm(val);
     if (val <= 15) {
-      setConditionStatus("critical");
+      setConditionStatus('critical');
     } else if (val <= 25) {
-      setConditionStatus("warning");
+      setConditionStatus('warning');
     } else {
-      setConditionStatus("good");
+      setConditionStatus('good');
     }
   };
 
@@ -47,11 +47,11 @@ export function TireInspectionModal({
     setErrorMsg(null);
 
     if (pressurePsi <= 0 || pressurePsi > 200) {
-      setErrorMsg("Pressure must be between 1 and 200 PSI.");
+      setErrorMsg('Pressure must be between 1 and 200 PSI.');
       return;
     }
     if (treadDepthMm < 0 || treadDepthMm > 150) {
-      setErrorMsg("Tread depth must be between 0 and 150 mm.");
+      setErrorMsg('Tread depth must be between 0 and 150 mm.');
       return;
     }
 
@@ -68,7 +68,7 @@ export function TireInspectionModal({
         onSuccess?.();
         onClose();
       } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : "Failed to record inspection.");
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to record inspection.');
       }
     });
   };
@@ -86,10 +86,10 @@ export function TireInspectionModal({
                 Log Tire Inspection
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Serial:{" "}
+                Serial:{' '}
                 <span className="font-mono font-semibold text-[var(--text-heading)]">
                   {tire.serial_number}
-                </span>{" "}
+                </span>{' '}
                 ({tire.brand} {tire.size})
               </p>
             </div>
@@ -185,11 +185,11 @@ export function TireInspectionModal({
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setConditionStatus("good")}
+                onClick={() => setConditionStatus('good')}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium border transition-all ${
-                  conditionStatus === "good"
-                    ? "bg-accent-green/15 border-accent-green text-accent-green"
-                    : "bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]"
+                  conditionStatus === 'good'
+                    ? 'bg-accent-green/15 border-accent-green text-accent-green'
+                    : 'bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]'
                 }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -197,11 +197,11 @@ export function TireInspectionModal({
               </button>
               <button
                 type="button"
-                onClick={() => setConditionStatus("warning")}
+                onClick={() => setConditionStatus('warning')}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium border transition-all ${
-                  conditionStatus === "warning"
-                    ? "bg-amber-500/15 border-amber-500 text-amber-500"
-                    : "bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]"
+                  conditionStatus === 'warning'
+                    ? 'bg-amber-500/15 border-amber-500 text-amber-500'
+                    : 'bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]'
                 }`}
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
@@ -209,11 +209,11 @@ export function TireInspectionModal({
               </button>
               <button
                 type="button"
-                onClick={() => setConditionStatus("critical")}
+                onClick={() => setConditionStatus('critical')}
                 className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium border transition-all ${
-                  conditionStatus === "critical"
-                    ? "bg-accent-red/15 border-accent-red text-accent-red"
-                    : "bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]"
+                  conditionStatus === 'critical'
+                    ? 'bg-accent-red/15 border-accent-red text-accent-red'
+                    : 'bg-[var(--bg-tertiary)] border-[var(--border-default)] text-[var(--text-muted)]'
                 }`}
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ export function TireInspectionModal({
               disabled={isPending}
               className="px-4 py-2 rounded-lg text-xs font-medium bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 transition-opacity disabled:opacity-50"
             >
-              {isPending ? "Saving..." : "Record Inspection"}
+              {isPending ? 'Saving...' : 'Record Inspection'}
             </button>
           </div>
         </form>

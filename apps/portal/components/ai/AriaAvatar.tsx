@@ -1,28 +1,28 @@
-import type { JSX } from "react";
+import type { JSX } from 'react';
 
-export type AriaState = "idle" | "thinking" | "speaking" | "happy" | "error";
+export type AriaState = 'idle' | 'thinking' | 'speaking' | 'happy' | 'error';
 
 interface AriaAvatarProps {
   state?: AriaState;
   className?: string;
 }
 
-const SKIN = "#f5cfae";
-const SKIN_SHADOW = "#e8b78e";
-const HAIR = "#2a3550";
-const HAIR_DARK = "#1d2740";
-const EYE = "#c97b2d";
-const BLAZER = "#1f3a93";
-const BLAZER_DARK = "#172d74";
-const BLOUSE = "#ffffff";
-const SKIRT = "#1d3468";
-const VEST = "#c6f126";
-const VEST_DARK = "#a8d41f";
-const REFLECT = "#e6e6e6";
-const REFLECT_EDGE = "#b9b9b9";
-const BLUSH = "rgba(239, 130, 150, 0.35)";
-const HELMET = "#f5f5f5";
-const HELMET_ORANGE = "#e8590c";
+const SKIN = '#f5cfae';
+const SKIN_SHADOW = '#e8b78e';
+const HAIR = '#2a3550';
+const HAIR_DARK = '#1d2740';
+const EYE = '#c97b2d';
+const BLAZER = '#1f3a93';
+const BLAZER_DARK = '#172d74';
+const BLOUSE = '#ffffff';
+const SKIRT = '#1d3468';
+const VEST = '#c6f126';
+const VEST_DARK = '#a8d41f';
+const REFLECT = '#e6e6e6';
+const REFLECT_EDGE = '#b9b9b9';
+const BLUSH = 'rgba(239, 130, 150, 0.35)';
+const HELMET = '#f5f5f5';
+const HELMET_ORANGE = '#e8590c';
 
 /**
  * Aria — original character. Code-drawn SVG chibi in business attire with a
@@ -33,16 +33,16 @@ const HELMET_ORANGE = "#e8590c";
  * the character as an overlay on top of the page (see AriaLauncher). The
  * float/blink/think animations live in packages/ui globals.css.
  */
-export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.Element {
+export function AriaAvatar({ state = 'idle', className }: AriaAvatarProps): JSX.Element {
   const shellClass =
-    state === "idle" || state === "happy"
-      ? "aria-float"
-      : state === "thinking"
-        ? "aria-think-bounce"
-        : "aria-float-slow";
+    state === 'idle' || state === 'happy'
+      ? 'aria-float'
+      : state === 'thinking'
+        ? 'aria-think-bounce'
+        : 'aria-float-slow';
 
-  const eyes = state === "thinking" ? { cx: "5.5", cy: "3" } : { cx: "1", cy: "4.5" };
-  const browTilt = state === "error" ? "rotate(10 44 40)" : "rotate(0 44 40)";
+  const eyes = state === 'thinking' ? { cx: '5.5', cy: '3' } : { cx: '1', cy: '4.5' };
+  const browTilt = state === 'error' ? 'rotate(10 44 40)' : 'rotate(0 44 40)';
 
   return (
     <svg
@@ -83,7 +83,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         <ellipse cx="73" cy="58" rx="4.5" ry="2.5" fill={BLUSH} />
 
         {/* Brows */}
-        <g transform={browTilt} opacity={state === "error" ? 1 : undefined}>
+        <g transform={browTilt} opacity={state === 'error' ? 1 : undefined}>
           <path
             d="M 42 40 Q 47 37 52 39"
             stroke={HAIR_DARK}
@@ -109,9 +109,9 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         <circle cx="74" cy="50" r="1.4" fill="#fff" />
 
         {/* Mouth */}
-        {state === "speaking" ? (
+        {state === 'speaking' ? (
           <ellipse cx="60" cy="60" rx="5" ry="4" fill={HAIR_DARK} />
-        ) : state === "happy" ? (
+        ) : state === 'happy' ? (
           <path
             d="M 52 58 Q 60 67 68 58"
             stroke={HAIR_DARK}
@@ -119,7 +119,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
             fill="none"
             strokeLinecap="round"
           />
-        ) : state === "error" ? (
+        ) : state === 'error' ? (
           <path
             d="M 56 60 Q 60 58 64 60"
             stroke={HAIR_DARK}
@@ -169,7 +169,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         <path d="M 44 104 L 48 132 L 72 132 L 76 104 Z" fill={SKIRT} />
 
         {/* Arm idle (left, holds tablet) */}
-        {state !== "happy" && (
+        {state !== 'happy' && (
           <>
             <path
               d="M 45 84 Q 34 94 36 106"
@@ -202,7 +202,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         )}
 
         {/* Arm right idle */}
-        {state === "idle" && (
+        {state === 'idle' && (
           <path
             d="M 75 84 Q 86 94 84 108"
             stroke={BLAZER}
@@ -213,7 +213,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         )}
 
         {/* Thinking: hand to chin */}
-        {state === "thinking" && (
+        {state === 'thinking' && (
           <>
             <path
               d="M 76 84 Q 88 90 82 102"
@@ -227,7 +227,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         )}
 
         {/* Speaking: hand gesturing out */}
-        {state === "speaking" && (
+        {state === 'speaking' && (
           <>
             <path
               d="M 75 84 Q 90 86 96 72"
@@ -248,7 +248,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         )}
 
         {/* Happy: thumbs up with right arm */}
-        {state === "happy" && (
+        {state === 'happy' && (
           <>
             <path
               d="M 75 84 Q 90 86 84 92"
@@ -268,7 +268,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         )}
 
         {/* Error: bracing both hands together */}
-        {state === "error" && (
+        {state === 'error' && (
           <>
             <path
               d="M 45 92 Q 42 104 52 108"
@@ -327,7 +327,7 @@ export function AriaAvatar({ state = "idle", className }: AriaAvatarProps): JSX.
         </g>
 
         {/* Hard hat — happy state only */}
-        {state === "happy" && (
+        {state === 'happy' && (
           <g transform="translate(60 24) rotate(-4)">
             <path d="M -22 6 Q -24 -14 -4 -18 Q 12 -18 20 -10 Q 24 -4 20 6 Z" fill={HELMET} />
             <path d="M 8 -16 L -6 -14 L -4 2 Q 2 -8 8 -16 Z" fill={HELMET_ORANGE} opacity="0.9" />

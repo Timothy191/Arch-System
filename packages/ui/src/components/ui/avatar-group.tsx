@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../../lib/utils";
-import { Avatar } from "./avatar";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
+import { Avatar } from './avatar';
 
 export interface AvatarMember {
   username?: string;
@@ -16,7 +16,7 @@ export interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   limit?: number;
   size?: 16 | 20 | 24 | 32 | 36 | 40 | 48 | 64 | number;
   reverse?: boolean;
-  overlap?: "auto" | number;
+  overlap?: 'auto' | number;
   className?: string;
 }
 
@@ -25,18 +25,18 @@ export function AvatarGroup({
   limit,
   size = 32,
   reverse = false,
-  overlap = "auto",
+  overlap = 'auto',
   className,
   ...props
 }: AvatarGroupProps): React.JSX.Element {
-  const visibleMembers = typeof limit === "number" && limit > 0 ? members.slice(0, limit) : members;
+  const visibleMembers = typeof limit === 'number' && limit > 0 ? members.slice(0, limit) : members;
 
   const overflowCount =
-    typeof limit === "number" && limit > 0 ? Math.max(0, members.length - limit) : 0;
+    typeof limit === 'number' && limit > 0 ? Math.max(0, members.length - limit) : 0;
 
   // Calculate negative margin for overlap
   const computedMarginLeft = React.useMemo(() => {
-    if (typeof overlap === "number") {
+    if (typeof overlap === 'number') {
       return `-${overlap}px`;
     }
     // "auto" overlap: approximately ~28% to 33% of avatar diameter
@@ -50,7 +50,7 @@ export function AvatarGroup({
     <div
       role="group"
       aria-label={groupLabel}
-      className={cn("flex items-center isolate", className)}
+      className={cn('flex items-center isolate', className)}
       {...props}
     >
       {visibleMembers.map((member, index) => {
@@ -92,10 +92,10 @@ export function AvatarGroup({
             minWidth: `${size}px`,
           }}
           className={cn(
-            "relative rounded-full shrink-0 select-none flex items-center justify-center font-medium",
-            "ring-2 ring-white border border-black/[0.08]",
-            "bg-neutral-100 text-neutral-600",
-            size <= 24 ? "text-[10px]" : "text-xs",
+            'relative rounded-full shrink-0 select-none flex items-center justify-center font-medium',
+            'ring-2 ring-white border border-black/[0.08]',
+            'bg-neutral-100 text-neutral-600',
+            size <= 24 ? 'text-[10px]' : 'text-xs'
           )}
           title={`+${overflowCount} more`}
           aria-label={`+${overflowCount} more members`}
@@ -107,4 +107,4 @@ export function AvatarGroup({
   );
 }
 
-AvatarGroup.displayName = "AvatarGroup";
+AvatarGroup.displayName = 'AvatarGroup';

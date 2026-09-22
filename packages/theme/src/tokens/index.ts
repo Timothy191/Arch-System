@@ -26,7 +26,7 @@ export {
   generateThemerColorSet,
   glass,
   hsl,
-} from "./colors";
+} from './colors';
 export type {
   ColorTokens,
   HslTokens,
@@ -34,9 +34,9 @@ export type {
   RadiusTokens,
   ShadowTokens,
   Tokens,
-} from "./generated";
-export { tokens } from "./generated";
-export * from "./glass";
+} from './generated';
+export { tokens } from './generated';
+export * from './glass';
 export {
   EASINGS,
   easings,
@@ -56,7 +56,7 @@ export {
   transitions,
   VARIANTS,
   variants,
-} from "./motion";
-export { radii } from "./radii";
-export { shadows } from "./shadows";
-export { fonts, fontWeights } from "./typography";
+} from './motion';
+export { radii } from './radii';
+export { shadows } from './shadows';
+export { fonts, fontWeights } from './typography';

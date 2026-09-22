@@ -1,10 +1,10 @@
-import { Book } from "@repo/ui/components/ui/book";
-import { Breadcrumb, BreadcrumbItem } from "@repo/ui/components/ui/breadcrumb";
-import { Browser } from "@repo/ui/components/ui/browser";
-import { ButtonLink } from "@repo/ui/components/ui/button";
-import { CodeBlock } from "@repo/ui/components/ui/code-block";
-import { Collapse, CollapseGroup } from "@repo/ui/components/ui/collapse";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { Book } from '@repo/ui/components/ui/book';
+import { Breadcrumb, BreadcrumbItem } from '@repo/ui/components/ui/breadcrumb';
+import { Browser } from '@repo/ui/components/ui/browser';
+import { ButtonLink } from '@repo/ui/components/ui/button';
+import { CodeBlock } from '@repo/ui/components/ui/code-block';
+import { Collapse, CollapseGroup } from '@repo/ui/components/ui/collapse';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   ArrowRight,
   BookOpen,
@@ -14,81 +14,81 @@ import {
   Layers,
   Network,
   ShieldCheck,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata = {
-  title: "Documentation & Runbooks | Arch Systems",
-  description: "Official system manuals, security architecture, and operational runbooks.",
+  title: 'Documentation & Runbooks | Arch Systems',
+  description: 'Official system manuals, security architecture, and operational runbooks.',
 };
 
 const DOCUMENTATION_VOLUMES = [
   {
-    id: "system-architecture",
-    title: "Arch Architecture Manual",
-    subtitle: "Enterprise Topology",
+    id: 'system-architecture',
+    title: 'Arch Architecture Manual',
+    subtitle: 'Enterprise Topology',
     description:
-      "Comprehensive system diagrams, Turborepo 2.x monorepo topology, Next.js 16 app router specifications, and reactive state trees.",
-    variant: "stripe" as const,
-    color: "#006fee",
-    textColor: "#ffffff",
+      'Comprehensive system diagrams, Turborepo 2.x monorepo topology, Next.js 16 app router specifications, and reactive state trees.',
+    variant: 'stripe' as const,
+    color: '#006fee',
+    textColor: '#ffffff',
     icon: <Network className="w-4 h-4" />,
-    href: "/overview?tab=architecture",
-    badge: "Core Architecture",
+    href: '/overview?tab=architecture',
+    badge: 'Core Architecture',
   },
   {
-    id: "security-rls",
-    title: "Security & RLS Governance",
-    subtitle: "PostgreSQL & Auth",
+    id: 'security-rls',
+    title: 'Security & RLS Governance',
+    subtitle: 'PostgreSQL & Auth',
     description:
-      "Role-based row level security policies, multi-tenant isolation, audit log schemas, and crypto key rotation procedures.",
-    variant: "simple" as const,
-    color: "#9D2127",
-    textColor: "#ffffff",
+      'Role-based row level security policies, multi-tenant isolation, audit log schemas, and crypto key rotation procedures.',
+    variant: 'simple' as const,
+    color: '#9D2127',
+    textColor: '#ffffff',
     textured: true,
     icon: <ShieldCheck className="w-4 h-4" />,
-    href: "/overview?tab=audit",
-    badge: "Security & Compliance",
+    href: '/overview?tab=audit',
+    badge: 'Security & Compliance',
   },
   {
-    id: "multi-agent",
-    title: "Multi-Agent Specialist Handbook",
-    subtitle: "Autonomous Agents",
+    id: 'multi-agent',
+    title: 'Multi-Agent Specialist Handbook',
+    subtitle: 'Autonomous Agents',
     description:
-      "Operational mandates for the 8 specialist agent mesh: Antigravity, Claude, Codex, Gemini, Grok, Cline, Pi, and Goose.",
-    variant: "stripe" as const,
-    color: "#7DC1C1",
-    textColor: "#ffffff",
+      'Operational mandates for the 8 specialist agent mesh: Antigravity, Claude, Codex, Gemini, Grok, Cline, Pi, and Goose.',
+    variant: 'stripe' as const,
+    color: '#7DC1C1',
+    textColor: '#ffffff',
     icon: <Bot className="w-4 h-4" />,
-    href: "/overview?tab=agentic",
-    badge: "Agent Mesh",
+    href: '/overview?tab=agentic',
+    badge: 'Agent Mesh',
   },
   {
-    id: "mining-dispatch",
-    title: "Operations & Dispatch Protocols",
-    subtitle: "Heavy Machinery",
+    id: 'mining-dispatch',
+    title: 'Operations & Dispatch Protocols',
+    subtitle: 'Heavy Machinery',
     description:
-      "Standard operating procedures for coal haul trucks, blast drills, RFID access gates, and shift handovers.",
-    variant: "simple" as const,
-    color: "#FED954",
-    textColor: "#9d3b05",
+      'Standard operating procedures for coal haul trucks, blast drills, RFID access gates, and shift handovers.',
+    variant: 'simple' as const,
+    color: '#FED954',
+    textColor: '#9d3b05',
     textured: true,
     icon: <Layers className="w-4 h-4" />,
-    href: "/overview?tab=departments",
-    badge: "Industrial Ops",
+    href: '/overview?tab=departments',
+    badge: 'Industrial Ops',
   },
   {
-    id: "api-specs",
-    title: "OpenAPI & Swagger Specification",
-    subtitle: "REST API Contracts",
+    id: 'api-specs',
+    title: 'OpenAPI & Swagger Specification',
+    subtitle: 'REST API Contracts',
     description:
-      "Interactive Swagger UI API explorer detailing telemetry ingest, access badge verification, and SCADA endpoints.",
-    variant: "stripe" as const,
-    color: "#059669",
-    textColor: "#ffffff",
+      'Interactive Swagger UI API explorer detailing telemetry ingest, access badge verification, and SCADA endpoints.',
+    variant: 'stripe' as const,
+    color: '#059669',
+    textColor: '#ffffff',
     icon: <FileCode className="w-4 h-4" />,
-    href: "/docs/api",
-    badge: "API Reference",
+    href: '/docs/api',
+    badge: 'API Reference',
   },
 ];
 

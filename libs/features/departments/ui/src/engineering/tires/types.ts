@@ -6,7 +6,7 @@ export type {
   TireCondition,
   TireInspection,
   TireStatus,
-} from "@repo/contract/types/tire-management.types";
+} from '@repo/contract/types/tire-management.types';
 
 export interface TireWithInspections {
   id: string;
@@ -16,7 +16,7 @@ export interface TireWithInspections {
   machine_id: string | null;
   machine_name?: string | null;
   position: string;
-  status: "installed" | "inventory" | "scrapped";
+  status: 'installed' | 'inventory' | 'scrapped';
   installed_at: string;
   installed_hours: number;
   removed_at: string | null;
@@ -29,14 +29,14 @@ export interface TireWithInspections {
     inspection_date: string;
     tread_depth_mm: number;
     pressure_psi: number;
-    condition_status: "good" | "warning" | "critical";
+    condition_status: 'good' | 'warning' | 'critical';
     notes: string | null;
     created_at: string;
   }[];
   latest_inspection?: {
     tread_depth_mm: number;
     pressure_psi: number;
-    condition_status: "good" | "warning" | "critical";
+    condition_status: 'good' | 'warning' | 'critical';
     inspection_date: string;
     notes: string | null;
   } | null;

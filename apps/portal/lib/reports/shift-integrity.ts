@@ -1,7 +1,7 @@
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { inngest } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { inngest } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 /**
  * Shift Integrity Report Job
@@ -16,16 +16,16 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
 /**
  * Operational timezone for the mine. All shift windows are defined in SAST.
  */
-const OPERATIONAL_TIMEZONE = "Africa/Johannesburg";
+const OPERATIONAL_TIMEZONE = 'Africa/Johannesburg';
 
 /**
  * Adds `days` days to a YYYY-MM-DD string (calendar arithmetic in UTC, which is
  * safe for date-only values).
  */
 export function addDays(dateStr: string, days: number): string {
-  const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
+  const [year = NaN, month = NaN, day = NaN] = dateStr.split('-').map(Number);
   const next = new Date(Date.UTC(year, month - 1, day + days));
-  return next.toISOString().split("T")[0]!;
+  return next.toISOString().split('T')[0]!;
 }
 
 /**
@@ -38,19 +38,19 @@ export function addDays(dateStr: string, days: number): string {
 export function timeAtOperationalZone(
   dateStr: string,
   time: string,
-  timeZone: string = OPERATIONAL_TIMEZONE,
+  timeZone: string = OPERATIONAL_TIMEZONE
 ): Date {
-  const [year = NaN, month = NaN, day = NaN] = dateStr.split("-").map(Number);
-  const [hour = 0, minute = 0] = time.split(":").map(Number);
+  const [year = NaN, month = NaN, day = NaN] = dateStr.split('-').map(Number);
+  const [hour = 0, minute = 0] = time.split(':').map(Number);
   const utcGuess = Date.UTC(year, month - 1, day, hour, minute);
-  const formatter = new Intl.DateTimeFormat("en-US", {
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
-    hour: "numeric",
+    hour: 'numeric',
     hour12: false,
-    hourCycle: "h23",
+    hourCycle: 'h23',
   });
   const zoneHour = Number(
-    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === "hour")?.value,
+    formatter.formatToParts(new Date(utcGuess)).find((p) => p.type === 'hour')?.value
   );
   const utcHour = new Date(utcGuess).getUTCHours();
   // Shift the guess by the zone's offset so the result is `time` in that zone.
@@ -59,8 +59,8 @@ export function timeAtOperationalZone(
 
 export const shiftIntegrityReportFn = inngest.createFunction(
   {
-    id: "shift-integrity-report",
-    triggers: [{ cron: "0 3 * * 0" }],
+    id: 'shift-integrity-report',
+    triggers: [{ cron: '0 3 * * 0' }],
   },
   async () => {
     const serviceRole = createServiceRoleClient();
@@ -73,30 +73,30 @@ export const shiftIntegrityReportFn = inngest.createFunction(
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7);
 
-      const startDateStr = startDate.toISOString().split("T")[0];
-      const endDateStr = endDate.toISOString().split("T")[0];
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
 
       // AGENT-TRACE: Get all shift statuses for the week
       const { data: shiftStatuses, error: shiftError } = await serviceRole
-        .from("shift_status")
-        .select("*")
-        .gte("shift_date", startDateStr)
-        .lte("shift_date", endDateStr)
-        .order("shift_date", { ascending: true });
+        .from('shift_status')
+        .select('*')
+        .gte('shift_date', startDateStr)
+        .lte('shift_date', endDateStr)
+        .order('shift_date', { ascending: true });
 
       if (shiftError) throw shiftError;
 
       // AGENT-TRACE: Calculate shift completion metrics
       const totalShifts = shiftStatuses?.length || 0;
-      const closedShifts = shiftStatuses?.filter((s) => s.status === "closed") || [];
+      const closedShifts = shiftStatuses?.filter((s) => s.status === 'closed') || [];
       const shiftsClosedOnTime = closedShifts.filter((s) => {
         // AGENT-TRACE: Consider shift closed "on time" if closed within 2 hours of
         // shift end, evaluated in the operational timezone (SAST):
         //   Day shift ends 18:00 (+2h grace = 20:00 SAST same day)
         //   Night shift ends 06:00 the NEXT day (+2h grace = 08:00 SAST next day)
         const shiftType = s.shift_type;
-        const graceTime = shiftType === "day" ? "20:00" : "08:00";
-        const graceDate = shiftType === "night" ? addDays(s.shift_date, 1) : s.shift_date;
+        const graceTime = shiftType === 'day' ? '20:00' : '08:00';
+        const graceDate = shiftType === 'night' ? addDays(s.shift_date, 1) : s.shift_date;
         const expectedEndTime = timeAtOperationalZone(graceDate, graceTime);
         const closedAt = new Date(s.closed_at);
         return !Number.isNaN(closedAt.getTime()) && closedAt <= expectedEndTime;
@@ -106,10 +106,10 @@ export const shiftIntegrityReportFn = inngest.createFunction(
 
       // AGENT-TRACE: Calculate data quality score
       const { data: completenessAlerts, error: alertError } = await serviceRole
-        .from("shift_completeness_alerts")
-        .select("*")
-        .gte("created_at", startDate.toISOString())
-        .lte("created_at", endDate.toISOString());
+        .from('shift_completeness_alerts')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
 
       if (alertError) throw alertError;
 
@@ -122,33 +122,33 @@ export const shiftIntegrityReportFn = inngest.createFunction(
 
       // AGENT-TRACE: Get data integrity issues for the week
       const { data: integrityIssues, error: issuesError } = await serviceRole
-        .from("data_integrity_issues")
-        .select("*")
-        .gte("created_at", startDate.toISOString())
-        .lte("created_at", endDate.toISOString());
+        .from('data_integrity_issues')
+        .select('*')
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
 
       if (issuesError) throw issuesError;
 
       const totalIssues = integrityIssues?.length || 0;
       const unresolvedIssues = integrityIssues?.filter((i) => !i.resolved) || [];
       const highSeverityIssues =
-        unresolvedIssues?.filter((i) => i.severity === "high" || i.severity === "critical") || [];
+        unresolvedIssues?.filter((i) => i.severity === 'high' || i.severity === 'critical') || [];
 
       // AGENT-TRACE: Calculate operational KPIs
       const { data: machines, error: machineError } = await serviceRole
-        .from("machines")
-        .select("id, active, department_id")
-        .eq("active", true);
+        .from('machines')
+        .select('id, active, department_id')
+        .eq('active', true);
 
       if (machineError) throw machineError;
 
       const totalActiveMachines = machines?.length || 0;
 
       const { data: machineOps, error: opsError } = await serviceRole
-        .from("machine_operations")
-        .select("id, operation_date, department_id")
-        .gte("operation_date", startDateStr)
-        .lte("operation_date", endDateStr);
+        .from('machine_operations')
+        .select('id, operation_date, department_id')
+        .gte('operation_date', startDateStr)
+        .lte('operation_date', endDateStr);
 
       if (opsError) throw opsError;
 
@@ -185,7 +185,7 @@ export const shiftIntegrityReportFn = inngest.createFunction(
       };
 
       // AGENT-TRACE: Store report in database
-      const { error: insertError } = await serviceRole.from("shift_integrity_reports").insert({
+      const { error: insertError } = await serviceRole.from('shift_integrity_reports').insert({
         report_data: reportSummary,
         report_date: endDateStr,
         created_at: new Date().toISOString(),
@@ -202,11 +202,11 @@ export const shiftIntegrityReportFn = inngest.createFunction(
     } catch (err) {
       success = false;
       logError(err, {
-        context: "shift_integrity_report_job",
+        context: 'shift_integrity_report_job',
       });
       throw err;
     } finally {
-      recordJobExecution("shift-integrity-report", performance.now() - start, success);
+      recordJobExecution('shift-integrity-report', performance.now() - start, success);
     }
-  },
+  }
 );

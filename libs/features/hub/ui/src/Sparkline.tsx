@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { useEffect, useId, useState } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { useEffect, useId, useState } from 'react';
 
 interface SparklineProps {
   data: number[];
@@ -25,11 +25,11 @@ export function Sparkline({
   // infinite r/opacity animation was running on every sparkline regardless of
   // user preference.
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
     const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   if (data.length < 2) return null;
@@ -47,14 +47,14 @@ export function Sparkline({
     return `${x},${y}`;
   });
 
-  const pathD = `M${points.join(" L")}`;
+  const pathD = `M${points.join(' L')}`;
   const trend = data[data.length - 1]! - data[0]!;
 
   // Neon cyan for steady metrics, high-saturation neon coral for alerts
-  const strokeColor = trend >= 0 ? "#00f0ff" : "#ff4b5c";
+  const strokeColor = trend >= 0 ? '#00f0ff' : '#ff4b5c';
 
-  const endX = points[points.length - 1]?.split(",")[0] ?? "0";
-  const endY = points[points.length - 1]?.split(",")[1] ?? "0";
+  const endX = points[points.length - 1]?.split(',')[0] ?? '0';
+  const endY = points[points.length - 1]?.split(',')[1] ?? '0';
 
   // Create an area path closed at the bottom of the svg
   const areaPathD = `${pathD} L${endX},${height} L0,${height} Z`;
@@ -64,7 +64,7 @@ export function Sparkline({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className={cn("shrink-0 overflow-visible", className)}
+      className={cn('shrink-0 overflow-visible', className)}
       aria-hidden="true"
     >
       <defs>

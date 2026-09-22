@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from 'zod';
 export const GovernanceEventPayloadSchema = z.object({
-  eventType: z.enum(["PreToolUse", "PostToolUse", "PreInvocation", "Stop"]),
+  eventType: z.enum(['PreToolUse', 'PostToolUse', 'PreInvocation', 'Stop']),
   toolName: z.string(),
   targetPath: z.string().optional(),
   exitCode: z.number(),

@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { analytics } from "@repo/utils";
-import { fetchClient } from "@repo/utils/client";
-import { useState } from "react";
+import { Button } from '@repo/ui/components/ui/button';
+import { analytics } from '@repo/utils';
+import { fetchClient } from '@repo/utils/client';
+import { useState } from 'react';
 
 interface FeedbackWidgetProps {
-  variant?: "header" | "floating";
+  variant?: 'header' | 'floating';
 }
 
 // AGENT-TRACE: Integrated taskbar variant to mount Feedback/Support directly in top MacMenuBar/HeaderWidgets with anchored glass popover modal and autofocus/keyboard ergonomics.
-export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
+export function FeedbackWidget({ variant = 'header' }: FeedbackWidgetProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [type, setType] = useState("bug");
-  const [message, setMessage] = useState("");
+  const [type, setType] = useState('bug');
+  const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       setIsOpen(false);
-    } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && message.trim()) {
+    } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && message.trim()) {
       e.preventDefault();
       handleSubmit(e as unknown as React.FormEvent);
     }
@@ -32,19 +32,19 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
     setSubmitting(true);
 
     analytics.track({
-      eventName: "User Feedback Submitted",
+      eventName: 'User Feedback Submitted',
       properties: { type, messageLength: message.length },
     });
 
-    await fetchClient.post("/api/feedback", { type, message }).catch(() => {});
+    await fetchClient.post('/api/feedback', { type, message }).catch(() => {});
 
     setSubmitting(false);
-    setMessage("");
+    setMessage('');
     setIsOpen(false);
-    alert("Thank you for your feedback! Our support team has received it.");
+    alert('Thank you for your feedback! Our support team has received it.');
   };
 
-  if (variant === "header") {
+  if (variant === 'header') {
     return (
       <div className="relative inline-block">
         <button
@@ -113,7 +113,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
                     disabled={submitting || !message.trim()}
                     className="h-8 text-xs bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
                   >
-                    {submitting ? "Sending..." : "Submit"}
+                    {submitting ? 'Sending...' : 'Submit'}
                   </Button>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export function FeedbackWidget({ variant = "header" }: FeedbackWidgetProps) {
           <span className="text-[10px] text-muted-foreground font-mono">⌘+Enter to send</span>
           <div className="flex gap-2">
             <Button type="submit" disabled={submitting || !message.trim()}>
-              {submitting ? "Sending..." : "Submit"}
+              {submitting ? 'Sending...' : 'Submit'}
             </Button>
           </div>
         </div>

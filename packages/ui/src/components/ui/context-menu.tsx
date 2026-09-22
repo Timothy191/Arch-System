@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 interface ContextMenuState {
   isOpen: boolean;
@@ -15,7 +15,7 @@ const ContextMenuContext = React.createContext<ContextMenuState | null>(null);
 function useContextMenu() {
   const context = React.useContext(ContextMenuContext);
   if (!context) {
-    throw new Error("ContextMenu components must be used within a ContextMenu");
+    throw new Error('ContextMenu components must be used within a ContextMenu');
   }
   return context;
 }
@@ -50,16 +50,16 @@ export function ContextMenu({ children }: ContextMenuProps) {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         closeMenu();
       }
     };
 
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, closeMenu]);
 
@@ -86,7 +86,7 @@ export function ContextMenuTrigger({ children, className, ...props }: ContextMen
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.shiftKey && e.key === "F10") || e.key === "ContextMenu") {
+    if ((e.shiftKey && e.key === 'F10') || e.key === 'ContextMenu') {
       e.preventDefault();
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       openMenu({ x: rect.left + 20, y: rect.top + 20 });
@@ -117,7 +117,7 @@ export function ContextMenuTrigger({ children, className, ...props }: ContextMen
       onKeyDown={handleKeyDown}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={cn("outline-none select-none", className)}
+      className={cn('outline-none select-none', className)}
       {...props}
     >
       {children}
@@ -161,13 +161,13 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
       role="menu"
       data-context-menu-content="true"
       style={{
-        position: "fixed",
+        position: 'fixed',
         left: adjustedPos.x,
         top: adjustedPos.y,
       }}
       className={cn(
-        "z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100",
-        className,
+        'z-50 min-w-[180px] overflow-hidden rounded-lg border border-neutral-200 bg-white/95 p-1 shadow-xl backdrop-blur-md text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100',
+        className
       )}
       {...props}
     >
@@ -177,7 +177,7 @@ export function ContextMenuContent({ children, className, ...props }: ContextMen
 }
 
 export interface ContextMenuItemProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "onClick" | "prefix"> {
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick' | 'prefix'> {
   value?: string;
   onClick?: (value?: string) => void;
   href?: string;
@@ -219,12 +219,12 @@ export function ContextMenuItem({
   );
 
   const sharedClasses = cn(
-    "relative flex cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors",
+    'relative flex cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors',
     destructive
-      ? "text-red-600 hover:bg-red-50:bg-red-950/40"
-      : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100",
-    disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className,
+      ? 'text-red-600 hover:bg-red-50:bg-red-950/40'
+      : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100',
+    disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+    className
   );
 
   if (href && !disabled) {
@@ -255,5 +255,5 @@ export function ContextMenuItem({
 }
 
 export function ContextMenuDivider({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div role="separator" className={cn("my-1 h-px bg-neutral-200", className)} {...props} />;
+  return <div role="separator" className={cn('my-1 h-px bg-neutral-200', className)} {...props} />;
 }

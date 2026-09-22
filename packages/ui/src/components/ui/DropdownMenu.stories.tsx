@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   Cloud,
   CreditCard,
@@ -10,8 +10,8 @@ import {
   User,
   UserPlus,
   Users,
-} from "lucide-react";
-import { Button } from "./button";
+} from 'lucide-react';
+import { Button } from './button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
+} from './dropdown-menu';
 
 const GithubIcon = () => (
   <svg className="mr-2 h-4 w-4 shrink-0 text-black fill-current" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@ const GithubIcon = () => (
 );
 
 const meta: Meta<typeof DropdownMenu> = {
-  title: "UI/DropdownMenu",
+  title: 'UI/DropdownMenu',
   component: DropdownMenu,
 };
 

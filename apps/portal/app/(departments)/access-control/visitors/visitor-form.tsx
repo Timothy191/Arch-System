@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Loader2, Plus, Users } from "lucide-react";
-import { useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { toast } from "sonner";
-import { registerVisitor } from "../actions";
+import { Button } from '@repo/ui/components/ui/button';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Loader2, Plus, Users } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { toast } from 'sonner';
+import { registerVisitor } from '../actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -42,18 +42,18 @@ export function VisitorForm() {
     try {
       const result = await registerVisitor(formData);
       if (result.success) {
-        toast.success("Visitor registered successfully", {
-          description: `${formData.get("first_name")} ${formData.get("surname")} has been checked in.`,
+        toast.success('Visitor registered successfully', {
+          description: `${formData.get('first_name')} ${formData.get('surname')} has been checked in.`,
         });
         formRef.current?.reset();
       } else {
-        setError("Failed to register visitor. Please try again.");
-        toast.error("Registration failed");
+        setError('Failed to register visitor. Please try again.');
+        toast.error('Registration failed');
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred";
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(message);
-      toast.error("An error occurred", {
+      toast.error('An error occurred', {
         description: message,
       });
     }

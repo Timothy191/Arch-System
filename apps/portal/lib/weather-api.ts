@@ -5,4 +5,4 @@ export {
   getWindDirection,
   searchLocation,
   type WeatherData,
-} from "@repo/shared/data-access";
+} from '@repo/shared/data-access';

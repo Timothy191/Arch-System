@@ -1,6 +1,6 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { DailyLogForm } from "./DailyLogForm";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getDepartmentContext } from '~/lib/dept-context';
+import { DailyLogForm } from './DailyLogForm';
 
 export default async function DailyLogPage({
   params,
@@ -14,18 +14,18 @@ export default async function DailyLogPage({
 
   // Standard daily log for non-safety departments (centralised fleet)
   const { data: machines } = await supabase
-    .from("machines")
-    .select("id, name, machine_type")
-    .eq("active", true)
-    .order("name");
+    .from('machines')
+    .select('id, name, machine_type')
+    .eq('active', true)
+    .order('name');
 
   const { data: todayLogs } = await supabase
-    .from("daily_logs")
-    .select("id, shift, notes")
-    .eq("department_id", deptId)
-    .eq("log_date", today);
+    .from('daily_logs')
+    .select('id, shift, notes')
+    .eq('department_id', deptId)
+    .eq('log_date', today);
 
-  const existingShifts = (todayLogs || []).map((l) => l.shift as "day" | "night");
+  const existingShifts = (todayLogs || []).map((l) => l.shift as 'day' | 'night');
   const allShiftsLogged = existingShifts.length >= 2;
 
   return (
@@ -52,7 +52,7 @@ export default async function DailyLogPage({
             <GlassCard className="border-accent-blue/20">
               <p className="text-accent-blue text-sm font-medium">
                 {existingShifts.length} shift
-                {existingShifts.length > 1 ? "s" : ""} already logged: {existingShifts.join(", ")}
+                {existingShifts.length > 1 ? 's' : ''} already logged: {existingShifts.join(', ')}
               </p>
             </GlassCard>
           )}

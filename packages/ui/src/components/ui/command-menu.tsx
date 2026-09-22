@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Search } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { Search } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 interface ItemRegistration {
   id: string;
@@ -27,7 +27,7 @@ const CommandMenuContext = React.createContext<CommandMenuContextType | null>(nu
 function useCommandMenu() {
   const context = React.useContext(CommandMenuContext);
   if (!context) {
-    throw new Error("CommandMenu components must be used within a CommandMenu");
+    throw new Error('CommandMenu components must be used within a CommandMenu');
   }
   return context;
 }
@@ -38,7 +38,7 @@ export interface CommandMenuProps {
   onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
   className?: string;
-  "aria-label"?: string;
+  'aria-label'?: string;
 }
 
 export function CommandMenu({
@@ -47,9 +47,9 @@ export function CommandMenu({
   onOpenChange,
   children,
   className,
-  "aria-label": ariaLabel = "Command Menu",
+  'aria-label': ariaLabel = 'Command Menu',
 }: CommandMenuProps) {
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = React.useState('');
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [items, setItems] = React.useState<ItemRegistration[]>([]);
 
@@ -58,11 +58,11 @@ export function CommandMenu({
       setOpen?.(nextOpen);
       onOpenChange?.(nextOpen);
       if (!nextOpen) {
-        setSearch("");
+        setSearch('');
         setActiveIndex(0);
       }
     },
-    [setOpen, onOpenChange],
+    [setOpen, onOpenChange]
   );
 
   const close = React.useCallback(() => {
@@ -97,17 +97,17 @@ export function CommandMenu({
   // Global ⌘K / Ctrl+K listener
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         handleOpenChange(!open);
       }
-      if (e.key === "Escape" && open) {
+      if (e.key === 'Escape' && open) {
         e.preventDefault();
         close();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, handleOpenChange, close]);
 
   if (!open) return null;
@@ -136,8 +136,8 @@ export function CommandMenu({
       >
         <div
           className={cn(
-            "w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl transition-all text-neutral-900",
-            className,
+            'w-full max-w-xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl transition-all text-neutral-900',
+            className
           )}
         >
           {children}
@@ -148,14 +148,14 @@ export function CommandMenu({
 }
 
 export interface CommandMenuInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuInputProps>(
-  ({ placeholder = "What do you need?", className, value, onChange, ...props }, ref) => {
+  ({ placeholder = 'What do you need?', className, value, onChange, ...props }, ref) => {
     const { search, setSearch, activeIndex, setActiveIndex, items, close } = useCommandMenu();
     const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -173,19 +173,18 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       const activeItems = items.filter(
-        (i) =>
-          !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
+        (i) => !i.disabled && (search === '' || i.text.toLowerCase().includes(search.toLowerCase()))
       );
 
-      if (e.key === "ArrowDown") {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActiveIndex((prev) => (activeItems.length === 0 ? 0 : (prev + 1) % activeItems.length));
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActiveIndex((prev) =>
-          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length,
+          activeItems.length === 0 ? 0 : (prev - 1 + activeItems.length) % activeItems.length
         );
-      } else if (e.key === "Enter") {
+      } else if (e.key === 'Enter') {
         e.preventDefault();
         if (activeItems[activeIndex]?.callback) {
           activeItems[activeIndex].callback!();
@@ -205,8 +204,8 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={cn(
-            "flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
-            className,
+            'flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50',
+            className
           )}
           {...props}
         />
@@ -215,10 +214,10 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
         </kbd>
       </div>
     );
-  },
+  }
 );
 
-CommandMenuInput.displayName = "CommandMenuInput";
+CommandMenuInput.displayName = 'CommandMenuInput';
 
 export interface CommandMenuListProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -228,13 +227,13 @@ export interface CommandMenuListProps extends React.HTMLAttributes<HTMLDivElemen
 export function CommandMenuList({
   children,
   className,
-  emptyMessage = "No results found.",
+  emptyMessage = 'No results found.',
   ...props
 }: CommandMenuListProps) {
   const { search, items } = useCommandMenu();
 
   const matchingCount = items.filter(
-    (i) => search === "" || i.text.toLowerCase().includes(search.toLowerCase()),
+    (i) => search === '' || i.text.toLowerCase().includes(search.toLowerCase())
   ).length;
 
   // Always render children so registered items stay mounted (their effects populate
@@ -244,7 +243,7 @@ export function CommandMenuList({
 
   return (
     <div
-      className={cn("max-h-80 overflow-y-auto overflow-x-hidden p-2 space-y-1", className)}
+      className={cn('max-h-80 overflow-y-auto overflow-x-hidden p-2 space-y-1', className)}
       role="listbox"
       aria-live="polite"
       {...props}
@@ -288,7 +287,7 @@ export function CommandMenuGroup({
   return (
     <div
       ref={groupRef}
-      className={cn("overflow-hidden px-1 py-1.5", className)}
+      className={cn('overflow-hidden px-1 py-1.5', className)}
       role="group"
       {...props}
     >
@@ -303,7 +302,7 @@ export function CommandMenuGroup({
 }
 
 export interface CommandMenuItemProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect" | "prefix"> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect' | 'prefix'> {
   callback?: () => void;
   onSelect?: () => void;
   prefix?: React.ReactNode;
@@ -326,7 +325,7 @@ export function CommandMenuItem({
   const { search, activeIndex, items, registerItem, unregisterItem, close } = useCommandMenu();
 
   const textContent = React.useMemo(() => {
-    if (typeof children === "string") return children;
+    if (typeof children === 'string') return children;
     return String(children);
   }, [children]);
 
@@ -359,7 +358,7 @@ export function CommandMenuItem({
 
   // Check if this item is currently active in the filtered list
   const activeItems = items.filter(
-    (i) => !i.disabled && (search === "" || i.text.toLowerCase().includes(search.toLowerCase())),
+    (i) => !i.disabled && (search === '' || i.text.toLowerCase().includes(search.toLowerCase()))
   );
   const isActive = activeItems[activeIndex]?.id === id;
 
@@ -371,12 +370,12 @@ export function CommandMenuItem({
       data-command-item="true"
       onClick={handleSelect}
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-2 text-sm outline-none transition-colors",
+        'relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-2 text-sm outline-none transition-colors',
         isActive
-          ? "bg-neutral-100 text-neutral-900"
-          : "text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60",
-        disabled && "pointer-events-none opacity-50",
-        className,
+          ? 'bg-neutral-100 text-neutral-900'
+          : 'text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60',
+        disabled && 'pointer-events-none opacity-50',
+        className
       )}
       {...props}
     >
@@ -389,6 +388,6 @@ export function CommandMenuItem({
 
 export function CommandMenuDivider({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div role="separator" className={cn("my-1.5 h-px bg-neutral-200", className)} {...props} />
+    <div role="separator" className={cn('my-1.5 h-px bg-neutral-200', className)} {...props} />
   );
 }

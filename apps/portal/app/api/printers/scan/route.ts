@@ -1,6 +1,6 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { NextResponse } from "next/server";
-import { detectAllPrinters } from "@/app/(departments)/access-control/lib/printer-detection";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { NextResponse } from 'next/server';
+import { detectAllPrinters } from '@/app/(departments)/access-control/lib/printer-detection';
 
 export async function GET() {
   try {
@@ -10,18 +10,18 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Verify user has access_control or admin role
     const { data: employee } = await supabase
-      .from("employees")
-      .select("role")
-      .eq("auth_id", user.id)
+      .from('employees')
+      .select('role')
+      .eq('auth_id', user.id)
       .single();
 
-    if (!employee || !["admin", "access_control"].includes(employee.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // 1. Detect all printers via CUPS + USB
@@ -29,9 +29,9 @@ export async function GET() {
 
     // 2. Fetch already-registered printers from DB
     const { data: registered } = await supabase
-      .from("card_printers")
-      .select("cups_name, id")
-      .is("deleted_at", null);
+      .from('card_printers')
+      .select('cups_name, id')
+      .is('deleted_at', null);
 
     const registeredNames = new Set((registered ?? []).map((r) => r.cups_name));
 
@@ -45,10 +45,10 @@ export async function GET() {
     return NextResponse.json({ printers: results, count: results.length });
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("Printer scan failed:", error);
+    console.error('Printer scan failed:', error);
     return NextResponse.json(
-      { error: "Failed to scan printers", printers: [], count: 0 },
-      { status: 500 },
+      { error: 'Failed to scan printers', printers: [], count: 0 },
+      { status: 500 }
     );
   }
 }

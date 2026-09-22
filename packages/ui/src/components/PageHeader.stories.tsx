@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { PageHeader } from "./PageHeader";
+import type { Meta, StoryObj } from '@storybook/react';
+import { PageHeader } from './PageHeader';
 
 const meta: Meta<typeof PageHeader> = {
-  title: "Components/PageHeader",
+  title: 'Components/PageHeader',
   component: PageHeader,
   parameters: {
-    layout: "padded",
+    layout: 'padded',
   },
 };
 
@@ -15,14 +15,14 @@ type Story = StoryObj<typeof PageHeader>;
 
 export const Default: Story = {
   args: {
-    title: "Drilling Operations Overview",
+    title: 'Drilling Operations Overview',
     showDate: true,
   },
 };
 
 export const WithoutDate: Story = {
   args: {
-    title: "System Settings",
+    title: 'System Settings',
     showDate: false,
   },
 };

@@ -1,8 +1,8 @@
-import type React from "react";
-import { cn } from "../../lib/utils";
+import type React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface FieldsetProps
-  extends Omit<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, "title"> {
+  extends Omit<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, 'title'> {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   footer?: React.ReactNode;
@@ -19,8 +19,8 @@ export function Fieldset({
   return (
     <fieldset
       className={cn(
-        "rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden",
-        className,
+        'rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden',
+        className
       )}
       {...props}
     >

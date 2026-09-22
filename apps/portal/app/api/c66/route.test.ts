@@ -7,21 +7,21 @@
  * and rejects unauthenticated callers.
  */
 
-import { POST } from "./route";
+import { POST } from './route';
 
-jest.mock("@repo/supabase/service-role", () => ({
+jest.mock('@repo/supabase/service-role', () => ({
   createServiceRoleClient: jest.fn(),
 }));
 
-jest.mock("@/lib/errors/error-logger", () => ({
+jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
-const { createServiceRoleClient } = jest.requireMock("@repo/supabase/service-role");
+const { createServiceRoleClient } = jest.requireMock('@repo/supabase/service-role');
 
 let lastServiceRoleClient: ReturnType<typeof buildServiceRoleMock> | null = null;
 
-const PUBLICLY_DOCUMENTED_SCANNER_SOURCES = ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
+const PUBLICLY_DOCUMENTED_SCANNER_SOURCES = ['C66-HARDWARE', 'C66-SCANNER', 'GATE-TERMINAL'];
 
 function buildServiceRoleMock(overrides?: {
   badge?: any;
@@ -31,38 +31,38 @@ function buildServiceRoleMock(overrides?: {
   visitor?: any;
 }) {
   const badge = overrides?.badge ?? {
-    id: "badge-1",
+    id: 'badge-1',
     is_active: true,
-    entity_type: "personnel",
-    personnel_id: "person-1",
+    entity_type: 'personnel',
+    personnel_id: 'person-1',
     visitor_id: null,
     fleet_id: null,
     equipment_id: null,
   };
-  const person = overrides?.person ?? { first_name: "Test", surname: "User", status: "Active" };
+  const person = overrides?.person ?? { first_name: 'Test', surname: 'User', status: 'Active' };
   const fleet = overrides?.fleet ?? {
-    fleet_code: "CT-01",
-    vehicle_type: "Coal Truck",
-    registration_number: "ABC 123 GP",
-    make: "Scania",
-    model: "R500",
-    status: "Active",
+    fleet_code: 'CT-01',
+    vehicle_type: 'Coal Truck',
+    registration_number: 'ABC 123 GP',
+    make: 'Scania',
+    model: 'R500',
+    status: 'Active',
   };
   const equip = overrides?.equip ?? {
-    equip_code: "EQP-CAT-777",
-    equipment_type: "Haul Truck Excavator",
-    status: "Active",
+    equip_code: 'EQP-CAT-777',
+    equipment_type: 'Haul Truck Excavator',
+    status: 'Active',
   };
   const visitor = overrides?.visitor ?? {
-    first_name: "David",
-    surname: "Khumalo",
-    company: "Eskom Technical Audit",
-    status: "Checked In",
+    first_name: 'David',
+    surname: 'Khumalo',
+    company: 'Eskom Technical Audit',
+    status: 'Checked In',
   };
 
   const mock = {
     from: jest.fn().mockImplementation((table: string) => {
-      if (table === "badges") {
+      if (table === 'badges') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -74,7 +74,7 @@ function buildServiceRoleMock(overrides?: {
           }),
         };
       }
-      if (table === "personnel") {
+      if (table === 'personnel') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -83,7 +83,7 @@ function buildServiceRoleMock(overrides?: {
           }),
         };
       }
-      if (table === "fleet") {
+      if (table === 'fleet') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -92,7 +92,7 @@ function buildServiceRoleMock(overrides?: {
           }),
         };
       }
-      if (table === "equipment") {
+      if (table === 'equipment') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -101,7 +101,7 @@ function buildServiceRoleMock(overrides?: {
           }),
         };
       }
-      if (table === "visitors") {
+      if (table === 'visitors') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
@@ -110,7 +110,7 @@ function buildServiceRoleMock(overrides?: {
           }),
         };
       }
-      if (table === "access_logs") {
+      if (table === 'access_logs') {
         return {
           insert: jest.fn().mockResolvedValue({ error: null }),
         };
@@ -137,28 +137,28 @@ function makeRequest(opts: {
   raw?: string;
 }) {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   };
   if (opts.source !== null && opts.source !== undefined) {
-    headers["x-scanner-source"] = opts.source;
+    headers['x-scanner-source'] = opts.source;
   }
   if (opts.token !== null && opts.token !== undefined) {
-    headers["x-scanner-token"] = opts.token;
+    headers['x-scanner-token'] = opts.token;
   }
   const init: RequestInit = {
-    method: "POST",
+    method: 'POST',
     headers,
   };
   if (opts.raw !== undefined) {
     init.body = opts.raw;
   } else {
-    init.body = JSON.stringify(opts.body ?? { barcode: "TEST-CODE" });
+    init.body = JSON.stringify(opts.body ?? { barcode: 'TEST-CODE' });
   }
-  return new Request("http://localhost/api/c66", init);
+  return new Request('http://localhost/api/c66', init);
 }
 
 const ORIGINAL_ENV = process.env;
-const TEST_TOKEN = "secure-test-token";
+const TEST_TOKEN = 'secure-test-token';
 
 beforeEach(() => {
   jest.resetModules();
@@ -171,168 +171,168 @@ afterEach(() => {
   process.env = ORIGINAL_ENV;
 });
 
-describe("P0 /api/c66 secure access checks", () => {
+describe('P0 /api/c66 secure access checks', () => {
   it.each(PUBLICLY_DOCUMENTED_SCANNER_SOURCES)(
-    "forged x-scanner-source=%s WITHOUT valid token is rejected with 401",
+    'forged x-scanner-source=%s WITHOUT valid token is rejected with 401',
     async (source) => {
-      const res = await POST(makeRequest({ source, token: "wrong-token" }));
+      const res = await POST(makeRequest({ source, token: 'wrong-token' }));
       expect(res.status).toBe(401);
       const body = await res.json();
       expect(body.success).toBe(false);
-      expect(body.error).toBe("Unauthorized scanner token");
-    },
+      expect(body.error).toBe('Unauthorized scanner token');
+    }
   );
 
   it.each(PUBLICLY_DOCUMENTED_SCANNER_SOURCES)(
-    "valid token with valid source=%s succeeds",
+    'valid token with valid source=%s succeeds',
     async (source) => {
       const res = await POST(makeRequest({ source, token: TEST_TOKEN }));
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.success).toBe(true);
-      expect(body.name).toBe("Test User");
+      expect(body.name).toBe('Test User');
       expect(lastServiceRoleClient).not.toBeNull();
-      expect(lastServiceRoleClient!.from).toHaveBeenCalledWith("access_logs");
-    },
+      expect(lastServiceRoleClient!.from).toHaveBeenCalledWith('access_logs');
+    }
   );
 
-  it("missing token is rejected with 401", async () => {
-    const res = await POST(makeRequest({ source: "C66-HARDWARE", token: null }));
+  it('missing token is rejected with 401', async () => {
+    const res = await POST(makeRequest({ source: 'C66-HARDWARE', token: null }));
     expect(res.status).toBe(401);
   });
 
-  it("invalid source with valid token is rejected with 403", async () => {
-    const res = await POST(makeRequest({ source: "INVALID-SOURCE", token: TEST_TOKEN }));
+  it('invalid source with valid token is rejected with 403', async () => {
+    const res = await POST(makeRequest({ source: 'INVALID-SOURCE', token: TEST_TOKEN }));
     expect(res.status).toBe(403);
     const body = await res.json();
-    expect(body.error).toBe("Unauthorized scanner source");
+    expect(body.error).toBe('Unauthorized scanner source');
   });
 
-  it("unconfigured SCANNER_API_KEY environment variable rejects all requests", async () => {
+  it('unconfigured SCANNER_API_KEY environment variable rejects all requests', async () => {
     delete process.env.SCANNER_API_KEY;
-    const res = await POST(makeRequest({ source: "C66-HARDWARE", token: TEST_TOKEN }));
+    const res = await POST(makeRequest({ source: 'C66-HARDWARE', token: TEST_TOKEN }));
     expect(res.status).toBe(401);
   });
 
-  it("valid coal truck badge succeeds and resolves vehicle details", async () => {
+  it('valid coal truck badge succeeds and resolves vehicle details', async () => {
     buildServiceRoleMock({
       badge: {
-        id: "badge-coal-1",
+        id: 'badge-coal-1',
         is_active: true,
-        entity_type: "fleet",
+        entity_type: 'fleet',
         personnel_id: null,
         visitor_id: null,
-        fleet_id: "fleet-coal-1",
+        fleet_id: 'fleet-coal-1',
         equipment_id: null,
       },
       fleet: {
-        fleet_code: "CT-01",
-        vehicle_type: "Coal Truck",
-        registration_number: "ABC 123 GP",
-        make: "Scania",
-        model: "R500",
-        status: "Active",
+        fleet_code: 'CT-01',
+        vehicle_type: 'Coal Truck',
+        registration_number: 'ABC 123 GP',
+        make: 'Scania',
+        model: 'R500',
+        status: 'Active',
       },
     });
 
     const res = await POST(
       makeRequest({
-        source: "C66-HARDWARE",
+        source: 'C66-HARDWARE',
         token: TEST_TOKEN,
-        body: { code: "CT-QR-01", direction: "IN", gate_location: "Weighbridge Inbound" },
-      }),
+        body: { code: 'CT-QR-01', direction: 'IN', gate_location: 'Weighbridge Inbound' },
+      })
     );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.name).toContain("Coal Truck: CT-01");
-    expect(body.entity_type).toBe("fleet");
+    expect(body.name).toContain('Coal Truck: CT-01');
+    expect(body.entity_type).toBe('fleet');
   });
 
-  it("valid equipment badge succeeds and resolves equipment details", async () => {
+  it('valid equipment badge succeeds and resolves equipment details', async () => {
     buildServiceRoleMock({
       badge: {
-        id: "badge-eqp-1",
+        id: 'badge-eqp-1',
         is_active: true,
-        entity_type: "equipment",
+        entity_type: 'equipment',
         personnel_id: null,
         visitor_id: null,
         fleet_id: null,
-        equipment_id: "eqp-1",
+        equipment_id: 'eqp-1',
       },
       equip: {
-        equip_code: "EQP-CAT-777",
-        equipment_type: "Haul Truck Excavator",
-        status: "Active",
+        equip_code: 'EQP-CAT-777',
+        equipment_type: 'Haul Truck Excavator',
+        status: 'Active',
       },
     });
 
     const res = await POST(
       makeRequest({
-        source: "C66-HARDWARE",
+        source: 'C66-HARDWARE',
         token: TEST_TOKEN,
-        body: { code: "EQP-QR-777", direction: "IN" },
-      }),
+        body: { code: 'EQP-QR-777', direction: 'IN' },
+      })
     );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.name).toContain("Equipment: EQP-CAT-777");
-    expect(body.entity_type).toBe("equipment");
+    expect(body.name).toContain('Equipment: EQP-CAT-777');
+    expect(body.entity_type).toBe('equipment');
   });
 
-  it("valid visitor badge succeeds and resolves visitor details", async () => {
+  it('valid visitor badge succeeds and resolves visitor details', async () => {
     buildServiceRoleMock({
       badge: {
-        id: "badge-vis-1",
+        id: 'badge-vis-1',
         is_active: true,
-        entity_type: "visitor",
+        entity_type: 'visitor',
         personnel_id: null,
-        visitor_id: "vis-1",
+        visitor_id: 'vis-1',
         fleet_id: null,
         equipment_id: null,
       },
       visitor: {
-        first_name: "David",
-        surname: "Khumalo",
-        company: "Eskom Technical Audit",
-        status: "Checked In",
+        first_name: 'David',
+        surname: 'Khumalo',
+        company: 'Eskom Technical Audit',
+        status: 'Checked In',
       },
     });
 
     const res = await POST(
       makeRequest({
-        source: "C66-HARDWARE",
+        source: 'C66-HARDWARE',
         token: TEST_TOKEN,
-        body: { code: "VIS-QR-01" },
-      }),
+        body: { code: 'VIS-QR-01' },
+      })
     );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.name).toContain("David Khumalo");
-    expect(body.entity_type).toBe("visitor");
+    expect(body.name).toContain('David Khumalo');
+    expect(body.entity_type).toBe('visitor');
   });
 
-  it("revoked badge is rejected with 403", async () => {
+  it('revoked badge is rejected with 403', async () => {
     buildServiceRoleMock({
       badge: {
-        id: "badge-revoked",
+        id: 'badge-revoked',
         is_active: false,
-        entity_type: "personnel",
+        entity_type: 'personnel',
       },
     });
 
     const res = await POST(
       makeRequest({
-        source: "C66-HARDWARE",
+        source: 'C66-HARDWARE',
         token: TEST_TOKEN,
-        body: { code: "REVOKED-QR" },
-      }),
+        body: { code: 'REVOKED-QR' },
+      })
     );
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.success).toBe(false);
-    expect(body.name).toBe("Revoked Badge");
+    expect(body.name).toBe('Revoked Badge');
   });
 });

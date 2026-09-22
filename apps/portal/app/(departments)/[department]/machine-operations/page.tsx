@@ -1,17 +1,17 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
+import { GlassCard } from '@repo/ui/GlassCard';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 const MachineOperationsForm = dynamic(
-  () => import("./MachineOperationsForm").then((m) => m.MachineOperationsForm),
+  () => import('./MachineOperationsForm').then((m) => m.MachineOperationsForm),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const MachineOperationsList = dynamic(
-  () => import("./MachineOperationsList").then((m) => m.MachineOperationsList),
+  () => import('./MachineOperationsList').then((m) => m.MachineOperationsList),
   {
     loading: () => (
       <div className="space-y-4">
@@ -20,15 +20,15 @@ const MachineOperationsList = dynamic(
         ))}
       </div>
     ),
-  },
+  }
 );
 
 const MachineOperationsComplianceWidget = dynamic(
   () =>
-    import("./MachineOperationsComplianceWidget").then((m) => m.MachineOperationsComplianceWidget),
+    import('./MachineOperationsComplianceWidget').then((m) => m.MachineOperationsComplianceWidget),
   {
     loading: () => <div className="h-20 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 export default async function MachineOperationsPage({
@@ -37,7 +37,7 @@ export default async function MachineOperationsPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  requireDepartment(deptSlug, "control-room");
+  requireDepartment(deptSlug, 'control-room');
   const { deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
@@ -53,37 +53,37 @@ export default async function MachineOperationsPage({
     { data: activeBreakdowns },
   ] = await Promise.all([
     supabase
-      .from("machines")
-      .select("id, name, machine_type, serial_number, active, bin_factor, site_id")
-      .eq("active", true)
-      .order("name"),
+      .from('machines')
+      .select('id, name, machine_type, serial_number, active, bin_factor, site_id')
+      .eq('active', true)
+      .order('name'),
     supabase
-      .from("operators")
-      .select("id, full_name, employee_code")
-      .eq("active", true)
-      .order("full_name"),
-    supabase.from("sites").select("id, name, site_code").eq("active", true).order("name"),
+      .from('operators')
+      .select('id, full_name, employee_code')
+      .eq('active', true)
+      .order('full_name'),
+    supabase.from('sites').select('id, name, site_code').eq('active', true).order('name'),
     supabase
-      .from("machine_operations")
+      .from('machine_operations')
       .select(
-        "*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))",
+        '*, machine:machines(name, bin_factor, serial_number), operator:operators(full_name), site:sites(name), delay_entries:delay_entries(*, delay_category:delay_categories(*))'
       )
-      .eq("department_id", deptId)
-      .eq("shift_date", today)
-      .order("start_time", { ascending: false }),
+      .eq('department_id', deptId)
+      .eq('shift_date', today)
+      .order('start_time', { ascending: false }),
     supabase
-      .from("hourly_loads")
-      .select("machine_id, shift_type, total_loads")
-      .eq("department_id", deptId)
-      .eq("load_date", today),
+      .from('hourly_loads')
+      .select('machine_id, shift_type, total_loads')
+      .eq('department_id', deptId)
+      .eq('load_date', today),
     supabase
-      .from("delay_categories")
-      .select("id, name, description")
-      .eq("is_active", true)
-      .order("name"),
+      .from('delay_categories')
+      .select('id, name, description')
+      .eq('is_active', true)
+      .order('name'),
     supabase
-      .from("breakdowns")
-      .select("id, fleet_id, reason, repair_notes, status, date_in, date_out")
+      .from('breakdowns')
+      .select('id, fleet_id, reason, repair_notes, status, date_in, date_out')
       .or(`status.eq.active,date_in.eq.${today},date_out.eq.${today}`),
   ]);
 
@@ -125,11 +125,11 @@ export default async function MachineOperationsPage({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-medium text-[var(--text-heading)]">Machine Operations</h2>
         <p className="text-[var(--text-muted)] text-sm">
-          {new Date().toLocaleDateString("en-ZA", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date().toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </p>
       </div>

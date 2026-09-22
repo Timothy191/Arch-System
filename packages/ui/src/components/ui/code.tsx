@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   syntax?: string;
@@ -13,16 +13,16 @@ export const Code = React.forwardRef<HTMLElement, CodeProps>(
         ref={ref}
         data-syntax={syntax}
         className={cn(
-          "font-mono text-xs px-1.5 py-0.5 rounded",
-          "bg-neutral-100 text-neutral-900 border border-neutral-200",
-          className,
+          'font-mono text-xs px-1.5 py-0.5 rounded',
+          'bg-neutral-100 text-neutral-900 border border-neutral-200',
+          className
         )}
         {...props}
       >
         {children}
       </code>
     );
-  },
+  }
 );
 
-Code.displayName = "Code";
+Code.displayName = 'Code';

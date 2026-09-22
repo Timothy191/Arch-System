@@ -1,18 +1,18 @@
-import { act, renderHook } from "@testing-library/react";
-import { useAdaptivePerformance } from "./useAdaptivePerformance";
+import { act, renderHook } from '@testing-library/react';
+import { useAdaptivePerformance } from './useAdaptivePerformance';
 
-describe("useAdaptivePerformance", () => {
+describe('useAdaptivePerformance', () => {
   let rafCallback: ((_time: number) => void) | null = null;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     rafCallback = null;
-    jest.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
       rafCallback = cb as any;
       return 1;
     });
-    jest.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+    jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -20,12 +20,12 @@ describe("useAdaptivePerformance", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns false initially when frame rate is fine", () => {
+  it('returns false initially when frame rate is fine', () => {
     const { result } = renderHook(() => useAdaptivePerformance());
     expect(result.current).toBe(false);
   });
 
-  it("signals low performance if FPS drops below 30 after warm-up", () => {
+  it('signals low performance if FPS drops below 30 after warm-up', () => {
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
@@ -50,7 +50,7 @@ describe("useAdaptivePerformance", () => {
     expect(result.current).toBe(true);
   });
 
-  it("does not trigger fallback if FPS stays high (e.g. 60 FPS)", () => {
+  it('does not trigger fallback if FPS stays high (e.g. 60 FPS)', () => {
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);
@@ -74,7 +74,7 @@ describe("useAdaptivePerformance", () => {
     expect(result.current).toBe(false);
   });
 
-  it("does not trigger fallback at 40 FPS (above 30 threshold)", () => {
+  it('does not trigger fallback at 40 FPS (above 30 threshold)', () => {
     const { result } = renderHook(() => useAdaptivePerformance());
 
     expect(result.current).toBe(false);

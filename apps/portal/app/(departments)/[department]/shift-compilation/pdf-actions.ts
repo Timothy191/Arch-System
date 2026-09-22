@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
-import crypto from "node:crypto";
-import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
-import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
-import { serverLogger } from "@repo/logger";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import crypto from 'node:crypto';
+import { multiSiteShiftReportSchema } from '@repo/contract/schemas/multi-site-production.schema';
+import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-production.types';
+import { serverLogger } from '@repo/logger';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 interface ExportPdfParams {
   departmentId: string;
   shiftDate: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
 }
 
 interface ExportPdfResponse {
@@ -23,7 +23,7 @@ interface ExportPdfResponse {
 
 // AGENT-TRACE: Server action fetching multi-site compilation, generating SHA256 digital signature seal, and providing report markup/PDF export payload.
 export async function exportSignedShiftReportPdf(
-  params: ExportPdfParams,
+  params: ExportPdfParams
 ): Promise<ExportPdfResponse> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -34,25 +34,25 @@ export async function exportSignedShiftReportPdf(
       error: authError,
     } = await supabase.auth.getUser();
     if (authError || !user) {
-      return { success: false, error: "Unauthorized. Active session required." };
+      return { success: false, error: 'Unauthorized. Active session required.' };
     }
 
     // 2. Fetch compiled shift data
     const { data: rawData, error: rpcError } = await supabase.rpc(
-      "get_multi_site_shift_compilation",
+      'get_multi_site_shift_compilation',
       {
         p_department_id: params.departmentId,
         p_shift_date: params.shiftDate,
         p_shift_type: params.shiftType,
-      },
+      }
     );
 
     if (rpcError || !rawData) {
       serverLogger.error({
-        err: new Error(rpcError?.message || "Failed to fetch shift data"),
-        context: "exportSignedShiftReportPdf:rpc",
+        err: new Error(rpcError?.message || 'Failed to fetch shift data'),
+        context: 'exportSignedShiftReportPdf:rpc',
       });
-      return { success: false, error: rpcError?.message || "Failed to compile report data." };
+      return { success: false, error: rpcError?.message || 'Failed to compile report data.' };
     }
 
     const parsed = multiSiteShiftReportSchema.safeParse(rawData);
@@ -73,15 +73,15 @@ export async function exportSignedShiftReportPdf(
     });
 
     const signatureHash = crypto
-      .createHmac("sha256", process.env.SHIFT_SIGNING_SECRET || "arch-mining-secret-key")
+      .createHmac('sha256', process.env.SHIFT_SIGNING_SECRET || 'arch-mining-secret-key')
       .update(hashPayload)
-      .digest("hex");
+      .digest('hex');
 
     // 4. Render HTML template for the print document
     const htmlContent = generatePrintHtml(
       reportData,
       signatureHash,
-      user.email || "Control Room Lead",
+      user.email || 'Control Room Lead'
     );
 
     const fileName = `Shift_Report_${params.shiftDate}_${params.shiftType.toUpperCase()}_${signatureHash.slice(0, 8)}.pdf`;
@@ -93,10 +93,10 @@ export async function exportSignedShiftReportPdf(
       signatureHash,
     };
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : "PDF generation failed";
+    const errorMsg = err instanceof Error ? err.message : 'PDF generation failed';
     serverLogger.error({
       err: err instanceof Error ? err : new Error(errorMsg),
-      context: "exportSignedShiftReportPdf:catch",
+      context: 'exportSignedShiftReportPdf:catch',
     });
     return { success: false, error: `PDF generation failed: ${errorMsg}` };
   }
@@ -106,7 +106,7 @@ export async function exportSignedShiftReportPdf(
 function generatePrintHtml(
   report: MultiSiteShiftReport,
   signatureHash: string,
-  signerEmail: string,
+  signerEmail: string
 ): string {
   const { meta, production, rollover, breakdowns, ancillary } = report;
 
@@ -169,18 +169,18 @@ function generatePrintHtml(
               <td><strong>${exc.excavator_name}</strong> (${exc.operator_name})</td>
               <td>${exc.block_id} — ${exc.material_type}</td>
               <td class="mono" style="font-size: 7pt;">
-                ${exc.trucks.map((t) => `${t.truck_name}=${t.loads}`).join(", ")}
+                ${exc.trucks.map((t) => `${t.truck_name}=${t.loads}`).join(', ')}
               </td>
               <td class="bold mono">${exc.total_loads}</td>
-              <td class="bold mono">${exc.material_type === "TOPSOIL" ? `${exc.total_bcm.toLocaleString()} m³` : `${exc.total_tonnes.toLocaleString()} t`}</td>
+              <td class="bold mono">${exc.material_type === 'TOPSOIL' ? `${exc.total_bcm.toLocaleString()} m³` : `${exc.total_tonnes.toLocaleString()} t`}</td>
               <td class="mono">${exc.operating_hours}h</td>
               <td class="mono bold">${exc.rate_per_hour}</td>
-              <td style="color: #b45309;">${exc.delays || "—"}</td>
+              <td style="color: #b45309;">${exc.delays || '—'}</td>
             </tr>
-          `,
-            ),
+          `
+            )
           )
-          .join("")}
+          .join('')}
       </tbody>
     </table>
 
@@ -202,9 +202,9 @@ function generatePrintHtml(
                 <td class="mono">${r.hours}h</td>
                 <td class="bold mono">${r.total_bcm.toLocaleString()} BCM</td>
               </tr>
-            `,
+            `
               )
-              .join("")}
+              .join('')}
             <tr style="background-color: #f1f5f9;">
               <td colspan="3" class="bold">Total Rollover Pushed</td>
               <td class="bold mono">${rollover?.total_bcm?.toLocaleString() || 0} BCM</td>
@@ -223,11 +223,11 @@ function generatePrintHtml(
               <tr>
                 <td class="bold">${a.machine_name}</td>
                 <td>${a.site_code}</td>
-                <td>${a.activity_type} ${a.trip_loads ? `(${a.trip_loads} loads)` : ""} ${a.notes || ""}</td>
+                <td>${a.activity_type} ${a.trip_loads ? `(${a.trip_loads} loads)` : ''} ${a.notes || ''}</td>
               </tr>
-            `,
+            `
               )
-              .join("")}
+              .join('')}
           </tbody>
         </table>
       </div>
@@ -252,13 +252,13 @@ function generatePrintHtml(
           <tr>
             <td class="bold mono">${b.machine_name}</td>
             <td>${b.site_code}</td>
-            <td class="mono bold" style="color: ${b.duration_hours >= 10 ? "#dc2626" : "#0f172a"};">${b.duration_hours} hrs</td>
-            <td>${b.reason} ${b.repair_notes ? `— <em>${b.repair_notes}</em>` : ""}</td>
+            <td class="mono bold" style="color: ${b.duration_hours >= 10 ? '#dc2626' : '#0f172a'};">${b.duration_hours} hrs</td>
+            <td>${b.reason} ${b.repair_notes ? `— <em>${b.repair_notes}</em>` : ''}</td>
             <td>${b.is_operational_defect ? '<span style="color: #d97706;">Operational with Defect</span>' : b.status.toUpperCase()}</td>
           </tr>
-        `,
+        `
           )
-          .join("")}
+          .join('')}
       </tbody>
     </table>
 

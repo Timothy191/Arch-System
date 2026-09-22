@@ -6,7 +6,7 @@
  * https://open-meteo.com/
  */
 
-import { APIError } from "@repo/errors";
+import { APIError } from '@repo/errors';
 
 export interface WeatherData {
   temperature: number;
@@ -38,55 +38,55 @@ export interface DailyForecast {
 
 // WMO Weather interpretation codes
 const weatherCodes: Record<number, { description: string; icon: string }> = {
-  0: { description: "Clear sky", icon: "☀️" },
-  1: { description: "Mainly clear", icon: "🌤️" },
-  2: { description: "Partly cloudy", icon: "⛅" },
-  3: { description: "Overcast", icon: "☁️" },
-  45: { description: "Foggy", icon: "🌫️" },
-  48: { description: "Depositing rime fog", icon: "🌫️" },
-  51: { description: "Light drizzle", icon: "🌦️" },
-  53: { description: "Moderate drizzle", icon: "🌦️" },
-  55: { description: "Dense drizzle", icon: "🌧️" },
-  61: { description: "Slight rain", icon: "🌦️" },
-  63: { description: "Moderate rain", icon: "🌧️" },
-  65: { description: "Heavy rain", icon: "⛈️" },
-  71: { description: "Slight snow", icon: "🌨️" },
-  73: { description: "Moderate snow", icon: "❄️" },
-  75: { description: "Heavy snow", icon: "❄️" },
-  95: { description: "Thunderstorm", icon: "⛈️" },
-  96: { description: "Thunderstorm with hail", icon: "⛈️" },
-  99: { description: "Thunderstorm with heavy hail", icon: "⛈️" },
+  0: { description: 'Clear sky', icon: '☀️' },
+  1: { description: 'Mainly clear', icon: '🌤️' },
+  2: { description: 'Partly cloudy', icon: '⛅' },
+  3: { description: 'Overcast', icon: '☁️' },
+  45: { description: 'Foggy', icon: '🌫️' },
+  48: { description: 'Depositing rime fog', icon: '🌫️' },
+  51: { description: 'Light drizzle', icon: '🌦️' },
+  53: { description: 'Moderate drizzle', icon: '🌦️' },
+  55: { description: 'Dense drizzle', icon: '🌧️' },
+  61: { description: 'Slight rain', icon: '🌦️' },
+  63: { description: 'Moderate rain', icon: '🌧️' },
+  65: { description: 'Heavy rain', icon: '⛈️' },
+  71: { description: 'Slight snow', icon: '🌨️' },
+  73: { description: 'Moderate snow', icon: '❄️' },
+  75: { description: 'Heavy snow', icon: '❄️' },
+  95: { description: 'Thunderstorm', icon: '⛈️' },
+  96: { description: 'Thunderstorm with hail', icon: '⛈️' },
+  99: { description: 'Thunderstorm with heavy hail', icon: '⛈️' },
 };
 
 export function getWeatherDescription(code: number): {
   description: string;
   icon: string;
 } {
-  return weatherCodes[code] || { description: "Unknown", icon: "❓" };
+  return weatherCodes[code] || { description: 'Unknown', icon: '❓' };
 }
 
 export function getWindDirection(deg: number): string {
   const dirs = [
-    "N",
-    "NNE",
-    "NE",
-    "ENE",
-    "E",
-    "ESE",
-    "SE",
-    "SSE",
-    "S",
-    "SSW",
-    "SW",
-    "WSW",
-    "W",
-    "WNW",
-    "NW",
-    "NNW",
+    'N',
+    'NNE',
+    'NE',
+    'ENE',
+    'E',
+    'ESE',
+    'SE',
+    'SSE',
+    'S',
+    'SSW',
+    'SW',
+    'WSW',
+    'W',
+    'WNW',
+    'NW',
+    'NNW',
   ];
   const normalized = ((deg % 360) + 360) % 360;
   const index = Math.round(normalized / 22.5) % 16;
-  return dirs[index] ?? "N";
+  return dirs[index] ?? 'N';
 }
 
 /**
@@ -96,14 +96,14 @@ export function getWindDirection(deg: number): string {
 export async function fetchWeather(
   lat: number = -26.1436, // Delmas, Mpumalanga, South Africa default
   lon: number = 28.6811,
-  locationName?: string,
+  locationName?: string
 ): Promise<WeatherData> {
   // Use API route when coordinates match default (server-side proxy)
   // Direct API call for custom coordinates (client-side with CSP)
   const useApiRoute = lat === -26.1436 && lon === 28.6811;
 
   const url = useApiRoute
-    ? "/api/weather"
+    ? '/api/weather'
     : `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
 
   const response = await fetch(url, { next: { revalidate: 300 } }); // Cache 5 minutes
@@ -112,7 +112,7 @@ export async function fetchWeather(
     throw new APIError(`Weather API error: ${response.status}`, {
       statusCode: response.status,
       context: {
-        endpoint: useApiRoute ? "weather-api-route" : "open-meteo",
+        endpoint: useApiRoute ? 'weather-api-route' : 'open-meteo',
         statusText: response.statusText,
       },
     });
@@ -156,7 +156,7 @@ export async function fetchWeather(
  * Search for location coordinates by name (using Open-Meteo Geocoding API)
  */
 export async function searchLocation(
-  name: string,
+  name: string
 ): Promise<{ lat: number; lon: number; name: string }[]> {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`;
 
@@ -183,7 +183,7 @@ export async function searchLocation(
  * Get weather alerts/advisories for operations
  */
 export function getWeatherAlert(weather: WeatherData): {
-  level: "none" | "advisory" | "warning" | "critical";
+  level: 'none' | 'advisory' | 'warning' | 'critical';
   message: string;
 } {
   const code = weather.weatherCode;
@@ -191,38 +191,38 @@ export function getWeatherAlert(weather: WeatherData): {
   // Critical conditions for outdoor operations
   if (code >= 95) {
     return {
-      level: "critical",
-      message: "⚠️ Thunderstorm - Cease outdoor operations immediately",
+      level: 'critical',
+      message: '⚠️ Thunderstorm - Cease outdoor operations immediately',
     };
   }
 
   if (code >= 71 && code <= 75) {
     return {
-      level: "warning",
-      message: "❄️ Snow conditions - Reduced visibility and traction",
+      level: 'warning',
+      message: '❄️ Snow conditions - Reduced visibility and traction',
     };
   }
 
   if (code === 65 || weather.windSpeed > 50) {
     return {
-      level: "warning",
-      message: "🌧️ Heavy rain/high winds - Exercise caution outdoors",
+      level: 'warning',
+      message: '🌧️ Heavy rain/high winds - Exercise caution outdoors',
     };
   }
 
   if (code >= 45 && code <= 48) {
     return {
-      level: "advisory",
-      message: "🌫️ Fog conditions - Reduced visibility",
+      level: 'advisory',
+      message: '🌫️ Fog conditions - Reduced visibility',
     };
   }
 
   if (weather.windSpeed > 30) {
     return {
-      level: "advisory",
-      message: "💨 Strong winds - Secure equipment",
+      level: 'advisory',
+      message: '💨 Strong winds - Secure equipment',
     };
   }
 
-  return { level: "none", message: "" };
+  return { level: 'none', message: '' };
 }

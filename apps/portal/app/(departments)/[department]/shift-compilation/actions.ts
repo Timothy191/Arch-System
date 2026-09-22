@@ -1,28 +1,28 @@
-"use server";
+'use server';
 
-import { multiSiteShiftReportSchema } from "@repo/contract/schemas/multi-site-production.schema";
+import { multiSiteShiftReportSchema } from '@repo/contract/schemas/multi-site-production.schema';
 import {
   lockAndSignShiftSchema,
   unifiedShiftReportSchema,
-} from "@repo/contract/schemas/shift-compilation.schema";
-import type { MultiSiteShiftReport } from "@repo/contract/types/multi-site-production.types";
+} from '@repo/contract/schemas/shift-compilation.schema';
+import type { MultiSiteShiftReport } from '@repo/contract/types/multi-site-production.types';
 import type {
   LockAndSignShiftInput,
   UnifiedShiftReport,
-} from "@repo/contract/types/shift-compilation.types";
-import { AuthError, ForbiddenError, ValidationError } from "@repo/errors";
-import { serverLogger } from "@repo/logger";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import bcrypt from "bcryptjs";
-import { revalidatePath } from "next/cache";
-import { logAuditEvent } from "@/lib/audit";
+} from '@repo/contract/types/shift-compilation.types';
+import { AuthError, ForbiddenError, ValidationError } from '@repo/errors';
+import { serverLogger } from '@repo/logger';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { createServiceRoleClient } from '@repo/supabase/service-role';
+import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
+import { logAuditEvent } from '@/lib/audit';
 
 // AGENT-TRACE: Server action fetching unified shift compilation from PostgreSQL RPC.
 export async function getUnifiedShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: 'day' | 'night'
 ): Promise<{ data?: UnifiedShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -32,12 +32,12 @@ export async function getUnifiedShiftReport(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      throw new AuthError("Unauthorized: valid session required", {
-        context: { operation: "getUnifiedShiftReport" },
+      throw new AuthError('Unauthorized: valid session required', {
+        context: { operation: 'getUnifiedShiftReport' },
       });
     }
 
-    const { data, error } = await supabase.rpc("get_unified_shift_compilation", {
+    const { data, error } = await supabase.rpc('get_unified_shift_compilation', {
       p_department_id: departmentId,
       p_shift_date: shiftDate,
       p_shift_type: shiftType,
@@ -46,7 +46,7 @@ export async function getUnifiedShiftReport(
     if (error) {
       serverLogger.error({
         err: new Error(error.message),
-        context: "getUnifiedShiftReport:rpc",
+        context: 'getUnifiedShiftReport:rpc',
         details: error,
       });
       return { error: error.message };
@@ -55,16 +55,16 @@ export async function getUnifiedShiftReport(
     const parsed = unifiedShiftReportSchema.safeParse(data);
     if (!parsed.success) {
       serverLogger.error({
-        err: new Error("Failed to validate shift report data structure"),
-        context: "getUnifiedShiftReport:validation",
+        err: new Error('Failed to validate shift report data structure'),
+        context: 'getUnifiedShiftReport:validation',
         details: parsed.error.issues,
       });
-      return { error: "Failed to validate shift report data structure" };
+      return { error: 'Failed to validate shift report data structure' };
     }
 
     return { data: parsed.data };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "An unexpected error occurred";
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred';
     return { error: message };
   }
 }
@@ -73,7 +73,7 @@ export async function getUnifiedShiftReport(
 export async function getMultiSiteShiftReport(
   departmentId: string,
   shiftDate: string,
-  shiftType: "day" | "night",
+  shiftType: 'day' | 'night'
 ): Promise<{ data?: MultiSiteShiftReport; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -83,12 +83,12 @@ export async function getMultiSiteShiftReport(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      throw new AuthError("Unauthorized: valid session required", {
-        context: { operation: "getMultiSiteShiftReport" },
+      throw new AuthError('Unauthorized: valid session required', {
+        context: { operation: 'getMultiSiteShiftReport' },
       });
     }
 
-    const { data, error } = await supabase.rpc("get_multi_site_shift_compilation", {
+    const { data, error } = await supabase.rpc('get_multi_site_shift_compilation', {
       p_department_id: departmentId,
       p_shift_date: shiftDate,
       p_shift_type: shiftType,
@@ -97,7 +97,7 @@ export async function getMultiSiteShiftReport(
     if (error) {
       serverLogger.error({
         err: new Error(error.message),
-        context: "getMultiSiteShiftReport:rpc",
+        context: 'getMultiSiteShiftReport:rpc',
         details: error,
       });
       return { error: error.message };
@@ -106,23 +106,23 @@ export async function getMultiSiteShiftReport(
     const parsed = multiSiteShiftReportSchema.safeParse(data);
     if (!parsed.success) {
       serverLogger.error({
-        err: new Error("Failed to validate multi-site shift report data structure"),
-        context: "getMultiSiteShiftReport:validation",
+        err: new Error('Failed to validate multi-site shift report data structure'),
+        context: 'getMultiSiteShiftReport:validation',
         details: parsed.error.issues,
       });
-      return { error: "Failed to validate multi-site shift report data structure" };
+      return { error: 'Failed to validate multi-site shift report data structure' };
     }
 
     return { data: parsed.data };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "An unexpected error occurred";
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred';
     return { error: message };
   }
 }
 
 // AGENT-TRACE: Server action locking and signing the unified shift closeout with supervisor PIN verification.
 export async function lockAndSignUnifiedShift(
-  payload: LockAndSignShiftInput & { departmentSlug?: string },
+  payload: LockAndSignShiftInput & { departmentSlug?: string }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const validated = lockAndSignShiftSchema.parse(payload);
@@ -134,21 +134,21 @@ export async function lockAndSignUnifiedShift(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      throw new AuthError("Unauthorized", {
-        context: { operation: "lockAndSignUnifiedShift" },
+      throw new AuthError('Unauthorized', {
+        context: { operation: 'lockAndSignUnifiedShift' },
       });
     }
 
     // 1. Fetch current user employee record
     const { data: currentEmployee } = await supabase
-      .from("employees")
-      .select("id, role, full_name, pin_hash")
-      .eq("auth_id", user.id)
+      .from('employees')
+      .select('id, role, full_name, pin_hash')
+      .eq('auth_id', user.id)
       .single();
 
     if (!currentEmployee) {
-      throw new AuthError("Employee record not found", {
-        context: { operation: "lockAndSignUnifiedShift" },
+      throw new AuthError('Employee record not found', {
+        context: { operation: 'lockAndSignUnifiedShift' },
       });
     }
 
@@ -157,59 +157,59 @@ export async function lockAndSignUnifiedShift(
     if (validated.approvedById && validated.approvedById !== currentEmployee.id) {
       const serviceClient = createServiceRoleClient();
       const { data: specifiedApprover } = await serviceClient
-        .from("employees")
-        .select("id, role, full_name, pin_hash")
-        .eq("id", validated.approvedById)
+        .from('employees')
+        .select('id, role, full_name, pin_hash')
+        .eq('id', validated.approvedById)
         .single();
 
       if (!specifiedApprover) {
-        return { success: false, error: "Approving supervisor not found" };
+        return { success: false, error: 'Approving supervisor not found' };
       }
       approver = specifiedApprover;
     }
 
-    if (approver.role !== "supervisor" && approver.role !== "admin") {
-      throw new ForbiddenError("Only supervisors and admins can approve shift closeout", {
+    if (approver.role !== 'supervisor' && approver.role !== 'admin') {
+      throw new ForbiddenError('Only supervisors and admins can approve shift closeout', {
         context: { role: approver.role },
       });
     }
 
     if (!approver.pin_hash) {
-      return { success: false, error: "Supervisor does not have a PIN configured" };
+      return { success: false, error: 'Supervisor does not have a PIN configured' };
     }
 
     // 3. Verify BCrypt PIN
     const isPinValid = await bcrypt.compare(validated.pin, approver.pin_hash);
     if (!isPinValid) {
-      return { success: false, error: "Invalid supervisor PIN" };
+      return { success: false, error: 'Invalid supervisor PIN' };
     }
 
     // 4. Update / Insert Shift Status via service role client
     const serviceClient = createServiceRoleClient();
     const { data: updatedStatus, error: upsertError } = await serviceClient
-      .from("shift_status")
+      .from('shift_status')
       .upsert(
         {
           department_id: validated.departmentId,
           shift_date: validated.shiftDate,
           shift_type: validated.shiftType,
-          status: "closed",
+          status: 'closed',
           closed_at: new Date().toISOString(),
           closed_by: currentEmployee.id,
           approved_by: approver.id,
           notes: validated.notes || null,
         },
         {
-          onConflict: "department_id,shift_date,shift_type",
-        },
+          onConflict: 'department_id,shift_date,shift_type',
+        }
       )
-      .select("id")
+      .select('id')
       .single();
 
     if (upsertError) {
       serverLogger.error({
         err: new Error(upsertError.message),
-        context: "lockAndSignUnifiedShift:upsert",
+        context: 'lockAndSignUnifiedShift:upsert',
         details: upsertError,
       });
       return { success: false, error: upsertError.message };
@@ -217,12 +217,12 @@ export async function lockAndSignUnifiedShift(
 
     // 5. Audit logging
     await logAuditEvent({
-      action: "update",
-      tableName: "shift_status",
+      action: 'update',
+      tableName: 'shift_status',
       recordId: updatedStatus?.id,
       departmentId: validated.departmentId,
       newData: {
-        status: "closed",
+        status: 'closed',
         approved_by: approver.id,
         closed_by: currentEmployee.id,
         shift_date: validated.shiftDate,
@@ -230,7 +230,7 @@ export async function lockAndSignUnifiedShift(
       },
     });
 
-    const slug = payload.departmentSlug || "control-room";
+    const slug = payload.departmentSlug || 'control-room';
     revalidatePath(`/${slug}/shift-compilation`);
     revalidatePath(`/${slug}`);
     revalidatePath(`/${slug}/shift-coverage`);
@@ -240,7 +240,7 @@ export async function lockAndSignUnifiedShift(
     if (err instanceof ValidationError) {
       return { success: false, error: err.message };
     }
-    const message = err instanceof Error ? err.message : "Failed to sign and close shift";
+    const message = err instanceof Error ? err.message : 'Failed to sign and close shift';
     return { success: false, error: message };
   }
 }

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { RadialBar, RadialBarChart, ResponsiveContainer, Tooltip } from "recharts";
+import { RadialBar, RadialBarChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface QRStatusDistributionChartProps {
   data: Array<{ name: string; value: number; fill: string }>;
@@ -15,7 +15,7 @@ interface CustomTooltipProps {
 function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
   if (!active || !payload?.length || !payload[0]?.payload) return null;
   const d = payload[0].payload;
-  const pct = totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(1) : "0.0";
+  const pct = totalValue > 0 ? ((d.value / totalValue) * 100).toFixed(1) : '0.0';
   return (
     <div className="bg-card border border-border rounded-lg shadow-card px-3 py-2 text-xs">
       <div className="flex items-center gap-2 mb-0.5">
@@ -25,7 +25,7 @@ function CustomTooltip({ active, payload, totalValue }: CustomTooltipProps) {
       <p className="text-muted-foreground">
         <span className="tabular-nums font-semibold text-foreground">
           {d.value.toLocaleString()}
-        </span>{" "}
+        </span>{' '}
         codes ({pct}%)
       </p>
     </div>
@@ -50,7 +50,7 @@ export default function QRStatusDistributionChart({ data }: QRStatusDistribution
           <RadialBar
             dataKey="value"
             cornerRadius={4}
-            background={{ fill: "hsl(var(--secondary))" }}
+            background={{ fill: 'hsl(var(--secondary))' }}
           />
           <Tooltip content={<CustomTooltip totalValue={total} />} />
         </RadialBarChart>

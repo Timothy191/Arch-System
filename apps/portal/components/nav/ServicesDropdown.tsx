@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   DropdownMenu,
@@ -10,8 +10,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@repo/ui/components/ui/dropdown-menu";
-import { cn } from "@repo/ui/lib/utils";
+} from '@repo/ui/components/ui/dropdown-menu';
+import { cn } from '@repo/ui/lib/utils';
 import {
   ChevronDown,
   ClipboardList,
@@ -27,10 +27,10 @@ import {
   Siren,
   Sun,
   Wind,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { fetchWeather, getWindDirection, type WeatherData } from "@/lib/weather-api";
-import { logout } from "~/app/actions";
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { fetchWeather, getWindDirection, type WeatherData } from '@/lib/weather-api';
+import { logout } from '~/app/actions';
 
 /* ------------------------------------------------------------------ */
 //  Shift helpers
@@ -47,7 +47,7 @@ function getShiftInfo(): ShiftInfo {
   const isDay = hour >= 6 && hour < 18;
   const hoursRemaining = isDay ? 18 - hour : hour >= 18 ? 30 - hour : 6 - hour;
   return {
-    label: isDay ? "Day Shift" : "Night Shift",
+    label: isDay ? 'Day Shift' : 'Night Shift',
     hoursRemaining,
     isDay,
   };
@@ -58,16 +58,16 @@ function getShiftInfo(): ShiftInfo {
 /* ------------------------------------------------------------------ */
 interface SafetyAlert {
   id: string;
-  severity: "critical" | "warning" | "info";
+  severity: 'critical' | 'warning' | 'info';
   message: string;
   timestamp: number;
 }
 
 function useSafetyAlerts() {
   const [alerts, _setAlerts] = useState<SafetyAlert[]>(() => {
-    if (typeof window === "undefined") return [];
+    if (typeof window === 'undefined') return [];
     try {
-      const raw = window.localStorage.getItem("arch-safety-alerts");
+      const raw = window.localStorage.getItem('arch-safety-alerts');
       if (raw) return JSON.parse(raw);
     } catch {
       /* ignore */
@@ -75,24 +75,24 @@ function useSafetyAlerts() {
     // Seed realistic mining alerts on first load
     const seed: SafetyAlert[] = [
       {
-        id: "sa-1",
-        severity: "warning",
-        message: "High dust levels — Pit B",
+        id: 'sa-1',
+        severity: 'warning',
+        message: 'High dust levels — Pit B',
         timestamp: Date.now() - 3600000,
       },
       {
-        id: "sa-2",
-        severity: "info",
-        message: "Blasting hold lifted — Sector 4",
+        id: 'sa-2',
+        severity: 'info',
+        message: 'Blasting hold lifted — Sector 4',
         timestamp: Date.now() - 7200000,
       },
     ];
-    window.localStorage.setItem("arch-safety-alerts", JSON.stringify(seed));
+    window.localStorage.setItem('arch-safety-alerts', JSON.stringify(seed));
     return seed;
   });
 
-  const criticalCount = alerts.filter((a) => a.severity === "critical").length;
-  const warningCount = alerts.filter((a) => a.severity === "warning").length;
+  const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
+  const warningCount = alerts.filter((a) => a.severity === 'warning').length;
 
   return { alerts, criticalCount, warningCount, total: alerts.length };
 }
@@ -116,7 +116,7 @@ export function ServicesDropdown() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchWeather(-26.35914, 28.79267, "Delmas, Mpumalanga")
+    fetchWeather(-26.35914, 28.79267, 'Delmas, Mpumalanga')
       .then((data) => {
         if (!cancelled) {
           setWeather(data);
@@ -133,13 +133,13 @@ export function ServicesDropdown() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && e.key.toLowerCase() === "s") {
+      if (e.altKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
@@ -152,20 +152,20 @@ export function ServicesDropdown() {
             aria-expanded={open}
             title="System Tray (Alt+S)"
             className={cn(
-              "relative flex items-center justify-center w-7 h-7 rounded-full",
-              "bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm",
-              "text-[var(--text-secondary)]",
-              "active:scale-[0.97]",
-              "transition-all duration-150 ease-in-out",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50",
-              "cursor-default select-none",
-              open && "bg-[var(--material-thin)]",
+              'relative flex items-center justify-center w-7 h-7 rounded-full',
+              'bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm',
+              'text-[var(--text-secondary)]',
+              'active:scale-[0.97]',
+              'transition-all duration-150 ease-in-out',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50',
+              'cursor-default select-none',
+              open && 'bg-[var(--material-thin)]'
             )}
           >
             <ChevronDown
               className={cn(
-                "w-3.5 h-3.5 transition-transform duration-200 ease-out",
-                open && "rotate-180",
+                'w-3.5 h-3.5 transition-transform duration-200 ease-out',
+                open && 'rotate-180'
               )}
             />
           </button>
@@ -247,18 +247,18 @@ export function ServicesDropdown() {
               <div className="flex items-center gap-2">
                 <ShieldAlert
                   className={cn(
-                    "w-4 h-4 shrink-0",
+                    'w-4 h-4 shrink-0',
                     safety.criticalCount > 0
-                      ? "text-[var(--accent-red)]"
+                      ? 'text-[var(--accent-red)]'
                       : safety.warningCount > 0
-                        ? "text-[var(--accent-orange)]"
-                        : "text-[var(--accent-green)]",
+                        ? 'text-[var(--accent-orange)]'
+                        : 'text-[var(--accent-green)]'
                   )}
                 />
                 <span className="text-[12px] text-[var(--text-heading)] flex-1">
                   {safety.total === 0
-                    ? "No active alerts"
-                    : `${safety.total} active alert${safety.total === 1 ? "" : "s"}`}
+                    ? 'No active alerts'
+                    : `${safety.total} active alert${safety.total === 1 ? '' : 's'}`}
                 </span>
                 {safety.criticalCount > 0 && (
                   <span className="text-[10px] font-bold text-white bg-[var(--accent-red)] px-1.5 py-0.5 rounded-full">
@@ -323,7 +323,7 @@ export function ServicesDropdown() {
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
-                    window.location.href = "/control-room/hourly-loads";
+                    window.location.href = '/control-room/hourly-loads';
                   }}
                 >
                   <ClipboardList className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
@@ -334,7 +334,7 @@ export function ServicesDropdown() {
                 <DropdownMenuItem
                   className="cursor-default hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                   onSelect={() => {
-                    window.location.href = "/control-room";
+                    window.location.href = '/control-room';
                   }}
                 >
                   <ShieldAlert className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
@@ -345,7 +345,7 @@ export function ServicesDropdown() {
                 <DropdownMenuSeparator className="bg-black/[0.06] my-1 mx-1" />
                 <DropdownMenuItem
                   className="cursor-default hover:bg-accent-red/10 focus:bg-accent-red/10 rounded-md mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
-                  onSelect={() => window.open("tel:+27170000000", "_self")}
+                  onSelect={() => window.open('tel:+27170000000', '_self')}
                 >
                   <Phone className="h-3.5 w-3.5 text-accent-red" />
                   <span className="text-[13px] font-medium text-accent-red">Emergency Line</span>

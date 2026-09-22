@@ -1,11 +1,11 @@
-import { execFile } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
-import { promisify } from "node:util";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { type NextRequest, NextResponse } from "next/server";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { logError } from "@/lib/errors/error-logger";
+import { execFile } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { promisify } from 'node:util';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { logError } from '@/lib/errors/error-logger';
 
 /**
  * @swagger
@@ -80,7 +80,7 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -92,20 +92,20 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
     // Direct path targeting our compiled native Rust release executable
     const binaryPath = path.join(
       process.cwd(),
-      "plugins",
-      "rust-telemetry-engine",
-      "target",
-      "release",
-      "rust-telemetry-engine",
+      'plugins',
+      'rust-telemetry-engine',
+      'target',
+      'release',
+      'rust-telemetry-engine'
     );
 
     if (fs.existsSync(binaryPath)) {
       const { stdout } = await execFileAsync(binaryPath, [
-        "--hours",
+        '--hours',
         String(h),
-        "--temp",
+        '--temp',
         String(t),
-        "--rpm",
+        '--rpm',
         String(r),
       ]);
 
@@ -127,21 +127,21 @@ async function handleTelemetryRequest(req: NextRequest): Promise<NextResponse> {
         wearIndex: parseFloat(wear.toFixed(2)),
         probability: parseFloat(prob.toFixed(1)),
         rulHours: parseFloat(Math.max(0.0, 1200.0 - h).toFixed(1)),
-        status: prob > 75.0 ? "critical" : prob > 35.0 ? "warning" : "optimal",
+        status: prob > 75.0 ? 'critical' : prob > 35.0 ? 'warning' : 'optimal',
         isNative: false,
       });
     }
   } catch (err: unknown) {
     logError(err, {
-      context: "rust_telemetry_plugin",
+      context: 'rust_telemetry_plugin',
     });
     return NextResponse.json({
       wearIndex: 45.2,
       probability: 48.6,
       rulHours: 780.0,
-      status: "warning",
+      status: 'warning',
       isNative: false,
-      error: err instanceof Error ? err.message : "Native Rust pipeline runtime exception",
+      error: err instanceof Error ? err.message : 'Native Rust pipeline runtime exception',
     });
   }
 }

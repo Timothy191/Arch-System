@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   addEdge,
@@ -13,10 +13,10 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
-} from "@xyflow/react";
-import { useCallback, useMemo } from "react";
-import "@xyflow/react/dist/style.css";
-import { DEPARTMENTS } from "../lib/data";
+} from '@xyflow/react';
+import { useCallback, useMemo } from 'react';
+import '@xyflow/react/dist/style.css';
+import { DEPARTMENTS } from '../lib/data';
 
 // Custom node components
 function RootNode({ data }: { data: { label: string } }) {
@@ -94,24 +94,24 @@ export default function SystemArchitecture() {
     const nodes: Node[] = [
       // Hub - center top
       {
-        id: "hub",
-        type: "root",
+        id: 'hub',
+        type: 'root',
         position: { x: 950, y: 30 },
-        data: { label: "Hub" },
+        data: { label: 'Hub' },
       },
       // Login - left
       {
-        id: "login",
-        type: "auth",
+        id: 'login',
+        type: 'auth',
         position: { x: 50, y: 50 },
-        data: { label: "Login" },
+        data: { label: 'Login' },
       },
       // Admin - right
       {
-        id: "admin",
-        type: "admin",
+        id: 'admin',
+        type: 'admin',
         position: { x: 1900, y: 50 },
-        data: { label: "Admin" },
+        data: { label: 'Admin' },
       },
     ];
 
@@ -124,7 +124,7 @@ export default function SystemArchitecture() {
     DEPARTMENTS.forEach((dept, index) => {
       nodes.push({
         id: dept.id,
-        type: "department",
+        type: 'department',
         position: { x: startX + index * (deptWidth + gap), y },
         data: { label: dept.name, color: dept.color, slug: dept.id },
       });
@@ -137,19 +137,19 @@ export default function SystemArchitecture() {
     const edges: Edge[] = [
       // Login -> Hub
       {
-        id: "e-login-hub",
-        source: "login",
-        target: "hub",
+        id: 'e-login-hub',
+        source: 'login',
+        target: 'hub',
         animated: true,
-        style: { stroke: "var(--text-muted)" },
+        style: { stroke: 'var(--text-muted)' },
       },
       // Admin -> Hub
       {
-        id: "e-admin-hub",
-        source: "admin",
-        target: "hub",
+        id: 'e-admin-hub',
+        source: 'admin',
+        target: 'hub',
         animated: true,
-        style: { stroke: "var(--accent-red)" },
+        style: { stroke: 'var(--accent-red)' },
       },
     ];
 
@@ -157,7 +157,7 @@ export default function SystemArchitecture() {
     DEPARTMENTS.forEach((dept) => {
       edges.push({
         id: `e-hub-${dept.id}`,
-        source: "hub",
+        source: 'hub',
         target: dept.id,
         animated: true,
         style: { stroke: dept.color },
@@ -172,7 +172,7 @@ export default function SystemArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   return (
@@ -193,10 +193,10 @@ export default function SystemArchitecture() {
         <Controls />
         <MiniMap
           nodeColor={(node) => {
-            if (node.type === "root") return "var(--accent-green)";
-            if (node.type === "auth") return "var(--text-muted)";
-            if (node.type === "admin") return "var(--accent-red)";
-            return (node.data.color as string) || "var(--accent-green)";
+            if (node.type === 'root') return 'var(--accent-green)';
+            if (node.type === 'auth') return 'var(--text-muted)';
+            if (node.type === 'admin') return 'var(--accent-red)';
+            return (node.data.color as string) || 'var(--accent-green)';
           }}
           maskColor="var(--overlay-medium)"
         />

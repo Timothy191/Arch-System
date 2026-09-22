@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AnimatedDialog } from "./animated-dialog";
-import { Button } from "./button";
+import { AnimatedDialog } from './animated-dialog';
+import { Button } from './button';
 
 interface ActionConfirmDialogProps {
   open: boolean;
@@ -11,7 +11,7 @@ interface ActionConfirmDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: "default" | "destructive";
+  variant?: 'default' | 'destructive';
 }
 
 /**
@@ -23,9 +23,9 @@ export function ActionConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  variant = "default",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  variant = 'default',
 }: ActionConfirmDialogProps) {
   const handleConfirm = () => {
     onConfirm();
@@ -43,12 +43,12 @@ export function ActionConfirmDialog({
           {cancelText}
         </Button>
         <Button
-          variant={variant === "destructive" ? "destructive" : "default"}
+          variant={variant === 'destructive' ? 'destructive' : 'default'}
           onClick={handleConfirm}
           className={
-            variant === "default"
-              ? "bg-accent-blue hover:bg-accent-blue/90 text-white border-none"
-              : ""
+            variant === 'default'
+              ? 'bg-accent-blue hover:bg-accent-blue/90 text-white border-none'
+              : ''
           }
         >
           {confirmText}

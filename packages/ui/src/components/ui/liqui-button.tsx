@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { LiquiGlass, type LiquiGlassProps } from "@liqui-design/glass";
+import { LiquiGlass, type LiquiGlassProps } from '@liqui-design/glass';
 // AGENT-TRACE: @liqui-design/glass/dist/glass.css originally used @layer base
 // which Turbopack's isolated PostCSS pass can't resolve. The @layer base wrapper
 // has been patched out in node_modules via scripts/patch-glass-css.mjs.
 // Run `pnpm postinstall` or `node scripts/patch-glass-css.mjs` after pnpm install.
-import { cn } from "@repo/ui/lib/utils";
-import { cva, type VariantProps } from "class-variance-authority";
-import type React from "react";
-import { forwardRef } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+import type React from 'react';
+import { forwardRef } from 'react';
 
 /**
  * LiquiButton — a glass button rendered as a LiquiGlass surface.
@@ -18,37 +18,37 @@ import { forwardRef } from "react";
  */
 
 const buttonVariants = cva(
-  "group inline-flex cursor-pointer select-none items-center justify-center outline-none transition-[transform,box-shadow] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50",
+  'group inline-flex cursor-pointer select-none items-center justify-center outline-none transition-[transform,box-shadow] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
         glass:
-          "focus-visible:shadow-[0_0_0_3px_color-mix(in_srgb,var(--lq-accent)_40%,transparent)]",
+          'focus-visible:shadow-[0_0_0_3px_color-mix(in_srgb,var(--lq-accent)_40%,transparent)]',
         accent:
-          "text-white [--lq-tint:color-mix(in_srgb,var(--lq-accent)_82%,transparent)] [--lq-tint-deep:color-mix(in_srgb,var(--lq-accent)_62%,transparent)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]",
+          'text-white [--lq-tint:color-mix(in_srgb,var(--lq-accent)_82%,transparent)] [--lq-tint-deep:color-mix(in_srgb,var(--lq-accent)_62%,transparent)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]',
         danger:
-          "text-white [--lq-tint:rgba(229,72,77,0.82)] [--lq-tint-deep:rgba(229,72,77,0.62)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]",
+          'text-white [--lq-tint:rgba(229,72,77,0.82)] [--lq-tint-deep:rgba(229,72,77,0.62)] focus-visible:shadow-[0_0_0_3px_rgba(255,255,255,0.55)]',
       },
       size: {
-        sm: "",
-        md: "",
+        sm: '',
+        md: '',
       },
     },
-    defaultVariants: { variant: "glass", size: "md" },
-  },
+    defaultVariants: { variant: 'glass', size: 'md' },
+  }
 );
 
 const buttonContentVariants = cva(
-  "inline-flex items-center justify-center rounded-[inherit] font-semibold leading-tight whitespace-nowrap group-hover:bg-[color-mix(in_srgb,var(--lq-highlight)_40%,transparent)] group-disabled:bg-transparent",
+  'inline-flex items-center justify-center rounded-[inherit] font-semibold leading-tight whitespace-nowrap group-hover:bg-[color-mix(in_srgb,var(--lq-highlight)_40%,transparent)] group-disabled:bg-transparent',
   {
     variants: {
       size: {
-        sm: "gap-1.5 px-3 py-1.5 text-xs",
-        md: "gap-[7px] px-4 py-[9px] text-[13.5px]",
+        sm: 'gap-1.5 px-3 py-1.5 text-xs',
+        md: 'gap-[7px] px-4 py-[9px] text-[13.5px]',
       },
     },
-    defaultVariants: { size: "md" },
-  },
+    defaultVariants: { size: 'md' },
+  }
 );
 
 const BUTTON_GLASS = {
@@ -78,19 +78,19 @@ export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(buttonVariants({ variant, size }), pill && "rounded-full", className)}
+        className={cn(buttonVariants({ variant, size }), pill && 'rounded-full', className)}
         {...props}
       >
         <LiquiGlass {...glassConfig}>
-          <div className={cn(buttonContentVariants({ size }), pill && "rounded-full px-5")}>
+          <div className={cn(buttonContentVariants({ size }), pill && 'rounded-full px-5')}>
             {children}
           </div>
         </LiquiGlass>
       </button>
     );
-  },
+  }
 );
 
-LiquiButton.displayName = "LiquiButton";
+LiquiButton.displayName = 'LiquiButton';
 
 export { buttonVariants as liquiButtonVariants, buttonVariants };

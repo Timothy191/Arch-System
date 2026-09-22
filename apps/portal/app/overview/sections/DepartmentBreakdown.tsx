@@ -1,11 +1,11 @@
-import { Badge } from "@repo/ui/components/ui/badge";
+import { Badge } from '@repo/ui/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
+} from '@repo/ui/components/ui/card';
 import {
   AlertTriangle,
   BarChart3,
@@ -22,27 +22,27 @@ import {
   Truck,
   Users,
   Wrench,
-} from "lucide-react";
-import { DEPARTMENTS } from "../lib/data";
+} from 'lucide-react';
+import { DEPARTMENTS } from '../lib/data';
 
 const routeIcons: Record<string, React.ReactNode> = {
   Dashboard: <LayoutDashboard className="w-4 h-4" />,
-  "Daily Log": <FileText className="w-4 h-4" />,
+  'Daily Log': <FileText className="w-4 h-4" />,
   Machines: <Settings className="w-4 h-4" />,
   History: <History className="w-4 h-4" />,
   Reports: <BarChart3 className="w-4 h-4" />,
   Tools: <Wrench className="w-4 h-4" />,
-  "SAR Analysis": <Satellite className="w-4 h-4" />,
-  "High-Res Imagery": <Image className="w-4 h-4" />,
+  'SAR Analysis': <Satellite className="w-4 h-4" />,
+  'High-Res Imagery': <Image className="w-4 h-4" />,
   Hyperspectral: <Layers className="w-4 h-4" />,
-  "Operational Delays": <AlertTriangle className="w-4 h-4" />,
-  "Shift Coverage": <Users className="w-4 h-4" />,
-  "Roll Over": <RefreshCw className="w-4 h-4" />,
+  'Operational Delays': <AlertTriangle className="w-4 h-4" />,
+  'Shift Coverage': <Users className="w-4 h-4" />,
+  'Roll Over': <RefreshCw className="w-4 h-4" />,
   Breakdowns: <Wrench className="w-4 h-4" />,
-  "Engineering Notes": <FileText className="w-4 h-4" />,
-  "Machine Operations": <Cpu className="w-4 h-4" />,
-  "Hourly Loads": <Truck className="w-4 h-4" />,
-  "Excavator Activity": <Cpu className="w-4 h-4" />,
+  'Engineering Notes': <FileText className="w-4 h-4" />,
+  'Machine Operations': <Cpu className="w-4 h-4" />,
+  'Hourly Loads': <Truck className="w-4 h-4" />,
+  'Excavator Activity': <Cpu className="w-4 h-4" />,
 };
 
 export default function DepartmentBreakdown() {
@@ -109,15 +109,15 @@ export default function DepartmentBreakdown() {
                     <Badge
                       key={role}
                       variant={
-                        role === "admin"
-                          ? "destructive"
-                          : role === "supervisor"
-                            ? "default"
-                            : "secondary"
+                        role === 'admin'
+                          ? 'destructive'
+                          : role === 'supervisor'
+                            ? 'default'
+                            : 'secondary'
                       }
                       className="text-[10px]"
                     >
-                      {role.replace(/_/g, " ")}
+                      {role.replace(/_/g, ' ')}
                     </Badge>
                   ))}
                 </div>

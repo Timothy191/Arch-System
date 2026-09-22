@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   ancillaryReportEntrySchema,
   breakdownReportEntrySchema,
@@ -9,7 +9,7 @@ import type {
   multiSiteShiftReportSchema,
   operationalStatusEnum,
   truckTallySchema,
-} from "../schemas/multi-site-production.schema.js";
+} from '../schemas/multi-site-production.schema.js';
 
 export type MachineOperationalStatus = z.infer<typeof operationalStatusEnum>;
 export type TruckTally = z.infer<typeof truckTallySchema>;

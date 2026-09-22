@@ -5,6 +5,6 @@
  * Uses `eslint-plugin-boundaries` to enforce architecture and dependency rules.
  */
 
-const generated = require("../../tools/repo/policy/eslint-boundaries.generated.cjs");
+const generated = require('../../tools/repo/policy/eslint-boundaries.generated.cjs');
 
 module.exports = generated;

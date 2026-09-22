@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { createContext, type ReactNode, useContext, useEffect } from "react";
+import { createContext, type ReactNode, useContext, useEffect } from 'react';
 
 interface ArchThemeContextType {
-  theme: "light";
-  resolvedTheme: "light";
+  theme: 'light';
+  resolvedTheme: 'light';
   setTheme: () => void;
   toggleTheme: () => void;
 }
@@ -12,8 +12,8 @@ interface ArchThemeContextType {
 const ArchThemeContext = createContext<ArchThemeContextType | undefined>(undefined);
 
 const LIGHT_THEME = {
-  theme: "light" as const,
-  resolvedTheme: "light" as const,
+  theme: 'light' as const,
+  resolvedTheme: 'light' as const,
   setTheme: () => {},
   toggleTheme: () => {},
 };
@@ -27,12 +27,12 @@ const LIGHT_THEME = {
 export function ArchThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute("data-theme", "light");
-    root.style.colorScheme = "light";
+    root.setAttribute('data-theme', 'light');
+    root.style.colorScheme = 'light';
 
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", "#ffffff");
+      metaThemeColor.setAttribute('content', '#ffffff');
     }
   }, []);
 
@@ -42,7 +42,7 @@ export function ArchThemeProvider({ children }: { children: ReactNode }) {
 export function useArchTheme() {
   const ctx = useContext(ArchThemeContext);
   if (!ctx) {
-    throw new Error("useArchTheme must be used within an ArchThemeProvider");
+    throw new Error('useArchTheme must be used within an ArchThemeProvider');
   }
   return ctx;
 }

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Check, Minus } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { Check, Minus } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
-export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   checked?: boolean;
   indeterminate?: boolean;
   disabled?: boolean;
-  size?: "small" | "medium";
+  size?: 'small' | 'medium';
   label?: React.ReactNode;
   onCheckedChange?: (checked: boolean) => void;
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       checked = false,
       indeterminate = false,
       disabled = false,
-      size = "medium",
+      size = 'medium',
       label,
       onChange,
       onCheckedChange,
@@ -28,7 +28,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -50,9 +50,9 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <label
         className={cn(
-          "inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium",
-          disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-          className,
+          'inline-flex items-center gap-2 select-none cursor-pointer text-sm font-medium',
+          disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
+          className
         )}
       >
         <input
@@ -60,19 +60,19 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           checked={checked}
           disabled={disabled}
-          aria-checked={indeterminate ? "mixed" : checked}
+          aria-checked={indeterminate ? 'mixed' : checked}
           onChange={handleChange}
           className="sr-only peer"
           {...props}
         />
         <span
           className={cn(
-            "flex items-center justify-center shrink-0 rounded border transition-colors duration-150",
-            size === "small" ? "w-3.5 h-3.5 text-[10px]" : "w-4 h-4 text-xs",
-            "peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900",
+            'flex items-center justify-center shrink-0 rounded border transition-colors duration-150',
+            size === 'small' ? 'w-3.5 h-3.5 text-[10px]' : 'w-4 h-4 text-xs',
+            'peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-neutral-900',
             isChecked
-              ? "bg-neutral-900 border-neutral-900 text-white"
-              : "bg-white/5 border-white/10 hover:border-white/20",
+              ? 'bg-neutral-900 border-neutral-900 text-white'
+              : 'bg-white/5 border-white/10 hover:border-white/20'
           )}
           aria-hidden="true"
         >
@@ -87,7 +87,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         )}
       </label>
     );
-  },
+  }
 );
 
-Checkbox.displayName = "Checkbox";
+Checkbox.displayName = 'Checkbox';

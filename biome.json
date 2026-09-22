@@ -1,0 +1,93 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.cjs", "**/*.json"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "useKeyWithClickEvents": "off",
+        "useMediaCaption": "off",
+        "useValidAnchor": "off",
+        "noAutofocus": "off",
+        "noSvgWithoutTitle": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off",
+        "noInteractiveElementToNoninteractiveRole": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "useButtonType": "off",
+        "noStaticElementInteractions": "off",
+        "useFocusableInteractive": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noAssignInExpressions": "off",
+        "noControlCharactersInRegex": "off",
+        "noArrayIndexKey": "off",
+        "useIterableCallbackReturn": "off",
+        "noThenProperty": "off",
+        "noEmptyBlockStatements": "off",
+        "noReactSpecificProps": "off",
+        "noImplicitAnyLet": "off",
+        "noConsole": "off",
+        "noEvolvingTypes": "off",
+        "noConfusingLabels": "off",
+        "noShadowRestrictedNames": "off",
+        "noDoubleEquals": "off",
+        "noUndeclaredEnvVars": "off",
+        "noDuplicateCustomProperties": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useNodejsImportProtocol": "off",
+        "useTemplate": "off",
+        "useImportType": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedImports": "off",
+        "useExhaustiveDependencies": "off",
+        "noEmptyPattern": "off",
+        "noUnusedFunctionParameters": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off",
+        "noImgElement": "off"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off"
+      },
+      "security": {
+        "noGlobalEval": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "trailingCommas": "es5",
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}

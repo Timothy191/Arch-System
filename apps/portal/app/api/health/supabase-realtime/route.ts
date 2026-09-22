@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_req: NextRequest) {
   const startedAt = Date.now();
@@ -6,10 +6,10 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json(
     {
-      status: degraded ? "degraded" : "healthy",
+      status: degraded ? 'degraded' : 'healthy',
       latencyMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     },
-    { status: degraded ? 503 : 200 },
+    { status: degraded ? 503 : 200 }
   );
 }

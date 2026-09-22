@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Pagination } from "@repo/ui/Pagination";
-import { Download, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import { logError } from "@/lib/errors/error-logger";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Pagination } from '@repo/ui/Pagination';
+import { Download, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { logError } from '@/lib/errors/error-logger';
 
 interface AuditLog {
   id: string;
@@ -26,10 +26,10 @@ interface AuditLog {
 export function AuditLogsTab() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [actionFilter, setActionFilter] = useState("all");
-  const [tableFilter, setTableFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [tableFilter, setTableFilter] = useState('all');
   const [tables, setTables] = useState<string[]>([]);
   const [actions, setActions] = useState<string[]>([]);
 
@@ -43,7 +43,7 @@ export function AuditLogsTab() {
   // Load available table names and actions for select filters once on mount
   useEffect(() => {
     const loadFilters = async () => {
-      const { data } = await supabase.from("audit_logs").select("table_name, action");
+      const { data } = await supabase.from('audit_logs').select('table_name, action');
       if (data) {
         const uniqueTables = Array.from(new Set(data.map((d) => d.table_name)));
         const uniqueActions = Array.from(new Set(data.map((d) => d.action)));
@@ -68,23 +68,23 @@ export function AuditLogsTab() {
     size: number,
     search: string,
     action: string,
-    table: string,
+    table: string
   ) => {
     setLoading(true);
 
-    let query = supabase.from("audit_logs").select("*, employees(full_name)", { count: "exact" });
+    let query = supabase.from('audit_logs').select('*, employees(full_name)', { count: 'exact' });
 
-    if (action !== "all") {
-      query = query.eq("action", action);
+    if (action !== 'all') {
+      query = query.eq('action', action);
     }
-    if (table !== "all") {
-      query = query.eq("table_name", table);
+    if (table !== 'all') {
+      query = query.eq('table_name', table);
     }
-    if (search !== "") {
+    if (search !== '') {
       query = query.or(`action.ilike.%${search}%,table_name.ilike.%${search}%`);
     }
 
-    query = query.order("created_at", { ascending: false });
+    query = query.order('created_at', { ascending: false });
 
     const from = (page - 1) * size;
     const to = from + size - 1;
@@ -93,7 +93,7 @@ export function AuditLogsTab() {
     const { data, count, error } = await query;
 
     if (error) {
-      logError(new Error(error.message), { context: "AuditLogsTab.loadLogs" });
+      logError(new Error(error.message), { context: 'AuditLogsTab.loadLogs' });
     } else {
       if (data) setLogs(data);
       if (count !== null) setTotalCount(count);
@@ -218,19 +218,19 @@ export function AuditLogsTab() {
                       {new Date(log.created_at).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-heading)] text-sm">
-                      {log.employees?.full_name || "System"}
+                      {log.employees?.full_name || 'System'}
                     </td>
                     <td className="px-6 py-4">
                       <Badge
                         variant="outline"
                         className={
-                          log.action === "INSERT"
-                            ? "bg-green-500/10 text-green-400 border-green-500/20"
-                            : log.action === "UPDATE"
-                              ? "bg-accent-blue/10 text-accent-blue border-accent-blue/20"
-                              : log.action === "DELETE"
-                                ? "bg-accent-red/10 text-accent-red border-accent-red/20"
-                                : ""
+                          log.action === 'INSERT'
+                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                            : log.action === 'UPDATE'
+                              ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                              : log.action === 'DELETE'
+                                ? 'bg-accent-red/10 text-accent-red border-accent-red/20'
+                                : ''
                         }
                       >
                         {log.action}

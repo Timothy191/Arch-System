@@ -1,41 +1,41 @@
-import { test, expect } from "@playwright/test";
-import { findOpaqueBackgroundLayers, ROUTE_BG_SELECTOR } from "./helpers/background";
-import { TEST_EMAIL, TEST_PASSWORD } from "./helpers/credentials";
+import { expect, test } from '@playwright/test';
+import { findOpaqueBackgroundLayers, ROUTE_BG_SELECTOR } from './helpers/background';
+import { TEST_EMAIL, TEST_PASSWORD } from './helpers/credentials';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe("login page", () => {
-  test("renders login form with all fields", async ({ page }) => {
-    await page.goto("/login");
+test.describe('login page', () => {
+  test('renders login form with all fields', async ({ page }) => {
+    await page.goto('/login');
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
-    await expect(page.locator("input#email")).toBeVisible();
-    await expect(page.locator("input#password")).toBeVisible();
+    await expect(page.locator('input#email')).toBeVisible();
+    await expect(page.locator('input#password')).toBeVisible();
     await expect(
-      page.locator("form[data-testid='login-form'] button[type='submit']"),
+      page.locator("form[data-testid='login-form'] button[type='submit']")
     ).toBeVisible();
   });
 
-  test("form has correct HTML5 validation attributes", async ({ page }) => {
-    await page.goto("/login");
+  test('form has correct HTML5 validation attributes', async ({ page }) => {
+    await page.goto('/login');
 
-    const email = page.locator("input#email");
-    const emailType = await email.getAttribute("type");
+    const email = page.locator('input#email');
+    const emailType = await email.getAttribute('type');
     // Accept both email and text types — employee ID can be an email or badge id
-    expect(["email", "text"]).toContain(emailType);
-    await expect(email).toHaveAttribute("required", "");
+    expect(['email', 'text']).toContain(emailType);
+    await expect(email).toHaveAttribute('required', '');
 
-    const password = page.locator("input#password");
-    await expect(password).toHaveAttribute("type", "password");
-    await expect(password).toHaveAttribute("required", "");
+    const password = page.locator('input#password');
+    await expect(password).toHaveAttribute('type', 'password');
+    await expect(password).toHaveAttribute('required', '');
     // Some input wrappers map minLength -> minlength attribute; accept numeric >= 6 if present
-    const pwdMin = await password.getAttribute("minlength");
+    const pwdMin = await password.getAttribute('minlength');
     if (pwdMin) {
       expect(Number(pwdMin)).toBeGreaterThanOrEqual(6);
     }
   });
 
-  test("empty form submission is blocked by browser validation", async ({ page }) => {
-    await page.goto("/login");
+  test('empty form submission is blocked by browser validation', async ({ page }) => {
+    await page.goto('/login');
 
     // Try to submit without filling anything
     await page.locator("form[data-testid='login-form'] button[type='submit']").click();
@@ -43,29 +43,29 @@ test.describe("login page", () => {
     // Form should still be visible (submission blocked)
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
     // URL should not change
-    expect(page.url()).toContain("/login");
+    expect(page.url()).toContain('/login');
   });
 
-  test("captures redirect parameter in URL", async ({ page }) => {
-    await page.goto("/login?redirect=/drilling");
+  test('captures redirect parameter in URL', async ({ page }) => {
+    await page.goto('/login?redirect=/drilling');
 
     // Verify the redirect param is in the URL (browsers display decoded)
-    expect(page.url()).toContain("redirect=/drilling");
+    expect(page.url()).toContain('redirect=/drilling');
 
     // Form should still render
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
   });
 });
 
-test.describe("auth middleware", () => {
-  test("unauthenticated user is redirected to login from protected routes", async ({ page }) => {
-    await page.goto("/drilling");
+test.describe('auth middleware', () => {
+  test('unauthenticated user is redirected to login from protected routes', async ({ page }) => {
+    await page.goto('/drilling');
 
     // Should redirect to login (may include redirect query param)
     await expect(page).toHaveURL(/.*\/login.*/);
     const redirectedUrl = page.url();
-    if (redirectedUrl.includes("redirect=")) {
-      expect(redirectedUrl).toContain("redirect=%2Fdrilling");
+    if (redirectedUrl.includes('redirect=')) {
+      expect(redirectedUrl).toContain('redirect=%2Fdrilling');
     } else {
       // Accept plain /login in some test environments
       expect(redirectedUrl).toMatch(/\/login$/);
@@ -75,26 +75,26 @@ test.describe("auth middleware", () => {
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
   });
 
-  test("unauthenticated user is redirected from hub page", async ({ page }) => {
-    await page.goto("/");
+  test('unauthenticated user is redirected from hub page', async ({ page }) => {
+    await page.goto('/');
 
     await expect(page).toHaveURL(/.*\/login.*/);
-    expect(page.url()).toContain("redirect=%2F");
+    expect(page.url()).toContain('redirect=%2F');
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
   });
 
-  test("unauthenticated user is redirected from department tools", async ({ page }) => {
-    await page.goto("/drilling/tools");
+  test('unauthenticated user is redirected from department tools', async ({ page }) => {
+    await page.goto('/drilling/tools');
 
     await expect(page).toHaveURL(/.*\/login.*/);
-    expect(page.url()).toContain("redirect=%2Fdrilling%2Ftools");
+    expect(page.url()).toContain('redirect=%2Fdrilling%2Ftools');
     await expect(page.locator("form[data-testid='login-form']")).toBeVisible();
   });
 });
 
-test.describe("design system", () => {
-  test("login page does not cover the global route background", async ({ page }) => {
-    await page.goto("/login");
+test.describe('design system', () => {
+  test('login page does not cover the global route background', async ({ page }) => {
+    await page.goto('/login');
 
     // The global RouteBackground must be mounted...
     await expect(page.locator(ROUTE_BG_SELECTOR)).toBeVisible();
@@ -106,12 +106,12 @@ test.describe("design system", () => {
     const opaque = await findOpaqueBackgroundLayers(page, '[data-testid="login-card"]');
     expect(
       opaque,
-      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`,
+      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`
     ).toEqual([]);
   });
 
-  test("login form uses macOS glass card styling", async ({ page }) => {
-    await page.goto("/login");
+  test('login form uses macOS glass card styling', async ({ page }) => {
+    await page.goto('/login');
 
     // Form card should use the glass card background (bg-white/80 in the
     // current design; keep layer-signin-card as the token-based alternative)
@@ -119,13 +119,13 @@ test.describe("design system", () => {
     await expect(card).toHaveClass(/bg-arch-surface-secondary|bg-white\/80|layer-signin-card/);
 
     // Heading should be present and use dark text
-    const heading = page.locator("h1");
+    const heading = page.locator('h1');
     await expect(heading).toBeVisible();
     await expect(heading).toHaveClass(/text-\[var\(--text-heading\)\]/);
   });
 
-  test("no forbidden raw shadow classes are present", async ({ page }) => {
-    await page.goto("/login");
+  test('no forbidden raw shadow classes are present', async ({ page }) => {
+    await page.goto('/login');
 
     const html = await page.content();
 
@@ -144,29 +144,29 @@ test.describe("design system", () => {
   });
 });
 
-test.describe("full login and reset password flows", () => {
-  test("intro overlay is skipped automatically in E2E environment", async ({ page }) => {
-    await page.goto("/login");
+test.describe('full login and reset password flows', () => {
+  test('intro overlay is skipped automatically in E2E environment', async ({ page }) => {
+    await page.goto('/login');
     await expect(
-      page.locator("text=Initializing industrial operations terminal..."),
+      page.locator('text=Initializing industrial operations terminal...')
     ).not.toBeVisible();
   });
 
-  test("unauthenticated flow: invalid login, forgot password navigation, reset submission, and successful login redirect", async ({
+  test('unauthenticated flow: invalid login, forgot password navigation, reset submission, and successful login redirect', async ({
     page,
   }) => {
     // 1. Invalid credentials flow
-    await page.goto("/login");
-    await page.locator("input#email").fill(TEST_EMAIL);
-    await page.locator("input#password").fill("wrong-password");
+    await page.goto('/login');
+    await page.locator('input#email').fill(TEST_EMAIL);
+    await page.locator('input#password').fill('wrong-password');
     await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Check for error message or that the form is still visible (some envs do not surface auth failure text)
     try {
       await expect(
         page
-          .locator("text=Employee ID or password incorrect")
-          .or(page.locator("text=Sign in failed")),
+          .locator('text=Employee ID or password incorrect')
+          .or(page.locator('text=Sign in failed'))
       ).toBeVisible({ timeout: 3000 });
     } catch {
       // Fallback: ensure the login form remains visible after failed attempt
@@ -174,25 +174,25 @@ test.describe("full login and reset password flows", () => {
     }
 
     // 2. Navigation to Reset Password
-    await page.locator("text=Forgot password?").click();
+    await page.locator('text=Forgot password?').click();
     await expect(page).toHaveURL(/.*\/reset-password/);
 
     // 3. Reset password submission
-    await page.locator("input#reset-email").fill(TEST_EMAIL);
+    await page.locator('input#reset-email').fill(TEST_EMAIL);
     await page.locator("button[type='submit']").click();
 
     // Verify "Check Your Email" screen or error alert
     await expect(
-      page.locator("text=Check Your Email").or(page.locator("text=Unable to send reset email")),
+      page.locator('text=Check Your Email').or(page.locator('text=Unable to send reset email'))
     ).toBeVisible();
 
     // 4. Navigate back to login
-    await page.locator("text=Back to Sign In").click();
+    await page.locator('text=Back to Sign In').click();
     await expect(page).toHaveURL(/.*\/login/);
 
     // 5. Successful login redirect
-    await page.locator("input#email").fill(TEST_EMAIL);
-    await page.locator("input#password").fill(TEST_PASSWORD);
+    await page.locator('input#email').fill(TEST_EMAIL);
+    await page.locator('input#password').fill(TEST_PASSWORD);
     await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login

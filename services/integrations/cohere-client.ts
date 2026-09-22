@@ -8,7 +8,7 @@
  */
 
 interface CohereMessage {
-  role: "USER" | "CHATBOT" | "SYSTEM";
+  role: 'USER' | 'CHATBOT' | 'SYSTEM';
   message: string;
 }
 
@@ -24,13 +24,13 @@ interface CohereChatRequest {
 
 export class CohereClient {
   private apiKey: string;
-  private baseUrl = "https://api.cohere.com/v1";
+  private baseUrl = 'https://api.cohere.com/v1';
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || process.env.COHERE_API_KEY || "";
+    this.apiKey = apiKey || process.env.COHERE_API_KEY || '';
 
     if (!this.apiKey) {
-      console.warn("CohereClient initialized without an API key.");
+      console.warn('CohereClient initialized without an API key.');
     }
   }
 
@@ -41,11 +41,11 @@ export class CohereClient {
    */
   async chat(request: CohereChatRequest): Promise<any> {
     const response = await fetch(`${this.baseUrl}/chat`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-        accept: "application/json",
+        'Content-Type': 'application/json',
+        accept: 'application/json',
       },
       body: JSON.stringify(request),
     });
@@ -63,15 +63,15 @@ export class CohereClient {
    */
   async embed(
     texts: string[],
-    model: string = "embed-english-v3.0",
-    inputType: "search_document" | "search_query" = "search_document",
+    model: string = 'embed-english-v3.0',
+    inputType: 'search_document' | 'search_query' = 'search_document'
   ): Promise<any> {
     const response = await fetch(`${this.baseUrl}/embed`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-        accept: "application/json",
+        'Content-Type': 'application/json',
+        accept: 'application/json',
       },
       body: JSON.stringify({
         texts,

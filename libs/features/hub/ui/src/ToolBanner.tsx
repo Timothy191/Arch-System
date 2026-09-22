@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { cn } from "@repo/ui/lib/utils";
-import { Marquee } from "@repo/ui/Marquee";
-import { Calculator, Calendar, CheckSquare, Factory, FileText, StickyNote } from "lucide-react";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
+import { Marquee } from '@repo/ui/Marquee';
+import { Calculator, Calendar, CheckSquare, Factory, FileText, StickyNote } from 'lucide-react';
 
 // AGENT-TRACE: Maps database icon identifiers to canonical Lucide React component references
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -17,24 +17,24 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 // AGENT-TRACE: Canonical design tokens mapped to specific alert/accent colors for glass spotlights
 const COLOR_MAP: Record<string, { iconBg: string; glow: string }> = {
   emerald: {
-    iconBg: "bg-accent-green/10 text-accent-green",
-    glow: "rgba(52, 199, 89, 0.08)",
+    iconBg: 'bg-accent-green/10 text-accent-green',
+    glow: 'rgba(52, 199, 89, 0.08)',
   },
   blue: {
-    iconBg: "bg-accent-blue/10 text-accent-blue",
-    glow: "rgba(0, 122, 255, 0.08)",
+    iconBg: 'bg-accent-blue/10 text-accent-blue',
+    glow: 'rgba(0, 122, 255, 0.08)',
   },
   violet: {
-    iconBg: "bg-accent-blue/10 text-accent-blue",
-    glow: "rgba(0, 122, 255, 0.08)",
+    iconBg: 'bg-accent-blue/10 text-accent-blue',
+    glow: 'rgba(0, 122, 255, 0.08)',
   },
   cyan: {
-    iconBg: "bg-accent-blue/10 text-accent-blue",
-    glow: "rgba(0, 122, 255, 0.08)",
+    iconBg: 'bg-accent-blue/10 text-accent-blue',
+    glow: 'rgba(0, 122, 255, 0.08)',
   },
   red: {
-    iconBg: "bg-accent-red/10 text-accent-red",
-    glow: "rgba(255, 59, 48, 0.08)",
+    iconBg: 'bg-accent-red/10 text-accent-red',
+    glow: 'rgba(255, 59, 48, 0.08)',
   },
 };
 
@@ -56,8 +56,8 @@ export function ToolBanner({ tools }: ToolBannerProps) {
 
   // AGENT-TRACE: Using CSS mask-image gradient to smoothly fade marquee edges over the dynamic video background
   const maskStyle = {
-    maskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)",
-    WebkitMaskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)",
+    maskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
   };
 
   return (
@@ -66,8 +66,8 @@ export function ToolBanner({ tools }: ToolBannerProps) {
         {tools.map((tool) => {
           const Icon = ICON_MAP[tool.icon] || Factory;
           const config = COLOR_MAP[tool.color] || {
-            iconBg: "bg-arch-surface-tertiary text-arch-text-primary",
-            glow: "rgba(0,0,0,0.04)",
+            iconBg: 'bg-arch-surface-tertiary text-arch-text-primary',
+            glow: 'rgba(0,0,0,0.04)',
           };
 
           return (
@@ -80,8 +80,8 @@ export function ToolBanner({ tools }: ToolBannerProps) {
                 <div className="p-5 sm:p-6 flex flex-col items-center text-center select-none">
                   <div
                     className={cn(
-                      "p-3.5 rounded-lg mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle",
-                      config.iconBg,
+                      'p-3.5 rounded-lg mb-3.5 shadow-sm transition-transform duration-300 hover:scale-105 border border-arch-border-subtle',
+                      config.iconBg
                     )}
                   >
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6" />

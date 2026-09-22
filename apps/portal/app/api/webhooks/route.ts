@@ -103,25 +103,25 @@
  *         description: Internal server error
  */
 
-import { createWebhookSchema } from "@repo/contract/schemas/webhook.schema";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
-import { type NextRequest, NextResponse } from "next/server";
-import { withBodyLimit } from "@/lib/api/body-limit";
-import { applyCors } from "@/lib/api/cors";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { validateBody } from "@/lib/api/response";
+import { createWebhookSchema } from '@repo/contract/schemas/webhook.schema';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { type NextRequest, NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
+import { applyCors } from '@/lib/api/cors';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { validateBody } from '@/lib/api/response';
 
 type WebhookEventType =
-  | "daily_log.created"
-  | "daily_log.updated"
-  | "breakdown.created"
-  | "breakdown.updated"
-  | "breakdown.completed"
-  | "production_log.created"
-  | "production_log.updated"
-  | "operational_delay.created"
-  | "operational_delay.updated";
+  | 'daily_log.created'
+  | 'daily_log.updated'
+  | 'breakdown.created'
+  | 'breakdown.updated'
+  | 'breakdown.completed'
+  | 'production_log.created'
+  | 'production_log.updated'
+  | 'operational_delay.created'
+  | 'operational_delay.updated';
 
 interface _WebhookEndpoint {
   id: string;
@@ -136,7 +136,7 @@ interface _WebhookEndpoint {
   updated_at: string | null;
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
@@ -145,33 +145,33 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Get user's department and role
   const { data: employee } = await supabase
-    .from("employees")
-    .select("department_id, role, accessible_departments")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('department_id, role, accessible_departments')
+    .eq('auth_id', user.id)
     .single();
 
   if (!employee) {
-    return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
 
   // Admins can see all webhooks, supervisors only their department's
-  let query = supabase.from("webhook_endpoints").select("*").is("deleted_at", null);
+  let query = supabase.from('webhook_endpoints').select('*').is('deleted_at', null);
 
-  if (employee.role !== "admin") {
+  if (employee.role !== 'admin') {
     query = query.or(
-      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(",")})`,
+      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(',')})`
     );
   }
 
   const { data: webhooks, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: "Database query failed" }, { status: 500 });
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   }
 
   return NextResponse.json({ webhooks });
@@ -190,7 +190,7 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const parsed = await validateBody(request, createWebhookSchema);
@@ -199,28 +199,28 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
 
   // Get user's department and role
   const { data: employee } = await supabase
-    .from("employees")
-    .select("department_id, role, accessible_departments")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('department_id, role, accessible_departments')
+    .eq('auth_id', user.id)
     .single();
 
   if (!employee) {
-    return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
   }
 
   // Non-admins can only create webhooks for their department
-  if (employee.role !== "admin") {
+  if (employee.role !== 'admin') {
     const targetDept = department_id || employee.department_id;
     if (
       targetDept !== employee.department_id &&
       !employee.accessible_departments?.includes(targetDept)
     ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
   }
 
   const { data: webhook, error } = await supabase
-    .from("webhook_endpoints")
+    .from('webhook_endpoints')
     .insert({
       url,
       description,
@@ -232,11 +232,11 @@ async function handleCreateWebhook(request: NextRequest): Promise<NextResponse> 
     .single();
 
   if (error) {
-    return NextResponse.json({ error: "Failed to create webhook" }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
   }
 
-  revalidatePath("/admin/tools");
-  revalidatePath("/(departments)/[department]/tools");
+  revalidatePath('/admin/tools');
+  revalidatePath('/(departments)/[department]/tools');
 
   return NextResponse.json({ webhook }, { status: 201 });
 }
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
   const response = await withRateLimit(request, () =>
     withBodyLimit(request, () => handleCreateWebhook(request), {
       maxSize: 524288,
-    }),
+    })
   );
   return applyCors(request, response);
 }

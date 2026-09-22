@@ -1,7 +1,7 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
-export type BookVariant = "simple" | "stripe";
+export type BookVariant = 'simple' | 'stripe';
 
 export interface ResponsiveWidth {
   default?: number;
@@ -11,7 +11,7 @@ export interface ResponsiveWidth {
   xl?: number;
 }
 
-export interface BookProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface BookProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title: React.ReactNode;
   variant?: BookVariant;
   color?: string;
@@ -21,7 +21,7 @@ export interface BookProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "t
   textured?: boolean;
   width?: number | ResponsiveWidth;
   aspectRatio?: string;
-  headingLevel?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "span";
+  headingLevel?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span';
   subtitle?: React.ReactNode;
 }
 
@@ -29,90 +29,90 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
   (
     {
       title,
-      variant = "stripe",
-      color = "#171717",
-      textColor = "#ffffff",
+      variant = 'stripe',
+      color = '#171717',
+      textColor = '#ffffff',
       icon,
       illustration,
       textured = false,
       width = 196,
-      aspectRatio = "1 / 1.34",
-      headingLevel = "h3",
+      aspectRatio = '1 / 1.34',
+      headingLevel = 'h3',
       subtitle,
       className,
       children,
       style,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Calculate style variables for responsive width
     const customStyles: React.CSSProperties & Record<string, string | number> = { ...style };
-    let widthClasses = "";
+    let widthClasses = '';
 
-    if (typeof width === "number") {
-      customStyles["--book-w"] = `${width}px`;
-      widthClasses = "w-[var(--book-w)]";
-    } else if (typeof width === "object" && width !== null) {
+    if (typeof width === 'number') {
+      customStyles['--book-w'] = `${width}px`;
+      widthClasses = 'w-[var(--book-w)]';
+    } else if (typeof width === 'object' && width !== null) {
       const defW = width.default ?? width.sm ?? width.md ?? 196;
-      customStyles["--book-w"] = `${defW}px`;
-      widthClasses = "w-[var(--book-w)]";
+      customStyles['--book-w'] = `${defW}px`;
+      widthClasses = 'w-[var(--book-w)]';
 
       if (width.sm !== undefined) {
-        customStyles["--book-w-sm"] = `${width.sm}px`;
-        widthClasses += " sm:w-[var(--book-w-sm)]";
+        customStyles['--book-w-sm'] = `${width.sm}px`;
+        widthClasses += ' sm:w-[var(--book-w-sm)]';
       }
       if (width.md !== undefined) {
-        customStyles["--book-w-md"] = `${width.md}px`;
-        widthClasses += " md:w-[var(--book-w-md)]";
+        customStyles['--book-w-md'] = `${width.md}px`;
+        widthClasses += ' md:w-[var(--book-w-md)]';
       }
       if (width.lg !== undefined) {
-        customStyles["--book-w-lg"] = `${width.lg}px`;
-        widthClasses += " lg:w-[var(--book-w-lg)]";
+        customStyles['--book-w-lg'] = `${width.lg}px`;
+        widthClasses += ' lg:w-[var(--book-w-lg)]';
       }
       if (width.xl !== undefined) {
-        customStyles["--book-w-xl"] = `${width.xl}px`;
-        widthClasses += " xl:w-[var(--book-w-xl)]";
+        customStyles['--book-w-xl'] = `${width.xl}px`;
+        widthClasses += ' xl:w-[var(--book-w-xl)]';
       }
     }
 
     const renderHeading = (content: React.ReactNode) => {
       const headingClasses =
-        "text-xs sm:text-sm font-semibold leading-snug tracking-tight text-balance";
+        'text-xs sm:text-sm font-semibold leading-snug tracking-tight text-balance';
       const headingStyle: React.CSSProperties = { color: textColor };
 
       switch (headingLevel) {
-        case "h1":
+        case 'h1':
           return (
             <h1 className={headingClasses} style={headingStyle}>
               {content}
             </h1>
           );
-        case "h2":
+        case 'h2':
           return (
             <h2 className={headingClasses} style={headingStyle}>
               {content}
             </h2>
           );
-        case "h4":
+        case 'h4':
           return (
             <h4 className={headingClasses} style={headingStyle}>
               {content}
             </h4>
           );
-        case "h5":
+        case 'h5':
           return (
             <h5 className={headingClasses} style={headingStyle}>
               {content}
             </h5>
           );
-        case "h6":
+        case 'h6':
           return (
             <h6 className={headingClasses} style={headingStyle}>
               {content}
             </h6>
           );
-        case "span":
+        case 'span':
           return (
             <span className={headingClasses} style={headingStyle}>
               {content}
@@ -131,13 +131,13 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
       <div
         ref={ref}
         role="group"
-        aria-label={typeof title === "string" ? `Book: ${title}` : "Book"}
+        aria-label={typeof title === 'string' ? `Book: ${title}` : 'Book'}
         className={cn(
-          "relative select-none overflow-hidden shrink-0 rounded-r-md rounded-l-sm transition-transform duration-200",
-          "shadow-[0_4px_16px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.12),-2px_0_4px_rgba(0,0,0,0.08),2px_0_6px_rgba(0,0,0,0.06)]",
-          "border-r-2 border-r-white/20 border-y border-y-black/10",
+          'relative select-none overflow-hidden shrink-0 rounded-r-md rounded-l-sm transition-transform duration-200',
+          'shadow-[0_4px_16px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.12),-2px_0_4px_rgba(0,0,0,0.08),2px_0_6px_rgba(0,0,0,0.06)]',
+          'border-r-2 border-r-white/20 border-y border-y-black/10',
           widthClasses,
-          className,
+          className
         )}
         style={{
           backgroundColor: color,
@@ -153,7 +153,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
           className="absolute inset-y-0 left-0 w-4 z-20 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to right, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.12) 35%, rgba(255,255,255,0.2) 70%, rgba(0,0,0,0.12) 100%)",
+              'linear-gradient(to right, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.12) 35%, rgba(255,255,255,0.2) 70%, rgba(0,0,0,0.12) 100%)',
           }}
         />
 
@@ -174,14 +174,14 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
           className="absolute inset-x-0 top-0 h-1/2 z-10 pointer-events-none opacity-30"
           style={{
             background:
-              "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)",
+              'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
           }}
         />
 
         {/* Inner Cover Content */}
         <div className="relative z-10 h-full flex flex-col justify-between pl-6 pr-3.5 py-3.5">
           {/* Top / Stripe Header Area */}
-          {variant === "stripe" ? (
+          {variant === 'stripe' ? (
             <div className="space-y-2">
               <div
                 className="inline-flex items-center gap-2 px-2 py-1 rounded bg-black/20 backdrop-blur-xs text-xs"
@@ -236,7 +236,7 @@ export const Book = React.forwardRef<HTMLDivElement, BookProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
-Book.displayName = "Book";
+Book.displayName = 'Book';

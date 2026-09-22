@@ -1,6 +1,6 @@
-import { toast } from "sonner";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { toast } from 'sonner';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface QueuedRequest {
   id: string;
@@ -16,7 +16,7 @@ interface OfflineQueueState {
   queue: QueuedRequest[];
   isOnline: boolean;
   isSyncing: boolean;
-  enqueue: (_request: Omit<QueuedRequest, "id" | "timestamp">) => void;
+  enqueue: (_request: Omit<QueuedRequest, 'id' | 'timestamp'>) => void;
   dequeue: (_id: string) => void;
   clearQueue: () => void;
   setOnlineStatus: (_status: boolean) => void;
@@ -27,7 +27,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
   persist(
     (set, get) => ({
       queue: [],
-      isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+      isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
       isSyncing: false,
 
       enqueue: (request) => {
@@ -37,7 +37,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
           timestamp: Date.now(),
         };
         set((state) => ({ queue: [...state.queue, newReq] }));
-        if (typeof window !== "undefined") {
+        if (typeof window !== 'undefined') {
           toast.info(`Saved offline: ${request.description}`);
         }
       },
@@ -94,14 +94,14 @@ export const useOfflineQueue = create<OfflineQueueState>()(
       },
     }),
     {
-      name: "arch-offline-queue",
-    },
-  ),
+      name: 'arch-offline-queue',
+    }
+  )
 );
 
 // We need a way to initialize the listeners
 export function initOfflineQueueListeners() {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
   const handleOnline = () => {
     useOfflineQueue.getState().setOnlineStatus(true);
@@ -112,8 +112,8 @@ export function initOfflineQueueListeners() {
     useOfflineQueue.getState().setOnlineStatus(false);
   };
 
-  window.addEventListener("online", handleOnline);
-  window.addEventListener("offline", handleOffline);
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
 
   // Initial sync attempt if we load the page online and have queued items
   if (navigator.onLine) {
@@ -121,7 +121,7 @@ export function initOfflineQueueListeners() {
   }
 
   return () => {
-    window.removeEventListener("online", handleOnline);
-    window.removeEventListener("offline", handleOffline);
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
   };
 }

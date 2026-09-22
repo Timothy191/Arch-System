@@ -6,7 +6,7 @@ services:
     container_name: plantcor-redis
     restart: unless-stopped
     ports:
-      - "6381:6379"
+      - "127.0.0.1:6381:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
     env_file: ../../.env.tools
     ports:
-      - "3003:3000"
+      - "127.0.0.1:3003:3000"
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
@@ -93,7 +93,7 @@ services:
     container_name: plantcor-langfuse-redis
     restart: unless-stopped
     ports:
-      - "6380:6379"
+      - "127.0.0.1:6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

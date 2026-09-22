@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   Table,
   TableBody,
@@ -8,10 +8,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./table";
+} from './table';
 
 const meta: Meta<typeof Table> = {
-  title: "UI/Table",
+  title: 'UI/Table',
   component: Table,
 };
 
@@ -21,23 +21,23 @@ type Story = StoryObj<typeof Table>;
 
 const invoices = [
   {
-    invoice: "INV001",
-    status: "Paid",
-    method: "Credit Card",
-    amount: "$250.00",
+    invoice: 'INV001',
+    status: 'Paid',
+    method: 'Credit Card',
+    amount: '$250.00',
   },
-  { invoice: "INV002", status: "Pending", method: "PayPal", amount: "$150.00" },
+  { invoice: 'INV002', status: 'Pending', method: 'PayPal', amount: '$150.00' },
   {
-    invoice: "INV003",
-    status: "Unpaid",
-    method: "Bank Transfer",
-    amount: "$350.00",
+    invoice: 'INV003',
+    status: 'Unpaid',
+    method: 'Bank Transfer',
+    amount: '$350.00',
   },
   {
-    invoice: "INV004",
-    status: "Paid",
-    method: "Credit Card",
-    amount: "$450.00",
+    invoice: 'INV004',
+    status: 'Paid',
+    method: 'Credit Card',
+    amount: '$450.00',
   },
 ];
 

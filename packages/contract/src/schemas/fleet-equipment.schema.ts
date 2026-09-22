@@ -1,25 +1,25 @@
-import { z } from "zod";
-import { nonEmptyString, uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { nonEmptyString, uuidSchema } from './common.schema';
 
 export const fleetCategoryEnum = z.enum([
-  "truck",
-  "excavator",
-  "dozer",
-  "drill",
-  "grader",
-  "bowser",
-  "ldv",
-  "ancillary",
+  'truck',
+  'excavator',
+  'dozer',
+  'drill',
+  'grader',
+  'bowser',
+  'ldv',
+  'ancillary',
 ]);
 
-export const fleetStatusEnum = z.enum(["operational", "breakdown", "standby", "maintenance"]);
+export const fleetStatusEnum = z.enum(['operational', 'breakdown', 'standby', 'maintenance']);
 
 export const fleetSchema = z.object({
   id: uuidSchema.optional(),
   code: nonEmptyString,
   category: fleetCategoryEnum,
   model: z.string().optional().nullable(),
-  status: fleetStatusEnum.default("operational"),
+  status: fleetStatusEnum.default('operational'),
   department_id: uuidSchema.optional().nullable(),
   current_site: z.string().optional().nullable(),
   hour_meter: z.number().min(0).default(0),
@@ -27,7 +27,7 @@ export const fleetSchema = z.object({
   updated_at: z.string().datetime().optional(),
 });
 
-export const equipmentStatusEnum = z.enum(["available", "assigned", "maintenance", "retired"]);
+export const equipmentStatusEnum = z.enum(['available', 'assigned', 'maintenance', 'retired']);
 
 export const equipmentSchema = z.object({
   id: uuidSchema.optional(),
@@ -36,7 +36,7 @@ export const equipmentSchema = z.object({
   serial_number: z.string().optional().nullable(),
   assigned_to: uuidSchema.optional().nullable(),
   department_id: uuidSchema.optional().nullable(),
-  status: equipmentStatusEnum.default("available"),
+  status: equipmentStatusEnum.default('available'),
   created_at: z.string().datetime().optional(),
   updated_at: z.string().datetime().optional(),
 });

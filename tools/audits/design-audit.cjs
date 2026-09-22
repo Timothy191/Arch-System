@@ -19,67 +19,67 @@
  * Exit Code: 0 on clean run, 1 if critical violations found (CI gate).
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
-const REPORT_PATH = path.join(REPORT_DIR, "design-report.md");
+const ROOT = path.resolve(__dirname, '..', '..');
+const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, 'documentation', '03-audit-reports');
+const REPORT_PATH = path.join(REPORT_DIR, 'design-report.md');
 
 const TARGET_DIRS = [
-  path.join(ROOT, "apps", "portal"),
-  path.join(ROOT, "packages", "ui"),
-  path.join(ROOT, "packages", "theme"),
+  path.join(ROOT, 'apps', 'portal'),
+  path.join(ROOT, 'packages', 'ui'),
+  path.join(ROOT, 'packages', 'theme'),
 ];
 
 const EXCLUDE_DIRS = [
-  ".next",
-  "dist",
-  "node_modules",
-  ".turbo",
-  "build",
-  "out",
-  ".git",
-  "public",
-  "__snapshots__",
-  "coverage",
+  '.next',
+  'dist',
+  'node_modules',
+  '.turbo',
+  'build',
+  'out',
+  '.git',
+  'public',
+  '__snapshots__',
+  'coverage',
 ];
 
 // Load tokens to dynamically get allowed shadows
 let ALLOWED_SHADOWS;
 try {
-  const tokensPath = path.join(ROOT, "packages", "theme", "tokens.json");
-  const tokens = JSON.parse(fs.readFileSync(tokensPath, "utf-8"));
+  const tokensPath = path.join(ROOT, 'packages', 'theme', 'tokens.json');
+  const tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf-8'));
 
   // Extract all keys starting with 'shadow-' from tokens.json
-  const tokenShadows = Object.keys(tokens).filter((k) => k.startsWith("shadow-"));
+  const tokenShadows = Object.keys(tokens).filter((k) => k.startsWith('shadow-'));
 
   // Combine with standard allowed Tailwind/Tremor shadows that aren't explicit tokens
   ALLOWED_SHADOWS = new Set([
     ...tokenShadows,
-    "shadow-2xs",
-    "shadow-xs",
-    "shadow-sm",
-    "shadow-md",
-    "shadow-lg",
-    "shadow-xl",
-    "shadow-2xl",
-    "shadow-card",
-    "shadow-window",
-    "shadow-none",
-    "shadow-inner",
-    "shadow-tremor-input",
-    "shadow-tremor-card",
-    "shadow-tremor-dropdown",
-    "shadow-glass-depth",
-    "shadow-glass-depth-hover",
-    "shadow-glass-depth-active",
-    "shadow-liquid-depth-hover",
-    "shadow-diffusion-cyan",
-    "shadow-glow-mint",
+    'shadow-2xs',
+    'shadow-xs',
+    'shadow-sm',
+    'shadow-md',
+    'shadow-lg',
+    'shadow-xl',
+    'shadow-2xl',
+    'shadow-card',
+    'shadow-window',
+    'shadow-none',
+    'shadow-inner',
+    'shadow-tremor-input',
+    'shadow-tremor-card',
+    'shadow-tremor-dropdown',
+    'shadow-glass-depth',
+    'shadow-glass-depth-hover',
+    'shadow-glass-depth-active',
+    'shadow-liquid-depth-hover',
+    'shadow-diffusion-cyan',
+    'shadow-glow-mint',
   ]);
 } catch (e) {
-  console.error("Failed to parse tokens.json for shadow validation", e);
+  console.error('Failed to parse tokens.json for shadow validation', e);
   process.exit(1);
 }
 
@@ -108,11 +108,11 @@ function walkDir(dir, callback) {
       walkDir(res, callback);
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name);
-      if ([".ts", ".tsx", ".js", ".jsx", ".css"].includes(ext)) {
+      if (['.ts', '.tsx', '.js', '.jsx', '.css'].includes(ext)) {
         if (
-          entry.name.includes(".stories.") ||
-          entry.name.includes(".test.") ||
-          entry.name.includes(".spec.")
+          entry.name.includes('.stories.') ||
+          entry.name.includes('.test.') ||
+          entry.name.includes('.spec.')
         ) {
           continue;
         }
@@ -130,13 +130,13 @@ function walkDir(dir, callback) {
  */
 function auditFile(filePath) {
   const relPath = path.relative(ROOT, filePath);
-  if (relPath.includes("packages/theme") || relPath === "packages/ui/src/globals.css") {
+  if (relPath.includes('packages/theme') || relPath === 'packages/ui/src/globals.css') {
     return;
   }
   filesScanned++;
-  const content = fs.readFileSync(filePath, "utf-8");
-  const lines = content.split("\n");
-  const isCSS = filePath.endsWith(".css");
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const lines = content.split('\n');
+  const isCSS = filePath.endsWith('.css');
   const isCode = !isCSS;
 
   lines.forEach((lineText, lineIdx) => {
@@ -144,19 +144,19 @@ function auditFile(filePath) {
 
     // Skip comment lines
     const trimmed = lineText.trim();
-    if (isCode && (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")))
+    if (isCode && (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')))
       return;
-    if (isCSS && (trimmed.startsWith("/*") || trimmed.startsWith("*"))) return;
+    if (isCSS && (trimmed.startsWith('/*') || trimmed.startsWith('*'))) return;
 
     // Check 1: Dark Mode / 'dark:' classes (Warning)
     // Avoid false positives in config files, scripts, or comments (like "data-theme='light'")
-    if (lineText.includes("dark:") && !relPath.includes("tailwind.config")) {
+    if (lineText.includes('dark:') && !relPath.includes('tailwind.config')) {
       violations.push({
         file: relPath,
         line: lineNum,
-        type: "DARK_MODE",
+        type: 'DARK_MODE',
         content: trimmed,
-        severity: "WARNING",
+        severity: 'WARNING',
         description:
           "Use of 'dark:' responsive class is discouraged. Theme is strictly light-only.",
       });
@@ -170,15 +170,15 @@ function auditFile(filePath) {
         shadowMatches.forEach((shadow) => {
           const isColorShadow =
             /^shadow-(blue|emerald|red|amber|purple|indigo|cyan|rose|sky|teal|zinc|neutral|slate|green|orange|yellow|violet|fuchsia|pink|lime)-[0-9]+$/.test(
-              shadow,
+              shadow
             );
           if (!ALLOWED_SHADOWS.has(shadow) && !isColorShadow) {
             violations.push({
               file: relPath,
               line: lineNum,
-              type: "FORBIDDEN_SHADOW",
+              type: 'FORBIDDEN_SHADOW',
               content: shadow,
-              severity: "CRITICAL",
+              severity: 'CRITICAL',
               description: `Raw Tailwind shadow class '${shadow}' is forbidden. Use only approved tokens (shadow-sm, shadow-md, shadow-lg, shadow-card, shadow-window, shadow-diffusion-*).`,
             });
           }
@@ -188,16 +188,16 @@ function auditFile(filePath) {
 
     if (isCSS) {
       if (
-        lineText.includes("box-shadow:") &&
-        !lineText.includes("var(--") &&
-        !relPath.includes("liqui-glass")
+        lineText.includes('box-shadow:') &&
+        !lineText.includes('var(--') &&
+        !relPath.includes('liqui-glass')
       ) {
         violations.push({
           file: relPath,
           line: lineNum,
-          type: "FORBIDDEN_SHADOW",
+          type: 'FORBIDDEN_SHADOW',
           content: trimmed,
-          severity: "CRITICAL",
+          severity: 'CRITICAL',
           description:
             "Raw CSS 'box-shadow' property is forbidden. Use token variables like var(--shadow-sm), var(--shadow-md), etc.",
         });
@@ -206,13 +206,13 @@ function auditFile(filePath) {
 
     // Check 3: Wildcard Lucide Imports (Warning)
     if (isCode && lineText.includes('from "lucide-react"')) {
-      if (lineText.includes("import * as")) {
+      if (lineText.includes('import * as')) {
         violations.push({
           file: relPath,
           line: lineNum,
-          type: "WILDCARD_ICON",
+          type: 'WILDCARD_ICON',
           content: trimmed,
-          severity: "WARNING",
+          severity: 'WARNING',
           description:
             "Wildcard import from 'lucide-react' causes bundle bloat. Use named imports instead (e.g. import { Drill } from 'lucide-react').",
         });
@@ -221,52 +221,52 @@ function auditFile(filePath) {
 
     // Check 4: Unsafe Animations (Critical/Warning)
     // Framer motion properties animation checking
-    if (isCode && (lineText.includes("animate={{") || lineText.includes("transition={{"))) {
+    if (isCode && (lineText.includes('animate={{') || lineText.includes('transition={{'))) {
       const unsafeProps = [
-        "width",
-        "height",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "margin",
-        "padding",
+        'width',
+        'height',
+        'top',
+        'bottom',
+        'left',
+        'right',
+        'margin',
+        'padding',
       ];
       unsafeProps.forEach((prop) => {
-        const regex = new RegExp(`\\b${prop}\\s*:`, "i");
+        const regex = new RegExp(`\\b${prop}\\s*:`, 'i');
         if (regex.test(lineText)) {
           violations.push({
             file: relPath,
             line: lineNum,
-            type: "UNSAFE_ANIMATION",
+            type: 'UNSAFE_ANIMATION',
             content: `${prop} in motion declaration`,
-            severity: "CRITICAL",
+            severity: 'CRITICAL',
             description: `Animating layout-inducing property '${prop}' causes reflow and lag. Animate opacity, transform, or colors instead.`,
           });
         }
       });
     }
 
-    if (isCSS && (lineText.includes("transition:") || lineText.includes("transition-property:"))) {
+    if (isCSS && (lineText.includes('transition:') || lineText.includes('transition-property:'))) {
       const unsafeProps = [
-        "width",
-        "height",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "margin",
-        "padding",
+        'width',
+        'height',
+        'top',
+        'bottom',
+        'left',
+        'right',
+        'margin',
+        'padding',
       ];
       unsafeProps.forEach((prop) => {
-        const regex = new RegExp(`\\b${prop}\\b`, "i");
+        const regex = new RegExp(`\\b${prop}\\b`, 'i');
         if (regex.test(lineText)) {
           violations.push({
             file: relPath,
             line: lineNum,
-            type: "UNSAFE_ANIMATION",
+            type: 'UNSAFE_ANIMATION',
             content: trimmed,
-            severity: "CRITICAL",
+            severity: 'CRITICAL',
             description: `CSS transition includes layout property '${prop}', which triggers layout recalculations on every frame. Transition opacity or transform instead.`,
           });
         }
@@ -281,53 +281,53 @@ function auditFile(filePath) {
  * @returns {string} The formatted Markdown report.
  */
 function generateReport() {
-  const critical = violations.filter((v) => v.severity === "CRITICAL");
-  const warnings = violations.filter((v) => v.severity === "WARNING");
+  const critical = violations.filter((v) => v.severity === 'CRITICAL');
+  const warnings = violations.filter((v) => v.severity === 'WARNING');
 
   const lines = [];
-  lines.push("# Design System Compliance Audit Report");
-  lines.push("");
+  lines.push('# Design System Compliance Audit Report');
+  lines.push('');
   lines.push(`Generated by \`tools/audits/design-audit.cjs\` on ${new Date().toISOString()}.`);
-  lines.push("");
-  lines.push("## Summary");
-  lines.push("");
+  lines.push('');
+  lines.push('## Summary');
+  lines.push('');
   lines.push(`- **Files Scanned**: ${filesScanned}`);
   lines.push(`- **Critical Violations**: ${critical.length} 🛑`);
   lines.push(`- **Warnings**: ${warnings.length} ⚠️`);
-  lines.push("");
+  lines.push('');
 
   if (critical.length > 0) {
-    lines.push("## 🛑 CRITICAL VIOLATIONS (Must Fix)");
-    lines.push("");
-    lines.push("| File | Line | Type | Violation | Description |");
-    lines.push("| --- | --- | --- | --- | --- |");
+    lines.push('## 🛑 CRITICAL VIOLATIONS (Must Fix)');
+    lines.push('');
+    lines.push('| File | Line | Type | Violation | Description |');
+    lines.push('| --- | --- | --- | --- | --- |');
     critical.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
       );
     });
-    lines.push("");
+    lines.push('');
   } else {
-    lines.push("## 🟢 Critical Violations");
-    lines.push("");
-    lines.push("_None! The codebase conforms to the primary visual rules of the design system._");
-    lines.push("");
+    lines.push('## 🟢 Critical Violations');
+    lines.push('');
+    lines.push('_None! The codebase conforms to the primary visual rules of the design system._');
+    lines.push('');
   }
 
   if (warnings.length > 0) {
-    lines.push("## ⚠️ WARNINGS (Review Recommended)");
-    lines.push("");
-    lines.push("| File | Line | Type | Snippet | Description |");
-    lines.push("| --- | --- | --- | --- | --- |");
+    lines.push('## ⚠️ WARNINGS (Review Recommended)');
+    lines.push('');
+    lines.push('| File | Line | Type | Snippet | Description |');
+    lines.push('| --- | --- | --- | --- | --- |');
     warnings.forEach((v) => {
       lines.push(
-        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`,
+        `| [${path.basename(v.file)}](file://${path.resolve(ROOT, v.file)}#L${v.line}) | ${v.line} | \`${v.type}\` | \`${v.content}\` | ${v.description} |`
       );
     });
-    lines.push("");
+    lines.push('');
   }
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 /**
@@ -337,7 +337,7 @@ function generateReport() {
  * @returns {void}
  */
 function main() {
-  console.log("Initiating Design System Compliance Audit...");
+  console.log('Initiating Design System Compliance Audit...');
 
   TARGET_DIRS.forEach((dir) => {
     if (fs.existsSync(dir)) {
@@ -352,17 +352,17 @@ function main() {
 
   console.log(`Scan Complete. Scanned ${filesScanned} files.`);
   console.log(
-    `Found ${violations.filter((v) => v.severity === "CRITICAL").length} critical violations and ${violations.filter((v) => v.severity === "WARNING").length} warnings.`,
+    `Found ${violations.filter((v) => v.severity === 'CRITICAL').length} critical violations and ${violations.filter((v) => v.severity === 'WARNING').length} warnings.`
   );
   console.log(`Report written to: ${path.relative(ROOT, REPORT_PATH)}`);
 
-  const criticalCount = violations.filter((v) => v.severity === "CRITICAL").length;
+  const criticalCount = violations.filter((v) => v.severity === 'CRITICAL').length;
   if (criticalCount > 0) {
     console.error(`\n❌ Audit failed: ${criticalCount} design compliance violation(s) found.`);
     process.exit(1);
   }
 
-  console.log("\n✅ Design compliance check passed successfully!");
+  console.log('\n✅ Design compliance check passed successfully!');
   process.exit(0);
 }
 

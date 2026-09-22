@@ -1,8 +1,8 @@
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { inngest } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
-import { getShiftCompleteness } from "@/lib/shift-completeness";
+import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { inngest } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
+import { getShiftCompleteness } from '@/lib/shift-completeness';
 
 /**
  * Shift Completeness Check Job
@@ -17,9 +17,9 @@ import { getShiftCompleteness } from "@/lib/shift-completeness";
 
 export const shiftCompletenessCheckFn = inngest.createFunction(
   {
-    id: "shift-completeness-check",
+    id: 'shift-completeness-check',
     // AGENT-TRACE: Run every 15 minutes
-    triggers: [{ cron: "*/15 * * * *" }],
+    triggers: [{ cron: '*/15 * * * *' }],
   },
   async ({ step: _step }) => {
     const serviceRole = createServiceRoleClient();
@@ -30,39 +30,39 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
     try {
       // AGENT-TRACE: Get all active departments
       const { data: departments, error: deptError } = await serviceRole
-        .from("departments")
-        .select("id, name")
-        .eq("type", "operational")
-        .eq("active", true);
+        .from('departments')
+        .select('id, name')
+        .eq('type', 'operational')
+        .eq('active', true);
 
       if (deptError) throw deptError;
       if (!departments || departments.length === 0) {
-        return { success: true, message: "No active departments found" };
+        return { success: true, message: 'No active departments found' };
       }
 
       // AGENT-TRACE: Determine current shift
       const now = new Date();
       const hour = now.getHours();
       const isDayShift = hour >= 6 && hour < 18;
-      const shiftType: "day" | "night" = isDayShift ? "day" : "night";
-      const today = now.toISOString().split("T")[0]!;
+      const shiftType: 'day' | 'night' = isDayShift ? 'day' : 'night';
+      const today = now.toISOString().split('T')[0]!;
 
       // AGENT-TRACE: Check each department's shift completeness
       for (const department of departments) {
         // Only check control-room departments
-        if (department.name !== "control-room") continue;
+        if (department.name !== 'control-room') continue;
 
         const completeness = await getShiftCompleteness(
           serviceRole,
           department.id,
           null,
           today,
-          shiftType,
+          shiftType
         );
 
         // AGENT-TRACE: Identify machines without entries
         const missingMachines = completeness.statuses.filter(
-          (status) => !status.exempt && !status.hasEntry,
+          (status) => !status.exempt && !status.hasEntry
         );
 
         // AGENT-TRACE: Check if we're >30 minutes into shift
@@ -75,12 +75,12 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
 
         if (missingMachines.length > 0 && actualMinutesIntoShift > 30) {
           // AGENT-TRACE: Create alert for missing machines
-          const machineNames = missingMachines.map((m) => m.machineName).join(", ");
+          const machineNames = missingMachines.map((m) => m.machineName).join(', ');
           const alert = `Department: ${department.name}, Shift: ${shiftType}, Missing machines (${missingMachines.length}): ${machineNames}`;
           alerts.push(alert);
 
           // AGENT-TRACE: Log to database for tracking
-          await serviceRole.from("shift_completeness_alerts").insert({
+          await serviceRole.from('shift_completeness_alerts').insert({
             department_id: department.id,
             shift_date: today,
             shift_type: shiftType,
@@ -104,11 +104,11 @@ export const shiftCompletenessCheckFn = inngest.createFunction(
     } catch (err) {
       success = false;
       logError(err, {
-        context: "shift_completeness_check_job",
+        context: 'shift_completeness_check_job',
       });
       throw err;
     } finally {
-      recordJobExecution("shift-completeness-check", performance.now() - start, success);
+      recordJobExecution('shift-completeness-check', performance.now() - start, success);
     }
-  },
+  }
 );

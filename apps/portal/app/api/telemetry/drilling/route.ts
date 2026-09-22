@@ -50,13 +50,13 @@
 import {
   type DrillTelemetryIngestInput,
   drillTelemetryIngestSchema,
-} from "@repo/contract/schemas/drill.schema";
-import { withValidation } from "@repo/contract/validation";
-import { getRedisClient } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { NextResponse } from "next/server";
-import { withBodyLimit } from "@/lib/api/body-limit";
-import { applyCors } from "@/lib/api/cors";
+} from '@repo/contract/schemas/drill.schema';
+import { withValidation } from '@repo/contract/validation';
+import { getRedisClient } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
+import { applyCors } from '@/lib/api/cors';
 
 // AGENT-TRACE: Ingestion route for Drill Rig IoT telemetry
 // Updates machine_telemetry table, updates Redis cache, and syncs with SCADA tag system
@@ -81,17 +81,17 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
 
     // 1. Verify machine exists and belongs to Drilling department
     const { data: machine } = await supabase
-      .from("machines")
-      .select("id, name, department_id")
-      .eq("id", machine_id)
+      .from('machines')
+      .select('id, name, department_id')
+      .eq('id', machine_id)
       .maybeSingle();
 
     if (!machine) {
-      return NextResponse.json({ error: "Machine not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Machine not found' }, { status: 404 });
     }
 
     // 2. Insert into machine_telemetry log table
-    const { error: dbError } = await supabase.from("machine_telemetry").insert({
+    const { error: dbError } = await supabase.from('machine_telemetry').insert({
       machine_id,
       engine_rpm: engine_rpm ?? null,
       engine_temp: engine_temp ?? null,
@@ -104,7 +104,7 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
 
     if (dbError) {
       // eslint-disable-next-line no-console
-      console.error("[DrillTelemetry] Database insert error:", dbError.message);
+      console.error('[DrillTelemetry] Database insert error:', dbError.message);
     }
 
     // 3. Cache telemetry state in Redis for rapid dashboard retrieval
@@ -128,12 +128,12 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
       await redis.set(
         `drilling:telemetry:last:${machine_id}`,
         JSON.stringify(telemetryState),
-        { EX: 86400 }, // 24 hours TTL
+        { EX: 86400 } // 24 hours TTL
       );
-      await redis.publish("drilling:telemetry:stream", JSON.stringify(telemetryState));
+      await redis.publish('drilling:telemetry:stream', JSON.stringify(telemetryState));
     } catch (redisErr) {
       // eslint-disable-next-line no-console
-      console.warn("[DrillTelemetry] Redis caching warning:", redisErr);
+      console.warn('[DrillTelemetry] Redis caching warning:', redisErr);
     }
 
     // 4. Reverse-flow ingest (D2-a) — expose drilling metrics as FUXA-pullable
@@ -174,8 +174,8 @@ const handleIngest = withValidation(drillTelemetryIngestSchema, async (_req, dat
     });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Failed to process drill telemetry" },
-      { status: 500 },
+      { error: err.message || 'Failed to process drill telemetry' },
+      { status: 500 }
     );
   }
 });
@@ -187,6 +187,6 @@ export async function POST(req: Request) {
       const response = await handleIngest(req, { params: Promise.resolve({}) });
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 1048576 }, // 1MB payload limit
+    { maxSize: 1048576 } // 1MB payload limit
   );
 }

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Parameter schemas for AI-agent tool invocations (SearXNG web search
@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 
 export const searxngToolParamsSchema = z.object({
-  query: z.string().describe("The search query to send to SearXNG."),
+  query: z.string().describe('The search query to send to SearXNG.'),
   categories: z
     .array(z.string())
     .optional()
@@ -15,7 +15,7 @@ export const searxngToolParamsSchema = z.object({
 });
 
 export const wolframToolParamsSchema = z.object({
-  query: z.string().describe("The mathematical or factual query to compute."),
+  query: z.string().describe('The mathematical or factual query to compute.'),
 });
 
 export type SearxngToolParams = z.infer<typeof searxngToolParamsSchema>;

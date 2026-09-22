@@ -1,19 +1,18 @@
-import { Divider } from "@repo/ui/Divider";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import { ErrorBoundary } from "~/components/ErrorBoundary";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { Divider } from '@repo/ui/Divider';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { ErrorBoundary } from '~/components/ErrorBoundary';
+import { ProductionDashboard } from '~/features/departments/components/production/ProductionDashboard';
+import { getDepartmentContext } from '~/lib/dept-context';
 
-import { ProductionDashboard } from "~/features/departments/components/production/ProductionDashboard";
-
-import { ControlRoomSummaryGridClient } from "./ControlRoomSummaryGridClient";
-import { NonControlRoomSummaryGridClient } from "./NonControlRoomSummaryGridClient";
+import { ControlRoomSummaryGridClient } from './ControlRoomSummaryGridClient';
+import { NonControlRoomSummaryGridClient } from './NonControlRoomSummaryGridClient';
 
 // AGENT-TRACE: ControlRoomWidgets consolidated dynamic island — co-locates all control-room
 // specific widgets (ScadaPanel, AlertPanel, ActivityFeed, Checklist, ShiftCoverage) to prevent
 // bundle fragmentation and reduce React reconciliation passes on non-control room pages.
 const ControlRoomWidgets = dynamic(
-  () => import("./ControlRoomWidgets").then((m) => m.ControlRoomWidgets),
+  () => import('./ControlRoomWidgets').then((m) => m.ControlRoomWidgets),
   {
     loading: () => (
       <div className="space-y-6">
@@ -26,7 +25,7 @@ const ControlRoomWidgets = dynamic(
         <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />
       </div>
     ),
-  },
+  }
 );
 
 export default async function DepartmentDashboard({
@@ -39,7 +38,7 @@ export default async function DepartmentDashboard({
     department: deptSlug,
   });
 
-  if (deptSlug === "production") {
+  if (deptSlug === 'production') {
     return (
       <Suspense
         fallback={
@@ -53,7 +52,7 @@ export default async function DepartmentDashboard({
     );
   }
 
-  const isControlRoom = dept.type === "control_room";
+  const isControlRoom = dept.type === 'control_room';
 
   return (
     // AGENT-TRACE: ErrorBoundary wraps entire dashboard for graceful degradation
@@ -67,11 +66,11 @@ export default async function DepartmentDashboard({
                 Control Room Dashboard
               </h2>
               <p className="text-[var(--text-muted)] text-sm">
-                {new Date().toLocaleDateString("en-ZA", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
+                {new Date().toLocaleDateString('en-ZA', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })}
               </p>
             </div>

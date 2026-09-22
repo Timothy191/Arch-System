@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 // AGENT-TRACE: Simple APIError class for package-level use
 // Removed unused options parameter to fix ESLint warnings preventing git push
@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 class APIError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "APIError";
+    this.name = 'APIError';
   }
 }
 
@@ -17,7 +17,7 @@ export function createServiceRoleClient() {
   const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) {
     throw new APIError(
-      "Missing SUPABASE_URL or SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_KEY) environment variables",
+      'Missing SUPABASE_URL or SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_KEY) environment variables'
     );
   }
   return createClient(url, key, {

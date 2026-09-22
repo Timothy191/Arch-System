@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, type RefObject } from "react";
+import { type RefObject, useEffect } from 'react';
 
 /**
  * Hook to handle click or touch events occurring outside specified element target.
  */
 export function useClickOutside<T extends HTMLElement = HTMLElement>(
   ref: RefObject<T | null>,
-  handler: (event: MouseEvent | TouchEvent) => void,
+  handler: (event: MouseEvent | TouchEvent) => void
 ): void {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
@@ -18,12 +18,12 @@ export function useClickOutside<T extends HTMLElement = HTMLElement>(
       handler(event);
     };
 
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
 
     return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
     };
   }, [ref, handler]);
 }

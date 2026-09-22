@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import type { PollingOptions } from "./types";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PollingOptions } from './types';
 
 /**
  * Hook for managing periodic polling with pause, resume, and immediate execution flags.
@@ -9,7 +9,7 @@ import type { PollingOptions } from "./types";
 export function usePolling(
   callback: () => void | Promise<void>,
   intervalMs: number | null,
-  options: PollingOptions = {},
+  options: PollingOptions = {}
 ): { isPolling: boolean; pause: () => void; resume: () => void } {
   const { immediate = false, autoStart = true } = options;
 

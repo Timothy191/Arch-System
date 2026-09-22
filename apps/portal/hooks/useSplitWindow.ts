@@ -1,6 +1,6 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-type SplitService = "github" | "whatsapp";
+type SplitService = 'github' | 'whatsapp';
 
 interface Tab {
   id: string;

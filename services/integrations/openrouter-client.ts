@@ -9,7 +9,7 @@
  */
 
 interface OpenRouterMessage {
-  role: "user" | "assistant" | "system";
+  role: 'user' | 'assistant' | 'system';
   content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
 }
 
@@ -19,23 +19,23 @@ interface OpenRouterRequest {
   temperature?: number;
   max_tokens?: number;
   tools?: any[];
-  tool_choice?: "auto" | "none" | { type: "function"; function: { name: string } };
+  tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
   stream?: boolean;
 }
 
 export class OpenRouterClient {
   private apiKey: string;
-  private baseUrl = "https://openrouter.ai/api/v1";
+  private baseUrl = 'https://openrouter.ai/api/v1';
   private siteUrl: string;
   private siteName: string;
 
   constructor(config?: { apiKey?: string; siteUrl?: string; siteName?: string }) {
-    this.apiKey = config?.apiKey || process.env.OPENROUTER_API_KEY || "";
-    this.siteUrl = config?.siteUrl || process.env.SITE_URL || "http://localhost:3000";
-    this.siteName = config?.siteName || process.env.SITE_NAME || "Arch-System";
+    this.apiKey = config?.apiKey || process.env.OPENROUTER_API_KEY || '';
+    this.siteUrl = config?.siteUrl || process.env.SITE_URL || 'http://localhost:3000';
+    this.siteName = config?.siteName || process.env.SITE_NAME || 'Arch-System';
 
     if (!this.apiKey) {
-      console.warn("OpenRouterClient initialized without an API key.");
+      console.warn('OpenRouterClient initialized without an API key.');
     }
   }
 
@@ -46,12 +46,12 @@ export class OpenRouterClient {
    */
   async generateCompletion(request: OpenRouterRequest): Promise<any> {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
-        "HTTP-Referer": this.siteUrl,
-        "X-Title": this.siteName,
-        "Content-Type": "application/json",
+        'HTTP-Referer': this.siteUrl,
+        'X-Title': this.siteName,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(request),
     });
@@ -69,7 +69,7 @@ export class OpenRouterClient {
    */
   async getModels(): Promise<any> {
     const response = await fetch(`${this.baseUrl}/models`, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },

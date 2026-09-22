@@ -1,37 +1,37 @@
-import { getCurrentShift } from "@repo/utils";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import { getCurrentShift } from '@repo/utils';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
 // AGENT-TRACE: ControlRoomWidgets groups all dynamic widgets exclusive to the control room dashboard.
 // Co-locating them prevents bundle fragmentation on non-control room department routes.
 
 const ShiftCoverageSectionClient = dynamic(
-  () => import("./ShiftCoverageSectionClient").then((m) => m.ShiftCoverageSectionClient),
+  () => import('./ShiftCoverageSectionClient').then((m) => m.ShiftCoverageSectionClient),
   {
     loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 const ControlRoomChecklistWidget = dynamic(
-  () => import("@/features/departments").then((m) => m.ControlRoomChecklistWidget),
+  () => import('@/features/departments').then((m) => m.ControlRoomChecklistWidget),
   {
     loading: () => <div className="h-96 animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
-const ScadaPanel = dynamic(() => import("@/features/departments").then((m) => m.ScadaPanel), {
+const ScadaPanel = dynamic(() => import('@/features/departments').then((m) => m.ScadaPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
 });
 
-const AlertPanel = dynamic(() => import("@/features/departments").then((m) => m.AlertPanel), {
+const AlertPanel = dynamic(() => import('@/features/departments').then((m) => m.AlertPanel), {
   loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
 });
 
 const ControlRoomActivityFeed = dynamic(
-  () => import("@/features/departments").then((m) => m.ControlRoomActivityFeed),
+  () => import('@/features/departments').then((m) => m.ControlRoomActivityFeed),
   {
     loading: () => <div className="h-[400px] animate-pulse bg-[var(--bg-tertiary)] rounded-2xl" />,
-  },
+  }
 );
 
 interface ControlRoomWidgetsProps {

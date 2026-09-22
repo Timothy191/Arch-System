@@ -1,6 +1,6 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { instrumentedFetch } from "./server";
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { instrumentedFetch } from './server';
 
 /**
  * Creates a Supabase client pointed at the read replica (if configured).
@@ -15,11 +15,11 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     cookieStore = await cookies();
   }
   const replicaUrl =
-    process.env.SUPABASE_READ_REPLICA_URL && process.env.SUPABASE_READ_REPLICA_URL.trim() !== ""
+    process.env.SUPABASE_READ_REPLICA_URL && process.env.SUPABASE_READ_REPLICA_URL.trim() !== ''
       ? process.env.SUPABASE_READ_REPLICA_URL
       : process.env.NEXT_PUBLIC_SUPABASE_URL ||
         process.env.SUPABASE_URL ||
-        "https://mrwhtxbhrzyttlsyuofc.supabase.co";
+        'https://mrwhtxbhrzyttlsyuofc.supabase.co';
 
   // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
@@ -28,7 +28,7 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    "";
+    '';
 
   return createServerClient(replicaUrl, anonKey, {
     global: {
@@ -40,7 +40,7 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
         const normalized = [...all];
         for (const cookie of all) {
           const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-          if (match && match[1] && !all.some((c: { name: string }) => c.name === match[1])) {
+          if (match?.[1] && !all.some((c: { name: string }) => c.name === match[1])) {
             normalized.push({ name: match[1], value: cookie.value });
           }
         }
@@ -51,7 +51,7 @@ export async function createReadReplicaClient(cookieList?: Array<{ name: string;
         try {
           cookiesToSet.forEach(
             ({ name, value, options }: { name: string; value: string; options?: any }) =>
-              cookieStore?.set(name, value, options),
+              cookieStore?.set(name, value, options)
           );
         } catch {
           // Called from a Server Component — safe to ignore.

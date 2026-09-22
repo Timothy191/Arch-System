@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
 // eslint-disable-next-line no-restricted-imports
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   dailyLogSchema,
   drillingDailyLogSchema,
   productionDailyLogSchema,
-} from "@repo/contract/schemas/form.schema";
+} from '@repo/contract/schemas/form.schema';
 import type {
   DailyLogFormValues,
   DrillingDailyLogFormValues,
   ProductionDailyLogFormValues,
-} from "@repo/contract/types/form.types";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { cn } from "@repo/ui/lib/utils";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { ShiftToggle } from "@repo/ui/ShiftToggle";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { revalidateRSC, speculativeEmbedShiftLog } from "@/app/actions";
-import { logError } from "@/lib/errors/error-logger";
-import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
+} from '@repo/contract/types/form.types';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { cn } from '@repo/ui/lib/utils';
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import { ShiftToggle } from '@repo/ui/ShiftToggle';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { revalidateRSC, speculativeEmbedShiftLog } from '@/app/actions';
+import { logError } from '@/lib/errors/error-logger';
+import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
 
 interface Machine {
   id: string;
@@ -41,8 +41,8 @@ type UnifiedFormValues = DailyLogFormValues &
   Partial<ProductionDailyLogFormValues>;
 
 export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLogFormProps) {
-  const isDrilling = departmentSlug === "drilling";
-  const isProduction = departmentSlug === "production";
+  const isDrilling = departmentSlug === 'drilling';
+  const isProduction = departmentSlug === 'production';
 
   const schemaResolver = isProduction
     ? productionDailyLogSchema
@@ -60,17 +60,17 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   } = useForm<UnifiedFormValues>({
     resolver: zodResolver(schemaResolver),
     defaultValues: {
-      shift: "day" as const,
-      notes: "",
+      shift: 'day' as const,
+      notes: '',
       ...(isDrilling
         ? {
             holesDrilled: 0,
             totalDepthMeters: 0,
             penetrationRate: 0,
             bitWearPercentage: 0,
-            delayCategory: "none" as const,
+            delayCategory: 'none' as const,
             delayMinutes: 0,
-            drillPatternId: "",
+            drillPatternId: '',
           }
         : {}),
       ...(isProduction
@@ -84,19 +84,19 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
 
   useUnsavedChangesWarning(isDirty);
 
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const formValues = watch();
 
   const draftKey = `arch_daily_log_draft_${departmentId}`;
 
   // Restore draft on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     try {
       const saved = localStorage.getItem(draftKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === "object") {
+        if (parsed && typeof parsed === 'object') {
           reset(parsed);
         }
       }
@@ -108,7 +108,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   // Save draft on tab switch / unload
   const saveDraft = useMemo(() => {
     return () => {
-      if (typeof window === "undefined") return;
+      if (typeof window === 'undefined') return;
       try {
         if (isDirty) {
           localStorage.setItem(draftKey, JSON.stringify(formValues));
@@ -120,7 +120,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   }, [draftKey, isDirty, formValues]);
 
   const clearDraft = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(draftKey);
     } catch {
@@ -131,24 +131,24 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   useEffect(() => {
     saveDraft();
     const handleVisibility = () => {
-      if (document.visibilityState === "hidden") saveDraft();
+      if (document.visibilityState === 'hidden') saveDraft();
     };
-    window.addEventListener("beforeunload", saveDraft);
-    window.addEventListener("pagehide", saveDraft);
-    window.addEventListener("arch:tab-swap", saveDraft);
-    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener('beforeunload', saveDraft);
+    window.addEventListener('pagehide', saveDraft);
+    window.addEventListener('arch:tab-swap', saveDraft);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      window.removeEventListener("beforeunload", saveDraft);
-      window.removeEventListener("pagehide", saveDraft);
-      window.removeEventListener("arch:tab-swap", saveDraft);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener('beforeunload', saveDraft);
+      window.removeEventListener('pagehide', saveDraft);
+      window.removeEventListener('arch:tab-swap', saveDraft);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [saveDraft]);
 
-  const shiftValue = watch("shift");
-  const holesDrilled = watch("holesDrilled") || 0;
-  const totalDepthMeters = watch("totalDepthMeters") || 0;
+  const shiftValue = watch('shift');
+  const holesDrilled = watch('holesDrilled') || 0;
+  const totalDepthMeters = watch('totalDepthMeters') || 0;
 
   const averageDepth = useMemo(() => {
     if (!holesDrilled || holesDrilled <= 0) return 0;
@@ -156,67 +156,67 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
   }, [holesDrilled, totalDepthMeters]);
 
   async function onSubmit(data: UnifiedFormValues) {
-    setStatus("submitting");
+    setStatus('submitting');
 
     const supabase = createBrowserSupabaseClient();
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
 
     // Format consolidated notes for cross-system searchability
-    let finalNotes = data.notes || "";
+    let finalNotes = data.notes || '';
     if (isDrilling) {
-      const summaryPrefix = `[Drilling Operations] Holes: ${data.holesDrilled || 0} | Total Depth: ${data.totalDepthMeters || 0}m (Avg: ${averageDepth}m/hole) | Penetration: ${data.penetrationRate || 0}m/h | Bit Wear: ${data.bitWearPercentage || 0}% | Delay: ${data.delayCategory || "none"} (${data.delayMinutes || 0} min)`;
+      const summaryPrefix = `[Drilling Operations] Holes: ${data.holesDrilled || 0} | Total Depth: ${data.totalDepthMeters || 0}m (Avg: ${averageDepth}m/hole) | Penetration: ${data.penetrationRate || 0}m/h | Bit Wear: ${data.bitWearPercentage || 0}% | Delay: ${data.delayCategory || 'none'} (${data.delayMinutes || 0} min)`;
       finalNotes = finalNotes.trim() ? `${summaryPrefix}\n\nNotes:\n${finalNotes}` : summaryPrefix;
     }
 
     const { data: logData, error } = await supabase
-      .from("daily_logs")
+      .from('daily_logs')
       .insert({
         department_id: departmentId,
         log_date: today,
         shift: data.shift,
-        notes: finalNotes === "" ? null : finalNotes,
+        notes: finalNotes === '' ? null : finalNotes,
       })
-      .select("id")
+      .select('id')
       .single();
 
     if (error) {
       logError(error);
-      toast.error("Failed to save daily log", {
+      toast.error('Failed to save daily log', {
         description: error.message,
       });
-      setStatus("error");
+      setStatus('error');
       return;
     }
 
     if (isProduction && logData) {
-      const { error: prodError } = await supabase.from("production_logs").insert({
+      const { error: prodError } = await supabase.from('production_logs').insert({
         daily_log_id: logData.id,
         coal_tonnes: data.actualCoalTonnes || 0,
         waste_tonnes: data.actualWasteTonnes || 0,
       });
       if (prodError) {
         logError(prodError);
-        toast.error("Saved daily log, but failed to save production metrics", {
+        toast.error('Saved daily log, but failed to save production metrics', {
           description: prodError.message,
         });
       }
     }
 
     // Offer a quick‑undo in case the user saved by mistake.
-    toast.success("Daily log saved successfully", {
+    toast.success('Daily log saved successfully', {
       action: {
-        label: "Undo",
+        label: 'Undo',
         onClick: async () => {
           if (logData?.id) {
             const { error: undoErr } = await supabase
-              .from("daily_logs")
+              .from('daily_logs')
               .delete()
-              .eq("id", logData.id);
+              .eq('id', logData.id);
             if (undoErr) {
               logError(undoErr);
-              toast.error("Unable to undo – contact support.");
+              toast.error('Unable to undo – contact support.');
             } else {
-              toast("Log entry undone");
+              toast('Log entry undone');
               // Reset form to a clean state after undo.
               reset();
             }
@@ -226,31 +226,31 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
     });
 
     // Revalidate cached RSC data
-    revalidateRSC(["table:daily_logs", "table:production_logs"]).catch((err) => {
+    revalidateRSC(['table:daily_logs', 'table:production_logs']).catch((err) => {
       logError(err);
     });
 
     // Speculatively generate embedding for the notes in background
-    if (finalNotes && finalNotes.trim() !== "") {
+    if (finalNotes && finalNotes.trim() !== '') {
       speculativeEmbedShiftLog(finalNotes).catch((err) => {
         logError(err);
       });
     }
 
-    setStatus("success");
+    setStatus('success');
     clearDraft();
     reset({
-      shift: "day",
-      notes: "",
+      shift: 'day',
+      notes: '',
       ...(isDrilling
         ? {
             holesDrilled: 0,
             totalDepthMeters: 0,
             penetrationRate: 0,
             bitWearPercentage: 0,
-            delayCategory: "none",
+            delayCategory: 'none',
             delayMinutes: 0,
-            drillPatternId: "",
+            drillPatternId: '',
           }
         : {}),
       ...(isProduction
@@ -274,7 +274,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
         <ShiftToggle
           value={shiftValue}
           onChange={(value) => {
-            setValue("shift", value);
+            setValue('shift', value);
           }}
           name="shift"
         />
@@ -288,12 +288,12 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
               Production Shift Metrics
             </h3>
             <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium">
-              Strip Ratio:{" "}
-              {watch("actualCoalTonnes")
+              Strip Ratio:{' '}
+              {watch('actualCoalTonnes')
                 ? (
-                    Number(watch("actualWasteTonnes") || 0) / Number(watch("actualCoalTonnes"))
+                    Number(watch('actualWasteTonnes') || 0) / Number(watch('actualCoalTonnes'))
                   ).toFixed(2)
-                : "0.00"}
+                : '0.00'}
             </span>
           </div>
 
@@ -307,9 +307,9 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   type="button"
                   onClick={() =>
                     setValue(
-                      "actualCoalTonnes",
-                      Math.max(0, (Number(watch("actualCoalTonnes")) || 0) - 100),
-                      { shouldDirty: true },
+                      'actualCoalTonnes',
+                      Math.max(0, (Number(watch('actualCoalTonnes')) || 0) - 100),
+                      { shouldDirty: true }
                     )
                   }
                   className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
@@ -318,18 +318,18 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 </button>
                 <input
                   type="number"
-                  {...register("actualCoalTonnes", { valueAsNumber: true })}
+                  {...register('actualCoalTonnes', { valueAsNumber: true })}
                   onFocus={(e) => e.target.select()}
                   className={cn(
-                    "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                    errors.actualCoalTonnes && "border-accent-red",
+                    'flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                    errors.actualCoalTonnes && 'border-accent-red'
                   )}
                   placeholder="0"
                 />
                 <button
                   type="button"
                   onClick={() =>
-                    setValue("actualCoalTonnes", (Number(watch("actualCoalTonnes")) || 0) + 100, {
+                    setValue('actualCoalTonnes', (Number(watch('actualCoalTonnes')) || 0) + 100, {
                       shouldDirty: true,
                     })
                   }
@@ -352,9 +352,9 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                   type="button"
                   onClick={() =>
                     setValue(
-                      "actualWasteTonnes",
-                      Math.max(0, (Number(watch("actualWasteTonnes")) || 0) - 500),
-                      { shouldDirty: true },
+                      'actualWasteTonnes',
+                      Math.max(0, (Number(watch('actualWasteTonnes')) || 0) - 500),
+                      { shouldDirty: true }
                     )
                   }
                   className="w-12 h-12 flex items-center justify-center bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl text-lg font-medium hover:bg-[var(--bg-tertiary)] active:scale-95 transition-all touch-manipulation"
@@ -363,18 +363,18 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 </button>
                 <input
                   type="number"
-                  {...register("actualWasteTonnes", { valueAsNumber: true })}
+                  {...register('actualWasteTonnes', { valueAsNumber: true })}
                   onFocus={(e) => e.target.select()}
                   className={cn(
-                    "flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                    errors.actualWasteTonnes && "border-accent-red",
+                    'flex-1 px-4 py-3 text-center rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-lg text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                    errors.actualWasteTonnes && 'border-accent-red'
                   )}
                   placeholder="0"
                 />
                 <button
                   type="button"
                   onClick={() =>
-                    setValue("actualWasteTonnes", (Number(watch("actualWasteTonnes")) || 0) + 500, {
+                    setValue('actualWasteTonnes', (Number(watch('actualWasteTonnes')) || 0) + 500, {
                       shouldDirty: true,
                     })
                   }
@@ -416,11 +416,11 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
               <input
                 id="drilling-holes"
                 type="number"
-                {...register("holesDrilled", { valueAsNumber: true })}
+                {...register('holesDrilled', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.holesDrilled && "border-accent-red",
+                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  errors.holesDrilled && 'border-accent-red'
                 )}
                 placeholder="0"
               />
@@ -440,11 +440,11 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 id="drilling-depth"
                 type="number"
                 step="0.1"
-                {...register("totalDepthMeters", { valueAsNumber: true })}
+                {...register('totalDepthMeters', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.totalDepthMeters && "border-accent-red",
+                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  errors.totalDepthMeters && 'border-accent-red'
                 )}
                 placeholder="0.0"
               />
@@ -464,11 +464,11 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 id="drilling-rate"
                 type="number"
                 step="0.1"
-                {...register("penetrationRate", { valueAsNumber: true })}
+                {...register('penetrationRate', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.penetrationRate && "border-accent-red",
+                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  errors.penetrationRate && 'border-accent-red'
                 )}
                 placeholder="0.0"
               />
@@ -487,11 +487,11 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
                 min="0"
                 max="100"
                 step="1"
-                {...register("bitWearPercentage", { valueAsNumber: true })}
+                {...register('bitWearPercentage', { valueAsNumber: true })}
                 onFocus={(e) => e.target.select()}
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.bitWearPercentage && "border-accent-red",
+                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  errors.bitWearPercentage && 'border-accent-red'
                 )}
                 placeholder="0"
               />
@@ -512,7 +512,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
               <input
                 id="drilling-pattern"
                 type="text"
-                {...register("drillPatternId")}
+                {...register('drillPatternId')}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
                 placeholder="e.g. PAT-2026-B4"
               />
@@ -527,7 +527,7 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
               </label>
               <select
                 id="drilling-delay-cat"
-                {...register("delayCategory")}
+                {...register('delayCategory')}
                 className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors"
               >
                 <option value="none">None (Zero Delay)</option>
@@ -549,10 +549,10 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
               <input
                 id="drilling-delay-min"
                 type="number"
-                {...register("delayMinutes", { valueAsNumber: true })}
+                {...register('delayMinutes', { valueAsNumber: true })}
                 className={cn(
-                  "w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors",
-                  errors.delayMinutes && "border-accent-red",
+                  'w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-sm text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors',
+                  errors.delayMinutes && 'border-accent-red'
                 )}
                 placeholder="0"
               />
@@ -590,16 +590,16 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
         </label>
         <textarea
           id="daily-log-notes"
-          {...register("notes")}
+          {...register('notes')}
           rows={4}
           className={cn(
-            "w-full px-4 py-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none",
-            errors.notes && "border-accent-red",
+            'w-full px-4 py-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:border-[var(--accent-blue)] transition-colors resize-none',
+            errors.notes && 'border-accent-red'
           )}
           placeholder="Enter any stratum notes, bit wear observations, or safety handovers..."
           aria-label="Daily log notes"
-          aria-invalid={errors.notes ? "true" : "false"}
-          aria-describedby={errors.notes ? "daily-log-notes-error" : undefined}
+          aria-invalid={errors.notes ? 'true' : 'false'}
+          aria-describedby={errors.notes ? 'daily-log-notes-error' : undefined}
         />
         {errors.notes && (
           <p id="daily-log-notes-error" className="text-accent-red text-xs mt-1">
@@ -611,19 +611,19 @@ export function DailyLogForm({ departmentId, departmentSlug, machines }: DailyLo
       {/* Actions */}
       <div className="flex items-center gap-4">
         <SecondaryButton type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Daily Log"}
+          {isSubmitting ? 'Saving...' : 'Save Daily Log'}
         </SecondaryButton>
         {/* Cancel – returns the user to the previous page without persisting changes */}
         <SecondaryButton type="button" onClick={() => router.back()} disabled={isSubmitting}>
           Cancel
         </SecondaryButton>
 
-        {status === "success" && (
+        {status === 'success' && (
           <span className="text-sm text-accent-green" role="status" aria-live="polite">
             Log saved successfully.
           </span>
         )}
-        {status === "error" && (
+        {status === 'error' && (
           <span className="text-sm text-accent-red" role="alert" aria-live="assertive">
             Failed to save log. Please try again.
           </span>

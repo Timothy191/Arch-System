@@ -1,4 +1,4 @@
-import { cn } from "@repo/ui/lib/utils";
+import { cn } from '@repo/ui/lib/utils';
 
 interface GlassSkeletonProps {
   className?: string;
@@ -8,8 +8,8 @@ interface GlassSkeletonProps {
   heights?: string[];
 }
 
-const DEFAULT_HEIGHTS = ["h-3", "h-8", "h-3"];
-const DEFAULT_WIDTHS = ["w-24", "w-16", "w-32"];
+const DEFAULT_HEIGHTS = ['h-3', 'h-8', 'h-3'];
+const DEFAULT_WIDTHS = ['w-24', 'w-16', 'w-32'];
 
 export function GlassSkeleton({
   className,
@@ -23,12 +23,12 @@ export function GlassSkeleton({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-card",
-        "border border-[var(--glass-border)] border-t-white/95",
-        "bg-white/40 backdrop-blur-xl saturate-[160%]",
-        className,
+        'relative overflow-hidden rounded-card',
+        'border border-[var(--glass-border)] border-t-white/95',
+        'bg-white/40 backdrop-blur-xl saturate-[160%]',
+        className
       )}
-      style={{ boxShadow: "var(--refraction-edge-light)" }}
+      style={{ boxShadow: 'var(--refraction-edge-light)' }}
     >
       {/* Ambient shimmer sweep — silver core, 12s diagonal */}
       <div
@@ -46,8 +46,8 @@ export function GlassSkeleton({
               rgba(255, 255, 255, 0.12) 55%,
               transparent 70%
             )`,
-            transform: "translateX(-100%) skewX(-12deg)",
-            animation: "glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)",
+            transform: 'translateX(-100%) skewX(-12deg)',
+            animation: 'glass-shimmer-ambient 12s ease-in-out infinite var(--shimmer-delay, 0s)',
           }}
         />
       </div>
@@ -63,9 +63,9 @@ export function GlassSkeleton({
           <div
             key={i}
             className={cn(
-              "rounded bg-[var(--bg-tertiary)]/60",
+              'rounded bg-[var(--bg-tertiary)]/60',
               heights[i % heights.length],
-              DEFAULT_WIDTHS[i % DEFAULT_WIDTHS.length],
+              DEFAULT_WIDTHS[i % DEFAULT_WIDTHS.length]
             )}
           />
         ))}

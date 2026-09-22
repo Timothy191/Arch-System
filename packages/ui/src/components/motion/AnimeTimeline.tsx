@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { motion } from "framer-motion";
-import type React from "react";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { motion } from 'framer-motion';
+import type React from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 export interface AnimeTimelineHandle {
   play: () => void;
@@ -66,7 +66,7 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
       <motion.div
         variants={containerVariants}
         initial="hidden"
-        animate={autoPlay ? "visible" : "hidden"}
+        animate={autoPlay ? 'visible' : 'hidden'}
         onAnimationComplete={onComplete}
         className={cn(className)}
       >
@@ -79,7 +79,7 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
           : children}
       </motion.div>
     );
-  },
+  }
 );
 
-AnimeTimeline.displayName = "AnimeTimeline";
+AnimeTimeline.displayName = 'AnimeTimeline';

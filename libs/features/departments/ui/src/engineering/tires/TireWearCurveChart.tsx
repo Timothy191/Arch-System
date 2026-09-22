@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Card, type Color, LineChart, Title } from "@tremor/react";
-import { Activity, TrendingDown } from "lucide-react";
-import type { WearCurvePoint } from "./types";
+import { Card, type Color, LineChart, Title } from '@tremor/react';
+import { Activity, TrendingDown } from 'lucide-react';
+import type { WearCurvePoint } from './types';
 
 interface TireWearCurveChartProps {
   serialNumber?: string;
@@ -14,8 +14,8 @@ interface TireWearCurveChartProps {
 }
 
 export function TireWearCurveChart({
-  serialNumber = "Fleet Aggregate",
-  brand = "All Brands",
+  serialNumber = 'Fleet Aggregate',
+  brand = 'All Brands',
   data,
   currentTread,
   criticalThreshold = 15,
@@ -27,8 +27,8 @@ export function TireWearCurveChart({
   const isWarning = activeTread <= warningThreshold && !isCritical;
 
   // AGENT-TRACE: Calculate wear rate (mm / 100 hrs) if multi-point inspection data exists
-  let wearRateFormatted = "—";
-  let hoursRemainingFormatted = "—";
+  let wearRateFormatted = '—';
+  let hoursRemainingFormatted = '—';
 
   if (data.length >= 2) {
     const first = data[0];
@@ -44,7 +44,7 @@ export function TireWearCurveChart({
           const hoursLeft = (usableTread / deltaWear) * deltaHours;
           hoursRemainingFormatted = `~${Math.round(hoursLeft)} hrs`;
         } else {
-          hoursRemainingFormatted = "0 hrs (Replace Now)";
+          hoursRemainingFormatted = '0 hrs (Replace Now)';
         }
       }
     }
@@ -74,10 +74,10 @@ export function TireWearCurveChart({
             </span>
             <span
               className={`text-sm font-bold ${
-                isCritical ? "text-accent-red" : isWarning ? "text-amber-500" : "text-accent-green"
+                isCritical ? 'text-accent-red' : isWarning ? 'text-amber-500' : 'text-accent-green'
               }`}
             >
-              {activeTread > 0 ? `${activeTread} mm` : "N/A"}
+              {activeTread > 0 ? `${activeTread} mm` : 'N/A'}
             </span>
           </div>
 
@@ -96,7 +96,7 @@ export function TireWearCurveChart({
             </span>
             <span
               className={`text-sm font-semibold ${
-                isCritical ? "text-accent-red" : "text-[var(--text-heading)]"
+                isCritical ? 'text-accent-red' : 'text-[var(--text-heading)]'
               }`}
             >
               {hoursRemainingFormatted}
@@ -110,8 +110,8 @@ export function TireWearCurveChart({
           className="h-64 mt-2"
           data={data}
           index="date"
-          categories={["treadDepth", "warningThreshold", "criticalThreshold"]}
-          colors={["blue", "amber", "rose"] as Color[]}
+          categories={['treadDepth', 'warningThreshold', 'criticalThreshold']}
+          colors={['blue', 'amber', 'rose'] as Color[]}
           valueFormatter={(val: number) => `${val} mm`}
           showLegend={true}
           showGridLines={true}

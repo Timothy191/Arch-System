@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-export type RealtimeEventType = "INSERT" | "UPDATE" | "DELETE" | "*";
+export type RealtimeEventType = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 
 export interface RealtimePayload<T = Record<string, unknown>> {
-  eventType: "INSERT" | "UPDATE" | "DELETE";
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
   new: T;
   old: Partial<T>;
   table: string;
@@ -44,17 +44,17 @@ export interface UseSupabaseRealtimeOptions<T = Record<string, unknown>> {
 export function useSupabaseRealtime<T = Record<string, unknown>>({
   supabaseClient,
   table,
-  schema = "public",
+  schema = 'public',
   filter,
-  event = "*",
+  event = '*',
   onChange,
   onInsert,
   onUpdate,
   onDelete,
   enabled = true,
 }: UseSupabaseRealtimeOptions<T>) {
-  const [status, setStatus] = useState<"CONNECTING" | "SUBSCRIBED" | "TIMED_OUT" | "CLOSED">(
-    "CONNECTING",
+  const [status, setStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED'>(
+    'CONNECTING'
   );
   const [lastError, setLastError] = useState<Error | null>(null);
 
@@ -70,12 +70,12 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
 
   useEffect(() => {
     if (!enabled || !supabaseClient || !table) {
-      setStatus("CLOSED");
+      setStatus('CLOSED');
       return;
     }
 
     let isMounted = true;
-    const channelName = `realtime:${schema}:${table}:${filter || "all"}:${Date.now()}`;
+    const channelName = `realtime:${schema}:${table}:${filter || 'all'}:${Date.now()}`;
 
     const channel = supabaseClient.channel(channelName);
 
@@ -96,10 +96,10 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
 
     channel
       .on(
-        "postgres_changes",
+        'postgres_changes',
         subscriptionConfig,
         (payload: {
-          eventType: "INSERT" | "UPDATE" | "DELETE";
+          eventType: 'INSERT' | 'UPDATE' | 'DELETE';
           new: T;
           old: Partial<T>;
           table: string;
@@ -117,26 +117,26 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
 
           onChangeRef.current?.(formattedPayload);
 
-          if (payload.eventType === "INSERT") {
+          if (payload.eventType === 'INSERT') {
             onInsertRef.current?.(payload.new);
-          } else if (payload.eventType === "UPDATE") {
+          } else if (payload.eventType === 'UPDATE') {
             onUpdateRef.current?.(payload.new, payload.old);
-          } else if (payload.eventType === "DELETE") {
+          } else if (payload.eventType === 'DELETE') {
             onDeleteRef.current?.(payload.old);
           }
-        },
+        }
       )
       .subscribe((subscriptionStatus: string, err?: Error) => {
         if (!isMounted) return;
 
-        if (subscriptionStatus === "SUBSCRIBED") {
-          setStatus("SUBSCRIBED");
+        if (subscriptionStatus === 'SUBSCRIBED') {
+          setStatus('SUBSCRIBED');
           setLastError(null);
-        } else if (subscriptionStatus === "TIMED_OUT") {
-          setStatus("TIMED_OUT");
-          setLastError(err || new Error("Realtime subscription timed out"));
-        } else if (subscriptionStatus === "CLOSED") {
-          setStatus("CLOSED");
+        } else if (subscriptionStatus === 'TIMED_OUT') {
+          setStatus('TIMED_OUT');
+          setLastError(err || new Error('Realtime subscription timed out'));
+        } else if (subscriptionStatus === 'CLOSED') {
+          setStatus('CLOSED');
         }
       });
 
@@ -152,7 +152,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
 
   return {
     status,
-    isConnected: status === "SUBSCRIBED",
+    isConnected: status === 'SUBSCRIBED',
     error: lastError,
   };
 }

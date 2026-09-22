@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import * as Popover from "@radix-ui/react-popover";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { cn } from "@repo/ui/lib/utils";
-import { fetchClient } from "@repo/utils/client";
-import React, { useEffect, useState } from "react";
-import { getWeatherAlert, getWindDirection, type WeatherData } from "@/lib/weather-api";
+import * as Popover from '@radix-ui/react-popover';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
+import { fetchClient } from '@repo/utils/client';
+import React, { useEffect, useState } from 'react';
+import { getWeatherAlert, getWindDirection, type WeatherData } from '@/lib/weather-api';
 
 interface WeatherWidgetProps {
   lat?: number;
   lon?: number;
   locationName?: string;
-  variant?: "compact" | "full" | "header";
+  variant?: 'compact' | 'full' | 'header';
 }
 
 export const WeatherWidget = React.memo(function WeatherWidget({
   lat: _lat = -26.35914,
   lon: _lon = 28.79267,
-  locationName = "Delmas, Mpumalanga",
-  variant = "full",
+  locationName = 'Delmas, Mpumalanga',
+  variant = 'full',
 }: WeatherWidgetProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,11 +29,11 @@ export const WeatherWidget = React.memo(function WeatherWidget({
       try {
         setLoading(true);
         // Fetch from API route using fetchClient to handle retry & error boundaries
-        const data = await fetchClient.get<WeatherData>("/api/weather");
+        const data = await fetchClient.get<WeatherData>('/api/weather');
         setWeather(data);
         setError(null);
       } catch (_err) {
-        setError("Failed to load weather");
+        setError('Failed to load weather');
       } finally {
         setLoading(false);
       }
@@ -64,7 +64,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
   const alert = getWeatherAlert(weather);
 
   // Header variant - minimal with interactive Popover
-  if (variant === "header") {
+  if (variant === 'header') {
     return (
       <Popover.Root>
         <Popover.Trigger asChild>
@@ -74,14 +74,14 @@ export const WeatherWidget = React.memo(function WeatherWidget({
             className="relative flex items-center justify-center w-7 h-7 bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.05] rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/50 cursor-default outline-none active:scale-[0.97]"
           >
             <span className="text-lg leading-none">{weather.icon}</span>
-            {alert.level !== "none" && (
+            {alert.level !== 'none' && (
               <span
                 className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${
-                  alert.level === "critical"
-                    ? "bg-accent-red animate-pulse"
-                    : alert.level === "warning"
-                      ? "bg-accent-blue"
-                      : "bg-accent-blue"
+                  alert.level === 'critical'
+                    ? 'bg-accent-red animate-pulse'
+                    : alert.level === 'warning'
+                      ? 'bg-accent-blue'
+                      : 'bg-accent-blue'
                 }`}
               />
             )}
@@ -103,10 +103,10 @@ export const WeatherWidget = React.memo(function WeatherWidget({
                   {weather.location.name || locationName}
                 </span>
                 <span className="text-[9px] text-[var(--text-muted)] shrink-0">
-                  Updated{" "}
+                  Updated{' '}
                   {new Date(weather.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </span>
               </div>
@@ -145,13 +145,13 @@ export const WeatherWidget = React.memo(function WeatherWidget({
               </div>
 
               {/* Operations alert */}
-              {alert.level !== "none" && (
+              {alert.level !== 'none' && (
                 <div
                   className={cn(
-                    "p-2.5 rounded-lg text-xs font-medium border",
-                    alert.level === "critical"
-                      ? "bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse"
-                      : "bg-accent-blue/10 text-accent-blue border-accent-blue/20",
+                    'p-2.5 rounded-lg text-xs font-medium border',
+                    alert.level === 'critical'
+                      ? 'bg-accent-red/10 text-accent-red border-accent-red/20 animate-pulse'
+                      : 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
                   )}
                 >
                   {alert.message}
@@ -165,7 +165,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
   }
 
   // Compact variant
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <GlassCard className="p-4">
         <div className="flex items-center justify-between">
@@ -183,14 +183,14 @@ export const WeatherWidget = React.memo(function WeatherWidget({
             <p>💨 {weather.windSpeed} km/h</p>
           </div>
         </div>
-        {alert.level !== "none" && (
+        {alert.level !== 'none' && (
           <div
             className={`mt-3 p-2 rounded-lg text-xs ${
-              alert.level === "critical"
-                ? "bg-accent-red/10 text-accent-red border border-accent-red/20"
-                : alert.level === "warning"
-                  ? "bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
-                  : "bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
+              alert.level === 'critical'
+                ? 'bg-accent-red/10 text-accent-red border border-accent-red/20'
+                : alert.level === 'warning'
+                  ? 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
+                  : 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
             }`}
           >
             {alert.message}
@@ -209,11 +209,11 @@ export const WeatherWidget = React.memo(function WeatherWidget({
           <p className="text-sm text-arch-text-tertiary">{weather.location.name}</p>
         </div>
         <span className="text-xs text-arch-text-tertiary">
-          Updated{" "}
+          Updated{' '}
           {new Date(weather.timestamp).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Africa/Johannesburg",
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Africa/Johannesburg',
           })}
         </span>
       </div>
@@ -234,23 +234,23 @@ export const WeatherWidget = React.memo(function WeatherWidget({
       </div>
 
       {/* Operations alert */}
-      {alert.level !== "none" && (
+      {alert.level !== 'none' && (
         <div
           className={`mb-6 p-3 rounded-lg ${
-            alert.level === "critical"
-              ? "bg-accent-red/10 border border-accent-red/30"
-              : alert.level === "warning"
-                ? "bg-accent-blue/10 border border-accent-blue/30"
-                : "bg-accent-blue/10 border border-accent-blue/30"
+            alert.level === 'critical'
+              ? 'bg-accent-red/10 border border-accent-red/30'
+              : alert.level === 'warning'
+                ? 'bg-accent-blue/10 border border-accent-blue/30'
+                : 'bg-accent-blue/10 border border-accent-blue/30'
           }`}
         >
           <p
             className={`text-sm font-medium ${
-              alert.level === "critical"
-                ? "text-accent-red"
-                : alert.level === "warning"
-                  ? "text-accent-blue"
-                  : "text-accent-blue"
+              alert.level === 'critical'
+                ? 'text-accent-red'
+                : alert.level === 'warning'
+                  ? 'text-accent-blue'
+                  : 'text-accent-blue'
             }`}
           >
             {alert.message}
@@ -266,7 +266,7 @@ export const WeatherWidget = React.memo(function WeatherWidget({
             <div key={i} className="text-center p-2 rounded-lg bg-arch-surface-primary/50">
               <p className="text-xs text-arch-text-tertiary mb-1">
                 {new Date(day.date).toLocaleDateString([], {
-                  weekday: "short",
+                  weekday: 'short',
                 })}
               </p>
               <p className="text-lg mb-1">{day.icon}</p>

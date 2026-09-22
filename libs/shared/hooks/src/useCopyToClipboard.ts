@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import type { ClipboardState } from "./types";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ClipboardState } from './types';
 
 /**
  * Hook to copy text to clipboard via navigator.clipboard with auto-reset timeout feedback.
@@ -41,7 +41,7 @@ export function useCopyToClipboard(timeoutMs: number = 2000): ClipboardState {
         return false;
       }
     },
-    [timeoutMs, reset],
+    [timeoutMs, reset]
   );
 
   useEffect(() => {

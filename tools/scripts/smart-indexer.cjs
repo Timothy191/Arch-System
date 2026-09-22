@@ -5,13 +5,13 @@
  * Usage: node tools/scripts/smart-indexer.cjs [--query "<term>"]
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const MEMORY_DIR = path.join(ROOT, ".memory_base");
-const RETRO_DIR = path.join(MEMORY_DIR, "retrospectives");
-const INDEX_FILE = path.join(MEMORY_DIR, "index.json");
+const ROOT = path.resolve(__dirname, '..', '..');
+const MEMORY_DIR = path.join(ROOT, '.memory_base');
+const RETRO_DIR = path.join(MEMORY_DIR, 'retrospectives');
+const INDEX_FILE = path.join(MEMORY_DIR, 'index.json');
 
 if (!fs.existsSync(MEMORY_DIR)) {
   fs.mkdirSync(MEMORY_DIR, { recursive: true });
@@ -22,18 +22,18 @@ if (!fs.existsSync(RETRO_DIR)) {
 
 const args = process.argv.slice(2);
 let query = null;
-const queryIdx = args.indexOf("--query");
+const queryIdx = args.indexOf('--query');
 if (queryIdx !== -1 && args[queryIdx + 1]) {
   query = args[queryIdx + 1].toLowerCase();
 }
 
 // Read all retrospectives
-const files = fs.readdirSync(RETRO_DIR).filter((f) => f.endsWith(".json"));
+const files = fs.readdirSync(RETRO_DIR).filter((f) => f.endsWith('.json'));
 const entries = [];
 
 for (const file of files) {
   try {
-    const raw = fs.readFileSync(path.join(RETRO_DIR, file), "utf-8");
+    const raw = fs.readFileSync(path.join(RETRO_DIR, file), 'utf-8');
     const data = JSON.parse(raw);
     entries.push(data);
   } catch (_e) {
@@ -53,13 +53,13 @@ const indexData = {
   })),
 };
 
-fs.writeFileSync(INDEX_FILE, JSON.stringify(indexData, null, 2), "utf-8");
+fs.writeFileSync(INDEX_FILE, JSON.stringify(indexData, null, 2), 'utf-8');
 
 if (query) {
   console.log(`🧠 [SmartIndexer] Searching memory base for query: "${query}"...`);
   const matches = entries.filter((e) => {
     const searchStr =
-      `${e.id} ${e.category} ${e.errorSignature} ${e.rootCause || ""} ${e.preventionRule || ""}`.toLowerCase();
+      `${e.id} ${e.category} ${e.errorSignature} ${e.rootCause || ''} ${e.preventionRule || ''}`.toLowerCase();
     return searchStr.includes(query);
   });
 
@@ -72,11 +72,11 @@ if (query) {
     });
   } else {
     console.log(
-      `No direct retrospectives matching "${query}". Proceed with standard guardrails.\n`,
+      `No direct retrospectives matching "${query}". Proceed with standard guardrails.\n`
     );
   }
 } else {
   console.log(
-    `🧠 [SmartIndexer] Memory base synchronized. Total entries indexed: ${entries.length}`,
+    `🧠 [SmartIndexer] Memory base synchronized. Total entries indexed: ${entries.length}`
   );
 }

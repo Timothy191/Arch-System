@@ -9,14 +9,14 @@ DO $$
 DECLARE
   v_dept_id UUID;
   v_other_dept UUID;
-  
+
   -- Create test users
   v_admin_auth UUID := gen_random_uuid();
   v_admin_emp UUID;
-  
+
   v_operator_auth UUID := gen_random_uuid();
   v_operator_emp UUID;
-  
+
   v_viewer_auth UUID := gen_random_uuid();
   v_viewer_emp UUID;
 
@@ -26,7 +26,7 @@ BEGIN
   SELECT id INTO v_other_dept FROM public.departments WHERE id != v_dept_id LIMIT 1;
 
   -- Setup users properly for Supabase auth schema
-  INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at) VALUES 
+  INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at) VALUES
     (v_admin_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@test', '123456', now(), '{}', '{}', now(), now()),
     (v_operator_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'op@test', '123456', now(), '{}', '{}', now(), now()),
     (v_viewer_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'viewer@test', '123456', now(), '{}', '{}', now(), now());
@@ -50,7 +50,7 @@ BEGIN
   -- Test 1: Idempotency Keys Server-Only RLS
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claims', '{"sub": "' || v_admin_auth || '"}', true);
-  
+
   BEGIN
     INSERT INTO public.idempotency_keys (key, user_id, route, request_hash, response_json, status_code)
     VALUES ('test-key', v_admin_auth, '/test', 'hash', '{}', 200);
@@ -58,7 +58,7 @@ BEGIN
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PASS: idempotency_keys blocked authenticated client';
   END;
-  
+
   -- Test 2: Shift Reports RLS (Viewer Blocked)
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claims', '{"sub": "' || v_viewer_auth || '"}', true);
@@ -70,11 +70,11 @@ BEGIN
   EXCEPTION WHEN insufficient_privilege THEN
     RAISE NOTICE 'PASS: Viewer blocked from inserting shift report';
   END;
-  
+
   -- Test 3: Shift Reports RLS (Operator Allowed)
   PERFORM set_config('role', 'authenticated', true);
   PERFORM set_config('request.jwt.claims', '{"sub": "' || v_operator_auth || '"}', true);
-  
+
   BEGIN
     INSERT INTO public.control_room_shift_reports (department_id, report_date, shift_type, operator_name, idempotency_key, created_by)
     VALUES (v_dept_id, CURRENT_DATE, 'day', 'Operator', 'idem2', v_operator_emp);

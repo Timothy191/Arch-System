@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertCircle, Clock } from "lucide-react";
-import { memo, useState } from "react";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertCircle, Clock } from 'lucide-react';
+import { memo, useState } from 'react';
 
 interface DelayEntry {
   id: string;
@@ -11,7 +11,7 @@ interface DelayEntry {
   delay_end_time: string;
   duration_hours: number;
   is_manual_override: boolean;
-  status: "draft" | "committed";
+  status: 'draft' | 'committed';
   delay_category?: {
     name: string;
   };
@@ -22,7 +22,7 @@ interface MachineOperation {
   machine_id: string;
   operator_id: string | null;
   site_id: string | null;
-  shift_type: "day" | "night";
+  shift_type: 'day' | 'night';
   start_time: string;
   end_time: string | null;
   hours_worked: number | null;
@@ -77,8 +77,8 @@ function MachineOperationsList({
   const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
 
   for (const op of operations) {
-    const siteKey = op.site_id ?? "__none__";
-    const siteName = op.site?.name ?? "No Site Assigned";
+    const siteKey = op.site_id ?? '__none__';
+    const siteName = op.site?.name ?? 'No Site Assigned';
     if (!siteMap.has(siteKey)) {
       siteMap.set(siteKey, { siteName, operations: [] });
     }
@@ -87,8 +87,8 @@ function MachineOperationsList({
 
   // "No Site Assigned" last
   const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === "__none__") return 1;
-    if (b === "__none__") return -1;
+    if (a === '__none__') return 1;
+    if (b === '__none__') return -1;
     return 0;
   });
 
@@ -104,8 +104,8 @@ function MachineOperationsList({
           return sum + loads * bf;
         }, 0);
 
-        const dayOps = siteOps.filter((op) => op.shift_type === "day");
-        const nightOps = siteOps.filter((op) => op.shift_type === "night");
+        const dayOps = siteOps.filter((op) => op.shift_type === 'day');
+        const nightOps = siteOps.filter((op) => op.shift_type === 'night');
 
         return (
           <div key={siteKey} className="space-y-3">
@@ -197,30 +197,30 @@ function OperationCard({
   const machineBreakdown = activeBreakdowns?.find(
     (b) =>
       b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number),
+      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
   );
 
   // AGENT-TRACE: Calculate delay totals by category and status
   const delayEntries = operation.delay_entries || [];
   const totalDelayHours = delayEntries.reduce((sum, d) => sum + d.duration_hours, 0);
   const _committedDelayHours = delayEntries
-    .filter((d) => d.status === "committed")
+    .filter((d) => d.status === 'committed')
     .reduce((sum, d) => sum + d.duration_hours, 0);
   const draftDelayHours = delayEntries
-    .filter((d) => d.status === "draft")
+    .filter((d) => d.status === 'draft')
     .reduce((sum, d) => sum + d.duration_hours, 0);
 
   // Group delays by category
   const delaysByCategory = delayEntries.reduce(
     (acc, delay) => {
-      const categoryName = delay.delay_category?.name || "Unknown";
+      const categoryName = delay.delay_category?.name || 'Unknown';
       if (!acc[categoryName]) {
         acc[categoryName] = 0;
       }
       acc[categoryName] += delay.duration_hours;
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<string, number>
   );
 
   const [showDelays, setShowDelays] = useState(false);
@@ -233,13 +233,13 @@ function OperationCard({
             {/* Status Indicator */}
             <div
               className={`w-2 h-2 rounded-full ${
-                machineBreakdown?.status === "active"
-                  ? "bg-accent-red animate-pulse"
+                machineBreakdown?.status === 'active'
+                  ? 'bg-accent-red animate-pulse'
                   : isComplete
-                    ? "bg-accent-green"
+                    ? 'bg-accent-green'
                     : isInProgress
-                      ? "bg-accent-blue animate-pulse"
-                      : "bg-[var(--text-secondary)]"
+                      ? 'bg-accent-blue animate-pulse'
+                      : 'bg-[var(--text-secondary)]'
               }`}
             />
 
@@ -247,25 +247,25 @@ function OperationCard({
             <div>
               <div className="flex items-center gap-2">
                 <p className="text-[var(--text-heading)] font-medium">
-                  {operation.machine?.name || "Unknown Machine"}
+                  {operation.machine?.name || 'Unknown Machine'}
                 </p>
                 {machineBreakdown && (
                   <span
                     className={`text-xs px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
-                      machineBreakdown.status === "active"
-                        ? "bg-accent-red/10 text-accent-red"
-                        : "bg-accent-green/10 text-accent-green"
+                      machineBreakdown.status === 'active'
+                        ? 'bg-accent-red/10 text-accent-red'
+                        : 'bg-accent-green/10 text-accent-green'
                     }`}
                   >
                     <AlertCircle size={12} />
-                    {machineBreakdown.status === "active" ? "Active Breakdown" : "Repaired"}
+                    {machineBreakdown.status === 'active' ? 'Active Breakdown' : 'Repaired'}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-3 mt-0.5 text-xs text-[var(--text-muted)]">
-                <span>{operation.operator?.full_name || "No Operator"}</span>
+                <span>{operation.operator?.full_name || 'No Operator'}</span>
                 <span className="text-[var(--border-emphasis)]">|</span>
-                <span>{operation.site?.name || "No Site"}</span>
+                <span>{operation.site?.name || 'No Site'}</span>
               </div>
             </div>
           </div>
@@ -273,8 +273,8 @@ function OperationCard({
           {/* Time, Hours & BCM */}
           <div className="text-right">
             <p className="text-[var(--text-heading)] text-sm">
-              {formatTime(operation.start_time)} -{" "}
-              {operation.end_time ? formatTime(operation.end_time) : "In Progress"}
+              {formatTime(operation.start_time)} -{' '}
+              {operation.end_time ? formatTime(operation.end_time) : 'In Progress'}
             </p>
             <div className="flex items-center gap-3 mt-0.5 justify-end">
               {operation.hours_worked !== null && (
@@ -303,14 +303,14 @@ function OperationCard({
               <AlertCircle
                 size={14}
                 className={
-                  machineBreakdown.status === "active"
-                    ? "text-accent-red mt-0.5 shrink-0"
-                    : "text-accent-green mt-0.5 shrink-0"
+                  machineBreakdown.status === 'active'
+                    ? 'text-accent-red mt-0.5 shrink-0'
+                    : 'text-accent-green mt-0.5 shrink-0'
                 }
               />
               <div>
                 <p
-                  className={`font-medium ${machineBreakdown.status === "active" ? "text-accent-red" : "text-accent-green"}`}
+                  className={`font-medium ${machineBreakdown.status === 'active' ? 'text-accent-red' : 'text-accent-green'}`}
                 >
                   Engineering Breakdown: {machineBreakdown.reason}
                 </p>
@@ -331,7 +331,7 @@ function OperationCard({
             >
               <Clock size={14} />
               <span className="font-medium">
-                {delayEntries.length} delay{delayEntries.length > 1 ? "s" : ""}
+                {delayEntries.length} delay{delayEntries.length > 1 ? 's' : ''}
               </span>
               <span className="text-accent-red">{totalDelayHours.toFixed(2)}h total</span>
               {draftDelayHours > 0 && (

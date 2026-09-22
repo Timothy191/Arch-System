@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { AnimatedButton } from "@repo/ui/AnimatedButton";
-import { Input } from "@repo/ui/Input";
-import { AlertTriangle, Check, Loader2, Lock } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { AnimatedButton } from '@repo/ui/AnimatedButton';
+import { Input } from '@repo/ui/Input';
+import { AlertTriangle, Check, Loader2, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Maps raw Supabase user profile update errors to precise, readable user instructions.
@@ -16,24 +16,24 @@ import { useEffect, useRef, useState } from "react";
  */
 function mapUpdateError(raw: string): string {
   const lower = raw.toLowerCase();
-  if (lower.includes("weak")) {
-    return "Password is too weak. Use at least 8 characters with a mix of letters, numbers, and symbols.";
+  if (lower.includes('weak')) {
+    return 'Password is too weak. Use at least 8 characters with a mix of letters, numbers, and symbols.';
   }
-  if (lower.includes("same")) {
-    return "New password must be different from your current password.";
+  if (lower.includes('same')) {
+    return 'New password must be different from your current password.';
   }
-  return "Unable to update password. Please try again.";
+  return 'Unable to update password. Please try again.';
 }
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [hasSession, setHasSession] = useState(false);
   const [updated, setUpdated] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -54,15 +54,15 @@ export default function UpdatePasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError('Passwords do not match.');
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError('Password must be at least 8 characters.');
       return;
     }
 
@@ -82,7 +82,7 @@ export default function UpdatePasswordPage() {
 
     setUpdated(true);
     redirectTimeoutRef.current = setTimeout(() => {
-      router.push("/login");
+      router.push('/login');
     }, 3000);
   }
 
@@ -178,7 +178,7 @@ export default function UpdatePasswordPage() {
                     className="liquid-glass-input focus:ring-0"
                     placeholder="Enter new password"
                     autoComplete="new-password"
-                    aria-describedby={error ? "update-error" : undefined}
+                    aria-describedby={error ? 'update-error' : undefined}
                   />
                 </div>
 
@@ -202,7 +202,7 @@ export default function UpdatePasswordPage() {
                     className="liquid-glass-input focus:ring-0"
                     placeholder="Re-enter new password"
                     autoComplete="new-password"
-                    aria-describedby={error ? "update-error" : undefined}
+                    aria-describedby={error ? 'update-error' : undefined}
                   />
                 </div>
 
@@ -224,7 +224,7 @@ export default function UpdatePasswordPage() {
                   hoverScale={1}
                   tapScale={0.97}
                 >
-                  {loading ? "Updating..." : "Update Password"}
+                  {loading ? 'Updating...' : 'Update Password'}
                 </AnimatedButton>
               </form>
             </>

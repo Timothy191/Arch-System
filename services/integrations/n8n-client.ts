@@ -25,7 +25,7 @@ export interface N8nExecutionResponse<T = unknown> {
   success: boolean;
   executed: boolean;
   skipped: boolean;
-  source: "n8n" | "fallback" | "none";
+  source: 'n8n' | 'fallback' | 'none';
   data?: T;
   statusCode?: number;
   error?: string;
@@ -41,10 +41,10 @@ export class N8nClient {
       config?.baseUrl ||
       process.env.N8N_URL ||
       process.env.NEXT_PUBLIC_N8N_URL ||
-      "http://192.168.1.79:5678";
+      'http://192.168.1.79:5678';
 
-    this.baseUrl = rawUrl.replace(/\/+$/, "");
-    this.apiKey = config?.apiKey || process.env.N8N_API_KEY || "";
+    this.baseUrl = rawUrl.replace(/\/+$/, '');
+    this.apiKey = config?.apiKey || process.env.N8N_API_KEY || '';
     this.defaultTimeoutMs = config?.defaultTimeoutMs ?? 3000;
   }
 
@@ -53,14 +53,14 @@ export class N8nClient {
    */
   isConfigured(): boolean {
     const url = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL;
-    return typeof url === "string" && url.trim().length > 0;
+    return typeof url === 'string' && url.trim().length > 0;
   }
 
   /**
    * Health check returning reachability status.
    */
   async checkHealth(timeoutMs = 2500): Promise<{
-    status: "healthy" | "degraded" | "unavailable";
+    status: 'healthy' | 'degraded' | 'unavailable';
     optional: true;
     latencyMs: number;
     statusCode: number | null;
@@ -72,21 +72,21 @@ export class N8nClient {
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(`${this.baseUrl}/healthz`, {
-        method: "GET",
+        method: 'GET',
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
 
       const latencyMs = Date.now() - startTime;
       if (res.ok) {
         return {
-          status: "healthy",
+          status: 'healthy',
           optional: true,
           latencyMs,
           statusCode: res.status,
         };
       }
       return {
-        status: "degraded",
+        status: 'degraded',
         optional: true,
         latencyMs,
         statusCode: res.status,
@@ -95,11 +95,11 @@ export class N8nClient {
     } catch (err: unknown) {
       const latencyMs = Date.now() - startTime;
       return {
-        status: "unavailable",
+        status: 'unavailable',
         optional: true,
         latencyMs,
         statusCode: null,
-        error: err instanceof Error ? err.message : "Connection failed",
+        error: err instanceof Error ? err.message : 'Connection failed',
       };
     }
   }
@@ -115,29 +115,29 @@ export class N8nClient {
     options?: {
       fallback?: () => Promise<T> | T;
       timeoutMs?: number;
-    },
+    }
   ): Promise<N8nExecutionResponse<T>> {
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
     const targetUrl =
-      pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")
+      pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')
         ? pathOrUrl
-        : `${this.baseUrl}/${pathOrUrl.replace(/^\/+/, "")}`;
+        : `${this.baseUrl}/${pathOrUrl.replace(/^\/+/, '')}`;
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       };
 
       if (this.apiKey) {
-        headers["X-N8N-API-KEY"] = this.apiKey;
+        headers['X-N8N-API-KEY'] = this.apiKey;
       }
 
       const response = await fetch(targetUrl, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(payload),
         signal: controller.signal,
@@ -148,8 +148,8 @@ export class N8nClient {
       }
 
       let data: T;
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
         data = (await response.json()) as T;
       } else {
         data = (await response.text()) as unknown as T;
@@ -159,12 +159,12 @@ export class N8nClient {
         success: true,
         executed: true,
         skipped: false,
-        source: "n8n",
+        source: 'n8n',
         data,
         statusCode: response.status,
       };
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "n8n dispatch failed";
+      const errorMessage = err instanceof Error ? err.message : 'n8n dispatch failed';
 
       if (options?.fallback) {
         try {
@@ -173,7 +173,7 @@ export class N8nClient {
             success: true,
             executed: false,
             skipped: true,
-            source: "fallback",
+            source: 'fallback',
             data: fallbackData,
             error: errorMessage,
           };
@@ -183,7 +183,7 @@ export class N8nClient {
             success: false,
             executed: false,
             skipped: true,
-            source: "fallback",
+            source: 'fallback',
             error: `${errorMessage}; Fallback failed: ${fbMsg}`,
           };
         }
@@ -193,7 +193,7 @@ export class N8nClient {
         success: false,
         executed: false,
         skipped: true,
-        source: "none",
+        source: 'none',
         error: errorMessage,
       };
     }

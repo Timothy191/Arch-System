@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -8,10 +8,10 @@ Sentry.init({
   beforeSend(event) {
     // Scrub potentially sensitive fields from server events
     if (event.request?.headers) {
-      const scrubbed = new Set(["authorization", "cookie", "x-internal-secret"]);
+      const scrubbed = new Set(['authorization', 'cookie', 'x-internal-secret']);
       for (const key of Object.keys(event.request.headers)) {
         if (scrubbed.has(key.toLowerCase())) {
-          event.request.headers[key] = "[redacted]";
+          event.request.headers[key] = '[redacted]';
         }
       }
     }

@@ -1,16 +1,16 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { PageHeader } from "@repo/ui/PageHeader";
-import { classifyReconciliationDrift, RECONCILIATION_UI } from "~/lib/production-reconciliation";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { PageHeader } from '@repo/ui/PageHeader';
+import { classifyReconciliationDrift, RECONCILIATION_UI } from '~/lib/production-reconciliation';
 
 export async function ProductionDashboard({ deptId }: { deptId: string }) {
   const supabase = await createServerSupabaseClient();
 
   // Get today's start and end boundaries
-  const today = new Date().toISOString().split("T")[0]!;
+  const today = new Date().toISOString().split('T')[0]!;
 
   // Fetch from the materialized view using the RPC function
-  const { data: productionData } = await supabase.rpc("get_production_summary", {
+  const { data: productionData } = await supabase.rpc('get_production_summary', {
     p_start_date: today,
     p_end_date: today,
   });
@@ -35,7 +35,7 @@ export async function ProductionDashboard({ deptId }: { deptId: string }) {
   const actualTotalTonnes = actualCoal + actualWaste;
 
   // Strip Ratio: Waste / Coal
-  const stripRatio = actualCoal > 0 ? (actualWaste / actualCoal).toFixed(2) : "0.00";
+  const stripRatio = actualCoal > 0 ? (actualWaste / actualCoal).toFixed(2) : '0.00';
 
   // Calculate Drift Pct globally for today's aggregated shifts
   const driftPct =
@@ -89,7 +89,7 @@ export async function ProductionDashboard({ deptId }: { deptId: string }) {
 
       {/* Reconciliation Drift Alert */}
       <GlassCard
-        className={`border-l-4 ${driftLevel === "critical" ? "border-accent-red" : driftLevel === "moderate" ? "border-accent-orange" : driftLevel === "minor" ? "border-accent-amber" : "border-accent-green"}`}
+        className={`border-l-4 ${driftLevel === 'critical' ? 'border-accent-red' : driftLevel === 'moderate' ? 'border-accent-orange' : driftLevel === 'minor' ? 'border-accent-amber' : 'border-accent-green'}`}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -100,9 +100,9 @@ export async function ProductionDashboard({ deptId }: { deptId: string }) {
           </div>
           <div className="text-right">
             <span
-              className={`text-xl font-bold ${driftLevel === "critical" ? "text-accent-red" : driftLevel === "moderate" ? "text-accent-orange" : driftLevel === "minor" ? "text-accent-amber" : "text-accent-green"}`}
+              className={`text-xl font-bold ${driftLevel === 'critical' ? 'text-accent-red' : driftLevel === 'moderate' ? 'text-accent-orange' : driftLevel === 'minor' ? 'text-accent-amber' : 'text-accent-green'}`}
             >
-              {driftPct > 0 ? "+" : ""}
+              {driftPct > 0 ? '+' : ''}
               {driftPct.toFixed(2)}%
             </span>
             <p className="text-xs text-[var(--text-secondary)] mt-1 uppercase tracking-wider">

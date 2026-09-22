@@ -19,7 +19,7 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0"
+    "lint": "biome check ."
   },
   "devDependencies": {
     "@types/react": "catalog:react19",

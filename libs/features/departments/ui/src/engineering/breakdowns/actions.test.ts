@@ -2,26 +2,26 @@
  * @jest-environment node
  */
 
-import { AuthError, DatabaseError } from "@repo/errors";
-import { bookOutBreakdown, createBreakdown, directCheckout, softDeleteBreakdown } from "./actions";
+import { AuthError, DatabaseError } from '@repo/errors';
+import { bookOutBreakdown, createBreakdown, directCheckout, softDeleteBreakdown } from './actions';
 
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
 
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock("next/cache", () => ({
+jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
-jest.mock("@repo/shared/data-access", () => ({
+jest.mock('@repo/shared/data-access', () => ({
   logAuditEvent: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
+const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -33,9 +33,9 @@ function buildSupabaseMock(
     insertError?: unknown;
     updateError?: unknown;
     selectData?: unknown;
-  } = {},
+  } = {}
 ) {
-  const user = overrides.getUser !== undefined ? overrides.getUser : { id: "user-1" };
+  const user = overrides.getUser !== undefined ? overrides.getUser : { id: 'user-1' };
 
   const mock = {
     auth: {
@@ -59,60 +59,60 @@ function buildSupabaseMock(
 }
 
 const validBreakdownInput = {
-  fleet_id: "exc-01",
-  machine_name: "CAT 320D",
-  machine_type: "Excavator",
-  date_in: "2026-05-17",
-  time_in: "06:00",
-  reason: "Hydraulic leak",
+  fleet_id: 'exc-01',
+  machine_name: 'CAT 320D',
+  machine_type: 'Excavator',
+  date_in: '2026-05-17',
+  time_in: '06:00',
+  reason: 'Hydraulic leak',
 };
 
 const validBookOutInput = {
-  date_out: "2026-05-17",
-  time_out: "14:00",
-  repair_notes: "Replaced seals",
+  date_out: '2026-05-17',
+  time_out: '14:00',
+  repair_notes: 'Replaced seals',
 };
 
 const validDirectCheckout = {
-  fleet_id: "drill-01",
-  machine_type: "Drill Rig",
-  date_out: "2026-05-17",
-  time_out: "12:00",
-  reason: "Routine maintenance",
-  repair_notes: "Oil change done",
+  fleet_id: 'drill-01',
+  machine_type: 'Drill Rig',
+  date_out: '2026-05-17',
+  time_out: '12:00',
+  reason: 'Routine maintenance',
+  repair_notes: 'Oil change done',
 };
 
 // ---------------------------------------------------------------------------
 // createBreakdown
 // ---------------------------------------------------------------------------
 
-describe("createBreakdown", () => {
+describe('createBreakdown', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("throws AuthError when user is not authenticated", async () => {
+  it('throws AuthError when user is not authenticated', async () => {
     buildSupabaseMock({ getUser: null });
-    await expect(createBreakdown("dept-1", validBreakdownInput)).rejects.toThrow(AuthError);
+    await expect(createBreakdown('dept-1', validBreakdownInput)).rejects.toThrow(AuthError);
   });
 
-  it("throws DatabaseError when insert fails", async () => {
-    buildSupabaseMock({ insertError: { message: "DB insert failed" } });
-    await expect(createBreakdown("dept-1", validBreakdownInput)).rejects.toThrow(DatabaseError);
+  it('throws DatabaseError when insert fails', async () => {
+    buildSupabaseMock({ insertError: { message: 'DB insert failed' } });
+    await expect(createBreakdown('dept-1', validBreakdownInput)).rejects.toThrow(DatabaseError);
   });
 
-  it("returns success on valid input", async () => {
+  it('returns success on valid input', async () => {
     buildSupabaseMock();
-    const result = await createBreakdown("dept-1", validBreakdownInput);
+    const result = await createBreakdown('dept-1', validBreakdownInput);
     expect(result).toEqual({ success: true });
   });
 
-  it("uppercases the fleet_id before insert", async () => {
+  it('uppercases the fleet_id before insert', async () => {
     const mock = buildSupabaseMock();
-    await createBreakdown("dept-1", {
+    await createBreakdown('dept-1', {
       ...validBreakdownInput,
-      fleet_id: "exc-01",
+      fleet_id: 'exc-01',
     });
     const insertCall = mock.from.mock.results[0]!.value.insert.mock.calls[0]![0];
-    expect(insertCall.fleet_id).toBe("EXC-01");
+    expect(insertCall.fleet_id).toBe('EXC-01');
   });
 });
 
@@ -120,22 +120,22 @@ describe("createBreakdown", () => {
 // bookOutBreakdown
 // ---------------------------------------------------------------------------
 
-describe("bookOutBreakdown", () => {
+describe('bookOutBreakdown', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("throws AuthError when user is not authenticated", async () => {
+  it('throws AuthError when user is not authenticated', async () => {
     buildSupabaseMock({ getUser: null });
-    await expect(bookOutBreakdown("bd-1", validBookOutInput)).rejects.toThrow(AuthError);
+    await expect(bookOutBreakdown('bd-1', validBookOutInput)).rejects.toThrow(AuthError);
   });
 
-  it("throws DatabaseError when update fails", async () => {
-    buildSupabaseMock({ updateError: { message: "Update failed" } });
-    await expect(bookOutBreakdown("bd-1", validBookOutInput)).rejects.toThrow(DatabaseError);
+  it('throws DatabaseError when update fails', async () => {
+    buildSupabaseMock({ updateError: { message: 'Update failed' } });
+    await expect(bookOutBreakdown('bd-1', validBookOutInput)).rejects.toThrow(DatabaseError);
   });
 
-  it("returns success on valid book out", async () => {
+  it('returns success on valid book out', async () => {
     buildSupabaseMock();
-    const result = await bookOutBreakdown("bd-1", validBookOutInput);
+    const result = await bookOutBreakdown('bd-1', validBookOutInput);
     expect(result).toEqual({ success: true });
   });
 });
@@ -144,31 +144,31 @@ describe("bookOutBreakdown", () => {
 // directCheckout
 // ---------------------------------------------------------------------------
 
-describe("directCheckout", () => {
+describe('directCheckout', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("throws AuthError when user is not authenticated", async () => {
+  it('throws AuthError when user is not authenticated', async () => {
     buildSupabaseMock({ getUser: null });
-    await expect(directCheckout("dept-1", validDirectCheckout)).rejects.toThrow(AuthError);
+    await expect(directCheckout('dept-1', validDirectCheckout)).rejects.toThrow(AuthError);
   });
 
-  it("throws DatabaseError when insert fails", async () => {
-    buildSupabaseMock({ insertError: { message: "DB insert failed" } });
-    await expect(directCheckout("dept-1", validDirectCheckout)).rejects.toThrow(DatabaseError);
+  it('throws DatabaseError when insert fails', async () => {
+    buildSupabaseMock({ insertError: { message: 'DB insert failed' } });
+    await expect(directCheckout('dept-1', validDirectCheckout)).rejects.toThrow(DatabaseError);
   });
 
-  it("returns success on valid direct checkout", async () => {
+  it('returns success on valid direct checkout', async () => {
     buildSupabaseMock();
-    const result = await directCheckout("dept-1", validDirectCheckout);
+    const result = await directCheckout('dept-1', validDirectCheckout);
     expect(result).toEqual({ success: true });
   });
 
-  it("sets missing_book_in to true", async () => {
+  it('sets missing_book_in to true', async () => {
     const mock = buildSupabaseMock();
-    await directCheckout("dept-1", validDirectCheckout);
+    await directCheckout('dept-1', validDirectCheckout);
     const insertCall = (mock.from.mock.results[0] as any).value.insert.mock.calls[0][0];
     expect(insertCall.missing_book_in).toBe(true);
-    expect(insertCall.status).toBe("completed");
+    expect(insertCall.status).toBe('completed');
   });
 });
 
@@ -176,22 +176,22 @@ describe("directCheckout", () => {
 // softDeleteBreakdown
 // ---------------------------------------------------------------------------
 
-describe("softDeleteBreakdown", () => {
+describe('softDeleteBreakdown', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("throws AuthError when user is not authenticated", async () => {
+  it('throws AuthError when user is not authenticated', async () => {
     buildSupabaseMock({ getUser: null });
-    await expect(softDeleteBreakdown("bd-1")).rejects.toThrow(AuthError);
+    await expect(softDeleteBreakdown('bd-1')).rejects.toThrow(AuthError);
   });
 
-  it("throws DatabaseError when update fails", async () => {
-    buildSupabaseMock({ updateError: { message: "Soft delete failed" } });
-    await expect(softDeleteBreakdown("bd-1")).rejects.toThrow(DatabaseError);
+  it('throws DatabaseError when update fails', async () => {
+    buildSupabaseMock({ updateError: { message: 'Soft delete failed' } });
+    await expect(softDeleteBreakdown('bd-1')).rejects.toThrow(DatabaseError);
   });
 
-  it("returns success on valid soft delete", async () => {
+  it('returns success on valid soft delete', async () => {
     buildSupabaseMock();
-    const result = await softDeleteBreakdown("bd-1");
+    const result = await softDeleteBreakdown('bd-1');
     expect(result).toEqual({ success: true });
   });
 });

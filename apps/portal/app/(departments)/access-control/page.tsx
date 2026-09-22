@@ -1,35 +1,35 @@
-import { BorderBox } from "@repo/ui/BorderBox";
-import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import { Divider } from "@repo/ui/Divider";
-import { GlassCard } from "@repo/ui/GlassCard";
-import nextDynamic from "next/dynamic";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { BorderBox } from '@repo/ui/BorderBox';
+import { Skeleton } from '@repo/ui/components/ui/skeleton';
+import { Divider } from '@repo/ui/Divider';
+import { GlassCard } from '@repo/ui/GlassCard';
+import nextDynamic from 'next/dynamic';
+import { getDepartmentContext } from '~/lib/dept-context';
 import {
   getAccessControlMetrics,
   getBadgeStatusDistribution,
   getEntityBadgeStatus,
   getHourlyAccessStats,
   getRecentAccessActivity,
-} from "./actions";
+} from './actions';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
-const DashboardKPIGrid = nextDynamic(() => import("./components/DashboardKPIGrid"), {
+const DashboardKPIGrid = nextDynamic(() => import('./components/DashboardKPIGrid'), {
   loading: () => <Skeleton className="h-[140px] w-full" />,
 });
-const DashboardChartsRow = nextDynamic(() => import("./components/DashboardChartsRow"), {
+const DashboardChartsRow = nextDynamic(() => import('./components/DashboardChartsRow'), {
   loading: () => <Skeleton className="h-[260px] w-full" />,
 });
-const DashboardActivityFeed = nextDynamic(() => import("./components/DashboardActivityFeed"), {
+const DashboardActivityFeed = nextDynamic(() => import('./components/DashboardActivityFeed'), {
   loading: () => <Skeleton className="h-[360px] w-full" />,
 });
-const DashboardEntityStatus = nextDynamic(() => import("./components/DashboardEntityStatus"), {
+const DashboardEntityStatus = nextDynamic(() => import('./components/DashboardEntityStatus'), {
   loading: () => <Skeleton className="h-[360px] w-full" />,
 });
 
 export default async function AccessControlDashboardPage() {
   const { deptId, today } = await getDepartmentContext({
-    department: "access-control",
+    department: 'access-control',
   });
 
   const [metrics, activity, entityStatus, hourlyStats, distribution] = await Promise.all([

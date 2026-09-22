@@ -1,4 +1,4 @@
-import { Langfuse } from "langfuse";
+import { Langfuse } from 'langfuse';
 
 let langfuseInstance: Langfuse | null = null;
 
@@ -24,7 +24,7 @@ export function getLangfuseClient(config?: LangfuseConfig): Langfuse | null {
     config?.baseUrl ||
     process.env.LANGFUSE_BASE_URL ||
     process.env.LANGFUSE_HOST ||
-    "https://us.cloud.langfuse.com";
+    'https://us.cloud.langfuse.com';
 
   if (!publicKey || !secretKey) {
     return null;

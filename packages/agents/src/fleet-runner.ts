@@ -1,5 +1,5 @@
-import { QualityGate } from "./quality-gate.js";
-import { SPECIALIST_PERSONAS, type SpecialistPersona } from "./specialists.js";
+import { QualityGate } from './quality-gate.js';
+import { SPECIALIST_PERSONAS, type SpecialistPersona } from './specialists.js';
 
 export interface AgentSwarmReport {
   timestamp: string;
@@ -8,7 +8,7 @@ export interface AgentSwarmReport {
   domainAudits: Array<{
     agentRole: string;
     focusArea: string;
-    status: "PASS" | "WARNING" | "FAIL";
+    status: 'PASS' | 'WARNING' | 'FAIL';
     findings: string[];
   }>;
   recommendations: string[];
@@ -19,18 +19,18 @@ export class AgentFleetRunner {
    * Orchestrates a multi-agent review pass across domain areas.
    */
   public static runSwarmAudit(
-    filesToAudit: Array<{ filePath: string; content: string }>,
+    filesToAudit: Array<{ filePath: string; content: string }>
   ): AgentSwarmReport {
-    const domainAudits: AgentSwarmReport["domainAudits"] = [];
+    const domainAudits: AgentSwarmReport['domainAudits'] = [];
     const recommendations: string[] = [];
     let totalScore = 0;
 
     const agentKeys = [
-      "databaseArchitect",
-      "uiEngineer",
-      "securityAndQualityGate",
-      "apiIntegrator",
-      "systemSimplifier",
+      'databaseArchitect',
+      'uiEngineer',
+      'securityAndQualityGate',
+      'apiIntegrator',
+      'systemSimplifier',
     ];
 
     const agents: SpecialistPersona[] = agentKeys
@@ -49,30 +49,30 @@ export class AgentFleetRunner {
           agentPassed = false;
           auditResult.criticalViolations.forEach((v) => {
             findings.push(
-              `Critical: [${v.ruleId}] in ${filePath}:${v.lineNumber || 0} - ${v.description}`,
+              `Critical: [${v.ruleId}] in ${filePath}:${v.lineNumber || 0} - ${v.description}`
             );
           });
         }
 
         auditResult.warnings.forEach((w) => {
           findings.push(
-            `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`,
+            `Warning: [${w.ruleId}] in ${filePath}:${w.lineNumber || 0} - ${w.description}`
           );
         });
       });
 
       if (findings.length === 0) {
-        findings.push("Zero architectural or quality defects detected in assigned domain.");
+        findings.push('Zero architectural or quality defects detected in assigned domain.');
       }
 
       domainAudits.push({
         agentRole: agent.role,
         focusArea: agent.focusArea,
         status: agentPassed
-          ? findings.some((f) => f.startsWith("Warning"))
-            ? "WARNING"
-            : "PASS"
-          : "FAIL",
+          ? findings.some((f) => f.startsWith('Warning'))
+            ? 'WARNING'
+            : 'PASS'
+          : 'FAIL',
         findings,
       });
     });
@@ -83,13 +83,13 @@ export class AgentFleetRunner {
         : 100;
 
     if (averageScore < 90) {
-      recommendations.push("Execute ReflectionEngine auto-remediation loop on failing modules.");
+      recommendations.push('Execute ReflectionEngine auto-remediation loop on failing modules.');
     }
     recommendations.push(
-      "Maintain 100% InitPlan RLS policy subquery optimization on all PostgreSQL tables.",
+      'Maintain 100% InitPlan RLS policy subquery optimization on all PostgreSQL tables.'
     );
     recommendations.push(
-      "Enforce OKLCH theme design tokens and light-mode layout constraints on pure UI packages.",
+      'Enforce OKLCH theme design tokens and light-mode layout constraints on pure UI packages.'
     );
 
     return {
@@ -113,7 +113,7 @@ export class AgentFleetRunner {
     md += `## 📊 Specialist Domain Verdicts\n\n`;
     report.domainAudits.forEach((audit) => {
       const badge =
-        audit.status === "PASS" ? "🟢 PASS" : audit.status === "WARNING" ? "🟡 WARNING" : "🔴 FAIL";
+        audit.status === 'PASS' ? '🟢 PASS' : audit.status === 'WARNING' ? '🟡 WARNING' : '🔴 FAIL';
       md += `### ${badge} - ${audit.agentRole}\n`;
       md += `**Focus Area**: *${audit.focusArea}*\n\n`;
       md += `**Findings**:\n`;

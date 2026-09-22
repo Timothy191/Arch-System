@@ -92,11 +92,11 @@
  *         description: Internal server error
  */
 
-import { exportQuerySchema } from "@repo/contract/schemas/export.schema";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { type NextRequest, NextResponse } from "next/server";
-import { applyCors } from "@/lib/api/cors";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
+import { exportQuerySchema } from '@repo/contract/schemas/export.schema';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { applyCors } from '@/lib/api/cors';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
@@ -110,7 +110,7 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return applyCors(req, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    return applyCors(req, NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
   }
 
   const { searchParams } = req.nextUrl;
@@ -120,41 +120,41 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     return applyCors(
       req,
       NextResponse.json(
-        { error: "Invalid query parameters", details: parsed.error.issues },
-        { status: 400 },
-      ),
+        { error: 'Invalid query parameters', details: parsed.error.issues },
+        { status: 400 }
+      )
     );
   }
   const { from, to, dept, limit, offset } = parsed.data;
 
-  const fromDate = from ?? new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
-  const toDate = to ?? new Date().toISOString().split("T")[0]!;
+  const fromDate = from ?? new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
+  const toDate = to ?? new Date().toISOString().split('T')[0]!;
 
-  const format = req.headers.get("accept")?.includes("text/csv") ? "csv" : "json";
+  const format = req.headers.get('accept')?.includes('text/csv') ? 'csv' : 'json';
 
   let query = supabase
-    .from("daily_logs")
+    .from('daily_logs')
     .select(
-      "id, log_date, shift, department_id, fuel_logs(id, diesel_litres, machine_id, machines(name, machine_type))",
-      { count: "estimated" },
+      'id, log_date, shift, department_id, fuel_logs(id, diesel_litres, machine_id, machines(name, machine_type))',
+      { count: 'estimated' }
     )
-    .gte("log_date", fromDate)
-    .lte("log_date", toDate)
-    .order("log_date", { ascending: false })
+    .gte('log_date', fromDate)
+    .lte('log_date', toDate)
+    .order('log_date', { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (dept) {
     const { data: deptRow } = await supabase
-      .from("departments")
-      .select("id")
-      .eq("name", dept)
+      .from('departments')
+      .select('id')
+      .eq('name', dept)
       .single();
-    if (deptRow) query = query.eq("department_id", deptRow.id);
+    if (deptRow) query = query.eq('department_id', deptRow.id);
   }
 
   const { data, error, count } = await query;
   if (error) {
-    return applyCors(req, NextResponse.json({ error: "Database query failed" }, { status: 500 }));
+    return applyCors(req, NextResponse.json({ error: 'Database query failed' }, { status: 500 }));
   }
 
   const rows: any[] = [];
@@ -165,8 +165,8 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
         ? [log.fuel_logs]
         : [];
     fLogs.forEach((fl: any) => {
-      const machineName = fl.machines?.name ?? "Unknown";
-      const machineType = fl.machines?.machine_type ?? "Unknown";
+      const machineName = fl.machines?.name ?? 'Unknown';
+      const machineType = fl.machines?.machine_type ?? 'Unknown';
       rows.push({
         id: fl.id,
         log_date: log.log_date,
@@ -180,27 +180,27 @@ async function handleExportRequest(req: NextRequest): Promise<NextResponse> {
     });
   });
 
-  if (format === "csv") {
+  if (format === 'csv') {
     const headers = [
-      "id",
-      "log_date",
-      "shift",
-      "department_id",
-      "machine_id",
-      "machine_name",
-      "machine_type",
-      "diesel_litres",
+      'id',
+      'log_date',
+      'shift',
+      'department_id',
+      'machine_id',
+      'machine_name',
+      'machine_type',
+      'diesel_litres',
     ];
     const csv = [
-      headers.join(","),
+      headers.join(','),
       ...rows.map((r) =>
-        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r] ?? ""))).join(","),
+        headers.map((h) => sanitizeCsvCell(String(r[h as keyof typeof r] ?? ''))).join(',')
       ),
-    ].join("\n");
+    ].join('\n');
     const response = new NextResponse(csv, {
       headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="fuel-logs-${fromDate}-${toDate}.csv"`,
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="fuel-logs-${fromDate}-${toDate}.csv"`,
       },
     });
     return applyCors(req, response);

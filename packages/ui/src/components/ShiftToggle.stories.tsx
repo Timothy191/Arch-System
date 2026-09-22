@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { useState } from "react";
-import { ShiftToggle } from "./ShiftToggle";
+import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
+import { ShiftToggle } from './ShiftToggle';
 
 const meta: Meta<typeof ShiftToggle> = {
-  title: "Components/ShiftToggle",
+  title: 'Components/ShiftToggle',
   component: ShiftToggle,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
 };
 
@@ -15,7 +15,7 @@ export default meta;
 type Story = StoryObj<typeof ShiftToggle>;
 
 const ShiftToggleWithState = () => {
-  const [value, setValue] = useState<"day" | "night">("day");
+  const [value, setValue] = useState<'day' | 'night'>('day');
   return (
     <div className="w-64">
       <ShiftToggle value={value} onChange={setValue} />
@@ -29,7 +29,7 @@ export const Default: Story = {
 
 export const Day: Story = {
   args: {
-    value: "day",
+    value: 'day',
     onChange: () => {},
   },
   decorators: [
@@ -43,7 +43,7 @@ export const Day: Story = {
 
 export const Night: Story = {
   args: {
-    value: "night",
+    value: 'night',
     onChange: () => {},
   },
   decorators: [

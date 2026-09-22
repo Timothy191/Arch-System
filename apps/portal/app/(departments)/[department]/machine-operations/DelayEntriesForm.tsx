@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertCircle, CheckCircle, Clock, HelpCircle, Info, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { useUnsavedChangesWarning } from "~/hooks/useUnsavedChangesWarning";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertCircle, CheckCircle, Clock, HelpCircle, Info, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { useUnsavedChangesWarning } from '~/hooks/useUnsavedChangesWarning';
 
 // AGENT-TRACE: Delay entry form with granular tracking, auto-calculation, and manual override
 // Supports draft/committed workflow with role-based access control
@@ -36,7 +36,7 @@ interface DelayEntry {
   is_manual_override: boolean;
   manual_duration_hours: number | null;
   description: string | null;
-  status: "draft" | "committed";
+  status: 'draft' | 'committed';
 }
 
 interface DelayEntriesFormProps {
@@ -64,7 +64,7 @@ export function DelayEntriesForm({
   const [isCommitting, setIsCommitting] = useState(false);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<"commit" | "remove" | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'commit' | 'remove' | null>(null);
   const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -75,10 +75,10 @@ export function DelayEntriesForm({
   useEffect(() => {
     const loadCategories = async () => {
       const { data } = await supabase
-        .from("delay_categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
+        .from('delay_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
       if (data) setCategories(data);
     };
     loadCategories();
@@ -90,10 +90,10 @@ export function DelayEntriesForm({
       if (!machineOperationId) return;
 
       const { data } = await supabase
-        .from("delay_entries")
-        .select("*")
-        .eq("machine_operation_id", machineOperationId)
-        .order("delay_start_time");
+        .from('delay_entries')
+        .select('*')
+        .eq('machine_operation_id', machineOperationId)
+        .order('delay_start_time');
 
       if (data) {
         const formatted = data.map((d) => ({
@@ -105,7 +105,7 @@ export function DelayEntriesForm({
           is_manual_override: d.is_manual_override,
           manual_duration_hours: d.manual_duration_hours,
           description: d.description,
-          status: d.status as "draft" | "committed",
+          status: d.status as 'draft' | 'committed',
         }));
         setDelayEntries(formatted);
         setInitialDelays(formatted);
@@ -127,17 +127,17 @@ export function DelayEntriesForm({
   const validateEntry = useCallback(
     (entry: DelayEntry, index: number): string | null => {
       if (!entry.delay_category_id) {
-        return "Category is required";
+        return 'Category is required';
       }
 
       if (!entry.delay_start_time) {
-        return "Start time is required";
+        return 'Start time is required';
       }
 
       // AGENT-TRACE: End time is required unless manual override is enabled
       // For manual override, duration is explicit and end time can be calculated later
       if (!entry.is_manual_override && !entry.delay_end_time) {
-        return "End time is required (unless using manual override)";
+        return 'End time is required (unless using manual override)';
       }
 
       // Validate end time if provided
@@ -146,7 +146,7 @@ export function DelayEntriesForm({
         const end = new Date(entry.delay_end_time);
 
         if (end <= start) {
-          return "End time must be after start time";
+          return 'End time must be after start time';
         }
       }
 
@@ -157,11 +157,11 @@ export function DelayEntriesForm({
       } else if (entry.delay_end_time) {
         duration = calculateDuration(entry.delay_start_time, entry.delay_end_time);
       } else {
-        return "Duration cannot be calculated without end time";
+        return 'Duration cannot be calculated without end time';
       }
 
       if (duration <= 0) {
-        return "Duration must be greater than 0";
+        return 'Duration must be greater than 0';
       }
 
       // Check total duration for this operation
@@ -179,26 +179,26 @@ export function DelayEntriesForm({
 
       return null;
     },
-    [delayEntries, calculateDuration],
+    [delayEntries, calculateDuration]
   );
 
   // Add new empty delay entry
   const addDelayEntry = useCallback(() => {
     const newEntry: DelayEntry = {
-      delay_category_id: "",
+      delay_category_id: '',
       delay_start_time: new Date().toISOString().slice(0, 16),
       delay_end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
       is_manual_override: false,
       manual_duration_hours: null,
-      description: "",
-      status: "draft",
+      description: '',
+      status: 'draft',
     };
     setDelayEntries([...delayEntries, newEntry]);
   }, [delayEntries]);
 
   // Remove delay entry
   const handleRemoveClick = useCallback((index: number) => {
-    setConfirmAction("remove");
+    setConfirmAction('remove');
     setConfirmIndex(index);
     setShowConfirmDialog(true);
   }, []);
@@ -211,9 +211,9 @@ export function DelayEntriesForm({
         delete newErrors[index];
         return newErrors;
       });
-      toast.success("Delay entry removed");
+      toast.success('Delay entry removed');
     },
-    [delayEntries],
+    [delayEntries]
   );
 
   // Update delay entry field
@@ -242,7 +242,7 @@ export function DelayEntriesForm({
       // Notify parent of changes
       onDelayChange?.(updatedEntries);
     },
-    [delayEntries, validateEntry, onDelayChange],
+    [delayEntries, validateEntry, onDelayChange]
   );
 
   // Save all delay entries
@@ -276,29 +276,29 @@ export function DelayEntriesForm({
           is_manual_override: entry.is_manual_override,
           manual_duration_hours: entry.manual_duration_hours,
           description: entry.description,
-          status: "draft" as const,
+          status: 'draft' as const,
         };
 
         if (entry.id) {
           // Update existing
           const { error } = await supabase
-            .from("delay_entries")
+            .from('delay_entries')
             .update(entryData)
-            .eq("id", entry.id);
+            .eq('id', entry.id);
           if (error) throw error;
         } else {
           // Insert new
-          const { error } = await supabase.from("delay_entries").insert(entryData);
+          const { error } = await supabase.from('delay_entries').insert(entryData);
           if (error) throw error;
         }
       }
 
       // Reload delays to get IDs for new entries
       const { data } = await supabase
-        .from("delay_entries")
-        .select("*")
-        .eq("machine_operation_id", machineOperationId)
-        .order("delay_start_time");
+        .from('delay_entries')
+        .select('*')
+        .eq('machine_operation_id', machineOperationId)
+        .order('delay_start_time');
 
       if (data) {
         const formatted = data.map((d) => ({
@@ -310,15 +310,15 @@ export function DelayEntriesForm({
           is_manual_override: d.is_manual_override,
           manual_duration_hours: d.manual_duration_hours,
           description: d.description,
-          status: d.status as "draft" | "committed",
+          status: d.status as 'draft' | 'committed',
         }));
         setDelayEntries(formatted);
         setInitialDelays(formatted);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Failed to save delay entries:", err);
-      toast.error("Failed to save delay entries. Please try again.");
+      console.error('Failed to save delay entries:', err);
+      toast.error('Failed to save delay entries. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -327,12 +327,12 @@ export function DelayEntriesForm({
   // AGENT-TRACE: Commit all draft delays for this operation
   // This transitions delays from draft to committed status, locking them for editing
   const handleCommitClick = useCallback(() => {
-    const draftDelays = delayEntries.filter((d) => d.status === "draft");
+    const draftDelays = delayEntries.filter((d) => d.status === 'draft');
     if (draftDelays.length === 0) {
-      toast.error("No draft delays to commit");
+      toast.error('No draft delays to commit');
       return;
     }
-    setConfirmAction("commit");
+    setConfirmAction('commit');
     setShowConfirmDialog(true);
   }, [delayEntries]);
 
@@ -346,50 +346,50 @@ export function DelayEntriesForm({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("You must be logged in to commit delays");
+        toast.error('You must be logged in to commit delays');
         return;
       }
 
       // Get employee record for current user
       const { data: employee } = await supabase
-        .from("employees")
-        .select("id, role")
-        .eq("auth_id", user.id)
+        .from('employees')
+        .select('id, role')
+        .eq('auth_id', user.id)
         .single();
 
       if (!employee) {
-        toast.error("Employee record not found");
+        toast.error('Employee record not found');
         return;
       }
 
       // Check if user has permission to commit (supervisor or admin)
-      if (employee.role !== "supervisor" && employee.role !== "admin") {
-        toast.error("Only supervisors can commit delay entries");
+      if (employee.role !== 'supervisor' && employee.role !== 'admin') {
+        toast.error('Only supervisors can commit delay entries');
         return;
       }
 
       // Commit all draft delays for this operation
-      const draftDelays = delayEntries.filter((d) => d.status === "draft");
+      const draftDelays = delayEntries.filter((d) => d.status === 'draft');
 
       for (const entry of draftDelays) {
         const { error } = await supabase
-          .from("delay_entries")
+          .from('delay_entries')
           .update({
-            status: "committed",
+            status: 'committed',
             committed_at: new Date().toISOString(),
             committed_by: employee.id,
           })
-          .eq("id", entry.id);
+          .eq('id', entry.id);
 
         if (error) throw error;
       }
 
       // Reload delays to update status
       const { data } = await supabase
-        .from("delay_entries")
-        .select("*")
-        .eq("machine_operation_id", machineOperationId)
-        .order("delay_start_time");
+        .from('delay_entries')
+        .select('*')
+        .eq('machine_operation_id', machineOperationId)
+        .order('delay_start_time');
 
       if (data) {
         const formatted = data.map((d) => ({
@@ -401,7 +401,7 @@ export function DelayEntriesForm({
           is_manual_override: d.is_manual_override,
           manual_duration_hours: d.manual_duration_hours,
           description: d.description,
-          status: d.status as "draft" | "committed",
+          status: d.status as 'draft' | 'committed',
         }));
         setDelayEntries(formatted);
         setInitialDelays(formatted);
@@ -410,8 +410,8 @@ export function DelayEntriesForm({
       toast.success(`${draftDelays.length} delay entry(ies) committed successfully`);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Failed to commit delays:", err);
-      toast.error("Failed to commit delays. Please try again.");
+      console.error('Failed to commit delays:', err);
+      toast.error('Failed to commit delays. Please try again.');
     } finally {
       setIsCommitting(false);
     }
@@ -549,9 +549,9 @@ export function DelayEntriesForm({
                           title="Category"
                           value={entry.delay_category_id}
                           onChange={(e) =>
-                            updateDelayEntry(index, "delay_category_id", e.target.value)
+                            updateDelayEntry(index, 'delay_category_id', e.target.value)
                           }
-                          disabled={readOnly || entry.status === "committed"}
+                          disabled={readOnly || entry.status === 'committed'}
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="">Select category...</option>
@@ -579,12 +579,12 @@ export function DelayEntriesForm({
                           onChange={(e) =>
                             updateDelayEntry(
                               index,
-                              "delay_start_time",
-                              new Date(e.target.value).toISOString(),
+                              'delay_start_time',
+                              new Date(e.target.value).toISOString()
                             )
                           }
                           disabled={
-                            readOnly || entry.status === "committed" || entry.is_manual_override
+                            readOnly || entry.status === 'committed' || entry.is_manual_override
                           }
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
                         />
@@ -606,12 +606,12 @@ export function DelayEntriesForm({
                           onChange={(e) =>
                             updateDelayEntry(
                               index,
-                              "delay_end_time",
-                              new Date(e.target.value).toISOString(),
+                              'delay_end_time',
+                              new Date(e.target.value).toISOString()
                             )
                           }
                           disabled={
-                            readOnly || entry.status === "committed" || entry.is_manual_override
+                            readOnly || entry.status === 'committed' || entry.is_manual_override
                           }
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed"
                         />
@@ -626,7 +626,7 @@ export function DelayEntriesForm({
                           <span className="text-lg font-medium text-[var(--text-heading)]">
                             {duration.toFixed(2)}h
                           </span>
-                          {!readOnly && entry.status === "draft" && (
+                          {!readOnly && entry.status === 'draft' && (
                             <label
                               className="flex items-center gap-1 cursor-pointer"
                               title="Enable to manually specify duration when exact times aren't available"
@@ -635,7 +635,7 @@ export function DelayEntriesForm({
                                 type="checkbox"
                                 checked={entry.is_manual_override}
                                 onChange={(e) =>
-                                  updateDelayEntry(index, "is_manual_override", e.target.checked)
+                                  updateDelayEntry(index, 'is_manual_override', e.target.checked)
                                 }
                                 className="w-4 h-4 rounded border-[var(--border-default)]"
                               />
@@ -650,7 +650,7 @@ export function DelayEntriesForm({
                     </div>
 
                     {/* Remove Button */}
-                    {!readOnly && entry.status === "draft" && (
+                    {!readOnly && entry.status === 'draft' && (
                       <button
                         type="button"
                         onClick={() => handleRemoveClick(index)}
@@ -663,7 +663,7 @@ export function DelayEntriesForm({
                   </div>
 
                   {/* Manual Override Duration */}
-                  {entry.is_manual_override && !readOnly && entry.status === "draft" && (
+                  {entry.is_manual_override && !readOnly && entry.status === 'draft' && (
                     <div className="space-y-1">
                       <label className="text-[var(--text-secondary)] text-xs block">
                         Manual Duration (hours) <span className="text-accent-red">*</span>
@@ -675,12 +675,12 @@ export function DelayEntriesForm({
                         step="0.01"
                         min="0"
                         max="12"
-                        value={entry.manual_duration_hours || ""}
+                        value={entry.manual_duration_hours || ''}
                         onChange={(e) =>
                           updateDelayEntry(
                             index,
-                            "manual_duration_hours",
-                            parseFloat(e.target.value) || null,
+                            'manual_duration_hours',
+                            parseFloat(e.target.value) || null
                           )
                         }
                         className="w-full md:w-48 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)]"
@@ -697,9 +697,9 @@ export function DelayEntriesForm({
                       Description (optional)
                     </label>
                     <textarea
-                      value={entry.description || ""}
-                      onChange={(e) => updateDelayEntry(index, "description", e.target.value)}
-                      disabled={readOnly || entry.status === "committed"}
+                      value={entry.description || ''}
+                      onChange={(e) => updateDelayEntry(index, 'description', e.target.value)}
+                      disabled={readOnly || entry.status === 'committed'}
                       rows={2}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg px-2 py-1.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] disabled:opacity-50 disabled:cursor-not-allowed resize-none"
                       placeholder="Describe the delay cause and impact..."
@@ -707,7 +707,7 @@ export function DelayEntriesForm({
                   </div>
 
                   {/* Status Badge */}
-                  {entry.status === "committed" && (
+                  {entry.status === 'committed' && (
                     <div className="flex items-center gap-2 text-xs text-[var(--accent-green)]">
                       <Clock size={14} />
                       Committed - locked for editing
@@ -728,7 +728,7 @@ export function DelayEntriesForm({
         )}
 
         {/* Save Button */}
-        {!readOnly && delayEntries.length > 0 && delayEntries.some((d) => d.status === "draft") && (
+        {!readOnly && delayEntries.length > 0 && delayEntries.some((d) => d.status === 'draft') && (
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
             <button
               type="button"
@@ -736,7 +736,7 @@ export function DelayEntriesForm({
               disabled={isSubmitting}
               className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2 px-4 rounded-lg transition-colors min-w-[120px]"
             >
-              {isSubmitting ? "Saving..." : "Save Delays"}
+              {isSubmitting ? 'Saving...' : 'Save Delays'}
             </button>
             <button
               type="button"
@@ -745,7 +745,7 @@ export function DelayEntriesForm({
               className="bg-[var(--accent-green)] hover:bg-[var(--accent-green)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 min-w-[140px]"
             >
               {isCommitting ? (
-                "Committing..."
+                'Committing...'
               ) : (
                 <>
                   <CheckCircle size={16} />
@@ -761,19 +761,19 @@ export function DelayEntriesForm({
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-[var(--bg-primary)] border border-[var(--border-default)] rounded-lg p-6 max-w-md w-full mx-4 shadow-window">
               <div className="flex items-start gap-3 mb-4">
-                {confirmAction === "commit" ? (
+                {confirmAction === 'commit' ? (
                   <CheckCircle className="text-[var(--accent-green)]" size={24} />
                 ) : (
                   <Trash2 className="text-accent-red" size={24} />
                 )}
                 <div>
                   <h3 className="text-lg font-medium text-[var(--text-heading)]">
-                    {confirmAction === "commit" ? "Commit Delay Entries" : "Remove Delay Entry"}
+                    {confirmAction === 'commit' ? 'Commit Delay Entries' : 'Remove Delay Entry'}
                   </h3>
                   <p className="text-[var(--text-secondary)] text-sm mt-1">
-                    {confirmAction === "commit"
-                      ? "This will transition all draft delay entries to committed status. Committed entries cannot be edited. Are you sure?"
-                      : "This will remove the delay entry. This action cannot be undone. Are you sure?"}
+                    {confirmAction === 'commit'
+                      ? 'This will transition all draft delay entries to committed status. Committed entries cannot be edited. Are you sure?'
+                      : 'This will remove the delay entry. This action cannot be undone. Are you sure?'}
                   </p>
                 </div>
               </div>
@@ -792,9 +792,9 @@ export function DelayEntriesForm({
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirmAction === "commit") {
+                    if (confirmAction === 'commit') {
                       commitDelays();
-                    } else if (confirmAction === "remove" && confirmIndex !== null) {
+                    } else if (confirmAction === 'remove' && confirmIndex !== null) {
                       removeDelayEntry(confirmIndex);
                     }
                     setShowConfirmDialog(false);
@@ -802,12 +802,12 @@ export function DelayEntriesForm({
                     setConfirmIndex(null);
                   }}
                   className={`px-4 py-2 rounded-lg transition-colors font-medium ${
-                    confirmAction === "commit"
-                      ? "bg-[var(--accent-green)] hover:bg-[var(--accent-green)]/90 text-white"
-                      : "bg-accent-red hover:bg-red-600 text-white"
+                    confirmAction === 'commit'
+                      ? 'bg-[var(--accent-green)] hover:bg-[var(--accent-green)]/90 text-white'
+                      : 'bg-accent-red hover:bg-red-600 text-white'
                   }`}
                 >
-                  {confirmAction === "commit" ? "Confirm Commit" : "Remove"}
+                  {confirmAction === 'commit' ? 'Confirm Commit' : 'Remove'}
                 </button>
               </div>
             </div>

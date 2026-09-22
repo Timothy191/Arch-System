@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
-import { Button, type ButtonProps } from "./button";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
+import { Button, type ButtonProps } from './button';
 
 export interface LoadMoreButtonProps extends ButtonProps {
   loading?: boolean;
@@ -13,7 +13,7 @@ const LoadMoreButton = React.forwardRef<HTMLButtonElement, LoadMoreButtonProps>(
         <Button
           ref={ref}
           variant="secondary"
-          className={cn("w-full sm:w-auto min-w-[120px]", className)}
+          className={cn('w-full sm:w-auto min-w-[120px]', className)}
           disabled={loading || props.disabled}
           {...props}
         >
@@ -23,13 +23,13 @@ const LoadMoreButton = React.forwardRef<HTMLButtonElement, LoadMoreButtonProps>(
               Loading...
             </span>
           ) : (
-            children || "Load More"
+            children || 'Load More'
           )}
         </Button>
       </div>
     );
-  },
+  }
 );
-LoadMoreButton.displayName = "LoadMoreButton";
+LoadMoreButton.displayName = 'LoadMoreButton';
 
 export { LoadMoreButton };

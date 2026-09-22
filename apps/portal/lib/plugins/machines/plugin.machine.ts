@@ -1,8 +1,8 @@
-import { assign, fromPromise, setup } from "xstate";
-import { ValidationError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
-import type { ArchPlugin } from "../types";
-import { isRetryableError, type PluginContext, type PluginEvent } from "./types";
+import { assign, fromPromise, setup } from 'xstate';
+import { ValidationError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
+import type { ArchPlugin } from '../types';
+import { isRetryableError, type PluginContext, type PluginEvent } from './types';
 
 // =============================================================================
 // Async Load Function
@@ -14,7 +14,7 @@ async function loadPluginModule(pluginName: string): Promise<ArchPlugin> {
 
   if (!plugin?.metadata?.id) {
     throw new ValidationError(`Plugin ${pluginName} is missing valid metadata contract`, {
-      field: "metadata",
+      field: 'metadata',
       value: pluginName,
     });
   }
@@ -36,11 +36,11 @@ export const pluginMachine = setup({
       lastLoadedAt: () => Date.now(),
     }),
     logError: ({ context, event }) => {
-      if (event.type === "plugin.failed" || event.type === "plugin.invalid") {
+      if (event.type === 'plugin.failed' || event.type === 'plugin.invalid') {
         logError(new Error(event.error), {
-          context: "plugin_machine",
+          context: 'plugin_machine',
           pluginName: context.pluginName,
-          state: "failed",
+          state: 'failed',
         });
       }
     },
@@ -52,7 +52,7 @@ export const pluginMachine = setup({
     }),
     storePlugin: assign({
       plugin: ({ event }) => {
-        if (event.type === "plugin.loaded") {
+        if (event.type === 'plugin.loaded') {
           return event.plugin;
         }
         return undefined;
@@ -60,7 +60,7 @@ export const pluginMachine = setup({
     }),
     storeError: assign({
       error: ({ event }) => {
-        if (event.type === "plugin.failed" || event.type === "plugin.invalid") {
+        if (event.type === 'plugin.failed' || event.type === 'plugin.invalid') {
           return event.error;
         }
         return undefined;
@@ -78,7 +78,7 @@ export const pluginMachine = setup({
   guards: {
     canRetry: ({ context }) => context.retryCount < context.maxRetries,
     isRetryableError: ({ event }) => {
-      if (event.type === "plugin.failed") {
+      if (event.type === 'plugin.failed') {
         return isRetryableError(event.error);
       }
       return false;
@@ -88,8 +88,8 @@ export const pluginMachine = setup({
     },
   },
 }).createMachine({
-  id: "plugin",
-  initial: "idle",
+  id: 'plugin',
+  initial: 'idle',
   context: ({ input }) => ({
     pluginName: (input as { pluginName: string; maxRetries?: number }).pluginName,
     plugin: undefined,
@@ -101,23 +101,23 @@ export const pluginMachine = setup({
   states: {
     idle: {
       on: {
-        LOAD: "loading",
-        DISABLE: "disabled",
+        LOAD: 'loading',
+        DISABLE: 'disabled',
       },
     },
     loading: {
-      entry: ["clearError", "logTransition"],
+      entry: ['clearError', 'logTransition'],
       invoke: {
-        src: "loadPlugin",
+        src: 'loadPlugin',
         input: ({ context }) => ({ pluginName: context.pluginName }),
         onDone: {
-          target: "validating",
+          target: 'validating',
           actions: assign({
             plugin: ({ event }) => event.output,
           }),
         },
         onError: {
-          target: "failed",
+          target: 'failed',
           actions: assign({
             error: ({ event }) =>
               event.error instanceof Error ? event.error.message : String(event.error),
@@ -126,43 +126,43 @@ export const pluginMachine = setup({
       },
     },
     validating: {
-      entry: ["resetRetry"],
+      entry: ['resetRetry'],
       always: [
         {
-          target: "active",
-          guard: "isEnabled",
+          target: 'active',
+          guard: 'isEnabled',
         },
         {
-          target: "disabled",
+          target: 'disabled',
         },
       ],
     },
     active: {
-      entry: ["logTransition"],
+      entry: ['logTransition'],
       on: {
-        UNLOAD: "idle",
-        DISABLE: "disabled",
+        UNLOAD: 'idle',
+        DISABLE: 'disabled',
       },
     },
     failed: {
-      entry: ["logError"],
+      entry: ['logError'],
       on: {
         RETRY: {
-          target: "retrying",
-          guard: "canRetry",
-          actions: "incrementRetry",
+          target: 'retrying',
+          guard: 'canRetry',
+          actions: 'incrementRetry',
         },
-        DISABLE: "disabled",
+        DISABLE: 'disabled',
       },
     },
     retrying: {
       after: {
-        1000: "loading",
+        1000: 'loading',
       },
     },
     disabled: {
       on: {
-        ENABLE: "loading",
+        ENABLE: 'loading',
       },
     },
   },

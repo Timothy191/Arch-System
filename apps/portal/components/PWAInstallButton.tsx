@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { Download, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Download, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
 export function PWAInstallButton() {
@@ -15,7 +15,7 @@ export function PWAInstallButton() {
 
   useEffect(() => {
     // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
       return;
     }
@@ -36,12 +36,12 @@ export function PWAInstallButton() {
       setDeferredPrompt(null);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -56,12 +56,12 @@ export function PWAInstallButton() {
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
+    if (outcome === 'accepted') {
       // eslint-disable-next-line no-console
-      console.log("User accepted the install prompt");
+      console.log('User accepted the install prompt');
     } else {
       // eslint-disable-next-line no-console
-      console.log("User dismissed the install prompt");
+      console.log('User dismissed the install prompt');
     }
 
     // Clear the deferred prompt

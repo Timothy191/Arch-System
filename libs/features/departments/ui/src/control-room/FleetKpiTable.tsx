@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import type { MachinePerformance } from "@repo/contract/types/shift-compilation.types";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { Activity, AlertTriangle, CheckCircle2, Clock, Wrench } from "lucide-react";
-import { useRef } from "react";
+import type { MachinePerformance } from '@repo/contract/types/shift-compilation.types';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { Activity, AlertTriangle, CheckCircle2, Clock, Wrench } from 'lucide-react';
+import { useRef } from 'react';
 
 interface FleetKpiTableProps {
   fleet: MachinePerformance[];
@@ -82,13 +82,13 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
       <div
         ref={parentRef}
         className="overflow-y-auto"
-        style={{ height: "400px", contain: "strict" }}
+        style={{ height: '400px', contain: 'strict' }}
       >
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
+            width: '100%',
+            position: 'relative',
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -114,26 +114,26 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
                 <div className="px-4 text-neutral-600 capitalize truncate">{item.machine_type}</div>
                 <div className="px-4 text-neutral-500 font-mono text-[11px] truncate">
                   {item.start_time
-                    ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || "Active"}`
-                    : "Not logged"}
+                    ? `${item.start_time.slice(0, 5)} - ${item.end_time?.slice(0, 5) || 'Active'}`
+                    : 'Not logged'}
                 </div>
                 <div className="px-4 text-right font-mono font-medium text-neutral-800">
                   {item.hours_worked.toFixed(1)}h
                 </div>
                 <div className="px-4 text-right font-mono font-medium text-amber-700">
-                  {item.delay_hours > 0 ? `${item.delay_hours.toFixed(1)}h` : "—"}
+                  {item.delay_hours > 0 ? `${item.delay_hours.toFixed(1)}h` : '—'}
                 </div>
                 <div className="px-4 text-right font-mono font-medium text-rose-700">
-                  {item.breakdown_hours > 0 ? `${item.breakdown_hours.toFixed(1)}h` : "—"}
+                  {item.breakdown_hours > 0 ? `${item.breakdown_hours.toFixed(1)}h` : '—'}
                 </div>
                 <div className="px-5 text-right font-mono font-semibold">
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${
                       isHigh
-                        ? "bg-emerald-100/70 text-emerald-800 border border-emerald-200"
+                        ? 'bg-emerald-100/70 text-emerald-800 border border-emerald-200'
                         : isMedium
-                          ? "bg-amber-100/70 text-amber-800 border border-amber-200"
-                          : "bg-rose-100/70 text-rose-800 border border-rose-200"
+                          ? 'bg-amber-100/70 text-amber-800 border border-amber-200'
+                          : 'bg-rose-100/70 text-rose-800 border border-rose-200'
                     }`}
                   >
                     {!isHigh && <AlertTriangle className="h-3 w-3 mr-1" />}

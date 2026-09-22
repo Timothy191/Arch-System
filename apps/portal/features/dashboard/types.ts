@@ -3,9 +3,9 @@ export interface MonolithizedDashboardPayload {
   daily_logs: Array<{
     id: string;
     log_date: string;
-    shift: "day" | "night";
+    shift: 'day' | 'night';
     notes: string | null;
-    sync_status: "pending" | "synced" | "failed";
+    sync_status: 'pending' | 'synced' | 'failed';
     idempotency_key: string;
     last_synced_at: string;
   }>;
@@ -16,19 +16,19 @@ export interface MonolithizedDashboardPayload {
     date_in: string;
     date_out: string | null;
     reason: string;
-    status: "active" | "completed";
-    sync_status: "pending" | "synced" | "failed";
+    status: 'active' | 'completed';
+    sync_status: 'pending' | 'synced' | 'failed';
     idempotency_key: string;
     last_synced_at: string;
   }>;
   safety_incidents: Array<{
     id: string;
     incident_date: string;
-    shift_type: "day" | "night";
-    incident_type: "near-miss" | "incident" | "lost-time" | "equipment-damage";
+    shift_type: 'day' | 'night';
+    incident_type: 'near-miss' | 'incident' | 'lost-time' | 'equipment-damage';
     description: string;
-    status: "open" | "under-investigation" | "resolved" | "closed";
-    sync_status: "pending" | "synced" | "failed";
+    status: 'open' | 'under-investigation' | 'resolved' | 'closed';
+    sync_status: 'pending' | 'synced' | 'failed';
     idempotency_key: string;
     last_synced_at: string;
   }>;

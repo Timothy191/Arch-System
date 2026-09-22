@@ -1,10 +1,10 @@
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: "pnpm --filter portal start",
-      url: ["http://localhost:3000/"],
+      startServerCommand: 'pnpm --filter portal start',
+      url: ['http://localhost:3000/'],
       settings: {
-        formFactor: "mobile",
+        formFactor: 'mobile',
         screenEmulation: {
           mobile: true,
           width: 360,
@@ -16,14 +16,14 @@ module.exports = {
     },
     assert: {
       assertions: {
-        "categories:performance": ["warn", { minScore: 0.8 }],
-        "categories:accessibility": ["warn", { minScore: 0.9 }],
-        "categories:best-practices": ["warn", { minScore: 0.9 }],
-        "categories:seo": ["warn", { minScore: 0.9 }],
+        'categories:performance': ['warn', { minScore: 0.8 }],
+        'categories:accessibility': ['warn', { minScore: 0.9 }],
+        'categories:best-practices': ['warn', { minScore: 0.9 }],
+        'categories:seo': ['warn', { minScore: 0.9 }],
       },
     },
     upload: {
-      target: "temporary-public-storage",
+      target: 'temporary-public-storage',
     },
   },
 };

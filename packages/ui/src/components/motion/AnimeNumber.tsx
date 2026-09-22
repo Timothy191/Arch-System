@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { animate, useMotionValue } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { animate, useMotionValue } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 
 interface AnimeNumberProps {
   value: number;
@@ -11,23 +11,23 @@ interface AnimeNumberProps {
   prefix?: string;
   suffix?: string;
   className?: string;
-  format?: "number" | "percentage" | "time";
+  format?: 'number' | 'percentage' | 'time';
 }
 
 export function AnimeNumber({
   value,
   duration = 1200,
   round = 0,
-  prefix = "",
-  suffix = "",
+  prefix = '',
+  suffix = '',
   className,
-  format = "number",
+  format = 'number',
 }: AnimeNumberProps) {
   const nodeRef = useRef<HTMLSpanElement>(null);
   const count = useMotionValue(0);
 
-  const displayPrefix = format === "percentage" && !prefix ? "" : prefix;
-  const displaySuffix = format === "percentage" && !suffix ? "%" : suffix;
+  const displayPrefix = format === 'percentage' && !prefix ? '' : prefix;
+  const displaySuffix = format === 'percentage' && !suffix ? '%' : suffix;
 
   useEffect(() => {
     const controls = animate(count, value, {
@@ -44,7 +44,7 @@ export function AnimeNumber({
   }, [value, duration, round, displayPrefix, displaySuffix, count]);
 
   return (
-    <span ref={nodeRef} className={cn("tabular-nums", className)}>
+    <span ref={nodeRef} className={cn('tabular-nums', className)}>
       {displayPrefix}0{displaySuffix}
     </span>
   );

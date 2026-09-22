@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../lib/utils";
+import * as React from 'react';
+import { cn } from '../lib/utils';
 
 /**
  * Clock — a hydration-safe live time/date renderer styled after the macOS
@@ -11,7 +11,7 @@ import { cn } from "../lib/utils";
  * paint match exactly; the live time string is only set inside useEffect. This
  * avoids Next.js App Router hydration mismatches caused by wall-clock variance.
  */
-export type ClockFormat = "time" | "date" | "datetime";
+export type ClockFormat = 'time' | 'date' | 'datetime';
 
 export interface ClockProps {
   /** Which fields to render. @default "time" */
@@ -33,29 +33,29 @@ function buildFormatter(
   format: ClockFormat,
   locale: string,
   hour12: boolean,
-  showSeconds: boolean,
+  showSeconds: boolean
 ): Intl.DateTimeFormat {
   switch (format) {
-    case "date":
+    case 'date':
       return new Intl.DateTimeFormat(locale, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
       });
-    case "datetime":
+    case 'datetime':
       return new Intl.DateTimeFormat(locale, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
         hour12,
       });
     default:
       return new Intl.DateTimeFormat(locale, {
-        hour: "numeric",
-        minute: "2-digit",
-        second: showSeconds ? "2-digit" : undefined,
+        hour: 'numeric',
+        minute: '2-digit',
+        second: showSeconds ? '2-digit' : undefined,
         hour12,
       });
   }
@@ -73,11 +73,11 @@ function computeDelay(showSeconds: boolean, now: number): number {
 }
 
 export function Clock({
-  format = "time",
-  locale = "en-US",
+  format = 'time',
+  locale = 'en-US',
   hour12 = true,
   showSeconds = false,
-  testId = "clock",
+  testId = 'clock',
   ariaLabel,
   className,
 }: ClockProps) {
@@ -100,22 +100,22 @@ export function Clock({
 
   const formatter = React.useMemo(
     () => buildFormatter(format, locale, hour12, showSeconds),
-    [format, locale, hour12, showSeconds],
+    [format, locale, hour12, showSeconds]
   );
 
-  const display = time ? formatter.format(time) : "";
+  const display = time ? formatter.format(time) : '';
   const ariaText = time
-    ? `${ariaLabel ? `${ariaLabel} ` : ""}${new Intl.DateTimeFormat(locale, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
+    ? `${ariaLabel ? `${ariaLabel} ` : ''}${new Intl.DateTimeFormat(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
         hour12,
       }).format(time)}`
-    : (ariaLabel ?? "");
+    : (ariaLabel ?? '');
 
   return (
     <span
@@ -124,8 +124,8 @@ export function Clock({
       aria-label={ariaText || undefined}
       className={cn(
         // AGENT-TRACE: reads theme tokens only — no hardcoded colors, preserves light-mode invariant
-        "tabular-nums select-none text-[var(--text-secondary)]",
-        className,
+        'tabular-nums select-none text-[var(--text-secondary)]',
+        className
       )}
       suppressHydrationWarning
     >

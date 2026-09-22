@@ -1,10 +1,10 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { inngest } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { inngest } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 export const generateReportFn = inngest.createFunction(
-  { id: "generate-shift-report", triggers: [{ event: "reports/generate" }] },
+  { id: 'generate-shift-report', triggers: [{ event: 'reports/generate' }] },
   async ({ event }) => {
     const { departmentId, dateFrom, dateTo } = event.data;
     const supabase = await createServerSupabaseClient();
@@ -14,18 +14,18 @@ export const generateReportFn = inngest.createFunction(
     try {
       // Fetch aggregated data for the report
       const { data: dailyLogs } = await supabase
-        .from("daily_logs")
-        .select("*")
-        .eq("department_id", departmentId)
-        .gte("date", dateFrom)
-        .lte("date", dateTo);
+        .from('daily_logs')
+        .select('*')
+        .eq('department_id', departmentId)
+        .gte('date', dateFrom)
+        .lte('date', dateTo);
 
       const { data: productionLogs } = await supabase
-        .from("production_logs")
-        .select("*")
-        .eq("department_id", departmentId)
-        .gte("date", dateFrom)
-        .lte("date", dateTo);
+        .from('production_logs')
+        .select('*')
+        .eq('department_id', departmentId)
+        .gte('date', dateFrom)
+        .lte('date', dateTo);
 
       const totalCoal = productionLogs?.reduce((sum, log) => sum + (log.coal_tonnes ?? 0), 0);
       const totalWaste = productionLogs?.reduce((sum, log) => sum + (log.waste_tonnes ?? 0), 0);
@@ -40,7 +40,7 @@ export const generateReportFn = inngest.createFunction(
         generated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from("generated_reports").insert(reportData);
+      const { error } = await supabase.from('generated_reports').insert(reportData);
 
       if (error) throw error;
 
@@ -48,14 +48,14 @@ export const generateReportFn = inngest.createFunction(
     } catch (err) {
       success = false;
       logError(err, {
-        context: "generate_report_job",
+        context: 'generate_report_job',
         departmentId,
         dateFrom,
         dateTo,
       });
       throw err;
     } finally {
-      recordJobExecution("generate-shift-report", performance.now() - start, success);
+      recordJobExecution('generate-shift-report', performance.now() - start, success);
     }
-  },
+  }
 );

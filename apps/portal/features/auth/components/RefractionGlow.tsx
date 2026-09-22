@@ -1,1 +1,1 @@
-export { RefractionGlow } from "@repo/auth/ui";
+export { RefractionGlow } from '@repo/auth/ui';

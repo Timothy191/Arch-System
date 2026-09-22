@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useReportWebVitals } from "next/web-vitals";
-import { useCallback, useEffect, useRef } from "react";
-import { analyzePerformance, INPMonitor, LCPMonitor } from "@/lib/performance-analyzer";
+import { useReportWebVitals } from 'next/web-vitals';
+import { useCallback, useEffect, useRef } from 'react';
+import { analyzePerformance, INPMonitor, LCPMonitor } from '@/lib/performance-analyzer';
 
 interface Metric {
   name: string;
@@ -65,18 +65,18 @@ export function WebVitalsReporter() {
 
   useEffect(() => {
     const onHidden = () => flush();
-    document.addEventListener("visibilitychange", onHidden);
-    return () => document.removeEventListener("visibilitychange", onHidden);
+    document.addEventListener('visibilitychange', onHidden);
+    return () => document.removeEventListener('visibilitychange', onHidden);
   }, [flush]);
 
   useReportWebVitals((metric: Metric) => {
-    const isDev = process.env.NODE_ENV === "development";
+    const isDev = process.env.NODE_ENV === 'development';
 
     // Dev-only: rich console breakdown for LCP and INP
-    if (isDev && (metric.name === "LCP" || metric.name === "INP")) {
+    if (isDev && (metric.name === 'LCP' || metric.name === 'INP')) {
       const analysis = analyzePerformance({
-        lcp: metric.name === "LCP" ? metric.value : undefined,
-        inp: metric.name === "INP" ? metric.value : undefined,
+        lcp: metric.name === 'LCP' ? metric.value : undefined,
+        inp: metric.name === 'INP' ? metric.value : undefined,
       });
 
       // eslint-disable-next-line no-console
@@ -84,26 +84,26 @@ export function WebVitalsReporter() {
       // eslint-disable-next-line no-console
       console.log(`Value: ${metric.value.toFixed(0)}ms (${metric.rating})`);
 
-      if (metric.name === "LCP" && analysis.lcp) {
+      if (metric.name === 'LCP' && analysis.lcp) {
         // eslint-disable-next-line no-console
-        console.log("Breakdown:", analysis.lcp.breakdown);
+        console.log('Breakdown:', analysis.lcp.breakdown);
         // eslint-disable-next-line no-console
         console.log(
-          `Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`,
+          `Longest subpart: ${analysis.lcp.longestSubpart} (${analysis.lcp.breakdown[analysis.lcp.longestSubpart]}ms)`
         );
         // eslint-disable-next-line no-console
-        console.log("Optimization strategies:", analysis.lcp.strategies);
+        console.log('Optimization strategies:', analysis.lcp.strategies);
       }
 
-      if (metric.name === "INP" && analysis.inp) {
+      if (metric.name === 'INP' && analysis.inp) {
         // eslint-disable-next-line no-console
-        console.log("Breakdown:", analysis.inp.breakdown);
+        console.log('Breakdown:', analysis.inp.breakdown);
         // eslint-disable-next-line no-console
         console.log(
-          `Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`,
+          `Longest subpart: ${analysis.inp.longestSubpart} (${analysis.inp.breakdown[analysis.inp.longestSubpart]}ms)`
         );
         // eslint-disable-next-line no-console
-        console.log("Optimization strategies:", analysis.inp.strategies);
+        console.log('Optimization strategies:', analysis.inp.strategies);
       }
 
       // eslint-disable-next-line no-console
@@ -112,7 +112,7 @@ export function WebVitalsReporter() {
     }
 
     // Production: stamp metric on body for scraping
-    const attrName = `data-web-vital-${metric.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+    const attrName = `data-web-vital-${metric.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
     try {
       document.body.setAttribute(attrName, String(metric.value));
     } catch {
@@ -150,15 +150,15 @@ export function usePerformanceMonitoring(options?: {
   // AGENT-TRACE: Fixed unreachable cleanup — monitors are now created inside
   // useEffect and their cleanup runs on unmount via the return value.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     const inpMonitor = new INPMonitor((inp) => {
-      const rating = inp <= 200 ? "good" : inp <= 500 ? "needs-improvement" : "poor";
+      const rating = inp <= 200 ? 'good' : inp <= 500 ? 'needs-improvement' : 'poor';
       onINPChange?.(inp, rating);
     });
 
     const lcpMonitor = new LCPMonitor((lcp) => {
-      const rating = lcp <= 2500 ? "good" : lcp <= 4000 ? "needs-improvement" : "poor";
+      const rating = lcp <= 2500 ? 'good' : lcp <= 4000 ? 'needs-improvement' : 'poor';
       onLCPChange?.(lcp, rating);
     });
 

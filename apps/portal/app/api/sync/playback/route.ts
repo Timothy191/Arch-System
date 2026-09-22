@@ -54,15 +54,15 @@
  *         description: Internal server error
  */
 
-import { syncPlaybackSchema } from "@repo/contract/schemas/sync.schema";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { inngest, syncPlaybackEvent } from "@repo/utils/inngest";
-import { type NextRequest, NextResponse } from "next/server";
-import { withBodyLimit } from "@/lib/api/body-limit";
-import { applyCors } from "@/lib/api/cors";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { validateBody } from "@/lib/api/response";
-import { logError } from "@/lib/errors/error-logger";
+import { syncPlaybackSchema } from '@repo/contract/schemas/sync.schema';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { inngest, syncPlaybackEvent } from '@repo/utils/inngest';
+import { type NextRequest, NextResponse } from 'next/server';
+import { withBodyLimit } from '@/lib/api/body-limit';
+import { applyCors } from '@/lib/api/cors';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
+import { validateBody } from '@/lib/api/response';
+import { logError } from '@/lib/errors/error-logger';
 
 async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
   const supabase = await createServerSupabaseClient();
@@ -71,7 +71,7 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -79,7 +79,7 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     const body = await reqClone.json().catch(() => ({}));
     const { idempotencyKey, actionType, payload, departmentId } = body;
     if (!idempotencyKey || !actionType || !payload || !departmentId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const parsed = await validateBody(req, syncPlaybackSchema);
@@ -98,11 +98,11 @@ async function handlePlaybackRequest(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success: true, queued: true });
   } catch (err: unknown) {
     logError(err, {
-      context: "sync_playback",
+      context: 'sync_playback',
     });
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal Server Error" },
-      { status: 500 },
+      { error: err instanceof Error ? err.message : 'Internal Server Error' },
+      { status: 500 }
     );
   }
 }
@@ -113,6 +113,6 @@ export async function POST(req: NextRequest) {
     async () => {
       return applyCors(req, await withRateLimit(req, () => handlePlaybackRequest(req)));
     },
-    { maxSize: 1048576 },
+    { maxSize: 1048576 }
   );
 }

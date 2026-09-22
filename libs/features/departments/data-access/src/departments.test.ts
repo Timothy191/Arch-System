@@ -1,7 +1,7 @@
-import { DEPARTMENTS, PRODUCTIVITY_TOOLS } from "./departments";
+import { DEPARTMENTS, PRODUCTIVITY_TOOLS } from './departments';
 
-describe("DEPARTMENTS registry", () => {
-  it("defines all active departments with valid configurations", () => {
+describe('DEPARTMENTS registry', () => {
+  it('defines all active departments with valid configurations', () => {
     expect(DEPARTMENTS.length).toBeGreaterThanOrEqual(7);
 
     const names = new Set<string>();
@@ -43,21 +43,21 @@ describe("DEPARTMENTS registry", () => {
     }
   });
 
-  it("contains critical operational departments", () => {
+  it('contains critical operational departments', () => {
     const departmentNames = DEPARTMENTS.map((d) => d.name);
-    expect(departmentNames).toContain("drilling");
-    expect(departmentNames).toContain("production");
-    expect(departmentNames).toContain("access-control");
-    expect(departmentNames).toContain("engineering");
-    expect(departmentNames).toContain("control-room");
-    expect(departmentNames).toContain("admin");
-    expect(departmentNames).toContain("overview");
-    expect(departmentNames).not.toContain("safety");
-    expect(departmentNames).not.toContain("training");
-    expect(departmentNames).not.toContain("satellite-monitoring");
+    expect(departmentNames).toContain('drilling');
+    expect(departmentNames).toContain('production');
+    expect(departmentNames).toContain('access-control');
+    expect(departmentNames).toContain('engineering');
+    expect(departmentNames).toContain('control-room');
+    expect(departmentNames).toContain('admin');
+    expect(departmentNames).toContain('overview');
+    expect(departmentNames).not.toContain('safety');
+    expect(departmentNames).not.toContain('training');
+    expect(departmentNames).not.toContain('satellite-monitoring');
   });
 
-  it("defines valid productivity tools with unique names", () => {
+  it('defines valid productivity tools with unique names', () => {
     expect(PRODUCTIVITY_TOOLS.length).toBeGreaterThan(0);
     const toolNames = new Set<string>();
 

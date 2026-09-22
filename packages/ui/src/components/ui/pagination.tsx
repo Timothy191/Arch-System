@@ -1,6 +1,6 @@
-import { cn } from "@repo/ui/lib/utils";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "./button";
+import { cn } from '@repo/ui/lib/utils';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Button } from './button';
 
 export interface PaginationProps {
   className?: string;
@@ -45,7 +45,7 @@ export function Pagination({
       const end = Math.min(totalPages - 1, currentPage + 1);
 
       if (start > 2) {
-        pages.push("...");
+        pages.push('...');
       }
 
       for (let i = start; i <= end; i++) {
@@ -53,7 +53,7 @@ export function Pagination({
       }
 
       if (end < totalPages - 1) {
-        pages.push("...");
+        pages.push('...');
       }
 
       // Always show last page
@@ -65,21 +65,21 @@ export function Pagination({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white/40 backdrop-blur-md border border-black/[0.08] rounded-xl",
-        className,
+        'flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white/40 backdrop-blur-md border border-black/[0.08] rounded-xl',
+        className
       )}
     >
       {/* Total count status */}
       <div className="text-sm text-[var(--text-muted)] font-medium">
         {totalCount !== undefined ? (
           <>
-            Showing <span className="font-semibold text-[var(--text-heading)]">{startRange}</span>{" "}
-            to <span className="font-semibold text-[var(--text-heading)]">{endRange}</span> of{" "}
+            Showing <span className="font-semibold text-[var(--text-heading)]">{startRange}</span>{' '}
+            to <span className="font-semibold text-[var(--text-heading)]">{endRange}</span> of{' '}
             <span className="font-semibold text-[var(--text-heading)]">{totalCount}</span> entries
           </>
         ) : (
           <>
-            Page <span className="font-semibold text-[var(--text-heading)]">{currentPage}</span> of{" "}
+            Page <span className="font-semibold text-[var(--text-heading)]">{currentPage}</span> of{' '}
             <span className="font-semibold text-[var(--text-heading)]">{totalPages}</span>
           </>
         )}
@@ -135,7 +135,7 @@ export function Pagination({
           </Button>
 
           {getPageNumbers().map((page, index) => {
-            if (page === "...") {
+            if (page === '...') {
               return (
                 <span
                   key={`ellipsis-${index}`}
@@ -150,13 +150,13 @@ export function Pagination({
             return (
               <Button
                 key={`page-${page}`}
-                variant={isCurrent ? "default" : "outline"}
+                variant={isCurrent ? 'default' : 'outline'}
                 onClick={() => onPageChange(page as number)}
                 className={cn(
-                  "w-8 h-8 rounded-lg font-semibold text-sm",
+                  'w-8 h-8 rounded-lg font-semibold text-sm',
                   isCurrent
-                    ? "bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90"
-                    : "bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]",
+                    ? 'bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90'
+                    : 'bg-white/50 border-black/[0.08] text-[var(--text-heading)] hover:bg-black/[0.02]'
                 )}
               >
                 {page}

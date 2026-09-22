@@ -1,7 +1,7 @@
-import { cacheEvictL1ByPrefix, cacheGet, cacheSet } from "@repo/redis/cache";
-import { createMiddlewareClient } from "@repo/supabase/middleware";
-import { type NextRequest, NextResponse } from "next/server";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { cacheEvictL1ByPrefix, cacheGet, cacheSet } from '@repo/redis/cache';
+import { createMiddlewareClient } from '@repo/supabase/middleware';
+import { type NextRequest, NextResponse } from 'next/server';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 /**
  * Server-side redirect validation with canonicalization and allowlist
@@ -24,17 +24,17 @@ function isValidRedirect(path: string): boolean {
 
   // Reject protocol-relative URLs, data URIs, javascript: URIs
   if (
-    path.startsWith("//") ||
-    path.startsWith("/\\") ||
-    path.startsWith("data:") ||
-    path.startsWith("javascript:") ||
-    path.startsWith("vbscript:")
+    path.startsWith('//') ||
+    path.startsWith('/\\') ||
+    path.startsWith('data:') ||
+    path.startsWith('javascript:') ||
+    path.startsWith('vbscript:')
   ) {
     return false;
   }
 
   // Must start with a single slash (internal relative path)
-  if (!path.startsWith("/")) return false;
+  if (!path.startsWith('/')) return false;
 
   // Allowlist of permitted path patterns
   const allowedPatterns = [
@@ -60,39 +60,39 @@ function isValidRedirect(path: string): boolean {
 // restricted route, not a sub-route under (departments). Admin access is handled
 // separately via its own auth check in RESTRICTED_ROUTES.
 const DEPARTMENT_ROUTES = [
-  "drilling",
-  "production",
-  "access-control",
-  "engineering",
-  "control-room",
+  'drilling',
+  'production',
+  'access-control',
+  'engineering',
+  'control-room',
 ];
 
 const RESTRICTED_ROUTES: Record<string, string[]> = {
-  "access-control": ["access_control", "admin", "supervisor", "operator"],
-  "control-room": ["control_room_operator", "admin", "supervisor", "operator"],
-  tools: ["admin", "supervisor"],
-  admin: ["admin"],
+  'access-control': ['access_control', 'admin', 'supervisor', 'operator'],
+  'control-room': ['control_room_operator', 'admin', 'supervisor', 'operator'],
+  tools: ['admin', 'supervisor'],
+  admin: ['admin'],
 };
 
 export function normalizeRole(role: unknown): string {
-  if (typeof role === "string") {
+  if (typeof role === 'string') {
     const trimmed = role.trim();
     if (trimmed.length > 0) return trimmed;
   }
-  return "operator";
+  return 'operator';
 }
 
 export function isTokenExpiredError(error: unknown): boolean {
-  if (!error || typeof error !== "object" || !("message" in error)) {
+  if (!error || typeof error !== 'object' || !('message' in error)) {
     return false;
   }
   const msg = String(error.message);
-  return msg.includes("Invalid Refresh Token") || msg.includes("Refresh Token Not Found");
+  return msg.includes('Invalid Refresh Token') || msg.includes('Refresh Token Not Found');
 }
 
 function redirectWithError(request: NextRequest, error: string, clientResponse?: NextResponse) {
-  const url = new URL("/", request.url);
-  url.searchParams.set("error", error);
+  const url = new URL('/', request.url);
+  url.searchParams.set('error', error);
   const res = NextResponse.redirect(url);
   if (clientResponse?.cookies) {
     clientResponse.cookies.getAll().forEach((cookie) => {
@@ -111,14 +111,14 @@ function redirectWithError(request: NextRequest, error: string, clientResponse?:
 }
 
 async function resolveDeptUuid(
-  supabase: Awaited<ReturnType<typeof createMiddlewareClient>>["supabase"],
-  slug: string,
+  supabase: Awaited<ReturnType<typeof createMiddlewareClient>>['supabase'],
+  slug: string
 ): Promise<string | null> {
   const cacheKey = `dept:uuid:${slug}`;
   const cached = await cacheGet<string>(cacheKey);
   if (cached) return cached;
 
-  const { data } = await supabase.from("departments").select("id").eq("name", slug).single();
+  const { data } = await supabase.from('departments').select('id').eq('name', slug).single();
   if (data?.id) {
     await cacheSet(cacheKey, data.id, 3600); // 1 hour
   }
@@ -130,15 +130,15 @@ export async function proxy(request: NextRequest) {
 
   // Exempt health, hardware API, and Prometheus metrics endpoints from authentication entirely
   if (
-    pathname.startsWith("/api/c66") ||
-    pathname.startsWith("/api/health") ||
-    pathname.startsWith("/api/metrics")
+    pathname.startsWith('/api/c66') ||
+    pathname.startsWith('/api/health') ||
+    pathname.startsWith('/api/metrics')
   ) {
     return NextResponse.next();
   }
 
   // Exempt password reset and update flows from middleware auth gating
-  if (pathname.startsWith("/reset-password") || pathname.startsWith("/update-password")) {
+  if (pathname.startsWith('/reset-password') || pathname.startsWith('/update-password')) {
     return NextResponse.next();
   }
 
@@ -152,13 +152,13 @@ export async function proxy(request: NextRequest) {
   // Short-circuit well-known public root files (PWA manifest, robots, sitemap...)
   // These are never auth-gated and must never redirect to /login.
   const PUBLIC_ROOT_FILES = new Set([
-    "/manifest.json",
-    "/manifest.webmanifest",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/browserconfig.xml",
-    "/sw.js",
-    "/workbox-*.js",
+    '/manifest.json',
+    '/manifest.webmanifest',
+    '/robots.txt',
+    '/sitemap.xml',
+    '/browserconfig.xml',
+    '/sw.js',
+    '/workbox-*.js',
   ]);
   if (
     PUBLIC_ROOT_FILES.has(pathname) ||
@@ -172,12 +172,12 @@ export async function proxy(request: NextRequest) {
   // network round-trip (~50 s cold) for a public unauthenticated route.
   // We only need auth here if there IS a session cookie (to redirect logged-in
   // users away from /login), so we check that cheaply first.
-  if (pathname.startsWith("/login")) {
+  if (pathname.startsWith('/login')) {
     const hasSession =
-      request.cookies.has("sb-access-token") ||
+      request.cookies.has('sb-access-token') ||
       [...request.cookies.getAll()].some(
         (c) =>
-          (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
+          (c.name.startsWith('sb-') || c.name.includes('sb-')) && c.name.includes('-auth-token')
       );
 
     if (!hasSession) {
@@ -204,7 +204,7 @@ export async function proxy(request: NextRequest) {
     if (shouldSignOut) {
       // Record middleware sign-out triggered due to expired/invalid token
       try {
-        recordJobExecution("auth.middleware.signout", 0, false);
+        recordJobExecution('auth.middleware.signout', 0, false);
         // eslint-disable-next-line no-empty
       } catch {}
       await client.supabase.auth.signOut();
@@ -213,14 +213,14 @@ export async function proxy(request: NextRequest) {
 
     if (sessionUser) {
       try {
-        recordJobExecution("auth.middleware.check", 0, true);
+        recordJobExecution('auth.middleware.check', 0, true);
         // eslint-disable-next-line no-empty
       } catch {}
-      const redirectParam = request.nextUrl.searchParams.get("redirect");
+      const redirectParam = request.nextUrl.searchParams.get('redirect');
       const target =
-        redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith("/login")
+        redirectParam && isValidRedirect(redirectParam) && !redirectParam.startsWith('/login')
           ? redirectParam
-          : "/hub";
+          : '/hub';
       const redirectRes = NextResponse.redirect(new URL(target, request.url));
       if (client.response?.cookies) {
         client.response.cookies.getAll().forEach((cookie) => {
@@ -238,7 +238,7 @@ export async function proxy(request: NextRequest) {
       return redirectRes;
     }
     try {
-      recordJobExecution("auth.middleware.check", 0, false);
+      recordJobExecution('auth.middleware.check', 0, false);
       // eslint-disable-next-line no-empty
     } catch {}
     return client.response;
@@ -247,15 +247,15 @@ export async function proxy(request: NextRequest) {
   // Check if session cookie exists before creating Supabase middleware client or calling auth.getUser().
   // If no session cookie exists, short-circuit immediately to /login without network round-trip.
   const hasSessionCookie =
-    request.cookies.has("sb-access-token") ||
+    request.cookies.has('sb-access-token') ||
     [...request.cookies.getAll()].some(
-      (c) => (c.name.startsWith("sb-") || c.name.includes("sb-")) && c.name.includes("-auth-token"),
+      (c) => (c.name.startsWith('sb-') || c.name.includes('sb-')) && c.name.includes('-auth-token')
     );
 
   if (!hasSessionCookie) {
-    const redirectUrl = new URL("/login", request.url);
+    const redirectUrl = new URL('/login', request.url);
     if (isValidRedirect(pathname)) {
-      redirectUrl.searchParams.set("redirect", pathname);
+      redirectUrl.searchParams.set('redirect', pathname);
     }
     return NextResponse.redirect(redirectUrl);
   }
@@ -285,10 +285,10 @@ export async function proxy(request: NextRequest) {
 
   // Not authenticated -> login
   if (!user) {
-    const redirectUrl = new URL("/login", request.url);
+    const redirectUrl = new URL('/login', request.url);
     // Only set redirect parameter if it passes server-side validation
     if (isValidRedirect(pathname)) {
-      redirectUrl.searchParams.set("redirect", pathname);
+      redirectUrl.searchParams.set('redirect', pathname);
     }
     const redirectResponse = NextResponse.redirect(redirectUrl);
     // Copy cookies from client.response to the redirectResponse
@@ -324,20 +324,20 @@ export async function proxy(request: NextRequest) {
     }>(employeeCacheKey);
 
     const timeoutPromise = new Promise<null>((_, reject) =>
-      setTimeout(() => reject(new Error("Redis cache timeout")), 150),
+      setTimeout(() => reject(new Error('Redis cache timeout')), 150)
     );
 
     employee = await Promise.race([cachePromise, timeoutPromise]);
-  } catch (err) {
+  } catch (_err) {
     // Redis offline or timeout — fall through to direct DB fetch
     employee = null;
   }
 
   if (!employee) {
     const { data } = await client.supabase
-      .from("employees")
-      .select("role, department_id, accessible_departments")
-      .eq("auth_id", user.id)
+      .from('employees')
+      .select('role, department_id, accessible_departments')
+      .eq('auth_id', user.id)
       .single();
     employee = data ?? null;
     if (employee) {
@@ -349,38 +349,38 @@ export async function proxy(request: NextRequest) {
   const userDept = employee?.department_id ?? null;
   const accessible = employee?.accessible_departments ?? [];
 
-  const pathSegments = pathname.split("/").filter(Boolean);
+  const pathSegments = pathname.split('/').filter(Boolean);
   const topSegment = pathSegments[0];
   const secondSegment = pathSegments[1];
 
   // Check restricted top-level routes
   for (const [route, allowedRoles] of Object.entries(RESTRICTED_ROUTES)) {
     if (pathname.startsWith(`/${route}`) && !allowedRoles.includes(userRole)) {
-      return redirectWithError(request as any, "unauthorized_department", client.response as any);
+      return redirectWithError(request as any, 'unauthorized_department', client.response as any);
     }
   }
 
   // Also check /{dept}/tools restriction
   if (
-    secondSegment === "tools" &&
+    secondSegment === 'tools' &&
     RESTRICTED_ROUTES.tools &&
     !RESTRICTED_ROUTES.tools.includes(userRole)
   ) {
-    return redirectWithError(request as any, "unauthorized_department", client.response as any);
+    return redirectWithError(request as any, 'unauthorized_department', client.response as any);
   }
 
   // Check department isolation
   if (topSegment && DEPARTMENT_ROUTES.includes(topSegment)) {
-    const isAdmin = userRole === "admin";
+    const isAdmin = userRole === 'admin';
 
     const deptUuid = await resolveDeptUuid(client.supabase, topSegment);
     if (!deptUuid) {
-      return redirectWithError(request as any, "unknown_department", client.response as any);
+      return redirectWithError(request as any, 'unknown_department', client.response as any);
     }
 
     const hasAccess = isAdmin || userDept === deptUuid || accessible.includes(deptUuid);
     if (!hasAccess) {
-      return redirectWithError(request as any, "unauthorized_department", client.response as any);
+      return redirectWithError(request as any, 'unauthorized_department', client.response as any);
     }
   }
 
@@ -391,5 +391,5 @@ export const config = {
   // Exclude static assets and API routes from middleware.
   // API routes handle their own auth; running Supabase getUser() here adds
   // a redundant round-trip (and ~50 s cold-start risk) to every API call.
-  matcher: ["/((?!_next/static|_next/image|api/|favicon.ico).*)"],
+  matcher: ['/((?!_next/static|_next/image|api/|favicon.ico).*)'],
 };

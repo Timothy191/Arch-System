@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getMetrics } from "@/lib/observability/metrics";
+import { type NextRequest, NextResponse } from 'next/server';
+import { getMetrics } from '@/lib/observability/metrics';
 
 /**
  * @swagger
@@ -36,15 +36,15 @@ export async function GET(req: NextRequest) {
     // AGENT-TRACE: Optional token validation for Prometheus scraping security
     const scrapeToken = process.env.METRICS_SCRAPE_TOKEN;
     if (scrapeToken) {
-      const authHeader = req.headers.get("Authorization");
-      const queryToken = req.nextUrl.searchParams.get("token");
-      const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : queryToken;
+      const authHeader = req.headers.get('Authorization');
+      const queryToken = req.nextUrl.searchParams.get('token');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : queryToken;
 
       if (token !== scrapeToken) {
-        return new NextResponse("Unauthorized", {
+        return new NextResponse('Unauthorized', {
           status: 401,
           headers: {
-            "Content-Type": "text/plain",
+            'Content-Type': 'text/plain',
           },
         });
       }
@@ -54,14 +54,14 @@ export async function GET(req: NextRequest) {
     return new NextResponse(metrics, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain",
+        'Content-Type': 'text/plain',
       },
     });
   } catch (_error) {
-    return new NextResponse("Error generating metrics", {
+    return new NextResponse('Error generating metrics', {
       status: 500,
       headers: {
-        "Content-Type": "text/plain",
+        'Content-Type': 'text/plain',
       },
     });
   }

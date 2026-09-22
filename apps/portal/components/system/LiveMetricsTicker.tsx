@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { useSystemMetrics } from "@/hooks/useSystemMetrics";
+import { cn } from '@repo/ui/lib/utils';
+import { useSystemMetrics } from '@/hooks/useSystemMetrics';
 
 interface LiveMetricsTickerProps {
   className?: string;
@@ -20,19 +20,19 @@ export function LiveMetricsTicker({ className }: LiveMetricsTickerProps) {
     <div
       data-testid="live-metrics-ticker"
       className={cn(
-        "flex items-center gap-2 font-mono text-[10px] tracking-wider text-black/45 select-none",
-        className,
+        'flex items-center gap-2 font-mono text-[10px] tracking-wider text-black/45 select-none',
+        className
       )}
     >
       <div className="flex items-center gap-1">
         <span
           data-testid="pulsing-indicator"
           className={cn(
-            "w-1.5 h-1.5 rounded-full animate-pulse",
-            online ? "bg-emerald-500" : "bg-rose-500",
+            'w-1.5 h-1.5 rounded-full animate-pulse',
+            online ? 'bg-emerald-500' : 'bg-rose-500'
           )}
         />
-        <span className="font-semibold">{online ? "SYS_OK" : "SYS_OFF"}</span>
+        <span className="font-semibold">{online ? 'SYS_OK' : 'SYS_OFF'}</span>
       </div>
 
       <span className="opacity-40">|</span>

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from 'react';
 
 /**
  * Hook to reactively evaluate media query strings using useSyncExternalStore.
@@ -8,18 +8,18 @@ import { useSyncExternalStore, useCallback } from "react";
 export function useMediaQuery(query: string): boolean {
   const subscribe = useCallback(
     (onChange: () => void) => {
-      if (typeof window === "undefined" || !window.matchMedia) {
+      if (typeof window === 'undefined' || !window.matchMedia) {
         return () => {};
       }
       const matchMedia = window.matchMedia(query);
-      matchMedia.addEventListener("change", onChange);
-      return () => matchMedia.removeEventListener("change", onChange);
+      matchMedia.addEventListener('change', onChange);
+      return () => matchMedia.removeEventListener('change', onChange);
     },
-    [query],
+    [query]
   );
 
   const getSnapshot = useCallback(() => {
-    if (typeof window === "undefined" || !window.matchMedia) {
+    if (typeof window === 'undefined' || !window.matchMedia) {
       return false;
     }
     return window.matchMedia(query).matches;

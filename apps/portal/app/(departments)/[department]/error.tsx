@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import Link from "next/link";
-import { useEffect } from "react";
-import { isAppError, isAuthError, isNotFoundError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import Link from 'next/link';
+import { useEffect } from 'react';
+import { isAppError, isAuthError, isNotFoundError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
 
 interface DepartmentErrorProps {
   error: Error & { digest?: string };
@@ -12,25 +12,25 @@ interface DepartmentErrorProps {
 }
 
 function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return "Department not found";
-  if (isAuthError(error)) return "Access denied";
-  if (isAppError(error)) return error.name.replace(/([A-Z])/g, " $1").trim();
-  return "Department Error";
+  if (isNotFoundError(error)) return 'Department not found';
+  if (isAuthError(error)) return 'Access denied';
+  if (isAppError(error)) return error.name.replace(/([A-Z])/g, ' $1').trim();
+  return 'Department Error';
 }
 
 function getErrorMessage(error: Error): string {
   if (isAppError(error)) return error.message;
-  return error.message || "Failed to load department data.";
+  return error.message || 'Failed to load department data.';
 }
 
 function getActionLink(error: Error): { href: string; label: string } {
   if (isNotFoundError(error)) {
-    return { href: "/", label: "Back to Hub" };
+    return { href: '/', label: 'Back to Hub' };
   }
   if (isAuthError(error)) {
-    return { href: "/login", label: "Sign in" };
+    return { href: '/login', label: 'Sign in' };
   }
-  return { href: "/", label: "Back to Hub" };
+  return { href: '/', label: 'Back to Hub' };
 }
 
 export default function DepartmentError({ error, reset }: DepartmentErrorProps) {

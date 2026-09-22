@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import type { ShiftTireEvent } from "@repo/contract/types/shift-compilation.types";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, CheckCircle2, Disc, Gauge, Ruler } from "lucide-react";
+import type { ShiftTireEvent } from '@repo/contract/types/shift-compilation.types';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, CheckCircle2, Disc, Gauge, Ruler } from 'lucide-react';
 
 interface TireAlertsBannerProps {
   tireEvents: ShiftTireEvent[];
 }
 
 export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
-  const criticalCount = tireEvents.filter((t) => t.condition_status === "critical").length;
-  const warningCount = tireEvents.filter((t) => t.condition_status === "warning").length;
+  const criticalCount = tireEvents.filter((t) => t.condition_status === 'critical').length;
+  const warningCount = tireEvents.filter((t) => t.condition_status === 'warning').length;
 
   return (
     <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
@@ -53,18 +53,18 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {tireEvents.map((event) => {
-              const isCritical = event.condition_status === "critical";
-              const isWarning = event.condition_status === "warning";
+              const isCritical = event.condition_status === 'critical';
+              const isWarning = event.condition_status === 'warning';
 
               return (
                 <div
                   key={event.id}
                   className={`p-3.5 rounded-lg border text-xs flex flex-col justify-between ${
                     isCritical
-                      ? "border-rose-200 bg-rose-50/40"
+                      ? 'border-rose-200 bg-rose-50/40'
                       : isWarning
-                        ? "border-amber-200 bg-amber-50/40"
-                        : "border-black/[0.06] bg-white/50"
+                        ? 'border-amber-200 bg-amber-50/40'
+                        : 'border-black/[0.06] bg-white/50'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -82,10 +82,10 @@ export function TireAlertsBanner({ tireEvents }: TireAlertsBannerProps) {
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
                         isCritical
-                          ? "bg-rose-100 text-rose-800 border border-rose-200"
+                          ? 'bg-rose-100 text-rose-800 border border-rose-200'
                           : isWarning
-                            ? "bg-amber-100 text-amber-800 border border-amber-200"
-                            : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                       }`}
                     >
                       {event.condition_status}

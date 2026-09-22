@@ -1,8 +1,8 @@
-import { PRODUCTIVITY_TOOLS } from "@repo/departments/data-access";
-import { CacheCategory } from "@repo/redis";
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { withCache } from "@/lib/cache-utils";
-import { cachedRSC } from "@/lib/server-cache";
+import { PRODUCTIVITY_TOOLS } from '@repo/departments/data-access';
+import { CacheCategory } from '@repo/redis';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { withCache } from '@/lib/cache-utils';
+import { cachedRSC } from '@/lib/server-cache';
 
 interface Tool {
   id: string;
@@ -27,24 +27,24 @@ interface ExternalTool {
  * Falls back to PRODUCTIVITY_TOOLS constant if database query fails.
  */
 export async function getTools(
-  cookieList?: Array<{ name: string; value: string }>,
+  cookieList?: Array<{ name: string; value: string }>
 ): Promise<Tool[]> {
   return cachedRSC(
-    ["hub", "tools"],
+    ['hub', 'tools'],
     async () => {
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
 
           const { data, error } = await db
-            .from("tools")
-            .select("id, name, display_name, description, icon, color")
-            .eq("active", true)
-            .order("sort_order", { ascending: true });
+            .from('tools')
+            .select('id, name, display_name, description, icon, color')
+            .eq('active', true)
+            .order('sort_order', { ascending: true });
 
           if (error) {
             // eslint-disable-next-line no-console
-            console.warn("Failed to fetch tools from database, falling back to constant:", error);
+            console.warn('Failed to fetch tools from database, falling back to constant:', error);
             return PRODUCTIVITY_TOOLS.map((t, i) => ({
               id: String(i),
               name: t.name,
@@ -77,15 +77,15 @@ export async function getTools(
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "tools"],
-          tags: ["table:tools"],
-        },
+          keyParts: ['hub', 'tools'],
+          tags: ['table:tools'],
+        }
       );
     },
     {
       revalidate: 3600,
-      tags: ["table:tools"],
-    },
+      tags: ['table:tools'],
+    }
   );
 }
 
@@ -99,11 +99,11 @@ export async function getTools(
  */
 export const EXTERNAL_TOOLS: ExternalTool[] = [
   {
-    name: "flowise",
-    displayName: "Flowise",
-    url: process.env.FLOWISE_URL ?? "http://localhost:3001",
-    description: "Visual AI workflow builder — drag-and-drop LangChain agents and LLM pipelines",
-    icon: "Bot",
-    color: "#3ecf8e",
+    name: 'flowise',
+    displayName: 'Flowise',
+    url: process.env.FLOWISE_URL ?? 'http://localhost:3001',
+    description: 'Visual AI workflow builder — drag-and-drop LangChain agents and LLM pipelines',
+    icon: 'Bot',
+    color: '#3ecf8e',
   },
 ];

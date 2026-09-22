@@ -1,11 +1,11 @@
-import type { IStore, IStrategy, RateLimitOptions, RateLimitResult } from "./interfaces";
+import type { IStore, IStrategy, RateLimitOptions, RateLimitResult } from './interfaces';
 
-export * from "./interfaces";
-export * from "./stores/memory.store";
-export * from "./stores/redis.store";
-export * from "./strategies/fixed-window";
-export * from "./strategies/sliding-window";
-export * from "./strategies/token-bucket";
+export * from './interfaces';
+export * from './stores/memory.store';
+export * from './stores/redis.store';
+export * from './strategies/fixed-window';
+export * from './strategies/sliding-window';
+export * from './strategies/token-bucket';
 
 export class RateLimiter {
   private store: IStore;
@@ -19,7 +19,7 @@ export class RateLimiter {
     this.strategy = options.strategy;
     this.limit = options.limit;
     this.windowMs = options.windowMs;
-    this.keyPrefix = options.keyPrefix || "ratelimit:";
+    this.keyPrefix = options.keyPrefix || 'ratelimit:';
   }
 
   async check(identifier: string): Promise<RateLimitResult> {

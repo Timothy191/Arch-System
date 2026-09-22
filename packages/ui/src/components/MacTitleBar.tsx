@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { cn } from "../lib/utils";
+import { cn } from '../lib/utils';
 
 interface MacTitleBarProps {
   title?: string;
@@ -22,10 +22,10 @@ export function MacTitleBar({
   return (
     <div
       className={cn(
-        "group/titlebar flex items-center gap-3 px-4 h-11",
-        "bg-white/50 backdrop-blur-sm border-b border-black/[0.06]",
-        "select-none shrink-0",
-        className,
+        'group/titlebar flex items-center gap-3 px-4 h-11',
+        'bg-white/50 backdrop-blur-sm border-b border-black/[0.06]',
+        'select-none shrink-0',
+        className
       )}
     >
       {/* Traffic lights */}

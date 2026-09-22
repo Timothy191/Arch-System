@@ -3,8 +3,8 @@
  * No React/RevoGrid imports here so the regression tests never mount the grid.
  */
 
-export type HourlyShift = "day" | "night";
-export type HourlyMaterial = "Waste" | "Coal";
+export type HourlyShift = 'day' | 'night';
+export type HourlyMaterial = 'Waste' | 'Coal';
 
 export interface HourlyLoad {
   id: string;
@@ -30,7 +30,7 @@ export const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 
 /** Maps a 0-based hour index to its DB column name, e.g. 0 -> "hour_01", 11 -> "hour_12". */
 export function HOUR_PROP(hourIndex: number): string {
-  return `hour_${(hourIndex + 1).toString().padStart(2, "0")}`;
+  return `hour_${(hourIndex + 1).toString().padStart(2, '0')}`;
 }
 
 /** Composite key for one machine+shift row. */
@@ -57,6 +57,6 @@ export function sumHourlyTotal(load: HourlyLoad | Record<string, unknown>): numb
   // HOURS_12 is 1-based; HOUR_PROP expects a 0-based hour index.
   return HOURS_12.reduce((acc, i) => {
     const value = record[HOUR_PROP(i - 1)];
-    return acc + (typeof value === "number" ? value : 0);
+    return acc + (typeof value === 'number' ? value : 0);
   }, 0);
 }

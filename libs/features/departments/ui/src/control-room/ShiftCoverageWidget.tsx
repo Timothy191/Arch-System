@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { AvatarGroup, Badge } from "@repo/ui";
-import { EmptyState } from "@repo/ui/EmptyState";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, CheckCircle, Clock, XCircle } from "lucide-react";
-import { memo, useEffect, useState } from "react";
-import { CloseShiftModal } from "./CloseShiftModal";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { AvatarGroup, Badge } from '@repo/ui';
+import { EmptyState } from '@repo/ui/EmptyState';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { memo, useEffect, useState } from 'react';
+import { CloseShiftModal } from './CloseShiftModal';
 
 interface ShiftCoverageWidgetProps {
   departmentId: string;
   departmentSlug: string;
   today: string;
-  currentShift: "day" | "night";
+  currentShift: 'day' | 'night';
 }
 
 interface MachineWithOp {
@@ -47,17 +47,17 @@ function ShiftCoverageWidgetBase({
       try {
         const [machinesRes, opsRes] = await Promise.all([
           supabase
-            .from("machines")
-            .select("id, name, machine_type")
-            .eq("department_id", departmentId)
-            .eq("active", true)
-            .order("name"),
+            .from('machines')
+            .select('id, name, machine_type')
+            .eq('department_id', departmentId)
+            .eq('active', true)
+            .order('name'),
           supabase
-            .from("machine_operations")
-            .select("machine_id, hours_worked")
-            .eq("department_id", departmentId)
-            .eq("shift_date", today)
-            .eq("shift_type", currentShift),
+            .from('machine_operations')
+            .select('machine_id, hours_worked')
+            .eq('department_id', departmentId)
+            .eq('shift_date', today)
+            .eq('shift_type', currentShift),
         ]);
 
         if (cancelled) return;
@@ -83,19 +83,19 @@ function ShiftCoverageWidgetBase({
         setMachines(machinesWithOps);
 
         const { data: statusData } = await supabase
-          .from("shift_status")
-          .select("status")
-          .eq("department_id", departmentId)
-          .eq("shift_date", today)
-          .eq("shift_type", currentShift)
+          .from('shift_status')
+          .select('status')
+          .eq('department_id', departmentId)
+          .eq('shift_date', today)
+          .eq('shift_type', currentShift)
           .maybeSingle();
 
-        if (statusData?.status === "closed") {
+        if (statusData?.status === 'closed') {
           setIsClosed(true);
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load data");
+          setError(err instanceof Error ? err.message : 'Failed to load data');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -164,10 +164,10 @@ function ShiftCoverageWidgetBase({
               limit={4}
               overlap="auto"
               members={[
-                { letter: "CR", title: "Control Room Lead" },
-                { letter: "OP", title: "Shift Operator" },
-                { letter: "SO", title: "Safety Officer" },
-                { letter: "ME", title: "Maintenance Engineer" },
+                { letter: 'CR', title: 'Control Room Lead' },
+                { letter: 'OP', title: 'Shift Operator' },
+                { letter: 'SO', title: 'Safety Officer' },
+                { letter: 'ME', title: 'Maintenance Engineer' },
               ]}
             />
             <Clock className="w-5 h-5 text-[var(--text-muted)]" />
@@ -221,7 +221,7 @@ function ShiftCoverageWidgetBase({
                         {m.name}
                       </td>
                       <td className="px-3 py-2 text-right text-[var(--text-heading)]">
-                        {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : "—"}
+                        {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : '—'}
                       </td>
                       <td className="px-3 py-2 text-center">
                         {m.has_entry && m.hours_worked !== null && m.hours_worked > 0 ? (

@@ -16,7 +16,7 @@
  * ```
  */
 
-import { ZodError, type z } from "zod";
+import { ZodError, type z } from 'zod';
 
 // ---------------------------------------------------------------------------
 // ValidationError — structured error for API validation failures
@@ -28,7 +28,7 @@ export class ValidationError extends Error {
 
   constructor(message: string, issues: z.ZodIssue[]) {
     super(message);
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
     this.statusCode = 400;
     this.issues = issues;
   }
@@ -57,7 +57,7 @@ export async function validateBody<T>(schema: z.ZodType<T>, request: Request): P
     const result = schema.safeParse(body);
 
     if (!result.success) {
-      throw new ValidationError("Request body validation failed", result.error.issues);
+      throw new ValidationError('Request body validation failed', result.error.issues);
     }
 
     return result.data;
@@ -67,11 +67,11 @@ export async function validateBody<T>(schema: z.ZodType<T>, request: Request): P
 
     // Catch ZodError for cases where the schema itself throws
     if (err instanceof ZodError) {
-      throw new ValidationError("Request body validation failed", err.issues);
+      throw new ValidationError('Request body validation failed', err.issues);
     }
 
     // Invalid JSON or other parse errors
-    throw new ValidationError("Request body must be valid JSON", []);
+    throw new ValidationError('Request body must be valid JSON', []);
   }
 }
 
@@ -101,13 +101,13 @@ export function withValidation<T>(
     // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     data: T,
     // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-    context: { params: Promise<unknown> },
-  ) => Promise<Response> | Response,
+    context: { params: Promise<unknown> }
+  ) => Promise<Response> | Response
 ): (
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
   request: Request,
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  context: { params: Promise<unknown> },
+  context: { params: Promise<unknown> }
 ) => Promise<Response> {
   return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
@@ -117,7 +117,7 @@ export function withValidation<T>(
       if (err instanceof ValidationError) {
         return Response.json(
           { error: err.message, issues: err.issues },
-          { status: err.statusCode },
+          { status: err.statusCode }
         );
       }
 
@@ -153,13 +153,13 @@ export function withQueryValidation<T>(
     // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
     query: T,
     // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-    context: { params: Promise<unknown> },
-  ) => Promise<Response> | Response,
+    context: { params: Promise<unknown> }
+  ) => Promise<Response> | Response
 ): (
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
   request: Request,
   // eslint-disable-next-line no-unused-vars -- Callback type signature parameter
-  context: { params: Promise<unknown> },
+  context: { params: Promise<unknown> }
 ) => Promise<Response> {
   return async (request: Request, context: { params: Promise<unknown> }): Promise<Response> => {
     try {
@@ -170,10 +170,10 @@ export function withQueryValidation<T>(
       if (!result.success) {
         return Response.json(
           {
-            error: "Query parameter validation failed",
+            error: 'Query parameter validation failed',
             issues: result.error.issues,
           },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -182,7 +182,7 @@ export function withQueryValidation<T>(
       if (err instanceof ValidationError) {
         return Response.json(
           { error: err.message, issues: err.issues },
-          { status: err.statusCode },
+          { status: err.statusCode }
         );
       }
 

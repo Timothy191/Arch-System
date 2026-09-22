@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { Puzzle, Settings } from "lucide-react";
-import { memo } from "react";
+import { Handle, type NodeProps, Position } from '@xyflow/react';
+import { Puzzle, Settings } from 'lucide-react';
+import { memo } from 'react';
 
 // =============================================================================
 // Plugin Node Data Type
@@ -28,7 +28,7 @@ export const PluginNode = memo(function PluginNode({ data: rawData, selected }: 
         bg-gradient-to-br from-[#f5f5f7] to-white
         backdrop-blur-xl shadow-card
         transition-all duration-200
-        ${selected ? "ring-2 ring-[#007aff] ring-offset-2" : ""}
+        ${selected ? 'ring-2 ring-[#007aff] ring-offset-2' : ''}
       `}
     >
       {/* Header */}
@@ -37,7 +37,7 @@ export const PluginNode = memo(function PluginNode({ data: rawData, selected }: 
           <Puzzle className="w-3.5 h-3.5 text-[#34c759]" />
         </div>
         <span className="text-xs font-medium text-[#1d1d1f] truncate">
-          {data.label || "Plugin Step"}
+          {data.label || 'Plugin Step'}
         </span>
         <button
           type="button"
@@ -53,7 +53,7 @@ export const PluginNode = memo(function PluginNode({ data: rawData, selected }: 
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#6e6e73] uppercase tracking-wide">Plugin ID</span>
           <span className="text-[10px] font-mono text-[#3a3a3c] truncate max-w-[100px]">
-            {data.pluginId || "not set"}
+            {data.pluginId || 'not set'}
           </span>
         </div>
 

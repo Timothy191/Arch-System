@@ -31,10 +31,10 @@
  *                   format: date-time
  */
 
-import { getCacheStats, getRedisClient } from "@repo/redis";
-import { NextResponse } from "next/server";
+import { getCacheStats, getRedisClient } from '@repo/redis';
+import { NextResponse } from 'next/server';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const stats = await getCacheStats();
@@ -50,7 +50,7 @@ export async function GET() {
   const hitRate = total > 0 ? Math.round((stats.hits / total) * 10000) / 10000 : 0;
 
   return NextResponse.json({
-    status: redisConnected ? "healthy" : "degraded",
+    status: redisConnected ? 'healthy' : 'degraded',
     hitRate,
     ...stats,
     redisConnected,

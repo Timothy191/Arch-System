@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 // AGENT-TRACE: error.tsx is intentionally kept dependency-light so the error
 // boundary loads fast even when the rest of the app is broken. It avoids
@@ -6,13 +6,13 @@
 // Sentry import from error-logger. Sentry is already initialized globally via
 // sentry.client.config.ts, so unhandled errors are captured automatically; the
 // structured logger is code-split so it never bloats this boundary's bundle.
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import {
   isAppError,
   isAuthError,
   isNotFoundError,
   isValidationError,
-} from "@/lib/errors/error-classes";
+} from '@/lib/errors/error-classes';
 
 interface RootErrorProps {
   error: Error & { digest?: string };
@@ -23,14 +23,14 @@ interface RootErrorProps {
  * Get user-friendly error title based on error type
  */
 function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return "Page not found";
-  if (isAuthError(error)) return "Access denied";
-  if (isValidationError(error)) return "Invalid input";
+  if (isNotFoundError(error)) return 'Page not found';
+  if (isAuthError(error)) return 'Access denied';
+  if (isValidationError(error)) return 'Invalid input';
   if (isAppError(error)) {
     // Use the error name for other AppErrors
-    return error.name.replace(/([A-Z])/g, " $1").trim();
+    return error.name.replace(/([A-Z])/g, ' $1').trim();
   }
-  return "Something went wrong";
+  return 'Something went wrong';
 }
 
 /**
@@ -42,7 +42,7 @@ function getErrorMessage(error: Error): string {
     return error.message;
   }
   // Fallback for generic errors
-  return error.message || "An unexpected error occurred. Please try again.";
+  return error.message || 'An unexpected error occurred. Please try again.';
 }
 
 /**
@@ -60,10 +60,10 @@ export default function RootError({ error, reset }: RootErrorProps) {
     // Code-split the Sentry-backed structured logger so it never lands in the
     // error boundary's initial bundle. Sentry's global init still captures
     // unhandled errors automatically.
-    import("@/lib/errors/error-logger")
+    import('@/lib/errors/error-logger')
       .then(({ logError }) => logError(error))
       .catch(() => {
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === 'development') {
           // eslint-disable-next-line no-console
           console.error(error);
         }
@@ -73,7 +73,7 @@ export default function RootError({ error, reset }: RootErrorProps) {
   const title = getErrorTitle(error);
   const message = getErrorMessage(error);
   const context = getErrorContext(error);
-  const isDev = process.env.NODE_ENV === "development";
+  const isDev = process.env.NODE_ENV === 'development';
   const appError = isAppError(error) ? (error as any) : null;
 
   return (

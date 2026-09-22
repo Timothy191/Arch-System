@@ -1,11 +1,11 @@
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { BorderBox } from "@repo/ui/BorderBox";
-import { Divider } from "@repo/ui/Divider";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, Clock, Drill } from "lucide-react";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { BorderBox } from '@repo/ui/BorderBox';
+import { Divider } from '@repo/ui/Divider';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, Clock, Drill } from 'lucide-react';
+import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 async function getDrillingDashboardData(deptId: string, today: string) {
   const db = await createReadReplicaClient();
@@ -17,26 +17,26 @@ async function getDrillingDashboardData(deptId: string, today: string) {
     { data: todayDelays },
   ] = await Promise.all([
     db
-      .from("daily_logs")
-      .select("id, log_date, shift")
-      .eq("department_id", deptId)
-      .eq("log_date", today)
-      .order("shift"),
+      .from('daily_logs')
+      .select('id, log_date, shift')
+      .eq('department_id', deptId)
+      .eq('log_date', today)
+      .order('shift'),
     db
-      .from("machines")
-      .select("*", { count: "exact", head: true })
-      .eq("machine_type", "Drill Rig")
-      .eq("active", true),
+      .from('machines')
+      .select('*', { count: 'exact', head: true })
+      .eq('machine_type', 'Drill Rig')
+      .eq('active', true),
     db
-      .from("drill_operations")
-      .select("total_hours, status")
-      .eq("department_id", deptId)
-      .eq("operation_date", today),
+      .from('drill_operations')
+      .select('total_hours, status')
+      .eq('department_id', deptId)
+      .eq('operation_date', today),
     db
-      .from("operational_delays")
-      .select("delay_minutes, status")
-      .eq("department_id", deptId)
-      .eq("delay_date", today),
+      .from('operational_delays')
+      .select('delay_minutes, status')
+      .eq('department_id', deptId)
+      .eq('delay_date', today),
   ]);
 
   const shiftCount = todayLogs?.length ?? 0;
@@ -45,7 +45,7 @@ async function getDrillingDashboardData(deptId: string, today: string) {
   const totalHours =
     todayOperations?.reduce((sum, op) => sum + (Number(op.total_hours) || 0), 0) || 0;
 
-  const activeOps = todayOperations?.filter((op) => op.status === "active").length || 0;
+  const activeOps = todayOperations?.filter((op) => op.status === 'active').length || 0;
 
   const delayCount = todayDelays?.length || 0;
   const delayMinutes = todayDelays?.reduce((sum, d) => sum + (d.delay_minutes || 0), 0) || 0;
@@ -63,7 +63,7 @@ async function getDrillingDashboardData(deptId: string, today: string) {
 
 export default async function DrillingDashboardPage() {
   const { deptId, today } = await getDepartmentContext({
-    department: "drilling",
+    department: 'drilling',
   });
 
   const { shiftCount, latestShift, machineCount, totalHours, activeOps, delayCount, delayMinutes } =
@@ -74,11 +74,11 @@ export default async function DrillingDashboardPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-[var(--text-heading)]">Drilling Dashboard</h2>
         <p className="text-[var(--text-muted)] text-sm">
-          {new Date().toLocaleDateString("en-ZA", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date().toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </p>
       </div>
@@ -95,8 +95,8 @@ export default async function DrillingDashboardPage() {
           </div>
           <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">
             {shiftCount > 0
-              ? `${shiftCount} shift${shiftCount > 1 ? "s" : ""} logged`
-              : "Not logged"}
+              ? `${shiftCount} shift${shiftCount > 1 ? 's' : ''} logged`
+              : 'Not logged'}
           </p>
           {latestShift && (
             <p className="text-[var(--text-muted)] text-xs mt-1">Latest: {latestShift}</p>
@@ -113,7 +113,7 @@ export default async function DrillingDashboardPage() {
           <p className="text-2xl font-bold text-[var(--text-heading)] mt-2">{machineCount}</p>
           {activeOps > 0 && (
             <p className="text-accent-green text-xs mt-1">
-              {activeOps} operation{activeOps > 1 ? "s" : ""} active
+              {activeOps} operation{activeOps > 1 ? 's' : ''} active
             </p>
           )}
         </GlassCard>

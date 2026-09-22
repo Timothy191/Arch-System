@@ -41,7 +41,7 @@ services:
     image: inngest/inngest:latest
     restart: unless-stopped
     ports:
-      - "8288:8288"
+      - "127.0.0.1:8288:8288"
     environment:
       - INNGEST_DEV_SERVER_PORT=8288
     networks:
@@ -51,7 +51,7 @@ services:
     image: ghcr.io/langfuse/langfuse:latest
     restart: unless-stopped
     ports:
-      - "3003:3000"
+      - "127.0.0.1:3003:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
       - NEXTAUTH_SECRET=secret

@@ -6,9 +6,9 @@
  *
  * @see https://web.dev/lcp
  */
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 interface LCPElement {
   element: Element;
@@ -41,12 +41,12 @@ export function LCPObserver() {
   }, []);
 
   useEffect(() => {
-    const dev = process.env.NODE_ENV === "development";
+    const dev = process.env.NODE_ENV === 'development';
     setIsDev(dev);
 
     // AGENT-TRACE: Guard PerformanceObserver behind isDev to avoid
     // running observer setup + callback logic in production.
-    if (!dev || typeof PerformanceObserver === "undefined") return;
+    if (!dev || typeof PerformanceObserver === 'undefined') return;
 
     const observer = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
@@ -68,7 +68,7 @@ export function LCPObserver() {
         size: entry.size || 0,
         tagName: element.tagName.toLowerCase(),
         id: element.id || undefined,
-        className: element.getAttribute("class") || undefined,
+        className: element.getAttribute('class') || undefined,
         text: element.textContent?.slice(0, 100).trim(),
         imageUrl:
           (element as HTMLImageElement).src ||
@@ -79,27 +79,27 @@ export function LCPObserver() {
       setLcpElement(lcpData);
 
       // Debug logging in development
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
-        console.group("📊 LCP Detected");
+        console.group('📊 LCP Detected');
         // eslint-disable-next-line no-console
-        console.log("Element:", lcpData.tagName, lcpData.id ? `#${lcpData.id}` : "");
+        console.log('Element:', lcpData.tagName, lcpData.id ? `#${lcpData.id}` : '');
         // eslint-disable-next-line no-console
-        console.log("Time:", lcpData.startTime.toFixed(0), "ms");
+        console.log('Time:', lcpData.startTime.toFixed(0), 'ms');
         // eslint-disable-next-line no-console
-        console.log("Size:", lcpData.size, "px²");
+        console.log('Size:', lcpData.size, 'px²');
         // eslint-disable-next-line no-console
-        console.log("Class:", lcpData.className);
+        console.log('Class:', lcpData.className);
         if (lcpData.text) {
           // eslint-disable-next-line no-console
-          console.log("Text:", lcpData.text);
+          console.log('Text:', lcpData.text);
         }
         if (lcpData.imageUrl) {
           // eslint-disable-next-line no-console
-          console.log("Image URL:", lcpData.imageUrl);
+          console.log('Image URL:', lcpData.imageUrl);
         }
         // eslint-disable-next-line no-console
-        console.log("Element:", element);
+        console.log('Element:', element);
         // eslint-disable-next-line no-console
         console.groupEnd();
 
@@ -110,7 +110,7 @@ export function LCPObserver() {
       }
     });
 
-    observer.observe({ type: "largest-contentful-paint", buffered: true });
+    observer.observe({ type: 'largest-contentful-paint', buffered: true });
 
     return () => observer.disconnect();
   }, [highlightLCPElement]);
@@ -118,8 +118,8 @@ export function LCPObserver() {
   // Visual highlight for LCP element (development only)
   function highlightLCPElement(element: Element) {
     const originalOutline = (element as HTMLElement).style.outline;
-    (element as HTMLElement).style.outline = "4px solid #ff00ff";
-    (element as HTMLElement).style.outlineOffset = "2px";
+    (element as HTMLElement).style.outline = '4px solid #ff00ff';
+    (element as HTMLElement).style.outlineOffset = '2px';
 
     setTimeout(() => {
       (element as HTMLElement).style.outline = originalOutline;
@@ -136,12 +136,12 @@ export function LCPObserver() {
           className="bg-[var(--arch0)] text-white px-3 py-1.5 rounded-full text-xs font-mono border border-[var(--accent-blue)] shadow-window flex items-center gap-1.5 hover:bg-[var(--arch1)] transition-colors"
           title="Expand LCP Observer"
         >
-          📊 LCP:{" "}
+          📊 LCP:{' '}
           <span
             className={
               lcpElement.startTime < 2500
-                ? "text-[var(--accent-green)]"
-                : "text-[var(--accent-red)]"
+                ? 'text-[var(--accent-green)]'
+                : 'text-[var(--accent-red)]'
             }
           >
             {lcpElement.startTime.toFixed(0)}ms
@@ -168,40 +168,40 @@ export function LCPObserver() {
       </div>
       <div className="space-y-1 text-sm font-mono">
         <div>
-          <span className="text-[var(--text-secondary)]">Tag:</span>{" "}
+          <span className="text-[var(--text-secondary)]">Tag:</span>{' '}
           <span className="text-[var(--accent-blue)]">{lcpElement.tagName}</span>
         </div>
         {lcpElement.id && (
           <div>
-            <span className="text-[var(--text-secondary)]">ID:</span>{" "}
+            <span className="text-[var(--text-secondary)]">ID:</span>{' '}
             <span className="text-[var(--accent-yellow)]">#{lcpElement.id}</span>
           </div>
         )}
         {lcpElement.className && (
           <div className="truncate">
-            <span className="text-[var(--text-secondary)]">Class:</span>{" "}
+            <span className="text-[var(--text-secondary)]">Class:</span>{' '}
             <span className="text-[var(--accent-green)]">{lcpElement.className}</span>
           </div>
         )}
         <div>
-          <span className="text-[var(--text-secondary)]">Time:</span>{" "}
+          <span className="text-[var(--text-secondary)]">Time:</span>{' '}
           <span
             className={
               lcpElement.startTime < 2500
-                ? "text-[var(--accent-green)]"
-                : "text-[var(--accent-red)]"
+                ? 'text-[var(--accent-green)]'
+                : 'text-[var(--accent-red)]'
             }
           >
             {lcpElement.startTime.toFixed(0)}ms
           </span>
         </div>
         <div>
-          <span className="text-[var(--text-secondary)]">Size:</span>{" "}
+          <span className="text-[var(--text-secondary)]">Size:</span>{' '}
           <span className="text-white">{lcpElement.size.toLocaleString()} px²</span>
         </div>
         {lcpElement.imageUrl && (
           <div className="truncate">
-            <span className="text-[var(--text-secondary)]">Image:</span>{" "}
+            <span className="text-[var(--text-secondary)]">Image:</span>{' '}
             <span className="text-[var(--accent-purple)] truncate block">
               {lcpElement.imageUrl}
             </span>

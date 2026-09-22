@@ -2,7 +2,7 @@
  * Validates whether a redirect path is internal to the application to prevent open redirects.
  */
 export function isInternalRedirect(path: string): boolean {
-  return path.startsWith("/") && !path.startsWith("//") && !path.startsWith("/\\");
+  return path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/\\');
 }
 
 /**

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import type {
   ControlRoomChecklistItem,
   ControlRoomShiftReportInput,
-} from "@repo/contract/types/control-room.types";
-import { GlassCard } from "@repo/ui/GlassCard";
+} from '@repo/contract/types/control-room.types';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Activity,
   AlertOctagon,
@@ -19,8 +19,8 @@ import {
   Send,
   ShieldCheck,
   Zap,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 // AGENT-TRACE: Structural subset of the persisted shift report (ShiftReportRecord
 // in apps/portal/lib/control-room-shift-report.ts). Kept local so the lib package
@@ -43,65 +43,65 @@ export interface ControlRoomChecklistWidgetProps {
   departmentId: string;
   departmentSlug?: string;
   date: string;
-  shift: "day" | "night";
+  shift: 'day' | 'night';
   initialOperatorName?: string;
   initialReport?: ExistingShiftReport | null;
   onSubmitReport?: (report: ControlRoomShiftReportInput) => Promise<void> | void;
 }
 
-type ChecklistCategory = "daily" | "weekly" | "monthly" | "incident" | "compliance";
+type ChecklistCategory = 'daily' | 'weekly' | 'monthly' | 'incident' | 'compliance';
 
 const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
   // Daily
   {
-    id: "daily-1",
-    label: "Verify all monitoring systems (CCTV, alarms, SCADA) are online and operational",
-    category: "daily",
+    id: 'daily-1',
+    label: 'Verify all monitoring systems (CCTV, alarms, SCADA) are online and operational',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "daily-2",
-    label: "Conduct formal shift handover and review previous shift completeness logs",
-    category: "daily",
+    id: 'daily-2',
+    label: 'Conduct formal shift handover and review previous shift completeness logs',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "daily-3",
-    label: "Test primary, secondary, and emergency radio/telephony dispatch channels",
-    category: "daily",
+    id: 'daily-3',
+    label: 'Test primary, secondary, and emergency radio/telephony dispatch channels',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "daily-4",
-    label: "Inspect UPS battery charge level, power frequency, and backup generator readiness",
-    category: "daily",
+    id: 'daily-4',
+    label: 'Inspect UPS battery charge level, power frequency, and backup generator readiness',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "daily-5",
-    label: "Review active machine breakdown tickets, delays, and pending work permits",
-    category: "daily",
+    id: 'daily-5',
+    label: 'Review active machine breakdown tickets, delays, and pending work permits',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "daily-6",
-    label: "Verify physical access control security, turnstiles, and visitor credentials",
-    category: "daily",
+    id: 'daily-6',
+    label: 'Verify physical access control security, turnstiles, and visitor credentials',
+    category: 'daily',
     completed: false,
     completedAt: null,
     completedBy: null,
@@ -110,45 +110,45 @@ const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
 
   // Weekly
   {
-    id: "weekly-1",
-    label: "Perform end-to-end failover test of backup radio and satellite channels",
-    category: "weekly",
+    id: 'weekly-1',
+    label: 'Perform end-to-end failover test of backup radio and satellite channels',
+    category: 'weekly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "weekly-2",
-    label: "Review 7-day incident logs for recurring telemetry or machine alarms",
-    category: "weekly",
+    id: 'weekly-2',
+    label: 'Review 7-day incident logs for recurring telemetry or machine alarms',
+    category: 'weekly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "weekly-3",
-    label: "Update emergency contact directory and tactical escalation matrices",
-    category: "weekly",
+    id: 'weekly-3',
+    label: 'Update emergency contact directory and tactical escalation matrices',
+    category: 'weekly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "weekly-4",
-    label: "Clean and inspect console workstations, displays, and peripheral hardware",
-    category: "weekly",
+    id: 'weekly-4',
+    label: 'Clean and inspect console workstations, displays, and peripheral hardware',
+    category: 'weekly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "weekly-5",
-    label: "Verify storage capacity and backup retention for CCTV video recordings",
-    category: "weekly",
+    id: 'weekly-5',
+    label: 'Verify storage capacity and backup retention for CCTV video recordings',
+    category: 'weekly',
     completed: false,
     completedAt: null,
     completedBy: null,
@@ -157,36 +157,36 @@ const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
 
   // Monthly
   {
-    id: "monthly-1",
-    label: "Perform full diagnostic self-tests on all SCADA gateways, servers, and panels",
-    category: "monthly",
+    id: 'monthly-1',
+    label: 'Perform full diagnostic self-tests on all SCADA gateways, servers, and panels',
+    category: 'monthly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "monthly-2",
-    label: "Conduct site-wide emergency response and evacuation simulation drill",
-    category: "monthly",
+    id: 'monthly-2',
+    label: 'Conduct site-wide emergency response and evacuation simulation drill',
+    category: 'monthly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "monthly-3",
-    label: "Audit role-based access permissions (RBAC) for all control room staff",
-    category: "monthly",
+    id: 'monthly-3',
+    label: 'Audit role-based access permissions (RBAC) for all control room staff',
+    category: 'monthly',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "monthly-4",
-    label: "Calibrate and inspect field atmospheric, gas, and thermal sensors",
-    category: "monthly",
+    id: 'monthly-4',
+    label: 'Calibrate and inspect field atmospheric, gas, and thermal sensors',
+    category: 'monthly',
     completed: false,
     completedAt: null,
     completedBy: null,
@@ -195,36 +195,36 @@ const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
 
   // Incident
   {
-    id: "incident-1",
-    label: "Acknowledge alarm and timestamp initial detection event (< 30s SLA)",
-    category: "incident",
+    id: 'incident-1',
+    label: 'Acknowledge alarm and timestamp initial detection event (< 30s SLA)',
+    category: 'incident',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "incident-2",
-    label: "Gather contextual telemetry (camera feeds, SCADA tags, operator locations)",
-    category: "incident",
+    id: 'incident-2',
+    label: 'Gather contextual telemetry (camera feeds, SCADA tags, operator locations)',
+    category: 'incident',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "incident-3",
-    label: "Classify severity level (L1/L2/L3) and assign Portal Incident ID",
-    category: "incident",
+    id: 'incident-3',
+    label: 'Classify severity level (L1/L2/L3) and assign Portal Incident ID',
+    category: 'incident',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "incident-4",
-    label: "Dispatch field crew / emergency units and notify shift supervisor",
-    category: "incident",
+    id: 'incident-4',
+    label: 'Dispatch field crew / emergency units and notify shift supervisor',
+    category: 'incident',
     completed: false,
     completedAt: null,
     completedBy: null,
@@ -233,27 +233,27 @@ const DEFAULT_CHECKLIST_ITEMS: ControlRoomChecklistItem[] = [
 
   // Compliance
   {
-    id: "compliance-1",
-    label: "Verify all operator licenses, safety passports, and certifications are current",
-    category: "compliance",
+    id: 'compliance-1',
+    label: 'Verify all operator licenses, safety passports, and certifications are current',
+    category: 'compliance',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "compliance-2",
-    label: "Enforce statutory data retention policies for dispatch audio and camera footage",
-    category: "compliance",
+    id: 'compliance-2',
+    label: 'Enforce statutory data retention policies for dispatch audio and camera footage',
+    category: 'compliance',
     completed: false,
     completedAt: null,
     completedBy: null,
     notes: null,
   },
   {
-    id: "compliance-3",
-    label: "Audit cybersecurity access logs for unauthorized attempts or anomalies",
-    category: "compliance",
+    id: 'compliance-3',
+    label: 'Audit cybersecurity access logs for unauthorized attempts or anomalies',
+    category: 'compliance',
     completed: false,
     completedAt: null,
     completedBy: null,
@@ -265,22 +265,22 @@ export function ControlRoomChecklistWidget({
   departmentId,
   date,
   shift,
-  initialOperatorName = "",
+  initialOperatorName = '',
   initialReport = null,
   onSubmitReport,
 }: ControlRoomChecklistWidgetProps) {
-  const [activeCategory, setActiveCategory] = useState<ChecklistCategory>("daily");
+  const [activeCategory, setActiveCategory] = useState<ChecklistCategory>('daily');
   // AGENT-TRACE: Restore persisted checklist state on mount so a partially
   // completed closeout survives reloads. Falls back to the default SOP list.
   const [items, setItems] = useState<ControlRoomChecklistItem[]>(
-    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS,
+    initialReport?.checklistItems?.length ? initialReport.checklistItems : DEFAULT_CHECKLIST_ITEMS
   );
   const [operatorName, setOperatorName] = useState(
-    initialReport?.operatorName ?? initialOperatorName,
+    initialReport?.operatorName ?? initialOperatorName
   );
-  const [summaryNotes, setSummaryNotes] = useState(initialReport?.summaryNotes ?? "");
+  const [summaryNotes, setSummaryNotes] = useState(initialReport?.summaryNotes ?? '');
   const [supervisorSignature, setSupervisorSignature] = useState(
-    initialReport?.supervisorSignature ?? "",
+    initialReport?.supervisorSignature ?? ''
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(!!initialReport);
@@ -289,7 +289,7 @@ export function ControlRoomChecklistWidget({
   // Live KPI metrics — editable, defaults matching wiki SLAs, restored from an
   // existing report so a revision starts from the last submitted values.
   const [alarmResponseSec, setAlarmResponseSec] = useState(
-    initialReport?.alarmResponseAvgSeconds ?? 42,
+    initialReport?.alarmResponseAvgSeconds ?? 42
   );
   const [incidentAckSec, setIncidentAckSec] = useState(initialReport?.incidentAckAvgSeconds ?? 18);
   const [systemUptime, setSystemUptime] = useState(initialReport?.systemUptimePercent ?? 99.98);
@@ -302,7 +302,7 @@ export function ControlRoomChecklistWidget({
   const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined" || initialReport) return;
+    if (typeof window === 'undefined' || initialReport) return;
     try {
       const saved = localStorage.getItem(draftKey);
       if (saved) {
@@ -325,7 +325,7 @@ export function ControlRoomChecklistWidget({
 
   const saveDraft = useMemo(() => {
     return () => {
-      if (typeof window === "undefined") return;
+      if (typeof window === 'undefined') return;
       try {
         const payload = {
           items,
@@ -356,7 +356,7 @@ export function ControlRoomChecklistWidget({
   ]);
 
   const clearDraft = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(draftKey);
       setHasRestoredDraft(false);
@@ -370,21 +370,21 @@ export function ControlRoomChecklistWidget({
     saveDraft();
 
     const handleVisibility = () => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === 'hidden') {
         saveDraft();
       }
     };
 
-    window.addEventListener("beforeunload", saveDraft);
-    window.addEventListener("pagehide", saveDraft);
-    window.addEventListener("arch:tab-swap", saveDraft);
-    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener('beforeunload', saveDraft);
+    window.addEventListener('pagehide', saveDraft);
+    window.addEventListener('arch:tab-swap', saveDraft);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      window.removeEventListener("beforeunload", saveDraft);
-      window.removeEventListener("pagehide", saveDraft);
-      window.removeEventListener("arch:tab-swap", saveDraft);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener('beforeunload', saveDraft);
+      window.removeEventListener('pagehide', saveDraft);
+      window.removeEventListener('arch:tab-swap', saveDraft);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [saveDraft]);
 
@@ -404,11 +404,11 @@ export function ControlRoomChecklistWidget({
             ...item,
             completed: nextCompleted,
             completedAt: nextCompleted ? new Date().toISOString() : null,
-            completedBy: nextCompleted ? operatorName || "Operator" : null,
+            completedBy: nextCompleted ? operatorName || 'Operator' : null,
           };
         }
         return item;
-      }),
+      })
     );
   };
 
@@ -436,17 +436,17 @@ export function ControlRoomChecklistWidget({
 
     // Defensive input bounds validation
     if (!operatorName.trim()) {
-      setValidationError("Operator name is required.");
+      setValidationError('Operator name is required.');
       return;
     }
 
     if (alarmResponseSec < 0 || incidentAckSec < 0 || missedIncidents < 0) {
-      setValidationError("KPI SLA metrics must be non-negative numbers.");
+      setValidationError('KPI SLA metrics must be non-negative numbers.');
       return;
     }
 
     if (systemUptime < 0 || systemUptime > 100) {
-      setValidationError("System uptime percentage must be between 0% and 100%.");
+      setValidationError('System uptime percentage must be between 0% and 100%.');
       return;
     }
 
@@ -460,7 +460,7 @@ export function ControlRoomChecklistWidget({
         incidentAckAvgSeconds: incidentAckSec,
         systemUptimePercent: systemUptime,
         missedIncidentsCount: missedIncidents,
-        summaryNotes: summaryNotes || "Operational shift verified according to SOP standards.",
+        summaryNotes: summaryNotes || 'Operational shift verified according to SOP standards.',
         operatorName: operatorName.trim(),
         completedChecklistCount: overallStats.completed,
         totalChecklistCount: overallStats.total,
@@ -477,7 +477,7 @@ export function ControlRoomChecklistWidget({
       setSubmitted(true);
     } catch (err) {
       setValidationError(
-        err instanceof Error ? err.message : "Failed to submit shift verification. Please retry.",
+        err instanceof Error ? err.message : 'Failed to submit shift verification. Please retry.'
       );
     } finally {
       setIsSubmitting(false);
@@ -489,11 +489,11 @@ export function ControlRoomChecklistWidget({
     label: string;
     icon: React.ComponentType<{ className?: string }>;
   }[] = [
-    { key: "daily", label: "Daily Shift", icon: CheckSquare },
-    { key: "weekly", label: "Weekly Tasks", icon: CalendarCheck },
-    { key: "monthly", label: "Monthly Audit", icon: FileCheck },
-    { key: "incident", label: "Incident Triage", icon: AlertOctagon },
-    { key: "compliance", label: "Compliance", icon: ShieldCheck },
+    { key: 'daily', label: 'Daily Shift', icon: CheckSquare },
+    { key: 'weekly', label: 'Weekly Tasks', icon: CalendarCheck },
+    { key: 'monthly', label: 'Monthly Audit', icon: FileCheck },
+    { key: 'incident', label: 'Incident Triage', icon: AlertOctagon },
+    { key: 'compliance', label: 'Compliance', icon: ShieldCheck },
   ];
 
   return (
@@ -538,11 +538,11 @@ export function ControlRoomChecklistWidget({
               setItems(
                 initialReport?.checklistItems?.length
                   ? initialReport.checklistItems
-                  : DEFAULT_CHECKLIST_ITEMS,
+                  : DEFAULT_CHECKLIST_ITEMS
               );
               setOperatorName(initialReport?.operatorName ?? initialOperatorName);
-              setSummaryNotes(initialReport?.summaryNotes ?? "");
-              setSupervisorSignature(initialReport?.supervisorSignature ?? "");
+              setSummaryNotes(initialReport?.summaryNotes ?? '');
+              setSupervisorSignature(initialReport?.supervisorSignature ?? '');
             }}
             className="text-[11px] underline hover:opacity-80 transition-opacity cursor-pointer"
           >
@@ -631,7 +631,7 @@ export function ControlRoomChecklistWidget({
               const Icon = cat.icon;
               const isActive = activeCategory === cat.key;
               const catCompleted = items.filter(
-                (i) => i.category === cat.key && i.completed,
+                (i) => i.category === cat.key && i.completed
               ).length;
               const catTotal = items.filter((i) => i.category === cat.key).length;
 
@@ -642,8 +642,8 @@ export function ControlRoomChecklistWidget({
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-[var(--accent-blue)] text-white shadow-sm"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-primary)]"
+                      ? 'bg-[var(--accent-blue)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-primary)]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -651,8 +651,8 @@ export function ControlRoomChecklistWidget({
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                       isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
                     }`}
                   >
                     {catCompleted}/{catTotal}
@@ -664,10 +664,10 @@ export function ControlRoomChecklistWidget({
 
           <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
             <span>
-              Overall:{" "}
+              Overall:{' '}
               <strong>
                 {overallStats.completed}/{overallStats.total}
-              </strong>{" "}
+              </strong>{' '}
               ({overallStats.pct}%)
             </span>
             <div className="w-24 h-2 rounded-full bg-[var(--bg-secondary)] overflow-hidden border border-[var(--glass-border)]">
@@ -698,14 +698,14 @@ export function ControlRoomChecklistWidget({
               onClick={() => toggleItem(item.id)}
               className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
                 item.completed
-                  ? "bg-[var(--accent-green)]/5 border-[var(--accent-green)]/30 hover:border-[var(--accent-green)]/50"
-                  : "bg-[var(--bg-secondary)] border-[var(--glass-border)] hover:border-[var(--glass-border-hover)]"
+                  ? 'bg-[var(--accent-green)]/5 border-[var(--accent-green)]/30 hover:border-[var(--accent-green)]/50'
+                  : 'bg-[var(--bg-secondary)] border-[var(--glass-border)] hover:border-[var(--glass-border-hover)]'
               }`}
             >
               <button
                 type="button"
                 className="mt-0.5 text-[var(--text-muted)] focus:outline-none"
-                aria-label={item.completed ? "Mark incomplete" : "Mark complete"}
+                aria-label={item.completed ? 'Mark incomplete' : 'Mark complete'}
               >
                 {item.completed ? (
                   <CheckCircle2 className="w-5 h-5 text-[var(--accent-green)] transition-transform scale-110" />
@@ -718,8 +718,8 @@ export function ControlRoomChecklistWidget({
                 <span
                   className={`text-xs font-medium leading-relaxed ${
                     item.completed
-                      ? "text-[var(--text-muted)] line-through"
-                      : "text-[var(--text-heading)]"
+                      ? 'text-[var(--text-muted)] line-through'
+                      : 'text-[var(--text-heading)]'
                   }`}
                 >
                   {item.label}
@@ -784,7 +784,7 @@ export function ControlRoomChecklistWidget({
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-[11px] text-[var(--text-muted)]">
-            Checklist Status:{" "}
+            Checklist Status:{' '}
             <strong>
               {overallStats.completed}/{overallStats.total} items verified
             </strong>
@@ -796,7 +796,7 @@ export function ControlRoomChecklistWidget({
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--accent-blue)] text-white hover:bg-[var(--accent-blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? "Submitting Log..." : "Submit Shift Verification"}</span>
+            <span>{isSubmitting ? 'Submitting Log...' : 'Submit Shift Verification'}</span>
           </button>
         </div>
       </form>

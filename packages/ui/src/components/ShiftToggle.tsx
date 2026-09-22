@@ -1,16 +1,16 @@
-import * as React from "react";
+import * as React from 'react';
 
 interface ShiftToggleProps {
-  value: "day" | "night";
+  value: 'day' | 'night';
   // eslint-disable-next-line no-unused-vars
-  onChange: (value: "day" | "night") => void;
+  onChange: (value: 'day' | 'night') => void;
   name?: string;
 }
 
-export function ShiftToggle({ value, onChange, name = "shift-toggle" }: ShiftToggleProps) {
+export function ShiftToggle({ value, onChange, name = 'shift-toggle' }: ShiftToggleProps) {
   return (
     <div className="cir-tabs" role="radiogroup" aria-label="Shift selector">
-      {(["day", "night"] as const).map((shift) => {
+      {(['day', 'night'] as const).map((shift) => {
         const id = `${name}-${shift}`;
         const isChecked = value === shift;
         return (
@@ -24,7 +24,7 @@ export function ShiftToggle({ value, onChange, name = "shift-toggle" }: ShiftTog
               className="cir-tabs-r"
             />
             <label htmlFor={id} className="cir-tabs-t">
-              {shift === "day" ? "Day" : "Night"}
+              {shift === 'day' ? 'Day' : 'Night'}
             </label>
           </React.Fragment>
         );

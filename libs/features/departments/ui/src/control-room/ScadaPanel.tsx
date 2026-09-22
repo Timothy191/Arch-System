@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { trackClientMetric, useThrottledState } from "@repo/shared/hooks";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { useEffect, useState } from "react";
-import { FuxaFrame } from "./FuxaFrame";
-import { MachineControl } from "./MachineControl";
+import { trackClientMetric, useThrottledState } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { useEffect, useState } from 'react';
+import { FuxaFrame } from './FuxaFrame';
+import { MachineControl } from './MachineControl';
 
 interface Machine {
   id: string;
@@ -23,7 +23,8 @@ interface ScadaPanelProps {
 export function ScadaPanel({ departmentId }: ScadaPanelProps) {
   const [machines, setMachines] = useThrottledState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"list" | "scada">("list");
+  const [outboxCount, setOutboxCount] = useState(0);
+  const [viewMode, setViewMode] = useState<'list' | 'scada'>('list');
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
@@ -31,45 +32,54 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
     // AGENT-TRACE: Client-side telemetry for machine fetch operations
     async function fetchMachines() {
       await trackClientMetric(
-        "scada_machines_fetch",
+        'scada_machines_fetch',
         async () => {
           const { data } = await supabase
-            .from("machines")
-            .select("id, name, machine_type, serial_number, active, created_at")
-            .eq("department_id", departmentId)
-            .order("name");
+            .from('machines')
+            .select('id, name, machine_type, serial_number, active, created_at')
+            .eq('department_id', departmentId)
+            .order('name');
           setMachines(data || []);
           setLoading(false);
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
     fetchMachines();
 
+    async function fetchOutboxCount() {
+      const { count } = await supabase
+        .from('control_room_outbox')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      setOutboxCount(count || 0);
+    }
+    fetchOutboxCount();
+
     const channel = supabase
-      .channel("scada-machines")
+      .channel('scada-machines')
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "machines",
+          event: '*',
+          schema: 'public',
+          table: 'machines',
           filter: `department_id=eq.${departmentId}`,
         },
         (payload) => {
           // AGENT-TRACE: Track real-time subscription events
           trackClientMetric(
-            "scada_realtime_update",
+            'scada_realtime_update',
             () => {
               setMachines((prev) => {
-                if (payload.eventType === "INSERT") {
+                if (payload.eventType === 'INSERT') {
                   return [...prev, payload.new as Machine];
                 }
-                if (payload.eventType === "UPDATE") {
+                if (payload.eventType === 'UPDATE') {
                   return prev.map((m) => (m.id === payload.new.id ? (payload.new as Machine) : m));
                 }
-                if (payload.eventType === "DELETE") {
+                if (payload.eventType === 'DELETE') {
                   return prev.filter((m) => m.id !== payload.old.id);
                 }
                 return prev;
@@ -78,9 +88,9 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
             {
               department_id: departmentId,
               event_type: payload.eventType,
-            },
+            }
           );
-        },
+        }
       )
       .subscribe();
 
@@ -103,6 +113,11 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
           <span className="px-2.5 py-1 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20">
             {inactiveCount} Offline
           </span>
+          {outboxCount > 0 && (
+            <span className="px-2.5 py-1 rounded-full bg-arch-brand/10 text-arch-brand border border-arch-brand/20">
+              {outboxCount} Queued
+            </span>
+          )}
         </div>
       </div>
 
@@ -110,31 +125,31 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
       <div className="flex items-center gap-2" role="group" aria-label="View mode selection">
         <button
           type="button"
-          onClick={() => setViewMode("list")}
-          aria-pressed={viewMode === "list"}
+          onClick={() => setViewMode('list')}
+          aria-pressed={viewMode === 'list'}
           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            viewMode === "list"
-              ? "bg-arch-accent-green text-white"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
+            viewMode === 'list'
+              ? 'bg-arch-accent-green text-white'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
           }`}
         >
           Machine List
         </button>
         <button
           type="button"
-          onClick={() => setViewMode("scada")}
-          aria-pressed={viewMode === "scada"}
+          onClick={() => setViewMode('scada')}
+          aria-pressed={viewMode === 'scada'}
           className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            viewMode === "scada"
-              ? "bg-arch-accent-green text-white"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-heading)]"
+            viewMode === 'scada'
+              ? 'bg-arch-accent-green text-white'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
           }`}
         >
           SCADA Dashboard
         </button>
       </div>
 
-      {viewMode === "list" ? (
+      {viewMode === 'list' ? (
         <>
           {/* AGENT-TRACE: UX improvement - Skeleton loader instead of text-only loading state */}
           {loading && (
@@ -164,11 +179,11 @@ export function ScadaPanel({ departmentId }: ScadaPanelProps) {
                     <span
                       className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                         machine.active
-                          ? "bg-accent-green/10 text-accent-green border border-accent-green/20"
-                          : "bg-accent-red/10 text-accent-red border border-accent-red/20"
+                          ? 'bg-accent-green/10 text-accent-green border border-accent-green/20'
+                          : 'bg-accent-red/10 text-accent-red border border-accent-red/20'
                       }`}
                     >
-                      {machine.active ? "Online" : "Offline"}
+                      {machine.active ? 'Online' : 'Offline'}
                     </span>
                   </div>
                 </GlassCard>

@@ -1,1 +1,1 @@
-export { LoginForm } from "@repo/auth/ui";
+export { LoginForm } from '@repo/auth/ui';

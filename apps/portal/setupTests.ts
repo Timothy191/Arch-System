@@ -1,17 +1,17 @@
-import "@testing-library/jest-dom";
-import { TextDecoder, TextEncoder } from "node:util";
+import '@testing-library/jest-dom';
+import { TextDecoder, TextEncoder } from 'node:util';
 
 global.TextEncoder = global.TextEncoder || TextEncoder;
 global.TextDecoder = global.TextDecoder || (TextDecoder as any);
 
 // Override environment variables to prevent local development .env from polluting tests
-process.env.DISABLE_RATE_LIMIT = "false";
-process.env.NEXT_PUBLIC_FUXA_URL = "http://localhost:1881";
+process.env.DISABLE_RATE_LIMIT = 'false';
+process.env.NEXT_PUBLIC_FUXA_URL = 'http://localhost:1881';
 
 // Jest setup file — provide Web API globals that Next.js server modules expect
 // but jsdom may not define in all versions.
 
-jest.mock("next/cache", () => ({
+jest.mock('next/cache', () => ({
   unstable_cache: jest.fn((cb) => cb),
   revalidatePath: jest.fn(),
   revalidateTag: jest.fn(),
@@ -22,7 +22,7 @@ global.Request =
   class Request {
     url: string;
     constructor(input: string | Request) {
-      this.url = typeof input === "string" ? input : input.url;
+      this.url = typeof input === 'string' ? input : input.url;
     }
   };
 
@@ -36,8 +36,8 @@ global.Response =
   };
 
 // Global mock for redis to avoid database connection timeout/hangs in tests
-jest.mock("@repo/redis", () => {
-  const actual = jest.requireActual("@repo/redis");
+jest.mock('@repo/redis', () => {
+  const actual = jest.requireActual('@repo/redis');
   const mockCache = new Map<string, string>();
   const mockRedisClient = {
     get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
@@ -48,7 +48,7 @@ jest.mock("@repo/redis", () => {
       mockCache.delete(key);
     }),
     incr: jest.fn(async (key: string) => {
-      const val = parseInt(mockCache.get(key) || "0", 10) + 1;
+      const val = parseInt(mockCache.get(key) || '0', 10) + 1;
       mockCache.set(key, val.toString());
       return val;
     }),
@@ -70,7 +70,7 @@ jest.mock("@repo/redis", () => {
   };
 });
 
-jest.mock("../../packages/redis/src/client", () => {
+jest.mock('../../packages/redis/src/client', () => {
   const mockCache = new Map<string, string>();
   const mockRedisClient = {
     get: jest.fn(async (key: string) => mockCache.get(key) ?? null),
@@ -81,7 +81,7 @@ jest.mock("../../packages/redis/src/client", () => {
       mockCache.delete(key);
     }),
     incr: jest.fn(async (key: string) => {
-      const val = parseInt(mockCache.get(key) || "0", 10) + 1;
+      const val = parseInt(mockCache.get(key) || '0', 10) + 1;
       mockCache.set(key, val.toString());
       return val;
     }),
@@ -103,8 +103,8 @@ jest.mock("../../packages/redis/src/client", () => {
 });
 
 // Mock window.matchMedia and IntersectionObserver only if running in a browser-like environment (jsdom)
-if (typeof window !== "undefined") {
-  Object.defineProperty(window, "matchMedia", {
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
       matches: false,
@@ -125,7 +125,7 @@ if (typeof window !== "undefined") {
     unobserve = jest.fn();
   }
 
-  Object.defineProperty(window, "IntersectionObserver", {
+  Object.defineProperty(window, 'IntersectionObserver', {
     writable: true,
     configurable: true,
     value: MockIntersectionObserver,
@@ -140,7 +140,7 @@ if (typeof window !== "undefined") {
     unobserve = jest.fn();
   }
 
-  Object.defineProperty(window, "ResizeObserver", {
+  Object.defineProperty(window, 'ResizeObserver', {
     writable: true,
     configurable: true,
     value: MockResizeObserver,

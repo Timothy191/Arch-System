@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { CacheCategory, cacheInvalidateTags } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
-import { withCache } from "@/lib/cache-utils";
-import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
+import { CacheCategory, cacheInvalidateTags } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { withCache } from '@/lib/cache-utils';
+import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -24,7 +24,7 @@ interface AccessActivityEntry {
   entityName: string;
   entityType: string;
   zone: string;
-  status: "Granted" | "Denied" | "Expired Credential" | "Tailgate Alert";
+  status: 'Granted' | 'Denied' | 'Expired Credential' | 'Tailgate Alert';
   time: string;
   qrId: string;
 }
@@ -58,18 +58,18 @@ async function assertAccessControlRole() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new AuthError("Unauthorized");
+  if (!user) throw new AuthError('Unauthorized');
 
   const { data: employee } = await supabase
-    .from("employees")
-    .select("role, department_id")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('role, department_id')
+    .eq('auth_id', user.id)
     .single();
 
-  if (!employee || !["admin", "access_control"].includes(employee.role)) {
-    throw new ForbiddenError("Forbidden: access_control or admin role required", {
-      resource: "access_control",
-      action: "assert_role",
+  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+    throw new ForbiddenError('Forbidden: access_control or admin role required', {
+      resource: 'access_control',
+      action: 'assert_role',
     });
   }
 
@@ -85,13 +85,13 @@ export async function getAccessControlMetrics(deptId: string): Promise<AccessCon
     async () => {
       const { supabase } = await assertAccessControlRole();
 
-      const { data, error } = await supabase.rpc("get_access_control_metrics_jsonb", {
+      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
         p_department_id: deptId,
       });
 
       if (error) {
-        throw new DatabaseError("Failed to load access control metrics", {
-          operation: "rpc",
+        throw new DatabaseError('Failed to load access control metrics', {
+          operation: 'rpc',
           context: { error: error.message },
         });
       }
@@ -116,9 +116,9 @@ export async function getAccessControlMetrics(deptId: string): Promise<AccessCon
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ["access-control", deptId, "metrics"],
-      tags: [`dept:${deptId}`, "table:badges", "table:access_logs", "table:personnel"],
-    },
+      keyParts: ['access-control', deptId, 'metrics'],
+      tags: [`dept:${deptId}`, 'table:badges', 'table:access_logs', 'table:personnel'],
+    }
   );
 }
 
@@ -142,12 +142,12 @@ interface AccessLogWithBadge {
 
 export async function getRecentAccessActivity(
   deptId: string,
-  limit = 8,
+  limit = 8
 ): Promise<AccessActivityEntry[]> {
   const { supabase } = await assertAccessControlRole();
 
   const { data: logs } = await supabase
-    .from("access_logs")
+    .from('access_logs')
     .select(
       `
       id,
@@ -156,35 +156,35 @@ export async function getRecentAccessActivity(
       access_granted,
       denial_reason,
       badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(name))
-    `,
+    `
     )
-    .eq("department_id", deptId)
-    .order("scanned_at", { ascending: false })
+    .eq('department_id', deptId)
+    .order('scanned_at', { ascending: false })
     .limit(limit);
 
   if (!logs) return [];
 
   return (logs as unknown as AccessLogWithBadge[]).map((log) => {
     const { badge } = log;
-    let entityName = "Unknown";
-    let entityType = badge?.entity_type ?? "Unknown";
+    let entityName = 'Unknown';
+    let entityType = badge?.entity_type ?? 'Unknown';
 
     if (badge?.personnel) {
       entityName = `${badge.personnel.first_name} ${badge.personnel.surname}`;
-      entityType = "Employee";
+      entityType = 'Employee';
     } else if (badge?.visitor) {
       entityName = `${badge.visitor.first_name} ${badge.visitor.surname}`;
-      entityType = "Visitor";
+      entityType = 'Visitor';
     }
 
-    let status: AccessActivityEntry["status"] = "Granted";
+    let status: AccessActivityEntry['status'] = 'Granted';
     if (!log.access_granted) {
       status =
-        log.denial_reason?.includes("Expired") || log.denial_reason?.includes("expired")
-          ? "Expired Credential"
-          : log.denial_reason?.includes("Tailgate")
-            ? "Tailgate Alert"
-            : "Denied";
+        log.denial_reason?.includes('Expired') || log.denial_reason?.includes('expired')
+          ? 'Expired Credential'
+          : log.denial_reason?.includes('Tailgate')
+            ? 'Tailgate Alert'
+            : 'Denied';
     }
 
     return {
@@ -193,12 +193,12 @@ export async function getRecentAccessActivity(
       entityType,
       zone: log.gate_location,
       status,
-      time: new Date(log.scanned_at).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
+      time: new Date(log.scanned_at).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: false,
       }),
-      qrId: badge?.qr_code ?? "N/A",
+      qrId: badge?.qr_code ?? 'N/A',
     };
   });
 }
@@ -212,13 +212,13 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
     async () => {
       const { supabase } = await assertAccessControlRole();
 
-      const { data, error } = await supabase.rpc("get_access_control_metrics_jsonb", {
+      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
         p_department_id: deptId,
       });
 
       if (error) {
-        throw new DatabaseError("Failed to load entity badge status", {
-          operation: "rpc",
+        throw new DatabaseError('Failed to load entity badge status', {
+          operation: 'rpc',
           context: { error: error.message },
         });
       }
@@ -237,21 +237,21 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
 
       return [
         {
-          type: "Employees",
+          type: 'Employees',
           total: status?.employees?.total ?? 0,
           active: status?.employees?.active ?? 0,
           expiring: status?.employees?.expiring ?? 0,
           expired: status?.employees?.expired ?? 0,
         },
         {
-          type: "Vehicles",
+          type: 'Vehicles',
           total: status?.vehicles?.total ?? 0,
           active: status?.vehicles?.active ?? 0,
           expiring: status?.vehicles?.expiring ?? 0,
           expired: status?.vehicles?.expired ?? 0,
         },
         {
-          type: "Equipment",
+          type: 'Equipment',
           total: status?.equipment?.total ?? 0,
           active: status?.equipment?.active ?? 0,
           expiring: status?.equipment?.expiring ?? 0,
@@ -261,9 +261,9 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ["access-control", deptId, "badge-status"],
-      tags: [`dept:${deptId}`, "table:badges", "table:personnel", "table:fleet", "table:equipment"],
-    },
+      keyParts: ['access-control', deptId, 'badge-status'],
+      tags: [`dept:${deptId}`, 'table:badges', 'table:personnel', 'table:fleet', 'table:equipment'],
+    }
   );
 }
 
@@ -273,24 +273,24 @@ export async function getEntityBadgeStatus(deptId: string): Promise<EntityBadgeS
 
 export async function getHourlyAccessStats(
   deptId: string,
-  date?: string,
+  date?: string
 ): Promise<HourlyAccessPoint[]> {
   const { supabase } = await assertAccessControlRole();
 
-  const targetDate = date ?? new Date().toISOString().split("T")[0];
+  const targetDate = date ?? new Date().toISOString().split('T')[0];
   const start = `${targetDate}T00:00:00Z`;
   const end = `${targetDate}T23:59:59Z`;
 
   const { data: logs } = await supabase
-    .from("access_logs")
-    .select("scanned_at, access_granted")
-    .eq("department_id", deptId)
-    .gte("scanned_at", start)
-    .lte("scanned_at", end);
+    .from('access_logs')
+    .select('scanned_at, access_granted')
+    .eq('department_id', deptId)
+    .gte('scanned_at', start)
+    .lte('scanned_at', end);
 
   // Aggregate into hourly buckets
   const hours = Array.from({ length: 24 }, (_, i) => ({
-    hour: `${String(i).padStart(2, "0")}:00`,
+    hour: `${String(i).padStart(2, '0')}:00`,
     granted: 0,
     denied: 0,
   }));
@@ -314,19 +314,19 @@ export async function getHourlyAccessStats(
 /* ------------------------------------------------------------------ */
 
 export async function getBadgeStatusDistribution(
-  deptId: string,
+  deptId: string
 ): Promise<BadgeStatusDistribution[]> {
   return withCache(
     async () => {
       const { supabase } = await assertAccessControlRole();
 
-      const { data, error } = await supabase.rpc("get_access_control_metrics_jsonb", {
+      const { data, error } = await supabase.rpc('get_access_control_metrics_jsonb', {
         p_department_id: deptId,
       });
 
       if (error) {
-        throw new DatabaseError("Failed to load badge status distribution", {
-          operation: "rpc",
+        throw new DatabaseError('Failed to load badge status distribution', {
+          operation: 'rpc',
           context: { error: error.message },
         });
       }
@@ -336,25 +336,25 @@ export async function getBadgeStatusDistribution(
         | undefined;
 
       return [
-        { name: "Active", value: dist?.active ?? 0, fill: "var(--success)" },
+        { name: 'Active', value: dist?.active ?? 0, fill: 'var(--success)' },
         {
-          name: "Expiring Soon",
+          name: 'Expiring Soon',
           value: dist?.expiring_soon ?? 0,
-          fill: "var(--warning)",
+          fill: 'var(--warning)',
         },
-        { name: "Expired", value: dist?.expired ?? 0, fill: "var(--danger)" },
+        { name: 'Expired', value: dist?.expired ?? 0, fill: 'var(--danger)' },
         {
-          name: "Revoked",
+          name: 'Revoked',
           value: dist?.revoked ?? 0,
-          fill: "var(--muted-foreground)",
+          fill: 'var(--muted-foreground)',
         },
       ];
     },
     {
       category: CacheCategory.METRICS,
-      keyParts: ["access-control", deptId, "distribution"],
-      tags: [`dept:${deptId}`, "table:badges"],
-    },
+      keyParts: ['access-control', deptId, 'distribution'],
+      tags: [`dept:${deptId}`, 'table:badges'],
+    }
   );
 }
 
@@ -366,16 +366,16 @@ async function _revokeBadge(badgeId: string): Promise<{ success: boolean; error?
   const { supabase, employee } = await assertAccessControlRole();
 
   const { error } = await supabase
-    .from("badges")
+    .from('badges')
     .update({ is_active: false, revoked_at: new Date().toISOString() })
-    .eq("id", badgeId);
+    .eq('id', badgeId);
 
   if (error) {
     return { success: false, error: error.message };
   }
 
-  await cacheInvalidateTags(["table:badges", `dept:${employee.department_id}`]);
-  revalidatePath("/access-control/badges");
+  await cacheInvalidateTags(['table:badges', `dept:${employee.department_id}`]);
+  revalidatePath('/access-control/badges');
   return { success: true };
 }
 
@@ -390,7 +390,7 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
     count,
     error,
   } = await supabase
-    .from("badges")
+    .from('badges')
     .select(
       `
       id,
@@ -404,15 +404,15 @@ export async function getBadgesForDepartment(deptId: string, page = 1, pageSize 
       fleet:fleet_id(fleet_code, vehicle_type),
       equipment:equipment_id(equip_code, equipment_type)
     `,
-      { count: "exact" },
+      { count: 'exact' }
     )
-    .eq("department_id", deptId)
-    .order("issued_at", { ascending: false })
+    .eq('department_id', deptId)
+    .order('issued_at', { ascending: false })
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError("Failed to load badges", {
-      operation: "select",
+    throw new DatabaseError('Failed to load badges', {
+      operation: 'select',
       context: { error: error.message },
     });
   }
@@ -431,7 +431,7 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
     count,
     error,
   } = await supabase
-    .from("visitors")
+    .from('visitors')
     .select(
       `
       id,
@@ -445,15 +445,15 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
       check_out_time,
       status
     `,
-      { count: "exact" },
+      { count: 'exact' }
     )
-    .eq("department_id", deptId)
-    .order("check_in_time", { ascending: false })
+    .eq('department_id', deptId)
+    .order('check_in_time', { ascending: false })
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError("Failed to load visitors", {
-      operation: "select",
+    throw new DatabaseError('Failed to load visitors', {
+      operation: 'select',
       context: { error: error.message },
     });
   }
@@ -464,37 +464,37 @@ export async function getVisitorsForDepartment(deptId: string, page = 1, pageSiz
 export async function registerVisitor(formData: FormData) {
   const { supabase, employee } = await assertAccessControlRole();
 
-  const firstName = formData.get("first_name") as string;
-  const surname = formData.get("surname") as string;
-  const company = formData.get("company") as string;
-  const reason = formData.get("reason") as string;
+  const firstName = formData.get('first_name') as string;
+  const surname = formData.get('surname') as string;
+  const company = formData.get('company') as string;
+  const reason = formData.get('reason') as string;
 
   const { data: visitor, error } = await supabase
-    .from("visitors")
+    .from('visitors')
     .insert({
       first_name: firstName,
       surname,
       company,
       reason_for_entry: reason,
       department_id: employee.department_id,
-      status: "Checked In",
+      status: 'Checked In',
       check_in_time: new Date().toISOString(),
     })
     .select()
     .single();
 
   if (error) {
-    throw new DatabaseError("Failed to register visitor", {
-      operation: "insert",
+    throw new DatabaseError('Failed to register visitor', {
+      operation: 'insert',
       context: { error: error.message },
     });
   }
 
   // Also issue a temporary badge
   const qrCode = `TEMP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-  const { error: badgeError } = await supabase.from("badges").insert({
+  const { error: badgeError } = await supabase.from('badges').insert({
     qr_code: qrCode,
-    entity_type: "Visitor",
+    entity_type: 'Visitor',
     visitor_id: visitor.id,
     department_id: employee.department_id,
     is_active: true,
@@ -507,7 +507,7 @@ export async function registerVisitor(formData: FormData) {
     // In production, we should log this to a proper observability system.
   }
 
-  revalidatePath("/access-control/visitors");
+  revalidatePath('/access-control/visitors');
   return { success: true };
 }
 
@@ -522,7 +522,7 @@ export async function getAccessLogsForDepartment(deptId: string, page = 1, pageS
     count,
     error,
   } = await supabase
-    .from("access_logs")
+    .from('access_logs')
     .select(
       `
       id,
@@ -534,15 +534,15 @@ export async function getAccessLogsForDepartment(deptId: string, page = 1, pageS
       direction,
       badge:badges!inner(qr_code, entity_type, personnel:personnel_id(first_name, surname), visitor:visitor_id(first_name, surname))
     `,
-      { count: "exact" },
+      { count: 'exact' }
     )
-    .eq("department_id", deptId)
-    .order("scanned_at", { ascending: false })
+    .eq('department_id', deptId)
+    .order('scanned_at', { ascending: false })
     .range(from, to);
 
   if (error) {
-    throw new DatabaseError("Failed to load access logs", {
-      operation: "select",
+    throw new DatabaseError('Failed to load access logs', {
+      operation: 'select',
       context: { error: error.message },
     });
   }

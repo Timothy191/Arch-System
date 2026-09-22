@@ -1,46 +1,46 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function seedDrilling(supabase: SupabaseClient): Promise<void> {
-  console.log("--> Seeding Drilling department data...");
+  console.log('--> Seeding Drilling department data...');
 
   const { data: dept, error: deptError } = await supabase
-    .from("departments")
-    .select("id")
-    .eq("name", "drilling")
+    .from('departments')
+    .select('id')
+    .eq('name', 'drilling')
     .single();
 
   if (deptError || !dept) {
-    console.error("   [Drilling] Department not found in database.");
+    console.error('   [Drilling] Department not found in database.');
     return;
   }
 
   // Find or fallback to any machine
   const { data: machine } = await supabase
-    .from("machines")
-    .select("id, name")
-    .eq("department_id", dept.id)
+    .from('machines')
+    .select('id, name')
+    .eq('department_id', dept.id)
     .limit(1)
     .single();
 
   let targetMachineId = machine?.id;
   if (!targetMachineId) {
     const { data: fallbackMachine } = await supabase
-      .from("machines")
-      .select("id")
+      .from('machines')
+      .select('id')
       .limit(1)
       .single();
     targetMachineId = fallbackMachine?.id;
   }
 
   if (!targetMachineId) {
-    console.error("   [Drilling] No machine found for seeding.");
+    console.error('   [Drilling] No machine found for seeding.');
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
 
   // 1. Seed Drill Operations
-  const { error: drillOpError } = await supabase.from("drill_operations").upsert(
+  const { error: drillOpError } = await supabase.from('drill_operations').upsert(
     [
       {
         department_id: dept.id,
@@ -50,21 +50,21 @@ export async function seedDrilling(supabase: SupabaseClient): Promise<void> {
         close_hours: 1431.5,
         holes: 18,
         meters_drilled: 234.5,
-        block_drilled: "Pit-A-Bench-04",
+        block_drilled: 'Pit-A-Bench-04',
         production_delays: 15.0,
         non_productional_delays: 10.0,
         engineering_delays: 0.0,
-        status: "active",
-        notes: "Target drill pattern completed on schedule.",
+        status: 'active',
+        notes: 'Target drill pattern completed on schedule.',
       },
     ],
-    { onConflict: "machine_id,operation_date" },
+    { onConflict: 'machine_id,operation_date' }
   );
 
   if (drillOpError) {
-    console.error("   [Drilling] Drill operations upsert error:", drillOpError.message);
+    console.error('   [Drilling] Drill operations upsert error:', drillOpError.message);
   } else {
-    console.log("   ✓ Drill operations seeded successfully.");
+    console.log('   ✓ Drill operations seeded successfully.');
   }
 
   // 2. Seed Machine Telemetry snapshots
@@ -90,11 +90,11 @@ export async function seedDrilling(supabase: SupabaseClient): Promise<void> {
   });
 
   const { error: telemetryError } = await supabase
-    .from("machine_telemetry")
+    .from('machine_telemetry')
     .insert(telemetryPoints);
 
   if (telemetryError) {
-    console.warn("   [Drilling] Machine telemetry insert warning:", telemetryError.message);
+    console.warn('   [Drilling] Machine telemetry insert warning:', telemetryError.message);
   } else {
     console.log(`   ✓ Seeded ${telemetryPoints.length} real-time drill telemetry stream points.`);
   }

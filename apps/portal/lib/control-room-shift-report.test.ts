@@ -1,27 +1,27 @@
 /**
  * @jest-environment node
  */
-import { getShiftReport, submitShiftReport } from "./control-room-shift-report";
+import { getShiftReport, submitShiftReport } from './control-room-shift-report';
 
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@repo/supabase/service-role", () => ({
+jest.mock('@repo/supabase/service-role', () => ({
   createServiceRoleClient: jest.fn(),
 }));
 
 const mockLogAuditEvent = jest.fn();
-jest.mock("./audit", () => ({ logAuditEvent: (...args: unknown[]) => mockLogAuditEvent(...args) }));
+jest.mock('./audit', () => ({ logAuditEvent: (...args: unknown[]) => mockLogAuditEvent(...args) }));
 
-jest.mock("@/lib/errors/error-logger", () => ({ logError: jest.fn() }));
+jest.mock('@/lib/errors/error-logger', () => ({ logError: jest.fn() }));
 
-const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
-const { createServiceRoleClient } = jest.requireMock("@repo/supabase/service-role");
+const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
+const { createServiceRoleClient } = jest.requireMock('@repo/supabase/service-role');
 
-const DEPT_ID = "12345678-1234-4234-8234-1234567890ab";
-const DATE = "2026-08-18";
-const SHIFT = "day" as const;
+const DEPT_ID = '12345678-1234-4234-8234-1234567890ab';
+const DATE = '2026-08-18';
+const SHIFT = 'day' as const;
 
 const validInput = {
   departmentId: DEPT_ID,
@@ -31,8 +31,8 @@ const validInput = {
   incidentAckAvgSeconds: 18,
   systemUptimePercent: 99.98,
   missedIncidentsCount: 0,
-  summaryNotes: "Quiet shift",
-  operatorName: "Jane Operator",
+  summaryNotes: 'Quiet shift',
+  operatorName: 'Jane Operator',
   completedChecklistCount: 8,
   totalChecklistCount: 8,
   checklistItems: [],
@@ -66,15 +66,15 @@ function makeBuilder(table: string, resolve: () => { data: unknown; error: unkno
 }
 
 function mockServerClient(
-  overrides: { user?: unknown; employee?: unknown; report?: unknown } = {},
+  overrides: { user?: unknown; employee?: unknown; report?: unknown } = {}
 ) {
-  const { user = { id: "user-1" }, employee = { id: "emp-1" }, report = null } = overrides;
+  const { user = { id: 'user-1' }, employee = { id: 'emp-1' }, report = null } = overrides;
   const builders: Record<string, ReturnType<typeof makeBuilder>> = {};
   const from = jest.fn((table: string) => {
     if (!builders[table]) {
       builders[table] = makeBuilder(
         table,
-        () => serverResults[table] ?? { data: null, error: null },
+        () => serverResults[table] ?? { data: null, error: null }
       );
     }
     return builders[table];
@@ -95,7 +95,7 @@ function mockServiceClient(existing: unknown = null, writeResult: unknown = null
     if (!builders[table]) {
       builders[table] = makeBuilder(
         table,
-        () => serviceQueues[table]?.shift() ?? { data: null, error: null },
+        () => serviceQueues[table]?.shift() ?? { data: null, error: null }
       );
     }
     return builders[table];
@@ -108,7 +108,7 @@ function mockServiceClient(existing: unknown = null, writeResult: unknown = null
   return { from, builders };
 }
 
-describe("submitShiftReport", () => {
+describe('submitShiftReport', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete serverResults.control_room_shift_reports;
@@ -118,69 +118,69 @@ describe("submitShiftReport", () => {
     updateCalls.length = 0;
   });
 
-  it("throws AuthError when user is not logged in", async () => {
+  it('throws AuthError when user is not logged in', async () => {
     mockServerClient({ user: null });
-    await expect(submitShiftReport(validInput)).rejects.toThrow("Unauthorized");
+    await expect(submitShiftReport(validInput)).rejects.toThrow('Unauthorized');
   });
 
-  it("throws AuthError when employee record is missing", async () => {
+  it('throws AuthError when employee record is missing', async () => {
     mockServerClient({ employee: null });
-    await expect(submitShiftReport(validInput)).rejects.toThrow("Unauthorized");
+    await expect(submitShiftReport(validInput)).rejects.toThrow('Unauthorized');
   });
 
-  it("inserts a new report when none exists for (dept, date, shift)", async () => {
+  it('inserts a new report when none exists for (dept, date, shift)', async () => {
     mockServerClient();
-    mockServiceClient(null, { id: "report-1" });
+    mockServiceClient(null, { id: 'report-1' });
 
     const result = await submitShiftReport(validInput);
 
-    expect(result).toEqual({ success: true, reportId: "report-1" });
-    const insert = insertCalls.find((c) => c.table === "control_room_shift_reports");
+    expect(result).toEqual({ success: true, reportId: 'report-1' });
+    const insert = insertCalls.find((c) => c.table === 'control_room_shift_reports');
     expect(insert).toBeDefined();
     expect(insert!.args).toMatchObject({
       department_id: DEPT_ID,
       report_date: DATE,
       shift_type: SHIFT,
-      operator_name: "Jane Operator",
-      created_by: "emp-1",
+      operator_name: 'Jane Operator',
+      created_by: 'emp-1',
     });
     expect(updateCalls).toHaveLength(0);
     expect(mockLogAuditEvent).toHaveBeenCalledWith({
-      action: "insert",
-      tableName: "control_room_shift_reports",
-      recordId: "report-1",
+      action: 'insert',
+      tableName: 'control_room_shift_reports',
+      recordId: 'report-1',
       departmentId: DEPT_ID,
     });
   });
 
-  it("updates the existing report in place, preserving created_by", async () => {
+  it('updates the existing report in place, preserving created_by', async () => {
     mockServerClient();
-    mockServiceClient({ id: "report-1" }, { id: "report-1" });
+    mockServiceClient({ id: 'report-1' }, { id: 'report-1' });
 
     const result = await submitShiftReport(validInput);
 
-    expect(result).toEqual({ success: true, reportId: "report-1" });
-    const update = updateCalls.find((c) => c.table === "control_room_shift_reports");
+    expect(result).toEqual({ success: true, reportId: 'report-1' });
+    const update = updateCalls.find((c) => c.table === 'control_room_shift_reports');
     expect(update).toBeDefined();
     // created_by must NOT be in the update payload — original author preserved.
-    expect(update!.args).not.toHaveProperty("created_by");
+    expect(update!.args).not.toHaveProperty('created_by');
     expect(insertCalls).toHaveLength(0);
     expect(mockLogAuditEvent).toHaveBeenCalledWith({
-      action: "update",
-      tableName: "control_room_shift_reports",
-      recordId: "report-1",
+      action: 'update',
+      tableName: 'control_room_shift_reports',
+      recordId: 'report-1',
       departmentId: DEPT_ID,
     });
   });
 
-  it("rejects invalid input at the boundary", async () => {
+  it('rejects invalid input at the boundary', async () => {
     mockServerClient();
     await expect(submitShiftReport({ ...validInput, systemUptimePercent: 150 })).rejects.toThrow();
     expect(createServiceRoleClient).not.toHaveBeenCalled();
   });
 });
 
-describe("getShiftReport", () => {
+describe('getShiftReport', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete serverResults.control_room_shift_reports;
@@ -188,41 +188,41 @@ describe("getShiftReport", () => {
     delete serviceQueues.control_room_shift_reports;
   });
 
-  it("returns null when no report exists", async () => {
+  it('returns null when no report exists', async () => {
     mockServerClient({ report: null });
     await expect(getShiftReport(DEPT_ID, DATE, SHIFT)).resolves.toBeNull();
   });
 
-  it("maps a stored report to the camelCase record shape", async () => {
+  it('maps a stored report to the camelCase record shape', async () => {
     mockServerClient({
       report: {
-        id: "report-1",
+        id: 'report-1',
         department_id: DEPT_ID,
         report_date: DATE,
         shift_type: SHIFT,
-        operator_name: "Jane Operator",
+        operator_name: 'Jane Operator',
         alarm_response_avg_seconds: 42,
         incident_ack_avg_seconds: 18,
         system_uptime_percent: 99.98,
         missed_incidents_count: 0,
-        summary_notes: "Quiet shift",
+        summary_notes: 'Quiet shift',
         checklist_items: [],
         completed_checklist_count: 8,
         total_checklist_count: 8,
         supervisor_signature: null,
-        created_at: "2026-08-18T06:00:00Z",
-        updated_at: "2026-08-18T06:00:00Z",
+        created_at: '2026-08-18T06:00:00Z',
+        updated_at: '2026-08-18T06:00:00Z',
       },
     });
 
     const result = await getShiftReport(DEPT_ID, DATE, SHIFT);
 
     expect(result).toMatchObject({
-      id: "report-1",
+      id: 'report-1',
       departmentId: DEPT_ID,
       date: DATE,
       shift: SHIFT,
-      operatorName: "Jane Operator",
+      operatorName: 'Jane Operator',
       alarmResponseAvgSeconds: 42,
       systemUptimePercent: 99.98,
       checklistItems: [],

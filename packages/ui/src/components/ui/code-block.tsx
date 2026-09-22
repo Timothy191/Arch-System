@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Check, Copy, ExternalLink, Terminal } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { Check, Copy, ExternalLink, Terminal } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface LanguageOption {
   label: string;
@@ -24,7 +24,7 @@ export interface CodeBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   removedLinesNumbers?: number[];
   switcher?: SwitcherConfig;
   tabs?: SwitcherConfig;
-  v0?: "ask" | "build";
+  v0?: 'ask' | 'build';
   children: string;
 }
 
@@ -44,7 +44,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const [copied, setCopied] = React.useState(false);
 
@@ -60,10 +60,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
 
     // Split code into lines
     const rawLines =
-      typeof children === "string" ? children.replace(/\r\n/g, "\n").split("\n") : [];
+      typeof children === 'string' ? children.replace(/\r\n/g, '\n').split('\n') : [];
     // If the last line is empty due to trailing newline, trim it
     const lines =
-      rawLines.length > 0 && rawLines[rawLines.length - 1] === ""
+      rawLines.length > 0 && rawLines[rawLines.length - 1] === ''
         ? rawLines.slice(0, -1)
         : rawLines;
 
@@ -71,9 +71,9 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-lg overflow-hidden border border-neutral-200",
-          "bg-neutral-950 text-neutral-100 font-mono text-xs shadow-sm",
-          className,
+          'rounded-lg overflow-hidden border border-neutral-200',
+          'bg-neutral-950 text-neutral-100 font-mono text-xs shadow-sm',
+          className
         )}
         {...props}
       >
@@ -90,10 +90,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                       type="button"
                       onClick={() => tabs.onChange(opt.value)}
                       className={cn(
-                        "px-2.5 py-1 rounded text-xs font-medium transition-colors",
+                        'px-2.5 py-1 rounded text-xs font-medium transition-colors',
                         tabs.value === opt.value
-                          ? "bg-neutral-800 text-white shadow-2xs"
-                          : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50",
+                          ? 'bg-neutral-800 text-white shadow-2xs'
+                          : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50'
                       )}
                     >
                       {opt.label}
@@ -127,7 +127,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
               {v0 && (
                 <button
                   type="button"
-                  onClick={() => window.open(`https://v0.dev/${v0}`, "_blank")}
+                  onClick={() => window.open(`https://v0.dev/${v0}`, '_blank')}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors border border-neutral-700"
                 >
                   <span>Open in v0</span>
@@ -138,7 +138,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
               <button
                 type="button"
                 onClick={handleCopy}
-                aria-label={copied ? "Copied" : "Copy code"}
+                aria-label={copied ? 'Copied' : 'Copy code'}
                 className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
               >
                 {copied ? (
@@ -158,7 +158,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
             <button
               type="button"
               onClick={handleCopy}
-              aria-label={copied ? "Copied" : "Copy code"}
+              aria-label={copied ? 'Copied' : 'Copy code'}
               className="absolute right-3 top-3 p-1.5 rounded bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
             >
               {copied ? (
@@ -180,11 +180,10 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
                 <div
                   key={lineNum}
                   className={cn(
-                    "flex items-center -mx-4 px-4 py-0.5 transition-colors",
-                    isHighlighted && "bg-blue-500/15 border-l-2 border-l-blue-400",
-                    isAdded && "bg-emerald-500/15 border-l-2 border-l-emerald-400 text-emerald-200",
-                    isRemoved &&
-                      "bg-red-500/15 border-l-2 border-l-red-400 text-red-200 opacity-75",
+                    'flex items-center -mx-4 px-4 py-0.5 transition-colors',
+                    isHighlighted && 'bg-blue-500/15 border-l-2 border-l-blue-400',
+                    isAdded && 'bg-emerald-500/15 border-l-2 border-l-emerald-400 text-emerald-200',
+                    isRemoved && 'bg-red-500/15 border-l-2 border-l-red-400 text-red-200 opacity-75'
                   )}
                 >
                   {!hideLineNumbers && (
@@ -215,7 +214,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
-CodeBlock.displayName = "CodeBlock";
+CodeBlock.displayName = 'CodeBlock';

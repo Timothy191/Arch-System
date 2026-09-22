@@ -1,61 +1,61 @@
-"use client";
+'use client';
 
-import { useLogin } from "@repo/auth/data-access";
-import { isValidPageRedirect } from "@repo/auth/utils";
-import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useLogin } from '@repo/auth/data-access';
+import { isValidPageRedirect } from '@repo/auth/utils';
+import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get('redirect') || '/';
   const redirectTo =
-    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith("/login") ? rawRedirect : "/";
+    isValidPageRedirect(rawRedirect) && !rawRedirect.startsWith('/login') ? rawRedirect : '/';
 
-  const [employeeId, setEmployeeId] = useState("");
-  const [password, setPassword] = useState("");
+  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [passwordError, setPasswordError] = useState("");
+  const [passwordError, setPasswordError] = useState('');
 
   const { login, loading, rateLimitCountdown } = useLogin();
   const isRateLimited = rateLimitCountdown !== null && rateLimitCountdown > 0;
 
   useEffect(() => {
-    const emailParam = searchParams.get("email") || searchParams.get("employeeId");
+    const emailParam = searchParams.get('email') || searchParams.get('employeeId');
     if (emailParam) setEmployeeId(emailParam);
   }, [searchParams]);
 
   function handleCapsLockKey(e: React.KeyboardEvent) {
-    setCapsLock(e.getModifierState("CapsLock"));
+    setCapsLock(e.getModifierState('CapsLock'));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPasswordError("");
+    setPasswordError('');
 
     if (isRateLimited) return;
 
     if (password.length < 6) {
-      setPasswordError("Invalid email/employee ID or password");
+      setPasswordError('Invalid email/employee ID or password');
       return;
     }
 
     const result = await login(employeeId, password);
     if (result?.success) {
-      if (typeof window !== "undefined" && window.location && process.env.NODE_ENV !== "test") {
-        const destination = redirectTo === "/" ? "/hub" : redirectTo;
+      if (typeof window !== 'undefined' && window.location && process.env.NODE_ENV !== 'test') {
+        const destination = redirectTo === '/' ? '/hub' : redirectTo;
         window.location.assign(destination);
       } else {
         router.push(redirectTo);
         router.refresh();
       }
     } else {
-      setPasswordError("Invalid email/employee ID or password");
+      setPasswordError('Invalid email/employee ID or password');
     }
   }
 
@@ -83,10 +83,10 @@ export function LoginForm() {
             onChange={(e) => setEmployeeId(e.target.value)}
             onFocus={(e) => e.target.select()}
             onBlur={(e) => {
-              if (e.target.value && !e.target.value.includes("@")) {
+              if (e.target.value && !e.target.value.includes('@')) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (e.target.value.includes("@") && !emailRegex.test(e.target.value)) {
-                  toast.error("Please enter a valid email address");
+                if (e.target.value.includes('@') && !emailRegex.test(e.target.value)) {
+                  toast.error('Please enter a valid email address');
                 }
               }
             }}
@@ -117,7 +117,7 @@ export function LoginForm() {
           <Lock className="w-4 h-4 absolute left-3.5 text-neutral-400 pointer-events-none" />
           <input
             id="password"
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? 'text' : 'password'}
             required
             minLength={6}
             maxLength={128}
@@ -125,7 +125,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              setPasswordError("");
+              setPasswordError('');
             }}
             onFocus={(e) => e.target.select()}
             onKeyDown={handleCapsLockKey}
@@ -138,7 +138,7 @@ export function LoginForm() {
             type="button"
             onClick={() => setShowPassword((s) => !s)}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors p-1 rounded focus:outline-none"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>

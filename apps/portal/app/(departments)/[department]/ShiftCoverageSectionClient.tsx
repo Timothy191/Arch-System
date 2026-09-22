@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { getCurrentShift } from "@repo/utils";
-import { ShiftCoverageWidget } from "@/features/departments";
-import { useShiftCoverage } from "@/hooks/useDashboardQueries";
+import { getCurrentShift } from '@repo/utils';
+import { ShiftCoverageWidget } from '@/features/departments';
+import { useShiftCoverage } from '@/hooks/useDashboardQueries';
 
 interface ShiftCoverageSectionClientProps {
   deptId: string;
@@ -19,7 +19,7 @@ export function ShiftCoverageSectionClient({
 
   if (!data) return null;
 
-  const currentShift = (data.latestShift as "day" | "night") || getCurrentShift();
+  const currentShift = (data.latestShift as 'day' | 'night') || getCurrentShift();
 
   return (
     <ShiftCoverageWidget

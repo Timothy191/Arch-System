@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { FileText, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { generateMonthlyReport } from "@/app/actions";
+import { FileText, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { generateMonthlyReport } from '@/app/actions';
 
 interface PDFDownloadButtonProps {
   reportData: {
@@ -24,13 +24,13 @@ export function PDFDownloadButton({ reportData, departmentId }: PDFDownloadButto
     try {
       const res = await generateMonthlyReport(reportData, departmentId);
       if (res.success && res.url) {
-        window.open(res.url, "_blank");
-        toast.success("PDF report generated successfully!");
+        window.open(res.url, '_blank');
+        toast.success('PDF report generated successfully!');
       } else {
-        toast.error("Failed to generate PDF report.");
+        toast.error('Failed to generate PDF report.');
       }
     } catch (_err) {
-      toast.error("An error occurred while generating the PDF.");
+      toast.error('An error occurred while generating the PDF.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export function PDFDownloadButton({ reportData, departmentId }: PDFDownloadButto
       ) : (
         <FileText className="w-4 h-4 text-accent-red" />
       )}
-      <span>{loading ? "Generating PDF..." : "Export PDF"}</span>
+      <span>{loading ? 'Generating PDF...' : 'Export PDF'}</span>
     </button>
   );
 }

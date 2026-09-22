@@ -1,17 +1,17 @@
-import { z } from "zod";
-import { dateSchema, nonEmptyString, uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { dateSchema, nonEmptyString, uuidSchema } from './common.schema';
 
 export const shiftCompletenessSchema = z.object({
   deptId: uuidSchema,
   deptSlug: nonEmptyString.max(100),
   date: dateSchema,
-  shift: z.enum(["day", "night"]),
+  shift: z.enum(['day', 'night']),
 });
 
 export const controlRoomChecklistItemSchema = z.object({
   id: nonEmptyString.max(64),
   label: nonEmptyString.max(255),
-  category: z.enum(["daily", "weekly", "monthly", "incident", "compliance"]),
+  category: z.enum(['daily', 'weekly', 'monthly', 'incident', 'compliance']),
   completed: z.boolean(),
   completedAt: z.string().datetime().optional().nullable(),
   completedBy: nonEmptyString.max(100).optional().nullable(),
@@ -21,7 +21,7 @@ export const controlRoomChecklistItemSchema = z.object({
 export const controlRoomChecklistSchema = z.object({
   departmentId: uuidSchema,
   date: dateSchema,
-  shift: z.enum(["day", "night"]),
+  shift: z.enum(['day', 'night']),
   items: z.array(controlRoomChecklistItemSchema),
   supervisorSignature: nonEmptyString.max(100).optional().nullable(),
 });
@@ -29,7 +29,7 @@ export const controlRoomChecklistSchema = z.object({
 export const controlRoomShiftReportSchema = z.object({
   departmentId: uuidSchema,
   date: dateSchema,
-  shift: z.enum(["day", "night"]),
+  shift: z.enum(['day', 'night']),
   alarmResponseAvgSeconds: z.number().nonnegative(),
   incidentAckAvgSeconds: z.number().nonnegative(),
   systemUptimePercent: z.number().min(0).max(100),
@@ -44,9 +44,9 @@ export const controlRoomShiftReportSchema = z.object({
 
 export const shiftCloseoutSchema = z.object({
   shiftId: uuidSchema,
-  department: z.literal("control_room"),
+  department: z.literal('control_room'),
   supervisorId: uuidSchema,
-  supervisorPin: z.string().regex(/^\d{4,6}$/, "Supervisor PIN must be 4 to 6 digits"),
+  supervisorPin: z.string().regex(/^\d{4,6}$/, 'Supervisor PIN must be 4 to 6 digits'),
   totalLoads: z.number().int().nonnegative(),
   totalOperatingHours: z.number().min(0).max(24),
   breakdownHours: z.number().min(0).max(24),
@@ -54,22 +54,22 @@ export const shiftCloseoutSchema = z.object({
 });
 
 export const healthCheckResponseSchema = z.object({
-  status: z.enum(["healthy", "degraded", "unhealthy"]),
+  status: z.enum(['healthy', 'degraded', 'unhealthy']),
   timestamp: z.string(),
   latencyMs: z.number().nonnegative(),
   services: z.object({
     supabase: z.object({
-      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      status: z.enum(['healthy', 'degraded', 'unhealthy']),
       latencyMs: z.number().nonnegative(),
       error: z.string().optional(),
     }),
     redis: z.object({
-      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      status: z.enum(['healthy', 'degraded', 'unhealthy']),
       latencyMs: z.number().nonnegative(),
       error: z.string().optional(),
     }),
     fuxa: z.object({
-      status: z.enum(["healthy", "degraded", "unhealthy"]),
+      status: z.enum(['healthy', 'degraded', 'unhealthy']),
       latencyMs: z.number().nonnegative(),
       statusCode: z.number().optional().nullable(),
       error: z.string().optional(),

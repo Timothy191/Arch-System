@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Spotlight } from "./spotlight";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Spotlight } from './spotlight';
 
 const meta: Meta<typeof Spotlight> = {
-  title: "Motion/Spotlight",
+  title: 'Motion/Spotlight',
   component: Spotlight,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
 };
 

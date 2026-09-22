@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { AuthError } from "@repo/errors";
-import { cacheInvalidateTags } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidateTag } from "next/cache";
+import { AuthError } from '@repo/errors';
+import { cacheInvalidateTags } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidateTag } from 'next/cache';
 
-type AuditAction = "insert" | "update" | "delete";
+type AuditAction = 'insert' | 'update' | 'delete';
 
 export interface AuditLogInput {
   action: AuditAction;
@@ -24,18 +24,18 @@ export async function logAuditEvent(input: AuditLogInput) {
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    throw new AuthError("Unauthorized: valid session required", {
-      context: { operation: "logAuditEvent" },
+    throw new AuthError('Unauthorized: valid session required', {
+      context: { operation: 'logAuditEvent' },
     });
   }
 
   const { data: employee } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('id')
+    .eq('auth_id', user.id)
     .maybeSingle();
 
-  await supabase.from("audit_logs").insert({
+  await supabase.from('audit_logs').insert({
     action: input.action,
     table_name: input.tableName,
     record_id: input.recordId,
@@ -48,7 +48,7 @@ export async function logAuditEvent(input: AuditLogInput) {
   if (input.tableName) {
     cacheInvalidateTags([`table:${input.tableName}`]).catch(() => {});
     try {
-      revalidateTag(`table:${input.tableName}`, "max");
+      revalidateTag(`table:${input.tableName}`, 'max');
     } catch {
       // Ignore if not in rendering/action context
     }

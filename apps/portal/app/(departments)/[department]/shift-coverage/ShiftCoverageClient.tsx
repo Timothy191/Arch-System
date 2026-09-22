@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { CloseShiftModal } from "@repo/departments/ui";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { ShiftToggle } from "@repo/ui/ShiftToggle";
+import { CloseShiftModal } from '@repo/departments/ui';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { ShiftToggle } from '@repo/ui/ShiftToggle';
 import {
   AlertTriangle,
   CheckCircle,
@@ -11,14 +11,14 @@ import {
   ChevronRight,
   Clock,
   XCircle,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ShiftCoverageClientProps {
   departmentId: string;
   departmentSlug: string;
   initialDate: string;
-  initialShift: "day" | "night";
+  initialShift: 'day' | 'night';
 }
 
 interface MachineWithOp {
@@ -32,7 +32,7 @@ interface MachineWithOp {
 interface ShiftHistoryItem {
   id: string;
   shift_date: string;
-  shift_type: "day" | "night";
+  shift_type: 'day' | 'night';
   closed_at: string;
 }
 
@@ -44,7 +44,7 @@ export function ShiftCoverageClient({
 }: ShiftCoverageClientProps) {
   const supabase = createBrowserSupabaseClient();
   const [date, setDate] = useState(initialDate);
-  const [shiftType, setShiftType] = useState<"day" | "night">(initialShift);
+  const [shiftType, setShiftType] = useState<'day' | 'night'>(initialShift);
   const [machines, setMachines] = useState<MachineWithOp[]>([]);
   const [isClosed, setIsClosed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -61,16 +61,16 @@ export function ShiftCoverageClient({
       try {
         const [machinesRes, opsRes] = await Promise.all([
           supabase
-            .from("machines")
-            .select("id, name, machine_type")
-            .eq("active", true)
-            .order("name"),
+            .from('machines')
+            .select('id, name, machine_type')
+            .eq('active', true)
+            .order('name'),
           supabase
-            .from("machine_operations")
-            .select("machine_id, hours_worked")
-            .eq("department_id", departmentId)
-            .eq("shift_date", date)
-            .eq("shift_type", shiftType),
+            .from('machine_operations')
+            .select('machine_id, hours_worked')
+            .eq('department_id', departmentId)
+            .eq('shift_date', date)
+            .eq('shift_type', shiftType),
         ]);
 
         if (cancelled) return;
@@ -96,17 +96,17 @@ export function ShiftCoverageClient({
         setMachines(machinesWithOps);
 
         const { data: statusData } = await supabase
-          .from("shift_status")
-          .select("status")
-          .eq("department_id", departmentId)
-          .eq("shift_date", date)
-          .eq("shift_type", shiftType)
+          .from('shift_status')
+          .select('status')
+          .eq('department_id', departmentId)
+          .eq('shift_date', date)
+          .eq('shift_type', shiftType)
           .maybeSingle();
 
-        setIsClosed(statusData?.status === "closed");
+        setIsClosed(statusData?.status === 'closed');
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load data");
+          setError(err instanceof Error ? err.message : 'Failed to load data');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -124,10 +124,10 @@ export function ShiftCoverageClient({
 
     async function fetchHistory() {
       const { data } = await supabase
-        .from("shift_status")
-        .select("id, shift_date, shift_type, closed_at")
-        .eq("department_id", departmentId)
-        .order("shift_date", { ascending: false })
+        .from('shift_status')
+        .select('id, shift_date, shift_type, closed_at')
+        .eq('department_id', departmentId)
+        .order('shift_date', { ascending: false })
         .limit(20);
 
       if (!cancelled && data) {
@@ -144,13 +144,13 @@ export function ShiftCoverageClient({
   const prevDay = () => {
     const d = new Date(date);
     d.setDate(d.getDate() - 1);
-    setDate(d.toISOString().split("T")[0] || "");
+    setDate(d.toISOString().split('T')[0] || '');
   };
 
   const nextDay = () => {
     const d = new Date(date);
     d.setDate(d.getDate() + 1);
-    setDate(d.toISOString().split("T")[0] || "");
+    setDate(d.toISOString().split('T')[0] || '');
   };
 
   const reportedCount = machines.filter((m) => m.has_entry).length;
@@ -173,11 +173,11 @@ export function ShiftCoverageClient({
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-[var(--text-heading)] font-medium text-sm">
-              {new Date(date).toLocaleDateString("en-ZA", {
-                weekday: "short",
-                year: "numeric",
-                month: "short",
-                day: "numeric",
+              {new Date(date).toLocaleDateString('en-ZA', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
               })}
             </span>
             <button
@@ -213,7 +213,7 @@ export function ShiftCoverageClient({
             )}
           </div>
           <p className="text-[var(--text-muted)] text-sm">
-            {loading ? "Loading..." : `${reportedCount} / ${machines.length} reported`}
+            {loading ? 'Loading...' : `${reportedCount} / ${machines.length} reported`}
           </p>
         </div>
 
@@ -262,7 +262,7 @@ export function ShiftCoverageClient({
                       {m.name}
                     </td>
                     <td className="px-4 py-2.5 text-right text-[var(--text-heading)] font-medium tabular-nums">
-                      {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : "—"}
+                      {m.hours_worked !== null ? `${Number(m.hours_worked).toFixed(1)}h` : '—'}
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       {m.has_entry && m.hours_worked !== null && m.hours_worked > 0 ? (
@@ -337,25 +337,25 @@ export function ShiftCoverageClient({
                 {history.map((item) => (
                   <tr key={item.id} className="hover:bg-[var(--bg-tertiary)]/50 transition-colors">
                     <td className="px-4 py-2.5 text-[var(--text-heading)]">
-                      {new Date(item.shift_date).toLocaleDateString("en-ZA", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
+                      {new Date(item.shift_date).toLocaleDateString('en-ZA', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
                       })}
                     </td>
                     <td className="px-4 py-2.5">
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          item.shift_type === "day"
-                            ? "bg-accent-blue/10 text-accent-blue border border-accent-blue/20"
-                            : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+                          item.shift_type === 'day'
+                            ? 'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
+                            : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
                         }`}
                       >
-                        {item.shift_type === "day" ? "Day" : "Night"}
+                        {item.shift_type === 'day' ? 'Day' : 'Night'}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-[var(--text-muted)] text-xs">
-                      {new Date(item.closed_at).toLocaleString("en-ZA")}
+                      {new Date(item.closed_at).toLocaleString('en-ZA')}
                     </td>
                   </tr>
                 ))}

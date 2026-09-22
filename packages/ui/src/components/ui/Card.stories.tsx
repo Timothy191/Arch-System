@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Button } from "./button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
 
 const meta: Meta<typeof Card> = {
-  title: "UI/Card",
+  title: 'UI/Card',
   component: Card,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
 };
 

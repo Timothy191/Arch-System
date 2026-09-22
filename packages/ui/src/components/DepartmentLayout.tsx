@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
@@ -28,12 +28,12 @@ import {
   Undo2,
   Users,
   Wrench,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "../lib/utils";
-import { Logo } from "./Logo";
-import { MacTitleBar } from "./MacTitleBar";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '../lib/utils';
+import { Logo } from './Logo';
+import { MacTitleBar } from './MacTitleBar';
 
 const ICON_MAP: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   BarChart2: BarChart3,
@@ -92,7 +92,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
       <aside
         className="w-60 shrink-0 border-r border-black/[0.08] bg-[var(--vibrancy-surface)] backdrop-blur-2xl flex flex-col"
         // Vibrancy sidebar: subtle border refinement for macOS theme
-        style={{ borderRight: "1px solid rgba(0,0,0,0.07)" }}
+        style={{ borderRight: '1px solid rgba(0,0,0,0.07)' }}
       >
         {/* MacTitleBar with department name */}
         <MacTitleBar title={department.displayName} />
@@ -113,11 +113,11 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         <div className="px-4 py-2 flex items-center gap-2.5">
           <div
             className={cn(
-              "p-1.5 rounded-lg",
-              department.color === "blue" && "bg-dept-drilling/10 text-dept-drilling",
-              department.color === "emerald" && "bg-dept-production/10 text-dept-production",
-              department.color === "violet" && "bg-dept-engineering/10 text-dept-engineering",
-              department.color === "red" && "bg-dept-control-room/10 text-dept-control-room",
+              'p-1.5 rounded-lg',
+              department.color === 'blue' && 'bg-dept-drilling/10 text-dept-drilling',
+              department.color === 'emerald' && 'bg-dept-production/10 text-dept-production',
+              department.color === 'violet' && 'bg-dept-engineering/10 text-dept-engineering',
+              department.color === 'red' && 'bg-dept-control-room/10 text-dept-control-room'
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -130,19 +130,19 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
         {/* Navigation items */}
         <nav className="flex-1 px-2 pb-2 space-y-0.5 overflow-y-auto">
           {tabs.map((tab) => {
-            const href = tab.name === "dashboard" ? basePath : `${basePath}/${tab.name}`;
+            const href = tab.name === 'dashboard' ? basePath : `${basePath}/${tab.name}`;
             const isActive =
-              pathname === href || (tab.name === "dashboard" && pathname === basePath);
+              pathname === href || (tab.name === 'dashboard' && pathname === basePath);
             const Icon = ICON_MAP[tab.icon];
             return (
               <Link
                 key={tab.name}
                 href={href}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group",
+                  'flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group',
                   isActive
-                    ? "bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]",
+                    ? 'bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]'
                 )}
               >
                 {isActive && (
@@ -154,10 +154,10 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                 {Icon && (
                   <Icon
                     className={cn(
-                      "w-3.5 h-3.5 shrink-0 transition-colors",
+                      'w-3.5 h-3.5 shrink-0 transition-colors',
                       isActive
-                        ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-muted)] group-hover:text-[var(--text-body)]",
+                        ? 'text-[var(--accent-blue)]'
+                        : 'text-[var(--text-muted)] group-hover:text-[var(--text-body)]'
                     )}
                   />
                 )}

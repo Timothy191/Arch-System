@@ -20,7 +20,7 @@ const metrics: TelemetryMetric[] = [];
 export function trackClientMetric(
   name: string,
   fn: () => void | Promise<void>,
-  attributes?: Record<string, string | number | boolean>,
+  attributes?: Record<string, string | number | boolean>
 ): void | Promise<void> {
   const startTime = performance.now();
 
@@ -38,7 +38,7 @@ export function trackClientMetric(
       metrics.push(metric);
 
       // Log to console for development
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.log(`[Client Telemetry] ${name}`, { duration, attributes });
       }
@@ -54,7 +54,7 @@ export function trackClientMetric(
     metrics.push(metric);
 
     // Log to console for development
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.log(`[Client Telemetry] ${name}`, { duration, attributes });
     }

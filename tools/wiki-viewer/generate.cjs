@@ -5,17 +5,17 @@
  * Zero dependencies. Zero impact on the main project.
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const WIKI_ROOT = path.resolve(__dirname, "../../docs/wiki");
-const OUT_FILE = path.resolve(__dirname, "viewer.html");
+const WIKI_ROOT = path.resolve(__dirname, '../../docs/wiki');
+const OUT_FILE = path.resolve(__dirname, 'viewer.html');
 
 /* ────────────── helpers ────────────── */
 
 function readFile(p) {
   try {
-    return fs.readFileSync(p, "utf-8");
+    return fs.readFileSync(p, 'utf-8');
   } catch {
     return null;
   }
@@ -27,27 +27,27 @@ function parseFrontmatter(text) {
   const raw = m[1];
   const body = m[2];
   const meta = {};
-  for (const line of raw.split("\n")) {
+  for (const line of raw.split('\n')) {
     const kv = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
     if (!kv) continue;
     let [, k, v] = kv;
     v = v.trim();
-    if (v.startsWith("[") && v.endsWith("]")) {
+    if (v.startsWith('[') && v.endsWith(']')) {
       try {
         meta[k] = JSON.parse(v.replace(/'/g, '"'));
         continue;
       } catch {}
       meta[k] = v
         .slice(1, -1)
-        .split(",")
-        .map((s) => s.trim().replace(/^['"]|['"]$/g, ""));
+        .split(',')
+        .map((s) => s.trim().replace(/^['"]|['"]$/g, ''));
       continue;
     }
-    if (v === "true") {
+    if (v === 'true') {
       meta[k] = true;
       continue;
     }
-    if (v === "false") {
+    if (v === 'false') {
       meta[k] = false;
       continue;
     }
@@ -76,7 +76,7 @@ function mdToHtml(md, slugMap) {
 
   // Wikilinks
   html = html.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, display) => {
-    const t = target.trim().replace(/\s+/g, "-").toLowerCase();
+    const t = target.trim().replace(/\s+/g, '-').toLowerCase();
     const d = (display || target).trim();
     if (slugMap.has(t)) {
       return `<a class="wiki-link" href="#page=${t}">${escapeHtml(d)}</a>`;
@@ -85,43 +85,43 @@ function mdToHtml(md, slugMap) {
   });
 
   // Headings
-  html = html.replace(/^###### (.*)$/gm, "<h6>$1</h6>");
-  html = html.replace(/^##### (.*)$/gm, "<h5>$1</h5>");
-  html = html.replace(/^#### (.*)$/gm, "<h4>$1</h4>");
-  html = html.replace(/^### (.*)$/gm, "<h3>$1</h3>");
-  html = html.replace(/^## (.*)$/gm, "<h2>$1</h2>");
-  html = html.replace(/^# (.*)$/gm, "<h1>$1</h1>");
+  html = html.replace(/^###### (.*)$/gm, '<h6>$1</h6>');
+  html = html.replace(/^##### (.*)$/gm, '<h5>$1</h5>');
+  html = html.replace(/^#### (.*)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
 
   // Horizontal rule
-  html = html.replace(/^---\s*$/gm, "<hr>");
+  html = html.replace(/^---\s*$/gm, '<hr>');
 
   // Blockquotes
-  html = html.replace(/^&gt; (.*)$/gm, "<blockquote>$1</blockquote>");
+  html = html.replace(/^&gt; (.*)$/gm, '<blockquote>$1</blockquote>');
   // Merge consecutive blockquotes
-  html = html.replace(/<\/blockquote>\n<blockquote>/g, "<br>");
+  html = html.replace(/<\/blockquote>\n<blockquote>/g, '<br>');
 
   // Tables (simple parser)
   html = html.replace(/(\|.*\|[ \t]*\n)(\|[-:| \t]+\|[ \t]*\n)((?:\|.*\|[ \t]*\n)+)/g, (match) => {
-    const lines = match.trim().split("\n");
+    const lines = match.trim().split('\n');
     if (lines.length < 3) return match;
-    let out = "<table><thead><tr>";
+    let out = '<table><thead><tr>';
     const headers = lines[0]
-      .split("|")
+      .split('|')
       .map((s) => s.trim())
       .filter(Boolean);
     for (const h of headers) out += `<th>${h}</th>`;
-    out += "</tr></thead><tbody>";
+    out += '</tr></thead><tbody>';
     for (let i = 2; i < lines.length; i++) {
       const cells = lines[i]
-        .split("|")
+        .split('|')
         .map((s) => s.trim())
         .filter(Boolean);
       if (!cells.length) continue;
-      out += "<tr>";
+      out += '<tr>';
       for (const c of cells) out += `<td>${c}</td>`;
-      out += "</tr>";
+      out += '</tr>';
     }
-    out += "</tbody></table>";
+    out += '</tbody></table>';
     return out;
   });
 
@@ -130,10 +130,10 @@ function mdToHtml(md, slugMap) {
     const items = block.trim().split(/\n(?=\s*[-*+] )/);
     let out = `${pre}<ul>`;
     for (const item of items) {
-      const content = item.replace(/^\s*[-*+]\s+/, "").trim();
+      const content = item.replace(/^\s*[-*+]\s+/, '').trim();
       if (content) out += `<li>${content}</li>`;
     }
-    out += "</ul>";
+    out += '</ul>';
     return out;
   });
 
@@ -141,23 +141,23 @@ function mdToHtml(md, slugMap) {
     const items = block.trim().split(/\n(?=\s*\d+\. )/);
     let out = `${pre}<ol>`;
     for (const item of items) {
-      const content = item.replace(/^\s*\d+\.\s+/, "").trim();
+      const content = item.replace(/^\s*\d+\.\s+/, '').trim();
       if (content) out += `<li>${content}</li>`;
     }
-    out += "</ol>";
+    out += '</ol>';
     return out;
   });
 
   // External links
   html = html.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener">$1</a>',
+    '<a href="$2" target="_blank" rel="noopener">$1</a>'
   );
 
   // Bold / italic
-  html = html.replace(/\*\*\*([^*]+)\*\*\*/g, "<b><i>$1</i></b>");
-  html = html.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
-  html = html.replace(/\*([^*]+)\*/g, "<i>$1</i>");
+  html = html.replace(/\*\*\*([^*]+)\*\*\*/g, '<b><i>$1</i></b>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\*([^*]+)\*/g, '<i>$1</i>');
 
   // Restore inline code
   html = html.replace(/\x00INLINECODE(\d+)\x00/g, (_, idx) => `<code>${inlineCodes[+idx]}</code>`);
@@ -165,7 +165,7 @@ function mdToHtml(md, slugMap) {
   // Restore code blocks
   html = html.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
     const { lang, code } = codeBlocks[+idx];
-    return `<pre class="code-block${lang ? ` language-${lang}` : ""}"><code>${code}</code></pre>`;
+    return `<pre class="code-block${lang ? ` language-${lang}` : ''}"><code>${code}</code></pre>`;
   });
 
   // Paragraphs
@@ -173,21 +173,21 @@ function mdToHtml(md, slugMap) {
   html = blocks
     .map((blk) => {
       const t = blk.trim();
-      if (!t) return "";
+      if (!t) return '';
       if (/^<(h[1-6]|ul|ol|pre|table|hr|blockquote)/.test(t)) return t;
-      return `<p>${t.replace(/\n/g, "<br>")}</p>`;
+      return `<p>${t.replace(/\n/g, '<br>')}</p>`;
     })
-    .join("\n");
+    .join('\n');
 
   return html;
 }
 
 function escapeHtml(s) {
   return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /* ────────────── collect pages ────────────── */
@@ -199,35 +199,35 @@ function walk(dir) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, ent.name);
     if (ent.isDirectory()) {
-      if (ent.name.startsWith(".")) continue;
+      if (ent.name.startsWith('.')) continue;
       walk(p);
-    } else if (ent.name.endsWith(".md")) {
+    } else if (ent.name.endsWith('.md')) {
       const raw = readFile(p);
       if (raw == null) continue;
-      const rel = path.relative(WIKI_ROOT, p).replace(/\\/g, "/");
-      const slug = rel.replace(/\.md$/, "").replace(/\//g, "-");
+      const rel = path.relative(WIKI_ROOT, p).replace(/\\/g, '/');
+      const slug = rel.replace(/\.md$/, '').replace(/\//g, '-');
       const { meta, body } = parseFrontmatter(raw);
       const page = {
         slug,
         rel,
-        title: meta.title || ent.name.replace(/\.md$/, ""),
-        type: meta.type || "page",
+        title: meta.title || ent.name.replace(/\.md$/, ''),
+        type: meta.type || 'page',
         tags: Array.isArray(meta.tags) ? meta.tags : [],
         sources: Array.isArray(meta.sources) ? meta.sources : [],
-        confidence: meta.confidence || "",
+        confidence: meta.confidence || '',
         contested: meta.contested || false,
         contradictions: Array.isArray(meta.contradictions) ? meta.contradictions : [],
-        created: meta.created || "",
-        updated: meta.updated || "",
-        source_url: meta.source_url || "",
-        ingested: meta.ingested || "",
-        sha256: meta.sha256 || "",
+        created: meta.created || '',
+        updated: meta.updated || '',
+        source_url: meta.source_url || '',
+        ingested: meta.ingested || '',
+        sha256: meta.sha256 || '',
         body,
       };
       pages.push(page);
       slugMap.set(slug, page);
       // Also register simpler slugs for wikilink resolution
-      const simple = path.basename(ent.name, ".md");
+      const simple = path.basename(ent.name, '.md');
       if (!slugMap.has(simple)) slugMap.set(simple, page);
     }
   }
@@ -241,7 +241,7 @@ for (const p of pages) {
   const re = /\[\[([^\]|]+)/g;
   let m;
   while ((m = re.exec(p.body))) {
-    const t = m[1].trim().replace(/\s+/g, "-").toLowerCase();
+    const t = m[1].trim().replace(/\s+/g, '-').toLowerCase();
     if (slugMap.has(t) && t !== p.slug) {
       links.push({ source: p.slug, target: t });
     }
@@ -269,45 +269,45 @@ const pageData = pages.map((p) => ({
 }));
 
 const groups = {
-  index: pageData.filter((p) => p.slug === "index"),
-  schema: pageData.filter((p) => p.slug === "SCHEMA"),
-  log: pageData.filter((p) => p.slug === "log"),
-  entity: pageData.filter((p) => p.type === "entity"),
-  concept: pageData.filter((p) => p.type === "concept"),
-  comparison: pageData.filter((p) => p.type === "comparison"),
-  query: pageData.filter((p) => p.type === "query"),
-  raw: pageData.filter((p) => p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
+  index: pageData.filter((p) => p.slug === 'index'),
+  schema: pageData.filter((p) => p.slug === 'SCHEMA'),
+  log: pageData.filter((p) => p.slug === 'log'),
+  entity: pageData.filter((p) => p.type === 'entity'),
+  concept: pageData.filter((p) => p.type === 'concept'),
+  comparison: pageData.filter((p) => p.type === 'comparison'),
+  query: pageData.filter((p) => p.type === 'query'),
+  raw: pageData.filter((p) => p.slug.startsWith('raw-') || p.rel.startsWith('raw/')),
   other: pageData.filter(
     (p) =>
-      !["index", "SCHEMA", "log", "entity", "concept", "comparison", "query"].includes(p.type) &&
-      !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
+      !['index', 'SCHEMA', 'log', 'entity', 'concept', 'comparison', 'query'].includes(p.type) &&
+      !(p.slug.startsWith('raw-') || p.rel.startsWith('raw/'))
   ),
 };
 
 function groupHtml(_key, label, arr) {
-  if (!arr.length) return "";
+  if (!arr.length) return '';
   const lis = arr
     .map(
       (p) =>
-        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`,
+        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`
     )
-    .join("");
+    .join('');
   return `<details open><summary>${label} <span class="count">${arr.length}</span></summary><ul>${lis}</ul></details>`;
 }
 
 const sidebarGroups = [
-  groupHtml("index", "Index", groups.index),
-  groupHtml("schema", "Schema", groups.schema),
-  groupHtml("log", "Log", groups.log),
-  groupHtml("entity", "Entities", groups.entity),
-  groupHtml("concept", "Concepts", groups.concept),
-  groupHtml("comparison", "Comparisons", groups.comparison),
-  groupHtml("query", "Queries", groups.query),
-  groupHtml("raw", "Raw Sources", groups.raw),
-  groupHtml("other", "Other", groups.other),
+  groupHtml('index', 'Index', groups.index),
+  groupHtml('schema', 'Schema', groups.schema),
+  groupHtml('log', 'Log', groups.log),
+  groupHtml('entity', 'Entities', groups.entity),
+  groupHtml('concept', 'Concepts', groups.concept),
+  groupHtml('comparison', 'Comparisons', groups.comparison),
+  groupHtml('query', 'Queries', groups.query),
+  groupHtml('raw', 'Raw Sources', groups.raw),
+  groupHtml('other', 'Other', groups.other),
 ]
   .filter(Boolean)
-  .join("");
+  .join('');
 
 const _allTags = [...new Set(pageData.flatMap((p) => p.tags))].sort();
 
@@ -1069,6 +1069,6 @@ drawSystemMap();
 </html>`;
 
 fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
-fs.writeFileSync(OUT_FILE, html, "utf-8");
+fs.writeFileSync(OUT_FILE, html, 'utf-8');
 console.log(`Wiki viewer generated: ${OUT_FILE}`);
 console.log(`Pages: ${pages.length} | Links: ${links.length}`);

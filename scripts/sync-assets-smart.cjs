@@ -14,18 +14,18 @@
  *   node scripts/sync-assets-smart.cjs
  */
 
-const { execSync } = require("node:child_process");
-const { createHash } = require("node:crypto");
-const { readdirSync, statSync, readFileSync, writeFileSync, existsSync } = require("node:fs");
-const path = require("node:path");
+const { execSync } = require('node:child_process');
+const { createHash } = require('node:crypto');
+const { readdirSync, statSync, readFileSync, writeFileSync, existsSync } = require('node:fs');
+const path = require('node:path');
 
-const REPO_ROOT = path.resolve(__dirname, "..");
-const ASSETS_DIR = path.join(REPO_ROOT, "apps", "portal", "assets");
-const CHECKSUM_FILE = path.join(REPO_ROOT, ".assets-checksum");
-const SYNC_SCRIPT = path.join(__dirname, "sync-assets.sh");
+const REPO_ROOT = path.resolve(__dirname, '..');
+const ASSETS_DIR = path.join(REPO_ROOT, 'apps', 'portal', 'assets');
+const CHECKSUM_FILE = path.join(REPO_ROOT, '.assets-checksum');
+const SYNC_SCRIPT = path.join(__dirname, 'sync-assets.sh');
 
 function getFileHash(filePath) {
-  return createHash("sha256").update(readFileSync(filePath)).digest("hex");
+  return createHash('sha256').update(readFileSync(filePath)).digest('hex');
 }
 
 function getAssetsChecksum(dir) {
@@ -41,38 +41,38 @@ function getAssetsChecksum(dir) {
   const combined = files
     .sort()
     .map((f) => getFileHash(f))
-    .join("");
-  return createHash("sha256").update(combined).digest("hex");
+    .join('');
+  return createHash('sha256').update(combined).digest('hex');
 }
 
 if (!existsSync(ASSETS_DIR)) {
-  console.log("⚠️  No assets directory found. Skipping sync.");
+  console.log('⚠️  No assets directory found. Skipping sync.');
   process.exit(0);
 }
 
 const currentChecksum = getAssetsChecksum(ASSETS_DIR);
 const previousChecksum = existsSync(CHECKSUM_FILE)
-  ? readFileSync(CHECKSUM_FILE, "utf8").trim()
-  : "";
+  ? readFileSync(CHECKSUM_FILE, 'utf8').trim()
+  : '';
 
 if (currentChecksum === previousChecksum) {
-  console.log("✅ Assets unchanged, skipping sync.");
+  console.log('✅ Assets unchanged, skipping sync.');
   process.exit(0);
 }
 
 console.log(
-  `🔄 Assets changed (Old: ${previousChecksum || "none"} -> New: ${currentChecksum}). Synchronizing...`,
+  `🔄 Assets changed (Old: ${previousChecksum || 'none'} -> New: ${currentChecksum}). Synchronizing...`
 );
 
 try {
   // Execute the actual bash sync script
-  execSync(`bash ${SYNC_SCRIPT}`, { stdio: "inherit" });
+  execSync(`bash ${SYNC_SCRIPT}`, { stdio: 'inherit' });
 
   // Only update checksum if the sync was successful
   writeFileSync(CHECKSUM_FILE, currentChecksum);
-  console.log("✅ Assets synced successfully and checksum updated.");
+  console.log('✅ Assets synced successfully and checksum updated.');
 } catch (error) {
-  console.error("❌ Error: Asset synchronization failed!");
+  console.error('❌ Error: Asset synchronization failed!');
   console.error(error.message);
   // Do NOT update checksum, so it will try again next time
   process.exit(1);

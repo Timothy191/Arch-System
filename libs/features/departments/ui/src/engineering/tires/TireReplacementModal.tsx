@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertTriangle, PlusCircle, RefreshCw, ShieldX, X } from "lucide-react";
-import { useState, useTransition } from "react";
-import { replaceTire } from "./actions";
-import type { TireWithInspections } from "./types";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertTriangle, PlusCircle, RefreshCw, ShieldX, X } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { replaceTire } from './actions';
+import type { TireWithInspections } from './types';
 
 interface TireReplacementModalProps {
   isOpen: boolean;
@@ -14,13 +14,13 @@ interface TireReplacementModalProps {
 }
 
 const SCRAP_REASONS = [
-  "Tread Worn Below Limit (<15mm)",
-  "Sidewall Cut / Severe Puncture",
-  "Impact Burst / Pit Wall Rock Strike",
-  "Crown Separation / Delamination",
-  "Bead Ring Distortion / Seating Failure",
-  "Irregular Cupping / Shoulder Wear Out",
-  "Scheduled Preventative Rotation & Scrap",
+  'Tread Worn Below Limit (<15mm)',
+  'Sidewall Cut / Severe Puncture',
+  'Impact Burst / Pit Wall Rock Strike',
+  'Crown Separation / Delamination',
+  'Bead Ring Distortion / Seating Failure',
+  'Irregular Cupping / Shoulder Wear Out',
+  'Scheduled Preventative Rotation & Scrap',
 ];
 
 export function TireReplacementModal({
@@ -30,18 +30,18 @@ export function TireReplacementModal({
   onSuccess,
 }: TireReplacementModalProps) {
   const [isPending, startTransition] = useTransition();
-  const [removalDate, setRemovalDate] = useState(new Date().toISOString().split("T")[0] ?? "");
+  const [removalDate, setRemovalDate] = useState(new Date().toISOString().split('T')[0] ?? '');
   const [removedHours, setRemovedHours] = useState<number>(
-    tire ? tire.installed_hours + 1200 : 2500,
+    tire ? tire.installed_hours + 1200 : 2500
   );
-  const [scrappedReason, setScrappedReason] = useState<string>(SCRAP_REASONS[0] ?? "");
-  const [customReason, setCustomReason] = useState("");
+  const [scrappedReason, setScrappedReason] = useState<string>(SCRAP_REASONS[0] ?? '');
+  const [customReason, setCustomReason] = useState('');
 
   // New tire mount fields
   const [installReplacement, setInstallReplacement] = useState(true);
-  const [newSerial, setNewSerial] = useState("");
-  const [newBrand, setNewBrand] = useState(tire?.brand || "Michelin");
-  const [newSize, setNewSize] = useState(tire?.size || "40.00R57");
+  const [newSerial, setNewSerial] = useState('');
+  const [newBrand, setNewBrand] = useState(tire?.brand || 'Michelin');
+  const [newSize, setNewSize] = useState(tire?.size || '40.00R57');
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -51,14 +51,14 @@ export function TireReplacementModal({
     e.preventDefault();
     setErrorMsg(null);
 
-    const finalReason = scrappedReason === "Other" ? customReason.trim() : scrappedReason;
+    const finalReason = scrappedReason === 'Other' ? customReason.trim() : scrappedReason;
     if (!finalReason) {
-      setErrorMsg("Please specify a decommissioning / scrap reason.");
+      setErrorMsg('Please specify a decommissioning / scrap reason.');
       return;
     }
 
     if (installReplacement && !newSerial.trim()) {
-      setErrorMsg("Please provide the serial number of the replacement tire.");
+      setErrorMsg('Please provide the serial number of the replacement tire.');
       return;
     }
 
@@ -76,7 +76,7 @@ export function TireReplacementModal({
                 size: newSize.trim(),
                 machine_id: tire.machine_id,
                 position: tire.position,
-                status: "installed",
+                status: 'installed',
                 installed_at: removalDate,
                 installed_hours: 0,
               }
@@ -85,7 +85,7 @@ export function TireReplacementModal({
         onSuccess?.();
         onClose();
       } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : "Failed to replace tire.");
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to replace tire.');
       }
     });
   };
@@ -103,8 +103,8 @@ export function TireReplacementModal({
                 Decommission &amp; Replace Tire
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Active Position:{" "}
-                <span className="font-semibold text-[var(--text-heading)]">{tire.position}</span>{" "}
+                Active Position:{' '}
+                <span className="font-semibold text-[var(--text-heading)]">{tire.position}</span>{' '}
                 (Current: {tire.serial_number})
               </p>
             </div>
@@ -193,7 +193,7 @@ export function TireReplacementModal({
                 <option value="Other">Other / Specific Incident...</option>
               </select>
 
-              {scrappedReason === "Other" && (
+              {scrappedReason === 'Other' && (
                 <input
                   type="text"
                   placeholder="Describe failure reason..."
@@ -288,8 +288,8 @@ export function TireReplacementModal({
               disabled={isPending}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-accent-red text-white hover:bg-accent-red/90 transition-opacity disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isPending ? "animate-spin" : ""}`} />
-              <span>{isPending ? "Processing..." : "Confirm Replacement & Scrap"}</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isPending ? 'animate-spin' : ''}`} />
+              <span>{isPending ? 'Processing...' : 'Confirm Replacement & Scrap'}</span>
             </button>
           </div>
         </form>

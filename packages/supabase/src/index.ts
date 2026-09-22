@@ -1,6 +1,6 @@
-export { createBrowserSupabaseClient } from "./client";
+export { createBrowserSupabaseClient } from './client';
 // Database types - Database is a stub until supabase:gen can run against local DB
-export type { Database } from "./database.types";
+export type { Database } from './database.types';
 // Json and manual table types from manual-types.ts (tables exist in migrations)
 // Manual type stubs for tables missing from auto-generated database.types.ts
 export type {
@@ -38,10 +38,10 @@ export type {
   VisitorsInsert,
   VisitorsRow,
   VisitorsUpdate,
-} from "./manual-types";
-export { createMiddlewareClient, refreshSession } from "./middleware";
-export { createProxyClient, updateSession } from "./proxy";
-export { createServerSupabaseClient, getUserSafely, instrumentedFetch } from "./server";
-export { withSpan } from "./tracing";
+} from './manual-types';
+export { createMiddlewareClient, refreshSession } from './middleware';
+export { createProxyClient, updateSession } from './proxy';
+export { createServerSupabaseClient, getUserSafely, instrumentedFetch } from './server';
+export { withSpan } from './tracing';
 // Server client must be imported from @repo/supabase/server directly
 // to avoid pulling next/headers into client bundles

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Search, Trash2, UserPlus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { logError } from "@/lib/errors/error-logger";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Edit2, Search, Trash2, UserPlus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { logError } from '@/lib/errors/error-logger';
 
 interface Employee {
   id: string;
@@ -26,7 +26,7 @@ export function UsersTab() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<{ id: string; display_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const supabase = createBrowserSupabaseClient();
@@ -34,10 +34,10 @@ export function UsersTab() {
   const loadData = useCallback(async () => {
     const [empData, deptData] = await Promise.all([
       supabase
-        .from("employees")
-        .select("*, departments(display_name)")
-        .order("created_at", { ascending: false }),
-      supabase.from("departments").select("id, display_name"),
+        .from('employees')
+        .select('*, departments(display_name)')
+        .order('created_at', { ascending: false }),
+      supabase.from('departments').select('id, display_name'),
     ]);
 
     if (empData.data) setEmployees(empData.data);
@@ -62,17 +62,17 @@ export function UsersTab() {
     if (!editingEmployee) return;
 
     const { error } = await supabase
-      .from("employees")
+      .from('employees')
       .update({
         role: formData.role,
         department_id: formData.department_id,
         accessible_departments: formData.accessible_departments,
       })
-      .eq("id", editingEmployee.id);
+      .eq('id', editingEmployee.id);
 
     if (error) {
       logError(new Error(error.message), {
-        context: "users_tab_update_employee",
+        context: 'users_tab_update_employee',
       });
       return;
     }
@@ -83,7 +83,7 @@ export function UsersTab() {
   };
 
   const filteredEmployees = employees.filter((emp) =>
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
+    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const deptMap = new Map(departments.map((d) => [d.id, d.display_name]));
@@ -172,18 +172,18 @@ export function UsersTab() {
                       <Badge
                         variant="outline"
                         className={
-                          emp.role === "admin"
-                            ? "bg-violet-500/10 text-violet-400 border-violet-500/20"
-                            : emp.role === "supervisor"
-                              ? "bg-accent-blue/10 text-accent-blue border-accent-blue/20"
-                              : ""
+                          emp.role === 'admin'
+                            ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                            : emp.role === 'supervisor'
+                              ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/20'
+                              : ''
                         }
                       >
                         {emp.role}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {emp.department_id ? deptMap.get(emp.department_id) : "Unassigned"}
+                      {emp.department_id ? deptMap.get(emp.department_id) : 'Unassigned'}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                       {emp.accessible_departments?.length || 0} departments
@@ -248,10 +248,10 @@ function EditEmployeeForm({
   }) => void;
   onCancel: () => void;
 }) {
-  const [role, setRole] = useState(employee?.role || "operator");
-  const [departmentId, setDepartmentId] = useState(employee?.department_id || "");
+  const [role, setRole] = useState(employee?.role || 'operator');
+  const [departmentId, setDepartmentId] = useState(employee?.department_id || '');
   const [accessibleDepts, setAccessibleDepts] = useState<string[]>(
-    employee?.accessible_departments || [],
+    employee?.accessible_departments || []
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -265,7 +265,7 @@ function EditEmployeeForm({
 
   const toggleAccessibleDept = (deptId: string) => {
     setAccessibleDepts((prev) =>
-      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId],
+      prev.includes(deptId) ? prev.filter((d) => d !== deptId) : [...prev, deptId]
     );
   };
 
@@ -322,8 +322,8 @@ function EditEmployeeForm({
               onClick={() => toggleAccessibleDept(dept.id)}
               className={`text-left px-3 py-2 rounded border text-sm ${
                 accessibleDepts.includes(dept.id)
-                  ? "bg-[var(--accent-emerald)] border-[var(--accent-emerald)] text-[var(--bg-void)]"
-                  : "bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-body)]"
+                  ? 'bg-[var(--accent-emerald)] border-[var(--accent-emerald)] text-[var(--bg-void)]'
+                  : 'bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-body)]'
               }`}
             >
               {dept.display_name}

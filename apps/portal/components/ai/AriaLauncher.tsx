@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { type JSX, useEffect, useRef, useState } from "react";
-import { AriaAvatar, type AriaState } from "@/components/ai/AriaAvatar";
+import { cn } from '@repo/ui/lib/utils';
+import { type JSX, useEffect, useRef, useState } from 'react';
+import { AriaAvatar, type AriaState } from '@/components/ai/AriaAvatar';
 
 /**
  * Aria — the operations assistant launcher. A floating button opens a compact,
@@ -16,7 +16,7 @@ import { AriaAvatar, type AriaState } from "@/components/ai/AriaAvatar";
 export function AriaLauncher(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [ariaState, setAriaState] = useState<AriaState>("idle");
+  const [ariaState, setAriaState] = useState<AriaState>('idle');
   const frameRef = useRef<HTMLIFrameElement>(null);
 
   const openPanel = () => {
@@ -31,36 +31,36 @@ export function AriaLauncher(): JSX.Element {
     }
     function onMessage(e: MessageEvent) {
       const data = e.data as { type?: string; state?: string } | null;
-      if (!data || typeof data !== "object") return;
-      if (data.type === "aria-close") {
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'aria-close') {
         closePanel();
         return;
       }
-      if (data.type === "aria-state") {
+      if (data.type === 'aria-state') {
         // AGENT-TRACE: drive the character overlay from the sidecar's chat
         // lifecycle (submitted/streaming -> thinking, error -> error).
         const state = data.state as AriaState;
-        if (["idle", "thinking", "speaking", "happy", "error"].includes(state)) {
+        if (['idle', 'thinking', 'speaking', 'happy', 'error'].includes(state)) {
           setAriaState(state);
         }
       }
     }
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") closePanel();
+      if (e.key === 'Escape') closePanel();
     }
 
-    window.addEventListener("open-ai-assistant", onOpenEvent);
-    window.addEventListener("message", onMessage);
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener('open-ai-assistant', onOpenEvent);
+    window.addEventListener('message', onMessage);
+    window.addEventListener('keydown', onKeyDown);
     return () => {
-      window.removeEventListener("open-ai-assistant", onOpenEvent);
-      window.removeEventListener("message", onMessage);
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener('open-ai-assistant', onOpenEvent);
+      window.removeEventListener('message', onMessage);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [openPanel, closePanel]);
 
   useEffect(() => {
-    if (!isOpen) setAriaState("idle");
+    if (!isOpen) setAriaState('idle');
   }, [isOpen]);
 
   return (
@@ -70,8 +70,8 @@ export function AriaLauncher(): JSX.Element {
           className={cn(
             // AGENT-TRACE: z-ai-launcher keeps the FAB + panel above transient bottom
             // banners (e.g. consent bar at z-[100]) so they stay clickable.
-            "fixed bottom-6 right-6 z-ai-launcher transition-all duration-200",
-            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+            'fixed bottom-6 right-6 z-ai-launcher transition-all duration-200',
+            isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           )}
         >
           <div

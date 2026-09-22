@@ -1,11 +1,11 @@
-import { DatabaseError } from "@repo/errors";
+import { DatabaseError } from '@repo/errors';
 import {
   buildCacheKey,
   CACHE_TTL_REGISTRY,
   type CacheCategory,
   cacheGetWithStats,
   cacheSetWithTags,
-} from "@repo/redis";
+} from '@repo/redis';
 
 interface WithCacheOptions {
   category: CacheCategory;
@@ -65,7 +65,7 @@ export async function withCache<T>(fn: () => Promise<T>, options: WithCacheOptio
     // request in the meantime), otherwise rethrow.
     if (fallback) {
       const l1Retry = await cacheGetWithStats<T>(key);
-      if (l1Retry.value !== null && l1Retry.source === "l1") {
+      if (l1Retry.value !== null && l1Retry.source === 'l1') {
         return l1Retry.value;
       }
     }

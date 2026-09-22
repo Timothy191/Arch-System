@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Check, ChevronDown, X } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { Check, ChevronDown, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 interface OptionRegistration {
   value: string;
@@ -19,7 +19,7 @@ interface ComboboxContextType {
   setIsOpen: (open: boolean) => void;
   disabled: boolean;
   errored: boolean;
-  size: "small" | "medium" | "large";
+  size: 'small' | 'medium' | 'large';
   clearable: boolean;
   placeholder: string;
   registerOption: (opt: OptionRegistration) => void;
@@ -35,7 +35,7 @@ const ComboboxContext = React.createContext<ComboboxContextType | null>(null);
 function useCombobox() {
   const ctx = React.useContext(ComboboxContext);
   if (!ctx) {
-    throw new Error("Combobox components must be used within a Combobox");
+    throw new Error('Combobox components must be used within a Combobox');
   }
   return ctx;
 }
@@ -48,9 +48,9 @@ export interface ComboboxProps {
   disabled?: boolean;
   errored?: boolean;
   clearable?: boolean;
-  size?: "small" | "medium" | "large";
+  size?: 'small' | 'medium' | 'large';
   width?: number | string;
-  "aria-label"?: string;
+  'aria-label'?: string;
   id?: string;
   className?: string;
   children: React.ReactNode;
@@ -60,19 +60,19 @@ export function Combobox({
   value: controlledValue,
   defaultValue = null,
   onChange,
-  placeholder = "Search...",
+  placeholder = 'Search...',
   disabled = false,
   errored = false,
   clearable = false,
-  size = "medium",
+  size = 'medium',
   width,
-  "aria-label": ariaLabel,
+  'aria-label': ariaLabel,
   id,
   className,
   children,
 }: ComboboxProps) {
   const [uncontrolledValue, setUncontrolledValue] = React.useState<string | null>(defaultValue);
-  const [query, setQuery] = React.useState("");
+  const [query, setQuery] = React.useState('');
   const [isOpen, setIsOpen] = React.useState(false);
   const [options, setOptions] = React.useState<OptionRegistration[]>([]);
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
@@ -90,11 +90,11 @@ export function Combobox({
       if (label) {
         setQuery(label);
       } else if (!val) {
-        setQuery("");
+        setQuery('');
       }
       setIsOpen(false);
     },
-    [isControlled, onChange],
+    [isControlled, onChange]
   );
 
   const registerOption = React.useCallback((opt: OptionRegistration) => {
@@ -117,7 +117,7 @@ export function Combobox({
   React.useEffect(() => {
     if (activeValue) {
       const match = options.find((o) => o.value === activeValue);
-      if (match && query === "") {
+      if (match && query === '') {
         setQuery(match.label);
       }
     }
@@ -131,13 +131,13 @@ export function Combobox({
       }
     };
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
 
   const style: React.CSSProperties = {
-    ...(width !== undefined ? { width: typeof width === "number" ? `${width}px` : width } : {}),
+    ...(width !== undefined ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
   };
 
   return (
@@ -167,7 +167,7 @@ export function Combobox({
         id={id}
         style={style}
         aria-label={ariaLabel}
-        className={cn("relative inline-block w-full text-left font-sans", className)}
+        className={cn('relative inline-block w-full text-left font-sans', className)}
       >
         {children}
       </div>
@@ -176,7 +176,7 @@ export function Combobox({
 }
 
 export interface ComboboxInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "onChange"> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -203,37 +203,37 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
     React.useImperativeHandle(ref, () => inputRef.current!);
 
     const filteredOptions = options.filter(
-      (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase())),
+      (o) => !o.disabled && (query === '' || o.label.toLowerCase().includes(query.toLowerCase()))
     );
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (disabled) return;
 
-      if (!isOpen && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter")) {
+      if (!isOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
         e.preventDefault();
         setIsOpen(true);
         return;
       }
 
-      if (e.key === "ArrowDown") {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          filteredOptions.length === 0 ? 0 : (prev + 1) % filteredOptions.length,
+          filteredOptions.length === 0 ? 0 : (prev + 1) % filteredOptions.length
         );
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setHighlightedIndex((prev) =>
           filteredOptions.length === 0
             ? 0
-            : (prev - 1 + filteredOptions.length) % filteredOptions.length,
+            : (prev - 1 + filteredOptions.length) % filteredOptions.length
         );
-      } else if (e.key === "Enter") {
+      } else if (e.key === 'Enter') {
         if (isOpen && filteredOptions[highlightedIndex]) {
           e.preventDefault();
           const chosen = filteredOptions[highlightedIndex];
           selectValue(chosen.value, chosen.label);
         }
-      } else if (e.key === "Escape") {
+      } else if (e.key === 'Escape') {
         e.preventDefault();
         setIsOpen(false);
       }
@@ -242,16 +242,16 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
     const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
       selectValue(null);
-      setQuery("");
+      setQuery('');
       inputRef.current?.focus();
     };
 
     const heightClass =
-      size === "small"
-        ? "h-8 text-xs px-2.5"
-        : size === "large"
-          ? "h-11 text-base px-4"
-          : "h-9 text-sm px-3";
+      size === 'small'
+        ? 'h-8 text-xs px-2.5'
+        : size === 'large'
+          ? 'h-11 text-base px-4'
+          : 'h-9 text-sm px-3';
 
     return (
       <div className="relative flex items-center w-full">
@@ -271,18 +271,18 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            "w-full rounded-md border bg-white pr-8 text-neutral-900 placeholder:text-neutral-400:text-neutral-500 transition-colors outline-none",
+            'w-full rounded-md border bg-white pr-8 text-neutral-900 placeholder:text-neutral-400:text-neutral-500 transition-colors outline-none',
             heightClass,
             errored
-              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-              : "border-neutral-200 hover:border-neutral-300:border-neutral-700 focus:border-neutral-900:border-neutral-100",
-            disabled && "cursor-not-allowed opacity-50 bg-neutral-100",
-            className,
+              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+              : 'border-neutral-200 hover:border-neutral-300:border-neutral-700 focus:border-neutral-900:border-neutral-100',
+            disabled && 'cursor-not-allowed opacity-50 bg-neutral-100',
+            className
           )}
           {...props}
         />
         <div className="absolute right-2.5 flex items-center gap-1 text-neutral-400">
-          {clearable && (value !== null || query !== "") && !disabled && (
+          {clearable && (value !== null || query !== '') && !disabled && (
             <button
               type="button"
               tabIndex={-1}
@@ -295,17 +295,17 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           )}
           <ChevronDown
             className={cn(
-              "h-4 w-4 transition-transform duration-150 pointer-events-none",
-              isOpen && "rotate-180",
+              'h-4 w-4 transition-transform duration-150 pointer-events-none',
+              isOpen && 'rotate-180'
             )}
           />
         </div>
       </div>
     );
-  },
+  }
 );
 
-ComboboxInput.displayName = "ComboboxInput";
+ComboboxInput.displayName = 'ComboboxInput';
 
 export interface ComboboxListProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -316,7 +316,7 @@ export interface ComboboxListProps extends React.HTMLAttributes<HTMLDivElement> 
 export function ComboboxList({
   children,
   maxWidth,
-  emptyMessage = "No results found.",
+  emptyMessage = 'No results found.',
   className,
   style,
   ...props
@@ -326,13 +326,13 @@ export function ComboboxList({
   if (!isOpen) return null;
 
   const filtered = options.filter(
-    (o) => query === "" || o.label.toLowerCase().includes(query.toLowerCase()),
+    (o) => query === '' || o.label.toLowerCase().includes(query.toLowerCase())
   );
 
   const customStyle: React.CSSProperties = {
     ...style,
     ...(maxWidth !== undefined
-      ? { maxWidth: typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth }
+      ? { maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth }
       : {}),
   };
 
@@ -341,8 +341,8 @@ export function ComboboxList({
       role="listbox"
       style={customStyle}
       className={cn(
-        "absolute left-0 top-[calc(100%+4px)] z-50 min-w-full max-h-60 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 duration-100",
-        className,
+        'absolute left-0 top-[calc(100%+4px)] z-50 min-w-full max-h-60 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 duration-100',
+        className
       )}
       {...props}
     >
@@ -355,7 +355,7 @@ export function ComboboxList({
   );
 }
 
-export interface ComboboxOptionProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "prefix"> {
+export interface ComboboxOptionProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'prefix'> {
   value: string;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
@@ -385,7 +385,7 @@ export function ComboboxOption({
   } = useCombobox();
 
   const label = React.useMemo(() => {
-    if (typeof children === "string") return children;
+    if (typeof children === 'string') return children;
     return value;
   }, [children, value]);
 
@@ -403,7 +403,7 @@ export function ComboboxOption({
 
   const isSelected = selectedValue === value;
   const filtered = options.filter(
-    (o) => !o.disabled && (query === "" || o.label.toLowerCase().includes(query.toLowerCase())),
+    (o) => !o.disabled && (query === '' || o.label.toLowerCase().includes(query.toLowerCase()))
   );
   const isHighlighted = filtered[highlightedIndex]?.value === value;
 
@@ -418,19 +418,19 @@ export function ComboboxOption({
         }
       }}
       className={cn(
-        "relative flex cursor-pointer select-none items-center justify-between rounded px-2 text-sm transition-colors",
-        !ignoreDefaultHeight && "h-8",
+        'relative flex cursor-pointer select-none items-center justify-between rounded px-2 text-sm transition-colors',
+        !ignoreDefaultHeight && 'h-8',
         isHighlighted || isSelected
-          ? "bg-neutral-100 text-neutral-900 font-medium"
-          : "text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60",
-        disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-        className,
+          ? 'bg-neutral-100 text-neutral-900 font-medium'
+          : 'text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60',
+        disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+        className
       )}
       {...props}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {prefix && <span className="shrink-0 flex items-center text-neutral-500">{prefix}</span>}
-        <span className={cn("truncate", ignoreDefaultHeight && "whitespace-normal")}>
+        <span className={cn('truncate', ignoreDefaultHeight && 'whitespace-normal')}>
           {children}
         </span>
       </div>

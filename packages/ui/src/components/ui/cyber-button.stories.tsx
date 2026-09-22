@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Terminal } from "lucide-react";
-import { CyberButton } from "./cyber-button";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Terminal } from 'lucide-react';
+import { CyberButton } from './cyber-button';
 
 const meta: Meta<typeof CyberButton> = {
-  title: "UI/CyberButton",
+  title: 'UI/CyberButton',
   component: CyberButton,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
   argTypes: {
     variant: {
-      control: "select",
-      options: ["cyan", "blue", "alert"],
+      control: 'select',
+      options: ['cyan', 'blue', 'alert'],
     },
     size: {
-      control: "select",
-      options: ["default", "sm", "lg"],
+      control: 'select',
+      options: ['default', 'sm', 'lg'],
     },
   },
 };
@@ -32,28 +32,28 @@ export const Cyan: Story = {
         <span>Initialize Core</span>
       </>
     ),
-    variant: "cyan",
+    variant: 'cyan',
   },
 };
 
 export const Blue: Story = {
   args: {
-    children: "Network Scan",
-    variant: "blue",
+    children: 'Network Scan',
+    variant: 'blue',
   },
 };
 
 export const Alert: Story = {
   args: {
-    children: "Emergency Stop",
-    variant: "alert",
+    children: 'Emergency Stop',
+    variant: 'alert',
   },
 };
 
 export const Large: Story = {
   args: {
-    children: "Override Protocol",
-    size: "lg",
-    variant: "cyan",
+    children: 'Override Protocol',
+    size: 'lg',
+    variant: 'cyan',
   },
 };

@@ -1,11 +1,11 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
-import { ScadaPanel } from "./ScadaPanel";
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { ScadaPanel } from './ScadaPanel';
 
-jest.mock("@repo/supabase/client", () => ({
+jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@repo/ui/GlassCard", () => ({
+jest.mock('@repo/ui/GlassCard', () => ({
   GlassCard: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="glass-card">{children}</div>
   ),
@@ -17,7 +17,7 @@ function createMockSupabase(data: unknown[]) {
     subscribe: jest.fn().mockReturnThis(),
   };
 
-  const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
+  const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
   createBrowserSupabaseClient.mockReturnValue({
     from: jest.fn().mockReturnValue({
@@ -34,24 +34,24 @@ function createMockSupabase(data: unknown[]) {
   return { mockChannel };
 }
 
-describe("ScadaPanel", () => {
-  it("renders machine cards with status", async () => {
+describe('ScadaPanel', () => {
+  it('renders machine cards with status', async () => {
     const machines = [
       {
-        id: "1",
-        name: "Drill A",
-        machine_type: "drill",
-        serial_number: "SN-001",
+        id: '1',
+        name: 'Drill A',
+        machine_type: 'drill',
+        serial_number: 'SN-001',
         active: true,
-        created_at: "2024-01-01",
+        created_at: '2024-01-01',
       },
       {
-        id: "2",
-        name: "Drill B",
-        machine_type: "drill",
+        id: '2',
+        name: 'Drill B',
+        machine_type: 'drill',
         serial_number: null,
         active: false,
-        created_at: "2024-01-02",
+        created_at: '2024-01-02',
       },
     ];
 
@@ -59,32 +59,32 @@ describe("ScadaPanel", () => {
     render(<ScadaPanel departmentId="dept-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Drill A")).toBeInTheDocument();
+      expect(screen.getByText('Drill A')).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Drill B")).toBeInTheDocument();
-    expect(screen.getByText("Online")).toBeInTheDocument();
-    expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(screen.getByText('Drill B')).toBeInTheDocument();
+    expect(screen.getByText('Online')).toBeInTheDocument();
+    expect(screen.getByText('Offline')).toBeInTheDocument();
   });
 
-  it("shows empty state when no machines", async () => {
+  it('shows empty state when no machines', async () => {
     createMockSupabase([]);
     render(<ScadaPanel departmentId="dept-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("No machines registered for this department.")).toBeInTheDocument();
+      expect(screen.getByText('No machines registered for this department.')).toBeInTheDocument();
     });
   });
 
-  it("updates machine list on real-time insert", async () => {
+  it('updates machine list on real-time insert', async () => {
     const machines = [
       {
-        id: "1",
-        name: "Drill A",
-        machine_type: "drill",
+        id: '1',
+        name: 'Drill A',
+        machine_type: 'drill',
         serial_number: null,
         active: true,
-        created_at: "2024-01-01",
+        created_at: '2024-01-01',
       },
     ];
 
@@ -92,27 +92,27 @@ describe("ScadaPanel", () => {
     render(<ScadaPanel departmentId="dept-1" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Drill A")).toBeInTheDocument();
+      expect(screen.getByText('Drill A')).toBeInTheDocument();
     });
 
     // Simulate a real-time INSERT event via the callback registered on .on()
     const onCallback = mockChannel.on.mock.calls[0][2];
     await act(async () => {
       onCallback({
-        eventType: "INSERT",
+        eventType: 'INSERT',
         new: {
-          id: "2",
-          name: "Pump X",
-          machine_type: "pump",
+          id: '2',
+          name: 'Pump X',
+          machine_type: 'pump',
           serial_number: null,
           active: false,
-          created_at: "2024-01-03",
+          created_at: '2024-01-03',
         },
       });
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Pump X")).toBeInTheDocument();
+      expect(screen.getByText('Pump X')).toBeInTheDocument();
     });
   });
 });

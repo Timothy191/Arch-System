@@ -35,7 +35,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist .turbo",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint": "biome check .",
     "type-check": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "openapi:generate": "SPEC_FILE=./openapi.generated.json node scripts/generate-openapi-types.js",

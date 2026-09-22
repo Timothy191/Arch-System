@@ -1,7 +1,7 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Input } from "@repo/ui/Input";
-import Link from "next/link";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Input } from '@repo/ui/Input';
+import Link from 'next/link';
+import { getDepartmentContext } from '~/lib/dept-context';
 
 export default async function HistoryPage({
   params,
@@ -16,10 +16,10 @@ export default async function HistoryPage({
     department: deptSlug,
   });
 
-  const to = toParam || new Date().toISOString().split("T")[0];
-  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const to = toParam || new Date().toISOString().split('T')[0];
+  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
-  const isControlRoom = dept.type === "control_room";
+  const isControlRoom = dept.type === 'control_room';
 
   const dateFilter = (
     <GlassCard>
@@ -47,32 +47,32 @@ export default async function HistoryPage({
     const [{ data: shiftStatuses }, { data: operations }, { data: loads }, { data: delays }] =
       await Promise.all([
         supabase
-          .from("shift_status")
+          .from('shift_status')
           .select(
-            "shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)",
+            'shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)'
           )
-          .eq("department_id", deptId)
-          .gte("shift_date", from)
-          .lte("shift_date", to)
-          .order("shift_date", { ascending: false }),
+          .eq('department_id', deptId)
+          .gte('shift_date', from)
+          .lte('shift_date', to)
+          .order('shift_date', { ascending: false }),
         supabase
-          .from("machine_operations")
-          .select("shift_date, shift_type, hours_worked")
-          .eq("department_id", deptId)
-          .gte("shift_date", from)
-          .lte("shift_date", to),
+          .from('machine_operations')
+          .select('shift_date, shift_type, hours_worked')
+          .eq('department_id', deptId)
+          .gte('shift_date', from)
+          .lte('shift_date', to),
         supabase
-          .from("hourly_loads")
-          .select("load_date, shift_type, total_loads")
-          .eq("department_id", deptId)
-          .gte("load_date", from)
-          .lte("load_date", to),
+          .from('hourly_loads')
+          .select('load_date, shift_type, total_loads')
+          .eq('department_id', deptId)
+          .gte('load_date', from)
+          .lte('load_date', to),
         supabase
-          .from("operational_delays")
-          .select("delay_date, shift_type, delay_minutes")
-          .eq("department_id", deptId)
-          .gte("delay_date", from)
-          .lte("delay_date", to),
+          .from('operational_delays')
+          .select('delay_date, shift_type, delay_minutes')
+          .eq('department_id', deptId)
+          .gte('delay_date', from)
+          .lte('delay_date', to),
       ]);
 
     type ShiftKey = string;
@@ -116,13 +116,13 @@ export default async function HistoryPage({
               <thead>
                 <tr className="border-b border-[var(--border-default)]">
                   {[
-                    { label: "Date", align: "" },
-                    { label: "Shift", align: "" },
-                    { label: "Status", align: "" },
-                    { label: "Hours", align: "text-right" },
-                    { label: "Loads", align: "text-right" },
-                    { label: "Delay (min)", align: "text-right" },
-                    { label: "Closed By", align: "" },
+                    { label: 'Date', align: '' },
+                    { label: 'Shift', align: '' },
+                    { label: 'Status', align: '' },
+                    { label: 'Hours', align: 'text-right' },
+                    { label: 'Loads', align: 'text-right' },
+                    { label: 'Delay (min)', align: 'text-right' },
+                    { label: 'Closed By', align: '' },
                   ].map(({ label, align }) => (
                     <th
                       key={label}
@@ -146,9 +146,9 @@ export default async function HistoryPage({
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                            ss.shift_type === "day"
-                              ? "bg-accent-blue/10 text-accent-blue"
-                              : "bg-indigo-500/10 text-indigo-400"
+                            ss.shift_type === 'day'
+                              ? 'bg-accent-blue/10 text-accent-blue'
+                              : 'bg-indigo-500/10 text-indigo-400'
                           }`}
                         >
                           {ss.shift_type}
@@ -157,12 +157,12 @@ export default async function HistoryPage({
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                            ss.status === "closed"
-                              ? "bg-emerald-50/70 border-emerald-200/50 text-emerald-700"
-                              : "bg-amber-50/70 border-amber-200/50 text-amber-700"
+                            ss.status === 'closed'
+                              ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
+                              : 'bg-amber-50/70 border-amber-200/50 text-amber-700'
                           }`}
                         >
-                          {ss.status === "closed" && (
+                          {ss.status === 'closed' && (
                             <span className="badge-pulse-dot bg-emerald-500" />
                           )}
                           {ss.status}
@@ -178,10 +178,10 @@ export default async function HistoryPage({
                         {delayMap.get(k) || 0}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-xs">
-                        {closer?.full_name || "—"}
+                        {closer?.full_name || '—'}
                         {ss.closed_at && (
                           <span className="block text-[10px] opacity-60">
-                            {new Date(ss.closed_at).toLocaleString("en-ZA")}
+                            {new Date(ss.closed_at).toLocaleString('en-ZA')}
                           </span>
                         )}
                       </td>
@@ -208,12 +208,12 @@ export default async function HistoryPage({
 
   // ─── Generic department branch ────────────────────────────────────────────
   const { data: logs } = await supabase
-    .from("daily_logs")
-    .select("id, log_date, shift, notes, created_at")
-    .eq("department_id", deptId)
-    .gte("log_date", from)
-    .lte("log_date", to)
-    .order("log_date", { ascending: false })
+    .from('daily_logs')
+    .select('id, log_date, shift, notes, created_at')
+    .eq('department_id', deptId)
+    .gte('log_date', from)
+    .lte('log_date', to)
+    .order('log_date', { ascending: false })
     .returns<
       {
         id: string;
@@ -277,16 +277,16 @@ export default async function HistoryPage({
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        log.shift === "day"
-                          ? "bg-accent-blue/10 text-accent-blue"
-                          : "bg-indigo-500/10 text-indigo-400"
+                        log.shift === 'day'
+                          ? 'bg-accent-blue/10 text-accent-blue'
+                          : 'bg-indigo-500/10 text-indigo-400'
                       }`}
                     >
                       {log.shift}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-[var(--text-muted)] text-sm truncate max-w-xs">
-                    {log.notes || "—"}
+                    {log.notes || '—'}
                   </td>
                   <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
                     {new Date(log.created_at).toLocaleDateString()}

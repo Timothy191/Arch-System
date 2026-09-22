@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { BarChart3, Drill, Factory, LayoutDashboard, Radar } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { cn } from '@repo/ui/lib/utils';
+import { BarChart3, Drill, Factory, LayoutDashboard, Radar } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { href: "/", label: "Hub", icon: LayoutDashboard, dept: null },
-  { href: "/drilling", label: "Drilling", icon: Drill, dept: "drilling" },
+  { href: '/', label: 'Hub', icon: LayoutDashboard, dept: null },
+  { href: '/drilling', label: 'Drilling', icon: Drill, dept: 'drilling' },
   {
-    href: "/production",
-    label: "Production",
+    href: '/production',
+    label: 'Production',
     icon: Factory,
-    dept: "production",
+    dept: 'production',
   },
   {
-    href: "/control-room",
-    label: "Control",
+    href: '/control-room',
+    label: 'Control',
     icon: Radar,
-    dept: "control-room",
+    dept: 'control-room',
   },
-  { href: "/hub/executive", label: "Analytics", icon: BarChart3, dept: null },
+  { href: '/hub/executive', label: 'Analytics', icon: BarChart3, dept: null },
 ];
 
 interface BottomNavProps {
@@ -41,19 +41,19 @@ export function BottomNav({ accessibleDepartments }: BottomNavProps) {
       className="fixed bottom-0 left-0 right-0 z-dock flex md:hidden border-t border-[var(--border-default)] bg-white/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
     >
       {visibleItems.map(({ href, label, icon: Icon }) => {
-        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
         return (
           <Link
             key={href}
             href={href}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium transition-colors touch-manipulation",
+              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium transition-colors touch-manipulation',
               isActive
-                ? "text-[var(--accent-emerald)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-body)]",
+                ? 'text-[var(--accent-emerald)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'
             )}
           >
-            <Icon className={cn("h-5 w-5 shrink-0", isActive && "text-[var(--accent-emerald)]")} />
+            <Icon className={cn('h-5 w-5 shrink-0', isActive && 'text-[var(--accent-emerald)]')} />
             <span>{label}</span>
           </Link>
         );

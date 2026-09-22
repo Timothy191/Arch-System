@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Skeleton } from "./skeleton";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Skeleton } from './skeleton';
 
 const meta: Meta<typeof Skeleton> = {
-  title: "UI/Skeleton",
+  title: 'UI/Skeleton',
   component: Skeleton,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
 };
 

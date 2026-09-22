@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from "@xyflow/react";
-import { memo } from "react";
+import { BaseEdge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from '@xyflow/react';
+import { memo } from 'react';
 
 // =============================================================================
 // Flow Edge Component
@@ -36,26 +36,26 @@ export const FlowEdge = memo(function FlowEdge({
         markerEnd={markerEnd}
         style={{
           ...style,
-          stroke: selected ? "#007aff" : "#a1a1a6",
+          stroke: selected ? '#007aff' : '#a1a1a6',
           strokeWidth: selected ? 3 : 2,
-          transition: "all 0.2s ease",
+          transition: 'all 0.2s ease',
         }}
       />
       <EdgeLabelRenderer>
         {/* xyflow requires dynamic pixel positioning for edge labels */}
         <div
           style={{
-            position: "absolute",
+            position: 'absolute',
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             fontSize: 10,
             fontWeight: 500,
-            pointerEvents: "all",
+            pointerEvents: 'all',
           }}
           className={`
             px-2 py-0.5 rounded-full border border-black/[0.08]
             bg-white/80 backdrop-blur-xl
             text-[#6e6e73]
-            ${selected ? "text-[#007aff] border-[#007aff]/30" : ""}
+            ${selected ? 'text-[#007aff] border-[#007aff]/30' : ''}
           `}
         >
           flow

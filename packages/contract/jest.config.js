@@ -1,13 +1,13 @@
 module.exports = {
   rootDir: __dirname,
-  testEnvironment: "node",
+  testEnvironment: 'node',
   transform: {
-    "^.+\\.(t|j)sx?$": [
-      "@swc/jest",
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
       {
         jsc: {
           parser: {
-            syntax: "typescript",
+            syntax: 'typescript',
             tsx: true,
           },
         },
@@ -15,6 +15,6 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
-    "^(\\./.*)\\.js$": "$1",
+    '^(\\./.*)\\.js$': '$1',
   },
 };

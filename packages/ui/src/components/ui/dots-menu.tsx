@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { MoreHorizontal } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { MoreHorizontal } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 interface DotsMenuContextType {
   close: () => void;
@@ -18,15 +18,15 @@ export interface DotsMenuProps extends React.HTMLAttributes<HTMLDivElement> {
   iconSize?: number;
   disabled?: boolean;
   buttonAriaLabel?: string;
-  align?: "start" | "center" | "end";
+  align?: 'start' | 'center' | 'end';
   children: React.ReactNode;
 }
 
 export function DotsMenu({
   iconSize = 16,
   disabled = false,
-  buttonAriaLabel = "More options",
-  align = "end",
+  buttonAriaLabel = 'More options',
+  align = 'end',
   children,
   className,
   ...props
@@ -48,27 +48,27 @@ export function DotsMenu({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
 
   const alignClasses =
-    align === "start" ? "left-0" : align === "center" ? "left-1/2 -translate-x-1/2" : "right-0";
+    align === 'start' ? 'left-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-0';
 
   return (
     <DotsMenuContext.Provider value={{ close }}>
       <div
         ref={containerRef}
-        className={cn("relative inline-block text-left", className)}
+        className={cn('relative inline-block text-left', className)}
         {...props}
       >
         <button
@@ -79,8 +79,8 @@ export function DotsMenu({
           aria-expanded={isOpen}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            "inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors:bg-neutral-800:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
-            disabled && "cursor-not-allowed opacity-50 pointer-events-none",
+            'inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors:bg-neutral-800:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
+            disabled && 'cursor-not-allowed opacity-50 pointer-events-none'
           )}
         >
           <MoreHorizontal style={{ width: iconSize, height: iconSize }} />
@@ -90,8 +90,8 @@ export function DotsMenu({
           <div
             role="menu"
             className={cn(
-              "absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100",
-              alignClasses,
+              'absolute top-[calc(100%+4px)] z-50 min-w-[160px] overflow-hidden rounded-lg border border-neutral-200 bg-white p-1 shadow-lg text-neutral-900 animate-in fade-in-0 zoom-in-95 duration-100',
+              alignClasses
             )}
           >
             {children}
@@ -103,7 +103,7 @@ export function DotsMenu({
 }
 
 export interface DotsMenuItemProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "onClick" | "prefix"> {
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick' | 'prefix'> {
   disabled?: boolean;
   destructive?: boolean;
   onClick?: () => void;
@@ -133,12 +133,12 @@ export function DotsMenuItem({
   };
 
   const sharedClasses = cn(
-    "flex w-full cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors",
+    'flex w-full cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors',
     destructive
-      ? "text-red-600 hover:bg-red-50:bg-red-950/40"
-      : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100",
-    disabled && "pointer-events-none opacity-40 cursor-not-allowed",
-    className,
+      ? 'text-red-600 hover:bg-red-50:bg-red-950/40'
+      : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100',
+    disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
+    className
   );
 
   const content = (

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface ContextCardTriggerProps {
   content: React.ReactNode;
-  side?: "top" | "bottom" | "left" | "right";
-  align?: "start" | "center" | "end";
+  side?: 'top' | 'bottom' | 'left' | 'right';
+  align?: 'start' | 'center' | 'end';
   render?: React.ReactElement;
   delay?: number;
   className?: string;
@@ -16,8 +16,8 @@ export interface ContextCardTriggerProps {
 
 export function ContextCardTrigger({
   content,
-  side = "top",
-  align = "center",
+  side = 'top',
+  align = 'center',
   render,
   delay = 150,
   className,
@@ -59,7 +59,7 @@ export function ContextCardTrigger({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       setIsOpen(false);
     }
   };
@@ -73,33 +73,33 @@ export function ContextCardTrigger({
 
   const positionClasses = React.useMemo(() => {
     switch (side) {
-      case "top":
+      case 'top':
         return cn(
-          "bottom-[calc(100%+8px)]",
-          align === "start" && "left-0",
-          align === "center" && "left-1/2 -translate-x-1/2",
-          align === "end" && "right-0",
+          'bottom-[calc(100%+8px)]',
+          align === 'start' && 'left-0',
+          align === 'center' && 'left-1/2 -translate-x-1/2',
+          align === 'end' && 'right-0'
         );
-      case "bottom":
+      case 'bottom':
         return cn(
-          "top-[calc(100%+8px)]",
-          align === "start" && "left-0",
-          align === "center" && "left-1/2 -translate-x-1/2",
-          align === "end" && "right-0",
+          'top-[calc(100%+8px)]',
+          align === 'start' && 'left-0',
+          align === 'center' && 'left-1/2 -translate-x-1/2',
+          align === 'end' && 'right-0'
         );
-      case "left":
+      case 'left':
         return cn(
-          "right-[calc(100%+8px)]",
-          align === "start" && "top-0",
-          align === "center" && "top-1/2 -translate-y-1/2",
-          align === "end" && "bottom-0",
+          'right-[calc(100%+8px)]',
+          align === 'start' && 'top-0',
+          align === 'center' && 'top-1/2 -translate-y-1/2',
+          align === 'end' && 'bottom-0'
         );
-      case "right":
+      case 'right':
         return cn(
-          "left-[calc(100%+8px)]",
-          align === "start" && "top-0",
-          align === "center" && "top-1/2 -translate-y-1/2",
-          align === "end" && "bottom-0",
+          'left-[calc(100%+8px)]',
+          align === 'start' && 'top-0',
+          align === 'center' && 'top-1/2 -translate-y-1/2',
+          align === 'end' && 'bottom-0'
         );
     }
   }, [side, align]);
@@ -110,9 +110,9 @@ export function ContextCardTrigger({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "absolute z-50 min-w-[200px] max-w-sm rounded-xl border border-neutral-200 bg-white p-3 text-sm text-neutral-900 shadow-xl animate-in fade-in-0 zoom-in-95 duration-150",
+        'absolute z-50 min-w-[200px] max-w-sm rounded-xl border border-neutral-200 bg-white p-3 text-sm text-neutral-900 shadow-xl animate-in fade-in-0 zoom-in-95 duration-150',
         positionClasses,
-        cardClassName,
+        cardClassName
       )}
     >
       {content}
@@ -122,7 +122,7 @@ export function ContextCardTrigger({
   if (render) {
     return (
       <div
-        className={cn("relative inline-block", className)}
+        className={cn('relative inline-block', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
@@ -140,7 +140,7 @@ export function ContextCardTrigger({
   return (
     <div
       ref={triggerRef as React.RefObject<HTMLDivElement>}
-      className={cn("relative inline-block cursor-pointer", className)}
+      className={cn('relative inline-block cursor-pointer', className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}

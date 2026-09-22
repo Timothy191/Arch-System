@@ -10,7 +10,7 @@ export interface Breakdown {
   time_out: string | null;
   reason: string;
   repair_notes: string | null;
-  status: "active" | "completed";
+  status: 'active' | 'completed';
   missing_book_in: boolean;
   created_by: string | null;
   completed_by: string | null;
@@ -31,7 +31,7 @@ export interface BreakdownControlRoomView {
   date_in: string;
   time_in: string;
   date_out: string | null;
-  status: "active" | "completed";
+  status: 'active' | 'completed';
   created_at: string;
 }
 
@@ -75,22 +75,22 @@ export interface Machine {
 }
 
 export const MACHINE_TYPES = [
-  "Excavator",
-  "Haul Truck",
-  "Dozer",
-  "Drill Rig",
-  "Grader",
-  "Front End Loader",
-  "Water Cart",
-  "Compactor",
+  'Excavator',
+  'Haul Truck',
+  'Dozer',
+  'Drill Rig',
+  'Grader',
+  'Front End Loader',
+  'Water Cart',
+  'Compactor',
 ] as const;
 
 export interface ServiceTrigger {
   id: string;
   machine_name: string;
   machine_type: string;
-  trigger_type: "mtbf_threshold" | "failure_frequency" | "service_interval";
-  severity: "high" | "medium" | "low";
+  trigger_type: 'mtbf_threshold' | 'failure_frequency' | 'service_interval';
+  severity: 'high' | 'medium' | 'low';
   reason: string;
   metric_value: string;
   recommended_action: string;

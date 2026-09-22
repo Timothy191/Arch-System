@@ -1,9 +1,9 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { type NextRequest, NextResponse } from "next/server";
-import { withRateLimit } from "@/lib/api/rate-limit-middleware";
-import { trace } from "@opentelemetry/api";
+import { trace } from '@opentelemetry/api';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
-const tracer = trace.getTracer("auth-service");
+const tracer = trace.getTracer('auth-service');
 
 /**
  * @swagger
@@ -113,13 +113,13 @@ const tracer = trace.getTracer("auth-service");
  */
 export async function POST(request: NextRequest) {
   // ── Content-Type validation ──────────────────────────────────────────
-  const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
-    return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 415 });
+  const contentType = request.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 415 });
   }
 
   // ── CSRF protection (production only) ────────────────────────────────
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === 'production') {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
     if (appUrl) {
       // Parse the app URL origin once; fail closed if config is invalid
@@ -127,16 +127,16 @@ export async function POST(request: NextRequest) {
       try {
         appOrigin = new URL(appUrl).origin;
       } catch {
-        return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
       }
 
-      const origin = request.headers.get("origin");
-      const referer = request.headers.get("referer");
+      const origin = request.headers.get('origin');
+      const referer = request.headers.get('referer');
 
       if (origin) {
         // Origin header is always protocol + host + port; compare directly
         if (origin !== appOrigin) {
-          return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
         }
       } else if (referer) {
         // Referer includes full path; parse it and compare origins to
@@ -144,15 +144,15 @@ export async function POST(request: NextRequest) {
         try {
           const refUrl = new URL(referer);
           if (refUrl.origin !== appOrigin) {
-            return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+            return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
           }
         } catch {
           // Invalid Referer URL — reject
-          return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+          return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
         }
       } else {
         // Neither Origin nor Referer present — reject
-        return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+        return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 });
       }
     }
   }
@@ -160,14 +160,14 @@ export async function POST(request: NextRequest) {
   return withRateLimit(
     request,
     async () => {
-      return tracer.startActiveSpan("loginAttempt", async (span) => {
+      return tracer.startActiveSpan('loginAttempt', async (span) => {
         try {
           const body = await request.json();
           const { email, password } = body;
 
           // Validate input
           if (!email || !password) {
-            return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+            return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
           }
 
           const supabase = await createServerSupabaseClient();
@@ -177,71 +177,71 @@ export async function POST(request: NextRequest) {
           });
 
           if (error) {
-            const errMsg = error.message ? error.message.toLowerCase() : "";
+            const errMsg = error.message ? error.message.toLowerCase() : '';
             const status = (error as { status?: number }).status || 0;
 
             // 1. Upstream / Network / Outage / Connection failure / Timeout
             const isUpstreamFailure =
               status >= 500 ||
-              errMsg.includes("fetch failed") ||
-              errMsg.includes("networkerror") ||
-              errMsg.includes("timeout") ||
-              errMsg.includes("econnrefused") ||
-              errMsg.includes("failed to fetch") ||
-              errMsg.includes("invalid api key");
+              errMsg.includes('fetch failed') ||
+              errMsg.includes('networkerror') ||
+              errMsg.includes('timeout') ||
+              errMsg.includes('econnrefused') ||
+              errMsg.includes('failed to fetch') ||
+              errMsg.includes('invalid api key');
 
             if (isUpstreamFailure) {
               span.recordException(new Error(error.message));
-              span.setStatus({ code: 2, message: "Upstream auth failure" });
+              span.setStatus({ code: 2, message: 'Upstream auth failure' });
               // eslint-disable-next-line no-console
               console.error(
-                JSON.stringify({ event: "auth_failed", reason: "upstream_failure", error: errMsg }),
+                JSON.stringify({ event: 'auth_failed', reason: 'upstream_failure', error: errMsg })
               );
               return NextResponse.json(
                 {
                   error:
-                    "Authentication service is temporarily unavailable. Please try again later.",
+                    'Authentication service is temporarily unavailable. Please try again later.',
                 },
-                { status: 503 },
+                { status: 503 }
               );
             }
 
             // 2. Auth Rate Limiting
-            const isRateLimitError = status === 429 || errMsg.includes("rate limit");
+            const isRateLimitError = status === 429 || errMsg.includes('rate limit');
             if (isRateLimitError) {
-              span.setStatus({ code: 2, message: "Rate limit exceeded" });
+              span.setStatus({ code: 2, message: 'Rate limit exceeded' });
               // eslint-disable-next-line no-console
-              console.error(JSON.stringify({ event: "auth_failed", reason: "rate_limit" }));
+              console.error(JSON.stringify({ event: 'auth_failed', reason: 'rate_limit' }));
               return NextResponse.json(
                 {
-                  error: "Too many attempts. Please wait a moment and try again.",
+                  error: 'Too many attempts. Please wait a moment and try again.',
                 },
-                { status: 429 },
+                { status: 429 }
               );
             }
 
             // 3. Invalid credentials (status 400 or default credential rejection)
-            span.setStatus({ code: 2, message: "Invalid credentials" });
+            span.setStatus({ code: 2, message: 'Invalid credentials' });
             // eslint-disable-next-line no-console
-            console.error(JSON.stringify({ event: "auth_failed", reason: "invalid_credentials" }));
+            console.error(JSON.stringify({ event: 'auth_failed', reason: 'invalid_credentials' }));
             return NextResponse.json(
               {
-                error: "Invalid credentials",
+                error: 'Invalid credentials',
               },
-              { status: 401 },
+              { status: 401 }
             );
           }
 
           // Log successful login (avoiding PII, just user ID)
-          span.setStatus({ code: 1, message: "Success" });
+          span.setStatus({ code: 1, message: 'Success' });
           // eslint-disable-next-line no-console
-          console.log(JSON.stringify({ event: "auth_success", user_id: data?.session?.user?.id }));
+          console.log(JSON.stringify({ event: 'auth_success', user_id: data?.session?.user?.id }));
 
           // Return session data to enable client-side cookie preservation in proxied webview environments
           return NextResponse.json(
             {
               success: true,
-              redirectTo: "/",
+              redirectTo: '/',
               session: data?.session
                 ? {
                     access_token: data.session.access_token,
@@ -253,35 +253,35 @@ export async function POST(request: NextRequest) {
                   }
                 : undefined,
             },
-            { status: 200 },
+            { status: 200 }
           );
         } catch (err) {
           // Distinguish malformed JSON from internal server errors
           if (err instanceof SyntaxError) {
-            span.setStatus({ code: 2, message: "Invalid JSON" });
-            return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
+            span.setStatus({ code: 2, message: 'Invalid JSON' });
+            return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
           }
 
           const isNetworkOrTimeout =
             err instanceof Error &&
-            (err.message.toLowerCase().includes("fetch failed") ||
-              err.message.toLowerCase().includes("timeout") ||
-              err.message.toLowerCase().includes("econnrefused"));
+            (err.message.toLowerCase().includes('fetch failed') ||
+              err.message.toLowerCase().includes('timeout') ||
+              err.message.toLowerCase().includes('econnrefused'));
 
           if (isNetworkOrTimeout) {
             span.recordException(err as Error);
-            span.setStatus({ code: 2, message: "Upstream connection error" });
+            span.setStatus({ code: 2, message: 'Upstream connection error' });
             return NextResponse.json(
               {
-                error: "Authentication service is temporarily unavailable. Please try again later.",
+                error: 'Authentication service is temporarily unavailable. Please try again later.',
               },
-              { status: 503 },
+              { status: 503 }
             );
           }
 
           span.recordException(err as Error);
-          span.setStatus({ code: 2, message: "Internal server error" });
-          return NextResponse.json({ error: "An error occurred during sign in" }, { status: 500 });
+          span.setStatus({ code: 2, message: 'Internal server error' });
+          return NextResponse.json({ error: 'An error occurred during sign in' }, { status: 500 });
         } finally {
           span.end();
         }
@@ -292,6 +292,6 @@ export async function POST(request: NextRequest) {
         windowMs: 15 * 60 * 1000, // 15 minutes
         maxRequests: 5, // 5 attempts per 15 minutes
       },
-    },
+    }
   );
 }

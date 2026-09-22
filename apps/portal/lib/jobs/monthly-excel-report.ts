@@ -1,5 +1,5 @@
-import { inngest } from "@repo/utils/inngest";
-import * as XLSX from "xlsx";
+import { inngest } from '@repo/utils/inngest';
+import * as XLSX from 'xlsx';
 
 /**
  * Monthly Excel Report Generation Job
@@ -9,40 +9,40 @@ import * as XLSX from "xlsx";
  */
 export const monthlyExcelReportFn = inngest.createFunction(
   {
-    id: "monthly-excel-report",
-    name: "Monthly Excel Report Generation",
-    triggers: [{ cron: "0 0 1 * *" }],
+    id: 'monthly-excel-report',
+    name: 'Monthly Excel Report Generation',
+    triggers: [{ cron: '0 0 1 * *' }],
   },
   async ({ step, logger }: any) => {
-    logger.info("Starting monthly Excel report generation...");
+    logger.info('Starting monthly Excel report generation...');
 
     // Step 1: Fetch operational records
-    const reportData = await step.run("fetch-report-data", async () => {
+    const reportData = await step.run('fetch-report-data', async () => {
       return [
-        { Department: "Drilling", TargetTons: 15000, ActualTons: 15420, Efficiency: "102.8%" },
-        { Department: "Production", TargetTons: 45000, ActualTons: 46210, Efficiency: "102.7%" },
+        { Department: 'Drilling', TargetTons: 15000, ActualTons: 15420, Efficiency: '102.8%' },
+        { Department: 'Production', TargetTons: 45000, ActualTons: 46210, Efficiency: '102.7%' },
         {
-          Department: "Engineering",
-          Availability: "96.4%",
+          Department: 'Engineering',
+          Availability: '96.4%',
           MaintenanceHours: 34,
           OpenBreakdowns: 0,
         },
         {
-          Department: "Safety",
+          Department: 'Safety',
           LtiFreeDays: 142,
           IncidentsRecorded: 0,
-          InspectionCompliance: "100%",
+          InspectionCompliance: '100%',
         },
       ];
     });
 
     // Step 2: Generate Excel buffer with XLSX
-    const reportMeta = await step.run("generate-excel-file", async () => {
+    const reportMeta = await step.run('generate-excel-file', async () => {
       const worksheet = XLSX.utils.json_to_sheet(reportData);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Operational KPI");
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Monthly Operational KPI');
 
-      const excelBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+      const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
       logger.info(`Generated XLSX report buffer (${excelBuffer.length} bytes)`);
 
       return {
@@ -53,10 +53,10 @@ export const monthlyExcelReportFn = inngest.createFunction(
     });
 
     // Step 3: Notify stakeholders
-    await step.run("notify-stakeholders", async () => {
+    await step.run('notify-stakeholders', async () => {
       logger.info(`Monthly report ${reportMeta.filename} generated successfully.`);
     });
 
     return { success: true, report: reportMeta };
-  },
+  }
 );

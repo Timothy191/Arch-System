@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { cache } from "react";
-import { logError } from "@/lib/errors/error-logger";
-import { addEvent, setAttributes, withAsyncSpan } from "@/lib/observability/tracing";
-import { fetchWeather } from "@/lib/weather-api";
+import { NextResponse } from 'next/server';
+import { cache } from 'react';
+import { logError } from '@/lib/errors/error-logger';
+import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
+import { fetchWeather } from '@/lib/weather-api';
 
 /**
  * @swagger
@@ -47,25 +47,25 @@ import { fetchWeather } from "@/lib/weather-api";
 // Centralized caching layer with React cache + Next.js data cache
 const getCachedWeather = cache(async () => {
   const weather = await fetchWeather();
-  addEvent("weather_data_fetched", {
+  addEvent('weather_data_fetched', {
     temperature: weather.temperature,
     conditions: weather.description,
-    location: weather.location?.name || "Unknown",
+    location: weather.location?.name || 'Unknown',
   });
   return weather;
 });
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return withAsyncSpan("weather_api_route", { context: "weather" }, async () => {
+  return withAsyncSpan('weather_api_route', { context: 'weather' }, async () => {
     const startTime = Date.now();
 
     try {
       setAttributes({
-        "weather.cache_enabled": "true",
-        "weather.cache_ttl_seconds": "300",
-        "weather.stale_while_revalidate": "true",
+        'weather.cache_enabled': 'true',
+        'weather.cache_ttl_seconds': '300',
+        'weather.stale_while_revalidate': 'true',
       });
 
       // Try cache first with stale-while-revalidate strategy
@@ -73,22 +73,22 @@ export async function GET() {
 
       const duration = Date.now() - startTime;
       setAttributes({
-        "weather.response_time_ms": String(duration),
-        "weather.cache_hit": "true",
+        'weather.response_time_ms': String(duration),
+        'weather.cache_hit': 'true',
       });
 
       // Add performance markers for INP/LCP analysis
-      addEvent("weather_response_ready", {
+      addEvent('weather_response_ready', {
         duration_ms: duration,
-        cache_strategy: "stale-while-revalidate",
+        cache_strategy: 'stale-while-revalidate',
       });
 
       return NextResponse.json(weather, {
         headers: {
           // Centralized cache control: 5min cache, 5min stale-while-revalidate
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=300",
-          "X-Weather-Cache": "hit",
-          "X-Response-Time": `${duration}ms`,
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
+          'X-Weather-Cache': 'hit',
+          'X-Response-Time': `${duration}ms`,
         },
       });
     } catch (error) {
@@ -96,17 +96,17 @@ export async function GET() {
 
       // Centralized error handling with structured logging
       const errorId = await logError(
-        error instanceof Error ? error : new Error("Weather fetch failed"),
+        error instanceof Error ? error : new Error('Weather fetch failed'),
         {
-          context: "weather_api_route",
+          context: 'weather_api_route',
           duration_ms: duration,
-        },
+        }
       );
 
       setAttributes({
-        "weather.error": "true",
-        "weather.error_id": String(errorId ?? "unknown"),
-        "weather.response_time_ms": String(duration),
+        'weather.error': 'true',
+        'weather.error_id': String(errorId ?? 'unknown'),
+        'weather.response_time_ms': String(duration),
       });
 
       // Graceful degradation: return null data instead of hard failure
@@ -114,10 +114,10 @@ export async function GET() {
       return NextResponse.json(null, {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=60", // Cache error state briefly
-          "X-Weather-Cache": "error",
-          "X-Response-Time": `${duration}ms`,
-          "X-Error-ID": String(errorId ?? "unknown"),
+          'Cache-Control': 'public, s-maxage=60', // Cache error state briefly
+          'X-Weather-Cache': 'error',
+          'X-Response-Time': `${duration}ms`,
+          'X-Error-ID': String(errorId ?? 'unknown'),
         },
       });
     }

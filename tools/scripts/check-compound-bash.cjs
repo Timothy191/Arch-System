@@ -7,10 +7,10 @@
  */
 
 const args = process.argv.slice(2);
-const explain = args.includes("--explain");
+const explain = args.includes('--explain');
 const rawCmd = args
-  .filter((a) => a !== "--explain")
-  .join(" ")
+  .filter((a) => a !== '--explain')
+  .join(' ')
   .trim();
 
 if (!rawCmd) {
@@ -32,21 +32,21 @@ for (let i = 0; i < rawSegments.length; i++) {
 
 // Forbidden patterns
 const DANGEROUS_PATTERNS = [
-  { pattern: /\brm\s+-[rfR]*\s+[\/\~]/, reason: "Destructive filesystem root deletion" },
-  { pattern: />\s*\/dev\/[s|h|n]d[a-z0-9]*/, reason: "Direct block device write" },
-  { pattern: /\b(mkfs|dd\s+if=)/, reason: "Direct disk formatting or raw block write" },
-  { pattern: /\bchmod\s+-R\s+777\s+\//, reason: "Unsafe global permission elevation" },
-  { pattern: /\bcurl.*\|\s*(bash|sh)/, reason: "Unverified remote script execution pipe" },
+  { pattern: /\brm\s+-[rfR]*\s+[/~]/, reason: 'Destructive filesystem root deletion' },
+  { pattern: />\s*\/dev\/[s|h|n]d[a-z0-9]*/, reason: 'Direct block device write' },
+  { pattern: /\b(mkfs|dd\s+if=)/, reason: 'Direct disk formatting or raw block write' },
+  { pattern: /\bchmod\s+-R\s+777\s+\//, reason: 'Unsafe global permission elevation' },
+  { pattern: /\bcurl.*\|\s*(bash|sh)/, reason: 'Unverified remote script execution pipe' },
 ];
 
 let violations = 0;
 
 if (explain) {
-  console.log("🔍 [CompoundBashAuditor] AST Command Segmentation:");
+  console.log('🔍 [CompoundBashAuditor] AST Command Segmentation:');
   segments.forEach((seg, idx) => {
     console.log(`  Segment ${idx + 1}: \`${seg}\``);
   });
-  console.log("");
+  console.log('');
 }
 
 segments.forEach((seg, idx) => {
@@ -61,12 +61,12 @@ segments.forEach((seg, idx) => {
 
 if (violations === 0) {
   console.log(
-    `🟢 [CompoundBashAuditor] PASSED: Command verified safe (${segments.length} segment${segments.length === 1 ? "" : "s"}).`,
+    `🟢 [CompoundBashAuditor] PASSED: Command verified safe (${segments.length} segment${segments.length === 1 ? '' : 's'}).`
   );
   process.exit(0);
 } else {
   console.error(
-    `\n🔴 [CompoundBashAuditor] REJECTED: ${violations} critical security violation(s) detected.`,
+    `\n🔴 [CompoundBashAuditor] REJECTED: ${violations} critical security violation(s) detected.`
   );
   process.exit(1);
 }

@@ -8,9 +8,9 @@
 
 function printUsage() {
   console.log(
-    "Usage: node tools/real-world-score.cjs <feasibility> <maintainability> <security> <performance> <reliability>",
+    'Usage: node tools/real-world-score.cjs <feasibility> <maintainability> <security> <performance> <reliability>'
   );
-  console.log("Example: node tools/real-world-score.cjs 95 90 92 88 96");
+  console.log('Example: node tools/real-world-score.cjs 95 90 92 88 96');
 }
 
 const args = process.argv.slice(2);
@@ -22,8 +22,8 @@ if (args.length !== 5) {
 
 const [feasibility, maintainability, security, performance, reliability] = args.map(Number);
 
-if (args.some((arg) => isNaN(Number(arg)))) {
-  console.error("Error: All arguments must be numbers.");
+if (args.some((arg) => Number.isNaN(Number(arg)))) {
+  console.error('Error: All arguments must be numbers.');
   printUsage();
   process.exit(1);
 }

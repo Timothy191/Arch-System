@@ -1,11 +1,11 @@
 # 4-Operation Row-Level Security (RLS) Coverage Matrix Report
 
-Generated on 2026-09-22T07:20:37.756Z
+Generated on 2026-09-22T10:48:56.333Z
 
 ## Summary Metrics
 
-- **Total Tables**: 86
-- **RLS Enabled**: 86/86 (100.0%)
+- **Total Tables**: 88
+- **RLS Enabled**: 88/88 (100.0%)
 - **Critical Security Violations**: 0
 
 ## 4-Operation Policy Coverage Matrix
@@ -19,7 +19,7 @@ Generated on 2026-09-22T07:20:37.756Z
 | `machine_hours`                        | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `001_initial.sql`                                |
 | `fuel_logs`                            | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `001_initial.sql`                                |
 | `production_logs`                      | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `001_initial.sql`                                |
-| `operators`                            | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `002_control_room_tables.sql`                    |
+| `operators`                            | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `002_control_room_tables.sql`                    |
 | `sites`                                | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `002_control_room_tables.sql`                    |
 | `machine_operations`                   | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `002_control_room_tables.sql`                    |
 | `hourly_loads`                         | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `002_control_room_tables.sql`                    |
@@ -83,20 +83,22 @@ Generated on 2026-09-22T07:20:37.756Z
 | `print_jobs`                           | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `076_card_printing_infrastructure.sql`           |
 | `issued_cards`                         | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `076_card_printing_infrastructure.sql`           |
 | `satellite_deformations`               | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `078_satellite_insar_deformations.sql`           |
-| `secrets_rotation_log`                 | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `085_secrets_rotation_log.sql`                   |
-| `shift_completeness_alerts`            | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `086_shift_completeness_alerts.sql`              |
-| `data_integrity_issues`                | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `087_data_integrity_issues.sql`                  |
-| `shift_integrity_reports`              | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `088_shift_integrity_reports.sql`                |
-| `slo_metrics`                          | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `091_slo_monitoring.sql`                         |
-| `feature_flags`                        | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `092_feature_flags.sql`                          |
-| `feature_flag_exposures`               | ✅ ENABLED | ⚪ (Deny) | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `092_feature_flags.sql`                          |
-| `ab_test_results`                      | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `092_feature_flags.sql`                          |
-| `control_room_shift_reports`           | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `096_control_room_shift_reports.sql`             |
-| `ai_token_usage`                       | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | 🟢        | `100_ai_token_usage_tracking.sql`                |
-| `excavator_haul_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `148_multi_site_production_report.sql`           |
-| `excavator_truck_tallies`              | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `148_multi_site_production_report.sql`           |
-| `dozer_rollover_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `148_multi_site_production_report.sql`           |
-| `ancillary_shift_logs`                 | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `148_multi_site_production_report.sql`           |
-| `compliance_audit_runs`                | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `151_operational_compliance_checks.sql`          |
+| `secrets_rotation_log`                 | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `086_secrets_rotation_log.sql`                   |
+| `shift_completeness_alerts`            | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `087_shift_completeness_alerts.sql`              |
+| `data_integrity_issues`                | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `088_data_integrity_issues.sql`                  |
+| `shift_integrity_reports`              | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `089_shift_integrity_reports.sql`                |
+| `slo_metrics`                          | ✅ ENABLED | 🟢        | 🟢        | 🟢        | ⚪ (Deny) | `092_slo_monitoring.sql`                         |
+| `feature_flags`                        | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `093_feature_flags.sql`                          |
+| `feature_flag_exposures`               | ✅ ENABLED | ⚪ (Deny) | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `093_feature_flags.sql`                          |
+| `ab_test_results`                      | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `093_feature_flags.sql`                          |
+| `control_room_shift_reports`           | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `097_control_room_shift_reports.sql`             |
+| `ai_token_usage`                       | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | 🟢        | `102_ai_token_usage_tracking.sql`                |
+| `excavator_haul_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`           |
+| `excavator_truck_tallies`              | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`           |
+| `dozer_rollover_logs`                  | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`           |
+| `ancillary_shift_logs`                 | ✅ ENABLED | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | ⚪ (Deny) | `150_multi_site_production_report.sql`           |
+| `compliance_audit_runs`                | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `153_operational_compliance_checks.sql`          |
+| `idempotency_keys`                     | ✅ ENABLED | 🟢        | 🟢        | 🟢        | 🟢        | `162_idempotency_and_outbox.sql`                 |
+| `control_room_outbox`                  | ✅ ENABLED | 🟢        | 🟢        | ⚪ (Deny) | ⚪ (Deny) | `162_idempotency_and_outbox.sql`                 |
 
 _Legend: 🟢 = Explicit Policy Defined | ⚪ (Deny) = Default Secure Tenant Isolation (Implicit Deny)_

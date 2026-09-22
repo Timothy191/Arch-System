@@ -8,7 +8,7 @@ export interface QualityCheckViolation {
   filePath?: string;
   lineNumber?: number;
   ruleId: string;
-  severity: "CRITICAL" | "WARNING";
+  severity: 'CRITICAL' | 'WARNING';
   description: string;
   remediationSnippet?: string;
 }
@@ -29,25 +29,25 @@ export class QualityGate {
   public static auditContent(content: string, filePath?: string): QualityAuditResult {
     const violations: QualityCheckViolation[] = [];
     const isUIFile =
-      filePath?.includes("/packages/ui/") ||
-      (filePath?.includes("/libs/features/") && filePath?.includes("/ui/"));
-    const isSQLFile = filePath?.endsWith(".sql");
+      filePath?.includes('/packages/ui/') ||
+      (filePath?.includes('/libs/features/') && filePath?.includes('/ui/'));
+    const isSQLFile = filePath?.endsWith('.sql');
 
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     lines.forEach((line, idx) => {
       const lineNum = idx + 1;
 
       // 1. Boundary Violation Check: UI importing Database/Supabase directly
-      if (isUIFile && (line.includes("@repo/database") || line.includes("@repo/supabase"))) {
+      if (isUIFile && (line.includes('@repo/database') || line.includes('@repo/supabase'))) {
         violations.push({
           filePath,
           lineNumber: lineNum,
-          ruleId: "NO_DIRECT_DB_IMPORT_IN_UI",
-          severity: "CRITICAL",
+          ruleId: 'NO_DIRECT_DB_IMPORT_IN_UI',
+          severity: 'CRITICAL',
           description:
-            "Pure UI component imports database or supabase package directly. Must use feature data-access libraries.",
-          remediationSnippet: "Refactor import to use @repo/<feature>/data-access",
+            'Pure UI component imports database or supabase package directly. Must use feature data-access libraries.',
+          remediationSnippet: 'Refactor import to use @repo/<feature>/data-access',
         });
       }
 
@@ -56,8 +56,8 @@ export class QualityGate {
         violations.push({
           filePath,
           lineNumber: lineNum,
-          ruleId: "FORBIDDEN_DARK_MODE_CLASS",
-          severity: "CRITICAL",
+          ruleId: 'FORBIDDEN_DARK_MODE_CLASS',
+          severity: 'CRITICAL',
           description:
             "Use of responsive 'dark:' class is prohibited. Application theme is strictly light-mode.",
           remediationSnippet: "Remove 'dark:' prefix and rely on light OKLCH theme tokens.",
@@ -66,14 +66,14 @@ export class QualityGate {
 
       // 3. Forbidden Raw Tailwind Shadow Check
       const shadowMatch = line.match(
-        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo)-[0-9]+\b/,
+        /\bshadow-(blue|red|emerald|amber|purple|pink|indigo)-[0-9]+\b/
       );
       if (shadowMatch) {
         violations.push({
           filePath,
           lineNumber: lineNum,
-          ruleId: "FORBIDDEN_TAILWIND_SHADOW",
-          severity: "CRITICAL",
+          ruleId: 'FORBIDDEN_TAILWIND_SHADOW',
+          severity: 'CRITICAL',
           description: `Raw colored shadow class '${shadowMatch[0]}' is forbidden. Use OKLCH theme tokens (shadow-card, shadow-window, shadow-diffusion-*).`,
           remediationSnippet:
             "Replace with 'shadow-card' or approved shadow token from @repo/theme.",
@@ -83,14 +83,14 @@ export class QualityGate {
       // 4. Untyped 'any' Parameter / Cast Check
       if (
         /:\s*any\b/.test(line) &&
-        !line.includes("eslint-disable") &&
-        !line.includes("// @ts-ignore")
+        !line.includes('eslint-disable') &&
+        !line.includes('// @ts-ignore')
       ) {
         violations.push({
           filePath,
           lineNumber: lineNum,
-          ruleId: "NO_IMPLICIT_OR_EXPLICIT_ANY",
-          severity: "WARNING",
+          ruleId: 'NO_IMPLICIT_OR_EXPLICIT_ANY',
+          severity: 'WARNING',
           description:
             "Explicit 'any' type annotation detected. Provide strict TypeScript interface or unknown.",
           remediationSnippet: "Use strict type interface or 'unknown' with type guard.",
@@ -102,34 +102,34 @@ export class QualityGate {
         violations.push({
           filePath,
           lineNumber: lineNum,
-          ruleId: "NO_DYNAMIC_SQL_CONCAT",
-          severity: "CRITICAL",
-          description: "Dynamic SQL string concatenation detected. Vulnerable to SQL injection.",
-          remediationSnippet: "Use parameterized queries or Kysely query builder.",
+          ruleId: 'NO_DYNAMIC_SQL_CONCAT',
+          severity: 'CRITICAL',
+          description: 'Dynamic SQL string concatenation detected. Vulnerable to SQL injection.',
+          remediationSnippet: 'Use parameterized queries or Kysely query builder.',
         });
       }
 
       // 6. RLS Policy Subquery Check in SQL files
-      if (isSQLFile && line.toUpperCase().includes("CREATE POLICY")) {
+      if (isSQLFile && line.toUpperCase().includes('CREATE POLICY')) {
         if (
-          !content.includes("(SELECT auth.uid())") &&
-          !content.includes("(SELECT public.is_admin())")
+          !content.includes('(SELECT auth.uid())') &&
+          !content.includes('(SELECT public.is_admin())')
         ) {
           violations.push({
             filePath,
             lineNumber: lineNum,
-            ruleId: "RLS_INITPLAN_OPTIMIZATION_MISSING",
-            severity: "CRITICAL",
+            ruleId: 'RLS_INITPLAN_OPTIMIZATION_MISSING',
+            severity: 'CRITICAL',
             description:
               "RLS CREATE POLICY missing InitPlan subquery pattern '(SELECT auth.uid())'. Direct auth.uid() disables per-query plan caching.",
-            remediationSnippet: "Wrap auth call: USING ((SELECT auth.uid()) = user_id)",
+            remediationSnippet: 'Wrap auth call: USING ((SELECT auth.uid()) = user_id)',
           });
         }
       }
     });
 
-    const criticals = violations.filter((v) => v.severity === "CRITICAL");
-    const warnings = violations.filter((v) => v.severity === "WARNING");
+    const criticals = violations.filter((v) => v.severity === 'CRITICAL');
+    const warnings = violations.filter((v) => v.severity === 'WARNING');
     const totalChecks = 6;
     const score = Math.max(0, 100 - criticals.length * 20 - warnings.length * 5);
 
@@ -148,28 +148,28 @@ export class QualityGate {
    */
   public static formatDiagnosticFeedback(audit: QualityAuditResult): string {
     if (audit.passed && audit.warnings.length === 0) {
-      return "✅ Quality Gate Verdict: 100% PASS. Zero architectural, type, or design violations detected.";
+      return '✅ Quality Gate Verdict: 100% PASS. Zero architectural, type, or design violations detected.';
     }
 
-    let feedback = `### ⚠️ Quality Gate Verdict: ${audit.passed ? "PASSED WITH WARNINGS" : "FAILED"}\n`;
+    let feedback = `### ⚠️ Quality Gate Verdict: ${audit.passed ? 'PASSED WITH WARNINGS' : 'FAILED'}\n`;
     feedback += `Compliance Score: ${audit.score}/100\n\n`;
 
     if (audit.criticalViolations.length > 0) {
-      feedback += "#### 🛑 Critical Violations (Must Remediate Immediately):\n";
+      feedback += '#### 🛑 Critical Violations (Must Remediate Immediately):\n';
       audit.criticalViolations.forEach((v, i) => {
-        feedback += `${i + 1}. **[${v.ruleId}]** in \`${v.filePath || "generated content"}\` (Line ${v.lineNumber || "N/A"})\n`;
+        feedback += `${i + 1}. **[${v.ruleId}]** in \`${v.filePath || 'generated content'}\` (Line ${v.lineNumber || 'N/A'})\n`;
         feedback += `   - **Defect**: ${v.description}\n`;
         if (v.remediationSnippet) {
           feedback += `   - **Remediation**: ${v.remediationSnippet}\n`;
         }
       });
-      feedback += "\n";
+      feedback += '\n';
     }
 
     if (audit.warnings.length > 0) {
-      feedback += "#### ⚠️ Warnings:\n";
+      feedback += '#### ⚠️ Warnings:\n';
       audit.warnings.forEach((v, i) => {
-        feedback += `${i + 1}. **[${v.ruleId}]** in \`${v.filePath || "generated content"}\` (Line ${v.lineNumber || "N/A"})\n`;
+        feedback += `${i + 1}. **[${v.ruleId}]** in \`${v.filePath || 'generated content'}\` (Line ${v.lineNumber || 'N/A'})\n`;
         feedback += `   - **Defect**: ${v.description}\n`;
       });
     }

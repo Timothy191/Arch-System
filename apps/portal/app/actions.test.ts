@@ -1,14 +1,14 @@
 /**
  * @jest-environment node
  */
-import { generateMonthlyReport, logout, speculativeEmbedShiftLog } from "./actions";
+import { generateMonthlyReport, logout, speculativeEmbedShiftLog } from './actions';
 
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@react-pdf/renderer", () => {
-  const React = require("react");
+jest.mock('@react-pdf/renderer', () => {
+  const React = require('react');
   const createMockComponent = (name: string) => {
     const MockComp = (props: any) => React.createElement(name, props, props.children);
     MockComp.displayName = name;
@@ -16,117 +16,117 @@ jest.mock("@react-pdf/renderer", () => {
   };
   return {
     pdf: jest.fn().mockImplementation(() => ({
-      toBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-pdf-content")),
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-pdf-content')),
     })),
     StyleSheet: {
       create: jest.fn().mockImplementation((styles) => styles),
     },
-    Document: createMockComponent("Document"),
-    Page: createMockComponent("Page"),
-    Text: createMockComponent("Text"),
-    View: createMockComponent("View"),
+    Document: createMockComponent('Document'),
+    Page: createMockComponent('Page'),
+    Text: createMockComponent('Text'),
+    View: createMockComponent('View'),
   };
 });
 
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   redirect: jest.fn().mockImplementation(() => {
-    throw new Error("NEXT_REDIRECT");
+    throw new Error('NEXT_REDIRECT');
   }),
 }));
 
-jest.mock("@repo/utils/inngest", () => ({
+jest.mock('@repo/utils/inngest', () => ({
   inngest: {
     send: jest.fn().mockResolvedValue({}),
   },
-  aiGenerateEmbeddingEvent: "ai/generate-embedding",
+  aiGenerateEmbeddingEvent: 'ai/generate-embedding',
 }));
 
-const { createServerSupabaseClient } = jest.requireMock("@repo/supabase/server");
+const { createServerSupabaseClient } = jest.requireMock('@repo/supabase/server');
 
-const { inngest } = jest.requireMock("@repo/utils/inngest");
+const { inngest } = jest.requireMock('@repo/utils/inngest');
 
-describe("actions", () => {
+describe('actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe("logout", () => {
-    it("calls signOut and redirects to /login", async () => {
+  describe('logout', () => {
+    it('calls signOut and redirects to /login', async () => {
       const signOut = jest.fn().mockResolvedValue({});
       createServerSupabaseClient.mockResolvedValue({ auth: { signOut } });
 
-      await expect(logout()).rejects.toThrow("NEXT_REDIRECT");
+      await expect(logout()).rejects.toThrow('NEXT_REDIRECT');
       expect(signOut).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("speculativeEmbedShiftLog", () => {
-    it("returns unauthorized error result if user is not authenticated", async () => {
+  describe('speculativeEmbedShiftLog', () => {
+    it('returns unauthorized error result if user is not authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
       });
 
-      const res = await speculativeEmbedShiftLog("test shift log note");
+      const res = await speculativeEmbedShiftLog('test shift log note');
       expect(res.success).toBe(false);
-      expect(res.error).toBe("Unauthorized");
-      expect(res.code).toBe("AUTH_ERROR");
+      expect(res.error).toBe('Unauthorized');
+      expect(res.code).toBe('AUTH_ERROR');
       expect(inngest.send).not.toHaveBeenCalled();
     });
 
-    it("does not generate embedding if text is empty", async () => {
+    it('does not generate embedding if text is empty', async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
+            data: { user: { id: 'user-123' } },
           }),
         },
       });
 
-      const res = await speculativeEmbedShiftLog("");
+      const res = await speculativeEmbedShiftLog('');
       expect(res.success).toBe(true);
       expect(res.data?.queued).toBe(false);
       expect(inngest.send).not.toHaveBeenCalled();
     });
 
-    it("generates embedding for valid text when user is authenticated", async () => {
+    it('generates embedding for valid text when user is authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
+            data: { user: { id: 'user-123' } },
           }),
         },
       });
 
-      const res = await speculativeEmbedShiftLog("valid log entry");
+      const res = await speculativeEmbedShiftLog('valid log entry');
       expect(res.success).toBe(true);
       expect(res.data?.queued).toBe(true);
       expect(inngest.send).toHaveBeenCalledWith({
-        name: "ai/generate-embedding",
+        name: 'ai/generate-embedding',
         data: {
-          text: "valid log entry",
-          userId: "user-123",
+          text: 'valid log entry',
+          userId: 'user-123',
         },
       });
     });
   });
 
-  describe("generateMonthlyReport", () => {
-    it("returns unauthorized error if user is not authenticated", async () => {
+  describe('generateMonthlyReport', () => {
+    it('returns unauthorized error if user is not authenticated', async () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
         },
       });
 
-      const res = await generateMonthlyReport({ title: "Test" });
+      const res = await generateMonthlyReport({ title: 'Test' });
       expect(res.success).toBe(false);
-      expect(res.error).toBe("Unauthorized");
-      expect(res.code).toBe("AUTH_ERROR");
+      expect(res.error).toBe('Unauthorized');
+      expect(res.code).toBe('AUTH_ERROR');
     });
 
-    it("returns forbidden error if user is not admin or manager", async () => {
+    it('returns forbidden error if user is not admin or manager', async () => {
       const mockSingle = jest.fn().mockResolvedValue({
-        data: { role: "operator", department_id: "dept-1" },
+        data: { role: 'operator', department_id: 'dept-1' },
         error: null,
       });
       const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
@@ -135,20 +135,20 @@ describe("actions", () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
+            data: { user: { id: 'user-123' } },
           }),
         },
         from: jest.fn().mockReturnValue({ select: mockSelect }),
       } as any);
 
-      const res = await generateMonthlyReport({ title: "Test" });
+      const res = await generateMonthlyReport({ title: 'Test' });
       expect(res.success).toBe(false);
-      expect(res.code).toBe("FORBIDDEN_ERROR");
+      expect(res.code).toBe('FORBIDDEN_ERROR');
     });
 
-    it("generates report and returns signed URL for authorized users", async () => {
+    it('generates report and returns signed URL for authorized users', async () => {
       const mockSingle = jest.fn().mockResolvedValue({
-        data: { role: "admin", department_id: "dept-1" },
+        data: { role: 'admin', department_id: 'dept-1' },
         error: null,
       });
       const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
@@ -156,7 +156,7 @@ describe("actions", () => {
 
       const mockUpload = jest.fn().mockResolvedValue({ data: {}, error: null });
       const mockCreateSignedUrl = jest.fn().mockResolvedValue({
-        data: { signedUrl: "http://signed-url" },
+        data: { signedUrl: 'http://signed-url' },
         error: null,
       });
 
@@ -170,16 +170,16 @@ describe("actions", () => {
       createServerSupabaseClient.mockResolvedValue({
         auth: {
           getUser: jest.fn().mockResolvedValue({
-            data: { user: { id: "user-123" } },
+            data: { user: { id: 'user-123' } },
           }),
         },
         from: jest.fn().mockReturnValue({ select: mockSelect }),
         storage: mockStorage,
       } as any);
 
-      const res = await generateMonthlyReport({ title: "Test" }, "dept-1");
+      const res = await generateMonthlyReport({ title: 'Test' }, 'dept-1');
       expect(res.success).toBe(true);
-      expect(res.url).toBe("http://signed-url");
+      expect(res.url).toBe('http://signed-url');
       expect(mockUpload).toHaveBeenCalled();
       expect(mockCreateSignedUrl).toHaveBeenCalled();
     });

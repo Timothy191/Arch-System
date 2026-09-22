@@ -1,15 +1,15 @@
-import { AutoAnimateList } from "@repo/ui/AnimatedList";
-import { cn } from "@repo/ui/lib/utils";
-import { AlertTriangle, Clock, Wrench } from "lucide-react";
-import Link from "next/link";
+import { AutoAnimateList } from '@repo/ui/AnimatedList';
+import { cn } from '@repo/ui/lib/utils';
+import { AlertTriangle, Clock, Wrench } from 'lucide-react';
+import Link from 'next/link';
 
 export interface AlertEvent {
   id: string;
-  type: "incident" | "breakdown" | "offline";
+  type: 'incident' | 'breakdown' | 'offline';
   title: string;
   description?: string;
   timestamp: string;
-  severity: "critical" | "warning" | "info";
+  severity: 'critical' | 'warning' | 'info';
   href: string;
 }
 
@@ -25,13 +25,13 @@ function timeAgo(dateString: string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
 
-  if (diffMs < 0) return "just now";
+  if (diffMs < 0) return 'just now';
 
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return "just now";
+  if (diffMins < 1) return 'just now';
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   return `${diffDays}d ago`;
@@ -39,22 +39,22 @@ function timeAgo(dateString: string): string {
 
 const severityConfig = {
   critical: {
-    iconBg: "bg-accent-red/10 text-accent-red",
-    border: "border-accent-red/20",
-    dot: "bg-accent-red",
-    label: "CRITICAL",
+    iconBg: 'bg-accent-red/10 text-accent-red',
+    border: 'border-accent-red/20',
+    dot: 'bg-accent-red',
+    label: 'CRITICAL',
   },
   warning: {
-    iconBg: "bg-accent-amber/10 text-accent-amber",
-    border: "border-accent-amber/20",
-    dot: "bg-accent-amber",
-    label: "WARN",
+    iconBg: 'bg-accent-amber/10 text-accent-amber',
+    border: 'border-accent-amber/20',
+    dot: 'bg-accent-amber',
+    label: 'WARN',
   },
   info: {
-    iconBg: "bg-accent-blue/10 text-accent-blue",
-    border: "border-accent-blue/20",
-    dot: "bg-accent-blue",
-    label: "INFO",
+    iconBg: 'bg-accent-blue/10 text-accent-blue',
+    border: 'border-accent-blue/20',
+    dot: 'bg-accent-blue',
+    label: 'INFO',
   },
 };
 
@@ -71,7 +71,7 @@ export function AlertTicker({ events }: AlertTickerProps) {
   return (
     <div
       className={cn(
-        "w-full rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden",
+        'w-full rounded-2xl liquid-glass-light border border-white/40 shadow-window overflow-hidden'
       )}
     >
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/20 bg-white/10">
@@ -87,18 +87,18 @@ export function AlertTicker({ events }: AlertTickerProps) {
       <AutoAnimateList className="max-h-[220px] overflow-y-auto divide-y divide-arch-border-subtle/60">
         {events.map((event) => {
           const config = severityConfig[event.severity];
-          const Icon = event.type === "breakdown" ? Wrench : AlertTriangle;
+          const Icon = event.type === 'breakdown' ? Wrench : AlertTriangle;
 
           return (
             <Link
               key={event.id}
               href={event.href}
               className={cn(
-                "flex items-start gap-3 px-4 py-3",
-                "hover:bg-arch-surface-secondary/50 transition-colors duration-150",
+                'flex items-start gap-3 px-4 py-3',
+                'hover:bg-arch-surface-secondary/50 transition-colors duration-150'
               )}
             >
-              <div className={cn("mt-0.5 p-1.5 rounded-lg shrink-0", config.iconBg)}>
+              <div className={cn('mt-0.5 p-1.5 rounded-lg shrink-0', config.iconBg)}>
                 <Icon className="w-3.5 h-3.5" />
               </div>
 
@@ -109,8 +109,8 @@ export function AlertTicker({ events }: AlertTickerProps) {
                   </span>
                   <span
                     className={cn(
-                      "shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wider",
-                      config.iconBg,
+                      'shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wider',
+                      config.iconBg
                     )}
                   >
                     {config.label}

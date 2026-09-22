@@ -1,5 +1,5 @@
-import type React from "react";
-import { cn } from "../../lib/utils";
+import type React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface GaugeProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number;
@@ -26,13 +26,13 @@ export function Gauge({
   const percent = clampedValue / max;
   const offset = circumference - percent * circumference;
 
-  let colorClass = "text-green-500";
-  if (percent < 0.5) colorClass = "text-red-500";
-  else if (percent < 0.8) colorClass = "text-amber-500";
+  let colorClass = 'text-green-500';
+  if (percent < 0.5) colorClass = 'text-red-500';
+  else if (percent < 0.8) colorClass = 'text-amber-500';
 
   return (
     <div
-      className={cn("relative flex items-center justify-center", className)}
+      className={cn('relative flex items-center justify-center', className)}
       style={{ width: size, height: size }}
       {...props}
     >
@@ -47,7 +47,7 @@ export function Gauge({
           cy={size / 2}
         />
         <circle
-          className={cn("transition-all duration-1000 ease-in-out", colorClass)}
+          className={cn('transition-all duration-1000 ease-in-out', colorClass)}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
