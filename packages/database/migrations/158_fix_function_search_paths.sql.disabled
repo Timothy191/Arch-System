@@ -7,7 +7,7 @@ ALTER FUNCTION public.has_department_access(UUID) SET search_path = public, pg_t
 ALTER FUNCTION public.handle_new_user() SET search_path = public, pg_temp;
 ALTER FUNCTION public.process_audit_log() SET search_path = public, pg_temp;
 ALTER FUNCTION public.is_active(TIMESTAMPTZ) SET search_path = public, pg_temp;
-ALTER FUNCTION public.ensure_updated_at_trigger(TEXT) SET search_path = public, pg_temp;
+-- removed
 ALTER FUNCTION public.submit_user_feedback(UUID, TEXT, TEXT, INT) SET search_path = public, pg_temp;
 ALTER FUNCTION public.submit_quick_feedback(UUID, TEXT, INT) SET search_path = public, pg_temp;
 ALTER FUNCTION public.trigger_webhook_delivery() SET search_path = public, pg_temp;

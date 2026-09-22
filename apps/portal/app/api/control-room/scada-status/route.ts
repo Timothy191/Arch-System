@@ -3,71 +3,137 @@
  * /api/control-room/scada-status:
  *   get:
  *     summary: Retrieve SCADA & Redis Degraded Status
- *     description: Returns SCADA server health, Redis fallback telemetry cache status, and active tag metadata for Control Room resilience.
+ *     description: Returns SCADA server health with state machine, hysteresis, and outage tracking.
  *     tags:
  *       - Control Room
- *     responses:
- *       200:
- *         description: SCADA status and cached telemetry retrieved
  */
 
-import { getRedisClient } from "@repo/redis";
-import { NextResponse } from "next/server";
-import { applyCors } from "@/lib/api/cors";
+import { getRedisClient } from '@repo/redis';
+import { NextResponse } from 'next/server';
+import { applyCors } from '@/lib/api/cors';
+import { logError } from '@/lib/errors/error-logger';
+import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
 
-// AGENT-TRACE: Route to provide Control Room components with Redis-backed SCADA status and fallback telemetry metadata
-// Health probe targets the FUXA web root (HEAD /) — FUXA exposes no
-// /api/health endpoint (404), so probing /api/health falsely reported degraded.
+const SCADA_STATE_KEY = 'control-room:scada:state';
+const HYSTERESIS_MS = 10000;
+
+// Best-effort in-memory circuit breaker
+let consecutiveFailures = 0;
+let breakerOpenUntil = 0;
+
 export async function GET(req: Request) {
-  try {
-    const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
-    let isFuxaHealthy = false;
-    let latencyMs = 0;
-
-    const startTime = Date.now();
+  return withAsyncSpan('api_scada_status', {}, async () => {
     try {
-      const res = await fetch(fuxaUrl, {
-        method: "HEAD",
-        signal: AbortSignal.timeout(3000),
+      const fuxaUrl = process.env.NEXT_PUBLIC_FUXA_URL || 'http://localhost:1881';
+      let reportedFuxaHealthy = false;
+      let latencyMs = 0;
+      let redisConnected = false;
+      let lastGoodAt: string | null = null;
+      let previousState = 'offline';
+
+      const redis = await getRedisClient().catch(() => null);
+      if (redis) {
+        redisConnected = true;
+        try {
+          const savedStateStr = await redis.get(SCADA_STATE_KEY);
+          if (savedStateStr) {
+            const parsed = JSON.parse(savedStateStr);
+            lastGoodAt = parsed.lastGoodAt || null;
+            previousState = parsed.state || 'offline';
+          }
+        } catch (e) {
+          // ignore cache read error
+        }
+      }
+
+      // Circuit Breaker State Check
+      const now = Date.now();
+      let breakerTripped = false;
+      if (breakerOpenUntil > now) {
+        breakerTripped = true;
+        latencyMs = 0;
+        reportedFuxaHealthy = false;
+      } else {
+        // Probe FUXA
+        const startTime = Date.now();
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3000); // 3s budget
+          const res = await fetch(fuxaUrl, { method: 'HEAD', signal: controller.signal });
+          clearTimeout(timeout);
+          latencyMs = Date.now() - startTime;
+
+          if (res.ok) {
+            reportedFuxaHealthy = true;
+            consecutiveFailures = 0; // reset breaker
+          } else {
+            reportedFuxaHealthy = false;
+            consecutiveFailures++;
+          }
+        } catch (err: any) {
+          latencyMs = Date.now() - startTime;
+          reportedFuxaHealthy = false;
+          consecutiveFailures++;
+        }
+
+        // Open breaker if failed 5 times in a row, for 30s
+        if (consecutiveFailures >= 5) {
+          breakerOpenUntil = now + 30000;
+        }
+      }
+
+      setAttributes({
+        scada_healthy: reportedFuxaHealthy,
+        latency_ms: latencyMs,
+        breaker_tripped: breakerTripped,
       });
-      latencyMs = Date.now() - startTime;
-      isFuxaHealthy = res.ok;
-    } catch {
-      latencyMs = Date.now() - startTime;
-      isFuxaHealthy = false;
+
+      let currentState = reportedFuxaHealthy ? 'healthy' : redisConnected ? 'degraded' : 'offline';
+
+      // Hysteresis
+      if (reportedFuxaHealthy && previousState !== 'healthy' && lastGoodAt) {
+        const timeSinceGood = now - new Date(lastGoodAt).getTime();
+        if (timeSinceGood > 0 && timeSinceGood < HYSTERESIS_MS) {
+          currentState = previousState; // Avoid flapping, retain degraded state
+        } else {
+          lastGoodAt = new Date().toISOString();
+        }
+      } else if (reportedFuxaHealthy) {
+        lastGoodAt = new Date().toISOString();
+      }
+
+      const reasons: string[] = [];
+      if (breakerTripped) reasons.push('Circuit breaker open due to consecutive failures');
+      else if (!reportedFuxaHealthy) reasons.push('SCADA endpoint unreachable or timed out');
+
+      if (!redisConnected) reasons.push('Redis telemetry cache unavailable');
+
+      const isStale = !!lastGoodAt && now - new Date(lastGoodAt).getTime() > 60000;
+
+      const payload = {
+        state: currentState,
+        reportedFuxaHealthy,
+        breakerTripped,
+        latencyMs,
+        lastGoodAt,
+        staleSince: isStale ? lastGoodAt : null,
+        reasons,
+        timestamp: new Date().toISOString(),
+      };
+
+      if (redis) {
+        try {
+          await redis.set(SCADA_STATE_KEY, JSON.stringify(payload), { EX: 60 });
+        } catch (cacheErr) {
+          logError(cacheErr, { context: 'scada_status_cache_write' });
+        }
+      }
+
+      addEvent('scada_probe_complete', { state: currentState, latencyMs });
+      return applyCors(req, NextResponse.json(payload));
+    } catch (err: any) {
+      logError(err, { context: 'scada_status_error' });
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-
-    let cachedTagCount = 0;
-    let redisConnected = false;
-
-    try {
-      const redis = await getRedisClient();
-      redisConnected = true;
-
-      // Scan Redis for cached telemetry keys
-      const keys = await redis.keys("telemetry:last:*");
-      cachedTagCount = keys.length;
-    } catch {
-      redisConnected = false;
-    }
-
-    const overallStatus = isFuxaHealthy ? "healthy" : redisConnected ? "degraded" : "offline";
-
-    const body = {
-      status: overallStatus,
-      fuxa_healthy: isFuxaHealthy,
-      fuxa_url: fuxaUrl,
-      latency_ms: latencyMs,
-      redis_connected: redisConnected,
-      cached_tag_count: cachedTagCount,
-      timestamp: new Date().toISOString(),
-    };
-
-    return applyCors(req, NextResponse.json(body));
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || "Failed to fetch SCADA status" },
-      { status: 500 },
-    );
-  }
+  });
 }
