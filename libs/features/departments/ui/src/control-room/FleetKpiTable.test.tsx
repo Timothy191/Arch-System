@@ -2,6 +2,20 @@ import type { MachinePerformance } from "@repo/contract/types/shift-compilation.
 import { render, screen } from "@testing-library/react";
 import { FleetKpiTable } from "./FleetKpiTable";
 
+jest.mock("@tanstack/react-virtual", () => ({
+  ...jest.requireActual("@tanstack/react-virtual"),
+  useVirtualizer: ({ count }: { count: number }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }, (_, index) => ({
+        index,
+        start: index * 48,
+        size: 48,
+        key: index,
+      })),
+    getTotalSize: () => count * 48,
+  }),
+}));
+
 const mockFleet: MachinePerformance[] = [
   {
     machine_id: "11111111-1111-1111-1111-111111111111",
