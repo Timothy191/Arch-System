@@ -3,15 +3,9 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 
 function getAuditRoot() {
-  let current = process.cwd();
-  while (current !== "/" && current !== path.dirname(current)) {
-    const candidate = path.join(current, "documentation", "03-audit-reports");
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-    current = path.dirname(current);
-  }
-  return path.resolve(process.cwd(), "../../documentation/03-audit-reports");
+  // Using string concatenation to prevent Next.js from tracing upwards
+  const staticRoot = path.normalize(process.cwd() + "/../../documentation/03-audit-reports");
+  return staticRoot;
 }
 
 export async function GET(request: Request) {
@@ -19,7 +13,7 @@ export async function GET(request: Request) {
   const logId = searchParams.get("log") || "latest";
 
   const auditRoot = getAuditRoot();
-  const manifestPath = path.join(auditRoot, "manifest.json");
+  const manifestPath = path.normalize(auditRoot + "/manifest.json");
 
   let manifest = [];
   if (fs.existsSync(manifestPath)) {
@@ -30,11 +24,11 @@ export async function GET(request: Request) {
     }
   }
 
-  const logDir = logId === "latest" ? path.join(auditRoot, "latest") : path.join(auditRoot, logId);
+  const logDir = logId === "latest" ? path.normalize(auditRoot + "/latest") : path.normalize(auditRoot + "/" + logId);
   const targetDir = fs.existsSync(logDir) ? logDir : auditRoot;
 
   const readReport = (filename: string) => {
-    const filePath = path.join(targetDir, filename);
+    const filePath = path.normalize(targetDir + "/" + filename);
     if (fs.existsSync(filePath)) {
       return fs.readFileSync(filePath, "utf-8");
     }
