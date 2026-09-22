@@ -28,7 +28,7 @@ const LoadMoreButton = React.forwardRef<HTMLButtonElement, LoadMoreButtonProps>(
         </Button>
       </div>
     );
-  }
+  },
 );
 LoadMoreButton.displayName = "LoadMoreButton";
 

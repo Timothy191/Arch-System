@@ -4,16 +4,17 @@
 
 Before any system modification, schema update, or refactoring is approved, it must be evaluated across 4 critical perspectives with an overall score threshold $\ge 98\%$:
 
-| Perspective | Focus Area | Minimum Bar |
-| :--- | :--- | :--- |
-| **Angle 1: Architectural Integrity & OS Standards** | XDG adherence, system boundaries, lifecycle correctness, concurrency safety, data-flow integrity, SOLID adherence. | $\ge 98\%$ |
-| **Angle 2: Performance, Latency & Anti-Bloat** | Execution efficiency, memory footprint, bundle size, zero extraneous dependencies, non-blocking execution. | $\ge 98\%$ |
-| **Angle 3: Security, Robustness & Error Boundaries** | Input validation, defensive handling, failure recovery, credential safety, zero unhandled exceptions. | $\ge 98\%$ |
-| **Angle 4: Maintainability, Docs & Cascading Consistency** | Zero orphan symbols/files, complete imports, typing completeness, wiki & storybook updates. | $\ge 98\%$ |
+| Perspective                                                | Focus Area                                                                                                         | Minimum Bar |
+| :--------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :---------- |
+| **Angle 1: Architectural Integrity & OS Standards**        | XDG adherence, system boundaries, lifecycle correctness, concurrency safety, data-flow integrity, SOLID adherence. | $\ge 98\%$  |
+| **Angle 2: Performance, Latency & Anti-Bloat**             | Execution efficiency, memory footprint, bundle size, zero extraneous dependencies, non-blocking execution.         | $\ge 98\%$  |
+| **Angle 3: Security, Robustness & Error Boundaries**       | Input validation, defensive handling, failure recovery, credential safety, zero unhandled exceptions.              | $\ge 98\%$  |
+| **Angle 4: Maintainability, Docs & Cascading Consistency** | Zero orphan symbols/files, complete imports, typing completeness, wiki & storybook updates.                        | $\ge 98\%$  |
 
 ## 2. Refinement Loop Protocol
 
 If any perspective scores $< 98\%$:
+
 1. Immediately halt execution.
 2. Formulate a targeted remediation plan.
 3. Apply structural fixes.
@@ -56,4 +57,3 @@ Target workspace metadata (e.g. @[path])
 
 - **`AGENT_TRACER.md`**: Assistants must append an ISO 8601 timestamped entry documenting context handover, files modified, and rationale.
 - **Inline Breadcrumbs**: Annotate non-obvious logic with `// AGENT-TRACE: <explanation>`.
-

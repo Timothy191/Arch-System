@@ -132,7 +132,7 @@ import { logError } from "@/lib/errors/error-logger";
  */
 
 const ALLOWED_SCANNER_SOURCES = process.env.ALLOWED_SCANNER_SOURCES?.split(",").map((s) =>
-  s.trim()
+  s.trim(),
 ) || ["C66-HARDWARE", "C66-SCANNER", "GATE-TERMINAL"];
 
 export async function OPTIONS(request: Request) {
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
       const response = await handlePost(request);
       return applyCors(request, response);
     },
-    { maxSize: 65536 }
+    { maxSize: 65536 },
   );
 }
 
@@ -160,14 +160,14 @@ async function handlePost(request: Request) {
     if (!expectedToken || token !== expectedToken) {
       return NextResponse.json(
         { success: false, error: "Unauthorized scanner token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (!ALLOWED_SCANNER_SOURCES.includes(source)) {
       return NextResponse.json(
         { success: false, error: "Unauthorized scanner source" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -198,7 +198,7 @@ async function handlePost(request: Request) {
     const selectQuery = supabase
       .from("badges")
       .select(
-        "id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id"
+        "id, is_active, entity_type, personnel_id, visitor_id, fleet_id, equipment_id, expires_at, department_id",
       );
 
     const badgeResult =
@@ -222,11 +222,11 @@ async function handlePost(request: Request) {
         direction,
         deviceId,
         operator,
-        alcoholTested
+        alcoholTested,
       );
       return NextResponse.json(
         { success: false, name: "Unrecognized Badge / RFID" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -243,7 +243,7 @@ async function handlePost(request: Request) {
         direction,
         deviceId,
         operator,
-        alcoholTested
+        alcoholTested,
       );
       return NextResponse.json({ success: false, name: "Revoked Badge" }, { status: 403 });
     }
@@ -261,7 +261,7 @@ async function handlePost(request: Request) {
         direction,
         deviceId,
         operator,
-        alcoholTested
+        alcoholTested,
       );
       return NextResponse.json({ success: false, name: "Expired Credential" }, { status: 403 });
     }
@@ -354,7 +354,7 @@ async function handlePost(request: Request) {
       direction,
       deviceId,
       operator,
-      alcoholTested
+      alcoholTested,
     );
 
     return NextResponse.json({
@@ -383,7 +383,7 @@ async function logAccess(
   direction: string = "IN",
   deviceId: string | null = null,
   operator: string | null = null,
-  alcoholTested: string = "Approved"
+  alcoholTested: string = "Approved",
 ) {
   const { error } = await supabase.from("access_logs").insert([
     {

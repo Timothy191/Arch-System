@@ -26,9 +26,9 @@ This document serves as the living architecture reference for the frosted glass 
 
 ## Component Token Usage
 
-| Component | Class / Token Formula | Purpose |
-| :--- | :--- | :--- |
-| `<Card />` | `border border-white/50 bg-white/75 backdrop-blur-2xl text-card-foreground shadow-glass-depth glass-depth-card` | Base container for all operational dashboards, charts, and metrics grids. |
-| `<Input />` | `bg-white/60 backdrop-blur-md border border-white/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),inset_0_-0.5px_0_rgba(255,255,255,0.7)]` | Standard form fields, shift inputs, telemetry search boxes. |
-| `<FormFields />` | `bg-white/60 backdrop-blur-md border border-white/60 focus:bg-white/80 focus:border-[var(--accent-blue)]` | Reusable form components with integrated validation states. |
-| `<GlassCard />` | `glassVariants: subtle \| moderate \| intense \| glossy` | Configurable Framer Motion glass cards with spotlight, glow, and liquid variants. |
+| Component        | Class / Token Formula                                                                                                                  | Purpose                                                                           |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `<Card />`       | `border border-white/50 bg-white/75 backdrop-blur-2xl text-card-foreground shadow-glass-depth glass-depth-card`                        | Base container for all operational dashboards, charts, and metrics grids.         |
+| `<Input />`      | `bg-white/60 backdrop-blur-md border border-white/60 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),inset_0_-0.5px_0_rgba(255,255,255,0.7)]` | Standard form fields, shift inputs, telemetry search boxes.                       |
+| `<FormFields />` | `bg-white/60 backdrop-blur-md border border-white/60 focus:bg-white/80 focus:border-[var(--accent-blue)]`                              | Reusable form components with integrated validation states.                       |
+| `<GlassCard />`  | `glassVariants: subtle \| moderate \| intense \| glossy`                                                                               | Configurable Framer Motion glass cards with spotlight, glow, and liquid variants. |

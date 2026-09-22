@@ -8,10 +8,13 @@
 
 const args = process.argv.slice(2);
 const explain = args.includes("--explain");
-const rawCmd = args.filter((a) => a !== "--explain").join(" ").trim();
+const rawCmd = args
+  .filter((a) => a !== "--explain")
+  .join(" ")
+  .trim();
 
 if (!rawCmd) {
-  console.log("Usage: node tools/scripts/check-compound-bash.cjs \"<command>\" [--explain]");
+  console.log('Usage: node tools/scripts/check-compound-bash.cjs "<command>" [--explain]');
   process.exit(1);
 }
 
@@ -57,10 +60,13 @@ segments.forEach((seg, idx) => {
 });
 
 if (violations === 0) {
-  console.log(`🟢 [CompoundBashAuditor] PASSED: Command verified safe (${segments.length} segment${segments.length === 1 ? "" : "s"}).`);
+  console.log(
+    `🟢 [CompoundBashAuditor] PASSED: Command verified safe (${segments.length} segment${segments.length === 1 ? "" : "s"}).`,
+  );
   process.exit(0);
 } else {
-  console.error(`\n🔴 [CompoundBashAuditor] REJECTED: ${violations} critical security violation(s) detected.`);
+  console.error(
+    `\n🔴 [CompoundBashAuditor] REJECTED: ${violations} critical security violation(s) detected.`,
+  );
   process.exit(1);
 }
-

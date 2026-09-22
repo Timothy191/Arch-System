@@ -15,7 +15,7 @@ test.describe("shift compilation closeout", () => {
 
     // 3. Find the lock button. Assuming it says "Lock & Sign" or similar, wait let me check ShiftCompilationHeader.tsx
     const lockButton = page.getByRole("button", { name: /Lock Shift|Close Shift|Lock & Sign/i });
-    
+
     // If it's already closed, we can't test the open->close flow easily without setup/teardown.
     // Let's assume the mock/seed data has an open shift, or we handle it gracefully.
     const isClosed = await page.getByText("Shift Finalized", { exact: true }).isVisible();
@@ -43,7 +43,7 @@ test.describe("shift compilation closeout", () => {
 
     // 8. Wait for modal to close and status to update to CLOSED
     await expect(modalHeading).not.toBeVisible({ timeout: 10000 });
-    
+
     // 9. Assert the status badge now says CLOSED
     await expect(page.getByText("Shift Finalized", { exact: true })).toBeVisible();
   });

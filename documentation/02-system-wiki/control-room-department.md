@@ -14,12 +14,12 @@ The **Control Room Department** serves as the central nervous system for monitor
 
 ## 2. Department Overview
 
-| Attribute | Specification |
-| :--- | :--- |
-| **Primary Function** | Real-time monitoring, telemetry surveillance, incident management, and dispatch coordination |
-| **Operating Schedule** | 24/7/365 (Continuous Shift Rotation) |
-| **Operational Environments** | Industrial Control Room, Security Operations Center (SOC), Network Operations Center (NOC), Emergency Operations Center (EOC) |
-| **Core Systems Integrated** | SCADA, Industrial Telemetry, CCTV / VMS, Fire/Alarm Suppression Panels, Radio/VoIP Telephony, Incident Response Platforms, Building Management Systems (BMS) |
+| Attribute                    | Specification                                                                                                                                                |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Primary Function**         | Real-time monitoring, telemetry surveillance, incident management, and dispatch coordination                                                                 |
+| **Operating Schedule**       | 24/7/365 (Continuous Shift Rotation)                                                                                                                         |
+| **Operational Environments** | Industrial Control Room, Security Operations Center (SOC), Network Operations Center (NOC), Emergency Operations Center (EOC)                                |
+| **Core Systems Integrated**  | SCADA, Industrial Telemetry, CCTV / VMS, Fire/Alarm Suppression Panels, Radio/VoIP Telephony, Incident Response Platforms, Building Management Systems (BMS) |
 
 ---
 
@@ -36,14 +36,14 @@ The **Control Room Department** serves as the central nervous system for monitor
 
 ## 4. Roles & Responsibilities Matrix
 
-| Role | Key Operational Responsibilities |
-| :--- | :--- |
-| **Control Room Manager** | Strategic oversight of department operations, staffing rosters, regulatory liaison, and policy enforcement. |
-| **Shift Supervisor** | Active shift command, incident escalation decisions, shift handover sign-off, and tactical resource allocation. |
-| **Control Room Operator** | Primary console monitoring, alarm triage, shift journal entry, sensor tracking, and direct field radio dispatch. |
-| **Dispatcher / Coordinator** | Tactical radio communications, field crew routing, and external emergency service coordination. |
-| **Systems Administrator** | Control room hardware, SCADA edge connectivity, local telemetry network, and display console maintenance. |
-| **Compliance Officer** | Periodic audits of audit trails, alarm acknowledge latencies, safety protocols, and incident records. |
+| Role                         | Key Operational Responsibilities                                                                                 |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| **Control Room Manager**     | Strategic oversight of department operations, staffing rosters, regulatory liaison, and policy enforcement.      |
+| **Shift Supervisor**         | Active shift command, incident escalation decisions, shift handover sign-off, and tactical resource allocation.  |
+| **Control Room Operator**    | Primary console monitoring, alarm triage, shift journal entry, sensor tracking, and direct field radio dispatch. |
+| **Dispatcher / Coordinator** | Tactical radio communications, field crew routing, and external emergency service coordination.                  |
+| **Systems Administrator**    | Control room hardware, SCADA edge connectivity, local telemetry network, and display console maintenance.        |
+| **Compliance Officer**       | Periodic audits of audit trails, alarm acknowledge latencies, safety protocols, and incident records.            |
 
 ---
 
@@ -87,13 +87,15 @@ The **Control Room Department** serves as the central nervous system for monitor
 ## 6. Standard Operating Procedures (SOPs)
 
 ### Shift Handover Workflow
+
 1. Incoming supervisor reviews the active incident queue, breakdown logs, and machine availability states.
 2. Outgoing operator reviews equipment anomalies, weather advisories, and ongoing radio channel assignments.
 3. Both shift leads sign off electronically in the Portal Shift Completeness module.
 
 ### Alarm & Incident Triage Pipeline
+
 ```
-[ Alarm Triggered ] 
+[ Alarm Triggered ]
        │
        ▼ (< 30s)
 [ Operator Acknowledges & Classifies Severity ]
@@ -107,20 +109,21 @@ The **Control Room Department** serves as the central nervous system for monitor
 
 ## 7. Performance Targets (KPIs)
 
-| Metric | SLA / Target | Evaluation Frequency |
-| :--- | :--- | :--- |
-| **Alarm Response Latency** | $< 60\text{ seconds}$ | Real-time telemetry |
-| **Incident Acknowledgment Time** | $< 30\text{ seconds}$ | Real-time telemetry |
-| **Shift Report Accuracy & Completeness** | $100\%$ | Per shift handover |
-| **Core Monitoring System Uptime** | $\ge 99.9\%$ | Monthly aggregate |
-| **Operator Annual Training & Drills** | $\ge 40\text{ hours / operator}$ | Annual audit |
-| **Unacknowledged / Missed Critical Incident Rate** | $0.0\%$ | Continuous audit |
+| Metric                                             | SLA / Target                     | Evaluation Frequency |
+| :------------------------------------------------- | :------------------------------- | :------------------- |
+| **Alarm Response Latency**                         | $< 60\text{ seconds}$            | Real-time telemetry  |
+| **Incident Acknowledgment Time**                   | $< 30\text{ seconds}$            | Real-time telemetry  |
+| **Shift Report Accuracy & Completeness**           | $100\%$                          | Per shift handover   |
+| **Core Monitoring System Uptime**                  | $\ge 99.9\%$                     | Monthly aggregate    |
+| **Operator Annual Training & Drills**              | $\ge 40\text{ hours / operator}$ | Annual audit         |
+| **Unacknowledged / Missed Critical Incident Rate** | $0.0\%$                          | Continuous audit     |
 
 ---
 
 ## 8. Operational Checklists
 
 ### Daily Verification Checklist
+
 - [ ] Verify all core monitoring feeds (CCTV, SCADA telemetry, fire panels) are online.
 - [ ] Complete formal shift handover and sign off previous shift completeness ledger.
 - [ ] Perform radio check across primary, secondary, and emergency dispatch frequencies.
@@ -129,6 +132,7 @@ The **Control Room Department** serves as the central nervous system for monitor
 - [ ] Verify physical access security and visitor badges at control room entry points.
 
 ### Weekly Operational Checklist
+
 - [ ] Conduct end-to-end failover test of backup radio and satellite communication channels.
 - [ ] Analyze 7-day incident logs for recurring machine alarms or telemetry anomalies.
 - [ ] Review and update emergency contact directories and tactical escalation rosters.
@@ -136,6 +140,7 @@ The **Control Room Department** serves as the central nervous system for monitor
 - [ ] Verify storage pool capacity, retention limits, and backup status for CCTV recordings.
 
 ### Monthly Audit & Diagnostic Checklist
+
 - [ ] Execute comprehensive diagnostic self-tests on all SCADA gateways, servers, and panels.
 - [ ] Conduct unannounced emergency response and evacuation drill with site teams.
 - [ ] Audit role-based access permissions (RBAC) and badge credentials for control room entry.
@@ -143,6 +148,7 @@ The **Control Room Department** serves as the central nervous system for monitor
 - [ ] Deliver monthly operator refresher modules on new equipment protocols and SOP updates.
 
 ### Incident Response Checklist
+
 - [ ] Acknowledge alarm and timestamp initial detection event.
 - [ ] Aggregate contextual telemetry (camera angles, sensor metrics, operator location).
 - [ ] Classify severity level and generate unique Portal Incident ID.
@@ -151,6 +157,7 @@ The **Control Room Department** serves as the central nervous system for monitor
 - [ ] Perform post-incident operational debrief and finalize root cause report.
 
 ### Regulatory Compliance Checklist
+
 - [ ] Verify operator certifications and licenses are current and compliant.
 - [ ] Enforce statutory retention periods on audio dispatches and video surveillance recordings.
 - [ ] Review cybersecurity access logs for unauthorized attempts or anomalous network traffic.

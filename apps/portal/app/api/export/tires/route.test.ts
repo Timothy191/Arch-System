@@ -52,7 +52,7 @@ function createSupabase(overrides: {
 }) {
   const tiresBuilder = createQueryBuilder(overrides.tiresQuery ?? { data: [], error: null });
   const inspectionsBuilder = createQueryBuilder(
-    overrides.inspectionsQuery ?? { data: [], error: null }
+    overrides.inspectionsQuery ?? { data: [], error: null },
   );
 
   const from = jest.fn((table: string) => {
@@ -96,7 +96,7 @@ describe("GET /api/export/tires", () => {
           data: [{ id: "i1", inspection_date: "2026-01-01" }],
           error: null,
         },
-      })
+      }),
     );
 
     const req = new NextRequest("http://localhost/api/export/tires?type=all&format=json", {
@@ -136,7 +136,7 @@ describe("GET /api/export/tires", () => {
           ],
           error: null,
         },
-      })
+      }),
     );
 
     const req = new NextRequest("http://localhost/api/export/tires?type=inspections", {
@@ -156,7 +156,7 @@ describe("GET /api/export/tires", () => {
         authUser: { user: { id: "1" } },
         tiresQuery: { data: null, error: { message: "boom" } },
         inspectionsQuery: { data: null, error: { message: "boom" } },
-      })
+      }),
     );
 
     const req = new NextRequest("http://localhost/api/export/tires");

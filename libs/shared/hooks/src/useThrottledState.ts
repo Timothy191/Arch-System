@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 export function useThrottledState<T>(
   initialValue: T | (() => T),
-  delay = 500
+  delay = 500,
 ): [T, (_value: T | ((_prev: T) => T)) => void] {
   const [state, setState] = useState<T>(initialValue);
   const queue = useRef<(T | ((_prev: T) => T))[]>([]);
@@ -51,7 +51,7 @@ export function useThrottledState<T>(
         timeoutRef.current = setTimeout(processQueue, remaining);
       }
     },
-    [delay, processQueue]
+    [delay, processQueue],
   );
 
   useEffect(() => {

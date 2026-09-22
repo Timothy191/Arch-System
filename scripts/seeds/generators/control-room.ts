@@ -51,7 +51,7 @@ export async function seedControlRoom(supabase: SupabaseClient): Promise<void> {
         hour_12: 30,
       },
     ],
-    { onConflict: "machine_id,load_date,shift_type" }
+    { onConflict: "machine_id,load_date,shift_type" },
   );
 
   if (loadError) {
@@ -72,7 +72,7 @@ export async function seedControlRoom(supabase: SupabaseClient): Promise<void> {
         start_time: "06:00:00",
         end_time: "18:00:00",
       },
-      { onConflict: "machine_id,shift_date,shift_type,start_time" }
+      { onConflict: "machine_id,shift_date,shift_type,start_time" },
     )
     .select("id")
     .single();

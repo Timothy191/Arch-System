@@ -29,20 +29,22 @@ export function AcknowledgeButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // Optimistic UI updates
     setAcknowledged(true);
     onAcknowledge();
-    
+
     toast.success(confirmTitle, {
       description: confirmDescription,
-      action: onUndo ? {
-        label: "Undo",
-        onClick: () => {
-          setAcknowledged(false);
-          onUndo();
-        }
-      } : undefined,
+      action: onUndo
+        ? {
+            label: "Undo",
+            onClick: () => {
+              setAcknowledged(false);
+              onUndo();
+            },
+          }
+        : undefined,
     });
   };
 

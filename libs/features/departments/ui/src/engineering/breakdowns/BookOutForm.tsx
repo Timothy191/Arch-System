@@ -79,7 +79,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       try {
         localStorage.setItem(
           DRAFT_BOOKOUT_KEY,
-          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes })
+          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes }),
         );
         setHasDraft(true);
       } catch {

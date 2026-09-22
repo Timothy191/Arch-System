@@ -95,7 +95,9 @@ function atomicRun(jobDesc) {
   try {
     const staged = run("git diff --cached --name-only", { silent: true });
     if (!staged.trim()) {
-      log("No staged changes to commit. Stage the files you want to include in this atomic job first.");
+      log(
+        "No staged changes to commit. Stage the files you want to include in this atomic job first.",
+      );
       log("SUCCESS (no commit)");
       return;
     }
@@ -119,7 +121,7 @@ function main() {
   if (cmd === "run") {
     const jobDesc = rest.join(" ");
     if (!jobDesc) {
-      log("Usage: ralph run \"<job description>\"");
+      log('Usage: ralph run "<job description>"');
       process.exit(1);
     }
     atomicRun(jobDesc);
@@ -131,7 +133,7 @@ function main() {
     const n = Number.parseInt(nArg, 10);
     const goal = goalParts.join(" ");
     if (!Number.isFinite(n) || !goal) {
-      log("Usage: ralph loop <n> \"<goal>\"");
+      log('Usage: ralph loop <n> "<goal>"');
       process.exit(1);
     }
     log(`Loop goal: ${goal} (${n} iterations)`);
@@ -142,7 +144,7 @@ function main() {
     return;
   }
 
-  log("Usage: ralph init | ralph run \"<job>\" | ralph loop <n> \"<goal>\"");
+  log('Usage: ralph init | ralph run "<job>" | ralph loop <n> "<goal>"');
   process.exit(1);
 }
 

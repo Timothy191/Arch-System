@@ -96,7 +96,7 @@ export function ExcavatorActivityForm({
       if (formData.excavatorId || formData.siteId) {
         localStorage.setItem(
           getAutoSaveKey(departmentId),
-          JSON.stringify({ formData, dumperAssignments })
+          JSON.stringify({ formData, dumperAssignments }),
         );
         setLastSaved(new Date());
       }

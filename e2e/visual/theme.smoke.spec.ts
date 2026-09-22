@@ -53,7 +53,9 @@ test("light-mode liquid glass background should be pure white with rgba tint", a
 
   // 4. SOTA Synthetic Performance & Layout Stability Probe
   const perfMetrics = await page.evaluate(() => {
-    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    const nav = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
     return {
       domContentLoaded: nav ? nav.domContentLoadedEventEnd - nav.startTime : 0,
       loadTime: nav ? nav.loadEventEnd - nav.startTime : 0,

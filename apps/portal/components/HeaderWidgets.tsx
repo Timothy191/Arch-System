@@ -7,17 +7,17 @@ import { Suspense } from "react";
 // splitting, chunk prefetching, and SSR control.
 const FeedbackWidget = dynamic(
   () => import("@/components/FeedbackWidget").then((m) => ({ default: m.FeedbackWidget })),
-  { ssr: false }
+  { ssr: false },
 );
 
 const SystemClock = dynamic(
   () => import("@/components/clock/SystemClock").then((m) => ({ default: m.SystemClock })),
-  { ssr: false }
+  { ssr: false },
 );
 
 const ServicesDropdown = dynamic(
   () => import("@/components/nav/ServicesDropdown").then((m) => ({ default: m.ServicesDropdown })),
-  { ssr: false }
+  { ssr: false },
 );
 
 /**

@@ -93,6 +93,7 @@ graph TD
 ---
 
 ## ⚙️ Nx Configuration Overview (`nx.json`)
+
 - **Default Base**: `master`
 - **Task Hashing**: Inputs hash includes `sharedGlobals` + project files
 - **Caching**: `build`, `lint`, `type-check`, `test`, `codegen` set to `cache: true`

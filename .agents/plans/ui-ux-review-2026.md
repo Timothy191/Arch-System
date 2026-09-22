@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Scope:** Frontend UI/UX surface of the Arch monorepo  
 **allow:** `apps/portal`, `packages/ui`, `packages/theme`, `libs/features/**/ui`, shared styling/layout configs, public frontend assets  
-**deny:** backend API routes, DB/migrations, CI/CD, secrets, infra, anything outside the UI surface  
+**deny:** backend API routes, DB/migrations, CI/CD, secrets, infra, anything outside the UI surface
 
 ## Objectives
 
@@ -15,15 +15,15 @@
 
 ## Scoring Dimensions
 
-| Dimension | Weight | Evidence Sources |
-| :-------- | :----- | :--------------- |
-| Design-token discipline | 0.15 | `tokens.json`, `variables.css`, Tailwind preset, component class names |
-| Glassmorphism & visual consistency | 0.15 | `GlassCard`, `glass.css`, screenshots/build output, token usage |
-| Accessibility (a11y) | 0.20 | axe/Lighthouse, keyboard flow, touch targets, color contrast |
-| Performance & Core Web Vitals | 0.15 | `next.config.mjs`, build stats, WebVitalsReporter, image/animation choices |
-| Interaction & motion design | 0.15 | Framer Motion usage, reduced-motion support, hover/active states |
-| Navigation & information architecture | 0.10 | route structure, hub/department layout, page hierarchy |
-| Mobile/responsive fit | 0.10 | breakpoints, popover collision, touch targets, viewport handling |
+| Dimension                             | Weight | Evidence Sources                                                           |
+| :------------------------------------ | :----- | :------------------------------------------------------------------------- |
+| Design-token discipline               | 0.15   | `tokens.json`, `variables.css`, Tailwind preset, component class names     |
+| Glassmorphism & visual consistency    | 0.15   | `GlassCard`, `glass.css`, screenshots/build output, token usage            |
+| Accessibility (a11y)                  | 0.20   | axe/Lighthouse, keyboard flow, touch targets, color contrast               |
+| Performance & Core Web Vitals         | 0.15   | `next.config.mjs`, build stats, WebVitalsReporter, image/animation choices |
+| Interaction & motion design           | 0.15   | Framer Motion usage, reduced-motion support, hover/active states           |
+| Navigation & information architecture | 0.10   | route structure, hub/department layout, page hierarchy                     |
+| Mobile/responsive fit                 | 0.10   | breakpoints, popover collision, touch targets, viewport handling           |
 
 ## Constraints
 

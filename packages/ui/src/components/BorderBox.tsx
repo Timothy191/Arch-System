@@ -81,14 +81,14 @@ export const BorderBox = forwardRef<HTMLDivElement, BorderBoxProps>(
           variant !== "handdrawn" && roundedStyles,
           paddingStyles,
           variantStyles[variant],
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 BorderBox.displayName = "BorderBox";

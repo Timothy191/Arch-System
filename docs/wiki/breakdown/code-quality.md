@@ -165,4 +165,3 @@ Config: `.bundlesize.json` — thresholds defined, CI integration pending.
 - [`../project-stability-analysis.md`](../project-stability-analysis.md) — overall stability analysis
 - [`.bundlesize-config.json`](../../../.bundlesize-config.json) — bundle size thresholds
 - [`package.json`](../../../package.json) — workspace quality scripts
-

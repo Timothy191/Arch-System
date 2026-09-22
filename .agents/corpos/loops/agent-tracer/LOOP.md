@@ -20,8 +20,10 @@ verification:
 # Business Loop: AGENT_TRACER.md Logging Sentinel
 
 ## 1. Business Intent
+
 Ensures that all autonomous and human operations are properly logged in the appropriate `AGENT_TRACER.md` files.
 
 ## 2. Invariants & Guardrails
+
 - **Continuous Logging**: Every meaningful change must result in an `AGENT_TRACER.md` entry.
 - **Root and Package Logs**: Both the root and the modified packages must have updated tracer entries.

@@ -14,7 +14,7 @@ describe("useFormDraft", () => {
       useFormDraft({
         key: TEST_KEY,
         initialState: { title: "Default" },
-      })
+      }),
     );
 
     expect(result.current.draftState).toEqual({ title: "Default" });
@@ -35,7 +35,7 @@ describe("useFormDraft", () => {
         key: TEST_KEY,
         initialState: { title: "Default" },
         onRestore: onRestoreMock,
-      })
+      }),
     );
 
     expect(result.current.draftState).toEqual({ title: "Restored Title" });
@@ -48,7 +48,7 @@ describe("useFormDraft", () => {
       useFormDraft({
         key: TEST_KEY,
         initialState: { title: "Draft 1" },
-      })
+      }),
     );
 
     act(() => {
@@ -72,7 +72,7 @@ describe("useFormDraft", () => {
       useFormDraft({
         key: TEST_KEY,
         initialState: { title: "Default" },
-      })
+      }),
     );
 
     act(() => {

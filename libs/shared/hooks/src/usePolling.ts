@@ -9,7 +9,7 @@ import type { PollingOptions } from "./types";
 export function usePolling(
   callback: () => void | Promise<void>,
   intervalMs: number | null,
-  options: PollingOptions = {}
+  options: PollingOptions = {},
 ): { isPolling: boolean; pause: () => void; resume: () => void } {
   const { immediate = false, autoStart = true } = options;
 

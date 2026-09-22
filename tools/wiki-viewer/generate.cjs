@@ -151,7 +151,7 @@ function mdToHtml(md, slugMap) {
   // External links
   html = html.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener">$1</a>'
+    '<a href="$2" target="_blank" rel="noopener">$1</a>',
   );
 
   // Bold / italic
@@ -280,7 +280,7 @@ const groups = {
   other: pageData.filter(
     (p) =>
       !["index", "SCHEMA", "log", "entity", "concept", "comparison", "query"].includes(p.type) &&
-      !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/"))
+      !(p.slug.startsWith("raw-") || p.rel.startsWith("raw/")),
   ),
 };
 
@@ -289,7 +289,7 @@ function groupHtml(_key, label, arr) {
   const lis = arr
     .map(
       (p) =>
-        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`
+        `<li data-slug="${escapeHtml(p.slug)}"><a href="#page=${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`,
     )
     .join("");
   return `<details open><summary>${label} <span class="count">${arr.length}</span></summary><ul>${lis}</ul></details>`;

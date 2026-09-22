@@ -24,7 +24,7 @@ const { createMiddlewareClient } = jest.requireMock("@repo/supabase/middleware")
 const { cacheGet } = jest.requireMock("@repo/redis/cache");
 
 function buildProxyMock(
-  overrides: { user?: unknown; employee?: unknown; deptData?: unknown } = {}
+  overrides: { user?: unknown; employee?: unknown; deptData?: unknown } = {},
 ) {
   const user = overrides.user !== undefined ? overrides.user : { id: "auth-1" };
   const employee =

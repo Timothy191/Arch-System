@@ -100,7 +100,7 @@ export async function GET() {
         {
           context: "weather_api_route",
           duration_ms: duration,
-        }
+        },
       );
 
       setAttributes({

@@ -10,9 +10,7 @@
   "roleId": "analyst",
   "workerId": "worker-1",
   "skill": "plan",
-  "skills": [
-    "plan"
-  ],
+  "skills": ["plan"],
   "status": "completed",
   "summary": "analyst completed assignment 1/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
   "simulated": true,

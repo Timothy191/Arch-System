@@ -280,4 +280,3 @@ cd packages/eval && python -m pytest
 - [`apps/portal/jest.config.js`](../../../apps/portal/jest.config.js) — coverage config
 - [`playwright.config.ts`](../../../playwright.config.ts) — E2E config
 - [`package.json`](../../../package.json) — test script commands
-

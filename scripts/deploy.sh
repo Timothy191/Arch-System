@@ -999,7 +999,7 @@ phase_deploy_portal() {
         run_if_not_dry cd "$PORTAL_DIR"
         
         if [ "$DRY_RUN" = false ]; then
-          NODE_ENV=production PORT=$PORT pnpm start >> "$REPO_ROOT/run/portal.log" 2>&1 &
+          NODE_ENV=production HOSTNAME=0.0.0.0 HOST=0.0.0.0 PORT=$PORT pnpm start >> "$REPO_ROOT/run/portal.log" 2>&1 &
           echo $! > "$REPO_ROOT/run/.portal.pid"
         fi
         

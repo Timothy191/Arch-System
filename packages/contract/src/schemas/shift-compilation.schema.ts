@@ -60,7 +60,7 @@ export const unifiedShiftReportSchema = z.object({
         machine_type: z.string(),
         total_loads: z.number().int().nonnegative(),
         hourly_distribution: z.record(z.string(), z.number()),
-      })
+      }),
     ),
   }),
   fleet_performance: z.array(machinePerformanceSchema),

@@ -25,7 +25,8 @@ const plan = {
       role: "Security & Quality Gatekeeper",
       agent: "security-quality-gatekeeper",
       modelTier: "flash",
-      focus: "Light mode invariant guard (#f3f4f6 canvas), TypeScript strict checks, ESLint/Prettier validation",
+      focus:
+        "Light mode invariant guard (#f3f4f6 canvas), TypeScript strict checks, ESLint/Prettier validation",
       allowedTools: ["run_command", "grep_search", "view_file"],
     },
     {
@@ -54,4 +55,3 @@ plan.specialists.forEach((s, idx) => {
 console.log("\n🛠️ Authorized Toolchains & Execution Flags:");
 console.log(`  ${plan.authorizedToolchains.join(", ")}`);
 console.log("\n🚀 Dispatch Plan Ready for Autonomous Execution.\n");
-

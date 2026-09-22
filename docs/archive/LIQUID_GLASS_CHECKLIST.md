@@ -9,7 +9,6 @@
 - **[PRODUCT.md](../../PRODUCT.md)** — Product strategy and visual direction
 - **[CLAUDE.md](../../CLAUDE.md)** — Technical implementation guide
 
-
 ---
 
 > Use `[x]` to mark a task complete.

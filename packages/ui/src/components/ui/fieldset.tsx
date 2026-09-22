@@ -20,7 +20,7 @@ export function Fieldset({
     <fieldset
       className={cn(
         "rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden",
-        className
+        className,
       )}
       {...props}
     >

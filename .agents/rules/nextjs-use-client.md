@@ -15,11 +15,13 @@ package consumed by a Next.js App Router monorepo) that uses ANY of the followin
 1. **The file MUST start with `"use client";` as the very first line** — before any imports.
 
 2. **Before committing**, run this audit command to catch any remaining violations:
+
    ```bash
    find packages/ui/src -name "*.tsx" \
      | xargs grep -l "useState\|useEffect\|useRef\|useCallback\|createContext\|useContext\|framer-motion" \
      | xargs grep -L '"use client"'
    ```
+
    If this prints any files, add `"use client";` to each before proceeding.
 
 3. **Never rely on the build to catch this.** Missing `"use client"` in a shared UI

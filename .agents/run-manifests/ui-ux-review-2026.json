@@ -4,7 +4,14 @@
   "model": "claude-sonnet-4",
   "skills": ["review", "agent-ready", "llm-council"],
   "scope": {
-    "allow": ["apps/portal", "packages/ui", "packages/theme", "libs/features/**/ui", "shared styling/layout configs", "public frontend assets"],
+    "allow": [
+      "apps/portal",
+      "packages/ui",
+      "packages/theme",
+      "libs/features/**/ui",
+      "shared styling/layout configs",
+      "public frontend assets"
+    ],
     "deny": ["backend API routes", "DB/migrations", "CI/CD", "secrets", "infra"]
   },
   "commands": [

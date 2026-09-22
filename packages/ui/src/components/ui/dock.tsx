@@ -23,7 +23,7 @@ const DEFAULT_DISABLEMAGNIFICATION = false;
 
 const dockVariants = cva(
   "mx-auto flex h-[58px] w-max items-center justify-center gap-2 rounded-xl border border-black/[0.08] bg-white/60 backdrop-blur-2xl p-2 shadow-diffusion-lg" +
-    " [border-top:1px_solid_rgba(255,255,255,0.9)]"
+    " [border-top:1px_solid_rgba(255,255,255,0.9)]",
 );
 
 const Dock = React.forwardRef<HTMLDivElement, DockProps>(
@@ -38,7 +38,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
       direction = "middle",
       ...props
     },
-    ref
+    ref,
   ) => {
     const mouseX = useMotionValue(Infinity);
 
@@ -73,7 +73,7 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
         {renderChildren()}
       </motion.div>
     );
-  }
+  },
 );
 
 Dock.displayName = "Dock";
@@ -114,7 +114,7 @@ const DockIcon = ({
   const sizeTransform = useTransform(
     distanceCalc,
     [-distance, 0, distance],
-    [size, targetSize, size]
+    [size, targetSize, size],
   );
 
   const scaleSize = useSpring(sizeTransform, {
@@ -130,7 +130,7 @@ const DockIcon = ({
       className={cn(
         "flex aspect-square cursor-pointer items-center justify-center rounded-full",
         disableMagnification && "hover:bg-muted-foreground transition-colors",
-        className
+        className,
       )}
       {...props}
     >

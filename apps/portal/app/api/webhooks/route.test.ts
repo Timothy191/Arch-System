@@ -22,7 +22,7 @@ function buildMock(
     webhooks?: unknown;
     insertData?: unknown;
     dbError?: unknown;
-  } = {}
+  } = {},
 ) {
   const user = overrides.user !== undefined ? overrides.user : { id: "user-1" };
   const employee =
@@ -164,7 +164,7 @@ describe("GET /api/webhooks", () => {
             is: jest.fn().mockReturnValue(
               Object.assign(isResult, {
                 or: jest.fn().mockResolvedValue({ data: webhookList, error: null }),
-              })
+              }),
             ),
           }),
         };

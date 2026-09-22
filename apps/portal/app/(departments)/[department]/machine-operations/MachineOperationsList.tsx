@@ -197,7 +197,7 @@ function OperationCard({
   const machineBreakdown = activeBreakdowns?.find(
     (b) =>
       b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
+      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number),
   );
 
   // AGENT-TRACE: Calculate delay totals by category and status
@@ -220,7 +220,7 @@ function OperationCard({
       acc[categoryName] += delay.duration_hours;
       return acc;
     },
-    {} as Record<string, number>
+    {} as Record<string, number>,
   );
 
   const [showDelays, setShowDelays] = useState(false);

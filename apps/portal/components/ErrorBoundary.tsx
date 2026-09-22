@@ -119,12 +119,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
               {/* Error Message */}
               <div className="text-center space-y-2">
-                <h3 className="text-lg font-medium text-rose-900">
-                  {displayTitle}
-                </h3>
-                <p className="text-rose-700 text-sm">
-                  {displayMessage}
-                </p>
+                <h3 className="text-lg font-medium text-rose-900">{displayTitle}</h3>
+                <p className="text-rose-700 text-sm">{displayMessage}</p>
                 <p className="text-rose-500 text-xs font-mono">
                   {this.state.error?.message || "Unknown error"}
                 </p>
@@ -132,11 +128,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button onClick={this.handleReset} variant="outline" className="flex-1 border-rose-300 text-rose-900 hover:bg-rose-100">
+                <Button
+                  onClick={this.handleReset}
+                  variant="outline"
+                  className="flex-1 border-rose-300 text-rose-900 hover:bg-rose-100"
+                >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                <Button onClick={this.handleGoHome} variant="default" className="flex-1 bg-rose-600 hover:bg-rose-700 text-white">
+                <Button
+                  onClick={this.handleGoHome}
+                  variant="default"
+                  className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
+                >
                   <Home className="w-4 h-4 mr-2" />
                   Go Home
                 </Button>

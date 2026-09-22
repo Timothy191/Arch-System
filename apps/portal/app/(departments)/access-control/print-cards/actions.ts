@@ -131,7 +131,8 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
 
   let query = supabase
     .from("personnel")
-    .select(`
+    .select(
+      `
       id,
       emp_code,
       first_name,
@@ -143,14 +144,15 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       medical_expiry,
       status,
       departments:department_id(display_name)
-    `)
+    `,
+    )
     .order("surname", { ascending: true })
     .limit(100);
 
   if (search && search.trim().length > 0) {
     const s = search.trim();
     query = query.or(
-      `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`
+      `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`,
     );
   }
 
@@ -300,7 +302,7 @@ export async function getRecentNeo300Jobs(limit = 10): Promise<CardPrintJob[]> {
   const { data: jobs, error } = await supabase
     .from("print_jobs")
     .select(
-      "id, personnel_id, employee_name, role_title, qr_code_data, status, created_at, printer_id"
+      "id, personnel_id, employee_name, role_title, qr_code_data, status, created_at, printer_id",
     )
     .order("created_at", { ascending: false })
     .limit(limit);

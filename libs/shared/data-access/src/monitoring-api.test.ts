@@ -152,7 +152,7 @@ describe("mapDeformationRowsToReadings", () => {
           location_name: zone,
           acquisition_date: `2025-${month}-${day}`,
           displacement_mm: -10 + (i % 20),
-        })
+        }),
       );
     }
 

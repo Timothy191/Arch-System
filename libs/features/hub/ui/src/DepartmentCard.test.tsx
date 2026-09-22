@@ -51,7 +51,7 @@ describe("DepartmentCard", () => {
     render(<DepartmentCard department={mockDepartment} index={0} />);
     expect(screen.getByText("Drilling Operations")).toBeInTheDocument();
     expect(
-      screen.getByText("Core drilling operations telemetry and systems control.")
+      screen.getByText("Core drilling operations telemetry and systems control."),
     ).toBeInTheDocument();
     expect(screen.getByText("1,240 m")).toBeInTheDocument();
     expect(screen.getByText("Daily Logs")).toBeInTheDocument();

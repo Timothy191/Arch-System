@@ -1,6 +1,7 @@
 # 00 - Core Project Documentation
 
 ## Overview
+
 Essential architectural definitions, guidelines, and technical standards governing the Arch-Systems monorepo.
 
 - **[CLAUDE.md](../../CLAUDE.md)**: Technical guide, commands, architectural layers, and heuristics.

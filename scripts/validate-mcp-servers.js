@@ -134,7 +134,7 @@ function testStdioServer(command, args, env = {}) {
           method: "tools/list",
           params: {},
           id: 1,
-        })}\n`
+        })}\n`,
       );
     } catch (err) {
       if (!resolved) {
@@ -153,7 +153,7 @@ async function main() {
   const mcpJsonPath = path.join(REPO_ROOT, ".mcp.json");
   if (!fs.existsSync(mcpJsonPath)) {
     console.error(
-      `${RED}✗ .mcp.json not found in repository root. Please run scripts/sync-mcp-config.js first.${NC}`
+      `${RED}✗ .mcp.json not found in repository root. Please run scripts/sync-mcp-config.js first.${NC}`,
     );
     process.exit(1);
   }
@@ -203,14 +203,14 @@ async function main() {
     // Server-specific dependency checks
     if (name === "postgres") {
       const connStr = (server.args || []).find(
-        (a) => typeof a === "string" && a.startsWith("postgres")
+        (a) => typeof a === "string" && a.startsWith("postgres"),
       );
       const isRemote =
         connStr && (connStr.includes("pooler.supabase.com") || connStr.includes(":6543"));
       if (isRemote) {
         if (connStr.includes("[PASSWORD]") || connStr.includes("[REGION]")) {
           console.log(
-            `${YELLOW}⚠ Supavisor pooler configured (awaiting DB password/region in apps/portal/.env)${NC}`
+            `${YELLOW}⚠ Supavisor pooler configured (awaiting DB password/region in apps/portal/.env)${NC}`,
           );
           warningsCount++;
           continue;
@@ -264,7 +264,7 @@ async function main() {
   }
 
   console.log(
-    `\nValidation complete: ${GREEN}${errorsCount === 0 ? "PASS" : "FAIL"}${NC} (${errorsCount} error(s), ${warningsCount} warning(s))\n`
+    `\nValidation complete: ${GREEN}${errorsCount === 0 ? "PASS" : "FAIL"}${NC} (${errorsCount} error(s), ${warningsCount} warning(s))\n`,
   );
   process.exit(errorsCount > 0 ? 1 : 0);
 }

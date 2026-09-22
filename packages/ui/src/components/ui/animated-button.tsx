@@ -35,7 +35,7 @@ const animatedButtonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 interface AnimatedButtonProps
@@ -87,7 +87,7 @@ export const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButton
         {children}
       </motion.button>
     );
-  }
+  },
 );
 
 AnimatedButton.displayName = "AnimatedButton";

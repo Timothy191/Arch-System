@@ -147,7 +147,7 @@ describe("SyncQueue", () => {
 
       expect((global as any).fetch).toHaveBeenCalledWith(
         "/api/sync/playback",
-        expect.objectContaining({ method: "POST" })
+        expect.objectContaining({ method: "POST" }),
       );
     });
 

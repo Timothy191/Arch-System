@@ -75,7 +75,7 @@ describe("ExportButton", () => {
           { date: "2026-08-17", note: 'he said "hi"' },
           { date: "2026-08-18", note: "plain" },
         ]}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: /Export Report/ }));
@@ -83,7 +83,7 @@ describe("ExportButton", () => {
 
     expect(createObjectURL).toHaveBeenCalledTimes(1);
     expect(blobParts[0]![0]).toBe(
-      '"date","note"\n"2026-08-17","he said ""hi"""\n"2026-08-18","plain"'
+      '"date","note"\n"2026-08-17","he said ""hi"""\n"2026-08-18","plain"',
     );
 
     expect(anchorClick).toHaveBeenCalledTimes(1);

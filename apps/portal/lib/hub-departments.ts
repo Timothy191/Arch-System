@@ -12,7 +12,7 @@ import { cachedRSC } from "@/lib/server-cache";
  */
 export async function getAccessibleDepartmentNames(
   userId: string,
-  cookieList?: Array<{ name: string; value: string }>
+  cookieList?: Array<{ name: string; value: string }>,
 ): Promise<string[]> {
   return cachedRSC(
     ["user", userId, "accessible-dept-names"],
@@ -40,13 +40,13 @@ export async function getAccessibleDepartmentNames(
           category: CacheCategory.AUTH,
           keyParts: ["user", userId, "accessible-dept-names"],
           tags: [`auth:${userId}`, "table:employees", "table:departments"],
-        }
+        },
       );
     },
     {
       revalidate: 3600,
       tags: [`auth:${userId}`, "table:employees", "table:departments"],
-    }
+    },
   );
 }
 
@@ -55,7 +55,7 @@ export async function getAccessibleDepartmentNames(
  */
 export async function getEmployeeRole(
   userId: string,
-  cookieList?: Array<{ name: string; value: string }>
+  cookieList?: Array<{ name: string; value: string }>,
 ): Promise<string | null> {
   return cachedRSC(
     ["user", userId, "role"],
@@ -71,12 +71,12 @@ export async function getEmployeeRole(
           category: CacheCategory.AUTH,
           keyParts: ["user", userId, "role"],
           tags: [`auth:${userId}`, "table:employees"],
-        }
+        },
       );
     },
     {
       revalidate: 3600,
       tags: [`auth:${userId}`, "table:employees"],
-    }
+    },
   );
 }

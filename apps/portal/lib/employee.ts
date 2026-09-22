@@ -8,7 +8,7 @@ type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
  *  Falls back to DB query when headers() is unavailable (e.g. tests). */
 export async function getEmployeeIdForAuthUser(
   supabase: SupabaseClient,
-  authUserId: string
+  authUserId: string,
 ): Promise<string | null> {
   try {
     const headerEmployeeId = (await headers()).get("x-auth-employee-id");

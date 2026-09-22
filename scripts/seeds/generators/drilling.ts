@@ -58,7 +58,7 @@ export async function seedDrilling(supabase: SupabaseClient): Promise<void> {
         notes: "Target drill pattern completed on schedule.",
       },
     ],
-    { onConflict: "machine_id,operation_date" }
+    { onConflict: "machine_id,operation_date" },
   );
 
   if (drillOpError) {

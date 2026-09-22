@@ -21,9 +21,11 @@ verification:
 # Business Loop: Control Room Shift Integrity & SCADA Monitor
 
 ## 1. Business Intent
+
 Surveys real-time mining operations across the plant and pit. Verifies that all operational shifts have valid supervisor cryptographic signatures, no orphaned machinery runs unmonitored, and SCADA telemetry lines remain healthy.
 
 ## 2. Invariants & Guardrails
+
 - **Cryptographic PIN Verification**: Shift handovers require supervisor PIN validation via `verify_supervisor_pin` RPC.
 - **Fail-Safe Telemetry**: If FUXA iframe drops or streams lag > 60s, activate graceful fallback views in `apps/portal`.
 - **Zero Unassigned Machines**: Every active excavator, haul truck, and ball mill must map to an active operator ID.

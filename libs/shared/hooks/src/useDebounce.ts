@@ -25,7 +25,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 export function useDebounceFn<T extends (...args: any[]) => any>(
   fn: T,
   delay: number,
-  options: DebounceOptions = {}
+  options: DebounceOptions = {},
 ): {
   run: (...args: Parameters<T>) => void;
   cancel: () => void;
@@ -90,7 +90,7 @@ export function useDebounceFn<T extends (...args: any[]) => any>(
         }, maxWait);
       }
     },
-    [delay, leading, trailing, maxWait, cancel]
+    [delay, leading, trailing, maxWait, cancel],
   );
 
   useEffect(() => {

@@ -33,6 +33,6 @@ export async function revalidateRSC(tags: string[]) {
   } catch {
     // Gracefully handle Redis offline
   }
-  
+
   return { success: true };
 }

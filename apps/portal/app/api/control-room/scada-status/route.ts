@@ -67,7 +67,7 @@ export async function GET(req: Request) {
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to fetch SCADA status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

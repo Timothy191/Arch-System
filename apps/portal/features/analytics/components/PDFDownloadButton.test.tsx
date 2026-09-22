@@ -72,7 +72,7 @@ describe("PDFDownloadButton", () => {
   it("disables the button and shows a spinner while loading", async () => {
     let resolveFn: (_value: unknown) => void = () => {};
     mockGenerateMonthlyReport.mockImplementation(
-      () => new Promise((resolve) => (resolveFn = resolve))
+      () => new Promise((resolve) => (resolveFn = resolve)),
     );
 
     render(<PDFDownloadButton reportData={reportData} />);

@@ -79,7 +79,7 @@ export const AnimeTimeline = forwardRef<AnimeTimelineHandle, AnimeTimelineProps>
           : children}
       </motion.div>
     );
-  }
+  },
 );
 
 AnimeTimeline.displayName = "AnimeTimeline";

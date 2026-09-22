@@ -55,7 +55,7 @@ describe("CloseShiftModal", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Cannot close shift until the following are resolved:")
+        screen.getByText("Cannot close shift until the following are resolved:"),
       ).toBeInTheDocument();
     });
 
@@ -74,7 +74,7 @@ describe("CloseShiftModal", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("All machines accounted for. Supervisor PIN required to close.")
+        screen.getByText("All machines accounted for. Supervisor PIN required to close."),
       ).toBeInTheDocument();
     });
 

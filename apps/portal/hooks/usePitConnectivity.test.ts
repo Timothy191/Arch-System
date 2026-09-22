@@ -24,7 +24,7 @@ describe("usePitConnectivity hook", () => {
         pingUrl: "/api/health",
         pingIntervalMs: 10000,
         degradedThresholdMs: 1000,
-      })
+      }),
     );
 
     await act(async () => {
@@ -44,7 +44,7 @@ describe("usePitConnectivity hook", () => {
       usePitConnectivity({
         pingUrl: "/api/health",
         onStatusChange,
-      })
+      }),
     );
 
     await act(async () => {

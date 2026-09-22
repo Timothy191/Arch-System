@@ -3,11 +3,13 @@
 ## Issues Identified & Resolved
 
 ### ✅ 1. Character Encoding Declaration
+
 **Status**: FIXED (2026-08-20)
 
 **Issue**: Missing `<meta charset="UTF-8">` in first 1024 bytes
 
 **Fix Applied**:
+
 ```tsx
 // apps/portal/app/layout.tsx
 <head>
@@ -16,7 +18,8 @@
 </head>
 ```
 
-**Verification**: 
+**Verification**:
+
 - Meta tag is 2nd element in `<head>` (well within 1024 bytes)
 - Next.js also adds `Content-Type: text/html; charset=UTF-8` header
 - ✅ Lighthouse insight now passes
@@ -24,11 +27,13 @@
 ---
 
 ### ✅ 2. Viewport Optimization for Mobile
+
 **Status**: ALREADY CONFIGURED
 
 **Issue**: Viewport not optimized for mobile (300ms tap delay)
 
 **Current Configuration**:
+
 ```tsx
 // apps/portal/app/layout.tsx
 export const viewport: Viewport = {
@@ -43,6 +48,7 @@ export const viewport: Viewport = {
 ```
 
 **Why This Passes**:
+
 - `width: "device-width"` - Responsive to screen size
 - `initialScale: 1` - No zoom on load
 - `userScalable: true` - User can zoom if needed
@@ -53,21 +59,25 @@ export const viewport: Viewport = {
 ---
 
 ### ✅ 3. DOM Size Optimization
+
 **Status**: MONITORED
 
 **Issue**: Large DOM increases style calculation time and memory usage
 
 **Current DOM Stats**:
+
 - Average page: ~800-1,200 nodes
 - Complex dashboard: ~2,000 nodes
 - **Target**: <1,500 nodes (recommended max)
 
 **Optimizations Applied**:
+
 1. **Dynamic Imports** - Components loaded on-demand
+
    ```tsx
    const SatelliteMonitoringDashboard = dynamic(
      () => import("@/features/departments").then((m) => m.SatelliteMonitoringDashboard),
-     { loading: () => <Spinner /> }
+     { loading: () => <Spinner /> },
    );
    ```
 
@@ -76,6 +86,7 @@ export const viewport: Viewport = {
 3. **Conditional Rendering** - Departments only render their specific components
 
 **Recommendations**:
+
 - [ ] Add `React.memo()` to static components
 - [ ] Use `content-visibility: auto` for off-screen sections
 - [ ] Implement virtual scrolling for tables with >100 rows
@@ -83,11 +94,13 @@ export const viewport: Viewport = {
 ---
 
 ### ✅ 4. Third-Party Code Impact
+
 **Status**: NO THIRD-PARTY CODE DETECTED ✅
 
 **Issue**: 3rd party scripts can significantly impact load performance
 
 **Audit Results**:
+
 ```bash
 # Searched for:
 - Google Tag Manager ❌ (not found)
@@ -97,7 +110,9 @@ export const viewport: Viewport = {
 ```
 
 **Only External Resources**:
+
 1. **Google Fonts** (Preconnected)
+
    ```tsx
    <link rel="preconnect" href="https://fonts.googleapis.com" />
    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -116,11 +131,13 @@ export const viewport: Viewport = {
 ---
 
 ### ✅ 5. Duplicate JavaScript Modules
+
 **Status**: NO DUPLICATES FOUND ✅
 
 **Issue**: Large duplicate JS modules increase bundle size
 
 **Audit Results**:
+
 ```bash
 pnpm bundlesize
 # ✓ All bundles under 1500 kB limit
@@ -128,11 +145,13 @@ pnpm bundlesize
 ```
 
 **Bundle Analysis**:
+
 - Main bundle: ~800 kB (gzipped)
 - Largest chunk: ~1.2 MB (uncompressed)
 - **Status**: ✅ Well under budget
 
 **Optimizations Active**:
+
 1. **Tree-shaking** - Unused code eliminated
 2. **Code splitting** - Route-based chunks
 3. **Shared chunks** - Common code extracted
@@ -141,11 +160,13 @@ pnpm bundlesize
 ---
 
 ### ✅ 6. Forced Reflow Prevention
+
 **Status**: NO FORCED REFLOWS DETECTED ✅
 
 **Issue**: JavaScript querying geometry after style invalidation causes poor performance
 
 **Audit Results**:
+
 ```bash
 # Searched for:
 - offsetWidth / offsetHeight ❌ (not found)
@@ -154,6 +175,7 @@ pnpm bundlesize
 ```
 
 **Why This Passes**:
+
 - React handles DOM updates efficiently
 - No direct DOM manipulation in components
 - CSS transitions use GPU-accelerated properties only:
@@ -164,6 +186,7 @@ pnpm bundlesize
   - `color`
 
 **Best Practices Followed**:
+
 ```tsx
 // ✅ GOOD - CSS transitions (GPU accelerated)
 <div className="transition-opacity duration-300" />
@@ -175,20 +198,22 @@ pnpm bundlesize
 ---
 
 ### ✅ 7. Efficient Cache Lifetimes
+
 **Status**: OPTIMIZED ✅
 
 **Issue**: Short cache lifetimes slow repeat visits
 
 **Current Cache Strategy**:
 
-| Resource Type | Cache-Control | Lifetime |
-|--------------|---------------|----------|
-| Static JS/CSS | `public, max-age=31536000, immutable` | 1 year |
-| Weather API | `public, s-maxage=300, stale-while-revalidate=300` | 5 min + 5 min SWR |
-| Images | `public, max-age=86400` | 24 hours |
-| HTML Pages | `no-cache` | Always fresh |
+| Resource Type | Cache-Control                                      | Lifetime          |
+| ------------- | -------------------------------------------------- | ----------------- |
+| Static JS/CSS | `public, max-age=31536000, immutable`              | 1 year            |
+| Weather API   | `public, s-maxage=300, stale-while-revalidate=300` | 5 min + 5 min SWR |
+| Images        | `public, max-age=86400`                            | 24 hours          |
+| HTML Pages    | `no-cache`                                         | Always fresh      |
 
 **Implementation**:
+
 ```tsx
 // apps/portal/app/api/weather/route.ts
 return NextResponse.json(weather, {
@@ -213,17 +238,20 @@ return NextResponse.json(weather, {
 ---
 
 ### ⚠️ 8. Image Delivery Optimization
+
 **Status**: NEEDS ATTENTION
 
 **Issue**: No optimizable images detected (because no `<img>` tags with explicit dimensions)
 
 **Current State**:
+
 - Background: Video (`RouteBackground.tsx`)
 - UI: Glass morphism + CSS gradients
 - Icons: Lucide React (SVG components)
 - **LCP Element**: Main content area (not an image)
 
 **Why "No optimizable images"**:
+
 - Lighthouse looks for `<img>` tags
 - App uses CSS backgrounds and video
 - No traditional hero image to optimize
@@ -232,34 +260,30 @@ return NextResponse.json(weather, {
 
 ```tsx
 // 1. Use Next.js Image component with priority
-import Image from 'next/image';
+import Image from "next/image";
 
 <Image
   src="/hero.webp"
-  priority  // Marks as LCP image
+  priority // Marks as LCP image
   fill
   sizes="(max-width: 768px) 100vw, 1200px"
   quality={85}
   format="webp"
   alt="Mining operations"
-/>
+/>;
 
 // 2. Preload LCP image
-import { preloadLCPImage } from '@/components/LCPObserver';
+import { preloadLCPImage } from "@/components/LCPObserver";
 
-preloadLCPImage('/hero.webp');
+preloadLCPImage("/hero.webp");
 
 // 3. Use AVIF for better compression
 // AVIF is ~50% smaller than JPEG
-<Image
-  src="/hero.avif"
-  width={1200}
-  height={630}
-  alt="Hero"
-/>
+<Image src="/hero.avif" width={1200} height={630} alt="Hero" />;
 ```
 
 **Action Items**:
+
 - [ ] If adding hero images, use WebP/AVIF format
 - [ ] Add `priority` prop to LCP images
 - [ ] Implement responsive `sizes` attribute
@@ -271,15 +295,16 @@ preloadLCPImage('/hero.webp');
 
 ### Core Web Vitals Status
 
-| Metric | Current | Target | Status |
-|--------|---------|--------|--------|
-| LCP | Not detected | <2500ms | ⚠️ Needs measurement |
-| INP | Not detected | <200ms | ⚠️ Needs measurement |
-| CLS | 0 | <0.1 | ✅ Excellent |
-| FCP | ~500ms | <1800ms | ✅ Excellent |
-| TTI | ~1.2s | <3.8s | ✅ Excellent |
+| Metric | Current      | Target  | Status               |
+| ------ | ------------ | ------- | -------------------- |
+| LCP    | Not detected | <2500ms | ⚠️ Needs measurement |
+| INP    | Not detected | <200ms  | ⚠️ Needs measurement |
+| CLS    | 0            | <0.1    | ✅ Excellent         |
+| FCP    | ~500ms       | <1800ms | ✅ Excellent         |
+| TTI    | ~1.2s        | <3.8s   | ✅ Excellent         |
 
 ### Strengths
+
 ✅ Zero third-party scripts  
 ✅ No forced reflows  
 ✅ Efficient caching strategy  
@@ -287,29 +312,33 @@ preloadLCPImage('/hero.webp');
 ✅ Proper viewport configuration  
 ✅ Character encoding declared  
 ✅ CSS-only animations (GPU accelerated)  
-✅ Minimal DOM size (~1000 nodes)  
+✅ Minimal DOM size (~1000 nodes)
 
 ### Areas for Improvement
+
 ⚠️ **LCP Measurement** - Add LCP observer to identify target element  
 ⚠️ **Image Optimization** - If images are added, optimize format and loading  
-⚠️ **INP Monitoring** - Profile event handlers with React DevTools  
+⚠️ **INP Monitoring** - Profile event handlers with React DevTools
 
 ---
 
 ## Action Plan
 
 ### Immediate (This Week)
+
 1. ✅ Character encoding - DONE
 2. ✅ Viewport - ALREADY CONFIGURED
 3. [ ] Test LCP observer in dev mode
 4. [ ] Profile top 3 interactions with React DevTools
 
 ### Short-term (Next Sprint)
+
 5. [ ] Add `React.memo()` to static components
 6. [ ] Implement virtual scrolling for large tables
 7. [ ] Add image optimization if hero images are introduced
 
 ### Long-term (Backlog)
+
 8. [ ] Enable React Compiler for automatic memoization
 9. [ ] Implement speculative prerendering
 10. [ ] Add performance budgets to CI
@@ -319,6 +348,7 @@ preloadLCPImage('/hero.webp');
 ## Monitoring
 
 ### Development
+
 ```bash
 # Run Lighthouse
 pnpm lighthouse http://localhost:3000
@@ -328,6 +358,7 @@ pnpm lighthouse http://localhost:3000
 ```
 
 ### Production
+
 - Metrics stamped on `<body>` as `data-web-vital-*` attributes
 - SessionStorage aggregation (last 50 entries)
 - OpenTelemetry spans for tracing
@@ -337,23 +368,28 @@ pnpm lighthouse http://localhost:3000
 ## Tips for Future Optimizations
 
 ### When Adding New Features
+
 1. **Check bundle impact**: `pnpm build --analyze`
 2. **Profile interactions**: React DevTools Profiler
 3. **Test on mobile**: Chrome DevTools Device Mode
 4. **Monitor LCP**: Use `LCPObserver` component
 
 ### AI-Assisted Optimization
+
 **Good Prompt**:
+
 ```
-I'm adding a hero image to the dashboard. 
+I'm adding a hero image to the dashboard.
 Show me how to optimize it for LCP using Next.js Image component.
 Include: priority, sizes, format (WebP/AVIF), and preload hints.
 ```
 
 **Avoid**:
+
 ```
 Make my site faster.
 ```
+
 (Too vague - be specific about metric and component)
 
 ---

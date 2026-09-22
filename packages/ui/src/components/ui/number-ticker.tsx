@@ -55,7 +55,7 @@ export function NumberTicker({
           }).format(Number(latest.toFixed(decimalPlaces)));
         }
       }),
-    [springValue, decimalPlaces]
+    [springValue, decimalPlaces],
   );
 
   return (
@@ -63,7 +63,7 @@ export function NumberTicker({
       ref={ref}
       className={cn(
         "inline-block tracking-wider text-[var(--text-heading)] tabular-nums",
-        className
+        className,
       )}
       {...props}
     >

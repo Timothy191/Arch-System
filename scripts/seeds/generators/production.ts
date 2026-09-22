@@ -26,7 +26,7 @@ export async function seedProduction(supabase: SupabaseClient): Promise<void> {
         shift: "day",
         notes: "High-tonnage extraction shift on Pit-A Upper Seam.",
       },
-      { onConflict: "department_id,log_date,shift" }
+      { onConflict: "department_id,log_date,shift" },
     )
     .select("id")
     .single();
@@ -59,7 +59,7 @@ export async function seedProduction(supabase: SupabaseClient): Promise<void> {
       { material_type: "Overburden (Sandstone)", density_t_per_m3: 2.45, active: true },
       { material_type: "Interburden (Shale)", density_t_per_m3: 2.2, active: true },
     ],
-    { onConflict: "material_type" }
+    { onConflict: "material_type" },
   );
 
   if (!densityError) {

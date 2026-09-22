@@ -23,9 +23,11 @@ verification:
 # Business Loop: Codebase Health & Policy Sentinel
 
 ## 1. Business Intent
+
 Guarantees that the Arch-System monorepo remains strictly typed, free of architectural boundary leaks, and structurally sound across all 21 packages. Prevents compilation regressions from accumulating in long-running development branches.
 
 ## 2. Invariants & Guardrails
+
 - **Zero Type Errors**: Must pass `pnpm type-check` across every workspace package.
 - **Architectural Isolation**: Package boundaries defined in `tools/repo/policy-compiler.cjs` must never be violated.
 - **Light Mode UI**: No `dark:` Tailwind classes.

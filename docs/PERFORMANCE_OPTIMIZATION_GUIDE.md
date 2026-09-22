@@ -4,13 +4,14 @@
 
 ### Current Metrics (Development Mode)
 
-| Metric | Value | Rating | Threshold |
-|--------|-------|--------|-----------|
-| **LCP** | Not detected | - | <2500ms |
-| **INP** | Not detected | - | <200ms |
-| **CLS** | 0 | ✅ Good | <0.1 |
+| Metric  | Value        | Rating  | Threshold |
+| ------- | ------------ | ------- | --------- |
+| **LCP** | Not detected | -       | <2500ms   |
+| **INP** | Not detected | -       | <200ms    |
+| **CLS** | 0            | ✅ Good | <0.1      |
 
 **Why "No LCP/INP detected"?**
+
 - Page loads extremely fast (<100ms)
 - Background video is the dominant visual element
 - Glass morphism UI has no single large image
@@ -23,6 +24,7 @@
 ### 1. **LCP (Largest Contentful Paint)**
 
 **Current State:**
+
 - Background video (`RouteBackground.tsx`) is the visual LCP
 - No explicit LCP image element
 - Content renders after video loads
@@ -31,7 +33,7 @@
 ✅ `LCPObserver` component - Identifies and highlights LCP element in dev mode  
 ✅ Preconnect hints for critical origins (Supabase, fonts)  
 ✅ `fetchpriority="high"` for critical images  
-✅ Server-side caching with React `cache()`  
+✅ Server-side caching with React `cache()`
 
 **Recommended Actions:**
 
@@ -45,7 +47,7 @@ preloadLCPImage('/hero.webp');
 // 2. Mark hero image as priority
 import Image from 'next/image';
 
-<Image 
+<Image
   src="/hero.webp"
   priority  // Tells Next.js to preload
   fill
@@ -59,6 +61,7 @@ import Image from 'next/image';
 ```
 
 **LCP Breakdown Analysis:**
+
 ```
 Typical LCP Composition:
 ├─ TTFB (15%): ~480ms
@@ -74,6 +77,7 @@ Focus: Optimize resource load time (images, video)
 ### 2. **INP (Interaction to Next Paint)**
 
 **Current State:**
+
 - Multiple dynamic imports reduce initial JS
 - React Query handles client-side data fetching
 - Some Server Actions may block main thread
@@ -82,45 +86,45 @@ Focus: Optimize resource load time (images, video)
 ✅ `PerformanceOptimizations` component with INP strategies  
 ✅ Passive event listeners for touch/wheel  
 ✅ Deferred non-critical scripts  
-✅ Centralized error handling prevents INP spikes  
+✅ Centralized error handling prevents INP spikes
 
 **Recommended Actions:**
 
 ```tsx
 // 1. Use useTransition for non-urgent updates
-import { useTransition } from 'react';
+import { useTransition } from "react";
 
 function Dashboard() {
   const [isPending, startTransition] = useTransition();
-  
+
   const handleTabChange = (newTab: string) => {
     startTransition(() => {
       setActiveTab(newTab); // Won't block interaction
     });
   };
-  
+
   return <Tabs value={activeTab} onValueChange={handleTabChange} />;
 }
 
 // 2. Memoize expensive calculations
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 function MachineList({ machines }) {
   const sortedMachines = useMemo(() => {
     return machines.sort((a, b) => a.priority - b.priority);
   }, [machines]);
-  
+
   return <List items={sortedMachines} />;
 }
 
 // 3. Debounce rapid interactions
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 function SearchInput() {
   const handleChange = debounce((value) => {
     // Search API call
   }, 300);
-  
+
   return <Input onChange={handleChange} />;
 }
 
@@ -128,14 +132,15 @@ function SearchInput() {
 function Component({ data }) {
   useEffect(() => {
     // Analytics tracking (doesn't block paint)
-    analytics.track('view', { data });
+    analytics.track("view", { data });
   }, [data]);
-  
+
   return <div>{data}</div>;
 }
 ```
 
 **INP Breakdown Analysis:**
+
 ```
 Typical INP Composition:
 ├─ Input Delay (30%): ~105ms
@@ -153,13 +158,13 @@ Focus: Optimize event handler execution time
 ✅ **0 CLS** - No layout shifts detected  
 ✅ Fonts use `font-display: swap`  
 ✅ Images have explicit dimensions  
-✅ Glass components use fixed heights  
+✅ Glass components use fixed heights
 
 **Maintaining Zero CLS:**
 
 ```tsx
 // 1. Always specify image dimensions
-<Image 
+<Image
   src="/photo.jpg"
   width={1200}
   height={630}
@@ -184,6 +189,7 @@ Focus: Optimize event handler execution time
 ### Development Mode
 
 **Console Output:**
+
 ```bash
 [Web Vitals] LCP Analysis
 Value: 3200ms (needs-improvement)
@@ -197,6 +203,7 @@ Optimization strategies:
 ```
 
 **Visual Debugging:**
+
 - LCP element highlighted with magenta outline (3 seconds)
 - Floating debug panel shows element details
 - Real-time INP/LCP monitoring
@@ -204,11 +211,13 @@ Optimization strategies:
 ### Production Mode
 
 **Data Collection:**
+
 - Metrics stamped on `<body>` as `data-web-vital-*` attributes
 - SessionStorage aggregation (last 50 entries)
 - OpenTelemetry spans for tracing
 
 **Monitoring Integration:**
+
 ```bash
 # Scrape metrics from body attributes
 curl http://localhost:3000 | grep data-web-vital
@@ -240,6 +249,7 @@ headers: {
 ```
 
 **Performance Benefits:**
+
 - ✅ First request: ~200ms (fetch from Open-Meteo)
 - ✅ Cached requests: ~45ms (server memory)
 - ✅ Stale-while-revalidate: Instant response, background refresh
@@ -250,7 +260,7 @@ headers: {
 
 ### High Priority (This Week)
 
-1. **Test LCP Observer** 
+1. **Test LCP Observer**
    - Run `pnpm dev`
    - Navigate to `/hub`
    - Check console for LCP element details
@@ -303,17 +313,20 @@ headers: {
 ### Chrome DevTools
 
 **Performance Tab:**
+
 1. Record interaction (click, type)
 2. View Event Timing breakdown
 3. Identify longest subpart
 4. Apply targeted optimization
 
 **Lighthouse:**
+
 ```bash
 pnpm lighthouse http://localhost:3000
 ```
 
 **Web Vitals Extension:**
+
 - Install from Chrome Web Store
 - Real-time CWV metrics in toolbar
 - Historical trend tracking
@@ -321,12 +334,14 @@ pnpm lighthouse http://localhost:3000
 ### React DevTools
 
 **Profiler:**
+
 1. Record session
 2. Sort by "Self time"
 3. Identify slow components
 4. Apply memoization
 
 **Components Tab:**
+
 - Check which components re-render
 - Verify props are stable
 - Detect unnecessary renders
@@ -335,15 +350,16 @@ pnpm lighthouse http://localhost:3000
 
 ## Performance Budgets
 
-| Metric | Target | Warning | Critical |
-|--------|--------|---------|----------|
-| LCP | <2500ms | 2500-4000ms | >4000ms |
-| INP | <200ms | 200-500ms | >500ms |
-| CLS | <0.1 | 0.1-0.25 | >0.25 |
-| TTFB | <600ms | 600-800ms | >800ms |
-| Bundle Size | <1500kB | 1500-2000kB | >2000kB |
+| Metric      | Target  | Warning     | Critical |
+| ----------- | ------- | ----------- | -------- |
+| LCP         | <2500ms | 2500-4000ms | >4000ms  |
+| INP         | <200ms  | 200-500ms   | >500ms   |
+| CLS         | <0.1    | 0.1-0.25    | >0.25    |
+| TTFB        | <600ms  | 600-800ms   | >800ms   |
+| Bundle Size | <1500kB | 1500-2000kB | >2000kB  |
 
 **Current Status:**
+
 - ✅ CLS: 0 (well under budget)
 - ⚠️ LCP: Not detected (needs measurement)
 - ⚠️ INP: Not detected (needs measurement)
@@ -361,8 +377,9 @@ When asking AI assistants to optimize performance:
 5. **Verify**: "How do I test if this improved INP?"
 
 **Example Prompt:**
+
 ```
-The INP on my dashboard is 350ms (needs-improvement). 
+The INP on my dashboard is 350ms (needs-improvement).
 The longest subpart is processingTime (175ms).
 
 Here's the event handler:
@@ -377,6 +394,7 @@ Show me before/after code with useTransition and memoization.
 ## Contact & Support
 
 For performance-related questions:
+
 - Check this guide first
 - Review console output in dev mode
 - Use Chrome DevTools Performance tab

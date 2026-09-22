@@ -45,7 +45,7 @@ async function fetchDashboard(departmentId: string): Promise<MonolithizedDashboa
  * cached for 15 seconds per department.
  */
 export async function getMonolithizedDashboard(
-  departmentId: string
+  departmentId: string,
 ): Promise<MonolithizedDashboardPayload> {
   const cacheKey = `dept:dashboard:monolith:${departmentId}`;
 
@@ -55,8 +55,8 @@ export async function getMonolithizedDashboard(
       cacheWrap<MonolithizedDashboardPayload>(
         cacheKey,
         async () => fetchDashboard(departmentId),
-        15
+        15,
       ),
-    { departmentId }
+    { departmentId },
   );
 }

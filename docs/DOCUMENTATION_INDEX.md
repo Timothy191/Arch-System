@@ -109,6 +109,7 @@ Quick navigation guide for Arch-Systems documentation.
   - Troubleshooting for Rocky Linux environments
 
 ## 📊 Repository Structure
+
 ```text
 
 Arch-System/
@@ -181,4 +182,7 @@ Arch-System/
 
 **Last Updated**: 2026-09-01
 **Maintained by**: Arch-Systems Development Team & Documentation Specialist Agent
+
+```
+
 ```

@@ -78,7 +78,7 @@ export async function GET(req: Request) {
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to read SCADA tags" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

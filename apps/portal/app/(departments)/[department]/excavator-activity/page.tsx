@@ -53,7 +53,7 @@ export default async function ExcavatorActivityPage({
     supabase
       .from("excavator_activity")
       .select(
-        "*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)"
+        "*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)",
       )
       .eq("department_id", deptId)
       .eq("activity_date", today)

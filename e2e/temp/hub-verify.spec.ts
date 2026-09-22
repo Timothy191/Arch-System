@@ -34,5 +34,7 @@ test("hub page renders images and no broken img tags", async ({ page }) => {
   expect(broken.length).toBe(0);
 
   // Verify hero rotator is present
-  await expect(page.locator("[data-testid='hero-rotator']").or(page.locator("main").first())).toBeVisible();
+  await expect(
+    page.locator("[data-testid='hero-rotator']").or(page.locator("main").first()),
+  ).toBeVisible();
 });

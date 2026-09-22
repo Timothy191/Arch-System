@@ -43,8 +43,8 @@ export async function GET(req: Request) {
         // Initial welcome event
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ event: "connected", timestamp: new Date().toISOString() })}\n\n`
-          )
+            `data: ${JSON.stringify({ event: "connected", timestamp: new Date().toISOString() })}\n\n`,
+          ),
         );
 
         // Keep-alive heartbeat every 15 seconds to prevent proxy timeouts
@@ -60,8 +60,8 @@ export async function GET(req: Request) {
         console.error("[DrillStream] Connection error:", err);
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ error: err.message || "Failed to initialize telemetry stream" })}\n\n`
-          )
+            `data: ${JSON.stringify({ error: err.message || "Failed to initialize telemetry stream" })}\n\n`,
+          ),
         );
         controller.close();
       }

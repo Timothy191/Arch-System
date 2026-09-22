@@ -51,10 +51,10 @@ function createSupabase(overrides: {
   departmentsQuery?: unknown;
 }) {
   const dailyLogsBuilder = createQueryBuilder(
-    overrides.dailyLogsQuery ?? { data: [], count: 0, error: null }
+    overrides.dailyLogsQuery ?? { data: [], count: 0, error: null },
   );
   const departmentsBuilder = createQueryBuilder(
-    overrides.departmentsQuery ?? { data: null, error: null }
+    overrides.departmentsQuery ?? { data: null, error: null },
   );
 
   const from = jest.fn((table: string) => {
@@ -88,7 +88,7 @@ describe("GET /api/export/production", () => {
 
   it("returns 400 for invalid query parameters", async () => {
     createServerSupabaseClient.mockResolvedValue(
-      createSupabase({ authUser: { user: { id: "1" } } })
+      createSupabase({ authUser: { user: { id: "1" } } }),
     );
 
     const req = new NextRequest("http://localhost/api/export/production?limit=bad");
@@ -114,12 +114,12 @@ describe("GET /api/export/production", () => {
           error: null,
         },
         departmentsQuery: { data: { id: "dept-1" }, error: null },
-      })
+      }),
     );
 
     const req = new NextRequest(
       "http://localhost/api/export/production?from=2026-01-01&to=2026-01-02&dept=Mining",
-      { headers: { accept: "application/json" } }
+      { headers: { accept: "application/json" } },
     );
     const res = await GET(req);
     expect(res.status).toBe(200);
@@ -148,7 +148,7 @@ describe("GET /api/export/production", () => {
           count: 1,
           error: null,
         },
-      })
+      }),
     );
 
     const req = new NextRequest("http://localhost/api/export/production", {
@@ -167,7 +167,7 @@ describe("GET /api/export/production", () => {
       createSupabase({
         authUser: { user: { id: "1" } },
         dailyLogsQuery: { data: null, error: { message: "db error" }, count: 0 },
-      })
+      }),
     );
 
     const req = new NextRequest("http://localhost/api/export/production");

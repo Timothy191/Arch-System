@@ -49,7 +49,7 @@ export function ShiftCompilationClient({
       ? (
           report.fleet_performance.reduce(
             (acc, curr) => acc + curr.mechanical_availability_pct,
-            0
+            0,
           ) / activeMachines
         ).toFixed(1)
       : "100.0";
@@ -89,7 +89,7 @@ export function ShiftCompilationClient({
               "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
               activeTab === "department"
                 ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary"
+                : "text-arch-text-tertiary hover:text-arch-text-secondary",
             )}
           >
             Department Breakdown
@@ -101,7 +101,7 @@ export function ShiftCompilationClient({
               "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
               activeTab === "multisite"
                 ? "bg-white text-arch-text-primary shadow-card"
-                : "text-arch-text-tertiary hover:text-arch-text-secondary"
+                : "text-arch-text-tertiary hover:text-arch-text-secondary",
             )}
           >
             Multi-Site Operational Report (BKF / EXT / PLANT)

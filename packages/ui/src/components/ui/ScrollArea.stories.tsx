@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj<typeof ScrollArea>;
 
 const tags = Array.from({ length: 50 }).map(
-  (_, i, a) => `System Log Event v1.2.0-beta.${a.length - i}`
+  (_, i, a) => `System Log Event v1.2.0-beta.${a.length - i}`,
 );
 
 export const Default: Story = {

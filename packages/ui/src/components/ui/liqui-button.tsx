@@ -35,7 +35,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: { variant: "glass", size: "md" },
-  }
+  },
 );
 
 const buttonContentVariants = cva(
@@ -48,7 +48,7 @@ const buttonContentVariants = cva(
       },
     },
     defaultVariants: { size: "md" },
-  }
+  },
 );
 
 const BUTTON_GLASS = {
@@ -78,11 +78,7 @@ export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(
-          buttonVariants({ variant, size }),
-          pill && "rounded-full",
-          className,
-        )}
+        className={cn(buttonVariants({ variant, size }), pill && "rounded-full", className)}
         {...props}
       >
         <LiquiGlass {...glassConfig}>
@@ -92,7 +88,7 @@ export const LiquiButton = forwardRef<HTMLButtonElement, LiquiButtonProps>(
         </LiquiGlass>
       </button>
     );
-  }
+  },
 );
 
 LiquiButton.displayName = "LiquiButton";

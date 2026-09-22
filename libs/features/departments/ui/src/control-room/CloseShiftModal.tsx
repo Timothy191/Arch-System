@@ -101,7 +101,7 @@ export function CloseShiftModal({
         state.employeeId,
         pin,
         false,
-        departmentSlug
+        departmentSlug,
       );
       if (result.success) {
         setState({ type: "success" });

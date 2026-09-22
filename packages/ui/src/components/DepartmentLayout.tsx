@@ -117,7 +117,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
               department.color === "blue" && "bg-dept-drilling/10 text-dept-drilling",
               department.color === "emerald" && "bg-dept-production/10 text-dept-production",
               department.color === "violet" && "bg-dept-engineering/10 text-dept-engineering",
-              department.color === "red" && "bg-dept-control-room/10 text-dept-control-room"
+              department.color === "red" && "bg-dept-control-room/10 text-dept-control-room",
             )}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -142,7 +142,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                   "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-all relative group",
                   isActive
                     ? "bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] font-medium"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-black/[0.04]",
                 )}
               >
                 {isActive && (
@@ -157,7 +157,7 @@ export function DepartmentLayout({ department, tabs, children }: DepartmentLayou
                       "w-3.5 h-3.5 shrink-0 transition-colors",
                       isActive
                         ? "text-[var(--accent-blue)]"
-                        : "text-[var(--text-muted)] group-hover:text-[var(--text-body)]"
+                        : "text-[var(--text-muted)] group-hover:text-[var(--text-body)]",
                     )}
                   />
                 )}

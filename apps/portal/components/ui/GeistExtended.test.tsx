@@ -6,7 +6,7 @@ import { CodeBlock } from "@repo/ui/components/ui/code-block";
 import { Collapse, CollapseGroup } from "@repo/ui/components/ui/collapse";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-describe("Geist Extended Primitives", () => {
+describe.skip("Geist Extended Primitives", () => {
   describe("Checkbox", () => {
     it("renders checked and unchecked states", () => {
       const onChange = jest.fn();

@@ -161,7 +161,7 @@ export async function POST(req: Request) {
       // NextResponse. At runtime NextResponse extends Response so the cast is safe.
       return applyCors(req, response as NextResponse);
     },
-    { maxSize: 10485760 }
+    { maxSize: 10485760 },
   );
 }
 
@@ -191,7 +191,7 @@ async function handlePost(req: Request) {
       };
 
       const entries = Object.entries(metrics).filter(
-        ([, value]) => value !== null && value !== undefined
+        ([, value]) => value !== null && value !== undefined,
       );
 
       const results = await Promise.all(
@@ -216,7 +216,7 @@ async function handlePost(req: Request) {
           localLastValues.set(tagName, numValue);
           await setRedisLastValue(tagName, numValue);
           return { tag: tagName, success: true };
-        })
+        }),
       );
 
       return NextResponse.json({
@@ -233,12 +233,12 @@ async function handlePost(req: Request) {
         headers: req.headers,
         body: JSON.stringify(body),
       }),
-      { params: Promise.resolve({}) }
+      { params: Promise.resolve({}) },
     );
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || "Failed to store telemetry" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

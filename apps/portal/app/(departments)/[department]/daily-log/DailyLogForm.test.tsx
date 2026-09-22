@@ -105,7 +105,7 @@ describe("DailyLogForm", () => {
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
         "Daily log saved successfully",
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 

@@ -21,7 +21,7 @@ function buildMock(
     employee?: unknown;
     existingWebhook?: unknown;
     updateError?: unknown;
-  } = {}
+  } = {},
 ) {
   const user = overrides.user !== undefined ? overrides.user : { id: "user-1" };
   const employee =

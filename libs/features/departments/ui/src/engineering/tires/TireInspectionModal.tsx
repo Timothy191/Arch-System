@@ -21,7 +21,7 @@ export function TireInspectionModal({
 }: TireInspectionModalProps) {
   const [isPending, startTransition] = useTransition();
   const [inspectionDate, setInspectionDate] = useState(
-    new Date().toISOString().split("T")[0] ?? ""
+    new Date().toISOString().split("T")[0] ?? "",
   );
   const [pressurePsi, setPressurePsi] = useState<number>(100);
   const [treadDepthMm, setTreadDepthMm] = useState<number>(50);

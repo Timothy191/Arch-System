@@ -35,12 +35,9 @@ export function Spotlight({
     }
   }, []);
 
-  const handleMouseMove = useCallback(
-    (event: MouseEvent) => {
-      // Disabled mouse effects
-    },
-    [],
-  );
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    // Disabled mouse effects
+  }, []);
 
   useEffect(() => {
     if (!parentElement) return;

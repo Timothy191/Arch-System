@@ -55,7 +55,7 @@ export async function adminAddMachine(data: {
   });
 
   if (error) return { error: "Failed to add machine" };
- 
+
   await updateTags(["table:fleet", "table:equipment", "table:machines"]);
   revalidatePath("/admin");
   return { success: true };

@@ -54,7 +54,7 @@ describe("ResetPasswordPage", () => {
 
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Send (Password )?Reset Link/i })
+      screen.getByRole("button", { name: /Send (Password )?Reset Link/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
   });
@@ -153,7 +153,7 @@ describe("ResetPasswordPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Unable to send reset email. Please try again or contact IT Support.")
+        screen.getByText("Unable to send reset email. Please try again or contact IT Support."),
       ).toBeInTheDocument();
     });
   });

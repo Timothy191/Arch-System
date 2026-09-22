@@ -36,8 +36,8 @@ Browser (operator, control-room)
 - [ ] FUXA WebAPI device imported from `templates/fuxa-portal-connection.json`
       with `getTags` = `https://portal.production-mining.com/api/scada/tags`
 - [ ] Dashboard authored with `scripts/fuxa-gauge-grid.py` (`--fuxa-url
-  https://fuxa.production-mining.com --tags-url
-  https://portal.production-mining.com/api/scada/tags`)
+https://fuxa.production-mining.com --tags-url
+https://portal.production-mining.com/api/scada/tags`)
 - [ ] **`/api/scada/tags` access gated in prod** — it exposes machine telemetry.
       Restrict to the FUXA origin (tunnel), an internal header/token, or Supabase
       auth. It is unauthenticated in dev (FUXA on host networking, same host).

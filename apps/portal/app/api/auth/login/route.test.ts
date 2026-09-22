@@ -142,7 +142,7 @@ describe("POST /api/auth/login", () => {
 
   it("returns 503 when network connection throws an unhandled error", async () => {
     mockSignInWithPassword.mockRejectedValueOnce(
-      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321")
+      new Error("fetch failed: ECONNREFUSED 127.0.0.1:54321"),
     );
 
     const req = createRequest({

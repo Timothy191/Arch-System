@@ -69,7 +69,8 @@ function record(status, category, message, details = null, remediation = null) {
   results.checks.push({ status, category, message, details, remediation });
 
   if (!isJson) {
-    const badge = status === "PASS" ? symbols.pass : status === "WARN" ? symbols.warn : symbols.fail;
+    const badge =
+      status === "PASS" ? symbols.pass : status === "WARN" ? symbols.warn : symbols.fail;
     console.log(`  [${badge}] ${colors.bold}${category}${colors.reset}: ${message}`);
     if (details) {
       console.log(`         ${colors.dim}${details}${colors.reset}`);
@@ -222,7 +223,8 @@ if (pnpmCheck.success) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. Docker & Container Stack Health
 // ─────────────────────────────────────────────────────────────────────────────
-if (!isJson) console.log(`\n${colors.bold}2. Infrastructure & Local Container Stack${colors.reset}`);
+if (!isJson)
+  console.log(`\n${colors.bold}2. Infrastructure & Local Container Stack${colors.reset}`);
 
 const dockerCheck = safeExec("docker info");
 if (dockerCheck.success) {
@@ -346,7 +348,8 @@ if (fs.existsSync(ROOT_ENV_ACTUAL)) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. Monorepo Architecture & Policy Boundaries
 // ─────────────────────────────────────────────────────────────────────────────
-if (!isJson) console.log(`\n${colors.bold}4. Monorepo Boundaries & Architecture Policies${colors.reset}`);
+if (!isJson)
+  console.log(`\n${colors.bold}4. Monorepo Boundaries & Architecture Policies${colors.reset}`);
 
 const policyCheck = safeExec("node tools/repo/policy-compiler.cjs --check");
 if (policyCheck.success) {

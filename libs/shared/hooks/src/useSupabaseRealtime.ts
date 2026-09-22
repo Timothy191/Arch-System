@@ -54,7 +54,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
   enabled = true,
 }: UseSupabaseRealtimeOptions<T>) {
   const [status, setStatus] = useState<"CONNECTING" | "SUBSCRIBED" | "TIMED_OUT" | "CLOSED">(
-    "CONNECTING"
+    "CONNECTING",
   );
   const [lastError, setLastError] = useState<Error | null>(null);
 
@@ -124,7 +124,7 @@ export function useSupabaseRealtime<T = Record<string, unknown>>({
           } else if (payload.eventType === "DELETE") {
             onDeleteRef.current?.(payload.old);
           }
-        }
+        },
       )
       .subscribe((subscriptionStatus: string, err?: Error) => {
         if (!isMounted) return;

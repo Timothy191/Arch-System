@@ -1,6 +1,7 @@
 # Available Models and Capabilities Report (Goal-3)
 
 ## 1. Executive Overview
+
 This report details the available LLM models, subagent tiers, thinking budgets, and routing heuristics within the Antigravity agent environment.
 
 ---
@@ -9,13 +10,13 @@ This report details the available LLM models, subagent tiers, thinking budgets, 
 
 The agent system operates with Google DeepMind's Gemini frontier models across multiple performance and thinking budget tiers:
 
-| Model Tier / Name | Thinking Budget | Primary Strengths & Optimization | Recommended Use Cases |
-| :--- | :--- | :--- | :--- |
-| **Gemini 3.8 Flash (Low)** *(Active Session Model)* | Low (~2k tokens) | Ultra-low latency, maximum token conservation, fast tool calling | Interactive pair-programming, fast-feedback execution, single-file edits, CLI diagnostics |
-| **Gemini 3.7 Flash (High)** | Adaptive / High (~24k tokens) | Adaptive hybrid reasoning, deep tool calling, fast complex code generation | Refactoring, AST-level boundary audits, full quality gate orchestration |
-| **Gemini 3.5 / 3.6 Flash** | Low - Medium (~4k-8k tokens) | High throughput, efficient structured output, high prefix-cache reuse | Realtime state management, automated test execution, unit test generation |
-| **Gemini 3.5 Flash-Lite** | Minimal (~1k-2k tokens) | Lightweight, minimal latency, lowest cost | Quick greps, simple file lookups, log classification |
-| **Gemini 3.1 Pro (High / Low)** | Deep (~24k-64k tokens) | Frontier architectural synthesis, complex multi-step reasoning, mathematical proofs | System re-architecture, formal security analysis, cross-package boundary redesign |
+| Model Tier / Name                                   | Thinking Budget               | Primary Strengths & Optimization                                                    | Recommended Use Cases                                                                     |
+| :-------------------------------------------------- | :---------------------------- | :---------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| **Gemini 3.8 Flash (Low)** _(Active Session Model)_ | Low (~2k tokens)              | Ultra-low latency, maximum token conservation, fast tool calling                    | Interactive pair-programming, fast-feedback execution, single-file edits, CLI diagnostics |
+| **Gemini 3.7 Flash (High)**                         | Adaptive / High (~24k tokens) | Adaptive hybrid reasoning, deep tool calling, fast complex code generation          | Refactoring, AST-level boundary audits, full quality gate orchestration                   |
+| **Gemini 3.5 / 3.6 Flash**                          | Low - Medium (~4k-8k tokens)  | High throughput, efficient structured output, high prefix-cache reuse               | Realtime state management, automated test execution, unit test generation                 |
+| **Gemini 3.5 Flash-Lite**                           | Minimal (~1k-2k tokens)       | Lightweight, minimal latency, lowest cost                                           | Quick greps, simple file lookups, log classification                                      |
+| **Gemini 3.1 Pro (High / Low)**                     | Deep (~24k-64k tokens)        | Frontier architectural synthesis, complex multi-step reasoning, mathematical proofs | System re-architecture, formal security analysis, cross-package boundary redesign         |
 
 ---
 
@@ -38,12 +39,12 @@ When delegating tasks to autonomous subagents, the \`Model\` property can be exp
 
 Based on \`~/.gemini/config/skills/effort-routing\`:
 
-| Tier | Thinking Budget | Cost Multiplier | Recommended Tasks |
-| :--- | :--- | :--- | :--- |
-| **\`low\`** | ~2,048 tokens | 0.35x | Syntax fixes, single-line edits, file lookups, lint checks |
-| **\`medium\`** | ~8,192 tokens | 1.0x | Default interactive pairing, component creation, feature development |
-| **\`high\`** | ~24,576 tokens | 1.8x | Multi-file refactors, deep root cause analysis, test suite generation |
-| **\`xhigh\` / \`max\`** | ~65,536 tokens | 2.5x | Autonomous research, whole-monorepo migrations, formal verification |
+| Tier                    | Thinking Budget | Cost Multiplier | Recommended Tasks                                                     |
+| :---------------------- | :-------------- | :-------------- | :-------------------------------------------------------------------- |
+| **\`low\`**             | ~2,048 tokens   | 0.35x           | Syntax fixes, single-line edits, file lookups, lint checks            |
+| **\`medium\`**          | ~8,192 tokens   | 1.0x            | Default interactive pairing, component creation, feature development  |
+| **\`high\`**            | ~24,576 tokens  | 1.8x            | Multi-file refactors, deep root cause analysis, test suite generation |
+| **\`xhigh\` / \`max\`** | ~65,536 tokens  | 2.5x            | Autonomous research, whole-monorepo migrations, formal verification   |
 
 ---
 

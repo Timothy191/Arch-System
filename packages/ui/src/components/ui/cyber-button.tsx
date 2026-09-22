@@ -72,7 +72,7 @@ export function CyberButton({
         sizeMap[size],
         "before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-10",
         colors.before,
-        className
+        className,
       )}
       {...props}
     >

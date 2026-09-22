@@ -219,8 +219,8 @@ Set up contract validation scripts to ensure API routes defined in the portal ma
 - **Handoff**: Any coding agent working on schema contracts can now inspect localized inner-loop commands and invariants directly from `packages/contract/AGENTS.md`.
 
 ## [2026-09-11T09:14:00Z] Control Room Hardening Schemas
+
 - **Agent**: Antigravity
 - **Changes**:
   - Added `shiftCloseoutSchema` and `healthCheckResponseSchema` to `src/schemas/control-room.schema.ts`.
   - Re-exported schemas and inferred types (`ShiftCloseoutInput`, `HealthCheckResponse`) from `src/index.ts`.
-

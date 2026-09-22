@@ -99,7 +99,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
 
   const draftKey = useCallback(
     (machineId: string, shift: Shift, field: string) => `${machineId}:${shift}:${field}`,
-    []
+    [],
   );
 
   function getDraftValue(machineId: string, shift: Shift, field: keyof DrillOpRow): string {
@@ -123,7 +123,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
     async (
       machineId: string,
       shift: Shift,
-      patch: Partial<DrillOpRow>
+      patch: Partial<DrillOpRow>,
     ): Promise<DrillOpRow | null> => {
       if (!departmentId) return null;
       const key = `${machineId}:${shift}`;
@@ -181,7 +181,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
       });
       return data;
     },
-    [departmentId, rows]
+    [departmentId, rows],
   );
 
   async function commitField(machineId: string, shift: Shift, field: keyof DrillOpRow) {
@@ -227,7 +227,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
     "w-full bg-[var(--bg-secondary)] border border-[var(--border-default)]",
     "rounded px-2 py-1 text-sm text-[var(--text-heading)]",
     "focus:outline-none focus:border-[var(--accent-blue)]",
-    "min-w-0"
+    "min-w-0",
   );
 
   if (drills.length === 0) {
@@ -351,7 +351,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                           "px-2 py-1 text-xs font-medium flex items-center gap-1",
                           shift === "day"
                             ? "bg-[var(--accent-blue)] text-white"
-                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]"
+                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]",
                         )}
                         aria-label="Day shift"
                       >
@@ -365,7 +365,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                           "px-2 py-1 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)]",
                           shift === "night"
                             ? "bg-[var(--accent-blue)] text-white"
-                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]"
+                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]",
                         )}
                         aria-label="Night shift"
                       >

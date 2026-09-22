@@ -7,49 +7,31 @@
   "mcpServers": {
     "omg_cli_tools": {
       "command": "oh-my-antigravity",
-      "args": [
-        "tools",
-        "serve"
-      ],
+      "args": ["tools", "serve"],
       "description": "oh-my-antigravity CLI tools MCP server (file/git/http/process)",
       "cwd": "${extensionPath}"
     },
     "omp_cli_tools": {
       "command": "oh-my-antigravity",
-      "args": [
-        "tools",
-        "serve"
-      ],
+      "args": ["tools", "serve"],
       "cwd": "${extensionPath}",
       "description": "oh-my-antigravity CLI tools MCP server compatibility alias (file/git/http/process)"
     },
     "codebase-memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "codebase-memory-mcp"
-      ]
+      "args": ["-y", "codebase-memory-mcp"]
     },
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ]
+      "args": ["-y", "@upstash/context7-mcp"]
     },
     "knowledge-rail": {
       "command": "npx",
-      "args": [
-        "-y",
-        "knowledge-rail"
-      ]
+      "args": ["-y", "knowledge-rail"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp"
-      ]
+      "args": ["-y", "next-devtools-mcp"]
     },
     "postgres": {
       "command": "npx",
@@ -83,9 +65,7 @@
     },
     "AgentsRoom-MCP": {
       "command": "node",
-      "args": [
-        "/opt/AgentsRoom/resources/app-mcp-server.cjs"
-      ],
+      "args": ["/opt/AgentsRoom/resources/app-mcp-server.cjs"],
       "env": {
         "AR_PROJECT_ID": "proj-1788803548784-lh3ald",
         "AR_PROJECT_PATH": "/home/timothy/Projects/Arch-System",
@@ -96,9 +76,7 @@
     },
     "AgentsRoom-Test-Runner": {
       "command": "node",
-      "args": [
-        "/opt/AgentsRoom/resources/test-runner-mcp-server.cjs"
-      ],
+      "args": ["/opt/AgentsRoom/resources/test-runner-mcp-server.cjs"],
       "env": {
         "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
         "AR_BROWSER_PROJECT_ID": "proj-1788803548784-lh3ald",
@@ -107,9 +85,7 @@
     },
     "AgentsRoom-QA-Tester": {
       "command": "node",
-      "args": [
-        "/opt/AgentsRoom/resources/qa-tester-mcp-server.cjs"
-      ],
+      "args": ["/opt/AgentsRoom/resources/qa-tester-mcp-server.cjs"],
       "env": {
         "AR_BROWSER_BRIDGE_FILE": "/home/timothy/.agentsroom/browser-bridge.json",
         "AR_BROWSER_PROJECT_ID": "proj-1788803548784-lh3ald"
@@ -121,9 +97,7 @@
     },
     "MathAgent": {
       "command": "/home/timothy/Projects/math-agent/.venv/bin/python",
-      "args": [
-        "/home/timothy/Projects/math-agent/mcp_server.py"
-      ]
+      "args": ["/home/timothy/Projects/math-agent/mcp_server.py"]
     }
   },
   "experimental": {

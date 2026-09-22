@@ -26,6 +26,7 @@ If `@layer base` is present, apply the fix below.
 ## Fix Protocol
 
 1. **Create a patch script** at `scripts/patch-<pkg>-css.mjs`:
+
    ```js
    // Strip @layer base { ... } wrapper — safe because unlayered rules
    // are overridden by Tailwind utilities anyway (see glass.css comment)
@@ -33,19 +34,22 @@ If `@layer base` is present, apply the fix below.
    ```
 
 2. **Register it in root `package.json` `postinstall`**:
+
    ```json
    "postinstall": "node scripts/patch-glass-css.mjs && node scripts/patch-<pkg>-css.mjs"
    ```
 
 3. **Add to `transpilePackages` in `apps/portal/next.config.mjs`** as a secondary safeguard:
+
    ```js
    transpilePackages: [
      // ...existing packages
      "@problem-package/name",
-   ]
+   ];
    ```
 
 4. **Document with AGENT-TRACE** in the consuming file:
+
    ```tsx
    // AGENT-TRACE: <pkg> CSS uses @layer base — patched via scripts/patch-<pkg>-css.mjs
    // Re-run `node scripts/patch-<pkg>-css.mjs` after pnpm install if build breaks.

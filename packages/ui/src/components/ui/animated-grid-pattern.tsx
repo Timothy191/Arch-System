@@ -62,7 +62,7 @@ export function AnimatedGridPattern({
         iteration: 0,
       }));
     },
-    [getPos]
+    [getPos],
   );
 
   const updateSquarePosition = useCallback(
@@ -81,7 +81,7 @@ export function AnimatedGridPattern({
         return nextSquares;
       });
     },
-    [getPos]
+    [getPos],
   );
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function AnimatedGridPattern({
       aria-hidden="true"
       className={cn(
         "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
-        className
+        className,
       )}
       {...props}
     >

@@ -11,7 +11,7 @@ Elevate the terminal deployment experience with high-contrast double-line border
 1. **`scripts/monitor-hud.sh`**:
    - Upgraded framing to double-line Unicode box drawing (`╔══╗`, `╠══╣`, `╚══╝`) with calibrated 256-color palette.
    - Implemented animated 8-frame packet pulse streams across data bus conduits (`───━═◆═━──▶`, `────»»────▶`, `──────●───▶`).
-   - Added animated orbital spinner (`⠋⠙⠹⠸...`) and live audio/telemetry waveform spectrum (` ▃▅▇█▇▅▃ `).
+   - Added animated orbital spinner (`⠋⠙⠹⠸...`) and live audio/telemetry waveform spectrum (`▃▅▇█▇▅▃`).
    - Added illustrated service node cards for Client Ingress (Cloudflare Edge CDN/HTTP/2), Next.js 16 Portal Engine with dynamic CPU & RAM gauge bars (`[████░░░░]`), Cloud Supabase PG 15, In-Memory Redis, SCADA/Edge FUXA, and Zero-Trust Security Sandbox.
    - Added mode detection (`--mode deploy` vs `--mode dev`) with live deployment pipeline tracker (`[✔ BUILD] ──▶ [✔ INFRA] ──▶ [● GATEWAY] ──▶ [○ EDGE CDN]`).
    - Integrated safe line-clipping on right-pane log streams to prevent curses cursor wrapping or terminal corruption.
@@ -25,8 +25,6 @@ Elevate the terminal deployment experience with high-contrast double-line border
 - Syntax validation via `bash -n scripts/monitor-hud.sh` and `bash -n scripts/deploy.sh`.
 - Single-pass rendering verification in simulated PTY 2D buffer (120x34).
 - Successful dry-run execution via `bash scripts/deploy.sh local --dry-run`.
-
-
 
 ## 2026-09-11: Non-root Port Checking (`lsof -ti`)
 
@@ -303,9 +301,11 @@ Ensure seamless dev deployment initialization without spurious warnings caused b
 ## 2026-09-11T07:41:00Z: Removed Arch-Base Requirement and Aligned Dev & Deployment Scripts to Cloud Mode Supabase
 
 ### Purpose
+
 Remove the external repository requirement on `Arch-Base` (`../Arch-Base`), making `Arch-System` self-contained using internal `@repo/database` and `@repo/supabase`, and aligning all deployment and development scripts (`deploy.sh`, `dev.sh`, `preflight-checklist.sh`, `setup-production-environment.sh`) to default to cloud-mode hosted Supabase (`https://mrwhtxbhrzyttlsyuofc.supabase.co`).
 
 ### Changes Made
+
 1. **`scripts/deploy.sh`**:
    - Converted `ARCH_BASE_DIR` from mandatory to optional with graceful fallback to `packages/database` and `packages/supabase`.
    - Auto-detected hosted cloud Supabase from `.env` and added `--cloud`/`--hosted` flags.
@@ -327,8 +327,8 @@ Remove the external repository requirement on `Arch-Base` (`../Arch-Base`), maki
    - Added fallback to `.mcp.json` when `config/tools/mcp.json` is missing.
 
 ### Verification
+
 - `./scripts/deploy.sh local --dry-run` passed 100% with exit code 0.
 - `./scripts/deploy.sh production --dry-run` passed 100% with exit code 0.
 - `./scripts/preflight-checklist.sh` passed 100% with exit code 0 (0 errors).
 - `bash scripts/dev.sh --quick --headless` successfully compiled and started dev server in cloud mode.
-

@@ -26,7 +26,8 @@ const buttonVariants = cva(
         link: "text-neutral-900 underline-offset-4 hover:underline border border-transparent bg-transparent",
 
         // Glass translucent variant
-        glass: "bg-white/70 backdrop-blur-md text-neutral-900 border border-white/40 hover:bg-white/85 shadow-xs active:scale-[0.98]",
+        glass:
+          "bg-white/70 backdrop-blur-md text-neutral-900 border border-white/40 hover:bg-white/85 shadow-xs active:scale-[0.98]",
       },
       size: {
         // Geist sizes

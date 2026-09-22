@@ -7,7 +7,7 @@
 ```mermaid
 flowchart TD
     User([User Prompt / Event]) --> Supervisor[Supervisor / Orchestrator Agent]
-    
+
     subgraph MultiAgentTeam ["Multi-Agent Execution Team"]
         Supervisor --> Researcher[Research & Retrieval Agent]
         Supervisor --> Implementer[Implementation & Coding Agent]
@@ -17,12 +17,13 @@ flowchart TD
     Researcher <--> MCP[MCP Protocol Tools & APIs]
     Implementer <--> Tools[Code Execution & Git Tools]
     Auditor <--> Memory[(Supabase Vector & Hybrid Memory)]
-    
+
     Auditor -->|Verification Verdict| Supervisor
     Supervisor --> Output([Production-Ready Deliverable])
 ```
 
-### Key Cognitive Patterns:
+### Key Cognitive Patterns
+
 1. **Reflection & Self-Correction**: Agents evaluate their own tool outputs, verify schema validity, and iteratively fix syntax or test failures before concluding.
 2. **Tool Use & Model Context Protocol (MCP)**: Strict JSON schema tool encapsulation ensuring stateless, deterministic execution across external services.
 3. **Planning & Task Decomposition**: Bounded step-by-step breakdown (e.g. `/plan`, `/goal`) resolving dependencies sequentially.
@@ -32,11 +33,11 @@ flowchart TD
 
 ## 2. Memory Tiering Architecture
 
-| Memory Tier | Storage Backend | Latency | Purpose |
-|---|---|---|---|
-| **Short-Term Context** | Prompt Prefix Cache / Local Memory | $< 1\text{ ms}$ | Turn-by-turn conversational continuity and fast reasoning. |
-| **Episodic & Task State** | Redis Key-Value (`arch:auth:*`, `telemetry:*`) | $< 5\text{ ms}$ | Real-time session state, active telemetry buffers, and rate limits. |
-| **Long-Term Semantic Memory** | Supabase Cloud PostgreSQL (`pgvector` + HNSW) | $< 50\text{ ms}$ | Hybrid full-text + vector search across architectural verdicts and cross-session learnings. |
+| Memory Tier                   | Storage Backend                                | Latency          | Purpose                                                                                     |
+| ----------------------------- | ---------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| **Short-Term Context**        | Prompt Prefix Cache / Local Memory             | $< 1\text{ ms}$  | Turn-by-turn conversational continuity and fast reasoning.                                  |
+| **Episodic & Task State**     | Redis Key-Value (`arch:auth:*`, `telemetry:*`) | $< 5\text{ ms}$  | Real-time session state, active telemetry buffers, and rate limits.                         |
+| **Long-Term Semantic Memory** | Supabase Cloud PostgreSQL (`pgvector` + HNSW)  | $< 50\text{ ms}$ | Hybrid full-text + vector search across architectural verdicts and cross-session learnings. |
 
 ---
 

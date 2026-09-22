@@ -27,7 +27,7 @@ export default async function TireManagementPage() {
       db
         .from("tire_inspections")
         .select(
-          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at"
+          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at",
         )
         .order("inspection_date", { ascending: true }),
     ]);

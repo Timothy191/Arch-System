@@ -69,10 +69,10 @@
   "scripts": {
     "build": "node scripts/generate-openapi-spec.js && next build && node ../../scripts/sync-assets-smart.cjs",
     "build:analyze": "ANALYZE=true next build",
-    "dev": "next dev --webpack",
+    "dev": "next dev -H 0.0.0.0 --webpack",
     "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
-    "start": "next start",
-    "test": "jest --passWithNoTests --maxWorkers=2 --workerIdleMemoryLimit=512MB",
+    "start": "next start -H 0.0.0.0",
+    "test": "jest --passWithNoTests --runInBand",
     "type-check": "tsc --noEmit",
     "generate-openapi-spec": "node scripts/generate-openapi-spec.js"
   }

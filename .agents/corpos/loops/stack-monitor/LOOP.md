@@ -20,8 +20,10 @@ verification:
 # Business Loop: Stack Auto-Healing
 
 ## 1. Business Intent
+
 Monitors the critical Next.js, Supabase, and Redis stack for downtime or degraded performance and automatically attempts self-healing via container restarts or service reloads.
 
 ## 2. Invariants & Guardrails
+
 - **Max Restarts**: Do not restart more than 3 times per hour.
 - **Dependency Order**: Ensure Redis and Supabase are up before restarting Next.js.

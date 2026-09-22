@@ -145,7 +145,7 @@ describe("RedisStore", () => {
       const clientWithoutEval = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
       const storeWithoutEval = new RedisStore(clientWithoutEval as any);
       await expect(storeWithoutEval.eval("script", [], [])).rejects.toThrow(
-        "Redis client does not support eval method"
+        "Redis client does not support eval method",
       );
     });
   });

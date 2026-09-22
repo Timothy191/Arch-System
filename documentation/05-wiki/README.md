@@ -1,6 +1,7 @@
 # 05 - Technical Wiki & Domain Concepts
 
 ## Overview
+
 Comprehensive knowledge base containing technical concept deep-dives, entity models, database schemas, and architectural decision records.
 
 - **[Wiki Index](../../docs/wiki/index.md)**: Main wiki catalog and page index.

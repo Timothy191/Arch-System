@@ -40,13 +40,8 @@ export const options = {
   },
 };
 
-const BASE_URL =
-  __ENV.BENCH_BASE_URL || "http://localhost:3000";
-const WARMUP_PATHS = [
-  "/api/health/live",
-  "/api/health/warmup",
-  "/api/health/supabase-realtime",
-];
+const BASE_URL = __ENV.BENCH_BASE_URL || "http://localhost:3000";
+const WARMUP_PATHS = ["/api/health/live", "/api/health/warmup", "/api/health/supabase-realtime"];
 
 export function coldWarmup() {
   runPass("cold");

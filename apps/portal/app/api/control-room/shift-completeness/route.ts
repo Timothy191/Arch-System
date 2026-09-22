@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
   if (!deptId || !deptSlug || !date || !shift) {
     return NextResponse.json(
       { error: "Missing required params: deptId, deptSlug, date, shift" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

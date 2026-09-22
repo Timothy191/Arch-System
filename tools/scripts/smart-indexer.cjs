@@ -58,7 +58,8 @@ fs.writeFileSync(INDEX_FILE, JSON.stringify(indexData, null, 2), "utf-8");
 if (query) {
   console.log(`🧠 [SmartIndexer] Searching memory base for query: "${query}"...`);
   const matches = entries.filter((e) => {
-    const searchStr = `${e.id} ${e.category} ${e.errorSignature} ${e.rootCause || ""} ${e.preventionRule || ""}`.toLowerCase();
+    const searchStr =
+      `${e.id} ${e.category} ${e.errorSignature} ${e.rootCause || ""} ${e.preventionRule || ""}`.toLowerCase();
     return searchStr.includes(query);
   });
 
@@ -70,9 +71,12 @@ if (query) {
       console.log(`     Rule:  ${m.preventionRule}\n`);
     });
   } else {
-    console.log(`No direct retrospectives matching "${query}". Proceed with standard guardrails.\n`);
+    console.log(
+      `No direct retrospectives matching "${query}". Proceed with standard guardrails.\n`,
+    );
   }
 } else {
-  console.log(`🧠 [SmartIndexer] Memory base synchronized. Total entries indexed: ${entries.length}`);
+  console.log(
+    `🧠 [SmartIndexer] Memory base synchronized. Total entries indexed: ${entries.length}`,
+  );
 }
-

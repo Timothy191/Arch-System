@@ -13,7 +13,7 @@ describe("useCommandScope hook", () => {
             handler,
           },
         ],
-      })
+      }),
     );
 
     act(() => {
@@ -41,7 +41,7 @@ describe("useCommandScope hook", () => {
             allowInInputs: false,
           },
         ],
-      })
+      }),
     );
 
     // Mock active element as an input

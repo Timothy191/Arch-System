@@ -24,7 +24,7 @@ describe("useOptimisticAction hook", () => {
         }),
         action: mockAction,
         onSuccess,
-      })
+      }),
     );
 
     expect(result.current.state.status).toBe("active");
@@ -55,7 +55,7 @@ describe("useOptimisticAction hook", () => {
         }),
         action: mockAction,
         onError,
-      })
+      }),
     );
 
     await act(async () => {

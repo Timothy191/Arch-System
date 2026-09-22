@@ -180,7 +180,7 @@ describe("P0 /api/c66 secure access checks", () => {
       const body = await res.json();
       expect(body.success).toBe(false);
       expect(body.error).toBe("Unauthorized scanner token");
-    }
+    },
   );
 
   it.each(PUBLICLY_DOCUMENTED_SCANNER_SOURCES)(
@@ -193,7 +193,7 @@ describe("P0 /api/c66 secure access checks", () => {
       expect(body.name).toBe("Test User");
       expect(lastServiceRoleClient).not.toBeNull();
       expect(lastServiceRoleClient!.from).toHaveBeenCalledWith("access_logs");
-    }
+    },
   );
 
   it("missing token is rejected with 401", async () => {
@@ -240,7 +240,7 @@ describe("P0 /api/c66 secure access checks", () => {
         source: "C66-HARDWARE",
         token: TEST_TOKEN,
         body: { code: "CT-QR-01", direction: "IN", gate_location: "Weighbridge Inbound" },
-      })
+      }),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -272,7 +272,7 @@ describe("P0 /api/c66 secure access checks", () => {
         source: "C66-HARDWARE",
         token: TEST_TOKEN,
         body: { code: "EQP-QR-777", direction: "IN" },
-      })
+      }),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -305,7 +305,7 @@ describe("P0 /api/c66 secure access checks", () => {
         source: "C66-HARDWARE",
         token: TEST_TOKEN,
         body: { code: "VIS-QR-01" },
-      })
+      }),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -328,7 +328,7 @@ describe("P0 /api/c66 secure access checks", () => {
         source: "C66-HARDWARE",
         token: TEST_TOKEN,
         body: { code: "REVOKED-QR" },
-      })
+      }),
     );
     expect(res.status).toBe(403);
     const body = await res.json();

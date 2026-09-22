@@ -41,7 +41,7 @@ export function useCopyToClipboard(timeoutMs: number = 2000): ClipboardState {
         return false;
       }
     },
-    [timeoutMs, reset]
+    [timeoutMs, reset],
   );
 
   useEffect(() => {

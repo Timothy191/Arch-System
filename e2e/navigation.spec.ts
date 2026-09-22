@@ -2,13 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("department navigation", () => {
   test("unauthenticated access to any department redirects to login", async ({ page }) => {
-    const departments = [
-      "drilling",
-      "production",
-      "engineering",
-      "control-room",
-      "access-control",
-    ];
+    const departments = ["drilling", "production", "engineering", "control-room", "access-control"];
 
     for (const dept of departments) {
       await page.goto(`/${dept}`);

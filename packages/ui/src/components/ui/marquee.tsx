@@ -61,7 +61,7 @@ export function Marquee({
       },
       {
         rootMargin: "200px",
-      }
+      },
     );
     observer.observe(target);
     return () => observer.disconnect();
@@ -77,7 +77,7 @@ export function Marquee({
           "flex-row": !vertical,
           "flex-col": vertical,
         },
-        className
+        className,
       )}
     >
       {Array(repeat)

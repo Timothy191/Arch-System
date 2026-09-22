@@ -80,8 +80,8 @@ export async function exportMultiSheetExcel(sheets: ExcelSheetConfig[], fileName
               acc[col.key] = val ?? "";
               return acc;
             },
-            {} as Record<string, Primitive>
-          )
+            {} as Record<string, Primitive>,
+          ),
         );
       } else {
         ws.addRow(
@@ -91,7 +91,7 @@ export async function exportMultiSheetExcel(sheets: ExcelSheetConfig[], fileName
               return col.type === "date" ? val.toISOString() : val;
             }
             return val ?? "";
-          })
+          }),
         );
       }
     }
@@ -110,7 +110,7 @@ export async function exportStyledExcel(
     headerFontColor?: string;
     currencyFormat?: string;
     dateFormat?: string;
-  }
+  },
 ) {
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
@@ -157,8 +157,8 @@ export async function exportStyledExcel(
             acc[col.key] = row[col.key];
             return acc;
           },
-          {} as Record<string, Primitive>
-        )
+          {} as Record<string, Primitive>,
+        ),
       );
 
       dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {

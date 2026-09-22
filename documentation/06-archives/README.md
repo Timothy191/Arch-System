@@ -1,6 +1,7 @@
 # 06 - Historical Documentation & Archives
 
 ## Overview
+
 Archived checklists, legacy migration plans, and historical implementation logs.
 
 - **[Archive Catalog](../../docs/archive/)**: Historical task lists, legacy checklists, and audit snapshots.

@@ -3,9 +3,7 @@
   "roleId": "architect",
   "workerId": "worker-2",
   "skill": "plan",
-  "skills": [
-    "plan"
-  ],
+  "skills": ["plan"],
   "status": "completed",
   "summary": "architect completed assignment 2/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
   "simulated": true,

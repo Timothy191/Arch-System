@@ -19,7 +19,7 @@ module.exports = {
     "build/**",
     "report/**",
     "coverage/**",
-    "commitlint.config.mjs"
+    "commitlint.config.mjs",
   ],
   rules: {
     "no-console": ["warn", { allow: ["warn", "error"] }],

@@ -20,7 +20,7 @@ export function Entity({
     <div
       className={cn(
         "flex items-center justify-between gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm",
-        className
+        className,
       )}
       {...props}
     >

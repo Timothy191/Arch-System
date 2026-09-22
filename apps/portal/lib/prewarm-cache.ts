@@ -33,6 +33,6 @@ export async function prewarmDepartmentCache() {
           // Silently fail - cache will be populated on-demand
         }
       }
-    })
+    }),
   );
 }

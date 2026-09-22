@@ -13,7 +13,7 @@ interface ActionResult<T = unknown> {
 
 // AGENT-TRACE: Server Action to validate and upsert drill operations daily shift log
 export async function upsertDrillOperationAction(
-  rawInput: DrillOperationInput
+  rawInput: DrillOperationInput,
 ): Promise<ActionResult> {
   try {
     const parseResult = drillOperationSchema.safeParse(rawInput);

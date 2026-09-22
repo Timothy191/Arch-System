@@ -11,15 +11,15 @@
 
 **Overall weighted score: 62.5 / 100** — Good foundation, not yet world-class.
 
-| Dimension | Score | Weight | Notes |
-| :-------- | ----: | -----: | :---- |
-| Design-token discipline | 62 | 0.15 | Strong token layer, but raw colors/opacities leak into GlassCard, login, and preset. |
-| Glassmorphism & visual consistency | 62 | 0.15 | Glass foundation restored; opaque overrides and charcoal drift remain. |
-| Accessibility (a11y) | 68 | 0.20 | Labels/focus good; touch targets and reduced-motion guards are the gaps. |
-| Performance & Core Web Vitals | 52 | 0.15 | Largest gap: 4.5 MB PNG LCP, disabled inline CSS, misaligned preload. |
-| Interaction & motion design | 62 | 0.15 | Mostly transform-only; inconsistent easing and missing `prefers-reduced-motion`. |
-| Navigation & information architecture | 68 | 0.10 | Skip links + route announcer; missing breadcrumbs, nested `<main>`, mobile nav gaps. |
-| Mobile / responsive fit | 64 | 0.10 | Desktop-first residues: fixed sidebars, fixed-width popovers, unscaled 3D carousel. |
+| Dimension                             | Score | Weight | Notes                                                                                |
+| :------------------------------------ | ----: | -----: | :----------------------------------------------------------------------------------- |
+| Design-token discipline               |    62 |   0.15 | Strong token layer, but raw colors/opacities leak into GlassCard, login, and preset. |
+| Glassmorphism & visual consistency    |    62 |   0.15 | Glass foundation restored; opaque overrides and charcoal drift remain.               |
+| Accessibility (a11y)                  |    68 |   0.20 | Labels/focus good; touch targets and reduced-motion guards are the gaps.             |
+| Performance & Core Web Vitals         |    52 |   0.15 | Largest gap: 4.5 MB PNG LCP, disabled inline CSS, misaligned preload.                |
+| Interaction & motion design           |    62 |   0.15 | Mostly transform-only; inconsistent easing and missing `prefers-reduced-motion`.     |
+| Navigation & information architecture |    68 |   0.10 | Skip links + route announcer; missing breadcrumbs, nested `<main>`, mobile nav gaps. |
+| Mobile / responsive fit               |    64 |   0.10 | Desktop-first residues: fixed sidebars, fixed-width popovers, unscaled 3D carousel.  |
 
 **Agent-ready scans:** `/login`, `/hub`, `/` all score **98/100 A+** with valid MCP manifest, `llms.txt`, and JSON-LD.  
 **Build:** Full production build OOM-killed (exit 137) during TypeScript; dev server builds OK on webpack.  
@@ -73,18 +73,18 @@
 
 ## Priority 1 — Short-Term Roadmap (Next Sprint)
 
-| # | Action | Files | Effort | Impact |
-| :- | :----- | :---- | :----- | :----- |
-| 1 | Add global `prefers-reduced-motion` policy | `packages/theme/src/tokens/motion.ts`, `packages/ui/src/components/ui/animated-button.tsx`, `cyber-button.tsx`, `packages/ui/src/components/motion/AnimeStagger.tsx`, `apps/portal/app/hub/page.tsx` | M | Eliminates WCAG 2.3 risk across all motion |
-| 2 | Replace `transition-all` and width animations with transform-only | `packages/ui/src/components/ui/cyber-button.tsx`, `SystemTray.tsx:260` | S-M | Reduces INP/layout cost |
-| 3 | Standardize tactile feedback: `active:scale-[0.97] duration-150 ease-out-expo` | All interactive primitives (`button.tsx`, `GlassCard.tsx`, `liqui-button.tsx`) | M | Consistent premium feel |
-| 4 | Audit `login/page.tsx` for raw colors/opacities and migrate to tokens | `apps/portal/app/(auth)/login/page.tsx` | M | Fixes the visual entry point |
-| 5 | Make GlassCard token-only | `packages/ui/src/components/GlassCard.tsx` | M | Closes biggest token-drift source |
-| 6 | Remove opaque `bg-white/75` overrides in ToolBanner and GlowBorder | `libs/features/hub/ui/src/ToolBanner.tsx`, `packages/ui/src/components/GlassCard.tsx:370` | S | Restores glass illusion |
-| 7 | Fix charcoal drift: replace deprecated `var(--accent-blue)` with electric blue | `packages/ui/src/components/GlassCard.tsx:88`, `apps/portal/components/system/SystemTray.tsx:342` | S | Restores brand-blue accent |
-| 8 | Add `aria-live`/`aria-describedby` refactor to LoginForm errors | `libs/features/auth/ui/src/LoginForm.tsx:153` | S | Robust screen-reader status |
-| 9 | Add collision padding + max-width to all popovers/dropdowns | `SystemTray.tsx`, `WeatherWidget.tsx`, `MacMenuBar.tsx` | M | Fixes mobile overflow |
-| 10 | Increase default input/button/icon sizes to 44 px | `packages/ui/src/components/ui/input.tsx:24`, `button.tsx:33` | S-M | WCAG 2.5.5/2.5.8 |
+| #   | Action                                                                         | Files                                                                                                                                                                                                | Effort | Impact                                     |
+| :-- | :----------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- | :----------------------------------------- |
+| 1   | Add global `prefers-reduced-motion` policy                                     | `packages/theme/src/tokens/motion.ts`, `packages/ui/src/components/ui/animated-button.tsx`, `cyber-button.tsx`, `packages/ui/src/components/motion/AnimeStagger.tsx`, `apps/portal/app/hub/page.tsx` | M      | Eliminates WCAG 2.3 risk across all motion |
+| 2   | Replace `transition-all` and width animations with transform-only              | `packages/ui/src/components/ui/cyber-button.tsx`, `SystemTray.tsx:260`                                                                                                                               | S-M    | Reduces INP/layout cost                    |
+| 3   | Standardize tactile feedback: `active:scale-[0.97] duration-150 ease-out-expo` | All interactive primitives (`button.tsx`, `GlassCard.tsx`, `liqui-button.tsx`)                                                                                                                       | M      | Consistent premium feel                    |
+| 4   | Audit `login/page.tsx` for raw colors/opacities and migrate to tokens          | `apps/portal/app/(auth)/login/page.tsx`                                                                                                                                                              | M      | Fixes the visual entry point               |
+| 5   | Make GlassCard token-only                                                      | `packages/ui/src/components/GlassCard.tsx`                                                                                                                                                           | M      | Closes biggest token-drift source          |
+| 6   | Remove opaque `bg-white/75` overrides in ToolBanner and GlowBorder             | `libs/features/hub/ui/src/ToolBanner.tsx`, `packages/ui/src/components/GlassCard.tsx:370`                                                                                                            | S      | Restores glass illusion                    |
+| 7   | Fix charcoal drift: replace deprecated `var(--accent-blue)` with electric blue | `packages/ui/src/components/GlassCard.tsx:88`, `apps/portal/components/system/SystemTray.tsx:342`                                                                                                    | S      | Restores brand-blue accent                 |
+| 8   | Add `aria-live`/`aria-describedby` refactor to LoginForm errors                | `libs/features/auth/ui/src/LoginForm.tsx:153`                                                                                                                                                        | S      | Robust screen-reader status                |
+| 9   | Add collision padding + max-width to all popovers/dropdowns                    | `SystemTray.tsx`, `WeatherWidget.tsx`, `MacMenuBar.tsx`                                                                                                                                              | M      | Fixes mobile overflow                      |
+| 10  | Increase default input/button/icon sizes to 44 px                              | `packages/ui/src/components/ui/input.tsx:24`, `button.tsx:33`                                                                                                                                        | S-M    | WCAG 2.5.5/2.5.8                           |
 
 ---
 

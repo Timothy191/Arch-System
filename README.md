@@ -39,35 +39,39 @@ This project is organized as a **Turborepo** monorepo using **pnpm** for workspa
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### One-Command Setup (Clone & Run)
 
-- **Node.js**: `>=22`
-- **pnpm**: `9.15.9`
+Simply clone and run `./setup.sh`:
 
-### Setup
+```bash
+git clone https://github.com/Timothy191/Arch-System.git
+cd Arch-System
+./setup.sh --dev
+```
 
-1. **Install dependencies**:
+This single command will:
 
-   ```bash
-   pnpm install
-   ```
+1. Validate Node.js (`>=22`) and auto-configure `pnpm`.
+2. Install all monorepo dependencies.
+3. Auto-configure `apps/portal/.env` from templates.
+4. Compile design tokens and monorepo architectural boundaries.
+5. Bind to `0.0.0.0` so the server is **accessible across your entire local network / Wi-Fi** (phones, tablets, other PCs).
 
-2. **Environment Variables**:
-   Copy `apps/portal/env/.env.example` to `apps/portal/.env` and fill in your Supabase credentials.
-3. **Start Local Database** (requires Docker):
+### Setup Options
 
-   ```bash
-   cd packages/database && pnpm supabase:dev
-   ```
+```bash
+./setup.sh             # Setup only (dependencies, tokens, env)
+./setup.sh --dev       # Setup and launch development server on 0.0.0.0:3000
+./setup.sh --start     # Setup, build, and launch production server on 0.0.0.0:3000
+./setup.sh --clean     # Clean reinstall: wipes node_modules/cache and reinstalls cleanly
+```
 
-4. **Development Mode**:
+### Local Network Access (Any Device on Same Network)
 
-   ```bash
-   # Start the monorepo dev server (auto-resolves port conflicts and starts dependencies)
-   pnpm dev
-   ```
+When the server starts, it binds to `0.0.0.0:3000`:
 
-   **Note**: The development server automatically checks for port conflicts, starts the Supabase local stack, and launches the portal.
+- **This Machine**: `http://localhost:3000`
+- **Other Devices on Local Network**: `http://<YOUR_LOCAL_IP>:3000` (e.g. `http://192.168.1.50:3000` or `http://10.42.0.240:3000`)
 
 ## 🛠️ Key Commands
 

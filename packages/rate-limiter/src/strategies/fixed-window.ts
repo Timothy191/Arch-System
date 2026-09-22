@@ -10,7 +10,7 @@ export class FixedWindowStrategy implements IStrategy {
     key: string,
     limit: number,
     windowMs: number,
-    store: IStore
+    store: IStore,
   ): Promise<RateLimitResult> {
     const now = Date.now();
     const windowStart = Math.floor(now / windowMs) * windowMs;

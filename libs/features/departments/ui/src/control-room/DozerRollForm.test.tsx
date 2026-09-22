@@ -173,12 +173,12 @@ describe("DozerRollForm", () => {
         departmentId={defaultProps.departmentId}
         dozers={defaultProps.dozers}
         today=""
-      />
+      />,
     );
 
     expect(screen.getByTestId("glass-card")).toBeInTheDocument();
     expect(
-      screen.getByText("Operational date is missing or invalid. Please reload the page.")
+      screen.getByText("Operational date is missing or invalid. Please reload the page."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Add Roll")).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
@@ -192,7 +192,7 @@ describe("DozerRollForm", () => {
         departmentId={defaultProps.departmentId}
         dozers={[]}
         today={defaultProps.today}
-      />
+      />,
     );
 
     openForm();

@@ -50,7 +50,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                 "rounded-md px-3 py-1 text-xs font-medium transition-all",
                 activeSite === site
                   ? "bg-white text-arch-text-primary shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary"
+                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
               )}
             >
               {site}
@@ -146,7 +146,7 @@ export function MultiSiteShiftReportClient({ initialReport }: MultiSiteShiftRepo
                       )}
                     </div>
                   </GlassCard>
-                ))
+                )),
               )}
           </div>
         </div>

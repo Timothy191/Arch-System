@@ -6,7 +6,7 @@ export function applyCors(request: Request, response: NextResponse): NextRespons
   response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
   response.headers.set(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, x-scanner-token, x-scanner-source, x-device-id, apikey, x-client-info"
+    "Content-Type, Authorization, x-scanner-token, x-scanner-source, x-device-id, apikey, x-client-info",
   );
   return response;
 }

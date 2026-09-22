@@ -61,7 +61,7 @@ if (currentChecksum === previousChecksum) {
 }
 
 console.log(
-  `🔄 Assets changed (Old: ${previousChecksum || "none"} -> New: ${currentChecksum}). Synchronizing...`
+  `🔄 Assets changed (Old: ${previousChecksum || "none"} -> New: ${currentChecksum}). Synchronizing...`,
 );
 
 try {

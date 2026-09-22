@@ -29,7 +29,7 @@ describe("GET /api/codebase-maps", () => {
     fs.writeFileSync(path.join(tempRoot, "manifest.json"), "[]");
     fs.writeFileSync(
       path.join(tempRoot, "latest", "route-feature-architecture.md"),
-      "# default map"
+      "# default map",
     );
 
     const res = await GET(makeRequest(), { mapsRoot: tempRoot });

@@ -14,12 +14,12 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 
 ## 2. Department Overview
 
-| Attribute | Specification |
-| :--- | :--- |
-| **Primary Function** | Heavy equipment maintenance, breakdown book-in/out, tire fleet tracking, MTTR optimization |
-| **Operating Schedule** | 24/7/365 (Shift Mechanics, Maintenance Planners & Workshop Technicians) |
-| **Operational Environments** | Heavy Mobile Equipment (HME) Workshop, Field Repair Bays, Central Warehouse & Engineering Office |
-| **Core Systems Integrated** | CMMS / Maintenance Logs, Telemetry Diagnostics, SCADA Machine Alerts, Tire Pressure/Tread Scanners, CAD Equipment Schematics |
+| Attribute                    | Specification                                                                                                                |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| **Primary Function**         | Heavy equipment maintenance, breakdown book-in/out, tire fleet tracking, MTTR optimization                                   |
+| **Operating Schedule**       | 24/7/365 (Shift Mechanics, Maintenance Planners & Workshop Technicians)                                                      |
+| **Operational Environments** | Heavy Mobile Equipment (HME) Workshop, Field Repair Bays, Central Warehouse & Engineering Office                             |
+| **Core Systems Integrated**  | CMMS / Maintenance Logs, Telemetry Diagnostics, SCADA Machine Alerts, Tire Pressure/Tread Scanners, CAD Equipment Schematics |
 
 ---
 
@@ -36,14 +36,14 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 
 ## 4. Roles & Responsibilities Matrix
 
-| Role | Key Operational Responsibilities |
-| :--- | :--- |
-| **Chief Engineer / Engineering Lead** | Strategic maintenance planning, asset capital expenditure, vendor management, and statutory machinery compliance. |
-| **Maintenance Planner** | Shift scheduling, parts availability forecasting, planned maintenance work orders, and backlog prioritization. |
-| **Workshop Supervisor** | Active bay supervision, breakdown triage, mechanical/electrical team dispatch, and repair sign-off. |
-| **Field Mechanic / Technician** | Equipment book-in, diagnosis, repair execution, replacement part logging, and book-out submission. |
-| **Tire Specialist / Technician** | Weekly tire pressure audits, ultrasonic tread depth measurements, rotation scheduling, and scrap root-cause analysis. |
-| **Reliability Engineer** | Failure modes and effects analysis (FMEA), MTTR/MTBF trend analysis, and root cause failure analysis (RCFA). |
+| Role                                  | Key Operational Responsibilities                                                                                      |
+| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| **Chief Engineer / Engineering Lead** | Strategic maintenance planning, asset capital expenditure, vendor management, and statutory machinery compliance.     |
+| **Maintenance Planner**               | Shift scheduling, parts availability forecasting, planned maintenance work orders, and backlog prioritization.        |
+| **Workshop Supervisor**               | Active bay supervision, breakdown triage, mechanical/electrical team dispatch, and repair sign-off.                   |
+| **Field Mechanic / Technician**       | Equipment book-in, diagnosis, repair execution, replacement part logging, and book-out submission.                    |
+| **Tire Specialist / Technician**      | Weekly tire pressure audits, ultrasonic tread depth measurements, rotation scheduling, and scrap root-cause analysis. |
+| **Reliability Engineer**              | Failure modes and effects analysis (FMEA), MTTR/MTBF trend analysis, and root cause failure analysis (RCFA).          |
 
 ---
 
@@ -79,6 +79,7 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 ## 6. Standard Operating Procedures (SOPs)
 
 ### Equipment Breakdown Lifecycle
+
 ```
 [ Machine Breakdown In Field ]
        │
@@ -99,6 +100,7 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 ```
 
 ### Tire Inspection & Replacement Protocol
+
 1. **Inspection**: Record tire serial number, machine wheel position, tread depth (mm), and pressure (psi).
 2. **Evaluation**: Compare tread wear against statutory safety minimums (e.g. $< 15\text{ mm}$ triggers replacement advisory).
 3. **Action**: If condition is `warning`, schedule rotation or remolding; if `critical`, issue immediate lock-out work order.
@@ -108,26 +110,28 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 
 ## 7. Performance Targets (KPIs)
 
-| Metric | Target SLA | Evaluation Frequency |
-| :--- | :--- | :--- |
-| **Mean Time to Repair (MTTR)** | $< 4.0\text{ hours}$ (standard faults) | Weekly aggregate |
-| **Fleet Availability Rate** | $\ge 92.5\%$ | Daily shift review |
-| **Tire Inspection Compliance** | $100\%$ fleet inspected bi-weekly | Bi-weekly audit |
-| **Emergency Breakdown Rate** | $< 5\%$ of total operating hours | Monthly aggregate |
-| **Repeat Failure Rate (< 48 hrs)** | $< 2.0\%$ | Continuous audit |
-| **Breakdown Data Integrity (Book In/Out)** | $100\%$ complete records | Per breakdown closure |
+| Metric                                     | Target SLA                             | Evaluation Frequency  |
+| :----------------------------------------- | :------------------------------------- | :-------------------- |
+| **Mean Time to Repair (MTTR)**             | $< 4.0\text{ hours}$ (standard faults) | Weekly aggregate      |
+| **Fleet Availability Rate**                | $\ge 92.5\%$                           | Daily shift review    |
+| **Tire Inspection Compliance**             | $100\%$ fleet inspected bi-weekly      | Bi-weekly audit       |
+| **Emergency Breakdown Rate**               | $< 5\%$ of total operating hours       | Monthly aggregate     |
+| **Repeat Failure Rate (< 48 hrs)**         | $< 2.0\%$                              | Continuous audit      |
+| **Breakdown Data Integrity (Book In/Out)** | $100\%$ complete records               | Per breakdown closure |
 
 ---
 
 ## 8. Operational Checklists
 
 ### Daily Workshop Checklist
+
 - [ ] Review all active overnight breakdowns in the Engineering Dashboard.
 - [ ] Verify bay mechanics allocation and outstanding high-priority work orders.
 - [ ] Check parts inventory status for machines currently in critical repair.
 - [ ] Cross-reference SCADA machinery fault alerts with logged breakdown tickets.
 
 ### Weekly Reliability Checklist
+
 - [ ] Calculate 7-day rolling MTTR and MTBF per fleet category (Drills, Excavators, Dozers, Dumpers).
 - [ ] Inspect critical high-hour machines due for preventative 250h / 500h service intervals.
 - [ ] Review tire wear status reports and prioritize wheel rotations.
@@ -137,13 +141,13 @@ The **Engineering Department** is responsible for plant asset lifecycle reliabil
 
 ## 9. Current Technical Completeness & Focus Areas
 
-| Feature / Subsystem | Completeness | Technical Implementation State |
-| :--- | :--- | :--- |
-| **Engineering Hub Dashboard** | 100% | Live breakdown counters, resolved today metrics, recent breakdown feed |
-| **Breakdowns Workflow & Drafting** | 100% | Book-in form, book-out modal, interactive data query table, localStorage draft caching, quick-select chips |
-| **Tire Management & Regulatory Export** | 100% | Database schema (`0146_tire_management.sql`), RLS, interactive inspection modal, replacement workflow, tread degradation curve chart, CSV/JSON audit exports |
-| **Equipment Inventory (Machines)** | 100% | Supabase `machines` integration, specifications lookup, status tracking |
-| **Engineering Notes** | 100% | Rich text issue logging, severity tags, filterable shift note history |
-| **Reliability Analytics / MTTR & MTBF** | 100% | MTTR vs predictive MTBF comparison chart and automated preventative service triggers |
-| **Living Documentation & System Wiki** | 100% | Full operational manual, SOPs, KPIs, checklist matrix (`system-wiki/engineering-department.md`) |
-| **Overall Engineering Department** | **100%** | Production-grade completeness across all operational, analytical, and field modules |
+| Feature / Subsystem                     | Completeness | Technical Implementation State                                                                                                                               |
+| :-------------------------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Engineering Hub Dashboard**           | 100%         | Live breakdown counters, resolved today metrics, recent breakdown feed                                                                                       |
+| **Breakdowns Workflow & Drafting**      | 100%         | Book-in form, book-out modal, interactive data query table, localStorage draft caching, quick-select chips                                                   |
+| **Tire Management & Regulatory Export** | 100%         | Database schema (`0146_tire_management.sql`), RLS, interactive inspection modal, replacement workflow, tread degradation curve chart, CSV/JSON audit exports |
+| **Equipment Inventory (Machines)**      | 100%         | Supabase `machines` integration, specifications lookup, status tracking                                                                                      |
+| **Engineering Notes**                   | 100%         | Rich text issue logging, severity tags, filterable shift note history                                                                                        |
+| **Reliability Analytics / MTTR & MTBF** | 100%         | MTTR vs predictive MTBF comparison chart and automated preventative service triggers                                                                         |
+| **Living Documentation & System Wiki**  | 100%         | Full operational manual, SOPs, KPIs, checklist matrix (`system-wiki/engineering-department.md`)                                                              |
+| **Overall Engineering Department**      | **100%**     | Production-grade completeness across all operational, analytical, and field modules                                                                          |

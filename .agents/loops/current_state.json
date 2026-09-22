@@ -9,7 +9,5 @@
     "timeout_seconds": 600
   },
   "created_at": "2026-09-11T08:14:58Z",
-  "verification_gates": [
-    "pnpm --filter @repo/shared/hooks type-check"
-  ]
+  "verification_gates": ["pnpm --filter @repo/shared/hooks type-check"]
 }

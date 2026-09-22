@@ -21,9 +21,11 @@ verification:
 # Business Loop: Security & RLS Governance Sentinel
 
 ## 1. Business Intent
+
 Guarantees that database schemas, migration files, and security policies strictly adhere to Supabase Row Level Security (RLS) standards. Flags missing RLS, open policies (`USING (true)`), unpinned search paths, or leaked credentials.
 
 ## 2. Invariants & Guardrails
+
 - **100% RLS Coverage**: Every table created in `packages/database/migrations/` must explicitly enable RLS.
 - **Department-Scoped Access**: Policies must enforce `employees.department_id` and `employees.role` checks.
 - **Level 3 Protection**: Any remediation touching SQL migration files or database policies requires human approval via `corpos approve`.

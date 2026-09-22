@@ -7,11 +7,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-  findOpaqueBackgroundLayers,
-  luminanceOf,
-  ROUTE_BG_SELECTOR,
-} from "../helpers/background";
+import { findOpaqueBackgroundLayers, luminanceOf, ROUTE_BG_SELECTOR } from "../helpers/background";
 
 // AGENT-TRACE: Override the project-level authenticated storageState (e2e/.auth/user.json)
 // so this spec runs UNauthenticated. The (auth) middleware redirects authenticated

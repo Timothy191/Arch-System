@@ -77,7 +77,7 @@ export function File({ name, active, icon, className, ...props }: FileProps) {
         active
           ? "bg-muted/50 text-foreground font-medium"
           : "text-muted-foreground hover:text-foreground",
-        className
+        className,
       )}
       style={{ paddingLeft: `${level * 16 + 28}px` }}
       {...props}

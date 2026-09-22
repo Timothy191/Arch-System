@@ -164,7 +164,7 @@ async function handleGetWebhooks(_request: NextRequest): Promise<NextResponse> {
 
   if (employee.role !== "admin") {
     query = query.or(
-      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(",")})`
+      `department_id.eq.${employee.department_id},department_id.in.(${(employee.accessible_departments || []).join(",")})`,
     );
   }
 
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
   const response = await withRateLimit(request, () =>
     withBodyLimit(request, () => handleCreateWebhook(request), {
       maxSize: 524288,
-    })
+    }),
   );
   return applyCors(request, response);
 }

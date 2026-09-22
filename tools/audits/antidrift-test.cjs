@@ -71,7 +71,11 @@ function readFile(rel) {
 /** Run a shell command; return trimmed stdout or "" on failure. */
 function sh(cmd) {
   try {
-    return execSync(cmd, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return execSync(cmd, {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
   } catch {
     return "";
   }
@@ -140,7 +144,17 @@ function capabilitySourceRetention() {
   const livingNxRefs = countMatches(
     "\\bNx\\b monorepo|pnpm nx run|nx build|nx test|nx lint",
     ["*.md", "*.cjs", "*.mjs", "*.ts", "*.tsx", "*.json"],
-    ["**/node_modules/**", "**/.next/**", "**/dist/**", "documentation/06-archives/**", "docs/archive/**", "codebase-maps/log-*/**", "documentation/08-ultragoal-archives/**", "AGENT_TRACER.md", "tools/audits/antidrift-test.cjs"],
+    [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "documentation/06-archives/**",
+      "docs/archive/**",
+      "codebase-maps/log-*/**",
+      "documentation/08-ultragoal-archives/**",
+      "AGENT_TRACER.md",
+      "tools/audits/antidrift-test.cjs",
+    ],
   );
   checks.push(
     result(
@@ -208,7 +222,17 @@ function capabilityConceptStability() {
   const nxTurboConflation = countMatches(
     "\\bNx\\b monorepo|Nx/Turbo",
     ["*.md"],
-    ["**/node_modules/**", "**/.next/**", "**/dist/**", "documentation/06-archives/**", "docs/archive/**", "codebase-maps/log-*/**", "documentation/08-ultragoal-archives/**", "AGENT_TRACER.md", "tools/audits/antidrift-test.cjs"],
+    [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "documentation/06-archives/**",
+      "docs/archive/**",
+      "codebase-maps/log-*/**",
+      "documentation/08-ultragoal-archives/**",
+      "AGENT_TRACER.md",
+      "tools/audits/antidrift-test.cjs",
+    ],
   );
   checks.push(
     result(
@@ -228,11 +252,18 @@ function capabilityConceptStability() {
       "CS-2",
       "Deploy-time supabase migration copy is not the SSoT",
       supabaseMigrationsEdited === 0,
-      supabaseMigrationsEdited === 0 ? "copy is empty/deploy-time only" : `${supabaseMigrationsEdited} file(s) in the deploy-time copy`,
+      supabaseMigrationsEdited === 0
+        ? "copy is empty/deploy-time only"
+        : `${supabaseMigrationsEdited} file(s) in the deploy-time copy`,
     ),
   );
 
-  const nxIgnoreRefs = countMatches("\\.nx/", [".prettierignore", ".dockerignore", ".gitignore", "config/tools/.secretlintignore"]);
+  const nxIgnoreRefs = countMatches("\\.nx/", [
+    ".prettierignore",
+    ".dockerignore",
+    ".gitignore",
+    "config/tools/.secretlintignore",
+  ]);
   checks.push(
     result(
       "CS-3",
@@ -280,7 +311,9 @@ function capabilityUnauthorizedMerge() {
       "UM-3",
       "Apps never import @repo/database-internal",
       appImportsInternal === 0,
-      appImportsInternal === 0 ? "clean" : `${appImportsInternal} app file(s) import database-internal`,
+      appImportsInternal === 0
+        ? "clean"
+        : `${appImportsInternal} app file(s) import database-internal`,
     ),
   );
 
@@ -379,7 +412,9 @@ function capabilityRepairAccuracy() {
       "RA-2",
       "audit:compliance invokes the real rollback test",
       !rollbackRef,
-      rollbackRef ? "phantom test:migration-rollback reference" : "invokes pnpm --filter @repo/database test",
+      rollbackRef
+        ? "phantom test:migration-rollback reference"
+        : "invokes pnpm --filter @repo/database test",
     ),
   );
 
@@ -442,7 +477,12 @@ function computeConfidence(capabilities) {
     const confidence = Math.round((capScore / capWeight) * 100);
     totalWeight += capWeight;
     weightedSum += (capScore / capWeight) * capWeight;
-    return { capability: cap.capability, confidence, passed: cap.checks.filter((c) => c.passed).length, total: cap.checks.length };
+    return {
+      capability: cap.capability,
+      confidence,
+      passed: cap.checks.filter((c) => c.passed).length,
+      total: cap.checks.length,
+    };
   });
   const overall = Math.round((weightedSum / totalWeight) * 100);
   return { perCapability, overall };

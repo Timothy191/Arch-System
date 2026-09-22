@@ -83,7 +83,7 @@ jest.mock("@/lib/weather-api", () => ({
       icon: "⛅",
       timestamp: new Date().toISOString(),
       location: { lat: -26.35914, lon: 28.79267, name: "Delmas, Mpumalanga" },
-    })
+    }),
   ),
   getWindDirection: jest.fn((deg: number) => {
     const dirs = [
@@ -132,7 +132,7 @@ describe("ServicesDropdown", () => {
           message: "Blasting hold lifted — Sector 4",
           timestamp: Date.now() - 7200000,
         },
-      ])
+      ]),
     );
   });
 

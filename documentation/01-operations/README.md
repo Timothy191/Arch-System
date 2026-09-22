@@ -1,6 +1,7 @@
 # 01 - Operational Procedures & Runbooks
 
 ## Overview
+
 Control room operational procedures, FUXA integrations, shift handovers, and troubleshooting runbooks.
 
 - **[Control Room Production Readiness](../../docs/operations/CONTROL_ROOM_PRODUCTION_READINESS.md)**: Production deployment verification and readiness checks.

@@ -47,7 +47,7 @@ export function ProductionSummaryCard({ production, shiftType }: ProductionSumma
             {production.machines.map((machine) => {
               const maxHourly = Math.max(
                 1,
-                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0)
+                ...Object.values(machine.hourly_distribution).map((v) => Number(v) || 0),
               );
 
               return (

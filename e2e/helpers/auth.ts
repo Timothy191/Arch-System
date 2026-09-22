@@ -12,7 +12,11 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || "Yugioh@123#";
  */
 async function formLogin(page: Page): Promise<boolean> {
   // If already authenticated and on hub, return immediately
-  if (page.url().includes("/hub") || page.url().includes("/drilling") || page.url().includes("/engineering")) {
+  if (
+    page.url().includes("/hub") ||
+    page.url().includes("/drilling") ||
+    page.url().includes("/engineering")
+  ) {
     return true;
   }
 
@@ -33,7 +37,11 @@ async function formLogin(page: Page): Promise<boolean> {
     await emailInput.fill(TEST_EMAIL);
     await page.locator("input#password, input[name='password']").fill(TEST_PASSWORD);
     await page.locator("button[type='submit']").click();
-    await page.waitForURL((url) => url.pathname.includes("/hub") || url.pathname === "/", { timeout: 10000 }).catch(() => {});
+    await page
+      .waitForURL((url) => url.pathname.includes("/hub") || url.pathname === "/", {
+        timeout: 10000,
+      })
+      .catch(() => {});
   }
   return true;
 }
@@ -51,7 +59,6 @@ export async function loginWithTestUser(context: BrowserContext, page: Page): Pr
 
   return await formLogin(page);
 }
-
 
 /**
  * Perform a mock login for E2E tests.

@@ -116,7 +116,7 @@ export function Drawer({
             className={cn(
               "fixed z-50 flex flex-col bg-background shadow-xl outline-none border-border",
               getPositionClasses(),
-              className
+              className,
             )}
             {...props}
           >

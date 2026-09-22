@@ -54,7 +54,7 @@ export default async function DrillingReportsPage({
       delay_other,
       status,
       machines!inner(name)
-    `
+    `,
     )
     .eq("department_id", deptId)
     .gte("operation_date", from)

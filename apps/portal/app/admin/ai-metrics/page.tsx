@@ -14,7 +14,7 @@ const AIMetricsDashboard = dynamic(
         </div>
       </div>
     ),
-  }
+  },
 );
 
 export default function AIMetricsPage() {

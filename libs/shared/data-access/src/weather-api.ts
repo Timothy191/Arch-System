@@ -96,7 +96,7 @@ export function getWindDirection(deg: number): string {
 export async function fetchWeather(
   lat: number = -26.1436, // Delmas, Mpumalanga, South Africa default
   lon: number = 28.6811,
-  locationName?: string
+  locationName?: string,
 ): Promise<WeatherData> {
   // Use API route when coordinates match default (server-side proxy)
   // Direct API call for custom coordinates (client-side with CSP)
@@ -156,7 +156,7 @@ export async function fetchWeather(
  * Search for location coordinates by name (using Open-Meteo Geocoding API)
  */
 export async function searchLocation(
-  name: string
+  name: string,
 ): Promise<{ lat: number; lon: number; name: string }[]> {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`;
 

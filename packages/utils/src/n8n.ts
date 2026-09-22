@@ -55,9 +55,7 @@ export function getN8nBaseUrl(overrideUrl?: string): string {
   }
 
   const envUrl =
-    process.env.N8N_URL ||
-    process.env.NEXT_PUBLIC_N8N_URL ||
-    "http://192.168.1.79:5678";
+    process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL || "http://192.168.1.79:5678";
 
   return envUrl.replace(/\/+$/, "");
 }
@@ -74,9 +72,7 @@ export function isN8nConfigured(): boolean {
  * Probes the n8n service health endpoint without throwing.
  * Always returns optional: true.
  */
-export async function checkN8nHealth(
-  options: N8nHealthOptions = {}
-): Promise<N8nHealthResult> {
+export async function checkN8nHealth(options: N8nHealthOptions = {}): Promise<N8nHealthResult> {
   const startTime = Date.now();
   const url = getN8nBaseUrl(options.url);
   const healthEndpoint = `${url}/healthz`;
@@ -113,8 +109,7 @@ export async function checkN8nHealth(
     };
   } catch (err: unknown) {
     const latencyMs = Date.now() - startTime;
-    const errorMessage =
-      err instanceof Error ? err.message : "n8n connection failed or timed out";
+    const errorMessage = err instanceof Error ? err.message : "n8n connection failed or timed out";
 
     return {
       status: "unavailable",
@@ -138,17 +133,17 @@ export async function checkN8nHealth(
 export async function triggerN8nWorkflow<TPayload, TResponse = unknown>(
   endpointOrWebhookPath: string,
   payload: TPayload,
-  options: TriggerN8nOptions<TResponse> = {}
+  options: TriggerN8nOptions<TResponse> = {},
 ): Promise<TriggerN8nResult<TResponse>> {
   const baseUrl = getN8nBaseUrl(options.baseUrl);
   const timeoutMs = options.timeoutMs ?? 3000;
   const apiKey = options.apiKey || process.env.N8N_API_KEY;
 
   // Construct target URL
-  const targetUrl = endpointOrWebhookPath.startsWith("http://") ||
-    endpointOrWebhookPath.startsWith("https://")
-    ? endpointOrWebhookPath
-    : `${baseUrl}/${endpointOrWebhookPath.replace(/^\/+/, "")}`;
+  const targetUrl =
+    endpointOrWebhookPath.startsWith("http://") || endpointOrWebhookPath.startsWith("https://")
+      ? endpointOrWebhookPath
+      : `${baseUrl}/${endpointOrWebhookPath.replace(/^\/+/, "")}`;
 
   try {
     const controller = new AbortController();
@@ -191,8 +186,7 @@ export async function triggerN8nWorkflow<TPayload, TResponse = unknown>(
       statusCode: response.status,
     };
   } catch (err: unknown) {
-    const errorMsg =
-      err instanceof Error ? err.message : "n8n workflow dispatch failed";
+    const errorMsg = err instanceof Error ? err.message : "n8n workflow dispatch failed";
 
     // Non-blocking fallback execution
     if (options.fallback) {
@@ -208,9 +202,7 @@ export async function triggerN8nWorkflow<TPayload, TResponse = unknown>(
         };
       } catch (fallbackErr: unknown) {
         const fallbackMsg =
-          fallbackErr instanceof Error
-            ? fallbackErr.message
-            : "Fallback handler threw an error";
+          fallbackErr instanceof Error ? fallbackErr.message : "Fallback handler threw an error";
         return {
           success: false,
           executed: false,
@@ -238,7 +230,7 @@ export async function triggerN8nWorkflow<TPayload, TResponse = unknown>(
  */
 export async function executeOptionalN8nAction<T>(
   action: () => Promise<T>,
-  fallback: () => Promise<T> | T
+  fallback: () => Promise<T> | T,
 ): Promise<OptionalActionResult<T>> {
   try {
     const result = await action();
@@ -248,8 +240,7 @@ export async function executeOptionalN8nAction<T>(
       data: result,
     };
   } catch (err: unknown) {
-    const errorMsg =
-      err instanceof Error ? err.message : "n8n action execution failed";
+    const errorMsg = err instanceof Error ? err.message : "n8n action execution failed";
     const fallbackResult = await fallback();
     return {
       success: true,

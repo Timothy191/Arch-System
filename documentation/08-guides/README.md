@@ -1,6 +1,7 @@
 # 08 - Operational Guides & Handbooks
 
 ## Overview
+
 Practical step-by-step manuals for developer onboarding, performance optimization, and platform compliance.
 
 - **[Developer Onboarding Checklist](../../docs/ONBOARDING.md)**: Workspace initialization and dependency setup.

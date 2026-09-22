@@ -40,9 +40,7 @@
         "role": "analyst",
         "mission": "Analyze requirement gaps and acceptance criteria before planning starts.",
         "model": "gemini-3.1-flash-lite-preview",
-        "skills": [
-          "plan"
-        ],
+        "skills": ["plan"],
         "assignmentIndex": 1,
         "workerId": "worker-1"
       },
@@ -51,9 +49,7 @@
         "role": "architect",
         "mission": "Define boundaries, interfaces, and architecture trade-offs using code evidence.",
         "model": "gemini-3.1-flash-lite-preview",
-        "skills": [
-          "plan"
-        ],
+        "skills": ["plan"],
         "assignmentIndex": 2,
         "workerId": "worker-2"
       },
@@ -62,9 +58,7 @@
         "role": "build-fixer",
         "mission": "Resolve build, type, and compile failures with minimal, low-risk diffs.",
         "model": "gemini-3.1-flash-lite-preview",
-        "skills": [
-          "team"
-        ],
+        "skills": ["team"],
         "assignmentIndex": 3,
         "workerId": "worker-3"
       }
@@ -90,12 +84,7 @@
           "recommendedGeminiModel": "gemini-3.1-flash-lite-preview",
           "matchedBy": "id",
           "promptAlias": "analyst",
-          "tools": [
-            "read",
-            "glob",
-            "grep",
-            "web-search"
-          ]
+          "tools": ["read", "glob", "grep", "web-search"]
         },
         {
           "subagentId": "architect",
@@ -107,13 +96,7 @@
           "recommendedGeminiModel": "gemini-3.1-flash-lite-preview",
           "matchedBy": "id",
           "promptAlias": "architect",
-          "tools": [
-            "read",
-            "glob",
-            "grep",
-            "web-search",
-            "web-fetch"
-          ]
+          "tools": ["read", "glob", "grep", "web-search", "web-fetch"]
         },
         {
           "subagentId": "build-fixer",
@@ -125,14 +108,7 @@
           "recommendedGeminiModel": "gemini-3.1-flash-lite-preview",
           "matchedBy": "id",
           "promptAlias": "build-fixer",
-          "tools": [
-            "read",
-            "glob",
-            "grep",
-            "edit",
-            "write",
-            "bash"
-          ]
+          "tools": ["read", "glob", "grep", "edit", "write", "bash"]
         }
       ],
       "unmatchedRoles": []
@@ -143,35 +119,17 @@
       "steps": [
         {
           "stage": 1,
-          "workerIds": [
-            "worker-1",
-            "worker-2"
-          ],
-          "agentIds": [
-            "analyst",
-            "architect"
-          ],
-          "roleIds": [
-            "analyst",
-            "architect"
-          ],
+          "workerIds": ["worker-1", "worker-2"],
+          "agentIds": ["analyst", "architect"],
+          "roleIds": ["analyst", "architect"],
           "dependsOn": []
         },
         {
           "stage": 2,
-          "workerIds": [
-            "worker-3"
-          ],
-          "agentIds": [
-            "build-fixer"
-          ],
-          "roleIds": [
-            "build-fixer"
-          ],
-          "dependsOn": [
-            "worker-1",
-            "worker-2"
-          ]
+          "workerIds": ["worker-3"],
+          "agentIds": ["build-fixer"],
+          "roleIds": ["build-fixer"],
+          "dependsOn": ["worker-1", "worker-2"]
         }
       ],
       "handoffs": [
@@ -193,9 +151,7 @@
         "roleId": "analyst",
         "workerId": "worker-1",
         "skill": "plan",
-        "skills": [
-          "plan"
-        ],
+        "skills": ["plan"],
         "status": "completed",
         "summary": "analyst completed assignment 1/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
         "simulated": true,
@@ -218,9 +174,7 @@
         "roleId": "architect",
         "workerId": "worker-2",
         "skill": "plan",
-        "skills": [
-          "plan"
-        ],
+        "skills": ["plan"],
         "status": "completed",
         "summary": "architect completed assignment 2/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
         "simulated": true,
@@ -243,9 +197,7 @@
         "roleId": "build-fixer",
         "workerId": "worker-3",
         "skill": "team",
-        "skills": [
-          "team"
-        ],
+        "skills": ["team"],
         "status": "completed",
         "summary": "build-fixer completed assignment 3/3 for task \"implement-phase-2-3\" in deterministic simulated mode.",
         "simulated": true,
@@ -256,10 +208,7 @@
         },
         "implementation": {
           "changeSummary": "Implemented scoped changes for \"implement-phase-2-3\" in deterministic runtime mode.",
-          "commands": [
-            "npm run typecheck",
-            "npm run test:reliability"
-          ]
+          "commands": ["npm run typecheck", "npm run test:reliability"]
         }
       }
     ],

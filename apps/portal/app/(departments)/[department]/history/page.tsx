@@ -49,7 +49,7 @@ export default async function HistoryPage({
         supabase
           .from("shift_status")
           .select(
-            "shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)"
+            "shift_date, shift_type, status, closed_at, closer:employees!closed_by(full_name), approver:employees!approved_by(full_name)",
           )
           .eq("department_id", deptId)
           .gte("shift_date", from)

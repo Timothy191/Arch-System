@@ -33,7 +33,7 @@ export default async function BreakdownsPage({
   const allBreakdowns = (breakdowns ?? []) as Breakdown[];
   const active = allBreakdowns.filter((b) => b.status === "active").length;
   const completedToday = allBreakdowns.filter(
-    (b) => b.status === "completed" && b.date_out === today
+    (b) => b.status === "completed" && b.date_out === today,
   ).length;
 
   // Avg repair time for completed breakdowns

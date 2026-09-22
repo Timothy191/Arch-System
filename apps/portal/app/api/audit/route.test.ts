@@ -29,14 +29,14 @@ function buildFsScenario(
     pathDirname?: (_p: string | Buffer | URL) => string;
     pathResolve?: (..._p: string[]) => string;
     pathNormalize?: (_p: string) => string;
-  } = {}
+  } = {},
 ) {
   mockFs.existsSync.mockImplementation(overrides.existsSync || (() => false));
   mockFs.readFileSync.mockImplementation(overrides.readFileSync || (() => "{}"));
   mockPath.join.mockImplementation(overrides.pathJoin || ((...args) => args.join("/")));
   mockPath.dirname.mockImplementation(
     overrides.dirname ||
-      ((p) => (typeof p === "string" ? p.slice(0, p.lastIndexOf("/") || 1) : String(p)))
+      ((p) => (typeof p === "string" ? p.slice(0, p.lastIndexOf("/") || 1) : String(p))),
   );
   mockPath.resolve.mockImplementation(overrides.pathResolve || ((...args) => args.join("/")));
   mockPath.normalize.mockImplementation(overrides.pathNormalize || ((p) => String(p)));

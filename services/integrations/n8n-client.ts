@@ -115,7 +115,7 @@ export class N8nClient {
     options?: {
       fallback?: () => Promise<T> | T;
       timeoutMs?: number;
-    }
+    },
   ): Promise<N8nExecutionResponse<T>> {
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
     const targetUrl =
@@ -164,8 +164,7 @@ export class N8nClient {
         statusCode: response.status,
       };
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "n8n dispatch failed";
+      const errorMessage = err instanceof Error ? err.message : "n8n dispatch failed";
 
       if (options?.fallback) {
         try {

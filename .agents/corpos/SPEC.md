@@ -21,20 +21,21 @@ Real company work sits squarely in the middle:
 
 ### The Fundamental Duality: Cron vs. Win Loop
 
-| Characteristic | Traditional Cron Task | Arch-CorpOS Business Loop |
-| :--- | :--- | :--- |
-| **Trigger Mechanism** | Runs at a fixed, blind clock time | Wakes on useful signal (telemetry drift, git event) or adaptive interval |
-| **Execution Script** | Blindly replays the exact same script | Uses a readable `SKILL.md` that adapts its strategy to the specific signal |
-| **Delivery Model** | Usually fire-and-forget | Records structured briefs, approvals, artifacts, outcomes, and journals |
-| **Auditability** | Opaque standard output, hard to inspect | Writes files you can diff, commit, inspect, and review in Git |
-| **Judgment Scope** | Good only for mechanical, deterministic jobs | Built for corporate business cases where contextual judgment matters |
-| **Rescheduling** | Static schedule repeats blindly | Dynamically schedules the next useful check based on outcome & health |
+| Characteristic        | Traditional Cron Task                        | Arch-CorpOS Business Loop                                                  |
+| :-------------------- | :------------------------------------------- | :------------------------------------------------------------------------- |
+| **Trigger Mechanism** | Runs at a fixed, blind clock time            | Wakes on useful signal (telemetry drift, git event) or adaptive interval   |
+| **Execution Script**  | Blindly replays the exact same script        | Uses a readable `SKILL.md` that adapts its strategy to the specific signal |
+| **Delivery Model**    | Usually fire-and-forget                      | Records structured briefs, approvals, artifacts, outcomes, and journals    |
+| **Auditability**      | Opaque standard output, hard to inspect      | Writes files you can diff, commit, inspect, and review in Git              |
+| **Judgment Scope**    | Good only for mechanical, deterministic jobs | Built for corporate business cases where contextual judgment matters       |
+| **Rescheduling**      | Static schedule repeats blindly              | Dynamically schedules the next useful check based on outcome & health      |
 
 ---
 
 ## 2. The Three Architectural Pillars
 
 ### Pillar A: Signal-Driven Business Loops (`win.sh`)
+
 - **Signal Intake**: Loops subscribe to specific signals (SCADA sensor anomalies, git commits, failing tests, pull request requests).
 - **Brief First**: Before modifying any state, the system synthesizes a markdown brief (`briefs/<tick_id>.md`) summarizing why action is required, the proposed scope, and the safety budget.
 - **Evidence & Outcomes**: Every action captures before/after diffs in `artifacts/<tick_id>/` and produces an impact evaluation card in `outcomes/<tick_id>.md`.
@@ -42,14 +43,18 @@ Real company work sits squarely in the middle:
 - **Adaptive Scheduling**: The next tick interval expands (exponential backoff) when conditions are green, and contracts to immediate follow-up when active intervention is underway.
 
 ### Pillar B: Corporate Governance & Authority Matrix (`CorpOS`)
+
 Operations are partitioned into deterministic authority levels:
+
 - **Level 0 (Observer)**: Read-only inspection of telemetry, files, and git logs. Zero risk of mutation.
 - **Level 1 (Advisor)**: Authors documentation, briefs, audit reports, and proposed patches. Cannot modify production codebase.
 - **Level 2 (Operator)**: Autonomous code mutation, unit test execution, and verification assertions in isolated git worktrees. Changes cannot merge without passing all quality gates.
 - **Level 3 (Executive/Admin)**: High-risk operations (database migrations, secret updates, production deployment). **Strictly requires human sign-off** via an approval card written to `storage/approvals/`.
 
 ### Pillar C: Tiered Organizational Structure (`ai-company`)
+
 Autonomous agents belong to organized corporate departments:
+
 - **Tier 0: Executive & Strategic Brain**:
   - `executive`: Cross-department alignment, global compute/token budget enforcement, priority conflicts.
 - **Tier 1: Core Business Operations**:

@@ -45,7 +45,7 @@ export default function AIMetricsDashboard() {
     queryKey: ["ai-metrics", scope],
     queryFn: async () => {
       const json = await fetchClient.get<{ success: boolean; error?: string; metrics: AIMetrics }>(
-        `/api/ai/metrics?scope=${scope}`
+        `/api/ai/metrics?scope=${scope}`,
       );
       if (!json.success) throw new Error(json.error || "Failed to fetch AI metrics");
       return json.metrics;

@@ -1,20 +1,24 @@
 # Data Structures & Memory Layouts
 
-> **REFERENCE SOURCE**: MathWorks *Fundamentals of Programming* & High-Performance Data Engineering.
+> **REFERENCE SOURCE**: MathWorks _Fundamentals of Programming_ & High-Performance Data Engineering.
 
 ---
 
 ## 1. Linear Data Structures & Cache Locality
 
 ### A. Arrays & Memory Contiguity
+
 - **Contiguous Allocation**: Arrays store elements in contiguous memory blocks, maximizing CPU L1/L2 cache line hits.
 - **Preallocation Principle**:
   - In dynamic arrays (e.g. JavaScript Arrays, Python lists, MATLAB matrices), repeated `push` or incremental resizing forces $O(n)$ reallocations and copies.
   - **Rule**: Always preallocate arrays of fixed size `new Array(size)` or pre-sized buffers when the upper bound is known.
 
 ### B. Vectorization vs Scalar Loops
+
 Vectorized operations apply single-instruction transformations across entire data arrays simultaneously (SIMD) rather than evaluating element-by-element in userland loops.
+
 - **Pattern**:
+
   ```typescript
   // BAD: Scalar loop with repeated push and reallocations
   const results: number[] = [];
@@ -45,10 +49,12 @@ Vectorized operations apply single-instruction transformations across entire dat
 ## 3. Hierarchical Structures (Trees & Graphs)
 
 ### A. Trees
+
 - **Binary Search Tree (BST)**: Left child $\le$ Node $<$ Right child. Search/Insert in $O(\log n)$ average, $O(n)$ worst-case unbalanced.
 - **Balanced Trees (AVL, Red-Black)**: Enforce balance factor via self-balancing rotations to guarantee $O(\log n)$ operations.
 
 ### B. Graphs
+
 - **Representations**:
   - **Adjacency Matrix**: $V \times V$ matrix. Optimal for dense graphs ($O(1)$ edge lookup, $O(V^2)$ memory).
   - **Adjacency List**: Map of vertex $\to$ array of neighbors. Optimal for sparse graphs ($O(V + E)$ memory).

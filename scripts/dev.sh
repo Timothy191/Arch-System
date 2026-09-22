@@ -170,9 +170,15 @@ show_results() {
   echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}All systems go${NC} ${DIM}· edit a file to see live updates${NC}       ${GREEN}${BOLD}│${NC}"
   echo -e "  ${GREEN}${BOLD}╰──────────────────────────────────────────────────────────╯${NC}"
   echo
+  local lan_ip
+  lan_ip=$(hostname -I 2>/dev/null | awk '{print $1}' || ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' || echo "")
+
   echo -e "  ${BOLD}${WHITE}Services${NC}"
   _url_row "Login" "http://localhost:$PORT/login"
   _url_row "Portal" "http://localhost:$PORT"
+  if [ -n "$lan_ip" ] && [ "$lan_ip" != "127.0.0.1" ]; then
+    _url_row "Network" "http://${lan_ip}:$PORT" "(accessible across local network)"
+  fi
   if [ "$START_CMS" = "true" ]; then
     _url_row "CMS" "http://localhost:3001"
   fi
@@ -890,7 +896,7 @@ else
   echo "$!" > "$REPO_ROOT/run/theme-watch.pid"
 
   cd "$REPO_ROOT/apps/portal"
-  PORT=$PORT NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
+  PORT=$PORT HOST=0.0.0.0 HOSTNAME=0.0.0.0 NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
   echo $! >"$REPO_ROOT/run/.portal.pid"
   cd "$REPO_ROOT"
   echo -e "  ${INFO} Starting Next.js dev server (via pnpm dev → Turbopack)..."

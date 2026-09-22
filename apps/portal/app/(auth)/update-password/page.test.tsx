@@ -66,7 +66,7 @@ describe("UpdatePasswordPage", () => {
     mockGetSession.mockReturnValue(
       new Promise((resolve) => {
         resolveSession = resolve;
-      })
+      }),
     );
 
     render(<UpdatePasswordPage />);
