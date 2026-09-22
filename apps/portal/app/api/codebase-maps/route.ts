@@ -6,8 +6,9 @@ import { NextResponse } from "next/server";
 // AGENT-TRACE: Statically scoped to the repo-root codebase-maps folder so
 // Turbopack NFT does not trace the whole project. The mapsRoot option is
 // kept for tests; in production it defaults to the resolved repo root.
-const here = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_MAPS_ROOT = path.resolve(here, "../../../../../../codebase-maps");
+// Using process.cwd() instead of __dirname to prevent Next.js from tracing
+// backwards up the directory tree and including the entire monorepo.
+const DEFAULT_MAPS_ROOT = path.join(/*turbopackIgnore: true*/ process.cwd(), "../../codebase-maps");
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function GET(request: Request, options?: { mapsRoot?: string }) {
   const logId = searchParams.get("log") || "latest";
   const fileKey = searchParams.get("file") || "route-feature-architecture.md";
 
-  const manifestPath = path.join(mapsRoot, "manifest.json");
+  const manifestPath = path.join(/*turbopackIgnore: true*/ mapsRoot, "manifest.json");
 
   let manifest: unknown[] = [];
   if (fs.existsSync(manifestPath)) {
@@ -28,9 +29,9 @@ export async function GET(request: Request, options?: { mapsRoot?: string }) {
     }
   }
 
-  const targetDir = logId === "latest" ? path.join(mapsRoot, "latest") : path.join(mapsRoot, logId);
+  const targetDir = logId === "latest" ? path.join(/*turbopackIgnore: true*/ mapsRoot, "latest") : path.join(/*turbopackIgnore: true*/ mapsRoot, logId);
   const fallbackDir = fs.existsSync(targetDir) ? targetDir : mapsRoot;
-  const filePath = path.join(fallbackDir, fileKey);
+  const filePath = path.join(/*turbopackIgnore: true*/ fallbackDir, fileKey);
 
   let mapContent = "";
   if (fs.existsSync(filePath)) {
