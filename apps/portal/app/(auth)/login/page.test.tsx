@@ -98,4 +98,21 @@ describe("LoginPage Server Component", () => {
     ).rejects.toThrow("NEXT_REDIRECT:/production");
     expect(mockRedirect).toHaveBeenCalledWith("/production");
   });
+
+  it("auto-focuses the Retry link in the System Unavailable state (a11y)", async () => {
+    // Auth cookie present but the auth check fails non-transiently ->
+    // the System Unavailable card renders instead of the form.
+    mockCookies.mockResolvedValue({
+      getAll: jest.fn(() => [{ name: "sb-access-token", value: "token" }]),
+    });
+    mockCreateServerSupabaseClient.mockResolvedValue({});
+    mockGetUserSafely.mockRejectedValue(new Error("upstream auth outage"));
+
+    const pageElement = await LoginPage();
+    render(pageElement);
+
+    const retry = screen.getByRole("link", { name: "Retry" });
+    expect(retry).toBeInTheDocument();
+    expect(document.activeElement).toBe(retry);
+  });
 });

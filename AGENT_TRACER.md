@@ -625,3 +625,5 @@ Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/ar
   - `eval-loop/SKILL.md` (NEW): Implemented Loop Engineering iterative refinement against local testing suites.
   - `.agents/skills.json` (UPDATED): Safely whitelisted the new skills.
 - **Verification**: `pnpm audit:antidrift` passed with 95% confidence score.
+| `--task-260` | `archive/tracers` | Agent Tracer Task Log: --task-260 | [`--task-260-2026-09-21-stale-content-removal.md`](./archive/tracers/log/--task-260-2026-09-21-stale-content-removal.md) |
+| `--task-261` | `archive/tracers` | Agent Tracer Task Log: --task-261 | [`--task-261-combine-login-status-bars.md`](./archive/tracers/log/--task-261-combine-login-status-bars.md) |

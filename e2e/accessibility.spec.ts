@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { TEST_EMAIL, TEST_PASSWORD } from "./helpers/credentials";
 
 test.describe("Accessibility Tests", () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await page.goto("/login");
-    await page.fill('input[type="email"]', "admin@plantcor.os");
-    await page.fill('input[type="password"]', "Yugioh@123#");
+    await page.fill('input[type="email"]', TEST_EMAIL);
+    await page.fill('input[type="password"]', TEST_PASSWORD);
     await page.click('button[type="submit"]');
     await page.waitForURL("/");
   });
@@ -31,7 +32,7 @@ test.describe("Accessibility Tests", () => {
     // Tab through elements and check focus visibility
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
-    
+
     const focusedElement = page.locator(":focus");
     await expect(focusedElement).toBeVisible();
   });
@@ -47,7 +48,7 @@ test.describe("Accessibility Tests", () => {
     // This is a basic check - full a11y audit would use axe-core
     const textElements = page.locator("h1, h2, h3, p, span, a, button");
     const count = await textElements.count();
-    
+
     // Ensure at least some text elements exist
     expect(count).toBeGreaterThan(0);
   });
@@ -55,11 +56,11 @@ test.describe("Accessibility Tests", () => {
   test("should support keyboard navigation in dropdowns", async ({ page }) => {
     // Navigate to a department with dropdowns
     await page.goto("/drilling");
-    
+
     // Tab to interactive elements
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
-    
+
     // Check that focus is visible
     const focused = page.locator(":focus");
     await expect(focused).toBeVisible();
@@ -73,12 +74,12 @@ test.describe("Accessibility Tests", () => {
   test("images should have alt text or be decorative", async ({ page }) => {
     const images = page.locator("img");
     const count = await images.count();
-    
+
     for (let i = 0; i < count; i++) {
       const img = images.nth(i);
       const hasAlt = await img.getAttribute("alt");
       const hasAriaHidden = await img.getAttribute("aria-hidden");
-      
+
       // Either has alt text or is marked as decorative
       expect(hasAlt !== null || hasAriaHidden === "true").toBeTruthy();
     }

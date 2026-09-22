@@ -2,6 +2,7 @@ import { test as setup, expect } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { TEST_EMAIL, TEST_PASSWORD } from "./helpers/credentials";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,14 +29,19 @@ setup("authenticate", async ({ page }) => {
   // Fill credentials and login
   const emailInput = page.locator("input#email");
   if (await emailInput.isVisible()) {
-    await emailInput.fill("admin@plantcor.os");
-    await page.locator("input#password").fill("Yugioh@123#");
+    await emailInput.fill(TEST_EMAIL);
+    await page.locator("input#password").fill(TEST_PASSWORD);
     await page.locator("button[type='submit']").click();
   }
 
   // Wait for the redirect to complete
-  await page.waitForURL((url) => url.pathname.includes("/hub") || url.pathname.includes("/overview") || url.pathname === "/", { timeout: 5000 }).catch(() => {});
-
+  await page
+    .waitForURL(
+      (url) =>
+        url.pathname.includes("/hub") || url.pathname.includes("/overview") || url.pathname === "/",
+      { timeout: 5000 },
+    )
+    .catch(() => {});
 
   // End of authentication steps.
   // Ensure storage directory exists

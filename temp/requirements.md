@@ -1,25 +1,15 @@
-# Requirements — Onboard & Dotfiles Configuration Alignment (EARS Syntax)
+# Requirements (EARS Syntax)
 
-## 1. Runtime Version Pinning
+## Ubiquitous Requirements
+- **REQ-001**: The system shall adhere strictly to the Light Mode UI Invariant (#f3f4f6 canvas, luminance > 200) across all views.
+- **REQ-002**: The system shall utilize design tokens from `@repo/theme` and prevent arbitrary dark mode classes (`dark:*`).
 
-- **REQ-ENV-01 (Ubiquitous)**: The repository SHALL provide `.nvmrc` containing `24.15.0` matching `package.json` Volta configuration.
-- **REQ-ENV-02 (Ubiquitous)**: The repository SHALL provide `.node-version` containing `24.15.0` matching `package.json` Volta configuration.
+## Event-Driven Requirements
+- **REQ-003**: WHEN a user interacts with status badges or actionable tag filters, THE SYSTEM SHALL display them with calibrated pill geometry (`rounded-full`) and interactive hover feedback.
+- **REQ-004**: WHEN cards, navigation headers, or floating toolbars render over scrolling content, THE SYSTEM SHALL apply balanced translucency (`backdrop-blur-md`, subtle borders `border-border/60`) for elevation hierarchy.
 
-## 2. Editor & IDE Workspace Alignment
+## State-Driven Requirements
+- **REQ-005**: WHILE the application renders data tables and interactive dashboards, THE SYSTEM SHALL maintain clear contrast ratios ($ge 4.5:1$) for accessibility compliance.
 
-- **REQ-IDE-01 (Event-Driven)**: When a developer edits a `Makefile`, the editor SHALL enforce tab indentation per `.editorconfig`.
-- **REQ-IDE-02 (Event-Driven)**: When a developer edits a Markdown file, the editor SHALL not trim intentional trailing whitespace per `.editorconfig`.
-- **REQ-IDE-03 (Ubiquitous)**: The `.vscode/settings.json` file SHALL configure the TypeScript workspace SDK (`node_modules/typescript/lib`) and set Biome as default formatter.
-- **REQ-IDE-04 (Ubiquitous)**: The `.vscode/extensions.json` file SHALL recommend the standard monorepo tool extensions (`biomejs.biome`, `dbaeumer.vscode-eslint`, `esbenp.prettier-vscode`, `bradlc.vscode-tailwindcss`, `streetsidesoftware.code-spell-checker`, `stylelint.vscode-stylelint`).
-- **REQ-IDE-05 (Ubiquitous)**: The `.vscode/mcp.json` file SHALL reference current valid absolute workspace paths (`/home/tim/Projects/Next.js-Monorepo-Business-Portal` and `/home/tim/agentsroom-root/opt/AgentsRoom/resources/...`) in alignment with root `.mcp.json`.
-
-## 3. Environment Variable Parity
-
-- **REQ-CFG-01 (Ubiquitous)**: The `apps/portal/.env` file SHALL declare `GOOGLE_AI_API_KEY` matching the assigned Gemini API key to satisfy the onboarding environment matrix.
-- **REQ-CFG-02 (Ubiquitous)**: The repository SHALL expose `apps/portal/.env.example` referencing `apps/portal/env/.env.example` for immediate setup.
-
-## 4. Onboarding Diagnostic CLI
-
-- **REQ-CLI-01 (Event-Driven)**: When `pnpm onboard` is executed, the tool SHALL verify runtime versions, local infrastructure, environment variables, architecture policies, and feature hook tests with 0 failures and 0 warnings.
-- **REQ-CLI-02 (Optional Feature)**: Where the user passes `--json`, `tools/repo/onboard.cjs` SHALL emit machine-parseable JSON diagnostics to stdout.
-- **REQ-CLI-03 (Optional Feature)**: Where the user passes `--fix`, `tools/repo/onboard.cjs` SHALL automatically populate missing environment variables or templates from examples.
+## Optional & Unwanted Feature Constraints
+- **REQ-006**: IF any legacy dark mode classes or deprecated UI imports exist, THEN THE SYSTEM SHALL prune or normalize them to light-mode tokenized primitives.

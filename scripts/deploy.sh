@@ -592,9 +592,21 @@ phase_validate() {
   
   # Pre-launch Project-wide Cache Cleanup
   log "Performing pre-launch project-wide cache cleanup..."
-  run_if_not_dry rm -rf "$REPO_ROOT"/.kilo "$REPO_ROOT"/.remember "$REPO_ROOT"/.turbo/cache "$REPO_ROOT"/.venv "$REPO_ROOT"/.vercel "$REPO_ROOT"/.vscode "$REPO_ROOT"/skills-lock.json "$REPO_ROOT"/deployment-logs
-  run_if_not_dry rm -rf "$REPO_ROOT"/apps/portal/.next/cache "$REPO_ROOT"/apps/cms/.next/cache "$REPO_ROOT"/apps/overview/.next/cache "$REPO_ROOT"/packages/eval/.pytest_cache
-  run_if_not_dry find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .git -o -name .turbo \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+  # NOTE: .remember is NOT deleted — it holds cross-session agent memory
+  # (now.md, today-*.md) consumed by the SessionStart hook. Same policy as
+  # scripts/dev.sh. Only transient run caches are purged. .vscode is kept as
+  # shared workspace settings if committed.
+  run_if_not_dry rm -rf "$REPO_ROOT"/.kilo "$REPO_ROOT"/.turbo/cache "$REPO_ROOT"/.venv "$REPO_ROOT"/packages/eval/.venv "$REPO_ROOT"/.vercel "$REPO_ROOT"/skills-lock.json
+  # Clean deployment-logs contents while preserving the tracked directory.
+  if [ -d "$REPO_ROOT"/deployment-logs ]; then
+    run_if_not_dry find "$REPO_ROOT"/deployment-logs -mindepth 1 -delete 2>/dev/null || true
+  fi
+  run_if_not_dry rm -rf "$REPO_ROOT"/apps/portal/.next/cache "$REPO_ROOT"/packages/eval/.pytest_cache
+  [ -d "$REPO_ROOT"/apps/cms ] && run_if_not_dry rm -rf "$REPO_ROOT"/apps/cms/.next/cache
+  [ -d "$REPO_ROOT"/apps/overview ] && run_if_not_dry rm -rf "$REPO_ROOT"/apps/overview/.next/cache
+  # Prune vendor/state trees too: .venv holds installed deps whose bytecode
+  # Python regenerates on demand, so sweeping it only slows the next eval run.
+  run_if_not_dry find "$REPO_ROOT" -type d \( -name node_modules -o -name .next -o -name .git -o -name .turbo -o -name .venv \) -prune -o -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
   
   # Clean old logs and temporary status/monitor scripts, keeping the current DEPLOY_LOG
   if [ -n "${DEPLOY_LOG:-}" ] && [ -f "$DEPLOY_LOG" ]; then

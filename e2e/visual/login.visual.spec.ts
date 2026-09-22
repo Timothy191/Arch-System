@@ -7,6 +7,11 @@
  */
 
 import { test, expect } from "@playwright/test";
+import {
+  findOpaqueBackgroundLayers,
+  luminanceOf,
+  ROUTE_BG_SELECTOR,
+} from "../helpers/background";
 
 // AGENT-TRACE: Override the project-level authenticated storageState (e2e/.auth/user.json)
 // so this spec runs UNauthenticated. The (auth) middleware redirects authenticated
@@ -24,6 +29,12 @@ test.describe("login page visual regression", () => {
         canvas { display: none !important; }
         video { display: none !important; }
         .animate-pulse { animation: none !important; }
+        /* Ambient video + film grain rasterize nondeterministically into
+           full-page shots (frame timing) and re-encoded every baseline
+           (login-full grew 170KB -> 562KB). The deterministic WebP poster
+           (route-bg-image-container) remains visible for pixel comparison. */
+        .route-bg-video-container { display: none !important; }
+        .route-bg-grain { display: none !important; }
       `,
     });
   });
@@ -33,11 +44,6 @@ test.describe("login page visual regression", () => {
       fullPage: true,
       threshold: 0.02, // 2% pixel difference tolerance
       mask: [
-        page.locator('[data-testid="login-clock"]'),
-        page.locator('[data-testid="weather-card"]'),
-        page.locator('[data-testid="alert-banner"]'),
-        page.locator('[data-testid="login-marquees"]'),
-        page.locator('[data-testid="footer-date"]'),
         // eve status bar contains a pulsing status dot — mask for determinism
         page.locator('[data-testid="eve-status-bar"]'),
       ],
@@ -59,19 +65,22 @@ test.describe("login page visual regression", () => {
     });
   });
 
-  test("login page light macOS theme — no dark backgrounds", async ({ page }) => {
-    await page.goto("/login");
+  test("route background shows through and the card is a light surface", async ({ page }) => {
+    // The global wallpaper must be mounted rather than covered...
+    await expect(page.locator(ROUTE_BG_SELECTOR)).toBeVisible();
 
-    const bodyBg = await page.evaluate(() => {
-      return window.getComputedStyle(document.body).backgroundColor;
-    });
+    // ...and the login card must remain a light-mode surface on top of it.
+    const cardBg = await page
+      .locator('[data-testid="login-card"]')
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    const luminance = luminanceOf(cardBg);
+    expect(luminance, `login card background was ${cardBg}`).not.toBeNull();
+    expect(luminance!).toBeGreaterThan(200);
 
-    // Should be a light color — macOS base background #f3f4f6 ≈ rgb(243,244,246)
-    const match = bodyBg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (match) {
-      const [, r, g, b] = match.map(Number);
-      const luminance = (r! + g! + b!) / 3;
-      expect(luminance).toBeGreaterThan(200); // light background
-    }
+    const opaque = await findOpaqueBackgroundLayers(page, '[data-testid="login-card"]');
+    expect(
+      opaque,
+      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`,
+    ).toEqual([]);
   });
 });

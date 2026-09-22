@@ -4,7 +4,7 @@ Welcome to the Arch-Systems monorepo. This document outlines the structure, tool
 
 ## Structure
 
-- `apps/`: Next.js frontend (`portal`), CMS backend (`cms`), and React Flow architecture visualizer (`overview`).
+- `apps/`: Next.js frontend (`portal`).
 - `packages/`: Shared libraries such as `@repo/ui`, `@repo/theme`, `@repo/database`, and `@repo/supabase`.
 - `tools/`: Build, analysis, and audit scripts (`policy-compiler.cjs`, `design-audit.cjs`, `enforce-security-checks.cjs`).
 - `scripts/`: Local dev and deployment utility scripts (e.g. `sync-assets-smart.cjs`, `ensure_reachability.py`).

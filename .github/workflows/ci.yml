@@ -478,3 +478,34 @@ jobs:
 
       - name: Run Self-Healing CI
         run: pnpm turbo run lint --filter=...[origin/main] --force
+
+  tier2-check:
+    name: Tier 2 Review Policy Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check for Tier 2 Path Modifications
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const isTier2 = files.some(f => 
+              f.filename.includes('features/auth/') || 
+              f.filename.includes('supabase/migrations/') ||
+              f.filename.includes('packages/auth/')
+            );
+            if (isTier2) {
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+              });
+              const approvals = reviews.filter(r => r.state === 'APPROVED');
+              if (approvals.length < 2) {
+                core.setFailed('Tier 2 changes (auth/infra) require at least 2 approvals.');
+              }
+            }

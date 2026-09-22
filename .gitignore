@@ -11,6 +11,10 @@ node_modules
 
 # Testing
 coverage
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Vercel
 .vercel
@@ -22,6 +26,14 @@ build
 dist
 apps/*/dist/
 apps/*/.next/
+
+# Deployment artifacts
+deployment-logs/*
+!deployment-logs/.gitkeep
+
+# Python virtual environments
+.venv/
+venv/
 
 # Agent runtime / personal skills (not project source)
 .claude/skills/

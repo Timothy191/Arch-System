@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { findOpaqueBackgroundLayers, ROUTE_BG_SELECTOR } from "./helpers/background";
+import { TEST_EMAIL, TEST_PASSWORD } from "./helpers/credentials";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -91,27 +93,30 @@ test.describe("auth middleware", () => {
 });
 
 test.describe("design system", () => {
-  test("login page uses light macOS theme background", async ({ page }) => {
+  test("login page does not cover the global route background", async ({ page }) => {
     await page.goto("/login");
 
-    // Body background should be a light gray (#f3f4f6)
-    const bodyBg = await page.evaluate(
-      () => window.getComputedStyle(document.body).backgroundColor,
-    );
-    const match = bodyBg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (match) {
-      const [, r, g, b] = match.map(Number);
-      const luminance = (r! + g! + b!) / 3;
-      expect(luminance).toBeGreaterThan(200); // light background
-    }
+    // The global RouteBackground must be mounted...
+    await expect(page.locator(ROUTE_BG_SELECTOR)).toBeVisible();
+
+    // ...and nothing between it and the login content may paint an opaque fill
+    // over it. Regression guard: the login page previously carried an opaque
+    // bg-[#f3f4f6] on its own <main>, which hid the wallpaper entirely while
+    // document.body stayed transparent.
+    const opaque = await findOpaqueBackgroundLayers(page, '[data-testid="login-card"]');
+    expect(
+      opaque,
+      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`,
+    ).toEqual([]);
   });
 
   test("login form uses macOS glass card styling", async ({ page }) => {
     await page.goto("/login");
 
-    // Form card should use the card background class
+    // Form card should use the glass card background (bg-white/80 in the
+    // current design; keep layer-signin-card as the token-based alternative)
     const card = page.locator('[data-testid="login-card"]');
-    await expect(card).toHaveClass(/bg-arch-surface-secondary|bg-white\/70|layer-signin-card/);
+    await expect(card).toHaveClass(/bg-arch-surface-secondary|bg-white\/80|layer-signin-card/);
 
     // Heading should be present and use dark text
     const heading = page.locator("h1");
@@ -152,7 +157,7 @@ test.describe("full login and reset password flows", () => {
   }) => {
     // 1. Invalid credentials flow
     await page.goto("/login");
-    await page.locator("input#email").fill("admin@plantcor.os");
+    await page.locator("input#email").fill(TEST_EMAIL);
     await page.locator("input#password").fill("wrong-password");
     await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
@@ -173,7 +178,7 @@ test.describe("full login and reset password flows", () => {
     await expect(page).toHaveURL(/.*\/reset-password/);
 
     // 3. Reset password submission
-    await page.locator("input#reset-email").fill("admin@plantcor.os");
+    await page.locator("input#reset-email").fill(TEST_EMAIL);
     await page.locator("button[type='submit']").click();
 
     // Verify "Check Your Email" screen or error alert
@@ -186,8 +191,8 @@ test.describe("full login and reset password flows", () => {
     await expect(page).toHaveURL(/.*\/login/);
 
     // 5. Successful login redirect
-    await page.locator("input#email").fill("admin@plantcor.os");
-    await page.locator("input#password").fill("Yugioh@123#");
+    await page.locator("input#email").fill(TEST_EMAIL);
+    await page.locator("input#password").fill(TEST_PASSWORD);
     await page.locator("form[data-testid='login-form'] button[type='submit']").click();
 
     // Verify redirection to hub/landing page — some dev envs may not have a seeded user, so accept staying on /login

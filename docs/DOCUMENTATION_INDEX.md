@@ -108,7 +108,8 @@ Quick navigation guide for Arch-Systems documentation.
   - SELinux considerations and policies
   - Troubleshooting for Rocky Linux environments
 
-## 📊 Document```text
+## 📊 Repository Structure
+```text
 
 Arch-System/
 ├── README.md # Project overview

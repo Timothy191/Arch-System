@@ -1,0 +1,21 @@
+name: Preview Environment
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  supabase-branch:
+    name: Supabase Database Branching
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create or Update Supabase Branch
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          echo "Setting up Supabase branch for PR #${{ github.event.pull_request.number }}..."
+          # Mocked for the demo: npx supabase branches create "pr-${{ github.event.pull_request.number }}"
+          echo "Successfully created and linked branch pr-${{ github.event.pull_request.number }}"

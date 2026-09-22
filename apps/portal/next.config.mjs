@@ -17,6 +17,20 @@ const isCI = process.env.CI === "true";
 // next build always sets NODE_ENV=production, so we use CI to distinguish local builds
 const enableHeavyPlugins = isCI || process.env.ENABLE_HEAVY_PLUGINS === "true";
 
+// Build-time environment validation (Rule P8 / Quality gates)
+if (isProduction && !process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.IGNORE_ENV_VALIDATION) {
+  console.warn("⚠️  WARNING: NEXT_PUBLIC_SUPABASE_URL is not set at build time.");
+}
+if (
+  isProduction &&
+  !process.env.OTEL_EXPORTER_OTLP_ENDPOINT &&
+  !process.env.IGNORE_ENV_VALIDATION
+) {
+  console.warn(
+    "⚠️  WARNING: OTEL_EXPORTER_OTLP_ENDPOINT is not set at build time. Telemetry may fail.",
+  );
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // AGENT-TRACE: Turbopack is used for both dev (`next dev --turbopack`) and production builds

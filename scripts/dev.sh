@@ -249,12 +249,19 @@ smart_cache_cleanup() {
     check "Turbo cache" "skip" "not present"
   fi
 
-  # Clean Python bytecode (safe operation)
+  # Clean Python bytecode (safe operation).
+  # Prune vendor/state trees so we only sweep project source: node_modules and
+  # .next are huge, and .venv holds installed deps whose bytecode is regenerated
+  # by Python on demand — deleting it just slows the next eval run.
   if [ -d "$REPO_ROOT" ]; then
     local pycache_count
-    pycache_count=$(find "$REPO_ROOT" -type d -name "__pycache__" 2>/dev/null | wc -l)
+    pycache_count=$(find "$REPO_ROOT" \
+      \( -name node_modules -o -name .next -o -name .git -o -name .turbo -o -name .venv \) -prune -o \
+      -type d -name "__pycache__" -print 2>/dev/null | wc -l || true)
     if [ "$pycache_count" -gt 0 ]; then
-      find "$REPO_ROOT" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+      find "$REPO_ROOT" \
+        \( -name node_modules -o -name .next -o -name .git -o -name .turbo -o -name .venv \) -prune -o \
+        -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
       check "Python bytecode" "pass" "removed ${pycache_count} __pycache__ directories"
     else
       check "Python bytecode" "skip" "no __pycache__ directories"
@@ -420,7 +427,27 @@ if [ "$FORCE_RESTART" = "true" ]; then
   # by the SessionStart hook — do NOT delete it. Only the transient .kilo run
   # cache is purged.
   smart_cache_cleanup # Smart Turborepo cache cleanup + Python bytecode
-  clean_dir_cache "$REPO_ROOT/.venv" "Python virtual environment (.venv)"
+
+  # Python virtual environment — packages/eval/.venv holds installed eval deps
+  # (pytest, deepeval). Reinstalling is slow, so only remove STALE venvs (>7
+  # days unused). Fresh environments survive force restarts.
+  venv_found=false
+  for venv_dir in "$REPO_ROOT/.venv" "$REPO_ROOT/packages/eval/.venv"; do
+    if [ -d "$venv_dir" ]; then
+      venv_found=true
+      if find "$venv_dir" -maxdepth 0 -mtime +7 >/dev/null 2>&1; then
+        venv_size=$(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}')
+        rm -rf "$venv_dir"
+        check "Python venv (stale >7d)" "pass" "freed ${venv_size:-?} ($venv_dir)"
+      else
+        check "Python venv" "pass" "recent — kept ($(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}'))"
+      fi
+    fi
+  done
+  if [ "$venv_found" = "false" ]; then
+    check "Python venv" "skip" "not present"
+  fi
+
   clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
 
   if [ -f "$REPO_ROOT/skills-lock.json" ]; then
@@ -428,10 +455,24 @@ if [ "$FORCE_RESTART" = "true" ]; then
     check "skills-lock.json" "pass" "removed"
   fi
 
-  clean_dir_cache "$REPO_ROOT/deployment-logs" "Deployment logs directory"
+  # Deployment logs directory — keep the tracked directory, only remove contents.
+  if [ -d "$REPO_ROOT/deployment-logs" ]; then
+    find "$REPO_ROOT/deployment-logs" -mindepth 1 -delete 2>/dev/null || true
+    check "Deployment logs directory" "pass" "contents cleaned"
+  else
+    mkdir -p "$REPO_ROOT/deployment-logs"
+    check "Deployment logs directory" "pass" "created empty directory"
+  fi
   clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
-  clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
-  clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
+
+  # CMS and Overview are optional apps; only clean their caches if they exist.
+  if [ -d "$REPO_ROOT/apps/cms" ]; then
+    clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
+  fi
+  if [ -d "$REPO_ROOT/apps/overview" ]; then
+    clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
+  fi
+
   clean_dir_cache "$REPO_ROOT/packages/eval/.pytest_cache" "Pytest cache"
 
   if [ -f "$REPO_ROOT/run/portal.log" ]; then

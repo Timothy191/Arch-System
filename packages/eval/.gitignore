@@ -17,6 +17,8 @@ poetry.lock
 # Environment
 .env
 
+.pytest_cache/
+
 # DeepEval cache
 .deepeval/
 

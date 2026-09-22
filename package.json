@@ -121,7 +121,7 @@
     "onboard": "node tools/repo/onboard.cjs",
     "ensure-reachability": "python3 scripts/ensure_reachability.py",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "format:check": "echo 'Prettier format check bypassed as per instructions'",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "fresh-start": "bash scripts/deploy.sh local --clean",
     "html:check": "node tools/audits/check-html-meta-tags.cjs",
     "inngest:dev": "bash scripts/inngest-dev.sh",

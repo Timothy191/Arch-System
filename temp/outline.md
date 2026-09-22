@@ -1,12 +1,11 @@
-# Outline — Onboard & Dotfiles Configuration Alignment
+# Task Outline: Frontend UI & Design Refinement
 
-## Executive Summary
+## Objective
+Enhance frontend UI with consistent pill-shaped elements, calibrated transparency, visual depth/effects, and verify integrity of core component libraries and dependencies.
 
-This initiative standardizes the onboarding toolchain and dotfile configuration across the Arch-Systems monorepo. It establishes strict Node runtime parity, aligns IDE workspace preferences, reconciles environment variable gaps, and implements full automation support (`--fix` and `--json`) in the onboarding diagnostics CLI.
-
-## Scope
-
-- Runtime version pinning: `.nvmrc`, `.node-version`
-- Editor and IDE workspace: `.editorconfig`, `.vscode/mcp.json`, `.vscode/settings.json`, `.vscode/extensions.json`, `.vscode/tasks.json`
-- Environment parity: `apps/portal/.env`, `apps/portal/.env.example`
-- Onboarding diagnostics suite: `tools/repo/onboard.cjs`
+## High-Level Workstreams
+1. **Design System & Tokens**: Audit OKLCH color palettes, elevation shadows, backdrop blurs, and border radius tokens.
+2. **Component Library & Asset Verification**: Inspect removed/missing packages or components across `packages/ui` and `apps/portal`.
+3. **Pill Shapes & Ergonomics**: Reintroduce pill shapes (`rounded-full`) for badges, status chips, quick-action buttons, and search filters where ergonomically appropriate.
+4. **Transparency & Glassmorphism Effects**: Apply calibrated background translucency (`bg-white/80`, `backdrop-blur-md`, light-mode luminance > 200) without violating strict light mode invariants.
+5. **Quality & Regression Guard**: Verify TypeScript compilation, Prettier formatting, and monorepo quality suite.

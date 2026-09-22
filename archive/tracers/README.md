@@ -5,8 +5,6 @@ Total Archived Tasks: **261**
 
 ## Archived Task Directory
 
-| `--task-261` | `archive/tracers` | Agent Tracer Task Log: --task-261 | [`--task-261-combine-login-status-bars.md`](./log/--task-261-combine-login-status-bars.md) |
-
 | Tag          | Source Scope                                                      | Task Summary / Header                                                                        | Log File                                                                                                                                                                                     |
 | :----------- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--task-001` | `archive/tracers`                                                 | Agent Tracer Task Log: --task-001                                                            | [`--task-001-2026-09-11---root-sanitation-agent-configurat.md`](./log/--task-001-2026-09-11---root-sanitation-agent-configurat.md)                                                           |
@@ -269,3 +267,4 @@ Total Archived Tasks: **261**
 | `--task-258` | `Heavy Setups, Docker Stack & Anti-Drift Guardian`                | --task-258-build-heavy-requirements-and-antidrift-guardian                                   | [`--task-258-2026-09-16-build-heavy-requirements-and-antidrift-guardian.md`](./log/--task-258-2026-09-16-build-heavy-requirements-and-antidrift-guardian.md)                                 |
 | `--task-259` | `archive/tracers`                                                 | Agent Tracer Task Log: --task-259                                                            | [`--task-259-2026-09-16-antigravity-patterns-dify-autogpt-loop.md`](./log/--task-259-2026-09-16-antigravity-patterns-dify-autogpt-loop.md)                                                   |
 | `--task-260` | `Frontend Styling & Layout Consistency`                           | Frontend styling/layout token drift, z-index matrix, body layout, focus mode, build warnings | [`--task-260-2026-09-21-frontend-styling-layout-consistency-fixes.md`](./log/--task-260-2026-09-21-frontend-styling-layout-consistency-fixes.md)                                             |
+| `--task-261` | `archive/tracers` | Agent Tracer Task Log: --task-261 | [`--task-261-combine-login-status-bars.md`](./log/--task-261-combine-login-status-bars.md) |

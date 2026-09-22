@@ -62,7 +62,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
   }
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-[#f3f4f6] bg-[radial-gradient(circle_at_2px_2px,rgba(0,0,0,0.03)_1px,transparent_0)] bg-[size:32px_32px] px-4 py-8">
+    <main className="relative w-full flex-1 flex flex-col items-center justify-center px-4 overflow-hidden bg-transparent bg-[radial-gradient(circle_at_2px_2px,rgba(0,0,0,0.03)_1px,transparent_0)] bg-[size:32px_32px]">
       {/* Ambient Gold Accents */}
       <div
         aria-hidden="true"
@@ -89,6 +89,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             </p>
             <a
               href="/login"
+              autoFocus
               className="inline-block mt-4 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-gradient-to-b from-[#c59837] via-[#a36c1e] to-[#71440d] hover:from-[#d4a843] hover:via-[#b37824] hover:to-[#814e10] rounded-lg shadow-md shadow-amber-950/20 border border-amber-400/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
             >
               Retry
@@ -139,10 +140,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
             <span>Secure industrial access • Arch-Systems v{PORTAL_VERSION}</span>
           </div>
           <div className="flex justify-center gap-6 text-xs text-neutral-400">
-            <a className="hover:text-neutral-700 transition-colors" href="#">
+            <a className="hover:text-neutral-700 transition-colors" href="/docs">
               Security Policy
             </a>
-            <a className="hover:text-neutral-700 transition-colors" href="#">
+            <a className="hover:text-neutral-700 transition-colors" href="/docs#support">
               Support
             </a>
           </div>
