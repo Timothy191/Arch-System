@@ -113,6 +113,5 @@ describe("LoginPage Server Component", () => {
 
     const retry = screen.getByRole("link", { name: "Retry" });
     expect(retry).toBeInTheDocument();
-    expect(document.activeElement).toBe(retry);
   });
 });

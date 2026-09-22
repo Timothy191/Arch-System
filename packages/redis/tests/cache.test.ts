@@ -27,6 +27,9 @@ jest.mock("../src/client", () => ({
     del: mockRedisDel,
     isOpen: true,
   }),
+  createRedisSubscriber: jest.fn().mockResolvedValue({
+    subscribe: jest.fn().mockResolvedValue(undefined),
+  }),
 }));
 
 describe("X-Fetch Cache Wrapper", () => {

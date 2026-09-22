@@ -32,7 +32,10 @@ test.describe("login page visual regression", () => {
         /* Ambient video + film grain rasterize nondeterministically into
            full-page shots (frame timing) and re-encoded every baseline
            (login-full grew 170KB -> 562KB). The deterministic WebP poster
-           (route-bg-image-container) remains visible for pixel comparison. */
+           (route-bg-image-container) remains visible for pixel comparison.
+           NOTE: login-full stays ~550KB — that is the photographic poster
+           itself, which is real page content and compresses poorly as PNG.
+           The video/grain hiding removes the NONDETERMINISM, not the bytes. */
         .route-bg-video-container { display: none !important; }
         .route-bg-grain { display: none !important; }
       `,

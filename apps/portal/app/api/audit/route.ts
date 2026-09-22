@@ -24,7 +24,10 @@ export async function GET(request: Request) {
     }
   }
 
-  const logDir = logId === "latest" ? path.normalize(auditRoot + "/latest") : path.normalize(auditRoot + "/" + logId);
+  const logDir =
+    logId === "latest"
+      ? path.normalize(auditRoot + "/latest")
+      : path.normalize(auditRoot + "/" + logId);
   const targetDir = fs.existsSync(logDir) ? logDir : auditRoot;
 
   const readReport = (filename: string) => {

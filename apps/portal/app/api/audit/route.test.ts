@@ -15,6 +15,7 @@ jest.mock("node:path", () => ({
   join: jest.fn(),
   dirname: jest.fn(),
   resolve: jest.fn(),
+  normalize: jest.fn(),
 }));
 
 const mockFs = jest.mocked(fs);
@@ -27,6 +28,7 @@ function buildFsScenario(
     pathJoin?: (..._args: string[]) => string;
     pathDirname?: (_p: string | Buffer | URL) => string;
     pathResolve?: (..._p: string[]) => string;
+    pathNormalize?: (_p: string) => string;
   } = {}
 ) {
   mockFs.existsSync.mockImplementation(overrides.existsSync || (() => false));
@@ -37,6 +39,7 @@ function buildFsScenario(
       ((p) => (typeof p === "string" ? p.slice(0, p.lastIndexOf("/") || 1) : String(p)))
   );
   mockPath.resolve.mockImplementation(overrides.pathResolve || ((...args) => args.join("/")));
+  mockPath.normalize.mockImplementation(overrides.pathNormalize || ((p) => String(p)));
 }
 
 function createRequest(url: string): Request {
