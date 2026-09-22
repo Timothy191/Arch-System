@@ -85,7 +85,6 @@ export default {
     // Process in chunks of 20 to keep memory low
     for (const batch of chunk(filtered, 20)) {
       commands.push(`pnpm biome check --write ${batch.join(" ")}`);
-      commands.push(`prettier --write ${batch.join(" ")}`);
     }
     return commands;
   },
