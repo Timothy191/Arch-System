@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import type { Department } from "@repo/departments/data-access";
-import { cn } from "@repo/ui/lib/utils";
+import type { Department } from '@repo/departments/data-access';
+import { cn } from '@repo/ui/lib/utils';
 import {
   Activity,
   ArrowUpRight,
@@ -17,14 +17,14 @@ import {
   Satellite,
   ShieldCheck,
   Wrench,
-} from "lucide-react";
+} from 'lucide-react';
 // eslint-disable-next-line no-redeclare
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { memo, useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
-import { Sparkline } from "./Sparkline";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { memo, useEffect, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { Sparkline } from './Sparkline';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -41,36 +41,36 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const COLOR_MAP: Record<string, { bg: string; text: string }> = {
   amber: {
-    bg: "border-accent-amber/20 text-accent-amber bg-accent-amber/5",
-    text: "text-accent-amber",
+    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
+    text: 'text-accent-amber',
   },
   emerald: {
-    bg: "border-accent-green/20 text-accent-green bg-accent-green/5",
-    text: "text-accent-green",
+    bg: 'border-accent-green/20 text-accent-green bg-accent-green/5',
+    text: 'text-accent-green',
   },
   blue: {
-    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
-    text: "text-accent-blue",
+    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
+    text: 'text-accent-blue',
   },
   violet: {
-    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
-    text: "text-accent-blue",
+    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
+    text: 'text-accent-blue',
   },
   red: {
-    bg: "border-accent-red/20 text-accent-red bg-accent-red/5",
-    text: "text-accent-red",
+    bg: 'border-accent-red/20 text-accent-red bg-accent-red/5',
+    text: 'text-accent-red',
   },
   orange: {
-    bg: "border-accent-amber/20 text-accent-amber bg-accent-amber/5",
-    text: "text-accent-amber",
+    bg: 'border-accent-amber/20 text-accent-amber bg-accent-amber/5',
+    text: 'text-accent-amber',
   },
   cyan: {
-    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
-    text: "text-accent-blue",
+    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
+    text: 'text-accent-blue',
   },
   indigo: {
-    bg: "border-accent-blue/20 text-accent-blue bg-accent-blue/5",
-    text: "text-accent-blue",
+    bg: 'border-accent-blue/20 text-accent-blue bg-accent-blue/5',
+    text: 'text-accent-blue',
   },
 };
 
@@ -87,7 +87,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
 
   useEffect(() => {
     const pinned = localStorage.getItem(`pinned_dept_${department.name}`);
-    setIsPinned(pinned === "true");
+    setIsPinned(pinned === 'true');
   }, [department.name]);
 
   const togglePin = (e: React.MouseEvent) => {
@@ -105,8 +105,8 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
 
   const Icon = ICON_MAP[department.icon] || Factory;
   const config = COLOR_MAP[department.color] || {
-    bg: "border-arch-border-subtle text-arch-text-primary",
-    text: "text-arch-text-primary",
+    bg: 'border-arch-border-subtle text-arch-text-primary',
+    text: 'text-arch-text-primary',
   };
 
   const route = department.route || `/${department.name}`;
@@ -116,10 +116,10 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
       style={
         {
           animation: `fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.05}s both`,
-          ["--shimmer-delay" as string]: `${-(index * 1.5)}s`,
+          ['--shimmer-delay' as string]: `${-(index * 1.5)}s`,
         } as React.CSSProperties
       }
-      className={cn("h-full", department.gridSpan)}
+      className={cn('h-full', department.gridSpan)}
     >
       <div
         className="uiverse-card group outline-none h-full interactive-element relative"
@@ -156,8 +156,8 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
         {/* Banner area with photographic / terrain visual background */}
         <div
           className={cn(
-            "uiverse-card-banner relative z-10 pointer-events-none overflow-hidden",
-            `uiverse-card-banner-${department.name}`,
+            'uiverse-card-banner relative z-10 pointer-events-none overflow-hidden',
+            `uiverse-card-banner-${department.name}`
           )}
         >
           {/* Real industrial terrain visual background with liquid glass gradient overlay */}
@@ -182,17 +182,15 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
             type="button"
             onClick={togglePin}
             className="uiverse-card-pin hover:scale-110 active:scale-95 pointer-events-auto relative z-20"
-            title={isPinned ? "Unpin department" : "Pin department"}
+            title={isPinned ? 'Unpin department' : 'Pin department'}
             aria-label={
               isPinned ? `Unpin ${department.displayName}` : `Pin ${department.displayName}`
             }
           >
             <Bookmark
               className={cn(
-                "w-3.5 h-3.5 transition-all duration-200",
-                isPinned
-                  ? "fill-arch-accent-blue text-arch-accent-blue"
-                  : "text-arch-text-tertiary",
+                'w-3.5 h-3.5 transition-all duration-200',
+                isPinned ? 'fill-arch-accent-blue text-arch-accent-blue' : 'text-arch-text-tertiary'
               )}
             />
           </button>
@@ -200,8 +198,8 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
           {/* Department Icon Bubble */}
           <div
             className={cn(
-              "uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20",
-              config.bg,
+              'uiverse-card-icon-bubble border-arch-border-emphasis/25 relative z-20',
+              config.bg
             )}
           >
             <Icon className="w-5 h-5" />
@@ -217,10 +215,10 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
                 <span className="flex items-center gap-1.5 shrink-0">
                   <span
                     className={cn(
-                      "w-1.5 h-1.5 rounded-full animate-pulse",
-                      department.status === "active" && "bg-accent-green",
-                      department.status === "maintenance" && "bg-accent-amber",
-                      department.status === "alert" && "bg-accent-red",
+                      'w-1.5 h-1.5 rounded-full animate-pulse',
+                      department.status === 'active' && 'bg-accent-green',
+                      department.status === 'maintenance' && 'bg-accent-amber',
+                      department.status === 'alert' && 'bg-accent-red'
                     )}
                   />
                   <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-arch-text-tertiary">
@@ -239,7 +237,7 @@ function DepartmentCard({ department, index }: DepartmentCardProps) {
                     href={action.href}
                     onClick={(e) => e.stopPropagation()}
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-1 h-6 rounded-full glass-action-button text-[10.5px] font-medium text-arch-text-primary hover:text-arch-accent-blue bg-arch-surface-secondary/60 hover:bg-arch-surface-tertiary/90 border border-arch-border-subtle hover:border-arch-accent-blue/40 shadow-card hover:shadow-card-hover transition-all duration-200 ease-out hover:scale-105 active:scale-95 interactive-element relative z-20 group/action"
-                    data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    data-testid={`dept-action-${action.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <FileText className="w-3 h-3 shrink-0 text-arch-accent-blue opacity-80 group-hover/action:opacity-100 transition-opacity" />
                     <span>{action.label}</span>

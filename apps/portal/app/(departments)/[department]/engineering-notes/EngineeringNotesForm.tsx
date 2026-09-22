@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Checkbox } from "@repo/ui/Checkbox";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { useAutoSave } from "@repo/ui/hooks/useAutoSave";
-import { getCurrentShift } from "@repo/utils";
-import { AlertTriangle, ChevronDown, ChevronUp, Wrench } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import { speculativeEmbedShiftLog } from "@/app/actions";
-import type { BreakdownControlRoomView } from "@/features/departments";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Checkbox } from '@repo/ui/Checkbox';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { useAutoSave } from '@repo/ui/hooks/useAutoSave';
+import { getCurrentShift } from '@repo/utils';
+import { AlertTriangle, ChevronDown, ChevronUp, Wrench } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { speculativeEmbedShiftLog } from '@/app/actions';
+import type { BreakdownControlRoomView } from '@/features/departments';
 
 interface Machine {
   id: string;
@@ -25,38 +25,38 @@ interface EngineeringNotesFormProps {
 }
 
 const ISSUE_TYPES = [
-  { value: "mechanical", label: "Mechanical", color: "#1c1c1e" },
-  { value: "electrical", label: "Electrical", color: "#27272a" },
-  { value: "structural", label: "Structural", color: "#3f3f46" },
-  { value: "hydraulic", label: "Hydraulic", color: "#52525b" },
-  { value: "other", label: "Other", color: "#71717a" },
+  { value: 'mechanical', label: 'Mechanical', color: '#1c1c1e' },
+  { value: 'electrical', label: 'Electrical', color: '#27272a' },
+  { value: 'structural', label: 'Structural', color: '#3f3f46' },
+  { value: 'hydraulic', label: 'Hydraulic', color: '#52525b' },
+  { value: 'other', label: 'Other', color: '#71717a' },
 ];
 
 const SEVERITY_LEVELS = [
-  { value: "low", label: "Low", color: "#10b981" },
-  { value: "medium", label: "Medium", color: "#71717a" },
-  { value: "high", label: "High", color: "#ef4444" },
-  { value: "critical", label: "Critical", color: "#dc2626" },
+  { value: 'low', label: 'Low', color: '#10b981' },
+  { value: 'medium', label: 'Medium', color: '#71717a' },
+  { value: 'high', label: 'High', color: '#ef4444' },
+  { value: 'critical', label: 'Critical', color: '#dc2626' },
 ];
 
 function inferIssueType(machineType: string): string {
   const t = machineType.toLowerCase();
-  if (t.includes("electric") || t.includes("switchgear") || t.includes("transformer"))
-    return "electrical";
-  if (t.includes("hydraul")) return "hydraulic";
-  return "mechanical";
+  if (t.includes('electric') || t.includes('switchgear') || t.includes('transformer'))
+    return 'electrical';
+  if (t.includes('hydraul')) return 'hydraulic';
+  return 'mechanical';
 }
 
 function matchMachineId(machines: Machine[], machineName: string | null): string {
-  if (!machineName) return "";
+  if (!machineName) return '';
   const needle = machineName.toLowerCase();
   const match = machines.find(
     (m) =>
       m.name.toLowerCase() === needle ||
       m.name.toLowerCase().includes(needle) ||
-      needle.includes(m.name.toLowerCase()),
+      needle.includes(m.name.toLowerCase())
   );
-  return match?.id ?? "";
+  return match?.id ?? '';
 }
 
 export function EngineeringNotesForm({
@@ -68,12 +68,12 @@ export function EngineeringNotesForm({
   const supabase = createBrowserSupabaseClient();
 
   const [formData, setFormData] = useState({
-    issueType: "",
-    severity: "",
-    machineId: "",
+    issueType: '',
+    severity: '',
+    machineId: '',
     shiftType: getCurrentShift(),
-    description: "",
-    actionTaken: "",
+    description: '',
+    actionTaken: '',
     requiresFollowUp: false,
   });
 
@@ -90,25 +90,25 @@ export function EngineeringNotesForm({
   const prefillFromBreakdown = (bd: BreakdownControlRoomView) => {
     setFormData({
       issueType: inferIssueType(bd.machine_type),
-      severity: bd.status === "active" ? "high" : "medium",
+      severity: bd.status === 'active' ? 'high' : 'medium',
       machineId: matchMachineId(machines, bd.machine_name),
       shiftType: getCurrentShift(),
       description: `[${bd.fleet_id}] ${bd.reason}`,
-      actionTaken: "",
-      requiresFollowUp: bd.status === "active",
+      actionTaken: '',
+      requiresFollowUp: bd.status === 'active',
     });
     setIsTemplatePreFilled(true);
     setDraftsExpanded(false);
     // Scroll form into view and autofocus actionTaken field
     setTimeout(() => {
-      const actionInput = document.getElementById("eng-action-taken") as HTMLTextAreaElement | null;
+      const actionInput = document.getElementById('eng-action-taken') as HTMLTextAreaElement | null;
       if (actionInput) {
-        actionInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        actionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         actionInput.focus();
       } else {
         document
-          .getElementById("eng-notes-form")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          .getElementById('eng-notes-form')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 50);
   };
@@ -117,13 +117,13 @@ export function EngineeringNotesForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.issueType) {
-      newErrors.issueType = "Select issue type";
+      newErrors.issueType = 'Select issue type';
     }
     if (!formData.severity) {
-      newErrors.severity = "Select severity";
+      newErrors.severity = 'Select severity';
     }
     if (!formData.description.trim()) {
-      newErrors.description = "Enter description";
+      newErrors.description = 'Enter description';
     }
 
     setErrors(newErrors);
@@ -134,16 +134,16 @@ export function EngineeringNotesForm({
     e.preventDefault();
 
     if (!validate()) {
-      toast.error("Please fix the errors in the form.");
+      toast.error('Please fix the errors in the form.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
 
-      const { error } = await supabase.from("engineering_notes").insert({
+      const { error } = await supabase.from('engineering_notes').insert({
         department_id: departmentId,
         note_date: today,
         shift_type: formData.shiftType,
@@ -153,7 +153,7 @@ export function EngineeringNotesForm({
         description: formData.description,
         action_taken: formData.actionTaken || null,
         requires_follow_up: formData.requiresFollowUp,
-        status: "open",
+        status: 'open',
       });
 
       if (error) throw error;
@@ -161,30 +161,30 @@ export function EngineeringNotesForm({
       clearDraft();
 
       // Speculatively generate embeddings in background
-      if (formData.description && formData.description.trim() !== "") {
+      if (formData.description && formData.description.trim() !== '') {
         speculativeEmbedShiftLog(formData.description).catch(() => {});
       }
-      if (formData.actionTaken && formData.actionTaken.trim() !== "") {
+      if (formData.actionTaken && formData.actionTaken.trim() !== '') {
         speculativeEmbedShiftLog(formData.actionTaken).catch(() => {});
       }
 
       // Clear form
       setFormData({
-        issueType: "",
-        severity: "",
-        machineId: "",
+        issueType: '',
+        severity: '',
+        machineId: '',
         shiftType: getCurrentShift(),
-        description: "",
-        actionTaken: "",
+        description: '',
+        actionTaken: '',
         requiresFollowUp: false,
       });
       setIsTemplatePreFilled(false);
-      toast.success("Engineering issue logged successfully");
+      toast.success('Engineering issue logged successfully');
 
       router.refresh();
     } catch (_err) {
-      toast.error("Failed to save. Please try again.");
-      setErrors({ submit: "Failed to save. Please try again." });
+      toast.error('Failed to save. Please try again.');
+      setErrors({ submit: 'Failed to save. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +226,7 @@ export function EngineeringNotesForm({
                         {bd.machine_name || bd.fleet_id}
                       </span>
                       <span className="text-xs text-[var(--text-muted)]">[{bd.fleet_id}]</span>
-                      {bd.status === "active" ? (
+                      {bd.status === 'active' ? (
                         <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent-red/10 text-accent-red border border-accent-red/20">
                           <AlertTriangle className="w-3 h-3" />
                           Active
@@ -273,12 +273,12 @@ export function EngineeringNotesForm({
                   type="button"
                   onClick={() => {
                     setFormData({
-                      issueType: "",
-                      severity: "",
-                      machineId: "",
+                      issueType: '',
+                      severity: '',
+                      machineId: '',
                       shiftType: getCurrentShift(),
-                      description: "",
-                      actionTaken: "",
+                      description: '',
+                      actionTaken: '',
                       requiresFollowUp: false,
                     });
                     setIsTemplatePreFilled(false);
@@ -366,20 +366,20 @@ export function EngineeringNotesForm({
           <div className="space-y-2">
             <label className="text-[var(--text-secondary)] text-sm block">Shift</label>
             <div className="flex gap-2 max-w-xs">
-              {["day", "night"].map((shift) => (
+              {['day', 'night'].map((shift) => (
                 <button
                   key={shift}
                   type="button"
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      shiftType: shift as "day" | "night",
+                      shiftType: shift as 'day' | 'night',
                     }))
                   }
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     formData.shiftType === shift
-                      ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-                      : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                      ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {shift.charAt(0).toUpperCase() + shift.slice(1)}
@@ -456,7 +456,7 @@ export function EngineeringNotesForm({
               disabled={isSubmitting}
               className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
             >
-              {isSubmitting ? "Saving..." : "Log Issue"}
+              {isSubmitting ? 'Saving...' : 'Log Issue'}
             </button>
           </div>
         </form>

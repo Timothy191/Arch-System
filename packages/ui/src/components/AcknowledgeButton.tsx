@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { useState } from "react";
-import { toast } from "sonner";
+import { cn } from '@repo/ui/lib/utils';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface AcknowledgeButtonProps {
   onAcknowledge: () => void;
@@ -21,9 +21,9 @@ export function AcknowledgeButton({
   onAcknowledge,
   onUndo,
   className,
-  label = "Acknowledge",
-  confirmTitle = "Alarm Acknowledged",
-  confirmDescription = "This action will mark the status as reviewed.",
+  label = 'Acknowledge',
+  confirmTitle = 'Alarm Acknowledged',
+  confirmDescription = 'This action will mark the status as reviewed.',
 }: AcknowledgeButtonProps) {
   const [acknowledged, setAcknowledged] = useState(false);
 
@@ -38,7 +38,7 @@ export function AcknowledgeButton({
       description: confirmDescription,
       action: onUndo
         ? {
-            label: "Undo",
+            label: 'Undo',
             onClick: () => {
               setAcknowledged(false);
               onUndo();
@@ -55,8 +55,8 @@ export function AcknowledgeButton({
       type="button"
       onClick={handleClick}
       className={cn(
-        "px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]",
-        className,
+        'px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-muted)] text-xs hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)] transition-colors border border-[var(--border-default)]',
+        className
       )}
     >
       {label}

@@ -1,11 +1,11 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   lockAndSignShiftSchema,
   machinePerformanceSchema,
   shiftBreakdownSummarySchema,
   shiftTireEventSchema,
   unifiedShiftReportSchema,
-} from "../schemas/shift-compilation.schema.js";
+} from '../schemas/shift-compilation.schema.js';
 
 export type MachinePerformance = z.infer<typeof machinePerformanceSchema>;
 export type ShiftBreakdownSummary = z.infer<typeof shiftBreakdownSummarySchema>;

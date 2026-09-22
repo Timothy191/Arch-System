@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Plus, Power, Search } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { logError } from "@/lib/errors/error-logger";
-import { adminAddMachine, adminUpdateMachine } from "../actions/fleet";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Edit2, Plus, Power, Search } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { logError } from '@/lib/errors/error-logger';
+import { adminAddMachine, adminUpdateMachine } from '../actions/fleet';
 
 interface Machine {
   id: string;
@@ -38,7 +38,7 @@ interface Site {
   active: boolean;
 }
 
-const DUMPER_TYPES = ["articulated dumper", "rigid dumper", "dump truck", "hauler"];
+const DUMPER_TYPES = ['articulated dumper', 'rigid dumper', 'dump truck', 'hauler'];
 
 export function FleetTab() {
   const supabase = createBrowserSupabaseClient();
@@ -49,24 +49,24 @@ export function FleetTab() {
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [dialogError, setDialogError] = useState("");
+  const [dialogError, setDialogError] = useState('');
 
-  const [search, setSearch] = useState("");
-  const [filterDept, setFilterDept] = useState("");
-  const [filterSite, setFilterSite] = useState("");
+  const [search, setSearch] = useState('');
+  const [filterDept, setFilterDept] = useState('');
+  const [filterSite, setFilterSite] = useState('');
   const [pendingToggle, setPendingToggle] = useState<Machine | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     const [{ data: machineData }, { data: deptData }, { data: siteData }] = await Promise.all([
       supabase
-        .from("machines")
+        .from('machines')
         .select(
-          "id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)",
+          'id, name, machine_type, serial_number, bin_factor, active, report_exempt, department_id, site_id, created_at, department:departments(display_name), site:sites(name, site_code)'
         )
-        .order("name"),
-      supabase.from("departments").select("id, display_name").order("display_name"),
-      supabase.from("sites").select("id, name, site_code, active").order("name"),
+        .order('name'),
+      supabase.from('departments').select('id, display_name').order('display_name'),
+      supabase.from('sites').select('id, name, site_code, active').order('name'),
     ]);
     if (machineData) {
       const normalised = machineData.map((m) => ({
@@ -92,10 +92,10 @@ export function FleetTab() {
         !q ||
         m.name.toLowerCase().includes(q) ||
         m.machine_type.toLowerCase().includes(q) ||
-        (m.serial_number ?? "").toLowerCase().includes(q);
+        (m.serial_number ?? '').toLowerCase().includes(q);
       const matchDept = !filterDept || m.department_id === filterDept;
       const matchSite =
-        !filterSite || (filterSite === "__none__" ? !m.site_id : m.site_id === filterSite);
+        !filterSite || (filterSite === '__none__' ? !m.site_id : m.site_id === filterSite);
       return matchSearch && matchDept && matchSite;
     });
   }, [machines, search, filterDept, filterSite]);
@@ -105,13 +105,13 @@ export function FleetTab() {
 
   const handleAdd = () => {
     setEditingMachine(null);
-    setDialogError("");
+    setDialogError('');
     setShowDialog(true);
   };
 
   const handleEdit = (machine: Machine) => {
     setEditingMachine(machine);
-    setDialogError("");
+    setDialogError('');
     setShowDialog(true);
   };
 
@@ -122,7 +122,7 @@ export function FleetTab() {
       active: !pendingToggle.active,
     });
     if (result.error) {
-      logError(new Error(result.error), { context: "fleet_toggle_active" });
+      logError(new Error(result.error), { context: 'fleet_toggle_active' });
     }
     setPendingToggle(null);
     setSaving(false);
@@ -140,7 +140,7 @@ export function FleetTab() {
     report_exempt: boolean;
   }) => {
     setSaving(true);
-    setDialogError("");
+    setDialogError('');
 
     const payload = {
       name: data.name,
@@ -239,9 +239,9 @@ export function FleetTab() {
         {(search || filterDept || filterSite) && (
           <button
             onClick={() => {
-              setSearch("");
-              setFilterDept("");
-              setFilterSite("");
+              setSearch('');
+              setFilterDept('');
+              setFilterSite('');
             }}
             className="px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
           >
@@ -257,19 +257,19 @@ export function FleetTab() {
             <thead>
               <tr className="border-b border-[var(--border-default)]">
                 {[
-                  "Name",
-                  "Type / Bin Factor",
-                  "Serial No",
-                  "Department",
-                  "Site",
-                  "Status",
-                  "Exempt",
-                  "Actions",
+                  'Name',
+                  'Type / Bin Factor',
+                  'Serial No',
+                  'Department',
+                  'Site',
+                  'Status',
+                  'Exempt',
+                  'Actions',
                 ].map((h) => (
                   <th
                     key={h}
                     scope="col"
-                    className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider${h === "Actions" ? " text-right" : ""}`}
+                    className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider${h === 'Actions' ? ' text-right' : ''}`}
                   >
                     {h}
                   </th>
@@ -287,14 +287,14 @@ export function FleetTab() {
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     {machines.length === 0
-                      ? "No machines registered. Add one to get started."
-                      : "No machines match the current filters."}
+                      ? 'No machines registered. Add one to get started.'
+                      : 'No machines match the current filters.'}
                   </td>
                 </tr>
               ) : (
                 filtered.map((m) => {
                   const isDumper = DUMPER_TYPES.some((t) =>
-                    m.machine_type.toLowerCase().includes(t),
+                    m.machine_type.toLowerCase().includes(t)
                   );
                   return (
                     <tr key={m.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
@@ -315,10 +315,10 @@ export function FleetTab() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {m.serial_number || "—"}
+                        {m.serial_number || '—'}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                        {m.department?.display_name || "—"}
+                        {m.department?.display_name || '—'}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {m.site ? (
@@ -335,11 +335,11 @@ export function FleetTab() {
                           variant="outline"
                           className={
                             m.active
-                              ? "bg-accent-green/10 text-accent-green border-accent-green/20"
-                              : "bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]"
+                              ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
+                              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
                           }
                         >
-                          {m.active ? "Active" : "Inactive"}
+                          {m.active ? 'Active' : 'Inactive'}
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
@@ -362,11 +362,11 @@ export function FleetTab() {
                             disabled={saving}
                             className={
                               m.active
-                                ? "text-accent-red hover:text-accent-red/80"
-                                : "text-accent-green hover:text-accent-green"
+                                ? 'text-accent-red hover:text-accent-red/80'
+                                : 'text-accent-green hover:text-accent-green'
                             }
                             onClick={() => setPendingToggle(m)}
-                            title={m.active ? "Deactivate" : "Activate"}
+                            title={m.active ? 'Deactivate' : 'Activate'}
                           >
                             <Power className="w-4 h-4" />
                           </Button>
@@ -390,7 +390,7 @@ export function FleetTab() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingMachine ? "Edit Machine" : "Add Machine"}</DialogTitle>
+            <DialogTitle>{editingMachine ? 'Edit Machine' : 'Add Machine'}</DialogTitle>
           </DialogHeader>
           <MachineForm
             machine={editingMachine}
@@ -409,7 +409,7 @@ export function FleetTab() {
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {pendingToggle?.active ? "Deactivate Machine?" : "Activate Machine?"}
+              {pendingToggle?.active ? 'Deactivate Machine?' : 'Activate Machine?'}
             </DialogTitle>
           </DialogHeader>
           <p className="text-[var(--text-body)] text-sm">
@@ -425,12 +425,12 @@ export function FleetTab() {
               disabled={saving}
               className={
                 pendingToggle?.active
-                  ? "bg-accent-red hover:bg-accent-red/90 text-white"
-                  : "bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+                  ? 'bg-accent-red hover:bg-accent-red/90 text-white'
+                  : 'bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]'
               }
               onClick={handleConfirmToggle}
             >
-              {saving ? "Saving…" : pendingToggle?.active ? "Deactivate" : "Activate"}
+              {saving ? 'Saving…' : pendingToggle?.active ? 'Deactivate' : 'Activate'}
             </Button>
           </div>
         </DialogContent>
@@ -465,12 +465,12 @@ function MachineForm({
   }) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState(machine?.name || "");
-  const [machineType, setMachineType] = useState(machine?.machine_type || "");
-  const [serialNumber, setSerialNumber] = useState(machine?.serial_number || "");
-  const [binFactor, setBinFactor] = useState(machine?.bin_factor?.toString() || "");
-  const [departmentId, setDepartmentId] = useState(machine?.department_id || "");
-  const [siteId, setSiteId] = useState(machine?.site_id || "");
+  const [name, setName] = useState(machine?.name || '');
+  const [machineType, setMachineType] = useState(machine?.machine_type || '');
+  const [serialNumber, setSerialNumber] = useState(machine?.serial_number || '');
+  const [binFactor, setBinFactor] = useState(machine?.bin_factor?.toString() || '');
+  const [departmentId, setDepartmentId] = useState(machine?.department_id || '');
+  const [siteId, setSiteId] = useState(machine?.site_id || '');
   const [active, setActive] = useState(machine?.active ?? true);
   const [reportExempt, setReportExempt] = useState(machine?.report_exempt ?? false);
 
@@ -640,7 +640,7 @@ function MachineForm({
           disabled={saving}
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
         >
-          {saving ? "Saving…" : machine ? "Update" : "Add Machine"}
+          {saving ? 'Saving…' : machine ? 'Update' : 'Add Machine'}
         </Button>
       </div>
     </form>

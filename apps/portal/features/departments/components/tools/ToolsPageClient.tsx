@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import ToolCard from "./ToolCard";
+import { GlassCard } from '@repo/ui/GlassCard';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
+import ToolCard from './ToolCard';
 
-const UniverSheet = dynamic(() => import("./UniverSheet"), {
+const UniverSheet = dynamic(() => import('./UniverSheet'), {
   ssr: false,
   loading: () => <div className="h-[600px] animate-pulse bg-arch-surface-tertiary rounded-lg" />,
 });
@@ -17,7 +17,7 @@ interface ToolStatus {
   description: string;
   icon: string;
   color: string;
-  status: "online" | "offline" | "unknown";
+  status: 'online' | 'offline' | 'unknown';
   responseTime?: number;
 }
 
@@ -34,8 +34,8 @@ export default function ToolsPageClient({ departmentName, initialTools }: ToolsP
     async function refreshStatus(showLoading = false) {
       if (showLoading) setLoading(true);
       try {
-        const response = await fetch("/api/tools/status", {
-          cache: "no-store",
+        const response = await fetch('/api/tools/status', {
+          cache: 'no-store',
         });
         if (response.ok) {
           const data = await response.json();

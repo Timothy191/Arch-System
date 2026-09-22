@@ -1,18 +1,18 @@
-import * as sharedHooks from "@repo/shared/hooks";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { PitConnectivityBanner } from "./PitConnectivityBanner";
+import * as sharedHooks from '@repo/shared/hooks';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { PitConnectivityBanner } from './PitConnectivityBanner';
 
-jest.mock("@repo/shared/hooks", () => ({
-  ...jest.requireActual("@repo/shared/hooks"),
+jest.mock('@repo/shared/hooks', () => ({
+  ...jest.requireActual('@repo/shared/hooks'),
   usePitConnectivity: jest.fn(),
 }));
 
-describe("PitConnectivityBanner", () => {
+describe('PitConnectivityBanner', () => {
   const mockUsePitConnectivity = sharedHooks.usePitConnectivity as jest.Mock;
 
-  it("should render nothing when connection is online", () => {
+  it('should render nothing when connection is online', () => {
     mockUsePitConnectivity.mockReturnValue({
-      status: "online",
+      status: 'online',
       isOnline: true,
       isDegraded: false,
       latencyMs: 120,
@@ -23,10 +23,10 @@ describe("PitConnectivityBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("should render warning banner when connection is degraded", () => {
+  it('should render warning banner when connection is degraded', () => {
     const mockCheck = jest.fn();
     mockUsePitConnectivity.mockReturnValue({
-      status: "degraded",
+      status: 'degraded',
       isOnline: true,
       isDegraded: true,
       latencyMs: 1450,
@@ -35,17 +35,17 @@ describe("PitConnectivityBanner", () => {
 
     render(<PitConnectivityBanner />);
     expect(
-      screen.getByText(/Degraded Network Detected \(1450ms\) — Local draft buffering active/),
+      screen.getByText(/Degraded Network Detected \(1450ms\) — Local draft buffering active/)
     ).toBeInTheDocument();
 
-    const button = screen.getByRole("button", { name: /Check Link/i });
+    const button = screen.getByRole('button', { name: /Check Link/i });
     fireEvent.click(button);
     expect(mockCheck).toHaveBeenCalled();
   });
 
-  it("should render offline banner when connection is offline", () => {
+  it('should render offline banner when connection is offline', () => {
     mockUsePitConnectivity.mockReturnValue({
-      status: "offline",
+      status: 'offline',
       isOnline: false,
       isDegraded: false,
       latencyMs: null,
@@ -54,7 +54,7 @@ describe("PitConnectivityBanner", () => {
 
     render(<PitConnectivityBanner />);
     expect(
-      screen.getByText(/Offline Mode Active — Inputs are safely preserved in local draft buffer/),
+      screen.getByText(/Offline Mode Active — Inputs are safely preserved in local draft buffer/)
     ).toBeInTheDocument();
   });
 });

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { dozerRollSchema } from "@repo/contract/schemas/form.schema";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { ShiftToggle } from "@repo/ui/ShiftToggle";
-import { getCurrentShift } from "@repo/utils";
-import { Calculator, Equal, Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { useUnsavedChangesWarning } from "../hooks/useUnsavedChangesWarning";
+import { dozerRollSchema } from '@repo/contract/schemas/form.schema';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { ShiftToggle } from '@repo/ui/ShiftToggle';
+import { getCurrentShift } from '@repo/utils';
+import { Calculator, Equal, Plus, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useUnsavedChangesWarning } from '../hooks/useUnsavedChangesWarning';
 
 interface DozerWithSite {
   id: string;
@@ -29,13 +29,13 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
   const supabase = createBrowserSupabaseClient();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [machineId, setMachineId] = useState("");
-  const [lengthM, setLengthM] = useState("");
-  const [widthM, setWidthM] = useState("");
-  const [bladePasses, setBladePasses] = useState("");
-  const [pushCount, setPushCount] = useState("");
-  const [hoursOperated, setHoursOperated] = useState("");
-  const [shiftType, setShiftType] = useState<"day" | "night">(getCurrentShift());
+  const [machineId, setMachineId] = useState('');
+  const [lengthM, setLengthM] = useState('');
+  const [widthM, setWidthM] = useState('');
+  const [bladePasses, setBladePasses] = useState('');
+  const [pushCount, setPushCount] = useState('');
+  const [hoursOperated, setHoursOperated] = useState('');
+  const [shiftType, setShiftType] = useState<'day' | 'night'>(getCurrentShift());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +43,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
   // Restore draft on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     try {
       const saved = localStorage.getItem(draftKey);
       if (saved) {
@@ -64,7 +64,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
   const saveDraft = useMemo(() => {
     return () => {
-      if (typeof window === "undefined") return;
+      if (typeof window === 'undefined') return;
       try {
         if (machineId || lengthM || widthM || bladePasses || pushCount || hoursOperated) {
           localStorage.setItem(
@@ -78,7 +78,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
               pushCount,
               hoursOperated,
               shiftType,
-            }),
+            })
           );
         } else {
           localStorage.removeItem(draftKey);
@@ -100,7 +100,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
   ]);
 
   const clearDraft = () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(draftKey);
     } catch {
@@ -111,18 +111,18 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
   useEffect(() => {
     saveDraft();
     const handleVisibility = () => {
-      if (document.visibilityState === "hidden") saveDraft();
+      if (document.visibilityState === 'hidden') saveDraft();
     };
-    window.addEventListener("beforeunload", saveDraft);
-    window.addEventListener("pagehide", saveDraft);
-    window.addEventListener("arch:tab-swap", saveDraft);
-    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener('beforeunload', saveDraft);
+    window.addEventListener('pagehide', saveDraft);
+    window.addEventListener('arch:tab-swap', saveDraft);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      window.removeEventListener("beforeunload", saveDraft);
-      window.removeEventListener("pagehide", saveDraft);
-      window.removeEventListener("arch:tab-swap", saveDraft);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener('beforeunload', saveDraft);
+      window.removeEventListener('pagehide', saveDraft);
+      window.removeEventListener('arch:tab-swap', saveDraft);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [saveDraft]);
 
@@ -133,7 +133,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
 
   const selectedDozer = useMemo(() => dozers.find((d) => d.id === machineId), [machineId, dozers]);
 
-  const siteName = selectedDozer?.sites?.[0]?.name ?? "—";
+  const siteName = selectedDozer?.sites?.[0]?.name ?? '—';
 
   const area = useMemo(() => {
     const l = parseFloat(lengthM);
@@ -153,12 +153,12 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
   }
 
   const reset = () => {
-    setMachineId("");
-    setLengthM("");
-    setWidthM("");
-    setBladePasses("");
-    setPushCount("");
-    setHoursOperated("");
+    setMachineId('');
+    setLengthM('');
+    setWidthM('');
+    setBladePasses('');
+    setPushCount('');
+    setHoursOperated('');
     setShiftType(getCurrentShift());
     setError(null);
     setIsOpen(false);
@@ -170,11 +170,11 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
     setError(null);
 
     if (!machineId) {
-      setError("Select a dozer");
+      setError('Select a dozer');
       return;
     }
     if (!lengthM || !widthM) {
-      setError("Enter both length and width");
+      setError('Enter both length and width');
       return;
     }
 
@@ -185,27 +185,27 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
       machineId,
       today,
       shiftType,
-      bladePasses: parseInt(bladePasses || "0", 10),
-      pushCount: parseInt(pushCount || "0", 10),
-      hoursOperated: parseFloat(hoursOperated || "0"),
+      bladePasses: parseInt(bladePasses || '0', 10),
+      pushCount: parseInt(pushCount || '0', 10),
+      hoursOperated: parseFloat(hoursOperated || '0'),
       area,
     });
 
     if (!validation.success) {
-      setError(validation.error.issues[0]?.message || "Validation failed");
+      setError(validation.error.issues[0]?.message || 'Validation failed');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const { error: insertError } = await supabase.from("dozer_rolls").insert({
+      const { error: insertError } = await supabase.from('dozer_rolls').insert({
         department_id: departmentId,
         machine_id: machineId,
         roll_date: today,
         shift_type: shiftType,
-        blade_passes: parseInt(bladePasses || "0", 10),
-        push_count: parseInt(pushCount || "0", 10),
-        hours_operated: parseFloat(hoursOperated || "0"),
+        blade_passes: parseInt(bladePasses || '0', 10),
+        push_count: parseInt(pushCount || '0', 10),
+        hours_operated: parseFloat(hoursOperated || '0'),
         area_covered_sqm: area,
         notes: `Length: ${lengthM}m, Width: ${widthM}m`,
       });
@@ -215,7 +215,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
       reset();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save roll. Try again.");
+      setError(err instanceof Error ? err.message : 'Failed to save roll. Try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -282,7 +282,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                   {dozers.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.name}
-                      {d.serial_number ? ` (${d.serial_number})` : ""}
+                      {d.serial_number ? ` (${d.serial_number})` : ''}
                     </option>
                   ))}
                 </select>
@@ -332,7 +332,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                 <Equal className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
                 <div className="flex-1">
                   <div className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--accent-blue)] text-sm font-medium text-center">
-                    {area > 0 ? `${area.toFixed(2)} m²` : "—"}
+                    {area > 0 ? `${area.toFixed(2)} m²` : '—'}
                   </div>
                 </div>
               </div>
@@ -392,7 +392,7 @@ export function DozerRollForm({ departmentId, dozers, today }: DozerRollFormProp
                 disabled={isSubmitting}
                 className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors"
               >
-                {isSubmitting ? "Saving..." : "Save Roll"}
+                {isSubmitting ? 'Saving...' : 'Save Roll'}
               </button>
             </div>
           </form>

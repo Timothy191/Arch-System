@@ -1,14 +1,14 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface NavigationState {
   scrollY: number;
-  activeSection: "function" | "content";
+  activeSection: 'function' | 'content';
   hoveredElement: string | null;
   activeDepartment: string | null;
   previousDepartment: string | null;
   departmentHistory: string[];
   setScrollY: (_y: number) => void;
-  setActiveSection: (_section: "function" | "content") => void;
+  setActiveSection: (_section: 'function' | 'content') => void;
   setHoveredElement: (_element: string | null) => void;
   setActiveDepartment: (_dept: string | null) => void;
 }
@@ -17,7 +17,7 @@ const MAX_HISTORY_LENGTH = 20;
 
 export const useNavigationState = create<NavigationState>((set) => ({
   scrollY: 0,
-  activeSection: "function",
+  activeSection: 'function',
   hoveredElement: null,
   activeDepartment: null,
   previousDepartment: null,

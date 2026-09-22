@@ -10,7 +10,7 @@
  * Token estimates use ~4 chars/token (conservative for English text).
  */
 
-type ContentType = "conversation" | "document" | "code" | "mixed";
+type ContentType = 'conversation' | 'document' | 'code' | 'mixed';
 
 interface ChunkOptions {
   contentType?: ContentType;
@@ -42,17 +42,17 @@ export function detectContentType(text: string): ContentType {
   ];
 
   const codeScore = codeIndicators.filter((r) =>
-    typeof r === "boolean" ? r : r.test(text),
+    typeof r === 'boolean' ? r : r.test(text)
   ).length;
 
-  if (codeScore >= 2) return "code";
+  if (codeScore >= 2) return 'code';
 
   // Check for conversational patterns
-  const lineCount = text.split("\n").length;
+  const lineCount = text.split('\n').length;
   const avgLineLength = text.length / Math.max(lineCount, 1);
-  if (lineCount <= 3 && avgLineLength < 200) return "conversation";
+  if (lineCount <= 3 && avgLineLength < 200) return 'conversation';
 
-  return "document";
+  return 'document';
 }
 
 /**
@@ -62,11 +62,11 @@ export function chunkText(text: string, options: ChunkOptions = {}): Chunk[] {
   const contentType = options.contentType ?? detectContentType(text);
 
   switch (contentType) {
-    case "conversation":
+    case 'conversation':
       return chunkConversation(text, options);
-    case "document":
+    case 'document':
       return chunkDocument(text, options);
-    case "code":
+    case 'code':
       return chunkCode(text, options);
     default:
       return chunkDocument(text, options);
@@ -152,7 +152,7 @@ function chunkDocument(text: string, options: ChunkOptions = {}): Chunk[] {
 
     if (preserveBoundaries && end < text.length) {
       // Try to break at paragraph boundary
-      const paragraphBreak = text.lastIndexOf("\n\n", end);
+      const paragraphBreak = text.lastIndexOf('\n\n', end);
       if (paragraphBreak > start + maxChars * 0.5) {
         end = paragraphBreak + 2;
       } else {
@@ -275,10 +275,10 @@ function splitBySentences(text: string, maxChars: number): string[] {
   const sentences: string[] = [];
   const rawSentences = text.split(/(?<=[.!?])\s+/);
 
-  let current = "";
+  let current = '';
   for (const sentence of rawSentences) {
     if (current.length + sentence.length < maxChars) {
-      current += (current ? " " : "") + sentence;
+      current += (current ? ' ' : '') + sentence;
     } else {
       if (current) sentences.push(current);
       current = sentence;
@@ -295,13 +295,13 @@ function splitBySentences(text: string, maxChars: number): string[] {
 }
 
 function splitByLines(text: string, maxChars: number): string[] {
-  const lines = text.split("\n");
+  const lines = text.split('\n');
   const chunks: string[] = [];
-  let current = "";
+  let current = '';
 
   for (const line of lines) {
     if (current.length + line.length + 1 < maxChars) {
-      current += (current ? "\n" : "") + line;
+      current += (current ? '\n' : '') + line;
     } else {
       if (current) chunks.push(current);
       current = line;

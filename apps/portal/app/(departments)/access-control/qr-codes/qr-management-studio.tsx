@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { Button } from '@repo/ui/components/ui/button';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Car,
   CheckCircle2,
@@ -17,17 +17,17 @@ import {
   Wrench,
   X,
   XCircle,
-} from "lucide-react";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { QRCodeSection } from "../card-actions/qr-section";
+} from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { QRCodeSection } from '../card-actions/qr-section';
 import type {
   BadgeInventoryItem,
   CreateBadgePayload,
   CredentialEntityType,
   EntityOption,
-} from "./actions";
-import { createBadgeCredential, getBadgesInventory, revokeBadgeCredential } from "./actions";
+} from './actions';
+import { createBadgeCredential, getBadgesInventory, revokeBadgeCredential } from './actions';
 
 interface QrManagementStudioProps {
   initialBadges: BadgeInventoryItem[];
@@ -42,24 +42,24 @@ interface QrManagementStudioProps {
 
 export function QrManagementStudio({ initialBadges, options }: QrManagementStudioProps) {
   const [badges, setBadges] = useState<BadgeInventoryItem[]>(initialBadges);
-  const [filterType, setFilterType] = useState<string>("all");
-  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<string>('all');
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inspectBadge, setInspectBadge] = useState<BadgeInventoryItem | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // Form State for Quick Issue
   const [formEntityType, setFormEntityType] = useState<CredentialEntityType>(
-    "employee" as unknown as CredentialEntityType,
+    'employee' as unknown as CredentialEntityType
   );
-  const [selectedEntityId, setSelectedEntityId] = useState<string>("");
+  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
   const [isCustomEntity, setIsCustomEntity] = useState(false);
-  const [customName, setCustomName] = useState("");
-  const [customCode, setCustomCode] = useState("");
-  const [customReg, setCustomReg] = useState("");
-  const [customMake, setCustomMake] = useState("");
-  const [qrCodeInput, setQrCodeInput] = useState("");
-  const [rfidCodeInput, setRfidCodeInput] = useState("");
+  const [customName, setCustomName] = useState('');
+  const [customCode, setCustomCode] = useState('');
+  const [customReg, setCustomReg] = useState('');
+  const [customMake, setCustomMake] = useState('');
+  const [qrCodeInput, setQrCodeInput] = useState('');
+  const [rfidCodeInput, setRfidCodeInput] = useState('');
   const [validityDays, setValidityDays] = useState<number>(365);
 
   const handleFilter = (type: string) => {
@@ -81,16 +81,16 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
   const handleAutoGenerateCode = (entityType: CredentialEntityType) => {
     const randomSuffix = Math.floor(10000 + Math.random() * 90000);
     switch (entityType) {
-      case "coal_truck":
+      case 'coal_truck':
         setQrCodeInput(`TRK-COAL-${randomSuffix}`);
         break;
-      case "vehicle":
+      case 'vehicle':
         setQrCodeInput(`VEH-${randomSuffix}`);
         break;
-      case "visitor":
+      case 'visitor':
         setQrCodeInput(`VIS-${randomSuffix}`);
         break;
-      case "equipment":
+      case 'equipment':
         setQrCodeInput(`EQP-${randomSuffix}`);
         break;
       default:
@@ -104,11 +104,11 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       try {
         await revokeBadgeCredential(badgeId);
         setBadges((prev) =>
-          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: "Revoked" } : b)),
+          prev.map((b) => (b.id === badgeId ? { ...b, is_active: false, status: 'Revoked' } : b))
         );
-        toast.success("Credential revoked successfully");
+        toast.success('Credential revoked successfully');
       } catch {
-        toast.error("Failed to revoke credential");
+        toast.error('Failed to revoke credential');
       }
     });
   };
@@ -135,23 +135,23 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
         const res = await createBadgeCredential(payload);
         if (res.success) {
-          toast.success("New QR & RFID credential activated and registered in database!");
+          toast.success('New QR & RFID credential activated and registered in database!');
           setIsModalOpen(false);
           // Refresh list
           const updated = await getBadgesInventory(filterType, search);
           setBadges(updated);
           // Reset form
-          setQrCodeInput("");
-          setRfidCodeInput("");
-          setSelectedEntityId("");
+          setQrCodeInput('');
+          setRfidCodeInput('');
+          setSelectedEntityId('');
           setIsCustomEntity(false);
-          setCustomName("");
-          setCustomCode("");
-          setCustomReg("");
-          setCustomMake("");
+          setCustomName('');
+          setCustomCode('');
+          setCustomReg('');
+          setCustomMake('');
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to create badge";
+        const msg = err instanceof Error ? err.message : 'Failed to create badge';
         toast.error(msg);
       }
     });
@@ -159,13 +159,13 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
   // Get options for current form selection
   const currentOptions: EntityOption[] =
-    formEntityType === "personnel"
+    formEntityType === 'personnel'
       ? options.personnel
-      : formEntityType === "coal_truck"
+      : formEntityType === 'coal_truck'
         ? options.coalTrucks
-        : formEntityType === "vehicle"
+        : formEntityType === 'vehicle'
           ? options.vehicles
-          : formEntityType === "visitor"
+          : formEntityType === 'visitor'
             ? options.visitors
             : options.equipment;
 
@@ -189,11 +189,11 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 </span>
               </div>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Issue and manage credentials for{" "}
-                <strong className="text-[var(--text-primary)]">Employees</strong>,{" "}
-                <strong className="text-[var(--text-primary)]">Vehicles</strong>,{" "}
-                <strong className="text-amber-400">Coal Trucks</strong>,{" "}
-                <strong className="text-[var(--text-primary)]">Visitors</strong>, and{" "}
+                Issue and manage credentials for{' '}
+                <strong className="text-[var(--text-primary)]">Employees</strong>,{' '}
+                <strong className="text-[var(--text-primary)]">Vehicles</strong>,{' '}
+                <strong className="text-amber-400">Coal Trucks</strong>,{' '}
+                <strong className="text-[var(--text-primary)]">Visitors</strong>, and{' '}
                 <strong className="text-[var(--text-primary)]">Heavy Equipment</strong>.
               </p>
             </div>
@@ -201,8 +201,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
 
           <Button
             onClick={() => {
-              setFormEntityType("personnel");
-              handleAutoGenerateCode("personnel");
+              setFormEntityType('personnel');
+              handleAutoGenerateCode('personnel');
               setIsModalOpen(true);
             }}
             className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2 shadow-lg shadow-emerald-600/30 self-end md:self-center"
@@ -217,12 +217,12 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
-            { id: "all", label: "All Credentials", icon: Layers },
-            { id: "personnel", label: "Employees", icon: Users },
-            { id: "coal_truck", label: "Coal Trucks", icon: Truck },
-            { id: "vehicle", label: "Vehicles", icon: Car },
-            { id: "visitor", label: "Visitors", icon: Users },
-            { id: "equipment", label: "Equipment", icon: Wrench },
+            { id: 'all', label: 'All Credentials', icon: Layers },
+            { id: 'personnel', label: 'Employees', icon: Users },
+            { id: 'coal_truck', label: 'Coal Trucks', icon: Truck },
+            { id: 'vehicle', label: 'Vehicles', icon: Car },
+            { id: 'visitor', label: 'Visitors', icon: Users },
+            { id: 'equipment', label: 'Equipment', icon: Wrench },
           ].map((cat) => {
             const Icon = cat.icon;
             const active = filterType === cat.id;
@@ -232,8 +232,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 onClick={() => handleFilter(cat.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap border ${
                   active
-                    ? "bg-blue-600 text-white border-blue-500 shadow-sm"
-                    : "bg-[var(--bg-secondary)]/50 border-[var(--border-default)] text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-secondary)]"
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                    : 'bg-[var(--bg-secondary)]/50 border-[var(--border-default)] text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-secondary)]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -308,24 +308,24 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                   <td className="p-3.5">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${
-                        b.entity_subtitle.toLowerCase().includes("coal")
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : b.entity_type === "personnel"
-                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                            : b.entity_type === "vehicle"
-                              ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                              : b.entity_type === "visitor"
-                                ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        b.entity_subtitle.toLowerCase().includes('coal')
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          : b.entity_type === 'personnel'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            : b.entity_type === 'vehicle'
+                              ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                              : b.entity_type === 'visitor'
+                                ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                       }`}
                     >
-                      {b.entity_subtitle.toLowerCase().includes("coal") ? (
+                      {b.entity_subtitle.toLowerCase().includes('coal') ? (
                         <Truck className="w-2.5 h-2.5" />
                       ) : (
                         <ShieldCheck className="w-2.5 h-2.5" />
                       )}
-                      {b.entity_subtitle.toLowerCase().includes("coal")
-                        ? "Coal Truck"
+                      {b.entity_subtitle.toLowerCase().includes('coal')
+                        ? 'Coal Truck'
                         : b.entity_type.toUpperCase()}
                     </span>
                   </td>
@@ -334,8 +334,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
                         b.is_active
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "bg-red-500/10 text-red-400 border border-red-500/20"
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-red-500/10 text-red-400 border border-red-500/20'
                       }`}
                     >
                       {b.is_active ? (
@@ -420,11 +420,11 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 <label className="text-xs font-medium text-slate-300">Target Entity Type</label>
                 <div className="grid grid-cols-5 gap-1.5 bg-slate-950 p-1 rounded-lg border border-white/10">
                   {[
-                    { id: "personnel", label: "Employee", icon: Users },
-                    { id: "coal_truck", label: "Coal Truck", icon: Truck },
-                    { id: "vehicle", label: "Vehicle", icon: Car },
-                    { id: "visitor", label: "Visitor", icon: Users },
-                    { id: "equipment", label: "Equipment", icon: Wrench },
+                    { id: 'personnel', label: 'Employee', icon: Users },
+                    { id: 'coal_truck', label: 'Coal Truck', icon: Truck },
+                    { id: 'vehicle', label: 'Vehicle', icon: Car },
+                    { id: 'visitor', label: 'Visitor', icon: Users },
+                    { id: 'equipment', label: 'Equipment', icon: Wrench },
                   ].map((t) => {
                     const active = formEntityType === t.id;
                     const Icon = t.icon;
@@ -436,12 +436,12 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                           const val = t.id as CredentialEntityType;
                           setFormEntityType(val);
                           handleAutoGenerateCode(val);
-                          setSelectedEntityId("");
+                          setSelectedEntityId('');
                         }}
                         className={`flex flex-col items-center justify-center p-2 rounded text-[11px] font-medium transition-all ${
                           active
-                            ? "bg-emerald-600 text-white shadow"
-                            : "text-slate-400 hover:text-white"
+                            ? 'bg-emerald-600 text-white shadow'
+                            : 'text-slate-400 hover:text-white'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5 mb-1" />
@@ -461,7 +461,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     onClick={() => setIsCustomEntity(!isCustomEntity)}
                     className="text-[11px] text-blue-400 hover:underline"
                   >
-                    {isCustomEntity ? "Select Existing Entity" : "+ Register New On-The-Fly"}
+                    {isCustomEntity ? 'Select Existing Entity' : '+ Register New On-The-Fly'}
                   </button>
                 </div>
 
@@ -471,7 +471,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                     onChange={(e) => setSelectedEntityId(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-950 border border-white/15 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
-                    <option value="">-- Choose {formEntityType.replace("_", " ")} --</option>
+                    <option value="">-- Choose {formEntityType.replace('_', ' ')} --</option>
                     {currentOptions.map((opt) => (
                       <option key={opt.id} value={opt.id}>
                         {opt.label} • {opt.sublabel}
@@ -480,7 +480,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                   </select>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-3 rounded-lg border border-white/10">
-                    {formEntityType === "coal_truck" || formEntityType === "vehicle" ? (
+                    {formEntityType === 'coal_truck' || formEntityType === 'vehicle' ? (
                       <>
                         <input
                           type="text"
@@ -504,7 +504,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                           className="col-span-2 px-2.5 py-1.5 bg-slate-900 border border-white/15 rounded text-xs text-white"
                         />
                       </>
-                    ) : formEntityType === "visitor" ? (
+                    ) : formEntityType === 'visitor' ? (
                       <>
                         <input
                           type="text"
@@ -584,7 +584,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
               {/* Live QR Preview Thumbnail */}
               <div className="flex items-center gap-4 bg-slate-950/80 p-3 rounded-xl border border-white/10">
                 <div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0 shadow-inner">
-                  <QRCodeSection data={qrCodeInput || "SAMPLE"} size={56} />
+                  <QRCodeSection data={qrCodeInput || 'SAMPLE'} size={56} />
                 </div>
                 <div className="text-xs space-y-1">
                   <p className="font-semibold text-white">Live Code Preview</p>
@@ -600,9 +600,9 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                 <span className="text-slate-300 font-medium">Validity Expiration</span>
                 <div className="flex items-center gap-2">
                   {[
-                    { label: "24 Hours", days: 1 },
-                    { label: "30 Days", days: 30 },
-                    { label: "1 Year", days: 365 },
+                    { label: '24 Hours', days: 1 },
+                    { label: '30 Days', days: 30 },
+                    { label: '1 Year', days: 365 },
                   ].map((p) => (
                     <button
                       key={p.days}
@@ -610,8 +610,8 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                       onClick={() => setValidityDays(p.days)}
                       className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                         validityDays === p.days
-                          ? "bg-blue-600 text-white"
-                          : "bg-slate-800 text-slate-400 hover:text-white"
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-800 text-slate-400 hover:text-white'
                       }`}
                     >
                       {p.label}
@@ -636,7 +636,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
                   disabled={isPending || !qrCodeInput}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
                 >
-                  {isPending ? "Activating..." : "Save & Activate Credential"}
+                  {isPending ? 'Activating...' : 'Save & Activate Credential'}
                 </Button>
               </div>
             </form>
@@ -679,7 +679,7 @@ export function QrManagementStudio({ initialBadges, options }: QrManagementStudi
             <Button
               className="w-full gap-2 bg-blue-600 hover:bg-blue-500 text-white"
               onClick={() => {
-                toast.success("Ready for scanning with Chainway C66");
+                toast.success('Ready for scanning with Chainway C66');
                 setInspectBadge(null);
               }}
             >

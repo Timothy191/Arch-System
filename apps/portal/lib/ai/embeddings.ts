@@ -1,7 +1,7 @@
-import crypto from "node:crypto";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { APIError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
+import crypto from 'node:crypto';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { APIError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
 
 /**
  * Embedding cache service.
@@ -59,7 +59,7 @@ export function clearEmbeddingCache(): void {
 
 // Helper to compute SHA-256 hash of text
 function computeHash(text: string): string {
-  return crypto.createHash("sha256").update(text).digest("hex");
+  return crypto.createHash('sha256').update(text).digest('hex');
 }
 
 // ------------------------------------------------------------------
@@ -70,15 +70,15 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
-      .from("embedding_cache")
-      .select("embedding")
-      .eq("text_hash", hash)
-      .eq("user_id", userId)
+      .from('embedding_cache')
+      .select('embedding')
+      .eq('text_hash', hash)
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
       logError(new Error(error.message), {
-        context: "embedding_db_cache_lookup_failed",
+        context: 'embedding_db_cache_lookup_failed',
         hash,
         userId,
       });
@@ -86,15 +86,15 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
     }
 
     if (data?.embedding) {
-      if (typeof data.embedding === "string") {
-        const clean = (data.embedding as string).replace(/[[\]\s]/g, "");
-        return clean.split(",").map(Number);
+      if (typeof data.embedding === 'string') {
+        const clean = (data.embedding as string).replace(/[[\]\s]/g, '');
+        return clean.split(',').map(Number);
       }
       return data.embedding as number[];
     }
   } catch (err) {
     logError(err, {
-      context: "embedding_db_cache_lookup_exception",
+      context: 'embedding_db_cache_lookup_exception',
       hash,
       userId,
     });
@@ -105,11 +105,11 @@ async function getDbCachedEmbedding(hash: string, userId: string): Promise<numbe
 async function _saveDbCachedEmbedding(
   hash: string,
   userId: string,
-  vector: number[],
+  vector: number[]
 ): Promise<void> {
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.from("embedding_cache").insert({
+    const { error } = await supabase.from('embedding_cache').insert({
       text_hash: hash,
       user_id: userId,
       embedding: vector,
@@ -117,18 +117,18 @@ async function _saveDbCachedEmbedding(
 
     if (error) {
       // Postgres error code 23505 is unique violation (ON CONFLICT DO NOTHING equivalent)
-      if (error.code === "23505") {
+      if (error.code === '23505') {
         return;
       }
       logError(new Error(error.message), {
-        context: "embedding_db_cache_insert_failed",
+        context: 'embedding_db_cache_insert_failed',
         hash,
         userId,
       });
     }
   } catch (err) {
     logError(err, {
-      context: "embedding_db_cache_insert_exception",
+      context: 'embedding_db_cache_insert_exception',
       hash,
       userId,
     });
@@ -158,9 +158,9 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
   }
 
   // Embedding not found in cache and generation is disabled
-  throw new APIError("Embedding not found in cache. Generation has been disabled.", {
+  throw new APIError('Embedding not found in cache. Generation has been disabled.', {
     statusCode: 503,
-    context: { hash, userId, reason: "generation_disabled" },
+    context: { hash, userId, reason: 'generation_disabled' },
   });
 }
 
@@ -172,7 +172,7 @@ export async function generateEmbedding(text: string, userId: string): Promise<n
  */
 export async function batchGenerateEmbeddings(
   texts: string[],
-  userId: string,
+  userId: string
 ): Promise<number[][]> {
   if (texts.length === 0) return [];
 
@@ -202,17 +202,17 @@ export async function batchGenerateEmbeddings(
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase
-      .from("embedding_cache")
-      .select("text_hash, embedding")
-      .eq("user_id", userId)
-      .in("text_hash", pendingHashes);
+      .from('embedding_cache')
+      .select('text_hash, embedding')
+      .eq('user_id', userId)
+      .in('text_hash', pendingHashes);
 
     if (!error && data) {
       for (const row of data) {
         let vector: number[];
-        if (typeof row.embedding === "string") {
-          const clean = (row.embedding as string).replace(/[[\]\s]/g, "");
-          vector = clean.split(",").map(Number);
+        if (typeof row.embedding === 'string') {
+          const clean = (row.embedding as string).replace(/[[\]\s]/g, '');
+          vector = clean.split(',').map(Number);
         } else {
           vector = row.embedding as number[];
         }
@@ -221,7 +221,7 @@ export async function batchGenerateEmbeddings(
     }
   } catch (dbErr) {
     logError(dbErr, {
-      context: "embedding_batch_db_lookup_failed",
+      context: 'embedding_batch_db_lookup_failed',
       userId,
     });
   }
@@ -245,8 +245,8 @@ export async function batchGenerateEmbeddings(
       `${missingIndices.length} embedding(s) not found in cache. Generation has been disabled.`,
       {
         statusCode: 503,
-        context: { userId, missingIndices, reason: "generation_disabled" },
-      },
+        context: { userId, missingIndices, reason: 'generation_disabled' },
+      }
     );
   }
 

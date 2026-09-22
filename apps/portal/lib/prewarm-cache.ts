@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { DEPARTMENTS } from "@repo/departments/data-access";
-import { cacheGet, cacheSet } from "@repo/redis/cache";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import { DEPARTMENTS } from '@repo/departments/data-access';
+import { cacheGet, cacheSet } from '@repo/redis/cache';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 /**
  * Pre-warm department UUID cache for all departments.
@@ -21,9 +21,9 @@ export async function prewarmDepartmentCache() {
       if (!cached) {
         try {
           const { data: department } = await supabase
-            .from("departments")
-            .select("id")
-            .eq("name", dept.name)
+            .from('departments')
+            .select('id')
+            .eq('name', dept.name)
             .single();
 
           if (department) {
@@ -33,6 +33,6 @@ export async function prewarmDepartmentCache() {
           // Silently fail - cache will be populated on-demand
         }
       }
-    }),
+    })
   );
 }

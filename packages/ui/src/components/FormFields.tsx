@@ -3,14 +3,14 @@ function deriveInputId(label: string, id?: string, name?: string): string {
   if (name) return `field-${name}`;
   return `field-${label
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")}`;
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`;
 }
 
-import { cn } from "../lib/utils";
+import { cn } from '../lib/utils';
 
 const inputStyles =
-  "w-full bg-white/60 backdrop-blur-md border border-white/60 rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),inset_0_-0.5px_0_rgba(255,255,255,0.7)] focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 focus:bg-white/80 transition-all duration-200";
+  'w-full bg-white/60 backdrop-blur-md border border-white/60 rounded-lg px-3 py-2.5 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] text-sm shadow-[inset_0_1px_2px_rgba(0,0,0,0.03),inset_0_-0.5px_0_rgba(255,255,255,0.7)] focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/20 focus:bg-white/80 transition-all duration-200';
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -65,7 +65,7 @@ export function FormSelect({
   error,
   optional,
   options,
-  placeholder = "Select...",
+  placeholder = 'Select...',
   className,
   id: idProp,
   name,
@@ -128,7 +128,7 @@ export function FormTextarea({
       <textarea
         id={inputId}
         aria-describedby={errorId}
-        className={cn(inputStyles, "resize-none", className)}
+        className={cn(inputStyles, 'resize-none', className)}
         name={name}
         {...props}
       />
@@ -160,13 +160,13 @@ export function SubmitButton({ loading, children, className, ...props }: SubmitB
       disabled={loading || props.disabled}
       aria-busy={loading}
       className={cn(
-        "bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]",
-        "text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors",
-        className,
+        'bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)]',
+        'text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors',
+        className
       )}
       {...props}
     >
-      {loading ? "Saving..." : children}
+      {loading ? 'Saving...' : children}
     </button>
   );
 }

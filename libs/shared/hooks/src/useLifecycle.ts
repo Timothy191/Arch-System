@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, type DependencyList, type EffectCallback } from "react";
+import { type DependencyList, type EffectCallback, useEffect, useRef } from 'react';
 
 /**
  * Hook executing callback exclusively on component initial mount.

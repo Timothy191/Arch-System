@@ -1,15 +1,15 @@
-import { cn } from "../lib/utils";
-import { EveLogo } from "./EveLogo";
-import { Clock } from "./Clock";
+import { cn } from '../lib/utils';
+import { Clock } from './Clock';
+import { EveLogo } from './EveLogo';
 
 interface EveStatusBarProps {
   className?: string;
 }
 
 const STATUS_CHIPS = [
-  { label: "Portal Watch" },
-  { label: "Backend Ops" },
-  { label: "RFID Ingest" },
+  { label: 'Portal Watch' },
+  { label: 'Backend Ops' },
+  { label: 'RFID Ingest' },
 ] as const;
 
 /**
@@ -21,8 +21,8 @@ export function EveStatusBar({ className }: EveStatusBarProps) {
     <div
       data-testid="eve-status-bar"
       className={cn(
-        "mt-6 w-[90%] max-w-3xl h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-lg flex items-center justify-between px-6 liquid-glass-light z-50",
-        className,
+        'mt-6 w-[90%] max-w-3xl h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-lg flex items-center justify-between px-6 liquid-glass-light z-50',
+        className
       )}
     >
       <div className="flex items-center gap-4">

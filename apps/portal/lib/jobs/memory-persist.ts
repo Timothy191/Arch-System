@@ -1,7 +1,7 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { aiMemoryPersistEvent, inngest } from "@repo/utils/inngest";
-import { logError } from "@/lib/errors/error-logger";
-import { recordJobExecution } from "@/lib/observability/simple-metrics";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { aiMemoryPersistEvent, inngest } from '@repo/utils/inngest';
+import { logError } from '@/lib/errors/error-logger';
+import { recordJobExecution } from '@/lib/observability/simple-metrics';
 
 /**
  * Durable fallback for saving assistant memory after a chat stream completes.
@@ -20,7 +20,7 @@ import { recordJobExecution } from "@/lib/observability/simple-metrics";
  */
 export const memoryPersistFn = inngest.createFunction(
   {
-    id: "memory-persist",
+    id: 'memory-persist',
     triggers: [{ event: aiMemoryPersistEvent }],
     concurrency: { limit: 5 },
   },
@@ -32,18 +32,18 @@ export const memoryPersistFn = inngest.createFunction(
     try {
       // If already stored, nothing to do
       if (assistantResponseStored) {
-        return { success: true, skipped: "already_stored" };
+        return { success: true, skipped: 'already_stored' };
       }
 
       const supabase = await createServerSupabaseClient();
 
       // Check the last memory entries to verify state
       const { data: recentMemories, error: queryError } = await supabase
-        .from("memory_embeddings")
-        .select("id, content, memory_type, created_at")
-        .eq("session_id", sessionId)
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
+        .from('memory_embeddings')
+        .select('id, content, memory_type, created_at')
+        .eq('session_id', sessionId)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
         .limit(5);
 
       if (queryError) {
@@ -53,7 +53,7 @@ export const memoryPersistFn = inngest.createFunction(
       // The user message was already stored by loadMemoryNode.
       // The assistant response is what we're recovering.
       const assistantMemories = recentMemories?.filter(
-        (m) => m.memory_type === "episodic" && m.content.startsWith("Assistant:"),
+        (m) => m.memory_type === 'episodic' && m.content.startsWith('Assistant:')
       );
 
       if (!assistantMemories || assistantMemories.length === 0) {
@@ -61,12 +61,12 @@ export const memoryPersistFn = inngest.createFunction(
         // This is informational; the next user request will still have
         // the user message in context via loadMemoryNode.
         logError(
-          new Error("Assistant response not persisted — stream may have been terminated early"),
+          new Error('Assistant response not persisted — stream may have been terminated early'),
           {
-            context: "memory_persist_job",
+            context: 'memory_persist_job',
             sessionId,
             userId,
-          },
+          }
         );
         return { success: true, recovered: false };
       }
@@ -79,13 +79,13 @@ export const memoryPersistFn = inngest.createFunction(
     } catch (err) {
       success = false;
       logError(err, {
-        context: "memory_persist_job",
+        context: 'memory_persist_job',
         sessionId,
         userId,
       });
       throw err;
     } finally {
-      recordJobExecution("memory-persist", performance.now() - start, success);
+      recordJobExecution('memory-persist', performance.now() - start, success);
     }
-  },
+  }
 );

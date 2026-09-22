@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { RevoGrid } from "@revolist/react-datagrid";
-import type { ColumnFilterConfig, SortingConfig } from "@revolist/revogrid";
-import * as React from "react";
-import { GlassCard } from "../GlassCard";
+import { cn } from '@repo/ui/lib/utils';
+import { RevoGrid } from '@revolist/react-datagrid';
+import type { ColumnFilterConfig, SortingConfig } from '@revolist/revogrid';
+import * as React from 'react';
+import { GlassCard } from '../GlassCard';
 
-type RevoColumn = React.ComponentProps<typeof RevoGrid>["columns"];
-type RevoSource = React.ComponentProps<typeof RevoGrid>["source"];
+type RevoColumn = React.ComponentProps<typeof RevoGrid>['columns'];
+type RevoSource = React.ComponentProps<typeof RevoGrid>['source'];
 
 export interface DataGridProps {
   columns: RevoColumn;
@@ -35,7 +35,7 @@ export function DataGrid({
   columns,
   source,
   className,
-  height = "600px",
+  height = '600px',
   resize = true,
   filter = false,
   sorting = false,
@@ -46,10 +46,10 @@ export function DataGrid({
   const gridRef = React.useRef<any>(null);
 
   const sortingProp =
-    typeof sorting === "boolean" ? (sorting ? { additive: false } : undefined) : sorting;
+    typeof sorting === 'boolean' ? (sorting ? { additive: false } : undefined) : sorting;
 
   return (
-    <GlassCard className={cn("overflow-hidden p-0", className)}>
+    <GlassCard className={cn('overflow-hidden p-0', className)}>
       <div
         className="w-full"
         style={{

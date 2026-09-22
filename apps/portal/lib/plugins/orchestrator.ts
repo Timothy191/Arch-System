@@ -1,8 +1,8 @@
-import { type ActorRefFrom, interpret } from "xstate";
-import { APIError, ConflictError, NotFoundError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
-import { type HealthReport, orchestratorMachine } from "./machines";
-import type { ArchPlugin, PluginHooks, PluginWidget } from "./types";
+import { type ActorRefFrom, interpret } from 'xstate';
+import { APIError, ConflictError, NotFoundError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
+import { type HealthReport, orchestratorMachine } from './machines';
+import type { ArchPlugin, PluginHooks, PluginWidget } from './types';
 
 /**
  * PluginOrchestrator - XState-powered plugin lifecycle management
@@ -15,16 +15,16 @@ class PluginOrchestrator {
   private isClient: boolean;
 
   constructor() {
-    this.isClient = typeof window !== "undefined";
+    this.isClient = typeof window !== 'undefined';
 
     // Create XState actor
     this.actor = interpret(orchestratorMachine, {
-      systemId: "plugin-system",
+      systemId: 'plugin-system',
     });
 
     // Subscribe to state changes for debugging
     this.actor.subscribe((snapshot) => {
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.log(`[PluginOrchestrator] State: ${snapshot.value}`, {
           plugins: snapshot.context.healthReport.activeCount,
@@ -36,12 +36,12 @@ class PluginOrchestrator {
     // Start the actor
     if (!this.isClient) {
       this.actor.start();
-      this.actor.send({ type: "INITIALIZE" });
+      this.actor.send({ type: 'INITIALIZE' });
 
       // Auto-load plugins
       this.loadAllPlugins().catch((err) => {
         logError(err, {
-          context: "plugin_autoload_critical",
+          context: 'plugin_autoload_critical',
         });
       });
     }
@@ -55,12 +55,12 @@ class PluginOrchestrator {
     if (this.isClient) return;
 
     const snapshot = this.actor.getSnapshot();
-    if (snapshot.context.isInitialized && snapshot.value === "active") {
+    if (snapshot.context.isInitialized && snapshot.value === 'active') {
       return; // Already loaded
     }
 
     // Send load command to orchestrator machine
-    this.actor.send({ type: "LOAD_PLUGINS" });
+    this.actor.send({ type: 'LOAD_PLUGINS' });
 
     // Wait for loading to complete (poll with timeout)
     const maxWait = 10000; // 10 seconds max
@@ -68,14 +68,14 @@ class PluginOrchestrator {
 
     while (Date.now() - startTime < maxWait) {
       const current = this.actor.getSnapshot();
-      if (current.value === "active") {
+      if (current.value === 'active') {
         return;
       }
       await new Promise((r) => setTimeout(r, 100));
     }
 
-    throw new ConflictError("Plugin loading timeout exceeded", {
-      resource: "plugin_orchestrator",
+    throw new ConflictError('Plugin loading timeout exceeded', {
+      resource: 'plugin_orchestrator',
     });
   }
 
@@ -85,7 +85,7 @@ class PluginOrchestrator {
    */
   public async executeEngine(
     pluginId: string,
-    params?: Record<string, any>,
+    params?: Record<string, any>
   ): Promise<Record<string, any>> {
     // Find plugin from XState context
     const snapshot = this.actor.getSnapshot();
@@ -93,16 +93,16 @@ class PluginOrchestrator {
 
     if (!pluginActor) {
       throw new NotFoundError(`Active engine for plugin ID [${pluginId}] not found.`, {
-        resource: "plugin_engine",
+        resource: 'plugin_engine',
         id: pluginId,
       });
     }
 
     // Get plugin data from actor
     const pluginSnapshot = pluginActor.getSnapshot();
-    if (pluginSnapshot.status !== "active") {
+    if (pluginSnapshot.status !== 'active') {
       throw new NotFoundError(`Plugin [${pluginId}] is not active.`, {
-        resource: "plugin_engine",
+        resource: 'plugin_engine',
         id: pluginId,
       });
     }
@@ -111,7 +111,7 @@ class PluginOrchestrator {
 
     if (!plugin?.engine?.execute) {
       throw new NotFoundError(`Plugin [${pluginId}] has no executable engine.`, {
-        resource: "plugin_engine",
+        resource: 'plugin_engine',
         id: pluginId,
       });
     }
@@ -120,7 +120,7 @@ class PluginOrchestrator {
       return await plugin.engine.execute(params);
     } catch (err: any) {
       logError(err, {
-        context: "plugin_engine_crash",
+        context: 'plugin_engine_crash',
         pluginId,
       });
 
@@ -145,7 +145,7 @@ class PluginOrchestrator {
     // Extract plugins from actors
     for (const actor of snapshot.context.plugins.values()) {
       const pluginSnapshot = actor.getSnapshot();
-      if (pluginSnapshot.status !== "active") continue;
+      if (pluginSnapshot.status !== 'active') continue;
       const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
         .plugin;
       if (plugin) {
@@ -163,7 +163,7 @@ class PluginOrchestrator {
           }
         } catch (err: any) {
           logError(err, {
-            context: "plugin_hook_crash",
+            context: 'plugin_hook_crash',
             pluginId: plugin.metadata.id,
             hookName,
           });
@@ -187,7 +187,7 @@ class PluginOrchestrator {
     // Extract widgets from active plugins
     for (const actor of snapshot.context.plugins.values()) {
       const pluginSnapshot = actor.getSnapshot();
-      if (pluginSnapshot.status !== "active") continue;
+      if (pluginSnapshot.status !== 'active') continue;
       const plugin = (pluginSnapshot as unknown as { context: { plugin?: ArchPlugin } }).context
         .plugin;
 
@@ -229,7 +229,7 @@ class PluginOrchestrator {
    * Retry a failed plugin
    */
   public async retryPlugin(pluginName: string): Promise<void> {
-    this.actor.send({ type: "RETRY_PLUGIN", pluginName });
+    this.actor.send({ type: 'RETRY_PLUGIN', pluginName });
     await new Promise((r) => setTimeout(r, 100)); // Brief wait for retry
   }
 
@@ -237,14 +237,14 @@ class PluginOrchestrator {
    * Disable a plugin
    */
   public disablePlugin(pluginName: string): void {
-    this.actor.send({ type: "DISABLE_PLUGIN", pluginName });
+    this.actor.send({ type: 'DISABLE_PLUGIN', pluginName });
   }
 
   /**
    * Enable a plugin
    */
   public enablePlugin(pluginName: string): void {
-    this.actor.send({ type: "ENABLE_PLUGIN", pluginName });
+    this.actor.send({ type: 'ENABLE_PLUGIN', pluginName });
   }
 }
 

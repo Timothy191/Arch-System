@@ -1,5 +1,5 @@
-import { getStoryContext, type TestRunnerConfig } from "@storybook/test-runner";
-import { checkA11y, configureAxe, injectAxe } from "axe-playwright";
+import { getStoryContext, type TestRunnerConfig } from '@storybook/test-runner';
+import { checkA11y, configureAxe, injectAxe } from 'axe-playwright';
 
 /*
  * See https://storybook.js.org/docs/writing-tests/test-runner#test-hook-api-hooks
@@ -23,7 +23,7 @@ const config: TestRunnerConfig = {
       rules: storyContext.parameters?.a11y?.config?.rules,
     });
 
-    await checkA11y(page, "#storybook-root", {
+    await checkA11y(page, '#storybook-root', {
       detailedReport: true,
       detailedReportOptions: {
         html: true,

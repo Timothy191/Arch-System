@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import type * as React from "react";
-import { useCallback, useEffect, useId, useRef } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import type * as React from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 
 interface AnimatedDialogProps {
   open: boolean;
@@ -75,13 +75,13 @@ export function AnimatedDialog({
   // Tab/Shift+Tab cycle within the dialog
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         e.stopPropagation();
         onClose();
         return;
       }
 
-      if (e.key !== "Tab" || !panelRef.current) return;
+      if (e.key !== 'Tab' || !panelRef.current) return;
 
       const focusable = panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
       if (focusable.length === 0) {
@@ -108,7 +108,7 @@ export function AnimatedDialog({
         }
       }
     },
-    [onClose],
+    [onClose]
   );
 
   return (
@@ -145,10 +145,10 @@ export function AnimatedDialog({
               y: 16,
               transition: { duration: 0.15, ease: [0.23, 1, 0.32, 1] },
             }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             className={cn(
-              "relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 backdrop-blur-xl p-6 outline-none",
-              className,
+              'relative z-10 w-full max-w-lg rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)]/90 backdrop-blur-xl p-6 outline-none',
+              className
             )}
           >
             {/* Close button */}

@@ -1,6 +1,6 @@
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { NextResponse } from "next/server";
-import { logError } from "@/lib/errors/error-logger";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { NextResponse } from 'next/server';
+import { logError } from '@/lib/errors/error-logger';
 
 /**
  * GET /api/ai/metrics
@@ -11,19 +11,19 @@ export async function GET(request: Request) {
     const supabase = await createServerSupabaseClient();
     const { searchParams } = new URL(request.url);
 
-    const scope = searchParams.get("scope") || "session"; // 'session' | 'all-time' | '24h' | '7d' | '30d'
-    const departmentId = searchParams.get("department_id");
+    const scope = searchParams.get('scope') || 'session'; // 'session' | 'all-time' | '24h' | '7d' | '30d'
+    const departmentId = searchParams.get('department_id');
 
     // Calculate date range
     const startDate = new Date();
-    if (scope === "session") {
+    if (scope === 'session') {
       // Current session = today
       startDate.setHours(0, 0, 0, 0);
-    } else if (scope === "24h") {
+    } else if (scope === '24h') {
       startDate.setHours(startDate.getHours() - 24);
-    } else if (scope === "7d") {
+    } else if (scope === '7d') {
       startDate.setDate(startDate.getDate() - 7);
-    } else if (scope === "30d") {
+    } else if (scope === '30d') {
       startDate.setDate(startDate.getDate() - 30);
     } else {
       // all-time = no date filter
@@ -32,16 +32,16 @@ export async function GET(request: Request) {
 
     // Build query
     let query = supabase
-      .from("ai_token_usage")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .from('ai_token_usage')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    if (scope !== "all-time") {
-      query = query.gte("created_at", startDate.toISOString());
+    if (scope !== 'all-time') {
+      query = query.gte('created_at', startDate.toISOString());
     }
 
     if (departmentId) {
-      query = query.eq("department_id", departmentId);
+      query = query.eq('department_id', departmentId);
     }
 
     const { data: usage, error } = await query;
@@ -136,20 +136,20 @@ export async function GET(request: Request) {
         totalCostZAR,
         totalRequests: usage.length,
         avgLatency: Math.round(
-          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1),
+          usage.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / (usage.length || 1)
         ),
         byModel: modelBreakdown,
         recentUsage,
       },
     });
   } catch (error) {
-    await logError(error, { context: "ai_metrics_route" });
+    await logError(error, { context: 'ai_metrics_route' });
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch metrics",
+        error: error instanceof Error ? error.message : 'Failed to fetch metrics',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

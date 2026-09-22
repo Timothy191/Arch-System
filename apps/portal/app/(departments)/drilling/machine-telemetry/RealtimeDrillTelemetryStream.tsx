@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Activity,
   ArrowDown,
@@ -11,8 +11,8 @@ import {
   Thermometer,
   Wifi,
   WifiOff,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface LiveTelemetryPayload {
   machine_id: string;
@@ -31,18 +31,18 @@ interface LiveTelemetryPayload {
 
 // AGENT-TRACE: Real-time telemetry subscriber component connecting to Redis SSE stream (/api/telemetry/drilling/stream)
 export function RealtimeDrillTelemetryStream() {
-  const [status, setStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   const [latestEvents, setLatestEvents] = useState<Record<string, LiveTelemetryPayload>>({});
 
   useEffect(() => {
     let eventSource: EventSource | null = null;
 
     function connect() {
-      setStatus("connecting");
-      eventSource = new EventSource("/api/telemetry/drilling/stream");
+      setStatus('connecting');
+      eventSource = new EventSource('/api/telemetry/drilling/stream');
 
       eventSource.onopen = () => {
-        setStatus("connected");
+        setStatus('connected');
       };
 
       eventSource.onmessage = (event) => {
@@ -60,7 +60,7 @@ export function RealtimeDrillTelemetryStream() {
       };
 
       eventSource.onerror = () => {
-        setStatus("disconnected");
+        setStatus('disconnected');
         eventSource?.close();
         // Reconnect attempt after 5 seconds
         setTimeout(connect, 5000);
@@ -88,7 +88,7 @@ export function RealtimeDrillTelemetryStream() {
               Live Rig Telemetry Stream (Redis SSE)
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
-              Subscribed to channel{" "}
+              Subscribed to channel{' '}
               <code className="font-mono text-[var(--accent-blue)]">drilling:telemetry:stream</code>
             </p>
           </div>
@@ -96,19 +96,19 @@ export function RealtimeDrillTelemetryStream() {
 
         {/* Connection status badge */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-[var(--bg-secondary)]">
-          {status === "connected" && (
+          {status === 'connected' && (
             <>
               <Wifi className="w-3.5 h-3.5 text-accent-green" />
               <span className="text-accent-green font-medium">Live Connected</span>
             </>
           )}
-          {status === "connecting" && (
+          {status === 'connecting' && (
             <>
               <RefreshCw className="w-3.5 h-3.5 text-accent-amber animate-spin" />
               <span className="text-accent-amber font-medium">Connecting...</span>
             </>
           )}
-          {status === "disconnected" && (
+          {status === 'disconnected' && (
             <>
               <WifiOff className="w-3.5 h-3.5 text-accent-red" />
               <span className="text-accent-red font-medium">Disconnected</span>
@@ -148,45 +148,45 @@ export function RealtimeDrillTelemetryStream() {
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Gauge className="w-3.5 h-3.5 text-accent-blue" />
                   <span>
-                    RPM:{" "}
+                    RPM:{' '}
                     <strong className="text-[var(--text-heading)]">
-                      {rig.engine_rpm ?? "N/A"}
+                      {rig.engine_rpm ?? 'N/A'}
                     </strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Thermometer className="w-3.5 h-3.5 text-accent-amber" />
                   <span>
-                    Temp:{" "}
+                    Temp:{' '}
                     <strong className="text-[var(--text-heading)]">
-                      {rig.engine_temp ? `${rig.engine_temp}°C` : "N/A"}
+                      {rig.engine_temp ? `${rig.engine_temp}°C` : 'N/A'}
                     </strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Droplets className="w-3.5 h-3.5 text-accent-indigo" />
                   <span>
-                    Press:{" "}
+                    Press:{' '}
                     <strong className="text-[var(--text-heading)]">
-                      {rig.hydraulic_pressure ? `${rig.hydraulic_pressure} kPa` : "N/A"}
+                      {rig.hydraulic_pressure ? `${rig.hydraulic_pressure} kPa` : 'N/A'}
                     </strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <ArrowDown className="w-3.5 h-3.5 text-accent-green" />
                   <span>
-                    Bit Depth:{" "}
+                    Bit Depth:{' '}
                     <strong className="text-[var(--text-heading)]">
-                      {rig.bit_depth ? `${rig.bit_depth}m` : "N/A"}
+                      {rig.bit_depth ? `${rig.bit_depth}m` : 'N/A'}
                     </strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                   <Layers className="w-3.5 h-3.5 text-accent-purple" />
                   <span>
-                    Pen Rate:{" "}
+                    Pen Rate:{' '}
                     <strong className="text-[var(--text-heading)]">
-                      {rig.penetration_rate ? `${rig.penetration_rate}m/h` : "N/A"}
+                      {rig.penetration_rate ? `${rig.penetration_rate}m/h` : 'N/A'}
                     </strong>
                   </span>
                 </div>

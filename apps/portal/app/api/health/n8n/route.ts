@@ -38,10 +38,10 @@
  *                       type: string
  *                       nullable: true
  */
-import { checkN8nHealth } from "@repo/utils/n8n";
-import { type NextRequest, NextResponse } from "next/server";
+import { checkN8nHealth } from '@repo/utils/n8n';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(_req: NextRequest) {
@@ -50,7 +50,7 @@ export async function GET(_req: NextRequest) {
   const payload = {
     status: result.status,
     optional: true,
-    backend_status: "normal",
+    backend_status: 'normal',
     latency_ms: result.latencyMs,
     last_check: new Date().toISOString(),
     details: {

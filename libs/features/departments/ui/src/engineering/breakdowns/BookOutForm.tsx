@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   AlertTriangle,
@@ -9,10 +9,10 @@ import {
   Sparkles,
   Trash2,
   Wrench,
-} from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
-import { bookOutBreakdown, directCheckout } from "./actions";
-import { type Breakdown, MACHINE_TYPES } from "./types";
+} from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
+import { bookOutBreakdown, directCheckout } from './actions';
+import { type Breakdown, MACHINE_TYPES } from './types';
 
 interface BookOutFormProps {
   departmentId: string;
@@ -20,39 +20,39 @@ interface BookOutFormProps {
 }
 
 const COMMON_REPAIRS = [
-  "Hydraulic hose replaced & pressure tested",
-  "Coolant system flushed & thermostat replaced",
-  "Electrical wiring re-pinned & sensor calibrated",
-  "Track links greased, aligned & tension adjusted",
-  "Brake pads replaced & fluid bled",
-  "Filter elements changed & fluid topped up",
-  "Cylinder seal kit installed & cycle tested",
+  'Hydraulic hose replaced & pressure tested',
+  'Coolant system flushed & thermostat replaced',
+  'Electrical wiring re-pinned & sensor calibrated',
+  'Track links greased, aligned & tension adjusted',
+  'Brake pads replaced & fluid bled',
+  'Filter elements changed & fluid topped up',
+  'Cylinder seal kit installed & cycle tested',
 ];
 
-const DRAFT_BOOKOUT_KEY = "arch_breakdown_bookout_draft";
+const DRAFT_BOOKOUT_KEY = 'arch_breakdown_bookout_draft';
 
 export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
-    type: "success" | "error";
+    type: 'success' | 'error';
     text: string;
   } | null>(null);
   const [directMode, setDirectMode] = useState(false);
 
   // Normal book-out state
-  const [selectedId, setSelectedId] = useState("");
-  const [dateOut, setDateOut] = useState(new Date().toISOString().split("T")[0] ?? "");
+  const [selectedId, setSelectedId] = useState('');
+  const [dateOut, setDateOut] = useState(new Date().toISOString().split('T')[0] ?? '');
   const [timeOut, setTimeOut] = useState(new Date().toTimeString().slice(0, 5));
-  const [repairNotes, setRepairNotes] = useState("");
+  const [repairNotes, setRepairNotes] = useState('');
   const [hasDraft, setHasDraft] = useState(false);
 
   // Direct checkout state
   const [direct, setDirect] = useState({
-    fleet_id: "",
-    machine_type: "",
-    reason: "",
-    repair_notes: "",
-    date_out: new Date().toISOString().split("T")[0] ?? "",
+    fleet_id: '',
+    machine_type: '',
+    reason: '',
+    repair_notes: '',
+    date_out: new Date().toISOString().split('T')[0] ?? '',
     time_out: new Date().toTimeString().slice(0, 5),
   });
 
@@ -79,7 +79,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       try {
         localStorage.setItem(
           DRAFT_BOOKOUT_KEY,
-          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes }),
+          JSON.stringify({ selectedId, dateOut, timeOut, repairNotes })
         );
         setHasDraft(true);
       } catch {
@@ -94,10 +94,10 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
     } catch {
       // Storage fail-safe
     }
-    setSelectedId("");
-    setDateOut(new Date().toISOString().split("T")[0] ?? "");
+    setSelectedId('');
+    setDateOut(new Date().toISOString().split('T')[0] ?? '');
     setTimeOut(new Date().toTimeString().slice(0, 5));
-    setRepairNotes("");
+    setRepairNotes('');
     setHasDraft(false);
   };
 
@@ -108,7 +108,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
     setMessage(null);
 
     if (!selectedId) {
-      setMessage({ type: "error", text: "Please select a machine" });
+      setMessage({ type: 'error', text: 'Please select a machine' });
       return;
     }
 
@@ -120,12 +120,12 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
           repair_notes: repairNotes || undefined,
         });
         setMessage({
-          type: "success",
-          text: "Machine booked out successfully!",
+          type: 'success',
+          text: 'Machine booked out successfully!',
         });
         clearDraft();
       } catch {
-        setMessage({ type: "error", text: "Failed to book out." });
+        setMessage({ type: 'error', text: 'Failed to book out.' });
       }
     });
   };
@@ -135,15 +135,15 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
     setMessage(null);
 
     if (!direct.fleet_id.trim()) {
-      setMessage({ type: "error", text: "Fleet ID is required" });
+      setMessage({ type: 'error', text: 'Fleet ID is required' });
       return;
     }
     if (!direct.machine_type) {
-      setMessage({ type: "error", text: "Machine type is required" });
+      setMessage({ type: 'error', text: 'Machine type is required' });
       return;
     }
     if (!direct.reason.trim()) {
-      setMessage({ type: "error", text: "Breakdown reason is required" });
+      setMessage({ type: 'error', text: 'Breakdown reason is required' });
       return;
     }
 
@@ -158,21 +158,21 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
           time_out: direct.time_out,
         });
         setMessage({
-          type: "success",
-          text: "Direct checkout recorded — flagged as missing book-in.",
+          type: 'success',
+          text: 'Direct checkout recorded — flagged as missing book-in.',
         });
         setDirect({
-          fleet_id: "",
-          machine_type: "",
-          reason: "",
-          repair_notes: "",
-          date_out: new Date().toISOString().split("T")[0] ?? "",
+          fleet_id: '',
+          machine_type: '',
+          reason: '',
+          repair_notes: '',
+          date_out: new Date().toISOString().split('T')[0] ?? '',
           time_out: new Date().toTimeString().slice(0, 5),
         });
       } catch {
         setMessage({
-          type: "error",
-          text: "Failed to record direct checkout.",
+          type: 'error',
+          text: 'Failed to record direct checkout.',
         });
       }
     });
@@ -210,9 +210,9 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
       {message && (
         <div
           className={`mb-4 px-4 py-3 rounded-lg border text-sm ${
-            message.type === "success"
-              ? "bg-accent-green/10 border-accent-green/20 text-accent-green"
-              : "bg-accent-red/10 border-accent-red/20 text-accent-red"
+            message.type === 'success'
+              ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
+              : 'bg-accent-red/10 border-accent-red/20 text-accent-red'
           }`}
         >
           {message.text}
@@ -273,7 +273,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                   <option value="">— Choose a broken-down machine —</option>
                   {activeBreakdowns.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.fleet_id} — {b.machine_name || b.fleet_id} ({b.machine_type}) — in since{" "}
+                      {b.fleet_id} — {b.machine_name || b.fleet_id} ({b.machine_type}) — in since{' '}
                       {b.date_in} {b.time_in}
                     </option>
                   ))}
@@ -393,7 +393,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
               >
                 <Wrench className="w-4 h-4" />
-                {isPending ? "Booking Out..." : "Complete Repair & Book Out"}
+                {isPending ? 'Booking Out...' : 'Complete Repair & Book Out'}
               </button>
             </>
           )}
@@ -528,7 +528,7 @@ export function BookOutForm({ departmentId, activeBreakdowns }: BookOutFormProps
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
           >
             <Wrench className="w-4 h-4" />
-            {isPending ? "Recording Checkout..." : "Record Direct Checkout"}
+            {isPending ? 'Recording Checkout...' : 'Record Direct Checkout'}
           </button>
         </form>
       )}

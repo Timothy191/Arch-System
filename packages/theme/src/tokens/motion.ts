@@ -6,12 +6,12 @@
 
 // ── 1.0 Spring Physics ──
 export const SPRING_PHYSICS = {
-  soft: { type: "spring" as const, stiffness: 100, damping: 20 },
-  medium: { type: "spring" as const, stiffness: 200, damping: 28 },
-  stiff: { type: "spring" as const, stiffness: 300, damping: 30 },
-  snappy: { type: "spring" as const, stiffness: 500, damping: 40 },
-  overshoot: { type: "spring" as const, stiffness: 180, damping: 14 },
-  gentle: { type: "spring" as const, stiffness: 80, damping: 24 },
+  soft: { type: 'spring' as const, stiffness: 100, damping: 20 },
+  medium: { type: 'spring' as const, stiffness: 200, damping: 28 },
+  stiff: { type: 'spring' as const, stiffness: 300, damping: 30 },
+  snappy: { type: 'spring' as const, stiffness: 500, damping: 40 },
+  overshoot: { type: 'spring' as const, stiffness: 180, damping: 14 },
+  gentle: { type: 'spring' as const, stiffness: 80, damping: 24 },
 } as const;
 
 export const SPRING_SNAPPY = SPRING_PHYSICS.snappy;

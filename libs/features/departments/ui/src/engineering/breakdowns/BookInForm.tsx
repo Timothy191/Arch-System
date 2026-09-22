@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   CalendarDays,
@@ -8,10 +8,10 @@ import {
   Save,
   Sparkles,
   Trash2,
-} from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { createBreakdown } from "./actions";
-import type { Breakdown, Machine } from "./types";
+} from 'lucide-react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
+import { createBreakdown } from './actions';
+import type { Breakdown, Machine } from './types';
 
 interface BookInFormProps {
   departmentId: string;
@@ -20,28 +20,28 @@ interface BookInFormProps {
 }
 
 const COMMON_REASONS = [
-  "Hydraulic Hose Leak / Burst",
-  "Engine High Temp / Overheating",
-  "Electrical / Starter Fault",
-  "Track Tension & Link Wear",
-  "Brake System Pressure Drop",
-  "Transmission Slip / Filter Clogged",
-  "Pin & Bushing Excessive Play",
+  'Hydraulic Hose Leak / Burst',
+  'Engine High Temp / Overheating',
+  'Electrical / Starter Fault',
+  'Track Tension & Link Wear',
+  'Brake System Pressure Drop',
+  'Transmission Slip / Filter Clogged',
+  'Pin & Bushing Excessive Play',
 ];
 
-const DRAFT_KEY = "arch_breakdown_bookin_draft";
+const DRAFT_KEY = 'arch_breakdown_bookin_draft';
 
 export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInFormProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
-    type: "success" | "error";
+    type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  const [selectedMachineId, setSelectedMachineId] = useState("");
-  const [dateIn, setDateIn] = useState(new Date().toISOString().split("T")[0] ?? "");
+  const [selectedMachineId, setSelectedMachineId] = useState('');
+  const [dateIn, setDateIn] = useState(new Date().toISOString().split('T')[0] ?? '');
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
   const [hasDraft, setHasDraft] = useState(false);
 
   // AGENT-TRACE: Restore local drafting cache on mount for field resilience
@@ -67,7 +67,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
       try {
         localStorage.setItem(
           DRAFT_KEY,
-          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason }),
+          JSON.stringify({ selectedMachineId, dateIn, timeIn, reason })
         );
         setHasDraft(true);
       } catch {
@@ -82,16 +82,16 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
     } catch {
       // Storage fail-safe
     }
-    setSelectedMachineId("");
-    setDateIn(new Date().toISOString().split("T")[0] ?? "");
+    setSelectedMachineId('');
+    setDateIn(new Date().toISOString().split('T')[0] ?? '');
     setTimeIn(new Date().toTimeString().slice(0, 5));
-    setReason("");
+    setReason('');
     setHasDraft(false);
   };
 
   const selectedMachine = useMemo(
     () => machines.find((m) => m.id === selectedMachineId),
-    [machines, selectedMachineId],
+    [machines, selectedMachineId]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -99,13 +99,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
     setMessage(null);
 
     if (!selectedMachine) {
-      setMessage({ type: "error", text: "Please select a machine" });
+      setMessage({ type: 'error', text: 'Please select a machine' });
       return;
     }
     if (!reason.trim() || reason.length < 5) {
       setMessage({
-        type: "error",
-        text: "Reason must be at least 5 characters",
+        type: 'error',
+        text: 'Reason must be at least 5 characters',
       });
       return;
     }
@@ -121,15 +121,15 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           reason,
         });
         setMessage({
-          type: "success",
-          text: "Machine booked in successfully!",
+          type: 'success',
+          text: 'Machine booked in successfully!',
         });
 
         // Clear local cache on successful commit
         clearDraft();
 
         // Dispatch Inngest event for breakdown alert
-        import("@repo/utils/inngest").then(({ inngest, machineBreakdownEvent }) => {
+        import('@repo/utils/inngest').then(({ inngest, machineBreakdownEvent }) => {
           inngest
             .send({
               name: machineBreakdownEvent,
@@ -138,13 +138,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
                 fleet_id: selectedMachine.serial_number || selectedMachine.id,
                 machine_type: selectedMachine.machine_type,
                 reason,
-                status: "active",
+                status: 'active',
               },
             })
             .catch(() => {});
         });
       } catch (_err) {
-        setMessage({ type: "error", text: "Failed to book in machine." });
+        setMessage({ type: 'error', text: 'Failed to book in machine.' });
       }
     });
   };
@@ -181,9 +181,9 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         {message && (
           <div
             className={`mb-4 px-4 py-3 rounded-lg border text-sm ${
-              message.type === "success"
-                ? "bg-accent-green/10 border-accent-green/20 text-accent-green"
-                : "bg-accent-red/10 border-accent-red/20 text-accent-red"
+              message.type === 'success'
+                ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
+                : 'bg-accent-red/10 border-accent-red/20 text-accent-red'
             }`}
           >
             {message.text}
@@ -307,7 +307,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             disabled={isPending}
             className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card"
           >
-            {isPending ? "Booking In..." : "Book In Machine"}
+            {isPending ? 'Booking In...' : 'Book In Machine'}
           </button>
         </form>
       </div>

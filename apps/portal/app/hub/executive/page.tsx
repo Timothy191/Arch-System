@@ -1,9 +1,9 @@
-import { CacheCategory } from "@repo/redis";
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { GlassCard } from "@repo/ui/GlassCard";
-import type { KPIColor } from "@repo/ui/KPI";
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
+import { CacheCategory } from '@repo/redis';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { GlassCard } from '@repo/ui/GlassCard';
+import type { KPIColor } from '@repo/ui/KPI';
+import { KPICard, KPIGrid } from '@repo/ui/KPI';
 import {
   Activity,
   AlertCircle,
@@ -12,17 +12,17 @@ import {
   ShieldAlert,
   TrendingUp,
   Truck,
-} from "lucide-react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { ExportButton } from "@/features/analytics/components/ExportButton";
-import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
-import { ProductionTrendChart } from "@/features/analytics/components/ProductionTrendChartWrapper";
-import { withCache } from "@/lib/cache-utils";
-import { classifyReconciliationDrift, RECONCILIATION_UI } from "@/lib/production-reconciliation";
-import { cachedRSC } from "@/lib/server-cache";
+} from 'lucide-react';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { ExportButton } from '@/features/analytics/components/ExportButton';
+import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
+import { ProductionTrendChart } from '@/features/analytics/components/ProductionTrendChartWrapper';
+import { withCache } from '@/lib/cache-utils';
+import { classifyReconciliationDrift, RECONCILIATION_UI } from '@/lib/production-reconciliation';
+import { cachedRSC } from '@/lib/server-cache';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // AGENT-TRACE: Typed interface for the get_production_summary RPC response.
 // Replaces the previous `any` annotations throughout this page.
@@ -47,29 +47,29 @@ interface ChartDataRow {
 // purge — this ensures all classes are statically present in the build.
 const DRIFT_ALERT_STYLES: Record<string, { container: string; icon: string }> = {
   emerald: {
-    container: "bg-accent-green/10 border-accent-green/30",
-    icon: "text-accent-green",
+    container: 'bg-accent-green/10 border-accent-green/30',
+    icon: 'text-accent-green',
   },
   amber: {
-    container: "bg-accent-amber/10 border-accent-amber/30",
-    icon: "text-accent-amber",
+    container: 'bg-accent-amber/10 border-accent-amber/30',
+    icon: 'text-accent-amber',
   },
   orange: {
-    container: "bg-accent-amber/10 border-accent-amber/30",
-    icon: "text-accent-amber",
+    container: 'bg-accent-amber/10 border-accent-amber/30',
+    icon: 'text-accent-amber',
   },
   red: {
-    container: "bg-accent-red/10 border-accent-red/30",
-    icon: "text-accent-red",
+    container: 'bg-accent-red/10 border-accent-red/30',
+    icon: 'text-accent-red',
   },
 };
 
 // Map reconciliation color names to KPIColor values accepted by <KPICard>.
 const RECON_COLOR_TO_KPI: Record<string, KPIColor> = {
-  emerald: "green",
-  amber: "alert",
-  orange: "alert",
-  red: "red",
+  emerald: 'green',
+  amber: 'alert',
+  orange: 'alert',
+  red: 'red',
 };
 
 function toNumber(v: number | string): number {
@@ -78,17 +78,17 @@ function toNumber(v: number | string): number {
 
 async function getExecutiveData(cookieList: Array<{ name: string; value: string }>) {
   return cachedRSC(
-    ["hub", "executive", new Date().toISOString().split("T")[0]!],
+    ['hub', 'executive', new Date().toISOString().split('T')[0]!],
     async () => {
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
-          const today = new Date().toISOString().split("T")[0]!;
+          const today = new Date().toISOString().split('T')[0]!;
           const monthStart = `${today.slice(0, 7)}-01`;
-          const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0]!;
+          const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]!;
 
           // Step 1: Fetch Unified Production Summary (RPC)
-          const { data: summaryData } = await db.rpc("get_production_summary", {
+          const { data: summaryData } = await db.rpc('get_production_summary', {
             p_start_date: thirtyDaysAgo,
             p_end_date: today,
           });
@@ -104,20 +104,20 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
             { data: breakdownsMtd },
           ] = await Promise.all([
             db
-              .from("machines")
-              .select("id", { count: "exact", head: true })
-              .eq("active", true)
-              .is("deleted_at", null),
-            db.from("machines").select("id", { count: "exact", head: true }).is("deleted_at", null),
+              .from('machines')
+              .select('id', { count: 'exact', head: true })
+              .eq('active', true)
+              .is('deleted_at', null),
+            db.from('machines').select('id', { count: 'exact', head: true }).is('deleted_at', null),
             db
-              .from("employees")
-              .select("id", { count: "exact", head: true })
-              .is("deleted_at", null),
+              .from('employees')
+              .select('id', { count: 'exact', head: true })
+              .is('deleted_at', null),
             db
-              .from("breakdowns")
-              .select("id, status")
-              .gte("date_in", monthStart)
-              .is("deleted_at", null),
+              .from('breakdowns')
+              .select('id, status')
+              .gte('date_in', monthStart)
+              .is('deleted_at', null),
           ]);
 
           // Compute MTD aggregates
@@ -141,8 +141,8 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
               ? Math.round(((activeMachines ?? 0) / totalMachines) * 100)
               : 0;
           const fuelPerTonne =
-            totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : "—";
-          const openBreakdowns = breakdownsMtd?.filter((b) => b.status === "active").length ?? 0;
+            totalTonnageMtd > 0 ? (totalFuelMtd / totalTonnageMtd).toFixed(2) : '—';
+          const openBreakdowns = breakdownsMtd?.filter((b) => b.status === 'active').length ?? 0;
 
           // Build 30-day chart data from summary
           const chartData: ChartDataRow[] = typedSummary.map((s) => ({
@@ -174,15 +174,15 @@ async function getExecutiveData(cookieList: Array<{ name: string; value: string 
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "executive"],
-          tags: ["table:machines", "table:employees", "table:breakdowns"],
-        },
+          keyParts: ['hub', 'executive'],
+          tags: ['table:machines', 'table:employees', 'table:breakdowns'],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: ["table:machines", "table:employees", "table:breakdowns"],
-    },
+      tags: ['table:machines', 'table:employees', 'table:breakdowns'],
+    }
   );
 }
 
@@ -191,19 +191,19 @@ export default async function ExecutiveDashboardPage() {
   const user = await getUserSafely(supabase);
 
   if (!user?.id) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Gate: admin/manager only — query role from read-replica
   const db = await createReadReplicaClient();
   const { data: employee } = await db
-    .from("employees")
-    .select("role")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('role')
+    .eq('auth_id', user.id)
     .single();
 
-  if (employee?.role !== "admin" && employee?.role !== "manager") {
-    redirect("/");
+  if (employee?.role !== 'admin' && employee?.role !== 'manager') {
+    redirect('/');
   }
 
   const cookieStore = await cookies();
@@ -231,29 +231,29 @@ export default async function ExecutiveDashboardPage() {
   } = data;
 
   const driftAlertStyle = DRIFT_ALERT_STYLES[driftUi.color] ?? DRIFT_ALERT_STYLES.red!;
-  const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? "red";
+  const driftKpiColor = RECON_COLOR_TO_KPI[driftUi.color] ?? 'red';
 
   // CSV export payload
   const exportRows = chartData.map((r) => ({
     Date: r.date,
-    "Coal (t)": r.coal.toFixed(2),
-    "Waste (t)": r.waste.toFixed(2),
-    "Total (t)": (r.coal + r.waste).toFixed(2),
-    "Reconciliation Drift (%)": r.drift.toFixed(1),
+    'Coal (t)': r.coal.toFixed(2),
+    'Waste (t)': r.waste.toFixed(2),
+    'Total (t)': (r.coal + r.waste).toFixed(2),
+    'Reconciliation Drift (%)': r.drift.toFixed(1),
   }));
 
   const pdfReportData = {
-    title: "Executive Production & Fleet Report",
+    title: 'Executive Production & Fleet Report',
     subtitle: `Generated on ${today} — Month-to-date analysis`,
     kpis: [
-      { label: "Total Tonnage", value: `${totalTonnageMtd.toFixed(0)} t` },
-      { label: "Coal Removed", value: `${totalCoalMtd.toFixed(0)} t` },
-      { label: "Waste Removed", value: `${totalWasteMtd.toFixed(0)} t` },
-      { label: "Fuel Efficiency", value: `${fuelPerTonne} L/t` },
-      { label: "Fleet Availability", value: `${fleetPct}%` },
-      { label: "Active Breakdowns", value: `${openBreakdowns}` },
+      { label: 'Total Tonnage', value: `${totalTonnageMtd.toFixed(0)} t` },
+      { label: 'Coal Removed', value: `${totalCoalMtd.toFixed(0)} t` },
+      { label: 'Waste Removed', value: `${totalWasteMtd.toFixed(0)} t` },
+      { label: 'Fuel Efficiency', value: `${fuelPerTonne} L/t` },
+      { label: 'Fleet Availability', value: `${fleetPct}%` },
+      { label: 'Active Breakdowns', value: `${openBreakdowns}` },
     ],
-    tableHeaders: ["Date", "Coal (t)", "Waste (t)", "Total Tonnage (t)", "Drift %"],
+    tableHeaders: ['Date', 'Coal (t)', 'Waste (t)', 'Total Tonnage (t)', 'Drift %'],
     tableRows: chartData.map((r) => [
       r.date,
       r.coal.toFixed(2),
@@ -306,7 +306,7 @@ export default async function ExecutiveDashboardPage() {
         </KPIGrid>
 
         {/* Drift Alert (only if not stable) */}
-        {driftLevel !== "stable" && (
+        {driftLevel !== 'stable' && (
           <div
             className={`p-3 rounded-lg border flex items-start gap-3 ${driftAlertStyle.container} text-sm`}
           >
@@ -328,7 +328,7 @@ export default async function ExecutiveDashboardPage() {
           <KPICard
             label="Fleet Availability"
             value={`${fleetPct}%`}
-            color={fleetPct >= 80 ? "green" : fleetPct >= 60 ? "blue" : "red"}
+            color={fleetPct >= 80 ? 'green' : fleetPct >= 60 ? 'blue' : 'red'}
             sub={`${activeMachines} / ${totalMachines} machines`}
           />
           <KPICard
@@ -339,7 +339,7 @@ export default async function ExecutiveDashboardPage() {
           <KPICard
             label="Active Breakdowns"
             value={openBreakdowns}
-            color={openBreakdowns > 5 ? "red" : openBreakdowns > 2 ? "blue" : "green"}
+            color={openBreakdowns > 5 ? 'red' : openBreakdowns > 2 ? 'blue' : 'green'}
           />
           <KPICard label="Active Personnel" value={activeEmployees} color="default" />
         </KPIGrid>
@@ -354,7 +354,7 @@ export default async function ExecutiveDashboardPage() {
           <KPICard
             label="Open Incidents"
             value={openIncidents}
-            color={openIncidents > 0 ? "red" : "green"}
+            color={openIncidents > 0 ? 'red' : 'green'}
           />
           <KPICard
             label="Diesel Consumed (MTD)"

@@ -1,7 +1,7 @@
-import type React from "react";
-import { cn } from "../../lib/utils";
+import type React from 'react';
+import { cn } from '../../lib/utils';
 
-export interface EntityProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface EntityProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   thumbnail?: React.ReactNode;
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -19,8 +19,8 @@ export function Entity({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm",
-        className,
+        'flex items-center justify-between gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm',
+        className
       )}
       {...props}
     >

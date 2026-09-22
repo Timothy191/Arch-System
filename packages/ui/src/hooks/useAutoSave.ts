@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from 'react';
 
 interface AutoSaveOptions<T> {
   key: string;
@@ -30,7 +30,7 @@ export function useAutoSave<T>(data: T, { key, onLoad, debounceMs = 1000 }: Auto
         const parsed = JSON.parse(saved);
         onLoadRef.current(parsed);
       } catch (e) {
-        console.error("Failed to parse auto-saved data", e);
+        console.error('Failed to parse auto-saved data', e);
       }
     }
     isFirstRender.current = false;

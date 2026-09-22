@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getCurrentShift } from "@repo/utils";
-import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import type { MachineCoverageStatus, ShiftCompleteness } from "@/lib/shift-completeness";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getCurrentShift } from '@repo/utils';
+import { CheckCircle2, ChevronDown, ChevronUp, RefreshCw, ShieldOff, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import type { MachineCoverageStatus, ShiftCompleteness } from '@/lib/shift-completeness';
 
 interface Props {
   departmentId: string;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 function todayDate(): string {
-  return new Date().toISOString().split("T")[0]!;
+  return new Date().toISOString().split('T')[0]!;
 }
 
 export function MachineOperationsComplianceWidget({ departmentId, departmentSlug }: Props) {
@@ -64,12 +64,12 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
   const exempt = statuses.filter((s) => s.exempt);
 
   const headerColor = complete
-    ? "text-accent-green"
+    ? 'text-accent-green'
     : missing.length > 0
-      ? "text-accent-red"
-      : "text-[var(--text-heading)]";
+      ? 'text-accent-red'
+      : 'text-[var(--text-heading)]';
 
-  const dotColor = complete ? "bg-accent-green" : "bg-accent-red";
+  const dotColor = complete ? 'bg-accent-green' : 'bg-accent-red';
 
   return (
     <GlassCard className="space-y-0 p-0 overflow-hidden">
@@ -79,7 +79,7 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
         tabIndex={0}
         onClick={() => setExpanded((v) => !v)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             setExpanded((v) => !v);
           }
@@ -90,8 +90,8 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
           <span className={`w-2.5 h-2.5 rounded-full ${dotColor} shrink-0`} />
           <span className={`text-sm font-medium ${headerColor}`}>
             {complete
-              ? "All machines reported"
-              : `${missing.length} machine${missing.length !== 1 ? "s" : ""} missing`}
+              ? 'All machines reported'
+              : `${missing.length} machine${missing.length !== 1 ? 's' : ''} missing`}
           </span>
           <span className="text-[var(--text-muted)] text-xs">
             {totalCovered} / {totalRequired} covered
@@ -101,9 +101,9 @@ export function MachineOperationsComplianceWidget({ departmentId, departmentSlug
         <div className="flex items-center gap-2 text-[var(--text-muted)]">
           {lastRefresh && (
             <span className="text-xs hidden sm:block">
-              {lastRefresh.toLocaleTimeString("en-ZA", {
-                hour: "2-digit",
-                minute: "2-digit",
+              {lastRefresh.toLocaleTimeString('en-ZA', {
+                hour: '2-digit',
+                minute: '2-digit',
               })}
             </span>
           )}
@@ -178,7 +178,7 @@ function MachineRow({
   return (
     <button
       type="button"
-      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split("/").pop()}`)}
+      onClick={() => router.push(`/${departmentSlug}/${status.formPath.split('/').pop()}`)}
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent-red/5 transition-colors text-left group"
     >
       <XCircle className="w-4 h-4 text-accent-red shrink-0" />

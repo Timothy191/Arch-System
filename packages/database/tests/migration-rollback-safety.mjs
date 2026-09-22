@@ -18,12 +18,12 @@
  * Exit code: 0 (pass) or 1 (fail)
  */
 
-import { readFileSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const MIGRATIONS_DIR = join(__dirname, "..", "migrations");
+const MIGRATIONS_DIR = join(__dirname, '..', 'migrations');
 
 // ── Config ───────────────────────────────────────────────────────────────────
 
@@ -47,7 +47,7 @@ function warn(msg, file) {
 function checkFilenames(files) {
   const matched = [];
   for (const f of files) {
-    if (f.startsWith("standalone_")) {
+    if (f.startsWith('standalone_')) {
       continue;
     }
     const m = f.match(SEQUENTIAL_FILE_REGEX);
@@ -63,8 +63,8 @@ function checkFilenames(files) {
   for (const { file, seq } of matched) {
     if (seen.has(seq)) {
       warn(
-        `Duplicate sequence number ${String(seq).padStart(3, "0")} in ${file} (already seen in ${seen.get(seq)})`,
-        file,
+        `Duplicate sequence number ${String(seq).padStart(3, '0')} in ${file} (already seen in ${seen.get(seq)})`,
+        file
       );
     }
     seen.set(seq, file);
@@ -76,8 +76,8 @@ function checkFilenames(files) {
     const expected = matched[i].seq + 1;
     if (matched[i + 1].seq !== expected && matched[i + 1].seq !== matched[i].seq) {
       warn(
-        `Sequence gap: ${String(matched[i].seq).padStart(3, "0")} → ${String(expected).padStart(3, "0")} (next is ${String(matched[i + 1].seq).padStart(3, "0")})`,
-        matched[i + 1].file,
+        `Sequence gap: ${String(matched[i].seq).padStart(3, '0')} → ${String(expected).padStart(3, '0')} (next is ${String(matched[i + 1].seq).padStart(3, '0')})`,
+        matched[i + 1].file
       );
     }
   }
@@ -110,8 +110,8 @@ const ALTER_TYPE_RENAME_RE = /^\s*ALTER\s+TYPE\s+[^\s;]+\s+RENAME\s+TO\s+/gim;
  */
 function stripComments(sql) {
   return sql
-    .replace(/--.*$/gm, "")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/--.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
     .trim();
 }
 
@@ -150,7 +150,7 @@ function analyzeMigration(file, content) {
     if (!m[1]) {
       warn(
         `DROP TYPE without IF EXISTS — verify type was created in this migration: "${m[0].trim()}"`,
-        file,
+        file
       );
     }
   }
@@ -173,7 +173,7 @@ function analyzeMigration(file, content) {
     // Allow CREATE TABLE for partitioned tables (they use a separate pattern:
     // DROP TABLE IF EXISTS + CREATE TABLE without IF NOT EXISTS)
     const preceding = sql.substring(0, m.index).trimEnd();
-    const linesBefore = preceding.split("\n").slice(-10);
+    const linesBefore = preceding.split('\n').slice(-10);
     const hasRecentDrop = linesBefore.some((l) => /DROP\s+TABLE\s+IF EXISTS/i.test(l));
     if (!hasRecentDrop) {
       warn(`CREATE TABLE without IF NOT EXISTS: "${m[1] ?? m[0].trim()}"`, file);
@@ -207,7 +207,7 @@ function analyzeMigration(file, content) {
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 function main() {
-  const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"));
+  const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'));
   const total = files.length;
 
   console.info(`\n🔍 Checking ${total} migration files for rollback safety...\n`);
@@ -215,7 +215,7 @@ function main() {
   const matched = checkFilenames(files);
 
   for (const { file } of matched) {
-    const content = readFileSync(join(MIGRATIONS_DIR, file), "utf-8");
+    const content = readFileSync(join(MIGRATIONS_DIR, file), 'utf-8');
     analyzeMigration(file, content);
   }
 
@@ -236,7 +236,7 @@ function main() {
   }
 
   console.info(
-    `\n📊 ${total} migrations — ${errors.length} errors, ${warnings.length} warnings.\n`,
+    `\n📊 ${total} migrations — ${errors.length} errors, ${warnings.length} warnings.\n`
   );
 
   process.exit(errors.length > 0 ? 1 : 0);

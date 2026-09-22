@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseFormDraftOptions<T> {
   /** Unique storage key for this draft (e.g. 'control_room_checklist_dept123_2026-08-19_day') */
@@ -34,13 +34,13 @@ export function useFormDraft<T>({
 
   // Restore draft on mount or key change
   useEffect(() => {
-    if (!enabled || !key || typeof window === "undefined") return;
+    if (!enabled || !key || typeof window === 'undefined') return;
 
     try {
       const savedRaw = localStorage.getItem(key);
       if (savedRaw) {
         const parsed = JSON.parse(savedRaw);
-        if (parsed && typeof parsed === "object" && "data" in parsed) {
+        if (parsed && typeof parsed === 'object' && 'data' in parsed) {
           const restoredData = parsed.data as T;
           setDraftState(restoredData);
           setHasRestoredDraft(true);
@@ -57,7 +57,7 @@ export function useFormDraft<T>({
 
   // Flush draft to storage
   const saveDraft = useCallback(() => {
-    if (!enabled || !key || typeof window === "undefined") return;
+    if (!enabled || !key || typeof window === 'undefined') return;
 
     try {
       const payload = {
@@ -73,7 +73,7 @@ export function useFormDraft<T>({
 
   // Clear draft upon successful form submission
   const clearDraft = useCallback(() => {
-    if (!key || typeof window === "undefined") return;
+    if (!key || typeof window === 'undefined') return;
     try {
       localStorage.removeItem(key);
       setHasRestoredDraft(false);
@@ -85,28 +85,28 @@ export function useFormDraft<T>({
 
   // Auto-save on visibilitychange (switching tabs/minimizing) and beforeunload
   useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+    if (!enabled || typeof window === 'undefined') return;
 
     const handleFlush = () => {
       saveDraft();
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === 'hidden') {
         saveDraft();
       }
     };
 
-    window.addEventListener("beforeunload", handleFlush);
-    window.addEventListener("pagehide", handleFlush);
-    window.addEventListener("arch:tab-swap", handleFlush);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener('beforeunload', handleFlush);
+    window.addEventListener('pagehide', handleFlush);
+    window.addEventListener('arch:tab-swap', handleFlush);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("beforeunload", handleFlush);
-      window.removeEventListener("pagehide", handleFlush);
-      window.removeEventListener("arch:tab-swap", handleFlush);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleFlush);
+      window.removeEventListener('pagehide', handleFlush);
+      window.removeEventListener('arch:tab-swap', handleFlush);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [enabled, saveDraft]);
 

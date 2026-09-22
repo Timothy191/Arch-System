@@ -1,1 +1,1 @@
-export { default } from "@repo/theme/tailwind";
+export { default } from '@repo/theme/tailwind';

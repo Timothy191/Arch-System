@@ -1,5 +1,5 @@
-import { Avatar, Badge } from "@repo/ui";
-import { Pagination } from "@repo/ui/components/ui/pagination";
+import { Avatar, Badge } from '@repo/ui';
+import { Pagination } from '@repo/ui/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -7,15 +7,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/ui/table";
-import { EmptyState } from "@repo/ui/EmptyState";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Clock, Inbox } from "lucide-react";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { getVisitorsForDepartment } from "../actions";
-import { VisitorForm } from "./visitor-form";
+} from '@repo/ui/components/ui/table';
+import { EmptyState } from '@repo/ui/EmptyState';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Clock, Inbox } from 'lucide-react';
+import { getDepartmentContext } from '~/lib/dept-context';
+import { getVisitorsForDepartment } from '../actions';
+import { VisitorForm } from './visitor-form';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function VisitorsPage({
   searchParams,
@@ -23,11 +23,11 @@ export default async function VisitorsPage({
   searchParams: Promise<{ page?: string; pageSize?: string }>;
 }) {
   const params = await searchParams;
-  const page = parseInt(params.page || "1", 10);
-  const pageSize = parseInt(params.pageSize || "50", 10);
+  const page = parseInt(params.page || '1', 10);
+  const pageSize = parseInt(params.pageSize || '50', 10);
 
   const { deptId } = await getDepartmentContext({
-    department: "access-control",
+    department: 'access-control',
   });
 
   const { visitors, totalCount } = await getVisitorsForDepartment(deptId, page, pageSize);
@@ -93,7 +93,7 @@ export default async function VisitorsPage({
                           <div className="flex items-center gap-2.5">
                             <Avatar
                               size={24}
-                              letter={`${visitor.first_name?.[0] ?? ""}${visitor.surname?.[0] ?? ""}`}
+                              letter={`${visitor.first_name?.[0] ?? ''}${visitor.surname?.[0] ?? ''}`}
                               title={`${visitor.first_name} ${visitor.surname}`}
                             />
                             <span>
@@ -102,28 +102,28 @@ export default async function VisitorsPage({
                           </div>
                         </TableCell>
                         <TableCell className="text-[var(--text-secondary)]">
-                          {visitor.company || "—"}
+                          {visitor.company || '—'}
                         </TableCell>
                         <TableCell className="text-[var(--text-secondary)]">
-                          {visitor.reason_for_entry || "—"}
+                          {visitor.reason_for_entry || '—'}
                         </TableCell>
                         <TableCell className="font-mono text-sm text-[var(--text-secondary)]">
                           {visitor.check_in_time
-                            ? new Date(visitor.check_in_time).toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit",
+                            ? new Date(visitor.check_in_time).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
                                 hour12: false,
                               })
-                            : "—"}
+                            : '—'}
                         </TableCell>
                         <TableCell className="text-right">
-                          {visitor.status === "Checked In" ? (
+                          {visitor.status === 'Checked In' ? (
                             <Badge variant="green" contrast="low" size="sm">
                               Checked In
                             </Badge>
                           ) : (
                             <Badge variant="gray" contrast="low" size="sm">
-                              {visitor.status || "Pre-Registered"}
+                              {visitor.status || 'Pre-Registered'}
                             </Badge>
                           )}
                         </TableCell>
@@ -144,14 +144,14 @@ export default async function VisitorsPage({
                   pageSize={pageSize}
                   onPageChange={(newPage) => {
                     const url = new URL(window.location.href);
-                    url.searchParams.set("page", newPage.toString());
-                    url.searchParams.set("pageSize", pageSize.toString());
+                    url.searchParams.set('page', newPage.toString());
+                    url.searchParams.set('pageSize', pageSize.toString());
                     window.location.href = url.toString();
                   }}
                   onPageSizeChange={(newSize) => {
                     const url = new URL(window.location.href);
-                    url.searchParams.set("page", "1");
-                    url.searchParams.set("pageSize", newSize.toString());
+                    url.searchParams.set('page', '1');
+                    url.searchParams.set('pageSize', newSize.toString());
                     window.location.href = url.toString();
                   }}
                 />

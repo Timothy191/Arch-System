@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { AutoAnimateList } from "@repo/ui/AnimatedList";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { memo } from "react";
+import { AutoAnimateList } from '@repo/ui/AnimatedList';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { memo } from 'react';
 
 interface EngineeringNote {
   id: string;
-  shift_type: "day" | "night";
+  shift_type: 'day' | 'night';
   issue_type: string;
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   machine_id: string | null;
   description: string;
   action_taken: string | null;
   requires_follow_up: boolean;
-  status: "open" | "in_progress" | "resolved" | "closed";
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
   created_at: string;
   machine?: {
     name: string;
@@ -26,31 +26,31 @@ interface EngineeringNotesListProps {
 }
 
 const ISSUE_TYPE_COLORS: Record<string, string> = {
-  mechanical: "#1c1c1e",
-  electrical: "#27272a",
-  structural: "#3f3f46",
-  hydraulic: "#52525b",
-  other: "#71717a",
+  mechanical: '#1c1c1e',
+  electrical: '#27272a',
+  structural: '#3f3f46',
+  hydraulic: '#52525b',
+  other: '#71717a',
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "#10b981",
-  medium: "#71717a",
-  high: "#ef4444",
-  critical: "#dc2626",
+  low: '#10b981',
+  medium: '#71717a',
+  high: '#ef4444',
+  critical: '#dc2626',
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  open: "#1c1c1e",
-  in_progress: "#27272a",
-  resolved: "#10b981",
-  closed: "#71717a",
+  open: '#1c1c1e',
+  in_progress: '#27272a',
+  resolved: '#10b981',
+  closed: '#71717a',
 };
 
 function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString("en-ZA", {
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Date(dateStr).toLocaleTimeString('en-ZA', {
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -66,8 +66,8 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
   }
 
   // Group by shift
-  const dayNotes = notes.filter((n) => n.shift_type === "day");
-  const nightNotes = notes.filter((n) => n.shift_type === "night");
+  const dayNotes = notes.filter((n) => n.shift_type === 'day');
+  const nightNotes = notes.filter((n) => n.shift_type === 'night');
 
   return (
     <div className="space-y-4">
@@ -103,12 +103,12 @@ function EngineeringNotesList({ notes }: EngineeringNotesListProps) {
 }
 
 function NoteCard({ note }: { note: EngineeringNote }) {
-  const issueColor = ISSUE_TYPE_COLORS[note.issue_type] || "var(--text-muted)";
-  const severityColor = SEVERITY_COLORS[note.severity] || "var(--text-muted)";
-  const statusColor = STATUS_COLORS[note.status] || "var(--text-muted)";
+  const issueColor = ISSUE_TYPE_COLORS[note.issue_type] || 'var(--text-muted)';
+  const severityColor = SEVERITY_COLORS[note.severity] || 'var(--text-muted)';
+  const statusColor = STATUS_COLORS[note.status] || 'var(--text-muted)';
 
   return (
-    <GlassCard className={`py-3 ${note.severity === "critical" ? "border-accent-red/30" : ""}`}>
+    <GlassCard className={`py-3 ${note.severity === 'critical' ? 'border-accent-red/30' : ''}`}>
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -141,7 +141,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
               border: `1px solid ${statusColor}40`,
             }}
           >
-            {note.status.replace("_", " ").toUpperCase()}
+            {note.status.replace('_', ' ').toUpperCase()}
           </span>
 
           {/* Machine & Site */}
@@ -175,7 +175,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
         {/* Action Taken */}
         {note.action_taken && (
           <div className="text-sm">
-            <span className="text-[var(--accent-blue)]">Action:</span>{" "}
+            <span className="text-[var(--accent-blue)]">Action:</span>{' '}
             <span className="text-[var(--text-secondary)]">{note.action_taken}</span>
           </div>
         )}

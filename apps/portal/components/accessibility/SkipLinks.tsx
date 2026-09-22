@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * SkipLinks provides keyboard navigation shortcuts for accessibility.

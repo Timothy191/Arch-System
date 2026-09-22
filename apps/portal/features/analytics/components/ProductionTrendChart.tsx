@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AreaChart, Text } from "@tremor/react";
-import { linearForecast } from "@/lib/analytics/forecast";
+import { AreaChart, Text } from '@tremor/react';
+import { linearForecast } from '@/lib/analytics/forecast';
 
 interface TrendPoint {
   date: string;
@@ -18,33 +18,33 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
   const coalValues = data.map((d) => d.coal);
   const forecast: number[] = showForecast && data.length >= 7 ? linearForecast(coalValues, 7) : [];
 
-  const lastDate = data.at(-1)?.date ?? new Date().toISOString().split("T")[0]!;
+  const lastDate = data.at(-1)?.date ?? new Date().toISOString().split('T')[0]!;
 
   const forecastPoints = forecast.map((val: number, i: number) => {
     const d = new Date(lastDate);
     d.setDate(d.getDate() + i + 1);
     return {
-      date: d.toISOString().split("T")[0]!,
+      date: d.toISOString().split('T')[0]!,
       coal: undefined,
       waste: undefined,
-      "Coal Forecast": Math.max(0, Math.round(val)),
+      'Coal Forecast': Math.max(0, Math.round(val)),
     };
   });
 
   const chartData = [
     ...data.map((d) => ({
       date: d.date,
-      "Coal (t)": Math.round(d.coal),
-      "Waste (t)": Math.round(d.waste),
-      "Coal Forecast": undefined,
+      'Coal (t)': Math.round(d.coal),
+      'Waste (t)': Math.round(d.waste),
+      'Coal Forecast': undefined,
     })),
     ...forecastPoints,
   ];
 
   const categories =
     showForecast && forecast.length > 0
-      ? ["Coal (t)", "Waste (t)", "Coal Forecast"]
-      : ["Coal (t)", "Waste (t)"];
+      ? ['Coal (t)', 'Waste (t)', 'Coal Forecast']
+      : ['Coal (t)', 'Waste (t)'];
 
   if (data.length === 0) {
     return (
@@ -77,7 +77,7 @@ export function ProductionTrendChart({ data, showForecast = true }: ProductionTr
         data={chartData}
         index="date"
         categories={categories as unknown as string[]}
-        colors={["emerald", "blue", "indigo"]}
+        colors={['emerald', 'blue', 'indigo']}
         showLegend={false}
         showGridLines={false}
         curveType="monotone"

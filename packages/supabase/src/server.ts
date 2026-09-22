@@ -1,16 +1,16 @@
 /* global RequestInfo, RequestInit */
 
-import { serverLogger } from "@repo/logger";
-import { createServerClient } from "@supabase/ssr";
-import type { User } from "@supabase/supabase-js";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { serverLogger } from '@repo/logger';
+import { createServerClient } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 export { createClient };
 
 export async function instrumentedFetch(
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<Response> {
   const start = performance.now();
   let response: Response | null = null;
@@ -23,21 +23,21 @@ export async function instrumentedFetch(
   } finally {
     const duration = performance.now() - start;
     const urlStr =
-      typeof input === "string"
+      typeof input === 'string'
         ? input
         : input instanceof URL
           ? input.toString()
           : (input as Request).url;
-    const method = init?.method ?? "GET";
+    const method = init?.method ?? 'GET';
 
-    let tableName = "unknown";
+    let tableName = 'unknown';
     if (urlStr) {
       try {
         const url = new URL(urlStr);
-        const segments = url.pathname.split("/");
-        const restIndex = segments.indexOf("v1");
+        const segments = url.pathname.split('/');
+        const restIndex = segments.indexOf('v1');
         if (restIndex !== -1 && segments[restIndex + 1]) {
-          tableName = segments[restIndex + 1]!.split("?")[0] || "unknown";
+          tableName = segments[restIndex + 1]!.split('?')[0] || 'unknown';
         }
       } catch {
         // ignore
@@ -54,14 +54,14 @@ export async function instrumentedFetch(
     if (duration > 500) {
       serverLogger.warn(
         logData,
-        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`,
+        `Slow database query detected: ${tableName} (${method}) took ${logData.durationMs}ms`
       );
     } else if (!success) {
       serverLogger.error(logData, `Database query failed: ${tableName} (${method})`);
     } else {
       serverLogger.debug(
         logData,
-        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`,
+        `Database query: ${tableName} (${method}) in ${logData.durationMs}ms`
       );
     }
   }
@@ -72,7 +72,7 @@ export async function createServerSupabaseClient() {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
-    "https://mrwhtxbhrzyttlsyuofc.supabase.co";
+    'https://mrwhtxbhrzyttlsyuofc.supabase.co';
   // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   const supabaseAnonKey =
@@ -80,7 +80,7 @@ export async function createServerSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg";
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg';
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     global: {
@@ -92,7 +92,7 @@ export async function createServerSupabaseClient() {
         const normalized = [...all];
         for (const cookie of all) {
           const match = cookie.name.match(/^__tb\d+_(sb-.*)$/);
-          if (match && match[1] && !all.some((c: { name: string }) => c.name === match[1])) {
+          if (match?.[1] && !all.some((c: { name: string }) => c.name === match[1])) {
             normalized.push({ name: match[1], value: cookie.value });
           }
         }
@@ -105,9 +105,9 @@ export async function createServerSupabaseClient() {
               cookieStore.set(name, value, {
                 ...options,
                 maxAge: options?.maxAge ?? 34560000,
-                path: options?.path ?? "/",
-                sameSite: options?.sameSite ?? "lax",
-              }),
+                path: options?.path ?? '/',
+                sameSite: options?.sameSite ?? 'lax',
+              })
           );
         } catch {
           // The `setAll` method was called from a Server Component.
@@ -121,13 +121,13 @@ export async function createServerSupabaseClient() {
 
 export function createBearerSupabaseClient(token: string) {
   const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "http://127.0.0.1:54321";
+    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    "";
+    '';
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: {
@@ -159,7 +159,7 @@ export function createBearerSupabaseClient(token: string) {
  * Returns null if the user is not authenticated or if token validation fails.
  */
 export async function getUserSafely(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>
 ): Promise<User | null> {
   try {
     // Use getUser() for identity verification (recommended by Supabase docs)
@@ -171,7 +171,7 @@ export async function getUserSafely(
     }
 
     return data.user;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

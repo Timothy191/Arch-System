@@ -1,4 +1,4 @@
-import { GlassSkeleton } from "@repo/ui/components/ui/glass-skeleton";
+import { GlassSkeleton } from '@repo/ui/components/ui/glass-skeleton';
 
 export default function ExcavatorActivityLoading() {
   return (

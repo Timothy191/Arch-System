@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getCurrentShift } from "@repo/utils";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { type DumperAssignmentRow, ExcavatorDumperTable } from "./ExcavatorDumperTable";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getCurrentShift } from '@repo/utils';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { type DumperAssignmentRow, ExcavatorDumperTable } from './ExcavatorDumperTable';
 
 interface ExcavatorMachine {
   id: string;
@@ -75,12 +75,12 @@ export function ExcavatorActivityForm({
   const supabase = createBrowserSupabaseClient();
 
   const [formData, setFormData] = useState({
-    excavatorId: "",
-    operatorId: "",
-    siteId: "",
+    excavatorId: '',
+    operatorId: '',
+    siteId: '',
     shiftType: getCurrentShift(),
-    blockMinedId: "",
-    notes: "",
+    blockMinedId: '',
+    notes: '',
   });
 
   const [dumperAssignments, setDumperAssignments] = useState<DumperAssignmentRow[]>([]);
@@ -96,7 +96,7 @@ export function ExcavatorActivityForm({
       if (formData.excavatorId || formData.siteId) {
         localStorage.setItem(
           getAutoSaveKey(departmentId),
-          JSON.stringify({ formData, dumperAssignments }),
+          JSON.stringify({ formData, dumperAssignments })
         );
         setLastSaved(new Date());
       }
@@ -149,19 +149,19 @@ export function ExcavatorActivityForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.excavatorId) {
-      newErrors.excavatorId = "Select an excavator";
+      newErrors.excavatorId = 'Select an excavator';
     }
     if (!formData.operatorId) {
-      newErrors.operatorId = "Select an operator";
+      newErrors.operatorId = 'Select an operator';
     }
     if (!formData.siteId) {
-      newErrors.siteId = "Select a site";
+      newErrors.siteId = 'Select a site';
     }
     if (dumperAssignments.length === 0) {
-      newErrors.dumperAssignments = "Add at least one dumper assignment";
+      newErrors.dumperAssignments = 'Add at least one dumper assignment';
     }
     if (dumperAssignments.some((a) => !a.dumperMachineId)) {
-      newErrors.dumperAssignments = "All dumper rows must have a machine selected";
+      newErrors.dumperAssignments = 'All dumper rows must have a machine selected';
     }
 
     const seen = new Set<string>();
@@ -170,7 +170,7 @@ export function ExcavatorActivityForm({
       const key = `${a.dumperMachineId}|${a.materialType}`;
       if (seen.has(key)) {
         newErrors.dumperAssignments =
-          "Duplicate dumper and material combination. Merge or change one.";
+          'Duplicate dumper and material combination. Merge or change one.';
         break;
       }
       seen.add(key);
@@ -184,18 +184,18 @@ export function ExcavatorActivityForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error("Please fix the errors in the form.");
+      toast.error('Please fix the errors in the form.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
 
       // Insert excavator_activity
       const { data: activityData, error: activityError } = await supabase
-        .from("excavator_activity")
+        .from('excavator_activity')
         .insert({
           department_id: departmentId,
           machine_id: formData.excavatorId,
@@ -208,7 +208,7 @@ export function ExcavatorActivityForm({
           loads: totalLoads,
           notes: formData.notes || null,
         })
-        .select("id")
+        .select('id')
         .single();
 
       if (activityError) throw activityError;
@@ -228,34 +228,34 @@ export function ExcavatorActivityForm({
           }));
 
         const { error: assignError } = await supabase
-          .from("excavator_dumper_assignments")
+          .from('excavator_dumper_assignments')
           .insert(assignmentRows);
 
         if (assignError) {
           // Clean up the activity record if assignments fail
-          await supabase.from("excavator_activity").delete().eq("id", activityId);
+          await supabase.from('excavator_activity').delete().eq('id', activityId);
           throw assignError;
         }
       }
 
       // Clear form, keep shift/site/operator
       setFormData((prev) => ({
-        excavatorId: "",
+        excavatorId: '',
         operatorId: prev.operatorId,
         siteId: prev.siteId,
         shiftType: prev.shiftType,
-        blockMinedId: "",
-        notes: "",
+        blockMinedId: '',
+        notes: '',
       }));
       setDumperAssignments([]);
       setErrors({});
-      toast.success("Activity logged successfully");
+      toast.success('Activity logged successfully');
       setShowSuccessPlus(true);
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to save. Please try again.";
+      const message = err instanceof Error ? err.message : 'Failed to save. Please try again.';
       toast.error(message);
       setErrors({ submit: message });
     } finally {
@@ -313,7 +313,7 @@ export function ExcavatorActivityForm({
                   <option value="">Select excavator...</option>
                   {excavators.map((ex) => (
                     <option key={ex.id} value={ex.id}>
-                      {ex.name} {ex.serial_number ? `(${ex.serial_number})` : ""}
+                      {ex.name} {ex.serial_number ? `(${ex.serial_number})` : ''}
                     </option>
                   ))}
                 </select>
@@ -360,7 +360,7 @@ export function ExcavatorActivityForm({
                     setFormData((prev) => ({
                       ...prev,
                       siteId: e.target.value,
-                      blockMinedId: "",
+                      blockMinedId: '',
                     }))
                   }
                   className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg px-3 py-2.5 text-[var(--text-heading)] text-sm focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
@@ -381,7 +381,7 @@ export function ExcavatorActivityForm({
                   Shift <span className="text-accent-red">*</span>
                 </label>
                 <div className="flex gap-2">
-                  {(["day", "night"] as const).map((shift) => (
+                  {(['day', 'night'] as const).map((shift) => (
                     <button
                       key={shift}
                       type="button"
@@ -393,8 +393,8 @@ export function ExcavatorActivityForm({
                       }
                       className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                         formData.shiftType === shift
-                          ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-                          : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                          ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
+                          : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                       }`}
                     >
                       {shift.charAt(0).toUpperCase() + shift.slice(1)}
@@ -460,7 +460,7 @@ export function ExcavatorActivityForm({
                   <p className="text-lg font-medium text-[var(--text-heading)]">
                     {estimatedScoopTimeMinutes > 0
                       ? `${estimatedScoopTimeMinutes.toFixed(1)} min/load`
-                      : "--"}
+                      : '--'}
                   </p>
                 </div>
               </div>
@@ -485,7 +485,7 @@ export function ExcavatorActivityForm({
                 disabled={isSubmitting}
                 className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/90 disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
               >
-                {isSubmitting ? "Saving..." : "Log Activity"}
+                {isSubmitting ? 'Saving...' : 'Log Activity'}
               </button>
             </div>
 

@@ -1,12 +1,12 @@
 # Schema & Contract Drift Audit Report
 
-Generated on 2026-09-22T08:01:23.631Z
+Generated on 2026-09-22T11:24:03.906Z
 
 ## Fitness Function Telemetry
 
-- **Database Tables Scanned**: 86
+- **Database Tables Scanned**: 88
 - **Zod Contract Schemas**: 75
-- **Drift Health Index (DHI)**: 31.4%
+- **Drift Health Index (DHI)**: 30.7%
 - **Contract Coverage Rating**: 🟡 Needs Review
 
 ## Synchronized Domain Contracts (27 Tables)
@@ -34,14 +34,14 @@ Generated on 2026-09-22T08:01:23.631Z
 | `print_jobs`              | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema`                                       |
 | `issued_cards`            | `076_card_printing_infrastructure.sql`  | `PrintRequestSchema, EmployeeProfileUpdateSchema`          |
 | `satellite_deformations`  | `078_satellite_insar_deformations.sql`  | `insarTelemetryIngestSchema, insarGeoTIFFUploadSchema`     |
-| `ai_token_usage`          | `100_ai_token_usage_tracking.sql`       | `aiChatSchema, aiPredictSchema`                            |
-| `excavator_haul_logs`     | `148_multi_site_production_report.sql`  | `excavatorHaulSchema`                                      |
-| `excavator_truck_tallies` | `148_multi_site_production_report.sql`  | `truckTallySchema`                                         |
-| `dozer_rollover_logs`     | `148_multi_site_production_report.sql`  | `dozerRolloverEntrySchema`                                 |
-| `ancillary_shift_logs`    | `148_multi_site_production_report.sql`  | `ancillaryReportEntrySchema`                               |
-| `compliance_audit_runs`   | `151_operational_compliance_checks.sql` | `complianceAuditRunSchema, createComplianceAuditRunSchema` |
+| `ai_token_usage`          | `102_ai_token_usage_tracking.sql`       | `aiChatSchema, aiPredictSchema`                            |
+| `excavator_haul_logs`     | `150_multi_site_production_report.sql`  | `excavatorHaulSchema`                                      |
+| `excavator_truck_tallies` | `150_multi_site_production_report.sql`  | `truckTallySchema`                                         |
+| `dozer_rollover_logs`     | `150_multi_site_production_report.sql`  | `dozerRolloverEntrySchema`                                 |
+| `ancillary_shift_logs`    | `150_multi_site_production_report.sql`  | `ancillaryReportEntrySchema`                               |
+| `compliance_audit_runs`   | `153_operational_compliance_checks.sql` | `complianceAuditRunSchema, createComplianceAuditRunSchema` |
 
-## System & Infrastructure Tables (59 Tables)
+## System & Infrastructure Tables (61 Tables)
 
 - `departments` (001_initial.sql)
 - `employees` (001_initial.sql)
@@ -93,12 +93,14 @@ Generated on 2026-09-22T08:01:23.631Z
 - `delay_entries_archive` (068_delay_entries_table.sql)
 - `roles` (070_control_room_operator_role_and_lookup.sql)
 - `material_density` (073_production_summary_view.sql)
-- `secrets_rotation_log` (085_secrets_rotation_log.sql)
-- `shift_completeness_alerts` (086_shift_completeness_alerts.sql)
-- `data_integrity_issues` (087_data_integrity_issues.sql)
-- `shift_integrity_reports` (088_shift_integrity_reports.sql)
-- `slo_metrics` (091_slo_monitoring.sql)
-- `feature_flags` (092_feature_flags.sql)
-- `feature_flag_exposures` (092_feature_flags.sql)
-- `ab_test_results` (092_feature_flags.sql)
-- `control_room_shift_reports` (096_control_room_shift_reports.sql)
+- `secrets_rotation_log` (086_secrets_rotation_log.sql)
+- `shift_completeness_alerts` (087_shift_completeness_alerts.sql)
+- `data_integrity_issues` (088_data_integrity_issues.sql)
+- `shift_integrity_reports` (089_shift_integrity_reports.sql)
+- `slo_metrics` (092_slo_monitoring.sql)
+- `feature_flags` (093_feature_flags.sql)
+- `feature_flag_exposures` (093_feature_flags.sql)
+- `ab_test_results` (093_feature_flags.sql)
+- `control_room_shift_reports` (097_control_room_shift_reports.sql)
+- `idempotency_keys` (162_idempotency_and_outbox.sql)
+- `control_room_outbox` (162_idempotency_and_outbox.sql)

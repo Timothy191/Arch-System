@@ -1,9 +1,9 @@
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const AIMetricsDashboard = dynamic(
-  () => import("@/components/AIMetricsDashboard").then((m) => m.default),
+  () => import('@/components/AIMetricsDashboard').then((m) => m.default),
   {
     loading: () => (
       <div className="space-y-6">
@@ -14,7 +14,7 @@ const AIMetricsDashboard = dynamic(
         </div>
       </div>
     ),
-  },
+  }
 );
 
 export default function AIMetricsPage() {

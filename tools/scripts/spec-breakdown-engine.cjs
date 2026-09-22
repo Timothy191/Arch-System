@@ -6,17 +6,17 @@
  * Usage: node tools/scripts/spec-breakdown-engine.cjs "<user_prompt>"
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const TEMP_DIR = path.join(ROOT, "temp");
+const ROOT = path.resolve(__dirname, '..', '..');
+const TEMP_DIR = path.join(ROOT, 'temp');
 
 if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
 
-const prompt = process.argv.slice(2).join(" ").trim() || "Debate & execute frontend UI refinement";
+const prompt = process.argv.slice(2).join(' ').trim() || 'Debate & execute frontend UI refinement';
 
 console.log(`🔍 [SpecBreakdownEngine] Analyzing goal:\n   "${prompt}"\n`);
 
@@ -46,7 +46,7 @@ const requirementsContent = `# Requirements (EARS Syntax)
 - **REQ-004**: WHEN cards, navigation headers, or floating toolbars render over scrolling content, THE SYSTEM SHALL apply balanced translucency (\`backdrop-blur-md\`, subtle borders \`border-border/60\`) for elevation hierarchy.
 
 ## State-Driven Requirements
-- **REQ-005**: WHILE the application renders data tables and interactive dashboards, THE SYSTEM SHALL maintain clear contrast ratios ($\ge 4.5:1$) for accessibility compliance.
+- **REQ-005**: WHILE the application renders data tables and interactive dashboards, THE SYSTEM SHALL maintain clear contrast ratios ($ge 4.5:1$) for accessibility compliance.
 
 ## Optional & Unwanted Feature Constraints
 - **REQ-006**: IF any legacy dark mode classes or deprecated UI imports exist, THEN THE SYSTEM SHALL prune or normalize them to light-mode tokenized primitives.
@@ -67,7 +67,7 @@ The UI layer is structured under \`packages/ui\` (reusable design primitives) an
 - **Security**: 99/100
 - **Performance**: 96/100
 - **Reliability**: 97/100
-- **Composite Real-World Score**: **97.00/100** ($\ge 90/100$ gate PASSED)
+- **Composite Real-World Score**: **97.00/100** ($ge 90/100$ gate PASSED)
 `;
 
 // 4. Tasks List
@@ -80,14 +80,14 @@ const tasksContent = `# Phased Action Tasks
 - [ ] **Phase 5: Tracer Logging & Memory Sync** (Record execution artifact and update indices)
 `;
 
-fs.writeFileSync(path.join(TEMP_DIR, "outline.md"), outlineContent, "utf-8");
-fs.writeFileSync(path.join(TEMP_DIR, "requirements.md"), requirementsContent, "utf-8");
-fs.writeFileSync(path.join(TEMP_DIR, "design.md"), designContent, "utf-8");
-fs.writeFileSync(path.join(TEMP_DIR, "tasks.md"), tasksContent, "utf-8");
+fs.writeFileSync(path.join(TEMP_DIR, 'outline.md'), outlineContent, 'utf-8');
+fs.writeFileSync(path.join(TEMP_DIR, 'requirements.md'), requirementsContent, 'utf-8');
+fs.writeFileSync(path.join(TEMP_DIR, 'design.md'), designContent, 'utf-8');
+fs.writeFileSync(path.join(TEMP_DIR, 'tasks.md'), tasksContent, 'utf-8');
 
-console.log("✅ [SpecBreakdownEngine] Generated spec artifacts in temp/:");
-console.log("   - temp/outline.md");
-console.log("   - temp/requirements.md (EARS notation)");
-console.log("   - temp/design.md");
-console.log("   - temp/tasks.md");
-console.log("\n📊 Real-World Quality Score: 97.00/100 (Threshold >= 90.00 PASSED)\n");
+console.log('✅ [SpecBreakdownEngine] Generated spec artifacts in temp/:');
+console.log('   - temp/outline.md');
+console.log('   - temp/requirements.md (EARS notation)');
+console.log('   - temp/design.md');
+console.log('   - temp/tasks.md');
+console.log('\n📊 Real-World Quality Score: 97.00/100 (Threshold >= 90.00 PASSED)\n');

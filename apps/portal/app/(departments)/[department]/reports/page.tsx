@@ -1,11 +1,11 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Input } from "@repo/ui/Input";
-import Link from "next/link";
-import { ExportButton } from "@/features/analytics/components/ExportButton";
-import { PDFDownloadButton } from "@/features/analytics/components/PDFDownloadButton";
-import { getShiftCompleteness } from "@/lib/shift-completeness";
-import { getDepartmentContext } from "~/lib/dept-context";
-import { CopyReportButton } from "./CopyReportButton";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Input } from '@repo/ui/Input';
+import Link from 'next/link';
+import { ExportButton } from '@/features/analytics/components/ExportButton';
+import { PDFDownloadButton } from '@/features/analytics/components/PDFDownloadButton';
+import { getShiftCompleteness } from '@/lib/shift-completeness';
+import { getDepartmentContext } from '~/lib/dept-context';
+import { CopyReportButton } from './CopyReportButton';
 
 export default async function ReportsPage({
   params,
@@ -20,11 +20,11 @@ export default async function ReportsPage({
     department: deptSlug,
   });
 
-  const todayStr = new Date().toISOString().split("T")[0]!;
+  const todayStr = new Date().toISOString().split('T')[0]!;
   const toDateStr = toParam || todayStr;
-  const fromDateStr = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const fromDateStr = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
-  const isControlRoom = dept.type === "control_room";
+  const isControlRoom = dept.type === 'control_room';
 
   // ─── Control Room branch ───────────────────────────────────────────────────
   if (isControlRoom) {
@@ -36,38 +36,38 @@ export default async function ReportsPage({
       { data: dozerRolls },
     ] = await Promise.all([
       supabase
-        .from("machine_operations")
-        .select("shift_date, shift_type, hours_worked")
-        .eq("department_id", deptId)
-        .gte("shift_date", fromDateStr)
-        .lte("shift_date", toDateStr)
-        .order("shift_date", { ascending: false }),
+        .from('machine_operations')
+        .select('shift_date, shift_type, hours_worked')
+        .eq('department_id', deptId)
+        .gte('shift_date', fromDateStr)
+        .lte('shift_date', toDateStr)
+        .order('shift_date', { ascending: false }),
       supabase
-        .from("hourly_loads")
-        .select("load_date, shift_type, total_loads")
-        .eq("department_id", deptId)
-        .gte("load_date", fromDateStr)
-        .lte("load_date", toDateStr),
+        .from('hourly_loads')
+        .select('load_date, shift_type, total_loads')
+        .eq('department_id', deptId)
+        .gte('load_date', fromDateStr)
+        .lte('load_date', toDateStr),
       supabase
-        .from("operational_delays")
-        .select("delay_date, shift_type, delay_minutes")
-        .eq("department_id", deptId)
-        .gte("delay_date", fromDateStr)
-        .lte("delay_date", toDateStr),
+        .from('operational_delays')
+        .select('delay_date, shift_type, delay_minutes')
+        .eq('department_id', deptId)
+        .gte('delay_date', fromDateStr)
+        .lte('delay_date', toDateStr),
       supabase
-        .from("excavator_dumper_assignments")
+        .from('excavator_dumper_assignments')
         .select(
-          "total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))",
+          'total_bcm, excavator_activity!inner(activity_date, shift_type, department_id, site:sites(name))'
         )
-        .eq("excavator_activity.department_id", deptId)
-        .gte("excavator_activity.activity_date", fromDateStr)
-        .lte("excavator_activity.activity_date", toDateStr),
+        .eq('excavator_activity.department_id', deptId)
+        .gte('excavator_activity.activity_date', fromDateStr)
+        .lte('excavator_activity.activity_date', toDateStr),
       supabase
-        .from("dozer_rolls")
-        .select("roll_date, shift_type, blade_passes, hours_operated")
-        .eq("department_id", deptId)
-        .gte("roll_date", fromDateStr)
-        .lte("roll_date", toDateStr),
+        .from('dozer_rolls')
+        .select('roll_date, shift_type, blade_passes, hours_operated')
+        .eq('department_id', deptId)
+        .gte('roll_date', fromDateStr)
+        .lte('roll_date', toDateStr),
     ]);
 
     // Aggregate totals for KPIs
@@ -109,13 +109,13 @@ export default async function ReportsPage({
     };
 
     operations?.forEach((o) => {
-      getOrCreate("", o.shift_date, o.shift_type).hours += o.hours_worked || 0;
+      getOrCreate('', o.shift_date, o.shift_type).hours += o.hours_worked || 0;
     });
     loads?.forEach((l) => {
-      getOrCreate("", l.load_date, l.shift_type).loads += l.total_loads || 0;
+      getOrCreate('', l.load_date, l.shift_type).loads += l.total_loads || 0;
     });
     delays?.forEach((d) => {
-      getOrCreate("", d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;
+      getOrCreate('', d.delay_date, d.shift_type).delayMin += d.delay_minutes || 0;
     });
     excavatorAssignments?.forEach((a) => {
       const act = Array.isArray(a.excavator_activity)
@@ -124,13 +124,13 @@ export default async function ReportsPage({
       if (act) {
         const rawSite = (act as unknown as { site?: unknown }).site;
         const siteObj = Array.isArray(rawSite)
-          ? ((rawSite as { name: string }[])[0]?.name ?? "")
-          : ((rawSite as { name: string } | null | undefined)?.name ?? "");
+          ? ((rawSite as { name: string }[])[0]?.name ?? '')
+          : ((rawSite as { name: string } | null | undefined)?.name ?? '');
         getOrCreate(siteObj, act.activity_date, act.shift_type).bcm += a.total_bcm || 0;
       }
     });
     dozerRolls?.forEach((r) => {
-      getOrCreate("", r.roll_date, r.shift_type).dozerPasses += r.blade_passes || 0;
+      getOrCreate('', r.roll_date, r.shift_type).dozerPasses += r.blade_passes || 0;
     });
 
     const rows = Array.from(rowMap.values()).sort((a, b) => {
@@ -140,9 +140,9 @@ export default async function ReportsPage({
     });
 
     const csvRows = [
-      ["Site", "Date", "Shift", "Hours", "Total Loads", "BCM", "Delay (min)", "Dozer Passes"],
+      ['Site', 'Date', 'Shift', 'Hours', 'Total Loads', 'BCM', 'Delay (min)', 'Dozer Passes'],
       ...rows.map((r) => [
-        r.site || "—",
+        r.site || '—',
         r.date,
         r.shift,
         r.hours.toFixed(2),
@@ -154,61 +154,61 @@ export default async function ReportsPage({
     ];
 
     const csvContent = csvRows
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
 
     const exportRows = rows.map((r) => ({
-      Site: r.site || "—",
+      Site: r.site || '—',
       Date: r.date,
       Shift: r.shift,
       Hours: Number(r.hours.toFixed(2)),
-      "Total Loads": r.loads,
+      'Total Loads': r.loads,
       BCM: Number(r.bcm.toFixed(2)),
-      "Delay (min)": r.delayMin,
-      "Dozer Passes": r.dozerPasses,
+      'Delay (min)': r.delayMin,
+      'Dozer Passes': r.dozerPasses,
     }));
 
     const pdfReportData = {
       title: `${dept.displayName} Department Report`,
       subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
       kpis: [
-        { label: "Total Hours", value: `${totalHours.toFixed(1)} h` },
-        { label: "Total Loads", value: `${totalLoads.toLocaleString()}` },
-        { label: "Total BCM", value: `${totalBcm.toFixed(1)}` },
-        { label: "Delay Minutes", value: `${totalDelayMin.toLocaleString()}` },
+        { label: 'Total Hours', value: `${totalHours.toFixed(1)} h` },
+        { label: 'Total Loads', value: `${totalLoads.toLocaleString()}` },
+        { label: 'Total BCM', value: `${totalBcm.toFixed(1)}` },
+        { label: 'Delay Minutes', value: `${totalDelayMin.toLocaleString()}` },
       ],
       tableHeaders: [
-        "Site",
-        "Date",
-        "Shift",
-        "Hours",
-        "Loads",
-        "BCM",
-        "Delay (min)",
-        "Dozer Passes",
+        'Site',
+        'Date',
+        'Shift',
+        'Hours',
+        'Loads',
+        'BCM',
+        'Delay (min)',
+        'Dozer Passes',
       ],
       tableRows: exportRows.map((r) => [
         r.Site,
         r.Date,
         r.Shift,
         r.Hours.toString(),
-        r["Total Loads"].toString(),
+        r['Total Loads'].toString(),
         r.BCM.toString(),
-        r["Delay (min)"].toString(),
-        r["Dozer Passes"].toString(),
+        r['Delay (min)'].toString(),
+        r['Dozer Passes'].toString(),
       ]),
     };
 
     // ── Shift completeness gate ──────────────────────────────────────────────
     const currentHour = new Date().getHours();
-    const currentShift: "day" | "night" = currentHour >= 6 && currentHour < 18 ? "day" : "night";
+    const currentShift: 'day' | 'night' = currentHour >= 6 && currentHour < 18 ? 'day' : 'night';
 
     const completeness = await getShiftCompleteness(
       supabase,
       deptId,
       deptSlug,
       todayStr,
-      currentShift,
+      currentShift
     );
 
     if (!completeness.complete) {
@@ -227,7 +227,7 @@ export default async function ReportsPage({
                 </p>
                 <p className="text-[var(--text-muted)] text-sm mt-0.5">
                   {missing.length} machine
-                  {missing.length !== 1 ? "s are" : " is"} missing entries for the current{" "}
+                  {missing.length !== 1 ? 's are' : ' is'} missing entries for the current{' '}
                   {currentShift} shift. Complete all entries first.
                 </p>
               </div>
@@ -332,19 +332,19 @@ export default async function ReportsPage({
               <thead>
                 <tr className="border-b border-[var(--border-default)]">
                   {[
-                    "Site",
-                    "Date",
-                    "Shift",
-                    "Hours",
-                    "Loads",
-                    "BCM",
-                    "Delay (min)",
-                    "Dozer Passes",
+                    'Site',
+                    'Date',
+                    'Shift',
+                    'Hours',
+                    'Loads',
+                    'BCM',
+                    'Delay (min)',
+                    'Dozer Passes',
                   ].map((h, i) => (
                     <th
                       key={h}
                       scope="col"
-                      className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider ${i > 2 ? "text-right" : ""}`}
+                      className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider ${i > 2 ? 'text-right' : ''}`}
                     >
                       {h}
                     </th>
@@ -370,9 +370,9 @@ export default async function ReportsPage({
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          row.shift === "day"
-                            ? "bg-accent-blue/10 text-accent-blue"
-                            : "bg-indigo-500/10 text-indigo-400"
+                          row.shift === 'day'
+                            ? 'bg-accent-blue/10 text-accent-blue'
+                            : 'bg-indigo-500/10 text-indigo-400'
                         }`}
                       >
                         {row.shift}
@@ -415,30 +415,30 @@ export default async function ReportsPage({
 
   // ─── Generic department branch ────────────────────────────────────────────
   const { data: logs } = await supabase
-    .from("daily_logs")
-    .select("id, log_date, shift, notes")
-    .eq("department_id", deptId)
-    .gte("log_date", fromDateStr)
-    .lte("log_date", toDateStr)
-    .order("log_date", { ascending: false });
+    .from('daily_logs')
+    .select('id, log_date, shift, notes')
+    .eq('department_id', deptId)
+    .gte('log_date', fromDateStr)
+    .lte('log_date', toDateStr)
+    .order('log_date', { ascending: false });
 
   const logIds = logs?.map((l) => l.id) || [];
 
   const [{ data: machineHours }, { data: fuelLogs }, { data: productionLogs }] = await Promise.all([
     logIds.length > 0
       ? supabase
-          .from("machine_hours")
-          .select("daily_log_id, hours_worked")
-          .in("daily_log_id", logIds)
+          .from('machine_hours')
+          .select('daily_log_id, hours_worked')
+          .in('daily_log_id', logIds)
       : Promise.resolve({ data: [] }),
     logIds.length > 0
-      ? supabase.from("fuel_logs").select("daily_log_id, diesel_litres").in("daily_log_id", logIds)
+      ? supabase.from('fuel_logs').select('daily_log_id, diesel_litres').in('daily_log_id', logIds)
       : Promise.resolve({ data: [] }),
     logIds.length > 0
       ? supabase
-          .from("production_logs")
-          .select("daily_log_id, coal_tonnes, waste_tonnes")
-          .in("daily_log_id", logIds)
+          .from('production_logs')
+          .select('daily_log_id, coal_tonnes, waste_tonnes')
+          .in('daily_log_id', logIds)
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -451,7 +451,7 @@ export default async function ReportsPage({
   machineHours?.forEach((m) => {
     machineHoursByLog.set(
       m.daily_log_id,
-      (machineHoursByLog.get(m.daily_log_id) || 0) + (m.hours_worked || 0),
+      (machineHoursByLog.get(m.daily_log_id) || 0) + (m.hours_worked || 0)
     );
   });
 
@@ -459,7 +459,7 @@ export default async function ReportsPage({
   fuelLogs?.forEach((f) => {
     fuelLogsByLog.set(
       f.daily_log_id,
-      (fuelLogsByLog.get(f.daily_log_id) || 0) + (f.diesel_litres || 0),
+      (fuelLogsByLog.get(f.daily_log_id) || 0) + (f.diesel_litres || 0)
     );
   });
 
@@ -469,7 +469,7 @@ export default async function ReportsPage({
   });
 
   const csvRows = [
-    ["Date", "Shift", "Notes", "Total Hours", "Total Fuel (L)", "Coal (t)", "Waste (t)"],
+    ['Date', 'Shift', 'Notes', 'Total Hours', 'Total Fuel (L)', 'Coal (t)', 'Waste (t)'],
     ...(logs || []).map((log) => {
       const mh = machineHoursByLog.get(log.id) || 0;
       const fl = fuelLogsByLog.get(log.id) || 0;
@@ -477,7 +477,7 @@ export default async function ReportsPage({
       return [
         log.log_date,
         log.shift,
-        log.notes || "",
+        log.notes || '',
         mh.toFixed(2),
         fl.toFixed(2),
         (pl?.coal_tonnes || 0).toFixed(2),
@@ -487,8 +487,8 @@ export default async function ReportsPage({
   ];
 
   const csvContent = csvRows
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
 
   const exportRows = (logs || []).map((log) => {
     const mh = machineHoursByLog.get(log.id) || 0;
@@ -497,11 +497,11 @@ export default async function ReportsPage({
     return {
       Date: log.log_date,
       Shift: log.shift,
-      Notes: log.notes || "",
-      "Total Hours": Number(mh.toFixed(2)),
-      "Total Fuel (L)": Number(fl.toFixed(2)),
-      "Coal (t)": Number((pl?.coal_tonnes || 0).toFixed(2)),
-      "Waste (t)": Number((pl?.waste_tonnes || 0).toFixed(2)),
+      Notes: log.notes || '',
+      'Total Hours': Number(mh.toFixed(2)),
+      'Total Fuel (L)': Number(fl.toFixed(2)),
+      'Coal (t)': Number((pl?.coal_tonnes || 0).toFixed(2)),
+      'Waste (t)': Number((pl?.waste_tonnes || 0).toFixed(2)),
     };
   });
 
@@ -509,19 +509,19 @@ export default async function ReportsPage({
     title: `${dept.displayName} Department Report`,
     subtitle: `Generated on ${todayStr} — Date range: ${fromDateStr} to ${toDateStr}`,
     kpis: [
-      { label: "Total Machine Hours", value: `${totalHours.toFixed(1)} h` },
-      { label: "Diesel Consumed (L)", value: `${totalFuel.toFixed(1)} L` },
-      { label: "Coal Removed (t)", value: `${totalCoal.toFixed(1)} t` },
-      { label: "Waste Removed (t)", value: `${totalWaste.toFixed(1)} t` },
+      { label: 'Total Machine Hours', value: `${totalHours.toFixed(1)} h` },
+      { label: 'Diesel Consumed (L)', value: `${totalFuel.toFixed(1)} L` },
+      { label: 'Coal Removed (t)', value: `${totalCoal.toFixed(1)} t` },
+      { label: 'Waste Removed (t)', value: `${totalWaste.toFixed(1)} t` },
     ],
-    tableHeaders: ["Date", "Shift", "Hours", "Fuel (L)", "Coal (t)", "Waste (t)"],
+    tableHeaders: ['Date', 'Shift', 'Hours', 'Fuel (L)', 'Coal (t)', 'Waste (t)'],
     tableRows: exportRows.map((r) => [
       r.Date,
       r.Shift,
-      r["Total Hours"].toString(),
-      r["Total Fuel (L)"].toString(),
-      r["Coal (t)"].toString(),
-      r["Waste (t)"].toString(),
+      r['Total Hours'].toString(),
+      r['Total Fuel (L)'].toString(),
+      r['Coal (t)'].toString(),
+      r['Waste (t)'].toString(),
     ]),
   };
 
@@ -638,9 +638,9 @@ export default async function ReportsPage({
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          log.shift === "day"
-                            ? "bg-accent-blue/10 text-accent-blue"
-                            : "bg-indigo-500/10 text-indigo-400"
+                          log.shift === 'day'
+                            ? 'bg-accent-blue/10 text-accent-blue'
+                            : 'bg-indigo-500/10 text-indigo-400'
                         }`}
                       >
                         {log.shift}

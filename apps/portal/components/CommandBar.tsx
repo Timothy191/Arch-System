@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { getServiceUrls } from "@repo/ui/lib/urls";
-import { cn } from "@repo/ui/lib/utils";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { logout } from "~/app/actions";
+import { getServiceUrls } from '@repo/ui/lib/urls';
+import { cn } from '@repo/ui/lib/utils';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { logout } from '~/app/actions';
 
 const urls = getServiceUrls();
 
@@ -22,7 +22,7 @@ import {
   User,
   Wrench,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface CommandItem {
   id: string;
@@ -36,96 +36,96 @@ interface CommandItem {
 
 const DEPARTMENT_COMMANDS: CommandItem[] = [
   {
-    id: "dept-overview",
-    label: "System Overview",
-    href: "/overview",
-    category: "Departments",
+    id: 'dept-overview',
+    label: 'System Overview',
+    href: '/overview',
+    category: 'Departments',
     icon: <Activity className="w-4 h-4" />,
   },
   {
-    id: "dept-drilling",
-    label: "Drilling Operations",
-    href: "/drilling",
-    category: "Departments",
+    id: 'dept-drilling',
+    label: 'Drilling Operations',
+    href: '/drilling',
+    category: 'Departments',
     icon: <Pickaxe className="w-4 h-4" />,
   },
   {
-    id: "dept-production",
-    label: "Production",
-    href: "/production",
-    category: "Departments",
+    id: 'dept-production',
+    label: 'Production',
+    href: '/production',
+    category: 'Departments',
     icon: <Factory className="w-4 h-4" />,
   },
   {
-    id: "dept-control",
-    label: "Control Room",
-    href: "/control-room",
-    category: "Departments",
+    id: 'dept-control',
+    label: 'Control Room',
+    href: '/control-room',
+    category: 'Departments',
     icon: <Monitor className="w-4 h-4" />,
   },
   {
-    id: "dept-engineering",
-    label: "Engineering",
-    href: "/engineering",
-    category: "Departments",
+    id: 'dept-engineering',
+    label: 'Engineering',
+    href: '/engineering',
+    category: 'Departments',
     icon: <Wrench className="w-4 h-4" />,
   },
   {
-    id: "dept-access",
-    label: "Access Control",
-    href: "/access-control",
-    category: "Departments",
+    id: 'dept-access',
+    label: 'Access Control',
+    href: '/access-control',
+    category: 'Departments',
     icon: <ShieldCheck className="w-4 h-4" />,
   },
   {
-    id: "dept-admin",
-    label: "Admin Management",
-    href: "/admin",
-    category: "Departments",
+    id: 'dept-admin',
+    label: 'Admin Management',
+    href: '/admin',
+    category: 'Departments',
     icon: <ShieldCheck className="w-4 h-4" />,
   },
 ];
 
 const NAV_COMMANDS: CommandItem[] = [
   {
-    id: "nav-hub",
-    label: "Hub Dashboard",
-    href: "/",
-    category: "Navigation",
+    id: 'nav-hub',
+    label: 'Hub Dashboard',
+    href: '/',
+    category: 'Navigation',
     icon: <LayoutDashboard className="w-4 h-4" />,
   },
   {
-    id: "nav-profile",
-    label: "Profile",
-    href: "/admin",
-    category: "Navigation",
+    id: 'nav-profile',
+    label: 'Profile',
+    href: '/admin',
+    category: 'Navigation',
     icon: <User className="w-4 h-4" />,
   },
   {
-    id: "nav-settings",
-    label: "Settings",
-    href: "/admin",
-    category: "Navigation",
+    id: 'nav-settings',
+    label: 'Settings',
+    href: '/admin',
+    category: 'Navigation',
     icon: <Settings className="w-4 h-4" />,
   },
   {
-    id: "nav-logout",
-    label: "Log Out",
+    id: 'nav-logout',
+    label: 'Log Out',
     action: () => {
       // eslint-disable-next-line no-console
       logout().catch(console.error);
     },
-    category: "Navigation",
+    category: 'Navigation',
     icon: <LogOut className="w-4 h-4" />,
   },
 ];
 
 const TOOLS_COMMANDS: CommandItem[] = [
   {
-    id: "tool-flowise",
-    label: "Flowise",
+    id: 'tool-flowise',
+    label: 'Flowise',
     href: `${urls.portal}`,
-    category: "Tools",
+    category: 'Tools',
     icon: <Bot className="w-4 h-4" />,
   },
 ];
@@ -134,13 +134,13 @@ const ALL_COMMANDS = [...DEPARTMENT_COMMANDS, ...NAV_COMMANDS, ...TOOLS_COMMANDS
 
 export function CommandBar() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const filtered = ALL_COMMANDS.filter((cmd) =>
-    cmd.label.toLowerCase().includes(query.toLowerCase()),
+    cmd.label.toLowerCase().includes(query.toLowerCase())
   );
 
   const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
@@ -154,31 +154,31 @@ export function CommandBar() {
   const handleSelect = useCallback(
     (item: CommandItem) => {
       setOpen(false);
-      setQuery("");
+      setQuery('');
       if (item.href) {
-        if (item.href.startsWith("http")) {
-          window.open(item.href, "_blank", "noopener,noreferrer");
+        if (item.href.startsWith('http')) {
+          window.open(item.href, '_blank', 'noopener,noreferrer');
         } else {
           router.push(item.href);
         }
       }
       if (item.action) item.action();
     },
-    [router],
+    [router]
   );
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setOpen((prev) => !prev);
       }
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setOpen(false);
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   useEffect(() => {
@@ -188,20 +188,20 @@ export function CommandBar() {
   useEffect(() => {
     if (!open || flatList.length === 0) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedIndex((i) => (i + 1) % flatList.length);
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedIndex((i) => (i - 1 + flatList.length) % flatList.length);
-      } else if (e.key === "Enter") {
+      } else if (e.key === 'Enter') {
         e.preventDefault();
         const item = flatList[selectedIndex];
         if (item) handleSelect(item);
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, flatList, selectedIndex, handleSelect]);
 
   useEffect(() => {
@@ -267,16 +267,16 @@ export function CommandBar() {
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setSelectedIndex(globalIndex)}
                       className={cn(
-                        "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                        'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
                         isSelected
-                          ? "bg-arch-accent-blue/10 text-arch-accent-blue"
-                          : "text-arch-text-secondary hover:bg-arch-surface-tertiary",
+                          ? 'bg-arch-accent-blue/10 text-arch-accent-blue'
+                          : 'text-arch-text-secondary hover:bg-arch-surface-tertiary'
                       )}
                     >
                       <span
                         className={cn(
-                          "shrink-0",
-                          isSelected ? "text-arch-accent-blue" : "text-arch-text-tertiary",
+                          'shrink-0',
+                          isSelected ? 'text-arch-accent-blue' : 'text-arch-text-tertiary'
                         )}
                       >
                         {item.icon}

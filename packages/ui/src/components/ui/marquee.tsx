@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { type ComponentPropsWithoutRef, useEffect, useRef, useState } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { type ComponentPropsWithoutRef, useEffect, useRef, useState } from 'react';
 
-interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
+interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
   /**
    * Optional CSS class name to apply custom styles
    */
@@ -52,7 +52,7 @@ export function Marquee({
   // before the viewport edge so it never visibly pops.
   useEffect(() => {
     const target = containerRef.current;
-    if (!target || typeof IntersectionObserver === "undefined") return;
+    if (!target || typeof IntersectionObserver === 'undefined') return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry) {
@@ -60,8 +60,8 @@ export function Marquee({
         }
       },
       {
-        rootMargin: "200px",
-      },
+        rootMargin: '200px',
+      }
     );
     observer.observe(target);
     return () => observer.disconnect();
@@ -72,12 +72,12 @@ export function Marquee({
       {...props}
       ref={containerRef}
       className={cn(
-        "group flex gap-[var(--gap)] overflow-hidden p-2 [--duration:40s] [--gap:1rem]",
+        'group flex gap-[var(--gap)] overflow-hidden p-2 [--duration:40s] [--gap:1rem]',
         {
-          "flex-row": !vertical,
-          "flex-col": vertical,
+          'flex-row': !vertical,
+          'flex-col': vertical,
         },
-        className,
+        className
       )}
     >
       {Array(repeat)
@@ -85,15 +85,15 @@ export function Marquee({
         .map((_, i) => (
           <div
             key={i}
-            className={cn("flex shrink-0 justify-around gap-[var(--gap)]", {
-              "animate-marquee flex-row": !vertical,
-              "animate-marquee-vertical flex-col": vertical,
-              "group-hover:[animation-play-state:paused]": pauseOnHover,
-              "[animation-direction:reverse]": reverse,
+            className={cn('flex shrink-0 justify-around gap-[var(--gap)]', {
+              'animate-marquee flex-row': !vertical,
+              'animate-marquee-vertical flex-col': vertical,
+              'group-hover:[animation-play-state:paused]': pauseOnHover,
+              '[animation-direction:reverse]': reverse,
             })}
             // Inline style wins over the group-hover class, so off-screen
             // always pauses regardless of hover state.
-            style={!isVisible ? { animationPlayState: "paused" } : undefined}
+            style={!isVisible ? { animationPlayState: 'paused' } : undefined}
           >
             {children}
           </div>

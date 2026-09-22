@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
 
 interface CopyReportButtonProps {
   csvContent: string;
@@ -18,7 +18,7 @@ export function CopyReportButton({ csvContent }: CopyReportButtonProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Failed to copy CSV data to clipboard:", err);
+      console.error('Failed to copy CSV data to clipboard:', err);
     }
   };
 

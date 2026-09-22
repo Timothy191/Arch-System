@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface DateRange {
   start?: Date | null;
@@ -18,10 +18,10 @@ export interface DatePreset {
   end: Date;
 }
 
-export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: DateRange | Date | null;
   onChange?: (value: DateRange | any) => void;
-  size?: "small" | "medium";
+  size?: 'small' | 'medium';
   allowClear?: boolean;
   compact?: boolean;
   stacked?: boolean;
@@ -32,7 +32,7 @@ export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   maxValue?: Date | number;
   pinnedTimezone?: string;
   showTimeInput?: boolean;
-  popoverAlignment?: "start" | "center" | "end";
+  popoverAlignment?: 'start' | 'center' | 'end';
 }
 
 export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
@@ -40,7 +40,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
     {
       value,
       onChange,
-      size = "medium",
+      size = 'medium',
       allowClear = false,
       compact = false,
       stacked = false,
@@ -53,11 +53,11 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
       className,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Current viewed month
     const [viewDate, setViewDate] = React.useState<Date>(() => {
-      if (value && "start" in value && value.start instanceof Date) return value.start;
+      if (value && 'start' in value && value.start instanceof Date) return value.start;
       if (value instanceof Date) return value;
       return new Date();
     });
@@ -78,12 +78,12 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
 
     // Normalizing current selection
     const rangeStart =
-      value && typeof value === "object" && "start" in value
+      value && typeof value === 'object' && 'start' in value
         ? value.start
         : value instanceof Date
           ? value
           : null;
-    const rangeEnd = value && typeof value === "object" && "end" in value ? value.end : null;
+    const rangeEnd = value && typeof value === 'object' && 'end' in value ? value.end : null;
 
     const min = minValue ? new Date(minValue) : null;
     const max = maxValue ? new Date(maxValue) : null;
@@ -132,23 +132,23 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
     };
 
     const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
-    const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-    const isSmall = size === "small";
+    const isSmall = size === 'small';
 
     return (
       <div
@@ -156,12 +156,12 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
         role="region"
         aria-label="Calendar"
         className={cn(
-          "inline-flex rounded-xl border border-neutral-200 bg-white p-4 shadow-sm select-none",
+          'inline-flex rounded-xl border border-neutral-200 bg-white p-4 shadow-sm select-none',
           horizontalLayout || (!stacked && presets)
-            ? "flex-col md:flex-row gap-6"
-            : "flex-col gap-4",
-          isSmall ? "text-xs" : "text-sm",
-          className,
+            ? 'flex-col md:flex-row gap-6'
+            : 'flex-col gap-4',
+          isSmall ? 'text-xs' : 'text-sm',
+          className
         )}
         {...props}
       >
@@ -169,14 +169,14 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
         {presets && (
           <div
             className={cn(
-              "flex flex-col gap-1 shrink-0",
-              stacked ? "border-b border-neutral-200 pb-3" : "border-r border-neutral-200 pr-4",
+              'flex flex-col gap-1 shrink-0',
+              stacked ? 'border-b border-neutral-200 pb-3' : 'border-r border-neutral-200 pr-4'
             )}
           >
             <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
               Presets
             </span>
-            <div className={cn("flex", stacked ? "flex-row flex-wrap gap-1.5" : "flex-col gap-1")}>
+            <div className={cn('flex', stacked ? 'flex-row flex-wrap gap-1.5' : 'flex-col gap-1')}>
               {Object.entries(presets).map(([key, preset]) => (
                 <button
                   key={key}
@@ -250,13 +250,13 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                   disabled={Boolean(isDisabled)}
                   onClick={() => handleDateClick(day)}
                   className={cn(
-                    "w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors mx-auto",
+                    'w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors mx-auto',
                     isStart || isEnd
-                      ? "bg-neutral-900 text-white font-semibold shadow-2xs"
+                      ? 'bg-neutral-900 text-white font-semibold shadow-2xs'
                       : isInRange
-                        ? "bg-neutral-100 text-neutral-900 rounded-none"
-                        : "text-neutral-700 hover:bg-neutral-100:bg-neutral-800",
-                    isDisabled && "opacity-30 pointer-events-none cursor-not-allowed",
+                        ? 'bg-neutral-100 text-neutral-900 rounded-none'
+                        : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800',
+                    isDisabled && 'opacity-30 pointer-events-none cursor-not-allowed'
                   )}
                 >
                   {day}
@@ -292,7 +292,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
-Calendar.displayName = "Calendar";
+Calendar.displayName = 'Calendar';

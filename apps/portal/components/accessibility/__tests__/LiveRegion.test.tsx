@@ -1,34 +1,34 @@
-import { act, render, screen } from "@testing-library/react";
-import { Announcer, LiveRegion } from "../LiveRegion";
+import { act, render, screen } from '@testing-library/react';
+import { Announcer, LiveRegion } from '../LiveRegion';
 
-describe("LiveRegion", () => {
-  test("renders children with correct ARIA attributes", () => {
+describe('LiveRegion', () => {
+  test('renders children with correct ARIA attributes', () => {
     render(
       <LiveRegion live="polite" atomic>
         <span>Test content</span>
-      </LiveRegion>,
+      </LiveRegion>
     );
 
-    const region = screen.getByText("Test content").parentElement;
+    const region = screen.getByText('Test content').parentElement;
 
-    expect(region).toHaveAttribute("aria-live", "polite");
-    expect(region).toHaveAttribute("aria-atomic", "true");
+    expect(region).toHaveAttribute('aria-live', 'polite');
+    expect(region).toHaveAttribute('aria-atomic', 'true');
   });
 
-  test("renders with assertive live region", () => {
+  test('renders with assertive live region', () => {
     render(
       <LiveRegion live="assertive">
         <span>Important message</span>
-      </LiveRegion>,
+      </LiveRegion>
     );
 
-    const region = screen.getByText("Important message").parentElement;
+    const region = screen.getByText('Important message').parentElement;
 
-    expect(region).toHaveAttribute("aria-live", "assertive");
+    expect(region).toHaveAttribute('aria-live', 'assertive');
   });
 });
 
-describe("Announcer", () => {
+describe('Announcer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -37,7 +37,7 @@ describe("Announcer", () => {
     jest.useRealTimers();
   });
 
-  test("announces message to screen readers", () => {
+  test('announces message to screen readers', () => {
     render(<Announcer message="Test announcement" />);
 
     // Wait for the message to appear
@@ -45,21 +45,21 @@ describe("Announcer", () => {
       jest.advanceTimersByTime(200);
     });
 
-    const announcer = screen.getByText("Test announcement");
+    const announcer = screen.getByText('Test announcement');
     // The LiveRegion wraps the content, so check the LiveRegion's div
-    const liveRegion = announcer.closest("[aria-live]");
-    expect(liveRegion).toHaveAttribute("aria-live", "polite");
+    const liveRegion = announcer.closest('[aria-live]');
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
   });
 
-  test("uses assertive live region when specified", () => {
+  test('uses assertive live region when specified', () => {
     render(<Announcer message="Urgent message" live="assertive" />);
 
     act(() => {
       jest.advanceTimersByTime(200);
     });
 
-    const announcer = screen.getByText("Urgent message");
-    const liveRegion = announcer.closest("[aria-live]");
-    expect(liveRegion).toHaveAttribute("aria-live", "assertive");
+    const announcer = screen.getByText('Urgent message');
+    const liveRegion = announcer.closest('[aria-live]');
+    expect(liveRegion).toHaveAttribute('aria-live', 'assertive');
   });
 });

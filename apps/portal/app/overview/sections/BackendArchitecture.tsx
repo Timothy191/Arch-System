@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   addEdge,
@@ -13,9 +13,9 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
-} from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import "@xyflow/react/dist/style.css";
+} from '@xyflow/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import '@xyflow/react/dist/style.css';
 import {
   Activity,
   CheckCircle2,
@@ -37,18 +37,18 @@ import {
   Sparkles,
   Workflow,
   Zap,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   BACKEND_CONNECTIONS,
   BACKEND_SERVICES,
   type BackendService,
   type ScadaMetrics,
   type ScadaTelemetryTag,
-} from "../lib/data";
+} from '../lib/data';
 
 // Category Icons & Color Mapping
 const CATEGORY_ICONS: Record<
-  BackendService["category"],
+  BackendService['category'],
   React.ComponentType<{ className?: string }>
 > = {
   client: Layers,
@@ -73,9 +73,9 @@ function ServiceNode({
     <div
       className={`w-64 rounded-xl border transition-all duration-200 shadow-lg overflow-hidden cursor-pointer ${
         selected
-          ? "ring-2 ring-[#3ecf8e] border-[#3ecf8e] bg-[#222222] shadow-[0_0_20px_rgba(62,207,142,0.25)]"
-          : "border-[#363636] bg-[#171717] hover:border-[#525252] hover:bg-[#1c1c1c]"
-      } ${data.isDimmed ? "opacity-30 grayscale-[50%]" : "opacity-100"}`}
+          ? 'ring-2 ring-[#3ecf8e] border-[#3ecf8e] bg-[#222222] shadow-[0_0_20px_rgba(62,207,142,0.25)]'
+          : 'border-[#363636] bg-[#171717] hover:border-[#525252] hover:bg-[#1c1c1c]'
+      } ${data.isDimmed ? 'opacity-30 grayscale-[50%]' : 'opacity-100'}`}
     >
       <Handle
         type="target"
@@ -120,7 +120,7 @@ function ServiceNode({
       <div className="px-3.5 pb-2.5 pt-1 border-t border-[#262626] bg-[#141414] flex flex-wrap items-center justify-between gap-1.5 text-[10px]">
         <div className="flex items-center gap-1 text-[#b4b4b4] font-mono">
           <Activity className="w-3 h-3 text-[#3ecf8e]" />
-          <span>{data.sla.split(" ")[0]}</span>
+          <span>{data.sla.split(' ')[0]}</span>
         </div>
         <div className="flex items-center gap-1">
           {data.protocols.slice(0, 2).map((proto) => (
@@ -128,7 +128,7 @@ function ServiceNode({
               key={proto}
               className="px-1.5 py-0.5 rounded bg-[#242424] text-[#a1a1aa] font-mono text-[9px] border border-[#333333]"
             >
-              {proto.split(" ")[0]}
+              {proto.split(' ')[0]}
             </span>
           ))}
         </div>
@@ -171,20 +171,20 @@ function getLiveTagValue(
   tag: ScadaTelemetryTag,
   tick: number,
   isLive: boolean,
-  index: number,
+  index: number
 ): string {
-  if (typeof tag.baseValue === "boolean") {
-    return tag.baseValue ? "TRIGGERED (ALARM)" : "NORMAL (OK)";
+  if (typeof tag.baseValue === 'boolean') {
+    return tag.baseValue ? 'TRIGGERED (ALARM)' : 'NORMAL (OK)';
   }
   if (!isLive || !tag.variance) {
-    return `${tag.baseValue} ${tag.unit || ""}`;
+    return `${tag.baseValue} ${tag.unit || ''}`;
   }
   const jitter = Math.sin(tick * 0.8 + index * 1.7) * tag.variance;
   const currentVal = tag.baseValue + jitter;
-  if (tag.dataType === "INT16" || tag.dataType === "UINT32") {
-    return `${Math.round(currentVal).toLocaleString()} ${tag.unit || ""}`;
+  if (tag.dataType === 'INT16' || tag.dataType === 'UINT32') {
+    return `${Math.round(currentVal).toLocaleString()} ${tag.unit || ''}`;
   }
-  return `${currentVal.toFixed(1)} ${tag.unit || ""}`;
+  return `${currentVal.toFixed(1)} ${tag.unit || ''}`;
 }
 
 // SCADA Telemetry Inspector Component
@@ -199,15 +199,15 @@ function ScadaTelemetryInspector({
   isLive: boolean;
   onToggleLive: () => void;
 }) {
-  const [filterProto, setFilterProto] = useState<"all" | "OPC-UA" | "Modbus-TCP">("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filterProto, setFilterProto] = useState<'all' | 'OPC-UA' | 'Modbus-TCP'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredTags = useMemo(() => {
     return metrics.tags.filter((tag) => {
-      const matchProto = filterProto === "all" || tag.sourceProtocol === filterProto;
+      const matchProto = filterProto === 'all' || tag.sourceProtocol === filterProto;
       const q = searchQuery.toLowerCase();
       const matchSearch =
-        searchQuery === "" ||
+        searchQuery === '' ||
         tag.name.toLowerCase().includes(q) ||
         tag.equipment.toLowerCase().includes(q) ||
         tag.registerAddress?.toLowerCase().includes(q) ||
@@ -229,9 +229,9 @@ function ScadaTelemetryInspector({
               SCADA Live Telemetry Stream
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#06b6d4]/15 text-[#22d3ee] border border-[#06b6d4]/30">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${isLive ? "bg-[#06b6d4] animate-ping" : "bg-[#71717a]"}`}
+                  className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-[#06b6d4] animate-ping' : 'bg-[#71717a]'}`}
                 />
-                {isLive ? "LIVE STREAM" : "PAUSED"}
+                {isLive ? 'LIVE STREAM' : 'PAUSED'}
               </span>
             </h4>
             <p className="text-[11px] text-[#898989] font-mono">
@@ -242,7 +242,7 @@ function ScadaTelemetryInspector({
 
         <button
           onClick={onToggleLive}
-          title={isLive ? "Pause live simulation" : "Resume live simulation"}
+          title={isLive ? 'Pause live simulation' : 'Resume live simulation'}
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#242424] hover:bg-[#303030] text-[#fafafa] text-xs font-mono border border-[#383838] transition-colors"
         >
           {isLive ? (
@@ -326,9 +326,9 @@ function ScadaTelemetryInspector({
           <div className="flex items-center gap-1 bg-[#121212] p-1 rounded-lg border border-[#262626]">
             {(
               [
-                { id: "all", label: `All (${metrics.tags.length})` },
-                { id: "OPC-UA", label: "OPC-UA" },
-                { id: "Modbus-TCP", label: "Modbus-TCP" },
+                { id: 'all', label: `All (${metrics.tags.length})` },
+                { id: 'OPC-UA', label: 'OPC-UA' },
+                { id: 'Modbus-TCP', label: 'Modbus-TCP' },
               ] as const
             ).map((item) => (
               <button
@@ -336,8 +336,8 @@ function ScadaTelemetryInspector({
                 onClick={() => setFilterProto(item.id)}
                 className={`px-2 py-1 rounded text-[11px] font-mono transition-colors ${
                   filterProto === item.id
-                    ? "bg-[#242424] text-[#06b6d4] font-medium border border-[#06b6d4]/30"
-                    : "text-[#898989] hover:text-[#fafafa]"
+                    ? 'bg-[#242424] text-[#06b6d4] font-medium border border-[#06b6d4]/30'
+                    : 'text-[#898989] hover:text-[#fafafa]'
                 }`}
               >
                 {item.label}
@@ -367,7 +367,7 @@ function ScadaTelemetryInspector({
           ) : (
             filteredTags.map((tag, idx) => {
               const liveValue = getLiveTagValue(tag, tick, isLive, idx);
-              const isOpc = tag.sourceProtocol === "OPC-UA";
+              const isOpc = tag.sourceProtocol === 'OPC-UA';
 
               return (
                 <div
@@ -380,8 +380,8 @@ function ScadaTelemetryInspector({
                         <span
                           className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-medium border ${
                             isOpc
-                              ? "bg-[#06b6d4]/10 text-[#22d3ee] border-[#06b6d4]/30"
-                              : "bg-[#f59e0b]/10 text-[#fbbf24] border-[#f59e0b]/30"
+                              ? 'bg-[#06b6d4]/10 text-[#22d3ee] border-[#06b6d4]/30'
+                              : 'bg-[#f59e0b]/10 text-[#fbbf24] border-[#f59e0b]/30'
                           }`}
                         >
                           {tag.sourceProtocol}
@@ -423,11 +423,11 @@ function ScadaTelemetryInspector({
   );
 }
 
-type FilterMode = "all" | "data" | "realtime" | "observability" | "cache";
+type FilterMode = 'all' | 'data' | 'realtime' | 'observability' | 'cache';
 
 export default function BackendArchitecture() {
-  const [filterMode, setFilterMode] = useState<FilterMode>("all");
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>("fuxa-scada");
+  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>('fuxa-scada');
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
 
   // AGENT-TRACE: Live Telemetry Simulation Engine state
@@ -444,13 +444,13 @@ export default function BackendArchitecture() {
 
   // Filtered Services & Connections
   const activeServiceIds = useMemo(() => {
-    if (filterMode === "all") return new Set(BACKEND_SERVICES.map((s) => s.id));
+    if (filterMode === 'all') return new Set(BACKEND_SERVICES.map((s) => s.id));
 
     const matchingConns = BACKEND_CONNECTIONS.filter((conn) => {
-      if (filterMode === "data") return conn.flowType === "data";
-      if (filterMode === "realtime") return conn.flowType === "realtime" || conn.flowType === "iot";
-      if (filterMode === "observability") return conn.flowType === "observability";
-      if (filterMode === "cache") return conn.flowType === "cache";
+      if (filterMode === 'data') return conn.flowType === 'data';
+      if (filterMode === 'realtime') return conn.flowType === 'realtime' || conn.flowType === 'iot';
+      if (filterMode === 'observability') return conn.flowType === 'observability';
+      if (filterMode === 'cache') return conn.flowType === 'cache';
       return true;
     });
 
@@ -472,24 +472,24 @@ export default function BackendArchitecture() {
 
     const positions: Record<string, { x: number; y: number }> = {
       // Column 0: Clients
-      "portal-app": { x: 40, y: 120 },
-      "overview-engine": { x: 40, y: 380 },
+      'portal-app': { x: 40, y: 120 },
+      'overview-engine': { x: 40, y: 380 },
 
       // Column 1: Gateways & Orchestration
-      "server-actions": { x: 360, y: 140 },
-      "inngest-workers": { x: 360, y: 360 },
+      'server-actions': { x: 360, y: 140 },
+      'inngest-workers': { x: 360, y: 360 },
 
       // Column 2: Data Persistence & Fast State
-      "supabase-db": { x: 680, y: 40 },
-      "supabase-realtime": { x: 680, y: 220 },
-      "redis-cluster": { x: 680, y: 400 },
-      "supabase-storage": { x: 680, y: 580 },
+      'supabase-db': { x: 680, y: 40 },
+      'supabase-realtime': { x: 680, y: 220 },
+      'redis-cluster': { x: 680, y: 400 },
+      'supabase-storage': { x: 680, y: 580 },
 
       // Column 3: SCADA Hardware & Observability
-      "fuxa-scada": { x: 1020, y: 60 },
-      "satellite-tiles": { x: 1020, y: 220 },
-      "langfuse-mesh": { x: 1020, y: 380 },
-      "telemetry-sentry": { x: 1020, y: 540 },
+      'fuxa-scada': { x: 1020, y: 60 },
+      'satellite-tiles': { x: 1020, y: 220 },
+      'langfuse-mesh': { x: 1020, y: 380 },
+      'telemetry-sentry': { x: 1020, y: 540 },
     };
 
     return BACKEND_SERVICES.map((svc) => {
@@ -498,7 +498,7 @@ export default function BackendArchitecture() {
 
       return {
         id: svc.id,
-        type: "service",
+        type: 'service',
         position: pos,
         data: {
           ...svc,
@@ -512,11 +512,11 @@ export default function BackendArchitecture() {
   const initialEdges: Edge[] = useMemo(() => {
     return BACKEND_CONNECTIONS.map((conn) => {
       const isMatchingFilter =
-        filterMode === "all" ||
-        (filterMode === "data" && conn.flowType === "data") ||
-        (filterMode === "realtime" && (conn.flowType === "realtime" || conn.flowType === "iot")) ||
-        (filterMode === "observability" && conn.flowType === "observability") ||
-        (filterMode === "cache" && conn.flowType === "cache");
+        filterMode === 'all' ||
+        (filterMode === 'data' && conn.flowType === 'data') ||
+        (filterMode === 'realtime' && (conn.flowType === 'realtime' || conn.flowType === 'iot')) ||
+        (filterMode === 'observability' && conn.flowType === 'observability') ||
+        (filterMode === 'cache' && conn.flowType === 'cache');
 
       return {
         id: conn.id,
@@ -525,21 +525,21 @@ export default function BackendArchitecture() {
         animated: isMatchingFilter,
         label: conn.protocol,
         labelStyle: {
-          fill: isMatchingFilter ? "#fafafa" : "#525252",
+          fill: isMatchingFilter ? '#fafafa' : '#525252',
           fontWeight: 600,
           fontSize: 10,
-          fontFamily: "monospace",
+          fontFamily: 'monospace',
         },
         labelBgStyle: {
-          fill: isMatchingFilter ? "#171717" : "#111111",
+          fill: isMatchingFilter ? '#171717' : '#111111',
           fillOpacity: 0.9,
-          stroke: isMatchingFilter ? conn.color : "#333333",
+          stroke: isMatchingFilter ? conn.color : '#333333',
           strokeWidth: 1,
           rx: 4,
           ry: 4,
         },
         style: {
-          stroke: isMatchingFilter ? conn.color : "#262626",
+          stroke: isMatchingFilter ? conn.color : '#262626',
           strokeWidth: isMatchingFilter ? 2 : 1,
           opacity: isMatchingFilter ? 1 : 0.2,
         },
@@ -558,7 +558,7 @@ export default function BackendArchitecture() {
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -585,7 +585,7 @@ export default function BackendArchitecture() {
   const relatedConnections = useMemo(() => {
     if (!activeService) return [];
     return BACKEND_CONNECTIONS.filter(
-      (c) => c.source === activeService.id || c.target === activeService.id,
+      (c) => c.source === activeService.id || c.target === activeService.id
     );
   }, [activeService]);
 
@@ -617,11 +617,11 @@ export default function BackendArchitecture() {
           </span>
           {(
             [
-              { id: "all", label: "All Mesh", icon: Sparkles },
-              { id: "data", label: "Core Data", icon: Database },
-              { id: "cache", label: "Fast Cache", icon: Server },
-              { id: "realtime", label: "SCADA & Realtime", icon: Radio },
-              { id: "observability", label: "AI & OTel", icon: Eye },
+              { id: 'all', label: 'All Mesh', icon: Sparkles },
+              { id: 'data', label: 'Core Data', icon: Database },
+              { id: 'cache', label: 'Fast Cache', icon: Server },
+              { id: 'realtime', label: 'SCADA & Realtime', icon: Radio },
+              { id: 'observability', label: 'AI & OTel', icon: Eye },
             ] as const
           ).map((item) => {
             const Icon = item.icon;
@@ -632,8 +632,8 @@ export default function BackendArchitecture() {
                 onClick={() => setFilterMode(item.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]/30 shadow-sm"
-                    : "text-[#a1a1aa] hover:text-[#fafafa] hover:bg-[#1a1a1a]"
+                    ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]/30 shadow-sm'
+                    : 'text-[#a1a1aa] hover:text-[#fafafa] hover:bg-[#1a1a1a]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -669,7 +669,7 @@ export default function BackendArchitecture() {
               className="!bg-[#171717] !border-[#363636] !rounded-lg"
               nodeColor={(node) => {
                 const svc = BACKEND_SERVICES.find((s) => s.id === node.id);
-                return svc?.color || "#3ecf8e";
+                return svc?.color || '#3ecf8e';
               }}
               maskColor="rgba(15, 15, 15, 0.75)"
             />
@@ -717,9 +717,9 @@ export default function BackendArchitecture() {
         {/* Selected Service Detail Drawer / Inspector */}
         <div className="xl:col-span-4 flex flex-col gap-4">
           {/* Direct Server Actions -> Supabase RLS Callout Banner */}
-          {(activeService.id === "server-actions" ||
-            activeService.id === "supabase-db" ||
-            activeConnection?.id === "conn-actions-db") && (
+          {(activeService.id === 'server-actions' ||
+            activeService.id === 'supabase-db' ||
+            activeConnection?.id === 'conn-actions-db') && (
             <div className="bg-[#0f281e] border border-[#3ecf8e]/40 rounded-2xl p-4 shadow-lg text-xs space-y-2">
               <div className="flex items-center gap-2 text-[#3ecf8e] font-semibold">
                 <Sparkles className="w-4 h-4" />

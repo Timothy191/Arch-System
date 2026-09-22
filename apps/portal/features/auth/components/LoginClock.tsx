@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Clock } from "@repo/ui/Clock";
+import { Clock } from '@repo/ui/Clock';
 
 /**
  * LoginClock — thin client wrapper that mounts the shared @repo/ui Clock on

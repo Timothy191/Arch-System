@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   addEdge,
@@ -12,13 +12,13 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
-} from "@xyflow/react";
-import { useCallback, useState } from "react";
-import "@xyflow/react/dist/style.css";
-import { Loader2, Play, Save } from "lucide-react";
-import { FlowEdge } from "./edges/FlowEdge";
-import { PluginNode } from "./nodes/PluginNode";
-import { TriggerNode } from "./nodes/TriggerNode";
+} from '@xyflow/react';
+import { useCallback, useState } from 'react';
+import '@xyflow/react/dist/style.css';
+import { Loader2, Play, Save } from 'lucide-react';
+import { FlowEdge } from './edges/FlowEdge';
+import { PluginNode } from './nodes/PluginNode';
+import { TriggerNode } from './nodes/TriggerNode';
 
 // =============================================================================
 // Node & Edge Types
@@ -60,18 +60,18 @@ export interface WorkflowBuilderProps {
 
 const defaultNodes: Node[] = [
   {
-    id: "trigger",
-    type: "trigger",
+    id: 'trigger',
+    type: 'trigger',
     position: { x: 100, y: 200 },
-    data: { label: "Start Workflow" },
+    data: { label: 'Start Workflow' },
   },
   {
-    id: "plugin-1",
-    type: "plugin",
+    id: 'plugin-1',
+    type: 'plugin',
     position: { x: 400, y: 200 },
     data: {
-      label: "Plugin Step",
-      pluginId: "predictive-maintenance",
+      label: 'Plugin Step',
+      pluginId: 'predictive-maintenance',
       config: {},
     },
   },
@@ -79,10 +79,10 @@ const defaultNodes: Node[] = [
 
 const defaultEdges: Edge[] = [
   {
-    id: "e-trigger-plugin",
-    source: "trigger",
-    target: "plugin-1",
-    type: "flow",
+    id: 'e-trigger-plugin',
+    source: 'trigger',
+    target: 'plugin-1',
+    type: 'flow',
   },
 ];
 
@@ -96,7 +96,7 @@ export function WorkflowBuilder({
   onSave,
   onExecute,
   readOnly = false,
-  className = "",
+  className = '',
 }: WorkflowBuilderProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -108,22 +108,22 @@ export function WorkflowBuilder({
       const edge: Edge = {
         ...connection,
         id: `e-${connection.source}-${connection.target}`,
-        type: "flow",
+        type: 'flow',
       };
       setEdges((eds) => addEdge(edge, eds));
     },
-    [setEdges],
+    [setEdges]
   );
 
   // Add new plugin node
   const addPluginNode = useCallback(() => {
     const newNode: Node = {
       id: `plugin-${Date.now()}`,
-      type: "plugin",
+      type: 'plugin',
       position: { x: 400 + Math.random() * 100, y: 200 + Math.random() * 100 },
       data: {
-        label: "New Plugin Step",
-        pluginId: "",
+        label: 'New Plugin Step',
+        pluginId: '',
         config: {},
       },
     };
@@ -169,9 +169,9 @@ export function WorkflowBuilder({
           className="!bg-white/80 !backdrop-blur-xl !border-black/[0.08]"
           maskColor="rgba(0,0,0,0.1)"
           nodeColor={(node) => {
-            if (node.type === "trigger") return "#007aff";
-            if (node.type === "plugin") return "#34c759";
-            return "#a1a1a6";
+            if (node.type === 'trigger') return '#007aff';
+            if (node.type === 'plugin') return '#34c759';
+            return '#a1a1a6';
           }}
         />
 
@@ -210,7 +210,7 @@ export function WorkflowBuilder({
                 ) : (
                   <Play className="w-3.5 h-3.5" />
                 )}
-                {isExecuting ? "Running..." : "Execute"}
+                {isExecuting ? 'Running...' : 'Execute'}
               </button>
             )}
           </div>

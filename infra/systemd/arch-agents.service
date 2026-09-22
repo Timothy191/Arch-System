@@ -21,3 +21,4 @@ SyslogIdentifier=arch-agents
 
 [Install]
 WantedBy=multi-user.target
+

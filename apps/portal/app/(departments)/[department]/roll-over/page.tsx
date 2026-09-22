@@ -1,6 +1,6 @@
-import { DozerRollForm } from "@repo/departments/ui";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
+import { DozerRollForm } from '@repo/departments/ui';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
 
 export default async function RollOverPage({
   params,
@@ -8,25 +8,25 @@ export default async function RollOverPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  requireDepartment(deptSlug, "control-room");
+  requireDepartment(deptSlug, 'control-room');
   const { deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
   });
 
   // Fetch dozers with site info (centralised fleet)
   const { data: dozers } = await supabase
-    .from("machines")
-    .select("id, name, serial_number, site_id, sites(name)")
-    .eq("machine_type", "Dozer")
-    .eq("active", true)
-    .order("name");
+    .from('machines')
+    .select('id, name, serial_number, site_id, sites(name)')
+    .eq('machine_type', 'Dozer')
+    .eq('active', true)
+    .order('name');
 
   // Fetch today's roll data — include site via machine join
   const { data: todayRolls } = await supabase
-    .from("dozer_rolls")
-    .select("*, machine:machines(name, site_id, sites(name)), operator:operators(full_name)")
-    .eq("department_id", deptId)
-    .eq("roll_date", today);
+    .from('dozer_rolls')
+    .select('*, machine:machines(name, site_id, sites(name)), operator:operators(full_name)')
+    .eq('department_id', deptId)
+    .eq('roll_date', today);
 
   const totalPasses = todayRolls?.reduce((sum, r) => sum + (r.blade_passes || 0), 0) || 0;
   const totalPushes = todayRolls?.reduce((sum, r) => sum + (r.push_count || 0), 0) || 0;
@@ -37,11 +37,11 @@ export default async function RollOverPage({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-medium text-[var(--text-heading)]">Roll Over (Dozers)</h2>
         <p className="text-[var(--text-muted)] text-sm">
-          {new Date().toLocaleDateString("en-ZA", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date().toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </p>
       </div>
@@ -85,9 +85,9 @@ export default async function RollOverPage({
 
           for (const roll of todayRolls) {
             const machine = Array.isArray(roll.machine) ? roll.machine[0] : roll.machine;
-            const siteId = (machine as { site_id?: string | null } | null)?.site_id ?? "__none__";
+            const siteId = (machine as { site_id?: string | null } | null)?.site_id ?? '__none__';
             const sites = (machine as { sites?: { name: string }[] | null } | null)?.sites;
-            const siteName = (Array.isArray(sites) ? sites[0]?.name : null) ?? "No Site Assigned";
+            const siteName = (Array.isArray(sites) ? sites[0]?.name : null) ?? 'No Site Assigned';
 
             if (!siteMap.has(siteId)) {
               siteMap.set(siteId, { siteName, rolls: [] });
@@ -96,8 +96,8 @@ export default async function RollOverPage({
           }
 
           const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-            if (a === "__none__") return 1;
-            if (b === "__none__") return -1;
+            if (a === '__none__') return 1;
+            if (b === '__none__') return -1;
             return 0;
           });
 
@@ -108,8 +108,8 @@ export default async function RollOverPage({
               {siteEntries.map(([siteKey, { siteName, rolls }]) => {
                 const sitePasses = rolls.reduce((sum, r) => sum + (r.blade_passes || 0), 0);
                 const siteHours = rolls.reduce((sum, r) => sum + (r.hours_operated || 0), 0);
-                const dayRolls = rolls.filter((r) => r.shift_type === "day");
-                const nightRolls = rolls.filter((r) => r.shift_type === "night");
+                const dayRolls = rolls.filter((r) => r.shift_type === 'day');
+                const nightRolls = rolls.filter((r) => r.shift_type === 'night');
 
                 return (
                   <div key={siteKey} className="space-y-3">

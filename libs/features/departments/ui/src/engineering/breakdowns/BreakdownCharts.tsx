@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { BarChart, Card, type Color, DonutChart, Title } from "@tremor/react";
-import { ShieldAlert } from "lucide-react";
-import type { MTBFDataPoint, ServiceTrigger } from "./types";
+import { BarChart, Card, type Color, DonutChart, Title } from '@tremor/react';
+import { ShieldAlert } from 'lucide-react';
+import type { MTBFDataPoint, ServiceTrigger } from './types';
 
 interface BreakdownChartsProps {
   statusData: {
@@ -28,13 +28,13 @@ export function BreakdownCharts({
     mtbfData.length > 0
       ? mtbfData.map((d) => ({
           category: d.category,
-          "MTTR (hrs)": d.mttrHours,
-          "MTBF (hrs)": d.mtbfHours,
+          'MTTR (hrs)': d.mttrHours,
+          'MTBF (hrs)': d.mtbfHours,
         }))
       : mttrData.map((d) => ({
           category: d.machine,
-          "MTTR (hrs)": d.hours,
-          "MTBF (hrs)": Math.round(d.hours * 18.5), // Predictive baseline fallback
+          'MTTR (hrs)': d.hours,
+          'MTBF (hrs)': Math.round(d.hours * 18.5), // Predictive baseline fallback
         }));
 
   return (
@@ -67,9 +67,9 @@ export function BreakdownCharts({
                     </span>
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                        trigger.severity === "high"
-                          ? "bg-accent-red/15 text-accent-red"
-                          : "bg-accent-amber/15 text-accent-amber"
+                        trigger.severity === 'high'
+                          ? 'bg-accent-red/15 text-accent-red'
+                          : 'bg-accent-amber/15 text-accent-amber'
                       }`}
                     >
                       {trigger.severity.toUpperCase()}
@@ -120,8 +120,8 @@ export function BreakdownCharts({
             className="h-72 mt-4"
             data={reliabilityChartData}
             index="category"
-            categories={["MTTR (hrs)", "MTBF (hrs)"]}
-            colors={["blue", "emerald"] as Color[]}
+            categories={['MTTR (hrs)', 'MTBF (hrs)']}
+            colors={['blue', 'emerald'] as Color[]}
             valueFormatter={(number: number) => `${number}h`}
             showLegend={false}
             showGridLines={true}
@@ -141,7 +141,7 @@ export function BreakdownCharts({
             data={statusData}
             category="value"
             index="name"
-            colors={["emerald", "rose"] as Color[]}
+            colors={['emerald', 'rose'] as Color[]}
             variant="pie"
             showAnimation={true}
           />
@@ -150,7 +150,7 @@ export function BreakdownCharts({
               <div key={idx} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
                   <div
-                    className={`w-2 h-2 rounded-full ${idx === 0 ? "bg-accent-green" : "bg-accent-red"}`}
+                    className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-accent-green' : 'bg-accent-red'}`}
                   />
                   <span className="text-[var(--text-secondary)]">{item.name}</span>
                 </div>

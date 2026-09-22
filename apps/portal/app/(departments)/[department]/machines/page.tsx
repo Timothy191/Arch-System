@@ -1,6 +1,6 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import Link from "next/link";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { GlassCard } from '@repo/ui/GlassCard';
+import Link from 'next/link';
+import { getDepartmentContext } from '~/lib/dept-context';
 
 export default async function MachinesPage({
   params,
@@ -13,11 +13,11 @@ export default async function MachinesPage({
   });
 
   const { data: machines } = await supabase
-    .from("machines")
+    .from('machines')
     .select(
-      "id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)",
+      'id, name, machine_type, serial_number, active, created_at, site:sites(name, site_code)'
     )
-    .order("name");
+    .order('name');
 
   const activeCount = machines?.filter((m) => m.active).length || 0;
 
@@ -91,11 +91,11 @@ export default async function MachinesPage({
 
           for (const machine of machines) {
             const site = Array.isArray(machine.site) ? machine.site[0] : machine.site;
-            const siteKey = site?.site_code ?? "__none__";
+            const siteKey = site?.site_code ?? '__none__';
             if (!siteMap.has(siteKey)) {
               siteMap.set(siteKey, {
-                siteCode: site?.site_code ?? "",
-                siteName: site?.name ?? "Unassigned",
+                siteCode: site?.site_code ?? '',
+                siteName: site?.name ?? 'Unassigned',
                 machines: [],
               });
             }
@@ -103,8 +103,8 @@ export default async function MachinesPage({
           }
 
           const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-            if (a === "__none__") return 1;
-            if (b === "__none__") return -1;
+            if (a === '__none__') return 1;
+            if (b === '__none__') return -1;
             return a.localeCompare(b);
           });
 
@@ -121,7 +121,7 @@ export default async function MachinesPage({
                     ) : null}
                     <h3 className="text-sm font-medium text-[var(--text-heading)]">{siteName}</h3>
                     <span className="text-xs text-[var(--text-muted)]">
-                      {sms.length} machine{sms.length !== 1 ? "s" : ""}
+                      {sms.length} machine{sms.length !== 1 ? 's' : ''}
                     </span>
                   </div>
 
@@ -144,12 +144,12 @@ export default async function MachinesPage({
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
                             machine.active
-                              ? "bg-emerald-50/70 border-emerald-200/50 text-emerald-700"
-                              : "bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]"
+                              ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
+                              : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
                           }`}
                         >
                           {machine.active && <span className="badge-pulse-dot bg-emerald-500" />}
-                          {machine.active ? "Active" : "Inactive"}
+                          {machine.active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </GlassCard>

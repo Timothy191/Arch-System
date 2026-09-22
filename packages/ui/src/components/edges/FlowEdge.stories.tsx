@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Background, ReactFlow } from "@xyflow/react";
-import { PluginNode } from "../nodes/PluginNode";
-import { TriggerNode } from "../nodes/TriggerNode";
-import { FlowEdge } from "./FlowEdge";
-import "@xyflow/react/dist/style.css";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Background, ReactFlow } from '@xyflow/react';
+import { PluginNode } from '../nodes/PluginNode';
+import { TriggerNode } from '../nodes/TriggerNode';
+import { FlowEdge } from './FlowEdge';
+import '@xyflow/react/dist/style.css';
 
 const meta: Meta<typeof FlowEdge> = {
-  title: "Industrial/Edges/FlowEdge",
+  title: 'Industrial/Edges/FlowEdge',
   component: FlowEdge,
   parameters: {
-    layout: "fullscreen",
+    layout: 'fullscreen',
   },
 };
 
@@ -21,28 +21,28 @@ const nodeTypes = { trigger: TriggerNode, plugin: PluginNode };
 const edgeTypes = { flow: FlowEdge };
 
 const EdgeWrapper = (props: any) => (
-  <div style={{ width: "100vw", height: "100vh" }}>
+  <div style={{ width: '100vw', height: '100vh' }}>
     <ReactFlow
       nodes={[
         {
-          id: "1",
-          type: "trigger",
+          id: '1',
+          type: 'trigger',
           position: { x: 50, y: 100 },
-          data: { label: "Start" },
+          data: { label: 'Start' },
         },
         {
-          id: "2",
-          type: "plugin",
+          id: '2',
+          type: 'plugin',
           position: { x: 300, y: 100 },
-          data: { label: "Action", pluginId: "test", config: {} },
+          data: { label: 'Action', pluginId: 'test', config: {} },
         },
       ]}
       edges={[
         {
-          id: "e1-2",
-          source: "1",
-          target: "2",
-          type: "flow",
+          id: 'e1-2',
+          source: '1',
+          target: '2',
+          type: 'flow',
           selected: props.selected,
         },
       ]}

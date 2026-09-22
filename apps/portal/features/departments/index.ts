@@ -1,1 +1,1 @@
-export * from "@repo/departments/ui";
+export * from '@repo/departments/ui';

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { AnimatedButton } from "@repo/ui/AnimatedButton";
-import { Input } from "@repo/ui/Input";
-import { AlertTriangle, Check, Lock } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { AnimatedButton } from '@repo/ui/AnimatedButton';
+import { Input } from '@repo/ui/Input';
+import { AlertTriangle, Check, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 /**
  * Maps raw Supabase reset password errors to clear, localized user-facing validation and status messages.
@@ -17,30 +17,30 @@ import { useEffect, useState } from "react";
  */
 function mapResetError(raw: string): string {
   const lower = raw.toLowerCase();
-  if (lower.includes("rate limit")) {
-    return "Too many requests. Please wait a moment.";
+  if (lower.includes('rate limit')) {
+    return 'Too many requests. Please wait a moment.';
   }
-  if (lower.includes("email")) {
-    return "Please enter a valid email address.";
+  if (lower.includes('email')) {
+    return 'Please enter a valid email address.';
   }
-  return "Unable to send reset email. Please try again or contact IT Support.";
+  return 'Unable to send reset email. Please try again or contact IT Support.';
 }
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const emailParam = searchParams?.get("email");
+    const emailParam = searchParams?.get('email');
     if (emailParam) setEmail(emailParam);
   }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     const supabase = createBrowserSupabaseClient();
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
               <div className="space-y-1">
                 <h1 className="text-lg font-medium text-[var(--text-heading)]">Check Your Email</h1>
                 <p className="text-sm text-[var(--text-muted)]">
-                  If an account exists for{" "}
+                  If an account exists for{' '}
                   <span className="font-medium text-[var(--text-secondary)]">{email}</span>, you
                   will receive a password reset link.
                 </p>
@@ -129,7 +129,7 @@ export default function ResetPasswordPage() {
                     placeholder="admin@arch.os"
                     autoComplete="username"
                     aria-labelledby="reset-email-label"
-                    aria-describedby={error ? "reset-error" : undefined}
+                    aria-describedby={error ? 'reset-error' : undefined}
                   />
                 </div>
 
@@ -151,7 +151,7 @@ export default function ResetPasswordPage() {
                   hoverScale={1}
                   tapScale={0.97}
                 >
-                  {loading ? "Sending reset link..." : "Send Password Reset Link"}
+                  {loading ? 'Sending reset link...' : 'Send Password Reset Link'}
                 </AnimatedButton>
               </form>
 

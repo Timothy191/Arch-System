@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
-import { AuthError, DatabaseError, ForbiddenError } from "@/lib/errors/error-classes";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
 
 export interface Neo300Printer {
   id: string;
@@ -49,18 +49,18 @@ async function assertAccessControlRole() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new AuthError("Unauthorized");
+  if (!user) throw new AuthError('Unauthorized');
 
   const { data: employee } = await supabase
-    .from("employees")
-    .select("id, role, department_id")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('id, role, department_id')
+    .eq('auth_id', user.id)
     .single();
 
-  if (!employee || !["admin", "access_control"].includes(employee.role)) {
-    throw new ForbiddenError("Forbidden: access_control or admin role required", {
-      resource: "neo300_print",
-      action: "assert_role",
+  if (!employee || !['admin', 'access_control'].includes(employee.role)) {
+    throw new ForbiddenError('Forbidden: access_control or admin role required', {
+      resource: 'neo300_print',
+      action: 'assert_role',
     });
   }
 
@@ -74,21 +74,21 @@ export async function getNeo300PrinterStatus(): Promise<Neo300Printer> {
   const { supabase } = await assertAccessControlRole();
 
   let { data: printer } = await supabase
-    .from("card_printers")
-    .select("*")
-    .ilike("model", "%Neo%300%")
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false })
+    .from('card_printers')
+    .select('*')
+    .ilike('model', '%Neo%300%')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (!printer) {
     // Check by cups_name
     const { data: byName } = await supabase
-      .from("card_printers")
-      .select("*")
-      .ilike("cups_name", "%Neo%")
-      .is("deleted_at", null)
+      .from('card_printers')
+      .select('*')
+      .ilike('cups_name', '%Neo%')
+      .is('deleted_at', null)
       .limit(1)
       .maybeSingle();
 
@@ -98,22 +98,22 @@ export async function getNeo300PrinterStatus(): Promise<Neo300Printer> {
   if (!printer) {
     // Auto-register default Neo 300 printer
     const { data: inserted, error } = await supabase
-      .from("card_printers")
+      .from('card_printers')
       .insert({
-        cups_name: "Magicard_Neo300",
-        name: "Security Gate Neo300 Card Printer",
-        model: "Neo Magic 300",
-        connection_type: "usb",
-        status: "online",
-        status_message: "Ready to print ID cards",
+        cups_name: 'Magicard_Neo300',
+        name: 'Security Gate Neo300 Card Printer',
+        model: 'Neo Magic 300',
+        connection_type: 'usb',
+        status: 'online',
+        status_message: 'Ready to print ID cards',
         last_online_at: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (error) {
-      throw new DatabaseError("Failed to register Neo 300 printer", {
-        table: "card_printers",
+      throw new DatabaseError('Failed to register Neo 300 printer', {
+        table: 'card_printers',
         cause: error,
       });
     }
@@ -130,7 +130,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
   const { supabase } = await assertAccessControlRole();
 
   let query = supabase
-    .from("personnel")
+    .from('personnel')
     .select(
       `
       id,
@@ -144,23 +144,23 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       medical_expiry,
       status,
       departments:department_id(display_name)
-    `,
+    `
     )
-    .order("surname", { ascending: true })
+    .order('surname', { ascending: true })
     .limit(100);
 
   if (search && search.trim().length > 0) {
     const s = search.trim();
     query = query.or(
-      `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`,
+      `first_name.ilike.%${s}%,surname.ilike.%${s}%,emp_code.ilike.%${s}%,id_number.ilike.%${s}%`
     );
   }
 
   const { data: personnelList, error } = await query;
 
   if (error) {
-    throw new DatabaseError("Failed to load personnel for card printing", {
-      table: "personnel",
+    throw new DatabaseError('Failed to load personnel for card printing', {
+      table: 'personnel',
       cause: error,
     });
   }
@@ -173,10 +173,10 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
 
   // Fetch active badges
   const { data: badges } = await supabase
-    .from("badges")
-    .select("personnel_id, qr_code, rfid_code, is_active")
-    .in("personnel_id", personnelIds)
-    .eq("is_active", true);
+    .from('badges')
+    .select('personnel_id, qr_code, rfid_code, is_active')
+    .in('personnel_id', personnelIds)
+    .eq('is_active', true);
 
   const badgeMap = new Map<string, { qr_code: string; rfid_code: string | null }>();
   (badges ?? []).forEach((b) => {
@@ -196,7 +196,7 @@ export async function getEmployeeCardProfiles(search?: string): Promise<Employee
       id_number: p.id_number,
       job_title: p.job_title,
       department_id: p.department_id,
-      department_name: deptRecord?.display_name ?? "General Operations",
+      department_name: deptRecord?.display_name ?? 'General Operations',
       induction_expiry: p.induction_expiry,
       medical_expiry: p.medical_expiry,
       status: p.status,
@@ -214,30 +214,30 @@ export async function sendNeo300PrintJob(personnelId: string) {
   const { supabase, employee } = await assertAccessControlRole();
 
   const { data: person } = await supabase
-    .from("personnel")
-    .select("id, first_name, surname, job_title, emp_code, induction_expiry")
-    .eq("id", personnelId)
+    .from('personnel')
+    .select('id, first_name, surname, job_title, emp_code, induction_expiry')
+    .eq('id', personnelId)
     .single();
 
   if (!person) {
-    throw new DatabaseError("Personnel not found", { table: "personnel" });
+    throw new DatabaseError('Personnel not found', { table: 'personnel' });
   }
 
   // Check or create badge if missing
   let { data: badge } = await supabase
-    .from("badges")
-    .select("id, qr_code, rfid_code")
-    .eq("personnel_id", personnelId)
-    .eq("is_active", true)
+    .from('badges')
+    .select('id, qr_code, rfid_code')
+    .eq('personnel_id', personnelId)
+    .eq('is_active', true)
     .maybeSingle();
 
   if (!badge) {
     const generatedQr = `EMP-${person.emp_code || person.id.substring(0, 8).toUpperCase()}`;
     const { data: newBadge, error: bError } = await supabase
-      .from("badges")
+      .from('badges')
       .insert({
         qr_code: generatedQr,
-        entity_type: "personnel",
+        entity_type: 'personnel',
         personnel_id: personnelId,
         department_id: employee.department_id,
         is_active: true,
@@ -246,8 +246,8 @@ export async function sendNeo300PrintJob(personnelId: string) {
       .single();
 
     if (bError) {
-      throw new DatabaseError("Failed to issue badge for printing", {
-        table: "badges",
+      throw new DatabaseError('Failed to issue badge for printing', {
+        table: 'badges',
         cause: bError,
       });
     }
@@ -258,13 +258,13 @@ export async function sendNeo300PrintJob(personnelId: string) {
 
   // Create print job
   const { data: job, error: jobError } = await supabase
-    .from("print_jobs")
+    .from('print_jobs')
     .insert({
       personnel_id: person.id,
       employee_name: `${person.first_name} ${person.surname}`,
       role_title: person.job_title,
       qr_code_data: badge?.qr_code,
-      status: "queued",
+      status: 'queued',
       printer_id: printer.id,
       created_by: employee.id,
       expires_at: person.induction_expiry ?? undefined,
@@ -273,23 +273,23 @@ export async function sendNeo300PrintJob(personnelId: string) {
     .single();
 
   if (jobError) {
-    throw new DatabaseError("Failed to dispatch print job to Neo 300", {
-      table: "print_jobs",
+    throw new DatabaseError('Failed to dispatch print job to Neo 300', {
+      table: 'print_jobs',
       cause: jobError,
     });
   }
 
   // Update card_printers status to active
   await supabase
-    .from("card_printers")
+    .from('card_printers')
     .update({
-      status: "online",
+      status: 'online',
       last_online_at: new Date().toISOString(),
       status_message: `Printing job #${job.id.substring(0, 8)} for ${person.first_name} ${person.surname}`,
     })
-    .eq("id", printer.id);
+    .eq('id', printer.id);
 
-  revalidatePath("/access-control/print-cards");
+  revalidatePath('/access-control/print-cards');
   return { success: true, job };
 }
 
@@ -300,15 +300,15 @@ export async function getRecentNeo300Jobs(limit = 10): Promise<CardPrintJob[]> {
   const { supabase } = await assertAccessControlRole();
 
   const { data: jobs, error } = await supabase
-    .from("print_jobs")
+    .from('print_jobs')
     .select(
-      "id, personnel_id, employee_name, role_title, qr_code_data, status, created_at, printer_id",
+      'id, personnel_id, employee_name, role_title, qr_code_data, status, created_at, printer_id'
     )
-    .order("created_at", { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (error) {
-    throw new DatabaseError("Failed to load print jobs", { table: "print_jobs", cause: error });
+    throw new DatabaseError('Failed to load print jobs', { table: 'print_jobs', cause: error });
   }
 
   return (jobs ?? []) as CardPrintJob[];
@@ -321,14 +321,14 @@ export async function cancelNeo300Job(jobId: string) {
   const { supabase } = await assertAccessControlRole();
 
   const { error } = await supabase
-    .from("print_jobs")
-    .update({ status: "cancelled" })
-    .eq("id", jobId);
+    .from('print_jobs')
+    .update({ status: 'cancelled' })
+    .eq('id', jobId);
 
   if (error) {
-    throw new DatabaseError("Failed to cancel job", { table: "print_jobs", cause: error });
+    throw new DatabaseError('Failed to cancel job', { table: 'print_jobs', cause: error });
   }
 
-  revalidatePath("/access-control/print-cards");
+  revalidatePath('/access-control/print-cards');
   return { success: true };
 }

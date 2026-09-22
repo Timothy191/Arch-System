@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { trackClientMetric, useThrottledState } from "@repo/shared/hooks";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { AcknowledgeButton } from "@repo/ui/AcknowledgeButton";
-import { EmptyState } from "@repo/ui/EmptyState";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { CheckCircle2 } from "lucide-react";
-import { useEffect } from "react";
+import { trackClientMetric, useThrottledState } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { AcknowledgeButton } from '@repo/ui/AcknowledgeButton';
+import { EmptyState } from '@repo/ui/EmptyState';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { CheckCircle2 } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface Machine {
   id: string;
@@ -18,7 +18,7 @@ interface Alert {
   id: string;
   machineId: string;
   message: string;
-  severity: "warning" | "critical";
+  severity: 'warning' | 'critical';
   acknowledged: boolean;
   timestamp: number;
 }
@@ -36,12 +36,12 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
     // AGENT-TRACE: Client-side telemetry for machine status checks
     async function fetchMachines() {
       await trackClientMetric(
-        "machine_status_check",
+        'machine_status_check',
         async () => {
           const { data } = await supabase
-            .from("machines")
-            .select("id, name, active")
-            .eq("department_id", departmentId);
+            .from('machines')
+            .select('id, name, active')
+            .eq('department_id', departmentId);
 
           const machines = (data || []) as Machine[];
           const now = Date.now();
@@ -51,18 +51,18 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               id: `offline-${m.id}`,
               machineId: m.id,
               message: `${m.name} is offline`,
-              severity: "critical",
+              severity: 'critical',
               acknowledged: false,
               timestamp: now,
             }));
 
           // AGENT-TRACE: Track alert generation
           trackClientMetric(
-            "alert_generation",
+            'alert_generation',
             () => {
               setAlerts((prev) => {
                 const acknowledged = new Set(
-                  prev.filter((a) => a.acknowledged).map((a) => a.machineId),
+                  prev.filter((a) => a.acknowledged).map((a) => a.machineId)
                 );
                 return newAlerts.map((a) => ({
                   ...a,
@@ -74,28 +74,28 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
               department_id: departmentId,
               offline_count: newAlerts.length,
               total_machines: machines.length,
-            },
+            }
           );
         },
-        { department_id: departmentId },
+        { department_id: departmentId }
       );
     }
 
     fetchMachines();
 
     const channel = supabase
-      .channel("alert-machines")
+      .channel('alert-machines')
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "machines",
+          event: '*',
+          schema: 'public',
+          table: 'machines',
           filter: `department_id=eq.${departmentId}`,
         },
         () => {
           fetchMachines();
-        },
+        }
       )
       .subscribe();
 
@@ -136,12 +136,12 @@ export function AlertPanel({ departmentId }: AlertPanelProps) {
 
       <div className="space-y-3">
         {alerts.map((alert) => (
-          <GlassCard key={alert.id} className={alert.acknowledged ? "opacity-60" : ""}>
+          <GlassCard key={alert.id} className={alert.acknowledged ? 'opacity-60' : ''}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    alert.severity === "critical" ? "bg-accent-red" : "bg-accent-blue"
+                    alert.severity === 'critical' ? 'bg-accent-red' : 'bg-accent-blue'
                   }`}
                 />
                 <div>

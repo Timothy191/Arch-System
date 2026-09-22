@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import { controlRoomShiftReportSchema } from "@repo/contract/schemas/control-room.schema";
-import type { ControlRoomShiftReportInput } from "@repo/contract/types/control-room.types";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { createServiceRoleClient } from "@repo/supabase/service-role";
-import { AuthError, DatabaseError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
-import { logAuditEvent } from "./audit";
+import { controlRoomShiftReportSchema } from '@repo/contract/schemas/control-room.schema';
+import type { ControlRoomShiftReportInput } from '@repo/contract/types/control-room.types';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { createServiceRoleClient } from '@repo/supabase/service-role';
+import { AuthError, DatabaseError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
+import { logAuditEvent } from './audit';
 
 // AGENT-TRACE: Lookup key for a shift report — (department, date, shift) is the
 // natural key enforced by the UNIQUE constraint on control_room_shift_reports.
@@ -20,14 +20,14 @@ interface ShiftReportRecord {
   id: string;
   departmentId: string;
   date: string;
-  shift: "day" | "night";
+  shift: 'day' | 'night';
   operatorName: string;
   alarmResponseAvgSeconds: number;
   incidentAckAvgSeconds: number;
   systemUptimePercent: number;
   missedIncidentsCount: number;
   summaryNotes: string | null;
-  checklistItems: ControlRoomShiftReportInput["checklistItems"];
+  checklistItems: ControlRoomShiftReportInput['checklistItems'];
   completedChecklistCount: number;
   totalChecklistCount: number;
   supervisorSignature: string | null;
@@ -41,7 +41,7 @@ interface ShiftReportRecord {
  * operator can revise a closeout before the shift is locked.
  */
 export async function submitShiftReport(
-  input: ControlRoomShiftReportInput,
+  input: ControlRoomShiftReportInput
 ): Promise<{ success: true; reportId: string }> {
   // AGENT-TRACE: Validate the full report payload at the boundary — the schema
   // mirrors the table columns so a valid payload maps 1:1 to a row.
@@ -53,19 +53,19 @@ export async function submitShiftReport(
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    throw new AuthError("Unauthorized: valid session required", {
-      context: { operation: "submitShiftReport" },
+    throw new AuthError('Unauthorized: valid session required', {
+      context: { operation: 'submitShiftReport' },
     });
   }
 
   const { data: employee } = await supabase
-    .from("employees")
-    .select("id")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('id')
+    .eq('auth_id', user.id)
     .maybeSingle();
   if (!employee) {
-    throw new AuthError("Unauthorized: employee record not found", {
-      context: { operation: "submitShiftReport" },
+    throw new AuthError('Unauthorized: employee record not found', {
+      context: { operation: 'submitShiftReport' },
     });
   }
 
@@ -74,11 +74,11 @@ export async function submitShiftReport(
   // AGENT-TRACE: Select-then-insert-or-update (not .upsert()) so created_by is
   // preserved on revision — .upsert() would overwrite the original author.
   const { data: existing } = await serviceClient
-    .from("control_room_shift_reports")
-    .select("id")
-    .eq("department_id", validated.departmentId)
-    .eq("report_date", validated.date)
-    .eq("shift_type", validated.shift)
+    .from('control_room_shift_reports')
+    .select('id')
+    .eq('department_id', validated.departmentId)
+    .eq('report_date', validated.date)
+    .eq('shift_type', validated.shift)
     .maybeSingle();
 
   const payload = {
@@ -100,32 +100,32 @@ export async function submitShiftReport(
   let reportId: string;
   if (existing) {
     const { data, error } = await serviceClient
-      .from("control_room_shift_reports")
+      .from('control_room_shift_reports')
       .update(payload)
-      .eq("id", existing.id)
-      .select("id")
+      .eq('id', existing.id)
+      .select('id')
       .single();
     if (error) {
-      await logError(new Error(error.message), { action: "submitShiftReport:update" });
-      throw new DatabaseError("Failed to update shift report", { cause: error });
+      await logError(new Error(error.message), { action: 'submitShiftReport:update' });
+      throw new DatabaseError('Failed to update shift report', { cause: error });
     }
     reportId = data.id;
   } else {
     const { data, error } = await serviceClient
-      .from("control_room_shift_reports")
+      .from('control_room_shift_reports')
       .insert({ ...payload, created_by: employee.id })
-      .select("id")
+      .select('id')
       .single();
     if (error) {
-      await logError(new Error(error.message), { action: "submitShiftReport:insert" });
-      throw new DatabaseError("Failed to save shift report", { cause: error });
+      await logError(new Error(error.message), { action: 'submitShiftReport:insert' });
+      throw new DatabaseError('Failed to save shift report', { cause: error });
     }
     reportId = data.id;
   }
 
   await logAuditEvent({
-    action: existing ? "update" : "insert",
-    tableName: "control_room_shift_reports",
+    action: existing ? 'update' : 'insert',
+    tableName: 'control_room_shift_reports',
     recordId: reportId,
     departmentId: validated.departmentId,
   });
@@ -140,7 +140,7 @@ export async function submitShiftReport(
 export async function getShiftReport(
   departmentId: string,
   date: string,
-  shift: "day" | "night",
+  shift: 'day' | 'night'
 ): Promise<ShiftReportRecord | null> {
   const validated = shiftReportLookupSchema.parse({ departmentId, date, shift });
 
@@ -150,22 +150,22 @@ export async function getShiftReport(
     error: authError,
   } = await supabase.auth.getUser();
   if (authError || !user) {
-    throw new AuthError("Unauthorized: valid session required", {
-      context: { operation: "getShiftReport" },
+    throw new AuthError('Unauthorized: valid session required', {
+      context: { operation: 'getShiftReport' },
     });
   }
 
   const { data: report, error } = await supabase
-    .from("control_room_shift_reports")
-    .select("*")
-    .eq("department_id", validated.departmentId)
-    .eq("report_date", validated.date)
-    .eq("shift_type", validated.shift)
+    .from('control_room_shift_reports')
+    .select('*')
+    .eq('department_id', validated.departmentId)
+    .eq('report_date', validated.date)
+    .eq('shift_type', validated.shift)
     .maybeSingle();
 
   if (error) {
-    await logError(new Error(error.message), { action: "getShiftReport:select" });
-    throw new DatabaseError("Failed to load shift report", { cause: error });
+    await logError(new Error(error.message), { action: 'getShiftReport:select' });
+    throw new DatabaseError('Failed to load shift report', { cause: error });
   }
   if (!report) return null;
 
@@ -195,8 +195,8 @@ export async function getShiftReport(
 export async function autoSaveShiftReportDraft(
   departmentId: string,
   date: string,
-  shift: "day" | "night",
-  draftContent: Partial<ControlRoomShiftReportInput>,
+  shift: 'day' | 'night',
+  draftContent: Partial<ControlRoomShiftReportInput>
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createServerSupabaseClient();
@@ -205,10 +205,10 @@ export async function autoSaveShiftReportDraft(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return { success: false, error: "Unauthorized" };
+      return { success: false, error: 'Unauthorized' };
     }
 
-    const { getRedisClient } = await import("@repo/redis");
+    const { getRedisClient } = await import('@repo/redis');
     const redis = await getRedisClient();
 
     const key = `arch:autosave:shift:${departmentId}:${date}:${shift}:${user.id}`;
@@ -220,20 +220,20 @@ export async function autoSaveShiftReportDraft(
         ...draftContent,
         _updatedAt: new Date().toISOString(),
       }),
-      { EX: 60 * 60 * 24 },
+      { EX: 60 * 60 * 24 }
     ); // 24 hour expiry
 
     await Promise.race([
       savePromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 150)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 150)),
     ]);
 
     return { success: true };
   } catch (err) {
     // Silently catch so we don't interrupt the user's typing
     await logError(err instanceof Error ? err : new Error(String(err)), {
-      action: "autoSaveShiftReportDraft",
+      action: 'autoSaveShiftReportDraft',
     });
-    return { success: false, error: "Failed to auto-save draft" };
+    return { success: false, error: 'Failed to auto-save draft' };
   }
 }

@@ -1,5 +1,5 @@
-import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { Skeleton } from '@repo/ui/components/ui/skeleton';
+import { GlassCard } from '@repo/ui/GlassCard';
 
 export default function ShiftCompilationLoading() {
   return (

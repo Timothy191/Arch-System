@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 /* AGENT-TRACE: Adaptive performance monitor.
    Removed periodic recovery checks to prevent infinite loops of the background 

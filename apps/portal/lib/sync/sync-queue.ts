@@ -3,8 +3,8 @@
  * Powered by persistent IndexedDB with zero third-party dependencies.
  */
 
-import { DatabaseError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
+import { DatabaseError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
 
 export interface QueuedAction<T = unknown> {
   id?: number;
@@ -12,23 +12,23 @@ export interface QueuedAction<T = unknown> {
   actionType: string;
   payload: T;
   departmentId: string;
-  status: "pending" | "synced" | "failed";
+  status: 'pending' | 'synced' | 'failed';
   retryCount: number;
   createdAt: number;
 }
 
 class SyncQueue {
-  private dbName = "ArchSyncDB";
+  private dbName = 'ArchSyncDB';
   private dbVersion = 1;
-  private storeName = "actionQueue";
+  private storeName = 'actionQueue';
   private db: IDBDatabase | null = null;
   private isProcessing = false;
 
   constructor() {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       this.initDB().then(() => {
         this.processQueue();
-        window.addEventListener("online", () => {
+        window.addEventListener('online', () => {
           this.processQueue();
         });
       });
@@ -43,8 +43,8 @@ class SyncQueue {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
       request.onerror = () => {
-        logError(new Error("Failed to open IndexedDB for SyncQueue"), {
-          context: "sync_queue_indexeddb_open",
+        logError(new Error('Failed to open IndexedDB for SyncQueue'), {
+          context: 'sync_queue_indexeddb_open',
         });
         reject(request.error);
       };
@@ -58,11 +58,11 @@ class SyncQueue {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(this.storeName)) {
           const store = db.createObjectStore(this.storeName, {
-            keyPath: "id",
+            keyPath: 'id',
             autoIncrement: true,
           });
-          store.createIndex("status", "status", { unique: false });
-          store.createIndex("idempotencyKey", "idempotencyKey", {
+          store.createIndex('status', 'status', { unique: false });
+          store.createIndex('idempotencyKey', 'idempotencyKey', {
             unique: true,
           });
         }
@@ -76,7 +76,7 @@ class SyncQueue {
   public async enqueueAction<T = unknown>(
     actionType: string,
     payload: T,
-    departmentId: string,
+    departmentId: string
   ): Promise<string> {
     const idempotencyKey = crypto.randomUUID();
     const action: QueuedAction = {
@@ -84,21 +84,21 @@ class SyncQueue {
       actionType,
       payload,
       departmentId,
-      status: "pending",
+      status: 'pending',
       retryCount: 0,
       createdAt: Date.now(),
     };
 
     await this.initDB();
     if (!this.db) {
-      throw new DatabaseError("Database not initialized", {
-        operation: "init",
-        context: { reason: "indexeddb_init_failed" },
+      throw new DatabaseError('Database not initialized', {
+        operation: 'init',
+        context: { reason: 'indexeddb_init_failed' },
       });
     }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], "readwrite");
+      const transaction = this.db!.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.add(action);
 
@@ -123,10 +123,10 @@ class SyncQueue {
     return new Promise((resolve, reject) => {
       if (!this.db) return resolve([]);
 
-      const transaction = this.db.transaction([this.storeName], "readonly");
+      const transaction = this.db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
-      const index = store.index("status");
-      const request = index.getAll(IDBKeyRange.only("pending"));
+      const index = store.index('status');
+      const request = index.getAll(IDBKeyRange.only('pending'));
 
       request.onsuccess = () => {
         resolve(request.result as QueuedAction[]);
@@ -143,9 +143,9 @@ class SyncQueue {
    */
   private updateAction(action: QueuedAction): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.db) return reject("No DB");
+      if (!this.db) return reject('No DB');
 
-      const transaction = this.db.transaction([this.storeName], "readwrite");
+      const transaction = this.db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.put(action);
 
@@ -174,24 +174,24 @@ class SyncQueue {
         try {
           // Playback transaction to specific backend endpoints
           await this.playbackAction(action);
-          action.status = "synced";
+          action.status = 'synced';
           await this.updateAction(action);
         } catch (error) {
           logError(error, {
-            context: "sync_queue_replay",
+            context: 'sync_queue_replay',
             idempotencyKey: action.idempotencyKey,
           });
           action.retryCount++;
 
           if (action.retryCount >= 5) {
-            action.status = "failed"; // Terminate playback on hard failures after 5 retries
+            action.status = 'failed'; // Terminate playback on hard failures after 5 retries
           }
           await this.updateAction(action);
         }
       }
     } catch (err) {
       logError(err, {
-        context: "sync_queue_process",
+        context: 'sync_queue_process',
       });
     } finally {
       this.isProcessing = false;
@@ -202,10 +202,10 @@ class SyncQueue {
    * Replays the operation using fetch to our background server routes
    */
   private async playbackAction(action: QueuedAction): Promise<void> {
-    const response = await fetch("/api/sync/playback", {
-      method: "POST",
+    const response = await fetch('/api/sync/playback', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         idempotencyKey: action.idempotencyKey,
@@ -217,7 +217,7 @@ class SyncQueue {
 
     if (!response.ok) {
       throw new DatabaseError(`Sync queue sync failed`, {
-        operation: "sync",
+        operation: 'sync',
         context: { status: response.status, statusText: response.statusText },
       });
     }

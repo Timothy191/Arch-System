@@ -1,5 +1,5 @@
-import { AlertTriangle, CheckCircle, Clock, Zap } from "lucide-react";
-import type { BreakdownMetrics } from "./types";
+import { AlertTriangle, CheckCircle, Clock, Zap } from 'lucide-react';
+import type { BreakdownMetrics } from './types';
 
 interface BreakdownStatsProps {
   metrics: BreakdownMetrics;
@@ -8,36 +8,36 @@ interface BreakdownStatsProps {
 export function BreakdownStats({ metrics }: BreakdownStatsProps) {
   const stats = [
     {
-      label: "Active Incidents",
+      label: 'Active Incidents',
       value: metrics.active,
       icon: Zap,
-      color: "text-accent-red",
-      bg: "bg-accent-red/10 border-accent-red/20",
-      sub: "Currently in workshop",
+      color: 'text-accent-red',
+      bg: 'bg-accent-red/10 border-accent-red/20',
+      sub: 'Currently in workshop',
     },
     {
-      label: "Total Breakdowns",
+      label: 'Total Breakdowns',
       value: metrics.total,
       icon: AlertTriangle,
-      color: "text-accent-blue",
-      bg: "bg-accent-blue/10 border-accent-blue/20",
-      sub: "All time",
+      color: 'text-accent-blue',
+      bg: 'bg-accent-blue/10 border-accent-blue/20',
+      sub: 'All time',
     },
     {
-      label: "Completed Today",
+      label: 'Completed Today',
       value: metrics.completedToday,
       icon: CheckCircle,
-      color: "text-accent-green",
-      bg: "bg-accent-green/10 border-accent-green/20",
-      sub: "Back in service",
+      color: 'text-accent-green',
+      bg: 'bg-accent-green/10 border-accent-green/20',
+      sub: 'Back in service',
     },
     {
-      label: "Avg. Repair Time",
+      label: 'Avg. Repair Time',
       value: `${metrics.avgRepairHours.toFixed(1)}h`,
       icon: Clock,
-      color: "text-accent-blue",
-      bg: "bg-accent-blue/10 border-accent-blue/20",
-      sub: "All completed",
+      color: 'text-accent-blue',
+      bg: 'bg-accent-blue/10 border-accent-blue/20',
+      sub: 'All completed',
     },
   ];
 

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { motion } from "framer-motion";
-import type React from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { motion } from 'framer-motion';
+import type React from 'react';
 
 interface AnimeStaggerProps {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface AnimeStaggerProps {
   delayChildren?: number;
   duration?: number;
   ease?: string;
-  axis?: "x" | "y";
+  axis?: 'x' | 'y';
   distance?: number;
 }
 
@@ -23,7 +23,7 @@ export function AnimeStagger({
   staggerDelay = 60,
   delayChildren = 0,
   duration = 600,
-  axis = "y",
+  axis = 'y',
   distance = 24,
 }: AnimeStaggerProps) {
   const containerVariants = {
@@ -40,8 +40,8 @@ export function AnimeStagger({
   const itemVariants = {
     hidden: {
       opacity: 0,
-      x: axis === "x" ? distance : 0,
-      y: axis === "y" ? distance : 0,
+      x: axis === 'x' ? distance : 0,
+      y: axis === 'y' ? distance : 0,
     },
     visible: {
       opacity: 1,

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Badge } from "@repo/ui";
-import { RefreshCw, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import type { Breakdown } from "./types";
+import { Badge } from '@repo/ui';
+import { RefreshCw, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import type { Breakdown } from './types';
 
 interface BreakdownsTableProps {
   breakdowns: Breakdown[];
@@ -13,8 +13,8 @@ interface BreakdownsTableProps {
 
 export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps) {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const filtered = breakdowns.filter((b) => {
     if (statusFilter && b.status !== statusFilter) return false;
@@ -28,11 +28,11 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
   });
 
   const calcDuration = (b: Breakdown): string => {
-    if (!b.date_out || !b.time_out) return "—";
+    if (!b.date_out || !b.time_out) return '—';
     const start = new Date(`${b.date_in}T${b.time_in}`);
     const end = new Date(`${b.date_out}T${b.time_out}`);
     const diffMs = end.getTime() - start.getTime();
-    if (diffMs <= 0) return "0h 0m";
+    if (diffMs <= 0) return '0h 0m';
     const hours = Math.floor(diffMs / 3600000);
     const minutes = Math.floor((diffMs % 3600000) / 60000);
     return `${hours}h ${minutes}m`;
@@ -139,7 +139,7 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
                   <tr
                     key={b.id}
                     className={`border-b border-[var(--border-emphasis)] last:border-0 hover:bg-[var(--bg-tertiary)] transition-colors ${
-                      b.missing_book_in ? "border-l-2 border-l-blue-500" : ""
+                      b.missing_book_in ? 'border-l-2 border-l-blue-500' : ''
                     }`}
                   >
                     <td className="px-4 py-3 text-violet-400 font-medium">{b.fleet_id}</td>
@@ -148,9 +148,9 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
                     </td>
                     <td className="px-4 py-3 text-[#ccc]">{b.machine_type}</td>
                     <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{b.date_in}</td>
-                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{b.date_out || "—"}</td>
+                    <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{b.date_out || '—'}</td>
                     <td className="px-4 py-3">
-                      {b.status === "completed" ? (
+                      {b.status === 'completed' ? (
                         <span className="px-2 py-0.5 rounded-full text-xs bg-accent-green/10 border border-accent-green/20 text-accent-green">
                           {calcDuration(b)}
                         </span>
@@ -161,7 +161,7 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
                     <td className="px-4 py-3 text-[#ccc] max-w-[200px] truncate">{b.reason}</td>
                     {showStatus && (
                       <td className="px-4 py-3">
-                        {b.status === "completed" ? (
+                        {b.status === 'completed' ? (
                           <Badge variant="green" contrast="low" size="sm">
                             Completed
                           </Badge>
@@ -191,7 +191,7 @@ export function BreakdownsTable({ breakdowns, showStatus }: BreakdownsTableProps
 
       {/* Count */}
       <div className="text-[var(--text-secondary)] text-xs">
-        {filtered.length} record{filtered.length !== 1 ? "s" : ""} found
+        {filtered.length} record{filtered.length !== 1 ? 's' : ''} found
       </div>
     </div>
   );

@@ -1,99 +1,99 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import type { CardPrintSpec } from "../printing";
+import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import type { CardPrintSpec } from '../printing';
 
 const styles = StyleSheet.create({
   page: {
-    flexDirection: "column",
-    backgroundColor: "#ffffff",
-    width: "100%",
-    height: "100%",
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    width: '100%',
+    height: '100%',
     padding: 20,
   },
   topBar: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: 40,
-    backgroundColor: "#2563eb", // Blue
+    backgroundColor: '#2563eb', // Blue
   },
   content: {
     marginTop: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   leftColumn: {
-    width: "60%",
-    flexDirection: "column",
+    width: '60%',
+    flexDirection: 'column',
   },
   rightColumn: {
-    width: "35%",
-    flexDirection: "column",
-    alignItems: "flex-end",
+    width: '35%',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
   },
   photo: {
     width: 80,
     height: 100,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: '#e5e7eb',
     marginBottom: 20,
-    objectFit: "cover",
+    objectFit: 'cover',
   },
   name: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#1f2937",
+    fontWeight: 'bold',
+    color: '#1f2937',
     marginBottom: 4,
   },
   surname: {
     fontSize: 28,
-    fontWeight: "heavy",
-    color: "#111827",
-    textTransform: "uppercase",
+    fontWeight: 'heavy',
+    color: '#111827',
+    textTransform: 'uppercase',
     marginBottom: 20,
   },
   label: {
     fontSize: 10,
-    color: "#6b7280",
-    fontWeight: "bold",
+    color: '#6b7280',
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   value: {
     fontSize: 14,
-    color: "#1f2937",
-    fontWeight: "bold",
+    color: '#1f2937',
+    fontWeight: 'bold',
     marginBottom: 16,
   },
   qrContainer: {
-    marginTop: "auto",
+    marginTop: 'auto',
     width: 80,
     height: 80,
   },
   qrPlaceholder: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderStyle: "dashed",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    borderColor: '#d1d5db',
+    borderStyle: 'dashed',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qrText: {
     fontSize: 8,
-    color: "#9ca3af",
+    color: '#9ca3af',
   },
   footer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 20,
     left: 20,
     right: 20,
     borderTopWidth: 2,
-    borderTopColor: "#e5e7eb",
+    borderTopColor: '#e5e7eb',
     paddingTop: 10,
   },
   footerText: {
     fontSize: 10,
-    color: "#6b7280",
+    color: '#6b7280',
   },
 });
 
@@ -116,7 +116,7 @@ export const CardDocument = ({ spec }: { spec: CardPrintSpec }) => {
             <Text style={styles.name}>{spec.firstName}</Text>
             <Text style={styles.surname}>{spec.lastName}</Text>
 
-            <View style={{ width: "100%", alignItems: "flex-end" }}>
+            <View style={{ width: '100%', alignItems: 'flex-end' }}>
               <Text style={styles.label}>JOB TITLE</Text>
               <Text style={styles.value}>{spec.jobTitle}</Text>
 
@@ -127,7 +127,7 @@ export const CardDocument = ({ spec }: { spec: CardPrintSpec }) => {
             <View style={styles.qrContainer}>
               <View style={styles.qrPlaceholder}>
                 <Text style={styles.qrText}>QR CODE</Text>
-                <Text style={{ fontSize: 6, color: "#9ca3af", marginTop: 4 }}>
+                <Text style={{ fontSize: 6, color: '#9ca3af', marginTop: 4 }}>
                   {spec.qrCodeData}
                 </Text>
               </View>

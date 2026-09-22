@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useThrottledState } from "@repo/shared/hooks";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { AnimatedFeed } from "@repo/ui/AnimatedList";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { useEffect, useState } from "react";
+import { useThrottledState } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { AnimatedFeed } from '@repo/ui/AnimatedList';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { useEffect, useState } from 'react';
 
-type ActivityType = "insert" | "update" | "delete";
+type ActivityType = 'insert' | 'update' | 'delete';
 
 interface ActivityItem {
   id: string;
@@ -21,29 +21,29 @@ interface ControlRoomActivityFeedProps {
 
 export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFeedProps) {
   const [activities, setActivities] = useThrottledState<ActivityItem[]>([]);
-  const [filter, setFilter] = useState<ActivityType | "all">("all");
+  const [filter, setFilter] = useState<ActivityType | 'all'>('all');
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
 
     const channel = supabase
-      .channel("control-room-activity")
+      .channel('control-room-activity')
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "machines",
+          event: '*',
+          schema: 'public',
+          table: 'machines',
           filter: `department_id=eq.${departmentId}`,
         },
         (payload) => {
           const rawEvent = payload.eventType;
           const eventType: ActivityType =
-            rawEvent === "INSERT" ? "insert" : rawEvent === "UPDATE" ? "update" : "delete";
+            rawEvent === 'INSERT' ? 'insert' : rawEvent === 'UPDATE' ? 'update' : 'delete';
           const machine = (payload.new || payload.old) as {
             name?: string;
           };
-          const message = `${machine.name || "Machine"} ${eventType === "insert" ? "registered" : eventType === "update" ? "updated" : "removed"}`;
+          const message = `${machine.name || 'Machine'} ${eventType === 'insert' ? 'registered' : eventType === 'update' ? 'updated' : 'removed'}`;
 
           setActivities((prev) => [
             {
@@ -54,7 +54,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
             },
             ...prev.slice(0, 49),
           ]);
-        },
+        }
       )
       .subscribe();
 
@@ -63,7 +63,7 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
     };
   }, [departmentId, setActivities]);
 
-  const filtered = filter === "all" ? activities : activities.filter((a) => a.type === filter);
+  const filtered = filter === 'all' ? activities : activities.filter((a) => a.type === filter);
 
   return (
     <div className="space-y-6">
@@ -71,18 +71,18 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
         <h2 className="text-xl font-medium text-[var(--text-heading)]">Activity Feed</h2>
         {/* AGENT-TRACE: Accessibility - Added role="group" and aria-pressed for filter toggle buttons */}
         <div className="flex items-center gap-2" role="group" aria-label="Activity filter">
-          {(["all", "insert", "update", "delete"] as const).map((f) => (
+          {(['all', 'insert', 'update', 'delete'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               aria-pressed={filter === f}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 filter === f
-                  ? "bg-[var(--bg-tertiary)] text-[var(--text-heading)] border border-arch-accent-green"
-                  : "bg-[var(--bg-primary)] text-[var(--text-secondary)] border border-[var(--border-emphasis)] hover:text-[var(--text-heading)]"
+                  ? 'bg-[var(--bg-tertiary)] text-[var(--text-heading)] border border-arch-accent-green'
+                  : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] border border-[var(--border-emphasis)] hover:text-[var(--text-heading)]'
               }`}
             >
-              {f === "all" ? "All" : f}
+              {f === 'all' ? 'All' : f}
             </button>
           ))}
         </div>
@@ -96,11 +96,11 @@ export function ControlRoomActivityFeed({ departmentId }: ControlRoomActivityFee
                 <div className="flex items-center gap-3">
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      activity.type === "insert"
-                        ? "bg-accent-green"
-                        : activity.type === "update"
-                          ? "bg-accent-blue"
-                          : "bg-accent-red"
+                      activity.type === 'insert'
+                        ? 'bg-accent-green'
+                        : activity.type === 'update'
+                          ? 'bg-accent-blue'
+                          : 'bg-accent-red'
                     }`}
                   />
                   <p className="text-[var(--text-heading)] text-sm">{activity.message}</p>

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Activity, AlertTriangle, CheckCircle2, Power, Wrench } from "lucide-react";
-import Link from "next/link";
-import { cn } from "../lib/utils";
-import type { Panel } from "./HeroRotator";
-import { TrustLogos } from "./TrustLogos";
+import { Activity, AlertTriangle, CheckCircle2, Power, Wrench } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '../lib/utils';
+import type { Panel } from './HeroRotator';
+import { TrustLogos } from './TrustLogos';
 
 export interface HeroCardContentProps {
   panel: Panel;
@@ -70,8 +70,8 @@ export function HeroCardContent({
             <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  "w-6 h-6 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform",
-                  panel.iconBgColor,
+                  'w-6 h-6 rounded-lg shrink-0 flex items-center justify-center border border-black/5 shadow-sm transition-transform',
+                  panel.iconBgColor
                 )}
               >
                 {panel.icon}
@@ -124,10 +124,10 @@ export function HeroCardContent({
       <div className="absolute top-0 right-0 w-[55%] h-full group/img overflow-hidden rounded-r-2xl z-10">
         <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
         <img
-          src={failedImages.has(panel.image) ? "/images/departments/overview.jpg" : panel.image}
+          src={failedImages.has(panel.image) ? '/images/departments/overview.jpg' : panel.image}
           alt={`${panel.title} visual`}
           className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover/img:scale-105"
-          loading={isActive ? "eager" : "lazy"}
+          loading={isActive ? 'eager' : 'lazy'}
           onError={() => onImageError(panel.image)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 pointer-events-none" />
@@ -151,7 +151,7 @@ export function HeroCardContent({
             {panel.name.toUpperCase()}
           </span>
           <span className="text-[9px] font-mono text-white/70 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-md border border-white/10 shadow-sm">
-            CAM-{String(idx + 1).padStart(2, "0")}
+            CAM-{String(idx + 1).padStart(2, '0')}
           </span>
         </div>
       </div>

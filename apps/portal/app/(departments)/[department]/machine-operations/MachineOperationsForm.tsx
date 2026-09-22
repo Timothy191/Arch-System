@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { getCurrentShift } from "@repo/utils";
-import { ChevronDown, ChevronUp, Clock } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { DelayEntriesForm } from "./DelayEntriesForm";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { getCurrentShift } from '@repo/utils';
+import { ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { DelayEntriesForm } from './DelayEntriesForm';
 
 interface Machine {
   id: string;
@@ -33,7 +33,7 @@ interface MachineOperation {
   machine_id: string;
   operator_id: string | null;
   site_id: string | null;
-  shift_type: "day" | "night";
+  shift_type: 'day' | 'night';
   start_time: string;
   end_time: string | null;
   hours_worked: number | null;
@@ -69,12 +69,12 @@ export function MachineOperationsForm({
   };
 
   const [formData, setFormData] = useState({
-    machineId: "",
-    operatorId: "",
-    siteId: "",
+    machineId: '',
+    operatorId: '',
+    siteId: '',
     shiftType: getCurrentShift(),
     startTime: getDefaultStartTime(),
-    endTime: "",
+    endTime: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,27 +139,27 @@ export function MachineOperationsForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.machineId) {
-      newErrors.machineId = "Select a machine";
+      newErrors.machineId = 'Select a machine';
     }
 
     if (!formData.operatorId) {
-      newErrors.operatorId = "Select an operator";
+      newErrors.operatorId = 'Select an operator';
     }
 
     if (!formData.siteId) {
-      newErrors.siteId = "Select a site/location";
+      newErrors.siteId = 'Select a site/location';
     }
 
     if (!formData.startTime) {
-      newErrors.startTime = "Enter start time";
+      newErrors.startTime = 'Enter start time';
     }
 
     if (formData.endTime && hoursWorked === null) {
-      newErrors.endTime = "End time must be after start time";
+      newErrors.endTime = 'End time must be after start time';
     }
 
     if (hoursWorked !== null && hoursWorked > 14) {
-      newErrors.endTime = "Hours cannot exceed 14 per shift";
+      newErrors.endTime = 'Hours cannot exceed 14 per shift';
     }
 
     setErrors(newErrors);
@@ -171,17 +171,17 @@ export function MachineOperationsForm({
     e.preventDefault();
 
     if (!validate()) {
-      toast.error("Please fix the errors in the form.");
+      toast.error('Please fix the errors in the form.');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
 
       const { data, error } = await supabase
-        .from("machine_operations")
+        .from('machine_operations')
         .insert({
           department_id: departmentId,
           machine_id: formData.machineId,
@@ -205,21 +205,21 @@ export function MachineOperationsForm({
 
       // Clear form and localStorage
       setFormData({
-        machineId: "",
+        machineId: '',
         operatorId: formData.operatorId, // Keep operator for next entry
         siteId: formData.siteId, // Keep site for next entry
         shiftType: formData.shiftType,
         startTime: formData.endTime || getDefaultStartTime(), // End time becomes next start
-        endTime: "",
+        endTime: '',
       });
       localStorage.removeItem(getAutoSaveKey(departmentId));
 
-      toast.success("Machine operation logged successfully");
+      toast.success('Machine operation logged successfully');
       // Refresh page to show new data
       router.refresh();
     } catch (_err) {
-      toast.error("Failed to save. Please try again.");
-      setErrors({ submit: "Failed to save. Please try again." });
+      toast.error('Failed to save. Please try again.');
+      setErrors({ submit: 'Failed to save. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -304,20 +304,20 @@ export function MachineOperationsForm({
               Shift <span className="text-accent-red">*</span>
             </label>
             <div className="flex gap-2">
-              {["day", "night"].map((shift) => (
+              {['day', 'night'].map((shift) => (
                 <button
                   key={shift}
                   type="button"
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      shiftType: shift as "day" | "night",
+                      shiftType: shift as 'day' | 'night',
                     }))
                   }
                   className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     formData.shiftType === shift
-                      ? "bg-[var(--accent-blue)] text-[var(--bg-secondary)]"
-                      : "bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]"
+                      ? 'bg-[var(--accent-blue)] text-[var(--bg-secondary)]'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-heading)]'
                   }`}
                 >
                   {shift.charAt(0).toUpperCase() + shift.slice(1)}
@@ -371,7 +371,7 @@ export function MachineOperationsForm({
             disabled={isSubmitting}
             className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] disabled:bg-[var(--bg-tertiary)] disabled:text-[var(--text-muted)] text-[var(--bg-secondary)] font-medium py-2.5 px-6 rounded-lg transition-colors min-w-[120px]"
           >
-            {isSubmitting ? "Saving..." : "Save Operation"}
+            {isSubmitting ? 'Saving...' : 'Save Operation'}
           </button>
         </div>
 
@@ -393,7 +393,7 @@ export function MachineOperationsForm({
             {showDelaySection ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             <Clock size={18} />
             <span className="font-medium">
-              {showDelaySection ? "Hide Delay Entries" : "Add Delay Entries"}
+              {showDelaySection ? 'Hide Delay Entries' : 'Add Delay Entries'}
             </span>
           </button>
 

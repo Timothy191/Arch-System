@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 export interface ShortcutDefinition {
   /** Key combination string, e.g. 'ctrl+k', 'shift+?', 'alt+1', 'ctrl+shift+l' */
@@ -29,28 +29,28 @@ function normalizeKey(key: string): string {
 }
 
 function matchesShortcut(event: KeyboardEvent, shortcut: string): boolean {
-  const parts = shortcut.split("+").map(normalizeKey);
+  const parts = shortcut.split('+').map(normalizeKey);
   const key = normalizeKey(event.key);
 
-  const requireCtrl = parts.includes("ctrl") || parts.includes("control");
-  const requireCmd = parts.includes("cmd") || parts.includes("meta");
-  const requireAlt = parts.includes("alt");
-  const requireShift = parts.includes("shift");
+  const requireCtrl = parts.includes('ctrl') || parts.includes('control');
+  const requireCmd = parts.includes('cmd') || parts.includes('meta');
+  const requireAlt = parts.includes('alt');
+  const requireShift = parts.includes('shift');
 
   // Filter out modifier names to isolate the target key
   const targetKeyParts = parts.filter(
-    (p) => !["ctrl", "control", "cmd", "meta", "alt", "shift"].includes(p),
+    (p) => !['ctrl', 'control', 'cmd', 'meta', 'alt', 'shift'].includes(p)
   );
 
   const targetKey = targetKeyParts[0];
 
-  const _ctrlMatches = requireCtrl ? event.ctrlKey : !event.ctrlKey || parts.includes("cmd");
-  const _metaMatches = requireCmd ? event.metaKey : !event.metaKey || parts.includes("ctrl");
+  const _ctrlMatches = requireCtrl ? event.ctrlKey : !event.ctrlKey || parts.includes('cmd');
+  const _metaMatches = requireCmd ? event.metaKey : !event.metaKey || parts.includes('ctrl');
   const _altMatches = requireAlt ? event.altKey : !event.altKey;
   const _shiftMatches = requireShift ? event.shiftKey : !event.shiftKey;
 
   // Handle Ctrl or Meta interchangeably if specified as 'mod'
-  if (parts.includes("mod")) {
+  if (parts.includes('mod')) {
     const hasMod = event.ctrlKey || event.metaKey;
     if (!hasMod) return false;
   } else {
@@ -66,14 +66,14 @@ function matchesShortcut(event: KeyboardEvent, shortcut: string): boolean {
 }
 
 function isInputFocused(): boolean {
-  if (typeof document === "undefined") return false;
+  if (typeof document === 'undefined') return false;
   const active = document.activeElement;
   if (!active) return false;
   const tag = active.tagName.toLowerCase();
   return (
-    tag === "input" ||
-    tag === "textarea" ||
-    tag === "select" ||
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select' ||
     (active as HTMLElement).isContentEditable
   );
 }
@@ -93,7 +93,7 @@ export function useCommandScope({
   shortcutsRef.current = shortcuts;
 
   useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+    if (!enabled || typeof window === 'undefined') return;
 
     const target = targetElement ?? window;
 
@@ -116,10 +116,10 @@ export function useCommandScope({
       }
     };
 
-    target.addEventListener("keydown", handleKeyDown);
+    target.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      target.removeEventListener("keydown", handleKeyDown);
+      target.removeEventListener('keydown', handleKeyDown);
     };
   }, [enabled, targetElement]);
 }

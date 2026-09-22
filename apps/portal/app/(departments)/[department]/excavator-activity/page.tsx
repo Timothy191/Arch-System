@@ -1,8 +1,8 @@
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
-import { PageHeader } from "@repo/ui/PageHeader";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { ExcavatorActivityForm } from "./ExcavatorActivityForm";
-import { ExcavatorActivityList } from "./ExcavatorActivityList";
+import { KPICard, KPIGrid } from '@repo/ui/KPI';
+import { PageHeader } from '@repo/ui/PageHeader';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { ExcavatorActivityForm } from './ExcavatorActivityForm';
+import { ExcavatorActivityList } from './ExcavatorActivityList';
 
 export const revalidate = 0;
 
@@ -12,7 +12,7 @@ export default async function ExcavatorActivityPage({
   params: Promise<{ department: string }>;
 }) {
   const { department: deptSlug } = await params;
-  requireDepartment(deptSlug, "control-room");
+  requireDepartment(deptSlug, 'control-room');
 
   const { deptId, supabase, today } = await getDepartmentContext({
     department: deptSlug,
@@ -28,36 +28,36 @@ export default async function ExcavatorActivityPage({
     { data: todayActivity },
   ] = await Promise.all([
     supabase
-      .from("machines")
-      .select("id, name, machine_type, serial_number, active")
-      .eq("machine_type", "Excavator")
-      .eq("active", true)
-      .order("name"),
+      .from('machines')
+      .select('id, name, machine_type, serial_number, active')
+      .eq('machine_type', 'Excavator')
+      .eq('active', true)
+      .order('name'),
     supabase
-      .from("machines")
-      .select("id, name, machine_type, serial_number, active, bin_factor, site_id")
-      .eq("machine_type", "Dump Truck")
-      .eq("active", true)
-      .order("name"),
+      .from('machines')
+      .select('id, name, machine_type, serial_number, active, bin_factor, site_id')
+      .eq('machine_type', 'Dump Truck')
+      .eq('active', true)
+      .order('name'),
     supabase
-      .from("operators")
-      .select("id, full_name, employee_code")
-      .eq("active", true)
-      .order("full_name"),
-    supabase.from("sites").select("id, name, site_code, active").eq("active", true).order("name"),
+      .from('operators')
+      .select('id, full_name, employee_code')
+      .eq('active', true)
+      .order('full_name'),
+    supabase.from('sites').select('id, name, site_code, active').eq('active', true).order('name'),
     supabase
-      .from("mine_blocks")
-      .select("id, name, code, site_id, active")
-      .eq("active", true)
-      .order("name"),
+      .from('mine_blocks')
+      .select('id, name, code, site_id, active')
+      .eq('active', true)
+      .order('name'),
     supabase
-      .from("excavator_activity")
+      .from('excavator_activity')
       .select(
-        "*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)",
+        '*, machine:machines(name), operator:operators(full_name), site:sites(name), block_mined:mine_blocks(name, code)'
       )
-      .eq("department_id", deptId)
-      .eq("activity_date", today)
-      .order("created_at", { ascending: false }),
+      .eq('department_id', deptId)
+      .eq('activity_date', today)
+      .order('created_at', { ascending: false }),
   ]);
 
   // Fetch today's dumper assignments via excavator_activity IDs
@@ -81,15 +81,15 @@ export default async function ExcavatorActivityPage({
   const [{ data: assignments }, { data: todayLoads }] = await Promise.all([
     activityIds.length > 0
       ? supabase
-          .from("excavator_dumper_assignments")
-          .select("*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)")
-          .in("excavator_activity_id", activityIds)
+          .from('excavator_dumper_assignments')
+          .select('*, dumper:machines!dumper_machine_id(name, bin_factor, machine_type)')
+          .in('excavator_activity_id', activityIds)
       : Promise.resolve({ data: [] }),
     supabase
-      .from("hourly_loads")
-      .select("machine_id, shift_type, total_loads")
-      .eq("department_id", deptId)
-      .eq("load_date", today),
+      .from('hourly_loads')
+      .select('machine_id, shift_type, total_loads')
+      .eq('department_id', deptId)
+      .eq('load_date', today),
   ]);
   todayAssignments = assignments || [];
 

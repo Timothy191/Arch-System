@@ -57,14 +57,14 @@ type RateLimitType = keyof typeof RATE_LIMIT_CONFIGS;
  * Determine rate limit type based on API route path
  */
 function getRateLimitType(path: string): RateLimitType {
-  if (path.startsWith("/api/ai/")) return "ai";
-  if (path.startsWith("/api/auth/") || path.includes("/login") || path.includes("/reset-password"))
-    return "auth";
-  if (path.startsWith("/api/export/")) return "export";
-  if (path.startsWith("/api/admin/")) return "admin";
-  if (path.startsWith("/api/webhooks/")) return "webhooks";
-  if (path.startsWith("/api/c66")) return "hardware";
-  return "general";
+  if (path.startsWith('/api/ai/')) return 'ai';
+  if (path.startsWith('/api/auth/') || path.includes('/login') || path.includes('/reset-password'))
+    return 'auth';
+  if (path.startsWith('/api/export/')) return 'export';
+  if (path.startsWith('/api/admin/')) return 'admin';
+  if (path.startsWith('/api/webhooks/')) return 'webhooks';
+  if (path.startsWith('/api/c66')) return 'hardware';
+  return 'general';
 }
 
 /**

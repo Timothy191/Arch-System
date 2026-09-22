@@ -56,7 +56,7 @@ export default {
   // JS/TS/JSX/CJS/MJS → eslint then prettier
   "*.{js,jsx,ts,tsx,cjs,mjs}": (files) => {
     const filtered = files.filter((f) => {
-      const relativePath = f.replace(process.cwd() + "/", "");
+      const relativePath = f.replace(`${process.cwd()}/`, "");
       if (!relativePath.includes("/")) return false;
       if (!matchesAny(f, ESLINT_GLOBS)) return false;
       if (f.endsWith("database.types.ts")) return false;
@@ -84,10 +84,7 @@ export default {
     const commands = ["pnpm --filter @repo/shared/hooks type-check"];
     // Process in chunks of 20 to keep memory low
     for (const batch of chunk(filtered, 20)) {
-      commands.push(
-        `eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern ${batch.join(" ")}`,
-      );
-      commands.push(`prettier --write ${batch.join(" ")}`);
+      commands.push(`pnpm biome check --write ${batch.join(" ")}`);
     }
     return commands;
   },

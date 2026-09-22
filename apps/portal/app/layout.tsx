@@ -1,23 +1,23 @@
-import "@repo/ui/globals.css";
-import "@/styles/print-report.css";
-import { ArchThemeProvider } from "@repo/theme/react";
-import { EveLogo } from "@repo/ui/EveLogo";
-import { Toaster } from "@repo/ui/Toaster";
-import type { Metadata, Viewport } from "next";
-import dynamic from "next/dynamic";
-import { Inter, JetBrains_Mono, Outfit } from "next/font/google";
-import { SkipLinks } from "@/components/accessibility/SkipLinks";
-import { AriaLauncher } from "@/components/ai/AriaLauncher";
-import { ClientOverlays } from "@/components/ClientOverlays";
-import { OfflineBanner } from "@/components/OfflineBanner";
-import { RouteAnnouncer } from "@/components/RouteAnnouncer";
-import { SystemTrayPill } from "@/components/system/SystemTray";
-import { WebVitalsReporter } from "@/components/WebVitalsReporter";
-import ClientProviders from "./ClientProviders";
+import '@repo/ui/globals.css';
+import '@/styles/print-report.css';
+import { ArchThemeProvider } from '@repo/theme/react';
+import { EveLogo } from '@repo/ui/EveLogo';
+import { Toaster } from '@repo/ui/Toaster';
+import type { Metadata, Viewport } from 'next';
+import dynamic from 'next/dynamic';
+import { Inter, JetBrains_Mono, Outfit } from 'next/font/google';
+import { SkipLinks } from '@/components/accessibility/SkipLinks';
+import { AriaLauncher } from '@/components/ai/AriaLauncher';
+import { ClientOverlays } from '@/components/ClientOverlays';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { RouteAnnouncer } from '@/components/RouteAnnouncer';
+import { SystemTrayPill } from '@/components/system/SystemTray';
+import { WebVitalsReporter } from '@/components/WebVitalsReporter';
+import ClientProviders from './ClientProviders';
 
 const HeaderWidgets = dynamic(
   () =>
-    import("@/components/HeaderWidgets").then((m) => ({
+    import('@/components/HeaderWidgets').then((m) => ({
       default: m.HeaderWidgets,
     })),
   {
@@ -28,11 +28,11 @@ const HeaderWidgets = dynamic(
         <div className="w-7 h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse" />
       </div>
     ),
-  },
+  }
 );
 
 const CommandBar = dynamic(() =>
-  import("@/components/CommandBar").then((m) => ({ default: m.CommandBar })),
+  import('@/components/CommandBar').then((m) => ({ default: m.CommandBar }))
 );
 
 // AGENT-TRACE: MacMenuBar deferred via next/dynamic to remove framer-motion
@@ -40,50 +40,50 @@ const CommandBar = dynamic(() =>
 // page's bundle (including error.tsx, global-error.tsx) because MacMenuBar
 // is synchronously imported in a Server Component layout boundary.
 const MacMenuBar = dynamic(
-  () => import("@repo/ui/MacMenuBar").then((m) => ({ default: m.MacMenuBar })),
+  () => import('@repo/ui/MacMenuBar').then((m) => ({ default: m.MacMenuBar })),
   {
     ssr: true,
-  },
+  }
 );
 
-import { RouteBackground } from "@/components/RouteBackground";
-import { SplitWindowLayout } from "@/components/system/SplitWindowLayout";
-import { ViewportBoundaries } from "@/components/system/ViewportBoundaries";
+import { RouteBackground } from '@/components/RouteBackground';
+import { SplitWindowLayout } from '@/components/system/SplitWindowLayout';
+import { ViewportBoundaries } from '@/components/system/ViewportBoundaries';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600"],
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['400', '500', '600'],
+  display: 'swap',
   adjustFontFallback: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500"],
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500'],
+  display: 'swap',
   adjustFontFallback: true,
 });
 
 const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  weight: ["400", "500", "600"],
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  weight: ['400', '500', '600'],
+  display: 'swap',
   adjustFontFallback: true,
 });
 
-const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.0.0.1";
+const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.0.0.1';
 
 export const metadata: Metadata = {
-  title: "Arch-Systems | Arch OS",
-  description: "Multi-departmental industrial operations portal",
-  manifest: "/manifest.json",
+  title: 'Arch-Systems | Arch OS',
+  description: 'Multi-departmental industrial operations portal',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Arch Portal",
+    statusBarStyle: 'black-translucent',
+    title: 'Arch Portal',
   },
   formatDetection: {
     telephone: false,
@@ -91,13 +91,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#f5f5f7",
-  viewportFit: "cover",
+  themeColor: '#f5f5f7',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
@@ -122,11 +122,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="preconnect"
-          href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
+          href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
         <link
           rel="dns-prefetch"
-          href={process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"}
+          href={process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://*.supabase.co'}
         />
       </head>
       <body

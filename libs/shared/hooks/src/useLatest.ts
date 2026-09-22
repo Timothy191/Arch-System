@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef, useEffect, type RefObject } from "react";
+import { type RefObject, useEffect, useRef } from 'react';
 
 /**
  * Hook that returns a mutable ref holding the latest value across renders.

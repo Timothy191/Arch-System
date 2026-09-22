@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useOptimistic, useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from 'react';
 
 export interface ActionResult<TData = unknown> {
   success: boolean;
@@ -50,7 +50,7 @@ export function useOptimisticAction<TState, TInput, TData = unknown>({
         const result = await action(input);
 
         if (!result.success) {
-          const errMsg = result.error || "Action failed";
+          const errMsg = result.error || 'Action failed';
           setLastError(errMsg);
           onError?.(errMsg);
           return;
@@ -58,7 +58,7 @@ export function useOptimisticAction<TState, TInput, TData = unknown>({
 
         onSuccess?.(result.data);
       } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : "Unexpected server error";
+        const errMsg = err instanceof Error ? err.message : 'Unexpected server error';
         setLastError(errMsg);
         onError?.(errMsg);
       }

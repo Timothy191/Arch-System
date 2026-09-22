@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { inngest, machineBreakdownEvent } from "@repo/utils/inngest";
-import { CalendarDays, ClipboardList, ClipboardPlus, Clock } from "lucide-react";
-import { useState, useTransition } from "react";
-import { createBreakdown } from "./actions";
-import type { Breakdown, Machine } from "./types";
+import { inngest, machineBreakdownEvent } from '@repo/utils/inngest';
+import { CalendarDays, ClipboardList, ClipboardPlus, Clock } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { createBreakdown } from './actions';
+import type { Breakdown, Machine } from './types';
 
 interface BookInFormProps {
   departmentId: string;
@@ -15,14 +15,14 @@ interface BookInFormProps {
 export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInFormProps) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
-    type: "success" | "error";
+    type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  const [selectedMachineId, setSelectedMachineId] = useState("");
+  const [selectedMachineId, setSelectedMachineId] = useState('');
   const [dateIn, setDateIn] = useState(new Date().toISOString().slice(0, 10));
   const [timeIn, setTimeIn] = useState(new Date().toTimeString().slice(0, 5));
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
 
   const selectedMachine = machines.find((m) => m.id === selectedMachineId);
 
@@ -31,13 +31,13 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
     setMessage(null);
 
     if (!selectedMachine) {
-      setMessage({ type: "error", text: "Please select a machine" });
+      setMessage({ type: 'error', text: 'Please select a machine' });
       return;
     }
     if (!reason.trim() || reason.length < 5) {
       setMessage({
-        type: "error",
-        text: "Reason must be at least 5 characters",
+        type: 'error',
+        text: 'Reason must be at least 5 characters',
       });
       return;
     }
@@ -53,8 +53,8 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
           reason,
         });
         setMessage({
-          type: "success",
-          text: "Machine booked in successfully!",
+          type: 'success',
+          text: 'Machine booked in successfully!',
         });
 
         // Dispatch Inngest event for breakdown alert
@@ -66,17 +66,17 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
               fleet_id: selectedMachine.serial_number || selectedMachine.id,
               machine_type: selectedMachine.machine_type,
               reason,
-              status: "active",
+              status: 'active',
             },
           })
           .catch(() => {});
 
-        setSelectedMachineId("");
+        setSelectedMachineId('');
         setDateIn(new Date().toISOString().slice(0, 10));
         setTimeIn(new Date().toTimeString().slice(0, 5));
-        setReason("");
+        setReason('');
       } catch (_err) {
-        setMessage({ type: "error", text: "Failed to book in machine." });
+        setMessage({ type: 'error', text: 'Failed to book in machine.' });
       }
     });
   };
@@ -93,9 +93,9 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
         {message && (
           <div
             className={`mb-4 px-4 py-3 rounded-lg border text-sm ${
-              message.type === "success"
-                ? "bg-accent-green/10 border-accent-green/20 text-accent-green"
-                : "bg-accent-red/10 border-accent-red/20 text-accent-red"
+              message.type === 'success'
+                ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
+                : 'bg-accent-red/10 border-accent-red/20 text-accent-red'
             }`}
           >
             {message.text}
@@ -201,7 +201,7 @@ export function BookInForm({ departmentId, activeBreakdowns, machines }: BookInF
             disabled={isPending}
             className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending ? "Booking In..." : "Book In Machine"}
+            {isPending ? 'Booking In...' : 'Book In Machine'}
           </button>
         </form>
       </div>

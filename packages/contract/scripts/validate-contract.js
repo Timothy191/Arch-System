@@ -15,17 +15,17 @@
  *   - Generate types: pnpm --filter @repo/contract openapi:generate
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const SPEC_FILE = path.join(__dirname, "../openapi.generated.json");
-const GENERATED_TYPES_FILE = path.join(__dirname, "..", "src", "generated", "openapi.types.ts");
-const SCHEMAS_DIR = path.join(__dirname, "..", "src", "schemas");
+const SPEC_FILE = path.join(__dirname, '../openapi.generated.json');
+const GENERATED_TYPES_FILE = path.join(__dirname, '..', 'src', 'generated', 'openapi.types.ts');
+const SCHEMAS_DIR = path.join(__dirname, '..', 'src', 'schemas');
 
 function checkSpecExists() {
   if (!fs.existsSync(SPEC_FILE)) {
     console.error(`✗ OpenAPI spec file not found: ${SPEC_FILE}`);
-    console.error("\nPlease run: pnpm --filter portal generate-openapi-spec");
+    console.error('\nPlease run: pnpm --filter portal generate-openapi-spec');
     process.exit(1);
   }
   console.log(`✓ Found OpenAPI spec at ${SPEC_FILE}`);
@@ -34,7 +34,7 @@ function checkSpecExists() {
 function checkGeneratedTypesExist() {
   if (!fs.existsSync(GENERATED_TYPES_FILE)) {
     console.error(`✗ Generated types file not found: ${GENERATED_TYPES_FILE}`);
-    console.error("\nPlease run: pnpm --filter @repo/contract openapi:generate");
+    console.error('\nPlease run: pnpm --filter @repo/contract openapi:generate');
     process.exit(1);
   }
   console.log(`✓ Found generated types at ${GENERATED_TYPES_FILE}`);
@@ -44,8 +44,8 @@ function listContractSchemas() {
   const schemas = [];
   const files = fs.readdirSync(SCHEMAS_DIR);
   for (const file of files) {
-    if (file.endsWith(".schema.ts")) {
-      const schemaName = file.replace(".schema.ts", "");
+    if (file.endsWith('.schema.ts')) {
+      const schemaName = file.replace('.schema.ts', '');
       schemas.push(schemaName);
     }
   }
@@ -54,17 +54,17 @@ function listContractSchemas() {
 
 function extractOpenAPIEndpoints() {
   // Read the OpenAPI spec JSON directly
-  const spec = JSON.parse(fs.readFileSync(SPEC_FILE, "utf-8"));
+  const spec = JSON.parse(fs.readFileSync(SPEC_FILE, 'utf-8'));
 
   if (!spec.paths || Object.keys(spec.paths).length === 0) {
-    console.error("❌ No endpoints found in OpenAPI spec.");
+    console.error('❌ No endpoints found in OpenAPI spec.');
     process.exit(1);
   }
 
   const endpoints = [];
   for (const [path, methods] of Object.entries(spec.paths)) {
     const operations = Object.keys(methods).filter(
-      (m) => m !== "parameters" && m !== "$ref" && m !== "servers",
+      (m) => m !== 'parameters' && m !== '$ref' && m !== 'servers'
     );
     for (const operation of operations) {
       endpoints.push({
@@ -92,7 +92,7 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
   }
 
   for (const [path, methods] of Object.entries(endpointGroups)) {
-    console.log(`   ${path}: [${methods.join(", ")}]`);
+    console.log(`   ${path}: [${methods.join(', ')}]`);
   }
 
   const schemaNames = new Set(contractSchemas);
@@ -100,7 +100,7 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
 
   // Check if schemas match endpoint patterns
   for (const endpoint of openAPIEndpoints) {
-    const pathParts = endpoint.path.split("/").filter(Boolean);
+    const pathParts = endpoint.path.split('/').filter(Boolean);
     if (pathParts.length >= 2) {
       // Convert path to schema name pattern (e.g., /api/ai/chat -> aiChat)
       const potentialSchema =
@@ -108,7 +108,7 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
         pathParts
           .slice(2)
           .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-          .join("");
+          .join('');
       if (schemaNames.has(potentialSchema)) {
         coveredSchemas.add(potentialSchema);
       }
@@ -120,7 +120,7 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
 
   console.log(`\n✓ Schemas covered by OpenAPI: ${coveredSchemas.size}`);
   if (uncoveredSchemas.length > 0) {
-    console.warn(`⚠ Schemas without OpenAPI coverage: ${uncoveredSchemas.join(", ")}`);
+    console.warn(`⚠ Schemas without OpenAPI coverage: ${uncoveredSchemas.join(', ')}`);
   }
   if (orphanEndpoints > 0) {
     console.warn(`⚠ OpenAPI endpoints without contract schemas: ${orphanEndpoints}`);
@@ -134,7 +134,7 @@ function validateCoverage(contractSchemas, openAPIEndpoints) {
 }
 
 function main() {
-  console.log("Validating contract schemas against OpenAPI specification...\n");
+  console.log('Validating contract schemas against OpenAPI specification...\n');
 
   checkSpecExists();
   checkGeneratedTypesExist();
@@ -144,18 +144,18 @@ function main() {
 
   const validation = validateCoverage(contractSchemas, openAPIEndpoints);
 
-  console.log("\nValidation complete.");
+  console.log('\nValidation complete.');
 
   // Exit with non-zero if there are significant gaps
   if (validation.uncovered > 0 || validation.orphanEndpoints > 0) {
-    console.warn("\n⚠ Validation warnings detected. Please review.");
+    console.warn('\n⚠ Validation warnings detected. Please review.');
     process.exit(1);
   }
 
-  console.log("✓ All checks passed.");
+  console.log('✓ All checks passed.');
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  console.error('Fatal error:', error);
   process.exit(1);
 });

@@ -6,8 +6,8 @@
  * Subsequent runs:       npx playwright test e2e/visual
  */
 
-import { test, expect } from "@playwright/test";
-import { findOpaqueBackgroundLayers, luminanceOf, ROUTE_BG_SELECTOR } from "../helpers/background";
+import { expect, test } from '@playwright/test';
+import { findOpaqueBackgroundLayers, luminanceOf, ROUTE_BG_SELECTOR } from '../helpers/background';
 
 // AGENT-TRACE: Override the project-level authenticated storageState (e2e/.auth/user.json)
 // so this spec runs UNauthenticated. The (auth) middleware redirects authenticated
@@ -16,10 +16,10 @@ import { findOpaqueBackgroundLayers, luminanceOf, ROUTE_BG_SELECTOR } from "../h
 // login baseline. Mirrors the pattern in e2e/login.spec.ts.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe("login page visual regression", () => {
+test.describe('login page visual regression', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.waitForLoadState("load");
+    await page.goto('/login');
+    await page.waitForLoadState('load');
     await page.addStyleTag({
       content: `
         canvas { display: none !important; }
@@ -38,8 +38,8 @@ test.describe("login page visual regression", () => {
     });
   });
 
-  test("full login page matches snapshot", async ({ page }) => {
-    await expect(page).toHaveScreenshot("login-full.png", {
+  test('full login page matches snapshot', async ({ page }) => {
+    await expect(page).toHaveScreenshot('login-full.png', {
       fullPage: true,
       threshold: 0.02, // 2% pixel difference tolerance
       mask: [
@@ -49,22 +49,22 @@ test.describe("login page visual regression", () => {
     });
   });
 
-  test("login form card matches snapshot", async ({ page }) => {
-    const form = page.getByTestId("login-form");
-    await expect(form).toHaveScreenshot("login-form-card.png", {
+  test('login form card matches snapshot', async ({ page }) => {
+    const form = page.getByTestId('login-form');
+    await expect(form).toHaveScreenshot('login-form-card.png', {
       threshold: 0.02,
     });
   });
 
-  test("login page with filled email field", async ({ page }) => {
-    await page.locator("input[type='email'], input#email").first().fill("operator@arch.os");
+  test('login page with filled email field', async ({ page }) => {
+    await page.locator("input[type='email'], input#email").first().fill('operator@arch.os');
 
-    await expect(page.getByTestId("login-form")).toHaveScreenshot("login-form-filled.png", {
+    await expect(page.getByTestId('login-form')).toHaveScreenshot('login-form-filled.png', {
       threshold: 0.02,
     });
   });
 
-  test("route background shows through and the card is a light surface", async ({ page }) => {
+  test('route background shows through and the card is a light surface', async ({ page }) => {
     // The global wallpaper must be mounted rather than covered...
     await expect(page.locator(ROUTE_BG_SELECTOR)).toBeVisible();
 
@@ -79,7 +79,7 @@ test.describe("login page visual regression", () => {
     const opaque = await findOpaqueBackgroundLayers(page, '[data-testid="login-card"]');
     expect(
       opaque,
-      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`,
+      `opaque layer(s) covering the route background: ${JSON.stringify(opaque)}`
     ).toEqual([]);
   });
 });

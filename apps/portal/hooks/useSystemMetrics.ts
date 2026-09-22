@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { getThreeShift } from "@repo/utils";
-import { useEffect, useState } from "react";
+import { getThreeShift } from '@repo/utils';
+import { useEffect, useState } from 'react';
 
 interface SystemMetrics {
   websocketLatency: number; // mock latency in ms
   serverTimeSAST: string; // SAST formatted time string HH:MM:SS
   currentShift: {
-    shift: "A" | "B" | "C";
+    shift: 'A' | 'B' | 'C';
     label: string;
     start: string;
     end: string;
@@ -29,15 +29,15 @@ export function useSystemMetrics(): SystemMetrics {
     const now = new Date();
     return {
       websocketLatency: 15,
-      serverTimeSAST: now.toLocaleTimeString("en-US", {
-        timeZone: "Africa/Johannesburg",
+      serverTimeSAST: now.toLocaleTimeString('en-US', {
+        timeZone: 'Africa/Johannesburg',
         hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
       }),
       currentShift: getThreeShift(now),
-      online: typeof window !== "undefined" ? window.navigator.onLine : true,
+      online: typeof window !== 'undefined' ? window.navigator.onLine : true,
     };
   });
 
@@ -48,20 +48,20 @@ export function useSystemMetrics(): SystemMetrics {
     const handleOffline = () =>
       setMetrics((prev) => (!prev.online ? prev : { ...prev, online: false }));
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("online", handleOnline);
-      window.addEventListener("offline", handleOffline);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
     }
 
     // Tick clock and update shift every second
     const clockInterval = setInterval(() => {
       const now = new Date();
-      const serverTimeSAST = now.toLocaleTimeString("en-US", {
-        timeZone: "Africa/Johannesburg",
+      const serverTimeSAST = now.toLocaleTimeString('en-US', {
+        timeZone: 'Africa/Johannesburg',
         hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
       });
       const currentShift = getThreeShift(now);
 
@@ -101,9 +101,9 @@ export function useSystemMetrics(): SystemMetrics {
     return () => {
       clearInterval(clockInterval);
       clearInterval(latencyInterval);
-      if (typeof window !== "undefined") {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
       }
     };
   }, []);

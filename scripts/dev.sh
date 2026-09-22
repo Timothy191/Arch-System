@@ -889,7 +889,7 @@ else
     check "Workspace deps" "pass" "Turbo build cached" ||
     check "Workspace deps" "warn" "build had warnings — proceeding anyway"
 
-  
+
   echo -e "  \033[0;34mℹ\033[0m Starting Theme watcher..."
   cd "$REPO_ROOT/packages/theme"
   pnpm dev >"$REPO_ROOT/run/theme-watch.log" 2>&1 &

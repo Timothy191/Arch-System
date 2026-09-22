@@ -213,7 +213,7 @@ export interface VisitorsUpdate {
 export interface BadgesRow {
   id: string;
   qr_code: string;
-  entity_type: "personnel" | "visitor" | "vehicle";
+  entity_type: 'personnel' | 'visitor' | 'vehicle';
   personnel_id: string | null;
   visitor_id: string | null;
   is_active: boolean;
@@ -224,7 +224,7 @@ export interface BadgesRow {
 export interface BadgesInsert {
   id?: string;
   qr_code: string;
-  entity_type: "personnel" | "visitor" | "vehicle";
+  entity_type: 'personnel' | 'visitor' | 'vehicle';
   personnel_id?: string | null;
   visitor_id?: string | null;
   is_active?: boolean;
@@ -235,7 +235,7 @@ export interface BadgesInsert {
 export interface BadgesUpdate {
   id?: string;
   qr_code?: string;
-  entity_type?: "personnel" | "visitor" | "vehicle";
+  entity_type?: 'personnel' | 'visitor' | 'vehicle';
   personnel_id?: string | null;
   visitor_id?: string | null;
   is_active?: boolean;
@@ -249,7 +249,7 @@ export interface AccessLogsRow {
   id: string;
   badge_id: string | null;
   access_type: string;
-  direction: "IN" | "OUT";
+  direction: 'IN' | 'OUT';
   gate_location: string;
   access_granted: boolean;
   denial_reason: string | null;
@@ -261,7 +261,7 @@ export interface AccessLogsInsert {
   id?: string;
   badge_id?: string | null;
   access_type: string;
-  direction: "IN" | "OUT";
+  direction: 'IN' | 'OUT';
   gate_location: string;
   access_granted?: boolean;
   denial_reason?: string | null;
@@ -273,7 +273,7 @@ export interface AccessLogsUpdate {
   id?: string;
   badge_id?: string | null;
   access_type?: string;
-  direction?: "IN" | "OUT";
+  direction?: 'IN' | 'OUT';
   gate_location?: string;
   access_granted?: boolean;
   denial_reason?: string | null;

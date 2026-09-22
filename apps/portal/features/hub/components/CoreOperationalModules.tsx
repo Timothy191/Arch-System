@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import type { Department } from "@repo/departments/data-access";
-import { cn } from "@repo/ui/lib/utils";
-import { Boxes, Search, Star } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { DepartmentCard } from "@/features/hub";
+import type { Department } from '@repo/departments/data-access';
+import { cn } from '@repo/ui/lib/utils';
+import { Boxes, Search, Star } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { DepartmentCard } from '@/features/hub';
 
 interface CoreOperationalModulesProps {
   departments: Department[];
 }
 
-type FilterCategory = "all" | "pinned" | "active" | "critical";
+type FilterCategory = 'all' | 'pinned' | 'active' | 'critical';
 
 // AGENT-TRACE: Refactored Core Operational Modules component for Hub page with interactive search, category/status filtering, and pinned priority ordering.
 export function CoreOperationalModules({ departments }: CoreOperationalModulesProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterCategory>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
   const [pinnedNames, setPinnedNames] = useState<Set<string>>(new Set());
 
   // Load pinned departments from localStorage on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     const pinned = new Set<string>();
     departments.forEach((dept) => {
-      if (localStorage.getItem(`pinned_dept_${dept.name}`) === "true") {
+      if (localStorage.getItem(`pinned_dept_${dept.name}`) === 'true') {
         pinned.add(dept.name);
       }
     });
@@ -36,7 +36,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
       .filter((dept) => {
         // Search query filter
         const matchesSearch =
-          searchQuery.trim() === "" ||
+          searchQuery.trim() === '' ||
           dept.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           dept.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           dept.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -44,14 +44,14 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
         if (!matchesSearch) return false;
 
         // Category filter
-        if (activeFilter === "pinned") {
+        if (activeFilter === 'pinned') {
           return pinnedNames.has(dept.name);
         }
-        if (activeFilter === "active") {
-          return dept.status === "active";
+        if (activeFilter === 'active') {
+          return dept.status === 'active';
         }
-        if (activeFilter === "critical") {
-          return dept.status === "alert" || dept.status === "maintenance";
+        if (activeFilter === 'critical') {
+          return dept.status === 'alert' || dept.status === 'maintenance';
         }
 
         return true;
@@ -72,24 +72,24 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
-      if (activeTag === "input" || activeTag === "textarea" || activeTag === "select") {
+      if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
         return;
       }
-      if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+      if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) {
         e.preventDefault();
-        const input = document.getElementById("hub-module-search") as HTMLInputElement | null;
+        const input = document.getElementById('hub-module-search') as HTMLInputElement | null;
         input?.focus();
         input?.select();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
     <section
       className="space-y-4 animate-fade-up group/row relative rounded-card liquid-glass-light border border-white/20 shadow-window p-4 sm:p-6"
-      style={{ animationDelay: "0.2s", animationFillMode: "both" }}
+      style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
     >
       {/* Section Header with Live Filtering */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-arch-border-subtle">
@@ -127,7 +127,7 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
               <button
                 type="button"
                 aria-label="Clear search"
-                onClick={() => setSearchQuery("")}
+                onClick={() => setSearchQuery('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-arch-text-tertiary hover:text-arch-text-primary"
               >
                 ✕
@@ -147,13 +147,13 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
           >
             <button
               type="button"
-              aria-pressed={activeFilter === "all"}
-              onClick={() => setActiveFilter("all")}
+              aria-pressed={activeFilter === 'all'}
+              onClick={() => setActiveFilter('all')}
               className={cn(
-                "px-2.5 py-1 rounded-button transition-all text-xs",
-                activeFilter === "all"
-                  ? "bg-white text-arch-text-primary shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                'px-2.5 py-1 rounded-button transition-all text-xs',
+                activeFilter === 'all'
+                  ? 'bg-white text-arch-text-primary shadow-card font-semibold'
+                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
               )}
             >
               All
@@ -161,13 +161,13 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
             {pinnedCount > 0 && (
               <button
                 type="button"
-                aria-pressed={activeFilter === "pinned"}
-                onClick={() => setActiveFilter("pinned")}
+                aria-pressed={activeFilter === 'pinned'}
+                onClick={() => setActiveFilter('pinned')}
                 className={cn(
-                  "px-2.5 py-1 rounded-button transition-all text-xs flex items-center gap-1",
-                  activeFilter === "pinned"
-                    ? "bg-white text-arch-accent-blue shadow-card font-semibold"
-                    : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                  'px-2.5 py-1 rounded-button transition-all text-xs flex items-center gap-1',
+                  activeFilter === 'pinned'
+                    ? 'bg-white text-arch-accent-blue shadow-card font-semibold'
+                    : 'text-arch-text-tertiary hover:text-arch-text-secondary'
                 )}
               >
                 <Star className="w-3 h-3 fill-arch-accent-blue/20" />
@@ -176,26 +176,26 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
             )}
             <button
               type="button"
-              aria-pressed={activeFilter === "active"}
-              onClick={() => setActiveFilter("active")}
+              aria-pressed={activeFilter === 'active'}
+              onClick={() => setActiveFilter('active')}
               className={cn(
-                "px-2.5 py-1 rounded-button transition-all text-xs",
-                activeFilter === "active"
-                  ? "bg-white text-accent-green shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                'px-2.5 py-1 rounded-button transition-all text-xs',
+                activeFilter === 'active'
+                  ? 'bg-white text-accent-green shadow-card font-semibold'
+                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
               )}
             >
               Active
             </button>
             <button
               type="button"
-              aria-pressed={activeFilter === "critical"}
-              onClick={() => setActiveFilter("critical")}
+              aria-pressed={activeFilter === 'critical'}
+              onClick={() => setActiveFilter('critical')}
               className={cn(
-                "px-2.5 py-1 rounded-button transition-all text-xs",
-                activeFilter === "critical"
-                  ? "bg-white text-accent-amber shadow-card font-semibold"
-                  : "text-arch-text-tertiary hover:text-arch-text-secondary",
+                'px-2.5 py-1 rounded-button transition-all text-xs',
+                activeFilter === 'critical'
+                  ? 'bg-white text-accent-amber shadow-card font-semibold'
+                  : 'text-arch-text-tertiary hover:text-arch-text-secondary'
               )}
             >
               Alerts
@@ -212,8 +212,8 @@ export function CoreOperationalModules({ departments }: CoreOperationalModulesPr
           </p>
           <button
             onClick={() => {
-              setSearchQuery("");
-              setActiveFilter("all");
+              setSearchQuery('');
+              setActiveFilter('all');
             }}
             className="text-xs text-arch-accent-blue hover:underline font-medium"
           >

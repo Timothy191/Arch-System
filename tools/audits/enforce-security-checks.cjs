@@ -13,20 +13,20 @@
  * Usage: node tools/audits/enforce-security-checks.cjs [--ci]
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 let globSync;
 try {
   // glob v9+ uses globSync, v8 uses glob.sync
-  const glob = require("glob");
+  const glob = require('glob');
   globSync = glob.globSync || glob.sync;
 } catch (_e) {
   console.error("❌ 'glob' package not found. Run pnpm install.");
   process.exit(1);
 }
 
-const POLICY_PATH = path.join(__dirname, "..", "repo", "policy", "security.checks.json");
-const REPO_ROOT = path.resolve(__dirname, "..", "..");
+const POLICY_PATH = path.join(__dirname, '..', 'repo', 'policy', 'security.checks.json');
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
 if (!fs.existsSync(POLICY_PATH)) {
   console.error(`❌ Policy file not found: ${POLICY_PATH}`);
@@ -34,11 +34,11 @@ if (!fs.existsSync(POLICY_PATH)) {
   process.exit(1);
 }
 
-const policyData = JSON.parse(fs.readFileSync(POLICY_PATH, "utf-8"));
+const policyData = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf-8'));
 const checks = policyData.checks || [];
 
-const isCI = process.argv.includes("--ci");
-const currentEnv = isCI ? "ci" : "local";
+const isCI = process.argv.includes('--ci');
+const currentEnv = isCI ? 'ci' : 'local';
 
 let hasErrors = false;
 let warningCount = 0;
@@ -50,7 +50,7 @@ for (const check of checks) {
     continue; // Skip checks not meant for this environment
   }
 
-  const regex = new RegExp(check.pattern, "g");
+  const regex = new RegExp(check.pattern, 'g');
 
   let filesToScan = [];
   for (const globPattern of check.paths) {
@@ -58,7 +58,7 @@ for (const check of checks) {
       cwd: REPO_ROOT,
       absolute: true,
       nodir: true,
-      ignore: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/.turbo/**"],
+      ignore: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/.turbo/**'],
     });
     filesToScan = filesToScan.concat(matched);
   }
@@ -66,30 +66,30 @@ for (const check of checks) {
   for (const file of filesToScan) {
     // Skip checking this script itself and the policy compiler
     if (
-      file.endsWith("tools/audits/enforce-security-checks.cjs") ||
-      file.endsWith("tools/repo/policy-compiler.cjs")
+      file.endsWith('tools/audits/enforce-security-checks.cjs') ||
+      file.endsWith('tools/repo/policy-compiler.cjs')
     ) {
       continue;
     }
 
-    const content = fs.readFileSync(file, "utf-8");
-    const lines = content.split("\n");
+    const content = fs.readFileSync(file, 'utf-8');
+    const lines = content.split('\n');
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (regex.test(line)) {
         // Exclude lines that are just comments (very basic check)
-        if (line.trim().startsWith("//") || line.trim().startsWith("*")) {
+        if (line.trim().startsWith('//') || line.trim().startsWith('*')) {
           continue;
         }
 
         const relativePath = path.relative(REPO_ROOT, file);
-        const symbol = check.severity === "error" ? "❌" : "⚠️";
+        const symbol = check.severity === 'error' ? '❌' : '⚠️';
         console.log(`${symbol} [${check.id}] ${check.rule}`);
         console.log(`   File: ${relativePath}:${i + 1}`);
         console.log(`   Line: ${line.trim()}\n`);
 
-        if (check.severity === "error") {
+        if (check.severity === 'error') {
           hasErrors = true;
         } else {
           warningCount++;

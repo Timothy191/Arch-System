@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Area,
@@ -8,7 +8,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from 'recharts';
 
 interface HourlyAccessChartProps {
   data: Array<{ hour: string; granted: number; denied: number }>;
@@ -53,13 +53,13 @@ export default function HourlyAccessChart({ data }: HourlyAccessChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
         <XAxis
           dataKey="hour"
-          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+          tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
           tickLine={false}
           axisLine={false}
           interval={3}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+          tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
           tickLine={false}
           axisLine={false}
         />

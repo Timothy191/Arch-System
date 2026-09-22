@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   type MotionValue,
@@ -7,10 +7,10 @@ import {
   useMotionValue,
   useSpring,
   useTransform,
-} from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "../lib/utils";
+} from 'framer-motion';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '../lib/utils';
 
 export interface Panel {
   id: string;
@@ -36,11 +36,11 @@ export interface HeroRotatorProps {
 
 const CONFIG = {
   // AGENT-TRACE: 3D Globe cylinder carousel configuration with sleek wide horizontal profile
-  cardWidth: "min(720px, 60%)", // extended horizontal width
-  cardLeft: "calc((100% - min(720px, 60%)) / 2)", // centered left offset
-  perspective: "1800px",
-  perspectiveOrigin: "50% 35%",
-  minHeight: "clamp(440px, 46vw, 560px)", // slightly increased vertical profile for more breathing room
+  cardWidth: 'min(720px, 60%)', // extended horizontal width
+  cardLeft: 'calc((100% - min(720px, 60%)) / 2)', // centered left offset
+  perspective: '1800px',
+  perspectiveOrigin: '50% 35%',
+  minHeight: 'clamp(440px, 46vw, 560px)', // slightly increased vertical profile for more breathing room
   autoRotateMs: 6000, // interval between auto-advances
   panDivisor: 400, // px-to-index sensitivity for drag
   velocityThreshold: 300, // px/s above which a flick snaps to next/prev
@@ -68,10 +68,10 @@ function InteractiveGlassCard({
     mass: 0.5,
   });
 
-  const sheenX = useTransform(mouseX, [-0.5, 0.5], ["0%", "100%"]);
-  const sheenY = useTransform(mouseY, [-0.5, 0.5], ["0%", "100%"]);
+  const sheenX = useTransform(mouseX, [-0.5, 0.5], ['0%', '100%']);
+  const sheenY = useTransform(mouseY, [-0.5, 0.5], ['0%', '100%']);
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+  function handleMouseMove(_e: React.MouseEvent<HTMLDivElement>) {
     // Disabled mouse effects
   }
 
@@ -89,14 +89,14 @@ function InteractiveGlassCard({
       style={{
         rotateX: isActive ? rotateX : 0,
         rotateY: isActive ? rotateY : 0,
-        transformStyle: "preserve-3d",
+        transformStyle: 'preserve-3d',
       }}
       className={cn(
-        "relative h-full w-full rounded-2xl overflow-hidden",
-        "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
-        "transition-[shadow,transform] duration-500 ease-out group/card",
-        isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
-        isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+        'relative h-full w-full rounded-2xl overflow-hidden',
+        'bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window',
+        'transition-[shadow,transform] duration-500 ease-out group/card',
+        isActive && 'hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]',
+        isActive ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
@@ -117,7 +117,7 @@ function InteractiveGlassCard({
   );
 }
 
-import { HeroCardContent } from "./HeroCardContent";
+import { HeroCardContent } from './HeroCardContent';
 
 interface HeroSlideProps {
   panel: Panel;
@@ -202,7 +202,7 @@ function HeroSlide({
     return Math.round(50 + Math.cos(angleRad) * 40); // 90 at front, 10 at back
   });
 
-  const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.5 ? "auto" : "none"));
+  const pointerEvents = useTransform(offset, (v) => (Math.abs(v) < 0.5 ? 'auto' : 'none'));
   const blurValue = useTransform(offset, (v) => {
     const angleRad = (v * angleStepDeg * Math.PI) / 180;
     const depthFactor = (Math.cos(angleRad) + 1) / 2;
@@ -244,10 +244,10 @@ function HeroSlide({
       style={{
         width: CONFIG.cardWidth,
         left: CONFIG.cardLeft,
-        transformStyle: "preserve-3d",
-        transformOrigin: "center center",
-        backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
+        transformStyle: 'preserve-3d',
+        transformOrigin: 'center center',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
         rotateY,
         rotateX,
         x,
@@ -323,7 +323,7 @@ export function HeroRotator({
       if (diff < -total / 2) diff += total;
       carouselIndex.set(current + diff);
     },
-    [carouselIndex, total],
+    [carouselIndex, total]
   );
 
   const handleImageError = useCallback((src: string) => {
@@ -344,15 +344,15 @@ export function HeroRotator({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (total <= 1) return;
-      if (e.key === "ArrowRight") {
+      if (e.key === 'ArrowRight') {
         e.preventDefault();
         nextSlide();
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         prevSlide();
       }
     },
-    [total, nextSlide, prevSlide],
+    [total, nextSlide, prevSlide]
   );
 
   return (
@@ -370,7 +370,7 @@ export function HeroRotator({
       >
         <div
           className="relative w-full overflow-hidden"
-          style={{ height: CONFIG.minHeight, touchAction: "pan-y" }}
+          style={{ height: CONFIG.minHeight, touchAction: 'pan-y' }}
         >
           {panels.map((panel, idx) => (
             <HeroSlide
@@ -412,7 +412,7 @@ export function HeroRotator({
             <div className="w-px h-3.5 bg-black/10 mx-0.5" />
             <button
               onClick={() => setIsManuallyPaused((p) => !p)}
-              aria-label={isManuallyPaused ? "Resume auto rotation" : "Pause auto rotation"}
+              aria-label={isManuallyPaused ? 'Resume auto rotation' : 'Pause auto rotation'}
               className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
               {isManuallyPaused ? (
@@ -430,10 +430,10 @@ export function HeroRotator({
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
+                  'h-1.5 rounded-full transition-all duration-300',
                   idx === activeIndex
-                    ? "w-6 bg-[var(--accent-blue)]"
-                    : "w-1.5 bg-black/20 hover:bg-black/40",
+                    ? 'w-6 bg-[var(--accent-blue)]'
+                    : 'w-1.5 bg-black/20 hover:bg-black/40'
                 )}
               />
             ))}

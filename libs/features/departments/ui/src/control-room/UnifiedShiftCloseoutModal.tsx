@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { LockAndSignShiftInput } from "@repo/contract/types/shift-compilation.types";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertCircle, CheckCircle2, KeyRound, Loader2, Lock, X } from "lucide-react";
-import { useState } from "react";
+import type { LockAndSignShiftInput } from '@repo/contract/types/shift-compilation.types';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertCircle, CheckCircle2, KeyRound, Loader2, Lock, X } from 'lucide-react';
+import { useState } from 'react';
 
 interface UnifiedShiftCloseoutModalProps {
   open: boolean;
@@ -11,9 +11,9 @@ interface UnifiedShiftCloseoutModalProps {
   departmentId: string;
   departmentSlug: string;
   shiftDate: string;
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
   onSignShift: (
-    payload: LockAndSignShiftInput & { departmentSlug?: string },
+    payload: LockAndSignShiftInput & { departmentSlug?: string }
   ) => Promise<{ success: boolean; error?: string }>;
   onSuccess: () => void;
 }
@@ -28,8 +28,8 @@ export function UnifiedShiftCloseoutModal({
   onSignShift,
   onSuccess,
 }: UnifiedShiftCloseoutModalProps) {
-  const [pin, setPin] = useState("");
-  const [notes, setNotes] = useState("");
+  const [pin, setPin] = useState('');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export function UnifiedShiftCloseoutModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pin.trim()) {
-      setErrorMessage("Supervisor PIN is required to close out shift.");
+      setErrorMessage('Supervisor PIN is required to close out shift.');
       return;
     }
 
@@ -56,7 +56,7 @@ export function UnifiedShiftCloseoutModal({
       });
 
       if (!result.success) {
-        setErrorMessage(result.error || "Failed to sign and close shift.");
+        setErrorMessage(result.error || 'Failed to sign and close shift.');
         setLoading(false);
         return;
       }
@@ -64,7 +64,7 @@ export function UnifiedShiftCloseoutModal({
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "An unexpected error occurred.");
+      setErrorMessage(err instanceof Error ? err.message : 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }

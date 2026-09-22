@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Background, ReactFlow } from "@xyflow/react";
-import { TriggerNode } from "./TriggerNode";
-import "@xyflow/react/dist/style.css";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Background, ReactFlow } from '@xyflow/react';
+import { TriggerNode } from './TriggerNode';
+import '@xyflow/react/dist/style.css';
 
 const meta: Meta<typeof TriggerNode> = {
-  title: "Industrial/Nodes/TriggerNode",
+  title: 'Industrial/Nodes/TriggerNode',
   component: TriggerNode,
   parameters: {
-    layout: "fullscreen",
+    layout: 'fullscreen',
   },
 };
 
@@ -18,12 +18,12 @@ type Story = StoryObj<typeof TriggerNode>;
 const nodeTypes = { trigger: TriggerNode };
 
 const NodeWrapper = (props: any) => (
-  <div style={{ width: "100vw", height: "100vh" }}>
+  <div style={{ width: '100vw', height: '100vh' }}>
     <ReactFlow
       nodes={[
         {
-          id: "1",
-          type: "trigger",
+          id: '1',
+          type: 'trigger',
           position: { x: 100, y: 100 },
           data: props.data,
           selected: props.selected,
@@ -41,7 +41,7 @@ export const Default: Story = {
   render: (args) => <NodeWrapper {...args} />,
   args: {
     data: {
-      label: "API Webhook",
+      label: 'API Webhook',
     },
     selected: false,
   },

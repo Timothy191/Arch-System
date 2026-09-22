@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Calendar, CheckCircle, Clock, Lock, Moon, Printer, Sun } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Calendar, CheckCircle, Clock, Lock, Moon, Printer, Sun } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ShiftCompilationHeaderProps {
   departmentSlug: string;
   shiftDate: string;
-  shiftType: "day" | "night";
-  status: "open" | "closed";
+  shiftType: 'day' | 'night';
+  status: 'open' | 'closed';
   closedAt?: string | null;
   onOpenCloseoutModal: () => void;
 }
@@ -24,18 +24,18 @@ export function ShiftCompilationHeader({
   const searchParams = useSearchParams();
 
   const handleDateChange = (newDate: string) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.set("date", newDate);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('date', newDate);
     router.push(`/${departmentSlug}/shift-compilation?${params.toString()}`);
   };
 
-  const handleShiftChange = (newShift: "day" | "night") => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    params.set("shift", newShift);
+  const handleShiftChange = (newShift: 'day' | 'night') => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('shift', newShift);
     router.push(`/${departmentSlug}/shift-compilation?${params.toString()}`);
   };
 
-  const isClosed = status === "closed";
+  const isClosed = status === 'closed';
 
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-2xl border border-black/[0.08] bg-white/80 backdrop-blur-xl shadow-card">
@@ -47,8 +47,8 @@ export function ShiftCompilationHeader({
           <span
             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
               isClosed
-                ? "bg-neutral-900 text-white"
-                : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                ? 'bg-neutral-900 text-white'
+                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
             }`}
           >
             {isClosed ? <Lock className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
@@ -81,11 +81,11 @@ export function ShiftCompilationHeader({
         <div className="flex items-center rounded-lg border border-black/[0.08] bg-neutral-100/80 p-0.5 text-xs font-medium">
           <button
             type="button"
-            onClick={() => handleShiftChange("day")}
+            onClick={() => handleShiftChange('day')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-              shiftType === "day"
-                ? "bg-white text-neutral-900 shadow-sm font-semibold"
-                : "text-neutral-500 hover:text-neutral-800"
+              shiftType === 'day'
+                ? 'bg-white text-neutral-900 shadow-sm font-semibold'
+                : 'text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Sun className="h-3.5 w-3.5 text-amber-500" />
@@ -93,11 +93,11 @@ export function ShiftCompilationHeader({
           </button>
           <button
             type="button"
-            onClick={() => handleShiftChange("night")}
+            onClick={() => handleShiftChange('night')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-              shiftType === "night"
-                ? "bg-white text-neutral-900 shadow-sm font-semibold"
-                : "text-neutral-500 hover:text-neutral-800"
+              shiftType === 'night'
+                ? 'bg-white text-neutral-900 shadow-sm font-semibold'
+                : 'text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Moon className="h-3.5 w-3.5 text-indigo-500" />

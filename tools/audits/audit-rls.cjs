@@ -26,32 +26,32 @@
 // analysis using regex over the migration files. Same code style as
 // tools/circular-dep-detect.cjs.
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const ARCH_BASE_MIGRATIONS = path.join(ROOT, "..", "Arch-Base", "supabase", "migrations");
+const ROOT = path.resolve(__dirname, '..', '..');
+const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
 const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
   ? ARCH_BASE_MIGRATIONS
-  : path.join(ROOT, "packages", "database", "migrations");
-const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
-const REPORT_PATH = path.join(REPORT_DIR, "rls-report.md");
+  : path.join(ROOT, 'packages', 'database', 'migrations');
+const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, 'documentation', '03-audit-reports');
+const REPORT_PATH = path.join(REPORT_DIR, 'rls-report.md');
 
 // Tables that legitimately do not need department-scoped SELECT policies.
 // These are reference / config tables or system-internal tables where
 // USING (true) for SELECT is the intentional design. Add to this list
 // sparingly — every entry should be reviewed.
 const REFERENCE_TABLES = new Set([
-  "departments",
-  "operators",
-  "sites",
-  "safety_severities",
-  "safety_incident_categories",
-  "delay_categories",
-  "report_templates",
-  "mine_blocks",
-  "materialized_view_refresh_log",
-  "material_density",
+  'departments',
+  'operators',
+  'sites',
+  'safety_severities',
+  'safety_incident_categories',
+  'delay_categories',
+  'report_templates',
+  'mine_blocks',
+  'materialized_view_refresh_log',
+  'material_density',
 ]);
 
 /**
@@ -66,7 +66,7 @@ function listMigrations() {
   }
   return fs
     .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith(".sql"))
+    .filter((f) => f.endsWith('.sql'))
     .sort(); // zero-padded NNN_... sort gives migration order
 }
 
@@ -77,7 +77,7 @@ function listMigrations() {
  * @returns {string} The text content of the migration file.
  */
 function readMigration(file) {
-  return fs.readFileSync(path.join(MIGRATIONS_DIR, file), "utf-8");
+  return fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf-8');
 }
 
 /**
@@ -88,9 +88,9 @@ function readMigration(file) {
  */
 function stripComments(sql) {
   // Block comments.
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, "");
+  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
   // Line comments (only when not inside a string — we approximate).
-  out = out.replace(/(^|\s)--[^\n]*/g, "$1");
+  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
   return out;
 }
 
@@ -180,8 +180,8 @@ function scanMigrations(files) {
     while ((m = RE_POLICY.exec(sql)) !== null) {
       const name = m[1];
       const table = m[2];
-      const command = (m[3] || "").toUpperCase().replace(/^FOR\s+/, "") || "ALL";
-      const body = m[4] || "";
+      const command = (m[3] || '').toUpperCase().replace(/^FOR\s+/, '') || 'ALL';
+      const body = m[4] || '';
       policies.push({
         table,
         command,
@@ -245,28 +245,28 @@ function findSuspiciousPolicies(policies, tablesWithDeptColumn) {
     // USING (true) on a SELECT or FOR ALL policy is almost always too
     // permissive UNLESS the table is on the allowlist. INSERT with
     // WITH CHECK (true) is similarly suspect.
-    if (p.hasUsingTrue && (p.command === "SELECT" || p.command === "ALL")) {
+    if (p.hasUsingTrue && (p.command === 'SELECT' || p.command === 'ALL')) {
       if (!REFERENCE_TABLES.has(p.table)) {
-        issues.push("USING (true) on SELECT/ALL — unrestricted read");
+        issues.push('USING (true) on SELECT/ALL — unrestricted read');
       }
     }
-    if (p.hasWithCheckTrue && (p.command === "INSERT" || p.command === "ALL")) {
+    if (p.hasWithCheckTrue && (p.command === 'INSERT' || p.command === 'ALL')) {
       if (!REFERENCE_TABLES.has(p.table)) {
-        issues.push("WITH CHECK (true) on INSERT/ALL — unrestricted write");
+        issues.push('WITH CHECK (true) on INSERT/ALL — unrestricted write');
       }
     }
     // SELECT policy on a table with department_id that never references
     // auth.uid() OR employees isolation. This catches policies that look
     // "fine" syntactically but leak across departments.
     if (
-      p.command === "SELECT" &&
+      p.command === 'SELECT' &&
       !p.hasUsingTrue &&
       tablesWithDeptColumn.has(p.table) &&
       !p.hasAuthUid &&
       !p.hasEmployeesRef
     ) {
       issues.push(
-        "SELECT policy with no auth.uid() or employees isolation on a department-scoped table",
+        'SELECT policy with no auth.uid() or employees isolation on a department-scoped table'
       );
     }
     if (issues.length) {
@@ -305,84 +305,84 @@ function renderReport({
   suspiciousTableSet,
 }) {
   const lines = [];
-  lines.push("# RLS Policy Audit");
-  lines.push("");
+  lines.push('# RLS Policy Audit');
+  lines.push('');
   lines.push(
-    `Generated by \`tools/audits/audit-rls.cjs\` from \`${path.relative(ROOT, MIGRATIONS_DIR)}\`.`,
+    `Generated by \`tools/audits/audit-rls.cjs\` from \`${path.relative(ROOT, MIGRATIONS_DIR)}\`.`
   );
-  lines.push("");
-  lines.push("## Summary");
-  lines.push("");
-  lines.push("| Metric | Count |");
-  lines.push("| --- | --- |");
+  lines.push('');
+  lines.push('## Summary');
+  lines.push('');
+  lines.push('| Metric | Count |');
+  lines.push('| --- | --- |');
   lines.push(`| Migrations scanned | ${files.length} |`);
   lines.push(`| Tables declared | ${allTables.length} |`);
   lines.push(`| Tables with RLS enabled | ${enabledTables.length} |`);
   lines.push(`| Tables missing RLS (CRITICAL) | ${critical.length} |`);
   lines.push(`| Tables with suspicious policies (WARNING) | ${suspiciousTableSet.size} |`);
   lines.push(`| Total CREATE POLICY statements | ${policyCount} |`);
-  lines.push("");
+  lines.push('');
 
-  lines.push("## CRITICAL — Tables Missing Row Level Security");
-  lines.push("");
+  lines.push('## CRITICAL — Tables Missing Row Level Security');
+  lines.push('');
   if (critical.length === 0) {
     lines.push(
-      "_None. Every CREATE TABLE has a matching ALTER TABLE … ENABLE ROW LEVEL SECURITY somewhere in the migration sequence._",
+      '_None. Every CREATE TABLE has a matching ALTER TABLE … ENABLE ROW LEVEL SECURITY somewhere in the migration sequence._'
     );
-    lines.push("");
+    lines.push('');
   } else {
     lines.push(
-      "These tables have no `ENABLE ROW LEVEL SECURITY` statement in any migration. RLS must be enabled before data is exposed via Supabase.",
+      'These tables have no `ENABLE ROW LEVEL SECURITY` statement in any migration. RLS must be enabled before data is exposed via Supabase.'
     );
-    lines.push("");
-    lines.push("| Table | First declared in |");
-    lines.push("| --- | --- |");
+    lines.push('');
+    lines.push('| Table | First declared in |');
+    lines.push('| --- | --- |');
     for (const c of critical) {
       lines.push(`| \`${c.table}\` | \`${c.firstFile}\` |`);
     }
-    lines.push("");
+    lines.push('');
   }
 
-  lines.push("## WARNING — Suspicious Policies");
-  lines.push("");
+  lines.push('## WARNING — Suspicious Policies');
+  lines.push('');
   if (warnings.length === 0) {
-    lines.push("_None._");
-    lines.push("");
+    lines.push('_None._');
+    lines.push('');
   } else {
     lines.push(
-      "These policies are syntactically valid but look overly permissive or missing department isolation. Review each entry.",
+      'These policies are syntactically valid but look overly permissive or missing department isolation. Review each entry.'
     );
-    lines.push("");
-    lines.push("| Table | Policy | Command | File | Issue |");
-    lines.push("| --- | --- | --- | --- | --- |");
+    lines.push('');
+    lines.push('| Table | Policy | Command | File | Issue |');
+    lines.push('| --- | --- | --- | --- | --- |');
     for (const w of warnings) {
       lines.push(
-        "| `" +
+        '| `' +
           w.table +
-          "` | `" +
+          '` | `' +
           w.policy +
-          "` | " +
+          '` | ' +
           w.command +
-          " | `" +
+          ' | `' +
           w.file +
-          "` | " +
-          w.issues.join("<br>") +
-          " |",
+          '` | ' +
+          w.issues.join('<br>') +
+          ' |'
       );
     }
-    lines.push("");
+    lines.push('');
   }
 
-  lines.push("## Tables With RLS Enabled");
-  lines.push("");
-  lines.push("| Table | RLS enabled in |");
-  lines.push("| --- | --- |");
+  lines.push('## Tables With RLS Enabled');
+  lines.push('');
+  lines.push('| Table | RLS enabled in |');
+  lines.push('| --- | --- |');
   for (const t of enabledTables) {
-    lines.push(`| \`${t.name}\` | ${t.files.join(", ") || "—"} |`);
+    lines.push(`| \`${t.name}\` | ${t.files.join(', ') || '—'} |`);
   }
-  lines.push("");
+  lines.push('');
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 /**
@@ -429,19 +429,19 @@ function main() {
   }
 
   console.log(
-    "OK Scanned " +
+    'OK Scanned ' +
       files.length +
-      " migrations: " +
+      ' migrations: ' +
       allTableNames.length +
-      " tables, " +
+      ' tables, ' +
       enabledTableNames.length +
-      " with RLS, " +
+      ' with RLS, ' +
       critical.length +
-      " critical, " +
+      ' critical, ' +
       warnings.length +
-      " warnings (" +
+      ' warnings (' +
       suspiciousTableSet.size +
-      " tables).",
+      ' tables).'
   );
   console.log(`Report: ${path.relative(ROOT, REPORT_PATH)}`);
   process.exit(0);

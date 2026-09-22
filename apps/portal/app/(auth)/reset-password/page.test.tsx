@@ -1,28 +1,28 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import ResetPasswordPage from "./page";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import ResetPasswordPage from './page';
 
-jest.mock("next/link", () => ({
+jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   ),
 }));
 
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useSearchParams: () => ({
     get: jest.fn().mockReturnValue(null),
   }),
 }));
 
-jest.mock("@repo/supabase/client", () => ({
+jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@repo/ui/Input", () => ({
+jest.mock('@repo/ui/Input', () => ({
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
 
-jest.mock("@repo/ui/AnimatedButton", () => ({
+jest.mock('@repo/ui/AnimatedButton', () => ({
   AnimatedButton: ({
     children,
     disabled,
@@ -33,7 +33,7 @@ jest.mock("@repo/ui/AnimatedButton", () => ({
     children: React.ReactNode;
     disabled?: boolean;
     className?: string;
-    type?: "button" | "submit" | "reset";
+    type?: 'button' | 'submit' | 'reset';
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
   }) => (
     <button type={type} disabled={disabled} className={className} onClick={onClick}>
@@ -42,24 +42,24 @@ jest.mock("@repo/ui/AnimatedButton", () => ({
   ),
 }));
 
-const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
+const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
-describe("ResetPasswordPage", () => {
+describe('ResetPasswordPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders form elements successfully", () => {
+  it('renders form elements successfully', () => {
     render(<ResetPasswordPage />);
 
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Send (Password )?Reset Link/i }),
+      screen.getByRole('button', { name: /Send (Password )?Reset Link/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("Back to Sign In")).toBeInTheDocument();
+    expect(screen.getByText('Back to Sign In')).toBeInTheDocument();
   });
 
-  it("submits the form successfully and shows checks your email content", async () => {
+  it('submits the form successfully and shows checks your email content', async () => {
     const mockReset = jest.fn().mockResolvedValue({ error: null });
     createBrowserSupabaseClient.mockReturnValue({
       auth: {
@@ -69,27 +69,27 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@arch.os" },
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'test@arch.os' },
     });
 
-    fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
+    fireEvent.submit(screen.getByLabelText('Email').closest('form')!);
 
     await waitFor(() => {
-      expect(mockReset).toHaveBeenCalledWith("test@arch.os", {
-        redirectTo: "http://localhost/update-password",
+      expect(mockReset).toHaveBeenCalledWith('test@arch.os', {
+        redirectTo: 'http://localhost/update-password',
       });
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Check Your Email")).toBeInTheDocument();
-      expect(screen.getByText("test@arch.os")).toBeInTheDocument();
+      expect(screen.getByText('Check Your Email')).toBeInTheDocument();
+      expect(screen.getByText('test@arch.os')).toBeInTheDocument();
     });
   });
 
-  it("maps rate limit error correctly", async () => {
+  it('maps rate limit error correctly', async () => {
     const mockReset = jest.fn().mockResolvedValue({
-      error: { message: "rate limit exceeded for email requests" },
+      error: { message: 'rate limit exceeded for email requests' },
     });
     createBrowserSupabaseClient.mockReturnValue({
       auth: {
@@ -99,20 +99,20 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@arch.os" },
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'test@arch.os' },
     });
 
-    fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
+    fireEvent.submit(screen.getByLabelText('Email').closest('form')!);
 
     await waitFor(() => {
-      expect(screen.getByText("Too many requests. Please wait a moment.")).toBeInTheDocument();
+      expect(screen.getByText('Too many requests. Please wait a moment.')).toBeInTheDocument();
     });
   });
 
-  it("maps invalid email error correctly", async () => {
+  it('maps invalid email error correctly', async () => {
     const mockReset = jest.fn().mockResolvedValue({
-      error: { message: "invalid email format" },
+      error: { message: 'invalid email format' },
     });
     createBrowserSupabaseClient.mockReturnValue({
       auth: {
@@ -122,20 +122,20 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "not-an-email" },
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'not-an-email' },
     });
 
-    fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
+    fireEvent.submit(screen.getByLabelText('Email').closest('form')!);
 
     await waitFor(() => {
-      expect(screen.getByText("Please enter a valid email address.")).toBeInTheDocument();
+      expect(screen.getByText('Please enter a valid email address.')).toBeInTheDocument();
     });
   });
 
-  it("maps generic error correctly", async () => {
+  it('maps generic error correctly', async () => {
     const mockReset = jest.fn().mockResolvedValue({
-      error: { message: "Some database exception" },
+      error: { message: 'Some database exception' },
     });
     createBrowserSupabaseClient.mockReturnValue({
       auth: {
@@ -145,15 +145,15 @@ describe("ResetPasswordPage", () => {
 
     render(<ResetPasswordPage />);
 
-    fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "test@arch.os" },
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'test@arch.os' },
     });
 
-    fireEvent.submit(screen.getByLabelText("Email").closest("form")!);
+    fireEvent.submit(screen.getByLabelText('Email').closest('form')!);
 
     await waitFor(() => {
       expect(
-        screen.getByText("Unable to send reset email. Please try again or contact IT Support."),
+        screen.getByText('Unable to send reset email. Please try again or contact IT Support.')
       ).toBeInTheDocument();
     });
   });

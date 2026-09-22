@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import dynamic from "next/dynamic";
-import type { BadgeStatusDistribution, HourlyAccessPoint } from "../actions";
+import { Skeleton } from '@repo/ui/components/ui/skeleton';
+import dynamic from 'next/dynamic';
+import type { BadgeStatusDistribution, HourlyAccessPoint } from '../actions';
 
-const HourlyAccessChart = dynamic(() => import("./HourlyAccessChart"), {
+const HourlyAccessChart = dynamic(() => import('./HourlyAccessChart'), {
   ssr: false,
   loading: () => <Skeleton className="h-[240px] w-full" />,
 });
 
-const QRStatusDistributionChart = dynamic(() => import("./QRStatusDistributionChart"), {
+const QRStatusDistributionChart = dynamic(() => import('./QRStatusDistributionChart'), {
   ssr: false,
   loading: () => <Skeleton className="h-[240px] w-full" />,
 });

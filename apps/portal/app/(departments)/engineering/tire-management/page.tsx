@@ -1,13 +1,13 @@
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import type { TireWithInspections } from "@/features/departments";
-import { TireManagementDashboard } from "@/features/departments";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import type { TireWithInspections } from '@/features/departments';
+import { TireManagementDashboard } from '@/features/departments';
+import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function TireManagementPage() {
   await getDepartmentContext({
-    department: "engineering",
+    department: 'engineering',
   });
 
   const db = await createReadReplicaClient();
@@ -16,20 +16,20 @@ export default async function TireManagementPage() {
   const [{ data: tiresData }, { data: machinesData }, { data: inspectionsData }] =
     await Promise.all([
       db
-        .from("tires")
-        .select("*, machines(name, machine_type)")
-        .order("created_at", { ascending: false }),
+        .from('tires')
+        .select('*, machines(name, machine_type)')
+        .order('created_at', { ascending: false }),
       db
-        .from("machines")
-        .select("id, name, machine_type, serial_number")
-        .eq("active", true)
-        .order("name"),
+        .from('machines')
+        .select('id, name, machine_type, serial_number')
+        .eq('active', true)
+        .order('name'),
       db
-        .from("tire_inspections")
+        .from('tire_inspections')
         .select(
-          "id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at",
+          'id, tire_id, inspection_date, tread_depth_mm, pressure_psi, condition_status, notes, created_at'
         )
-        .order("inspection_date", { ascending: true }),
+        .order('inspection_date', { ascending: true }),
     ]);
 
   // Group inspections by tire_id

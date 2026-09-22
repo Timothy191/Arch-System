@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { nonEmptyString, uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { nonEmptyString, uuidSchema } from './common.schema';
 
 export const telemetryPushSchema = z.object({
   name: nonEmptyString.max(200),

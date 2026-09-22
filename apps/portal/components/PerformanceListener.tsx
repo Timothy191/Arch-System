@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useAdaptivePerformance } from "@/hooks/useAdaptivePerformance";
+import { useEffect } from 'react';
+import { useAdaptivePerformance } from '@/hooks/useAdaptivePerformance';
 
 /**
  * PerformanceListener
@@ -14,13 +14,13 @@ export function PerformanceListener() {
 
   useEffect(() => {
     if (lowPerf) {
-      document.body.classList.add("low-perf-fallback");
+      document.body.classList.add('low-perf-fallback');
     } else {
-      document.body.classList.remove("low-perf-fallback");
+      document.body.classList.remove('low-perf-fallback');
     }
 
     return () => {
-      document.body.classList.remove("low-perf-fallback");
+      document.body.classList.remove('low-perf-fallback');
     };
   }, [lowPerf]);
 

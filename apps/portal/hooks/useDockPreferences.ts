@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface DockPreferencesState {
   autoHide: boolean;
@@ -17,7 +17,7 @@ export const useDockPreferences = create<DockPreferencesState>()(
       setAutoHide: (autoHide) => set({ autoHide }),
     }),
     {
-      name: "arch-dock-preferences",
-    },
-  ),
+      name: 'arch-dock-preferences',
+    }
+  )
 );

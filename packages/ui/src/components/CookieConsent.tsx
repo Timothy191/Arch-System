@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { X } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { X } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export function CookieConsent() {
   // AGENT-TRACE: Default the banner to VISIBLE so it is server-rendered into the
@@ -13,14 +13,14 @@ export function CookieConsent() {
   const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
-    const hasConsented = localStorage.getItem("cookie_consent");
+    const hasConsented = localStorage.getItem('cookie_consent');
     if (hasConsented) {
       setShowBanner(false);
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem("cookie_consent", "true");
+    localStorage.setItem('cookie_consent', 'true');
     setShowBanner(false);
   };
 
@@ -32,7 +32,7 @@ export function CookieConsent() {
         <p>
           We use cookies to improve your experience, analyze site traffic, and support operational
           security. By continuing to use the Arch Portal, you consent to our use of cookies as
-          described in our{" "}
+          described in our{' '}
           <Link href="/privacy" className="text-[var(--accent-blue)] hover:underline font-medium">
             Privacy Policy
           </Link>

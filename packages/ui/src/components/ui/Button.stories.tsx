@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Button } from "./button";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './button';
 
 const meta: Meta<typeof Button> = {
-  title: "UI/Button",
+  title: 'UI/Button',
   component: Button,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
   argTypes: {
     variant: {
-      control: "select",
-      options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
+      control: 'select',
+      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
     },
     size: {
-      control: "select",
-      options: ["default", "sm", "lg", "icon"],
+      control: 'select',
+      options: ['default', 'sm', 'lg', 'icon'],
     },
   },
 };
@@ -25,44 +25,44 @@ type Story = StoryObj<typeof Button>;
 
 export const Default: Story = {
   args: {
-    children: "Button",
-    variant: "default",
-    size: "default",
+    children: 'Button',
+    variant: 'default',
+    size: 'default',
   },
 };
 
 export const Secondary: Story = {
   args: {
-    children: "Secondary Action",
-    variant: "secondary",
+    children: 'Secondary Action',
+    variant: 'secondary',
   },
 };
 
 export const Destructive: Story = {
   args: {
-    children: "Delete Record",
-    variant: "destructive",
+    children: 'Delete Record',
+    variant: 'destructive',
   },
 };
 
 export const Outline: Story = {
   args: {
-    children: "System Settings",
-    variant: "outline",
+    children: 'System Settings',
+    variant: 'outline',
   },
 };
 
 export const Ghost: Story = {
   args: {
-    children: "Cancel",
-    variant: "ghost",
+    children: 'Cancel',
+    variant: 'ghost',
   },
 };
 
 export const Icon: Story = {
   args: {
-    children: "🔔",
-    variant: "outline",
-    size: "icon",
+    children: '🔔',
+    variant: 'outline',
+    size: 'icon',
   },
 };

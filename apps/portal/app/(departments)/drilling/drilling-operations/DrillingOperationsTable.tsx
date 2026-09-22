@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Table,
@@ -7,16 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/ui/table";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { cn } from "@repo/ui/lib/utils";
-import { getOperationalToday } from "@repo/utils";
-import { AlertCircle, Check, Loader2, Moon, Sun } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import { upsertDrillOperationAction } from "./actions";
+} from '@repo/ui/components/ui/table';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
+import { getOperationalToday } from '@repo/utils';
+import { AlertCircle, Check, Loader2, Moon, Sun } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
+import { upsertDrillOperationAction } from './actions';
 
-type Shift = "day" | "night";
+type Shift = 'day' | 'night';
 
 interface DrillOpRow {
   id?: string;
@@ -57,13 +57,13 @@ interface Props {
 const today = getOperationalToday();
 
 function numOrNull(v: string): number | null {
-  if (v === "" || v === "-") return null;
+  if (v === '' || v === '-') return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
 function fmt(n: number | null | undefined, digits = 2): string {
-  if (n === null || n === undefined) return "";
+  if (n === null || n === undefined) return '';
   return Number(n).toFixed(digits);
 }
 
@@ -86,7 +86,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
   // Per-machine active shift toggle (defaults to "day" on first load)
   const [activeShift, setActiveShift] = useState<Record<string, Shift>>(() => {
     const m: Record<string, Shift> = {};
-    for (const d of drills) m[d.id] = "day";
+    for (const d of drills) m[d.id] = 'day';
     return m;
   });
 
@@ -99,18 +99,18 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
 
   const draftKey = useCallback(
     (machineId: string, shift: Shift, field: string) => `${machineId}:${shift}:${field}`,
-    [],
+    []
   );
 
   function getDraftValue(machineId: string, shift: Shift, field: keyof DrillOpRow): string {
     const dk = draftKey(machineId, shift, field);
     if (Object.hasOwn(draft, dk)) {
-      return draft[dk] ?? "";
+      return draft[dk] ?? '';
     }
     const row = rows[`${machineId}:${shift}`];
-    if (!row) return "";
+    if (!row) return '';
     const v = row[field];
-    if (v === null || v === undefined) return "";
+    if (v === null || v === undefined) return '';
     return String(v);
   }
 
@@ -123,7 +123,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
     async (
       machineId: string,
       shift: Shift,
-      patch: Partial<DrillOpRow>,
+      patch: Partial<DrillOpRow>
     ): Promise<DrillOpRow | null> => {
       if (!departmentId) return null;
       const key = `${machineId}:${shift}`;
@@ -144,17 +144,17 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
 
       // Ensure numeric fields are sent as numbers, not strings
       const numericFields: (keyof DrillOpRow)[] = [
-        "open_hours",
-        "close_hours",
-        "external_delays_minutes",
-        "standard_delays_hours",
-        "production_delays_minutes",
-        "engineering_delays_minutes",
+        'open_hours',
+        'close_hours',
+        'external_delays_minutes',
+        'standard_delays_hours',
+        'production_delays_minutes',
+        'engineering_delays_minutes',
       ];
       for (const f of numericFields) {
         if (f in payload) {
           const v = payload[f as string];
-          if (v === null || v === "" || v === undefined) {
+          if (v === null || v === '' || v === undefined) {
             payload[f as string] = null;
           } else {
             const n = Number(v);
@@ -168,7 +168,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
       if (!res.success || !res.data) {
         setErrors((e) => ({
           ...e,
-          [key]: res.error || "Save failed",
+          [key]: res.error || 'Save failed',
         }));
         return null;
       }
@@ -181,7 +181,7 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
       });
       return data;
     },
-    [departmentId, rows],
+    [departmentId, rows]
   );
 
   async function commitField(machineId: string, shift: Shift, field: keyof DrillOpRow) {
@@ -198,17 +198,17 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
     setSaving(`${machineId}:${shift}`);
     const parsed: Partial<DrillOpRow> = {} as Partial<DrillOpRow>;
     if (
-      field === "open_hours" ||
-      field === "close_hours" ||
-      field === "external_delays_minutes" ||
-      field === "standard_delays_hours" ||
-      field === "production_delays_minutes" ||
-      field === "engineering_delays_minutes"
+      field === 'open_hours' ||
+      field === 'close_hours' ||
+      field === 'external_delays_minutes' ||
+      field === 'standard_delays_hours' ||
+      field === 'production_delays_minutes' ||
+      field === 'engineering_delays_minutes'
     ) {
       (parsed as Record<string, unknown>)[field] = numOrNull(value);
     } else {
       // text fields
-      (parsed as Record<string, unknown>)[field] = value === "" ? null : value;
+      (parsed as Record<string, unknown>)[field] = value === '' ? null : value;
     }
 
     await upsertRow(machineId, shift, parsed);
@@ -224,10 +224,10 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
   }
 
   const cellInputClass = cn(
-    "w-full bg-[var(--bg-secondary)] border border-[var(--border-default)]",
-    "rounded px-2 py-1 text-sm text-[var(--text-heading)]",
-    "focus:outline-none focus:border-[var(--accent-blue)]",
-    "min-w-0",
+    'w-full bg-[var(--bg-secondary)] border border-[var(--border-default)]',
+    'rounded px-2 py-1 text-sm text-[var(--text-heading)]',
+    'focus:outline-none focus:border-[var(--accent-blue)]',
+    'min-w-0'
   );
 
   if (drills.length === 0) {
@@ -310,13 +310,13 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
           </TableHeader>
           <TableBody>
             {drills.map((drill) => {
-              const shift = activeShift[drill.id] ?? "day";
+              const shift = activeShift[drill.id] ?? 'day';
               const key = `${drill.id}:${shift}`;
               const error = errors[key];
               const isSaving = saving === key;
               const isSaved = saved === key;
-              const openVal = getDraftValue(drill.id, shift, "open_hours");
-              const closeVal = getDraftValue(drill.id, shift, "close_hours");
+              const openVal = getDraftValue(drill.id, shift, 'open_hours');
+              const closeVal = getDraftValue(drill.id, shift, 'close_hours');
               const oN = numOrNull(openVal);
               const cN = numOrNull(closeVal);
               const liveTotal = oN !== null && cN !== null && cN >= oN ? cN - oN : null;
@@ -346,12 +346,12 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                     <div className="inline-flex rounded border border-[var(--border-default)] overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => setShift(drill.id, "day")}
+                        onClick={() => setShift(drill.id, 'day')}
                         className={cn(
-                          "px-2 py-1 text-xs font-medium flex items-center gap-1",
-                          shift === "day"
-                            ? "bg-[var(--accent-blue)] text-white"
-                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]",
+                          'px-2 py-1 text-xs font-medium flex items-center gap-1',
+                          shift === 'day'
+                            ? 'bg-[var(--accent-blue)] text-white'
+                            : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
                         )}
                         aria-label="Day shift"
                       >
@@ -360,12 +360,12 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShift(drill.id, "night")}
+                        onClick={() => setShift(drill.id, 'night')}
                         className={cn(
-                          "px-2 py-1 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)]",
-                          shift === "night"
-                            ? "bg-[var(--accent-blue)] text-white"
-                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]",
+                          'px-2 py-1 text-xs font-medium flex items-center gap-1 border-l border-[var(--border-default)]',
+                          shift === 'night'
+                            ? 'bg-[var(--accent-blue)] text-white'
+                            : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)]'
                         )}
                         aria-label="Night shift"
                       >
@@ -378,11 +378,11 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                   <TableCell>
                     <input
                       type="text"
-                      value={getDraftValue(drill.id, shift, "block_drilled")}
+                      value={getDraftValue(drill.id, shift, 'block_drilled')}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "block_drilled", e.target.value)
+                        setDraftValue(drill.id, shift, 'block_drilled', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "block_drilled")}
+                      onBlur={() => commitField(drill.id, shift, 'block_drilled')}
                       placeholder="—"
                       className={cellInputClass}
                     />
@@ -390,9 +390,9 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                   <TableCell>
                     <input
                       type="text"
-                      value={getDraftValue(drill.id, shift, "site")}
-                      onChange={(e) => setDraftValue(drill.id, shift, "site", e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, "site")}
+                      value={getDraftValue(drill.id, shift, 'site')}
+                      onChange={(e) => setDraftValue(drill.id, shift, 'site', e.target.value)}
+                      onBlur={() => commitField(drill.id, shift, 'site')}
                       placeholder="—"
                       className={cellInputClass}
                     />
@@ -402,10 +402,10 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       type="number"
                       step="0.01"
                       value={openVal}
-                      onChange={(e) => setDraftValue(drill.id, shift, "open_hours", e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, "open_hours")}
+                      onChange={(e) => setDraftValue(drill.id, shift, 'open_hours', e.target.value)}
+                      onBlur={() => commitField(drill.id, shift, 'open_hours')}
                       placeholder="—"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell>
@@ -414,24 +414,24 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       step="0.01"
                       value={closeVal}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "close_hours", e.target.value)
+                        setDraftValue(drill.id, shift, 'close_hours', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "close_hours")}
+                      onBlur={() => commitField(drill.id, shift, 'close_hours')}
                       placeholder="—"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell className="text-right font-medium text-[var(--accent-blue)] tabular-nums">
-                    {fmt(liveTotal, 2) || "—"}
+                    {fmt(liveTotal, 2) || '—'}
                   </TableCell>
                   <TableCell>
                     <select
-                      value={getDraftValue(drill.id, shift, "operator_name")}
+                      value={getDraftValue(drill.id, shift, 'operator_name')}
                       onChange={(e) => {
-                        setDraftValue(drill.id, shift, "operator_name", e.target.value);
+                        setDraftValue(drill.id, shift, 'operator_name', e.target.value);
                         // commit immediately on select change
                         // (avoids the focus-trap of commitField-on-blur on selects)
-                        const dk = draftKey(drill.id, shift, "operator_name");
+                        const dk = draftKey(drill.id, shift, 'operator_name');
                         setDraft((d) => {
                           const { [dk]: _drop, ...rest } = d;
                           return rest;
@@ -456,13 +456,13 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       type="number"
                       step="1"
                       min="0"
-                      value={getDraftValue(drill.id, shift, "external_delays_minutes")}
+                      value={getDraftValue(drill.id, shift, 'external_delays_minutes')}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "external_delays_minutes", e.target.value)
+                        setDraftValue(drill.id, shift, 'external_delays_minutes', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "external_delays_minutes")}
+                      onBlur={() => commitField(drill.id, shift, 'external_delays_minutes')}
                       placeholder="0"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell>
@@ -470,13 +470,13 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       type="number"
                       step="0.25"
                       min="0"
-                      value={getDraftValue(drill.id, shift, "standard_delays_hours")}
+                      value={getDraftValue(drill.id, shift, 'standard_delays_hours')}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "standard_delays_hours", e.target.value)
+                        setDraftValue(drill.id, shift, 'standard_delays_hours', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "standard_delays_hours")}
+                      onBlur={() => commitField(drill.id, shift, 'standard_delays_hours')}
                       placeholder="2.00"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell>
@@ -484,13 +484,13 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       type="number"
                       step="1"
                       min="0"
-                      value={getDraftValue(drill.id, shift, "production_delays_minutes")}
+                      value={getDraftValue(drill.id, shift, 'production_delays_minutes')}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "production_delays_minutes", e.target.value)
+                        setDraftValue(drill.id, shift, 'production_delays_minutes', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "production_delays_minutes")}
+                      onBlur={() => commitField(drill.id, shift, 'production_delays_minutes')}
                       placeholder="0"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell>
@@ -498,23 +498,23 @@ export function DrillingOperationsTable({ departmentId, drills, operators, initi
                       type="number"
                       step="1"
                       min="0"
-                      value={getDraftValue(drill.id, shift, "engineering_delays_minutes")}
+                      value={getDraftValue(drill.id, shift, 'engineering_delays_minutes')}
                       onChange={(e) =>
-                        setDraftValue(drill.id, shift, "engineering_delays_minutes", e.target.value)
+                        setDraftValue(drill.id, shift, 'engineering_delays_minutes', e.target.value)
                       }
-                      onBlur={() => commitField(drill.id, shift, "engineering_delays_minutes")}
+                      onBlur={() => commitField(drill.id, shift, 'engineering_delays_minutes')}
                       placeholder="0"
-                      className={cn(cellInputClass, "text-right")}
+                      className={cn(cellInputClass, 'text-right')}
                     />
                   </TableCell>
                   <TableCell>
                     <input
                       type="text"
-                      value={getDraftValue(drill.id, shift, "comments")}
-                      onChange={(e) => setDraftValue(drill.id, shift, "comments", e.target.value)}
-                      onBlur={() => commitField(drill.id, shift, "comments")}
+                      value={getDraftValue(drill.id, shift, 'comments')}
+                      onChange={(e) => setDraftValue(drill.id, shift, 'comments', e.target.value)}
+                      onBlur={() => commitField(drill.id, shift, 'comments')}
                       placeholder="—"
-                      className={cn(cellInputClass, "min-w-[160px]")}
+                      className={cn(cellInputClass, 'min-w-[160px]')}
                     />
                   </TableCell>
                 </TableRow>

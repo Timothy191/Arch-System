@@ -1,10 +1,10 @@
-import { z } from "zod";
-import { uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { uuidSchema } from './common.schema';
 
 export const complianceAuditRunSchema = z.object({
   id: uuidSchema.optional(),
   audit_type: z.string().min(1).max(64),
-  status: z.enum(["passed", "failed", "warning"]).default("passed"),
+  status: z.enum(['passed', 'failed', 'warning']).default('passed'),
   score: z.number().min(0).max(100).default(100.0),
   details: z.record(z.string(), z.unknown()).default({}),
   executed_by: uuidSchema.optional().nullable(),

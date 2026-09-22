@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 
-const MATERIAL_TYPES = ["Overburden", "Coal", "Waste", "Partings", "Soil", "Other"];
+const MATERIAL_TYPES = ['Overburden', 'Coal', 'Waste', 'Partings', 'Soil', 'Other'];
 
 interface DumperMachine {
   id: string;
@@ -28,7 +28,7 @@ export interface DumperAssignmentRow {
 
 interface ExcavatorDumperTableProps {
   siteDumpers: DumperMachine[];
-  shiftType: "day" | "night";
+  shiftType: 'day' | 'night';
   todayDumperLoads: HourlyLoadSummary[];
   assignments: DumperAssignmentRow[];
   onAssignmentsChange: (_updated: DumperAssignmentRow[]) => void;
@@ -53,8 +53,8 @@ export function ExcavatorDumperTable({
       ...assignments,
       {
         key: newRowKey(),
-        dumperMachineId: "",
-        materialType: "Overburden",
+        dumperMachineId: '',
+        materialType: 'Overburden',
         totalLoads: 0,
         totalBcm: 0,
       },
@@ -71,7 +71,7 @@ export function ExcavatorDumperTable({
 
     // Look up total loads from hourly_loads for this dumper + shift
     const loadEntry = todayDumperLoads.find(
-      (l) => l.machine_id === dumperId && l.shift_type === shiftType,
+      (l) => l.machine_id === dumperId && l.shift_type === shiftType
     );
     const loads = loadEntry?.total_loads || 0;
     const bcm = loads * binFactor;
@@ -105,7 +105,7 @@ export function ExcavatorDumperTable({
     const newRow: DumperAssignmentRow = {
       key: newRowKey(),
       dumperMachineId: row.dumperMachineId,
-      materialType: "Coal", // Default to a different material
+      materialType: 'Coal', // Default to a different material
       totalLoads: 0,
       totalBcm: 0,
     };
@@ -202,13 +202,13 @@ export function ExcavatorDumperTable({
                       >
                         <option value="">
                           {siteDumpers.length === 0
-                            ? "No dumpers at this site"
-                            : "Select dumper..."}
+                            ? 'No dumpers at this site'
+                            : 'Select dumper...'}
                         </option>
                         {siteDumpers.map((d) => (
                           <option key={d.id} value={d.id}>
                             {d.name} ({d.machine_type}
-                            {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ""})
+                            {d.bin_factor ? ` · ${d.bin_factor} BCM/load` : ''})
                           </option>
                         ))}
                       </select>

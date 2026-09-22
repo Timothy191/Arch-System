@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Checkbox } from "@repo/ui/components/Checkbox";
-import { Button } from "@repo/ui/components/ui/button";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { cn } from "@repo/ui/lib/utils";
+import { Checkbox } from '@repo/ui/components/Checkbox';
+import { Button } from '@repo/ui/components/ui/button';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { cn } from '@repo/ui/lib/utils';
 import {
   AlertCircle,
   Briefcase,
@@ -20,31 +20,31 @@ import {
   Stethoscope,
   User,
   X,
-} from "lucide-react";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import type { PersonnelDetail, PersonnelSearchResult } from "./actions";
+} from 'lucide-react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import type { PersonnelDetail, PersonnelSearchResult } from './actions';
 import {
   bulkPrintCardsForPersonnel,
   getCardTemplates,
   getPersonnelDetail,
   printCardForPersonnel,
   searchPersonnel,
-} from "./actions";
-import { QRCodeSection } from "./qr-section";
+} from './actions';
+import { QRCodeSection } from './qr-section';
 
 function getInitials(firstName: string, surname: string): string {
-  return `${(firstName ?? "")[0] ?? ""}${(surname ?? "")[0] ?? ""}`.toUpperCase();
+  return `${(firstName ?? '')[0] ?? ''}${(surname ?? '')[0] ?? ''}`.toUpperCase();
 }
 
 function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-ZA", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-ZA', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   });
 }
 
@@ -84,14 +84,14 @@ function ExpiryPill({ date }: { date: string | null }) {
 }
 
 function StatusPill({ status }: { status: string }) {
-  const isActive = status === "Active";
+  const isActive = status === 'Active';
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border",
+        'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border',
         isActive
-          ? "bg-accent-green/10 border-accent-green/20 text-accent-green"
-          : "bg-amber-50/70 border-amber-200/50 text-amber-700",
+          ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
+          : 'bg-amber-50/70 border-amber-200/50 text-amber-700'
       )}
     >
       {status}
@@ -119,7 +119,7 @@ function DetailRow({
         <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wider">
           {label}
         </p>
-        {children ?? <p className="text-sm text-[var(--text-heading)] truncate">{value ?? "—"}</p>}
+        {children ?? <p className="text-sm text-[var(--text-heading)] truncate">{value ?? '—'}</p>}
       </div>
     </div>
   );
@@ -150,7 +150,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
   const [templates, setTemplates] = useState<
     Array<{ id: string; name: string; background: string | null }>
   >([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   /* ── Search ── */
@@ -179,16 +179,16 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       debounceRef.current = setTimeout(() => {
         const params = new URLSearchParams(searchParams.toString());
         if (value.trim()) {
-          params.set("q", value.trim());
+          params.set('q', value.trim());
         } else {
-          params.delete("q");
+          params.delete('q');
         }
-        params.delete("selected");
+        params.delete('selected');
         router.replace(`?${params.toString()}`, { scroll: false });
         doSearch(value);
       }, 300);
     },
-    [router, searchParams, doSearch],
+    [router, searchParams, doSearch]
   );
 
   /* ── Detail selection ── */
@@ -198,7 +198,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       setSelectedId(id);
       setLoadingDetail(true);
       const params = new URLSearchParams(searchParams.toString());
-      params.set("selected", id);
+      params.set('selected', id);
       router.replace(`?${params.toString()}`, { scroll: false });
       try {
         const d = await getPersonnelDetail(id);
@@ -209,7 +209,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
         setLoadingDetail(false);
       }
     },
-    [router, searchParams],
+    [router, searchParams]
   );
 
   /* ── Print ── */
@@ -222,10 +222,10 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       if (result.printer) {
         toast.success(`Print job queued — submitted to ${result.printer.cups_name}`);
       } else {
-        toast.info("No printer available — job queued for later processing");
+        toast.info('No printer available — job queued for later processing');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Print failed");
+      toast.error(err instanceof Error ? err.message : 'Print failed');
     } finally {
       setPrinting(false);
     }
@@ -246,10 +246,10 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
     try {
       const results = await bulkPrintCardsForPersonnel(
         Array.from(selectedForBulk),
-        selectedTemplateId || undefined,
+        selectedTemplateId || undefined
       );
-      const successes = results.filter((r) => r.status === "success").length;
-      const errors = results.filter((r) => r.status === "error").length;
+      const successes = results.filter((r) => r.status === 'success').length;
+      const errors = results.filter((r) => r.status === 'error').length;
 
       if (successes > 0 && errors === 0) {
         toast.success(`Successfully queued ${successes} print jobs`);
@@ -260,7 +260,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
         toast.error(`Failed to queue any jobs (${errors} failed)`);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Bulk print failed");
+      toast.error(err instanceof Error ? err.message : 'Bulk print failed');
     } finally {
       setBulkPrinting(false);
     }
@@ -279,7 +279,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
       .then((res) => {
         setTemplates(res);
         if (res.length > 0) {
-          setSelectedTemplateId(res[0]?.id ?? "");
+          setSelectedTemplateId(res[0]?.id ?? '');
         }
       })
       .catch(() => {});
@@ -306,11 +306,11 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
               {query && (
                 <button
                   onClick={() => {
-                    setQuery("");
+                    setQuery('');
                     setResults([]);
                     const params = new URLSearchParams(searchParams.toString());
-                    params.delete("q");
-                    params.delete("selected");
+                    params.delete('q');
+                    params.delete('selected');
                     router.replace(`?${params.toString()}`, { scroll: false });
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-heading)]"
@@ -379,8 +379,8 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                 <div
                   key={person.id}
                   className={cn(
-                    "flex items-center w-full px-4 transition-colors hover:bg-[var(--bg-tertiary)] group",
-                    selectedId === person.id && "bg-[var(--accent-blue)]/5",
+                    'flex items-center w-full px-4 transition-colors hover:bg-[var(--bg-tertiary)] group',
+                    selectedId === person.id && 'bg-[var(--accent-blue)]/5'
                   )}
                 >
                   <div className="py-3 pr-3" onClick={(e) => e.stopPropagation()}>
@@ -402,7 +402,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                         {person.first_name} {person.surname}
                       </p>
                       <p className="text-xs text-[var(--text-muted)] truncate">
-                        {person.job_title ?? "—"}
+                        {person.job_title ?? '—'}
                         {person.area && ` · ${person.area}`}
                       </p>
                     </div>
@@ -461,7 +461,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                         {detail.first_name} {detail.surname}
                       </h2>
                       <p className="text-sm text-[var(--text-secondary)]">
-                        {detail.job_title ?? "No title"}
+                        {detail.job_title ?? 'No title'}
                       </p>
                     </div>
                     <StatusPill status={detail.status} />
@@ -524,13 +524,13 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                 {detail.badge && (
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border",
+                      'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border',
                       detail.badge.is_active
-                        ? "bg-accent-green/10 border-accent-green/20 text-accent-green"
-                        : "bg-red-50/70 border-red-200/50 text-red-700",
+                        ? 'bg-accent-green/10 border-accent-green/20 text-accent-green'
+                        : 'bg-red-50/70 border-red-200/50 text-red-700'
                     )}
                   >
-                    {detail.badge.is_active ? "Active" : "Revoked"}
+                    {detail.badge.is_active ? 'Active' : 'Revoked'}
                   </span>
                 )}
               </div>
@@ -590,7 +590,7 @@ export function CardActionsView({ initialQuery, initialSelectedId }: CardActions
                 ) : (
                   <Printer className="w-4 h-4" />
                 )}
-                {printing ? "Queuing..." : "Print Card"}
+                {printing ? 'Queuing...' : 'Print Card'}
               </Button>
             </div>
           </div>

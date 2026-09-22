@@ -1,13 +1,13 @@
-import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { Logo } from "@repo/ui/Logo";
-import { AlertTriangle, ShieldCheck } from "lucide-react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { LoginForm } from "@/features/auth/components/LoginForm";
+import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { Logo } from '@repo/ui/Logo';
+import { AlertTriangle, ShieldCheck } from 'lucide-react';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 
-const PORTAL_VERSION = process.env.PORTAL_VERSION ?? "2.4.1";
+const PORTAL_VERSION = process.env.PORTAL_VERSION ?? '2.4.1';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 interface LoginPageProps {
   searchParams?: Promise<{ redirect?: string }>;
@@ -19,9 +19,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     .getAll()
     .some(
       (c) =>
-        c.name === "sb-access-token" ||
-        ((c.name.startsWith("sb-") || c.name.includes("sb-")) &&
-          (c.name.includes("-auth-token") || c.name.includes("-access-token"))),
+        c.name === 'sb-access-token' ||
+        ((c.name.startsWith('sb-') || c.name.includes('sb-')) &&
+          (c.name.includes('-auth-token') || c.name.includes('-access-token')))
     );
 
   let authenticated = false;
@@ -37,12 +37,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     } catch (e) {
       if (
         e instanceof Error &&
-        (e.message.includes("AuthRetryableFetchError") ||
-          e.message.includes("fetch failed") ||
-          e.message.includes("network"))
+        (e.message.includes('AuthRetryableFetchError') ||
+          e.message.includes('fetch failed') ||
+          e.message.includes('network'))
       ) {
         // eslint-disable-next-line no-console
-        console.warn("Transient auth check failure, serving login form:", e.message);
+        console.warn('Transient auth check failure, serving login form:', e.message);
       } else {
         systemUnavailable = true;
       }
@@ -53,11 +53,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps = {}) {
     const params = await searchParams;
     const rawRedirect = params?.redirect;
     const target =
-      rawRedirect?.startsWith("/") &&
-      !rawRedirect.startsWith("//") &&
-      !rawRedirect.startsWith("/login")
+      rawRedirect?.startsWith('/') &&
+      !rawRedirect.startsWith('//') &&
+      !rawRedirect.startsWith('/login')
         ? rawRedirect
-        : "/hub";
+        : '/hub';
     redirect(target);
   }
 

@@ -1,25 +1,25 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-describe("GlassCard", () => {
-  it("renders with default variant and children", () => {
+describe('GlassCard', () => {
+  it('renders with default variant and children', () => {
     render(<GlassCard>Default Content</GlassCard>);
-    expect(screen.getByText("Default Content")).toBeInTheDocument();
+    expect(screen.getByText('Default Content')).toBeInTheDocument();
   });
 
-  it("renders with window variant and title", () => {
+  it('renders with window variant and title', () => {
     render(
       <GlassCard variant="window" title="Test Window">
         Window Content
-      </GlassCard>,
+      </GlassCard>
     );
-    expect(screen.getByText("Test Window")).toBeInTheDocument();
-    expect(screen.getByText("Window Content")).toBeInTheDocument();
+    expect(screen.getByText('Test Window')).toBeInTheDocument();
+    expect(screen.getByText('Window Content')).toBeInTheDocument();
   });
 
-  it("renders spotlight variant and handles mouse movement", () => {
+  it('renders spotlight variant and handles mouse movement', () => {
     const { container } = render(<GlassCard variant="spotlight">Spotlight Content</GlassCard>);
-    expect(screen.getByText("Spotlight Content")).toBeInTheDocument();
+    expect(screen.getByText('Spotlight Content')).toBeInTheDocument();
 
     const element = container.firstChild;
     expect(element).toBeInTheDocument();
@@ -29,45 +29,45 @@ describe("GlassCard", () => {
     }
   });
 
-  it("renders glowborder variant with custom animation duration", () => {
+  it('renders glowborder variant with custom animation duration', () => {
     const { container } = render(
       <GlassCard variant="glowborder" animationDuration={10}>
         GlowBorder Content
-      </GlassCard>,
+      </GlassCard>
     );
-    expect(screen.getByText("GlowBorder Content")).toBeInTheDocument();
+    expect(screen.getByText('GlowBorder Content')).toBeInTheDocument();
     expect(container.firstChild).toBeInTheDocument();
   });
 
-  it("renders liquid variant with background layer and sheen sweep layer", () => {
+  it('renders liquid variant with background layer and sheen sweep layer', () => {
     const { container } = render(<GlassCard variant="liquid">Liquid Content</GlassCard>);
-    expect(screen.getByText("Liquid Content")).toBeInTheDocument();
+    expect(screen.getByText('Liquid Content')).toBeInTheDocument();
 
-    const pane = container.querySelector(".liquid-glass-pane-rounded");
+    const pane = container.querySelector('.liquid-glass-pane-rounded');
     expect(pane).toBeInTheDocument();
 
-    const sheen = container.querySelector(".liquid-sheen-sweep");
+    const sheen = container.querySelector('.liquid-sheen-sweep');
     expect(sheen).toBeInTheDocument();
   });
 
-  it("increments hoverCount and remounts the sheen element on hover", () => {
+  it('increments hoverCount and remounts the sheen element on hover', () => {
     const { container } = render(
       <GlassCard variant="liquid" hover>
         Liquid Content
-      </GlassCard>,
+      </GlassCard>
     );
 
     const card = container.firstChild;
     expect(card).toBeInTheDocument();
 
-    const initialSheen = container.querySelector(".liquid-sheen-sweep");
+    const initialSheen = container.querySelector('.liquid-sheen-sweep');
     expect(initialSheen).toBeInTheDocument();
 
     if (card) {
       fireEvent.mouseEnter(card);
     }
 
-    const nextSheen = container.querySelector(".liquid-sheen-sweep");
+    const nextSheen = container.querySelector('.liquid-sheen-sweep');
     expect(nextSheen).toBeInTheDocument();
     expect(nextSheen).not.toBe(initialSheen);
   });

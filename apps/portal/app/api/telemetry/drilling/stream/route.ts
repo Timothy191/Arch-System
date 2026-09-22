@@ -15,7 +15,7 @@
  *               type: string
  */
 
-import { createRedisSubscriber } from "@repo/redis";
+import { createRedisSubscriber } from '@repo/redis';
 
 // AGENT-TRACE: Server-Sent Events (SSE) stream for real-time drill rig telemetry
 // Subscribes to Redis pub/sub channel "drilling:telemetry:stream" and pushes updates to clients
@@ -31,37 +31,37 @@ export async function GET(req: Request) {
         subscriber = await createRedisSubscriber();
 
         // Subscribe to drilling telemetry pub/sub channel
-        await subscriber.subscribe("drilling:telemetry:stream", (message) => {
+        await subscriber.subscribe('drilling:telemetry:stream', (message) => {
           try {
             controller.enqueue(encoder.encode(`data: ${message}\n\n`));
           } catch (enqueueErr) {
             // eslint-disable-next-line no-console
-            console.error("[DrillStream] Enqueue error:", enqueueErr);
+            console.error('[DrillStream] Enqueue error:', enqueueErr);
           }
         });
 
         // Initial welcome event
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ event: "connected", timestamp: new Date().toISOString() })}\n\n`,
-          ),
+            `data: ${JSON.stringify({ event: 'connected', timestamp: new Date().toISOString() })}\n\n`
+          )
         );
 
         // Keep-alive heartbeat every 15 seconds to prevent proxy timeouts
         keepAliveInterval = setInterval(() => {
           try {
-            controller.enqueue(encoder.encode(": ping\n\n"));
+            controller.enqueue(encoder.encode(': ping\n\n'));
           } catch {
             // Controller closed
           }
         }, 15000);
       } catch (err: any) {
         // eslint-disable-next-line no-console
-        console.error("[DrillStream] Connection error:", err);
+        console.error('[DrillStream] Connection error:', err);
         controller.enqueue(
           encoder.encode(
-            `data: ${JSON.stringify({ error: err.message || "Failed to initialize telemetry stream" })}\n\n`,
-          ),
+            `data: ${JSON.stringify({ error: err.message || 'Failed to initialize telemetry stream' })}\n\n`
+          )
         );
         controller.close();
       }
@@ -69,27 +69,27 @@ export async function GET(req: Request) {
     cancel() {
       if (keepAliveInterval) clearInterval(keepAliveInterval);
       if (subscriber?.isOpen) {
-        subscriber.unsubscribe("drilling:telemetry:stream").catch(() => {});
+        subscriber.unsubscribe('drilling:telemetry:stream').catch(() => {});
         subscriber.quit().catch(() => {});
       }
     },
   });
 
   // Handle client abort / disconnect signal
-  req.signal.addEventListener("abort", () => {
+  req.signal.addEventListener('abort', () => {
     if (keepAliveInterval) clearInterval(keepAliveInterval);
     if (subscriber?.isOpen) {
-      subscriber.unsubscribe("drilling:telemetry:stream").catch(() => {});
+      subscriber.unsubscribe('drilling:telemetry:stream').catch(() => {});
       subscriber.quit().catch(() => {});
     }
   });
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "X-Accel-Buffering": "no",
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
     },
   });
 }

@@ -10,9 +10,9 @@
  * @module printer-detection
  */
 
-import { exec } from "node:child_process";
-import { access } from "node:fs/promises";
-import { promisify } from "node:util";
+import { exec } from 'node:child_process';
+import { access } from 'node:fs/promises';
+import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
@@ -23,8 +23,8 @@ const execAsync = promisify(exec);
 interface DetectedPrinter {
   cupsName: string;
   model: string;
-  connectionType: "usb" | "network" | "unknown";
-  status: "online" | "offline" | "error";
+  connectionType: 'usb' | 'network' | 'unknown';
+  status: 'online' | 'offline' | 'error';
   statusMessage?: string;
   vendorId?: string;
   productId?: string;
@@ -43,7 +43,7 @@ interface PrintQueueEntry {
 // ---------------------------------------------------------------------------
 
 /** Known Neo Magic 300 model identifiers (case-insensitive match). */
-const NEO_MAGIC_KEYWORDS = ["neo magic 300", "magicard", "neo", "matica"];
+const NEO_MAGIC_KEYWORDS = ['neo magic 300', 'magicard', 'neo', 'matica'];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -64,24 +64,24 @@ function isNeoMagicModel(model: string): boolean {
  * "offline" when explicitly not accepting, and "error" otherwise.
  */
 function parseAcceptingStatus(line: string): {
-  status: DetectedPrinter["status"];
+  status: DetectedPrinter['status'];
   statusMessage?: string;
 } {
   // Check the negative case first since "accepting requests" is a substring
   // of "not accepting requests".
-  if (line.includes("not accepting requests")) {
+  if (line.includes('not accepting requests')) {
     // Extract optional reason after the date portion
     // Format: <name> not accepting requests since <date> - <reason>
-    const reasonIndex = line.indexOf(" - ");
+    const reasonIndex = line.indexOf(' - ');
     const statusMessage = reasonIndex !== -1 ? line.slice(reasonIndex + 3).trim() : undefined;
-    return { status: "offline", statusMessage };
+    return { status: 'offline', statusMessage };
   }
 
-  if (line.includes("accepting requests")) {
-    return { status: "online" };
+  if (line.includes('accepting requests')) {
+    return { status: 'online' };
   }
 
-  return { status: "error", statusMessage: line.trim() };
+  return { status: 'error', statusMessage: line.trim() };
 }
 
 /**
@@ -91,7 +91,7 @@ function parseAcceptingStatus(line: string): {
 function extractPrinterName(line: string): string | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
-  const spaceIndex = trimmed.indexOf(" ");
+  const spaceIndex = trimmed.indexOf(' ');
   return spaceIndex !== -1 ? trimmed.slice(0, spaceIndex) : trimmed;
 }
 
@@ -99,23 +99,23 @@ function extractPrinterName(line: string): string | null {
  * Determine connection type and extract USB vendor/product IDs from a device URI.
  */
 function parseDeviceUri(
-  uri: string,
-): Pick<DetectedPrinter, "connectionType" | "vendorId" | "productId" | "devicePath"> {
-  if (uri.startsWith("usb://")) {
+  uri: string
+): Pick<DetectedPrinter, 'connectionType' | 'vendorId' | 'productId' | 'devicePath'> {
+  if (uri.startsWith('usb://')) {
     // Format: usb://Vendor/Product?serial=... or usb://Vendor:Product/...
     const ids = uri.match(/usb:\/\/([^/?#]+)[/:]([^/?#]+)/);
     return {
-      connectionType: "usb",
+      connectionType: 'usb',
       vendorId: ids?.[1] ?? undefined,
       productId: ids?.[2] ?? undefined,
     };
   }
 
-  if (uri.startsWith("socket://") || uri.startsWith("lpd://")) {
-    return { connectionType: "network" };
+  if (uri.startsWith('socket://') || uri.startsWith('lpd://')) {
+    return { connectionType: 'network' };
   }
 
-  return { connectionType: "unknown" };
+  return { connectionType: 'unknown' };
 }
 
 /**
@@ -148,7 +148,7 @@ async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrin
   const result = await safeExec(`lpstat -l -p "${cupsName}"`);
   if (!result) return {};
 
-  const lines = result.stdout.split("\n");
+  const lines = result.stdout.split('\n');
   const details: Partial<DetectedPrinter> = {};
   const modelParts: string[] = [];
 
@@ -156,21 +156,21 @@ async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrin
     const trimmed = line.trim();
 
     // Parse device URI
-    if (trimmed.startsWith("Device:")) {
-      const uri = trimmed.replace(/^Device:\s*/, "").trim();
+    if (trimmed.startsWith('Device:')) {
+      const uri = trimmed.replace(/^Device:\s*/, '').trim();
       Object.assign(details, parseDeviceUri(uri));
       continue;
     }
 
     // Collect model-related lines for Neo Magic detection
-    if (trimmed.startsWith("Description:") || trimmed.startsWith("Make and model:")) {
-      const value = trimmed.replace(/^(Description|Make and model):\s*/, "");
+    if (trimmed.startsWith('Description:') || trimmed.startsWith('Make and model:')) {
+      const value = trimmed.replace(/^(Description|Make and model):\s*/, '');
       modelParts.push(value);
     }
   }
 
   // Derive model string from description / make-and-model
-  const model = modelParts.join(" ").trim();
+  const model = modelParts.join(' ').trim();
   if (model) {
     details.model = model;
     details.isNeoMagic300 = isNeoMagicModel(model);
@@ -190,13 +190,13 @@ async function getPrinterDetails(cupsName: string): Promise<Partial<DetectedPrin
  * Handles CUPS not installed, no printers configured, and offline printers.
  */
 export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
-  const result = await safeExec("lpstat -a");
+  const result = await safeExec('lpstat -a');
   if (!result) {
     // lpstat not found, not installed, or no printers — return empty
     return [];
   }
 
-  const lines = result.stdout.split("\n").filter(Boolean);
+  const lines = result.stdout.split('\n').filter(Boolean);
   if (lines.length === 0) return [];
 
   const printers: DetectedPrinter[] = [];
@@ -213,7 +213,7 @@ export async function scanCupsPrinters(): Promise<DetectedPrinter[]> {
     printers.push({
       cupsName,
       model: details.model ?? cupsName,
-      connectionType: details.connectionType ?? "unknown",
+      connectionType: details.connectionType ?? 'unknown',
       status,
       statusMessage,
       vendorId: details.vendorId,
@@ -234,18 +234,18 @@ export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry
   const result = await safeExec(`lpq -P "${cupsName}"`);
   if (!result) return [];
 
-  const lines = result.stdout.split("\n").filter(Boolean);
+  const lines = result.stdout.split('\n').filter(Boolean);
 
   // Skip header lines — find the column header first, then parse data rows
   const dataStartIndex = lines.findIndex(
-    (l) => l.includes("Rank") && l.includes("Owner") && l.includes("Job") && l.includes("File"),
+    (l) => l.includes('Rank') && l.includes('Owner') && l.includes('Job') && l.includes('File')
   );
   if (dataStartIndex === -1) return [];
 
   // "no entries" means the queue is empty
   const dataLines = lines.slice(dataStartIndex + 1).filter((l) => {
     const trimmed = l.trim();
-    return trimmed.length > 0 && !trimmed.includes("no entries");
+    return trimmed.length > 0 && !trimmed.includes('no entries');
   });
 
   const entries: PrintQueueEntry[] = [];
@@ -275,24 +275,24 @@ export async function getPrinterQueue(cupsName: string): Promise<PrintQueueEntry
  * and checking the status line.
  * Returns "online" | "offline" | "error"
  */
-export async function getPrinterStatus(cupsName: string): Promise<"online" | "offline" | "error"> {
+export async function getPrinterStatus(cupsName: string): Promise<'online' | 'offline' | 'error'> {
   const result = await safeExec(`lpstat -p "${cupsName}"`);
-  if (!result) return "error";
+  if (!result) return 'error';
 
-  const statusLine = result.stdout.split("\n").find((l) => l.toLowerCase().includes("printer"));
-  if (!statusLine) return "error";
+  const statusLine = result.stdout.split('\n').find((l) => l.toLowerCase().includes('printer'));
+  if (!statusLine) return 'error';
 
   const lower = statusLine.toLowerCase();
 
-  if (lower.includes("idle") || lower.includes("printing") || lower.includes("processing")) {
-    return "online";
+  if (lower.includes('idle') || lower.includes('printing') || lower.includes('processing')) {
+    return 'online';
   }
 
-  if (lower.includes("disabled") || lower.includes("offline")) {
-    return "offline";
+  if (lower.includes('disabled') || lower.includes('offline')) {
+    return 'offline';
   }
 
-  return "error";
+  return 'error';
 }
 
 /**
@@ -301,7 +301,7 @@ export async function getPrinterStatus(cupsName: string): Promise<"online" | "of
  * Uses fs.promises.access for each enumerated device.
  */
 export async function scanUsbDevices(): Promise<string[]> {
-  const candidates = ["/dev/usb/lp0", "/dev/usb/lp1", "/dev/usb/lp2", "/dev/usb/lp3"];
+  const candidates = ['/dev/usb/lp0', '/dev/usb/lp1', '/dev/usb/lp2', '/dev/usb/lp3'];
   const found: string[] = [];
 
   for (const devicePath of candidates) {
@@ -324,7 +324,7 @@ export async function scanUsbDevices(): Promise<string[]> {
 export async function submitCupsPrintJob(
   cupsName: string,
   jobName: string,
-  data?: string,
+  data?: string
 ): Promise<{ cupsJobId: number | null }> {
   const cmd = data
     ? `echo ${JSON.stringify(data)} | lp -d "${cupsName}" -t "${jobName}"`
@@ -359,10 +359,10 @@ export async function detectAllPrinters(): Promise<DetectedPrinter[]> {
     if (knownDevicePaths.has(devPath)) continue;
 
     cupsPrinters.push({
-      cupsName: `usb-${devPath.replace(/[^a-zA-Z0-9]/g, "_")}`,
+      cupsName: `usb-${devPath.replace(/[^a-zA-Z0-9]/g, '_')}`,
       model: `Unknown USB Printer (${devPath})`,
-      connectionType: "usb",
-      status: "online",
+      connectionType: 'usb',
+      status: 'online',
       devicePath: devPath,
       isNeoMagic300: false,
     });

@@ -32,15 +32,15 @@
  *         description: Failed to read SCADA tags
  */
 
-import { getRedisClient } from "@repo/redis";
-import { NextResponse } from "next/server";
-import { applyCors } from "@/lib/api/cors";
+import { getRedisClient } from '@repo/redis';
+import { NextResponse } from 'next/server';
+import { applyCors } from '@/lib/api/cors';
 
 export interface FuxaWebApiTag {
   id: string;
   name: string;
   value: number | string | null;
-  type: "number" | "string";
+  type: 'number' | 'string';
 }
 
 // AGENT-TRACE: FUXA ingests external data by *pulling* a flat tag list from a
@@ -53,7 +53,7 @@ export interface FuxaWebApiTag {
 export async function GET(req: Request) {
   try {
     const redis = await getRedisClient();
-    const keys = (await redis.keys("telemetry:last:*")) as string[];
+    const keys = (await redis.keys('telemetry:last:*')) as string[];
     const tags: FuxaWebApiTag[] = [];
 
     if (keys.length > 0) {
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key === undefined) continue; // noUncheckedIndexedAccess guard
-        const name = key.replace(/^telemetry:last:/, "");
+        const name = key.replace(/^telemetry:last:/, '');
         const raw = values[i] ?? null; // coalesce undefined → null
         const num = raw !== null ? Number(raw) : NaN;
         const isNum = !Number.isNaN(num);
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
           id: name,
           name,
           value: isNum ? num : raw,
-          type: isNum ? "number" : "string",
+          type: isNum ? 'number' : 'string',
         });
       }
     }
@@ -77,8 +77,8 @@ export async function GET(req: Request) {
     return applyCors(req, NextResponse.json(tags));
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Failed to read SCADA tags" },
-      { status: 500 },
+      { error: err.message || 'Failed to read SCADA tags' },
+      { status: 500 }
     );
   }
 }

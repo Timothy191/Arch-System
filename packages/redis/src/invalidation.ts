@@ -1,6 +1,6 @@
-import { getRedisClient } from "./client";
+import { getRedisClient } from './client';
 
-const TAG_PREFIX = "arch:__tags__";
+const TAG_PREFIX = 'arch:__tags__';
 
 async function getRedisClientSafe() {
   try {
@@ -64,7 +64,7 @@ export async function cacheInvalidateTags(tags: string[]): Promise<number> {
 
     // Broadcast L1 invalidation to all instances
     if (deleted > 0) {
-      await redis.publish("cache:invalidate:broadcast", JSON.stringify({ action: "tags", tags }));
+      await redis.publish('cache:invalidate:broadcast', JSON.stringify({ action: 'tags', tags }));
     }
   } catch {
     // Silent fail
@@ -109,8 +109,8 @@ export async function cacheInvalidatePrefixes(prefixes: string[]): Promise<numbe
     // Broadcast L1 invalidation to all instances
     if (deleted > 0) {
       await redis.publish(
-        "cache:invalidate:broadcast",
-        JSON.stringify({ action: "prefixes", prefixes }),
+        'cache:invalidate:broadcast',
+        JSON.stringify({ action: 'prefixes', prefixes })
       );
     }
   } catch {

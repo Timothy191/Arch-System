@@ -1,10 +1,10 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   dateMonthSchema,
   dateSchema,
   nonEmptyString,
   uuidSchema,
-} from "../schemas/common.schema.js";
+} from '../schemas/common.schema.js';
 
 export type Uuid = z.infer<typeof uuidSchema>;
 export type DateString = z.infer<typeof dateSchema>;

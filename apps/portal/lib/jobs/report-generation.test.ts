@@ -1,20 +1,20 @@
 const mockLogError = jest.fn();
-jest.mock("@/lib/errors/error-logger", () => ({
+jest.mock('@/lib/errors/error-logger', () => ({
   logError: (...args: unknown[]) => mockLogError(...args),
 }));
 
 const mockFrom = jest.fn();
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(() => ({ from: mockFrom })),
 }));
 
-jest.mock("@repo/utils/inngest", () => ({
+jest.mock('@repo/utils/inngest', () => ({
   inngest: {
     createFunction: jest.fn((_opts: unknown, handler: unknown) => ({ handler })),
   },
 }));
 
-import { generateReportFn } from "./report-generation";
+import { generateReportFn } from './report-generation';
 
 const resultsByTable: Record<string, { data: unknown; error: unknown }> = {};
 let insertResult: { error: unknown } = { error: null };
@@ -40,12 +40,12 @@ const handler = (generateReportFn as any).handler;
 function makeEvent(overrides: Record<string, unknown> = {}) {
   return {
     event: {
-      data: { departmentId: "dept-1", dateFrom: "2026-08-01", dateTo: "2026-08-17", ...overrides },
+      data: { departmentId: 'dept-1', dateFrom: '2026-08-01', dateTo: '2026-08-17', ...overrides },
     },
   };
 }
 
-describe("generateReportFn", () => {
+describe('generateReportFn', () => {
   beforeEach(() => {
     Object.keys(resultsByTable).forEach((k) => delete resultsByTable[k]);
     insertCalls.length = 0;
@@ -53,9 +53,9 @@ describe("generateReportFn", () => {
     mockLogError.mockClear();
   });
 
-  it("aggregates logs and inserts a report", async () => {
+  it('aggregates logs and inserts a report', async () => {
     resultsByTable.daily_logs = {
-      data: [{ id: "l1" }, { id: "l2" }],
+      data: [{ id: 'l1' }, { id: 'l2' }],
       error: null,
     };
     resultsByTable.production_logs = {
@@ -70,36 +70,36 @@ describe("generateReportFn", () => {
     const result = await handler(makeEvent());
     expect(result.success).toBe(true);
     expect(insertCalls).toHaveLength(1);
-    expect(insertCalls[0]!.table).toBe("generated_reports");
+    expect(insertCalls[0]!.table).toBe('generated_reports');
     expect(insertCalls[0]!.args).toEqual(
       expect.objectContaining({
-        department_id: "dept-1",
-        date_from: "2026-08-01",
-        date_to: "2026-08-17",
+        department_id: 'dept-1',
+        date_from: '2026-08-01',
+        date_to: '2026-08-17',
         total_shifts: 2,
         total_coal_tonnes: 150,
         total_waste_tonnes: 75,
-      }),
+      })
     );
   });
 
-  it("handles empty logs with zero aggregates", async () => {
+  it('handles empty logs with zero aggregates', async () => {
     resultsByTable.daily_logs = { data: [], error: null };
     resultsByTable.production_logs = { data: [], error: null };
 
     const result = await handler(makeEvent());
     expect(result.report).toEqual(
-      expect.objectContaining({ total_shifts: 0, total_coal_tonnes: 0, total_waste_tonnes: 0 }),
+      expect.objectContaining({ total_shifts: 0, total_coal_tonnes: 0, total_waste_tonnes: 0 })
     );
   });
 
-  it("logs and re-throws when the report insert fails", async () => {
-    insertResult = { error: new Error("insert failed") };
+  it('logs and re-throws when the report insert fails', async () => {
+    insertResult = { error: new Error('insert failed') };
 
-    await expect(handler(makeEvent())).rejects.toThrow("insert failed");
+    await expect(handler(makeEvent())).rejects.toThrow('insert failed');
     expect(mockLogError).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ context: "generate_report_job", departmentId: "dept-1" }),
+      expect.objectContaining({ context: 'generate_report_job', departmentId: 'dept-1' })
     );
   });
 });

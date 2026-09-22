@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   createTireSchema,
   logTireInspectionSchema,
@@ -7,7 +7,7 @@ import type {
   tireInspectionSchema,
   tireSchema,
   tireStatusSchema,
-} from "../schemas/tire-management.schema.js";
+} from '../schemas/tire-management.schema.js';
 
 export type Tire = z.infer<typeof tireSchema>;
 export type TireInspection = z.infer<typeof tireInspectionSchema>;

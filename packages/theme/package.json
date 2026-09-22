@@ -37,7 +37,7 @@
     "clean": "rm -rf dist .turbo",
     "codegen": "node sd.config.mjs && node scripts/generate-tokens.mjs",
     "dev": "node sd.config.mjs --watch",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint": "biome check .",
     "lint:css": "stylelint 'src/css/**/*.css'",
     "lint:tokens": "node scripts/validate-tokens.mjs",
     "tokens:watch": "chokidar 'tokens.json' -c 'pnpm build'",

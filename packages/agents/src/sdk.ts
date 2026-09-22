@@ -4,15 +4,15 @@
  * Provides unified entrypoints for pillar prompt assembly, output quality auditing, and reflection engine execution.
  */
 
-import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from "./coordinator.js";
-import { AgentFleetRunner, type AgentSwarmReport } from "./fleet-runner.js";
-import { type AgentPillarConfig, AgentPillarEnvelope } from "./prompt-envelope.js";
-import { type QualityAuditResult, QualityGate } from "./quality-gate.js";
+import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from './coordinator.js';
+import { AgentFleetRunner, type AgentSwarmReport } from './fleet-runner.js';
+import { type AgentPillarConfig, AgentPillarEnvelope } from './prompt-envelope.js';
+import { type QualityAuditResult, QualityGate } from './quality-gate.js';
 import {
   ReflectionEngine,
   type ReflectionEngineOptions,
   type VerifiedTaskResult,
-} from "./reflection-engine.js";
+} from './reflection-engine.js';
 
 export type {
   AgentPillarConfig,
@@ -73,7 +73,7 @@ export class AgentQualitySDK {
    */
   public async runTask(
     task: Subtask,
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult> {
     return this.reflectionEngine.executeTaskWithReflection(task, options);
   }
@@ -83,7 +83,7 @@ export class AgentQualitySDK {
    */
   public async runPlan(
     plan: Subtask[],
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult[]> {
     const results: VerifiedTaskResult[] = [];
     for (const task of plan) {

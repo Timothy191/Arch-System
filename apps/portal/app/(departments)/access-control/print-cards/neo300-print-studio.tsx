@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { Button } from '@repo/ui/components/ui/button';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   Clock,
   Cpu,
@@ -14,12 +14,12 @@ import {
   Search,
   ShieldCheck,
   Stethoscope,
-} from "lucide-react";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { QRCodeSection } from "../card-actions/qr-section";
-import type { CardPrintJob, EmployeeCardProfile, Neo300Printer } from "./actions";
-import { cancelNeo300Job, getEmployeeCardProfiles, sendNeo300PrintJob } from "./actions";
+} from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { QRCodeSection } from '../card-actions/qr-section';
+import type { CardPrintJob, EmployeeCardProfile, Neo300Printer } from './actions';
+import { cancelNeo300Job, getEmployeeCardProfiles, sendNeo300PrintJob } from './actions';
 
 interface Neo300PrintStudioProps {
   initialPrinter: Neo300Printer;
@@ -35,11 +35,11 @@ export function Neo300PrintStudio({
   const [printer] = useState<Neo300Printer>(initialPrinter);
   const [employees, setEmployees] = useState<EmployeeCardProfile[]>(initialEmployees);
   const [selectedEmp, setSelectedEmp] = useState<EmployeeCardProfile | null>(
-    initialEmployees[0] ?? null,
+    initialEmployees[0] ?? null
   );
   const [jobs, setJobs] = useState<CardPrintJob[]>(initialJobs);
-  const [search, setSearch] = useState("");
-  const [cardSide, setCardSide] = useState<"front" | "back">("front");
+  const [search, setSearch] = useState('');
+  const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
   const [isPending, startTransition] = useTransition();
 
   const handleSearch = (term: string) => {
@@ -59,12 +59,12 @@ export function Neo300PrintStudio({
         const result = await sendNeo300PrintJob(employeeId);
         if (result.success && result.job) {
           toast.success(
-            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`,
+            `Print job sent to ${printer.model} for ${selectedEmp?.first_name} ${selectedEmp?.surname}!`
           );
           setJobs((prev) => [result.job as CardPrintJob, ...prev]);
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Failed to dispatch print job";
+        const message = err instanceof Error ? err.message : 'Failed to dispatch print job';
         toast.error(message);
       }
     });
@@ -74,10 +74,10 @@ export function Neo300PrintStudio({
     startTransition(async () => {
       try {
         await cancelNeo300Job(jobId);
-        setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: "cancelled" } : j)));
-        toast.info("Job cancelled");
+        setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: 'cancelled' } : j)));
+        toast.info('Job cancelled');
       } catch (_err: unknown) {
-        toast.error("Failed to cancel job");
+        toast.error('Failed to cancel job');
       }
     });
   };
@@ -107,10 +107,10 @@ export function Neo300PrintStudio({
                 </span>
               </div>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Model:{" "}
+                Model:{' '}
                 <span className="font-semibold text-[var(--text-primary)]">{printer.model}</span> |
                 CUPS Queue: <span className="font-mono text-blue-400">{printer.cups_name}</span> |
-                Connection:{" "}
+                Connection:{' '}
                 <span className="uppercase text-[var(--text-primary)]">
                   {printer.connection_type}
                 </span>
@@ -122,14 +122,14 @@ export function Neo300PrintStudio({
             <div className="text-right hidden sm:block">
               <p className="text-xs text-[var(--text-muted)]">Active Print Queue</p>
               <p className="text-sm font-mono font-bold text-[var(--text-heading)]">
-                {jobs.filter((j) => j.status === "queued" || j.status === "printing").length} Jobs
+                {jobs.filter((j) => j.status === 'queued' || j.status === 'printing').length} Jobs
                 Pending
               </p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info("Printer status synchronized")}
+              onClick={() => toast.info('Printer status synchronized')}
               className="gap-1.5 text-xs"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -172,8 +172,8 @@ export function Neo300PrintStudio({
                     onClick={() => setSelectedEmp(emp)}
                     className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
-                        ? "bg-blue-600/15 border-blue-500/50 shadow-sm"
-                        : "bg-[var(--bg-secondary)]/30 border-[var(--border-default)] hover:bg-[var(--bg-secondary)]/60"
+                        ? 'bg-blue-600/15 border-blue-500/50 shadow-sm'
+                        : 'bg-[var(--bg-secondary)]/30 border-[var(--border-default)] hover:bg-[var(--bg-secondary)]/60'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -186,7 +186,7 @@ export function Neo300PrintStudio({
                           {emp.first_name} {emp.surname}
                         </p>
                         <p className="text-xs text-[var(--text-muted)] truncate">
-                          {emp.emp_code} • {emp.job_title || "Personnel"}
+                          {emp.emp_code} • {emp.job_title || 'Personnel'}
                         </p>
                       </div>
                     </div>
@@ -236,22 +236,22 @@ export function Neo300PrintStudio({
               <div className="flex items-center gap-1 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border-default)]">
                 <button
                   type="button"
-                  onClick={() => setCardSide("front")}
+                  onClick={() => setCardSide('front')}
                   className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                    cardSide === "front"
-                      ? "bg-blue-600 text-white"
-                      : "text-[var(--text-muted)] hover:text-white"
+                    cardSide === 'front'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
                   Front
                 </button>
                 <button
                   type="button"
-                  onClick={() => setCardSide("back")}
+                  onClick={() => setCardSide('back')}
                   className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                    cardSide === "back"
-                      ? "bg-blue-600 text-white"
-                      : "text-[var(--text-muted)] hover:text-white"
+                    cardSide === 'back'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
                   Back
@@ -267,7 +267,7 @@ export function Neo300PrintStudio({
                   <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
                   <div className="absolute -top-16 -right-16 w-36 h-36 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
 
-                  {cardSide === "front" ? (
+                  {cardSide === 'front' ? (
                     <div className="relative h-full flex flex-col justify-between">
                       {/* Card Header */}
                       <div className="flex items-center justify-between border-b border-white/15 pb-2">
@@ -307,32 +307,32 @@ export function Neo300PrintStudio({
                             {selectedEmp.first_name} {selectedEmp.surname}
                           </h4>
                           <p className="text-xs text-blue-200 font-medium truncate">
-                            {selectedEmp.job_title || "Site Operator"}
+                            {selectedEmp.job_title || 'Site Operator'}
                           </p>
                           <p className="text-[10px] text-slate-400 font-mono">
-                            NAT ID: {selectedEmp.id_number || "Verified"}
+                            NAT ID: {selectedEmp.id_number || 'Verified'}
                           </p>
 
                           <div className="pt-2 flex items-center gap-2">
                             <span
                               className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border ${
                                 isMedicalValid
-                                  ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                                  : "bg-red-500/20 border-red-400/30 text-red-300"
+                                  ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300'
+                                  : 'bg-red-500/20 border-red-400/30 text-red-300'
                               }`}
                             >
                               <Stethoscope className="w-2.5 h-2.5" />
-                              Med: {isMedicalValid ? "PASS" : "EXP"}
+                              Med: {isMedicalValid ? 'PASS' : 'EXP'}
                             </span>
                             <span
                               className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border ${
                                 isInductionValid
-                                  ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                                  : "bg-amber-500/20 border-amber-400/30 text-amber-300"
+                                  ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300'
+                                  : 'bg-amber-500/20 border-amber-400/30 text-amber-300'
                               }`}
                             >
                               <FileCheck2 className="w-2.5 h-2.5" />
-                              Induct: {isInductionValid ? "OK" : "DUE"}
+                              Induct: {isInductionValid ? 'OK' : 'DUE'}
                             </span>
                           </div>
                         </div>
@@ -386,13 +386,13 @@ export function Neo300PrintStudio({
                     disabled={isPending}
                   >
                     <Printer className="w-4 h-4" />
-                    {isPending ? "Sending to Neo 300..." : "Print Card via Neo 300"}
+                    {isPending ? 'Sending to Neo 300...' : 'Print Card via Neo 300'}
                   </Button>
 
                   <Button
                     variant="outline"
                     className="gap-2"
-                    onClick={() => toast.info("PDF card preview ready for download")}
+                    onClick={() => toast.info('PDF card preview ready for download')}
                   >
                     <Download className="w-4 h-4" />
                     PDF
@@ -439,11 +439,11 @@ export function Neo300PrintStudio({
                       <td className="py-2.5">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                            j.status === "completed"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : j.status === "queued" || j.status === "printing"
-                                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse"
-                                : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                            j.status === 'completed'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : j.status === 'queued' || j.status === 'printing'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse'
+                                : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
                           }`}
                         >
                           {j.status.toUpperCase()}
@@ -451,12 +451,12 @@ export function Neo300PrintStudio({
                       </td>
                       <td className="py-2.5 text-slate-400">
                         {new Date(j.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </td>
                       <td className="py-2.5 text-right">
-                        {j.status === "queued" && (
+                        {j.status === 'queued' && (
                           <button
                             type="button"
                             onClick={() => handleCancelJob(j.id)}
@@ -465,10 +465,10 @@ export function Neo300PrintStudio({
                             Cancel
                           </button>
                         )}
-                        {j.status === "completed" && (
+                        {j.status === 'completed' && (
                           <button
                             type="button"
-                            onClick={() => handlePrint(j.personnel_id || "")}
+                            onClick={() => handlePrint(j.personnel_id || '')}
                             className="text-blue-400 hover:text-blue-300 font-medium text-xs"
                           >
                             Reprint

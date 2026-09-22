@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
-import { Logo } from "@repo/ui/Logo";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/ui/tabs';
+import { Logo } from '@repo/ui/Logo';
 import {
   BookOpen,
   Bot,
@@ -11,18 +11,18 @@ import {
   Network,
   Server,
   ShieldCheck,
-} from "lucide-react";
-import { lazy, Suspense, useState } from "react";
+} from 'lucide-react';
+import { lazy, Suspense, useState } from 'react';
 
 // Lazy load sections for better performance
-const SystemArchitecture = lazy(() => import("./sections/SystemArchitecture"));
-const BackendArchitecture = lazy(() => import("./sections/BackendArchitecture"));
-const DepartmentBreakdown = lazy(() => import("./sections/DepartmentBreakdown"));
-const TechStack = lazy(() => import("./sections/TechStack"));
-const DatabaseSchema = lazy(() => import("./sections/DatabaseSchema"));
-const DocumentationMaps = lazy(() => import("./sections/DocumentationMaps"));
-const AgenticMonitor = lazy(() => import("./sections/AgenticMonitor"));
-const AuditReportsSection = lazy(() => import("./sections/AuditReportsSection"));
+const SystemArchitecture = lazy(() => import('./sections/SystemArchitecture'));
+const BackendArchitecture = lazy(() => import('./sections/BackendArchitecture'));
+const DepartmentBreakdown = lazy(() => import('./sections/DepartmentBreakdown'));
+const TechStack = lazy(() => import('./sections/TechStack'));
+const DatabaseSchema = lazy(() => import('./sections/DatabaseSchema'));
+const DocumentationMaps = lazy(() => import('./sections/DocumentationMaps'));
+const AgenticMonitor = lazy(() => import('./sections/AgenticMonitor'));
+const AuditReportsSection = lazy(() => import('./sections/AuditReportsSection'));
 
 function SectionLoader() {
   return (
@@ -36,7 +36,7 @@ function SectionLoader() {
 }
 
 export default function OverviewPage() {
-  const [activeTab, setActiveTab] = useState("architecture");
+  const [activeTab, setActiveTab] = useState('architecture');
 
   return (
     <div className="space-y-6 animate-fade-up max-w-[1600px] mx-auto pb-12">

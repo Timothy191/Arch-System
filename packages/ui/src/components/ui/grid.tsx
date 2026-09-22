@@ -1,5 +1,5 @@
-import type React from "react";
-import { cn } from "../../lib/utils";
+import type React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface GridSystemProps extends React.HTMLAttributes<HTMLDivElement> {
   columns?: number;
@@ -16,10 +16,10 @@ export function GridSystem({
 }: GridSystemProps) {
   return (
     <div
-      className={cn("grid", className)}
+      className={cn('grid', className)}
       style={{
         gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        gap: typeof gap === "number" ? `${gap * 0.25}rem` : gap,
+        gap: typeof gap === 'number' ? `${gap * 0.25}rem` : gap,
         ...style,
       }}
       {...props}
@@ -74,7 +74,7 @@ export interface GridPageProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function GridPage({ className, children, ...props }: GridPageProps) {
   return (
-    <div className={cn("max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8", className)} {...props}>
+    <div className={cn('max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8', className)} {...props}>
       {children}
     </div>
   );
@@ -82,7 +82,7 @@ export function GridPage({ className, children, ...props }: GridPageProps) {
 
 export function GridCross({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("relative w-4 h-4 text-muted", className)} {...props}>
+    <div className={cn('relative w-4 h-4 text-muted', className)} {...props}>
       <div className="absolute left-1/2 top-0 bottom-0 w-px bg-currentColor -translate-x-1/2" />
       <div className="absolute top-1/2 left-0 right-0 h-px bg-currentColor -translate-y-1/2" />
     </div>

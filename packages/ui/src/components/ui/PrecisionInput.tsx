@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { ChevronDown, ChevronUp } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface PrecisionInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   label?: string;
   suffix?: string;
   value?: number | null;
@@ -15,7 +15,7 @@ export interface PrecisionInputProps
 export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputProps>(
   function PrecisionInput(
     { label, suffix, className, value, onChange, min, max, step = 1, ...props },
-    ref,
+    ref
   ) {
     const internalRef = React.useRef<HTMLInputElement>(null);
 
@@ -35,7 +35,7 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const valStr = e.target.value;
-      if (valStr === "") {
+      if (valStr === '') {
         onChange?.(e, null);
         return;
       }
@@ -61,19 +61,19 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
         <div className="relative">
           <div
             className={cn(
-              "flex items-center rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] hover:border-[#424242] transition-all overflow-hidden focus-within:ring-1 focus-within:ring-[#3ecf8e] focus-within:border-[#3ecf8e]/50",
-              className,
+              'flex items-center rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] hover:border-[#424242] transition-all overflow-hidden focus-within:ring-1 focus-within:ring-[#3ecf8e] focus-within:border-[#3ecf8e]/50',
+              className
             )}
           >
             <input
               id={inputId}
               ref={(node) => {
                 internalRef.current = node as HTMLInputElement;
-                if (typeof ref === "function") ref(node);
+                if (typeof ref === 'function') ref(node);
                 else if (ref) ref.current = node;
               }}
               type="number"
-              value={value ?? ""}
+              value={value ?? ''}
               onChange={handleChange}
               min={min}
               max={max}
@@ -108,5 +108,5 @@ export const PrecisionInput = React.forwardRef<HTMLInputElement, PrecisionInputP
         </div>
       </div>
     );
-  },
+  }
 );

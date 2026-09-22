@@ -1,10 +1,10 @@
-import { ChevronLeft, ChevronRight, Lock, RotateCw } from "lucide-react";
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import { ChevronLeft, ChevronRight, Lock, RotateCw } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../lib/utils';
 
 export interface BrowserProps extends React.HTMLAttributes<HTMLDivElement> {
   address?: string;
-  theme?: "auto" | "light" | "dark";
+  theme?: 'auto' | 'light' | 'dark';
   aspectRatio?: string;
   children: React.ReactNode;
 }
@@ -21,27 +21,27 @@ function middleTruncate(str: string, maxLength: number = 42): string {
 export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
   (
     {
-      address = "https://arch.coal",
-      theme = "auto",
+      address = 'https://arch.coal',
+      theme = 'auto',
       aspectRatio,
       className,
       children,
       style,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Format address display
-    const cleanAddress = address.replace(/^https?:\/\//, "");
+    const cleanAddress = address.replace(/^https?:\/\//, '');
     const truncatedAddress = middleTruncate(cleanAddress);
 
     return (
       <div
         ref={ref}
         className={cn(
-          "w-full overflow-hidden rounded-xl border border-neutral-200",
-          "bg-white shadow-xl select-none",
-          className,
+          'w-full overflow-hidden rounded-xl border border-neutral-200',
+          'bg-white shadow-xl select-none',
+          className
         )}
         style={{
           aspectRatio,
@@ -82,7 +82,7 @@ export const Browser = React.forwardRef<HTMLDivElement, BrowserProps>(
         <div className="relative w-full h-full overflow-hidden bg-neutral-50">{children}</div>
       </div>
     );
-  },
+  }
 );
 
-Browser.displayName = "Browser";
+Browser.displayName = 'Browser';

@@ -13,30 +13,30 @@ const INP_THRESHOLDS = { good: 200, needsImprovement: 500 };
 export interface PerformanceBreakdown {
   lcp: {
     value: number;
-    rating: "good" | "needs-improvement" | "poor";
+    rating: 'good' | 'needs-improvement' | 'poor';
     breakdown: {
       ttfb: number; // Time to First Byte
       resourceLoadDelay: number;
       resourceLoadTime: number;
       elementRenderDelay: number;
     };
-    longestSubpart: "ttfb" | "resourceLoadDelay" | "resourceLoadTime" | "elementRenderDelay";
+    longestSubpart: 'ttfb' | 'resourceLoadDelay' | 'resourceLoadTime' | 'elementRenderDelay';
     strategies: string[];
   };
   inp: {
     value: number;
-    rating: "good" | "needs-improvement" | "poor";
+    rating: 'good' | 'needs-improvement' | 'poor';
     breakdown: {
       inputDelay: number; // Time before event handlers run
       processingTime: number; // Event handler execution
       presentationDelay: number; // Time to paint next frame
     };
-    longestSubpart: "inputDelay" | "processingTime" | "presentationDelay";
+    longestSubpart: 'inputDelay' | 'processingTime' | 'presentationDelay';
     strategies: string[];
   };
   recommendations: Array<{
-    priority: "high" | "medium" | "low";
-    category: "lcp" | "inp" | "both";
+    priority: 'high' | 'medium' | 'low';
+    category: 'lcp' | 'inp' | 'both';
     action: string;
     impact: string;
   }>;
@@ -66,13 +66,13 @@ export function analyzePerformance(metrics?: { lcp?: number; inp?: number }): Pe
   };
 }
 
-function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): PerformanceBreakdown["lcp"] {
+function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): PerformanceBreakdown['lcp'] {
   const rating =
     value <= thresholds.good
-      ? "good"
+      ? 'good'
       : value <= thresholds.needsImprovement
-        ? "needs-improvement"
-        : "poor";
+        ? 'needs-improvement'
+        : 'poor';
 
   // Simulate LCP breakdown (in real implementation, use Performance API)
   const ttfb = Math.min(value * 0.15, 600); // 15% of LCP or max 600ms
@@ -96,45 +96,45 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
   };
 
   const longestSubpart = Object.entries(subparts).reduce((a, b) =>
-    b[1] > a[1] ? b : a,
+    b[1] > a[1] ? b : a
   )[0] as typeof breakdown extends { [key: string]: infer _T } ? keyof typeof breakdown : never;
 
   // Generate strategies based on longest subpart
   const strategies: string[] = [];
 
-  if (longestSubpart === "ttfb") {
+  if (longestSubpart === 'ttfb') {
     strategies.push(
-      "Optimize server response time (use Edge Functions, CDN caching)",
-      "Implement early hints for critical resources",
-      "Reduce redirect chains",
-      "Preconnect to required origins",
+      'Optimize server response time (use Edge Functions, CDN caching)',
+      'Implement early hints for critical resources',
+      'Reduce redirect chains',
+      'Preconnect to required origins'
     );
-  } else if (longestSubpart === "resourceLoadDelay") {
+  } else if (longestSubpart === 'resourceLoadDelay') {
     strategies.push(
-      "Prioritize critical resources with preload hints",
-      "Remove render-blocking resources",
-      "Defer non-critical CSS/JS",
-      "Use resource hints (preconnect, prefetch, preload)",
+      'Prioritize critical resources with preload hints',
+      'Remove render-blocking resources',
+      'Defer non-critical CSS/JS',
+      'Use resource hints (preconnect, prefetch, preload)'
     );
-  } else if (longestSubpart === "resourceLoadTime") {
+  } else if (longestSubpart === 'resourceLoadTime') {
     strategies.push(
-      "Compress and optimize images (WebP, AVIF)",
-      "Implement responsive images with srcset",
-      "Use a CDN for static assets",
-      "Enable text compression (gzip, brotli)",
-      "Reduce resource file sizes through tree-shaking",
+      'Compress and optimize images (WebP, AVIF)',
+      'Implement responsive images with srcset',
+      'Use a CDN for static assets',
+      'Enable text compression (gzip, brotli)',
+      'Reduce resource file sizes through tree-shaking'
     );
-  } else if (longestSubpart === "elementRenderDelay") {
+  } else if (longestSubpart === 'elementRenderDelay') {
     strategies.push(
-      "Optimize CSS for LCP element (avoid layout thrashing)",
-      "Reduce DOM complexity around LCP element",
-      "Use content-visibility for off-screen content",
-      "Prioritize LCP element in rendering queue",
+      'Optimize CSS for LCP element (avoid layout thrashing)',
+      'Reduce DOM complexity around LCP element',
+      'Use content-visibility for off-screen content',
+      'Prioritize LCP element in rendering queue'
     );
   }
 
-  if (rating === "poor") {
-    strategies.unshift("CRITICAL: LCP >4s severely impacts user experience - address immediately");
+  if (rating === 'poor') {
+    strategies.unshift('CRITICAL: LCP >4s severely impacts user experience - address immediately');
   }
 
   return {
@@ -146,13 +146,13 @@ function analyzeLCP(value: number, thresholds: typeof LCP_THRESHOLDS): Performan
   };
 }
 
-function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): PerformanceBreakdown["inp"] {
+function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): PerformanceBreakdown['inp'] {
   const rating =
     value <= thresholds.good
-      ? "good"
+      ? 'good'
       : value <= thresholds.needsImprovement
-        ? "needs-improvement"
-        : "poor";
+        ? 'needs-improvement'
+        : 'poor';
 
   // Simulate INP breakdown (in real implementation, use event timing API)
   const inputDelay = Math.min(value * 0.3, 150); // Time before event handlers run
@@ -173,39 +173,39 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
   };
 
   const longestSubpart = Object.entries(subparts).reduce((a, b) =>
-    b[1] > a[1] ? b : a,
+    b[1] > a[1] ? b : a
   )[0] as keyof typeof breakdown;
 
   // Generate strategies based on longest subpart
   const strategies: string[] = [];
 
-  if (longestSubpart === "inputDelay") {
+  if (longestSubpart === 'inputDelay') {
     strategies.push(
-      "Reduce main thread work (break up long tasks)",
-      "Use Web Workers for heavy computations",
-      "Defer non-critical JavaScript",
-      "Minimize style recalculations during interaction",
+      'Reduce main thread work (break up long tasks)',
+      'Use Web Workers for heavy computations',
+      'Defer non-critical JavaScript',
+      'Minimize style recalculations during interaction'
     );
-  } else if (longestSubpart === "processingTime") {
+  } else if (longestSubpart === 'processingTime') {
     strategies.push(
-      "Optimize event handlers (debounce/throttle)",
-      "Use React.memo and useMemo for expensive calculations",
-      "Break up state updates with useTransition",
-      "Move non-critical work to useEffect (post-interaction)",
-      "Consider using Suspense for conditional content",
+      'Optimize event handlers (debounce/throttle)',
+      'Use React.memo and useMemo for expensive calculations',
+      'Break up state updates with useTransition',
+      'Move non-critical work to useEffect (post-interaction)',
+      'Consider using Suspense for conditional content'
     );
-  } else if (longestSubpart === "presentationDelay") {
+  } else if (longestSubpart === 'presentationDelay') {
     strategies.push(
-      "Reduce paint complexity (simplify DOM structure)",
-      "Use CSS containment (contain: layout)",
-      "Avoid forced synchronous layouts",
-      "Use requestAnimationFrame for visual updates",
+      'Reduce paint complexity (simplify DOM structure)',
+      'Use CSS containment (contain: layout)',
+      'Avoid forced synchronous layouts',
+      'Use requestAnimationFrame for visual updates'
     );
   }
 
-  if (rating === "poor") {
+  if (rating === 'poor') {
     strategies.unshift(
-      "CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers",
+      'CRITICAL: INP >500ms makes interface feel sluggish - optimize event handlers'
     );
   }
 
@@ -219,81 +219,81 @@ function analyzeINP(value: number, thresholds: typeof INP_THRESHOLDS): Performan
 }
 
 function generateRecommendations(
-  lcp: PerformanceBreakdown["lcp"],
-  inp: PerformanceBreakdown["inp"],
-): PerformanceBreakdown["recommendations"] {
-  const recommendations: PerformanceBreakdown["recommendations"] = [];
+  lcp: PerformanceBreakdown['lcp'],
+  inp: PerformanceBreakdown['inp']
+): PerformanceBreakdown['recommendations'] {
+  const recommendations: PerformanceBreakdown['recommendations'] = [];
 
   // High priority: Address poor ratings first
-  if (lcp.rating === "poor") {
+  if (lcp.rating === 'poor') {
     recommendations.push({
-      priority: "high",
-      category: "lcp",
+      priority: 'high',
+      category: 'lcp',
       action: `Reduce LCP from ${lcp.value}ms to <2500ms by optimizing ${lcp.longestSubpart}`,
-      impact: "Significantly improves perceived load time and user retention",
+      impact: 'Significantly improves perceived load time and user retention',
     });
   }
 
-  if (inp.rating === "poor") {
+  if (inp.rating === 'poor') {
     recommendations.push({
-      priority: "high",
-      category: "inp",
+      priority: 'high',
+      category: 'inp',
       action: `Reduce INP from ${inp.value}ms to <200ms by optimizing ${inp.longestSubpart}`,
-      impact: "Makes interface feel responsive and snappy",
+      impact: 'Makes interface feel responsive and snappy',
     });
   }
 
   // Medium priority: Address needs-improvement ratings
-  if (lcp.rating === "needs-improvement") {
+  if (lcp.rating === 'needs-improvement') {
     recommendations.push({
-      priority: "medium",
-      category: "lcp",
+      priority: 'medium',
+      category: 'lcp',
       action: `Improve LCP from ${lcp.value}ms to <2500ms by addressing ${lcp.longestSubpart}`,
-      impact: "Better user experience and SEO rankings",
+      impact: 'Better user experience and SEO rankings',
     });
   }
 
-  if (inp.rating === "needs-improvement") {
+  if (inp.rating === 'needs-improvement') {
     recommendations.push({
-      priority: "medium",
-      category: "inp",
+      priority: 'medium',
+      category: 'inp',
       action: `Improve INP from ${inp.value}ms to <200ms by optimizing ${inp.longestSubpart}`,
-      impact: "Smoother interactions and better engagement",
+      impact: 'Smoother interactions and better engagement',
     });
   }
 
   // Specific actionable recommendations based on longest subparts
-  if (lcp.longestSubpart === "resourceLoadTime") {
+  if (lcp.longestSubpart === 'resourceLoadTime') {
     recommendations.push({
-      priority: "high",
-      category: "lcp",
-      action: "Implement image optimization strategy (WebP/AVIF, responsive images, lazy loading)",
-      impact: "Can reduce LCP by 30-50% on image-heavy pages",
+      priority: 'high',
+      category: 'lcp',
+      action: 'Implement image optimization strategy (WebP/AVIF, responsive images, lazy loading)',
+      impact: 'Can reduce LCP by 30-50% on image-heavy pages',
     });
   }
 
-  if (inp.longestSubpart === "processingTime") {
+  if (inp.longestSubpart === 'processingTime') {
     recommendations.push({
-      priority: "high",
-      category: "inp",
-      action: "Audit and optimize event handlers using React DevTools Profiler",
-      impact: "Can reduce INP by 40-60% on interaction-heavy pages",
+      priority: 'high',
+      category: 'inp',
+      action: 'Audit and optimize event handlers using React DevTools Profiler',
+      impact: 'Can reduce INP by 40-60% on interaction-heavy pages',
     });
   }
 
   // General best practices
   recommendations.push({
-    priority: "medium",
-    category: "both",
-    action: "Enable React Compiler (experimental) for automatic memoization",
-    impact: "Reduces both LCP (faster renders) and INP (optimized handlers)",
+    priority: 'medium',
+    category: 'both',
+    action: 'Enable React Compiler (experimental) for automatic memoization',
+    impact: 'Reduces both LCP (faster renders) and INP (optimized handlers)',
   });
 
   recommendations.push({
-    priority: "low",
-    category: "both",
-    action: "Implement speculative prerendering for likely navigation targets",
-    impact: "Improves perceived performance for navigation interactions",
+    priority: 'low',
+    category: 'both',
+    action: 'Implement speculative prerendering for likely navigation targets',
+    impact: 'Improves perceived performance for navigation interactions',
   });
 
   return recommendations.sort((a, b) => {
@@ -315,7 +315,7 @@ export class INPMonitor {
   }
 
   start() {
-    if (typeof PerformanceObserver === "undefined") return;
+    if (typeof PerformanceObserver === 'undefined') return;
 
     this.observer = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries() as any[];
@@ -334,7 +334,7 @@ export class INPMonitor {
       this.callback(inp);
     });
 
-    this.observer.observe({ type: "event", buffered: true });
+    this.observer.observe({ type: 'event', buffered: true });
   }
 
   stop() {
@@ -359,7 +359,7 @@ export class LCPMonitor {
   }
 
   start() {
-    if (typeof PerformanceObserver === "undefined") return;
+    if (typeof PerformanceObserver === 'undefined') return;
 
     this.observer = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
@@ -369,7 +369,7 @@ export class LCPMonitor {
       this.callback(lcp);
     });
 
-    this.observer.observe({ type: "largest-contentful-paint", buffered: true });
+    this.observer.observe({ type: 'largest-contentful-paint', buffered: true });
   }
 
   stop() {

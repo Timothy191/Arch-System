@@ -231,7 +231,7 @@ export default defineConfig({
       dark: "github-dark",
     },
     lineNumbers: true,
-    config: (md) => {
+    config: (_md) => {
       // Add Mermaid support if needed
       // md.use(require('markdown-it-mermaid'))
     },

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ChevronDown, Download, FileSpreadsheet, FileText } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ExportButtonProps {
   filename: string;
@@ -9,15 +9,15 @@ interface ExportButtonProps {
 }
 
 function rowsToCsv(rows: Record<string, unknown>[]): string {
-  if (rows.length === 0) return "";
+  if (rows.length === 0) return '';
   const headers = Object.keys(rows[0]!);
   const lines = [
-    headers.map((h) => `"${h}"`).join(","),
+    headers.map((h) => `"${h}"`).join(','),
     ...rows.map((row) =>
-      headers.map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","),
+      headers.map((h) => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(',')
     ),
   ];
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 export function ExportButton({ filename, rows }: ExportButtonProps) {
@@ -30,15 +30,15 @@ export function ExportButton({ filename, rows }: ExportButtonProps) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleExportCsv = () => {
     const csv = rowsToCsv(rows);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${filename}.csv`;
     a.click();
@@ -47,8 +47,8 @@ export function ExportButton({ filename, rows }: ExportButtonProps) {
   };
 
   const handleExportExcel = async () => {
-    const { exportToExcel } = await import("@repo/utils/client");
-    await exportToExcel(rows, filename, "Sheet1");
+    const { exportToExcel } = await import('@repo/utils/client');
+    await exportToExcel(rows, filename, 'Sheet1');
     setIsOpen(false);
   };
 

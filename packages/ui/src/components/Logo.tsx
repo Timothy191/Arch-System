@@ -1,17 +1,17 @@
-import { cn } from "../lib/utils";
+import { cn } from '../lib/utils';
 
 interface LogoProps {
   className?: string;
-  variant?: "default" | "focus";
+  variant?: 'default' | 'focus';
 }
 
-export function Logo({ className, variant: _variant = "default" }: LogoProps) {
+export function Logo({ className, variant: _variant = 'default' }: LogoProps) {
   // AGENT-TRACE: Vector logo rendering the official Arch OS scalable symbol
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="22.75 16.625 166.16 166.19"
-      className={cn("fill-current text-arch-accent-blue", className)}
+      className={cn('fill-current text-arch-accent-blue', className)}
       aria-hidden="true"
     >
       <path

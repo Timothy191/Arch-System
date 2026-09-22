@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { fetchClient, offlineStorage, type QueuedFetchRequest } from "@repo/utils/client";
-import { useCallback, useEffect, useState } from "react";
+import { fetchClient, offlineStorage, type QueuedFetchRequest } from '@repo/utils/client';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useFetchOfflineQueue() {
   const [pendingQueue, setPendingQueue] = useState<QueuedFetchRequest[]>([]);
   const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== "undefined" ? navigator.onLine : true,
+    typeof navigator !== 'undefined' ? navigator.onLine : true
   );
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -42,15 +42,15 @@ export function useFetchOfflineQueue() {
       setIsOnline(false);
     };
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("online", handleOnline);
-      window.addEventListener("offline", handleOffline);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
     }
 
     return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("online", handleOnline);
-        window.removeEventListener("offline", handleOffline);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
       }
     };
   }, [refreshQueue, flushQueue]);

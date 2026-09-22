@@ -5,7 +5,7 @@
  * mining telemetry streams, SCADA Modbus ingest, and InSAR satellite pipelines.
  */
 
-export type CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";
+export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
 export interface CircuitBreakerOptions {
   /** Number of consecutive failures before opening the circuit (default: 3) */
@@ -34,7 +34,7 @@ export interface CircuitBreakerMetrics {
 }
 
 export class TelemetryCircuitBreaker {
-  private state: CircuitState = "CLOSED";
+  private state: CircuitState = 'CLOSED';
   private failureCount = 0;
   private successCount = 0;
   private totalExecutions = 0;
@@ -51,7 +51,7 @@ export class TelemetryCircuitBreaker {
   private readonly onStateChange?: (
     from: CircuitState,
     to: CircuitState,
-    streamName?: string,
+    streamName?: string
   ) => void;
 
   constructor(options: CircuitBreakerOptions = {}) {
@@ -60,13 +60,13 @@ export class TelemetryCircuitBreaker {
     this.baseBackoffMs = options.baseBackoffMs ?? 500;
     this.maxBackoffMs = options.maxBackoffMs ?? 10000;
     this.maxRetries = options.maxRetries ?? 3;
-    this.streamName = options.streamName ?? "telemetry-stream";
+    this.streamName = options.streamName ?? 'telemetry-stream';
     this.onStateChange = options.onStateChange;
   }
 
   public getState(): CircuitState {
-    if (this.state === "OPEN" && Date.now() >= this.nextTrialTime) {
-      this.transitionTo("HALF_OPEN");
+    if (this.state === 'OPEN' && Date.now() >= this.nextTrialTime) {
+      this.transitionTo('HALF_OPEN');
     }
     return this.state;
   }
@@ -84,7 +84,7 @@ export class TelemetryCircuitBreaker {
 
   public reset(): void {
     this.failureCount = 0;
-    this.transitionTo("CLOSED");
+    this.transitionTo('CLOSED');
   }
 
   private transitionTo(newState: CircuitState): void {
@@ -109,17 +109,17 @@ export class TelemetryCircuitBreaker {
    */
   public async execute<T>(
     operation: () => Promise<T>,
-    fallback?: () => Promise<T> | T,
+    fallback?: () => Promise<T> | T
   ): Promise<T> {
     this.totalExecutions++;
     const currentState = this.getState();
 
-    if (currentState === "OPEN") {
+    if (currentState === 'OPEN') {
       if (fallback) {
         return await fallback();
       }
       throw new Error(
-        `[TelemetryCircuitBreaker] Stream "${this.streamName}" circuit is OPEN. Request rejected to prevent service saturation.`,
+        `[TelemetryCircuitBreaker] Stream "${this.streamName}" circuit is OPEN. Request rejected to prevent service saturation.`
       );
     }
 
@@ -133,7 +133,7 @@ export class TelemetryCircuitBreaker {
         lastError = err;
         this.handleFailure();
 
-        if (attempt < this.maxRetries && this.getState() !== "OPEN") {
+        if (attempt < this.maxRetries && this.getState() !== 'OPEN') {
           const delay = this.calculateBackoff(attempt);
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
@@ -149,9 +149,9 @@ export class TelemetryCircuitBreaker {
   private handleSuccess(): void {
     this.successCount++;
     this.lastSuccessTime = Date.now();
-    if (this.state === "HALF_OPEN" || this.failureCount > 0) {
+    if (this.state === 'HALF_OPEN' || this.failureCount > 0) {
       this.failureCount = 0;
-      this.transitionTo("CLOSED");
+      this.transitionTo('CLOSED');
     }
   }
 
@@ -159,9 +159,9 @@ export class TelemetryCircuitBreaker {
     this.failureCount++;
     this.lastFailureTime = Date.now();
 
-    if (this.state === "HALF_OPEN" || this.failureCount >= this.failureThreshold) {
+    if (this.state === 'HALF_OPEN' || this.failureCount >= this.failureThreshold) {
       this.nextTrialTime = Date.now() + this.resetTimeoutMs;
-      this.transitionTo("OPEN");
+      this.transitionTo('OPEN');
     }
   }
 }

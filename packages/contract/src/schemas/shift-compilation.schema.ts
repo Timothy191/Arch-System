@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { dateSchema, nonEmptyString, uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { dateSchema, nonEmptyString, uuidSchema } from './common.schema';
 
 export const machinePerformanceSchema = z.object({
   machine_id: uuidSchema,
@@ -21,7 +21,7 @@ export const shiftBreakdownSummarySchema = z.object({
   time_out: z.string().nullable().optional(),
   reason: z.string(),
   repair_notes: z.string().nullable().optional(),
-  status: z.enum(["active", "completed"]),
+  status: z.enum(['active', 'completed']),
 });
 
 export const shiftTireEventSchema = z.object({
@@ -32,7 +32,7 @@ export const shiftTireEventSchema = z.object({
   position: z.string(),
   pressure_psi: z.number().nullable().optional(),
   tread_depth_mm: z.number().nullable().optional(),
-  condition_status: z.enum(["good", "warning", "critical"]),
+  condition_status: z.enum(['good', 'warning', 'critical']),
   notes: z.string().nullable().optional(),
 });
 
@@ -40,12 +40,12 @@ export const unifiedShiftReportSchema = z.object({
   meta: z.object({
     department_id: uuidSchema,
     shift_date: dateSchema,
-    shift_type: z.enum(["day", "night"]),
+    shift_type: z.enum(['day', 'night']),
     compiled_at: z.string(),
   }),
   shift_status: z.object({
     id: uuidSchema.optional(),
-    status: z.enum(["open", "closed"]).default("open"),
+    status: z.enum(['open', 'closed']).default('open'),
     closed_at: z.string().nullable().optional(),
     closed_by: uuidSchema.nullable().optional(),
     approved_by: uuidSchema.nullable().optional(),
@@ -60,7 +60,7 @@ export const unifiedShiftReportSchema = z.object({
         machine_type: z.string(),
         total_loads: z.number().int().nonnegative(),
         hourly_distribution: z.record(z.string(), z.number()),
-      }),
+      })
     ),
   }),
   fleet_performance: z.array(machinePerformanceSchema),
@@ -71,7 +71,7 @@ export const unifiedShiftReportSchema = z.object({
 export const lockAndSignShiftSchema = z.object({
   departmentId: uuidSchema,
   shiftDate: dateSchema,
-  shiftType: z.enum(["day", "night"]),
+  shiftType: z.enum(['day', 'night']),
   notes: z.string().max(2000).optional().nullable(),
   pin: nonEmptyString.max(20),
   approvedById: uuidSchema.optional(),

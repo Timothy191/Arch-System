@@ -10,7 +10,7 @@ export interface Breakdown {
   time_out: string | null;
   reason: string;
   repair_notes: string | null;
-  status: "active" | "completed";
+  status: 'active' | 'completed';
   missing_book_in: boolean;
   created_by: string | null;
   completed_by: string | null;

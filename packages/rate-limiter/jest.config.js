@@ -1,11 +1,11 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: 'node',
   transform: {
-    "^.+\\.tsx?$": ["@swc/jest", {}],
+    '^.+\\.tsx?$': ['@swc/jest', {}],
   },
   moduleNameMapper: {
-    "^@repo/(.*)$": "<rootDir>/../$1/src",
+    '^@repo/(.*)$': '<rootDir>/../$1/src',
   },
-  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 };

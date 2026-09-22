@@ -1,10 +1,10 @@
 export const CacheCategory = {
-  AUTH: "auth",
-  METRICS: "metrics",
-  SHIFT: "shift",
-  AI_MEMORY: "ai_memory",
-  DEPARTMENT: "dept",
-  EQUIPMENT: "equipment",
+  AUTH: 'auth',
+  METRICS: 'metrics',
+  SHIFT: 'shift',
+  AI_MEMORY: 'ai_memory',
+  DEPARTMENT: 'dept',
+  EQUIPMENT: 'equipment',
 } as const;
 
 // eslint-disable-next-line no-redeclare
@@ -29,5 +29,5 @@ export function buildCacheKey(
   ...parts: (string | number | undefined)[]
 ): string {
   const clean = parts.filter((p): p is string | number => p !== undefined);
-  return `arch:${category}:${clean.join(":")}`;
+  return `arch:${category}:${clean.join(':')}`;
 }

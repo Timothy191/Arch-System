@@ -16,11 +16,11 @@ export const analytics = {
    * In a real-world scenario, this would post to Mixpanel, PostHog, or a custom Postgres table.
    */
   track: (event: AnalyticsEvent) => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // Client-side tracking: send to an API endpoint that handles the external integration
-      fetch("/api/capture", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      fetch('/api/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...event, timestamp: new Date().toISOString() }),
         keepalive: true,
       }).catch(() => {
@@ -29,7 +29,7 @@ export const analytics = {
     } else {
       // Server-side tracking (e.g., from Server Actions or API routes)
       // eslint-disable-next-line no-console
-      console.log("[ANALYTICS]", JSON.stringify({ ...event, timestamp: new Date().toISOString() }));
+      console.log('[ANALYTICS]', JSON.stringify({ ...event, timestamp: new Date().toISOString() }));
       // e.g., await db.insert(analyticsTable).values(...)
     }
   },
@@ -38,10 +38,10 @@ export const analytics = {
    * Sets the current user context for subsequent events.
    */
   identify: (userId: string, traits?: Record<string, any>) => {
-    if (typeof window !== "undefined") {
-      fetch("/api/capture/identify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    if (typeof window !== 'undefined') {
+      fetch('/api/capture/identify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, traits }),
         keepalive: true,
       }).catch(() => {

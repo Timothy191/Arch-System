@@ -1,24 +1,24 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { GlassCard } from "./GlassCard";
+import type { Meta, StoryObj } from '@storybook/react';
+import { GlassCard } from './GlassCard';
 
 const meta: Meta<typeof GlassCard> = {
-  title: "Components/GlassCard",
+  title: 'Components/GlassCard',
   component: GlassCard,
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
   argTypes: {
     accent: {
-      control: "select",
-      options: ["green", "blue", "red", "cyan", "indigo", "violet", "alert", "none"],
+      control: 'select',
+      options: ['green', 'blue', 'red', 'cyan', 'indigo', 'violet', 'alert', 'none'],
     },
     variant: {
-      control: "select",
-      options: ["default", "window", "spotlight", "glowborder", "liquid"],
+      control: 'select',
+      options: ['default', 'window', 'spotlight', 'glowborder', 'liquid'],
     },
     colorPreset: {
-      control: "select",
-      options: ["nature", "ocean", "sunset", "aurora", "custom"],
+      control: 'select',
+      options: ['nature', 'ocean', 'sunset', 'aurora', 'custom'],
     },
   },
 };
@@ -34,14 +34,14 @@ export const Default: Story = {
         <p className="text-[var(--text-heading)] font-medium">Standard Glass Card</p>
       </div>
     ),
-    variant: "default",
+    variant: 'default',
     hover: true,
   },
 };
 
 export const Window: Story = {
   args: {
-    title: "Terminal",
+    title: 'Terminal',
     children: (
       <div className="w-80 h-48 bg-black/90 p-4 font-mono text-green-400 text-sm">
         <p>arch-system login: admin</p>
@@ -50,7 +50,7 @@ export const Window: Story = {
         <p className="animate-pulse">_</p>
       </div>
     ),
-    variant: "window",
+    variant: 'window',
     padding: false,
   },
 };
@@ -64,8 +64,8 @@ export const Spotlight: Story = {
         </p>
       </div>
     ),
-    variant: "spotlight",
-    spotlightColor: "rgba(28, 28, 30, 0.15)",
+    variant: 'spotlight',
+    spotlightColor: 'rgba(28, 28, 30, 0.15)',
   },
 };
 
@@ -76,8 +76,8 @@ export const GlowBorder: Story = {
         <p className="text-[var(--text-heading)] font-medium">Glow Border variant</p>
       </div>
     ),
-    variant: "glowborder",
-    colorPreset: "aurora",
+    variant: 'glowborder',
+    colorPreset: 'aurora',
   },
 };
 
@@ -88,7 +88,7 @@ export const Liquid: Story = {
         <p className="text-[var(--text-heading)] font-medium">Liquid Glass Refraction</p>
       </div>
     ),
-    variant: "liquid",
+    variant: 'liquid',
     hover: true,
   },
 };

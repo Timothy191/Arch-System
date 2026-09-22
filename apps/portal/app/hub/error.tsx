@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { useEffect } from "react";
-import { isAppError, isNotFoundError } from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import { useEffect } from 'react';
+import { isAppError, isNotFoundError } from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
 
 interface HubErrorProps {
   error: Error & { digest?: string };
@@ -11,14 +11,14 @@ interface HubErrorProps {
 }
 
 function getErrorTitle(error: Error): string {
-  if (isNotFoundError(error)) return "Hub not found";
-  if (isAppError(error)) return error.name.replace(/([A-Z])/g, " $1").trim();
-  return "Hub Error";
+  if (isNotFoundError(error)) return 'Hub not found';
+  if (isAppError(error)) return error.name.replace(/([A-Z])/g, ' $1').trim();
+  return 'Hub Error';
 }
 
 function getErrorMessage(error: Error): string {
   if (isAppError(error)) return error.message;
-  return error.message || "Failed to load hub data.";
+  return error.message || 'Failed to load hub data.';
 }
 
 export default function HubError({ error, reset }: HubErrorProps) {

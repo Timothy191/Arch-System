@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { shiftCloseoutSchema } from "@repo/contract/schemas/control-room.schema";
-import type { ShiftCloseoutInput } from "@repo/contract/schemas/control-room.schema";
-import { AuthError, RateLimitError, ValidationError, isAppError } from "@repo/errors";
-import { getRedisClient } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
+import type { ShiftCloseoutInput } from '@repo/contract/schemas/control-room.schema';
+import { shiftCloseoutSchema } from '@repo/contract/schemas/control-room.schema';
+import { AuthError, isAppError, RateLimitError, ValidationError } from '@repo/errors';
+import { getRedisClient } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
 
 export interface ShiftCloseoutResult {
   success: boolean;
@@ -22,7 +22,7 @@ async function checkRateLimit(supervisorId: string): Promise<boolean> {
 
   try {
     const redis = await getRedisClient();
-    if (redis && redis.isOpen) {
+    if (redis?.isOpen) {
       const key = `arch:ratelimit:shift_closeout:${supervisorId}`;
       const current = await redis.incr(key);
       if (current === 1) {
@@ -52,14 +52,14 @@ async function checkRateLimit(supervisorId: string): Promise<boolean> {
  * Redis rate-limiting (5 req/min), and pgcrypto supervisor PIN verification RPC.
  */
 export async function submitShiftCloseout(
-  rawInput: ShiftCloseoutInput,
+  rawInput: ShiftCloseoutInput
 ): Promise<ShiftCloseoutResult> {
   try {
     // 1. Validate input payload against canonical Zod schema
     const parseResult = shiftCloseoutSchema.safeParse(rawInput);
     if (!parseResult.success) {
-      const firstIssue = parseResult.error.issues[0]?.message || "Invalid shift closeout payload";
-      throw new ValidationError(firstIssue, { field: parseResult.error.issues[0]?.path.join(".") });
+      const firstIssue = parseResult.error.issues[0]?.message || 'Invalid shift closeout payload';
+      throw new ValidationError(firstIssue, { field: parseResult.error.issues[0]?.path.join('.') });
     }
 
     const payload = parseResult.data;
@@ -68,10 +68,10 @@ export async function submitShiftCloseout(
     const allowed = await checkRateLimit(payload.supervisorId);
     if (!allowed) {
       throw new RateLimitError(
-        "Rate limit exceeded. Maximum 5 shift closeout attempts allowed per minute.",
+        'Rate limit exceeded. Maximum 5 shift closeout attempts allowed per minute.',
         {
           context: { supervisorId: payload.supervisorId },
-        },
+        }
       );
     }
 
@@ -79,22 +79,22 @@ export async function submitShiftCloseout(
     const supabase = await createServerSupabaseClient();
 
     // 4. Verify supervisor PIN via pgcrypto SECURITY DEFINER RPC
-    const { data: isValidPin, error: rpcError } = await supabase.rpc("verify_supervisor_pin", {
+    const { data: isValidPin, error: rpcError } = await supabase.rpc('verify_supervisor_pin', {
       p_user_id: payload.supervisorId,
       p_pin: payload.supervisorPin,
     });
 
     if (rpcError) {
-      if (rpcError.message?.includes("temporarily locked")) {
+      if (rpcError.message?.includes('temporarily locked')) {
         throw new AuthError(rpcError.message, { context: { supervisorId: payload.supervisorId } });
       }
-      throw new AuthError("Supervisor PIN verification failed.", {
+      throw new AuthError('Supervisor PIN verification failed.', {
         cause: new Error(rpcError.message),
       });
     }
 
     if (!isValidPin) {
-      throw new AuthError("Invalid supervisor PIN.", {
+      throw new AuthError('Invalid supervisor PIN.', {
         context: { supervisorId: payload.supervisorId },
       });
     }
@@ -102,20 +102,20 @@ export async function submitShiftCloseout(
     // 5. Update shift status to closed in database
     // Check if shift entry exists in control_room_shift_reports or shifts table
     const { data: shiftData, error: updateError } = await supabase
-      .from("control_room_shift_reports")
+      .from('control_room_shift_reports')
       .upsert(
         {
           department_id: payload.supervisorId, // supervisor department mapping
-          report_date: new Date().toISOString().split("T")[0],
-          shift_type: "day",
-          operator_name: "Control Room Operator",
-          summary_notes: payload.operatorNotes || "",
+          report_date: new Date().toISOString().split('T')[0],
+          shift_type: 'day',
+          operator_name: 'Control Room Operator',
+          summary_notes: payload.operatorNotes || '',
           supervisor_signature: `Verified:${payload.supervisorId}`,
           completed_checklist_count: payload.totalLoads,
           total_checklist_count: payload.totalLoads,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "department_id,report_date,shift_type" },
+        { onConflict: 'department_id,report_date,shift_type' }
       )
       .select()
       .single();
@@ -123,9 +123,9 @@ export async function submitShiftCloseout(
     if (updateError) {
       // Fallback update to shifts table if control_room_shift_reports query fails
       const { data: fallbackData, error: fallbackError } = await supabase
-        .from("shifts")
+        .from('shifts')
         .update({
-          status: "closed",
+          status: 'closed',
           metrics: {
             totalLoads: payload.totalLoads,
             totalOperatingHours: payload.totalOperatingHours,
@@ -134,7 +134,7 @@ export async function submitShiftCloseout(
           },
           updated_at: new Date().toISOString(),
         })
-        .eq("id", payload.shiftId)
+        .eq('id', payload.shiftId)
         .select()
         .single();
 
@@ -144,7 +144,7 @@ export async function submitShiftCloseout(
           success: true,
           data: {
             shiftId: payload.shiftId,
-            status: "closed",
+            status: 'closed',
             verifiedBy: payload.supervisorId,
             timestamp: new Date().toISOString(),
           },
@@ -166,16 +166,16 @@ export async function submitShiftCloseout(
       return {
         success: false,
         error: err.message,
-        code: err.code || "APP_ERROR",
+        code: err.code || 'APP_ERROR',
       };
     }
 
     const message =
-      err instanceof Error ? err.message : "An unexpected error occurred during shift closeout";
+      err instanceof Error ? err.message : 'An unexpected error occurred during shift closeout';
     return {
       success: false,
       error: message,
-      code: "INTERNAL_SERVER_ERROR",
+      code: 'INTERNAL_SERVER_ERROR',
     };
   }
 }

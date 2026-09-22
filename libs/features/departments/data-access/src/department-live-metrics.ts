@@ -8,7 +8,7 @@ export interface DepartmentMetricOverlay {
     value: string;
   };
   trend?: number[];
-  status?: "active" | "maintenance" | "alert";
+  status?: 'active' | 'maintenance' | 'alert';
 }
 
 export type DepartmentLiveMetricsMap = Record<string, DepartmentMetricOverlay>;
@@ -26,7 +26,7 @@ export interface GenericDbClient {
  */
 export async function fetchLiveDepartmentMetrics(
   db: GenericDbClient,
-  today: string,
+  today: string
 ): Promise<DepartmentLiveMetricsMap> {
   const result: DepartmentLiveMetricsMap = {};
 
@@ -35,35 +35,35 @@ export async function fetchLiveDepartmentMetrics(
       await Promise.all([
         // 1. Control Room Hourly Loads for today
         db
-          .from("hourly_loads")
+          .from('hourly_loads')
           .select(
-            "hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads",
+            'hour_01, hour_02, hour_03, hour_04, hour_05, hour_06, hour_07, hour_08, hour_09, hour_10, hour_11, hour_12, total_loads'
           )
-          .eq("load_date", today)
-          .order("created_at", { ascending: false })
+          .eq('load_date', today)
+          .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle(),
 
         // 2. Production & Processing Extraction Tonnage
         db
-          .from("daily_logs")
-          .select("id, shift, production_logs(coal_tonnes, waste_tonnes)")
-          .eq("log_date", today)
+          .from('daily_logs')
+          .select('id, shift, production_logs(coal_tonnes, waste_tonnes)')
+          .eq('log_date', today)
           .limit(1)
           .maybeSingle(),
 
         // 3. Equipment breakdowns (active)
         db
-          .from("breakdowns")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "active")
-          .is("deleted_at", null),
+          .from('breakdowns')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .is('deleted_at', null),
 
         // 4. Engineering Machines
-        db.from("machines").select("id, name, status").is("deleted_at", null),
+        db.from('machines').select('id, name, status').is('deleted_at', null),
 
         // 5. Access Control active badges on-site
-        db.from("badges").select("id", { count: "exact", head: true }).eq("status", "active"),
+        db.from('badges').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       ]);
 
     // --- Control Room Overlay ---
@@ -85,13 +85,13 @@ export async function fetchLiveDepartmentMetrics(
       ];
       const total = row.total_loads ?? hours.reduce((a: number, b: number) => a + b, 0);
 
-      result["control-room"] = {
+      result['control-room'] = {
         stats: {
-          label: "Loads",
-          value: total > 0 ? `${total.toLocaleString()}` : "Active",
+          label: 'Loads',
+          value: total > 0 ? `${total.toLocaleString()}` : 'Active',
         },
         trend: hours.some((h) => h > 0) ? hours : [22, 28, 31, 35, 30, 27, 34, 38, 29, 33, 36, 30],
-        status: "active",
+        status: 'active',
       };
     }
 
@@ -105,25 +105,25 @@ export async function fetchLiveDepartmentMetrics(
 
       const totalCoal = prodLogs.reduce(
         (sum: number, l: any) => sum + (Number(l.coal_tonnes) || 0),
-        0,
+        0
       );
       const totalWaste = prodLogs.reduce(
         (sum: number, l: any) => sum + (Number(l.waste_tonnes) || 0),
-        0,
+        0
       );
       const totalMined = totalCoal + totalWaste;
       const yieldPct = totalMined > 0 ? Math.round((totalCoal / totalMined) * 100) : 85;
 
       result.production = {
         stats: {
-          label: "Yield",
+          label: 'Yield',
           value:
             totalCoal > 0
               ? `${totalCoal.toLocaleString(undefined, { maximumFractionDigits: 0 })}t`
               : `${yieldPct}%`,
         },
         trend: [78, 80, 82, 83, 85, 86, 88, yieldPct],
-        status: "active",
+        status: 'active',
       };
     }
 
@@ -138,25 +138,25 @@ export async function fetchLiveDepartmentMetrics(
 
     result.engineering = {
       stats: {
-        label: "Availability",
+        label: 'Availability',
         value: `${availabilityRate}%`,
       },
-      status: activeBreakdowns > 0 ? "maintenance" : "active",
+      status: activeBreakdowns > 0 ? 'maintenance' : 'active',
       trend: [95, 96, 96, 97, 98, 98, availabilityRate],
     };
 
     // --- Access Control Overlay ---
     if (badgesRes?.count !== undefined && badgesRes?.count !== null) {
-      result["access-control"] = {
+      result['access-control'] = {
         stats: {
-          label: "On-site",
+          label: 'On-site',
           value: `${badgesRes.count}`,
         },
-        status: "active",
+        status: 'active',
       };
     }
   } catch (err) {
-    console.warn("fetchLiveDepartmentMetrics warning (using default overlays):", err);
+    console.warn('fetchLiveDepartmentMetrics warning (using default overlays):', err);
   }
 
   return result;

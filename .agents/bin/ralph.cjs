@@ -11,71 +11,71 @@
  * it does not spawn external agent contexts.
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
-const { execSync } = require("node:child_process");
+const fs = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const root = process.cwd();
-const rcPath = path.join(root, ".ralphrc.json");
+const rcPath = path.join(root, '.ralphrc.json');
 
 const DEFAULT_RC = {
-  name: "arch-systems-ralph",
+  name: 'arch-systems-ralph',
   qualityGate: {
     commands: [
-      "pnpm --filter @repo/ui type-check",
-      "pnpm --filter @repo/theme type-check",
-      "pnpm --filter @repo/hub/ui type-check",
-      "pnpm --filter @repo/auth/ui type-check",
-      "pnpm --filter @repo/departments/ui type-check",
-      "pnpm --filter @repo/ui lint:css",
-      "pnpm --filter @repo/theme lint:css",
+      'pnpm --filter @repo/ui type-check',
+      'pnpm --filter @repo/theme type-check',
+      'pnpm --filter @repo/hub/ui type-check',
+      'pnpm --filter @repo/auth/ui type-check',
+      'pnpm --filter @repo/departments/ui type-check',
+      'pnpm --filter @repo/ui lint:css',
+      'pnpm --filter @repo/theme lint:css',
       "pnpm --filter portal test -- --testPathPatterns='login/page|hub/page|GlassCard|SystemTray|LoginForm' --maxWorkers=2",
     ],
   },
   commit: {
     all: false,
-    messagePrefix: "ralph:",
+    messagePrefix: 'ralph:',
   },
   recovery: {
-    onFailure: "stash broken work, log retrospective, and resume next cycle",
+    onFailure: 'stash broken work, log retrospective, and resume next cycle',
   },
 };
 
 function log(...args) {
   // eslint-disable-next-line no-console
-  console.log("[ralph]", ...args);
+  console.log('[ralph]', ...args);
 }
 
 function run(cmd, { silent = false } = {}) {
   const out = execSync(cmd, {
     cwd: root,
-    encoding: "utf8",
-    stdio: silent ? ["pipe", "pipe", "pipe"] : "inherit",
+    encoding: 'utf8',
+    stdio: silent ? ['pipe', 'pipe', 'pipe'] : 'inherit',
   });
   return out;
 }
 
 function loadRc() {
   if (!fs.existsSync(rcPath)) {
-    log("No .ralphrc.json found. Run `ralph init` first.");
+    log('No .ralphrc.json found. Run `ralph init` first.');
     process.exit(1);
   }
-  return JSON.parse(fs.readFileSync(rcPath, "utf8"));
+  return JSON.parse(fs.readFileSync(rcPath, 'utf8'));
 }
 
 function writeRc() {
-  fs.writeFileSync(rcPath, JSON.stringify(DEFAULT_RC, null, 2) + "\n");
-  log("Created", rcPath);
+  fs.writeFileSync(rcPath, `${JSON.stringify(DEFAULT_RC, null, 2)}\n`);
+  log('Created', rcPath);
 }
 
 function runQualityGate(rc) {
   const commands = rc.qualityGate?.commands ?? DEFAULT_RC.qualityGate.commands;
-  log("Running quality gate...");
+  log('Running quality gate...');
   for (const cmd of commands) {
     try {
       run(cmd);
-    } catch (err) {
-      log("Quality gate failed at:", cmd);
+    } catch (_err) {
+      log('Quality gate failed at:', cmd);
       return { pass: false, failedCommand: cmd };
     }
   }
@@ -83,43 +83,43 @@ function runQualityGate(rc) {
 }
 
 function atomicRun(jobDesc) {
-  log("Atomic job:", jobDesc);
-  log("Execute the described changes, then run quality gate.");
+  log('Atomic job:', jobDesc);
+  log('Execute the described changes, then run quality gate.');
   const rc = loadRc();
   const result = runQualityGate(rc);
   if (!result.pass) {
-    log("GATE_FAILED");
+    log('GATE_FAILED');
     process.exit(1);
   }
-  log("Quality gate passed.");
+  log('Quality gate passed.');
   try {
-    const staged = run("git diff --cached --name-only", { silent: true });
+    const staged = run('git diff --cached --name-only', { silent: true });
     if (!staged.trim()) {
       log(
-        "No staged changes to commit. Stage the files you want to include in this atomic job first.",
+        'No staged changes to commit. Stage the files you want to include in this atomic job first.'
       );
-      log("SUCCESS (no commit)");
+      log('SUCCESS (no commit)');
       return;
     }
     run(`git commit --no-verify -m "${rc.commit.messagePrefix} ${jobDesc.replace(/"/g, "'")}"`);
-    log("Committed atomic job.");
+    log('Committed atomic job.');
   } catch (err) {
-    log("Commit failed:", err.message);
+    log('Commit failed:', err.message);
     process.exit(1);
   }
-  log("SUCCESS");
+  log('SUCCESS');
 }
 
 function main() {
   const [, , cmd, ...rest] = process.argv;
 
-  if (cmd === "init") {
+  if (cmd === 'init') {
     writeRc();
     return;
   }
 
-  if (cmd === "run") {
-    const jobDesc = rest.join(" ");
+  if (cmd === 'run') {
+    const jobDesc = rest.join(' ');
     if (!jobDesc) {
       log('Usage: ralph run "<job description>"');
       process.exit(1);
@@ -128,10 +128,10 @@ function main() {
     return;
   }
 
-  if (cmd === "loop") {
+  if (cmd === 'loop') {
     const [nArg, ...goalParts] = rest;
     const n = Number.parseInt(nArg, 10);
-    const goal = goalParts.join(" ");
+    const goal = goalParts.join(' ');
     if (!Number.isFinite(n) || !goal) {
       log('Usage: ralph loop <n> "<goal>"');
       process.exit(1);

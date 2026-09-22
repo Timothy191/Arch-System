@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import type { ThrottleOptions } from "./types";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ThrottleOptions } from './types';
 
 /**
  * Hook that returns a throttled version of the provided value.
@@ -37,7 +37,7 @@ export function useThrottle<T>(value: T, delay: number): T {
 export function useThrottleFn<T extends (...args: any[]) => any>(
   fn: T,
   delay: number,
-  options: ThrottleOptions = {},
+  options: ThrottleOptions = {}
 ): { run: (...args: Parameters<T>) => void; cancel: () => void } {
   const { leading = true, trailing = true } = options;
 
@@ -84,7 +84,7 @@ export function useThrottleFn<T extends (...args: any[]) => any>(
         }, delay - elapsed);
       }
     },
-    [delay, leading, trailing],
+    [delay, leading, trailing]
   );
 
   useEffect(() => {

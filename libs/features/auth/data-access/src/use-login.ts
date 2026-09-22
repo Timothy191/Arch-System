@@ -1,12 +1,12 @@
-import * as Sentry from "@sentry/nextjs";
-import { useState } from "react";
-import { toast } from "sonner";
+import * as Sentry from '@sentry/nextjs';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 async function pushTelemetry(name: string) {
   try {
-    await fetch("/api/telemetry/push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    await fetch('/api/telemetry/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, value: 1 }),
     });
   } catch {
@@ -23,9 +23,9 @@ export function useLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: employeeId, password }),
       });
 
@@ -33,24 +33,24 @@ export function useLogin() {
 
       if (!response.ok) {
         if (response.status === 429) {
-          const retryAfter = response.headers.get("X-RateLimit-Reset");
+          const retryAfter = response.headers.get('X-RateLimit-Reset');
           if (retryAfter) {
             const retryTimestamp = parseInt(retryAfter, 10);
             const remaining = Math.max(0, retryTimestamp - Math.floor(Date.now() / 1000));
             setRateLimitCountdown(remaining);
           }
-          toast.error(data.error || "Too many attempts.");
+          toast.error(data.error || 'Too many attempts.');
         } else {
-          toast.error(data.error || "Sign in failed.");
+          toast.error(data.error || 'Sign in failed.');
         }
 
         Sentry.addBreadcrumb({
-          message: "Auth failed",
-          category: "auth",
-          level: "error",
+          message: 'Auth failed',
+          category: 'auth',
+          level: 'error',
           data: { reason: data.error },
         });
-        void pushTelemetry("auth.failure");
+        void pushTelemetry('auth.failure');
         setLoading(false);
         return { success: false };
       }
@@ -59,12 +59,12 @@ export function useLogin() {
       // We removed the manual client-side cookie assignment (sb-127-auth-token) to prevent
       // edge cases where middleware might detect conflicting or outdated tokens.
 
-      Sentry.addBreadcrumb({ message: "Auth succeeded", category: "auth", level: "info" });
-      void pushTelemetry("auth.success");
+      Sentry.addBreadcrumb({ message: 'Auth succeeded', category: 'auth', level: 'info' });
+      void pushTelemetry('auth.success');
       setLoading(false);
       return { success: true };
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error('Network error. Please try again.');
       setLoading(false);
       return { success: false };
     }

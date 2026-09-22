@@ -1,7 +1,7 @@
-import { Page } from "@playwright/test";
+import type { Page } from '@playwright/test';
 
 /** The global RouteBackground's LCP image — proves the background is mounted. */
-export const ROUTE_BG_SELECTOR = "#route-bg-light-image";
+export const ROUTE_BG_SELECTOR = '#route-bg-light-image';
 
 export interface OpaqueLayer {
   tag: string;
@@ -21,7 +21,7 @@ export interface OpaqueLayer {
  */
 export async function findOpaqueBackgroundLayers(
   page: Page,
-  contentSelector: string,
+  contentSelector: string
 ): Promise<OpaqueLayer[]> {
   return page.evaluate((sel) => {
     const content = document.querySelector(sel);
@@ -32,7 +32,7 @@ export async function findOpaqueBackgroundLayers(
     const alphaOf = (bg: string): number | null => {
       const m = bg.match(/^rgba?\(([^)]+)\)$/);
       if (!m) return null;
-      const parts = m[1].split(",").map((s) => s.trim());
+      const parts = m[1].split(',').map((s) => s.trim());
       const alpha = parts.length === 4 ? Number(parts[3]) : 1;
       return Number.isFinite(alpha) ? alpha : null;
     };
@@ -45,7 +45,7 @@ export async function findOpaqueBackgroundLayers(
       if (alpha !== null && alpha >= 0.95) {
         offenders.push({
           tag: el.tagName.toLowerCase(),
-          className: typeof el.className === "string" ? el.className : "",
+          className: typeof el.className === 'string' ? el.className : '',
           backgroundColor: bg,
         });
       }
@@ -60,7 +60,7 @@ export function luminanceOf(color: string): number | null {
   const m = color.match(/^rgba?\(([^)]+)\)$/);
   if (!m) return null;
   const [r, g, b] = m[1]
-    .split(",")
+    .split(',')
     .slice(0, 3)
     .map((s) => Number(s.trim()));
   if (r === undefined || g === undefined || b === undefined) return null;

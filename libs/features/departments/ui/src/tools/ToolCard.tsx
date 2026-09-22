@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Bot, ExternalLink, Wifi, WifiOff, Workflow } from "lucide-react";
-import { type ComponentType, type CSSProperties, useState } from "react";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Bot, ExternalLink, Wifi, WifiOff, Workflow } from 'lucide-react';
+import { type ComponentType, type CSSProperties, useState } from 'react';
 
 const ICON_MAP: Record<string, ComponentType<{ className?: string; style?: CSSProperties }>> = {
   Workflow,
@@ -16,7 +16,7 @@ interface ToolStatus {
   description: string;
   icon: string;
   color: string;
-  status: "online" | "offline" | "unknown";
+  status: 'online' | 'offline' | 'unknown';
   responseTime?: number;
 }
 
@@ -29,20 +29,20 @@ export default function ToolCard({ tool }: ToolCardProps) {
   const Icon = ICON_MAP[tool.icon] ?? ExternalLink;
 
   const statusColor =
-    tool.status === "online"
-      ? "text-[#3ecf8e]"
-      : tool.status === "offline"
-        ? "text-[#ef4444]"
-        : "text-[var(--text-secondary)]";
+    tool.status === 'online'
+      ? 'text-[#3ecf8e]'
+      : tool.status === 'offline'
+        ? 'text-[#ef4444]'
+        : 'text-[var(--text-secondary)]';
 
   const statusBg =
-    tool.status === "online"
-      ? "bg-[#3ecf8e]/10"
-      : tool.status === "offline"
-        ? "bg-[#ef4444]/10"
-        : "bg-[var(--bg-tertiary)]";
+    tool.status === 'online'
+      ? 'bg-[#3ecf8e]/10'
+      : tool.status === 'offline'
+        ? 'bg-[#ef4444]/10'
+        : 'bg-[var(--bg-tertiary)]';
 
-  const StatusIcon = tool.status === "online" ? Wifi : WifiOff;
+  const StatusIcon = tool.status === 'online' ? Wifi : WifiOff;
 
   return (
     <GlassCard className="flex flex-col">
@@ -62,7 +62,7 @@ export default function ToolCard({ tool }: ToolCardProps) {
           >
             <StatusIcon className="w-3.5 h-3.5" />
             <span className="capitalize">{tool.status}</span>
-            {tool.responseTime && tool.status === "online" && <span>({tool.responseTime}ms)</span>}
+            {tool.responseTime && tool.status === 'online' && <span>({tool.responseTime}ms)</span>}
           </div>
           <a
             href={tool.url}
@@ -75,19 +75,19 @@ export default function ToolCard({ tool }: ToolCardProps) {
           </a>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            disabled={tool.status === "offline"}
+            disabled={tool.status === 'offline'}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
               isOpen
-                ? "bg-[#3ecf8e]/20 text-[#3ecf8e] border-[#3ecf8e]/30"
-                : "bg-[var(--bg-primary)] text-[var(--text-muted)] border-[var(--border-emphasis)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]"
+                ? 'bg-[#3ecf8e]/20 text-[#3ecf8e] border-[#3ecf8e]/30'
+                : 'bg-[var(--bg-primary)] text-[var(--text-muted)] border-[var(--border-emphasis)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-heading)]'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            {isOpen ? "Close" : "Embed"}
+            {isOpen ? 'Close' : 'Embed'}
           </button>
         </div>
       </div>
 
-      {isOpen && tool.status === "online" && (
+      {isOpen && tool.status === 'online' && (
         <div className="flex-1 min-h-[500px] rounded-lg border border-[var(--border-emphasis)] overflow-hidden bg-[var(--bg-primary)] animate-in fade-in slide-in-from-top-2 duration-200">
           <iframe
             src={tool.url}
@@ -99,7 +99,7 @@ export default function ToolCard({ tool }: ToolCardProps) {
         </div>
       )}
 
-      {isOpen && tool.status === "offline" && (
+      {isOpen && tool.status === 'offline' && (
         <div className="flex-1 min-h-[200px] rounded-lg border border-[var(--border-emphasis)] bg-[var(--bg-primary)] flex items-center justify-center">
           <div className="text-center">
             <WifiOff className="w-8 h-8 text-[#ef4444] mx-auto mb-2" />

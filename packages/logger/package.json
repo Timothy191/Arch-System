@@ -23,7 +23,7 @@
     "build": "tsc",
     "clean": "rm -rf dist .turbo",
     "dev": "tsc --watch",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/.eslintcache --max-warnings 0",
+    "lint": "biome check .",
     "type-check": "tsc --noEmit"
   },
   "types": "./src/index.ts"

@@ -7,16 +7,16 @@
  * Usage: node tools/ops/explain-query-plans.cjs
  */
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const ARCH_BASE_MIGRATIONS = path.join(ROOT, "..", "Arch-Base", "supabase", "migrations");
+const ROOT = path.resolve(__dirname, '..', '..');
+const ARCH_BASE_MIGRATIONS = path.join(ROOT, '..', 'Arch-Base', 'supabase', 'migrations');
 const MIGRATIONS_DIR = fs.existsSync(ARCH_BASE_MIGRATIONS)
   ? ARCH_BASE_MIGRATIONS
-  : path.join(ROOT, "packages", "database", "migrations");
-const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, "documentation", "03-audit-reports");
-const REPORT_PATH = path.join(REPORT_DIR, "explain-query-plans-report.md");
+  : path.join(ROOT, 'packages', 'database', 'migrations');
+const REPORT_DIR = process.env.AUDIT_DIR || path.join(ROOT, 'documentation', '03-audit-reports');
+const REPORT_PATH = path.join(REPORT_DIR, 'explain-query-plans-report.md');
 
 /**
  * Reads all migration files in numeric order.
@@ -28,7 +28,7 @@ function listMigrations() {
   }
   return fs
     .readdirSync(MIGRATIONS_DIR)
-    .filter((f) => f.endsWith(".sql"))
+    .filter((f) => f.endsWith('.sql'))
     .sort();
 }
 
@@ -36,8 +36,8 @@ function listMigrations() {
  * Strips comments from SQL string to prevent regex false positives.
  */
 function stripComments(sql) {
-  let out = sql.replace(/\/\*[\s\S]*?\*\//g, "");
-  out = out.replace(/(^|\s)--[^\n]*/g, "$1");
+  let out = sql.replace(/\/\*[\s\S]*?\*\//g, '');
+  out = out.replace(/(^|\s)--[^\n]*/g, '$1');
   return out;
 }
 
@@ -48,11 +48,11 @@ function auditPartitionedTables() {
 
   for (const file of migrations) {
     const fullPath = path.join(MIGRATIONS_DIR, file);
-    const sql = stripComments(fs.readFileSync(fullPath, "utf-8"));
+    const sql = stripComments(fs.readFileSync(fullPath, 'utf-8'));
 
     // Find PARTITION BY RANGE (column_name)
     const partitionMatches = sql.matchAll(
-      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi,
+      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public\.)?(\w+)\s*\(([\s\S]*?)\)\s*PARTITION\s+BY\s+RANGE\s*\(\s*(\w+)\s*\)/gi
     );
 
     for (const match of partitionMatches) {
@@ -62,7 +62,7 @@ function auditPartitionedTables() {
 
       // Check Primary Key composition
       const pkMatch = tableBody.match(/PRIMARY\s+KEY\s*\(([^)]+)\)/i);
-      const pkCols = pkMatch ? pkMatch[1].split(",").map((c) => c.trim().toLowerCase()) : [];
+      const pkCols = pkMatch ? pkMatch[1].split(',').map((c) => c.trim().toLowerCase()) : [];
       const hasPartitionKeyInPK = pkCols.includes(partitionKey.toLowerCase());
 
       partitionedTables.push({
@@ -76,14 +76,14 @@ function auditPartitionedTables() {
 
     // Find Composite Foreign Keys referencing partitioned tables
     const fkMatches = sql.matchAll(
-      /CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi,
+      /CONSTRAINT\s+(\w+)\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s*REFERENCES\s+(?:public\.)?(\w+)\s*\(([^)]+)\)/gi
     );
 
     for (const match of fkMatches) {
       const constraintName = match[1];
-      const fkCols = match[2].split(",").map((c) => c.trim());
+      const fkCols = match[2].split(',').map((c) => c.trim());
       const targetTable = match[3];
-      const targetCols = match[4].split(",").map((c) => c.trim());
+      const targetCols = match[4].split(',').map((c) => c.trim());
 
       compositeFKs.push({
         file,
@@ -113,7 +113,7 @@ function generateReport() {
 
   for (const t of partitionedTables) {
     if (t.hasPartitionKeyInPK) _alignedPKs++;
-    markdown += `| \`${t.tableName}\` | \`${t.partitionKey}\` | \`(${t.primaryKeyCols.join(", ")})\` | ${t.hasPartitionKeyInPK ? "✅ Yes" : "❌ No"} | \`${t.file}\` |\n`;
+    markdown += `| \`${t.tableName}\` | \`${t.partitionKey}\` | \`(${t.primaryKeyCols.join(', ')})\` | ${t.hasPartitionKeyInPK ? '✅ Yes' : '❌ No'} | \`${t.file}\` |\n`;
   }
 
   markdown += `\n## Composite Foreign Key Constraints (Partition Aligned)\n\n`;
@@ -121,7 +121,7 @@ function generateReport() {
   markdown += `| --- | --- | --- | --- | --- | --- |\n`;
 
   for (const fk of compositeFKs) {
-    markdown += `| \`${fk.constraintName}\` | \`(${fk.fkCols.join(", ")})\` | \`${fk.targetTable}\` | \`(${fk.targetCols.join(", ")})\` | ${fk.isComposite ? "✅ Composite" : "ℹ️ Single"} | \`${fk.file}\` |\n`;
+    markdown += `| \`${fk.constraintName}\` | \`(${fk.fkCols.join(', ')})\` | \`${fk.targetTable}\` | \`(${fk.targetCols.join(', ')})\` | ${fk.isComposite ? '✅ Composite' : 'ℹ️ Single'} | \`${fk.file}\` |\n`;
   }
 
   markdown += `\n## Performance & EXPLAIN ANALYZE Guidelines\n\n`;
@@ -133,10 +133,10 @@ function generateReport() {
     fs.mkdirSync(REPORT_DIR, { recursive: true });
   }
 
-  fs.writeFileSync(REPORT_PATH, markdown, "utf-8");
+  fs.writeFileSync(REPORT_PATH, markdown, 'utf-8');
 
   console.log(
-    `OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`,
+    `OK Scanned ${partitionedTables.length} partitioned tables across database migrations.`
   );
   console.log(`Report generated at: ${path.relative(ROOT, REPORT_PATH)}`);
   return 0;

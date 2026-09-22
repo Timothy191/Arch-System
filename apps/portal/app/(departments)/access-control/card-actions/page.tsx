@@ -1,7 +1,7 @@
-import { PageHeader } from "@repo/ui/PageHeader";
-import { CardActionsView } from "./card-actions-view";
+import { PageHeader } from '@repo/ui/PageHeader';
+import { CardActionsView } from './card-actions-view';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function CardActionsPage(props: {
   searchParams: Promise<{ q?: string; selected?: string }>;
@@ -11,7 +11,7 @@ export default async function CardActionsPage(props: {
   return (
     <div className="space-y-6">
       <PageHeader title="Card Actions" showDate />
-      <CardActionsView initialQuery={params.q ?? ""} initialSelectedId={params.selected ?? ""} />
+      <CardActionsView initialQuery={params.q ?? ''} initialSelectedId={params.selected ?? ''} />
     </div>
   );
 }

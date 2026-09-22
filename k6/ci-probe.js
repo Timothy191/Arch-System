@@ -1,63 +1,63 @@
-import http from "k6/http";
-import { check, sleep } from "k6";
-import { Rate, Trend, Counter } from "k6/metrics";
+import { check, sleep } from 'k6';
+import http from 'k6/http';
+import { Counter, Rate, Trend } from 'k6/metrics';
 
-export const warmupPasses = new Rate("warmup_passes");
-export const warmupLatency = new Trend("warmup_latency_ms");
-export const warmupRequests = new Counter("warmup_requests");
+export const warmupPasses = new Rate('warmup_passes');
+export const warmupLatency = new Trend('warmup_latency_ms');
+export const warmupRequests = new Counter('warmup_requests');
 
 export const options = {
   scenarios: [
     {
-      name: "cold_pass",
-      executor: "constant-vus",
-      exec: "coldWarmup",
+      name: 'cold_pass',
+      executor: 'constant-vus',
+      exec: 'coldWarmup',
       vus: 1,
-      duration: "30s",
-      startTime: "0s",
+      duration: '30s',
+      startTime: '0s',
     },
     {
-      name: "warm_pass",
-      executor: "constant-vus",
-      exec: "warmWarmup",
+      name: 'warm_pass',
+      executor: 'constant-vus',
+      exec: 'warmWarmup',
       vus: 1,
-      duration: "30s",
-      startTime: "31s",
+      duration: '30s',
+      startTime: '31s',
     },
     {
-      name: "saturated",
-      executor: "constant-vus",
-      exec: "saturated",
+      name: 'saturated',
+      executor: 'constant-vus',
+      exec: 'saturated',
       vus: 5,
-      duration: "20s",
-      startTime: "0s",
+      duration: '20s',
+      startTime: '0s',
     },
   ],
   thresholds: {
-    warmup_latency_ms: ["p(95)<350", "p(99)<700"],
-    warmup_passes: ["rate>0.95"],
-    http_req_failed: ["rate<0.01"],
+    warmup_latency_ms: ['p(95)<350', 'p(99)<700'],
+    warmup_passes: ['rate>0.95'],
+    http_req_failed: ['rate<0.01'],
   },
 };
 
-const BASE_URL = __ENV.BENCH_BASE_URL || "http://localhost:3000";
-const WARMUP_PATHS = ["/api/health/live", "/api/health/warmup", "/api/health/supabase-realtime"];
+const BASE_URL = __ENV.BENCH_BASE_URL || 'http://localhost:3000';
+const WARMUP_PATHS = ['/api/health/live', '/api/health/warmup', '/api/health/supabase-realtime'];
 
 export function coldWarmup() {
-  runPass("cold");
+  runPass('cold');
 }
 
 export function warmWarmup() {
-  runPass("warm");
+  runPass('warm');
 }
 
 export function saturated() {
-  runPass("saturated");
+  runPass('saturated');
   sleep(0.5);
 }
 
 function runPass(passName) {
-  const start = Date.now();
+  const _start = Date.now();
   const failures = [];
 
   for (const path of WARMUP_PATHS) {
@@ -79,6 +79,6 @@ function runPass(passName) {
   warmupPasses.add(passed ? 1 : 0);
 
   if (!passed) {
-    console.warn(`${passName} pass failed: ${failures.join(" | ")}`);
+    console.warn(`${passName} pass failed: ${failures.join(' | ')}`);
   }
 }

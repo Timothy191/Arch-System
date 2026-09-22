@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * RouteBackground
@@ -15,15 +15,15 @@ export function RouteBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -67,10 +67,10 @@ export function RouteBackground() {
             className="route-bg-video filter brightness-105 object-cover object-center w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
-              transition: "opacity 1.5s ease-in-out",
-              willChange: "transform, opacity",
-              transform: "translateZ(0)",
-              backfaceVisibility: "hidden",
+              transition: 'opacity 1.5s ease-in-out',
+              willChange: 'transform, opacity',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
             }}
             onCanPlay={() => setIsVideoLoaded(true)}
             autoPlay

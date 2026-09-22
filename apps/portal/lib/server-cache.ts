@@ -1,5 +1,5 @@
-import { unstable_cache, revalidateTag as nextRevalidateTag } from "next/cache";
-import { cacheInvalidateTags } from "@repo/redis";
+import { cacheInvalidateTags } from '@repo/redis';
+import { revalidateTag as nextRevalidateTag, unstable_cache } from 'next/cache';
 
 /**
  * Standard Next.js 16 semantic cache lifetime profiles.
@@ -46,11 +46,11 @@ export function tagDepartment(departmentSlug: string, resource: string): string 
 export async function updateTag(tag: string): Promise<void> {
   // 1. Next.js Data Cache invalidation (read-your-writes)
   try {
-    const nextCache = require("next/cache");
-    if (typeof nextCache.updateTag === "function") {
+    const nextCache = require('next/cache');
+    if (typeof nextCache.updateTag === 'function') {
       nextCache.updateTag(tag);
     } else {
-      (nextRevalidateTag as any)(tag, "max");
+      (nextRevalidateTag as any)(tag, 'max');
     }
   } catch {
     // Outside request context (e.g. standalone tests)
@@ -72,11 +72,11 @@ export async function updateTag(tag: string): Promise<void> {
 export async function updateTags(tags: string[]): Promise<void> {
   for (const tag of tags) {
     try {
-      const nextCache = require("next/cache");
-      if (typeof nextCache.updateTag === "function") {
+      const nextCache = require('next/cache');
+      if (typeof nextCache.updateTag === 'function') {
         nextCache.updateTag(tag);
       } else {
-        (nextRevalidateTag as any)(tag, "max");
+        (nextRevalidateTag as any)(tag, 'max');
       }
     } catch {
       // Outside request context
@@ -97,7 +97,7 @@ export async function updateTags(tags: string[]): Promise<void> {
  * @param tag The cache tag to invalidate
  * @param profile The cache life profile ('max', 'hours', 'minutes', etc.)
  */
-export function refreshTag(tag: string, profile: CacheProfile = "max"): void {
+export function refreshTag(tag: string, profile: CacheProfile = 'max'): void {
   (nextRevalidateTag as any)(tag, profile);
 }
 
@@ -120,7 +120,7 @@ export function cachedRSC<T>(
   options?: {
     revalidate?: number | false;
     tags?: string[];
-  },
+  }
 ): Promise<T> {
   return unstable_cache(fn, keyParts, {
     revalidate: options?.revalidate,

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
-import { memo } from "react";
-import { useControlRoomSummary } from "@/hooks/useDashboardQueries";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { memo } from 'react';
+import { useControlRoomSummary } from '@/hooks/useDashboardQueries';
 
 interface ControlRoomSummaryGridClientProps {
   deptId: string;

@@ -1,77 +1,77 @@
-"use client";
+'use client';
 
-import { Avatar } from "@repo/ui";
-import { Marquee } from "@repo/ui/Marquee";
+import { Avatar } from '@repo/ui';
+import { Marquee } from '@repo/ui/Marquee';
 
 // AGENT-TRACE: Curated testimonials representing realistic operational feedback from key departments and directors.
 // Each review includes a `color` for the initials-based avatar fallback, which renders
 // if the external avatar.vercel.sh URL fails (network blocked, service down, etc.).
 const DEPT_COLOR_MAP: Record<string, string> = {
-  drilling: "bg-dept-drilling/20 text-dept-drilling",
-  production: "bg-dept-production/20 text-dept-production",
-  controlroom: "bg-dept-control-room/20 text-dept-control-room",
-  engineering: "bg-dept-engineering/20 text-dept-engineering",
-  accesscontrol: "bg-accent-blue/20 text-accent-blue",
-  director: "bg-accent-amber/20 text-accent-amber",
-  supervisor: "bg-accent-green/20 text-accent-green",
+  drilling: 'bg-dept-drilling/20 text-dept-drilling',
+  production: 'bg-dept-production/20 text-dept-production',
+  controlroom: 'bg-dept-control-room/20 text-dept-control-room',
+  engineering: 'bg-dept-engineering/20 text-dept-engineering',
+  accesscontrol: 'bg-accent-blue/20 text-accent-blue',
+  director: 'bg-accent-amber/20 text-accent-amber',
+  supervisor: 'bg-accent-green/20 text-accent-green',
 };
 
 const REVIEWS = [
   {
-    name: "Drilling Dept",
-    username: "@drilling",
-    body: "Rig 4 telemetry tracking is extremely fast now. Makes scheduling down-hole operations trivial.",
-    img: "https://avatar.vercel.sh/drilling",
-    color: DEPT_COLOR_MAP.drilling ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Drilling Dept',
+    username: '@drilling',
+    body: 'Rig 4 telemetry tracking is extremely fast now. Makes scheduling down-hole operations trivial.',
+    img: 'https://avatar.vercel.sh/drilling',
+    color: DEPT_COLOR_MAP.drilling ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Production Unit",
-    username: "@production",
-    body: "Tonnage logs are highly accurate. It makes shift handovers much cleaner.",
-    img: "https://avatar.vercel.sh/production",
-    color: DEPT_COLOR_MAP.production ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Production Unit',
+    username: '@production',
+    body: 'Tonnage logs are highly accurate. It makes shift handovers much cleaner.',
+    img: 'https://avatar.vercel.sh/production',
+    color: DEPT_COLOR_MAP.production ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Control Room Shift",
-    username: "@controlroom",
+    name: 'Control Room Shift',
+    username: '@controlroom',
     body: "SCADA panel integrations are incredibly responsive. Best portal we've used.",
-    img: "https://avatar.vercel.sh/controlroom",
-    color: DEPT_COLOR_MAP.controlroom ?? "bg-accent-blue/20 text-accent-blue",
+    img: 'https://avatar.vercel.sh/controlroom',
+    color: DEPT_COLOR_MAP.controlroom ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Engineering Lead",
-    username: "@engineering",
-    body: "Tire management calculations are highly precise. Prevented multiple haul truck flats.",
-    img: "https://avatar.vercel.sh/engineering",
-    color: DEPT_COLOR_MAP.engineering ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Engineering Lead',
+    username: '@engineering',
+    body: 'Tire management calculations are highly precise. Prevented multiple haul truck flats.',
+    img: 'https://avatar.vercel.sh/engineering',
+    color: DEPT_COLOR_MAP.engineering ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Access Control Crew",
-    username: "@accesscontrol",
-    body: "Visitor logs are super easy to check. Temp badges compile in seconds.",
-    img: "https://avatar.vercel.sh/accesscontrol",
-    color: DEPT_COLOR_MAP.accesscontrol ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Access Control Crew',
+    username: '@accesscontrol',
+    body: 'Visitor logs are super easy to check. Temp badges compile in seconds.',
+    img: 'https://avatar.vercel.sh/accesscontrol',
+    color: DEPT_COLOR_MAP.accesscontrol ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Operations Director",
-    username: "@director",
-    body: "Excellent visibility into plant metrics and shift logs. Real-time monitoring works perfectly.",
-    img: "https://avatar.vercel.sh/director",
-    color: DEPT_COLOR_MAP.director ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Operations Director',
+    username: '@director',
+    body: 'Excellent visibility into plant metrics and shift logs. Real-time monitoring works perfectly.',
+    img: 'https://avatar.vercel.sh/director',
+    color: DEPT_COLOR_MAP.director ?? 'bg-accent-blue/20 text-accent-blue',
   },
   {
-    name: "Site Supervisor",
-    username: "@supervisor",
-    body: "Highly reliable system. The offline banner and resilient auth keep operators in focus.",
-    img: "https://avatar.vercel.sh/supervisor",
-    color: DEPT_COLOR_MAP.supervisor ?? "bg-accent-blue/20 text-accent-blue",
+    name: 'Site Supervisor',
+    username: '@supervisor',
+    body: 'Highly reliable system. The offline banner and resilient auth keep operators in focus.',
+    img: 'https://avatar.vercel.sh/supervisor',
+    color: DEPT_COLOR_MAP.supervisor ?? 'bg-accent-blue/20 text-accent-blue',
   },
 ];
 
 const firstRow = REVIEWS.slice(0, REVIEWS.length / 2);
 const secondRow = REVIEWS.slice(REVIEWS.length / 2);
 
-import { MessageSquareQuote } from "lucide-react";
+import { MessageSquareQuote } from 'lucide-react';
 
 interface ReviewCardProps {
   img: string;
@@ -83,10 +83,10 @@ interface ReviewCardProps {
 
 function ReviewCard({ img, name, username, body }: ReviewCardProps) {
   const initials = name
-    .split(" ")
+    .split(' ')
     .map((word) => word[0])
     .slice(0, 2)
-    .join("")
+    .join('')
     .toUpperCase();
 
   return (
@@ -120,14 +120,14 @@ function ReviewCard({ img, name, username, body }: ReviewCardProps) {
 export function DepartmentReviews() {
   // AGENT-TRACE: Using CSS mask-image gradient to smoothly fade marquee edges over the dynamic background video
   const maskStyle = {
-    maskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)",
-    WebkitMaskImage: "linear-gradient(to right, transparent, white 10%, white 90%, transparent)",
+    maskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, white 10%, white 90%, transparent)',
   };
 
   return (
     <div
       className="space-y-4 animate-fade-up group/row"
-      style={{ animationDelay: "0.05s", animationFillMode: "both" }}
+      style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
     >
       <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
         <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">

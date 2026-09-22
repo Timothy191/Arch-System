@@ -1,8 +1,8 @@
-import { KPICard, KPIGrid } from "@repo/ui/KPI";
-import { PageHeader } from "@repo/ui/PageHeader";
-import { getCurrentShift } from "@repo/utils";
-import { getDepartmentContext, requireDepartment } from "~/lib/dept-context";
-import { HourlyLoadsGrid } from "./HourlyLoadsGrid";
+import { KPICard, KPIGrid } from '@repo/ui/KPI';
+import { PageHeader } from '@repo/ui/PageHeader';
+import { getCurrentShift } from '@repo/utils';
+import { getDepartmentContext, requireDepartment } from '~/lib/dept-context';
+import { HourlyLoadsGrid } from './HourlyLoadsGrid';
 
 export default async function HourlyLoadsPage({
   params,
@@ -10,7 +10,7 @@ export default async function HourlyLoadsPage({
   params: Promise<{ department: string }>;
 }) {
   const { department } = await params;
-  requireDepartment(department, "control-room");
+  requireDepartment(department, 'control-room');
 
   const { deptId, supabase, today } = await getDepartmentContext({
     department,
@@ -18,25 +18,25 @@ export default async function HourlyLoadsPage({
 
   // Fetch dump trucks with bin_factor (centralised fleet)
   const { data: machines } = await supabase
-    .from("machines")
-    .select("id, name, machine_type, bin_factor, site_id, sites(name)")
-    .eq("machine_type", "Dump Truck")
-    .eq("active", true)
-    .order("name");
+    .from('machines')
+    .select('id, name, machine_type, bin_factor, site_id, sites(name)')
+    .eq('machine_type', 'Dump Truck')
+    .eq('active', true)
+    .order('name');
 
   // Fetch today's hourly loads
   const { data: hourlyLoads } = await supabase
-    .from("hourly_loads")
-    .select("*")
-    .eq("department_id", deptId)
-    .eq("load_date", today);
+    .from('hourly_loads')
+    .select('*')
+    .eq('department_id', deptId)
+    .eq('load_date', today);
 
   // Fetch active sites
   const { data: sites } = await supabase
-    .from("sites")
-    .select("id, name, site_code")
-    .eq("active", true)
-    .order("name");
+    .from('sites')
+    .select('id, name, site_code')
+    .eq('active', true)
+    .order('name');
 
   // Calculate totals
   const loadsByMachine = new Map();

@@ -1,7 +1,7 @@
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { BorderBox } from "@repo/ui/BorderBox";
-import { Divider } from "@repo/ui/Divider";
-import { GlassCard } from "@repo/ui/GlassCard";
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { BorderBox } from '@repo/ui/BorderBox';
+import { Divider } from '@repo/ui/Divider';
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertTriangle,
   ArrowRight,
@@ -9,11 +9,11 @@ import {
   ClipboardList,
   TrendingUp,
   Wrench,
-} from "lucide-react";
-import Link from "next/link";
-import { getDepartmentContext } from "~/lib/dept-context";
+} from 'lucide-react';
+import Link from 'next/link';
+import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 async function getEngineeringHubData(deptId: string) {
   const db = await createReadReplicaClient();
@@ -25,24 +25,24 @@ async function getEngineeringHubData(deptId: string) {
     { count: tireAlerts },
   ] = await Promise.all([
     db
-      .from("breakdowns")
-      .select("*", { count: "exact", head: true })
-      .eq("department_id", deptId)
-      .eq("status", "active")
-      .is("deleted_at", null),
+      .from('breakdowns')
+      .select('*', { count: 'exact', head: true })
+      .eq('department_id', deptId)
+      .eq('status', 'active')
+      .is('deleted_at', null),
     db
-      .from("breakdowns")
-      .select("*", { count: "exact", head: true })
-      .eq("department_id", deptId)
-      .eq("status", "completed")
-      .gte("updated_at", new Date(Date.now() - 86400000).toISOString()),
+      .from('breakdowns')
+      .select('*', { count: 'exact', head: true })
+      .eq('department_id', deptId)
+      .eq('status', 'completed')
+      .gte('updated_at', new Date(Date.now() - 86400000).toISOString()),
     db
-      .from("breakdowns")
-      .select("id, machine_name, reason, priority, created_at")
-      .eq("department_id", deptId)
-      .eq("status", "active")
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false })
+      .from('breakdowns')
+      .select('id, machine_name, reason, priority, created_at')
+      .eq('department_id', deptId)
+      .eq('status', 'active')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
       .limit(5),
     Promise.resolve({ count: 0, data: null, error: null }),
   ]);
@@ -57,7 +57,7 @@ async function getEngineeringHubData(deptId: string) {
 
 export default async function EngineeringDashboardPage() {
   const { deptId } = await getDepartmentContext({
-    department: "engineering",
+    department: 'engineering',
   });
 
   const { activeBreakdowns, resolvedToday, recentBreakdowns, tireAlerts } =
@@ -73,11 +73,11 @@ export default async function EngineeringDashboardPage() {
           </p>
         </div>
         <p className="text-[var(--text-muted)] text-sm">
-          {new Date().toLocaleDateString("en-ZA", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date().toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </p>
       </div>
@@ -129,19 +129,19 @@ export default async function EngineeringDashboardPage() {
                       <div className="flex items-center gap-2">
                         <Wrench className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                         <span className="text-sm text-[var(--text-body)]">
-                          {b.machine_name || "Unknown Machine"}
+                          {b.machine_name || 'Unknown Machine'}
                         </span>
                       </div>
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          b.priority === "critical"
-                            ? "bg-accent-red/10 text-accent-red"
-                            : b.priority === "high"
-                              ? "bg-arch-accent-blue/10 text-arch-accent-blue"
-                              : "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                          b.priority === 'critical'
+                            ? 'bg-accent-red/10 text-accent-red'
+                            : b.priority === 'high'
+                              ? 'bg-arch-accent-blue/10 text-arch-accent-blue'
+                              : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
                         }`}
                       >
-                        {b.priority || "normal"}
+                        {b.priority || 'normal'}
                       </span>
                     </div>
                   ))}

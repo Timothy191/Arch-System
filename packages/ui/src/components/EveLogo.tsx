@@ -1,4 +1,4 @@
-import { cn } from "../lib/utils";
+import { cn } from '../lib/utils';
 
 interface EveLogoProps {
   className?: string;
@@ -14,7 +14,7 @@ export function EveLogo({ className }: EveLogoProps) {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 169 53"
-      className={cn("fill-current", className)}
+      className={cn('fill-current', className)}
       role="img"
       aria-label="eve"
     >

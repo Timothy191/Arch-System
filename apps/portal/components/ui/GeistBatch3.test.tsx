@@ -3,7 +3,7 @@ import {
   ComboboxInput,
   ComboboxList,
   ComboboxOption,
-} from "@repo/ui/components/ui/combobox";
+} from '@repo/ui/components/ui/combobox';
 import {
   CommandMenu,
   CommandMenuDivider,
@@ -11,22 +11,22 @@ import {
   CommandMenuInput,
   CommandMenuItem,
   CommandMenuList,
-} from "@repo/ui/components/ui/command-menu";
-import { ContextCardTrigger } from "@repo/ui/components/ui/context-card";
+} from '@repo/ui/components/ui/command-menu';
+import { ContextCardTrigger } from '@repo/ui/components/ui/context-card';
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@repo/ui/components/ui/context-menu";
-import { CopyButton } from "@repo/ui/components/ui/copy-button";
-import { Description } from "@repo/ui/components/ui/description";
-import { DotsMenu, DotsMenuItem } from "@repo/ui/components/ui/dots-menu";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+} from '@repo/ui/components/ui/context-menu';
+import { CopyButton } from '@repo/ui/components/ui/copy-button';
+import { Description } from '@repo/ui/components/ui/description';
+import { DotsMenu, DotsMenuItem } from '@repo/ui/components/ui/dots-menu';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
-describe("Geist Batch 3 Components", () => {
-  describe("CommandMenu", () => {
-    it("renders when open and handles item selection", () => {
+describe('Geist Batch 3 Components', () => {
+  describe('CommandMenu', () => {
+    it('renders when open and handles item selection', () => {
       const setOpen = jest.fn();
       const callback = jest.fn();
 
@@ -42,19 +42,19 @@ describe("Geist Batch 3 Components", () => {
               <CommandMenuItem callback={jest.fn()}>Settings</CommandMenuItem>
             </CommandMenuGroup>
           </CommandMenuList>
-        </CommandMenu>,
+        </CommandMenu>
       );
 
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Type a command...")).toBeInTheDocument();
-      expect(screen.getByText("Projects")).toBeInTheDocument();
-      expect(screen.getByTestId("suffix")).toHaveTextContent("⌘P");
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Type a command...')).toBeInTheDocument();
+      expect(screen.getByText('Projects')).toBeInTheDocument();
+      expect(screen.getByTestId('suffix')).toHaveTextContent('⌘P');
 
-      fireEvent.click(screen.getByText("Projects"));
+      fireEvent.click(screen.getByText('Projects'));
       expect(callback).toHaveBeenCalled();
     });
 
-    it("filters items based on search query", () => {
+    it('filters items based on search query', () => {
       render(
         <CommandMenu open={true}>
           <CommandMenuInput placeholder="Search..." />
@@ -64,37 +64,37 @@ describe("Geist Batch 3 Components", () => {
               <CommandMenuItem>Beta Option</CommandMenuItem>
             </CommandMenuGroup>
           </CommandMenuList>
-        </CommandMenu>,
+        </CommandMenu>
       );
 
-      const input = screen.getByPlaceholderText("Search...");
-      expect(screen.getByText("Alpha Option")).toBeInTheDocument();
-      expect(screen.getByText("Beta Option")).toBeInTheDocument();
+      const input = screen.getByPlaceholderText('Search...');
+      expect(screen.getByText('Alpha Option')).toBeInTheDocument();
+      expect(screen.getByText('Beta Option')).toBeInTheDocument();
 
-      fireEvent.change(input, { target: { value: "Alpha" } });
-      expect(screen.getByText("Alpha Option")).toBeInTheDocument();
-      expect(screen.queryByText("Beta Option")).not.toBeInTheDocument();
+      fireEvent.change(input, { target: { value: 'Alpha' } });
+      expect(screen.getByText('Alpha Option')).toBeInTheDocument();
+      expect(screen.queryByText('Beta Option')).not.toBeInTheDocument();
 
-      fireEvent.change(input, { target: { value: "Gamma" } });
-      expect(screen.getByText("No matches")).toBeInTheDocument();
+      fireEvent.change(input, { target: { value: 'Gamma' } });
+      expect(screen.getByText('No matches')).toBeInTheDocument();
     });
 
-    it("does not render when open is false", () => {
+    it('does not render when open is false', () => {
       render(
         <CommandMenu open={false}>
           <CommandMenuInput />
           <CommandMenuList>
             <CommandMenuItem>Hidden</CommandMenuItem>
           </CommandMenuList>
-        </CommandMenu>,
+        </CommandMenu>
       );
 
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
 
-  describe("Combobox", () => {
-    it("renders options and selects a value", () => {
+  describe('Combobox', () => {
+    it('renders options and selects a value', () => {
       const onChange = jest.fn();
       render(
         <Combobox aria-label="Select Country" onChange={onChange}>
@@ -106,20 +106,20 @@ describe("Geist Batch 3 Components", () => {
               Germany
             </ComboboxOption>
           </ComboboxList>
-        </Combobox>,
+        </Combobox>
       );
 
-      const input = screen.getByPlaceholderText("Choose...");
+      const input = screen.getByPlaceholderText('Choose...');
       fireEvent.click(input);
 
-      expect(screen.getByText("United States")).toBeInTheDocument();
-      expect(screen.getByText("France")).toBeInTheDocument();
+      expect(screen.getByText('United States')).toBeInTheDocument();
+      expect(screen.getByText('France')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText("France"));
-      expect(onChange).toHaveBeenCalledWith("fr");
+      fireEvent.click(screen.getByText('France'));
+      expect(onChange).toHaveBeenCalledWith('fr');
     });
 
-    it("supports clearable button", () => {
+    it('supports clearable button', () => {
       const onChange = jest.fn();
       render(
         <Combobox clearable value="us" onChange={onChange}>
@@ -127,17 +127,17 @@ describe("Geist Batch 3 Components", () => {
           <ComboboxList>
             <ComboboxOption value="us">United States</ComboboxOption>
           </ComboboxList>
-        </Combobox>,
+        </Combobox>
       );
 
-      const clearBtn = screen.getByLabelText("Clear selection");
+      const clearBtn = screen.getByLabelText('Clear selection');
       expect(clearBtn).toBeInTheDocument();
 
       fireEvent.click(clearBtn);
       expect(onChange).toHaveBeenCalledWith(null);
     });
 
-    it("handles multi-line option with ignoreDefaultHeight", () => {
+    it('handles multi-line option with ignoreDefaultHeight', () => {
       render(
         <Combobox defaultValue="env">
           <ComboboxInput />
@@ -149,16 +149,16 @@ describe("Geist Batch 3 Components", () => {
               </div>
             </ComboboxOption>
           </ComboboxList>
-        </Combobox>,
+        </Combobox>
       );
 
-      fireEvent.click(screen.getByRole("textbox"));
-      expect(screen.getByText("DATABASE_URL")).toBeInTheDocument();
-      expect(screen.getByText("Production cluster")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('textbox'));
+      expect(screen.getByText('DATABASE_URL')).toBeInTheDocument();
+      expect(screen.getByText('Production cluster')).toBeInTheDocument();
     });
   });
 
-  describe("ContextCard", () => {
+  describe('ContextCard', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
@@ -167,7 +167,7 @@ describe("Geist Batch 3 Components", () => {
       jest.useRealTimers();
     });
 
-    it("displays content on hover with entry delay", () => {
+    it('displays content on hover with entry delay', () => {
       render(
         <ContextCardTrigger
           content={<div data-testid="card-content">Entity Metadata</div>}
@@ -176,22 +176,22 @@ describe("Geist Batch 3 Components", () => {
           delay={150}
         >
           <span>Hover Me</span>
-        </ContextCardTrigger>,
+        </ContextCardTrigger>
       );
 
-      const trigger = screen.getByText("Hover Me");
-      expect(screen.queryByTestId("card-content")).not.toBeInTheDocument();
+      const trigger = screen.getByText('Hover Me');
+      expect(screen.queryByTestId('card-content')).not.toBeInTheDocument();
 
       fireEvent.mouseEnter(trigger);
       act(() => {
         jest.advanceTimersByTime(150);
       });
 
-      expect(screen.getByTestId("card-content")).toBeInTheDocument();
-      expect(screen.getByText("Entity Metadata")).toBeInTheDocument();
+      expect(screen.getByTestId('card-content')).toBeInTheDocument();
+      expect(screen.getByText('Entity Metadata')).toBeInTheDocument();
     });
 
-    it("supports custom render prop element", () => {
+    it('supports custom render prop element', () => {
       render(
         <ContextCardTrigger
           content={<div>Link details</div>}
@@ -200,17 +200,17 @@ describe("Geist Batch 3 Components", () => {
               Documentation
             </a>
           }
-        />,
+        />
       );
 
-      const link = screen.getByTestId("custom-link");
-      expect(link).toHaveAttribute("href", "https://example.com");
-      expect(link).toHaveTextContent("Documentation");
+      const link = screen.getByTestId('custom-link');
+      expect(link).toHaveAttribute('href', 'https://example.com');
+      expect(link).toHaveTextContent('Documentation');
     });
   });
 
-  describe("ContextMenu", () => {
-    it("opens on right click and handles item activation", () => {
+  describe('ContextMenu', () => {
+    it('opens on right click and handles item activation', () => {
       const onClick = jest.fn();
       render(
         <ContextMenu>
@@ -225,22 +225,22 @@ describe("Geist Batch 3 Components", () => {
               Delete Entry
             </ContextMenuItem>
           </ContextMenuContent>
-        </ContextMenu>,
+        </ContextMenu>
       );
 
-      const zone = screen.getByTestId("trigger-zone");
-      expect(screen.queryByText("Edit Entry")).not.toBeInTheDocument();
+      const zone = screen.getByTestId('trigger-zone');
+      expect(screen.queryByText('Edit Entry')).not.toBeInTheDocument();
 
       fireEvent.contextMenu(zone, { clientX: 100, clientY: 200 });
 
-      expect(screen.getByText("Edit Entry")).toBeInTheDocument();
-      expect(screen.getByText("Delete Entry")).toBeInTheDocument();
+      expect(screen.getByText('Edit Entry')).toBeInTheDocument();
+      expect(screen.getByText('Delete Entry')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText("Edit Entry"));
-      expect(onClick).toHaveBeenCalledWith("edit");
+      fireEvent.click(screen.getByText('Edit Entry'));
+      expect(onClick).toHaveBeenCalledWith('edit');
     });
 
-    it("supports disabled item in context menu", () => {
+    it('supports disabled item in context menu', () => {
       const onClick = jest.fn();
       render(
         <ContextMenu>
@@ -252,17 +252,17 @@ describe("Geist Batch 3 Components", () => {
               Disabled Option
             </ContextMenuItem>
           </ContextMenuContent>
-        </ContextMenu>,
+        </ContextMenu>
       );
 
-      fireEvent.contextMenu(screen.getByText("Right click"));
-      const item = screen.getByText("Disabled Option");
+      fireEvent.contextMenu(screen.getByText('Right click'));
+      const item = screen.getByText('Disabled Option');
       fireEvent.click(item);
       expect(onClick).not.toHaveBeenCalled();
     });
   });
 
-  describe("CopyButton", () => {
+  describe('CopyButton', () => {
     const originalClipboard = { ...navigator.clipboard };
 
     beforeEach(() => {
@@ -276,66 +276,66 @@ describe("Geist Batch 3 Components", () => {
       Object.assign(navigator, { clipboard: originalClipboard });
     });
 
-    it("copies text on click and shows feedback", async () => {
+    it('copies text on click and shows feedback', async () => {
       render(<CopyButton textToCopy="pnpm build" label="Copy build command" />);
 
-      const button = screen.getByLabelText("Copy build command");
+      const button = screen.getByLabelText('Copy build command');
       expect(button).toBeInTheDocument();
 
       await act(async () => {
         fireEvent.click(button);
       });
 
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith("pnpm build");
-      expect(button).toHaveAttribute("aria-label", "Copied");
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('pnpm build');
+      expect(button).toHaveAttribute('aria-label', 'Copied');
     });
   });
 
-  describe("Description", () => {
-    it("renders definition list semantics with title and content", () => {
+  describe('Description', () => {
+    it('renders definition list semantics with title and content', () => {
       render(
         <Description
           title="Deployment ID"
           content="dpl_7x92KmL4"
           tooltip="Unique identifier for deployment."
-        />,
+        />
       );
 
-      expect(screen.getByRole("term")).toHaveTextContent("Deployment ID");
-      expect(screen.getByRole("definition")).toHaveTextContent("dpl_7x92KmL4");
+      expect(screen.getByRole('term')).toHaveTextContent('Deployment ID');
+      expect(screen.getByRole('definition')).toHaveTextContent('dpl_7x92KmL4');
     });
 
-    it("applies right-alignment and ellipsis classes", () => {
+    it('applies right-alignment and ellipsis classes', () => {
       const { container } = render(
-        <Description title="Status" content="Active and Healthy" right ellipsis />,
+        <Description title="Status" content="Active and Healthy" right ellipsis />
       );
 
-      const dl = container.querySelector("dl");
-      const dd = container.querySelector("dd");
+      const dl = container.querySelector('dl');
+      const dd = container.querySelector('dd');
 
-      expect(dl).toHaveClass("flex-row");
-      expect(dd).toHaveClass("truncate");
-      expect(dd).toHaveClass("text-right");
+      expect(dl).toHaveClass('flex-row');
+      expect(dd).toHaveClass('truncate');
+      expect(dd).toHaveClass('text-right');
     });
   });
 
-  describe("DotsMenu", () => {
-    it("toggles overflow menu and triggers item onClick", () => {
+  describe('DotsMenu', () => {
+    it('toggles overflow menu and triggers item onClick', () => {
       const onClick = jest.fn();
       render(
         <DotsMenu buttonAriaLabel="Row actions">
           <DotsMenuItem onClick={onClick}>View Details</DotsMenuItem>
           <DotsMenuItem disabled>Export PDF</DotsMenuItem>
-        </DotsMenu>,
+        </DotsMenu>
       );
 
-      const button = screen.getByLabelText("Row actions");
-      expect(screen.queryByText("View Details")).not.toBeInTheDocument();
+      const button = screen.getByLabelText('Row actions');
+      expect(screen.queryByText('View Details')).not.toBeInTheDocument();
 
       fireEvent.click(button);
-      expect(screen.getByText("View Details")).toBeInTheDocument();
+      expect(screen.getByText('View Details')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText("View Details"));
+      fireEvent.click(screen.getByText('View Details'));
       expect(onClick).toHaveBeenCalled();
     });
   });

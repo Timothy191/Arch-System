@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { cn } from '@repo/ui/lib/utils';
+import { useEffect, useRef, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -10,9 +10,9 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
-import { GlassCard } from "../GlassCard";
-import { FreezeToggle } from "./freeze-toggle";
+} from 'recharts';
+import { GlassCard } from '../GlassCard';
+import { FreezeToggle } from './freeze-toggle';
 
 interface TelemetryPoint {
   timestamp: string | number;
@@ -36,8 +36,8 @@ interface TelemetryChartProps {
 export function TelemetryChart({
   data,
   title,
-  unit = "",
-  color = "var(--accent-green)",
+  unit = '',
+  color = 'var(--accent-green)',
   className,
   height = 300,
   allowFreeze = true,
@@ -64,7 +64,7 @@ export function TelemetryChart({
   const chartData = isFrozen ? frozenData : data;
 
   return (
-    <GlassCard className={cn("flex flex-col gap-4", className)}>
+    <GlassCard className={cn('flex flex-col gap-4', className)}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-[var(--text-heading)] uppercase tracking-wider">
@@ -96,19 +96,19 @@ export function TelemetryChart({
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+              tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
               width={40}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "var(--bg-secondary)",
-                border: "1px solid var(--border-default)",
-                borderRadius: "8px",
-                fontSize: "12px",
-                color: "var(--text-heading)",
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-default)',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: 'var(--text-heading)',
               }}
               itemStyle={{ color: color }}
-              labelStyle={{ display: "none" }}
+              labelStyle={{ display: 'none' }}
             />
             <Area
               type="monotone"

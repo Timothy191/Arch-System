@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertTriangle,
   CircleDot,
@@ -12,12 +12,12 @@ import {
   Search,
   ShieldAlert,
   TrendingDown,
-} from "lucide-react";
-import { useMemo, useState } from "react";
-import { TireInspectionModal } from "./TireInspectionModal";
-import { TireReplacementModal } from "./TireReplacementModal";
-import { TireWearCurveChart } from "./TireWearCurveChart";
-import type { TireMetrics, TireWithInspections, WearCurvePoint } from "./types";
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { TireInspectionModal } from './TireInspectionModal';
+import { TireReplacementModal } from './TireReplacementModal';
+import { TireWearCurveChart } from './TireWearCurveChart';
+import type { TireMetrics, TireWithInspections, WearCurvePoint } from './types';
 
 interface TireManagementDashboardProps {
   tires: TireWithInspections[];
@@ -29,19 +29,19 @@ export function TireManagementDashboard({
   machines,
 }: TireManagementDashboardProps) {
   const [tires, _setTires] = useState<TireWithInspections[]>(initialTires);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("installed");
-  const [conditionFilter, setConditionFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('installed');
+  const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [selectedTireForInspection, setSelectedTireForInspection] =
     useState<TireWithInspections | null>(null);
   const [selectedTireForReplacement, setSelectedTireForReplacement] =
     useState<TireWithInspections | null>(null);
-  const [selectedCurveTireId, setSelectedCurveTireId] = useState<string>("aggregate");
+  const [selectedCurveTireId, setSelectedCurveTireId] = useState<string>('aggregate');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Metrics calculation
   const metrics: TireMetrics = useMemo(() => {
-    const active = tires.filter((t) => t.status === "installed");
+    const active = tires.filter((t) => t.status === 'installed');
     if (active.length === 0) {
       return {
         totalActive: 0,
@@ -64,9 +64,9 @@ export function TireManagementDashboard({
         inspectedCount++;
         totalTread += latest.tread_depth_mm;
         totalPressure += latest.pressure_psi;
-        if (latest.condition_status === "critical" || latest.tread_depth_mm <= 15) {
+        if (latest.condition_status === 'critical' || latest.tread_depth_mm <= 15) {
           criticalCount++;
-        } else if (latest.condition_status === "warning" || latest.tread_depth_mm <= 25) {
+        } else if (latest.condition_status === 'warning' || latest.tread_depth_mm <= 25) {
           warningCount++;
         }
       }
@@ -84,9 +84,9 @@ export function TireManagementDashboard({
   // Filtered tires list
   const filteredTires = useMemo(() => {
     return tires.filter((t) => {
-      if (statusFilter !== "all" && t.status !== statusFilter) return false;
-      const condition = t.latest_inspection?.condition_status || "good";
-      if (conditionFilter !== "all" && condition !== conditionFilter) return false;
+      if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+      const condition = t.latest_inspection?.condition_status || 'good';
+      if (conditionFilter !== 'all' && condition !== conditionFilter) return false;
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -103,7 +103,7 @@ export function TireManagementDashboard({
   // Wear curve data derivation
   const wearCurveData: { data: WearCurvePoint[]; serial: string; brand: string; tread: number } =
     useMemo(() => {
-      if (selectedCurveTireId !== "aggregate") {
+      if (selectedCurveTireId !== 'aggregate') {
         const target = tires.find((t) => t.id === selectedCurveTireId);
         if (target?.inspections && target.inspections.length > 0) {
           const points: WearCurvePoint[] = target.inspections.map((insp) => ({
@@ -150,8 +150,8 @@ export function TireManagementDashboard({
 
       return {
         data: points,
-        serial: "Fleet Aggregate Wear Profile",
-        brand: "Heavy Vehicle Fleet",
+        serial: 'Fleet Aggregate Wear Profile',
+        brand: 'Heavy Vehicle Fleet',
         tread: metrics.avgTreadDepth,
       };
     }, [tires, selectedCurveTireId, metrics.avgTreadDepth]);
@@ -270,7 +270,7 @@ export function TireManagementDashboard({
             </span>
           </div>
           <p className="text-2xl font-bold text-[var(--text-heading)] mt-3">
-            {metrics.totalActive}{" "}
+            {metrics.totalActive}{' '}
             <span className="text-xs font-normal text-[var(--text-muted)]">units mounted</span>
           </p>
         </GlassCard>
@@ -288,7 +288,7 @@ export function TireManagementDashboard({
             <span className="text-xs text-[var(--text-muted)]">Spec: 80-110mm</span>
           </div>
           <p className="text-2xl font-bold text-[var(--text-heading)] mt-3">
-            {metrics.avgTreadDepth > 0 ? `${metrics.avgTreadDepth} mm` : "—"}
+            {metrics.avgTreadDepth > 0 ? `${metrics.avgTreadDepth} mm` : '—'}
           </p>
         </GlassCard>
 
@@ -305,7 +305,7 @@ export function TireManagementDashboard({
             <span className="text-xs font-semibold text-amber-500">&le; 25mm</span>
           </div>
           <p className="text-2xl font-bold text-amber-500 mt-3">
-            {metrics.warningCount}{" "}
+            {metrics.warningCount}{' '}
             <span className="text-xs font-normal text-[var(--text-muted)]">tires</span>
           </p>
         </GlassCard>
@@ -323,7 +323,7 @@ export function TireManagementDashboard({
             <span className="text-xs font-semibold text-accent-red">&le; 15mm</span>
           </div>
           <p className="text-2xl font-bold text-accent-red mt-3">
-            {metrics.criticalCount}{" "}
+            {metrics.criticalCount}{' '}
             <span className="text-xs font-normal text-[var(--text-muted)]">urgent actions</span>
           </p>
         </GlassCard>
@@ -349,7 +349,7 @@ export function TireManagementDashboard({
               <option value="aggregate">Fleet Aggregate Average</option>
               {tires.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.serial_number} ({t.position} - {t.machine_name || "HME"})
+                  {t.serial_number} ({t.position} - {t.machine_name || 'HME'})
                 </option>
               ))}
             </select>
@@ -427,9 +427,9 @@ export function TireManagementDashboard({
                   const latest = tire.latest_inspection;
                   const tread = latest?.tread_depth_mm ?? 50;
                   const pressure = latest?.pressure_psi ?? 100;
-                  const condition = latest?.condition_status ?? "good";
-                  const isCrit = condition === "critical" || tread <= 15;
-                  const isWarn = condition === "warning" || (tread <= 25 && !isCrit);
+                  const condition = latest?.condition_status ?? 'good';
+                  const isCrit = condition === 'critical' || tread <= 15;
+                  const isWarn = condition === 'warning' || (tread <= 25 && !isCrit);
 
                   return (
                     <tr
@@ -447,7 +447,7 @@ export function TireManagementDashboard({
 
                       <td className="py-3 px-3">
                         <div className="font-medium text-[var(--text-heading)]">
-                          {tire.machine_name || "Unassigned"}
+                          {tire.machine_name || 'Unassigned'}
                         </div>
                         <div className="text-[11px] text-[var(--text-muted)]">{tire.position}</div>
                       </td>
@@ -458,10 +458,10 @@ export function TireManagementDashboard({
                             <div
                               className={`h-full rounded-full ${
                                 isCrit
-                                  ? "bg-accent-red"
+                                  ? 'bg-accent-red'
                                   : isWarn
-                                    ? "bg-amber-500"
-                                    : "bg-accent-green"
+                                    ? 'bg-amber-500'
+                                    : 'bg-accent-green'
                               }`}
                               style={{ width: `${Math.min(100, (tread / 100) * 100)}%` }}
                             />
@@ -469,10 +469,10 @@ export function TireManagementDashboard({
                           <span
                             className={`font-semibold ${
                               isCrit
-                                ? "text-accent-red"
+                                ? 'text-accent-red'
                                 : isWarn
-                                  ? "text-amber-500"
-                                  : "text-[var(--text-heading)]"
+                                  ? 'text-amber-500'
+                                  : 'text-[var(--text-heading)]'
                             }`}
                           >
                             {tread} mm
@@ -488,10 +488,10 @@ export function TireManagementDashboard({
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                             isCrit
-                              ? "bg-accent-red/15 text-accent-red border border-accent-red/30"
+                              ? 'bg-accent-red/15 text-accent-red border border-accent-red/30'
                               : isWarn
-                                ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
-                                : "bg-accent-green/15 text-accent-green border border-accent-green/30"
+                                ? 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
+                                : 'bg-accent-green/15 text-accent-green border border-accent-green/30'
                           }`}
                         >
                           {condition}

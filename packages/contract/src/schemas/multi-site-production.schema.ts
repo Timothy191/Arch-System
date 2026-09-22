@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const operationalStatusEnum = z.enum([
-  "ACTIVE",
-  "STANDBY",
-  "BREAKDOWN",
-  "BREDELL",
-  "NO_OPERATOR",
-  "NO_SPACE",
-  "OFFSITE",
+  'ACTIVE',
+  'STANDBY',
+  'BREAKDOWN',
+  'BREDELL',
+  'NO_OPERATOR',
+  'NO_SPACE',
+  'OFFSITE',
 ]);
 
 export const truckTallySchema = z.object({
@@ -63,7 +63,7 @@ export const breakdownReportEntrySchema = z.object({
   reason: z.string(),
   repair_notes: z.string().nullable().optional(),
   is_operational_defect: z.boolean(),
-  status: z.enum(["active", "completed"]),
+  status: z.enum(['active', 'completed']),
 });
 
 export const ancillaryReportEntrySchema = z.object({
@@ -85,8 +85,8 @@ export const multiSiteShiftReportSchema = z.object({
   meta: z.object({
     department_id: z.string().uuid(),
     shift_date: z.string(),
-    shift_type: z.enum(["day", "night"]),
-    status: z.enum(["open", "closed"]),
+    shift_type: z.enum(['day', 'night']),
+    status: z.enum(['open', 'closed']),
     closed_at: z.string().nullable().optional(),
     closed_by: z.string().nullable().optional(),
     notes: z.string().nullable().optional(),

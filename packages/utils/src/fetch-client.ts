@@ -7,8 +7,8 @@ import {
   NotFoundError,
   RateLimitError,
   ValidationError,
-} from "@repo/errors";
-import { offlineStorage } from "./offline-storage";
+} from '@repo/errors';
+import { offlineStorage } from './offline-storage';
 
 export interface FetchClientOptions {
   /**
@@ -80,14 +80,14 @@ export interface RequestOptions extends RequestInit {
   description?: string;
 }
 
-const IDEMPOTENT_METHODS = new Set(["GET", "HEAD", "PUT", "DELETE", "OPTIONS"]);
+const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS']);
 const DEFAULT_RETRY_STATUSES = new Set([408, 429, 502, 503, 504]);
 
 export class FetchClient {
-  private config: Required<Omit<FetchClientOptions, "baseURL" | "interceptors">> & {
+  private config: Required<Omit<FetchClientOptions, 'baseURL' | 'interceptors'>> & {
     baseURL?: string;
     retryStatusCodesSet: Set<number>;
-    interceptors: FetchClientOptions["interceptors"];
+    interceptors: FetchClientOptions['interceptors'];
   };
   private isFlushingQueue = false;
 
@@ -109,10 +109,10 @@ export class FetchClient {
 
     if (
       this.config.autoFlushOffline &&
-      typeof window !== "undefined" &&
-      typeof window.addEventListener === "function"
+      typeof window !== 'undefined' &&
+      typeof window.addEventListener === 'function'
     ) {
-      window.addEventListener("online", () => {
+      window.addEventListener('online', () => {
         this.flushOfflineQueue().catch(() => {});
       });
     }
@@ -122,8 +122,8 @@ export class FetchClient {
     if (!this.config.baseURL || /^https?:\/\//i.test(path)) {
       return path;
     }
-    const base = this.config.baseURL.replace(/\/+$/, "");
-    const target = path.replace(/^\/+/, "");
+    const base = this.config.baseURL.replace(/\/+$/, '');
+    const target = path.replace(/^\/+/, '');
     return `${base}/${target}`;
   }
 
@@ -140,7 +140,7 @@ export class FetchClient {
     error: unknown,
     response: Response | null,
     method: string,
-    retryOnPostOverride?: boolean,
+    retryOnPostOverride?: boolean
   ): boolean {
     const isIdempotent = IDEMPOTENT_METHODS.has(method.toUpperCase());
     const allowRetry = isIdempotent || (retryOnPostOverride ?? this.config.retryOnPost);
@@ -157,7 +157,7 @@ export class FetchClient {
       return true;
     }
 
-    if (error instanceof TypeError && error.message.includes("fetch")) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
       return true;
     }
 
@@ -166,7 +166,7 @@ export class FetchClient {
 
   public async fetch(url: string, options: RequestOptions = {}): Promise<Response> {
     const fullUrl = this.resolveUrl(url);
-    const method = (options.method || "GET").toUpperCase();
+    const method = (options.method || 'GET').toUpperCase();
     const timeoutMs = options.timeoutMs ?? this.config.timeoutMs;
     const maxRetries = options.maxRetries ?? this.config.maxRetries;
 
@@ -178,7 +178,7 @@ export class FetchClient {
 
       const timer = setTimeout(() => {
         timedOut = true;
-        controller.abort("TIMEOUT");
+        controller.abort('TIMEOUT');
       }, timeoutMs);
 
       const externalSignal = options.signal;
@@ -188,7 +188,7 @@ export class FetchClient {
         if (externalSignal.aborted) {
           controller.abort(externalSignal.reason);
         } else {
-          externalSignal.addEventListener("abort", onExternalAbort);
+          externalSignal.addEventListener('abort', onExternalAbort);
         }
       }
 
@@ -210,7 +210,7 @@ export class FetchClient {
         clearTimeout(timer);
 
         if (externalSignal) {
-          externalSignal.removeEventListener("abort", onExternalAbort);
+          externalSignal.removeEventListener('abort', onExternalAbort);
         }
 
         if (this.config.interceptors?.onResponse) {
@@ -237,7 +237,7 @@ export class FetchClient {
       } catch (err) {
         clearTimeout(timer);
         if (externalSignal) {
-          externalSignal.removeEventListener("abort", onExternalAbort);
+          externalSignal.removeEventListener('abort', onExternalAbort);
         }
 
         if (timedOut) {
@@ -247,10 +247,10 @@ export class FetchClient {
             method,
             cause: err instanceof Error ? err : undefined,
           });
-        } else if (err instanceof TypeError && err.message.includes("fetch")) {
+        } else if (err instanceof TypeError && err.message.includes('fetch')) {
           caughtError = new NetworkError(
             `Network error when requesting ${fullUrl}: ${err.message}`,
-            { url: fullUrl, method, cause: err },
+            { url: fullUrl, method, cause: err }
           );
         } else {
           caughtError = err;
@@ -270,16 +270,16 @@ export class FetchClient {
         if (
           options.offlineQueue &&
           (caughtError instanceof NetworkError || caughtError instanceof FetchTimeoutError) &&
-          method !== "GET"
+          method !== 'GET'
         ) {
           const idempotencyKey = options.idempotencyKey || crypto.randomUUID();
           let bodyStr: string | undefined;
-          if (typeof options.body === "string") {
+          if (typeof options.body === 'string') {
             bodyStr = options.body;
           }
 
           const headersObj: Record<string, string> = {
-            "X-Idempotency-Key": idempotencyKey,
+            'X-Idempotency-Key': idempotencyKey,
           };
           if (options.headers) {
             const h = new Headers(options.headers);
@@ -299,7 +299,7 @@ export class FetchClient {
 
           throw new NetworkError(
             `Connection lost. Request enqueued offline for replay (${idempotencyKey})`,
-            { url: fullUrl, method, enqueued: true, idempotencyKey },
+            { url: fullUrl, method, enqueued: true, idempotencyKey }
           );
         }
 
@@ -318,10 +318,10 @@ export class FetchClient {
     let message = `HTTP ${response.status} ${response.statusText}`;
 
     try {
-      const contentType = response.headers.get("content-type");
-      if (contentType?.includes("application/json")) {
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
         body = await response.json();
-        if (body && typeof body === "object" && body.message) {
+        if (body && typeof body === 'object' && body.message) {
           message = body.message;
         }
       } else {
@@ -351,7 +351,7 @@ export class FetchClient {
   }
 
   public async request<T = unknown>(url: string, options: RequestOptions = {}): Promise<T> {
-    const isGet = (options.method || "GET").toUpperCase() === "GET";
+    const isGet = (options.method || 'GET').toUpperCase() === 'GET';
     const cacheKey = `GET:${this.resolveUrl(url)}`;
 
     try {
@@ -383,23 +383,23 @@ export class FetchClient {
   }
 
   public async get<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>(url, { ...options, method: "GET" });
+    return this.request<T>(url, { ...options, method: 'GET' });
   }
 
   public async post<T = unknown>(
     url: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     const isJsonBody = body !== undefined && !(body instanceof FormData) && !(body instanceof Blob);
     const headers = new Headers(options?.headers);
-    if (isJsonBody && !headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
+    if (isJsonBody && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
     }
 
     return this.request<T>(url, {
       ...options,
-      method: "POST",
+      method: 'POST',
       headers,
       body: isJsonBody ? JSON.stringify(body) : (body as BodyInit | null),
     });
@@ -408,13 +408,13 @@ export class FetchClient {
   public async put<T = unknown>(url: string, body?: unknown, options?: RequestOptions): Promise<T> {
     const isJsonBody = body !== undefined && !(body instanceof FormData) && !(body instanceof Blob);
     const headers = new Headers(options?.headers);
-    if (isJsonBody && !headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
+    if (isJsonBody && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
     }
 
     return this.request<T>(url, {
       ...options,
-      method: "PUT",
+      method: 'PUT',
       headers,
       body: isJsonBody ? JSON.stringify(body) : (body as BodyInit | null),
     });
@@ -423,24 +423,24 @@ export class FetchClient {
   public async patch<T = unknown>(
     url: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     const isJsonBody = body !== undefined && !(body instanceof FormData) && !(body instanceof Blob);
     const headers = new Headers(options?.headers);
-    if (isJsonBody && !headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
+    if (isJsonBody && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
     }
 
     return this.request<T>(url, {
       ...options,
-      method: "PATCH",
+      method: 'PATCH',
       headers,
       body: isJsonBody ? JSON.stringify(body) : (body as BodyInit | null),
     });
   }
 
   public async delete<T = unknown>(url: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>(url, { ...options, method: "DELETE" });
+    return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 
   public async flushOfflineQueue(): Promise<{ synced: number; failed: number }> {
@@ -455,10 +455,10 @@ export class FetchClient {
       for (const req of pending) {
         if (!req.id) continue;
         try {
-          await offlineStorage.updateStatus(req.id, "processing");
+          await offlineStorage.updateStatus(req.id, 'processing');
           const headers = new Headers(req.headers);
-          if (!headers.has("X-Idempotency-Key")) {
-            headers.set("X-Idempotency-Key", req.idempotencyKey);
+          if (!headers.has('X-Idempotency-Key')) {
+            headers.set('X-Idempotency-Key', req.idempotencyKey);
           }
 
           const res = await this.fetch(req.url, {
@@ -473,11 +473,11 @@ export class FetchClient {
             await offlineStorage.remove(req.id);
             synced++;
           } else {
-            await offlineStorage.updateStatus(req.id, "failed", `HTTP ${res.status}`);
+            await offlineStorage.updateStatus(req.id, 'failed', `HTTP ${res.status}`);
             failed++;
           }
         } catch (err: any) {
-          await offlineStorage.updateStatus(req.id, "failed", err?.message || "Replay failed");
+          await offlineStorage.updateStatus(req.id, 'failed', err?.message || 'Replay failed');
           failed++;
         }
       }

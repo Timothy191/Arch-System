@@ -5,12 +5,12 @@
  * and generic errors. Integrates with monitoring systems.
  */
 
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Error severity levels
  */
-type ErrorSeverity = "debug" | "info" | "warn" | "error" | "fatal";
+type ErrorSeverity = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 /**
  * Structured error log entry
@@ -34,10 +34,10 @@ interface ErrorLogEntry {
  * Determine error severity based on status code
  */
 function getSeverity(statusCode?: number): ErrorSeverity {
-  if (!statusCode) return "error";
-  if (statusCode >= 500) return "error";
-  if (statusCode >= 400) return "warn";
-  return "info";
+  if (!statusCode) return 'error';
+  if (statusCode >= 500) return 'error';
+  if (statusCode >= 400) return 'warn';
+  return 'info';
 }
 
 /**
@@ -45,7 +45,7 @@ function getSeverity(statusCode?: number): ErrorSeverity {
  */
 function strField(obj: Record<string, unknown>, key: string): string | undefined {
   const v = obj[key];
-  return typeof v === "string" && v.length > 0 ? v : undefined;
+  return typeof v === 'string' && v.length > 0 ? v : undefined;
 }
 
 /**
@@ -65,7 +65,7 @@ function createErrorLog(
     userId?: string;
     sessionId?: string;
     [key: string]: unknown;
-  },
+  }
 ): ErrorLogEntry {
   const timestamp = new Date().toISOString();
 
@@ -74,17 +74,17 @@ function createErrorLog(
   // real message and code survive instead of becoming "[object Object]".
   if (!(error instanceof Error)) {
     const obj = (error ?? {}) as Record<string, unknown>;
-    const message = strField(obj, "message") ?? String(error);
-    const statusCode = typeof obj.statusCode === "number" ? obj.statusCode : undefined;
+    const message = strField(obj, 'message') ?? String(error);
+    const statusCode = typeof obj.statusCode === 'number' ? obj.statusCode : undefined;
     return {
       timestamp,
       severity: getSeverity(statusCode),
-      code: strField(obj, "code"),
+      code: strField(obj, 'code'),
       statusCode,
       message,
       context: context as Record<string, unknown> | undefined,
       cause: obj.cause,
-      stack: strField(obj, "stack"),
+      stack: strField(obj, 'stack'),
       url: context?.url,
       method: context?.method,
       userId: context?.userId,
@@ -94,7 +94,7 @@ function createErrorLog(
 
   // Check if error has AppError-like properties
   const hasAppErrorProps =
-    "code" in error && "statusCode" in error && "context" in error && "cause" in error;
+    'code' in error && 'statusCode' in error && 'context' in error && 'cause' in error;
 
   if (hasAppErrorProps) {
     const appError = error as Error & {
@@ -122,7 +122,7 @@ function createErrorLog(
   // Generic error handling
   return {
     timestamp,
-    severity: "error",
+    severity: 'error',
     message: error.message,
     stack: error.stack,
     url: context?.url,
@@ -145,14 +145,14 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
 
   // AGENT-TRACE: In production, skip console output — Sentry handles error capture.
   // In development, log to console for local debugging.
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== 'production') {
     // eslint-disable-next-line no-console
     const logMethod =
-      entry.severity === "error" || entry.severity === "fatal"
+      entry.severity === 'error' || entry.severity === 'fatal'
         ? console.error // eslint-disable-line no-console
         : console.warn; // eslint-disable-line no-console
 
-    logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || "UNKNOWN"}: ${entry.message}`, {
+    logMethod(`[${entry.severity.toUpperCase()}] ${entry.code || 'UNKNOWN'}: ${entry.message}`, {
       timestamp: entry.timestamp,
       statusCode: entry.statusCode,
       context: entry.context,
@@ -162,7 +162,7 @@ async function sendToMonitoring(entry: ErrorLogEntry): Promise<void> {
   }
 
   // Forward server-side errors to Sentry — warn/info are expected control-flow (4xx) and not captured
-  if (entry.severity === "error" || entry.severity === "fatal") {
+  if (entry.severity === 'error' || entry.severity === 'fatal') {
     Sentry.captureException(error, {
       extra: {
         code: entry.code,
@@ -197,7 +197,7 @@ export async function logError(
     userId?: string;
     sessionId?: string;
     [key: string]: unknown;
-  },
+  }
 ): Promise<void> {
   try {
     const entry = createErrorLog(error, context);
@@ -227,7 +227,7 @@ export async function withErrorLogging<T>(
   options?: {
     userId?: string;
     sessionId?: string;
-  },
+  }
 ): Promise<T> {
   try {
     return await handler();
@@ -258,7 +258,7 @@ export async function withErrorLogging<T>(
  */
 export async function withServerActionLogging<T>(
   handler: () => Promise<T>,
-  actionName: string,
+  actionName: string
 ): Promise<T> {
   try {
     return await handler();

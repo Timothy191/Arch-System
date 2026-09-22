@@ -1,8 +1,8 @@
-import { DEPARTMENTS } from "@repo/departments/data-access";
-import { cacheGet, cacheSet } from "@repo/redis/cache";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { getOperationalToday } from "@repo/utils";
-import { notFound } from "next/navigation";
+import { DEPARTMENTS } from '@repo/departments/data-access';
+import { cacheGet, cacheSet } from '@repo/redis/cache';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { getOperationalToday } from '@repo/utils';
+import { notFound } from 'next/navigation';
 
 /**
  * Resolves department context for a server component page.
@@ -28,9 +28,9 @@ export async function getDepartmentContext(params: { department: string }): Prom
 
   if (!deptId) {
     const { data: department } = await supabase
-      .from("departments")
-      .select("id")
-      .eq("name", params.department)
+      .from('departments')
+      .select('id')
+      .eq('name', params.department)
       .single();
 
     if (!department) notFound();

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AreaChart, Title, Text as TremorText } from "@tremor/react";
-import { AlertCircle } from "lucide-react";
+import { AreaChart, Title, Text as TremorText } from '@tremor/react';
+import { AlertCircle } from 'lucide-react';
 
 export interface TrendDataPoint {
   date: string;
@@ -55,8 +55,8 @@ export function ProductionTrend({ data, isFallback = false }: ProductionTrendPro
         className="h-72 mt-2"
         data={data}
         index="date"
-        categories={["Drilling", "Production", "Engineering"]}
-        colors={["blue", "emerald", "violet"]}
+        categories={['Drilling', 'Production', 'Engineering']}
+        colors={['blue', 'emerald', 'violet']}
         showLegend={false}
         showYAxis={true}
         yAxisWidth={48}

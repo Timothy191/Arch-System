@@ -1,7 +1,8 @@
-"use client";
+'use client';
+import { ScadaMessageSchema } from '@repo/contract';
 
-import { Activity, AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Activity, AlertTriangle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface FuxaFrameProps {
   dashboardId?: string;
@@ -9,7 +10,7 @@ interface FuxaFrameProps {
   departmentId?: string;
 }
 
-type ConnectionStatus = "connected" | "degraded" | "offline" | "connecting";
+type ConnectionStatus = 'connected' | 'degraded' | 'offline' | 'connecting';
 
 export interface CachedMachineStatus {
   id?: string;
@@ -24,22 +25,22 @@ export interface CachedScadaData {
   lastUrl?: string;
 }
 
-const CACHE_KEY_PREFIX = "scada:fuxa:";
+const CACHE_KEY_PREFIX = 'scada:fuxa:';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // AGENT-TRACE: FuxaFrame now includes degraded mode with cache fallback, automatic retry, and connection status
 // Critical for production resilience when FUXA SCADA server is unavailable
 
-export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaFrameProps) {
+export function FuxaFrame({ dashboardId, height = '600px', departmentId }: FuxaFrameProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [key, setKey] = useState(0);
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting");
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const [retryCount, setRetryCount] = useState(0);
   const [cachedData, setCachedData] = useState<CachedScadaData | null>(null);
   const [showFallback, setShowFallback] = useState(false);
 
-  const baseUrl = process.env.NEXT_PUBLIC_FUXA_URL || "http://localhost:1881";
+  const baseUrl = process.env.NEXT_PUBLIC_FUXA_URL || 'http://localhost:1881';
   const src = dashboardId ? `${baseUrl}/dashboard/${dashboardId}` : baseUrl;
 
   // Cache key for this specific view
@@ -65,7 +66,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     }
 
     const handleOnline = () => {
-      setConnectionStatus("connecting");
+      setConnectionStatus('connecting');
       setLoading(true);
       setError(false);
       setShowFallback(false);
@@ -74,16 +75,16 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
 
     const handleOffline = () => {
       setError(true);
-      setConnectionStatus("offline");
+      setConnectionStatus('offline');
       setShowFallback(true);
     };
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [cacheKey]);
 
@@ -115,7 +116,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
         setLoading(true);
         setError(false);
         setKey((k) => k + 1);
-        setConnectionStatus("connecting");
+        setConnectionStatus('connecting');
       }, delay);
       return () => clearTimeout(timer);
     }
@@ -126,7 +127,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     const timer = setTimeout(() => {
       if (loading && !showFallback) {
         setError(true);
-        setConnectionStatus(cachedData ? "degraded" : "offline");
+        setConnectionStatus(cachedData ? 'degraded' : 'offline');
         if (cachedData && !showFallback) {
           setShowFallback(true);
         }
@@ -135,28 +136,50 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     return () => clearTimeout(timer);
   }, [loading, showFallback, cachedData]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const FUXA_ORIGIN = baseUrl || 'http://localhost:1881';
+      if (event.origin !== new URL(FUXA_ORIGIN).origin) {
+        console.warn('Blocked message from unknown origin:', event.origin);
+        return;
+      }
+
+      const parsed = ScadaMessageSchema.safeParse(event.data);
+      if (!parsed.success) {
+        console.warn('Dropped malformed SCADA message', parsed.error);
+        return;
+      }
+
+      // Process validated message safely...
+      console.log('Received valid SCADA message:', parsed.data.type);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [baseUrl]);
+
   const handleRetry = useCallback(() => {
     setLoading(true);
     setError(false);
     setShowFallback(false);
     setRetryCount(0);
     setKey((k) => k + 1);
-    setConnectionStatus("connecting");
+    setConnectionStatus('connecting');
   }, []);
 
   const handleIframeLoad = useCallback(() => {
     setLoading(false);
     setError(false);
-    setConnectionStatus("connected");
+    setConnectionStatus('connected');
     setRetryCount(0);
     saveToCache();
 
     try {
-      const iframe = document.getElementById("fuxa-iframe") as HTMLIFrameElement;
+      const iframe = document.getElementById('fuxa-iframe') as HTMLIFrameElement;
       if (iframe?.contentDocument) {
-        const link = iframe.contentDocument.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "/css/fuxa-light-theme.css";
+        const link = iframe.contentDocument.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/css/fuxa-light-theme.css';
         iframe.contentDocument.head.appendChild(link);
       }
     } catch {
@@ -167,7 +190,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
   const handleIframeError = useCallback(() => {
     setError(true);
     setLoading(false);
-    setConnectionStatus(cachedData ? "degraded" : "offline");
+    setConnectionStatus(cachedData ? 'degraded' : 'offline');
     if (cachedData) {
       setShowFallback(true);
     }
@@ -178,31 +201,31 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
     const statusConfig = {
       connected: {
         icon: Wifi,
-        color: "text-accent-green",
-        bgColor: "bg-accent-green/10",
-        borderColor: "border-accent-green/20",
-        label: "Connected",
+        color: 'text-accent-green',
+        bgColor: 'bg-accent-green/10',
+        borderColor: 'border-accent-green/20',
+        label: 'Connected',
       },
       degraded: {
         icon: Activity,
-        color: "text-accent-amber",
-        bgColor: "bg-accent-amber/10",
-        borderColor: "border-accent-amber/20",
-        label: "Degraded",
+        color: 'text-accent-amber',
+        bgColor: 'bg-accent-amber/10',
+        borderColor: 'border-accent-amber/20',
+        label: 'Degraded',
       },
       offline: {
         icon: WifiOff,
-        color: "text-accent-red",
-        bgColor: "bg-accent-red/10",
-        borderColor: "border-accent-red/20",
-        label: "Offline",
+        color: 'text-accent-red',
+        bgColor: 'bg-accent-red/10',
+        borderColor: 'border-accent-red/20',
+        label: 'Offline',
       },
       connecting: {
         icon: RefreshCw,
-        color: "text-[var(--text-muted)]",
-        bgColor: "bg-[var(--bg-tertiary)]",
-        borderColor: "border-[var(--border-default)]",
-        label: "Connecting",
+        color: 'text-[var(--text-muted)]',
+        bgColor: 'bg-[var(--bg-tertiary)]',
+        borderColor: 'border-[var(--border-default)]',
+        label: 'Connecting',
       },
     };
 
@@ -214,7 +237,7 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
         className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${config.bgColor} ${config.borderColor} border`}
       >
         <Icon
-          className={`w-3 h-3 ${config.color} ${connectionStatus === "connecting" ? "animate-spin" : ""}`}
+          className={`w-3 h-3 ${config.color} ${connectionStatus === 'connecting' ? 'animate-spin' : ''}`}
         />
         <span className={config.color}>{config.label}</span>
       </div>
@@ -233,13 +256,13 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
       </div>
 
       <p className="text-sm text-[var(--text-secondary)]">
-        Showing last known machine status from cache. Data updated{" "}
-        {cachedData ? `${Math.floor((Date.now() - cachedData.timestamp) / 1000)}s ago` : "recently"}
+        Showing last known machine status from cache. Data updated{' '}
+        {cachedData ? `${Math.floor((Date.now() - cachedData.timestamp) / 1000)}s ago` : 'recently'}
         .
       </p>
 
       <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-        <span>Next retry in: {retryCount < 3 ? `${[30, 60, 120][retryCount]}s` : "manual"}</span>
+        <span>Next retry in: {retryCount < 3 ? `${[30, 60, 120][retryCount]}s` : 'manual'}</span>
       </div>
 
       <button
@@ -285,15 +308,15 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
               </div>
               <h3 className="text-[var(--text-heading)] font-medium">SCADA Unavailable</h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                The FUXA SCADA server at{" "}
+                The FUXA SCADA server at{' '}
                 <code className="text-xs bg-[var(--bg-tertiary)] px-1.5 py-0.5 rounded">
                   {baseUrl}
-                </code>{" "}
+                </code>{' '}
                 could not be reached.
               </p>
               {retryCount > 0 && (
                 <p className="text-xs text-[var(--text-muted)]">
-                  Retry attempt {retryCount}/3. Next retry in{" "}
+                  Retry attempt {retryCount}/3. Next retry in{' '}
                   {[30, 60, 120][Math.min(retryCount - 1, 2)]}s...
                 </p>
               )}
@@ -302,8 +325,8 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
                   Configuration
                 </p>
                 <p className="text-xs text-[var(--text-secondary)]">
-                  Set{" "}
-                  <span className="font-mono text-[var(--accent-blue)]">NEXT_PUBLIC_FUXA_URL</span>{" "}
+                  Set{' '}
+                  <span className="font-mono text-[var(--accent-blue)]">NEXT_PUBLIC_FUXA_URL</span>{' '}
                   in <code className="font-mono text-[var(--text-muted)]">apps/portal/.env</code> to
                   your FUXA instance.
                 </p>
@@ -327,7 +350,9 @@ export function FuxaFrame({ dashboardId, height = "600px", departmentId }: FuxaF
         className="w-full h-full border-0"
         onLoad={handleIframeLoad}
         onError={handleIframeError}
-        allow="autoplay; clipboard-read; clipboard-write"
+        allow="autoplay"
+        referrerPolicy="no-referrer"
+        sandbox="allow-scripts allow-forms allow-popups"
         title="FUXA SCADA Dashboard"
       />
     </div>

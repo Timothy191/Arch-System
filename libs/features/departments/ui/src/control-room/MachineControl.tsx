@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { PrecisionInput } from "@repo/ui/components/ui/PrecisionInput";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Activity, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { Button } from '@repo/ui/components/ui/button';
+import { PrecisionInput } from '@repo/ui/components/ui/PrecisionInput';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Activity, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 
 export function MachineControl() {
   const [rpm, setRpm] = useState<number | null>(1250);

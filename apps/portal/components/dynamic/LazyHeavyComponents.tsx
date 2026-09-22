@@ -12,9 +12,9 @@
  * Total potential bundle savings: ~1.4MB when these components are loaded on-demand
  */
 
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 // ─────────────────────────────────────────────────────────────
 // DATA GRID COMPONENT
@@ -23,7 +23,7 @@ import dynamic from "next/dynamic";
 // Dependencies: @revolist/react-datagrid, @revolist/revogrid (~900KB total)
 
 export const DataGrid = dynamic(
-  () => import("@repo/ui/DataGrid").then((m) => ({ default: m.DataGrid })),
+  () => import('@repo/ui/DataGrid').then((m) => ({ default: m.DataGrid })),
   {
     loading: () => (
       <div className="flex items-center justify-center h-64 bg-[var(--bg-glass-card)] border border-[var(--border-default)] rounded-lg">
@@ -32,7 +32,7 @@ export const DataGrid = dynamic(
       </div>
     ),
     ssr: false, // Don't SSR this heavy component
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ export const DataGrid = dynamic(
 
 export const WorkflowBuilder = dynamic(
   () =>
-    import("@repo/ui/WorkflowBuilder").then((m) => ({
+    import('@repo/ui/WorkflowBuilder').then((m) => ({
       default: m.WorkflowBuilder,
     })),
   {
@@ -54,7 +54,7 @@ export const WorkflowBuilder = dynamic(
       </div>
     ),
     ssr: false,
-  },
+  }
 );
 
 // ─────────────────────────────────────────────────────────────

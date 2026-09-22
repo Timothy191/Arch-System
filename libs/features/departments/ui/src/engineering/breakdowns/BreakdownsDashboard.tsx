@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { LayoutDashboard, LogIn, LogOut, Search, Zap } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
-import { BookInForm } from "./BookInForm";
-import { BookOutForm } from "./BookOutForm";
-import { BreakdownStats } from "./BreakdownStats";
-import { BreakdownsTable } from "./BreakdownsTable";
-import type { Breakdown, BreakdownMetrics, Machine, MTBFDataPoint, ServiceTrigger } from "./types";
+import { AnimatePresence, motion } from 'framer-motion';
+import { LayoutDashboard, LogIn, LogOut, Search, Zap } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useMemo, useState } from 'react';
+import { BookInForm } from './BookInForm';
+import { BookOutForm } from './BookOutForm';
+import { BreakdownStats } from './BreakdownStats';
+import { BreakdownsTable } from './BreakdownsTable';
+import type { Breakdown, BreakdownMetrics, Machine, MTBFDataPoint, ServiceTrigger } from './types';
 
-const BreakdownCharts = dynamic(() => import("./BreakdownCharts").then((m) => m.BreakdownCharts), {
+const BreakdownCharts = dynamic(() => import('./BreakdownCharts').then((m) => m.BreakdownCharts), {
   ssr: false,
   loading: () => <div className="h-64 animate-pulse bg-[var(--bg-tertiary)] rounded-xl" />,
 });
 
-type Tab = "overview" | "bookin" | "bookout" | "query";
+type Tab = 'overview' | 'bookin' | 'bookout' | 'query';
 
 interface BreakdownsDashboardProps {
   departmentId: string;
@@ -30,16 +30,16 @@ export function BreakdownsDashboard({
   metrics,
   machines,
 }: BreakdownsDashboardProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
 
   const tabs = [
-    { id: "overview" as const, label: "Overview", icon: LayoutDashboard },
-    { id: "bookin" as const, label: "Book In", icon: LogIn },
-    { id: "bookout" as const, label: "Book Out", icon: LogOut },
-    { id: "query" as const, label: "Query Data", icon: Search },
+    { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
+    { id: 'bookin' as const, label: 'Book In', icon: LogIn },
+    { id: 'bookout' as const, label: 'Book Out', icon: LogOut },
+    { id: 'query' as const, label: 'Query Data', icon: Search },
   ];
 
-  const activeBreakdowns = breakdowns.filter((b) => b.status === "active");
+  const activeBreakdowns = breakdowns.filter((b) => b.status === 'active');
 
   // AGENT-TRACE: Dynamic computation of MTBF and automated preventative service triggers
   const { mtbfData, serviceTriggers } = useMemo(() => {
@@ -51,7 +51,7 @@ export function BreakdownsDashboard({
 
     for (const b of breakdowns) {
       // Machine frequency tracking
-      const mKey = b.fleet_id || b.machine_name || "Unknown";
+      const mKey = b.fleet_id || b.machine_name || 'Unknown';
       const existingM = machineFailureCount.get(mKey) || {
         count: 0,
         name: b.machine_name || b.fleet_id,
@@ -61,7 +61,7 @@ export function BreakdownsDashboard({
       machineFailureCount.set(mKey, existingM);
 
       // Category MTTR/MTBF tracking
-      const cat = b.machine_type || "General Equipment";
+      const cat = b.machine_type || 'General Equipment';
       const existing = categoryMap.get(cat) || {
         totalRepairHours: 0,
         repairCount: 0,
@@ -74,7 +74,7 @@ export function BreakdownsDashboard({
         existing.dates.push(new Date(b.date_in).getTime());
       }
 
-      if (b.status === "completed" && b.date_out && b.time_out && b.date_in && b.time_in) {
+      if (b.status === 'completed' && b.date_out && b.time_out && b.date_in && b.time_in) {
         const start = new Date(`${b.date_in}T${b.time_in}`).getTime();
         const end = new Date(`${b.date_out}T${b.time_out}`).getTime();
         const hrs = (end - start) / 3600000;
@@ -108,11 +108,11 @@ export function BreakdownsDashboard({
           id: `trigger-${mId}`,
           machine_name: mData.name,
           machine_type: mData.type,
-          trigger_type: mData.count >= 4 ? "failure_frequency" : "mtbf_threshold",
-          severity: mData.count >= 4 ? "high" : "medium",
+          trigger_type: mData.count >= 4 ? 'failure_frequency' : 'mtbf_threshold',
+          severity: mData.count >= 4 ? 'high' : 'medium',
           reason: `${mData.count} breakdowns logged recently (${mData.type})`,
           metric_value: `Freq: ${mData.count} events`,
-          recommended_action: "Schedule 250h Full Bay Overhaul",
+          recommended_action: 'Schedule 250h Full Bay Overhaul',
         });
       }
     }
@@ -120,10 +120,10 @@ export function BreakdownsDashboard({
     // Ensure fallback baseline categories if no historical data
     if (calculatedMtbf.length === 0) {
       calculatedMtbf.push(
-        { category: "Excavator", mttrHours: 4.2, mtbfHours: 120, failureCount: 3 },
-        { category: "Haul Truck", mttrHours: 6.8, mtbfHours: 95, failureCount: 5 },
-        { category: "Dozer", mttrHours: 3.1, mtbfHours: 160, failureCount: 2 },
-        { category: "Drill Rig", mttrHours: 5.5, mtbfHours: 110, failureCount: 4 },
+        { category: 'Excavator', mttrHours: 4.2, mtbfHours: 120, failureCount: 3 },
+        { category: 'Haul Truck', mttrHours: 6.8, mtbfHours: 95, failureCount: 5 },
+        { category: 'Dozer', mttrHours: 3.1, mtbfHours: 160, failureCount: 2 },
+        { category: 'Drill Rig', mttrHours: 5.5, mtbfHours: 110, failureCount: 4 }
       );
     }
 
@@ -163,13 +163,13 @@ export function BreakdownsDashboard({
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-[var(--bg-tertiary)] text-[var(--text-heading)] shadow-card"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]/50"
+                  ? 'bg-[var(--bg-tertiary)] text-[var(--text-heading)] shadow-card'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-tertiary)]/50'
               }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-              {tab.id === "bookout" && activeBreakdowns.length > 0 && (
+              {tab.id === 'bookout' && activeBreakdowns.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-accent-red/20 text-accent-red border border-accent-red/30">
                   {activeBreakdowns.length}
                 </span>
@@ -188,17 +188,17 @@ export function BreakdownsDashboard({
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === "overview" && (
+          {activeTab === 'overview' && (
             <div className="space-y-6">
               <BreakdownStats metrics={metrics} />
 
               <BreakdownCharts
                 statusData={[
                   {
-                    name: "Operational",
+                    name: 'Operational',
                     value: metrics.active === 0 ? 100 : Math.max(0, 100 - metrics.active),
                   },
-                  { name: "Broken Down", value: metrics.active },
+                  { name: 'Broken Down', value: metrics.active },
                 ]}
                 mtbfData={mtbfData}
                 serviceTriggers={serviceTriggers}
@@ -213,7 +213,7 @@ export function BreakdownsDashboard({
             </div>
           )}
 
-          {activeTab === "bookin" && (
+          {activeTab === 'bookin' && (
             <BookInForm
               departmentId={departmentId}
               activeBreakdowns={activeBreakdowns}
@@ -221,11 +221,11 @@ export function BreakdownsDashboard({
             />
           )}
 
-          {activeTab === "bookout" && (
+          {activeTab === 'bookout' && (
             <BookOutForm departmentId={departmentId} activeBreakdowns={activeBreakdowns} />
           )}
 
-          {activeTab === "query" && <BreakdownsTable breakdowns={breakdowns} showStatus={true} />}
+          {activeTab === 'query' && <BreakdownsTable breakdowns={breakdowns} showStatus={true} />}
         </motion.div>
       </AnimatePresence>
     </div>

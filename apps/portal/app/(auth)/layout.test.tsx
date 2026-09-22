@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { render } from "@testing-library/react";
-import AuthLayout from "./layout";
+import { render } from '@testing-library/react';
+import AuthLayout from './layout';
 
-describe("AuthLayout", () => {
+describe('AuthLayout', () => {
   let originalConsoleError: typeof console.error;
 
   beforeAll(() => {
@@ -13,36 +13,36 @@ describe("AuthLayout", () => {
     console.error = originalConsoleError;
   });
 
-  it("renders children correctly", () => {
+  it('renders children correctly', () => {
     const { getByText } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
-    expect(getByText("Test Child")).toBeInTheDocument();
+    expect(getByText('Test Child')).toBeInTheDocument();
   });
 
-  it("applies container layout classes", () => {
+  it('applies container layout classes', () => {
     const { container } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
 
     const outerContainer = container.firstChild;
-    expect(outerContainer).toHaveClass("relative");
-    expect(outerContainer).toHaveClass("min-h-[calc(100vh-4rem)]");
-    expect(outerContainer).toHaveClass("w-full");
-    expect(outerContainer).toHaveClass("h-full");
-    expect(outerContainer).toHaveClass("flex");
-    expect(outerContainer).toHaveClass("overflow-hidden");
+    expect(outerContainer).toHaveClass('relative');
+    expect(outerContainer).toHaveClass('min-h-[calc(100vh-4rem)]');
+    expect(outerContainer).toHaveClass('w-full');
+    expect(outerContainer).toHaveClass('h-full');
+    expect(outerContainer).toHaveClass('flex');
+    expect(outerContainer).toHaveClass('overflow-hidden');
   });
 
-  it("unmounts cleanly without side effects", () => {
+  it('unmounts cleanly without side effects', () => {
     const { unmount } = render(
       <AuthLayout>
         <div>Test Child</div>
-      </AuthLayout>,
+      </AuthLayout>
     );
     expect(() => unmount()).not.toThrow();
   });

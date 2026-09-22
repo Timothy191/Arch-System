@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Html } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import { cn } from "../lib/utils";
-import { HeroCardContent } from "./HeroCardContent";
-import type { HeroRotatorProps, Panel } from "./HeroRotator";
+import { Html } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { cn } from '../lib/utils';
+import { HeroCardContent } from './HeroCardContent';
+import type { HeroRotatorProps, Panel } from './HeroRotator';
 
 // AGENT-TRACE: 3D Cylinder configuration for React Three Fiber hero carousel
 const R3F_CONFIG = {
@@ -66,11 +66,11 @@ function ThreeCardItem({
         style={{
           width: `720px`,
           height: `420px`,
-          userSelect: "none",
+          userSelect: 'none',
         }}
         className={cn(
-          "transition-opacity duration-500",
-          isActive ? "opacity-100" : "opacity-40 hover:opacity-75 cursor-pointer",
+          'transition-opacity duration-500',
+          isActive ? 'opacity-100' : 'opacity-40 hover:opacity-75 cursor-pointer'
         )}
       >
         <div
@@ -82,10 +82,10 @@ function ThreeCardItem({
             if (!isActive) onSelect(idx);
           }}
           className={cn(
-            "relative h-full w-full rounded-2xl overflow-hidden select-none",
-            "bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window",
-            "transition-[shadow,transform] duration-500 ease-out",
-            isActive && "hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]",
+            'relative h-full w-full rounded-2xl overflow-hidden select-none',
+            'bg-white/90 backdrop-blur-3xl liquid-glass-light border border-black/[0.06] shadow-window',
+            'transition-[shadow,transform] duration-500 ease-out',
+            isActive && 'hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)]'
           )}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none z-0" />
@@ -136,7 +136,7 @@ function CarouselCylinder({
     currentAngleRef.current = THREE.MathUtils.lerp(
       currentAngleRef.current,
       targetAngle,
-      R3F_CONFIG.rotDamping,
+      R3F_CONFIG.rotDamping
     );
     groupRef.current.rotation.y = currentAngleRef.current;
   });
@@ -200,7 +200,7 @@ export function ThreeHeroRotator({
       if (diff < -total / 2) diff += total;
       setTargetIndex((prev) => prev + diff);
     },
-    [targetIndex, total],
+    [targetIndex, total]
   );
 
   const handleImageError = useCallback((src: string) => {
@@ -215,18 +215,18 @@ export function ThreeHeroRotator({
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === "ArrowLeft") {
+      if (e.key === 'ArrowLeft') {
         e.preventDefault();
         prevSlide();
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === 'ArrowRight') {
         e.preventDefault();
         nextSlide();
-      } else if (e.key === " ") {
+      } else if (e.key === ' ') {
         e.preventDefault();
         setIsManuallyPaused((p) => !p);
       }
     },
-    [nextSlide, prevSlide],
+    [nextSlide, prevSlide]
   );
 
   // Pointer swipe handlers
@@ -234,19 +234,19 @@ export function ThreeHeroRotator({
     const anyE = e as unknown as Record<string, unknown>;
     const nativeE = (e.nativeEvent || {}) as unknown as Record<string, unknown>;
     const cx =
-      typeof anyE.clientX === "number"
+      typeof anyE.clientX === 'number'
         ? anyE.clientX
-        : typeof nativeE.clientX === "number"
+        : typeof nativeE.clientX === 'number'
           ? nativeE.clientX
-          : typeof anyE.pageX === "number"
+          : typeof anyE.pageX === 'number'
             ? anyE.pageX
             : null;
     const cy =
-      typeof anyE.clientY === "number"
+      typeof anyE.clientY === 'number'
         ? anyE.clientY
-        : typeof nativeE.clientY === "number"
+        : typeof nativeE.clientY === 'number'
           ? nativeE.clientY
-          : typeof anyE.pageY === "number"
+          : typeof anyE.pageY === 'number'
             ? anyE.pageY
             : null;
     pointerStartX.current = cx;
@@ -258,19 +258,19 @@ export function ThreeHeroRotator({
     const anyE = e as unknown as Record<string, unknown>;
     const nativeE = (e.nativeEvent || {}) as unknown as Record<string, unknown>;
     const cx =
-      typeof anyE.clientX === "number"
+      typeof anyE.clientX === 'number'
         ? anyE.clientX
-        : typeof nativeE.clientX === "number"
+        : typeof nativeE.clientX === 'number'
           ? nativeE.clientX
-          : typeof anyE.pageX === "number"
+          : typeof anyE.pageX === 'number'
             ? anyE.pageX
             : null;
     const cy =
-      typeof anyE.clientY === "number"
+      typeof anyE.clientY === 'number'
         ? anyE.clientY
-        : typeof nativeE.clientY === "number"
+        : typeof nativeE.clientY === 'number'
           ? nativeE.clientY
-          : typeof anyE.pageY === "number"
+          : typeof anyE.pageY === 'number'
             ? anyE.pageY
             : null;
 
@@ -329,7 +329,7 @@ export function ThreeHeroRotator({
     return (
       <div
         className="relative w-full rounded-2xl bg-black/[0.02] border border-black/5 flex items-center justify-center"
-        style={{ height: "480px" }}
+        style={{ height: '480px' }}
       >
         <div className="w-8 h-8 rounded-full border-2 border-[var(--accent-blue)] border-t-transparent animate-spin" />
       </div>
@@ -351,12 +351,12 @@ export function ThreeHeroRotator({
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {total > 0 && panels[activeIndex]
           ? `Showing slide ${activeIndex + 1} of ${total}: ${panels[activeIndex].title}`
-          : ""}
+          : ''}
       </span>
 
       <div
         className="relative w-full touch-pan-y cursor-grab active:cursor-grabbing"
-        style={{ height: "520px" }}
+        style={{ height: '520px' }}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onTouchStart={handleTouchStart}
@@ -364,7 +364,7 @@ export function ThreeHeroRotator({
       >
         <Canvas
           camera={{ position: [0, 0, R3F_CONFIG.cameraZ], fov: R3F_CONFIG.fov }}
-          style={{ width: "100%", height: "100%", pointerEvents: "auto" }}
+          style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
           gl={{ antialias: true, alpha: true }}
         >
           <ambientLight intensity={0.9} />
@@ -404,7 +404,7 @@ export function ThreeHeroRotator({
             <div className="w-px h-3.5 bg-black/10 mx-0.5" />
             <button
               onClick={() => setIsManuallyPaused((p) => !p)}
-              aria-label={isManuallyPaused ? "Resume auto rotation" : "Pause auto rotation"}
+              aria-label={isManuallyPaused ? 'Resume auto rotation' : 'Pause auto rotation'}
               className="p-1.5 rounded-full hover:bg-black/[0.05] text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-all active:scale-95"
             >
               {isManuallyPaused ? (
@@ -422,10 +422,10 @@ export function ThreeHeroRotator({
                 onClick={() => jumpToSlide(idx)}
                 aria-label={`Jump to ${p.title}`}
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
+                  'h-1.5 rounded-full transition-all duration-300',
                   idx === activeIndex
-                    ? "w-6 bg-[var(--accent-blue)]"
-                    : "w-1.5 bg-black/20 hover:bg-black/40",
+                    ? 'w-6 bg-[var(--accent-blue)]'
+                    : 'w-1.5 bg-black/20 hover:bg-black/40'
                 )}
               />
             ))}

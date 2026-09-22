@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/ui/components/ui/button";
-import { cn } from "@repo/ui/lib/utils";
-import { ArrowRight } from "lucide-react";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { Button } from '@repo/ui/components/ui/button';
+import { cn } from '@repo/ui/lib/utils';
+import { ArrowRight } from 'lucide-react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
+interface BentoGridProps extends ComponentPropsWithoutRef<'div'> {
   children: ReactNode;
   className?: string;
 }
 
-interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
+interface BentoCardProps extends ComponentPropsWithoutRef<'div'> {
   name: string;
   className: string;
   background: ReactNode;
@@ -24,8 +24,8 @@ const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
   return (
     <div
       className={cn(
-        "grid w-full auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6",
-        className,
+        'grid w-full auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6',
+        className
       )}
       {...props}
     >
@@ -46,10 +46,10 @@ const BentoCard = ({
 }: BentoCardProps) => (
   <div
     className={cn(
-      "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
-      "bg-[var(--bg-tertiary)] border border-[var(--border-default)]",
-      "transform-gpu [box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
-      className,
+      'group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl',
+      'bg-[var(--bg-tertiary)] border border-[var(--border-default)]',
+      'transform-gpu [box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]',
+      className
     )}
     {...props}
   >
@@ -63,7 +63,7 @@ const BentoCard = ({
 
       <div
         className={cn(
-          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
+          'pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden'
         )}
       >
         <Button
@@ -82,7 +82,7 @@ const BentoCard = ({
 
     <div
       className={cn(
-        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
+        'pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex'
       )}
     >
       <Button

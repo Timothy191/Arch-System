@@ -1,21 +1,21 @@
 /**
  * @jest-environment node
  */
-import { GET } from "./route";
+import { GET } from './route';
 
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: jest.fn(),
 }));
 
-jest.mock("@/lib/errors/error-logger", () => ({
+jest.mock('@/lib/errors/error-logger', () => ({
   logError: jest.fn(),
 }));
 
-const { createServerSupabaseClient } = require("@repo/supabase/server");
-const { logError } = require("@/lib/errors/error-logger");
+const { createServerSupabaseClient } = require('@repo/supabase/server');
+const { logError } = require('@/lib/errors/error-logger');
 
-function buildRequest(url = "http://localhost:3000/api/ai/metrics") {
-  return new Request(url, { method: "GET" });
+function buildRequest(url = 'http://localhost:3000/api/ai/metrics') {
+  return new Request(url, { method: 'GET' });
 }
 
 function createQueryMock(rows: unknown[]) {
@@ -44,12 +44,12 @@ function mockSupabase(rows: unknown[]) {
   });
 }
 
-describe("GET /api/ai/metrics", () => {
+describe('GET /api/ai/metrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("returns zeroed metrics when usage is empty", async () => {
+  it('returns zeroed metrics when usage is empty', async () => {
     mockSupabase([]);
 
     const res = await GET(buildRequest());
@@ -63,45 +63,45 @@ describe("GET /api/ai/metrics", () => {
     expect(json.metrics.recentUsage).toEqual([]);
   });
 
-  it("aggregates totals, costs, cache ratio, and model breakdown", async () => {
+  it('aggregates totals, costs, cache ratio, and model breakdown', async () => {
     const rows = [
       {
-        id: "usage-0",
-        created_at: "2026-09-07T10:00:00Z",
-        model_name: "gpt-4o",
+        id: 'usage-0',
+        created_at: '2026-09-07T10:00:00Z',
+        model_name: 'gpt-4o',
         total_tokens: 100,
         prompt_tokens: 60,
         completion_tokens: 40,
         cached_prompt_tokens: 30,
         total_cost_usd_cents: 50,
         latency_ms: 120,
-        status: "success",
+        status: 'success',
         department_id: null,
       },
       {
-        id: "usage-1",
-        created_at: "2026-09-07T09:00:00Z",
-        model_name: "gpt-4o",
+        id: 'usage-1',
+        created_at: '2026-09-07T09:00:00Z',
+        model_name: 'gpt-4o',
         total_tokens: 200,
         prompt_tokens: 120,
         completion_tokens: 80,
         cached_prompt_tokens: 90,
         total_cost_usd_cents: 80,
         latency_ms: 180,
-        status: "success",
+        status: 'success',
         department_id: null,
       },
       {
-        id: "usage-2",
-        created_at: "2026-09-07T08:00:00Z",
-        model_name: "claude-3.5",
+        id: 'usage-2',
+        created_at: '2026-09-07T08:00:00Z',
+        model_name: 'claude-3.5',
         total_tokens: 50,
         prompt_tokens: 30,
         completion_tokens: 20,
         cached_prompt_tokens: 10,
         total_cost_usd_cents: 25,
         latency_ms: 90,
-        status: "success",
+        status: 'success',
         department_id: null,
       },
     ];
@@ -126,39 +126,39 @@ describe("GET /api/ai/metrics", () => {
     expect(json.metrics.avgLatency).toBe(Math.round((120 + 180 + 90) / 3));
 
     expect(json.metrics.byModel).toHaveLength(2);
-    const gpt = json.metrics.byModel.find((m) => m.name === "gpt-4o");
+    const gpt = json.metrics.byModel.find((m) => m.name === 'gpt-4o');
     expect(gpt.tokens).toBe(300);
     expect(gpt.cost).toBe(130);
     expect(gpt.requests).toBe(2);
     expect(gpt.cachedTokens).toBe(120);
     expect(gpt.percentage).toBeCloseTo(Math.round((300 / 350) * 100 * 10) / 10, 5);
 
-    const claude = json.metrics.byModel.find((m) => m.name === "claude-3.5");
+    const claude = json.metrics.byModel.find((m) => m.name === 'claude-3.5');
     expect(claude.percentage).toBeCloseTo(Math.round((50 / 350) * 100 * 10) / 10, 5);
 
     expect(json.metrics.recentUsage).toHaveLength(3);
     expect(json.metrics.recentUsage[0]).toMatchObject({
-      id: "usage-0",
-      model: "gpt-4o",
+      id: 'usage-0',
+      model: 'gpt-4o',
       tokens: 100,
       costCents: 50,
       latency: 120,
-      status: "success",
+      status: 'success',
     });
   });
 
-  it("limits recent usage to 20 rows", async () => {
+  it('limits recent usage to 20 rows', async () => {
     const rows = Array.from({ length: 25 }, (_, i) => ({
       id: `usage-${i}`,
       created_at: new Date(Date.now() - i * 1000).toISOString(),
-      model_name: "gpt-4o",
+      model_name: 'gpt-4o',
       total_tokens: i + 1,
       prompt_tokens: i + 1,
       completion_tokens: 0,
       cached_prompt_tokens: 0,
       total_cost_usd_cents: i + 1,
       latency_ms: 100,
-      status: "success",
+      status: 'success',
       department_id: null,
     }));
 
@@ -173,8 +173,8 @@ describe("GET /api/ai/metrics", () => {
     expect(json.metrics.recentUsage[19].tokens).toBe(20);
   });
 
-  it("returns 500 and logs when Supabase query errors", async () => {
-    const promise = Promise.resolve({ data: null, error: new Error("db failure") });
+  it('returns 500 and logs when Supabase query errors', async () => {
+    const promise = Promise.resolve({ data: null, error: new Error('db failure') });
 
     const builder = {
       from: jest.fn().mockReturnThis(),
@@ -199,7 +199,7 @@ describe("GET /api/ai/metrics", () => {
 
     const json = await res.json();
     expect(json.success).toBe(false);
-    expect(json.error).toBe("db failure");
-    expect(logError).toHaveBeenCalledWith(expect.any(Error), { context: "ai_metrics_route" });
+    expect(json.error).toBe('db failure');
+    expect(logError).toHaveBeenCalledWith(expect.any(Error), { context: 'ai_metrics_route' });
   });
 });

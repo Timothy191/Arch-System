@@ -16,9 +16,9 @@
  *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
  */
 
-import { Cpu, Radio, ShieldCheck } from "lucide-react";
-import NextImage from "next/image";
-import { Logo } from "./Logo";
+import { Cpu, Radio, ShieldCheck } from 'lucide-react';
+import NextImage from 'next/image';
+import { Logo } from './Logo';
 
 export interface TrustLogo {
   src: string;
@@ -31,19 +31,19 @@ export interface TrustLogosProps {
 
 const PLACEHOLDERS = [
   {
-    label: "Arch Mining",
+    label: 'Arch Mining',
     icon: <Logo className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
   },
   {
-    label: "Sector-01",
+    label: 'Sector-01',
     icon: <Radio className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
   },
   {
-    label: "Modbus Ready",
+    label: 'Modbus Ready',
     icon: <Cpu className="w-2.5 h-2.5 mr-1 shrink-0 text-[var(--accent-blue)]" />,
   },
   {
-    label: "ISO 27001",
+    label: 'ISO 27001',
     icon: <ShieldCheck className="w-2.5 h-2.5 mr-1 shrink-0 text-accent-green" />,
   },
 ];
@@ -68,7 +68,7 @@ export function TrustLogos({ logos }: TrustLogosProps) {
               height={18}
               className="h-4.5 w-auto object-contain"
               loading="lazy"
-              unoptimized={logo.src.startsWith("http")}
+              unoptimized={logo.src.startsWith('http')}
             />
           ))}
         </div>

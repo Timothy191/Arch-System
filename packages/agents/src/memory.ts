@@ -1,10 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 export interface AgentMemoryEntry {
   agentId: string;
   conversationId?: string;
   sessionId?: string;
-  memoryType: "episodic" | "semantic" | "decision" | "reflection" | "rule" | "fact" | "context";
+  memoryType: 'episodic' | 'semantic' | 'decision' | 'reflection' | 'rule' | 'fact' | 'context';
   title?: string;
   content: string;
   metadata?: Record<string, unknown>;
@@ -44,7 +44,7 @@ export class AgentMemoryStore {
       options?.supabaseUrl ||
       process.env.AGY_SUPABASE_URL ||
       process.env.SUPABASE_URL ||
-      "https://fjcfkrbbfzizrxclgkhq.supabase.co";
+      'https://fjcfkrbbfzizrxclgkhq.supabase.co';
 
     const key =
       options?.supabaseKey ||
@@ -52,14 +52,14 @@ export class AgentMemoryStore {
       process.env.AGY_SUPABASE_PUBLISHABLE_KEY ||
       process.env.SUPABASE_SECRET_KEY ||
       process.env.SUPABASE_PUBLISHABLE_KEY ||
-      "sb_publishable_8Mz3qACjG0uNKFmm3FyRJQ_fEz6SDZE";
+      'sb_publishable_8Mz3qACjG0uNKFmm3FyRJQ_fEz6SDZE';
 
     this.supabase = createClient(url, key);
   }
 
   public async saveMemory(entry: AgentMemoryEntry) {
     const { data, error } = await this.supabase
-      .from("agent_memories")
+      .from('agent_memories')
       .insert({
         agent_id: entry.agentId,
         conversation_id: entry.conversationId,
@@ -74,7 +74,7 @@ export class AgentMemoryStore {
       .single();
 
     if (error) {
-      console.warn("Failed to persist agent memory:", error.message);
+      console.warn('Failed to persist agent memory:', error.message);
       return null;
     }
     return data;
@@ -82,7 +82,7 @@ export class AgentMemoryStore {
 
   public async logTokens(entry: TokenMetricsEntry) {
     const { data, error } = await this.supabase
-      .from("token_metrics")
+      .from('token_metrics')
       .insert({
         conversation_id: entry.conversationId,
         agent_id: entry.agentId,
@@ -97,7 +97,7 @@ export class AgentMemoryStore {
       .single();
 
     if (error) {
-      console.warn("Failed to log token metrics:", error.message);
+      console.warn('Failed to log token metrics:', error.message);
       return null;
     }
     return data;
@@ -105,7 +105,7 @@ export class AgentMemoryStore {
 
   public async snapshotContext(entry: ContextSnapshotEntry) {
     const { data, error } = await this.supabase
-      .from("context_snapshots")
+      .from('context_snapshots')
       .insert({
         conversation_id: entry.conversationId,
         agent_id: entry.agentId,
@@ -119,7 +119,7 @@ export class AgentMemoryStore {
       .single();
 
     if (error) {
-      console.warn("Failed to snapshot context:", error.message);
+      console.warn('Failed to snapshot context:', error.message);
       return null;
     }
     return data;

@@ -6,7 +6,7 @@ export interface QueuedFetchRequest {
   headers?: Record<string, string>;
   body?: string;
   description?: string;
-  status: "pending" | "processing" | "synced" | "failed";
+  status: 'pending' | 'processing' | 'synced' | 'failed';
   retryCount: number;
   createdAt: number;
   lastAttemptAt?: number;
@@ -22,16 +22,16 @@ export interface CachedFetchResponse<T = unknown> {
 }
 
 export class IDBOfflineStorage {
-  private dbName = "ArchOfflineFetchDB";
+  private dbName = 'ArchOfflineFetchDB';
   private dbVersion = 1;
-  private queueStore = "requestQueue";
-  private cacheStore = "readCache";
+  private queueStore = 'requestQueue';
+  private cacheStore = 'readCache';
   private db: IDBDatabase | null = null;
   private inMemoryQueue: QueuedFetchRequest[] = [];
   private inMemoryCache: Map<string, CachedFetchResponse> = new Map();
 
   private isSupported(): boolean {
-    return typeof window !== "undefined" && typeof window.indexedDB !== "undefined";
+    return typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined';
   }
 
   private async getDB(): Promise<IDBDatabase | null> {
@@ -55,14 +55,14 @@ export class IDBOfflineStorage {
           const db = (event.target as IDBOpenDBRequest).result;
           if (!db.objectStoreNames.contains(this.queueStore)) {
             const store = db.createObjectStore(this.queueStore, {
-              keyPath: "id",
+              keyPath: 'id',
               autoIncrement: true,
             });
-            store.createIndex("status", "status", { unique: false });
-            store.createIndex("idempotencyKey", "idempotencyKey", { unique: true });
+            store.createIndex('status', 'status', { unique: false });
+            store.createIndex('idempotencyKey', 'idempotencyKey', { unique: true });
           }
           if (!db.objectStoreNames.contains(this.cacheStore)) {
-            db.createObjectStore(this.cacheStore, { keyPath: "cacheKey" });
+            db.createObjectStore(this.cacheStore, { keyPath: 'cacheKey' });
           }
         };
       } catch {
@@ -72,11 +72,11 @@ export class IDBOfflineStorage {
   }
 
   public async enqueue(
-    request: Omit<QueuedFetchRequest, "id" | "status" | "retryCount" | "createdAt">,
+    request: Omit<QueuedFetchRequest, 'id' | 'status' | 'retryCount' | 'createdAt'>
   ): Promise<QueuedFetchRequest> {
     const fullItem: QueuedFetchRequest = {
       ...request,
-      status: "pending",
+      status: 'pending',
       retryCount: 0,
       createdAt: Date.now(),
     };
@@ -88,7 +88,7 @@ export class IDBOfflineStorage {
     }
 
     return new Promise((resolve, _reject) => {
-      const tx = db.transaction(this.queueStore, "readwrite");
+      const tx = db.transaction(this.queueStore, 'readwrite');
       const store = tx.objectStore(this.queueStore);
       const req = store.add(fullItem);
 
@@ -107,21 +107,21 @@ export class IDBOfflineStorage {
   public async getPending(): Promise<QueuedFetchRequest[]> {
     const db = await this.getDB();
     if (!db) {
-      return this.inMemoryQueue.filter((item) => item.status === "pending");
+      return this.inMemoryQueue.filter((item) => item.status === 'pending');
     }
 
     return new Promise((resolve) => {
-      const tx = db.transaction(this.queueStore, "readonly");
+      const tx = db.transaction(this.queueStore, 'readonly');
       const store = tx.objectStore(this.queueStore);
-      const index = store.index("status");
-      const req = index.getAll("pending");
+      const index = store.index('status');
+      const req = index.getAll('pending');
 
       req.onsuccess = () => {
         resolve(req.result as QueuedFetchRequest[]);
       };
 
       req.onerror = () => {
-        resolve(this.inMemoryQueue.filter((item) => item.status === "pending"));
+        resolve(this.inMemoryQueue.filter((item) => item.status === 'pending'));
       };
     });
   }
@@ -134,7 +134,7 @@ export class IDBOfflineStorage {
     }
 
     return new Promise((resolve) => {
-      const tx = db.transaction(this.queueStore, "readwrite");
+      const tx = db.transaction(this.queueStore, 'readwrite');
       const store = tx.objectStore(this.queueStore);
       const req = store.delete(id);
 
@@ -145,8 +145,8 @@ export class IDBOfflineStorage {
 
   public async updateStatus(
     id: number,
-    status: QueuedFetchRequest["status"],
-    errorMessage?: string,
+    status: QueuedFetchRequest['status'],
+    errorMessage?: string
   ): Promise<void> {
     const db = await this.getDB();
     if (!db) {
@@ -161,7 +161,7 @@ export class IDBOfflineStorage {
     }
 
     return new Promise((resolve) => {
-      const tx = db.transaction(this.queueStore, "readwrite");
+      const tx = db.transaction(this.queueStore, 'readwrite');
       const store = tx.objectStore(this.queueStore);
       const getReq = store.get(id);
 
@@ -184,7 +184,7 @@ export class IDBOfflineStorage {
   public async cacheResponse<T>(
     cacheKey: string,
     data: T,
-    ttlMs: number = 86400000,
+    ttlMs: number = 86400000
   ): Promise<void> {
     const item: CachedFetchResponse<T> = {
       cacheKey,
@@ -200,7 +200,7 @@ export class IDBOfflineStorage {
     }
 
     return new Promise((resolve) => {
-      const tx = db.transaction(this.cacheStore, "readwrite");
+      const tx = db.transaction(this.cacheStore, 'readwrite');
       const store = tx.objectStore(this.cacheStore);
       store.put(item);
       tx.oncomplete = () => resolve();
@@ -221,7 +221,7 @@ export class IDBOfflineStorage {
     }
 
     return new Promise((resolve) => {
-      const tx = db.transaction(this.cacheStore, "readonly");
+      const tx = db.transaction(this.cacheStore, 'readonly');
       const store = tx.objectStore(this.cacheStore);
       const req = store.get(cacheKey);
 

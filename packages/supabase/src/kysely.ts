@@ -1,5 +1,5 @@
-import { type ColumnType, type Generated, Kysely, PostgresDialect } from "kysely";
-import { Pool } from "pg";
+import { type ColumnType, type Generated, Kysely, PostgresDialect } from 'kysely';
+import { Pool } from 'pg';
 
 // AGENT-TRACE: Simple APIError class for package-level use
 // Removed unused options parameter to fix ESLint warnings preventing git push
@@ -7,7 +7,7 @@ import { Pool } from "pg";
 class APIError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "APIError";
+    this.name = 'APIError';
   }
 }
 
@@ -84,7 +84,7 @@ export function createKyselyClient() {
 
   if (!url) {
     throw new APIError(
-      "Missing DATABASE_URL. Set it in your env (Supabase connection pool string).",
+      'Missing DATABASE_URL. Set it in your env (Supabase connection pool string).'
     );
   }
 

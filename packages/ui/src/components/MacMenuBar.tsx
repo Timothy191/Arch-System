@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   // Menu: Help
   BookOpen,
@@ -29,21 +29,21 @@ import {
   TowerControl,
   TrendingUp,
   Wrench,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import * as React from "react";
-import { getServiceUrls } from "../lib/urls";
-import { cn } from "../lib/utils";
-import { Logo } from "./Logo";
-import { Avatar } from "./ui/avatar";
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import * as React from 'react';
+import { getServiceUrls } from '../lib/urls';
+import { cn } from '../lib/utils';
+import { Logo } from './Logo';
+import { Avatar } from './ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from './ui/dropdown-menu';
 
 interface MacMenuBarProps {
   menuItems?: readonly string[];
@@ -56,96 +56,96 @@ const NAVIGATION_ITEMS: readonly string[] = [];
 
 const DEPARTMENTS_LIST = [
   {
-    name: "drilling",
-    displayName: "Drilling Operations",
+    name: 'drilling',
+    displayName: 'Drilling Operations',
     icon: Pickaxe,
-    iconColor: "text-dept-drilling",
-    bgColor: "bg-dept-drilling/10 hover:bg-dept-drilling/15",
-    description: "Rig operations & depth telemetry",
+    iconColor: 'text-dept-drilling',
+    bgColor: 'bg-dept-drilling/10 hover:bg-dept-drilling/15',
+    description: 'Rig operations & depth telemetry',
   },
   {
-    name: "production",
-    displayName: "Production Tracking",
+    name: 'production',
+    displayName: 'Production Tracking',
     icon: TrendingUp,
-    iconColor: "text-dept-production",
-    bgColor: "bg-dept-production/10 hover:bg-dept-production/15",
-    description: "Yield & tonnage monitoring",
+    iconColor: 'text-dept-production',
+    bgColor: 'bg-dept-production/10 hover:bg-dept-production/15',
+    description: 'Yield & tonnage monitoring',
   },
   {
-    name: "access-control",
-    displayName: "Access Control",
+    name: 'access-control',
+    displayName: 'Access Control',
     icon: ScanFace,
-    iconColor: "text-dept-access-control",
-    bgColor: "bg-dept-access-control/10 hover:bg-dept-access-control/15",
-    description: "Personnel badging & visitor logs",
+    iconColor: 'text-dept-access-control',
+    bgColor: 'bg-dept-access-control/10 hover:bg-dept-access-control/15',
+    description: 'Personnel badging & visitor logs',
   },
   {
-    name: "engineering",
-    displayName: "Engineering",
+    name: 'engineering',
+    displayName: 'Engineering',
     icon: Wrench,
-    iconColor: "text-dept-engineering",
-    bgColor: "bg-dept-engineering/10 hover:bg-dept-engineering/15",
-    description: "CAD, equipment specs & breakdowns",
+    iconColor: 'text-dept-engineering',
+    bgColor: 'bg-dept-engineering/10 hover:bg-dept-engineering/15',
+    description: 'CAD, equipment specs & breakdowns',
   },
   {
-    name: "control-room",
-    displayName: "SCADA Control Room",
+    name: 'control-room',
+    displayName: 'SCADA Control Room',
     icon: TowerControl,
-    iconColor: "text-dept-control-room",
-    bgColor: "bg-dept-control-room/10 hover:bg-dept-control-room/15",
-    description: "Real-time operations monitor",
+    iconColor: 'text-dept-control-room',
+    bgColor: 'bg-dept-control-room/10 hover:bg-dept-control-room/15',
+    description: 'Real-time operations monitor',
   },
 ] as const;
 
 const PRODUCTIVITY_LIST = [
   {
-    name: "tasks",
-    displayName: "Tasks",
+    name: 'tasks',
+    displayName: 'Tasks',
     icon: CheckSquare,
-    colorClass: "text-dept-production",
+    colorClass: 'text-dept-production',
   },
   {
-    name: "documents",
-    displayName: "Documents",
+    name: 'documents',
+    displayName: 'Documents',
     icon: FileText,
-    colorClass: "text-dept-drilling",
+    colorClass: 'text-dept-drilling',
   },
   {
-    name: "schedule",
-    displayName: "Schedule",
+    name: 'schedule',
+    displayName: 'Schedule',
     icon: CalendarDays,
-    colorClass: "text-dept-control-room",
+    colorClass: 'text-dept-control-room',
   },
   {
-    name: "calculations",
-    displayName: "Calculations",
+    name: 'calculations',
+    displayName: 'Calculations',
     icon: Calculator,
-    colorClass: "text-dept-engineering",
+    colorClass: 'text-dept-engineering',
   },
   {
-    name: "notes",
-    displayName: "Notes",
+    name: 'notes',
+    displayName: 'Notes',
     icon: StickyNote,
-    colorClass: "text-dept-safety",
+    colorClass: 'text-dept-safety',
   },
 ] as const;
 
 const urls = getServiceUrls();
 const EXTERNAL_LIST = [
   {
-    name: "flowise",
-    displayName: "Flowise AI",
+    name: 'flowise',
+    displayName: 'Flowise AI',
     icon: Bot,
     url: urls.portal,
-    colorClass: "text-[#3ecf8e]",
+    colorClass: 'text-[#3ecf8e]',
   },
 ] as const;
 
 const NAV_BTN =
-  "px-2.5 min-h-11 flex items-center rounded-button text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default";
+  'px-2.5 min-h-11 flex items-center rounded-button text-[13px] font-medium text-[var(--text-heading)] hover:bg-black/10 data-[state=open]:bg-black/10 transition-colors select-none outline-none cursor-default';
 
 const DROPDOWN_CONTENT =
-  "liquid-glass-light backdrop-blur-2xl shadow-window border border-white/20 rounded-card py-1";
+  'liquid-glass-light backdrop-blur-2xl shadow-window border border-white/20 rounded-card py-1';
 
 export function MacMenuBar({
   menuItems = NAVIGATION_ITEMS,
@@ -154,7 +154,7 @@ export function MacMenuBar({
   className,
 }: MacMenuBarProps) {
   // Navigation text labels intentionally removed; only logo + search + tray remain
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -162,10 +162,10 @@ export function MacMenuBar({
     if (!q) return;
     window.open(
       `https://www.google.com/search?q=${encodeURIComponent(q)}`,
-      "_blank",
-      "noopener,noreferrer",
+      '_blank',
+      'noopener,noreferrer'
     );
-    setSearchQuery("");
+    setSearchQuery('');
   }
 
   return (
@@ -178,9 +178,9 @@ export function MacMenuBar({
       }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed top-2 left-3 right-3 z-navigation h-10 flex items-center justify-between px-3.5",
-        "liquid-glass-light border border-white/20 shadow-window rounded-full",
-        className,
+        'fixed top-2 left-3 right-3 z-navigation h-10 flex items-center justify-between px-3.5',
+        'liquid-glass-light border border-white/20 shadow-window rounded-full',
+        className
       )}
     >
       {/* Left: System Menu Trigger + Navigation items */}
@@ -202,8 +202,8 @@ export function MacMenuBar({
             align="start"
             sideOffset={5}
             className={cn(
-              "w-[560px] p-0 flex flex-col md:flex-row overflow-hidden",
-              "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card",
+              'w-[560px] p-0 flex flex-col md:flex-row overflow-hidden',
+              'liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-card'
             )}
           >
             {/* ── Left Column: Departments ── */}
@@ -222,11 +222,11 @@ export function MacMenuBar({
                     >
                       <div
                         className={cn(
-                          "w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105",
-                          dept.bgColor,
+                          'w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-transform group-hover:scale-105',
+                          dept.bgColor
                         )}
                       >
-                        <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
+                        <Icon className={cn('w-3.5 h-3.5', dept.iconColor)} />
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-[13px] font-medium text-[var(--text-body)] group-hover:text-[var(--text-heading)] truncate leading-tight">
@@ -277,7 +277,7 @@ export function MacMenuBar({
                       className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <Icon
-                        className={cn("w-3.5 h-3.5 shrink-0 transition-colors", tool.colorClass)}
+                        className={cn('w-3.5 h-3.5 shrink-0 transition-colors', tool.colorClass)}
                       />
                       <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                         {tool.displayName}
@@ -298,9 +298,9 @@ export function MacMenuBar({
                   <button
                     onClick={() => {
                       window.dispatchEvent(
-                        new CustomEvent("open-split-view", {
-                          detail: { service: "whatsapp", action: "toggle" },
-                        }),
+                        new CustomEvent('open-split-view', {
+                          detail: { service: 'whatsapp', action: 'toggle' },
+                        })
                       );
                     }}
                     className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group text-left focus:outline-none cursor-default"
@@ -342,7 +342,7 @@ export function MacMenuBar({
                       className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-black/[0.04] active:bg-black/[0.08] transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className={cn("w-3.5 h-3.5 shrink-0", tool.colorClass)} />
+                        <Icon className={cn('w-3.5 h-3.5 shrink-0', tool.colorClass)} />
                         <span className="text-[12.5px] text-[var(--text-secondary)] group-hover:text-[var(--text-heading)] font-medium">
                           {tool.displayName}
                         </span>
@@ -374,9 +374,9 @@ export function MacMenuBar({
           type="button"
           onClick={() => {
             window.dispatchEvent(
-              new CustomEvent("open-split-view", {
-                detail: { service: "whatsapp", action: "toggle" },
-              }),
+              new CustomEvent('open-split-view', {
+                detail: { service: 'whatsapp', action: 'toggle' },
+              })
             );
           }}
           className="w-8 h-8 rounded-full bg-[var(--material-ultra-thin)] hover:bg-[var(--material-thin)] backdrop-blur-md border border-white/20 shadow-diffusion-sm flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer ml-1 shrink-0"
@@ -393,13 +393,13 @@ export function MacMenuBar({
 
         {/* ── Menu Bar Items ── */}
         {menuItems.map((item) => {
-          if (item === "Operations") {
+          if (item === 'Operations') {
             return (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-60", DROPDOWN_CONTENT)}>
+                <DropdownMenuContent align="start" className={cn('w-60', DROPDOWN_CONTENT)}>
                   {DEPARTMENTS_LIST.map((dept) => {
                     const Icon = dept.icon;
                     return (
@@ -414,11 +414,11 @@ export function MacMenuBar({
                         >
                           <div
                             className={cn(
-                              "w-6 h-6 rounded-sm flex items-center justify-center mr-2.5 shrink-0",
-                              dept.bgColor,
+                              'w-6 h-6 rounded-sm flex items-center justify-center mr-2.5 shrink-0',
+                              dept.bgColor
                             )}
                           >
-                            <Icon className={cn("w-3.5 h-3.5", dept.iconColor)} />
+                            <Icon className={cn('w-3.5 h-3.5', dept.iconColor)} />
                           </div>
                           <span className="text-[13px] font-medium text-[var(--text-heading)]">
                             {dept.displayName}
@@ -432,13 +432,13 @@ export function MacMenuBar({
             );
           }
 
-          if (item === "Tools") {
+          if (item === 'Tools') {
             return (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
+                <DropdownMenuContent align="start" className={cn('w-52', DROPDOWN_CONTENT)}>
                   {PRODUCTIVITY_LIST.map((tool) => {
                     const Icon = tool.icon;
                     return (
@@ -451,7 +451,7 @@ export function MacMenuBar({
                           href={`/${DEPARTMENTS_LIST[0]?.name}/tools?tab=${tool.name}`}
                           className="w-full flex items-center px-2 py-1.5 gap-2.5"
                         >
-                          <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
+                          <Icon className={cn('w-4 h-4 shrink-0', tool.colorClass)} />
                           <span className="text-[13px] font-medium text-[var(--text-heading)]">
                             {tool.displayName}
                           </span>
@@ -463,9 +463,9 @@ export function MacMenuBar({
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"
                     onClick={() => {
                       window.dispatchEvent(
-                        new CustomEvent("open-split-view", {
-                          detail: { service: "github" },
-                        }),
+                        new CustomEvent('open-split-view', {
+                          detail: { service: 'github' },
+                        })
                       );
                     }}
                   >
@@ -497,7 +497,7 @@ export function MacMenuBar({
                           className="w-full flex items-center justify-between px-2 py-1.5"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon className={cn("w-4 h-4 shrink-0", tool.colorClass)} />
+                            <Icon className={cn('w-4 h-4 shrink-0', tool.colorClass)} />
                             <span className="text-[13px] font-medium text-[var(--text-heading)]">
                               {tool.displayName}
                             </span>
@@ -512,13 +512,13 @@ export function MacMenuBar({
             );
           }
 
-          if (item === "View") {
+          if (item === 'View') {
             return (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-48", DROPDOWN_CONTENT)}>
+                <DropdownMenuContent align="start" className={cn('w-48', DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5 flex items-center gap-2.5 px-2 py-1.5"
                     onClick={() => window.location.reload()}
@@ -550,13 +550,13 @@ export function MacMenuBar({
             );
           }
 
-          if (item === "Help") {
+          if (item === 'Help') {
             return (
               <DropdownMenu key={item}>
                 <DropdownMenuTrigger asChild>
                   <button className={NAV_BTN}>{item}</button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className={cn("w-52", DROPDOWN_CONTENT)}>
+                <DropdownMenuContent align="start" className={cn('w-52', DROPDOWN_CONTENT)}>
                   <DropdownMenuItem
                     asChild
                     className="cursor-pointer hover:bg-black/[0.04] focus:bg-black/[0.04] rounded-lg mx-1 my-0.5"

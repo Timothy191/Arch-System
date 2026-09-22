@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Book } from "@repo/ui";
-import { Card } from "@repo/ui/components/ui/card";
+import { Book } from '@repo/ui';
+import { Card } from '@repo/ui/components/ui/card';
 import {
   Bot,
   Database,
@@ -12,8 +12,8 @@ import {
   Map,
   RefreshCw,
   ShieldCheck,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface MapFileMeta {
   key: string;
@@ -45,21 +45,21 @@ interface CodebaseMapsData {
 }
 
 const MAP_FILES = [
-  { key: "turbo-graph.md", label: "Turbo Project Graph & Pipeline", icon: Layers },
-  { key: "dependencies-graph.md", label: "Monorepo Dependencies Topology Graph", icon: GitBranch },
-  { key: "route-feature-architecture.md", label: "Route & Feature Architecture", icon: Map },
-  { key: "database-schema.md", label: "Database Schema & Topology", icon: Database },
-  { key: "multi-agent-architecture.md", label: "Multi-Agent Specialist Architecture", icon: Bot },
-  { key: "ci-cd-pipeline.md", label: "CI/CD Pipeline & Quality Gate", icon: GitBranch },
-  { key: "technology-stack.md", label: "Technology Stack Catalog", icon: Layers },
-  { key: "project-dependencies.md", label: "Project Dependencies Graph", icon: ShieldCheck },
-  { key: "package-structure.md", label: "Package Structure & Modules", icon: FileText },
+  { key: 'turbo-graph.md', label: 'Turbo Project Graph & Pipeline', icon: Layers },
+  { key: 'dependencies-graph.md', label: 'Monorepo Dependencies Topology Graph', icon: GitBranch },
+  { key: 'route-feature-architecture.md', label: 'Route & Feature Architecture', icon: Map },
+  { key: 'database-schema.md', label: 'Database Schema & Topology', icon: Database },
+  { key: 'multi-agent-architecture.md', label: 'Multi-Agent Specialist Architecture', icon: Bot },
+  { key: 'ci-cd-pipeline.md', label: 'CI/CD Pipeline & Quality Gate', icon: GitBranch },
+  { key: 'technology-stack.md', label: 'Technology Stack Catalog', icon: Layers },
+  { key: 'project-dependencies.md', label: 'Project Dependencies Graph', icon: ShieldCheck },
+  { key: 'package-structure.md', label: 'Package Structure & Modules', icon: FileText },
 ];
 
 export default function DocumentationMaps() {
   const [data, setData] = useState<CodebaseMapsData | null>(null);
-  const [selectedLogId, setSelectedLogId] = useState<string>("latest");
-  const [selectedFileKey, setSelectedFileKey] = useState<string>("route-feature-architecture.md");
+  const [selectedLogId, setSelectedLogId] = useState<string>('latest');
+  const [selectedFileKey, setSelectedFileKey] = useState<string>('route-feature-architecture.md');
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchMapsData = async (logId: string, fileKey: string) => {
@@ -127,8 +127,8 @@ export default function DocumentationMaps() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
-                      ) === index,
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>
@@ -144,7 +144,7 @@ export default function DocumentationMaps() {
               title="Refresh Maps Index"
             >
               <RefreshCw
-                className={`w-4 h-4 ${loading ? "animate-spin text-[var(--accent-blue)]" : ""}`}
+                className={`w-4 h-4 ${loading ? 'animate-spin text-[var(--accent-blue)]' : ''}`}
               />
             </button>
           </div>
@@ -162,8 +162,8 @@ export default function DocumentationMaps() {
               onClick={() => setSelectedFileKey(file.key)}
               className={`flex flex-col items-center text-center gap-2 p-3 rounded-xl border text-xs font-medium transition-all ${
                 isSelected
-                  ? "bg-[var(--accent-blue)] text-white border-[var(--accent-blue)] shadow-md"
-                  : "bg-white/70 border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-secondary)]"
+                  ? 'bg-[var(--accent-blue)] text-white border-[var(--accent-blue)] shadow-md'
+                  : 'bg-white/70 border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-secondary)]'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -188,7 +188,7 @@ export default function DocumentationMaps() {
               <div className="flex items-center gap-4">
                 <Book
                   title={activeFile?.label ?? selectedFileKey}
-                  subtitle={activeMeta?.folderName ?? "Topology"}
+                  subtitle={activeMeta?.folderName ?? 'Topology'}
                   variant="stripe"
                   color="#1e293b"
                   icon={<ActiveFileIcon className="w-3.5 h-3.5" />}
@@ -215,7 +215,7 @@ export default function DocumentationMaps() {
             </div>
 
             <pre className="p-4 rounded-xl bg-[var(--bg-secondary)]/70 border border-[var(--border-subtle)] text-xs font-mono text-[var(--text-heading)] whitespace-pre-wrap overflow-x-auto leading-relaxed">
-              {data?.content || "No map content loaded."}
+              {data?.content || 'No map content loaded.'}
             </pre>
           </div>
         )}

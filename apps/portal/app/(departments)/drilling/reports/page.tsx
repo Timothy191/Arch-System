@@ -1,10 +1,10 @@
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Input } from "@repo/ui/Input";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { AlertTriangle, ClipboardList, Clock, Drill } from "lucide-react";
-import { getDepartmentContext } from "~/lib/dept-context";
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Input } from '@repo/ui/Input';
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import { AlertTriangle, ClipboardList, Clock, Drill } from 'lucide-react';
+import { getDepartmentContext } from '~/lib/dept-context';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 interface DrillingReportsPageProps {
   params: Promise<{ department: string }>;
@@ -19,14 +19,14 @@ export default async function DrillingReportsPage({
   await params;
   const { from: fromParam, to: toParam } = await searchParams;
   const { deptId, supabase } = await getDepartmentContext({
-    department: "drilling",
+    department: 'drilling',
   });
 
-  const to = toParam || new Date().toISOString().split("T")[0];
-  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+  const to = toParam || new Date().toISOString().split('T')[0];
+  const from = fromParam || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
   const { data: operations } = await supabase
-    .from("drill_operations")
+    .from('drill_operations')
     .select(
       `
       id,
@@ -54,12 +54,12 @@ export default async function DrillingReportsPage({
       delay_other,
       status,
       machines!inner(name)
-    `,
+    `
     )
-    .eq("department_id", deptId)
-    .gte("operation_date", from)
-    .lte("operation_date", to)
-    .order("operation_date", { ascending: false });
+    .eq('department_id', deptId)
+    .gte('operation_date', from)
+    .lte('operation_date', to)
+    .order('operation_date', { ascending: false });
 
   const totalMeters =
     operations?.reduce((sum, op) => sum + (Number(op.meters_drilled) || 0), 0) || 0;
@@ -87,7 +87,7 @@ export default async function DrillingReportsPage({
     }, 0) || 0;
 
   function formatDelay(minutes: number): string {
-    if (!minutes || minutes === 0) return "—";
+    if (!minutes || minutes === 0) return '—';
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     if (hours > 0) {
@@ -98,17 +98,17 @@ export default async function DrillingReportsPage({
 
   const csvRows = [
     [
-      "Date",
-      "Drill Rig",
-      "Operator",
-      "Block",
-      "Hours Worked",
-      "Holes Drilled",
-      "Meters Drilled",
-      "Prod Delays (min)",
-      "Non-Prod Delays (min)",
-      "Eng Delays (min)",
-      "Status",
+      'Date',
+      'Drill Rig',
+      'Operator',
+      'Block',
+      'Hours Worked',
+      'Holes Drilled',
+      'Meters Drilled',
+      'Prod Delays (min)',
+      'Non-Prod Delays (min)',
+      'Eng Delays (min)',
+      'Status',
     ],
     ...(operations || []).map((op) => {
       const production_delays =
@@ -129,12 +129,12 @@ export default async function DrillingReportsPage({
         (Number(op.delay_unscheduled_maintenance) || 0);
       return [
         op.operation_date,
-        (op.machines as unknown as { name: string } | undefined)?.name || "Unknown",
-        op.operator_name || "",
-        op.block_drilled || "",
-        op.total_hours ? op.total_hours.toFixed(2) : "",
+        (op.machines as unknown as { name: string } | undefined)?.name || 'Unknown',
+        op.operator_name || '',
+        op.block_drilled || '',
+        op.total_hours ? op.total_hours.toFixed(2) : '',
         op.holes || 0,
-        op.meters_drilled ? Number(op.meters_drilled).toFixed(2) : "",
+        op.meters_drilled ? Number(op.meters_drilled).toFixed(2) : '',
         production_delays || 0,
         non_productional_delays || 0,
         engineering_delays || 0,
@@ -144,8 +144,8 @@ export default async function DrillingReportsPage({
   ];
 
   const csvContent = csvRows
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
 
   return (
     <div className="space-y-6">
@@ -308,22 +308,22 @@ export default async function DrillingReportsPage({
                       {op.operation_date}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-body)] text-sm">
-                      {(op.machines as unknown as { name: string } | undefined)?.name || "Unknown"}
+                      {(op.machines as unknown as { name: string } | undefined)?.name || 'Unknown'}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-body)] text-sm">
-                      {op.operator_name || "—"}
+                      {op.operator_name || '—'}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-body)] text-sm">
-                      {op.block_drilled || "—"}
+                      {op.block_drilled || '—'}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
-                      {op.total_hours ? op.total_hours.toFixed(1) : "—"}
+                      {op.total_hours ? op.total_hours.toFixed(1) : '—'}
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm text-right">
                       {op.holes || 0}
                     </td>
                     <td className="px-6 py-4 text-accent-green text-sm text-right font-medium">
-                      {op.meters_drilled ? Number(op.meters_drilled).toFixed(1) : "—"}
+                      {op.meters_drilled ? Number(op.meters_drilled).toFixed(1) : '—'}
                     </td>
                     <td className="px-6 py-4 text-accent-blue text-sm text-right">
                       {formatDelay(totalOpDelays)}
@@ -331,14 +331,14 @@ export default async function DrillingReportsPage({
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                          op.status === "active" || op.status === "completed"
-                            ? "bg-emerald-50/70 border-emerald-200/50 text-emerald-700"
-                            : op.status === "maintenance"
-                              ? "bg-amber-50/70 border-amber-200/50 text-amber-700"
-                              : "bg-red-50/70 border-red-200/50 text-red-700"
+                          op.status === 'active' || op.status === 'completed'
+                            ? 'bg-emerald-50/70 border-emerald-200/50 text-emerald-700'
+                            : op.status === 'maintenance'
+                              ? 'bg-amber-50/70 border-amber-200/50 text-amber-700'
+                              : 'bg-red-50/70 border-red-200/50 text-red-700'
                         }`}
                       >
-                        {op.status === "active" && (
+                        {op.status === 'active' && (
                           <span className="badge-pulse-dot bg-emerald-500" />
                         )}
                         {op.status}

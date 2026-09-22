@@ -1,1 +1,1 @@
-export { logAuditEvent } from "@repo/shared/data-access";
+export { logAuditEvent } from '@repo/shared/data-access';

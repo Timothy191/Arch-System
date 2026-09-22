@@ -1,4 +1,4 @@
-import { Car, ChevronRight, type LucideIcon, Users, Wrench } from "lucide-react";
+import { Car, ChevronRight, type LucideIcon, Users, Wrench } from 'lucide-react';
 
 interface EntityRow {
   type: string;
@@ -71,22 +71,22 @@ export default function DashboardEntityStatus({ entityStatus }: DashboardEntityS
         <div className="grid grid-cols-3 gap-3">
           {[
             {
-              id: "sum-active",
-              label: "Total Active",
+              id: 'sum-active',
+              label: 'Total Active',
               value: entityStatus.reduce((s, r) => s + r.active, 0).toLocaleString(),
-              color: "text-success",
+              color: 'text-success',
             },
             {
-              id: "sum-expiring",
-              label: "Expiring",
+              id: 'sum-expiring',
+              label: 'Expiring',
               value: entityStatus.reduce((s, r) => s + r.expiring, 0).toLocaleString(),
-              color: "text-warning",
+              color: 'text-warning',
             },
             {
-              id: "sum-expired",
-              label: "Expired",
+              id: 'sum-expired',
+              label: 'Expired',
               value: entityStatus.reduce((s, r) => s + r.expired, 0).toLocaleString(),
-              color: "text-danger",
+              color: 'text-danger',
             },
           ].map((s) => (
             <div key={s.id} className="text-center">

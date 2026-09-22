@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useSupabaseRealtime } from "@repo/shared/hooks";
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { SecondaryButton } from "@repo/ui/SecondaryButton";
-import { exportToExcel, parseExcel } from "@repo/utils/client";
-import { Download, Upload } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DataGrid } from "@/components/dynamic/LazyHeavyComponents";
-import { logError } from "@/lib/errors/error-logger";
-import { trackClientMetric } from "@/lib/observability/client-telemetry";
-import { updateMachineSite } from "./actions";
+import { useSupabaseRealtime } from '@repo/shared/hooks';
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { SecondaryButton } from '@repo/ui/SecondaryButton';
+import { exportToExcel, parseExcel } from '@repo/utils/client';
+import { Download, Upload } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DataGrid } from '@/components/dynamic/LazyHeavyComponents';
+import { logError } from '@/lib/errors/error-logger';
+import { trackClientMetric } from '@/lib/observability/client-telemetry';
+import { updateMachineSite } from './actions';
 import {
   buildHourlyLoadsMap,
   HOUR_PROP,
@@ -20,7 +20,7 @@ import {
   type HourlyShift,
   loadKey,
   sumHourlyTotal,
-} from "./loads-utils";
+} from './loads-utils';
 
 interface Machine {
   id: string;
@@ -41,8 +41,8 @@ interface HourlyLoadsGridProps {
   initialShift?: HourlyShift;
 }
 
-const DAY_HOUR_LABELS = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"];
-const NIGHT_HOUR_LABELS = ["18", "19", "20", "21", "22", "23", "00", "01", "02", "03", "04", "05"];
+const DAY_HOUR_LABELS = ['06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17'];
+const NIGHT_HOUR_LABELS = ['18', '19', '20', '21', '22', '23', '00', '01', '02', '03', '04', '05'];
 
 function HourlyLoadsGrid({
   departmentId,
@@ -62,15 +62,15 @@ function HourlyLoadsGrid({
   // AGENT-TRACE: Real-time synchronization of hourly_loads CDC events across operators
   useSupabaseRealtime<HourlyLoad>({
     supabaseClient: supabase,
-    table: "hourly_loads",
+    table: 'hourly_loads',
     filter: `department_id=eq.${departmentId}`,
     onChange: (payload) => {
-      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
         setLoadsState((prev) => {
           const index = prev.findIndex(
             (item) =>
               item.machine_id === payload.new.machine_id &&
-              item.shift_type === payload.new.shift_type,
+              item.shift_type === payload.new.shift_type
           );
           if (index >= 0) {
             const next = [...prev];
@@ -79,17 +79,17 @@ function HourlyLoadsGrid({
           }
           return [...prev, payload.new];
         });
-      } else if (payload.eventType === "DELETE" && payload.old.id) {
+      } else if (payload.eventType === 'DELETE' && payload.old.id) {
         setLoadsState((prev) => prev.filter((item) => item.id !== payload.old.id));
       }
     },
   });
 
   const [siteAssignments, setSiteAssignments] = useState<Record<string, string>>(() =>
-    Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? ""])),
+    Object.fromEntries(machines.map((m) => [m.id, m.site_id ?? '']))
   );
   const [selectedShift, setSelectedShift] = useState<HourlyShift>(
-    initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? "day" : "night"),
+    initialShift ?? (new Date().getHours() >= 6 && new Date().getHours() < 18 ? 'day' : 'night')
   );
   const [saving, setSaving] = useState(false);
 
@@ -112,7 +112,7 @@ function HourlyLoadsGrid({
   // are separate entries (regression: was keyed by machine_id only, dropping one).
   const loadsByMachine = useMemo(() => buildHourlyLoadsMap(loadsState), [loadsState]);
 
-  const hourLabels = selectedShift === "day" ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
+  const hourLabels = selectedShift === 'day' ? DAY_HOUR_LABELS : NIGHT_HOUR_LABELS;
 
   const getHourValue = useCallback(
     (machineId: string, hourIndex: number): number => {
@@ -121,7 +121,7 @@ function HourlyLoadsGrid({
       const field = HOUR_PROP(hourIndex) as keyof HourlyLoad;
       return (load[field] as number) || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   const getMachineTotal = useCallback(
@@ -129,15 +129,15 @@ function HourlyLoadsGrid({
       const load = loadsByMachine.get(loadKey(machineId, selectedShift));
       return load?.total_loads || 0;
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   const getMaterialType = useCallback(
     (machineId: string): HourlyMaterial => {
       const load = loadsByMachine.get(loadKey(machineId, selectedShift));
-      return load?.material_type || "Waste";
+      return load?.material_type || 'Waste';
     },
-    [loadsByMachine, selectedShift],
+    [loadsByMachine, selectedShift]
   );
 
   /**
@@ -175,13 +175,13 @@ function HourlyLoadsGrid({
           hour_11: 0,
           hour_12: 0,
           total_loads: 0,
-          material_type: "Waste",
+          material_type: 'Waste',
           ...patch,
         };
         return [...prev, { ...row, total_loads: sumHourlyTotal(row) }];
       });
     },
-    [],
+    []
   );
 
   /**
@@ -192,7 +192,7 @@ function HourlyLoadsGrid({
    */
   const persistLoad = useCallback(
     async (machineId: string, shiftType: HourlyShift, patch: Partial<HourlyLoad>) => {
-      const { error } = await supabase.from("hourly_loads").upsert(
+      const { error } = await supabase.from('hourly_loads').upsert(
         {
           department_id: departmentId,
           machine_id: machineId,
@@ -200,11 +200,11 @@ function HourlyLoadsGrid({
           shift_type: shiftType,
           ...patch,
         },
-        { onConflict: "machine_id,load_date,shift_type" },
+        { onConflict: 'machine_id,load_date,shift_type' }
       );
       if (error) throw error;
     },
-    [supabase, departmentId, today],
+    [supabase, departmentId, today]
   );
 
   /**
@@ -218,7 +218,7 @@ function HourlyLoadsGrid({
       shiftType: HourlyShift,
       field: string,
       newValue: number | string,
-      previousValue: number | string,
+      previousValue: number | string
     ) => {
       const key = loadKey(machineId, shiftType);
       setLoadsState((prev) => {
@@ -229,9 +229,9 @@ function HourlyLoadsGrid({
           [field]: previousValue,
         } as HourlyLoad;
         const isEmptyPhantom =
-          existing.id.startsWith("local-") &&
+          existing.id.startsWith('local-') &&
           sumHourlyTotal(reverted) === 0 &&
-          (reverted.material_type ?? "Waste") === "Waste";
+          (reverted.material_type ?? 'Waste') === 'Waste';
         if (isEmptyPhantom) {
           return prev.filter((load) => load !== existing);
         }
@@ -239,7 +239,7 @@ function HourlyLoadsGrid({
         return prev.map((load) => (load === existing ? reverted : load));
       });
     },
-    [],
+    []
   );
 
   /**
@@ -255,7 +255,7 @@ function HourlyLoadsGrid({
       newValue: number | string,
       patch: Partial<HourlyLoad>,
       operation: string,
-      attrs: Record<string, string | number>,
+      attrs: Record<string, string | number>
     ) => {
       applyLoadState(machineId, shiftType, patch);
       try {
@@ -269,10 +269,10 @@ function HourlyLoadsGrid({
           context: `hourly_loads_${operation}`,
         });
         revertField(machineId, shiftType, field, newValue, previousValue);
-        alert("Failed to save. Please try again.");
+        alert('Failed to save. Please try again.');
       }
     },
-    [applyLoadState, persistLoad, revertField, departmentId],
+    [applyLoadState, persistLoad, revertField, departmentId]
   );
 
   // Check if any machine in this department has a bin_factor set
@@ -285,7 +285,7 @@ function HourlyLoadsGrid({
       const binFactor = machine.bin_factor ?? 0;
       const assignedSiteId = siteAssignments[machine.id];
       const siteName =
-        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
+        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || 'No Site';
       const row: Record<string, string | number> = {
         machineName: machine.name,
         siteName,
@@ -297,8 +297,8 @@ function HourlyLoadsGrid({
       });
       row.total = totalLoads;
       if (hasBinFactors) {
-        row.binFactor = binFactor > 0 ? binFactor : "-";
-        row.totalMaterial = binFactor > 0 ? Math.round(totalLoads * binFactor * 10) / 10 : "-";
+        row.binFactor = binFactor > 0 ? binFactor : '-';
+        row.totalMaterial = binFactor > 0 ? Math.round(totalLoads * binFactor * 10) / 10 : '-';
       }
       return row;
     });
@@ -318,7 +318,7 @@ function HourlyLoadsGrid({
       const machine = machines[rowIndex];
       if (!machine) return;
 
-      const hourIndex = parseInt(hourProp.split("_")[1] ?? "0", 10) - 1;
+      const hourIndex = parseInt(hourProp.split('_')[1] ?? '0', 10) - 1;
       const currentValue = getHourValue(machine.id, hourIndex);
       const newValue = Math.max(0, Math.min(100, currentValue + delta));
       if (newValue === currentValue) return;
@@ -330,16 +330,16 @@ function HourlyLoadsGrid({
         currentValue,
         newValue,
         { [hourProp]: newValue },
-        "hourly_loads_update",
+        'hourly_loads_update',
         {
           hour_prop: hourProp,
           previous_value: currentValue,
           new_value: newValue,
-          operation: "increment_decrement",
-        },
+          operation: 'increment_decrement',
+        }
       );
     },
-    [machines, selectedShift, getHourValue, commitLoadChange],
+    [machines, selectedShift, getHourValue, commitLoadChange]
   );
 
   // Handle toggling material type for a row
@@ -349,25 +349,25 @@ function HourlyLoadsGrid({
       if (!machine) return;
 
       const currentMaterial = getMaterialType(machine.id);
-      const newMaterial = currentMaterial === "Waste" ? "Coal" : "Waste";
+      const newMaterial = currentMaterial === 'Waste' ? 'Coal' : 'Waste';
 
       await commitLoadChange(
         machine.id,
         selectedShift,
-        "material_type",
+        'material_type',
         currentMaterial,
         newMaterial,
         { material_type: newMaterial },
-        "hourly_loads_material_toggle",
+        'hourly_loads_material_toggle',
         {
-          field: "material_type",
+          field: 'material_type',
           previous_value: currentMaterial,
           new_value: newMaterial,
-          operation: "toggle_material",
-        },
+          operation: 'toggle_material',
+        }
       );
     },
-    [machines, selectedShift, getMaterialType, commitLoadChange],
+    [machines, selectedShift, getMaterialType, commitLoadChange]
   );
 
   // Handle grid click for up/down buttons and material toggle
@@ -377,41 +377,41 @@ function HourlyLoadsGrid({
 
       const toggleBtn = target.closest('[data-action="toggle-material"]') as HTMLElement | null;
       if (toggleBtn) {
-        const rowIndex = parseInt(toggleBtn.dataset.row || "0", 10);
+        const rowIndex = parseInt(toggleBtn.dataset.row || '0', 10);
         handleMaterialToggle(rowIndex);
         return;
       }
 
       const button = target.closest(
-        '[data-action="up"], [data-action="down"]',
+        '[data-action="up"], [data-action="down"]'
       ) as HTMLElement | null;
       if (!button) return;
 
-      const rowIndex = parseInt(button.dataset.row || "0", 10);
+      const rowIndex = parseInt(button.dataset.row || '0', 10);
       const hourProp = button.dataset.hour;
       const action = button.dataset.action;
 
       if (!hourProp || !action) return;
 
-      const delta = action === "up" ? 1 : -1;
+      const delta = action === 'up' ? 1 : -1;
       handleCellChange(rowIndex, hourProp, delta);
     },
-    [handleCellChange, handleMaterialToggle],
+    [handleCellChange, handleMaterialToggle]
   );
 
   // Handle site selection dropdown change
   const handleGridChange = useCallback(
     async (e: React.FormEvent) => {
       const target = e.target as HTMLSelectElement;
-      if (target.dataset.action !== "select-site") return;
+      if (target.dataset.action !== 'select-site') return;
 
-      const rowIndex = parseInt(target.dataset.row || "0", 10);
-      const newSiteId = target.value || "";
+      const rowIndex = parseInt(target.dataset.row || '0', 10);
+      const newSiteId = target.value || '';
 
       const machine = machines[rowIndex];
       if (!machine) return;
 
-      const previousSiteId = siteAssignments[machine.id] ?? "";
+      const previousSiteId = siteAssignments[machine.id] ?? '';
       if (newSiteId === previousSiteId) return;
 
       // AGENT-TRACE: Optimistic site reassignment — update the select immediately,
@@ -421,15 +421,15 @@ function HourlyLoadsGrid({
         await updateMachineSite(machine.id, newSiteId || null);
       } catch (err) {
         logError(err, {
-          context: "hourly_loads_site_change",
+          context: 'hourly_loads_site_change',
         });
         setSiteAssignments((prev) =>
-          prev[machine.id] === newSiteId ? { ...prev, [machine.id]: previousSiteId } : prev,
+          prev[machine.id] === newSiteId ? { ...prev, [machine.id]: previousSiteId } : prev
         );
-        alert("Failed to update site. Please try again.");
+        alert('Failed to update site. Please try again.');
       }
     },
-    [machines, siteAssignments],
+    [machines, siteAssignments]
   );
 
   // Build RevoGrid columns (stable reference)
@@ -467,78 +467,78 @@ function HourlyLoadsGrid({
 
     const cols = [
       {
-        prop: "machineName",
-        name: "Machine",
+        prop: 'machineName',
+        name: 'Machine',
         size: machineColSize,
-        pin: "colPinStart" as const,
+        pin: 'colPinStart' as const,
       },
       {
-        prop: "siteName",
-        name: "Site",
+        prop: 'siteName',
+        name: 'Site',
         size: siteColSize,
-        pin: "colPinStart" as const,
+        pin: 'colPinStart' as const,
         sortable: false,
         readonly: true,
         cellTemplate: (h: any, { rowIndex }: { rowIndex: number }) => {
-          const machineId = machines[rowIndex]?.id ?? "";
-          const currentSiteId = siteAssignments[machineId] ?? "";
-          return h("div", { class: "flex items-center justify-center h-full w-full px-1" }, [
+          const machineId = machines[rowIndex]?.id ?? '';
+          const currentSiteId = siteAssignments[machineId] ?? '';
+          return h('div', { class: 'flex items-center justify-center h-full w-full px-1' }, [
             h(
-              "select",
+              'select',
               {
                 class:
-                  "w-full bg-transparent border-0 text-xs font-semibold text-arch-text-secondary focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-[var(--overlay-subtle)] transition-all",
-                "data-row": String(rowIndex),
-                "data-action": "select-site",
+                  'w-full bg-transparent border-0 text-xs font-semibold text-arch-text-secondary focus:ring-0 focus:outline-none cursor-pointer py-1 px-1 rounded hover:bg-[var(--overlay-subtle)] transition-all',
+                'data-row': String(rowIndex),
+                'data-action': 'select-site',
               },
               [
                 h(
-                  "option",
+                  'option',
                   {
-                    value: "",
-                    selected: !currentSiteId ? "selected" : undefined,
+                    value: '',
+                    selected: !currentSiteId ? 'selected' : undefined,
                   },
-                  "No Site",
+                  'No Site'
                 ),
                 ...sites.map((s) =>
                   h(
-                    "option",
+                    'option',
                     {
                       value: s.id,
-                      selected: s.id === currentSiteId ? "selected" : undefined,
+                      selected: s.id === currentSiteId ? 'selected' : undefined,
                     },
-                    s.name,
-                  ),
+                    s.name
+                  )
                 ),
-              ],
+              ]
             ),
           ]);
         },
       },
       {
-        prop: "materialType",
-        name: "Material",
+        prop: 'materialType',
+        name: 'Material',
         size: materialColSize,
-        pin: "colPinStart" as const,
+        pin: 'colPinStart' as const,
         sortable: false,
         readonly: true,
         cellTemplate: (h: any, { rowIndex, model }: { rowIndex: number; model: any }) => {
-          const value = model?.materialType ?? "Waste";
-          const isCoal = value === "Coal";
-          return h("div", { class: "flex items-center justify-center h-full w-full px-1" }, [
+          const value = model?.materialType ?? 'Waste';
+          const isCoal = value === 'Coal';
+          return h('div', { class: 'flex items-center justify-center h-full w-full px-1' }, [
             h(
-              "button",
+              'button',
               {
                 class: `px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-150 cursor-pointer ${
                   isCoal
-                    ? "bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary"
-                    : "bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary"
+                    ? 'bg-arch-text-primary text-white border-arch-text-primary hover:bg-arch-text-secondary'
+                    : 'bg-arch-surface-primary text-arch-text-tertiary border-arch-border-subtle hover:bg-arch-surface-tertiary'
                 }`,
-                "data-row": String(rowIndex),
-                "data-action": "toggle-material",
-                title: "Click to toggle between Waste and Coal",
+                'data-row': String(rowIndex),
+                'data-action': 'toggle-material',
+                title: 'Click to toggle between Waste and Coal',
               },
-              value,
+              value
             ),
           ]);
         },
@@ -554,62 +554,62 @@ function HourlyLoadsGrid({
             const value = model?.[hourProp] ?? 0;
             const isMax = value >= 100;
             const isMin = value <= 0;
-            return h("div", { class: "flex items-center justify-between px-1 gap-1 h-full" }, [
-              h("span", { class: "text-sm font-medium font-mono tabular-nums px-1" }, value),
-              h("div", { class: "flex flex-col" }, [
+            return h('div', { class: 'flex items-center justify-between px-1 gap-1 h-full' }, [
+              h('span', { class: 'text-sm font-medium font-mono tabular-nums px-1' }, value),
+              h('div', { class: 'flex flex-col' }, [
                 h(
-                  "button",
+                  'button',
                   {
                     class:
-                      "hour-btn-up p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
-                    "data-row": String(rowIndex),
-                    "data-hour": hourProp,
-                    "data-action": "up",
+                      'hour-btn-up p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors',
+                    'data-row': String(rowIndex),
+                    'data-hour': hourProp,
+                    'data-action': 'up',
                     disabled: isMax,
-                    style: isMax ? { opacity: "0.3", cursor: "not-allowed" } : undefined,
+                    style: isMax ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
                   },
                   h(
-                    "svg",
+                    'svg',
                     {
-                      xmlns: "http://www.w3.org/2000/svg",
-                      width: "10",
-                      height: "10",
-                      viewBox: "0 0 24 24",
-                      fill: "none",
-                      stroke: "currentColor",
-                      "stroke-width": "3",
-                      "stroke-linecap": "round",
-                      "stroke-linejoin": "round",
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      width: '10',
+                      height: '10',
+                      viewBox: '0 0 24 24',
+                      fill: 'none',
+                      stroke: 'currentColor',
+                      'stroke-width': '3',
+                      'stroke-linecap': 'round',
+                      'stroke-linejoin': 'round',
                     },
-                    h("path", { d: "m18 15-6-6-6 6" }),
-                  ),
+                    h('path', { d: 'm18 15-6-6-6 6' })
+                  )
                 ),
                 h(
-                  "button",
+                  'button',
                   {
                     class:
-                      "hour-btn-down p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors",
-                    "data-row": String(rowIndex),
-                    "data-hour": hourProp,
-                    "data-action": "down",
+                      'hour-btn-down p-0 leading-none hover:text-[var(--accent-blue)] text-[var(--text-muted)] transition-colors',
+                    'data-row': String(rowIndex),
+                    'data-hour': hourProp,
+                    'data-action': 'down',
                     disabled: isMin,
-                    style: isMin ? { opacity: "0.3", cursor: "not-allowed" } : undefined,
+                    style: isMin ? { opacity: '0.3', cursor: 'not-allowed' } : undefined,
                   },
                   h(
-                    "svg",
+                    'svg',
                     {
-                      xmlns: "http://www.w3.org/2000/svg",
-                      width: "10",
-                      height: "10",
-                      viewBox: "0 0 24 24",
-                      fill: "none",
-                      stroke: "currentColor",
-                      "stroke-width": "3",
-                      "stroke-linecap": "round",
-                      "stroke-linejoin": "round",
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      width: '10',
+                      height: '10',
+                      viewBox: '0 0 24 24',
+                      fill: 'none',
+                      stroke: 'currentColor',
+                      'stroke-width': '3',
+                      'stroke-linecap': 'round',
+                      'stroke-linejoin': 'round',
                     },
-                    h("path", { d: "m6 9 6 6 6-6" }),
-                  ),
+                    h('path', { d: 'm6 9 6 6 6-6' })
+                  )
                 ),
               ]),
             ]);
@@ -617,17 +617,17 @@ function HourlyLoadsGrid({
         };
       }),
       {
-        prop: "total",
-        name: "Total",
+        prop: 'total',
+        name: 'Total',
         size: totalColSize,
         readonly: true,
         cellTemplate: (h: any, { model }: { model: any }) => {
           return h(
-            "div",
+            'div',
             {
-              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: 'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums',
             },
-            model?.total ?? 0,
+            model?.total ?? 0
           );
         },
       },
@@ -636,32 +636,32 @@ function HourlyLoadsGrid({
     // Add Bin Factor column for dumpers
     if (hasBinFactors) {
       cols.push({
-        prop: "binFactor",
-        name: "Bin Factor",
+        prop: 'binFactor',
+        name: 'Bin Factor',
         size: binFactorColSize,
         readonly: true,
         cellTemplate: (h: any, { model }: { model: any }) => {
           return h(
-            "div",
+            'div',
             {
-              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: 'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums',
             },
-            model?.binFactor ?? "-",
+            model?.binFactor ?? '-'
           );
         },
       });
       cols.push({
-        prop: "totalMaterial",
-        name: "Total Material (t)",
+        prop: 'totalMaterial',
+        name: 'Total Material (t)',
         size: totalMaterialColSize,
         readonly: true,
         cellTemplate: (h: any, { model }: { model: any }) => {
           return h(
-            "div",
+            'div',
             {
-              class: "flex items-center h-full w-full px-2 text-sm font-mono tabular-nums",
+              class: 'flex items-center h-full w-full px-2 text-sm font-mono tabular-nums',
             },
-            model?.totalMaterial ?? "-",
+            model?.totalMaterial ?? '-'
           );
         },
       });
@@ -677,17 +677,17 @@ function HourlyLoadsGrid({
       const rowIndex: number = detail?.rowIndex ?? detail?.row?.index;
       const val = detail?.val;
 
-      if (typeof rowIndex !== "number" || !prop?.startsWith("hour_") || val === undefined) return;
+      if (typeof rowIndex !== 'number' || !prop?.startsWith('hour_') || val === undefined) return;
 
       const machine = machines[rowIndex];
       if (!machine) return;
 
-      const hourIndex = parseInt(prop.split("_")[1] ?? "0", 10) - 1;
+      const hourIndex = parseInt(prop.split('_')[1] ?? '0', 10) - 1;
       const currentValue = getHourValue(machine.id, hourIndex);
       const value = parseInt(String(val), 10) || 0;
 
       if (value < 0 || value > 100) {
-        alert("Please enter a value between 0 and 100");
+        alert('Please enter a value between 0 and 100');
         // AGENT-TRACE: Push the current value back into local state so RevoGrid
         // drops the invalid cell (new source reference) instead of a page reload.
         applyLoadState(machine.id, selectedShift, { [prop]: currentValue });
@@ -703,18 +703,18 @@ function HourlyLoadsGrid({
         currentValue,
         value,
         { [prop]: value },
-        "hourly_loads_direct_edit",
-        { hour_prop: prop, value, operation: "direct_edit" },
+        'hourly_loads_direct_edit',
+        { hour_prop: prop, value, operation: 'direct_edit' }
       );
     },
-    [machines, selectedShift, getHourValue, applyLoadState, commitLoadChange],
+    [machines, selectedShift, getHourValue, applyLoadState, commitLoadChange]
   );
 
   const handleExport = async () => {
     const exportData = machines.map((machine) => {
       const assignedSiteId = siteAssignments[machine.id];
       const siteName =
-        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || "No Site";
+        (assignedSiteId && sites.find((s) => s.id === assignedSiteId)?.name) || 'No Site';
       const data: any = {
         Machine: machine.name,
         Site: siteName,
@@ -729,7 +729,7 @@ function HourlyLoadsGrid({
       return data;
     });
 
-    await exportToExcel(exportData, `hourly-loads-${selectedShift}-${today}`, "Hourly Loads");
+    await exportToExcel(exportData, `hourly-loads-${selectedShift}-${today}`, 'Hourly Loads');
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -748,7 +748,7 @@ function HourlyLoadsGrid({
         const patch: Partial<HourlyLoad> = {};
 
         if (row.Material !== undefined) {
-          patch.material_type = row.Material === "Coal" ? "Coal" : "Waste";
+          patch.material_type = row.Material === 'Coal' ? 'Coal' : 'Waste';
         }
 
         let hasData = false;
@@ -772,32 +772,32 @@ function HourlyLoadsGrid({
         applyLoadState(machine.id, selectedShift, patch);
         try {
           await trackClientMetric(
-            "hourly_loads_import",
+            'hourly_loads_import',
             () => persistLoad(machine.id, selectedShift, patch),
             {
               department_id: departmentId,
               machine_id: machine.id,
               machine_name: machineName,
-              operation: "import",
-            },
+              operation: 'import',
+            }
           );
         } catch (err) {
           logError(err, {
-            context: "hourly_loads_import",
+            context: 'hourly_loads_import',
             machineName,
           });
         }
       }
 
-      alert("Import completed successfully!");
+      alert('Import completed successfully!');
     } catch (err) {
       logError(err, {
-        context: "hourly_loads_import_failed",
+        context: 'hourly_loads_import_failed',
       });
-      alert("Failed to parse Excel file. Please ensure it follows the exported template.");
+      alert('Failed to parse Excel file. Please ensure it follows the exported template.');
     } finally {
       setSaving(false);
-      if (e.target) e.target.value = "";
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -820,22 +820,22 @@ function HourlyLoadsGrid({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setSelectedShift("day")}
+              onClick={() => setSelectedShift('day')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedShift === "day"
-                  ? "bg-arch-accent-blue text-arch-surface-secondary"
-                  : "bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary"
+                selectedShift === 'day'
+                  ? 'bg-arch-accent-blue text-arch-surface-secondary'
+                  : 'bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary'
               }`}
             >
               Day (06:00 - 17:59)
             </button>
             <button
               type="button"
-              onClick={() => setSelectedShift("night")}
+              onClick={() => setSelectedShift('night')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedShift === "night"
-                  ? "bg-arch-accent-blue text-arch-surface-secondary"
-                  : "bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary"
+                selectedShift === 'night'
+                  ? 'bg-arch-accent-blue text-arch-surface-secondary'
+                  : 'bg-arch-surface-secondary border border-arch-border-primary text-arch-text-tertiary hover:text-arch-text-primary'
               }`}
             >
               Night (18:00 - 05:59)
@@ -855,7 +855,7 @@ function HourlyLoadsGrid({
           <SecondaryButton
             size="sm"
             variant="rounded-lg"
-            onClick={() => document.getElementById("excel-import")?.click()}
+            onClick={() => document.getElementById('excel-import')?.click()}
             disabled={saving}
           >
             <Upload className="w-4 h-4 mr-2" />

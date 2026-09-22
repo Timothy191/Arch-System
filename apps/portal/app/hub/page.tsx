@@ -2,18 +2,18 @@ import {
   DEPARTMENTS,
   type DepartmentLiveMetricsMap,
   fetchLiveDepartmentMetrics,
-} from "@repo/departments/data-access";
-import { CacheCategory } from "@repo/redis";
-import { createReadReplicaClient } from "@repo/supabase/read-replica";
-import { createServerSupabaseClient, getUserSafely } from "@repo/supabase/server";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Activity, ArrowUpRight, BarChart3, Shield, Wrench as WrenchIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
-import type { AlertEvent, TrendDataPoint } from "@/features/hub";
+} from '@repo/departments/data-access';
+import { CacheCategory } from '@repo/redis';
+import { createReadReplicaClient } from '@repo/supabase/read-replica';
+import { createServerSupabaseClient, getUserSafely } from '@repo/supabase/server';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Activity, ArrowUpRight, BarChart3, Shield, Wrench as WrenchIcon } from 'lucide-react';
+import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import type { AlertEvent, TrendDataPoint } from '@/features/hub';
 import {
   AlertTicker,
   CoreOperationalModules,
@@ -22,38 +22,38 @@ import {
   HeroRotator,
   ProductionTrendWrapper as ProductionTrend,
   ToolBanner,
-} from "@/features/hub";
-import { withCache } from "@/lib/cache-utils";
-import { getAccessibleDepartmentNames, getEmployeeRole } from "@/lib/hub-departments";
-import { cachedRSC } from "@/lib/server-cache";
-import { getTools } from "@/lib/tools";
+} from '@/features/hub';
+import { withCache } from '@/lib/cache-utils';
+import { getAccessibleDepartmentNames, getEmployeeRole } from '@/lib/hub-departments';
+import { cachedRSC } from '@/lib/server-cache';
+import { getTools } from '@/lib/tools';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Hub — Arch Systems",
+  title: 'Hub — Arch Systems',
   description:
-    "Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, and satellite monitoring dashboards.",
+    'Central operations portal for Arch Systems industrial complexes. Access drilling, production, engineering, control room, and satellite monitoring dashboards.',
 };
 
 async function getDashboardCounts(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ) {
   return cachedRSC(
-    ["hub", "counts", today],
+    ['hub', 'counts', today],
     async () => {
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
           const [breakdowns, machines] = await Promise.all([
             db
-              .from("breakdowns")
-              .select("id", { count: "exact", head: true })
-              .eq("status", "active")
-              .is("deleted_at", null),
+              .from('breakdowns')
+              .select('id', { count: 'exact', head: true })
+              .eq('status', 'active')
+              .is('deleted_at', null),
 
-            db.from("machines").select("id", { count: "exact", head: true }).eq("active", false),
+            db.from('machines').select('id', { count: 'exact', head: true }).eq('active', false),
           ]);
           return {
             incidentCount: 0,
@@ -63,15 +63,15 @@ async function getDashboardCounts(
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "counts", today],
-          tags: ["table:breakdowns", "table:machines"],
-        },
+          keyParts: ['hub', 'counts', today],
+          tags: ['table:breakdowns', 'table:machines'],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: ["table:breakdowns", "table:machines"],
-    },
+      tags: ['table:breakdowns', 'table:machines'],
+    }
   );
 }
 
@@ -81,24 +81,24 @@ interface ProductionTrendResult {
 }
 
 const FALLBACK_TREND_DATA: TrendDataPoint[] = [
-  { date: "08:00", Drilling: 2890, Production: 2338, Engineering: 1200 },
-  { date: "09:00", Drilling: 2756, Production: 2103, Engineering: 1400 },
-  { date: "10:00", Drilling: 3322, Production: 2194, Engineering: 1100 },
-  { date: "11:00", Drilling: 3470, Production: 2108, Engineering: 1600 },
-  { date: "12:00", Drilling: 3475, Production: 1812, Engineering: 1300 },
-  { date: "13:00", Drilling: 3129, Production: 1726, Engineering: 1500 },
+  { date: '08:00', Drilling: 2890, Production: 2338, Engineering: 1200 },
+  { date: '09:00', Drilling: 2756, Production: 2103, Engineering: 1400 },
+  { date: '10:00', Drilling: 3322, Production: 2194, Engineering: 1100 },
+  { date: '11:00', Drilling: 3470, Production: 2108, Engineering: 1600 },
+  { date: '12:00', Drilling: 3475, Production: 1812, Engineering: 1300 },
+  { date: '13:00', Drilling: 3129, Production: 1726, Engineering: 1500 },
 ];
 
 async function getProductionTrendData(
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<ProductionTrendResult> {
   return cachedRSC(
-    ["hub", "production-trend"],
+    ['hub', 'production-trend'],
     async () => {
       return withCache(
         async () => {
           const db = await createReadReplicaClient(cookieList);
-          const { data: trendData, error } = await db.rpc("get_production_trend", {
+          const { data: trendData, error } = await db.rpc('get_production_trend', {
             p_hours_back: 24,
           });
 
@@ -122,8 +122,8 @@ async function getProductionTrendData(
             const point = hourlyMap.get(hour)!;
             // Map department name to the specific key in TrendDataPoint
             // If department name is not one of the keys, we skip or handle accordingly
-            const deptKey = row.department_name as keyof Omit<TrendDataPoint, "date">;
-            if (deptKey === "Drilling" || deptKey === "Production" || deptKey === "Engineering") {
+            const deptKey = row.department_name as keyof Omit<TrendDataPoint, 'date'>;
+            if (deptKey === 'Drilling' || deptKey === 'Production' || deptKey === 'Engineering') {
               point[deptKey] = Number(row.tonnes);
             }
           }
@@ -135,24 +135,24 @@ async function getProductionTrendData(
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "production-trend"],
-          tags: ["table:hourly_loads", "table:machines"],
-        },
+          keyParts: ['hub', 'production-trend'],
+          tags: ['table:hourly_loads', 'table:machines'],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: ["table:hourly_loads", "table:machines"],
-    },
+      tags: ['table:hourly_loads', 'table:machines'],
+    }
   );
 }
 
 async function getRecentAlertEvents(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<AlertEvent[]> {
   return cachedRSC(
-    ["hub", "alerts", today],
+    ['hub', 'alerts', today],
     async () => {
       return withCache(
         async () => {
@@ -162,25 +162,25 @@ async function getRecentAlertEvents(
           // Fetch recent active breakdowns
 
           const { data: breakdownsData } = await db
-            .from("breakdowns")
-            .select("id, machine_name, machine_type, reason, created_at, date_in")
-            .eq("status", "active")
-            .is("deleted_at", null)
-            .order("created_at", { ascending: false })
+            .from('breakdowns')
+            .select('id, machine_name, machine_type, reason, created_at, date_in')
+            .eq('status', 'active')
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
             .limit(5);
 
           if (breakdownsData) {
             for (const b of breakdownsData) {
               events.push({
                 id: `breakdown-${b.id}`,
-                type: "breakdown",
+                type: 'breakdown',
                 title: b.machine_name
                   ? `${b.machine_name} Breakdown`
                   : `${b.machine_type} Breakdown`,
                 description: b.reason,
                 timestamp: b.created_at,
-                severity: "warning",
-                href: "/engineering/breakdowns",
+                severity: 'warning',
+                href: '/engineering/breakdowns',
               });
             }
           }
@@ -192,15 +192,15 @@ async function getRecentAlertEvents(
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "alerts", today],
-          tags: ["table:breakdowns"],
-        },
+          keyParts: ['hub', 'alerts', today],
+          tags: ['table:breakdowns'],
+        }
       );
     },
     {
       revalidate: 300,
-      tags: ["table:breakdowns"],
-    },
+      tags: ['table:breakdowns'],
+    }
   );
 }
 
@@ -209,10 +209,10 @@ async function getRecentAlertEvents(
 
 async function getLiveDepartmentMetrics(
   today: string,
-  cookieList: Array<{ name: string; value: string }>,
+  cookieList: Array<{ name: string; value: string }>
 ): Promise<DepartmentLiveMetricsMap> {
   return cachedRSC(
-    ["hub", "live-department-metrics", today],
+    ['hub', 'live-department-metrics', today],
     async () => {
       return withCache(
         async () => {
@@ -221,29 +221,29 @@ async function getLiveDepartmentMetrics(
         },
         {
           category: CacheCategory.METRICS,
-          keyParts: ["hub", "live-department-metrics", today],
+          keyParts: ['hub', 'live-department-metrics', today],
           tags: [
-            "table:hourly_loads",
-            "table:daily_logs",
-            "table:production_logs",
+            'table:hourly_loads',
+            'table:daily_logs',
+            'table:production_logs',
 
-            "table:breakdowns",
-            "table:machines",
+            'table:breakdowns',
+            'table:machines',
           ],
-        },
+        }
       );
     },
     {
       revalidate: 60,
       tags: [
-        "table:hourly_loads",
-        "table:daily_logs",
-        "table:production_logs",
+        'table:hourly_loads',
+        'table:daily_logs',
+        'table:production_logs',
 
-        "table:breakdowns",
-        "table:machines",
+        'table:breakdowns',
+        'table:machines',
       ],
-    },
+    }
   );
 }
 
@@ -252,11 +252,11 @@ export default async function HubPage() {
   const user = await getUserSafely(supabase);
 
   if (!user?.id) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const userId = user.id as string;
-  const today = new Date().toISOString().split("T")[0] as string;
+  const today = new Date().toISOString().split('T')[0] as string;
 
   const cookieStore = await cookies();
   const cookieList = cookieStore.getAll();
@@ -287,22 +287,22 @@ export default async function HubPage() {
   ]);
 
   const { incidentCount, breakdownCount, offlineMachineCount } =
-    dashboardCountsResult.status === "fulfilled"
+    dashboardCountsResult.status === 'fulfilled'
       ? dashboardCountsResult.value
       : { incidentCount: 0, breakdownCount: 0, offlineMachineCount: 0 };
 
   const accessibleDeptIds =
-    accessibleDeptIdsResult.status === "fulfilled" ? accessibleDeptIdsResult.value : [];
+    accessibleDeptIdsResult.status === 'fulfilled' ? accessibleDeptIdsResult.value : [];
 
-  const tools = toolsResult.status === "fulfilled" ? toolsResult.value : [];
+  const tools = toolsResult.status === 'fulfilled' ? toolsResult.value : [];
 
-  const alertEvents = alertEventsResult.status === "fulfilled" ? alertEventsResult.value : [];
+  const alertEvents = alertEventsResult.status === 'fulfilled' ? alertEventsResult.value : [];
 
-  const liveMetrics = liveMetricsResult.status === "fulfilled" ? liveMetricsResult.value : {};
+  const liveMetrics = liveMetricsResult.status === 'fulfilled' ? liveMetricsResult.value : {};
 
-  const userRole = userRoleResult.status === "fulfilled" ? userRoleResult.value : null;
+  const userRole = userRoleResult.status === 'fulfilled' ? userRoleResult.value : null;
 
-  const canSeeExecutive = userRole === "admin" || userRole === "manager";
+  const canSeeExecutive = userRole === 'admin' || userRole === 'manager';
 
   // AGENT-TRACE: Admin/manager users see all departments. Regular users with
   // zero assigned departments get an explicit empty state instead of silently
@@ -331,8 +331,8 @@ export default async function HubPage() {
       <section
         className="relative w-full pt-2 pb-2 px-4 sm:px-6 motion-reduce:animate-none animate-fade-up"
         style={{
-          animationDelay: "0s",
-          animationFillMode: "both",
+          animationDelay: '0s',
+          animationFillMode: 'both',
         }}
       >
         <HeroBackground />
@@ -342,16 +342,16 @@ export default async function HubPage() {
           defaultTitle="Central Operations Portal"
           defaultDescription="Centralized monitoring and control system for Arch Systems industrial complexes. Access Modbus diagnostics, machine breakdowns, shifts, and live telemetry."
           primaryHref={
-            accessibleDeptIds.includes("control-room")
-              ? "/control-room"
+            accessibleDeptIds.includes('control-room')
+              ? '/control-room'
               : accessibleDeptIds.length > 0
                 ? `/${accessibleDeptIds[0]}`
-                : "/"
+                : '/'
           }
           primaryLabel={
-            accessibleDeptIds.includes("control-room") ? "Launch Monitor" : "Go to Department"
+            accessibleDeptIds.includes('control-room') ? 'Launch Monitor' : 'Go to Department'
           }
-          secondaryHref={accessibleDeptIds.length > 0 ? `/${accessibleDeptIds[0]}` : "/"}
+          secondaryHref={accessibleDeptIds.length > 0 ? `/${accessibleDeptIds[0]}` : '/'}
           secondaryLabel="System Guidelines"
           departments={departments}
           incidentCount={incidentCount}
@@ -364,7 +364,7 @@ export default async function HubPage() {
       {canSeeExecutive && (
         <div
           className="flex justify-end animate-fade-up"
-          style={{ animationDelay: "0.05s", animationFillMode: "both" }}
+          style={{ animationDelay: '0.05s', animationFillMode: 'both' }}
         >
           <Link
             href="/hub/executive"
@@ -383,7 +383,7 @@ export default async function HubPage() {
       {/* Operational Urgencies & Alerts */}
       <div
         className="space-y-4 animate-fade-up group/row"
-        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+        style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
       >
         <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">
@@ -415,7 +415,7 @@ export default async function HubPage() {
       {tools.length > 0 && (
         <section
           className="space-y-4 animate-fade-up group/row"
-          style={{ animationDelay: "0.3s", animationFillMode: "both" }}
+          style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
         >
           <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
             <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary group-hover/row:text-arch-accent-blue transition-colors duration-300 flex items-center gap-2.5">
@@ -437,7 +437,7 @@ export default async function HubPage() {
       {/* Industrial Insights & Production Trends */}
       <section
         className="space-y-4 animate-fade-up group/row"
-        style={{ animationDelay: "0.4s", animationFillMode: "both" }}
+        style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
       >
         <div className="flex items-center justify-between pb-3 border-b border-arch-border-subtle">
           <h2 className="text-base sm:text-lg font-semibold tracking-tight text-arch-text-primary flex items-center gap-2.5">

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { AnimatedList } from "@repo/ui/AnimatedList";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { AlertCircle, BrainCircuit } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AnimatedList } from '@repo/ui/AnimatedList';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { AlertCircle, BrainCircuit } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface MLPrediction {
   machine_id: string;
@@ -22,7 +22,7 @@ export function PredictiveAlertsWidget() {
   useEffect(() => {
     async function fetchPredictions() {
       try {
-        const res = await fetch("/api/ml/predictive-maintenance");
+        const res = await fetch('/api/ml/predictive-maintenance');
         if (res.ok) {
           const data = await res.json();
           setPredictions(data.predictions || []);
@@ -71,7 +71,7 @@ export function PredictiveAlertsWidget() {
                 </div>
                 <p className="text-sm text-[var(--text-muted)] mt-1">{p.reason}</p>
                 <div className="mt-2 text-sm bg-[var(--bg-primary)] p-2 rounded border border-[var(--border-subtle)] inline-block">
-                  <span className="font-medium text-[var(--text-heading)]">Action:</span>{" "}
+                  <span className="font-medium text-[var(--text-heading)]">Action:</span>{' '}
                   {p.recommended_action}
                 </div>
               </div>

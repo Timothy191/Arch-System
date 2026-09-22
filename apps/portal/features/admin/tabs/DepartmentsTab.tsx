@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { logError } from "@/lib/errors/error-logger";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Edit2, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { logError } from '@/lib/errors/error-logger';
 
 interface Department {
   id: string;
@@ -20,17 +20,17 @@ interface Department {
   created_at: string;
 }
 
-const COLORS = ["blue", "emerald", "blue", "violet", "red", "cyan", "indigo"];
+const COLORS = ['blue', 'emerald', 'blue', 'violet', 'red', 'cyan', 'indigo'];
 
 const ICONS = [
-  "Drill",
-  "Factory",
-  "Shield",
-  "Wrench",
-  "Monitor",
-  "HeartPulse",
-  "GraduationCap",
-  "Satellite",
+  'Drill',
+  'Factory',
+  'Shield',
+  'Wrench',
+  'Monitor',
+  'HeartPulse',
+  'GraduationCap',
+  'Satellite',
 ];
 
 export function DepartmentsTab() {
@@ -41,7 +41,7 @@ export function DepartmentsTab() {
   const supabase = createBrowserSupabaseClient();
 
   const loadDepartments = useCallback(async () => {
-    const { data } = await supabase.from("departments").select("*").order("display_name");
+    const { data } = await supabase.from('departments').select('*').order('display_name');
     if (data) setDepartments(data);
     setLoading(false);
   }, [supabase]);
@@ -69,18 +69,18 @@ export function DepartmentsTab() {
   }) => {
     if (editingDept) {
       const { error } = await supabase
-        .from("departments")
+        .from('departments')
         .update(formData)
-        .eq("id", editingDept.id);
+        .eq('id', editingDept.id);
       if (error)
         logError(new Error(error.message), {
-          context: "departments_tab_update",
+          context: 'departments_tab_update',
         });
     } else {
-      const { error } = await supabase.from("departments").insert(formData);
+      const { error } = await supabase.from('departments').insert(formData);
       if (error)
         logError(new Error(error.message), {
-          context: "departments_tab_create",
+          context: 'departments_tab_create',
         });
     }
     setShowEditDialog(false);
@@ -89,9 +89,9 @@ export function DepartmentsTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this department?")) return;
-    const { error } = await supabase.from("departments").delete().eq("id", id);
-    if (error) logError(new Error(error.message), { context: "departments_tab_delete" });
+    if (!confirm('Are you sure you want to delete this department?')) return;
+    const { error } = await supabase.from('departments').delete().eq('id', id);
+    if (error) logError(new Error(error.message), { context: 'departments_tab_delete' });
     loadDepartments();
   };
 
@@ -211,7 +211,7 @@ export function DepartmentsTab() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)]">
           <DialogHeader>
-            <DialogTitle>{editingDept ? "Edit Department" : "Create Department"}</DialogTitle>
+            <DialogTitle>{editingDept ? 'Edit Department' : 'Create Department'}</DialogTitle>
           </DialogHeader>
           <DepartmentForm
             department={editingDept}
@@ -242,11 +242,11 @@ function DepartmentForm({
   }) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState(department?.name || "");
-  const [displayName, setDisplayName] = useState(department?.display_name || "");
-  const [icon, setIcon] = useState(department?.icon || "Building2");
-  const [color, setColor] = useState(department?.color || "blue");
-  const [description, setDescription] = useState(department?.description || "");
+  const [name, setName] = useState(department?.name || '');
+  const [displayName, setDisplayName] = useState(department?.display_name || '');
+  const [icon, setIcon] = useState(department?.icon || 'Building2');
+  const [color, setColor] = useState(department?.color || 'blue');
+  const [description, setDescription] = useState(department?.description || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,7 +278,7 @@ function DepartmentForm({
         <Input
           id="name"
           value={name}
-          onChange={(e) => setName(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+          onChange={(e) => setName(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
           className="bg-[var(--bg-secondary)] border-[var(--border-default)]"
           required
         />
@@ -345,7 +345,7 @@ function DepartmentForm({
           type="submit"
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
         >
-          {department ? "Update" : "Create"}
+          {department ? 'Update' : 'Create'}
         </Button>
       </div>
     </form>

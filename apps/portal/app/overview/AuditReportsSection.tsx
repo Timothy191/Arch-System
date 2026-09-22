@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { GlassCard } from "@repo/ui/GlassCard";
+import { GlassCard } from '@repo/ui/GlassCard';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -11,8 +11,8 @@ import {
   Palette,
   RefreshCw,
   ShieldCheck,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface AuditLogMeta {
   id: string;
@@ -22,7 +22,7 @@ interface AuditLogMeta {
   isoDate: string;
   displayDate: string;
   score: number;
-  overallStatus: "PASS" | "WARN" | "FAIL";
+  overallStatus: 'PASS' | 'WARN' | 'FAIL';
   criticalCount: number;
   warningCount: number;
 }
@@ -39,7 +39,7 @@ interface AuditData {
 function SimpleMarkdownRenderer({ content }: { content: string }) {
   if (!content) return <p className="text-arch-text-tertiary">No content available.</p>;
 
-  const lines = content.split("\n");
+  const lines = content.split('\n');
   const elements: React.ReactNode[] = [];
   let inTable = false;
   let tableHeader: string[] = [];
@@ -77,7 +77,7 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
               ))}
             </tbody>
           </table>
-        </div>,
+        </div>
       );
       inTable = false;
       tableHeader = [];
@@ -88,9 +88,9 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
   lines.forEach((line, idx) => {
     const trimmed = line.trim();
 
-    if (trimmed.startsWith("|")) {
-      const parts = trimmed.split("|").slice(1, -1);
-      if (trimmed.includes("---")) {
+    if (trimmed.startsWith('|')) {
+      const parts = trimmed.split('|').slice(1, -1);
+      if (trimmed.includes('---')) {
         // Table separator row, ignore
         return;
       }
@@ -105,32 +105,32 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
       flushTable(`line-${idx}`);
     }
 
-    if (trimmed.startsWith("# ")) {
+    if (trimmed.startsWith('# ')) {
       elements.push(
         <h1
           key={idx}
           className="text-2xl font-bold text-arch-text-primary mt-6 mb-3 flex items-center gap-2 border-b border-arch-border-subtle pb-2"
         >
           {trimmed.slice(2)}
-        </h1>,
+        </h1>
       );
-    } else if (trimmed.startsWith("## ")) {
+    } else if (trimmed.startsWith('## ')) {
       elements.push(
         <h2
           key={idx}
           className="text-lg font-semibold text-arch-text-primary mt-5 mb-2 flex items-center gap-2"
         >
           {trimmed.slice(3)}
-        </h2>,
+        </h2>
       );
-    } else if (trimmed.startsWith("### ")) {
+    } else if (trimmed.startsWith('### ')) {
       elements.push(
         <h3 key={idx} className="text-md font-medium text-arch-text-secondary mt-4 mb-1">
           {trimmed.slice(4)}
-        </h3>,
+        </h3>
       );
-    } else if (trimmed.startsWith("- [ ]") || trimmed.startsWith("- [x]")) {
-      const isChecked = trimmed.startsWith("- [x]");
+    } else if (trimmed.startsWith('- [ ]') || trimmed.startsWith('- [x]')) {
+      const isChecked = trimmed.startsWith('- [x]');
       const text = trimmed.slice(6);
       elements.push(
         <div
@@ -146,40 +146,40 @@ function SimpleMarkdownRenderer({ content }: { content: string }) {
           <span
             className={
               isChecked
-                ? "line-through text-arch-text-tertiary"
-                : "text-arch-text-primary font-medium"
+                ? 'line-through text-arch-text-tertiary'
+                : 'text-arch-text-primary font-medium'
             }
           >
             {text}
           </span>
-        </div>,
+        </div>
       );
-    } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+    } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       elements.push(
         <li key={idx} className="ml-5 list-disc text-sm text-arch-text-secondary my-1">
           {trimmed.slice(2)}
-        </li>,
+        </li>
       );
-    } else if (trimmed.startsWith("```")) {
+    } else if (trimmed.startsWith('```')) {
       // Code block boundary handled simply
     } else if (trimmed.length > 0) {
       elements.push(
         <p key={idx} className="text-sm text-arch-text-secondary leading-relaxed my-2">
           {trimmed}
-        </p>,
+        </p>
       );
     }
   });
 
-  flushTable("end");
+  flushTable('end');
 
   return <div className="space-y-1">{elements}</div>;
 }
 
 export function AuditReportsSection() {
   const [data, setData] = useState<AuditData | null>(null);
-  const [selectedLogId, setSelectedLogId] = useState<string>("latest");
-  const [activeTab, setActiveTab] = useState<"results" | "actions" | "design" | "rls">("results");
+  const [selectedLogId, setSelectedLogId] = useState<string>('latest');
+  const [activeTab, setActiveTab] = useState<'results' | 'actions' | 'design' | 'rls'>('results');
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchAuditData = async (logId: string) => {
@@ -248,8 +248,8 @@ export function AuditReportsSection() {
                   ?.filter(
                     (log, index, self) =>
                       self.findIndex(
-                        (item) => (item.folderName || item.id) === (log.folderName || log.id),
-                      ) === index,
+                        (item) => (item.folderName || item.id) === (log.folderName || log.id)
+                      ) === index
                   )
                   .map((log, idx) => (
                     <option key={`${log.id}-${log.isoDate || idx}`} value={log.folderName}>
@@ -264,7 +264,7 @@ export function AuditReportsSection() {
               className="p-2 rounded-lg bg-arch-surface-secondary border border-arch-border-subtle text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary transition-colors"
               title="Refresh Audit Data"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-accent-blue" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-accent-blue' : ''}`} />
             </button>
           </div>
         </div>
@@ -282,14 +282,14 @@ export function AuditReportsSection() {
               <span className="text-xs text-arch-text-tertiary block">Gate Status</span>
               <span
                 className={`text-sm font-semibold inline-flex items-center gap-1.5 ${
-                  activeMeta.overallStatus === "PASS"
-                    ? "text-accent-green"
-                    : activeMeta.overallStatus === "WARN"
-                      ? "text-accent-amber"
-                      : "text-accent-red"
+                  activeMeta.overallStatus === 'PASS'
+                    ? 'text-accent-green'
+                    : activeMeta.overallStatus === 'WARN'
+                      ? 'text-accent-amber'
+                      : 'text-accent-red'
                 }`}
               >
-                {activeMeta.overallStatus === "PASS" ? (
+                {activeMeta.overallStatus === 'PASS' ? (
                   <CheckCircle2 className="w-4 h-4" />
                 ) : (
                   <AlertTriangle className="w-4 h-4" />
@@ -300,7 +300,7 @@ export function AuditReportsSection() {
             <div className="p-3 rounded-lg bg-arch-surface-secondary/50 border border-arch-border-subtle">
               <span className="text-xs text-arch-text-tertiary block">Critical Violations</span>
               <span
-                className={`text-lg font-bold font-mono ${activeMeta.criticalCount > 0 ? "text-accent-red" : "text-arch-text-primary"}`}
+                className={`text-lg font-bold font-mono ${activeMeta.criticalCount > 0 ? 'text-accent-red' : 'text-arch-text-primary'}`}
               >
                 {activeMeta.criticalCount}
               </span>
@@ -318,11 +318,11 @@ export function AuditReportsSection() {
       {/* Tab Navigation for 4 Markdown Reports */}
       <div className="flex flex-wrap gap-2 border-b border-arch-border-subtle pb-2">
         <button
-          onClick={() => setActiveTab("results")}
+          onClick={() => setActiveTab('results')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "results"
-              ? "bg-accent-blue text-white shadow-sm"
-              : "bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary"
+            activeTab === 'results'
+              ? 'bg-accent-blue text-white shadow-sm'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -331,11 +331,11 @@ export function AuditReportsSection() {
         </button>
 
         <button
-          onClick={() => setActiveTab("actions")}
+          onClick={() => setActiveTab('actions')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "actions"
-              ? "bg-accent-blue text-white shadow-sm"
-              : "bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary"
+            activeTab === 'actions'
+              ? 'bg-accent-blue text-white shadow-sm'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
           }`}
         >
           <ClipboardList className="w-4 h-4" />
@@ -346,11 +346,11 @@ export function AuditReportsSection() {
         </button>
 
         <button
-          onClick={() => setActiveTab("design")}
+          onClick={() => setActiveTab('design')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "design"
-              ? "bg-accent-blue text-white shadow-sm"
-              : "bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary"
+            activeTab === 'design'
+              ? 'bg-accent-blue text-white shadow-sm'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
           }`}
         >
           <Palette className="w-4 h-4" />
@@ -361,11 +361,11 @@ export function AuditReportsSection() {
         </button>
 
         <button
-          onClick={() => setActiveTab("rls")}
+          onClick={() => setActiveTab('rls')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === "rls"
-              ? "bg-accent-blue text-white shadow-sm"
-              : "bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary"
+            activeTab === 'rls'
+              ? 'bg-accent-blue text-white shadow-sm'
+              : 'bg-arch-surface-secondary/80 text-arch-text-secondary hover:text-arch-text-primary hover:bg-arch-surface-tertiary'
           }`}
         >
           <Lock className="w-4 h-4" />
@@ -388,14 +388,14 @@ export function AuditReportsSection() {
           </div>
         ) : (
           <div className="prose max-w-none">
-            {activeTab === "results" && <SimpleMarkdownRenderer content={data?.results || ""} />}
-            {activeTab === "actions" && (
-              <SimpleMarkdownRenderer content={data?.requiredActions || ""} />
+            {activeTab === 'results' && <SimpleMarkdownRenderer content={data?.results || ''} />}
+            {activeTab === 'actions' && (
+              <SimpleMarkdownRenderer content={data?.requiredActions || ''} />
             )}
-            {activeTab === "design" && (
-              <SimpleMarkdownRenderer content={data?.designReport || ""} />
+            {activeTab === 'design' && (
+              <SimpleMarkdownRenderer content={data?.designReport || ''} />
             )}
-            {activeTab === "rls" && <SimpleMarkdownRenderer content={data?.rlsReport || ""} />}
+            {activeTab === 'rls' && <SimpleMarkdownRenderer content={data?.rlsReport || ''} />}
           </div>
         )}
       </GlassCard>

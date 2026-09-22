@@ -9,11 +9,11 @@ export function PageHeader({ title, showDate = true }: PageHeaderProps) {
       <h2 className="text-fluid-2xl font-medium text-[var(--text-heading)]">{title}</h2>
       {showDate && (
         <p className="text-[var(--text-muted)] text-fluid-xs">
-          {new Date().toLocaleDateString("en-ZA", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
+          {new Date().toLocaleDateString('en-ZA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
           })}
         </p>
       )}

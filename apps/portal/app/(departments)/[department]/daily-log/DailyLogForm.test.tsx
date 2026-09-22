@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { DailyLogForm } from "./DailyLogForm";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DailyLogForm } from './DailyLogForm';
 
 // Mock next/navigation (useRouter, useParams)
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -10,28 +10,28 @@ jest.mock("next/navigation", () => ({
     prefetch: jest.fn(),
     back: jest.fn(),
   })),
-  useParams: jest.fn(() => ({ department: "test-dept" })),
+  useParams: jest.fn(() => ({ department: 'test-dept' })),
 }));
 
 // Mock the Supabase client
-jest.mock("@repo/supabase/client", () => ({
+jest.mock('@repo/supabase/client', () => ({
   createBrowserSupabaseClient: jest.fn(),
 }));
 
 // Mock sonner
-jest.mock("sonner", () => ({
+jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
   },
 }));
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
-const { createBrowserSupabaseClient } = jest.requireMock("@repo/supabase/client");
+const { createBrowserSupabaseClient } = jest.requireMock('@repo/supabase/client');
 
-describe("DailyLogForm", () => {
-  const mockSingle = jest.fn().mockResolvedValue({ data: { id: "log-1" }, error: null });
+describe('DailyLogForm', () => {
+  const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'log-1' }, error: null });
   const mockSelect = jest.fn().mockReturnValue({ single: mockSingle });
   const mockInsert = jest.fn().mockReturnValue({ select: mockSelect });
 
@@ -40,13 +40,13 @@ describe("DailyLogForm", () => {
       insert: mockInsert,
     }),
     auth: {
-      getUser: jest.fn().mockResolvedValue({ data: { user: { id: "test-user-id" } } }),
+      getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } } }),
     },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSingle.mockResolvedValue({ data: { id: "log-1" }, error: null });
+    mockSingle.mockResolvedValue({ data: { id: 'log-1' }, error: null });
     mockSelect.mockReturnValue({ single: mockSingle });
     mockInsert.mockReturnValue({ select: mockSelect });
     mockSupabase.from.mockReturnValue({ insert: mockInsert });
@@ -54,15 +54,15 @@ describe("DailyLogForm", () => {
   });
 
   const props = {
-    departmentId: "test-dept-id",
-    departmentSlug: "mining",
+    departmentId: 'test-dept-id',
+    departmentSlug: 'mining',
     machines: [
-      { id: "machine-1", name: "Excavator 1", machine_type: "excavator" },
-      { id: "machine-2", name: "Truck 1", machine_type: "dump_truck" },
+      { id: 'machine-1', name: 'Excavator 1', machine_type: 'excavator' },
+      { id: 'machine-2', name: 'Truck 1', machine_type: 'dump_truck' },
     ],
   };
 
-  it("renders the form correctly", () => {
+  it('renders the form correctly', () => {
     render(<DailyLogForm {...props} />);
 
     // Check that the form renders
@@ -80,10 +80,10 @@ describe("DailyLogForm", () => {
     expect(screen.getByLabelText(/Notes/i)).toBeInTheDocument();
   });
 
-  it("submits the form successfully", async () => {
+  it('submits the form successfully', async () => {
     render(<DailyLogForm {...props} />);
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = screen.getByRole('button', {
       name: /save daily log/i,
     });
     expect(submitButton).toBeEnabled();
@@ -97,15 +97,15 @@ describe("DailyLogForm", () => {
 
     // Wait for success
     await waitFor(() => {
-      expect(mockSupabase.from).toHaveBeenCalledWith("daily_logs");
+      expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs');
       expect(mockInsert).toHaveBeenCalled();
     });
 
     // Should show success message via toast
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
-        "Daily log saved successfully",
-        expect.any(Object),
+        'Daily log saved successfully',
+        expect.any(Object)
       );
     });
 
@@ -114,16 +114,16 @@ describe("DailyLogForm", () => {
     expect(submitButton).toBeEnabled();
   });
 
-  it("handles submission errors", async () => {
+  it('handles submission errors', async () => {
     // Mock an error
     mockSingle.mockResolvedValueOnce({
       data: null,
-      error: { message: "Database error" },
+      error: { message: 'Database error' },
     });
 
     render(<DailyLogForm {...props} />);
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = screen.getByRole('button', {
       name: /save daily log/i,
     });
     fireEvent.click(submitButton);
@@ -134,13 +134,13 @@ describe("DailyLogForm", () => {
 
     // Wait for error
     await waitFor(() => {
-      expect(mockSupabase.from).toHaveBeenCalledWith("daily_logs");
+      expect(mockSupabase.from).toHaveBeenCalledWith('daily_logs');
       expect(mockInsert).toHaveBeenCalled();
     });
 
     // Should show error message via toast
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Failed to save daily log", expect.anything());
+      expect(toast.error).toHaveBeenCalledWith('Failed to save daily log', expect.anything());
     });
 
     // Button should be enabled again

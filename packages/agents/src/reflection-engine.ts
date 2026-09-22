@@ -4,9 +4,9 @@
  * Wraps specialist subagents in a QualityGate verification loop to guarantee high quality output.
  */
 
-import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from "./coordinator.js";
-import { type AgentPillarConfig, AgentPillarEnvelope } from "./prompt-envelope.js";
-import { type QualityAuditResult, QualityGate } from "./quality-gate.js";
+import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from './coordinator.js';
+import { type AgentPillarConfig, AgentPillarEnvelope } from './prompt-envelope.js';
+import { type QualityAuditResult, QualityGate } from './quality-gate.js';
 
 export interface VerifiedTaskResult {
   subtaskId: string;
@@ -42,17 +42,17 @@ export class ReflectionEngine {
    */
   public async executeTaskWithReflection(
     task: Subtask,
-    options: ReflectionEngineOptions = {},
+    options: ReflectionEngineOptions = {}
   ): Promise<VerifiedTaskResult> {
     const maxRetries = options.maxReflectionIterations ?? this.maxIterations;
     const filePath = options.targetFilePath;
-    const auditTrail: VerifiedTaskResult["auditTrail"] = [];
+    const auditTrail: VerifiedTaskResult['auditTrail'] = [];
 
     // Compile Pillar 1-9 compliant envelope
     const pillarConfig: AgentPillarConfig = {
       identity: {
-        name: `specialist-${task.specialistRole.toLowerCase().replace(/\s+/g, "-")}`,
-        mode: "subagent",
+        name: `specialist-${task.specialistRole.toLowerCase().replace(/\s+/g, '-')}`,
+        mode: 'subagent',
         routingDescription: `Executes ${task.specialistRole} task ${task.id} with strict quality gate enforcement.`,
       },
       runtime: {
@@ -60,12 +60,12 @@ export class ReflectionEngine {
         maxSteps: 8,
       },
       permissions: {
-        allowedTools: task.mcpToolsRequired || ["read_file", "write_file"],
-        filesystemAccess: "scoped_write",
+        allowedTools: task.mcpToolsRequired || ['read_file', 'write_file'],
+        filesystemAccess: 'scoped_write',
         bashAllowed: true,
       },
       scope: {
-        includePaths: filePath ? [filePath] : ["apps/**", "packages/**", "libs/**"],
+        includePaths: filePath ? [filePath] : ['apps/**', 'packages/**', 'libs/**'],
       },
       negativeConstraints: task.constraints,
       ...(options.pillarConfig || {}),
@@ -73,11 +73,11 @@ export class ReflectionEngine {
 
     const pillarPrompt = AgentPillarEnvelope.compileSystemPrompt(
       pillarConfig,
-      task.workspaceContext,
+      task.workspaceContext
     );
 
     let currentInstructions = task.instructions;
-    let lastOutput = "";
+    let lastOutput = '';
     let finalAudit: QualityAuditResult = {
       passed: false,
       score: 0,

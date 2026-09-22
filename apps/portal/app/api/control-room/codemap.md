@@ -27,3 +27,12 @@ This folder hosts Control Room API routes that serve operational dashboards and 
 - Depends on `@repo/redis` for cached telemetry availability checks.
 - Uses internal helpers from `@/lib/shift-completeness` and `@/lib/api/cors`.
 - Serves Control Room UI surfaces that need shift completeness and SCADA resilience data.
+
+## Shift Closeout (Hardened)
+
+- `/shift-closeout/route.ts`: Exposes a secure, idempotent API for submitting the operator shift closeout report.
+  - Requires `Idempotency-Key` to prevent double-closing.
+  - Enforces `operator`, `supervisor`, `admin` roles, strictly rejecting `viewer`.
+  - Executes atomically using `db.transaction()` (Kysely) against `control_room_shift_reports`.
+  - Performs a synchronous JSON snapshot upsert into `shift_status` using Supabase client to maintain compatibility with legacy triggers.
+  - Returns `status: 'already_closed'` natively on idempotency hits.

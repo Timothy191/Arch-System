@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
-import LoginPage from "./page";
+import { render, screen } from '@testing-library/react';
+import LoginPage from './page';
 
 // Mock next/navigation
 const mockRedirect = jest.fn();
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   redirect: (target: string) => {
     mockRedirect(target);
     throw new Error(`NEXT_REDIRECT:${target}`);
@@ -12,28 +12,28 @@ jest.mock("next/navigation", () => ({
 
 // Mock cookies
 const mockCookies = jest.fn();
-jest.mock("next/headers", () => ({
+jest.mock('next/headers', () => ({
   cookies: () => mockCookies(),
 }));
 
 // Mock @repo/supabase/server
 const mockGetUserSafely = jest.fn();
 const mockCreateServerSupabaseClient = jest.fn();
-jest.mock("@repo/supabase/server", () => ({
+jest.mock('@repo/supabase/server', () => ({
   createServerSupabaseClient: () => mockCreateServerSupabaseClient(),
   getUserSafely: (...args: any[]) => mockGetUserSafely(...args),
 }));
 
 // Mock LoginForm
-jest.mock("@/features/auth/components/LoginForm", () => ({
+jest.mock('@/features/auth/components/LoginForm', () => ({
   LoginForm: () => <div data-testid="mock-login-form" />,
 }));
 
 // Mock EveStatusBar
-jest.mock("@repo/ui/EveStatusBar", () => ({}));
+jest.mock('@repo/ui/EveStatusBar', () => ({}));
 
 // Mock GlassCard
-jest.mock("@repo/ui/GlassCard", () => ({
+jest.mock('@repo/ui/GlassCard', () => ({
   GlassCard: ({ children, className, style }: any) => (
     <div data-testid="mock-glass-card" className={className} style={style}>
       {children}
@@ -42,16 +42,16 @@ jest.mock("@repo/ui/GlassCard", () => ({
 }));
 
 // Mock utils
-jest.mock("@repo/utils", () => ({
+jest.mock('@repo/utils', () => ({
   getThreeShift: jest.fn(() => ({
-    shift: "B",
-    label: "Shift B",
-    start: "14:00",
-    end: "22:00",
+    shift: 'B',
+    label: 'Shift B',
+    start: '14:00',
+    end: '22:00',
   })),
 }));
 
-describe("LoginPage Server Component", () => {
+describe('LoginPage Server Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCookies.mockResolvedValue({
@@ -59,59 +59,59 @@ describe("LoginPage Server Component", () => {
     });
   });
 
-  it("renders login page successfully for unauthenticated user", async () => {
+  it('renders login page successfully for unauthenticated user', async () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
-    expect(screen.getByText("Welcome Back")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-login-form")).toBeInTheDocument();
+    expect(screen.getByText('Welcome Back')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-login-form')).toBeInTheDocument();
   });
 
-  it("renders the heading with the theme token class", async () => {
+  it('renders the heading with the theme token class', async () => {
     const pageElement = await LoginPage();
     render(pageElement);
 
-    const heading = screen.getByRole("heading", { name: "Arch Systems" });
-    expect(heading).toHaveClass("text-[var(--text-heading)]");
+    const heading = screen.getByRole('heading', { name: 'Arch Systems' });
+    expect(heading).toHaveClass('text-[var(--text-heading)]');
   });
 
-  it("redirects authenticated user to /hub when no redirect param", async () => {
+  it('redirects authenticated user to /hub when no redirect param', async () => {
     mockCookies.mockResolvedValue({
-      getAll: jest.fn(() => [{ name: "sb-mock-auth-token.0", value: "token" }]),
+      getAll: jest.fn(() => [{ name: 'sb-mock-auth-token.0', value: 'token' }]),
     });
     mockCreateServerSupabaseClient.mockResolvedValue({});
-    mockGetUserSafely.mockResolvedValue({ id: "user-123" });
+    mockGetUserSafely.mockResolvedValue({ id: 'user-123' });
 
-    await expect(LoginPage()).rejects.toThrow("NEXT_REDIRECT:/hub");
-    expect(mockRedirect).toHaveBeenCalledWith("/hub");
+    await expect(LoginPage()).rejects.toThrow('NEXT_REDIRECT:/hub');
+    expect(mockRedirect).toHaveBeenCalledWith('/hub');
   });
 
-  it("redirects authenticated user to searchParams.redirect target", async () => {
+  it('redirects authenticated user to searchParams.redirect target', async () => {
     mockCookies.mockResolvedValue({
-      getAll: jest.fn(() => [{ name: "sb-mock-auth-token", value: "token" }]),
+      getAll: jest.fn(() => [{ name: 'sb-mock-auth-token', value: 'token' }]),
     });
     mockCreateServerSupabaseClient.mockResolvedValue({});
-    mockGetUserSafely.mockResolvedValue({ id: "user-123" });
+    mockGetUserSafely.mockResolvedValue({ id: 'user-123' });
 
     await expect(
-      LoginPage({ searchParams: Promise.resolve({ redirect: "/production" }) }),
-    ).rejects.toThrow("NEXT_REDIRECT:/production");
-    expect(mockRedirect).toHaveBeenCalledWith("/production");
+      LoginPage({ searchParams: Promise.resolve({ redirect: '/production' }) })
+    ).rejects.toThrow('NEXT_REDIRECT:/production');
+    expect(mockRedirect).toHaveBeenCalledWith('/production');
   });
 
-  it("auto-focuses the Retry link in the System Unavailable state (a11y)", async () => {
+  it('auto-focuses the Retry link in the System Unavailable state (a11y)', async () => {
     // Auth cookie present but the auth check fails non-transiently ->
     // the System Unavailable card renders instead of the form.
     mockCookies.mockResolvedValue({
-      getAll: jest.fn(() => [{ name: "sb-access-token", value: "token" }]),
+      getAll: jest.fn(() => [{ name: 'sb-access-token', value: 'token' }]),
     });
     mockCreateServerSupabaseClient.mockResolvedValue({});
-    mockGetUserSafely.mockRejectedValue(new Error("upstream auth outage"));
+    mockGetUserSafely.mockRejectedValue(new Error('upstream auth outage'));
 
     const pageElement = await LoginPage();
     render(pageElement);
 
-    const retry = screen.getByRole("link", { name: "Retry" });
+    const retry = screen.getByRole('link', { name: 'Retry' });
     expect(retry).toBeInTheDocument();
   });
 });

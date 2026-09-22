@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 // 4rem (pt-16) is the global header offset — subtract it so the auth area sizes
 // against the space actually available, not the full viewport.

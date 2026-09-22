@@ -14,10 +14,10 @@
 // Usage: node tools/audits/circular-dep-detect.cjs
 //
 
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, "..", "..");
+const ROOT = path.resolve(__dirname, '..', '..');
 
 /**
  * Reads dependencies of a project and filters workspace dependencies.
@@ -26,14 +26,14 @@ const ROOT = path.resolve(__dirname, "..", "..");
  * @returns {string[]} An array of package names this project depends on via workspace:*
  */
 function readDeps(projectPath) {
-  const pkgPath = path.join(ROOT, projectPath, "package.json");
+  const pkgPath = path.join(ROOT, projectPath, 'package.json');
   if (!fs.existsSync(pkgPath)) return [];
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
   const deps = pkg.dependencies || {};
   const result = [];
   for (const [name, version] of Object.entries(deps)) {
-    if (typeof version !== "string") continue;
-    if (!version.startsWith("workspace:")) continue;
+    if (typeof version !== 'string') continue;
+    if (!version.startsWith('workspace:')) continue;
     result.push(name);
   }
   return result;
@@ -46,15 +46,15 @@ function readDeps(projectPath) {
  */
 function buildGraph() {
   const graph = new Map();
-  const dirs = ["apps", "packages"];
+  const dirs = ['apps', 'packages'];
   for (const dir of dirs) {
     const abs = path.join(ROOT, dir);
     if (!fs.existsSync(abs)) continue;
     for (const n of fs.readdirSync(abs)) {
       const projectPath = path.join(dir, n);
-      const pkgPath = path.join(ROOT, projectPath, "package.json");
+      const pkgPath = path.join(ROOT, projectPath, 'package.json');
       if (!fs.existsSync(pkgPath)) continue;
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
       const name = pkg.name;
       const deps = readDeps(projectPath);
       graph.set(name, deps);
@@ -117,6 +117,6 @@ if (cycles.length === 0) {
 
 console.error(`FAIL ${cycles.length} circular dependency cycle(s) detected:\n`);
 for (const cycle of cycles) {
-  console.error(`  ${cycle.join(" -> ")}`);
+  console.error(`  ${cycle.join(' -> ')}`);
 }
 process.exit(1);

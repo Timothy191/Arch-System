@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import * as Popover from "@radix-ui/react-popover";
-import { cn } from "@repo/ui/lib/utils";
-import { useEffect, useState } from "react";
+import * as Popover from '@radix-ui/react-popover';
+import { cn } from '@repo/ui/lib/utils';
+import { useEffect, useState } from 'react';
 
 // AGENT-TRACE: Consolidated clock timer effect and guarded setTime/setTimeStr updates to prevent state update depth recursion in Turbopack.
 export function SystemClock() {
-  const [timeStr, setTimeStr] = useState<string>("");
+  const [timeStr, setTimeStr] = useState<string>('');
   const [time, setTime] = useState<Date>(() => new Date());
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
 
@@ -15,16 +15,16 @@ export function SystemClock() {
       const now = new Date();
       setTime(now);
 
-      const timePart = now.toLocaleTimeString("en-GB", {
-        timeZone: "Africa/Johannesburg",
-        hour: "2-digit",
-        minute: "2-digit",
+      const timePart = now.toLocaleTimeString('en-GB', {
+        timeZone: 'Africa/Johannesburg',
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: false,
       });
 
-      const dayPart = now.toLocaleDateString("en-GB", {
-        timeZone: "Africa/Johannesburg",
-        weekday: "short",
+      const dayPart = now.toLocaleDateString('en-GB', {
+        timeZone: 'Africa/Johannesburg',
+        weekday: 'short',
       });
 
       const formatted = `${dayPart} ${timePart}`;
@@ -42,7 +42,7 @@ export function SystemClock() {
   const viewYear = calendarDate.getFullYear();
   const viewMonth = calendarDate.getMonth();
 
-  const monthLabel = calendarDate.toLocaleString("en-US", { month: "long" });
+  const monthLabel = calendarDate.toLocaleString('en-US', { month: 'long' });
   const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
   const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
 
@@ -100,8 +100,8 @@ export function SystemClock() {
           align="end"
           sideOffset={6}
           className={cn(
-            "liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-popover",
-            "flex gap-5 select-none focus:outline-none",
+            'liquid-glass-light backdrop-blur-2xl border border-white/20 shadow-window rounded-xl p-4 z-popover',
+            'flex gap-5 select-none focus:outline-none'
           )}
         >
           {/* Left panel: Calendar */}
@@ -176,10 +176,10 @@ export function SystemClock() {
                   <div
                     key={`day-${day}`}
                     className={cn(
-                      "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors",
+                      'w-[24px] h-[24px] rounded-full flex items-center justify-center text-[10.5px] font-medium transition-colors',
                       isToday
-                        ? "bg-[var(--accent-blue)] text-white font-bold shadow-card"
-                        : "text-[var(--text-heading)] hover:bg-black/[0.04]",
+                        ? 'bg-[var(--accent-blue)] text-white font-bold shadow-card'
+                        : 'text-[var(--text-heading)] hover:bg-black/[0.04]'
                     )}
                   >
                     {day}
@@ -207,7 +207,7 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[3px] h-6 rounded-full bg-black/85 origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${hourDeg}deg)`,
-                  transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
               />
               {/* Minute hand */}
@@ -215,7 +215,7 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[2px] h-9 rounded-full bg-black/60 origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${minuteDeg}deg)`,
-                  transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  transition: 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
               />
               {/* Second hand */}
@@ -223,16 +223,16 @@ export function SystemClock() {
                 className="absolute bottom-1/2 left-1/2 w-[1px] h-10 rounded-full bg-[var(--accent-red)] origin-bottom"
                 style={{
                   transform: `translate(-50%, 0) rotate(${secondDeg}deg)`,
-                  transition: secondDeg === 0 ? "none" : "transform 0.1s ease-out",
+                  transition: secondDeg === 0 ? 'none' : 'transform 0.1s ease-out',
                 }}
               />
               {/* Center Pin */}
               <div
                 className="absolute w-1.5 h-1.5 rounded-full bg-black border border-white"
                 style={{
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
                 }}
               />
             </div>
@@ -240,9 +240,9 @@ export function SystemClock() {
             {/* Digital Time text */}
             <span className="text-[11px] font-semibold text-[var(--text-secondary)] mt-3 tabular-nums select-all">
               {time.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
                 hour12: false,
               })}
             </span>

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { type GlassVariant, glassVariants } from "@repo/theme";
+import { type GlassVariant, glassVariants } from '@repo/theme';
 import {
   type HTMLMotionProps,
   motion,
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
-} from "framer-motion";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "../lib/utils";
+} from 'framer-motion';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '../lib/utils';
 
-export interface GlassCardProps extends HTMLMotionProps<"div"> {
+export interface GlassCardProps extends HTMLMotionProps<'div'> {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   onClick?: () => void;
-  accent?: "green" | "blue" | "red" | "cyan" | "indigo" | "violet" | "alert" | "none";
-  variant?: "default" | "window" | "spotlight" | "glowborder" | "liquid";
+  accent?: 'green' | 'blue' | 'red' | 'cyan' | 'indigo' | 'violet' | 'alert' | 'none';
+  variant?: 'default' | 'window' | 'spotlight' | 'glowborder' | 'liquid';
   glassIntensity?: GlassVariant;
   title?: string;
   padding?: boolean;
@@ -28,7 +28,7 @@ export interface GlassCardProps extends HTMLMotionProps<"div"> {
   // GlowBorder variant props
   animationDuration?: number;
   gradientColors?: string[];
-  colorPreset?: "nature" | "ocean" | "sunset" | "aurora" | "custom";
+  colorPreset?: 'nature' | 'ocean' | 'sunset' | 'aurora' | 'custom';
   paused?: boolean;
   blur?: boolean;
   backgroundOpacity?: number;
@@ -52,7 +52,7 @@ function roundedRectSDF(
   y: number,
   width: number,
   height: number,
-  radius: number,
+  radius: number
 ): number {
   const absWidth = Math.abs(width);
   const absHeight = Math.abs(height);
@@ -69,7 +69,7 @@ function createDisplacementFragment(
   depth: number,
   shapeWidth: number,
   shapeHeight: number,
-  roundness: number,
+  roundness: number
 ) {
   const ix = uv.x - 0.5;
   const iy = uv.y - 0.5;
@@ -105,7 +105,7 @@ const generateDisplacementData = (
   shapeWidth = 0.35,
   shapeHeight = 0.35,
   depth = 1.2,
-  roundness = 0.1,
+  roundness = 0.1
 ) => {
   const w = Math.floor(width);
   const h = Math.floor(height);
@@ -125,7 +125,7 @@ const generateDisplacementData = (
       depth,
       shapeWidth,
       shapeHeight,
-      roundness,
+      roundness
     );
     const dx = pos.x * w - x;
     const dy = pos.y * h - y;
@@ -151,76 +151,76 @@ const generateDisplacementData = (
 };
 
 const ACCENT_COLORS = {
-  green: "hover:border-[var(--accent-green)]/40 hover:shadow-card-hover",
-  blue: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
-  red: "hover:border-[var(--accent-red)]/40 hover:shadow-card-hover",
-  cyan: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
-  indigo: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
-  violet: "hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover",
-  alert: "hover:border-[var(--accent-red)]/40 hover:shadow-card-hover",
-  none: "hover:border-black/[0.12] hover:shadow-card-hover",
+  green: 'hover:border-[var(--accent-green)]/40 hover:shadow-card-hover',
+  blue: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
+  red: 'hover:border-[var(--accent-red)]/40 hover:shadow-card-hover',
+  cyan: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
+  indigo: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
+  violet: 'hover:border-[var(--accent-blue)]/40 hover:shadow-card-hover',
+  alert: 'hover:border-[var(--accent-red)]/40 hover:shadow-card-hover',
+  none: 'hover:border-black/[0.12] hover:shadow-card-hover',
 };
 
 const colorPresets: Record<string, string[]> = {
   nature: [
-    "#669900",
-    "#88bb22",
-    "#99cc33",
-    "#aaddaa",
-    "#ccee66",
-    "#006699",
-    "#228888",
-    "#3399cc",
-    "#55aacc",
-    "#669900",
+    '#669900',
+    '#88bb22',
+    '#99cc33',
+    '#aaddaa',
+    '#ccee66',
+    '#006699',
+    '#228888',
+    '#3399cc',
+    '#55aacc',
+    '#669900',
   ],
   ocean: [
-    "#006699",
-    "#1177aa",
-    "#2288bb",
-    "#3399cc",
-    "#44aadd",
-    "#55bbee",
-    "#66ccff",
-    "#44bbee",
-    "#2299cc",
-    "#006699",
+    '#006699',
+    '#1177aa',
+    '#2288bb',
+    '#3399cc',
+    '#44aadd',
+    '#55bbee',
+    '#66ccff',
+    '#44bbee',
+    '#2299cc',
+    '#006699',
   ],
   sunset: [
-    "#ff6600",
-    "#ff7711",
-    "#ff8822",
-    "#ff9900",
-    "#ffaa22",
-    "#ffbb44",
-    "#ffcc00",
-    "#ff9933",
-    "#ff7722",
-    "#ff6600",
+    '#ff6600',
+    '#ff7711',
+    '#ff8822',
+    '#ff9900',
+    '#ffaa22',
+    '#ffbb44',
+    '#ffcc00',
+    '#ff9933',
+    '#ff7722',
+    '#ff6600',
   ],
   aurora: [
-    "#00ff87",
-    "#22ffaa",
-    "#44ffcc",
-    "#60efff",
-    "#88ddff",
-    "#bb99ff",
-    "#dd77ee",
-    "#ff68f0",
-    "#ff55cc",
-    "#00ff87",
+    '#00ff87',
+    '#22ffaa',
+    '#44ffcc',
+    '#60efff',
+    '#88ddff',
+    '#bb99ff',
+    '#dd77ee',
+    '#ff68f0',
+    '#ff55cc',
+    '#00ff87',
   ],
   custom: [
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
-    "var(--accent-blue)",
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
+    'var(--accent-blue)',
   ],
 };
 
@@ -240,19 +240,19 @@ export function GlassCard({
   className,
   hover,
   onClick,
-  accent = "none",
-  variant = "default",
+  accent = 'none',
+  variant = 'default',
   glassIntensity,
   title,
   padding = true,
 
   // Spotlight
-  spotlightColor = "rgba(62, 207, 142, 0.1)",
+  spotlightColor = 'rgba(62, 207, 142, 0.1)',
 
   // GlowBorder
   animationDuration = 4,
   gradientColors,
-  colorPreset = "custom",
+  colorPreset = 'custom',
   paused = false,
   blur = true,
   backgroundOpacity,
@@ -264,10 +264,10 @@ export function GlassCard({
 
   ...props
 }: GlassCardProps) {
-  const isWindow = variant === "window";
-  const isSpotlight = variant === "spotlight";
-  const isGlowBorder = variant === "glowborder";
-  const isLiquid = variant === "liquid";
+  const isWindow = variant === 'window';
+  const isSpotlight = variant === 'spotlight';
+  const isGlowBorder = variant === 'glowborder';
+  const isLiquid = variant === 'liquid';
 
   // Standardize transparency globally
   const globalBackgroundOpacity = backgroundOpacity ?? 0.08;
@@ -280,7 +280,7 @@ export function GlassCard({
 
   useEffect(() => {
     setIsTouch(
-      typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0),
+      typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
     );
   }, []);
 
@@ -296,7 +296,7 @@ export function GlassCard({
     )
   `;
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {
     // Disabled mouse effects
   }, []);
 
@@ -323,7 +323,7 @@ export function GlassCard({
     const target = localRef.current;
     if (!target) return;
 
-    if (typeof ResizeObserver === "undefined") {
+    if (typeof ResizeObserver === 'undefined') {
       // Safely fallback for JSDOM/Node test environments
       setSize({ width: 300, height: 200 });
       return;
@@ -348,7 +348,7 @@ export function GlassCard({
           if (pending) {
             const next = pending;
             setSize((prev) =>
-              prev.width === next.width && prev.height === next.height ? prev : next,
+              prev.width === next.width && prev.height === next.height ? prev : next
             );
             pending = null;
           }
@@ -384,7 +384,7 @@ export function GlassCard({
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     try {
@@ -403,40 +403,40 @@ export function GlassCard({
         sw,
         sh,
         1.2, // depth
-        roundness,
+        roundness
       );
 
-      if (data.length >= 4 && typeof ImageData !== "undefined") {
+      if (data.length >= 4 && typeof ImageData !== 'undefined') {
         const imageData = new ImageData(data, canvasWidth, canvasHeight);
         ctx.putImageData(imageData, 0, 0);
 
         canvas.toBlob((blob) => {
           if (!blob) return;
           const url = URL.createObjectURL(blob);
-          const prevUrl = feImage.getAttributeNS("http://www.w3.org/1999/xlink", "href");
-          if (prevUrl?.startsWith("blob:")) {
+          const prevUrl = feImage.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+          if (prevUrl?.startsWith('blob:')) {
             URL.revokeObjectURL(prevUrl);
           }
-          feImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", url);
-        }, "image/png");
+          feImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', url);
+        }, 'image/png');
 
-        feImage.setAttribute("width", `${finalWidth}`);
-        feImage.setAttribute("height", `${finalHeight}`);
+        feImage.setAttribute('width', `${finalWidth}`);
+        feImage.setAttribute('height', `${finalHeight}`);
 
         const finalScale = Math.max(0, (maxScale * 1.2) / canvasDPI);
-        feDisplacementMap.setAttribute("scale", finalScale.toString());
-        feDisplacementMap.parentElement?.setAttribute("width", `${finalWidth}`);
-        feDisplacementMap.parentElement?.setAttribute("height", `${finalHeight}`);
+        feDisplacementMap.setAttribute('scale', finalScale.toString());
+        feDisplacementMap.parentElement?.setAttribute('width', `${finalWidth}`);
+        feDisplacementMap.parentElement?.setAttribute('height', `${finalHeight}`);
       }
     } catch (err) {
-      console.error("Error generating liquid glass displacement:", err);
+      console.error('Error generating liquid glass displacement:', err);
     }
   }, [isLiquid, size]);
 
   const backdropStyle = isLiquid
     ? {
-        WebkitBackdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
-        backdropFilter: `url(#${filterId})${blur ? " blur(24px)" : ""} saturate(160%) contrast(110%)`,
+        WebkitBackdropFilter: `url(#${filterId})${blur ? ' blur(24px)' : ''} saturate(160%) contrast(110%)`,
+        backdropFilter: `url(#${filterId})${blur ? ' blur(24px)' : ''} saturate(160%) contrast(110%)`,
       }
     : undefined;
 
@@ -444,7 +444,7 @@ export function GlassCard({
     <motion.div
       ref={(node) => {
         localRef.current = node;
-        if (typeof ref === "function") {
+        if (typeof ref === 'function') {
           ref(node);
         } else if (ref) {
           (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
@@ -454,10 +454,10 @@ export function GlassCard({
       whileTap={hover && !prefersReduced && !isLiquid ? { scale: 0.995 } : undefined}
       transition={prefersReduced ? { duration: 0 } : { duration: 0.3, ease: [0.2, 0, 0, 1] }}
       tabIndex={tabIndexProp ?? (hover && onClick ? 0 : undefined)}
-      role={roleProp ?? (onClick ? "button" : undefined)}
+      role={roleProp ?? (onClick ? 'button' : undefined)}
       onClick={onClick}
       onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (onClick && (e.key === "Enter" || e.key === " ")) {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
           onClick();
         }
@@ -474,10 +474,10 @@ export function GlassCard({
       }}
       className={cn(
         // Base classes
-        "isolate relative overflow-hidden",
-        "liquid-glass-light border border-white/20 shadow-window",
-        "group rounded-card animate-window-open",
-        hover && "liquid-glass-interactive",
+        'isolate relative overflow-hidden',
+        'liquid-glass-light border border-white/20 shadow-window',
+        'group rounded-card animate-window-open',
+        hover && 'liquid-glass-interactive',
 
         // Accent colors for hover
         hover && ACCENT_COLORS[accent],
@@ -485,9 +485,9 @@ export function GlassCard({
         // Hover focus rings
         hover &&
           onClick &&
-          "cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none",
-        padding && "p-6",
-        className,
+          'cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none',
+        padding && 'p-6',
+        className
       )}
       style={
         {
@@ -498,9 +498,9 @@ export function GlassCard({
                 backgroundColor: `rgba(255, 255, 255, ${intensityTokens.opacity})`,
               }
             : {}),
-          ...(variant === "glowborder"
+          ...(variant === 'glowborder'
             ? {
-                "--glow-animation-duration": `${animationDuration}s`,
+                '--glow-animation-duration': `${animationDuration}s`,
               }
             : {}),
           ...props.style,
@@ -512,12 +512,12 @@ export function GlassCard({
       {isGlowBorder && (
         <div
           className={cn(
-            "absolute inset-[-2px] -z-10 rounded-[inherit]",
-            !isGlowPaused && "animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]",
+            'absolute inset-[-2px] -z-10 rounded-[inherit]',
+            !isGlowPaused && 'animate-[glow-spin_var(--glow-animation-duration)_linear_infinite]'
           )}
           style={{
-            background: `conic-gradient(from 0deg, ${glowColors.join(", ")})`,
-            filter: "blur(8px)",
+            background: `conic-gradient(from 0deg, ${glowColors.join(', ')})`,
+            filter: 'blur(8px)',
             opacity: 0.7,
           }}
         />
@@ -549,13 +549,13 @@ export function GlassCard({
       )}
 
       {/* Dynamic border highlight facing light source on hover */}
-      {hover && (variant === "default" || variant === "window") && (
+      {hover && (variant === 'default' || variant === 'window') && (
         <div className="absolute inset-0 rounded-[inherit] pointer-events-none opacity-0 group-hover/window:opacity-100 transition-opacity duration-500">
           <div
             className="absolute inset-0 rounded-[inherit]"
             style={{
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(210,210,215,0.2) 100%)",
+                'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, transparent 60%, rgba(210,210,215,0.2) 100%)',
             }}
           />
         </div>
@@ -639,14 +639,14 @@ export function GlassCard({
             className="absolute inset-0 will-change-transform liquid-sheen-sweep"
             style={{
               background:
-                "linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.4) 55%, transparent 65%)",
-              mixBlendMode: "screen",
-              pointerEvents: "none",
-              animationName: "liquid-sheen-sweep-mount",
-              animationDuration: hoverCount > 0 ? "1.4s" : "1.6s",
-              animationDelay: hoverCount > 0 ? "0s" : "0.2s",
-              animationTimingFunction: "cubic-bezier(0.25, 1, 0.5, 1)",
-              animationFillMode: "forwards",
+                'linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.4) 55%, transparent 65%)',
+              mixBlendMode: 'screen',
+              pointerEvents: 'none',
+              animationName: 'liquid-sheen-sweep-mount',
+              animationDuration: hoverCount > 0 ? '1.4s' : '1.6s',
+              animationDelay: hoverCount > 0 ? '0s' : '0.2s',
+              animationTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
+              animationFillMode: 'forwards',
             }}
           />
         </div>
@@ -654,7 +654,7 @@ export function GlassCard({
 
       {/* Content wrapper */}
       <div
-        className={cn("relative z-10 w-full h-full", (isWindow || isLiquid) && padding && "p-6")}
+        className={cn('relative z-10 w-full h-full', (isWindow || isLiquid) && padding && 'p-6')}
       >
         {children}
       </div>

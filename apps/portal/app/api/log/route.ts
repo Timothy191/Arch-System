@@ -1,5 +1,5 @@
-import { serverLogger as logger } from "@repo/logger";
-import { NextResponse } from "next/server";
+import { serverLogger as logger } from '@repo/logger';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
@@ -7,16 +7,16 @@ export async function POST(req: Request) {
     const { level, msg, timestamp, data } = body;
 
     // Server-side logging of client-side events
-    const clientLogPrefix = "[CLIENT]";
+    const clientLogPrefix = '[CLIENT]';
 
     switch (level) {
-      case "error":
+      case 'error':
         logger.error({ clientTimestamp: timestamp, ...data }, `${clientLogPrefix} ${msg}`);
         break;
-      case "warn":
+      case 'warn':
         logger.warn({ clientTimestamp: timestamp, ...data }, `${clientLogPrefix} ${msg}`);
         break;
-      case "info":
+      case 'info':
         logger.info({ clientTimestamp: timestamp, ...data }, `${clientLogPrefix} ${msg}`);
         break;
       default:
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error({ error }, "Failed to parse client log payload");
+    logger.error({ error }, 'Failed to parse client log payload');
     return NextResponse.json({ success: false }, { status: 400 });
   }
 }

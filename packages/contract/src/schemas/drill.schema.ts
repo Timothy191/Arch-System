@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { dateSchema, uuidSchema } from "./common.schema";
+import { z } from 'zod';
+import { dateSchema, uuidSchema } from './common.schema';
 
 // AGENT-TRACE: Zod schema for drill operations daily shift record
 export const drillOperationSchema = z.object({
@@ -7,7 +7,7 @@ export const drillOperationSchema = z.object({
   machine_id: uuidSchema,
   department_id: uuidSchema,
   operation_date: dateSchema,
-  shift_type: z.enum(["day", "night"]),
+  shift_type: z.enum(['day', 'night']),
   open_hours: z.number().min(0).max(99999).nullable().optional(),
   close_hours: z.number().min(0).max(99999).nullable().optional(),
   operator_name: z.string().max(255).nullable().optional(),
@@ -36,7 +36,7 @@ export const drillOperationSchema = z.object({
   engineering_delays_minutes: z.number().min(0).nullable().optional(),
 
   comments: z.string().max(2000).nullable().optional(),
-  status: z.enum(["active", "completed", "cancelled", "maintenance"]).optional(),
+  status: z.enum(['active', 'completed', 'cancelled', 'maintenance']).optional(),
 });
 
 export type DrillOperationInput = z.infer<typeof drillOperationSchema>;

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import type React from "react";
-import { useEffect, useState } from "react";
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
 interface LiveRegionProps {
   children: React.ReactNode;
   atomic?: boolean;
   busy?: boolean;
-  live?: "polite" | "assertive";
-  relevant?: "additions" | "removals" | "text" | "all";
+  live?: 'polite' | 'assertive';
+  relevant?: 'additions' | 'removals' | 'text' | 'all';
 }
 
 /**
@@ -23,8 +23,8 @@ export function LiveRegion({
   children,
   atomic = false,
   busy = false,
-  live = "polite",
-  relevant = "additions",
+  live = 'polite',
+  relevant = 'additions',
 }: LiveRegionProps) {
   return (
     <div
@@ -41,7 +41,7 @@ export function LiveRegion({
 
 interface AnnouncerProps {
   message: string;
-  live?: "polite" | "assertive";
+  live?: 'polite' | 'assertive';
   onAnnounced?: () => void;
 }
 
@@ -49,13 +49,13 @@ interface AnnouncerProps {
  * Announcer component for announcing messages to screen readers.
  * Automatically clears the message after announcement.
  */
-export function Announcer({ message, live = "polite", onAnnounced }: AnnouncerProps) {
-  const [announcement, setAnnouncement] = useState("");
+export function Announcer({ message, live = 'polite', onAnnounced }: AnnouncerProps) {
+  const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
     if (message) {
       // Clear first to ensure re-announcement
-      setAnnouncement("");
+      setAnnouncement('');
       // Then set the message
       const timer = setTimeout(() => {
         setAnnouncement(message);

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type PitConnectivityStatus = "online" | "degraded" | "offline";
+export type PitConnectivityStatus = 'online' | 'degraded' | 'offline';
 
 export interface UsePitConnectivityOptions {
   /** Endpoint URL to ping for liveness check (default: '/api/health') */
@@ -25,7 +25,7 @@ export interface UsePitConnectivityOptions {
  */
 export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
   const {
-    pingUrl = "/api/health",
+    pingUrl = '/api/health',
     pingIntervalMs = 15000,
     degradedThresholdMs = 1200,
     timeoutMs = 4000,
@@ -33,10 +33,10 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
   } = options;
 
   const [status, setStatus] = useState<PitConnectivityStatus>(() => {
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      return "offline";
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return 'offline';
     }
-    return "online";
+    return 'online';
   });
 
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -49,7 +49,7 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
     setStatus((prev) => {
       if (prev !== newStatus) {
         onStatusChangeRef.current?.(newStatus);
-        if (newStatus !== "offline") {
+        if (newStatus !== 'offline') {
           setLastOnlineAt(new Date());
         }
       }
@@ -58,8 +58,8 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
   }, []);
 
   const checkConnectivity = useCallback(async () => {
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      updateStatus("offline");
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      updateStatus('offline');
       setLatencyMs(null);
       return;
     }
@@ -70,8 +70,8 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
 
     try {
       const response = await fetch(pingUrl, {
-        method: "HEAD",
-        cache: "no-store",
+        method: 'HEAD',
+        cache: 'no-store',
         signal: controller.signal,
       });
 
@@ -81,34 +81,34 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
 
       if (response.ok) {
         if (duration > degradedThresholdMs) {
-          updateStatus("degraded");
+          updateStatus('degraded');
         } else {
-          updateStatus("online");
+          updateStatus('online');
         }
       } else {
-        updateStatus("degraded");
+        updateStatus('degraded');
       }
     } catch {
       clearTimeout(timeoutId);
-      updateStatus("offline");
+      updateStatus('offline');
       setLatencyMs(null);
     }
   }, [pingUrl, degradedThresholdMs, timeoutMs, updateStatus]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     const handleOnline = () => {
       checkConnectivity();
     };
 
     const handleOffline = () => {
-      updateStatus("offline");
+      updateStatus('offline');
       setLatencyMs(null);
     };
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     // Initial check
     checkConnectivity();
@@ -118,16 +118,16 @@ export function usePitConnectivity(options: UsePitConnectivityOptions = {}) {
     const intervalId = setInterval(checkConnectivity, pingIntervalMs + jitter);
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       clearInterval(intervalId);
     };
   }, [checkConnectivity, pingIntervalMs, updateStatus]);
 
   return {
     status,
-    isOnline: status !== "offline",
-    isDegraded: status === "degraded",
+    isOnline: status !== 'offline',
+    isDegraded: status === 'degraded',
     latencyMs,
     lastOnlineAt,
     checkConnectivity,

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
 // AGENT-TRACE: Converted React.lazy → next/dynamic for proper Next.js code
 // splitting, chunk prefetching, and SSR control.
 const FeedbackWidget = dynamic(
-  () => import("@/components/FeedbackWidget").then((m) => ({ default: m.FeedbackWidget })),
-  { ssr: false },
+  () => import('@/components/FeedbackWidget').then((m) => ({ default: m.FeedbackWidget })),
+  { ssr: false }
 );
 
 const SystemClock = dynamic(
-  () => import("@/components/clock/SystemClock").then((m) => ({ default: m.SystemClock })),
-  { ssr: false },
+  () => import('@/components/clock/SystemClock').then((m) => ({ default: m.SystemClock })),
+  { ssr: false }
 );
 
 const ServicesDropdown = dynamic(
-  () => import("@/components/nav/ServicesDropdown").then((m) => ({ default: m.ServicesDropdown })),
-  { ssr: false },
+  () => import('@/components/nav/ServicesDropdown').then((m) => ({ default: m.ServicesDropdown })),
+  { ssr: false }
 );
 
 /**
@@ -26,7 +26,7 @@ const ServicesDropdown = dynamic(
  * Groups the support/feedback widget, system clock, and services dropdown into a single
  * lazy-loaded chunk for the top taskbar header.
  */
-function WidgetFallback({ width = "w-7" }: { width?: string }) {
+function WidgetFallback({ width = 'w-7' }: { width?: string }) {
   return (
     <div
       className={`${width} h-7 rounded-full liquid-glass-light border border-white/20 animate-pulse`}

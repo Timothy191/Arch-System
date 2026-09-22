@@ -107,6 +107,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Run Policy Check
         run: pnpm policy:check
+      - name: Check Migration Drift
+        run: pnpm --filter @repo/database check-migrations
 
   # HTML Meta Tags Check job - runs in parallel on coordinator
   html-meta-check:
@@ -493,8 +495,8 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            const isTier2 = files.some(f => 
-              f.filename.includes('features/auth/') || 
+            const isTier2 = files.some(f =>
+              f.filename.includes('features/auth/') ||
               f.filename.includes('supabase/migrations/') ||
               f.filename.includes('packages/auth/')
             );

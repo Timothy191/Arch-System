@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { cn } from "@repo/ui/lib/utils";
-import type * as React from "react";
+import { cn } from '@repo/ui/lib/utils';
+import type * as React from 'react';
 
 export interface LoaderProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function Loader({ className, size = "md", ...props }: LoaderProps) {
+export function Loader({ className, size = 'md', ...props }: LoaderProps) {
   // Map sizes to Tailwind dimension classes
   const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-16 h-16",
-    lg: "w-24 h-24",
-    xl: "w-32 h-32",
+    sm: 'w-8 h-8',
+    md: 'w-16 h-16',
+    lg: 'w-24 h-24',
+    xl: 'w-32 h-32',
   };
 
   return (
@@ -23,7 +23,7 @@ export function Loader({ className, size = "md", ...props }: LoaderProps) {
       aria-label="Loading..."
       viewBox="0 0 240 240"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("loader-pl select-none pointer-events-none", sizeClasses[size], className)}
+      className={cn('loader-pl select-none pointer-events-none', sizeClasses[size], className)}
       {...props}
     >
       <circle

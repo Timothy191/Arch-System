@@ -1,24 +1,24 @@
-"use server";
+'use server';
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { revalidatePath } from "next/cache";
-import { updateTags } from "@/lib/server-cache";
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { updateTags } from '@/lib/server-cache';
 
 async function assertAdmin() {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Unauthorized", status: 401 as const };
+  if (!user) return { error: 'Unauthorized', status: 401 as const };
 
   const { data: employee } = await supabase
-    .from("employees")
-    .select("id, role")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('id, role')
+    .eq('auth_id', user.id)
     .single();
 
-  if (employee?.role !== "admin") {
-    return { error: "Forbidden: admin role required", status: 403 as const };
+  if (employee?.role !== 'admin') {
+    return { error: 'Forbidden: admin role required', status: 403 as const };
   }
 
   return { supabase, employee };
@@ -35,15 +35,15 @@ export async function adminAddMachine(data: {
   report_exempt?: boolean;
 }) {
   const auth = await assertAdmin();
-  if ("error" in auth) return { error: auth.error };
+  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
-  if (!data.name?.trim()) return { error: "Machine name is required." };
-  if (!data.machine_type?.trim()) return { error: "Machine type is required." };
-  if (!data.department_id) return { error: "Department is required." };
+  if (!data.name?.trim()) return { error: 'Machine name is required.' };
+  if (!data.machine_type?.trim()) return { error: 'Machine type is required.' };
+  if (!data.department_id) return { error: 'Department is required.' };
 
-  const { error } = await supabase.from("machines").insert({
+  const { error } = await supabase.from('machines').insert({
     name: data.name.trim(),
     machine_type: data.machine_type.trim(),
     serial_number: data.serial_number?.trim() || null,
@@ -54,10 +54,10 @@ export async function adminAddMachine(data: {
     report_exempt: data.report_exempt ?? false,
   });
 
-  if (error) return { error: "Failed to add machine" };
+  if (error) return { error: 'Failed to add machine' };
 
-  await updateTags(["table:fleet", "table:equipment", "table:machines"]);
-  revalidatePath("/admin");
+  await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
+  revalidatePath('/admin');
   return { success: true };
 }
 
@@ -72,31 +72,31 @@ export async function adminUpdateMachine(
     site_id?: string | null;
     active?: boolean;
     report_exempt?: boolean;
-  },
+  }
 ) {
   const auth = await assertAdmin();
-  if ("error" in auth) return { error: auth.error };
+  if ('error' in auth) return { error: auth.error };
 
   const { supabase } = auth;
 
   const name = data.name?.trim();
   const machineType = data.machine_type?.trim();
-  if (name !== undefined && !name) return { error: "Machine name cannot be empty." };
-  if (machineType !== undefined && !machineType) return { error: "Machine type cannot be empty." };
+  if (name !== undefined && !name) return { error: 'Machine name cannot be empty.' };
+  if (machineType !== undefined && !machineType) return { error: 'Machine type cannot be empty.' };
 
   const { error } = await supabase
-    .from("machines")
+    .from('machines')
     .update({
       ...data,
       name,
       machine_type: machineType,
       serial_number: data.serial_number?.trim() || null,
     })
-    .eq("id", id);
+    .eq('id', id);
 
-  if (error) return { error: "Failed to update machine" };
+  if (error) return { error: 'Failed to update machine' };
 
-  await updateTags(["table:fleet", "table:equipment", "table:machines"]);
-  revalidatePath("/admin");
+  await updateTags(['table:fleet', 'table:equipment', 'table:machines']);
+  revalidatePath('/admin');
   return { success: true };
 }

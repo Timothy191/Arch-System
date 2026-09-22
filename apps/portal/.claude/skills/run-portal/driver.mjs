@@ -12,15 +12,15 @@
 // Credentials are read from apps/portal/.env and are NEVER printed.
 // Playwright comes from the global mise install - see SKILL.md "Gotchas".
 
-import process from "node:process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SKILL_DIR = dirname(fileURLToPath(import.meta.url));
 const PORTAL_DIR = join(SKILL_DIR, "..", "..", "..");
 const PW_DIR = "/home/timothy/.local/share/mise/installs/npm-playwright/latest";
-const { chromium } = await import(pathToFileURL(PW_DIR + "/node_modules/playwright/index.mjs"));
+const { chromium } = await import(pathToFileURL(`${PW_DIR}/node_modules/playwright/index.mjs`));
 
 const BASE = process.env.PORTAL_BASE || "http://localhost:3000";
 const SHOT_DIR = process.env.PORTAL_SHOT_DIR || "/tmp/portal-shots";
@@ -28,16 +28,14 @@ const EXEC = "/usr/bin/chromium";
 
 const args = process.argv.slice(2);
 const doLogin = args.includes("--login");
-const paths = args.filter(function (a) {
-  return a !== "--login";
-});
+const paths = args.filter((a) => a !== "--login");
 
 let email = null;
 let password = null;
 if (doLogin) {
   const envText = readFileSync(join(PORTAL_DIR, ".env"), "utf8");
-  const pick = function (k) {
-    const m = envText.match(new RegExp("^" + k + "=(.*)$", "m"));
+  const pick = (k) => {
+    const m = envText.match(new RegExp(`^${k}=(.*)$`, "m"));
     return m ? m[1].trim() : null;
   };
   email = pick("SMOKE_TEST_EMAIL");
@@ -56,17 +54,17 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
 const consoleErrors = [];
-page.on("console", function (m) {
+page.on("console", (m) => {
   if (m.type() === "error") consoleErrors.push(m.text().slice(0, 300));
 });
-page.on("pageerror", function (e) {
-  consoleErrors.push("PAGEERROR: " + String(e).slice(0, 300));
+page.on("pageerror", (e) => {
+  consoleErrors.push(`PAGEERROR: ${String(e).slice(0, 300)}`);
 });
 
 let loginOk = !doLogin;
 
 if (doLogin) {
-  await page.goto(BASE + "/login?redirect=%2Fhub", { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(`${BASE}/login?redirect=%2Fhub`, { waitUntil: "networkidle", timeout: 60000 });
   await page.waitForTimeout(1000);
 
   for (const label of ["Decline Optional", "Accept All"]) {
@@ -74,14 +72,12 @@ if (doLogin) {
     const visible = await btn
       .first()
       .isVisible()
-      .catch(function () {
-        return false;
-      });
+      .catch(() => false);
     if (visible) {
       await btn
         .first()
         .click({ force: true })
-        .catch(function () {});
+        .catch(() => {});
       await page.waitForTimeout(400);
       break;
     }
@@ -93,12 +89,12 @@ if (doLogin) {
   try {
     await page.waitForURL("**/hub**", { timeout: 20000 });
     await page.waitForTimeout(2500);
-  } catch (e) {
+  } catch (_e) {
     // fall through; the URL check below decides the verdict
   }
   const u = page.url();
   loginOk = u.includes("/hub") && !u.includes("/login");
-  console.log("login: " + (loginOk ? "SUCCESS" : "FAILED") + " (final url " + u + ")");
+  console.log(`login: ${loginOk ? "SUCCESS" : "FAILED"} (final url ${u})`);
 }
 
 if (paths.length === 0) {
@@ -111,26 +107,20 @@ for (const t of paths) {
     await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
     await page.waitForTimeout(1200);
   } catch (e) {
-    console.log("!! goto " + t + ": " + e.message.split("\n")[0]);
+    console.log(`!! goto ${t}: ${e.message.split("\n")[0]}`);
   }
-  const title = await page.title().catch(function () {
-    return "?";
-  });
-  const bodyText = (
-    await page.innerText("body").catch(function () {
-      return "";
-    })
-  )
+  const title = await page.title().catch(() => "?");
+  const bodyText = (await page.innerText("body").catch(() => ""))
     .trim()
     .slice(0, 220)
     .replace(/\s+/g, " ");
   const name = t === "/" ? "home" : t.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "");
-  const shot = SHOT_DIR + "/" + name + ".png";
+  const shot = `${SHOT_DIR}/${name}.png`;
   await page.screenshot({ path: shot });
-  console.log("\n=== " + t + " -> finalUrl=" + page.url());
-  console.log("    title=" + JSON.stringify(title));
-  console.log("    body=" + JSON.stringify(bodyText));
-  console.log("    shot=" + shot);
+  console.log(`\n=== ${t} -> finalUrl=${page.url()}`);
+  console.log(`    title=${JSON.stringify(title)}`);
+  console.log(`    body=${JSON.stringify(bodyText)}`);
+  console.log(`    shot=${shot}`);
 }
 
 if (consoleErrors.length) {

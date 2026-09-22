@@ -1,10 +1,10 @@
-import { Shield } from "lucide-react";
-import type { Metadata } from "next";
-import type React from "react";
+import { Shield } from 'lucide-react';
+import type { Metadata } from 'next';
+import type React from 'react';
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Arch OS",
-  description: "Privacy policy and data compliance for the Arch Portal.",
+  title: 'Privacy Policy | Arch OS',
+  description: 'Privacy policy and data compliance for the Arch Portal.',
 };
 
 export default function PrivacyPage(): React.JSX.Element {
@@ -19,10 +19,10 @@ export default function PrivacyPage(): React.JSX.Element {
 
       <div className="prose prose-neutral max-w-none text-[var(--text-muted)] space-y-6">
         <p className="text-lg">
-          Last updated:{" "}
-          {new Date().toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
+          Last updated:{' '}
+          {new Date().toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric',
           })}
         </p>
 

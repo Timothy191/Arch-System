@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const UltragoalStateSchema = z.enum([
-  "PENDING",
-  "IN_PROGRESS",
-  "RE_LOOP_MAKER",
-  "VERIFY_EVIDENCE",
-  "COMPLETED",
-  "ABORTED",
+  'PENDING',
+  'IN_PROGRESS',
+  'RE_LOOP_MAKER',
+  'VERIFY_EVIDENCE',
+  'COMPLETED',
+  'ABORTED',
 ]);
 
 export const VerifierEvidenceSchema = z.object({
@@ -16,7 +16,7 @@ export const VerifierEvidenceSchema = z.object({
   exitStatus: z.number(),
   zeroAllocationVerified: z.boolean(),
   oomSignalDetected: z.boolean(),
-  verdict: z.enum(["VERIFY_PASS", "VERIFY_FAIL"]),
+  verdict: z.enum(['VERIFY_PASS', 'VERIFY_FAIL']),
 });
 
 export const CompilerResourceLimitsSchema = z.object({

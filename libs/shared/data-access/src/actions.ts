@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import { cacheInvalidateTags } from "@repo/redis";
-import { revalidateTag } from "next/cache";
+import { cacheInvalidateTags } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import { revalidateTag } from 'next/cache';
 
 export async function revalidateRSC(tags: string[]) {
   // Always validate the user at the top
@@ -12,16 +12,16 @@ export async function revalidateRSC(tags: string[]) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   for (const tag of tags) {
     try {
-      const nextCache = require("next/cache");
-      if (typeof nextCache.updateTag === "function") {
+      const nextCache = require('next/cache');
+      if (typeof nextCache.updateTag === 'function') {
         nextCache.updateTag(tag);
       } else {
-        (revalidateTag as any)(tag, "max");
+        (revalidateTag as any)(tag, 'max');
       }
     } catch {
       // Outside request context

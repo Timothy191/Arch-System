@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "../lib/utils";
+import * as React from 'react';
+import { cn } from '../lib/utils';
 
 export interface FluidCanvasProps {
   className?: string;
@@ -30,7 +30,7 @@ export function FluidCanvas({
   dissipation = 0.96,
   brushRadius = 26,
   impulseIntensity = 1.5,
-  tintColor = "rgba(47, 107, 255, 0.22)",
+  tintColor = 'rgba(47, 107, 255, 0.22)',
   respectReducedMotion = true,
 }: FluidCanvasProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -38,12 +38,12 @@ export function FluidCanvas({
 
   React.useEffect(() => {
     if (!respectReducedMotion) return;
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
 
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, [respectReducedMotion]);
 
   React.useEffect(() => {
@@ -51,7 +51,7 @@ export function FluidCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d", { alpha: true });
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let animationFrameId: number;
@@ -74,7 +74,7 @@ export function FluidCanvas({
     };
 
     handleResize();
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
@@ -120,7 +120,7 @@ export function FluidCanvas({
       addImpulse(e.clientX, e.clientY, dx, dy);
     };
 
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
 
     // Simulation & Render Loop
     const render = () => {
@@ -163,7 +163,7 @@ export function FluidCanvas({
               y * cellH + cellH * 0.5,
               cellW * (0.8 + d * 0.8),
               0,
-              Math.PI * 2,
+              Math.PI * 2
             );
             ctx.fill();
           }
@@ -178,8 +178,8 @@ export function FluidCanvas({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('pointermove', handlePointerMove);
       observer.disconnect();
     };
   }, [prefersReducedMotion, dissipation, brushRadius, impulseIntensity, tintColor]);
@@ -189,6 +189,6 @@ export function FluidCanvas({
   }
 
   return (
-    <canvas ref={canvasRef} className={cn("pointer-events-none w-full h-full block", className)} />
+    <canvas ref={canvasRef} className={cn('pointer-events-none w-full h-full block', className)} />
   );
 }

@@ -1,4 +1,4 @@
-import type { IStore } from "../interfaces";
+import type { IStore } from '../interfaces';
 
 export interface SimpleRedisClient {
   get(key: string): Promise<string | null>;
@@ -22,12 +22,12 @@ export class RedisStore implements IStore {
   }
 
   async eval(script: string, keys: string[], args: string[]): Promise<unknown> {
-    if (typeof (this.client as any).eval === "function") {
+    if (typeof (this.client as any).eval === 'function') {
       return (this.client as any).eval(script, {
         keys,
         arguments: args,
       });
     }
-    throw new Error("Redis client does not support eval method");
+    throw new Error('Redis client does not support eval method');
   }
 }

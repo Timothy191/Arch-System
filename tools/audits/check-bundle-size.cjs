@@ -10,14 +10,14 @@
  *
  * Usage: node tools/audits/check-bundle-size.cjs   (after `pnpm --filter portal build`)
  */
-const fs = require("node:fs");
-const path = require("node:path");
-const zlib = require("node:zlib");
-const { globSync } = require("glob");
+const fs = require('node:fs');
+const path = require('node:path');
+const zlib = require('node:zlib');
+const { globSync } = require('glob');
 
-const ROOT = path.join(__dirname, "..", "..");
-const configPath = path.join(ROOT, "config", "tools", ".bundlesize-config.json");
-const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+const ROOT = path.join(__dirname, '..', '..');
+const configPath = path.join(ROOT, 'config', 'tools', '.bundlesize-config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 const bytes = (n) => `${(n / 1024).toFixed(1)} kB`;
 
@@ -26,7 +26,7 @@ function parseSize(size) {
   const match = /^([\d.]+)\s*(b|kb|mb|gb)?$/i.exec(String(size).trim());
   if (!match) throw new Error(`Invalid maxSize in .bundlesize-config.json: ${size}`);
   const value = parseFloat(match[1]);
-  const unit = (match[2] || "b").toLowerCase();
+  const unit = (match[2] || 'b').toLowerCase();
   const mult = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 }[unit];
   return value * mult;
 }
@@ -60,4 +60,4 @@ if (failures > 0) {
   console.error(`✖ Bundle size gate failed: ${failures} file(s) over budget.`);
   process.exit(1);
 }
-console.log("✓ Bundle size gate passed.");
+console.log('✓ Bundle size gate passed.');

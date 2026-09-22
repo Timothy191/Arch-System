@@ -14,7 +14,7 @@
 
 /* eslint-disable no-console */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -22,8 +22,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
   // ── Public (embedded in client bundle — safe defaults for dev) ──────
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().default("http://127.0.0.1:54321"),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).default("dummy-anon-key"),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('http://127.0.0.1:54321'),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).default('dummy-anon-key'),
 
   // ── Server-side required ───────────────────────────────────────────
   SUPABASE_URL: z.string().url().optional(),
@@ -33,7 +33,7 @@ const envSchema = z.object({
 
   // ── Server — optional with defaults ────────────────────────────────
   PORT: z.coerce.number().int().positive().default(3000),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
   // ── Redis (optional, used only when configured) ────────────────────
   REDIS_URL: z.string().optional(),
@@ -60,19 +60,19 @@ const envSchema = z.object({
   // ── Feature flags ──────────────────────────────────────────────────
   ENABLE_LOAD_ADAPTIVE_TEST: z
     .string()
-    .default("false")
-    .transform((v) => v === "true"),
+    .default('false')
+    .transform((v) => v === 'true'),
   DISABLE_RATE_LIMIT: z
     .string()
-    .default("false")
-    .transform((v) => v === "true"),
+    .default('false')
+    .transform((v) => v === 'true'),
 
   // ── Rate limiting ──────────────────────────────────────────────────
   RATE_LIMIT_IP_WHITELIST: z.string().optional(),
   DISABLE_CORS: z
     .string()
-    .default("false")
-    .transform((v) => v === "true"),
+    .default('false')
+    .transform((v) => v === 'true'),
   ALLOWED_ORIGINS: z.string().optional(),
 
   // ── Inngest / Background jobs ──────────────────────────────────────
@@ -83,20 +83,20 @@ const envSchema = z.object({
 
   // ── Observability ──────────────────────────────────────────────────
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
-  OTEL_SERVICE_NAME: z.string().default("arch-portal"),
+  OTEL_SERVICE_NAME: z.string().default('arch-portal'),
   ENABLE_DB_TRACING: z
     .string()
-    .default("false")
-    .transform((v) => v === "true"),
+    .default('false')
+    .transform((v) => v === 'true'),
   SLOW_QUERY_THRESHOLD_MS: z.coerce.number().int().positive().default(500),
 
   // ── Version ────────────────────────────────────────────────────────
-  PORTAL_VERSION: z.string().default("1.0.0"),
+  PORTAL_VERSION: z.string().default('1.0.0'),
   VERCEL_ENV: z.string().optional(),
   CI: z
     .string()
-    .default("false")
-    .transform((v) => v === "true"),
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 // ---------------------------------------------------------------------------
@@ -153,8 +153,8 @@ function parseEnv(): EnvVars {
   const cleaned = Object.fromEntries(
     Object.entries(raw).map(([key, val]) => [
       key,
-      typeof val === "string" && (val.trim() === "" || val.trim() === "...") ? undefined : val,
-    ]),
+      typeof val === 'string' && (val.trim() === '' || val.trim() === '...') ? undefined : val,
+    ])
   ) as Record<keyof typeof raw, unknown>;
 
   const result = envSchema.safeParse(cleaned);
@@ -162,20 +162,20 @@ function parseEnv(): EnvVars {
   if (!result.success) {
     _envError = result.error;
 
-    if (raw.NODE_ENV === "production") {
+    if (raw.NODE_ENV === 'production') {
       const missing = result.error.issues
-        .filter((i) => i.code === "invalid_type" && "received" in i && i.received === "undefined")
-        .map((i) => i.path.join("."));
+        .filter((i) => i.code === 'invalid_type' && 'received' in i && i.received === 'undefined')
+        .map((i) => i.path.join('.'));
       if (missing.length > 0) {
-        console.error(`[env] Missing required environment variables:\n  ${missing.join("\n  ")}`);
-        throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
+        console.error(`[env] Missing required environment variables:\n  ${missing.join('\n  ')}`);
+        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
       }
     }
 
     // Non-critical — log warning and apply defaults
     console.warn(
-      "[env] Some environment variables have warnings:",
-      result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+      '[env] Some environment variables have warnings:',
+      result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
     );
   }
 

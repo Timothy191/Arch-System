@@ -2,28 +2,20 @@
  * @swagger
  * /api/metrics:
  *   get:
- *     summary: Portal metrics (Prometheus format)
- *     description: Exposes Prometheus-compatible metrics including cache performance, Inngest job executions, and database query statistics. For use with Prometheus or Grafana.
- *     tags:
- *       - Metrics
- *     responses:
- *       200:
- *         description: Prometheus metrics in text format
- *         content:
- *           text/plain:
- *             schema:
- *               type: string
- *               description: Prometheus metrics exposition format
+ *     summary: Prometheus Metrics
+ *     description: Exposes business telemetry and error metrics for Prometheus scraping.
  */
-import { getCacheStats } from "@repo/redis";
-import { getObservabilityMetrics } from "@/lib/observability/simple-metrics";
 
-export const dynamic = "force-dynamic";
+import { getCacheStats } from '@repo/redis';
+import { registry } from '@repo/utils/observability/metrics';
+import { getObservabilityMetrics } from '@/lib/observability/simple-metrics';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const cacheStats = await getCacheStats();
   const { jobMetrics, dbMetrics } = await getObservabilityMetrics();
-  let body = "";
+  let body = '';
 
   // 1. Cache Metrics
   body += `# HELP portal_cache_hits_total Cumulative number of cache hits.
@@ -76,7 +68,7 @@ portal_cache_latency_ms{metric="p95"} ${cacheStats.p95LatencyMs}
 # TYPE portal_db_query_executions_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(":");
+    const [tableName, operation] = key.split(':');
     body += `portal_db_query_executions_total{table="${tableName}",operation="${operation}"} ${entry.count}\n`;
   }
   body += `\n`;
@@ -85,7 +77,7 @@ portal_cache_latency_ms{metric="p95"} ${cacheStats.p95LatencyMs}
 # TYPE portal_db_query_errors_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(":");
+    const [tableName, operation] = key.split(':');
     body += `portal_db_query_errors_total{table="${tableName}",operation="${operation}"} ${entry.errors}\n`;
   }
   body += `\n`;
@@ -94,15 +86,19 @@ portal_cache_latency_ms{metric="p95"} ${cacheStats.p95LatencyMs}
 # TYPE portal_db_query_duration_ms_total counter
 `;
   for (const [key, entry] of dbMetrics.entries()) {
-    const [tableName, operation] = key.split(":");
+    const [tableName, operation] = key.split(':');
     body += `portal_db_query_duration_ms_total{table="${tableName}",operation="${operation}"} ${Math.round(entry.totalDurationMs * 100) / 100}\n`;
   }
   body += `\n`;
 
+  // 4. Prometheus Registry Metrics (@repo/utils)
+  const promMetrics = await registry.metrics();
+  body += promMetrics;
+
   return new Response(body, {
     headers: {
-      "Content-Type": "text/plain; version=0.0.4; charset=utf-8",
-      "Cache-Control": "no-store, no-cache, must-revalidate",
+      'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
     },
   });
 }

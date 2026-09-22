@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { createBrowserSupabaseClient } from "@repo/supabase/client";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@repo/ui/components/ui/dialog";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Edit2, Plus, Power } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { logError } from "@/lib/errors/error-logger";
-import { adminAddSite, adminUpdateSite } from "../actions/sites";
+import { createBrowserSupabaseClient } from '@repo/supabase/client';
+import { Badge } from '@repo/ui/components/ui/badge';
+import { Button } from '@repo/ui/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/ui/dialog';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Edit2, Plus, Power } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { logError } from '@/lib/errors/error-logger';
+import { adminAddSite, adminUpdateSite } from '../actions/sites';
 
 interface Site {
   id: string;
@@ -27,13 +27,13 @@ export function SitesTab() {
   const [editingSite, setEditingSite] = useState<Site | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [dialogError, setDialogError] = useState("");
+  const [dialogError, setDialogError] = useState('');
 
   const loadSites = useCallback(async () => {
     setLoading(true);
     const [{ data: siteData }, { data: machineCounts }] = await Promise.all([
-      supabase.from("sites").select("id, name, site_code, active, created_at").order("name"),
-      supabase.from("machines").select("site_id").not("site_id", "is", null),
+      supabase.from('sites').select('id, name, site_code, active, created_at').order('name'),
+      supabase.from('machines').select('site_id').not('site_id', 'is', null),
     ]);
     if (siteData) {
       const countMap = new Map<string, number>();
@@ -51,13 +51,13 @@ export function SitesTab() {
 
   const handleAdd = () => {
     setEditingSite(null);
-    setDialogError("");
+    setDialogError('');
     setShowDialog(true);
   };
 
   const handleEdit = (site: Site) => {
     setEditingSite(site);
-    setDialogError("");
+    setDialogError('');
     setShowDialog(true);
   };
 
@@ -70,7 +70,7 @@ export function SitesTab() {
       active: !pendingToggle.active,
     });
     if (result.error) {
-      logError(new Error(result.error), { context: "sites_toggle_active" });
+      logError(new Error(result.error), { context: 'sites_toggle_active' });
     }
     setPendingToggle(null);
     setSaving(false);
@@ -79,7 +79,7 @@ export function SitesTab() {
 
   const handleSave = async (data: { name: string; site_code: string; active: boolean }) => {
     setSaving(true);
-    setDialogError("");
+    setDialogError('');
 
     const result = editingSite
       ? await adminUpdateSite(editingSite.id, data)
@@ -112,11 +112,11 @@ export function SitesTab() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[var(--border-default)]">
-                {["Name", "Site Code", "Machines", "Status", "Created", "Actions"].map((h) => (
+                {['Name', 'Site Code', 'Machines', 'Status', 'Created', 'Actions'].map((h) => (
                   <th
                     key={h}
                     scope="col"
-                    className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider${h === "Actions" ? " text-right" : ""}`}
+                    className={`px-6 py-3 text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider${h === 'Actions' ? ' text-right' : ''}`}
                   >
                     {h}
                   </th>
@@ -161,15 +161,15 @@ export function SitesTab() {
                         variant="outline"
                         className={
                           s.active
-                            ? "bg-accent-green/10 text-accent-green border-accent-green/20"
-                            : "bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]"
+                            ? 'bg-accent-green/10 text-accent-green border-accent-green/20'
+                            : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-[var(--border-default)]'
                         }
                       >
-                        {s.active ? "Active" : "Inactive"}
+                        {s.active ? 'Active' : 'Inactive'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-[var(--text-muted)] text-sm">
-                      {new Date(s.created_at).toLocaleDateString("en-ZA")}
+                      {new Date(s.created_at).toLocaleDateString('en-ZA')}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
@@ -182,11 +182,11 @@ export function SitesTab() {
                           disabled={saving}
                           className={
                             s.active
-                              ? "text-accent-red hover:text-accent-red/80"
-                              : "text-accent-green hover:text-accent-green/80"
+                              ? 'text-accent-red hover:text-accent-red/80'
+                              : 'text-accent-green hover:text-accent-green/80'
                           }
                           onClick={() => setPendingToggle(s)}
-                          title={s.active ? "Deactivate" : "Activate"}
+                          title={s.active ? 'Deactivate' : 'Activate'}
                         >
                           <Power className="w-4 h-4" />
                         </Button>
@@ -205,7 +205,7 @@ export function SitesTab() {
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {pendingToggle?.active ? "Deactivate Site?" : "Activate Site?"}
+              {pendingToggle?.active ? 'Deactivate Site?' : 'Activate Site?'}
             </DialogTitle>
           </DialogHeader>
           <p className="text-[var(--text-body)] text-sm">
@@ -213,7 +213,7 @@ export function SitesTab() {
               ? `"${pendingToggle?.name}" will be marked inactive.${
                   (pendingToggle?.machineCount ?? 0) > 0
                     ? ` ${pendingToggle?.machineCount} machine(s) are currently assigned to this site.`
-                    : ""
+                    : ''
                 }`
               : `"${pendingToggle?.name}" will become active and available for machine assignments.`}
           </p>
@@ -225,12 +225,12 @@ export function SitesTab() {
               disabled={saving}
               className={
                 pendingToggle?.active
-                  ? "bg-accent-red hover:bg-accent-red/90 text-white"
-                  : "bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
+                  ? 'bg-accent-red hover:bg-accent-red/90 text-white'
+                  : 'bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]'
               }
               onClick={handleConfirmToggle}
             >
-              {saving ? "Saving…" : pendingToggle?.active ? "Deactivate" : "Activate"}
+              {saving ? 'Saving…' : pendingToggle?.active ? 'Deactivate' : 'Activate'}
             </Button>
           </div>
         </DialogContent>
@@ -239,7 +239,7 @@ export function SitesTab() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-[var(--bg-primary)] border-[var(--border-default)] max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingSite ? "Edit Site" : "Add Site"}</DialogTitle>
+            <DialogTitle>{editingSite ? 'Edit Site' : 'Add Site'}</DialogTitle>
           </DialogHeader>
           <SiteForm
             site={editingSite}
@@ -267,8 +267,8 @@ function SiteForm({
   onSubmit: (_data: { name: string; site_code: string; active: boolean }) => void;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState(site?.name || "");
-  const [siteCode, setSiteCode] = useState(site?.site_code || "");
+  const [name, setName] = useState(site?.name || '');
+  const [siteCode, setSiteCode] = useState(site?.site_code || '');
   const [active, setActive] = useState(site?.active ?? true);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -297,7 +297,7 @@ function SiteForm({
         </label>
         <Input
           value={siteCode}
-          onChange={(e) => setSiteCode(e.target.value.toUpperCase().replace(/\s+/g, "-"))}
+          onChange={(e) => setSiteCode(e.target.value.toUpperCase().replace(/\s+/g, '-'))}
           placeholder="e.g. NP-01"
           className="bg-[var(--bg-secondary)] border-[var(--border-default)] font-mono"
           required
@@ -333,7 +333,7 @@ function SiteForm({
           disabled={saving}
           className="bg-[var(--accent-emerald)] hover:bg-[var(--accent-green)] text-[var(--bg-void)]"
         >
-          {saving ? "Saving…" : site ? "Update" : "Add Site"}
+          {saving ? 'Saving…' : site ? 'Update' : 'Add Site'}
         </Button>
       </div>
     </form>

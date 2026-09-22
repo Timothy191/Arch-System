@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import type React from "react";
-import { useEffect } from "react";
-import { cn } from "../../lib/utils";
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import type React from 'react';
+import { useEffect } from 'react';
+import { cn } from '../../lib/utils';
 
 export interface DrawerProps
   extends Omit<
     React.HTMLAttributes<HTMLDivElement>,
-    "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"
+    'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart'
   > {
   show: boolean;
   onDismiss: () => void;
   height?: number | string;
-  position?: "bottom" | "right" | "left" | "top";
+  position?: 'bottom' | 'right' | 'left' | 'top';
   children: React.ReactNode;
 }
 
 export function Drawer({
   show,
   onDismiss,
-  height = "auto",
-  position = "bottom",
+  height = 'auto',
+  position = 'bottom',
   className,
   children,
   ...props
@@ -30,30 +30,30 @@ export function Drawer({
   // Prevent body scroll when drawer is open
   useEffect(() => {
     if (show) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [show]);
 
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && show) {
+      if (e.key === 'Escape' && show) {
         onDismiss();
       }
     };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
   }, [show, onDismiss]);
 
   const variants = {
     hidden: {
-      y: position === "bottom" ? "100%" : position === "top" ? "-100%" : 0,
-      x: position === "right" ? "100%" : position === "left" ? "-100%" : 0,
+      y: position === 'bottom' ? '100%' : position === 'top' ? '-100%' : 0,
+      x: position === 'right' ? '100%' : position === 'left' ? '-100%' : 0,
       opacity: 0,
     },
     visible: {
@@ -65,27 +65,27 @@ export function Drawer({
 
   const getPositionClasses = () => {
     switch (position) {
-      case "bottom":
-        return "bottom-0 left-0 right-0 rounded-t-xl border-t";
-      case "top":
-        return "top-0 left-0 right-0 rounded-b-xl border-b";
-      case "right":
-        return "top-0 right-0 bottom-0 border-l";
-      case "left":
-        return "top-0 left-0 bottom-0 border-r";
+      case 'bottom':
+        return 'bottom-0 left-0 right-0 rounded-t-xl border-t';
+      case 'top':
+        return 'top-0 left-0 right-0 rounded-b-xl border-b';
+      case 'right':
+        return 'top-0 right-0 bottom-0 border-l';
+      case 'left':
+        return 'top-0 left-0 bottom-0 border-r';
       default:
-        return "bottom-0 left-0 right-0 rounded-t-xl border-t";
+        return 'bottom-0 left-0 right-0 rounded-t-xl border-t';
     }
   };
 
   const drawerStyle: React.CSSProperties = {
-    height: position === "bottom" || position === "top" ? height : "100%",
+    height: position === 'bottom' || position === 'top' ? height : '100%',
     width:
-      position === "left" || position === "right"
-        ? typeof height === "number"
+      position === 'left' || position === 'right'
+        ? typeof height === 'number'
           ? height
           : 400
-        : "100%",
+        : '100%',
   };
 
   return (
@@ -111,17 +111,17 @@ export function Drawer({
             animate="visible"
             exit="hidden"
             variants={variants}
-            transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+            transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
             style={drawerStyle}
             className={cn(
-              "fixed z-50 flex flex-col bg-background shadow-xl outline-none border-border",
+              'fixed z-50 flex flex-col bg-background shadow-xl outline-none border-border',
               getPositionClasses(),
-              className,
+              className
             )}
             {...props}
           >
             {/* Draggable Handle Indicator for bottom sheets */}
-            {position === "bottom" && (
+            {position === 'bottom' && (
               <div className="flex w-full items-center justify-center pt-3 pb-1" aria-hidden="true">
                 <div className="h-1.5 w-12 rounded-full bg-muted" />
               </div>

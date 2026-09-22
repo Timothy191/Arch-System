@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 export const CodemodResultSchema = z.object({
   modifiedFiles: z.array(z.string()),
   hooksReplacedCount: z.number(),
@@ -9,6 +9,6 @@ export const CodemodResultSchema = z.object({
 export const HookMigrationMappingSchema = z.object({
   targetHookName: z.string(),
   sourceLibrary: z.string(),
-  replacementLibrary: z.literal("@repo/shared/hooks"),
+  replacementLibrary: z.literal('@repo/shared/hooks'),
   isNamedExport: z.boolean(),
 });

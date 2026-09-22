@@ -12,8 +12,8 @@
  * This implementation follows the recommended pattern from Supabase docs.
  */
 
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from '@supabase/ssr';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * Updates the session by refreshing the Auth token if needed.
@@ -31,7 +31,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
-    "https://mrwhtxbhrzyttlsyuofc.supabase.co";
+    'https://mrwhtxbhrzyttlsyuofc.supabase.co';
   // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   const supabaseAnonKey =
@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg";
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg';
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -66,10 +66,10 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
               expires: undefined,
               // Enforce security: HttpOnly prevents XSS, Secure ensures HTTPS-only
               httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax',
             });
-          },
+          }
         );
       },
     },
@@ -87,11 +87,11 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     if (error) {
       // Token refresh failed - could be expired or invalid
       // The response will still be returned, but without valid auth
-      console.error("Token refresh failed:", error.message);
+      console.error('Token refresh failed:', error.message);
     }
   } catch (err) {
     // Handle any unexpected errors during token refresh
-    console.error("Unexpected error during token refresh:", err);
+    console.error('Unexpected error during token refresh:', err);
   }
 
   // IMPORTANT: Do NOT set any Response headers here!
@@ -111,7 +111,7 @@ export async function createProxyClient(request: NextRequest) {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
-    "https://mrwhtxbhrzyttlsyuofc.supabase.co";
+    'https://mrwhtxbhrzyttlsyuofc.supabase.co';
   // Per Supabase docs: use NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   // Fallback to NEXT_PUBLIC_SUPABASE_ANON_KEY for backward compatibility
   const supabaseAnonKey =
@@ -119,7 +119,7 @@ export async function createProxyClient(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg";
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.nEt4Hfb3DGQtFPofXNRWUBX6zXyTXTJvcb9xLoBGDg';
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

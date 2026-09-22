@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Checkbox } from "@repo/ui/components/Checkbox";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { GlassCard } from "@repo/ui/GlassCard";
-import { Image as ImageIcon, Loader2, Settings as SettingsIcon, Upload } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { uploadCardTemplate } from "../actions/card-templates";
+import { Checkbox } from '@repo/ui/components/Checkbox';
+import { Button } from '@repo/ui/components/ui/button';
+import { Input } from '@repo/ui/components/ui/input';
+import { GlassCard } from '@repo/ui/GlassCard';
+import { Image as ImageIcon, Loader2, Settings as SettingsIcon, Upload } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { uploadCardTemplate } from '../actions/card-templates';
 
 export function SettingsTab() {
   const [isUploading, setIsUploading] = useState(false);
@@ -18,10 +18,10 @@ export function SettingsTab() {
     const formData = new FormData(e.currentTarget);
     try {
       await uploadCardTemplate(formData);
-      toast.success("Card template uploaded successfully");
+      toast.success('Card template uploaded successfully');
       (e.target as HTMLFormElement).reset();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload template");
+      toast.error(err instanceof Error ? err.message : 'Failed to upload template');
     } finally {
       setIsUploading(false);
     }
@@ -83,7 +83,7 @@ export function SettingsTab() {
                 ) : (
                   <Upload className="w-4 h-4 mr-2" />
                 )}
-                {isUploading ? "Uploading..." : "Upload Template"}
+                {isUploading ? 'Uploading...' : 'Upload Template'}
               </Button>
             </div>
           </form>

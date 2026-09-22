@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { useEffect, useState } from "react";
-import { TelemetryChart } from "./telemetry-chart";
+import type { Meta, StoryObj } from '@storybook/react';
+import { useEffect, useState } from 'react';
+import { TelemetryChart } from './telemetry-chart';
 
 const meta: Meta<typeof TelemetryChart> = {
-  title: "Industrial/TelemetryChart",
+  title: 'Industrial/TelemetryChart',
   component: TelemetryChart,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   parameters: {
-    layout: "centered",
+    layout: 'centered',
   },
 };
 
@@ -24,10 +24,10 @@ const generateData = () => {
 export const Default: Story = {
   args: {
     data: generateData(),
-    title: "Engine Temperature",
-    unit: "°C",
-    color: "#ff3b30",
-    className: "w-[500px]",
+    title: 'Engine Temperature',
+    unit: '°C',
+    color: '#ff3b30',
+    className: 'w-[500px]',
   },
 };
 
@@ -40,7 +40,7 @@ export const LiveDemo: Story = {
         setData((prev) => {
           const nextValue = Math.max(
             0,
-            Math.min(100, (prev[prev.length - 1]?.value || 50) + (Math.random() * 20 - 10)),
+            Math.min(100, (prev[prev.length - 1]?.value || 50) + (Math.random() * 20 - 10))
           );
           return [...prev.slice(1), { timestamp: Date.now(), value: nextValue }];
         });
@@ -51,9 +51,9 @@ export const LiveDemo: Story = {
     return <TelemetryChart {...args} data={data} />;
   },
   args: {
-    title: "Hydraulic Pressure",
-    unit: "bar",
-    color: "#007aff",
-    className: "w-[600px]",
+    title: 'Hydraulic Pressure',
+    unit: 'bar',
+    color: '#007aff',
+    className: 'w-[600px]',
   },
 };

@@ -3,7 +3,7 @@
 
 function SkeletonBlock({ className }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-arch-surface-tertiary rounded-2xl ${className ?? ""}`} />
+    <div className={`animate-pulse bg-arch-surface-tertiary rounded-2xl ${className ?? ''}`} />
   );
 }
 

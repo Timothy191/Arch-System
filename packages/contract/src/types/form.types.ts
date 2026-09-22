@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 import type {
   bookOutSchema,
   createBreakdownSchema,
@@ -9,7 +9,7 @@ import type {
   monthlyReportInputSchema,
   productionDailyLogSchema,
   updateMachineSiteSchema,
-} from "../schemas/form.schema.js";
+} from '../schemas/form.schema.js';
 
 export type DailyLogFormValues = z.infer<typeof dailyLogSchema>;
 export type DrillingDailyLogFormValues = z.infer<typeof drillingDailyLogSchema>;

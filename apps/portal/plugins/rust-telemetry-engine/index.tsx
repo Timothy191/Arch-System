@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { APIError } from "@repo/errors";
-import { useEffect, useState } from "react";
-import type { ArchPlugin } from "@/lib/plugins/types";
+import { APIError } from '@repo/errors';
+import { useEffect, useState } from 'react';
+import type { ArchPlugin } from '@/lib/plugins/types';
 
 // Types matching our Rust binary JSON output contract
 interface RustTelemetryData {
   wearIndex: number;
   probability: number;
   rulHours: number;
-  status: "optimal" | "warning" | "critical";
+  status: 'optimal' | 'warning' | 'critical';
   error?: string;
   isNative?: boolean;
 }
@@ -25,9 +25,9 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
   useEffect(() => {
     async function fetchRustTelemetry() {
       try {
-        const response = await fetch("/api/plugins/rust-telemetry", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('/api/plugins/rust-telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(DEFAULT_SENSORS),
         });
 
@@ -35,10 +35,10 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
           const result = await response.json();
           setData(result);
         } else {
-          throw new APIError("API call failed", {
+          throw new APIError('API call failed', {
             statusCode: response.status,
             context: {
-              endpoint: "rust-telemetry",
+              endpoint: 'rust-telemetry',
               statusText: response.statusText,
             },
           });
@@ -48,9 +48,9 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
           wearIndex: 45.2,
           probability: 48.6,
           rulHours: 780.0,
-          status: "warning",
+          status: 'warning',
           isNative: false,
-          error: err.message || "Failed to contact native engine",
+          error: err.message || 'Failed to contact native engine',
         });
       } finally {
         setLoading(false);
@@ -70,14 +70,14 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
     );
   }
 
-  const isCritical = data?.status === "critical";
-  const isWarning = data?.status === "warning";
+  const isCritical = data?.status === 'critical';
+  const isWarning = data?.status === 'warning';
 
   const statusColor = isCritical
-    ? "text-accent-red border-accent-red/20 bg-accent-red/10"
+    ? 'text-accent-red border-accent-red/20 bg-accent-red/10'
     : isWarning
-      ? "text-accent-blue border-accent-blue/20 bg-accent-blue/10"
-      : "text-[#3ecf8e] border-[#3ecf8e]/20 bg-[#3ecf8e]/10";
+      ? 'text-accent-blue border-accent-blue/20 bg-accent-blue/10'
+      : 'text-[#3ecf8e] border-[#3ecf8e]/20 bg-[#3ecf8e]/10';
 
   return (
     <div className="relative group overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0c0914] to-[#07050d] p-5 shadow-diffusion-xl backdrop-blur-xl transition-all duration-300 hover:border-violet-500/30">
@@ -131,7 +131,7 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
         </div>
 
         <div className="flex justify-between items-center border-t border-[#1c1c1c] pt-2 text-[10px] text-[var(--text-secondary)]">
-          <span>Engine type: {data?.isNative ? "Rust binary (compiled)" : "JS fallback"}</span>
+          <span>Engine type: {data?.isNative ? 'Rust binary (compiled)' : 'JS fallback'}</span>
           {data?.error && (
             <span className="text-accent-red italic text-[9px]">Sensor read timeout</span>
           )}
@@ -143,28 +143,28 @@ function RustTelemetryWidget({ departmentId: _departmentId }: { departmentId: st
 
 const rustTelemetryPlugin: ArchPlugin = {
   metadata: {
-    id: "rust-telemetry-engine",
-    name: "Rust Telemetry Analyzer",
-    version: "1.0.0",
+    id: 'rust-telemetry-engine',
+    name: 'Rust Telemetry Analyzer',
+    version: '1.0.0',
     description:
-      "Multi-variable stress-fatigue Native Rust calculations bridged into Next.js dashboard.",
-    author: "Arch Core Engineering",
+      'Multi-variable stress-fatigue Native Rust calculations bridged into Next.js dashboard.',
+    author: 'Arch Core Engineering',
     enabled: true,
   },
   widgets: [
     {
-      id: "rust-telemetry-card",
-      gridSpan: "col-span-1",
+      id: 'rust-telemetry-card',
+      gridSpan: 'col-span-1',
       component: RustTelemetryWidget,
     },
   ],
   workflow: {
     canBuildWorkflow: true,
     defaultNode: {
-      type: "plugin",
+      type: 'plugin',
       data: {
-        label: "Rust Telemetry",
-        pluginId: "rust-telemetry-engine",
+        label: 'Rust Telemetry',
+        pluginId: 'rust-telemetry-engine',
         config: {
           hours: 220.0,
           temp: 72.5,

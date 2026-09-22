@@ -1,25 +1,25 @@
-"use server";
+'use server';
 
-import { FixedWindowStrategy, RateLimiter, RedisStore } from "@repo/rate-limiter";
-import { getRedisClient } from "@repo/redis";
-import { createServerSupabaseClient } from "@repo/supabase/server";
-import bcrypt from "bcryptjs";
-import { revalidatePath } from "next/cache";
+import { FixedWindowStrategy, RateLimiter, RedisStore } from '@repo/rate-limiter';
+import { getRedisClient } from '@repo/redis';
+import { createServerSupabaseClient } from '@repo/supabase/server';
+import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
 import {
   AuthError,
   DatabaseError,
   ForbiddenError,
   NotFoundError,
-} from "@/lib/errors/error-classes";
-import { logError } from "@/lib/errors/error-logger";
-import { addEvent, setAttributes, withAsyncSpan } from "@/lib/observability/tracing";
-import { logAuditEvent } from "./audit";
+} from '@/lib/errors/error-classes';
+import { logError } from '@/lib/errors/error-logger';
+import { addEvent, setAttributes, withAsyncSpan } from '@/lib/observability/tracing';
+import { logAuditEvent } from './audit';
 import {
   getShiftCompleteness,
   validateBinFactor,
   validateMachineHours,
   validateShiftDataIntegrity,
-} from "./shift-completeness";
+} from './shift-completeness';
 
 type SupabaseClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -35,13 +35,13 @@ async function getShiftCloseoutRateLimiter(): Promise<RateLimiter | null> {
         strategy,
         limit: 5, // 5 attempts per minute
         windowMs: 60 * 1000, // 1 minute
-        keyPrefix: "shift_closeout:",
+        keyPrefix: 'shift_closeout:',
       });
     }
   } catch (error) {
     // If Redis is not available, return null (rate limiting disabled)
     // eslint-disable-next-line no-console
-    console.warn("Redis not available for rate limiting:", error);
+    console.warn('Redis not available for rate limiting:', error);
   }
   return null;
 }
@@ -82,7 +82,7 @@ async function checkPinAttemptLockout(employeeCode: string): Promise<boolean> {
     return false;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.warn("Failed to check PIN attempt lockout:", error);
+    console.warn('Failed to check PIN attempt lockout:', error);
     return false;
   }
 }
@@ -115,12 +115,12 @@ async function recordFailedPinAttempt(employeeCode: string): Promise<void> {
           count: 1,
           firstAttempt: now,
         }),
-        { EX: 15 * 60 },
+        { EX: 15 * 60 }
       );
     }
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.warn("Failed to record failed PIN attempt:", error);
+    console.warn('Failed to record failed PIN attempt:', error);
   }
 }
 
@@ -128,30 +128,30 @@ async function validateShiftData(
   supabase: SupabaseClient,
   departmentId: string,
   date: string,
-  shiftType: "day" | "night",
+  shiftType: 'day' | 'night'
 ): Promise<string[]> {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift validation
   return withAsyncSpan(
-    "shift_validation",
+    'shift_validation',
     {
       department_id: departmentId,
       date,
       shift_type: shiftType,
     },
     async (_span) => {
-      addEvent("validation_start");
+      addEvent('validation_start');
 
       const { data: existing } = await supabase
-        .from("shift_status")
-        .select("id, status")
-        .eq("department_id", departmentId)
-        .eq("shift_date", date)
-        .eq("shift_type", shiftType)
+        .from('shift_status')
+        .select('id, status')
+        .eq('department_id', departmentId)
+        .eq('shift_date', date)
+        .eq('shift_type', shiftType)
         .single();
 
-      if (existing?.status === "closed") {
+      if (existing?.status === 'closed') {
         setAttributes({ already_closed: true });
-        return ["Shift is already closed"];
+        return ['Shift is already closed'];
       }
 
       const completeness = await getShiftCompleteness(
@@ -159,7 +159,7 @@ async function validateShiftData(
         departmentId,
         null,
         date,
-        shiftType,
+        shiftType
       );
 
       setAttributes({ machine_count: completeness.statuses.length });
@@ -167,7 +167,7 @@ async function validateShiftData(
       const errors: string[] = [];
 
       if (completeness.statuses.length === 0) {
-        errors.push("No active machines found for this department");
+        errors.push('No active machines found for this department');
       }
 
       for (const status of completeness.statuses) {
@@ -187,17 +187,17 @@ async function validateShiftData(
 
       // AGENT-TRACE: Cross-field validation for hourly loads
       const { data: hourlyLoads } = await supabase
-        .from("hourly_loads")
-        .select("machine_id, total_loads")
-        .eq("department_id", departmentId)
-        .eq("load_date", date)
-        .eq("shift_type", shiftType);
+        .from('hourly_loads')
+        .select('machine_id, total_loads')
+        .eq('department_id', departmentId)
+        .eq('load_date', date)
+        .eq('shift_type', shiftType);
 
       // AGENT-TRACE: Fetch machine data for bin_factor validation
       const { data: machines } = await supabase
-        .from("machines")
-        .select("id, name, bin_factor")
-        .eq("department_id", departmentId);
+        .from('machines')
+        .select('id, name, bin_factor')
+        .eq('department_id', departmentId);
 
       const machineMap = new Map((machines || []).map((m) => [m.id, m]));
 
@@ -222,7 +222,7 @@ async function validateShiftData(
               status.hoursWorked,
               loads.total_loads,
               machine.bin_factor,
-              shiftType,
+              shiftType
             );
             errors.push(...consistencyErrors.map((e) => `Machine '${machine.name}': ${e.message}`));
           }
@@ -230,13 +230,13 @@ async function validateShiftData(
       }
 
       setAttributes({ error_count: errors.length });
-      addEvent("validation_complete", {
+      addEvent('validation_complete', {
         has_errors: errors.length > 0,
         error_count: errors.length,
       });
 
       return errors;
-    },
+    }
   );
 }
 
@@ -247,28 +247,28 @@ export async function setPin(employeeCode: string, pin: string) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    logError(new Error("Not authenticated"), { context: "setPin" });
-    throw new AuthError("Not authenticated", { context: { action: "setPin" } });
+    logError(new Error('Not authenticated'), { context: 'setPin' });
+    throw new AuthError('Not authenticated', { context: { action: 'setPin' } });
   }
 
   const { data: employee, error } = await supabase
-    .from("employees")
-    .select("id, role")
-    .eq("auth_id", user.id)
+    .from('employees')
+    .select('id, role')
+    .eq('auth_id', user.id)
     .single();
 
   if (error || !employee) {
-    logError(new Error("Employee not found"), { context: "setPin" });
-    throw new NotFoundError("Employee not found", { resource: "employee" });
+    logError(new Error('Employee not found'), { context: 'setPin' });
+    throw new NotFoundError('Employee not found', { resource: 'employee' });
   }
 
-  if (employee.role !== "supervisor" && employee.role !== "admin") {
-    logError(new Error("Only supervisors and admins can set PINs"), {
-      context: "setPin",
+  if (employee.role !== 'supervisor' && employee.role !== 'admin') {
+    logError(new Error('Only supervisors and admins can set PINs'), {
+      context: 'setPin',
     });
-    throw new ForbiddenError("Only supervisors and admins can set PINs", {
+    throw new ForbiddenError('Only supervisors and admins can set PINs', {
       context: {
-        requiredRoles: ["supervisor", "admin"],
+        requiredRoles: ['supervisor', 'admin'],
         actualRole: employee.role,
       },
     });
@@ -278,14 +278,14 @@ export async function setPin(employeeCode: string, pin: string) {
   const hash = await bcrypt.hash(pin, salt);
 
   const { error: updateError } = await supabase
-    .from("employees")
+    .from('employees')
     .update({ pin_hash: hash, employee_code: employeeCode })
-    .eq("id", employee.id);
+    .eq('id', employee.id);
 
   if (updateError) {
-    throw new DatabaseError("Failed to set PIN", {
-      operation: "update",
-      table: "employees",
+    throw new DatabaseError('Failed to set PIN', {
+      operation: 'update',
+      table: 'employees',
       context: { error: updateError.message },
     });
   }
@@ -295,8 +295,8 @@ export async function setPin(employeeCode: string, pin: string) {
 
 export async function verifyPin(employeeCode: string, pin: string) {
   // AGENT-TRACE: OpenTelemetry instrumentation for PIN verification
-  return withAsyncSpan("pin_verification", { employee_code: employeeCode }, async (_span) => {
-    addEvent("pin_verify");
+  return withAsyncSpan('pin_verification', { employee_code: employeeCode }, async (_span) => {
+    addEvent('pin_verify');
 
     // AGENT-TRACE: Check for PIN attempt lockout
     const isLockedOut = await checkPinAttemptLockout(employeeCode);
@@ -306,16 +306,16 @@ export async function verifyPin(employeeCode: string, pin: string) {
         valid: false,
         employee: null,
         lockedOut: true,
-        message: "Too many failed PIN attempts. Please try again in 15 minutes.",
+        message: 'Too many failed PIN attempts. Please try again in 15 minutes.',
       };
     }
 
     const supabase = await createServerSupabaseClient();
 
     const { data: employee, error } = await supabase
-      .from("employees")
-      .select("id, full_name, pin_hash")
-      .eq("employee_code", employeeCode)
+      .from('employees')
+      .select('id, full_name, pin_hash')
+      .eq('employee_code', employeeCode)
       .single();
 
     if (error || !employee || !employee.pin_hash) {
@@ -346,15 +346,15 @@ export async function verifyPin(employeeCode: string, pin: string) {
 export async function closeShift(
   departmentId: string,
   date: string,
-  shiftType: "day" | "night",
+  shiftType: 'day' | 'night',
   approvedById: string,
   pin: string,
   validateOnly: boolean = false,
-  departmentSlug?: string,
+  departmentSlug?: string
 ) {
   // AGENT-TRACE: OpenTelemetry instrumentation for shift closeout
   return withAsyncSpan(
-    "shift_closeout",
+    'shift_closeout',
     {
       department_id: departmentId,
       date,
@@ -369,9 +369,9 @@ export async function closeShift(
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        logError(new Error("Not authenticated"), { context: "closeShift" });
-        throw new AuthError("Not authenticated", {
-          context: { action: "closeShift" },
+        logError(new Error('Not authenticated'), { context: 'closeShift' });
+        throw new AuthError('Not authenticated', {
+          context: { action: 'closeShift' },
         });
       }
 
@@ -405,71 +405,71 @@ export async function closeShift(
       }
 
       const { data: closedBy } = await supabase
-        .from("employees")
-        .select("id")
-        .eq("auth_id", user.id)
+        .from('employees')
+        .select('id')
+        .eq('auth_id', user.id)
         .single();
 
       if (!closedBy) {
-        logError(new Error("Operator not found"), { context: "closeShift" });
-        throw new NotFoundError("Operator not found", { resource: "employee" });
+        logError(new Error('Operator not found'), { context: 'closeShift' });
+        throw new NotFoundError('Operator not found', { resource: 'employee' });
       }
 
       setAttributes({ operator_id: closedBy.id });
 
       const { data: approver } = await supabase
-        .from("employees")
-        .select("id, pin_hash, full_name")
-        .eq("id", approvedById)
+        .from('employees')
+        .select('id, pin_hash, full_name')
+        .eq('id', approvedById)
         .single();
 
       if (!approver?.pin_hash) {
         return {
           success: false,
-          errors: ["Approving supervisor not found or has no PIN set"],
+          errors: ['Approving supervisor not found or has no PIN set'],
         };
       }
 
       const pinValid = await bcrypt.compare(pin, approver.pin_hash);
       if (!pinValid) {
         setAttributes({ pin_valid: false });
-        return { success: false, errors: ["Invalid supervisor PIN"] };
+        return { success: false, errors: ['Invalid supervisor PIN'] };
       }
 
       setAttributes({ pin_valid: true });
 
       const { data: inserted, error: insertError } = await supabase
-        .from("shift_status")
+        .from('shift_status')
         .insert({
           department_id: departmentId,
           shift_date: date,
           shift_type: shiftType,
-          status: "closed",
+          status: 'closed',
           closed_at: new Date().toISOString(),
           closed_by: closedBy.id,
           approved_by: approvedById,
         })
-        .select("id")
+        .select('id')
         .single();
 
       if (insertError || !inserted) {
         setAttributes({ insert_success: false });
-        return { success: false, errors: ["Failed to close shift"] };
+        return { success: false, errors: ['Failed to close shift'] };
       }
 
       setAttributes({
         insert_success: true,
         shift_status_id: inserted.id,
       });
-      addEvent("shift_closed", {
+      addEvent('shift_closed', {
         shift_status_id: inserted.id,
         closed_by: closedBy.id,
         approved_by: approvedById,
       });
 
       await logAuditEvent({
-        action: "insert",
-        tableName: "shift_status",
+        action: 'insert',
+        tableName: 'shift_status',
         recordId: inserted.id,
         departmentId,
       });
@@ -480,6 +480,6 @@ export async function closeShift(
       }
 
       return { success: true, shiftStatusId: inserted.id };
-    },
+    }
   );
 }
