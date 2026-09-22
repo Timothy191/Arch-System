@@ -8,6 +8,8 @@
     "./migrations/*": "./migrations/*"
   },
   "scripts": {
+    "sync-migrations": "./scripts/sync-migrations.sh",
+    "check-migrations": "./scripts/sync-migrations.sh --check",
     "db:types": "supabase gen types typescript --local > ./types.ts",
     "supabase:gen": "supabase gen types typescript --local > ../supabase/src/database.types.ts",
     "supabase:push": "supabase db push",
