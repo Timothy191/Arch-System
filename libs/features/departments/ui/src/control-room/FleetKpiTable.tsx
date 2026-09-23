@@ -4,7 +4,7 @@ import type { MachinePerformance } from '@repo/contract/types/shift-compilation.
 import { GlassCard } from '@repo/ui/GlassCard';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Activity, AlertTriangle, CheckCircle2, Clock, Wrench } from 'lucide-react';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 
 interface FleetKpiTableProps {
   fleet: MachinePerformance[];
@@ -20,6 +20,30 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
     overscan: 5,
   });
 
+  // Performance Optimization:
+  // Virtualized table scrolling re-renders FleetKpiTable continuously on scroll frames.
+  // Single-pass traversal memoized on `fleet` prevents redundant O(N) array reductions
+  // on every scroll frame re-render.
+  const { avgAvailability, totalSmuHours, totalBreakdownHours } = useMemo(() => {
+    if (!fleet || fleet.length === 0) {
+      return { avgAvailability: '0.0', totalSmuHours: '0.0', totalBreakdownHours: '0.0' };
+    }
+    let totalMa = 0;
+    let totalSmu = 0;
+    let totalBreakdown = 0;
+    for (let i = 0; i < fleet.length; i++) {
+      const item = fleet[i];
+      totalMa += item.mechanical_availability_pct;
+      totalSmu += item.hours_worked;
+      totalBreakdown += item.breakdown_hours;
+    }
+    return {
+      avgAvailability: (totalMa / fleet.length).toFixed(1),
+      totalSmuHours: totalSmu.toFixed(1),
+      totalBreakdownHours: totalBreakdown.toFixed(1),
+    };
+  }, [fleet]);
+
   if (!fleet || fleet.length === 0) {
     return (
       <GlassCard className="p-6 text-center">
@@ -32,13 +56,6 @@ export function FleetKpiTable({ fleet }: FleetKpiTableProps) {
       </GlassCard>
     );
   }
-
-  const avgAvailability = (
-    fleet.reduce((acc, curr) => acc + curr.mechanical_availability_pct, 0) / fleet.length
-  ).toFixed(1);
-
-  const totalSmuHours = fleet.reduce((acc, curr) => acc + curr.hours_worked, 0).toFixed(1);
-  const totalBreakdownHours = fleet.reduce((acc, curr) => acc + curr.breakdown_hours, 0).toFixed(1);
 
   return (
     <GlassCard className="overflow-hidden border border-black/[0.08] shadow-card bg-white/70 backdrop-blur-xl">
