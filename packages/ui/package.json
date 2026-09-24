@@ -26,7 +26,7 @@
     "lucide-react": "catalog:",
     "recharts": "^3.8.1",
     "sonner": "catalog:",
-    "tailwind-merge": "^2.5.4",
+    "tailwind-merge": "^3.7.0",
     "three": "catalog:"
   },
   "devDependencies": {
