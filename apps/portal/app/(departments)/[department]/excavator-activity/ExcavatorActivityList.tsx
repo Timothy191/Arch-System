@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassCard } from '@repo/ui/GlassCard';
+import { useMemo } from 'react';
 
 const SHIFT_HOURS = 12;
 
@@ -45,6 +46,21 @@ export function ExcavatorActivityList({
   todayActivity,
   todayAssignments,
 }: ExcavatorActivityListProps) {
+  // Bolt Optimization: Pre-index dumper assignments into a Map keyed by excavator_activity_id.
+  // Replaces repeated O(N * M) .filter() array iterations per render with O(1) Map lookups.
+  const assignmentsByActivityId = useMemo(() => {
+    const map = new Map<string, DumperAssignment[]>();
+    for (const assignment of todayAssignments) {
+      const list = map.get(assignment.excavator_activity_id);
+      if (list) {
+        list.push(assignment);
+      } else {
+        map.set(assignment.excavator_activity_id, [assignment]);
+      }
+    }
+    return map;
+  }, [todayAssignments]);
+
   // Group by site_id, then by shift
   const siteMap = new Map<string, { siteName: string; activities: ExcavatorActivity[] }>();
 
@@ -69,9 +85,7 @@ export function ExcavatorActivityList({
       <h3 className="text-lg font-medium text-[var(--text-heading)]">Today&apos;s Activity</h3>
 
       {siteEntries.map(([siteKey, { siteName, activities }]) => {
-        const siteAssignments = activities.flatMap((a) =>
-          todayAssignments.filter((ta) => ta.excavator_activity_id === a.id)
-        );
+        const siteAssignments = activities.flatMap((a) => assignmentsByActivityId.get(a.id) ?? []);
         const siteBcm = siteAssignments.reduce((sum, a) => sum + (a.total_bcm || 0), 0);
         const siteLoads = siteAssignments.reduce((sum, a) => sum + (a.total_loads || 0), 0);
 
@@ -110,9 +124,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) ?? []}
                     />
                   ))}
                 </div>
@@ -131,9 +143,7 @@ export function ExcavatorActivityList({
                     <ActivityCard
                       key={activity.id}
                       activity={activity}
-                      assignments={todayAssignments.filter(
-                        (a) => a.excavator_activity_id === activity.id
-                      )}
+                      assignments={assignmentsByActivityId.get(activity.id) ?? []}
                     />
                   ))}
                 </div>
