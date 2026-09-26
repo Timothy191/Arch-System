@@ -1,0 +1,21 @@
+{
+  "name": "scripts-seeds",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ad-hoc database seeding and PostgREST schema-cache reload scripts.",
+  "scripts": {
+    "seed": "tsx seed.ts",
+    "schema-reload": "node pgrst-reload.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "catalog:",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.1",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

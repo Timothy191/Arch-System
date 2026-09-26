@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-11T06:54:45.559Z",
+  "agents": {
+    "oh-my-antigravity/worker-1": {
+      "id": "oh-my-antigravity/worker-1",
+      "type": "worker",
+      "teamName": "oh-my-antigravity",
+      "status": "completed",
+      "startedAt": "2026-09-11T06:54:45.158Z",
+      "updatedAt": "2026-09-11T06:54:45.165Z",
+      "completedAt": "2026-09-11T06:54:45.165Z",
+      "summary": "Worker worker-1 completed task for team oh-my-antigravity"
+    },
+    "oh-my-antigravity/worker-2": {
+      "id": "oh-my-antigravity/worker-2",
+      "type": "worker",
+      "teamName": "oh-my-antigravity",
+      "status": "completed",
+      "startedAt": "2026-09-11T06:54:45.338Z",
+      "updatedAt": "2026-09-11T06:54:45.354Z",
+      "completedAt": "2026-09-11T06:54:45.354Z",
+      "summary": "Worker worker-2 completed task for team oh-my-antigravity"
+    },
+    "oh-my-antigravity/worker-3": {
+      "id": "oh-my-antigravity/worker-3",
+      "type": "worker",
+      "teamName": "oh-my-antigravity",
+      "status": "completed",
+      "startedAt": "2026-09-11T06:54:45.551Z",
+      "updatedAt": "2026-09-11T06:54:45.559Z",
+      "completedAt": "2026-09-11T06:54:45.559Z",
+      "summary": "Worker worker-3 completed task for team oh-my-antigravity"
+    }
+  }
+}

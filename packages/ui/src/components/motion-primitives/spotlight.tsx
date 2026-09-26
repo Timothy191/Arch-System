@@ -1,0 +1,79 @@
+'use client';
+import { cn } from '@repo/ui/lib/utils';
+import { motion, type SpringOptions, useSpring, useTransform } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+export type SpotlightProps = {
+  className?: string;
+  size?: number;
+  springOptions?: SpringOptions;
+};
+
+export function Spotlight({
+  className,
+  size = 200,
+  springOptions = { bounce: 0 },
+}: SpotlightProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
+
+  const mouseX = useSpring(0, springOptions);
+  const mouseY = useSpring(0, springOptions);
+
+  const spotlightLeft = useTransform(mouseX, (x) => `${x - size / 2}px`);
+  const spotlightTop = useTransform(mouseY, (y) => `${y - size / 2}px`);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const parent = containerRef.current.parentElement;
+      if (parent) {
+        parent.style.position = 'relative';
+        parent.style.overflow = 'hidden';
+        setParentElement(parent);
+      }
+    }
+  }, []);
+
+  const handleMouseMove = useCallback((_event: MouseEvent) => {
+    // Disabled mouse effects
+  }, []);
+
+  useEffect(() => {
+    if (!parentElement) return;
+
+    const abortController = new AbortController();
+
+    parentElement.addEventListener('mousemove', handleMouseMove, {
+      signal: abortController.signal,
+    });
+    parentElement.addEventListener('mouseenter', () => setIsHovered(true), {
+      signal: abortController.signal,
+    });
+    parentElement.addEventListener('mouseleave', () => setIsHovered(false), {
+      signal: abortController.signal,
+    });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [parentElement, handleMouseMove]);
+
+  return (
+    <motion.div
+      ref={containerRef}
+      className={cn(
+        'pointer-events-none absolute rounded-full bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops),transparent_80%)] blur-xl transition-opacity duration-200',
+        'from-zinc-100 via-zinc-200 to-zinc-400',
+        isHovered ? 'opacity-100' : 'opacity-0',
+        className
+      )}
+      style={{
+        width: size,
+        height: size,
+        left: spotlightLeft,
+        top: spotlightTop,
+      }}
+    />
+  );
+}

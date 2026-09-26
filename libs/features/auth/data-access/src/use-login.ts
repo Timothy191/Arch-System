@@ -1,0 +1,80 @@
+import * as Sentry from '@sentry/nextjs';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+async function pushTelemetry(name: string) {
+  try {
+    await fetch('/api/telemetry/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, value: 1 }),
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+export interface LoginResult {
+  success: boolean;
+  /** Failure reason as returned by the API (or the client-side network message). */
+  error?: string;
+}
+
+export function useLogin() {
+  const [loading, setLoading] = useState(false);
+  const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null);
+
+  const login = async (employeeId: string, password: string) => {
+    setRateLimitCountdown(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: employeeId, password }),
+      });
+
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('X-RateLimit-Reset');
+          if (retryAfter) {
+            const retryTimestamp = parseInt(retryAfter, 10);
+            const remaining = Math.max(0, retryTimestamp - Math.floor(Date.now() / 1000));
+            setRateLimitCountdown(remaining);
+          }
+          toast.error(data.error || 'Too many attempts.');
+        } else {
+          toast.error(data.error || 'Sign in failed.');
+        }
+
+        Sentry.addBreadcrumb({
+          message: 'Auth failed',
+          category: 'auth',
+          level: 'error',
+          data: { reason: data.error },
+        });
+        void pushTelemetry('auth.failure');
+        setLoading(false);
+        return { success: false, error: data.error };
+      }
+
+      // Supabase SSR natively sets cookies via Set-Cookie headers in the API response.
+      // We removed the manual client-side cookie assignment (sb-127-auth-token) to prevent
+      // edge cases where middleware might detect conflicting or outdated tokens.
+
+      Sentry.addBreadcrumb({ message: 'Auth succeeded', category: 'auth', level: 'info' });
+      void pushTelemetry('auth.success');
+      setLoading(false);
+      return { success: true };
+    } catch {
+      toast.error('Network error. Please try again.');
+      setLoading(false);
+      return { success: false, error: 'Network error. Please try again.' };
+    }
+  };
+
+  return { login, loading, rateLimitCountdown, setRateLimitCountdown };
+}

@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7
+    container_name: plantcor-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6381:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+  langfuse:
+    image: langfuse/langfuse:3
+    container_name: plantcor-langfuse
+    restart: unless-stopped
+    env_file: ../../.env.tools
+    ports:
+      - "127.0.0.1:3003:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true
+      - OTEL_EXPORTER_OTLP_ENABLED=true
+      - LANGFUSE_INIT_ORG_ID=plantcor
+      - LANGFUSE_INIT_ORG_NAME=PlantCor
+      - LANGFUSE_INIT_PROJECT_ID=kiro-agent
+      - LANGFUSE_INIT_PROJECT_NAME=Kiro Agent
+      - LANGFUSE_INIT_USER_EMAIL=${TOOL_ADMIN_EMAIL}
+      - LANGFUSE_INIT_USER_PASSWORD=${TOOL_ADMIN_PASSWORD}
+      - LANGFUSE_INIT_USER_NAME=Admin
+      - LANGFUSE_INIT_PUBLIC_KEY=pk-lf-plantcor
+      - LANGFUSE_INIT_SECRET_KEY=sk-lf-plantcor
+      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER}:${LANGFUSE_DB_PASSWORD}@plantcor-langfuse-db:5432/${LANGFUSE_DB_NAME}
+      - LANGFUSE_S3_EVENT_UPLOAD_BUCKET=dummy
+      - LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-1
+      - LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://localhost:9000
+      - LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=dummy
+      - LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=dummy
+      - NEXTAUTH_URL=http://localhost:3003
+      - NEXTAUTH_SECRET=${TOOL_NEXTAUTH_SECRET}
+      - SALT=${TOOL_SALT}
+      - ENCRYPTION_KEY=${TOOL_ENCRYPTION_KEY}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000/api/public/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+      langfuse-redis:
+        condition: service_healthy
+    networks:
+      - plantcor-tools
+
+  langfuse-db:
+    image: postgres:16-alpine
+    container_name: plantcor-langfuse-db
+    restart: unless-stopped
+    env_file: ../../.env.tools
+    environment:
+      - POSTGRES_USER=${LANGFUSE_DB_USER}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD}
+      - POSTGRES_DB=${LANGFUSE_DB_NAME}
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_DB_USER} -d ${LANGFUSE_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - plantcor-tools
+
+  langfuse-redis:
+    image: redis:7
+    container_name: plantcor-langfuse-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - plantcor-tools
+
+volumes:
+  redis_data:
+  langfuse_db_data:
+
+networks:
+  plantcor-tools:
+    driver: bridge

@@ -1,0 +1,1196 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$PATH"
+# AGENT-TRACE: Turborepo uses local/remote cache for workspace task orchestration.
+
+# Prevent infinite hangs when probing health endpoints
+curl() {
+  command curl --max-time 10 "$@"
+}
+
+# ──────────────────────────────────────────────────────────
+# Arch-Systems — Lightning Dev Script v4 (Cloud-First, No Docker)
+# Connects to Cloud Supabase + optional Redis, starts Next.js HMR,
+# runs 4-phase health check, then opens browser to login page.
+# DOCKER / LOCAL SUPABASE REQUIREMENT REMOVED — all infra is SaaS.
+#
+# Uses: scripts/lib/common.sh (shared colors, compose detection, env
+#   parsing, port utilities, browser/terminal launching, health checks)
+# ──────────────────────────────────────────────────────────
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+LOG_LABEL="[dev]"
+
+PORT="${PORT:-3000}"
+CLOUD_PROJECT_REF="mrwhtxbhrzyttlsyuofc"
+
+# Read environment variables from .env via shared get_env_var (safe, no eval)
+ENV_FILE="$PORTAL_DIR/.env"
+[ ! -f "$ENV_FILE" ] && [ -f "$REPO_ROOT/.env" ] && ENV_FILE="$REPO_ROOT/.env"
+
+SUPABASE_URL=$(get_env_var "$ENV_FILE" "SUPABASE_URL")
+[ -z "$SUPABASE_URL" ] && SUPABASE_URL=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_URL")
+REDIS_URL=$(get_env_var "$ENV_FILE" "REDIS_URL")
+# SUPABASE_ANON_KEY: never log the value — only presence/absence.
+SUPABASE_ANON_KEY=$(get_env_var_fallback "$ENV_FILE" \
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  "SUPABASE_PUBLISHABLE_KEY" \
+  "SUPABASE_ANON_KEY")
+
+# ── Redirect & Watchdog Setup ───────────────────────────
+mkdir -p "$REPO_ROOT/run"
+rm -f "$REPO_ROOT/run/.dev_ready" "$REPO_ROOT/run/.dev_timeout"
+
+# Redirect stdout/stderr to dev.log while maintaining console output
+exec > >(tee "$REPO_ROOT/run/dev.log") 2>&1
+
+WATCHDOG_TIMEOUT="${WATCHDOG_TIMEOUT:-180}"
+watchdog() {
+  sleep "$WATCHDOG_TIMEOUT"
+  if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
+    echo -e "\n${RED}${BOLD}  [ERR] Watchdog timeout: Boot hung or exceeded ${WATCHDOG_TIMEOUT} seconds.${NC}"
+    touch "$REPO_ROOT/run/.dev_timeout"
+    node "$REPO_ROOT/tools/repo/generate-dev-report.js" "TIMEOUT (stuck > ${WATCHDOG_TIMEOUT}s)"
+    # Shutdown background PIDs that we started
+    for pidfile in .portal.pid .cms.pid .overview.pid; do
+      [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
+      rm -f "$REPO_ROOT/run/$pidfile"
+    done
+    kill -TERM "$1" 2>/dev/null || true
+    exit 1
+  fi
+}
+# Start watchdog in background, passing parent PID
+watchdog $$ &
+WATCHDOG_PID=$!
+
+# ── Dev-specific Display Helpers ──────────────────────────
+# Note: phase() and check() below OVERRIDE the common.sh versions because
+# dev.sh uses a unique multi-column badge format (OK/ERR/SKIP/WARN/INFO).
+# The shared spinner() from common.sh is used directly.
+
+# phase N TITLE — lightweight section header (colored tag + thin rule).
+phase() {
+  local n="$1" title="$2"
+  echo
+  echo -e "  ${BLUE}${BOLD}PHASE ${n}${NC} ${DIM}›${NC} ${BOLD}${WHITE}${title}${NC}"
+  echo -e "  ${DIM}────────────────────────${NC}"
+}
+
+# check LABEL STATUS [DETAIL] — two-column row: icon+label (fixed width) | detail.
+check() {
+  local label="$1" status="$2" detail="${3:-}"
+  local pad
+  printf -v pad '%-25s' "$label"
+  case "$status" in
+    pass) echo -e "  [${PASS}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+    fail) echo -e "  [${FAIL}] ${pad}${detail:+${RED}${detail}${NC}}" ;;
+    warn) echo -e "  [${WARN}] ${pad}${detail:+${YELLOW}${detail}${NC}}" ;;
+    skip) echo -e "  [${SKIP}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+    info) echo -e "  [${INFO}] ${pad}${detail:+${DIM}${detail}${NC}}" ;;
+  esac
+}
+
+# Dev-specific icon definitions (common.sh provides colors; these add the badge text)
+PASS="${GREEN}${BOLD}OK${NC}"
+FAIL="${RED}${BOLD}ERR${NC}"
+SKIP="${DIM}${BOLD}SKIP${NC}"
+WARN="${YELLOW}${BOLD}WARN${NC}"
+INFO="${BLUE}${BOLD}INFO${NC}"
+
+wait_for() {
+  local url="$1" label="$2" max="${3:-60}" delay="${4:-2}"
+  local i
+  for ((i = 1; i <= max; i++)); do
+    if curl -fs "$url" > /dev/null 2>&1; then
+      return 0
+    fi
+    sleep "$delay"
+  done
+  return 1
+}
+
+banner() {
+  clear 2>/dev/null || true
+  local branch
+  branch=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "—")
+  local mode_pill
+  if [ "$CLOUD_MODE" = "true" ]; then
+    mode_pill="${CYAN}${BOLD}CLOUD-FIRST · CLOUD SUPABASE${NC}"
+  else
+    mode_pill="${MAGENTA}${BOLD}LOCAL · DOCKER${NC}"
+  fi
+  echo
+  echo -e "  ${CYAN}${BOLD}╭─ ARCH SYSTEMS / DEV CONTROL ─────────────────────────────╮${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${BOLD}${WHITE}Operational portal${NC} ${DIM}· mining operations${NC}                 ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}│${NC} ${DIM}branch${NC} ${WHITE}${branch}${NC}  ${DIM}·${NC}  ${mode_pill}  ${DIM}·${NC}  ${DIM}$(date '+%a %b %d %Y  %H:%M')${NC} ${CYAN}${BOLD}│${NC}"
+  echo -e "  ${CYAN}${BOLD}╰───────────────────────────────────────────────────────────╯${NC}"
+  echo
+}
+
+# ── Browser / Status Terminal ────────────────────────────
+# open_browser and detect_terminal are provided by scripts/lib/common.sh
+# Launch a browser to the login page with cache-busting timestamp
+open_login_browser() {
+  local login_url="http://localhost:$PORT/login?_=$(date +%s)"
+  open_browser "$login_url"
+}
+
+launch_status_terminal() {
+  local hud_script="$REPO_ROOT/scripts/monitor-hud.sh"
+  chmod +x "$hud_script" 2>/dev/null || true
+  launch_in_terminal "Arch-Systems SysOps HUD" "$hud_script"
+}
+
+# _url_row LABEL URL [SUFFIX] — one aligned row in the status panel.
+_url_row() {
+  local label="$1" url="$2" suffix="${3:-}" pad
+  printf -v pad '%-9s' "$label"
+  echo -e "  ${BOLD}${pad}${NC} ${CYAN}${url}${NC}${suffix:+ ${DIM}${suffix}${NC}}"
+}
+
+show_results() {
+  local studio_url api_url redis_suffix
+  if [ "$CLOUD_MODE" = "true" ]; then
+    studio_url="https://supabase.com/dashboard/project/$CLOUD_PROJECT_REF"
+    api_url="https://$CLOUD_PROJECT_REF.supabase.co"
+    redis_suffix="(local)"
+  else
+    studio_url="http://localhost:54323"
+    api_url="http://localhost:54321"
+    redis_suffix=""
+  fi
+
+  echo
+  echo -e "  ${GREEN}${BOLD}╭─ READY ──────────────────────────────────────────────────╮${NC}"
+  echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}All systems go${NC} ${DIM}· edit a file to see live updates${NC}       ${GREEN}${BOLD}│${NC}"
+  echo -e "  ${GREEN}${BOLD}╰──────────────────────────────────────────────────────────╯${NC}"
+  echo
+  local lan_ip
+  lan_ip=$(hostname -I 2>/dev/null | awk '{print $1}' || ip route get 1.1.1.1 2>/dev/null | awk '{print $7}' || echo "")
+
+  echo -e "  ${BOLD}${WHITE}Services${NC}"
+  _url_row "Login" "http://localhost:$PORT/login"
+  _url_row "Portal" "http://localhost:$PORT"
+  if [ -n "$lan_ip" ] && [ "$lan_ip" != "127.0.0.1" ]; then
+    _url_row "Network" "http://${lan_ip}:$PORT" "(accessible across local network)"
+  fi
+  if [ "$START_CMS" = "true" ]; then
+    _url_row "CMS" "http://localhost:3001"
+  fi
+  if [ "$START_OVERVIEW" = "true" ]; then
+    _url_row "Overview" "http://localhost:${OVERVIEW_PORT:-3003}"
+  fi
+  _url_row "Redis" "redis://localhost:6379" "$redis_suffix"
+  _url_row "Studio" "$studio_url"
+  _url_row "API" "$api_url"
+
+
+  echo
+  echo -e "  ${BOLD}${WHITE}Controls${NC}"
+  echo -e "  ${DIM}Ctrl+C${NC}  stop services    ${DIM}logs${NC}  run/portal.log    ${DIM}HUD${NC}  separate status terminal"
+  echo
+}
+
+cleanup() {
+  # Temporarily disable traps to prevent recursion on exit
+  trap - EXIT INT TERM
+
+  echo
+  echo -e "  ${YELLOW}Shutting down...${NC}"
+  # Kill watchdog if still running
+  if [ -n "${WATCHDOG_PID:-}" ]; then
+    kill "$WATCHDOG_PID" 2>/dev/null || true
+  fi
+  # Generate FAILURE/TIMEOUT report if not completed
+  if [ ! -f "$REPO_ROOT/run/.dev_ready" ]; then
+    if [ -f "$REPO_ROOT/run/.dev_timeout" ]; then
+      rm -f "$REPO_ROOT/run/.dev_timeout"
+      exit 1
+    else
+      node "$REPO_ROOT/tools/repo/generate-dev-report.js" "FAILURE"
+      exit 1
+    fi
+  fi
+  rm -f "$REPO_ROOT/run/.dev_ready"
+  for pidfile in .portal.pid .cms.pid .overview.pid; do
+    [ -f "$REPO_ROOT/run/$pidfile" ] && kill "$(cat "$REPO_ROOT/run/$pidfile")" 2>/dev/null || true
+    rm -f "$REPO_ROOT/run/$pidfile"
+  done
+}
+trap cleanup EXIT INT TERM
+
+# ── Cleanup helpers ──────────────────────────────────────
+clean_dir_cache() {
+  local dir="$1" name="$2"
+  if [ -d "$dir" ]; then
+    local size
+    size=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
+    rm -rf "$dir"
+    check "$name" "pass" "freed ${size:-?}"
+  else
+    check "$name" "skip" "not present"
+  fi
+}
+
+smart_cache_cleanup() {
+  local max_size_mb=500
+  local max_age_days=7
+
+  if [ -d "$REPO_ROOT/.turbo/cache" ]; then
+    local cache_size
+    cache_size=$(du -sm "$REPO_ROOT/.turbo/cache" 2>/dev/null | cut -f1)
+    if [ -n "$cache_size" ] && [ "$cache_size" -gt "$max_size_mb" ]; then
+      echo "  🧹 Cache size (${cache_size}MB) exceeds limit, cleaning entries older than ${max_age_days} days..."
+      find "$REPO_ROOT/.turbo/cache" -type f -mtime +$max_age_days -delete
+      check "Turbo cache cleanup" "pass" "removed old entries (${cache_size}MB → cleaned)"
+    else
+      check "Turbo cache" "pass" "size acceptable (${cache_size}MB)"
+    fi
+  else
+    check "Turbo cache" "skip" "not present"
+  fi
+
+  # Clean Python bytecode (safe operation).
+  # Prune vendor/state trees so we only sweep project source: node_modules and
+  # .next are huge, and .venv holds installed deps whose bytecode is regenerated
+  # by Python on demand — deleting it just slows the next eval run.
+  if [ -d "$REPO_ROOT" ]; then
+    local pycache_count
+    pycache_count=$(find "$REPO_ROOT" \
+      \( -name node_modules -o -name .next -o -name .git -o -name .turbo -o -name .venv \) -prune -o \
+      -type d -name "__pycache__" -print 2>/dev/null | wc -l || true)
+    if [ "$pycache_count" -gt 0 ]; then
+      find "$REPO_ROOT" \
+        \( -name node_modules -o -name .next -o -name .git -o -name .turbo -o -name .venv \) -prune -o \
+        -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+      check "Python bytecode" "pass" "removed ${pycache_count} __pycache__ directories"
+    else
+      check "Python bytecode" "skip" "no __pycache__ directories"
+    fi
+  fi
+}
+
+# ══════════════════════════════════════════════════════════
+# MAIN
+# ══════════════════════════════════════════════════════════
+
+FORCE_KILL=false
+START_TOOLS=false
+QUICK_MODE=false
+START_CMS=false
+START_OVERVIEW=false
+RUN_E2E=false
+STRICT_MODE=false
+HEADLESS_MODE=false
+CLOUD_MODE=false
+START_FUXA=false
+
+if [ "${HEADLESS:-false}" = "true" ] || [ "${CI:-false}" = "true" ] || [ "${NO_OPEN:-false}" = "true" ]; then
+  HEADLESS_MODE=true
+fi
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --force | -f)
+    FORCE_KILL=true
+    shift
+    ;;
+  --tools | -t)
+    START_TOOLS=true
+    shift
+    ;;
+  --quick | -q)
+    QUICK_MODE=true
+    shift
+    ;;
+  --headless | --no-open)
+    HEADLESS_MODE=true
+    shift
+    ;;
+  --cloud | --hosted | --no-docker)
+    CLOUD_MODE=true
+    shift
+    ;;
+  --fuxa | --scada)
+    START_FUXA=true
+    shift
+    ;;
+  --cms)
+    START_CMS=true
+    shift
+    ;;
+  --overview)
+    START_OVERVIEW=true
+    shift
+    ;;
+  --e2e)
+    RUN_E2E=true
+    shift
+    ;;
+  --all)
+    START_CMS=true
+    START_OVERVIEW=true
+    shift
+    ;;
+  --strict)
+    STRICT_MODE=true
+    shift
+    ;;
+
+  *) shift ;;
+  esac
+done
+
+if [[ "${SUPABASE_URL:-}" =~ supabase\.(co|in) ]]; then
+  CLOUD_MODE=true
+fi
+
+banner
+
+if [ "$QUICK_MODE" = "true" ]; then
+  echo -e "  ${YELLOW}${BOLD}⚡ Quick mode${NC} — skipping Docker/Supabase, starting portal only"
+  echo
+elif [ "$CLOUD_MODE" = "true" ]; then
+  echo -e "  ${CYAN}${BOLD}☁️ Cloud mode${NC} — connecting directly to Cloud Supabase ($SUPABASE_URL)"
+  echo
+fi
+
+# ── Phase 0: Pre-flight (Cache & Stale Artifacts) ────────
+phase 0 "Pre-flight"
+
+# Clean leftover temp status scripts
+rm -f "$REPO_ROOT/.dev-status-"*.sh
+check "Temp artifacts" "pass" "cleaned"
+
+# Sync global assets (smart sync with checksums)
+if [ -f "$REPO_ROOT/scripts/sync-assets-smart.cjs" ]; then
+  node "$REPO_ROOT/scripts/sync-assets-smart.cjs"
+elif [ -f "$REPO_ROOT/scripts/sync-assets.sh" ]; then
+  bash "$REPO_ROOT/scripts/sync-assets.sh"
+  check "Global assets" "pass" "synchronized (legacy)"
+else
+  check "Global assets" "fail" "sync script missing"
+fi
+
+
+
+portal_healthy() {
+  curl -fs "http://localhost:$PORT/login" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200
+}
+
+# Check if any source file changed since portal last started
+source_files_stale() {
+  local marker="$REPO_ROOT/run/.portal.start"
+  [ ! -f "$marker" ] && return 0
+  find "$REPO_ROOT/apps/portal" \
+    \( -path "*/node_modules" -o -path "*/.next" -o -path "*/public" -o -path "*/.turbo" \) -prune -o \
+    -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.mjs" -o -name "*.js" \) \
+    -newer "$marker" -print -quit 2>/dev/null | grep -q .
+}
+
+FORCE_RESTART=false
+if portal_healthy; then
+  check "Portal health" "pass" "serving pages"
+  if source_files_stale; then
+    check "Source files" "warn" "changed since last start — force restart"
+    FORCE_RESTART=true
+  else
+    check "Source files" "pass" "no changes since last start"
+  fi
+else
+  check "Portal health" "warn" "needs restart"
+  FORCE_RESTART=true
+fi
+
+if [ "$FORCE_RESTART" = "true" ]; then
+  check "Restart" "pass" "preparing fresh start"
+
+  if [ -f "$REPO_ROOT/run/.portal.pid" ]; then
+    old_pid=$(cat "$REPO_ROOT/run/.portal.pid")
+    kill "$old_pid" 2>/dev/null || true
+    rm -f "$REPO_ROOT/run/.portal.pid" "$REPO_ROOT/run/.portal.start"
+    check "Stale portal process" "pass" "PID $old_pid cleaned"
+  else
+    check "Stale portal process" "skip" "no pid file"
+  fi
+
+  if lsof -ti:"$PORT" >/dev/null 2>&1; then
+    lsof -ti:"$PORT" | xargs kill 2>/dev/null || true
+    sleep 1
+    check "Port $PORT cleared" "pass" "freed by force"
+  else
+    check "Port $PORT cleared" "pass" "already free"
+  fi
+
+  # Project-wide Cache Cleanup (Smart Cleanup)
+  clean_dir_cache "$REPO_ROOT/.kilo" "Agent run cache (.kilo)"
+  # NOTE: .remember holds cross-session agent memory (now.md, today-*.md) read
+  # by the SessionStart hook — do NOT delete it. Only the transient .kilo run
+  # cache is purged.
+  smart_cache_cleanup # Smart Turborepo cache cleanup + Python bytecode
+
+  # Python virtual environment — packages/eval/.venv holds installed eval deps
+  # (pytest, deepeval). Reinstalling is slow, so only remove STALE venvs (>7
+  # days unused). Fresh environments survive force restarts.
+  venv_found=false
+  for venv_dir in "$REPO_ROOT/.venv" "$REPO_ROOT/packages/eval/.venv"; do
+    if [ -d "$venv_dir" ]; then
+      venv_found=true
+      if find "$venv_dir" -maxdepth 0 -mtime +7 >/dev/null 2>&1; then
+        venv_size=$(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}')
+        rm -rf "$venv_dir"
+        check "Python venv (stale >7d)" "pass" "freed ${venv_size:-?} ($venv_dir)"
+      else
+        check "Python venv" "pass" "recent — kept ($(du -sh "$venv_dir" 2>/dev/null | awk '{print $1}'))"
+      fi
+    fi
+  done
+  if [ "$venv_found" = "false" ]; then
+    check "Python venv" "skip" "not present"
+  fi
+
+  clean_dir_cache "$REPO_ROOT/.vercel" "Vercel cache (.vercel)"
+
+  if [ -f "$REPO_ROOT/skills-lock.json" ]; then
+    rm -f "$REPO_ROOT/skills-lock.json"
+    check "skills-lock.json" "pass" "removed"
+  fi
+
+  # Deployment logs directory — keep the tracked directory, only remove contents.
+  if [ -d "$REPO_ROOT/deployment-logs" ]; then
+    find "$REPO_ROOT/deployment-logs" -mindepth 1 -delete 2>/dev/null || true
+    check "Deployment logs directory" "pass" "contents cleaned"
+  else
+    mkdir -p "$REPO_ROOT/deployment-logs"
+    check "Deployment logs directory" "pass" "created empty directory"
+  fi
+  clean_dir_cache "$REPO_ROOT/apps/portal/.next/cache" "Next.js portal cache"
+
+  # CMS and Overview are optional apps; only clean their caches if they exist.
+  if [ -d "$REPO_ROOT/apps/cms" ]; then
+    clean_dir_cache "$REPO_ROOT/apps/cms/.next/cache" "Next.js CMS cache"
+  fi
+  if [ -d "$REPO_ROOT/apps/overview" ]; then
+    clean_dir_cache "$REPO_ROOT/apps/overview/.next/cache" "Next.js overview cache"
+  fi
+
+  clean_dir_cache "$REPO_ROOT/packages/eval/.pytest_cache" "Pytest cache"
+
+  if [ -f "$REPO_ROOT/run/portal.log" ]; then
+    logsize=$(du -sh "$REPO_ROOT/run/portal.log" 2>/dev/null | awk '{print $1}')
+    : >"$REPO_ROOT/run/portal.log"
+    check "Portal log" "pass" "cleared ${logsize:-old log}"
+  else
+    check "Portal log" "skip" "not present"
+  fi
+
+  SKIP_RESTART=false
+else
+  SKIP_RESTART=true
+fi
+
+# ── Phase 1: Environment ─────────────────────────────────
+phase 1 "Environment"
+
+env_pass=true
+node -v >/dev/null 2>&1 && check "Node.js" "pass" "$(node -v)" || {
+  check "Node.js" "fail"
+  env_pass=false
+}
+pnpm -v >/dev/null 2>&1 && check "pnpm" "pass" "$(pnpm -v)" || {
+  check "pnpm" "fail"
+  env_pass=false
+}
+
+# 1a. Check & Fix Docker (skip in quick mode or cloud mode)
+if [ "$QUICK_MODE" = "true" ] || [ "$CLOUD_MODE" = "true" ]; then
+  check "Docker" "skip" "$([ "$CLOUD_MODE" = "true" ] && echo "cloud mode" || echo "quick mode")"
+else
+  if ! docker info >/dev/null 2>&1; then
+    echo -e "  ${INFO} Docker is not running. Attempting to start docker..."
+    started=false
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      open -a Docker >/dev/null 2>&1 || true
+      for i in {1..15}; do
+        if docker info >/dev/null 2>&1; then
+          started=true
+          break
+        fi
+        sleep 1
+      done
+    elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux"* ]]; then
+      if command -v systemctl >/dev/null 2>&1 && sudo systemctl start docker >/dev/null 2>&1; then
+        started=true
+      fi
+    fi
+
+    if [ "$started" = "true" ] && docker info >/dev/null 2>&1; then
+      check "Docker" "pass" "started successfully"
+    else
+      check "Docker" "fail" "could not be started automatically — please start Docker Desktop manually."
+      env_pass=false
+    fi
+  else
+    check "Docker" "pass"
+  fi
+fi
+
+# 1b. Check & Fix Port Conflicts
+# Uses shared port utilities from common.sh (is_port_in_use, get_port_pid,
+# is_port_held_by_docker, kill_port) for the low-level port operations.
+check_and_fix_port() {
+  local port="$1" name="$2" service="$3"
+
+  # If the port is mapped by a running Docker container, it's fine
+  if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q -E "(0\.0\.0\.0|\[::\]|localhost|127\.0\.0\.1):$port->"; then
+    return 0
+  fi
+
+  # If it's Redis and it responds to PING, it's a valid native service
+  if [ "$name" = "Redis" ] && [ "$port" = "6379" ]; then
+    if command -v redis-cli >/dev/null 2>&1 && redis-cli -p "$port" PING 2>&1 | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
+      check "Port $port ($name)" "pass" "redis responding"
+      return 0
+    fi
+  fi
+
+  is_port_in_use "$port" || { check "Port $port ($name)" "pass" "free"; return 0; }
+
+  local pid proc
+  pid=$(get_port_pid "$port")
+  if [ -z "$pid" ]; then
+    check "Port $port ($name)" "fail" "occupied by a system/native service (PID inaccessible)"
+    env_pass=false
+    return 0
+  fi
+
+  proc=$(ps -p "$pid" -o comm= 2>/dev/null || echo "unknown")
+  if [[ "$proc" == *"docker"* ]]; then
+    return 0
+  fi
+
+  # Prompt before killing unless FORCE_KILL is set
+  if [ "$FORCE_KILL" = "true" ]; then
+    echo -e "  ${INFO} Force-clearing port $port ($name) PID $pid ($proc)..."
+  elif [ -t 0 ]; then
+    echo -n -e "  ${YELLOW}⚠ Port $port ($name) occupied by native $proc (PID $pid). Kill it? [y/N]: ${NC}"
+    read -r response </dev/tty || response="n"
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid)"
+      env_pass=false
+      return 0
+    fi
+  else
+    check "Port $port ($name)" "fail" "occupied by native $proc (PID $pid) — run with --force to clear"
+    env_pass=false
+    return 0
+  fi
+
+  # Try stopping the named systemd service first, then force-kill
+  if [ -n "$service" ] && command -v systemctl > /dev/null 2>&1 && sudo systemctl stop "$service" > /dev/null 2>&1; then
+    sleep 1
+    is_port_in_use "$port" || { check "Port $port ($name)" "pass" "freed native service"; return 0; }
+  fi
+  if kill_port "$port" 9; then
+    sleep 1
+    if ! is_port_in_use "$port"; then
+      check "Port $port ($name)" "pass" "killed conflicting process"
+      return 0
+    fi
+  fi
+  check "Port $port ($name)" "fail" "in use by PID $pid"
+  env_pass=false
+}
+
+if [ "$QUICK_MODE" = "true" ]; then
+  check_and_fix_port "$PORT" "Next.js portal" ""
+else
+  check_and_fix_port 54322 "Supabase DB" ""
+  check_and_fix_port 6379 "Redis" "redis-server"
+  check_and_fix_port 54321 "Supabase API" ""
+  check_and_fix_port 8000 "Kong Gateway" ""
+fi
+
+# 1c. Check & Fix Environment files
+if [ ! -f "$REPO_ROOT/apps/portal/.env" ] && [ ! -f "$REPO_ROOT/apps/portal/.env.local" ]; then
+  if [ -f "$REPO_ROOT/apps/portal/env/.env.example" ]; then
+    echo -e "  ${INFO} Apps portal .env missing. Copying from env/.env.example..."
+    cp "$REPO_ROOT/apps/portal/env/.env.example" "$REPO_ROOT/apps/portal/.env"
+    check "Environment file" "pass" "copied from template"
+    if grep -q -E "your-|TODO|CHANGEME" "$REPO_ROOT/apps/portal/.env" 2>/dev/null; then
+      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
+    fi
+  elif [ -f "$REPO_ROOT/apps/portal/.env.example" ]; then
+    echo -e "  ${INFO} Apps portal .env missing. Copying from .env.example..."
+    cp "$REPO_ROOT/apps/portal/.env.example" "$REPO_ROOT/apps/portal/.env"
+    check "Environment file" "pass" "copied from template"
+    if grep -q -E "your-|TODO|CHANGEME" "$REPO_ROOT/apps/portal/.env" 2>/dev/null; then
+      check "Environment secrets" "warn" "contains placeholder values — please configure them in apps/portal/.env"
+    fi
+  else
+    check "Environment file" "fail" "missing and no .env.example found"
+    env_pass=false
+  fi
+else
+  check "Environment file" "pass" "exists"
+fi
+
+if [ "$STRICT_MODE" = "true" ]; then
+  echo -e "  ${INFO} Strict Mode: Running pnpm install..."
+  pnpm install --prefer-offline >/dev/null 2>&1 && check "Dependencies" "pass" "synced (strict)" || {
+    check "Dependencies" "fail"
+    env_pass=false
+  }
+elif [ -d "$REPO_ROOT/node_modules" ]; then
+  check "Dependencies" "pass"
+else
+  echo -e "  ${INFO} Installing dependencies..."
+  pnpm install >/dev/null 2>&1 && check "Dependencies" "pass" || {
+    check "Dependencies" "fail"
+    env_pass=false
+  }
+fi
+
+[ "$env_pass" = false ] && {
+  echo -e "\n  ${RED}Environment checks failed. Aborting.${NC}\n"
+  exit 1
+}
+
+# ── Phase 1.5: Quality Gates (Strict Mode Only) ──────────
+if [ "$STRICT_MODE" = "true" ]; then
+  phase "1.5" "Quality Gates"
+  echo -e "  ${INFO} Running format checks..."
+  pnpm format:check >/dev/null 2>&1 && check "Formatting" "pass" || {
+    check "Formatting" "fail"
+    exit 1
+  }
+
+  echo -e "  ${INFO} Running quality gates (this may take a while)..."
+  pnpm quality >"$REPO_ROOT/run/quality.log" 2>&1 && check "Quality Gates" "pass" || {
+    check "Quality Gates" "fail"
+    echo -e "\n  ${RED}Quality checks failed. See run/quality.log${NC}\n"
+    exit 1
+  }
+fi
+
+# ── Phase 2: Infrastructure (Supabase) ───────────────────
+if [ "$QUICK_MODE" = "true" ]; then
+  phase 2 "Infrastructure"
+  check "Supabase API" "skip" "quick mode"
+  check "Database" "skip" "quick mode"
+  check "Studio" "skip" "quick mode"
+elif [ "$CLOUD_MODE" = "true" ]; then
+  phase 2 "Infrastructure (Cloud-First)"
+  # Real reachability check against the Cloud REST endpoint. 200 = reachable +
+  # anon key accepted; 401/403 = reachable but the anon header was rejected
+  # (still proves the endpoint resolves and the project is live). Anything else
+  # (incl. 000 = network error / paused project) is a warn, never a boot blocker.
+  cloud_api_code="000"
+  if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+    cloud_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
+      "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY}" 2>/dev/null || true)
+    [ -z "$cloud_api_code" ] && cloud_api_code="000"
+  fi
+  case "$cloud_api_code" in
+  200 | 401 | 403)
+    check "Supabase API" "pass" "${SUPABASE_URL} reachable (HTTP ${cloud_api_code})"
+    check "Database" "pass" "Cloud Postgres reachable via REST"
+    ;;
+  *)
+    check "Supabase API" "warn" "${SUPABASE_URL:-<unset>} not reachable (HTTP ${cloud_api_code}) — check network/keys/paused project"
+    check "Database" "warn" "Cloud Postgres not verified"
+    ;;
+  esac
+  check "Studio" "skip" "Cloud dashboard at supabase.com"
+else
+  phase 2 "Infrastructure"
+
+  if curl -fs "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
+    check "Supabase API" "pass" "http://localhost:54321 (local Supabase active)"
+  else
+    ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
+    if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
+      echo -e "  ${INFO} Starting Arch-Base Supabase (Docker)..."
+      (cd "$ARCH_BASE_DIR" && npx supabase start) >/dev/null 2>&1 &
+      SUPAPID=$!
+      spinner "$SUPAPID" "Booting Arch-Base Supabase containers"
+    elif [ -d "$REPO_ROOT/packages/database" ]; then
+      echo -e "  ${INFO} Starting local Supabase (Docker)..."
+      (cd "$REPO_ROOT/packages/database" && pnpx supabase start) >/dev/null 2>&1 &
+      SUPAPID=$!
+      spinner "$SUPAPID" "Booting local Supabase containers"
+    else
+      check "Supabase API" "skip" "no local Supabase configured — use --cloud for Cloud Supabase"
+    fi
+    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 15; then
+      check "Supabase API" "pass" "http://localhost:54321 active"
+    else
+      check "Supabase API" "warn" "local Supabase not responding — use --cloud for Cloud Supabase"
+    fi
+  fi
+
+  # Verify database connection
+  if curl -fs "http://127.0.0.1:54321/rest/v1/" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
+    check "Database" "pass" "Postgres responding"
+  else
+    check "Database" "warn" "API up but unexpected response"
+  fi
+
+  # 2b. Optional Tools
+  if [ "$START_TOOLS" = "true" ]; then
+    if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
+      echo -e "  ${INFO} Starting Docker Tools..."
+      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1
+
+      services=("plantcor-redis" "plantcor-qdrant")
+      for service in "${services[@]}"; do
+        printf "  ${CYAN}⏳${NC} Gating on $service health... "
+        svc_attempts=0
+        while [ $svc_attempts -lt 30 ]; do
+          svc_status=$(docker inspect --format='{{.State.Health.Status}}' "$service" 2>/dev/null || echo "starting")
+          if [ "$svc_status" = "healthy" ]; then
+            echo -e "${GREEN}healthy${NC}"
+            break
+          fi
+          sleep 2
+          ((svc_attempts++))
+        done
+        if [ $svc_attempts -eq 30 ]; then
+          echo -e "${YELLOW}timeout (continuing)${NC}"
+        fi
+      done
+      check "Docker Tools" "pass" "booted"
+    else
+      check "Docker Tools" "skip" "compose file missing"
+    fi
+  fi
+
+  # Studio check
+  curl -fs "http://127.0.0.1:54323" >/dev/null 2>&1 && check "Studio" "pass" "http://localhost:54323" || check "Studio" "skip" "not required"
+
+  # 2b. Redis — auto-start if not already running
+  REDIS_REQUIRED=true
+  if [ "$REDIS_REQUIRED" = "true" ]; then
+    if command -v redis-cli >/dev/null 2>&1 && echo "PING" | redis-cli 2>/dev/null | grep -q -E "(PONG|NOAUTH|WRONGPASS)"; then
+      check "Redis" "pass" "redis://localhost:6379 (already running)"
+    elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q "arch-redis"; then
+      check "Redis" "pass" "Docker container already running"
+    else
+      echo -e "  ${INFO} Starting Redis (Docker)..."
+      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.redis.yml" up -d >/dev/null 2>&1
+      REDIS_HEALTHY=false
+      for i in $(seq 1 15); do
+        if docker inspect --format='{{.State.Health.Status}}' arch-redis 2>/dev/null | grep -q "healthy"; then
+          REDIS_HEALTHY=true
+          break
+        fi
+        sleep 1
+      done
+      if [ "$REDIS_HEALTHY" = "true" ]; then
+        check "Redis" "pass" "redis://localhost:6379"
+      else
+        check "Redis" "warn" "started but health check pending — check 'docker ps'"
+      fi
+    fi
+  fi
+
+  # 2c. Open WebUI — launch if tools compose configuration has it
+  # if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
+  #   if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "plantcor-open-webui"; then
+  #     check "Open WebUI" "pass" "http://localhost:3005"
+  #   elif grep -q "open-webui:" "$REPO_ROOT/infra/docker/compose.tools.yml" 2>/dev/null; then
+  #     echo -e "  ${INFO} Starting Open WebUI (Docker Tools)..."
+  #     $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d open-webui > /dev/null 2>&1
+  #     for i in $(seq 1 15); do
+  #       if docker inspect --format='{{.State.Health.Status}}' plantcor-open-webui 2>/dev/null | grep -q "healthy"; then
+  #         break
+  #       fi
+  #       sleep 1
+  #     done
+  #     check "Open WebUI" "pass" "http://localhost:3005"
+  #   fi
+  # fi
+fi
+
+if [ "$START_FUXA" = "true" ] && [ "$QUICK_MODE" != "true" ]; then
+  # FUXA SCADA dev-sim — opt-in via --fuxa (local and cloud).
+  # Lightweight local container (frangoteam/fuxa), not real hardware. Heavy tools
+  # remain opt-in via -t (compose.tools.yml). Reverse-flow ingest (D2-a): the
+  # portal exposes /api/scada/tags which FUXA pulls via host.docker.internal.
+  if [ -f "$REPO_ROOT/infra/docker/compose.scada.yml" ]; then
+    timeout 30 $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.scada.yml" up -d >/dev/null 2>&1 || true
+  fi
+fi
+
+# ── Phase 2.6: Security & Exposure ────────────────────────
+# Read-only inspections. NEVER print secret values — only presence/status +
+# templated fix commands. NEVER mutate DB/RLS/auth.
+phase "2.6" "Security & Exposure"
+
+# Redis bind — warn only if REDIS_URL points beyond localhost.
+sec_redis_host="localhost"
+if [ -n "${REDIS_URL:-}" ]; then
+  sec_redis_host=$(printf '%s' "$REDIS_URL" | sed -E \
+    's#^[[:alpha:]][[:alnum:]+.-]*://##; s#^.*@##; s#[:/].*$##')
+  [ -z "$sec_redis_host" ] && sec_redis_host="localhost"
+fi
+case "$sec_redis_host" in
+localhost | 127.0.0.1 | 0.0.0.0)
+  check "Redis bind" "pass" "localhost-only ($sec_redis_host)"
+  ;;
+*)
+  check "Redis bind" "warn" "$sec_redis_host is non-local — bind 127.0.0.1 + set a password if exposed"
+  ;;
+esac
+
+# FUXA SCADA — only probe when explicitly enabled; dev-sim has no auth by design.
+if [ "$START_FUXA" = "true" ]; then
+  sec_fuxa_url="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+  sec_fuxa_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$sec_fuxa_url" 2>/dev/null || true)
+  [ -z "$sec_fuxa_code" ] && sec_fuxa_code="000"
+  case "$sec_fuxa_code" in
+  200 | 301 | 302)
+    check "FUXA SCADA" "pass" "$sec_fuxa_url reachable (dev-sim, auth disabled by design)"
+    ;;
+  000)
+    check "FUXA SCADA" "warn" "$sec_fuxa_url not reachable"
+    ;;
+  *)
+    check "FUXA SCADA" "info" "$sec_fuxa_url HTTP $sec_fuxa_code"
+    ;;
+  esac
+else
+  check "FUXA SCADA" "skip" "pass --fuxa to start dev-sim"
+fi
+
+# Supabase anon key presence + RLS advisory (read-only reminder, never a mutation).
+if [ -n "${SUPABASE_ANON_KEY:-}" ]; then
+  check "Anon key" "pass" "NEXT_PUBLIC_SUPABASE_ANON_KEY present"
+else
+  check "Anon key" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env"
+fi
+check "RLS advisory" "info" "ensure RLS ENABLED on every non-public table (employees.role/department_id policies)"
+
+# ── Phase 3: Portal (Start + Wait) ────────────────────────
+phase 3 "Portal"
+
+if [ "${SKIP_RESTART:-false}" = "true" ]; then
+  check "Dev server" "pass" "http://localhost:$PORT (already up)"
+else
+  # AGENT-TRACE: Build all workspace dependencies via Turbo before starting dev server.
+  # Turbo caches builds across packages — only rebuilds what changed.
+  echo -e "  ${INFO} Building workspace dependencies via Turbo (cached)..."
+  pnpm turbo run build --filter=!portal 2>/dev/null &&
+    check "Workspace deps" "pass" "Turbo build cached" ||
+    check "Workspace deps" "warn" "build had warnings — proceeding anyway"
+
+
+  echo -e "  \033[0;34mℹ\033[0m Starting Theme watcher..."
+  cd "$REPO_ROOT/packages/theme"
+  pnpm dev >"$REPO_ROOT/run/theme-watch.log" 2>&1 &
+  echo "$!" > "$REPO_ROOT/run/theme-watch.pid"
+
+  cd "$REPO_ROOT/apps/portal"
+  PORT=$PORT HOST=0.0.0.0 HOSTNAME=0.0.0.0 NODE_OPTIONS="${NODE_OPTIONS:- --max-old-space-size=2048 --no-deprecation}" pnpm dev >"$REPO_ROOT/run/portal.log" 2>&1 &
+  echo $! >"$REPO_ROOT/run/.portal.pid"
+  cd "$REPO_ROOT"
+  echo -e "  ${INFO} Starting Next.js dev server (via pnpm dev → Turbopack)..."
+
+  compiled=false
+  for i in $(seq 1 120); do
+    if curl -fs "http://localhost:$PORT/login" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
+      compiled=true
+      break
+    fi
+    if grep -qiE "Failed to compile|Module not found|Cannot find module|EADDRINUSE|Failed to start server" "$REPO_ROOT/run/portal.log" 2>/dev/null; then
+      break
+    fi
+    sleep 2
+  done
+
+  if [ "$compiled" = "true" ]; then
+    date +%s >"$REPO_ROOT/run/.portal.start"
+    check "Dev server" "pass" "http://localhost:$PORT (compiled)"
+  else
+    check "Dev server" "fail"
+    echo -e "\n  ${RED}Last 20 lines of portal.log:${NC}"
+    tail -20 "$REPO_ROOT/run/portal.log" 2>/dev/null | sed 's/^/  /'
+    exit 1
+  fi
+fi
+
+# ── Phase 3b: Additional Apps (CMS / Overview) ────────────
+phase "3b" "Additional Apps"
+
+start_extra_app() {
+  local app="$1" dir="$2" port="$3" logfile="$4" pidfile="$5" label="$6"
+  if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    check "$label" "pass" "http://localhost:$port (already up)"
+    return
+  fi
+  cd "$dir"
+  PORT=$port pnpm dev >"$logfile" 2>&1 &
+  echo $! >"$pidfile"
+  cd "$REPO_ROOT"
+  local ready=false
+  for i in $(seq 1 60); do
+    if curl -s "http://localhost:$port" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -qE "200|307|308|401|404"; then
+      ready=true
+      break
+    fi
+    sleep 2
+  done
+  if [ "$ready" = "true" ]; then
+    check "$label" "pass" "http://localhost:$port (compiled)"
+  else
+    check "$label" "warn" "startup timed out — check logs"
+  fi
+}
+
+if [ "$START_CMS" = "true" ]; then
+  start_extra_app \
+    "cms" "$REPO_ROOT/apps/cms" "3001" \
+    "$REPO_ROOT/run/cms.log" "$REPO_ROOT/run/.cms.pid" "CMS"
+fi
+
+if [ "$START_OVERVIEW" = "true" ]; then
+  start_extra_app \
+    "overview" "$REPO_ROOT/apps/overview" "${OVERVIEW_PORT:-3003}" \
+    "$REPO_ROOT/run/overview.log" "$REPO_ROOT/run/.overview.pid" "Overview"
+fi
+
+if [ "$START_CMS" != "true" ] && [ "$START_OVERVIEW" != "true" ]; then
+  check "Extra apps" "skip" "use --cms, --overview, or --all"
+fi
+
+# ── Phase 4: Smoke Tests ─────────────────────────────────
+phase 4 "Smoke Tests"
+
+# 4a. Health endpoint
+health_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://localhost:$PORT/api/health" 2>/dev/null || echo "000")
+if [ "$health_code" = "200" ] || [ "$health_code" = "503" ]; then
+  check "Health API" "pass" "/api/health (HTTP $health_code)"
+else
+  check "Health API" "warn" "no /api/health endpoint (HTTP $health_code)"
+fi
+
+# 4b. Login page loads
+login_code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "http://localhost:$PORT/login" 2>/dev/null || echo "000")
+if [ "$login_code" = "200" ]; then
+  check "Login page" "pass" "/login"
+else
+  check "Login page" "warn" "root page available instead (HTTP $login_code)"
+fi
+
+# 4d. Supabase RLS / anon key check
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Auth config" "skip" "quick mode"
+elif [ -n "${SUPABASE_ANON_KEY:-}" ] || grep -q 'NEXT_PUBLIC_SUPABASE_ANON_KEY' "$REPO_ROOT/apps/portal/.env" 2>/dev/null || grep -q 'NEXT_PUBLIC_SUPABASE_ANON_KEY' "$REPO_ROOT/.env" 2>/dev/null; then
+  check "Auth config" "pass" "anon key present"
+else
+  check "Auth config" "warn" "no NEXT_PUBLIC_SUPABASE_ANON_KEY in apps/portal/.env or .env"
+fi
+
+# 4e. Static assets accessible
+if curl -fs "http://localhost:$PORT/favicon.ico" >/dev/null 2>&1; then
+  check "Static assets" "pass"
+else
+  check "Static assets" "skip"
+fi
+
+# 4f. FUXA SCADA — only self-heal and probe when explicitly enabled.
+# AGENT-TRACE: `restart: unless-stopped` never revives an explicitly-stopped
+# container, so a single `docker stop`/`make clean-docker` would leave FUXA dead
+# forever. Detect exited -> start -> wait healthy before probing.
+if [ "$START_FUXA" = "true" ]; then
+  FUXA_URL="${NEXT_PUBLIC_FUXA_URL:-http://localhost:1881}"
+  fuxa_state="$(docker inspect --format='{{.State.Status}}' plantcor-fuxa 2>/dev/null || true)"
+  if [ "$fuxa_state" = "exited" ]; then
+    echo -e "  ${INFO} FUXA stopped — self-healing..."
+    docker start plantcor-fuxa >/dev/null 2>&1 || true
+  fi
+  for i in $(seq 1 15); do
+    docker inspect --format='{{.State.Health.Status}}' plantcor-fuxa 2>/dev/null | grep -q healthy && break
+    sleep 2
+  done
+  if curl -fs "$FUXA_URL" >/dev/null 2>&1; then
+    check "FUXA SCADA" "pass" "$FUXA_URL"
+  else
+    check "FUXA SCADA" "warn" "$FUXA_URL not reachable (SCADA degraded mode will activate)"
+  fi
+fi
+
+# 4g. Database reachability (Cloud REST + anon key + RLS end-to-end).
+# 200 = reachable + anon accepted; 401/403 = reachable but RLS-gated (still proves
+# connectivity + auth wiring); 000 = network error / paused project (warn, never block).
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Database" "skip" "quick mode"
+elif [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+  check "Database" "skip" "SUPABASE_URL / anon key unset"
+else
+  smoke_db_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
+    "${SUPABASE_URL}/rest/v1/" \
+    -H "apikey: ${SUPABASE_ANON_KEY}" \
+    -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" 2>/dev/null || true)
+  [ -z "$smoke_db_code" ] && smoke_db_code="000"
+  case "$smoke_db_code" in
+  200)
+    check "Database" "pass" "Cloud REST reachable (HTTP 200, anon key accepted)"
+    ;;
+  401 | 403)
+    check "Database" "pass" "Cloud REST reachable (HTTP $smoke_db_code, RLS-gated)"
+    ;;
+  *)
+    check "Database" "warn" "Cloud REST HTTP $smoke_db_code — check network/keys/paused project"
+    ;;
+  esac
+fi
+
+# 4h. Redis ping — direct redis-cli + the portal /api/health/redis endpoint.
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Redis ping" "skip" "quick mode"
+else
+  smoke_redis_ok=false
+  if command -v redis-cli >/dev/null 2>&1; then
+    if redis-cli -h 127.0.0.1 -p 6379 ping >/dev/null 2>&1; then
+      smoke_redis_ok=true
+    fi
+  fi
+  # Belt-and-suspenders: hit the existing portal health endpoint too.
+  if [ "$smoke_redis_ok" = "false" ] && curl -fs "http://localhost:$PORT/api/health/redis" >/dev/null 2>&1; then
+    smoke_redis_ok=true
+  fi
+  if [ "$smoke_redis_ok" = "true" ]; then
+    check "Redis ping" "pass" "PONG (127.0.0.1:6379)"
+  else
+    check "Redis ping" "warn" "no PONG — redis-cli missing or server down"
+  fi
+fi
+
+# 4i. Authenticated endpoint — full Supabase sign-in, then hit a protected route.
+# Reads SMOKE_TEST_EMAIL / SMOKE_TEST_PASSWORD from apps/portal/.env (gitignored).
+# NEVER echoes the password. Skips with an info row if creds absent — never blocks boot.
+if [ "$QUICK_MODE" = "true" ]; then
+  check "Auth endpoint" "skip" "quick mode"
+else
+  smoke_email=$(grep '^SMOKE_TEST_EMAIL=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- | tr -d '[:space:]' || echo '')
+  smoke_pass=$(grep '^SMOKE_TEST_PASSWORD=' "$REPO_ROOT/apps/portal/.env" 2>/dev/null | cut -d= -f2- || echo '')
+  if [ -z "$smoke_email" ] || [ -z "$smoke_pass" ]; then
+    check "Auth endpoint" "info" "set SMOKE_TEST_EMAIL/SMOKE_TEST_PASSWORD in apps/portal/.env to enable"
+  elif [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+    check "Auth endpoint" "skip" "SUPABASE_URL / anon key unset"
+  else
+    # Sign in via Supabase Auth (password grant). Extract access_token with node -e.
+    smoke_body=$(printf '{"email":"%s","password":"%s"}' "$smoke_email" "$smoke_pass")
+    smoke_token=$(curl -s --max-time 10 \
+      "${SUPABASE_URL}/auth/v1/token?grant_type=password" \
+      -H "apikey: ${SUPABASE_ANON_KEY}" \
+      -H "Content-Type: application/json" \
+      -d "$smoke_body" 2>/dev/null | node -e '
+        let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+          try { const j=JSON.parse(s); process.stdout.write(j.access_token||""); }
+          catch(e){ process.stdout.write(""); }
+        });
+      ' 2>/dev/null)
+    if [ -z "$smoke_token" ]; then
+      check "Auth endpoint" "warn" "sign-in failed — check SMOKE_TEST_EMAIL/PASSWORD (not a code problem)"
+    else
+      smoke_auth_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+        "http://localhost:$PORT/api/printers" \
+        -H "Authorization: Bearer ${smoke_token}" 2>/dev/null)
+      [ -z "$smoke_auth_code" ] && smoke_auth_code="000"
+      case "$smoke_auth_code" in
+      401)
+        check "Auth endpoint" "fail" "/api/printers returned 401 with valid JWT"
+        ;;
+      000)
+        check "Auth endpoint" "warn" "/api/printers unreachable (HTTP 000)"
+        ;;
+      *)
+        check "Auth endpoint" "pass" "signed in + /api/printers HTTP $smoke_auth_code (auth middleware working)"
+        ;;
+      esac
+    fi
+  fi
+fi
+
+# ── Phase 5: Environment Notes (advisory only — no mutation) ──────────────
+phase 5 "Environment Notes"
+
+# inotify watches — Next.js HMR + chokedelta benefit from a high limit.
+env_inotify=$(cat /proc/sys/fs/inotify/max_user_watches 2>/dev/null || echo "0")
+if [ "$env_inotify" -gt 0 ] 2>/dev/null && [ "$env_inotify" -lt 524288 ]; then
+  check "inotify" "info" "max_user_watches=$env_inotify (<524288) — raise for heavy HMR: echo fs.inotify_max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p"
+elif [ "$env_inotify" -gt 0 ] 2>/dev/null; then
+  check "inotify" "pass" "max_user_watches=$env_inotify"
+else
+  check "inotify" "skip" "could not read /proc/sys/fs/inotify/max_user_watches"
+fi
+
+# Turbo cache size — advise clearing stale cache if it has grown large.
+if [ -d "$REPO_ROOT/.turbo/cache" ]; then
+  env_turbo_size=$(du -sh "$REPO_ROOT/.turbo/cache" 2>/dev/null | cut -f1)
+  env_turbo_mb=$(du -sm "$REPO_ROOT/.turbo/cache" 2>/dev/null | cut -f1)
+  if [ -n "$env_turbo_mb" ] && [ "$env_turbo_mb" -ge 500 ] 2>/dev/null; then
+    check "Turbo cache" "info" "${env_turbo_size}B — large cache detected"
+  elif [ -n "$env_turbo_size" ]; then
+    check "Turbo cache" "pass" "${env_turbo_size}B"
+  else
+    check "Turbo cache" "skip" "could not measure .turbo/cache"
+  fi
+else
+  check "Turbo cache" "skip" "no .turbo/cache directory"
+fi
+
+# Portal log — advisory: logs clear on each start; persist with PORTAL_LOG_LEVEL if wanted.
+check "Portal log" "info" "logs reset each start — set PORTAL_LOG_LEVEL / redirect to a file for persistence"
+
+# Supabase free-tier keep-alive (Cloud only).
+if [ "$CLOUD_MODE" = "true" ]; then
+  check "Free-tier" "info" "Cloud free projects pause after 7d idle — cron GET /rest/v1/ to keep alive, or upgrade to paid tier"
+fi
+
+# ── Done ─────────────────────────────────────────────────
+show_results
+
+# Touch dev_ready file to signal success to the watchdog and cleanup traps
+touch "$REPO_ROOT/run/.dev_ready"
+# Kill the watchdog since boot completed
+if [ -n "${WATCHDOG_PID:-}" ]; then
+  kill "$WATCHDOG_PID" 2>/dev/null || true
+fi
+# Generate successful markdown report
+node "$REPO_ROOT/tools/repo/generate-dev-report.js" "SUCCESS"
+
+# ── E2E Test Runner ─────────────────────────
+if [ "$RUN_E2E" = "true" ]; then
+  phase "E2E" "Playwright Tests"
+  echo -e "  ${INFO} Seeding E2E test data..."
+  bash "$REPO_ROOT/scripts/seed-e2e.sh"
+  echo -e "  ${INFO} Running Playwright E2E tests..."
+  cd "$REPO_ROOT"
+  if [ -f "e2e/.auth/user.json" ]; then
+    rm -f "e2e/.auth/user.json"
+    check "Auth cache" "pass" "cleared for fresh session"
+  fi
+  pnpm test:e2e
+  E2E_EXIT=$?
+  if [ $E2E_EXIT -eq 0 ]; then
+    check "E2E tests" "pass" "all passed"
+  else
+    check "E2E tests" "fail" "exit code $E2E_EXIT — check above for failures"
+  fi
+fi
+
+if [ "$HEADLESS_MODE" != "true" ]; then
+  open_login_browser
+  launch_status_terminal
+else
+  check "Browser & Status Terminal" "skip" "headless mode"
+fi
+wait

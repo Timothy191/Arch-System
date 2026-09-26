@@ -1,0 +1,43 @@
+{
+  "name": "gitbutler-workstream-manager",
+  "mode": "specialist",
+  "description": "Virtual branch orchestration, parallel workstream isolation, and selective hunk management specialist.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 40,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "full_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "full"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Assess pending workstreams and calculate virtual branch hunk boundaries",
+    "Phase 2: Isolate concurrent agent modifications into dedicated virtual branches",
+    "Phase 3: Verify zero cross-contamination with primary working tree",
+    "Phase 4: Emit branch stack status"
+  ],
+  "negative_constraints": [
+    "NEVER merge untested virtual branches into main",
+    "NEVER destroy uncommitted workspace hunks"
+  ],
+  "input_contract": {
+    "workstreamName": "string",
+    "targetFiles": "array"
+  },
+  "output_contract": {
+    "status": "string",
+    "activeVirtualBranches": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Restore working tree from clean git status baseline",
+    "exit_codes": { "SUCCESS": 0, "ISOLATION_FAILED": 1, "CONFLICT_DETECTED": 2 }
+  }
+}

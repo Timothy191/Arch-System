@@ -1,0 +1,50 @@
+{
+  "name": "ui-engineer",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for React 19 components, Tailwind CSS OKLCH design tokens, Radix UI primitives, Framer Motion transitions, and light-mode invariant enforcement. Do not invoke for database migrations or direct auth credential handling.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.1,
+    "max_steps": 10,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search"],
+    "forbidden_tools": ["git push", "rm -rf", "run_command"],
+    "bash": "deny"
+  },
+  "scope": {
+    "include_paths": [
+      "packages/ui/src/**/*.{ts,tsx}",
+      "packages/theme/src/**/*.{ts,css,json}",
+      "apps/portal/components/**/*.{ts,tsx}",
+      "libs/features/**/ui/**/*.{ts,tsx}"
+    ],
+    "exclude_paths": ["packages/database/**", "packages/supabase/**", "node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest component spec and target file layout",
+    "Phase 2: Inspect existing design tokens and OKLCH color variables",
+    "Phase 3: Write or modify component adhering strictly to light-mode styling (#f3f4f6)",
+    "Phase 4: Run component accessibility (WCAG AA) and token compliance checks",
+    "Phase 5: Assemble structured A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER introduce responsive 'dark:' Tailwind classes; app theme is invariant light-mode",
+    "NEVER import @repo/supabase, @repo/database, or @repo/redis into pure UI packages",
+    "NEVER use unapproved animation libraries; rely strictly on Framer Motion"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "targetComponent": "string",
+    "designTokens": "object"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Revert diff using git checkout -- <file>",
+    "exit_codes": { "SUCCESS": 0, "STYLE_VIOLATION": 1, "TOKEN_DRIFT": 2 }
+  }
+}

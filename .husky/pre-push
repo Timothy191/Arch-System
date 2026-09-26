@@ -1,0 +1,4 @@
+export PATH="$HOME/.volta/bin:$PATH"
+
+
+pnpm turbo run lint type-check

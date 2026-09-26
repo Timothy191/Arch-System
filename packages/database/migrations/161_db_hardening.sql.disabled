@@ -1,0 +1,40 @@
+-- 159_db_hardening.sql
+-- Implements Phase 3: Database Hardening for Control Room and General Production
+
+-- 1. Compound Indexes for common operational queries
+-- Already exists on control_room_shift_reports via UNIQUE constraint, but we add explicitly if needed.
+-- But wait, UNIQUE automatically creates a btree index.
+
+-- Assuming `shift_status` table exists:
+CREATE INDEX IF NOT EXISTS idx_shift_status_lookup
+ON shift_status (department_id, shift_date, shift_type);
+
+-- Assuming `machine_telemetry` or `telemetry` or `breakdowns` exists, we add general composite indexes:
+-- Wait, let's target `breakdowns` and `telemetry` safely using IF EXISTS wrapper if possible, or just standard.
+DO $$
+BEGIN
+  -- We assume machine_operations exists
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'machine_operations') THEN
+    CREATE INDEX IF NOT EXISTS idx_machine_ops_machine_time
+    ON machine_operations (machine_id, recorded_at);
+  END IF;
+
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'breakdowns') THEN
+    CREATE INDEX IF NOT EXISTS idx_breakdowns_machine_time
+    ON breakdowns (machine_id, recorded_at);
+  END IF;
+END $$;
+
+-- 2. Audit/Revision Tables Append-Only
+-- Assuming `control_room_revisions` exists from 003_control_room_revisions.sql
+REVOKE UPDATE, DELETE ON control_room_revisions FROM authenticated, anon, public;
+
+-- Enforce strictly append-only at the RLS level
+DROP POLICY IF EXISTS "control_room_revisions_update" ON control_room_revisions;
+DROP POLICY IF EXISTS "control_room_revisions_delete" ON control_room_revisions;
+
+-- 3. Additional strict CHECK constraints on shift_reports
+ALTER TABLE control_room_shift_reports
+  ADD CONSTRAINT chk_system_uptime_bounds CHECK (system_uptime_percent >= 0 AND system_uptime_percent <= 100),
+  ADD CONSTRAINT chk_missed_incidents_non_negative CHECK (missed_incidents_count >= 0);
+

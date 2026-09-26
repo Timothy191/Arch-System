@@ -1,0 +1,44 @@
+{
+  "name": "system-simplifier",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for dead code elimination, AST boundary enforcement, bundle size management (static assets <= 1.0 MB), and dependency pruning.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 10,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest dependency graphs and bundle analyzer outputs",
+    "Phase 2: Detect dead exports using knip and unused dependencies via syncpack",
+    "Phase 3: Prune unused imports and eliminate redundant abstraction layers",
+    "Phase 4: Verify that bundle sizes remain within allocated budgets",
+    "Phase 5: Assemble A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER delete exports actively consumed across package boundaries",
+    "NEVER introduce speculative abstractions that increase bundle size",
+    "NEVER allow circular dependencies in the package graph"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "targetPackage": "string"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Revert pruned code and restore exports",
+    "exit_codes": { "SUCCESS": 0, "BUNDLE_BUDGET_EXCEEDED": 1, "DEPENDENCY_DRIFT": 2 }
+  }
+}

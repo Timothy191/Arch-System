@@ -1,0 +1,15 @@
+{"hookId":"hk-1789384701424","timestamp":"2026-09-14T11:18:21.424Z","hookName":"agent:PreInvocation","payload":{}}
+{"hookId":"hk-1789384801465","timestamp":"2026-09-14T11:20:01.465Z","hookName":"agent:PreInvocation","payload":{}}
+{"hookId":"hk-1789384801465","timestamp":"2026-09-14T11:20:01.465Z","hookName":"agent:PreToolUse","payload":{"command":"pnpm build && pnpm test"}}
+{"hookId":"hk-1789385994956","timestamp":"2026-09-14T11:39:54.956Z","hookName":"agent:PreInvocation","payload":{}}
+{"hookId":"hk-1789385994956","timestamp":"2026-09-14T11:39:54.956Z","hookName":"agent:PreToolUse","payload":{"command":"pnpm build && pnpm test"}}
+{"hookId":"hk-1789386272718","timestamp":"2026-09-14T11:44:32.718Z","hookName":"agent:PreInvocation","payload":{}}
+{"hookId":"hk-1789386272718","timestamp":"2026-09-14T11:44:32.718Z","hookName":"agent:PreToolUse","payload":{"command":"pnpm build && pnpm test"}}
+{"hookId":"hk-1789386722903","timestamp":"2026-09-14T11:52:02.903Z","hookName":"git:pre-commit","payload":{}}
+{"hookId":"hk-1789386724110","timestamp":"2026-09-14T11:52:04.110Z","hookName":"git:post-commit","payload":{}}
+{"hookId":"hk-1789387074708","timestamp":"2026-09-14T11:57:54.708Z","hookName":"git:pre-commit","payload":{}}
+{"hookId":"hk-1789387075596","timestamp":"2026-09-14T11:57:55.596Z","hookName":"git:post-commit","payload":{}}
+{"hookId":"hk-1789394695763","timestamp":"2026-09-14T14:04:55.763Z","hookName":"agent:PreInvocation","payload":{}}
+{"hookId":"hk-1789394695763","timestamp":"2026-09-14T14:04:55.763Z","hookName":"agent:PreToolUse","payload":{"command":"pnpm build && pnpm test"}}
+{"hookId":"hk-1789396107150","timestamp":"2026-09-14T14:28:27.150Z","hookName":"git:post-commit","payload":{}}
+{"hookId":"hk-1789396282509","timestamp":"2026-09-14T14:31:22.509Z","hookName":"git:post-commit","payload":{}}

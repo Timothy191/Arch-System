@@ -1,0 +1,22 @@
+{
+  "name": "@repo/database",
+  "description": "SQL migrations source of truth for Supabase database schema",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./migrations/*": "./migrations/*"
+  },
+  "scripts": {
+    "sync-migrations": "./scripts/sync-migrations.sh",
+    "check-migrations": "./scripts/sync-migrations.sh --check",
+    "db:types": "supabase gen types typescript --local > ./types.ts",
+    "supabase:gen": "supabase gen types typescript --local > ../supabase/src/database.types.ts",
+    "supabase:push": "supabase db push",
+    "supabase:reset": "supabase db reset",
+    "test": "node tests/migration-rollback-safety.mjs"
+  },
+  "devDependencies": {
+    "supabase": "catalog:"
+  }
+}

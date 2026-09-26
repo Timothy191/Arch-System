@@ -1,0 +1,15 @@
+/* AGENT-TRACE: Plain imports without layer() syntax to prevent bundler/PostCSS miscompilation to invalid @media layer() blocks */
+@import "./reset.css";
+@import "./typography.css";
+@import "./variables.css";
+@import "./variables-generated.css";
+@import "./glass.css";
+@import "./animations.css";
+@import "./transitions.css";
+@import "./focus.css";
+@import "./buttons.css";
+@import "./tabs.css";
+@import "./loaders.css";
+@import "./checks.css";
+@import "./cards.css";
+@import "./borders.css";

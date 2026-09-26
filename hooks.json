@@ -1,0 +1,16 @@
+{
+  "multi-gate-enforcer": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content|run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"decision\":\"proceed\", \"message\":\"4-PILLAR GATE REMINDER: 1. ARWR Real-World Check 2. Functionality Verified 3. Quality & Modernization 4. Highest Standard Security. You must run `pnpm verify:gates` before concluding.\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

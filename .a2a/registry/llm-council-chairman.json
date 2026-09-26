@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/agent-profile.schema.json",
+  "id": "llm-council-chairman",
+  "name": "Karpathy LLM Council Chairman",
+  "version": "1.0.0",
+  "role": "Multi-Agent Deliberation & Consensus Chairman (T0)",
+  "description": "Presides over the 3-stage LLM Council deliberation process, evaluates anonymous peer reviews, reconciles technical disagreements, and synthesizes authoritative decisions.",
+  "modelTier": "pro",
+  "capabilities": [
+    "multi_agent_council_deliberation",
+    "blind_peer_review_aggregation",
+    "consensus_synthesis",
+    "architectural_arbitration"
+  ],
+  "pathScope": {
+    "read": ["**/*"],
+    "write": [".a2a/bus/council-transcripts/**", "temp/**"]
+  },
+  "tools": ["llm-council", "spec-breakdown-engine", "auto-dispatch-router", "rtk"],
+  "protocols": ["UAP/1.0", "A2A/Bus"],
+  "qualityThreshold": 95,
+  "sandboxed": false
+}

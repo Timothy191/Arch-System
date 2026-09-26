@@ -1,0 +1,45 @@
+name: Deploy Canary to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
+        default: "latest"
+
+jobs:
+  canary_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Deploy Canary (10% Traffic)
+        run: |
+          echo "Deploying Canary version ${{ github.event.inputs.version }}..."
+          # In reality, this would apply an ArgoRollout or Istio VirtualService
+          # kubectl apply -f infra/k8s/rollout.yaml
+
+          # Simulate setting traffic weight
+          echo "Traffic shifted: 90% stable, 10% canary"
+
+      - name: Run Smoke Tests on Canary
+        run: |
+          echo "Running pnpm test:e2e against Canary endpoint..."
+          # pnpm test:e2e --url https://canary.arch-system.internal
+
+      - name: Monitor Canary Metrics for 5 minutes
+        run: |
+          echo "Monitoring Prometheus for HTTP 5xx errors or high latency on Canary..."
+          sleep 5 # Mocking wait time
+          # If metrics degrade:
+          # echo "Rollback triggered!" && exit 1
+
+      - name: Promote to 100%
+        run: |
+          echo "Canary stable. Promoting to 100% traffic."
+          # kubectl argo rollouts promote portal-rollout

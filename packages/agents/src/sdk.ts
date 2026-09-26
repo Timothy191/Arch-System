@@ -1,0 +1,102 @@
+/**
+ * @file sdk.ts
+ * @description High-level Agent Quality SDK Framework for @repo/agents.
+ * Provides unified entrypoints for pillar prompt assembly, output quality auditing, and reflection engine execution.
+ */
+
+import { type CoordinatorConfig, SubagentCoordinator, type Subtask } from './coordinator.js';
+import { AgentFleetRunner, type AgentSwarmReport } from './fleet-runner.js';
+import { type AgentPillarConfig, AgentPillarEnvelope } from './prompt-envelope.js';
+import { type QualityAuditResult, QualityGate } from './quality-gate.js';
+import {
+  ReflectionEngine,
+  type ReflectionEngineOptions,
+  type VerifiedTaskResult,
+} from './reflection-engine.js';
+
+export type {
+  AgentPillarConfig,
+  AgentSwarmReport,
+  QualityAuditResult,
+  ReflectionEngineOptions,
+  VerifiedTaskResult,
+};
+export { AgentFleetRunner, AgentPillarEnvelope, QualityGate, ReflectionEngine };
+
+export interface AgentSDKOptions {
+  coordinatorConfig?: CoordinatorConfig;
+  defaultPillarConfig?: Partial<AgentPillarConfig>;
+}
+
+export class AgentQualitySDK {
+  public coordinator: SubagentCoordinator;
+  private reflectionEngine: ReflectionEngine;
+
+  constructor(options: AgentSDKOptions = {}) {
+    this.coordinator = new SubagentCoordinator(options.coordinatorConfig);
+    this.reflectionEngine = new ReflectionEngine({
+      coordinatorConfig: options.coordinatorConfig,
+      pillarConfig: options.defaultPillarConfig,
+    });
+  }
+
+  /**
+   * One-line Quality Gate audit helper for code or diff text.
+   */
+  public audit(content: string, filePath?: string): QualityAuditResult {
+    return QualityGate.auditContent(content, filePath);
+  }
+
+  /**
+   * Formats Quality Gate audit results into Markdown feedback.
+   */
+  public formatFeedback(audit: QualityAuditResult): string {
+    return QualityGate.formatDiagnosticFeedback(audit);
+  }
+
+  /**
+   * Compiles system prompt adhering to the 9 Core Agent Setup Pillars.
+   */
+  public buildPillarPrompt(config: AgentPillarConfig, extraContext?: string): string {
+    return AgentPillarEnvelope.compileSystemPrompt(config, extraContext);
+  }
+
+  /**
+   * Executes multi-agent swarm audit across file payloads.
+   */
+  public runSwarmAudit(files: Array<{ filePath: string; content: string }>): AgentSwarmReport {
+    return AgentFleetRunner.runSwarmAudit(files);
+  }
+
+  /**
+   * Executes subagent task with automated Quality Gate self-reflection loop.
+   */
+  public async runTask(
+    task: Subtask,
+    options: ReflectionEngineOptions = {}
+  ): Promise<VerifiedTaskResult> {
+    return this.reflectionEngine.executeTaskWithReflection(task, options);
+  }
+
+  /**
+   * Runs multiple parallel subtasks cleanly with task decomposition.
+   */
+  public async runPlan(
+    plan: Subtask[],
+    options: ReflectionEngineOptions = {}
+  ): Promise<VerifiedTaskResult[]> {
+    const results: VerifiedTaskResult[] = [];
+    for (const task of plan) {
+      const res = await this.runTask(task, options);
+      results.push(res);
+    }
+    return results;
+  }
+}
+
+/**
+  Factory helper to create an AgentQualitySDK instance.
+ */
+export function createAgentSDK(options: AgentSDKOptions = {}): AgentQualitySDK {
+  return new AgentQualitySDK(options);
+}

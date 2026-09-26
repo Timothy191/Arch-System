@@ -1,0 +1,39 @@
+# Large archives and temp files
+Arch-System-main (2).zip
+Arch-System-main/
+out/
+temp/
+deployment-logs/
+test-results/
+backups/
+*.log
+
+# Documentation and heavy media
+docs/
+documentation/
+codebase-maps/
+
+# Test suites, Evals, and non-production tooling
+e2e/
+tests/
+k6/
+infra/
+monitoring/
+archive/
+packages/eval/
+
+# Agent and local environments
+.agents/
+.memory_base/
+.palabre/
+.gpt-researcher/
+.antigravity/
+.omg/
+.cargo/
+.venv/
+.changeset/
+.codebase-memory/
+
+# Build caches and build outputs
+.turbo/
+apps/portal/.next/

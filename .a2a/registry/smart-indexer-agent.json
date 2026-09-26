@@ -1,0 +1,44 @@
+{
+  "name": "smart-indexer-agent",
+  "mode": "indexer",
+  "description": "Continuous memory and codebase indexing specialist managing .memory_base/ retrospectives, graph associations, and auto-recall query interfaces.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 30,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [".memory_base/**", "archive/tracers/**", "tools/scripts/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest newly created retrospectives from .memory_base/retrospectives/",
+    "Phase 2: Validate against .memory_base/schema.json",
+    "Phase 3: Compile .memory_base/index.json and regenerate .memory_base/README.md",
+    "Phase 4: Prune stale ephemeral files and assert tracer indexing completeness"
+  ],
+  "negative_constraints": [
+    "NEVER mutate code files outside .memory_base/ and archive/",
+    "NEVER delete verified historical retrospectives"
+  ],
+  "input_contract": {
+    "action": "string",
+    "query": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "indexedCount": "number",
+    "results": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Log indexing failure and attempt schema repair",
+    "exit_codes": { "SUCCESS": 0, "PARSE_ERROR": 1, "SCHEMA_VIOLATION": 2 }
+  }
+}

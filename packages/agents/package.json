@@ -1,0 +1,25 @@
+{
+  "name": "@repo/agents",
+  "description": "Shared Agent Coordination engine and specialists using MCP and OpenAI/Together APIs",
+  "version": "1.0.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "langfuse": "^3.38.20",
+    "openai": "^4.82.0",
+    "p-limit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf dist .turbo",
+    "lint": "biome check .",
+    "type-check": "tsc --noEmit"
+  }
+}

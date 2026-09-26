@@ -1,0 +1,49 @@
+{
+  "name": "math-rag-specialist",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for mathematical reasoning, SymPy symbolic verification, dual-stream semantic RAG retrieval, formula normalization, and vector embedding accuracy. Do not invoke for generic CSS styling or UI wireframing.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 12,
+    "token_budget": 20000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [
+      "apps/portal/lib/ai/**/*.{ts,tsx}",
+      "packages/database/migrations/*vector*.sql",
+      "packages/database/migrations/*embedding*.sql"
+    ],
+    "exclude_paths": ["packages/ui/**", "node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest text queries, mathematical notation, and target vector configurations",
+    "Phase 2: Separate pure natural language semantics from raw LaTeX notation",
+    "Phase 3: Verify vector dimensionality (768-dim) and Ollama nomic-embed-text compatibility",
+    "Phase 4: Run symbolic equivalence and numerical tolerance sanity checks",
+    "Phase 5: Assemble structured A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER embed raw mathematical LaTeX without separating semantic tokens",
+    "NEVER query vector databases without user-isolated RLS filters",
+    "NEVER return mathematical solutions without empirical or symbolic verification"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "query": "string",
+    "targetEmbeddingDim": "number"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Fall back to cached embeddings or report mathematical contradiction",
+    "exit_codes": { "SUCCESS": 0, "VERIFICATION_ERROR": 1, "RAG_RETRIEVAL_MISS": 2 }
+  }
+}

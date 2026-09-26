@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Shell shim: delegates to the CommonJS Ralph Loop driver.
+exec "$(dirname "$0")/ralph.cjs" "$@"

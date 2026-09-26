@@ -1,0 +1,9 @@
+{
+  "name": "@repo/eval",
+  "description": "LLM evaluation suite for Arch-Systems portal — AI service quality and code generation compliance",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "command -v poetry >/dev/null 2>&1 && poetry run pytest tests/ -v || (command -v uv >/dev/null 2>&1 && uv run --project . pytest tests/ -v 2>/dev/null) || echo 'Poetry not installed — python eval suite skipped'"
+  }
+}

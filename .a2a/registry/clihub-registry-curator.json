@@ -1,0 +1,42 @@
+{
+  "name": "clihub-registry-curator",
+  "mode": "specialist",
+  "description": "CLI tool metadata detection, clihub.yaml manifest generation, and agent hint curation specialist utilizing clihub.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 30,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["tools/**", ".agents/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Detect binary metadata via clihub convert <binary>",
+    "Phase 2: Populate agent_hints (when_to_use, example_usage, categories, tags)",
+    "Phase 3: Validate manifest formatting via clihub submit",
+    "Phase 4: Emit PR-ready registry entry"
+  ],
+  "negative_constraints": [
+    "NEVER publish tool manifests with missing agent_hints",
+    "NEVER exceed manifest character limits"
+  ],
+  "input_contract": {
+    "binaryName": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "manifestYaml": "string"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report manifest validation failure and provide schema corrections",
+    "exit_codes": { "SUCCESS": 0, "MANIFEST_INVALID": 1, "CONVERSION_ERROR": 2 }
+  }
+}

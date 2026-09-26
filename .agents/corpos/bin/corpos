@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Arch-CorpOS CLI: Autonomous Corporate Business Loops Controller
+# Synthesis of win.sh, CorpOS, and ai-company
+# ==============================================================================
+set -euo pipefail
+
+BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CORPOS_ROOT="$(cd "${BIN_DIR}/.." && pwd)"
+CONFIG_FILE="${CORPOS_ROOT}/corpos.config.json"
+ENGINE_DIR="${CORPOS_ROOT}/engine"
+STORAGE_DIR="${CORPOS_ROOT}/storage"
+APPROVALS_DIR="${STORAGE_DIR}/approvals"
+JOURNAL_FILE="${STORAGE_DIR}/journal.jsonl"
+LOOPS_DIR="${CORPOS_ROOT}/loops"
+
+print_usage() {
+  cat <<EOF
+Usage: corpos <command> [options]
+
+Commands:
+  status                   Display company hierarchy, departments, active loops, and pending approvals
+  tick <loop-id> [options] Execute an autonomous business loop tick (e.g., codebase-health, shift-integrity)
+                           Options:
+                             --dry-run             Simulate without mutation
+                             --signal <payload>    Pass custom signal string
+  approve <approval-id>    Approve a pending Level 3 human approval request
+  journal [--limit N]      View chronological audit ledger of executed loop ticks
+  help                     Show this help message
+
+Examples:
+  corpos status
+  corpos tick codebase-health --dry-run
+  corpos tick shift-integrity --signal "scada_alarm_conveyor_3"
+  corpos approve tick-20260911-102500-cbh
+  corpos journal --limit 5
+EOF
+}
+
+cmd_status() {
+  node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const cfg = JSON.parse(fs.readFileSync("'"${CONFIG_FILE}"'", "utf8"));
+    console.log("======================================================================");
+    console.log("🏢 " + cfg.company_name);
+    console.log("📌 System: Arch-CorpOS v" + cfg.version);
+    console.log("======================================================================\n");
+
+    console.log("🏛️  ORGANIZATIONAL TIERS & DEPARTMENTS:");
+    for (const [deptId, dept] of Object.entries(cfg.departments)) {
+      console.log(`  • [${dept.authority_ceiling}] ${dept.name} (${deptId})`);
+      console.log(`    Lead Role: ${dept.lead_role}`);
+      console.log(`    Assigned Loops: ${dept.assigned_loops.join(", ") || "(none)"}`);
+    }
+
+    console.log("\n🔄 REGISTERED BUSINESS LOOPS:");
+    const loopsDir = "'"${LOOPS_DIR}"'";
+    if (fs.existsSync(loopsDir)) {
+      const entries = fs.readdirSync(loopsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const loopFile = path.join(loopsDir, entry.name, "LOOP.md");
+          if (fs.existsSync(loopFile)) {
+            const content = fs.readFileSync(loopFile, "utf8");
+            const deptMatch = content.match(/department:\s*["\x27]?([^\r\n"\x27]+)/);
+            const authMatch = content.match(/authority_level:\s*["\x27]?([^\r\n"\x27]+)/);
+            console.log(`  • ${entry.name} [Dept: ${deptMatch ? deptMatch[1] : "unknown"} | Auth: ${authMatch ? authMatch[1] : "L1"}]`);
+          }
+        }
+      }
+    }
+
+    console.log("\n📬 PENDING HUMAN APPROVALS (Level 3):");
+    const appDir = "'"${APPROVALS_DIR}"'";
+    let pendingCount = 0;
+    if (fs.existsSync(appDir)) {
+      const files = fs.readdirSync(appDir);
+      for (const file of files) {
+        if (file.endsWith(".md")) {
+          const content = fs.readFileSync(path.join(appDir, file), "utf8");
+          if (content.includes("status: PENDING_APPROVAL")) {
+            console.log(`  ⏳ ${file.replace(".md", "")}`);
+            pendingCount++;
+          }
+        }
+      }
+    }
+    if (pendingCount === 0) {
+      console.log("  (No pending approvals - system fully cleared)");
+    }
+
+    console.log("\n======================================================================");
+  '
+}
+
+cmd_tick() {
+  if [[ $# -eq 0 ]]; then
+    echo "Error: loop-id required. Available loops:" >&2
+    ls -1 "${LOOPS_DIR}"
+    exit 1
+  fi
+  "${ENGINE_DIR}/tick.sh" "$@"
+}
+
+cmd_approve() {
+  if [[ $# -eq 0 ]]; then
+    echo "Error: approval-id required." >&2
+    exit 1
+  fi
+  local APPROVAL_ID="$1"
+  local FILE="${APPROVALS_DIR}/${APPROVAL_ID}.md"
+  if [[ ! -f "${FILE}" ]]; then
+    # Try finding without .md or with partial name
+    local CANDIDATE
+    CANDIDATE=$(find "${APPROVALS_DIR}" -name "*${APPROVAL_ID}*.md" | head -n 1)
+    if [[ -n "${CANDIDATE}" && -f "${CANDIDATE}" ]]; then
+      FILE="${CANDIDATE}"
+    else
+      echo "Error: Approval file for '${APPROVAL_ID}' not found in ${APPROVALS_DIR}." >&2
+      exit 1
+    fi
+  fi
+
+  node -e '
+    const fs = require("fs");
+    const filePath = "'"${FILE}"'";
+    let content = fs.readFileSync(filePath, "utf8");
+    const now = new Date().toISOString();
+    content = content.replace(/status:\s*PENDING_APPROVAL/, "status: APPROVED");
+    content = content.replace(/approved_by:\s*null/, "approved_by: \"human_operator\"");
+    content = content.replace(/approved_at:\s*null/, "approved_at: \"" + now + "\"");
+    fs.writeFileSync(filePath, content, "utf8");
+    console.log("✅ [APPROVED]: Approval card updated successfully.");
+    console.log("📄 File: " + filePath);
+    console.log("Timestamp: " + now);
+  '
+}
+
+cmd_journal() {
+  local LIMIT=10
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --limit) LIMIT="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+
+  if [[ ! -f "${JOURNAL_FILE}" || ! -s "${JOURNAL_FILE}" ]]; then
+    echo "Journal is empty. No loop ticks recorded yet."
+    exit 0
+  fi
+
+  node -e '
+    const fs = require("fs");
+    const readline = require("readline");
+    const lines = fs.readFileSync("'"${JOURNAL_FILE}"'", "utf8").trim().split("\n").filter(Boolean);
+    const limit = parseInt("'"${LIMIT}"'", 10) || 10;
+    const selected = lines.slice(-limit);
+
+    console.log(`\n📓 LAST ${selected.length} AUDIT JOURNAL ENTRIES:\n`);
+    for (const line of selected) {
+      try {
+        const item = JSON.parse(line);
+        console.log(`[${item.timestamp}] ${item.tick_id}`);
+        console.log(`   Loop: ${item.loop_id} | Dept: ${item.department} | Auth: ${item.authority_level}`);
+        console.log(`   Signal: ${item.signal} -> Status: ${item.status}`);
+        console.log(`   Next Run: ${item.next_scheduled_run}`);
+        console.log("   ------------------------------------------------------------");
+      } catch (err) {
+        console.log(line);
+      }
+    }
+  '
+}
+
+# ------------------------------------------------------------------------------
+# Dispatch Command
+# ------------------------------------------------------------------------------
+COMMAND="${1:-"help"}"
+shift || true
+
+case "${COMMAND}" in
+  status)
+    cmd_status "$@"
+    ;;
+  tick)
+    cmd_tick "$@"
+    ;;
+  approve)
+    cmd_approve "$@"
+    ;;
+  journal)
+    cmd_journal "$@"
+    ;;
+  help|--help|-h)
+    print_usage
+    ;;
+  *)
+    echo "Unknown command: ${COMMAND}" >&2
+    print_usage
+    exit 1
+    ;;
+esac

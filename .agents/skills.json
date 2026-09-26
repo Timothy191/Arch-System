@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "path": ".agents/skills",
+      "include_only": [
+        "supabase",
+        "trailblazer",
+        "ce-compound",
+        "llm-council",
+        "ultragoal",
+        "fresh-cli",
+        "quartermaster",
+        "real-world-checker",
+        "spec-driven-swarming",
+        "universal-agentic-execution",
+        "self-reflection-loop",
+        "dag-orchestrator",
+        "eval-loop"
+      ]
+    }
+  ]
+}

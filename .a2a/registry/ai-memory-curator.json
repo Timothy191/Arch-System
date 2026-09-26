@@ -1,0 +1,43 @@
+{
+  "name": "ai-memory-curator",
+  "mode": "specialist",
+  "description": "Cross-session memory synthesis, observation capture, and long-term knowledge graph curator utilizing ai-memory plugin.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "max_steps": 30,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [".memory_base/**", "docs/**", "archive/tracers/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest session observations and distill key architectural decisions",
+    "Phase 2: Synthesize reusable memory nodes and link into .memory_base/",
+    "Phase 3: Update retrospective indexes and knowledge graphs",
+    "Phase 4: Emit memory health summary"
+  ],
+  "negative_constraints": [
+    "NEVER persist sensitive credentials or tokens in memory nodes",
+    "NEVER overwrite verified historical knowledge without deprecation markers"
+  ],
+  "input_contract": {
+    "sessionLog": "string",
+    "keyObservations": "array"
+  },
+  "output_contract": {
+    "status": "string",
+    "persistedNodes": "array"
+  },
+  "recovery_protocol": {
+    "on_failure": "Fall back to local json retrospective logging",
+    "exit_codes": { "SUCCESS": 0, "PARSE_FAILED": 1, "SCHEMA_ERROR": 2 }
+  }
+}

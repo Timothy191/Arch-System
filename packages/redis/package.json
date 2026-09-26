@@ -1,0 +1,30 @@
+{
+  "name": "@repo/redis",
+  "description": "Redis client, caching helpers, cache statistics, and TTL registry for department slug resolution and general caching",
+  "version": "1.0.0",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "jest": "^30.0.0",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./cache": "./src/cache.ts"
+  },
+  "main": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .turbo",
+    "dev": "tsc --watch",
+    "lint": "biome check .",
+    "type-check": "tsc --noEmit",
+    "test": "jest tests --passWithNoTests --runInBand"
+  },
+  "types": "./src/index.ts"
+}

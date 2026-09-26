@@ -1,0 +1,47 @@
+{
+  "name": "@repo/theme",
+  "description": "OKLCH design tokens, Style Dictionary code generation, Tailwind preset, and CSS variables as single source of truth for design system",
+  "version": "1.0.0",
+  "dependencies": {
+    "lucide-react": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "1.0.0",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react19",
+    "chokidar-cli": "^3.0.0",
+    "react": "catalog:react19",
+    "style-dictionary": "^5.4.1",
+    "stylelint": "^17.15.0",
+    "stylelint-config-standard": "^40.0.0",
+    "tailwindcss": "catalog:",
+    "@tailwindcss/typography": "^0.5.15",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "catalog:"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./css": "./src/css/index.css",
+    "./tokens": "./src/tokens/index.ts",
+    "./tokens/strata": "./src/tokens/strata.ts",
+    "./react": "./src/react/index.ts",
+    "./tailwind": "./src/tailwind/preset.ts",
+    "./motion": "./src/tokens/motion.ts"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  },
+  "private": true,
+  "scripts": {
+    "build": "pnpm codegen",
+    "clean": "rm -rf dist .turbo",
+    "codegen": "node sd.config.mjs && node scripts/generate-tokens.mjs",
+    "dev": "node sd.config.mjs --watch",
+    "lint": "biome check .",
+    "lint:css": "stylelint 'src/css/**/*.css'",
+    "lint:tokens": "node scripts/validate-tokens.mjs",
+    "tokens:watch": "chokidar 'tokens.json' -c 'pnpm build'",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module"
+}

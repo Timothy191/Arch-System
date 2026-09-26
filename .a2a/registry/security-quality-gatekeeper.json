@@ -1,0 +1,45 @@
+{
+  "name": "security-quality-gatekeeper",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for verifying monorepo boundary integrity, strict TypeScript checking (zero 'any'), ESLint/Prettier compliance, SQL injection prevention, and vulnerability auditing. Do not invoke for creative styling or speculative refactoring.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 12,
+    "token_budget": 20000
+  },
+  "permissions": {
+    "filesystem": "read_only",
+    "tools": ["view_file", "grep_search", "run_command"],
+    "forbidden_tools": ["git push", "rm -rf", "replace_file_content", "write_to_file"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["**/*"],
+    "exclude_paths": ["node_modules/**", ".git/**", "dist/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest modified file list from task handoff",
+    "Phase 2: Run QualityGate.auditContent against all modified lines",
+    "Phase 3: Run TypeScript compiler (tsc --noEmit) and linter (eslint)",
+    "Phase 4: Verify boundary compliance via policy:check and RLS auditor",
+    "Phase 5: Assemble structured A2AReviewVerdict with violation line numbers"
+  ],
+  "negative_constraints": [
+    "NEVER modify or write to any file directly; emit audit reports strictly to caller",
+    "NEVER accept explicit or implicit 'any' or @ts-ignore directives",
+    "NEVER approve diffs with missing InitPlan RLS subqueries or unhandled error exceptions"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "targetFiles": "array",
+    "gitDiff": "string"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report CRITICAL violations immediately and trigger ReflectionEngine",
+    "exit_codes": { "SUCCESS": 0, "LINT_OR_TYPE_FAILURE": 1, "SECURITY_VIOLATION": 2 }
+  }
+}

@@ -1,0 +1,17 @@
+:80 {
+	# Next.js Portal application
+	handle /* {
+		reverse_proxy portal:3000
+	}
+
+	# Langfuse Observability
+	handle /langfuse/* {
+		reverse_proxy langfuse:3000
+	}
+
+	# Grafana Monitoring
+	handle /grafana/* {
+		reverse_proxy grafana:3000
+	}
+}
+

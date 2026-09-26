@@ -1,0 +1,43 @@
+{
+  "name": "dexter-financial-analyst",
+  "mode": "specialist",
+  "description": "Mining operations financial analysis, equipment CAPEX/OPEX cost modeling, and shift profitability specialist.",
+  "runtime": {
+    "model": "gemini-2.5-pro",
+    "temperature": 0.0,
+    "max_steps": 40,
+    "token_budget": 24000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "write_to_file", "replace_file_content", "grep_search", "run_command"],
+    "forbidden_tools": ["git push --force"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": ["libs/features/departments/ui/src/control-room/**", "packages/utils/src/**"],
+    "exclude_paths": ["node_modules/**", ".git/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest shift operational logs and equipment runtimes",
+    "Phase 2: Calculate OPEX variance, fuel burn impact, and downtime costs via dexter analyze",
+    "Phase 3: Reconcile financial KPIs against budget baselines",
+    "Phase 4: Emit shift financial intelligence summary"
+  ],
+  "negative_constraints": [
+    "NEVER emit unverified financial estimates without clear variance ranges",
+    "NEVER modify financial ledger tables directly"
+  ],
+  "input_contract": {
+    "shiftId": "string",
+    "domain": "string"
+  },
+  "output_contract": {
+    "status": "string",
+    "financialSummary": "object"
+  },
+  "recovery_protocol": {
+    "on_failure": "Report missing telemetry feeds and compute fallback baseline",
+    "exit_codes": { "SUCCESS": 0, "DATA_MISSING": 1, "CALCULATION_ERROR": 2 }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "realtime-telemetry-engineer",
+  "mode": "subagent",
+  "description": "Specialist subagent responsible for Supabase Realtime CDC channels, WebSocket reconnect jitter, socket leak prevention, and TanStack Query state synchronization.",
+  "runtime": {
+    "model": "gemini-2.5-flash",
+    "temperature": 0.1,
+    "max_steps": 10,
+    "token_budget": 16000
+  },
+  "permissions": {
+    "filesystem": "scoped_write",
+    "tools": ["view_file", "replace_file_content", "write_to_file", "grep_search"],
+    "forbidden_tools": ["git push", "rm -rf"],
+    "bash": "scoped"
+  },
+  "scope": {
+    "include_paths": [
+      "apps/portal/lib/realtime/**/*.{ts,tsx}",
+      "apps/portal/lib/observability/**/*.{ts,tsx}",
+      "packages/supabase/src/**/*.ts"
+    ],
+    "exclude_paths": ["node_modules/**"]
+  },
+  "runbook": [
+    "Phase 1: Ingest CDC topic specs and event payload contracts",
+    "Phase 2: Inspect subscription lifecycles and component unmount hooks",
+    "Phase 3: Write robust channel listeners with jittered exponential backoff",
+    "Phase 4: Run unit tests asserting zero socket leaks",
+    "Phase 5: Assemble A2AReviewVerdict"
+  ],
+  "negative_constraints": [
+    "NEVER create a Realtime subscription without cleanup on unmount",
+    "NEVER parse incoming CDC events without Zod schema validation",
+    "NEVER block client UI thread on slow socket connections"
+  ],
+  "input_contract": {
+    "taskId": "string",
+    "channelName": "string",
+    "schema": "object"
+  },
+  "output_contract": {
+    "schema": ".a2a/schemas/review-verdict.schema.json"
+  },
+  "recovery_protocol": {
+    "on_failure": "Revert subscription diff and fall back to polling",
+    "exit_codes": { "SUCCESS": 0, "CONNECTION_ERROR": 1, "SCHEMA_MISMATCH": 2 }
+  }
+}

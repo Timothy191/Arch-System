@@ -1,0 +1,6 @@
+# Ignore all backup artifacts
+*.sql.gz
+*.manifest.txt
+
+# Keep the directory tracked (via .gitkeep)
+!.gitkeep

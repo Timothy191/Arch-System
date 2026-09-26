@@ -1,0 +1,28 @@
+Scope: all 26 workspace projects
+Progress: resolved 0, reused 1, downloaded 0, added 0
+apps/portal                              |  WARN  deprecated prom-client@15.1.3
+packages/utils                           |  WARN  deprecated @novu/node@2.6.6
+Progress: resolved 293, reused 269, downloaded 0, added 0
+Progress: resolved 2158, reused 1964, downloaded 0, added 0
+Progress: resolved 2208, reused 2014, downloaded 1, added 0
+Progress: resolved 2219, reused 2025, downloaded 1, added 0
+Progress: resolved 2244, reused 2050, downloaded 3, added 0
+Progress: resolved 2245, reused 2050, downloaded 3, added 0
+Progress: resolved 2304, reused 2084, downloaded 3, added 0
+ WARN  19 deprecated subdependencies found: @ungap/structured-clone@1.3.0, expect-playwright@0.8.0, glob@10.4.5, glob@10.5.0, glob@11.1.0, glob@7.1.6, glob@7.2.3, inflight@1.0.6, jest-process-manager@0.4.0, lodash.get@4.4.2, lodash.isequal@4.5.0, node-domexception@1.0.0, recharts@2.15.4, rimraf@3.0.2, serialize-error-cjs@0.1.4, tsconfck@3.1.6, uuid@8.3.2, uuid@9.0.1, whatwg-encoding@3.1.1
+Progress: resolved 2319, reused 2100, downloaded 3, added 0
+Packages: +8
+++++++++
+Progress: resolved 2319, reused 2100, downloaded 3, added 8, done
+. postinstall$ node scripts/patch-glass-css.mjs
+. postinstall: [patch-glass-css] Already patched — no @layer base found.
+. postinstall: Done
+. prepare$ husky
+. prepare: Done
+
+ WARN  Issues with peer dependencies found
+.
+└─┬ vite 8.0.16
+  └── ✕ unmet peer esbuild@"^0.27.0 || ^0.28.0": found 0.25.12
+
+Done in 11.8s using pnpm v9.15.9

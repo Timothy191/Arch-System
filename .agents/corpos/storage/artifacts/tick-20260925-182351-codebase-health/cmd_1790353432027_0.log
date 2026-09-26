@@ -1,0 +1,119 @@
+
+> arch-systems@1.5.1 type-check /home/tim/Fork/Arch-System
+> turbo run type-check
+
+
+   • Packages in scope: @repo/agents, @repo/auth/data-access, @repo/auth/ui, @repo/auth/utils, @repo/contract, @repo/database, @repo/departments/data-access, @repo/departments/ui, @repo/errors, @repo/eval, @repo/hub/ui, @repo/logger, @repo/rate-limiter, @repo/redis, @repo/shared/data-access, @repo/shared/hooks, @repo/shared/utils, @repo/supabase, @repo/theme, @repo/typescript-config, @repo/ui, @repo/utils, portal, scripts, scripts-seeds
+   • Running type-check in 25 packages
+   • Remote caching disabled
+
+@repo/ui:type-check: cache hit, replaying logs 07be9d2e3c39e287
+@repo/departments/ui:type-check: cache hit, replaying logs ad0f5fb7b8b2db8a
+@repo/ui:type-check: 
+@repo/departments/ui:type-check: 
+@repo/ui:type-check: > @repo/ui@1.0.0 type-check /home/tim/Fork/Arch-System/packages/ui
+@repo/departments/ui:type-check: > @repo/departments/ui@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/departments/ui
+@repo/ui:type-check: > tsc --noEmit
+@repo/departments/ui:type-check: > tsc --noEmit
+@repo/ui:type-check: 
+@repo/departments/ui:type-check: 
+@repo/utils:type-check: cache hit, replaying logs 179c2c5453be4156
+@repo/utils:type-check: 
+@repo/utils:type-check: > @repo/utils@1.0.0 type-check /home/tim/Fork/Arch-System/packages/utils
+@repo/utils:type-check: > tsc --noEmit
+@repo/utils:type-check: 
+@repo/auth/data-access:type-check: cache hit, replaying logs e85370ed9d1c0f5f
+@repo/shared/data-access:type-check: cache hit, replaying logs 6bbc07d683311af3
+@repo/auth/data-access:type-check: 
+@repo/auth/data-access:type-check: > @repo/auth/data-access@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/auth/data-access
+@repo/shared/data-access:type-check: 
+@repo/auth/data-access:type-check: > tsc --noEmit
+@repo/shared/data-access:type-check: > @repo/shared/data-access@1.0.0 type-check /home/tim/Fork/Arch-System/libs/shared/data-access
+@repo/auth/data-access:type-check: 
+@repo/shared/data-access:type-check: > tsc --noEmit
+@repo/shared/data-access:type-check: 
+@repo/contract:type-check: cache hit, replaying logs ce7b68ab973dc1f2
+@repo/contract:type-check: 
+@repo/contract:type-check: > @repo/contract@1.0.0 type-check /home/tim/Fork/Arch-System/packages/contract
+@repo/contract:type-check: > tsc --noEmit
+@repo/contract:type-check: 
+@repo/auth/ui:type-check: cache hit, replaying logs 1a590c8f1c4b7808
+@repo/departments/data-access:type-check: cache hit, replaying logs e65646858fc153c4
+@repo/departments/data-access:type-check: 
+@repo/departments/data-access:type-check: > @repo/departments/data-access@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/departments/data-access
+@repo/departments/data-access:type-check: > tsc --noEmit
+@repo/departments/data-access:type-check: 
+@repo/rate-limiter:type-check: cache hit, replaying logs 22ed3b0e6dc97ce4
+@repo/shared/hooks:type-check: cache hit, replaying logs 822a7479a65658b0
+@repo/rate-limiter:type-check: 
+@repo/auth/ui:type-check: 
+@repo/shared/hooks:type-check: 
+@repo/auth/ui:type-check: > @repo/auth/ui@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/auth/ui
+@repo/auth/ui:type-check: > tsc --noEmit
+@repo/rate-limiter:type-check: > @repo/rate-limiter@1.0.0 type-check /home/tim/Fork/Arch-System/packages/rate-limiter
+@repo/shared/hooks:type-check: > @repo/shared/hooks@1.0.0 type-check /home/tim/Fork/Arch-System/libs/shared/hooks
+@repo/shared/hooks:type-check: > tsc --noEmit
+@repo/shared/hooks:type-check: 
+@repo/rate-limiter:type-check: > tsc --noEmit
+@repo/rate-limiter:type-check: 
+@repo/auth/ui:type-check: 
+@repo/hub/ui:type-check: cache hit, replaying logs 2de40a78167c0755
+@repo/hub/ui:type-check: 
+@repo/hub/ui:type-check: > @repo/hub/ui@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/hub/ui
+@repo/hub/ui:type-check: > tsc --noEmit
+@repo/hub/ui:type-check: 
+portal:type-check: cache hit, replaying logs dbaad9298fb116e4
+@repo/logger:type-check: cache hit, replaying logs a5c22769c9b1f949
+@repo/logger:type-check: 
+portal:type-check: 
+@repo/logger:type-check: > @repo/logger@1.0.0 type-check /home/tim/Fork/Arch-System/packages/logger
+portal:type-check: > portal@1.0.0 type-check /home/tim/Fork/Arch-System/apps/portal
+@repo/logger:type-check: > tsc --noEmit
+portal:type-check: > tsc --noEmit
+@repo/logger:type-check: 
+portal:type-check: 
+@repo/supabase:type-check: cache hit, replaying logs db2f7b775bf00b9c
+@repo/redis:type-check: cache hit, replaying logs 8f33cb35ed911f87
+@repo/shared/utils:type-check: cache hit, replaying logs 6a3c3ac72a274ba1
+@repo/auth/utils:type-check: cache hit, replaying logs 7aff9009cf5f977f
+scripts-seeds:type-check: cache hit, replaying logs 36eff9cedfc744b2
+@repo/agents:type-check: cache hit, replaying logs 63bfc1f659eb609b
+@repo/agents:type-check: 
+@repo/agents:type-check: > @repo/agents@1.0.0 type-check /home/tim/Fork/Arch-System/packages/agents
+@repo/agents:type-check: > tsc --noEmit
+@repo/agents:type-check: 
+@repo/supabase:type-check: 
+@repo/supabase:type-check: > @repo/supabase@1.0.0 type-check /home/tim/Fork/Arch-System/packages/supabase
+@repo/supabase:type-check: > tsc --noEmit
+@repo/supabase:type-check: 
+@repo/redis:type-check: 
+@repo/redis:type-check: > @repo/redis@1.0.0 type-check /home/tim/Fork/Arch-System/packages/redis
+@repo/redis:type-check: > tsc --noEmit
+@repo/redis:type-check: 
+@repo/shared/utils:type-check: 
+@repo/shared/utils:type-check: > @repo/shared/utils@1.0.0 type-check /home/tim/Fork/Arch-System/libs/shared/utils
+@repo/shared/utils:type-check: > tsc --noEmit
+@repo/shared/utils:type-check: 
+@repo/errors:type-check: cache hit, replaying logs ee8626c676e8c4b1
+@repo/theme:type-check: cache hit, replaying logs ba4b43a7990954e8
+@repo/errors:type-check: 
+@repo/errors:type-check: > @repo/errors@1.0.0 type-check /home/tim/Fork/Arch-System/packages/errors
+@repo/theme:type-check: 
+@repo/errors:type-check: > tsc --noEmit
+@repo/theme:type-check: > @repo/theme@1.0.0 type-check /home/tim/Fork/Arch-System/packages/theme
+@repo/errors:type-check: 
+@repo/theme:type-check: > tsc --noEmit
+@repo/theme:type-check: 
+@repo/auth/utils:type-check: 
+scripts-seeds:type-check: 
+@repo/auth/utils:type-check: > @repo/auth/utils@1.0.0 type-check /home/tim/Fork/Arch-System/libs/features/auth/utils
+@repo/auth/utils:type-check: > tsc --noEmit
+scripts-seeds:type-check: > scripts-seeds@1.0.0 type-check /home/tim/Fork/Arch-System/scripts/seeds
+@repo/auth/utils:type-check: 
+scripts-seeds:type-check: > tsc --noEmit
+scripts-seeds:type-check: 
+
+ Tasks:    21 successful, 21 total
+Cached:    21 cached, 21 total
+  Time:    220ms >>> FULL TURBO
+

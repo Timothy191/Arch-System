@@ -1,0 +1,7 @@
+{"timestamp": "2026-09-02T17:57:23+02:00", "action": "initialized", "target": "ultragoal", "details": "Initialized ultragoal tracking"}
+{"timestamp": "2026-09-02T17:57:23+02:00", "action": "transition", "target": "goal-1", "from": "todo", "to": "in-progress"}
+{"timestamp": "2026-09-02T17:58:56+02:00", "action": "transition", "target": "goal-1", "from": "in-progress", "to": "completed", "evidence": "/home/tim/.omg/ultragoal/goal-1-report.md"}
+{"timestamp": "2026-09-02T17:58:56+02:00", "action": "transition", "target": "goal-2", "from": "todo", "to": "in-progress"}
+{"timestamp": "2026-09-02T17:59:30+02:00", "action": "transition", "target": "goal-2", "from": "in-progress", "to": "completed", "evidence": "/home/tim/.omg/ultragoal/manager-delegation-prompt.md"}
+{"timestamp": "2026-09-02T17:59:30+02:00", "action": "transition", "target": "goal-3", "from": "todo", "to": "in-progress"}
+{"timestamp": "2026-09-03T08:34:50+02:00", "action": "transition", "target": "goal-3", "from": "in-progress", "to": "completed", "evidence": "/home/tim/.omg/ultragoal/goal-3-report.md"}

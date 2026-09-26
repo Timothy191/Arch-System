@@ -1,0 +1,49 @@
+# Base SCADA stack — always brought up by `pnpm dev` (non-quick, non-hosted).
+# AGENT-TRACE: Split out of compose.tools.yml (2026-08-28) so the lightweight
+# FUXA dev-sim is always available without opting into the heavy tools stack
+# (`pnpm dev -- -t`). Volume name `docker_fuxa_data` is preserved because the
+# compose project name derives from this directory (`docker`) — zero migration.
+#
+# network_mode: host (2026-08-28): the host runs a hardened nftables firewall
+# (input policy=drop, accepts only lo / established / icmp) that drops all
+# container->host traffic, so FUXA in a bridge network cannot reach the portal's
+# /api/scada/tags reverse-flow endpoint. Host networking lets FUXA use the host
+# loopback: getTags = http://127.0.0.1:3000/api/scada/tags (explicit IPv4; the
+# portal is IPv4-only and FUXA's node resolves `localhost` to IPv6 ::1).
+# FUXA's port 1881 binds directly on the host (browser iframe -> localhost:1881). Acceptable for
+# a local dev sim; revisit with bridge isolation + a firewall rule for prod.
+services:
+  fuxa:
+    image: frangoteam/fuxa:latest
+    container_name: plantcor-fuxa
+    restart: unless-stopped
+    network_mode: host
+    # FUXA's node process ignores SIGTERM -> SIGKILL (exit 137). SIGINT traps
+    # cleanly in node; 30s grace covers shutdown.
+    stop_signal: SIGINT
+    stop_grace_period: 30s
+    volumes:
+      - fuxa_data:/root/.fuxa
+    environment:
+      - NODE_ENV=production
+      # Point FUXA at the persistent volume so authored projects (project.fuxap.db,
+      # settings, alarms) survive container recreation. FUXA's default data dir is
+      # <cwd>/_appdata (ephemeral in the image); userDir moves it onto fuxa_data.
+      - userDir=/root/.fuxa
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "/usr/bin/bash", "-c", ":> /dev/tcp/127.0.0.1/1881"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  fuxa_data:

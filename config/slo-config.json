@@ -1,0 +1,70 @@
+{
+  "version": "1.0.0",
+  "description": "Service Level Objectives configuration",
+  "slois": [
+    {
+      "name": "api-availability",
+      "description": "API endpoint availability",
+      "target": 99.9,
+      "window": "30d",
+      "metric": "http_requests_total{status=~'2..'} / http_requests_total",
+      "errorBudgetPercent": 0.1
+    },
+    {
+      "name": "api-latency-p95",
+      "description": "API response time P95",
+      "target": 95,
+      "window": "7d",
+      "thresholdMs": 1000,
+      "metric": "histogram_quantile(0.95, http_request_duration_seconds)"
+    },
+    {
+      "name": "api-latency-p99",
+      "description": "API response time P99",
+      "target": 99,
+      "window": "7d",
+      "thresholdMs": 2000,
+      "metric": "histogram_quantile(0.99, http_request_duration_seconds)"
+    },
+    {
+      "name": "database-query-latency",
+      "description": "Database query performance",
+      "target": 99.5,
+      "window": "30d",
+      "thresholdMs": 500,
+      "criticalThresholdMs": 2000
+    },
+    {
+      "name": "error-rate",
+      "description": "Application error rate",
+      "target": 99,
+      "window": "24h",
+      "thresholdPercent": 1,
+      "criticalThresholdPercent": 5
+    },
+    {
+      "name": "cache-hit-rate",
+      "description": "Redis cache hit ratio",
+      "target": 95,
+      "window": "1h",
+      "metric": "redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses)"
+    },
+    {
+      "name": "auth-success-rate",
+      "description": "Authentication success rate",
+      "target": 99.9,
+      "window": "24h",
+      "criticalThresholdPercent": 0.5
+    }
+  ],
+  "alerting": {
+    "warningBurnRateThreshold": 10,
+    "criticalBurnRateThreshold": 100,
+    "consecutiveBreachesForAlert": 3,
+    "remindBeforeBudgetExhaustion": "24h"
+  },
+  "reporting": {
+    "dashboardUrl": "${SLO_DASHBOARD_URL}",
+    "weeklyReportRecipients": ["ops@archsystems.com", "lead@archsystems.com"]
+  }
+}
