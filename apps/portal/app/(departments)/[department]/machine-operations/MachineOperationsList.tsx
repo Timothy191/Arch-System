@@ -2,7 +2,7 @@
 
 import { GlassCard } from '@repo/ui/GlassCard';
 import { AlertCircle, Clock } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 
 interface DelayEntry {
   id: string;
@@ -73,37 +73,67 @@ function MachineOperationsList({
     );
   }
 
-  // Group by site_id, then by shift
-  const siteMap = new Map<string, { siteName: string; operations: MachineOperation[] }>();
-
-  for (const op of operations) {
-    const siteKey = op.site_id ?? '__none__';
-    const siteName = op.site?.name ?? 'No Site Assigned';
-    if (!siteMap.has(siteKey)) {
-      siteMap.set(siteKey, { siteName, operations: [] });
+  // AGENT-TRACE: Pre-index todayLoads into a Map by machine_id to replace O(N * L) filter/reduce with O(1) Map lookups
+  const loadsByMachine = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!todayLoads) return map;
+    for (const load of todayLoads) {
+      if (!load.machine_id) continue;
+      map.set(load.machine_id, (map.get(load.machine_id) || 0) + (load.total_loads || 0));
     }
-    siteMap.get(siteKey)!.operations.push(op);
-  }
+    return map;
+  }, [todayLoads]);
 
-  // "No Site Assigned" last
-  const siteEntries = Array.from(siteMap.entries()).sort(([a], [b]) => {
-    if (a === '__none__') return 1;
-    if (b === '__none__') return -1;
-    return 0;
-  });
+  // AGENT-TRACE: Pre-index activeBreakdowns into a Map by fleet_id to replace O(N * B) array searching with O(1) Map lookups
+  const breakdownsByFleet = useMemo(() => {
+    const map = new Map<string, Breakdown>();
+    if (!activeBreakdowns) return map;
+    for (const breakdown of activeBreakdowns) {
+      if (breakdown.fleet_id) {
+        map.set(breakdown.fleet_id, breakdown);
+      }
+    }
+    return map;
+  }, [activeBreakdowns]);
+
+  // AGENT-TRACE: Group operations by site and compute site metrics in a single O(N) pass inside useMemo
+  const siteEntries = useMemo(() => {
+    const siteMap = new Map<
+      string,
+      {
+        siteName: string;
+        operations: MachineOperation[];
+        siteHours: number;
+        siteBcm: number;
+      }
+    >();
+
+    for (const op of operations) {
+      const siteKey = op.site_id ?? '__none__';
+      const siteName = op.site?.name ?? 'No Site Assigned';
+      let entry = siteMap.get(siteKey);
+      if (!entry) {
+        entry = { siteName, operations: [], siteHours: 0, siteBcm: 0 };
+        siteMap.set(siteKey, entry);
+      }
+      entry.operations.push(op);
+      entry.siteHours += op.hours_worked || 0;
+
+      const binFactor = op.machine?.bin_factor || 0;
+      const machineLoads = loadsByMachine.get(op.machine_id) || 0;
+      entry.siteBcm += machineLoads * binFactor;
+    }
+
+    return Array.from(siteMap.entries()).sort(([a], [b]) => {
+      if (a === '__none__') return 1;
+      if (b === '__none__') return -1;
+      return 0;
+    });
+  }, [operations, loadsByMachine]);
 
   return (
     <div className="space-y-6">
-      {siteEntries.map(([siteKey, { siteName, operations: siteOps }]) => {
-        const siteHours = siteOps.reduce((sum, op) => sum + (op.hours_worked || 0), 0);
-        const siteBcm = siteOps.reduce((sum, op) => {
-          const bf = op.machine?.bin_factor || 0;
-          const loads = todayLoads
-            .filter((l) => l.machine_id === op.machine_id)
-            .reduce((s, l) => s + (l.total_loads || 0), 0);
-          return sum + loads * bf;
-        }, 0);
-
+      {siteEntries.map(([siteKey, { siteName, operations: siteOps, siteHours, siteBcm }]) => {
         const dayOps = siteOps.filter((op) => op.shift_type === 'day');
         const nightOps = siteOps.filter((op) => op.shift_type === 'night');
 
@@ -138,8 +168,13 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
-                      activeBreakdowns={activeBreakdowns}
+                      machineLoads={loadsByMachine.get(op.machine_id) || 0}
+                      machineBreakdown={
+                        breakdownsByFleet.get(op.machine_id) ||
+                        (op.machine?.serial_number
+                          ? breakdownsByFleet.get(op.machine.serial_number)
+                          : undefined)
+                      }
                     />
                   ))}
                 </div>
@@ -157,8 +192,13 @@ function MachineOperationsList({
                     <OperationCard
                       key={op.id}
                       operation={op}
-                      todayLoads={todayLoads}
-                      activeBreakdowns={activeBreakdowns}
+                      machineLoads={loadsByMachine.get(op.machine_id) || 0}
+                      machineBreakdown={
+                        breakdownsByFleet.get(op.machine_id) ||
+                        (op.machine?.serial_number
+                          ? breakdownsByFleet.get(op.machine.serial_number)
+                          : undefined)
+                      }
                     />
                   ))}
                 </div>
@@ -173,32 +213,21 @@ function MachineOperationsList({
 
 function OperationCard({
   operation,
-  todayLoads,
-  activeBreakdowns,
+  machineLoads,
+  machineBreakdown,
 }: {
   operation: MachineOperation;
-  todayLoads: HourlyLoadSummary[];
-  activeBreakdowns: Breakdown[];
+  machineLoads: number;
+  machineBreakdown?: Breakdown;
 }) {
   const isComplete = operation.end_time !== null && operation.hours_worked !== null;
   const isInProgress = operation.end_time === null;
 
-  // Calculate BCM metrics
+  // Calculate BCM metrics using pre-indexed machineLoads
   const binFactor = operation.machine?.bin_factor || 0;
-  const machineLoads =
-    todayLoads
-      ?.filter((l) => l.machine_id === operation.machine_id)
-      ?.reduce((sum, l) => sum + (l.total_loads || 0), 0) || 0;
   const materialBCM = machineLoads * binFactor;
   const bcmPerHour =
     (operation.hours_worked || 0) > 0 ? materialBCM / (operation.hours_worked || 1) : 0;
-
-  // AGENT-TRACE: Match breakdown by serial_number or machine_id
-  const machineBreakdown = activeBreakdowns?.find(
-    (b) =>
-      b.fleet_id === operation.machine_id ||
-      (operation.machine?.serial_number && b.fleet_id === operation.machine.serial_number)
-  );
 
   // AGENT-TRACE: Calculate delay totals by category and status
   const delayEntries = operation.delay_entries || [];
@@ -210,18 +239,20 @@ function OperationCard({
     .filter((d) => d.status === 'draft')
     .reduce((sum, d) => sum + d.duration_hours, 0);
 
-  // Group delays by category
-  const delaysByCategory = delayEntries.reduce(
-    (acc, delay) => {
-      const categoryName = delay.delay_category?.name || 'Unknown';
-      if (!acc[categoryName]) {
-        acc[categoryName] = 0;
-      }
-      acc[categoryName] += delay.duration_hours;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  // Group delays by category — memoize to avoid recalculation on toggle state changes
+  const delaysByCategory = useMemo(() => {
+    return delayEntries.reduce(
+      (acc, delay) => {
+        const categoryName = delay.delay_category?.name || 'Unknown';
+        if (!acc[categoryName]) {
+          acc[categoryName] = 0;
+        }
+        acc[categoryName] += delay.duration_hours;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }, [delayEntries]);
 
   const [showDelays, setShowDelays] = useState(false);
 
