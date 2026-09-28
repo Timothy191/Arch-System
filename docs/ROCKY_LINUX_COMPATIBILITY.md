@@ -129,7 +129,7 @@ The following improvements could enhance Rocky Linux compatibility:
 Once prerequisites are installed, run the script normally:
 
 ```bash
-cd /path/to/Arch-Mk2
+cd /path/to/Arch-System
 ./scripts/setup-production-environment.sh
 ```
 

@@ -13,7 +13,7 @@
  *
  * TASK: Replace placeholder text badges with official SVG assets once
  *       brand team provides them in /public/logo/.
- *       Track: https://github.com/your-org/Arch-Mk2/issues/[issue-number]
+ *       Track: https://github.com/Timothy191/arch-system/issues/
  */
 
 import { Cpu, Radio, ShieldCheck } from 'lucide-react';

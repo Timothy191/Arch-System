@@ -153,12 +153,12 @@ export default function TechStack() {
         <h3 className="text-lg font-medium text-text-heading mb-4">Monorepo Structure</h3>
         <div className="glass-card p-6 rounded-xl font-mono text-sm">
           <div className="text-text-secondary">
-            <span className="text-accent-green">Arch-Mk2/</span>
+            <span className="text-accent-green">Arch-System/</span>
             <br />
             &nbsp;&nbsp;├── <span className="text-accent-blue">apps/</span>
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span className="text-accent-green">portal/</span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 14 application
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Next.js 16 application
             <br />
             &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──{' '}
             <span className="text-text-muted">app/</span>

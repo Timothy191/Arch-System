@@ -157,11 +157,11 @@ Arch-System/
 - **Set up the project**: Start with [README.md](../README.md), then [CLAUDE.md](../CLAUDE.md)
 - **Understand the architecture**: Read [CLAUDE.md](../CLAUDE.md) Architecture section or view [codebase-maps](../codebase-maps/)
 - **Run development commands**: Check [AGENTS.md](AGENTS.md) Commands section
-- **Deploy the application**: Follow [DEPLOYMENT.md](../DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
+- **Deploy the application**: Follow [DEPLOYMENT.md](./DEPLOYMENT.md) or run `./scripts/setup-production-environment.sh`
 - **Deploy on Rocky Linux/RHEL**: Read [ROCKY_LINUX_COMPATIBILITY.md](./ROCKY_LINUX_COMPATIBILITY.md)
-- **Design a new component**: Reference [DESIGN.md](../DESIGN.md) and [PRODUCT.md](../PRODUCT.md)
+- **Design a new component**: Reference [DESIGN.md](./DESIGN.md) and [PRODUCT.md](./PRODUCT.md)
 - **Implement AI features**: Read [GEMINI.md](../GEMINI.md)
-- **Report a security issue**: Follow [SECURITY.md](../SECURITY.md)
+- **Report a security issue**: Follow [SECURITY.md](./SECURITY.md)
 - **Understand quality gates**: Review [AGENTS.md](AGENTS.md) Quality Gates section
 - **Review historical plans / checklist**: Check [archive/LIQUID_GLASS_CHECKLIST.md](./archive/LIQUID_GLASS_CHECKLIST.md)
 - **Find operational runbooks**: Check [operations/runbooks/](./operations/runbooks/)

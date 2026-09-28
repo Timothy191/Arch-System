@@ -1,23 +1,23 @@
-# Contributing to Arch-Mk2
+# Contributing to Arch-System
 
 ## Welcome
 
-Arch-Mk2 (the Plantcor mining operations portal) is an industrial operations platform built for high-scale vigilance and operational precision. The monorepo hosts the Next.js portal, a Payload CMS, the architecture overview app, and shared packages (theme, UI, supabase, database, redis, eval, types, utils, errors). The mission of this guide is to get you from a fresh clone to a first successful quality-gated PR with as little detective work as possible — and to make sure every contribution leaves the system at least as safe and well-typed as it found it.
+Arch-System (the Plantcor mining operations portal) is an industrial operations platform built for high-scale vigilance and operational precision. The monorepo hosts the Next.js portal and shared packages (theme, UI, supabase, database, contract, redis, logger, rate-limiter, errors, eval, agents, utils). The mission of this guide is to get you from a fresh clone to a first successful quality-gated PR with as little detective work as possible — and to make sure every contribution leaves the system at least as safe and well-typed as it found it.
 
 ## Quick start
 
 ### Prerequisites
 
-- **Node.js** ≥ 22 (pinned via Volta in `package.json` to `24.15.0`)
-- **pnpm** `9.15.9` (Volta-managed; see root `package.json` `volta` block)
+- **Node.js** ≥ 22 (the `volta` block in `package.json` pins `24.15.0`; any Node ≥22 manager works)
+- **pnpm** `9.15.9` (pinned via the `packageManager` field in root `package.json`)
 - **Docker** — required for local Supabase
 - **Git** with hooks enabled (Husky installs automatically on `pnpm install`)
 
 ### First clone
 
 ```bash
-git clone <repo-url> arch-mk2
-cd arch-mk2
+git clone <repo-url> arch-system
+cd arch-system
 pnpm install                       # installs deps and activates Husky hooks
 cp apps/portal/env/.env.example apps/portal/.env
 # edit apps/portal/.env — fill Supabase keys, Sentry DSN, etc.
@@ -51,9 +51,6 @@ The monorepo is a **Turborepo + pnpm workspaces** project (`turbo run` is the en
 | Path                | Purpose                                                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `apps/portal`       | Next.js 16+ (App Router, React 19) — the mining operations portal. Server Actions and API routes co-located with features. |
-| `apps/cms`          | Payload CMS v3 headless content service.                                                                                   |
-| `apps/overview`     | Standalone architecture visualization (React Flow).                                                                        |
-| `apps/ci-observer`  | CI observation helper app.                                                                                                 |
 | `packages/ui`       | Shared Radix + shadcn UI components. `widgets/` for composites.                                                            |
 | `packages/theme`    | OKLCH design tokens + Tailwind preset (single source of truth).                                                            |
 | `packages/supabase` | Browser, server, middleware, read-replica Supabase clients, and auto-generated database types.                             |
@@ -98,9 +95,9 @@ Run `pnpm quality` before pushing. Husky's `pre-push` hook re-runs lint and type
 
 ### Coverage thresholds (enforced by Jest)
 
-- Lines 40 %, branches 30 %, functions 35 %, statements 40 %
+- Lines 40 %, branches 30 %, functions 30 %, statements 40 %
 
-If your change drops coverage, either add tests or explicitly raise the threshold in `jest.config.js` after a maintainer review.
+If your change drops coverage, either add tests or explicitly raise the threshold in `apps/portal/jest.config.cjs` after a maintainer review.
 
 ## Adding a new package
 
@@ -244,7 +241,7 @@ These rules are enforced by ESLint, TypeScript, and code review. They are not op
 
 ### Adding a new `@repo/*` import to a portal test
 
-`apps/portal/jest.config.js` uses **explicit** `moduleNameMapper` entries. A new package or subpath import will fail with module-not-found unless you add the mapping. Update the map when introducing new package exports.
+`apps/portal/jest.config.cjs` uses **explicit** `moduleNameMapper` entries. A new package or subpath import will fail with module-not-found unless you add the mapping. Update the map when introducing new package exports.
 
 ### Conventions
 
@@ -301,7 +298,7 @@ If the script errors, confirm your cloud project configuration is active.
 
 ### Portal Jest cannot resolve `@repo/something`
 
-Add the package to `moduleNameMapper` in `apps/portal/jest.config.js`. Wildcard mappings are not always sufficient for subpath exports — add explicit entries when needed.
+Add the package to `moduleNameMapper` in `apps/portal/jest.config.cjs`. Wildcard mappings are not always sufficient for subpath exports — add explicit entries when needed.
 
 ### Pre-commit hook complains about secrets
 
@@ -327,8 +324,8 @@ After editing `packages/theme/tokens.json`, run `pnpm --filter @repo/theme build
 
 - **[CLAUDE.md](CLAUDE.md)** — Complete technical guide, commands, and architecture details.
 - **[AGENTS.md](AGENTS.md)** — Workflow rules, agent contracts, codegen pipelines, and quality gates.
-- **[DESIGN.md](DESIGN.md)** — Color system, typography, components, animation rules.
-- **[PRODUCT.md](PRODUCT.md)** — User personas, product strategy, tone.
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Deployment guide for all environments.
-- **[SECURITY.md](SECURITY.md)** — Security policy and vulnerability reporting.
+- **[DESIGN.md](docs/DESIGN.md)** — Color system, typography, components, animation rules.
+- **[PRODUCT.md](docs/PRODUCT.md)** — User personas, product strategy, tone.
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Deployment guide for all environments.
+- **[SECURITY.md](docs/SECURITY.md)** — Security policy and vulnerability reporting.
 - **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** — Full documentation index and quick navigation.

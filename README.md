@@ -25,7 +25,6 @@ This project is organized as a **Turborepo** monorepo using **pnpm** for workspa
 - **`@repo/utils`**: Utility functions for third-party integrations (Novu, Inngest, Excel exports).
 - **`@repo/eval`**: LLM evaluation suite using DeepEval for AI service quality testing.
 - **`@repo/agents`**: Shared agent coordination engine and specialist modules.
-- **`@repo/eslint-config`**: Shared ESLint configurations.
 - **`@repo/typescript-config`**: Shared TypeScript configuration.
 
 ### Libraries (`libs/`)

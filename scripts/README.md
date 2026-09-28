@@ -617,9 +617,9 @@ Current project requirements (from CLAUDE.md):
 ## 📚 Related Documentation
 
 - **[CLAUDE.md](../CLAUDE.md)** - Development workflow and quality gates
-- **[DESIGN.md](../DESIGN.md)** - Technical guide and architecture details
-- **[DEPLOYMENT.md](../DEPLOYMENT.md)** - Deployment guide for all environments
-- **[DOCUMENTATION_INDEX.md](../DOCUMENTATION_INDEX.md)** - Complete documentation index
+- **[DESIGN.md](../docs/DESIGN.md)** - Technical guide and architecture details
+- **[DEPLOYMENT.md](../docs/DEPLOYMENT.md)** - Deployment guide for all environments
+- **[DOCUMENTATION_INDEX.md](../docs/DOCUMENTATION_INDEX.md)** - Complete documentation index
 - **[CONTROL_ROOM_IMPLEMENTATION_TODO.md](../apps/portal/CONTROL_ROOM_IMPLEMENTATION_TODO.md)** - Control Room department implementation status
 - **[DELAY_TRACKING_TEST_PLAN.md](../apps/portal/DELAY_TRACKING_TEST_PLAN.md)** - Delay tracking feature test plan
 

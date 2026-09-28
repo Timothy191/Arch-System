@@ -6,7 +6,7 @@ You are operating within the Arch-System enterprise monorepo.
 
 - Refer to the canonical Agent SSoT: [AGENTS.md](./AGENTS.md).
 - Follow Turborepo task conventions: use `pnpm` exclusively.
-- All code changes must satisfy `@repo/eslint-config`, Prettier formatting rules, and TypeScript strict checking.
+- All code changes must satisfy the repo lint gates (Biome, Stylelint, cspell) and TypeScript strict checking.
 - Do not edit generated Supabase types manually; use `pnpm --filter @repo/database db:types`.
 
 ## Core Directives & Quality Gates
@@ -17,3 +17,4 @@ You are operating within the Arch-System enterprise monorepo.
 4. **Architectural Boundaries**: Public package APIs must export strictly from `src/index.ts`. Never cross domain boundaries or import server-only code into client components.
 5. **Type Safety**: Strict TypeScript throughout. Never use `any` or `@ts-ignore`.
 6. **Phased Action Plan Framework**: All coding tasks must maintain the `temp/` pipeline (`temp/outline.md` → `temp/requirements.md` [EARS syntax] → `temp/design.md` → `temp/tasks.md` with real-world scoring audit gates).
+7. **TODO Phased Execution & Detailed Reporting Standard**: All initialized TODO checklist items (e.g. `5/5`) must be executed to completion with zero dangling tasks, followed immediately by a comprehensive, evidence-backed detailed report (`.agents/rules/todo-completion-and-detailed-reporting.md`).

@@ -3,7 +3,7 @@
 ## Overview
 
 [FUXA](https://github.com/frangoteam/FUXA) (4,497 stars, MIT) is a web-based SCADA/HMI
-platform that can be embedded alongside the Arch-Mk2 portal. It provides drag-and-drop
+platform that can be embedded alongside the Arch-System portal. It provides drag-and-drop
 dashboard creation with industrial protocol support.
 
 ## Architecture
@@ -43,7 +43,7 @@ fuxa:
   container_name: plantcor-fuxa
   restart: unless-stopped
   ports:
-    - "1881:1881"
+    - '1881:1881'
   volumes:
     - fuxa_data:/root/.fuxa
   environment:
@@ -58,19 +58,19 @@ fuxa:
 Create `apps/portal/components/control-room/FuxaFrame.tsx`:
 
 ```tsx
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 interface FuxaFrameProps {
   dashboardId?: string;
   height?: string;
 }
 
-export function FuxaFrame({ dashboardId, height = "600px" }: FuxaFrameProps) {
+export function FuxaFrame({ dashboardId, height = '600px' }: FuxaFrameProps) {
   const [loading, setLoading] = useState(true);
 
-  const baseUrl = process.env.NEXT_PUBLIC_FUXA_URL ?? "http://localhost:1881";
+  const baseUrl = process.env.NEXT_PUBLIC_FUXA_URL ?? 'http://localhost:1881';
   const src = dashboardId ? `${baseUrl}/dashboard/${dashboardId}` : `${baseUrl}/`;
 
   return (
@@ -134,7 +134,7 @@ FUXA supports MQTT and HTTP APIs. Bridge Supabase Realtime changes:
 
 ## Design Token Sharing
 
-FUXA supports custom CSS themes. Map Arch-Mk2 design tokens:
+FUXA supports custom CSS themes. Map Arch-System design tokens:
 
 ```css
 /* fuxa/theme.css — copy from @repo/theme */

@@ -2,6 +2,8 @@
 
 This directory contains all project documentation organized by purpose and audience.
 
+**Boundary with `docs/`:** `docs/` is the canonical home for hand-authored engineering documentation (DESIGN, DEPLOYMENT, runbooks, guides). This directory is the tool-written operational center — the audit suites (`tools/audits/*.cjs`) write reports into `03-audit-reports/` here. Humans edit `docs/`; tools write `documentation/`. The two are intentionally separate; do not merge them.
+
 ## Directory Structure
 
 - **`00-core/`** - Core project documentation (AGENTS.md, CLAUDE.md, DESIGN.md, etc.)
