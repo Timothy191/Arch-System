@@ -24,7 +24,7 @@ export function useLogin() {
   const [loading, setLoading] = useState(false);
   const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null);
 
-  const login = async (employeeId: string, password: string) => {
+  const login = async (employeeId: string, password: string): Promise<LoginResult> => {
     setRateLimitCountdown(null);
     setLoading(true);
 
