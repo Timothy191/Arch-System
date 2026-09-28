@@ -17,6 +17,9 @@
 
 import { createRedisSubscriber } from '@repo/redis';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 // AGENT-TRACE: Server-Sent Events (SSE) stream for real-time drill rig telemetry
 // Subscribes to Redis pub/sub channel "drilling:telemetry:stream" and pushes updates to clients
 export async function GET(req: Request) {

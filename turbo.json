@@ -70,7 +70,7 @@
     },
     "lint": {
       "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "!pnpm-lock.yaml"],
-      "outputs": ["node_modules/.cache/.eslintcache"],
+      "outputs": [],
       "cache": true
     },
     "lint:css": {
@@ -93,7 +93,7 @@
     },
     "type-check": {
       "inputs": ["$TURBO_DEFAULT$", "tsconfig.json", "tsconfig.*.json"],
-      "outputs": ["**/*.tsbuildinfo"],
+      "outputs": [],
       "cache": true
     }
   }

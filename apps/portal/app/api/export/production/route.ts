@@ -94,6 +94,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { applyCors } from '@/lib/api/cors';
 import { withRateLimit } from '@/lib/api/rate-limit-middleware';
 
+export const maxDuration = 60;
+
 function sanitizeCsvCell(value: string): string {
   const dangerous = /^[=+\-@\t\r]/;
   const sanitized = dangerous.test(value) ? `'${value}` : value;

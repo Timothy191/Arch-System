@@ -36,9 +36,8 @@ export const middleware = proxy;
 export default proxy;
 
 export const config = {
-  // Exclude static assets, API routes, and the Aria assistant overlay (which is
-  // proxied to the aria-overlay sidecar and handles its own session checks) from proxy.
+  // Exclude static assets, API routes, SEO files, and the Aria assistant overlay from proxy.
   matcher: [
-    '/((?!_next/static|_next/image|api/|assistant(?:/|$)|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
+    '/((?!_next/static|_next/image|api/|assistant(?:/|$)|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|woff|woff2|ttf|otf|eot|mp4|webm|mp3|wav)$).*)',
   ],
 };

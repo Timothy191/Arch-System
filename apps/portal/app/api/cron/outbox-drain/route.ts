@@ -11,6 +11,8 @@ import { NextResponse } from 'next/server';
 import { logError } from '@/lib/errors/error-logger';
 import { addEvent, withAsyncSpan } from '@/lib/observability/tracing';
 
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   return withAsyncSpan('cron_outbox_drain', {}, async () => {
     try {
