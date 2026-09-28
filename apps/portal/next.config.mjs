@@ -41,7 +41,9 @@ const nextConfig = {
   turbopack: {
     root: workspaceRoot,
   },
-  output: 'standalone',
+  // AGENT-TRACE: On Vercel, omit standalone output so Next.js uses native Vercel lambda tracing.
+  // In Docker/self-hosted environments, produce standalone output.
+  output: process.env.VERCEL ? undefined : 'standalone',
   env: {
     PORTAL_VERSION,
   },

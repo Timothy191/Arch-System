@@ -75,7 +75,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "node scripts/generate-openapi-spec.js && next build && node ../../scripts/sync-assets-smart.cjs",
+    "build": "node ../../scripts/sync-assets-smart.cjs && node scripts/generate-openapi-spec.js && next build",
     "build:analyze": "ANALYZE=true next build",
     "dev": "next dev -H 0.0.0.0 --webpack",
     "lint": "biome check .",

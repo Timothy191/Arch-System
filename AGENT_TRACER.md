@@ -4,6 +4,23 @@ Entries are reverse-chronological. Each records a meaningful code or documentati
 Operational-only actions (server restarts, read-only audits, image asset drops) are omitted.
 Older entries are archived to [`docs/archive/AGENT_TRACER_archive.md`](./docs/archive/AGENT_TRACER_archive.md).
 
+## [2026-09-28] - Vercel Best Practices Audit, Deployment Pruning & Production Release
+
+- **Action:** Pruned all stale/preview/superseded Vercel deployments (14 removed). Applied Turborepo + Next.js 16 Vercel best practices:
+  - Updated `apps/portal/next.config.mjs` to dynamically emit native Vercel lambda builds (`output: process.env.VERCEL ? undefined : 'standalone'`) while preserving standalone container output for Docker.
+  - Aligned build pipeline sequence in `apps/portal/package.json` to synchronize assets before compiling OpenAPI and Next.js assets (`node ../../scripts/sync-assets-smart.cjs && node scripts/generate-openapi-spec.js && next build`).
+  - Strengthened `.vercelignore` to exclude local `.next/`, `dist/`, `target/` (540MB Rust build artifacts), `.kilo/`, `analysis/`, and `*.tsbuildinfo`, dropping deployment upload payload from ~648MB to 41.4MB (93.6% reduction).
+  - Redeployed production release (`dpl_FkmBSVtoYUtHLWe9cbriNujTSYnB`) and bound primary domain `arch-system-theta.vercel.app`.
+- **Verification:** `vercel ls` confirms exactly 1 deployment active (target: production, status: READY). Live ingress test confirms HTTP/2 200 via `/` ➔ `/hub` ➔ `/login` with dynamic CSP nonces and HSTS headers intact.
+
+## [2026-09-28] - Local Setup and Compose Configuration Audit
+
+- **Action:** Aligned setup runtime checks with Node.js >=22; repaired Supabase CLI workdirs, migration/seed synchronization, portal/full-stack Compose paths, build/runtime env wiring, fresh `.env.tools` scaffolding, and the production Redis override.
+- **Verification:** Onboarding: 10 passed, 0 failed, 1 optional root-env warning. Supabase local stack: 12 containers running, REST HTTP 200, migrations through 164 applied, seed executed. Database migration safety: 116 files, 0 errors, 91 advisory warnings. Python eval suite: 29 tests collected. Portal production Docker image built successfully.
+- **Quality gate:** `pnpm quality` is blocked by formatting drift in pre-existing modified files `packages/theme/src/tokens/generated.ts` and `packages/contract/openapi.generated.json`; these were left untouched.
+- **Remaining setup:** Root `.env` is optional for selected integrations. `.env.tools` has a placeholder `TOOL_ENCRYPTION_KEY` that must be replaced before relying on Langfuse encryption or production-like tools deployment. No production deployment was attempted.
+- **Workflow caveat:** The UltraGoal spec generator and dispatch router currently hardcode an unrelated UI task; the generator would overwrite existing `temp/` artifacts, so neither was used to produce a misleading spec or score.
+
 ## [2026-09-18] - n8n Backend Contract and Safe Fleet Verifier
 
 - **Action:** Added `docs/operations/n8n-backend-requirements.md` and `scripts/verify-n8n-stack.sh`, plus the `verify:n8n` package command. Documented n8n OAuth callback requirements, Redis loopback policy, ScrapingBee workflow prerequisites, and external service boundaries.

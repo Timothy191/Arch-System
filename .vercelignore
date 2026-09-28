@@ -36,4 +36,19 @@ packages/eval/
 
 # Build caches and build outputs
 .turbo/
+.next/
+**/.next/
 apps/portal/.next/
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Rust and binary targets
+target/
+**/target/
+tools/swarms-orchestrator/target/
+
+# Local worktrees, agent caches, and analysis
+.kilo/
+analysis/
+
