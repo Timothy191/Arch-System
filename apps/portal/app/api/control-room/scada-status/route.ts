@@ -37,9 +37,23 @@ export async function GET(req: Request) {
       if (redis) {
         redisConnected = true;
         try {
-          const [savedStateStr, tagKeys] = await Promise.all([
+          // Use SCAN (non-blocking) instead of KEYS (blocking) per Redis best practice.
+          // KEYS blocks the single-threaded Redis event loop; SCAN iterates in chunks.
+          const tagKeys: string[] = [];
+          let cursor = 0;
+          do {
+            const result = (await redis.scan(cursor, {
+              MATCH: 'telemetry:last:*',
+              COUNT: 100,
+            })) as { cursor: number; keys: string[] };
+            cursor = result.cursor;
+            if (result.keys && result.keys.length > 0) {
+              tagKeys.push(...result.keys);
+            }
+          } while (cursor !== 0);
+
+          const [savedStateStr] = await Promise.all([
             typeof redis.get === 'function' ? redis.get(SCADA_STATE_KEY).catch(() => null) : null,
-            typeof redis.keys === 'function' ? redis.keys('telemetry:last:*').catch(() => []) : [],
           ]);
           cachedTagCount = Array.isArray(tagKeys) ? tagKeys.length : 0;
           if (savedStateStr) {

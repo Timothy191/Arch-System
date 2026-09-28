@@ -179,6 +179,7 @@ show_results() {
     _url_row "Overview" "http://localhost:${OVERVIEW_PORT:-3003}"
   fi
   _url_row "Redis" "redis://localhost:6379" "$redis_suffix"
+  _url_row "Redis UI" "http://localhost:5540" "(Insight)"
   _url_row "Studio" "$studio_url"
   _url_row "API" "$api_url"
 

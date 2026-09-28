@@ -53,7 +53,22 @@ export interface FuxaWebApiTag {
 export async function GET(req: Request) {
   try {
     const redis = await getRedisClient();
-    const keys = (await redis.keys('telemetry:last:*')) as string[];
+
+    // Use SCAN (non-blocking) instead of KEYS (blocking) per Redis best practice.
+    // KEYS blocks the single-threaded Redis event loop; SCAN iterates in chunks.
+    const keys: string[] = [];
+    let cursor = 0;
+    do {
+      const result = (await redis.scan(cursor, {
+        MATCH: 'telemetry:last:*',
+        COUNT: 100,
+      })) as { cursor: number; keys: string[] };
+      cursor = result.cursor;
+      if (result.keys && result.keys.length > 0) {
+        keys.push(...result.keys);
+      }
+    } while (cursor !== 0);
+
     const tags: FuxaWebApiTag[] = [];
 
     if (keys.length > 0) {
@@ -75,10 +90,8 @@ export async function GET(req: Request) {
     }
 
     return applyCors(req, NextResponse.json(tags));
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || 'Failed to read SCADA tags' },
-      { status: 500 }
-    );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to read SCADA tags';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

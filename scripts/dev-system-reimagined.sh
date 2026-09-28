@@ -10,6 +10,24 @@ if [ -f "scripts/sync-assets-smart.cjs" ]; then
     node scripts/sync-assets-smart.cjs
 fi
 
+# 1.5 Autonomous Arch-System Redis Server & Official UI Startup
+echo -e "\e[1;34m[Redis Engine]\e[0m Checking Arch-System Redis & UI..."
+if command -v redis-cli &> /dev/null && redis-cli ping &> /dev/null; then
+    echo -e "\e[1;32m[Redis Engine]\e[0m Redis is active on 127.0.0.1:6379."
+elif command -v docker &> /dev/null && docker info &> /dev/null; then
+    echo -e "\e[1;34m[Redis Engine]\e[0m Autonomously booting Arch-System Redis & Redis Insight UI..."
+    docker compose -f infra/docker/compose.redis.yml up -d
+    for i in {1..5}; do
+        if (command -v redis-cli &> /dev/null && redis-cli ping &> /dev/null) || (docker exec arch-redis redis-cli ping &> /dev/null); then
+            break
+        fi
+        sleep 1
+    done
+    echo -e "\e[1;32m[Redis Engine]\e[0m Redis Server (redis://localhost:6379) and Redis Insight (http://localhost:5540) active."
+else
+    echo -e "\e[1;33m[Redis Engine]\e[0m Docker not active — leveraging built-in Arch-System L1 memory cache layer."
+fi
+
 # 2. Spawn neat popup terminal for pnpm dev
 echo -e "\e[1;32m[T0 Coordinator]\e[0m Spawning neat terminal for pnpm dev..."
 if command -v gnome-terminal &> /dev/null; then

@@ -5,7 +5,10 @@ import { GET } from './route';
 
 jest.mock('@repo/redis', () => ({
   getRedisClient: jest.fn().mockResolvedValue({
-    keys: jest.fn().mockResolvedValue(['telemetry:last:tag1', 'telemetry:last:tag2']),
+    scan: jest
+      .fn()
+      .mockResolvedValue({ cursor: 0, keys: ['telemetry:last:tag1', 'telemetry:last:tag2'] }),
+    get: jest.fn().mockResolvedValue(null),
   }),
 }));
 

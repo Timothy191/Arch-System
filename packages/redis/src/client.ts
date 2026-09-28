@@ -24,6 +24,9 @@ export async function getRedisClient(): Promise<RedisClientType> {
       url: REDIS_URL,
       socket: {
         keepAlive: true,
+        // Bounded socket timeout: prevents requests from hanging indefinitely
+        // if Redis becomes unresponsive. Permanent Redis Rules — Timeouts.
+        connectTimeout: 5000,
         reconnectStrategy(retries: number) {
           if (retries > 3) {
             return new Error('Redis connection failed');

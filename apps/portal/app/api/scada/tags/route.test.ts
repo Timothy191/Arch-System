@@ -7,14 +7,16 @@ import { GET } from './route';
 jest.mock('@repo/redis', () => {
   const keys = jest.fn();
   const mGet = jest.fn();
+  const scan = jest.fn();
   return {
-    getRedisClient: jest.fn().mockResolvedValue({ keys, mGet }),
+    getRedisClient: jest.fn().mockResolvedValue({ keys, mGet, scan }),
   };
 });
 
 interface MockClient {
   keys: jest.Mock;
   mGet: jest.Mock;
+  scan: jest.Mock;
 }
 function getRedisMock(): { getRedisClient: jest.Mock } {
   return jest.requireMock('@repo/redis') as unknown as { getRedisClient: jest.Mock };
@@ -29,14 +31,16 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
     const c = await client();
     c.keys.mockReset();
     c.mGet.mockReset();
+    c.scan.mockReset();
   });
 
   it('returns FUXA WebAPI-shaped tag array from the Redis telemetry cache', async () => {
     const c = await client();
-    c.keys.mockResolvedValueOnce([
-      'telemetry:last:machine_1_engine_rpm',
-      'telemetry:last:machine_2_engine_temp',
-    ]);
+    // SCAN returns { cursor, keys }; cursor 0 ends iteration.
+    c.scan.mockResolvedValueOnce({
+      cursor: 0,
+      keys: ['telemetry:last:machine_1_engine_rpm', 'telemetry:last:machine_2_engine_temp'],
+    });
     c.mGet.mockResolvedValueOnce(['1500', '92.4']);
 
     const req = new Request('http://localhost:3000/api/scada/tags');
@@ -48,7 +52,9 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
       { id: 'machine_1_engine_rpm', name: 'machine_1_engine_rpm', value: 1500, type: 'number' },
       { id: 'machine_2_engine_temp', name: 'machine_2_engine_temp', value: 92.4, type: 'number' },
     ]);
-    expect(c.keys).toHaveBeenCalledWith('telemetry:last:*');
+    // SCAN must be used, not KEYS (blocking)
+    expect(c.scan).toHaveBeenCalledWith(0, { MATCH: 'telemetry:last:*', COUNT: 100 });
+    expect(c.keys).not.toHaveBeenCalled();
     expect(c.mGet).toHaveBeenCalledWith([
       'telemetry:last:machine_1_engine_rpm',
       'telemetry:last:machine_2_engine_temp',
@@ -57,7 +63,7 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
 
   it('returns an empty array when the cache has no telemetry keys', async () => {
     const c = await client();
-    c.keys.mockResolvedValueOnce([]);
+    c.scan.mockResolvedValueOnce({ cursor: 0, keys: [] });
 
     const req = new Request('http://localhost:3000/api/scada/tags');
     const res = await GET(req);
@@ -68,7 +74,7 @@ describe('GET /api/scada/tags (FUXA WebAPI source, reverse-flow)', () => {
 
   it('falls back to string type for non-numeric cached values', async () => {
     const c = await client();
-    c.keys.mockResolvedValueOnce(['telemetry:last:machine_1_status']);
+    c.scan.mockResolvedValueOnce({ cursor: 0, keys: ['telemetry:last:machine_1_status'] });
     c.mGet.mockResolvedValueOnce(['RUNNING']);
 
     const req = new Request('http://localhost:3000/api/scada/tags');
