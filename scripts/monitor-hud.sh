@@ -436,7 +436,7 @@ while true; do
     move_cursor "$r" 0
     
     if [ "$r" -eq 28 ]; then
-      printf "${CLR_BORDER}║${CLR_RESET}  %bNET:%b HTTP :3000 │ Supabase :54321 │ Redis :6379" "${CLR_BOLD}" "${CLR_RESET}"
+      printf "${CLR_BORDER}║${CLR_RESET}  %bNET:%b HTTP :3000 │ Supabase Cloud │ Redis :6379" "${CLR_BOLD}" "${CLR_RESET}"
     elif [ "$r" -eq 29 ]; then
       printf "${CLR_BORDER}║${CLR_RESET}  %bSEC:%b CSP Nonce: Active │ Cookie: HttpOnly/SameSite" "${CLR_BOLD}" "${CLR_RESET}"
     elif [ "$r" -eq 30 ]; then

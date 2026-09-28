@@ -1,5 +1,11 @@
 # Scripts Agent Tracer
 
+## 2026-09-28: Setup Command and Compose Env-File Alignment
+
+- **Purpose:** Make the development and local deployment launchers use the repository's configured Supabase project and Docker tools credentials source.
+- **Changes:** `scripts/dev.sh` now starts Supabase through the database package's configured-project command and passes `.env.tools` for Compose interpolation; `scripts/deploy-live-local.sh` and the local deploy path do the same for the tools stack. `setup.sh` seeds the ignored tools env file from its example only when absent.
+- **Verification:** `bash -n` and targeted Supabase/Compose checks are run after the setup changes.
+
 ## 2026-09-19: Visual Deployment Terminal Refinement & Animated ASCII HUD
 
 ### Purpose

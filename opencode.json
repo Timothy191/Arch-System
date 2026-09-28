@@ -17,11 +17,6 @@
       "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
       "enabled": true
     },
-    "inngest": {
-      "type": "remote",
-      "url": "http://127.0.0.1:8288/mcp",
-      "enabled": true
-    },
     "knowledge-rail": {
       "type": "local",
       "command": ["npx", "-y", "knowledge-rail"],
@@ -44,7 +39,7 @@
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp@0.0.76"],
+      "command": ["npx", "-y", "@playwright/mcp@0.0.76", "--headless"],
       "enabled": true
     },
     "postgres": {
@@ -53,7 +48,7 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+        "postgresql://postgres.mrwhtxbhrzyttlsyuofc:your_password@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
       ],
       "enabled": true
     },
@@ -68,11 +63,6 @@
         "redis://localhost:6379/0"
       ],
       "enabled": true
-    },
-    "slim-tools": {
-      "type": "remote",
-      "url": "https://slim.tools/mcp",
-      "enabled": false
     }
   }
 }

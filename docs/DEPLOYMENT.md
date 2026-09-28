@@ -72,7 +72,7 @@ Options:
 This starts:
 
 - Next.js portal on <http://localhost:3000>
-- Local Supabase on <http://localhost:54321>
+- Cloud Supabase on `https://mrwhtxbhrzyttlsyuofc.supabase.co`
 - Redis, Flowise (via Docker)
 - Prometheus & Grafana monitoring
 

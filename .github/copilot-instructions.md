@@ -10,26 +10,26 @@ All tasks run through Turborepo (`turbo run`). Use pnpm as the package manager (
 
 ### Daily commands
 
-| Action                                     | Command                                                                                |
-| ------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Install deps                               | `pnpm install`                                                                         |
-| Dev server (portal on `:3000`)             | `pnpm dev`                                                                             |
-| Minimal dev server (headless, no Docker)   | `pnpm dev:quick`                                                                       |
-| Bootstrap everything (all dev targets)     | `pnpm dev`                                                                             |
-| Local Supabase (Docker, separate terminal) | `pnpm --filter @repo/database supabase:dev`                                            |
-| Build all                                  | `pnpm build`                                                                           |
-| Build one package/app                      | `pnpm --filter @repo/<name> build` or `pnpm turbo run build --filter=<name>`           |
-| Lint all                                   | `pnpm lint`                                                                            |
-| Lint one project                           | `pnpm --filter @repo/<name> lint` or `pnpm turbo run lint --filter=<name>`             |
-| Type-check all                             | `pnpm type-check`                                                                      |
-| Type-check one project                     | `pnpm --filter @repo/<name> type-check` or `pnpm turbo run type-check --filter=<name>` |
-| Run all unit tests                         | `pnpm test`                                                                            |
-| Run one portal test file                   | `pnpm --filter portal test -- --testPathPatterns=<file>`                               |
-| Run E2E                                    | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)                   |
-| Visual E2E snapshots                       | `pnpm test:e2e:visual`                                                                 |
-| Storybook UI / a11y                        | `pnpm ui`, `pnpm test:a11y`                                                            |
-| Format code                                | `pnpm format`                                                                          |
-| Full local quality gate                    | `pnpm quality`                                                                         |
+| Action                                   | Command                                                                                |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| Install deps                             | `pnpm install`                                                                         |
+| Dev server (portal on `:3000`)           | `pnpm dev`                                                                             |
+| Minimal dev server (headless, no Docker) | `pnpm dev:quick`                                                                       |
+| Bootstrap everything (all dev targets)   | `pnpm dev`                                                                             |
+| Database type generation                 | `pnpm --filter @repo/database db:types`                                                |
+| Build all                                | `pnpm build`                                                                           |
+| Build one package/app                    | `pnpm --filter @repo/<name> build` or `pnpm turbo run build --filter=<name>`           |
+| Lint all                                 | `pnpm lint`                                                                            |
+| Lint one project                         | `pnpm --filter @repo/<name> lint` or `pnpm turbo run lint --filter=<name>`             |
+| Type-check all                           | `pnpm type-check`                                                                      |
+| Type-check one project                   | `pnpm --filter @repo/<name> type-check` or `pnpm turbo run type-check --filter=<name>` |
+| Run all unit tests                       | `pnpm test`                                                                            |
+| Run one portal test file                 | `pnpm --filter portal test -- --testPathPatterns=<file>`                               |
+| Run E2E                                  | `pnpm test:e2e` (requires portal dev server on `:3000` and Chromium)                   |
+| Visual E2E snapshots                     | `pnpm test:e2e:visual`                                                                 |
+| Storybook UI / a11y                      | `pnpm ui`, `pnpm test:a11y`                                                            |
+| Format code                              | `pnpm format`                                                                          |
+| Full local quality gate                  | `pnpm quality`                                                                         |
 
 ### What `pnpm quality` actually runs
 
@@ -70,10 +70,10 @@ Run `pnpm quality` before proposing a merge.
 
 ### Codegen pipelines (never edit generated output)
 
-| Source                          | Command                                                                                   | Generated output                                                    |
-| ------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `packages/theme/tokens.json`    | `pnpm --filter @repo/theme build`                                                         | `packages/theme/src/tokens/generated.ts`, `variables-generated.css` |
-| `packages/database/migrations/` | `pnpm --filter @repo/database supabase:push && pnpm --filter @repo/database supabase:gen` | `packages/supabase/src/database.types.ts`                           |
+| Source                          | Command                                 | Generated output                                                    |
+| ------------------------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| `packages/theme/tokens.json`    | `pnpm --filter @repo/theme build`       | `packages/theme/src/tokens/generated.ts`, `variables-generated.css` |
+| `packages/database/migrations/` | `pnpm --filter @repo/database db:types` | `packages/supabase/src/database.types.ts`                           |
 
 Commit both source and generated files in the same atomic change.
 
@@ -119,7 +119,7 @@ Commit both source and generated files in the same atomic change.
 ### Database and RLS
 
 - Migration files: zero-padded `NNN_description.sql`.
-- Workflow: add migration → `pnpm --filter @repo/database supabase:push` → `pnpm --filter @repo/database supabase:gen` → commit migration + regenerated `database.types.ts`.
+- Workflow: add migration → apply to Cloud Supabase → `pnpm --filter @repo/database db:types` → commit migration + regenerated `database.types.ts`.
 - Every new table must `ENABLE ROW LEVEL SECURITY`.
 - RLS policies should consult `employees.role` and `employees.department_id`, not `auth.uid()` alone.
 - SQL privilege-escalation and index-coverage tests live in `packages/database/tests/`.

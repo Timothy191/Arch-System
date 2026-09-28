@@ -22,12 +22,11 @@
 -- single transaction that rolls back, leaving the database untouched.
 --
 -- Run with:
---   PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres \
---     -d postgres -v ON_ERROR_STOP=1 \
+--   PGPASSWORD="$DB_PASSWORD" psql "$DATABASE_URL" \
+--     -v ON_ERROR_STOP=1 \
 --     -f packages/database/tests/p0_signup_role_self_elevation.sql
 --
--- Requires: local Supabase running on :54322 (pnpm supabase:dev).
--- All assertions are at the bottom; the script aborts on the first
+-- Requires: Cloud Supabase database or configured DATABASE_URL.
 -- failure (psql exits non-zero) so a red CI run is unambiguous.
 
 BEGIN;

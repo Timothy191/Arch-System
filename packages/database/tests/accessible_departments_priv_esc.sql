@@ -33,7 +33,7 @@
 --      refuses to grant extra departments.
 --
 -- Run with:
---   PGPASSWORD=postgres psql -h localhost -p 54322 -U postgres -d postgres \
+--   PGPASSWORD="$DB_PASSWORD" psql "$DATABASE_URL" \
 --     -v ON_ERROR_STOP=1 -f packages/database/tests/accessible_departments_priv_esc.sql
 --
 -- The harness should set ON_ERROR_STOP=1; the test will exit non-zero on RED.

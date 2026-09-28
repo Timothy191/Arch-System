@@ -66,20 +66,6 @@ if [ -f "$TOOLS_COMPOSE" ]; then
   fi
 fi
 
-# ── Step 4: Stop Supabase local stack ──────────────────────
-log "Stopping local Supabase stack safely (preserving database volumes)..."
-if docker ps --format '{{.Names}}' 2>/dev/null | grep -q 'supabase_'; then
-  if [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-    log "Stopping Supabase via Arch-Base ($ARCH_BASE_DIR)..."
-    (cd "$ARCH_BASE_DIR" && npx supabase stop) || true
-  elif [ -d "$DATABASE_DIR" ]; then
-    cd "$DATABASE_DIR"
-    pnpx supabase stop || true
-  fi
-  log "Supabase containers suspended."
-else
-  log "Supabase stack is already suspended."
-fi
 
 echo
 echo -e "${CLR_GREEN}┌────────────────────────────────────────────────────────────┐${NC}"

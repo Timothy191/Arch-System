@@ -49,9 +49,8 @@ The `pnpm onboard` diagnostic suite checks:
 We use Supabase for PostgreSQL, Auth, and Row-Level Security (RLS).
 
 ```bash
-# Start local Supabase containers (DB on :54322, Studio on :54323, API on :54321)
-pnpm --filter @repo/database supabase:dev
-
+# Verify Cloud Supabase credentials in apps/portal/.env
+grep SUPABASE apps/portal/.env
 # Launch Next.js 16 Portal with Turbopack dev server (:3000)
 pnpm dev
 ```

@@ -3,19 +3,19 @@ name: Deploy
 on:
   push:
     branches: [main, master]
-    tags: ["v*"]
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       environment:
-        description: "Deployment environment"
+        description: 'Deployment environment'
         required: true
-        default: "staging"
+        default: 'staging'
         type: choice
         options:
           - staging
           - production
       skip_tests:
-        description: "Skip test execution"
+        description: 'Skip test execution'
         required: false
         default: false
         type: boolean
@@ -33,9 +33,9 @@ jobs:
     env:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: http://localhost:54321
+      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000

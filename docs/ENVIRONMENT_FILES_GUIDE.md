@@ -175,7 +175,7 @@ cp apps/portal/env/.env.example apps/portal/.env
 
 ```
 Start → Copy apps/portal/env/.env.example to apps/portal/.env
-      → Fill in Supabase credentials (local: http://127.0.0.1:54321)
+      → Fill in Cloud Supabase credentials (https://mrwhtxbhrzyttlsyuofc.supabase.co)
       → Add tool URLs if using external tools
       → Set Redis URL for caching
       → (Optional) Configure Sentry for error tracking

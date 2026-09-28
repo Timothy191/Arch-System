@@ -155,16 +155,9 @@ _url_row() {
 
 show_results() {
   local studio_url api_url redis_suffix
-  if [ "$CLOUD_MODE" = "true" ]; then
-    studio_url="https://supabase.com/dashboard/project/$CLOUD_PROJECT_REF"
-    api_url="https://$CLOUD_PROJECT_REF.supabase.co"
-    redis_suffix="(local)"
-  else
-    studio_url="http://localhost:54323"
-    api_url="http://localhost:54321"
-    redis_suffix=""
-  fi
-
+  studio_url="https://supabase.com/dashboard/project/$CLOUD_PROJECT_REF"
+  api_url="https://$CLOUD_PROJECT_REF.supabase.co"
+  redis_suffix="(local)"
   echo
   echo -e "  ${GREEN}${BOLD}╭─ READY ──────────────────────────────────────────────────╮${NC}"
   echo -e "  ${GREEN}${BOLD}│${NC} ${BOLD}${WHITE}All systems go${NC} ${DIM}· edit a file to see live updates${NC}       ${GREEN}${BOLD}│${NC}"
@@ -610,10 +603,7 @@ check_and_fix_port() {
 if [ "$QUICK_MODE" = "true" ]; then
   check_and_fix_port "$PORT" "Next.js portal" ""
 else
-  check_and_fix_port 54322 "Supabase DB" ""
   check_and_fix_port 6379 "Redis" "redis-server"
-  check_and_fix_port 54321 "Supabase API" ""
-  check_and_fix_port 8000 "Kong Gateway" ""
 fi
 
 # 1c. Check & Fix Environment files
@@ -686,10 +676,6 @@ if [ "$QUICK_MODE" = "true" ]; then
   check "Studio" "skip" "quick mode"
 elif [ "$CLOUD_MODE" = "true" ]; then
   phase 2 "Infrastructure (Cloud-First)"
-  # Real reachability check against the Cloud REST endpoint. 200 = reachable +
-  # anon key accepted; 401/403 = reachable but the anon header was rejected
-  # (still proves the endpoint resolves and the project is live). Anything else
-  # (incl. 000 = network error / paused project) is a warn, never a boot blocker.
   cloud_api_code="000"
   if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ANON_KEY:-}" ]; then
     cloud_api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
@@ -707,45 +693,11 @@ elif [ "$CLOUD_MODE" = "true" ]; then
     ;;
   esac
   check "Studio" "skip" "Cloud dashboard at supabase.com"
-else
-  phase 2 "Infrastructure"
-
-  if curl -fs "http://127.0.0.1:54321/rest/v1/" >/dev/null 2>&1; then
-    check "Supabase API" "pass" "http://localhost:54321 (local Supabase active)"
-  else
-    ARCH_BASE_DIR="${ARCH_BASE_DIR:-$(cd "$REPO_ROOT/../Arch-Base" 2>/dev/null && pwd || true)}"
-    if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ] && [ -f "$ARCH_BASE_DIR/supabase/config.toml" ]; then
-      echo -e "  ${INFO} Starting Arch-Base Supabase (Docker)..."
-      (cd "$ARCH_BASE_DIR" && npx supabase start) >/dev/null 2>&1 &
-      SUPAPID=$!
-      spinner "$SUPAPID" "Booting Arch-Base Supabase containers"
-    elif [ -d "$REPO_ROOT/packages/database" ]; then
-      echo -e "  ${INFO} Starting local Supabase (Docker)..."
-      (cd "$REPO_ROOT/packages/database" && pnpx supabase start) >/dev/null 2>&1 &
-      SUPAPID=$!
-      spinner "$SUPAPID" "Booting local Supabase containers"
-    else
-      check "Supabase API" "skip" "no local Supabase configured — use --cloud for Cloud Supabase"
-    fi
-    if wait_for "http://127.0.0.1:54321/rest/v1/" "Supabase API" 15; then
-      check "Supabase API" "pass" "http://localhost:54321 active"
-    else
-      check "Supabase API" "warn" "local Supabase not responding — use --cloud for Cloud Supabase"
-    fi
-  fi
-
-  # Verify database connection
-  if curl -fs "http://127.0.0.1:54321/rest/v1/" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q 200; then
-    check "Database" "pass" "Postgres responding"
-  else
-    check "Database" "warn" "API up but unexpected response"
-  fi
-
   # 2b. Optional Tools
   if [ "$START_TOOLS" = "true" ]; then
     if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
       echo -e "  ${INFO} Starting Docker Tools..."
-      $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1
+      $COMPOSE_CMD --env-file "$REPO_ROOT/.env.tools" -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1
 
       services=("plantcor-redis" "plantcor-qdrant")
       for service in "${services[@]}"; do
@@ -769,9 +721,6 @@ else
       check "Docker Tools" "skip" "compose file missing"
     fi
   fi
-
-  # Studio check
-  curl -fs "http://127.0.0.1:54323" >/dev/null 2>&1 && check "Studio" "pass" "http://localhost:54323" || check "Studio" "skip" "not required"
 
   # 2b. Redis — auto-start if not already running
   REDIS_REQUIRED=true

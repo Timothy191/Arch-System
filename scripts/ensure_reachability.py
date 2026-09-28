@@ -28,8 +28,6 @@ import secrets
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ROOT_ENV = os.path.join(REPO_ROOT, ".env")
 PORTAL_ENV = os.path.join(REPO_ROOT, "apps/portal", ".env")
-SUPABASE_CONFIG = os.path.join(REPO_ROOT, "packages/supabase", "config.toml")
-ARCH_BASE_CONFIG = os.path.abspath(os.path.join(REPO_ROOT, "../Arch-Base/supabase/config.toml"))
 
 def get_primary_ip():
     """Detects the host's primary outgoing LAN IP address."""
@@ -139,19 +137,10 @@ def main():
         print("[*] Also updating Supabase Service Key...")
         env_replacements.append((r'(SUPABASE_SERVICE_KEY\s*=\s*)[^\s#\n]+', r'\g<1>' + service_key))
 
-    # config.toml rules (Supabase config)
-    supabase_replacements = [
-        (r'(api_url\s*=\s*"https?://)[^/"]+', r'\g<1>' + lan_ip)
-    ]
-
     # 3. Apply updates
     updated_any = False
     updated_any |= update_file(ROOT_ENV, env_replacements)
     updated_any |= update_file(PORTAL_ENV, env_replacements)
-    updated_any |= update_file(SUPABASE_CONFIG, supabase_replacements)
-    if os.path.exists(ARCH_BASE_CONFIG):
-        updated_any |= update_file(ARCH_BASE_CONFIG, supabase_replacements)
-
     print("-" * 60)
     if updated_any:
         print(f"[!] Reachability config updated to IP: {lan_ip}")

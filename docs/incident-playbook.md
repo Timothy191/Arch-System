@@ -16,7 +16,7 @@
 ### Detection
 
 - Portal returns 500 errors
-- `curl http://127.0.0.1:54321` fails
+- Cloud Supabase health check fails
 
 ### Response
 

@@ -87,11 +87,9 @@ pnpm deps:lint        # Dependency version consistency (syncpack)
 ### Database & Migrations
 
 ```bash
-pnpm --filter @repo/database supabase:dev     # Start local Supabase stack
-pnpm --filter @repo/database supabase:gen     # Generate database types
-pnpm --filter @repo/database db:types         # Alias for type generation
-pnpm db:seed              # Seed development database
-pnpm db:schema-reload     # Reload schema from migrations
+pnpm --filter @repo/database db:types         # Generate database types from cloud project
+pnpm db:seed                                  # Seed cloud development database
+pnpm db:schema-reload                         # Reload schema cache
 ```
 
 ### Testing

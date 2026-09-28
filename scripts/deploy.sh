@@ -264,12 +264,12 @@ export COMPOSE_BAKE=true
 
 # ── Service Status Checkers ─────────────────────────────
 is_supabase_running() {
-  if [ "$CLOUD_MODE" = true ] && [ -n "${SUPABASE_URL:-}" ]; then
+  if [ -n "${SUPABASE_URL:-}" ]; then
     local code
     code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 "${SUPABASE_URL}/rest/v1/" -H "apikey: ${SUPABASE_ANON_KEY:-}" 2>/dev/null || echo "000")
     [[ "$code" =~ ^(200|401|403)$ ]]
   else
-    curl -fs "http://127.0.0.1:54321/rest/v1/" > /dev/null 2>&1
+    return 1
   fi
 }
 
@@ -478,11 +478,7 @@ phase_port_check() {
         fatal "Port $port ($name) is locked by PID $pid and could not be freed."
       fi
     }
-    if [ "$CLOUD_MODE" = false ]; then
-      check_and_fix_port 5432 "PostgreSQL" "postgresql"
-      check_and_fix_port 54321 "Supabase API" ""
-      check_and_fix_port 8000 "Kong Gateway" ""
-    fi
+    # Local Postgres/Supabase port checks skipped; using Cloud Supabase
     if [ "${LIGHTWEIGHT:-false}" != "true" ]; then
       check_and_fix_port 6379 "Redis" "redis-server"
     fi
@@ -767,68 +763,11 @@ phase_start_infrastructure() {
   
   case "$DEPLOY_MODE" in
     local)
-      # Supabase in Cloud Mode
-      if [ "$CLOUD_MODE" = true ]; then
-        log "Cloud Supabase mode active ($SUPABASE_URL) — skipping local Supabase containers"
-        if is_supabase_running; then
-          success "Connected to Cloud Supabase ($SUPABASE_URL)"
-        else
-          warn "Cloud Supabase check returned non-200 — continuing with deployment"
-        fi
+      log "Connecting to Cloud Supabase ($SUPABASE_URL)..."
+      if is_supabase_running; then
+        success "Connected to Cloud Supabase ($SUPABASE_URL)"
       else
-        # Arch-Base Services (if available and requested)
-        if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
-          log "Starting Arch-Base services..."
-          
-          # Start Arch-Base Supabase if not running
-          if [ -d "$ARCH_BASE_DIR/packages/supabase" ]; then
-            cd "$ARCH_BASE_DIR"
-            if ! is_supabase_running; then
-              log "Starting Arch-Base Supabase..."
-              run_if_not_dry pnpm --filter @repo/supabase supabase:start || warn "Arch-Base Supabase start failed (may already be running)"
-              healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Arch-Base Supabase API"
-            else
-              success "Arch-Base Supabase already running"
-            fi
-          fi
-          
-          # Start Arch-Base web app if not running
-          if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
-            if ! is_arch_base_web_running; then
-              log "Starting Arch-Base web app on port 3001..."
-              cd "$ARCH_BASE_DIR"
-              if [ "$DRY_RUN" = false ]; then
-                # Start in background
-                pnpm --filter web dev > "$ARCH_BASE_DIR/.arch-base-web.log" 2>&1 &
-                echo $! > "$ARCH_BASE_DIR/.arch-base-web.pid"
-              fi
-              healthcheck "http://localhost:3001" 30 "Arch-Base Web App"
-            else
-              success "Arch-Base web app already running"
-            fi
-          fi
-          
-          cd "$REPO_ROOT"
-          success "Arch-Base services started"
-        fi
-        
-        # Local Supabase (Arch-System fallback if no Arch-Base)
-        if [ -z "$ARCH_BASE_DIR" ] || [ ! -d "$ARCH_BASE_DIR" ]; then
-          if is_supabase_running; then
-            success "Supabase already running - connecting to existing instance"
-          else
-            log "Supabase is not running. Attempting to start existing Supabase containers..."
-            if docker ps -a --format '{{.Names}}' | grep -q "^supabase_db_supabase$"; then
-              run_if_not_dry docker start $(docker ps -a --filter "name=supabase" --format "{{.ID}}")
-              healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Supabase API"
-            elif [ -d "$REPO_ROOT/packages/database" ]; then
-              log "Attempting to start local Supabase via @repo/database..."
-              run_if_not_dry pnpm --filter @repo/database supabase:start || warn "Local Supabase start failed"
-            else
-              warn "Supabase is not running and no existing containers found"
-            fi
-          fi
-        fi
+        warn "Cloud Supabase check returned non-200 — continuing with deployment"
       fi
       
       # Docker tools (skipped in lightweight mode)
@@ -839,7 +778,7 @@ phase_start_infrastructure() {
             success "Docker tools already running - connecting"
           else
             log "Starting Docker tools (Redis, Flowise, Langfuse, etc.)..."
-            run_if_not_dry $COMPOSE_CMD -f "$tools_compose" up -d || warn "Some Docker tools failed to start (non-critical)"
+            run_if_not_dry $COMPOSE_CMD --env-file "$REPO_ROOT/.env.tools" -f "$tools_compose" up -d || warn "Some Docker tools failed to start (non-critical)"
             
             if [ "$DRY_RUN" = false ]; then
               log "Waiting for Docker tools to report healthy..."
@@ -884,21 +823,6 @@ phase_start_infrastructure() {
       ;;
       
     production|staging)
-      # Arch-Base Services (if available)
-      if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
-        log "Starting Arch-Base services..."
-        
-        # Start Arch-Base Supabase if not running
-        if [ -d "$ARCH_BASE_DIR/packages/supabase" ]; then
-          cd "$ARCH_BASE_DIR"
-          if ! is_supabase_running; then
-            log "Starting Arch-Base Supabase..."
-            run_if_not_dry pnpm --filter @repo/supabase supabase:start || warn "Arch-Base Supabase start failed (may already be running)"
-            healthcheck "http://127.0.0.1:54321/rest/v1/" 60 "Arch-Base Supabase API"
-          else
-            success "Arch-Base Supabase already running"
-          fi
-        fi
         
         # Start Arch-Base web app if not running
         if [ -n "$ARCH_BASE_WEB_DIR" ] && [ -d "$ARCH_BASE_WEB_DIR" ]; then
@@ -1155,12 +1079,10 @@ if [ -n "$ARCH_BASE_DIR" ]; then
   fi
 fi
 
-if [ "$CLOUD_MODE" = true ] && [ -n "$SUPABASE_URL" ]; then
+if [ -n "$SUPABASE_URL" ]; then
   echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_CYAN}[ ☁ CLOUD ]\${CLR_RESET}  \${CLR_BOLD}Supabase:\${CLR_RESET}     $SUPABASE_URL (Cloud Mode)"
-elif curl -fs http://127.0.0.1:54321/rest/v1/ > /dev/null 2>&1; then
-  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GREEN}[ ✔ ONLINE ]\${CLR_RESET}  \${CLR_BOLD}Supabase:\${CLR_RESET}     http://localhost:54321"
 else
-  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GRAY}[ ○ OFFLINE ]\${CLR_RESET} \${CLR_BOLD}Supabase:\${CLR_RESET}     Not running"
+  echo -e "\${CLR_BORDER}║\${CLR_RESET}    \${CLR_GRAY}[ ○ OFFLINE ]\${CLR_RESET} \${CLR_BOLD}Supabase:\${CLR_RESET}     Not configured"
 fi
 
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -q plantcor-redis; then
@@ -1316,10 +1238,8 @@ main() {
   log "Portal:     http://localhost:$PORT"
   log "Login:      http://localhost:$PORT/login"
   [ -n "$ARCH_BASE_DIR" ] && log "Arch-Base:  http://localhost:3001"
-  if [ "$CLOUD_MODE" = true ] && [ -n "$SUPABASE_URL" ]; then
+  if [ -n "$SUPABASE_URL" ]; then
     log "Supabase:   $SUPABASE_URL (Cloud Mode)"
-  elif [ "$DEPLOY_MODE" = "local" ]; then
-    log "Supabase:   http://localhost:54321"
   fi
 
   [ "$DEPLOY_MODE" = "local" ] && log "Grafana:    http://localhost:9091"

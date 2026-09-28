@@ -6,7 +6,7 @@ set -e
 # Or download a release from https://github.com/k1LoW/tbls/releases
 
 # secretlint-disable-next-line
-TBLS_DSN="${TBLS_DSN:-postgres://postgres:postgres@127.0.0.1:54322/postgres?sslmode=disable}"
+TBLS_DSN="${TBLS_DSN:-${DATABASE_URL:-}}"
 OUT_DIR="docs/database"
 
 echo "Generating database documentation with tbls..."

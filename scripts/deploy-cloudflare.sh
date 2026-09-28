@@ -76,25 +76,10 @@ if ! docker info >/dev/null 2>&1; then
   fatal "Docker daemon is not running. Please start Docker (sudo systemctl start docker)."
 fi
 
-cd "$DATABASE_DIR"
-if docker ps --format '{{.Names}}' | grep -q 'supabase_'; then
-  info "Supabase containers are already running."
-else
-  info "Starting Supabase Docker stack..."
-  pnpm supabase:start || pnpm --filter @repo/supabase supabase:start || true
-fi
-
-# Grab Supabase keys
-info "Retrieving Supabase connection keys..."
-status_out=$(pnpm supabase status 2>/dev/null || pnpm --filter @repo/supabase supabase:status 2>/dev/null || true)
-anon_key=$(echo "$status_out" | grep "anon key:" | awk '{print $3}' || true)
-service_key=$(echo "$status_out" | grep "service_role key:" | awk '{print $3}' || true)
-
-if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
-  if [ -f "$ENV_FILE" ]; then
-    anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
-  fi
+# Grab Supabase keys from environment
+if [ -f "$ENV_FILE" ]; then
+  anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+  service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
 fi
 
 # ── Step 4: Clear Port & Launch Portal ─────────────────────────────────────
@@ -199,8 +184,7 @@ fi
 echo -e "${GREEN}│${NC} ${BOLD}Local Portal Endpoint:${NC}                                    ${GREEN}│${NC}"
 echo -e "${GREEN}│${NC} ${CYAN}${BOLD}http://localhost:${PORT}${NC}                                     ${GREEN}│${NC}"
 echo -e "${GREEN}│${NC}                                                            ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} ${WHITE}Supabase API:${NC}       http://localhost:54321                    ${GREEN}│${NC}"
-echo -e "${GREEN}│${NC} ${WHITE}Supabase Studio:${NC}    http://localhost:54323                    ${GREEN}│${NC}"
+echo -e "${GREEN}│${NC} ${WHITE}Supabase:${NC}           https://mrwhtxbhrzyttlsyuofc.supabase.co  ${GREEN}│${NC}"
 echo -e "${GREEN}├────────────────────────────────────────────────────────────┤${NC}"
 if [ "$mode_choice" -eq 1 ]; then
 echo -e "${GREEN}│${NC} ${YELLOW}Mode:${NC} ${BOLD}Development (TryCloudflare Tunnel + Hot Reload)${NC}       ${GREEN}│${NC}"

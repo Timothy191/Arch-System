@@ -37,9 +37,5 @@ ingress:
       connectTimeout: 15s
       keepAliveConnections: 100
 
-  # 4. Optional: Local Supabase REST & WebSockets (if hosting backend on-prem)
-  - hostname: supabase-api.yourdomain.com
-    service: http://127.0.0.1:54321
-
   # 5. Catch-all fallback rule (required by cloudflared)
   - service: http_status:404

@@ -85,7 +85,7 @@ describe('env validation', () => {
     setEnvVar('DISABLE_RATE_LIMIT', undefined);
     resetEnv();
 
-    expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe('http://127.0.0.1:54321');
+    expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe('https://mrwhtxbhrzyttlsyuofc.supabase.co');
     expect(env.PORT).toBe(3000);
     expect(env.NODE_ENV).toBe('development');
     expect(env.OTEL_SERVICE_NAME).toBe('arch-portal');

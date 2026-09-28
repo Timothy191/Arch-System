@@ -266,4 +266,7 @@ tools/agentic
 !**/.codewhale/constitution.json
 .deepseek/
 .env*
+!.env.example
+!.env*.example
 Arch-System-main (2).zip
+.omg/

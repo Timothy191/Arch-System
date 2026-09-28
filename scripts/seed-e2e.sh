@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────
-# Arch-Systems — E2E Seed Data Script
-# Inserts test-friendly data into local Supabase.
+# Inserts test-friendly data into Supabase.
 # Idempotent — safe to run multiple times.
 # ──────────────────────────────────────────────────────────
 set -euo pipefail
 
-DB_URL="${1:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
+DB_URL="${1:-${DATABASE_URL:-}}"
+if [ -z "$DB_URL" ]; then
+  echo "Missing DATABASE_URL" >&2
+  exit 1
+fi
 
-echo "  → Seeding E2E test data into local Supabase..."
+echo "  → Seeding E2E test data into Supabase..."
 echo "  → DB: $DB_URL"
 
 pnpx supabase db execute --db-url "$DB_URL" <<'SQLEOF'

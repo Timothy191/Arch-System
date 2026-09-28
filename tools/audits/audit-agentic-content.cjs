@@ -205,17 +205,21 @@ const reportMd = `# AI & Agentic Content Audit Report
 Generated on ${new Date().toISOString()}
 
 ## Summary Metrics
+
 - **Agent Rules**: ${rulesCount} verified in \`.agents/rules/\`
 - **Agent Skills**: ${skillsCount} verified in \`.agents/skills/\`
 - **Workspace Tracers**: ${tracerCount} \`AGENT_TRACER.md\` files active
 - **Root Directives**: ${ROOT_DOCS.join(', ')} validated
 
 ## Critical Findings
+
 ${violations.length === 0 ? '✅ None' : violations.map((v) => `- **[${v.type}]** \`${v.file}\`: ${v.description}`).join('\n')}
 
 ## Advisories & Warnings
+
 ${warnings.length === 0 ? '✅ None' : warnings.map((w) => `- **[${w.type}]** \`${w.file}\`: ${w.description}`).join('\n')}
 `;
+
 
 fs.writeFileSync(path.join(REPORT_DIR, 'agentic-audit-report.md'), reportMd, 'utf8');
 console.log(`\n📄 Report written to: documentation/03-audit-reports/agentic-audit-report.md`);

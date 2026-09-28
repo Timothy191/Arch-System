@@ -94,8 +94,9 @@ fi
 NODE_VERSION=$(node -v | tr -d 'v')
 NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
 
-if [ "$NODE_MAJOR" -lt 20 ]; then
-  warn "Detected Node.js v${NODE_VERSION}. Node.js 20+ is required (Node 22+ recommended)."
+if [ "$NODE_MAJOR" -lt 22 ]; then
+  error "Detected Node.js v${NODE_VERSION}. Node.js 22+ is required."
+  exit 1
 else
   success "Node.js v${NODE_VERSION} detected"
 fi
@@ -152,14 +153,26 @@ PORT=3000
 HOST=0.0.0.0
 HOSTNAME=0.0.0.0
 NODE_ENV=development
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key
+NEXT_PUBLIC_SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
 REDIS_URL=redis://localhost:6379
 EOF
     success "Created apps/portal/.env with default configuration"
   fi
 else
   success "apps/portal/.env already configured"
+fi
+
+TOOLS_ENV=".env.tools"
+if [ ! -f "$TOOLS_ENV" ]; then
+  if [ -f ".env.tools.example" ]; then
+    cp ".env.tools.example" "$TOOLS_ENV"
+    warn ".env.tools created from .env.tools.example — replace placeholder values before starting Docker tools"
+  else
+    warn ".env.tools is missing — create it before starting the Docker tools stack"
+  fi
+else
+  success ".env.tools already configured"
 fi
 
 # Ensure 0.0.0.0 host binding in apps/portal/.env

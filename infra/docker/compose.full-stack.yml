@@ -1,12 +1,12 @@
-version: "3.8"
+version: '3.8'
 
 services:
   caddy:
     image: caddy:2
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
@@ -17,12 +17,18 @@ services:
   portal:
     build:
       context: ../../
-      dockerfile: apps/portal/Dockerfile
+      dockerfile: apps/portal/docker/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?Set NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Set NEXT_PUBLIC_SUPABASE_ANON_KEY}
     restart: unless-stopped
+    env_file:
+      - ../../apps/portal/.env
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379
     networks:
       - arch-net
     depends_on:
@@ -41,7 +47,7 @@ services:
     image: inngest/inngest:latest
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8288:8288"
+      - '127.0.0.1:8288:8288'
     environment:
       - INNGEST_DEV_SERVER_PORT=8288
     networks:
@@ -51,7 +57,7 @@ services:
     image: ghcr.io/langfuse/langfuse:latest
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3003:3000"
+      - '127.0.0.1:3003:3000'
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
       - NEXTAUTH_SECRET=secret

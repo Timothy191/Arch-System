@@ -92,34 +92,15 @@ if ! docker info >/dev/null 2>&1; then
   fatal "Docker is not running."
 fi
 
-# ── Step 3: Run Database & Grab Keys ────────────────────────
-info "Starting local database stack..."
-# Ensure migrations are in place
-mkdir -p "$SUPABASE_DIR/supabase/migrations"
-cp -r "$DATABASE_DIR/migrations/"* "$SUPABASE_DIR/supabase/migrations/" 2>/dev/null || true
-
-cd "$DATABASE_DIR"
-if docker ps --format '{{.Names}}' | grep -q 'supabase_'; then
-  info "Supabase containers already running."
-else
-  npx supabase start
-fi
-
-info "Retrieving local database access credentials..."
-status_out=$(npx supabase status 2>/dev/null || true)
-anon_key=$(echo "$status_out" | grep "anon key:" | awk '{print $3}' || true)
-service_key=$(echo "$status_out" | grep "service_role key:" | awk '{print $3}' || true)
-
-if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
-  # Fallback to reading existing .env if present
-  if [ -f "$ENV_FILE" ]; then
-    anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
-  fi
+# ── Step 3: Grab Cloud Database Keys ────────────────────────
+info "Reading Cloud Supabase credentials..."
+if [ -f "$ENV_FILE" ]; then
+  anon_key=$(get_env_var "$ENV_FILE" "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+  service_key=$(get_env_var "$ENV_FILE" "SUPABASE_SERVICE_KEY")
 fi
 
 if [ -z "$anon_key" ] || [ -z "$service_key" ]; then
-  fatal "Could not retrieve Supabase keys. Please restart Supabase manually."
+  fatal "Could not retrieve Supabase keys from $ENV_FILE."
 fi
 
 # ── Step 4: Configure Live Local Env variables ───────────────
@@ -169,7 +150,7 @@ fi
 # ── Step 6: Start Secondary Tools ────────────────────────────
 info "Starting secondary tools..."
 if [ -f "$REPO_ROOT/infra/docker/compose.tools.yml" ]; then
-  $COMPOSE_CMD -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1 || true
+  $COMPOSE_CMD --env-file "$REPO_ROOT/.env.tools" -f "$REPO_ROOT/infra/docker/compose.tools.yml" up -d >/dev/null 2>&1 || true
 fi
 
 if [ -f "$REPO_ROOT/infra/monitoring/docker-compose.yml" ]; then

@@ -1,7 +1,7 @@
 # Agent Tracers Archive Index
 
 Centralized archive of all historical and active autonomous agent tasks across the Arch-System monorepo.
-Total Archived Tasks: **261**
+Total Archived Tasks: **263**
 
 ## Archived Task Directory
 
@@ -268,3 +268,5 @@ Total Archived Tasks: **261**
 | `--task-259` | `archive/tracers`                                                 | Agent Tracer Task Log: --task-259                                                            | [`--task-259-2026-09-16-antigravity-patterns-dify-autogpt-loop.md`](./log/--task-259-2026-09-16-antigravity-patterns-dify-autogpt-loop.md)                                                   |
 | `--task-260` | `Frontend Styling & Layout Consistency`                           | Frontend styling/layout token drift, z-index matrix, body layout, focus mode, build warnings | [`--task-260-2026-09-21-frontend-styling-layout-consistency-fixes.md`](./log/--task-260-2026-09-21-frontend-styling-layout-consistency-fixes.md)                                             |
 | `--task-261` | `archive/tracers`                                                 | Agent Tracer Task Log: --task-261                                                            | [`--task-261-combine-login-status-bars.md`](./log/--task-261-combine-login-status-bars.md)                                                                                                   |
+| `--task-262` | `Control Room Top-Tier Hardening`                                 | Control Room Top-Tier Hardening — Full Plan                                                  | [`--task-262-2026-09-22-control-room-ultragoal.md`](./log/--task-262-2026-09-22-control-room-ultragoal.md)                                                                                   |
+| `--task-263` | `Repository Setup Readiness Audit`                                | Repository setup prerequisites, local Supabase, Compose, and Docker build audit              | [`--task-263-2026-09-28-setup-readiness-audit-and-repair.md`](./log/--task-263-2026-09-28-setup-readiness-audit-and-repair.md)                                                               |

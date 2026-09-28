@@ -18,11 +18,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "supabase:start": "supabase start",
-    "supabase:stop": "supabase stop",
-    "supabase:reset": "supabase db reset",
-    "supabase:status": "supabase status",
-    "supabase:gen-types": "supabase gen types typescript --local > src/database.types.ts",
+    "supabase:gen-types": "supabase gen types typescript --project-id mrwhtxbhrzyttlsyuofc > src/database.types.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

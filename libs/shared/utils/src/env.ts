@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // ── Public (embedded in client bundle — safe defaults for dev) ──────
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('http://127.0.0.1:54321'),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().default('https://mrwhtxbhrzyttlsyuofc.supabase.co'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).default('dummy-anon-key'),
 
   // ── Server-side required ───────────────────────────────────────────

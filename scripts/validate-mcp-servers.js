@@ -42,21 +42,14 @@ async function checkHttp(url) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const _res = await fetch(url, {
+    const res = await fetch(url, {
       method: 'GET',
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-    return true; // online (even if 4xx/5xx)
-  } catch (err) {
-    if (err.name === 'AbortError') return false;
-    if (
-      err.message &&
-      (err.message.includes('ECONNREFUSED') || err.message.includes('ENOTFOUND'))
-    ) {
-      return false;
-    }
-    return true; // other errors mean the server is there
+    return res.status < 400 || res.status === 405;
+  } catch (_err) {
+    return false;
   }
 }
 
@@ -86,7 +79,7 @@ function testStdioServer(command, args, env = {}) {
         child.kill('SIGKILL');
         resolve({ success: false, error: 'Timeout waiting for response' });
       }
-    }, 2000);
+    }, 4000);
 
     child.on('error', (err) => {
       if (!resolved) {
@@ -200,6 +193,19 @@ async function main() {
       continue;
     }
 
+    // Verify script exists if passing a local script file
+    if (
+      server.args &&
+      server.args[0] &&
+      (server.args[0].endsWith('.js') || server.args[0].endsWith('.cjs'))
+    ) {
+      if (!fs.existsSync(server.args[0])) {
+        console.log(`${RED}✗ Target script "${server.args[0]}" not found${NC}`);
+        errorsCount++;
+        continue;
+      }
+    }
+
     // Server-specific dependency checks
     if (name === 'postgres') {
       const connStr = (server.args || []).find(
@@ -212,13 +218,6 @@ async function main() {
           console.log(
             `${YELLOW}⚠ Supavisor pooler configured (awaiting DB password/region in apps/portal/.env)${NC}`
           );
-          warningsCount++;
-          continue;
-        }
-      } else {
-        const isPostgresUp = await checkPort(54322);
-        if (!isPostgresUp) {
-          console.log(`${YELLOW}⚠ Postgres database not running on port 54322 (Supabase)${NC}`);
           warningsCount++;
           continue;
         }
@@ -238,8 +237,8 @@ async function main() {
         continue;
       }
     }
+
     // AGENT-TRACE: Fast path: skips spawn tests for npx/uvx servers to avoid network/download latency during local preflight
-    // Spawn check
     const isNpxUvx = server.command === 'npx' || server.command === 'uvx';
     if (isNpxUvx) {
       console.log(`${GREEN}✓ Ready (${server.command} verified)${NC}`);
@@ -251,15 +250,8 @@ async function main() {
     if (testResult.success) {
       console.log(`${GREEN}✓ Connected & Operational${NC}`);
     } else {
-      // If it failed because it doesn't exist yet/needs configuration, report as warning or error
-      const isCritical = name === 'knowledge-rail';
-      if (isCritical) {
-        console.log(`${RED}✗ Connection failed: ${testResult.error}${NC}`);
-        errorsCount++;
-      } else {
-        console.log(`${YELLOW}⚠ Ready (Spawn test deferred: ${testResult.error})${NC}`);
-        warningsCount++;
-      }
+      console.log(`${RED}✗ Connection failed: ${testResult.error}${NC}`);
+      errorsCount++;
     }
   }
 

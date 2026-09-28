@@ -23,13 +23,9 @@ cp apps/portal/env/.env.example apps/portal/.env
 # edit apps/portal/.env — fill Supabase keys, Sentry DSN, etc.
 ```
 
-### Start local services
+### Environment setup
 
-In a separate terminal, start Supabase (requires Docker):
-
-```bash
-pnpm --filter @repo/database supabase:dev   # local Postgres + Auth on :54321
-```
+Ensure `apps/portal/.env` contains your Cloud Supabase configuration (`NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co`).
 
 ### Run the app
 
@@ -263,20 +259,16 @@ The **`employees` table is the source of truth** for authorization (role and dep
 ### Workflow
 
 1. Add a new file in `packages/database/migrations/` with a zero-padded sequence number: `NNN_description.sql` (e.g. `062_add_equipment_table.sql`). Files are processed in lexical order — gaps are allowed but discouraged.
-2. Apply locally:
-
-   ```bash
-   pnpm --filter @repo/database supabase:push
-   ```
+2. Apply migrations to Cloud Supabase using the dashboard or linked Supabase CLI.
 
 3. Regenerate TypeScript types:
 
    ```bash
-   pnpm --filter @repo/database supabase:gen
+   pnpm --filter @repo/database db:types
    ```
 
 4. Commit **both** the migration and the updated `packages/supabase/src/database.types.ts` in a single atomic change.
-5. **Never** edit `packages/supabase/supabase/migrations/` directly — that directory is a deploy-time copy produced by the build pipeline. A PreToolUse hook blocks edits there.
+5. All migrations are tracked in `packages/database/migrations/` and pushed to Cloud Supabase.
 
 ### RLS requirements
 
@@ -302,10 +294,10 @@ You (or a previous commit) edited `tools/repo/policy-compiler.cjs` without regen
 ### Supabase types are stale after a migration
 
 ```bash
-pnpm --filter @repo/database supabase:gen
+pnpm --filter @repo/database db:types
 ```
 
-If the script errors, confirm the local Supabase stack is running (`pnpm --filter @repo/database supabase:dev`).
+If the script errors, confirm your cloud project configuration is active.
 
 ### Portal Jest cannot resolve `@repo/something`
 
@@ -329,7 +321,7 @@ Most common cause: a generated file is missing or stale. Run `pnpm policy:gen &&
 
 ### Knock-on issues from codegen
 
-After editing `packages/theme/tokens.json`, run `pnpm --filter @repo/theme build` and commit **both** the source tokens and the regenerated `packages/theme/src/tokens/generated.ts`. After editing migrations, run `supabase:gen` and commit the regenerated `database.types.ts`.
+After editing `packages/theme/tokens.json`, run `pnpm --filter @repo/theme build` and commit **both** the source tokens and the regenerated `packages/theme/src/tokens/generated.ts`. After applying migrations, run `pnpm --filter @repo/database db:types` and commit the regenerated `database.types.ts`.
 
 ## Further reading
 

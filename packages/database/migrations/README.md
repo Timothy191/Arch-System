@@ -1,8 +1,7 @@
 # Migrations Overview
 
-This directory is the canonical source of truth for the database schema migrations.
-During the build or development lifecycle, these migrations are synced to `packages/supabase/migrations` (the directory that the local Supabase CLI actually executes from).
-Do NOT edit migrations directly in `packages/supabase/migrations`.
+This directory is the canonical source of truth for database schema migrations.
+All migrations are pushed to Cloud Supabase (mrwhtxbhrzyttlsyuofc).
 
 ## Disabled Migrations
 

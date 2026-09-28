@@ -167,9 +167,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: http://localhost:54321
+      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000
@@ -187,12 +187,12 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: "javascript-typescript"
+          languages: 'javascript-typescript'
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:javascript-typescript"
+          category: '/language:javascript-typescript'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -230,10 +230,10 @@ jobs:
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: "fs"
+          scan-type: 'fs'
           ignore-unfixed: true
-          format: "table"
-          severity: "HIGH,CRITICAL"
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
           exit-code: 1
 
       - name: Generate SBOM
@@ -282,9 +282,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: http://localhost:54321
+      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000
@@ -345,9 +345,9 @@ jobs:
 
     env:
       NEXT_TELEMETRY_DISABLED: 1
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key-for-ci
-      SUPABASE_URL: http://localhost:54321
+      SUPABASE_URL: https://mrwhtxbhrzyttlsyuofc.supabase.co
       SUPABASE_ANON_KEY: dummy-anon-key-for-ci
       SUPABASE_SERVICE_KEY: dummy-service-key-for-ci
       PORT: 3000

@@ -41,7 +41,7 @@
 curl http://localhost:3000/api/health
 
 # Supabase
-curl http://127.0.0.1:54321/rest/v1/
+curl -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" https://mrwhtxbhrzyttlsyuofc.supabase.co/rest/v1/
 
 # Redis
 redis-cli -u redis://localhost:6379 ping

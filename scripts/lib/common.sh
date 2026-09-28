@@ -447,43 +447,18 @@ start_background() {
 
 # ── Supabase Helpers ───────────────────────────────────────────────────────────
 # is_supabase_running: returns 0 if Supabase REST API is reachable.
-#   In cloud mode, checks the configured SUPABASE_URL.
-#   In local mode, checks http://127.0.0.1:54321/rest/v1/
 is_supabase_running() {
   local supabase_url="${SUPABASE_URL:-}"
   local supabase_anon_key="${SUPABASE_ANON_KEY:-}"
 
-  if [ -n "$supabase_url" ] && [[ "$supabase_url" == *supabase.* ]]; then
+  if [ -n "$supabase_url" ]; then
     local code
     code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 \
       "${supabase_url}/rest/v1/" -H "apikey: ${supabase_anon_key:-}" 2>/dev/null || true)
     [ -z "$code" ] && code="000"
     [[ "$code" =~ ^(200|401|403)$ ]]
   else
-    curl -fs "http://127.0.0.1:54321/rest/v1/" > /dev/null 2>&1
-  fi
-}
-
-# start_local_supabase: starts local Supabase containers (Arch-Base or fallback).
-start_local_supabase() {
-  if [ -n "$ARCH_BASE_DIR" ] && [ -d "$ARCH_BASE_DIR" ]; then
-    log "Starting Arch-Base Supabase..."
-    (cd "$ARCH_BASE_DIR" && npx supabase start) > /dev/null 2>&1 &
-    local pid=$!
-    spinner "$pid" "Booting Arch-Base Supabase containers"
-  elif [ -d "$DATABASE_DIR" ]; then
-    log "Starting local Supabase..."
-    (cd "$DATABASE_DIR" && npx supabase start) > /dev/null 2>&1 &
-    local pid=$!
-    spinner "$pid" "Booting local Supabase containers"
-  else
-    warn "No local Supabase directory found. Use --hosted for Cloud Supabase."
-  fi
-
-  if wait_for_url "http://127.0.0.1:54321/rest/v1/" "Supabase API" 30; then
-    success "Supabase API is active"
-  else
-    warn "Local Supabase not responding — use --hosted for Cloud Supabase"
+    return 1
   fi
 }
 

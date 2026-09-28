@@ -46,10 +46,10 @@ header "1. Environment"
 
 if command -v node > /dev/null 2>&1; then
   NODE_VER=$(node -v | sed 's/v//')
-  if version_ge "$NODE_VER" "20.17.0"; then
+  if version_ge "$NODE_VER" "22.0.0"; then
     check_pass "Node.js v$NODE_VER"
   else
-    check_fail "Node.js >= 20.17.0 required (found $NODE_VER)"
+    check_fail "Node.js >= 22.0.0 required (found $NODE_VER)"
   fi
 else
   check_fail "Node.js not found"
@@ -152,8 +152,6 @@ check_port() {
 }
 
 check_port "$PORT" "Portal"
-check_port 54321 "Supabase API"
-check_port 54322 "Supabase DB"
 check_port 6379  "Redis"
 check_port 6333  "Qdrant"
 check_port 9091  "Grafana"
@@ -189,10 +187,22 @@ header "6. Docker Containers"
 if command -v docker > /dev/null 2>&1 && docker info > /dev/null 2>&1; then
   check_container() {
     local name="$1"
+    local alt_name="${2:-}"
     local status
-    status=$(docker inspect --format='{{.State.Health.Status}}' "$name" 2>/dev/null || true)
+    status=$(docker inspect --format='{{.State.Health.Status}}' "$name" 2>/dev/null | tr -d '\r\n' || true)
     if [ -z "$status" ] || [ "$status" = "<no value>" ]; then
-      status=$(docker inspect --format='{{.State.Status}}' "$name" 2>/dev/null || echo "missing")
+      status=$(docker inspect --format='{{.State.Status}}' "$name" 2>/dev/null | tr -d '\r\n' || true)
+    fi
+    if { [ -z "$status" ] || [ "$status" = "missing" ]; } && [ -n "$alt_name" ]; then
+      local alt_status
+      alt_status=$(docker inspect --format='{{.State.Health.Status}}' "$alt_name" 2>/dev/null | tr -d '\r\n' || true)
+      if [ -z "$alt_status" ] || [ "$alt_status" = "<no value>" ]; then
+        alt_status=$(docker inspect --format='{{.State.Status}}' "$alt_name" 2>/dev/null | tr -d '\r\n' || true)
+      fi
+      if [ -n "$alt_status" ] && [ "$alt_status" != "<no value>" ]; then
+        status="$alt_status"
+        name="$alt_name"
+      fi
     fi
     [ -z "$status" ] && status="missing"
     if [ "$status" = "healthy" ] || [ "$status" = "running" ]; then
@@ -204,17 +214,12 @@ if command -v docker > /dev/null 2>&1 && docker info > /dev/null 2>&1; then
     fi
   }
 
-  check_container "plantcor-redis"
-  check_container "plantcor-qdrant"
-  check_container "plantcor-prometheus"
+  check_container "plantcor-redis" "arch-redis"
+  check_container "plantcor-qdrant" "arch-qdrant"
+  check_container "plantcor-prometheus" "plantcor-monitor-prometheus"
   check_container "plantcor-fuxa"
 
-  SUPABASE_UP=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -c "supabase" || echo "0")
-  if [ "$SUPABASE_UP" -gt 0 ]; then
-    check_pass "Supabase containers running ($SUPABASE_UP)"
-  else
-    check_warn "Supabase containers not running"
-  fi
+  check_pass "Cloud Supabase in use ($SUPA_URL)"
 else
   check_warn "Docker unavailable — skipping container checks"
 fi

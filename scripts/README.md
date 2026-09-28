@@ -326,7 +326,7 @@ See `CLAUDE.md` for full Turbo configuration details.
 **Requirements**:
 
 - `tbls` CLI tool installed
-- Database connection (local: `postgres://postgres:postgres@127.0.0.1:54322/postgres`)
+- Database connection (Cloud Supabase: `postgres://postgres.mrwhtxbhrzyttlsyuofc:<password>@aws-0-us-east-1.pooler.supabase.com:5432/postgres`)
 
 **Install tbls**:
 
@@ -343,14 +343,13 @@ go install github.com/k1LoW/tbls/cmd/tbls@latest
 ### Required for Development
 
 ```bash
-# Supabase Local (default)
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<key from supabase start>
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_ANON_KEY=<key from supabase start>
-SUPABASE_SERVICE_KEY=<key from supabase start>
-DATABASE_URL=postgres://postgres:postgres@127.0.0.1:54322/postgres
-
+# Supabase Cloud
+NEXT_PUBLIC_SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
+SUPABASE_URL=https://mrwhtxbhrzyttlsyuofc.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_d-7-pJnWomgpNtWFFy_yCA_4axrPll5
+SUPABASE_SERVICE_KEY=<service-role-key>
+DATABASE_URL=postgresql://postgres.mrwhtxbhrzyttlsyuofc:<password>@aws-0-us-east-1.pooler.supabase.com:5432/postgres
 # Optional Services
 REDIS_URL=redis://localhost:6379
 FLOWISE_URL=http://localhost:3001

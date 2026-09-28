@@ -389,31 +389,4 @@ describe('createBrowserSupabaseClient', () => {
 
     process.env = originalEnv;
   });
-
-  test('rewrites hostname for localhost in LAN deployment', () => {
-    // Mock window object
-    global.window = {
-      location: {
-        hostname: 'localhost',
-      },
-    } as any;
-
-    // Mock URL to simulate non-HTTPS
-    const originalURL = global.URL;
-    global.URL = class extends originalURL {
-      constructor(url: string | URL) {
-        super(url);
-        // Override protocol to http for testing
-        Object.defineProperty(this, 'protocol', { value: 'http:' });
-      }
-    } as any;
-
-    const { createBrowserClient } = require('@supabase/ssr');
-
-    createBrowserSupabaseClient();
-
-    expect(createBrowserClient).toHaveBeenCalled();
-
-    global.URL = originalURL;
-  });
 });

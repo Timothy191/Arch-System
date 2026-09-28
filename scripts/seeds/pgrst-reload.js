@@ -10,12 +10,16 @@
 const { Client } = require('pg');
 
 const run = async () => {
-  const connectionString =
-    process.env.SUPABASE_DB_URL || 'postgres://postgres:postgres@localhost:54322/postgres';
+  const connectionString = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error('Missing SUPABASE_DB_URL or DATABASE_URL');
+    process.exitCode = 1;
+    return;
+  }
   const client = new Client(connectionString);
   try {
     await client.connect();
-    console.log('Connected to local Supabase');
+    console.log('Connected to Supabase DB');
 
     // Check columns
     const res = await client.query(`

@@ -107,7 +107,7 @@
     "dev:hosted": "node scripts/sync-assets-smart.cjs && bash scripts/dev.sh --hosted",
     "dev:quick": "node scripts/sync-assets-smart.cjs && bash scripts/dev.sh --quick --headless",
     "dev:turbo": "node scripts/sync-assets-smart.cjs && pnpm turbo run dev --filter=portal",
-    "dev:tools": "docker compose -f infra/docker/compose.tools.yml up -d && pnpm dev",
+    "dev:tools": "docker compose --env-file .env.tools -f infra/docker/compose.tools.yml up -d && pnpm dev",
     "dev:ai": "docker compose -f infra/docker/compose.ai-tools.yml up -d",
     "dev:all:turbo": "node scripts/sync-assets-smart.cjs && pnpm turbo run dev",
     "dev:graph": "pnpm turbo run build --graph",
