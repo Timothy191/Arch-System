@@ -155,7 +155,7 @@ export async function GET(req: Request) {
 
       addEvent('scada_probe_complete', { state: currentState, latencyMs });
       return applyCors(req, NextResponse.json(payload));
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError(err, { context: 'scada_status_error' });
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }

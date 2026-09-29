@@ -77,11 +77,10 @@ export function LoginForm() {
             onChange={(e) => setEmployeeId(e.target.value)}
             onFocus={(e) => e.target.select()}
             onBlur={(e) => {
-              if (e.target.value.includes('@')) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(e.target.value)) {
-                  toast.error('Please enter a valid email address');
-                }
+              if (e.target.value && e.target.validity.typeMismatch) {
+                toast.error('Please enter a valid email address');
+              } else if (e.target.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value)) {
+                toast.error('Please enter a valid email address');
               }
             }}
             placeholder="username@arch-systems.io"

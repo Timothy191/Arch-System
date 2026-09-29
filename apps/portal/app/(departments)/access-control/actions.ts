@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from '@repo/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { withCache } from '@/lib/cache-utils';
 import { AuthError, DatabaseError, ForbiddenError } from '@/lib/errors/error-classes';
-
+import { logError } from '@/lib/errors/error-logger';
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -503,8 +503,11 @@ export async function registerVisitor(formData: FormData) {
   });
 
   if (badgeError) {
-    // Failed to issue badge, but visitor was registered.
-    // In production, we should log this to a proper observability system.
+    logError(
+      new DatabaseError('Failed to issue temporary badge for registered visitor', {
+        context: { error: badgeError.message, visitorId: visitor.id },
+      })
+    );
   }
 
   revalidatePath('/access-control/visitors');

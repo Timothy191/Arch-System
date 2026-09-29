@@ -16,7 +16,7 @@
  */
 
 import { createRedisSubscriber } from '@repo/redis';
-
+import { logError } from '@/lib/errors/error-logger';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -58,14 +58,11 @@ export async function GET(req: Request) {
             // Controller closed
           }
         }, 15000);
-      } catch (err: any) {
-        // eslint-disable-next-line no-console
-        console.error('[DrillStream] Connection error:', err);
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({ error: err.message || 'Failed to initialize telemetry stream' })}\n\n`
-          )
-        );
+      } catch (err: unknown) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to initialize telemetry stream';
+        logError(err instanceof Error ? err : new Error(String(err)));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`));
         controller.close();
       }
     },

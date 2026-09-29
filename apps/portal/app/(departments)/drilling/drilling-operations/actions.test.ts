@@ -65,7 +65,7 @@ describe('upsertDrillOperationAction', () => {
             select: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
                 maybeSingle: jest.fn().mockResolvedValue({
-                  data: { department_id: '123e4567-e89b-12d3-a456-426614174001', is_admin: false },
+                  data: { department_id: '123e4567-e89b-12d3-a456-426614174001', role: 'operator' },
                 }),
               }),
             }),

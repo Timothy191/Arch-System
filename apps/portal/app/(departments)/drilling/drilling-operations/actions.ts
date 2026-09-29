@@ -38,12 +38,12 @@ export async function upsertDrillOperationAction(
 
     const { data: employee } = await supabase
       .from('employees')
-      .select('department_id, is_admin')
-      .eq('id', user.id)
+      .select('department_id, role')
+      .eq('auth_id', user.id)
       .maybeSingle();
 
     // Verify employee access if not global admin
-    if (employee && !employee.is_admin && employee.department_id !== payload.department_id) {
+    if (employee && employee.role !== 'admin' && employee.department_id !== payload.department_id) {
       return { success: false, error: 'Forbidden: Department access denied' };
     }
 

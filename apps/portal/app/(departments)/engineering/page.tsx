@@ -15,6 +15,14 @@ import { getDepartmentContext } from '~/lib/dept-context';
 
 export const dynamic = 'force-dynamic';
 
+interface BreakdownSummary {
+  id: string;
+  machine_name: string;
+  reason: string;
+  priority: string;
+  created_at: string;
+}
+
 async function getEngineeringHubData(deptId: string) {
   const db = await createReadReplicaClient();
 
@@ -44,13 +52,20 @@ async function getEngineeringHubData(deptId: string) {
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(5),
-    Promise.resolve({ count: 0, data: null, error: null }),
+    Promise.resolve(
+      db
+        .from('tire_inspections')
+        .select('*', { count: 'exact', head: true })
+        .in('condition_status', ['warning', 'critical'])
+    )
+      .then((res) => ({ count: res.count ?? 0 }))
+      .catch(() => ({ count: 0 })),
   ]);
 
   return {
     activeBreakdowns: activeBreakdowns ?? 0,
     resolvedToday: resolvedToday ?? 0,
-    recentBreakdowns: recentBreakdowns || [],
+    recentBreakdowns: (recentBreakdowns ?? []) as BreakdownSummary[],
     tireAlerts: tireAlerts ?? 0,
   };
 }
