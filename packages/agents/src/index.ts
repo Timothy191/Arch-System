@@ -8,3 +8,4 @@ export * from './quality-gate.js';
 export * from './reflection-engine.js';
 export * from './sdk.js';
 export * from './specialists.js';
+export * from './swarm/index.js';

@@ -3,6 +3,10 @@
   "description": "Shared Agent Coordination engine and specialists using MCP and OpenAI/Together APIs",
   "version": "1.0.0",
   "dependencies": {
+    "@babel/core": "^8.0.6",
+    "@babel/preset-typescript": "^8.0.1",
+    "@babel/traverse": "^8.0.6",
+    "@repo/logger": "1.0.0",
     "@supabase/supabase-js": "^2.112.3",
     "langfuse": "^3.38.20",
     "openai": "^4.82.0",
@@ -10,7 +14,10 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "1.0.0",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
+    "jest": "^30.0.0",
     "typescript": "catalog:"
   },
   "exports": {
@@ -20,6 +27,7 @@
   "scripts": {
     "clean": "rm -rf dist .turbo",
     "lint": "biome check .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "jest"
   }
 }
