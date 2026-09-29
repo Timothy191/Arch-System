@@ -79,7 +79,7 @@ export function DotsMenu({
           aria-expanded={isOpen}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            'inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors:bg-neutral-800:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
+            'inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400',
             disabled && 'cursor-not-allowed opacity-50 pointer-events-none'
           )}
         >
@@ -135,8 +135,8 @@ export function DotsMenuItem({
   const sharedClasses = cn(
     'flex w-full cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors',
     destructive
-      ? 'text-red-600 hover:bg-red-50:bg-red-950/40'
-      : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100',
+      ? 'text-red-600 hover:bg-red-50'
+      : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900',
     disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
     className
   );

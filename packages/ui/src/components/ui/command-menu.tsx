@@ -204,7 +204,7 @@ export const CommandMenuInput = React.forwardRef<HTMLInputElement, CommandMenuIn
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={cn(
-            'flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-50',
             className
           )}
           {...props}
@@ -371,9 +371,7 @@ export function CommandMenuItem({
       onClick={handleSelect}
       className={cn(
         'relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-2 text-sm outline-none transition-colors',
-        isActive
-          ? 'bg-neutral-100 text-neutral-900'
-          : 'text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60',
+        isActive ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-700 hover:bg-neutral-50',
         disabled && 'pointer-events-none opacity-50',
         className
       )}

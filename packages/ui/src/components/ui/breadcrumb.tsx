@@ -85,7 +85,7 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
         'inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors border select-none',
         active
           ? 'bg-neutral-900 text-white border-transparent shadow-xs font-semibold'
-          : 'bg-neutral-100 text-neutral-600 border-neutral-200/80 hover:bg-neutral-200/70:bg-neutral-700/60 hover:text-neutral-900:text-white',
+          : 'bg-neutral-100 text-neutral-600 border-neutral-200/80 hover:bg-neutral-200/70 hover:text-neutral-900',
         disabled && 'opacity-40 pointer-events-none cursor-not-allowed border-transparent'
       );
     } else {
@@ -93,7 +93,7 @@ export const BreadcrumbItem = React.forwardRef<HTMLElement, BreadcrumbItemProps>
         'inline-flex items-center text-sm transition-colors',
         active
           ? 'text-neutral-900 font-semibold cursor-default'
-          : 'text-neutral-500 hover:text-neutral-900:text-neutral-100',
+          : 'text-neutral-500 hover:text-neutral-900',
         disabled && 'opacity-40 pointer-events-none cursor-not-allowed'
       );
     }

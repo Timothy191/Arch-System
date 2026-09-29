@@ -87,8 +87,8 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
             className={cn(
               'w-full rounded-md border border-neutral-300',
               'bg-white text-neutral-900 placeholder:text-neutral-400',
-              'transition-colors focus:outline-none focus:border-neutral-900:border-neutral-100 focus:ring-1 focus:ring-neutral-900:ring-neutral-100',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100:bg-neutral-800',
+              'transition-colors focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100',
               size === 'small'
                 ? 'h-8 px-2.5 text-xs'
                 : size === 'large'
@@ -108,7 +108,7 @@ export const ClearableInput = React.forwardRef<HTMLInputElement, ClearableInputP
                 tabIndex={-1}
                 onClick={handleClear}
                 aria-label="Clear input"
-                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700:text-neutral-200 hover:bg-neutral-100:bg-neutral-800 transition-colors"
+                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

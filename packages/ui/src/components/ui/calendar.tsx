@@ -182,7 +182,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                   key={key}
                   type="button"
                   onClick={() => handlePresetClick(preset)}
-                  className="px-2.5 py-1 text-left rounded-md text-xs font-medium text-neutral-600 hover:bg-neutral-100:bg-neutral-800 transition-colors"
+                  className="px-2.5 py-1 text-left rounded-md text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
                 >
                   {preset.text}
                 </button>
@@ -199,7 +199,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
               type="button"
               onClick={handlePrevMonth}
               aria-label="Previous Month"
-              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900:text-white hover:bg-neutral-100:bg-neutral-800 transition-colors"
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -210,7 +210,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
               type="button"
               onClick={handleNextMonth}
               aria-label="Next Month"
-              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900:text-white hover:bg-neutral-100:bg-neutral-800 transition-colors"
+              className="p-1 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -255,7 +255,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                       ? 'bg-neutral-900 text-white font-semibold shadow-2xs'
                       : isInRange
                         ? 'bg-neutral-100 text-neutral-900 rounded-none'
-                        : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800',
+                        : 'text-neutral-700 hover:bg-neutral-100',
                     isDisabled && 'opacity-30 pointer-events-none cursor-not-allowed'
                   )}
                 >
@@ -281,7 +281,7 @@ export const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900:text-white transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
                 >
                   <X className="w-3 h-3" />
                   Clear

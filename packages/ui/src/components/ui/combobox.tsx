@@ -271,11 +271,11 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
           }}
           onKeyDown={handleKeyDown}
           className={cn(
-            'w-full rounded-md border bg-white pr-8 text-neutral-900 placeholder:text-neutral-400:text-neutral-500 transition-colors outline-none',
+            'w-full rounded-md border bg-white pr-8 text-neutral-900 placeholder:text-neutral-400 transition-colors outline-none',
             heightClass,
             errored
               ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-              : 'border-neutral-200 hover:border-neutral-300:border-neutral-700 focus:border-neutral-900:border-neutral-100',
+              : 'border-neutral-200 hover:border-neutral-300 focus:border-neutral-900',
             disabled && 'cursor-not-allowed opacity-50 bg-neutral-100',
             className
           )}
@@ -288,7 +288,7 @@ export const ComboboxInput = React.forwardRef<HTMLInputElement, ComboboxInputPro
               tabIndex={-1}
               aria-label="Clear selection"
               onClick={handleClear}
-              className="p-0.5 rounded hover:bg-neutral-100:bg-neutral-800 text-neutral-400 hover:text-neutral-700:text-neutral-200"
+              className="p-0.5 rounded hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -422,7 +422,7 @@ export function ComboboxOption({
         !ignoreDefaultHeight && 'h-8',
         isHighlighted || isSelected
           ? 'bg-neutral-100 text-neutral-900 font-medium'
-          : 'text-neutral-700 hover:bg-neutral-50:bg-neutral-800/60',
+          : 'text-neutral-700 hover:bg-neutral-50',
         disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
         className
       )}

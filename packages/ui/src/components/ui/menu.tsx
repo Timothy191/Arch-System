@@ -108,7 +108,7 @@ export const MenuItem = React.forwardRef<React.ElementRef<typeof DropdownMenuIte
         onClick={onClick}
         className={cn(
           'cursor-pointer flex items-center w-full',
-          type === 'error' && 'text-red-600 focus:bg-red-100 focus:text-red-700:bg-red-900/30',
+          type === 'error' && 'text-red-600 focus:bg-red-100 focus:text-red-700',
           className
         )}
         {...props}

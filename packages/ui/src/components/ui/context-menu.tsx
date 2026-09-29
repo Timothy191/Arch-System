@@ -221,8 +221,8 @@ export function ContextMenuItem({
   const sharedClasses = cn(
     'relative flex cursor-pointer select-none items-center rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors',
     destructive
-      ? 'text-red-600 hover:bg-red-50:bg-red-950/40'
-      : 'text-neutral-700 hover:bg-neutral-100:bg-neutral-800 hover:text-neutral-900:text-neutral-100',
+      ? 'text-red-600 hover:bg-red-50'
+      : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900',
     disabled && 'pointer-events-none opacity-40 cursor-not-allowed',
     className
   );

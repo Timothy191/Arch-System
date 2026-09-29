@@ -51,7 +51,7 @@ export function Description({
             role="button"
             aria-label={`More information about ${typeof title === 'string' ? title : 'this field'}`}
           >
-            <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600:text-neutral-300 transition-colors cursor-help" />
+            <Info className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-600 transition-colors cursor-help" />
             {showTooltip && (
               <span
                 role="tooltip"
