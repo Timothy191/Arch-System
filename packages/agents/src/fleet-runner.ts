@@ -25,11 +25,11 @@ export class AgentFleetRunner {
     const recommendations: string[] = [];
     let totalScore = 0;
 
+    // Keys restricted to personas that exist in SPECIALIST_PERSONAS; 'apiIntegrator' was a dangling key.
     const agentKeys = [
       'databaseArchitect',
       'uiEngineer',
       'securityAndQualityGate',
-      'apiIntegrator',
       'systemSimplifier',
     ];
 
